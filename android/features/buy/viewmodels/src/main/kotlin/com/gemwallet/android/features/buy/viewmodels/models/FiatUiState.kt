@@ -1,24 +1,30 @@
 package com.gemwallet.android.features.buy.viewmodels.models
 
+import androidx.annotation.StringRes
+import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.ButtonState
-import uniffi.gemstone.GemFiatAmountCheck
 import uniffi.gemstone.GemFiatButtonAction
 import uniffi.gemstone.GemFiatButtonState
 import uniffi.gemstone.GemFiatQuotePhase
 import uniffi.gemstone.GemFiatViewState
 
 data class FiatUiState(
-    val phase: GemFiatQuotePhase = GemFiatQuotePhase.NoInput,
-    val amountCheck: GemFiatAmountCheck = GemFiatAmountCheck.Valid,
-    val buttonAction: GemFiatButtonAction = GemFiatButtonAction.CONTINUE,
+    val isLoading: Boolean = false,
+    val errorText: String? = null,
+    @StringRes val actionTitle: Int = R.string.common_continue,
+    val retries: Boolean = false,
     val buttonState: ButtonState = ButtonState.Disabled,
     val canSelectProvider: Boolean = false,
 )
 
-internal fun createFiatUiState(state: GemFiatViewState) = FiatUiState(
-    phase = state.phase,
-    amountCheck = state.amountCheck,
-    buttonAction = state.buttonAction,
+internal fun createFiatUiState(state: GemFiatViewState, errorText: String?) = FiatUiState(
+    isLoading = state.phase is GemFiatQuotePhase.Loading,
+    errorText = errorText,
+    actionTitle = when (state.buttonAction) {
+        GemFiatButtonAction.CONTINUE -> R.string.common_continue
+        GemFiatButtonAction.RETRY_QUOTE -> R.string.common_try_again
+    },
+    retries = state.buttonAction == GemFiatButtonAction.RETRY_QUOTE,
     buttonState = when (state.buttonState) {
         GemFiatButtonState.DISABLED -> ButtonState.Disabled
         GemFiatButtonState.LOADING -> ButtonState.Loading

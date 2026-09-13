@@ -54,8 +54,6 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.FiatProviderName
 import com.wallet.core.primitives.FiatQuoteType
-import uniffi.gemstone.GemFiatButtonAction
-import uniffi.gemstone.GemFiatQuotePhase
 
 private val loadingIndicatorSize = 30.dp
 private val errorTextPadding = 20.dp
@@ -100,18 +98,11 @@ fun BuyScene(
             }
         },
         mainAction = {
-            when (uiState.buttonAction) {
-                GemFiatButtonAction.CONTINUE -> MainActionButton(
-                    title = stringResource(R.string.common_continue),
-                    state = uiState.buttonState,
-                    onClick = onBuy,
-                )
-                GemFiatButtonAction.RETRY_QUOTE -> MainActionButton(
-                    title = stringResource(R.string.common_try_again),
-                    state = uiState.buttonState,
-                    onClick = onRetry,
-                )
-            }
+            MainActionButton(
+                title = stringResource(uiState.actionTitle),
+                state = uiState.buttonState,
+                onClick = if (uiState.retries) onRetry else onBuy,
+            )
         }
     ) {
         Spacer16()
@@ -140,9 +131,9 @@ fun BuyScene(
             },
         )
 
-        val errorText = uiState.errorText(type, asset)
+        val errorText = uiState.errorText
         when {
-            uiState.phase is GemFiatQuotePhase.Loading -> {
+            uiState.isLoading -> {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

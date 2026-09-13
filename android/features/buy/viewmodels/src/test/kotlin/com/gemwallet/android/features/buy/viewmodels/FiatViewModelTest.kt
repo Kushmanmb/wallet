@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.buy.viewmodels
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -17,6 +18,7 @@ import com.gemwallet.android.testkit.mockAssetMetaData
 import com.gemwallet.android.testkit.mockAssetPriceInfo
 import com.gemwallet.android.testkit.mockFiatQuote
 import com.gemwallet.android.testkit.mockWallet
+import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.AssetId
@@ -71,6 +73,10 @@ class FiatViewModelTest {
         override fun invoke(assetId: AssetId): Flow<Double?> = assetPriceUsdFlow
     }
     private val fiatFormatter = CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = Currency.USD)
+    private val context = mockk<Context> {
+        every { getString(any()) } answers { "string:${firstArg<Int>()}" }
+        every { getString(any(), *anyVararg()) } answers { "string:${firstArg<Int>()}" }
+    }
     private val service = mockk<GemFiatQuoteServiceInterface> {
         every { getCurrency() } returns Currency.USD.toGem()
         every { suggestedAmounts() } returns listOf(100, 250)
@@ -193,7 +199,7 @@ class FiatViewModelTest {
             runCurrent()
 
             assertTrue(viewModel.providers.value.isEmpty())
-            assertEquals(GemFiatQuotePhase.Loading(75.0), viewModel.uiState.value.phase)
+            assertTrue(viewModel.uiState.value.isLoading)
             assertEquals(ButtonState.Loading, viewModel.uiState.value.buttonState)
             assertNull(viewModel.selectedProvider.value)
         } finally {
@@ -210,17 +216,16 @@ class FiatViewModelTest {
             advanceTimeBy(DebounceSettleMs)
             runCurrent()
 
-            val failed = viewModel.uiState.value.phase as GemFiatQuotePhase.Failed
-            assertEquals("offline", (failed.error as GemServiceException.Api).msg)
-            assertEquals(GemFiatButtonAction.RETRY_QUOTE, viewModel.uiState.value.buttonAction)
+            assertEquals("string:${R.string.errors_unknown_try_again}", viewModel.uiState.value.errorText)
+            assertTrue(viewModel.uiState.value.retries)
             assertEquals(ButtonState.Enabled, viewModel.uiState.value.buttonState)
 
             coEvery { service.quotes(any(), any(), any()) } returns listOf(mockFiatQuote())
             viewModel.retry()
             runCurrent()
 
-            assertEquals(GemFiatQuotePhase.Ready, viewModel.uiState.value.phase)
-            assertEquals(GemFiatButtonAction.CONTINUE, viewModel.uiState.value.buttonAction)
+            assertNull(viewModel.uiState.value.errorText)
+            assertFalse(viewModel.uiState.value.retries)
             assertTrue(viewModel.providers.value.isNotEmpty())
             coVerify(exactly = 2) {
                 service.quotes(FiatQuoteType.Buy.toGem(), asset.id.toIdentifier(), 50.0)
@@ -239,7 +244,7 @@ class FiatViewModelTest {
             advanceTimeBy(DebounceSettleMs)
             runCurrent()
 
-            assertEquals(GemFiatQuotePhase.NoQuotes, viewModel.uiState.value.phase)
+            assertEquals("string:${R.string.buy_no_results}", viewModel.uiState.value.errorText)
             assertEquals(ButtonState.Disabled, viewModel.uiState.value.buttonState)
         } finally {
             viewModel.viewModelScope.cancel()
@@ -382,6 +387,7 @@ class FiatViewModelTest {
             getBuyAssetInfo = getBuyAssetInfo,
             getAssetPriceUsd = getAssetPriceUsd,
             service = service,
+            context = context,
             savedStateHandle = SavedStateHandle(arguments),
         )
     }

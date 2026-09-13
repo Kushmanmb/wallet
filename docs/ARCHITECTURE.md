@@ -446,6 +446,32 @@ private fun errorText(phase: GemFiatQuotePhase): String? = when (phase) {
 
 Two greps keep this honest, because nothing else will: no file under an iOS feature's `Sources/Scenes/` and no file under an Android feature's `presents/` should name `Gemstone` or `uniffi.gemstone`.
 
+### A UI state class translates the view state; it does not re-shape it
+
+Compose screens collect a single state object, and the temptation is to declare it as a mirror of the Core view state — the same fields, re-typed. That is a twin with a different name: every Core field it restates has to be maintained in step, and the Core types it carries reach the composable anyway, so the [view boundary](#a-view-never-names-a-core-type) is not actually closed.
+
+A UI state class is the **translation** of the Core view state into platform values. It holds no Core type. Every property is a `String`, a `Boolean`, a `@StringRes` id, or an app enum, and each one names what the view does with it rather than what Core called it.
+
+```kotlin
+data class FiatUiState(
+    val isLoading: Boolean = false,
+    val errorText: String? = null,
+    @StringRes val actionTitle: Int = R.string.common_continue,
+    val retries: Boolean = false,
+    val buttonState: ButtonState = ButtonState.Disabled,
+    val canSelectProvider: Boolean = false,
+)
+```
+
+Compare it with what it replaced, which carried `GemFiatQuotePhase`, `GemFiatAmountCheck` and `GemFiatButtonAction` straight through: the composable then had to branch on all three, and a new Core case broke a screen instead of a model.
+
+Two consequences worth stating:
+
+- **Localization happens in the view model,** because that is where the branch over the Core enum now lives. An Android view model takes `@ApplicationContext` for this, as `NetworkAssetsViewModel` and `AssetsResultsViewModel` already do; a `@StringRes` id on the state is the alternative when no arguments are needed. iOS resolves `Localized.*` in the model for the same reason.
+- **The tests improve.** A test that asserted `uiState.phase == GemFiatQuotePhase.Failed` was asserting a Core value the user never sees; asserting `uiState.errorText` and `uiState.retries` checks what the screen actually shows.
+
+The same rule reads on iOS as: the view model exposes `String`, `Bool` and app enums; the Core record stays private behind them. A row model is the small case of this — it holds the Core record and exposes platform values from it — and a UI state class is the screen-sized one.
+
 ### Never call Core from the main thread
 
 The `flowOn` above is not decoration. A synchronous Core call such as `transactionDetailsService.detailRows` can read store callbacks that block on Room, and UniFFI polls the Rust future on the calling thread — so without it the read lands on main, where Room throws before any work happens.

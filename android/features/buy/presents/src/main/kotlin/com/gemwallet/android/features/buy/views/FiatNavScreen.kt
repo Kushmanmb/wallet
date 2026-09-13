@@ -38,8 +38,6 @@ import com.gemwallet.android.ui.theme.space6
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.FiatQuoteType
 import kotlinx.coroutines.launch
-import uniffi.gemstone.GemFiatAmountCheck
-import uniffi.gemstone.GemFiatQuotePhase
 
 @Composable
 fun FiatNavScreen(
@@ -158,26 +156,3 @@ fun LotButton(fiatSuggestion: FiatSuggestion, onLotClick: (FiatSuggestion) -> Un
     }
 }
 
-@Composable
-fun FiatUiState.errorText(type: FiatQuoteType, asset: Asset): String? = when (val phase = phase) {
-    is GemFiatQuotePhase.Invalid -> phase.check.errorText(asset)
-    GemFiatQuotePhase.InvalidInput -> stringResource(id = R.string.errors_invalid_amount)
-    GemFiatQuotePhase.NoInput -> stringResource(
-        R.string.input_enter_amount_to, when (type) {
-            FiatQuoteType.Buy -> stringResource(R.string.buy_title, "")
-            FiatQuoteType.Sell -> stringResource(R.string.sell_title, "")
-        }
-    )
-    GemFiatQuotePhase.NoQuotes -> stringResource(id = R.string.buy_no_results)
-    is GemFiatQuotePhase.Failed -> stringResource(R.string.errors_unknown_try_again)
-    is GemFiatQuotePhase.Loading -> null
-    GemFiatQuotePhase.Ready -> amountCheck.errorText(asset)
-}
-
-@Composable
-private fun GemFiatAmountCheck.errorText(asset: Asset): String? = when (this) {
-    is GemFiatAmountCheck.BelowMinimum -> stringResource(id = R.string.transfer_minimum_amount, "${minimum}$")
-    is GemFiatAmountCheck.AboveMaximum -> stringResource(id = R.string.transfer_maximum_amount, "${maximum}$")
-    is GemFiatAmountCheck.InsufficientBalance -> stringResource(R.string.transfer_insufficient_balance, "${asset.name} (${asset.symbol})")
-    GemFiatAmountCheck.Valid -> null
-}
