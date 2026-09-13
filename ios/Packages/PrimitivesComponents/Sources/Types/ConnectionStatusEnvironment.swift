@@ -8,6 +8,7 @@ import SwiftUI
 
 public extension EnvironmentValues {
     @Entry var connectionStatus: ConnectionStatus = .online
+    @Entry var isStreamConnected: Bool = false
 }
 
 public extension ConnectionStatus {

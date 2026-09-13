@@ -45,6 +45,7 @@ let package = Package(
             name: "StreamServiceTestKit",
             dependencies: [
                 "StreamService",
+                "Primitives",
                 .product(name: "WebSocketClientTestKit", package: "SwiftHTTPClient"),
                 .product(name: "GemstonePrimitivesTestKit", package: "GemstonePrimitives"),
                 "Gemstone",

@@ -35,6 +35,7 @@ struct RootScene: View {
             }
         }
         .environment(\.connectionStatus, connectionStatusObserver.status)
+        .environment(\.isStreamConnected, connectionStatusObserver.isHealthyByComponent[.stream] == true)
         .onOpenURL { url in
             Task {
                 await model.handleOpenUrl(url)

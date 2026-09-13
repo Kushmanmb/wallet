@@ -9,15 +9,18 @@ import WebSocketClient
 public actor StreamObserverService: Sendable {
     private let service: any GemStreamServiceProtocol
     private let webSocket: any WebSocketConnectable
+    private let health: ConnectionComponentHealth
     private var observeTask: Task<Void, Never>?
     private var isActive = false
 
     public init(
         service: any GemStreamServiceProtocol,
         webSocket: any WebSocketConnectable,
+        health: ConnectionComponentHealth,
     ) {
         self.service = service
         self.webSocket = webSocket
+        self.health = health
     }
 
     deinit {
@@ -27,15 +30,12 @@ public actor StreamObserverService: Sendable {
     // MARK: - Public API
 
     public func connect() {
-        guard !isActive else { return }
         isActive = true
-        restart()
+        startObserving()
     }
 
     public func updateSession() async {
-        if await webSocket.state == .disconnected {
-            restart()
-        }
+        startObserving()
         do {
             try await service.updateSession()
         } catch {
@@ -52,15 +52,16 @@ public actor StreamObserverService: Sendable {
 
     // MARK: - Private
 
-    private func restart() {
-        guard isActive else { return }
-        let previous = observeTask
-        previous?.cancel()
+    private func startObserving() {
+        guard isActive, observeTask == nil else { return }
         observeTask = Task { [weak self] in
-            await previous?.value
-            guard !Task.isCancelled else { return }
             await self?.observeConnection()
+            await self?.stopObserving()
         }
+    }
+
+    private func stopObserving() {
+        observeTask = nil
     }
 
     private func observeConnection() async {
@@ -84,11 +85,17 @@ public actor StreamObserverService: Sendable {
     private func handle(_ event: WebSocketEvent) async {
         do {
             switch event {
-            case .connected: try await service.connected()
+            case .connected:
+                health.report(isHealthy: true)
+                try await service.connected()
             case let .message(data):
                 let event = try await service.handle(event: String(decoding: data, as: UTF8.self))
                 debugLog("stream event: \(event)")
-            case .disconnected: await service.disconnected()
+            case .disconnected:
+                if isActive {
+                    health.report(isHealthy: false)
+                }
+                await service.disconnected()
             }
         } catch {
             debugLog("stream event handler error: \(error)")

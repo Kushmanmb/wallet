@@ -100,6 +100,26 @@ struct StreamObserverServiceTests {
     }
 
     @Test
+    func socketReportsHealthWhileTheObserverRuns() async {
+        let opened = AsyncStream<Void>.makeStream()
+        let socket = WebSocketConnectionMock(onConnect: { opened.continuation.yield(()) })
+        let health = ConnectionComponentHealth(component: .stream)
+        let observer = StreamObserverService.mock(webSocket: socket, health: health)
+        var reports = health.healthStream().makeAsyncIterator()
+        var connections = opened.stream.makeAsyncIterator()
+        await observer.connect()
+        _ = await connections.next()
+
+        await socket.simulateConnected()
+        #expect(await reports.next() == true)
+
+        await socket.simulateDisconnect()
+        #expect(await reports.next() == false)
+
+        await observer.disconnect()
+    }
+
+    @Test
     func foregroundSessionUpdateConnectsWhenCoreBecomesReady() async {
         let opened = AsyncStream<Void>.makeStream()
         let closed = AsyncStream<Void>.makeStream()

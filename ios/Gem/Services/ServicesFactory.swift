@@ -49,10 +49,12 @@ struct ServicesFactory {
         deviceApiClient.setDeviceSyncPreflight(device: deviceService)
 
         let connectionService = Gemstone.GemConnectionService()
+        let streamHealth = ConnectionComponentHealth(component: .stream)
         let connectionStatusObserver = ConnectionStatusObserver(
             connectionService: connectionService,
             monitors: [
                 InternetConnectionMonitor(connectionService: connectionService),
+                streamHealth,
             ],
         )
         let apiClient = Gemstone.GemApiClient(provider: nativeProvider)
@@ -198,6 +200,7 @@ struct ServicesFactory {
         let streamObserverService = StreamObserverService(
             service: streamService,
             webSocket: webSocket,
+            health: streamHealth,
         )
         let swapper = GemSwapper(rpcProvider: NativeProvider(), preferences: preferencesStore)
         let swapService = Gemstone.GemSwapService(
