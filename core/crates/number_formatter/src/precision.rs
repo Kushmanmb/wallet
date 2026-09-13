@@ -6,10 +6,7 @@ pub enum Precision {
 
 impl Precision {
     pub const TWO_PLACES: Self = Self::Fraction { min: 2, max: 2 };
-    pub const UP_TO_TWO_PLACES: Self = Self::Fraction { min: 0, max: 2 };
-    pub const UP_TO_FOUR_PLACES: Self = Self::Fraction { min: 0, max: 4 };
     pub const FOUR_SIGNIFICANT: Self = Self::Significant { max: 4 };
-    pub const FULL: Self = Self::Fraction { min: 0, max: 32 };
 }
 
 pub const ABBREVIATION_THRESHOLD: f64 = 100_000.0;

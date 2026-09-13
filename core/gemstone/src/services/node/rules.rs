@@ -192,7 +192,6 @@ mod tests {
     }
 
     #[test]
-    #[test]
     fn test_a_gem_node_titles_by_flag_and_any_other_by_host() {
         use super::super::model::GemNodeRowTitle;
         let plain = GemNodeSelection {
@@ -224,6 +223,7 @@ mod tests {
         );
     }
 
+    #[test]
     fn test_node_selections_marks_the_url_and_not_the_host() {
         let nodes = vec![node("https://rpc.example.com/one", 1), node("https://rpc.example.com/two", 2)];
         let selections = node_selections(nodes, "https://rpc.example.com/two");
