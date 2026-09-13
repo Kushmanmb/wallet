@@ -15,6 +15,7 @@ import com.gemwallet.android.ui.models.DelegationBalanceInfoUIModel
 import com.gemwallet.android.ui.models.ListPosition
 import com.wallet.core.primitives.Delegation
 import uniffi.gemstone.delegationStatus
+import com.gemwallet.android.ui.localization.stateText
 
 @Composable
 fun DelegationItem(

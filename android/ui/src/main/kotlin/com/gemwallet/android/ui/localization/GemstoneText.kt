@@ -6,8 +6,14 @@ import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.R
 import com.wallet.core.primitives.PerpetualDirection
+import uniffi.gemstone.DelegationState
+import uniffi.gemstone.GemDelegationStatus
+import uniffi.gemstone.GemSimulationWarningKind
+import uniffi.gemstone.GemSimulationWarningRow
+import uniffi.gemstone.GemTransactionFilter
 import uniffi.gemstone.GemTransactionTitle
 import uniffi.gemstone.GemWalletSubtitle
+import uniffi.gemstone.SimulationSeverity
 
 @Composable
 fun GemTransactionTitle.string(): String = when (this) {
@@ -35,6 +41,52 @@ fun GemTransactionTitle.string(): String = when (this) {
 fun GemWalletSubtitle.string(): String = when (this) {
     GemWalletSubtitle.Multicoin -> stringResource(R.string.wallet_multicoin)
     is GemWalletSubtitle.Address -> value
+}
+
+@Composable
+fun GemDelegationStatus.stateText(): String = stringResource(
+    when (state) {
+        DelegationState.ACTIVE -> R.string.stake_active
+        DelegationState.PENDING -> R.string.stake_pending
+        DelegationState.INACTIVE -> R.string.stake_inactive
+        DelegationState.ACTIVATING -> R.string.stake_activating
+        DelegationState.DEACTIVATING -> R.string.stake_deactivating
+        DelegationState.AWAITING_WITHDRAWAL -> R.string.stake_awaiting_withdrawal
+    }
+)
+
+@StringRes
+fun GemTransactionFilter.getLabel() = when (this) {
+    GemTransactionFilter.TRANSFERS -> R.string.transfer_title
+    GemTransactionFilter.SWAPS -> R.string.wallet_swap
+    GemTransactionFilter.STAKE -> R.string.wallet_stake
+    GemTransactionFilter.SMART_CONTRACT -> R.string.transfer_smart_contract_title
+    GemTransactionFilter.PERPETUALS -> R.string.perpetuals_title
+    GemTransactionFilter.OTHERS -> R.string.transfer_other_title
+}
+
+@StringRes
+fun GemSimulationWarningRow.titleRes(): Int = when (kind) {
+    GemSimulationWarningKind.VALIDATION_ERROR -> if (severity != SimulationSeverity.CRITICAL) R.string.common_warning else R.string.errors_error_occurred
+    GemSimulationWarningKind.NFT_COLLECTION_APPROVAL -> R.string.simulation_warning_nft_collection_approval_title
+    GemSimulationWarningKind.UNLIMITED_APPROVAL -> R.string.simulation_warning_unlimited_token_approval_title
+    GemSimulationWarningKind.EXTERNALLY_OWNED_SPENDER -> R.string.common_warning
+    GemSimulationWarningKind.SUSPICIOUS_SPENDER -> R.string.errors_error_occurred
+}
+
+@StringRes
+fun GemSimulationWarningRow.descriptionRes(): Int? = when (kind) {
+    GemSimulationWarningKind.UNLIMITED_APPROVAL -> R.string.simulation_warning_unlimited_token_approval_description
+    GemSimulationWarningKind.EXTERNALLY_OWNED_SPENDER -> R.string.simulation_warning_externally_owned_spender_description
+    GemSimulationWarningKind.SUSPICIOUS_SPENDER -> R.string.common_suspicious_address
+    GemSimulationWarningKind.VALIDATION_ERROR -> if (severity == SimulationSeverity.CRITICAL) R.string.errors_error_occurred else null
+    GemSimulationWarningKind.NFT_COLLECTION_APPROVAL -> null
+}
+
+@Composable
+fun GemSimulationWarningRow.descriptionText(): String? = when (kind) {
+    GemSimulationWarningKind.VALIDATION_ERROR -> if (severity != SimulationSeverity.CRITICAL) message.orEmpty() else message ?: stringResource(R.string.errors_error_occurred)
+    else -> message ?: descriptionRes()?.let { stringResource(it) }
 }
 
 @Composable

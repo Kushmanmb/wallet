@@ -34,6 +34,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import uniffi.gemstone.GemTransactionFilter
 import com.gemwallet.android.ui.theme.iconSize
 import com.wallet.core.primitives.Chain
+import com.gemwallet.android.ui.localization.getLabel
 
 @Composable
 fun TransactionsFilter(

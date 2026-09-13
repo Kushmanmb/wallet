@@ -6,6 +6,8 @@ import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ui.components.list_item.WarningItem
 import com.gemwallet.android.ui.models.ListPosition
 import uniffi.gemstone.GemSimulationWarningRow
+import com.gemwallet.android.ui.localization.titleRes
+import com.gemwallet.android.ui.localization.descriptionText
 
 fun LazyListScope.simulationWarningsContent(warnings: List<GemSimulationWarningRow>) {
     if (warnings.isEmpty()) return

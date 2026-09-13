@@ -1,4 +1,4 @@
-package com.gemwallet.android.ui.components.simulation
+package com.gemwallet.android.ui.localization
 
 import com.gemwallet.android.ui.R
 import org.junit.Assert.assertEquals
@@ -8,7 +8,7 @@ import uniffi.gemstone.GemSimulationWarningKind
 import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.SimulationSeverity
 
-class SimulationWarningExtTest {
+class GemstoneTextTest {
 
     @Test
     fun unlimitedApproval_usesUnlimitedWarningCopy() {

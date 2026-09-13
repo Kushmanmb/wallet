@@ -42,27 +42,6 @@ public struct SimulationWarningViewModel: Identifiable {
     }
 }
 
-private extension GemSimulationWarningKind {
-    var warningTitle: String {
-        switch self {
-        case .unlimitedApproval: Localized.Simulation.Warning.UnlimitedTokenApproval.title
-        case .nftCollectionApproval: Localized.Simulation.Warning.NftCollectionApproval.title
-        case .externallyOwnedSpender: Localized.Common.warning
-        case .suspiciousSpender, .validationError: Localized.Errors.errorOccurred
-        }
-    }
-
-    var defaultMessage: String? {
-        switch self {
-        case .unlimitedApproval: Localized.Simulation.Warning.UnlimitedTokenApproval.description
-        case .validationError: Localized.Errors.errorOccurred
-        case .externallyOwnedSpender: Localized.Simulation.warningExternallyOwnedSpenderDescription
-        case .suspiciousSpender: Localized.Common.suspiciousAddress
-        case .nftCollectionApproval: nil
-        }
-    }
-}
-
 private extension SimulationSeverity {
     var color: Color {
         switch self {
