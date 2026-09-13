@@ -17,7 +17,6 @@ struct CandlestickChartViewModel {
     private let priceChangeCalculator = PriceChangeCalculator()
     enum Constants {
         static let labelOverlapSpacing: CGFloat = 115
-        static let xAxisTickCount = 6
     }
 
     let candles: [ChartCandleStick]
@@ -55,6 +54,10 @@ struct CandlestickChartViewModel {
 
     var yAxisTicks: [Double] {
         layout.ticks
+    }
+
+    var xAxisTickCount: Int {
+        Int(layout.xTickCount)
     }
 
     func formattedPrice(_ price: Double) -> String {

@@ -34,6 +34,7 @@ const CHART_LABEL_OVERLAP_FRACTION: f64 = 0.06;
 const CHART_MINIMUM_SPAN_FRACTION: f64 = 0.001;
 const CHART_MINIMUM_SPAN: f64 = 1e-9;
 const CHART_TICK_COUNT: usize = 4;
+const CHART_X_TICK_COUNT: usize = 6;
 
 pub fn perpetual_asset_basics(data: &[PerpetualData]) -> Vec<AssetBasic> {
     data.iter()
@@ -139,8 +140,13 @@ pub fn chart_layout(candles: &[ChartCandleStick], position: Option<&PerpetualPos
         price_low,
         price_high,
         ticks: chart_ticks(candle_low, candle_high),
+        x_tick_count: chart_x_tick_count(candles.len()),
         lines,
     }
+}
+
+fn chart_x_tick_count(candle_count: usize) -> u32 {
+    if candle_count < 2 { 0 } else { CHART_X_TICK_COUNT.min(candle_count) as u32 }
 }
 
 fn chart_ticks(candle_low: f64, candle_high: f64) -> Vec<f64> {
@@ -656,6 +662,14 @@ mod tests {
         assert_eq!(layout.ticks[0], 9.0);
         assert_eq!(layout.ticks[3], 13.0);
         assert!(layout.lines.is_empty());
+    }
+
+    #[test]
+    fn test_chart_x_tick_count_never_exceeds_the_candles_it_can_mark() {
+        assert_eq!(chart_x_tick_count(0), 0, "an empty series draws no gridlines");
+        assert_eq!(chart_x_tick_count(1), 0, "a single candle spans nothing to divide");
+        assert_eq!(chart_x_tick_count(4), 4);
+        assert_eq!(chart_x_tick_count(40), CHART_X_TICK_COUNT as u32);
     }
 
     #[test]

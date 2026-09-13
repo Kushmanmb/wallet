@@ -32,14 +32,12 @@ data class CandlestickChartUIModel(
     val ySpan: Double get() = yMax - yMin
 
     companion object {
-        const val DEFAULT_X_TICK_COUNT = 6
 
         fun from(
             candles: List<ChartCandleStick>,
             layout: GemPerpetualChartLayout,
             yTickFormatter: (Double) -> String,
             lineLabel: (GemPerpetualChartLine) -> String,
-            xTickCount: Int = DEFAULT_X_TICK_COUNT,
         ): CandlestickChartUIModel {
             val span = layout.priceHigh - layout.priceLow
             return CandlestickChartUIModel(
@@ -49,19 +47,15 @@ data class CandlestickChartUIModel(
                 yTicks = layout.ticks.map { value ->
                     ChartAxisTick(value = value, fraction = ((value - layout.priceLow) / span).toFloat(), label = yTickFormatter(value))
                 },
-                xGridlineFractions = buildXGridlineFractions(candles, xTickCount),
+                xGridlineFractions = buildXGridlineFractions(layout.xTickCount.toInt()),
                 referenceLines = layout.lines.map { ChartReferenceLineUIModel(it, lineLabel(it)) },
                 currentPriceLabel = candles.lastOrNull()?.close?.let(yTickFormatter).orEmpty(),
             )
         }
 
-        private fun buildXGridlineFractions(
-            candles: List<ChartCandleStick>,
-            tickCount: Int,
-        ): List<Float> {
-            if (candles.size < 2) return emptyList()
-            val capped = tickCount.coerceAtMost(candles.size)
-            return (0 until capped).map { tick -> tick.toFloat() / (capped - 1) }
+        private fun buildXGridlineFractions(tickCount: Int): List<Float> {
+            if (tickCount < 2) return emptyList()
+            return (0 until tickCount).map { tick -> tick.toFloat() / (tickCount - 1) }
         }
 
         private fun candleUIModel(candle: ChartCandleStick): CandleUIModel = CandleUIModel(

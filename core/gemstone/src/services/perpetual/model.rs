@@ -133,6 +133,7 @@ pub struct GemPerpetualChartLayout {
     pub price_low: f64,
     pub price_high: f64,
     pub ticks: Vec<f64>,
+    pub x_tick_count: u32,
     pub lines: Vec<GemPerpetualChartLine>,
 }
 

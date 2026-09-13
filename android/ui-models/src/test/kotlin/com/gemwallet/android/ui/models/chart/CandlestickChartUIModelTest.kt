@@ -20,6 +20,7 @@ class CandlestickChartUIModelTest {
         priceLow = 8.0,
         priceHigh = 14.0,
         ticks = listOf(9.0, 11.0, 13.0),
+        xTickCount = 6u,
         lines = listOf(GemPerpetualChartLine(GemPerpetualChartLineKind.ENTRY, 10.5, 0u)),
     )
 
@@ -51,16 +52,15 @@ class CandlestickChartUIModelTest {
 
     @Test
     fun xGridlineFractionsSpanZeroToOne() {
-        val model = model(xTickCount = 2)
+        val model = model(layout.copy(xTickCount = 2u))
 
         assertEquals(listOf(0f, 1f), model.xGridlineFractions)
     }
 
-    private fun model(xTickCount: Int = CandlestickChartUIModel.DEFAULT_X_TICK_COUNT) = CandlestickChartUIModel.from(
+    private fun model(layout: GemPerpetualChartLayout = this.layout) = CandlestickChartUIModel.from(
         candles = candles,
         layout = layout,
         yTickFormatter = { "$it" },
         lineLabel = { "Entry | ${it.price}" },
-        xTickCount = xTickCount,
     )
 }

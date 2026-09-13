@@ -72,7 +72,7 @@ struct CandlestickChartView: View {
             }
         }
         .chartXAxis {
-            AxisMarks(position: .bottom, values: .automatic(desiredCount: CandlestickChartViewModel.Constants.xAxisTickCount)) { _ in
+            AxisMarks(position: .bottom, values: .automatic(desiredCount: model.xAxisTickCount)) { _ in
                 AxisGridLine(stroke: ChartGridStyle.strokeStyle)
                     .foregroundStyle(ChartGridStyle.color)
             }
