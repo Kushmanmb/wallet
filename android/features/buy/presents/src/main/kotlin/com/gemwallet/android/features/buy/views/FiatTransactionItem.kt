@@ -33,6 +33,7 @@ import com.gemwallet.android.ui.theme.pendingColor
 import com.gemwallet.android.ui.theme.space2
 import com.wallet.core.primitives.FiatQuoteType
 import com.wallet.core.primitives.FiatTransactionAssetData
+import com.gemwallet.android.ui.localization.string
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.fiatProviderName
 import uniffi.gemstone.fiatTransactionStatus
@@ -90,17 +91,10 @@ fun FiatTransactionItem(
 
 @Composable
 private fun FiatTransactionStatusBadge(badge: GemFiatTransactionBadge) {
-    val text: String
-    val color: Color
-    when (badge) {
-        GemFiatTransactionBadge.PENDING -> {
-            text = stringResource(R.string.transaction_status_pending)
-            color = pendingColor
-        }
-        GemFiatTransactionBadge.FAILED -> {
-            text = stringResource(R.string.transaction_status_failed)
-            color = MaterialTheme.colorScheme.error
-        }
+    val text = badge.string()
+    val color = when (badge) {
+        GemFiatTransactionBadge.PENDING -> pendingColor
+        GemFiatTransactionBadge.FAILED -> MaterialTheme.colorScheme.error
     }
 
     Text(

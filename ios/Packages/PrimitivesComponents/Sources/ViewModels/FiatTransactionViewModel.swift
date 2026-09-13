@@ -27,7 +27,7 @@ public struct FiatTransactionViewModel: Sendable {
         return ListItemModel(
             title: typeTitle,
             titleStyle: TextStyle(font: Font.system(.body, weight: .medium), color: .primary),
-            titleTag: status.badge.map(badgeTitle),
+            titleTag: status.badge?.text,
             titleTagStyle: status.badge.map(badgeStyle) ?? ListItemModel.StyleDefaults.titleTagStyle,
             titleExtra: "\(info.asset.name) (\(info.provider.displayName))",
             titleStyleExtra: .footnote,
@@ -56,13 +56,6 @@ extension FiatTransactionViewModel {
 
     private var providerImage: AssetImage {
         .image(info.provider.image)
-    }
-
-    private func badgeTitle(_ badge: GemFiatTransactionBadge) -> String {
-        switch badge {
-        case .pending: Localized.Transaction.Status.pending
-        case .failed: Localized.Transaction.Status.failed
-        }
     }
 
     private func badgeColor(_ badge: GemFiatTransactionBadge) -> Color {

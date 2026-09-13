@@ -8,6 +8,7 @@ import com.gemwallet.android.ui.R
 import com.wallet.core.primitives.PerpetualDirection
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.GemDelegationStatus
+import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemSimulationWarningKind
 import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.GemTransactionFilter
@@ -36,6 +37,14 @@ fun GemTransactionTitle.string(): String = when (this) {
     is GemTransactionTitle.PerpetualClose -> perpetualTitle(direction, R.string.perpetual_close_direction, R.string.perpetual_close_position)
     GemTransactionTitle.PerpetualModify -> stringResource(R.string.perpetual_modify)
 }
+
+@Composable
+fun GemFiatTransactionBadge.string(): String = stringResource(
+    when (this) {
+        GemFiatTransactionBadge.PENDING -> R.string.transaction_status_pending
+        GemFiatTransactionBadge.FAILED -> R.string.transaction_status_failed
+    }
+)
 
 @Composable
 fun GemWalletSubtitle.string(): String = when (this) {

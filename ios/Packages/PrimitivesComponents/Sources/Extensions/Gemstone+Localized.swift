@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import enum Gemstone.PerpetualDirection
+import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.GemSimulationWarningKind
 import enum Gemstone.GemTransactionTitle
 import enum Gemstone.GemWalletSubtitle
@@ -71,6 +72,15 @@ extension GemSimulationWarningKind {
         case .externallyOwnedSpender: Localized.Simulation.warningExternallyOwnedSpenderDescription
         case .suspiciousSpender: Localized.Common.suspiciousAddress
         case .nftCollectionApproval: nil
+        }
+    }
+}
+
+extension GemFiatTransactionBadge {
+    public var text: String {
+        switch self {
+        case .pending: Localized.Transaction.Status.pending
+        case .failed: Localized.Transaction.Status.failed
         }
     }
 }
