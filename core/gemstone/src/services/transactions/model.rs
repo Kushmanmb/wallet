@@ -168,6 +168,11 @@ pub fn transaction_row(transaction: TransactionExtended) -> GemTransactionRow {
     rules::row(&transaction)
 }
 
+#[uniffi::export]
+pub fn transaction_rows(transactions: Vec<TransactionExtended>) -> Vec<GemTransactionRow> {
+    transactions.iter().map(rules::row).collect()
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemTransactionHeader {
     Amount { amount: GemTransactionAmount, shows_fiat: bool },

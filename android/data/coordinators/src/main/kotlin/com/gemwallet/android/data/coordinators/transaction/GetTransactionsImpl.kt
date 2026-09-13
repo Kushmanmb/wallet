@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.transactionRow
+import uniffi.gemstone.transactionRows
 import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStatus
 import uniffi.gemstone.GemTransactionRowValue
@@ -48,19 +49,19 @@ class GetTransactionsImpl(
         .flowOn(Dispatchers.IO)
 
     private fun Flow<List<TransactionExtended>>.aggregates(): Flow<List<TransactionDataAggregate>> = flow {
-        val rows = TransactionRows(service)
+        val rows = TransactionRows()
         collect { emit(rows.aggregates(it)) }
     }
 }
 
-internal class TransactionRows(private val service: GemTransactionsServiceInterface) {
+internal class TransactionRows {
 
     private var previous: Map<TransactionExtended, TransactionDataAggregate> = emptyMap()
 
     fun aggregates(items: List<TransactionExtended>): List<TransactionDataAggregate> {
         val reused = previous
         val missing = items.filterNot(reused::containsKey).distinct()
-        val built = missing.zip(service.rows(missing.map { it.toGem() })) { data, row ->
+        val built = missing.zip(transactionRows(missing.map { it.toGem() })) { data, row ->
             data to TransactionDataAggregateImpl(data, row)
         }.toMap()
         val aggregates = items.mapNotNull { reused[it] ?: built[it] }

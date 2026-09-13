@@ -199,6 +199,8 @@ Two things a record cannot carry are a localized string and a bundled image asse
 
 **A Core case that becomes a bundled image maps in that type's own extension.** `GemWalletRow+PrimitivesComponents.swift` turns `placeholder` into an `Image` and the row into an `AssetImage`; Android's `GemWalletPlaceholder.iconModel()` and `GemWalletRow.supportIcon()` are the same two mappings. One place per platform, read by every screen.
 
+A row model earns its place only by owning something the record cannot: formatting that depends on locale or user preference, a binding, a bundled asset, or a join to app-side data. Keep it for those and read the record for everything else. A model whose every property is a one-line read of the record owns nothing, and the view takes the record instead.
+
 ### Sections, actions and destinations are records too
 
 A row is not the only choice a screen makes, and the other three recur often enough to have the same answer.

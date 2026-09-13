@@ -6,6 +6,7 @@ import Formatters
 import Foundation
 import struct Gemstone.GemTransactionRow
 import func Gemstone.transactionRow
+import func Gemstone.transactionRows
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -17,8 +18,12 @@ public struct TransactionViewModel: Sendable, Identifiable, Equatable {
     private let row: GemTransactionRow
 
     public init(transaction: TransactionExtended) {
-        row = transactionRow(transaction: transaction.map())
+        self.init(transaction: transaction, row: transactionRow(transaction: transaction.map()))
+    }
+
+    public init(transaction: TransactionExtended, row: GemTransactionRow) {
         self.transaction = transaction
+        self.row = row
     }
 
     public var id: String {
@@ -26,7 +31,9 @@ public struct TransactionViewModel: Sendable, Identifiable, Equatable {
     }
 
     public static func sections(_ transactions: [TransactionExtended]) -> [ListSection<TransactionViewModel>] {
-        DateSectionBuilder(items: transactions, dateKeyPath: \.transaction.createdAt) { TransactionViewModel(transaction: $0) }.build()
+        let models = zip(transactions, transactionRows(transactions: transactions.map { $0.map() }))
+            .map { TransactionViewModel(transaction: $0, row: $1) }
+        return DateSectionBuilder(items: models, dateKeyPath: \.transaction.transaction.createdAt).build()
     }
 
     public var assetImage: AssetImage {
