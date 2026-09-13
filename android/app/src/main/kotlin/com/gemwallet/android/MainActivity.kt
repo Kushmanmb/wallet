@@ -9,6 +9,9 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.gemwallet.android.application.notifications.NotificationPermissionRequests
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -18,6 +21,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import com.gemwallet.android.ui.LocalAddressService
 import com.gemwallet.android.ui.LocalConnectionStatus
+import com.gemwallet.android.ui.LocalStreamConnected
+import com.wallet.core.primitives.ConnectionComponent
 import com.gemwallet.android.ui.LocalAssetConfigService
 import com.gemwallet.android.ui.LocalChainService
 import com.gemwallet.android.ui.LocalAssetsService
@@ -100,6 +105,11 @@ class MainActivity : FragmentActivity(), AuthRequester {
             val pendingNavigation by viewModel.pendingNavigation.collectAsStateWithLifecycle()
             val systemAuthEnrollmentMissing by systemAuthenticator.enrollmentMissing.collectAsStateWithLifecycle()
             val connectionStatus by connectionStatusObserver.status.collectAsStateWithLifecycle()
+            val streamConnected = remember {
+                connectionStatusObserver.isHealthyByComponent
+                    .map { it[ConnectionComponent.Stream] == true }
+                    .stateIn(lifecycleScope, SharingStarted.Eagerly, false)
+            }
             val connectionBannerState = remember { ConnectionBannerState() }
             LaunchedEffect(connectionStatus) {
                 connectionBannerState.update(connectionStatus.bannerTitleRes()?.let(::getString))
@@ -115,6 +125,7 @@ class MainActivity : FragmentActivity(), AuthRequester {
             CompositionLocalProvider(
                 LocalConnectionBannerState provides connectionBannerState,
                 LocalConnectionStatus provides connectionStatusObserver.status,
+                LocalStreamConnected provides streamConnected,
                 LocalAddressService provides addressService,
                 LocalDeeplinkService provides deeplinkService,
                 LocalAssetsService provides assetsService,

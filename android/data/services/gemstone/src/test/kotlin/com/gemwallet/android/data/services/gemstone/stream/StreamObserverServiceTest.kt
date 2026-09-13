@@ -4,6 +4,8 @@ import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.model.Session
 import com.gemwallet.android.testkit.mockSession
 import com.gemwallet.android.testkit.mockWallet
+import com.gemwallet.android.data.services.gemstone.connection.ConnectionComponentHealth
+import com.wallet.core.primitives.ConnectionComponent
 import com.wallet.core.primitives.Currency
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -40,6 +42,7 @@ class StreamObserverServiceTest {
         coEvery { handle(any()) } returns GemStreamEvent.Prices(prices = 0u, rates = 0u)
     }
     private val connection = Connection()
+    private val health = ConnectionComponentHealth(ConnectionComponent.Stream)
 
     @Test
     fun forwardsReconnectEvents() = runTest {
@@ -285,6 +288,7 @@ class StreamObserverServiceTest {
         getSession = getSession,
         service = service,
         connection = connection,
+        health = health,
         scope = backgroundScope,
     )
 

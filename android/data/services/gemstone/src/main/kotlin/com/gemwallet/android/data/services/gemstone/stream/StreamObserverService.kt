@@ -16,12 +16,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.gemwallet.android.data.services.gemstone.connection.ConnectionComponentHealth
 import uniffi.gemstone.GemStreamServiceInterface
 
 class StreamObserverService(
     private val getSession: GetSession,
     private val service: GemStreamServiceInterface,
     private val connection: WebSocketConnectable,
+    private val health: ConnectionComponentHealth,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
 ) {
     private var connectionJob: Job? = null
@@ -63,9 +65,15 @@ class StreamObserverService(
             connection.connect().collect { event ->
                 runCatchingCancellable {
                     when (event) {
-                        WebSocketEvent.Connected -> service.connected()
+                        WebSocketEvent.Connected -> {
+                            health.report(isHealthy = true)
+                            service.connected()
+                        }
                         is WebSocketEvent.Message -> Log.d(TAG, "Stream event: ${service.handle(event.text)}")
-                        WebSocketEvent.Disconnected -> service.disconnected()
+                        WebSocketEvent.Disconnected -> {
+                            health.report(isHealthy = false)
+                            service.disconnected()
+                        }
                     }
                 }.onFailure { Log.e(TAG, "Stream event error", it) }
             }

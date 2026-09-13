@@ -1,6 +1,7 @@
 package com.gemwallet.android.data.services.gemstone.di
 
 import com.gemwallet.android.application.session.cases.GetSession
+import com.gemwallet.android.data.services.gemstone.connection.ConnectionComponentHealth
 import com.gemwallet.android.data.services.gemstone.stream.StreamObserverService
 import com.gemwallet.android.data.services.gemstone.stream.WebSocketConnection
 import com.gemwallet.android.data.services.gemstone.stream.WebSocketRequest
@@ -164,10 +165,12 @@ object AssetsModule {
         getSession: GetSession,
         streamService: GemStreamServiceInterface,
         connection: WebSocketConnectable,
+        streamHealth: ConnectionComponentHealth,
     ): StreamObserverService = StreamObserverService(
         getSession = getSession,
         service = streamService,
         connection = connection,
+        health = streamHealth,
     )
 
     @Provides
