@@ -138,6 +138,5 @@ Platform items:
 
 Guides:
 
-- **G1** **S** [ARCHITECTURE.md](ARCHITECTURE.md) cites deleted symbols as live debt (`transaction_input_asset`, `transferService.asset`, `simulationAssetIds`, `SetPriceAlertsEnabled`, `SearchCustomToken`, `service.manageContact()`) and § 11 still points completed items at SERVICES.md; [SERVICES.md](SERVICES.md) names an `AssetStore.getAssetData` read with no caller, a "plan below" that moved here, and an earn note that predates the Android surface.
 
 Do not "fix" the [deliberate divergences](SERVICES.md#deliberate-divergences--do-not-fix-these).

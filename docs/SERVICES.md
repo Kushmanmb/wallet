@@ -177,7 +177,7 @@ The same rule with each platform's noun, for the cases Core genuinely cannot ans
 
 **An app service holds Core services, not the tables Core owns.** Reaching into a `Gem*Store`'s table from the app is a second read path the owner cannot see — the same violation as a case taking a Room DAO. The exception is a table Core has no concept of: the recent-activity list is the app's own, so `RecentActivityStore` (iOS) and `RecentAssetsService` (Android) are the platform's query layer and stay.
 
-Android's observed store readers are cases in `data/coordinators`, the documented home for an observed read. iOS's confirm flow was the exception — `ConfirmSimulationService`, `FeeAssetProvider` and `TransferMetadataProvider` read `AssetStore`, `BalanceStore` and `PriceStore` directly. All three are deleted: the confirm service now asks the owners. The one store read left in that flow is `AssetStore.getAssetData` for the *selected* fee asset, which is a plain row lookup for rendering, not a rule.
+Android's observed store readers are cases in `data/coordinators`, the documented home for an observed read. iOS's confirm flow was the exception — `ConfirmSimulationService`, `FeeAssetProvider` and `TransferMetadataProvider` read `AssetStore`, `BalanceStore` and `PriceStore` directly. All three are deleted: the confirm service now asks the owners. 
 
 The precedent that made this work: `GemWalletStore.get_wallets`/`get_wallet` are **synchronous** trait methods, so a service can answer a point read without `await`. Any future point read of a single row or short list should be synchronous the same way rather than pushing the caller back to the store.
 
@@ -194,7 +194,7 @@ The precedent that made this work: `GemWalletStore.get_wallets`/`get_wallet` are
 - No app-side copy of a Core decision, no raw preference keys, no swallowed store failure, and no app service reading a table a `Gem*Store` owns.
 - Nothing was added to reach it: both apps inject the generated Core service directly, with narrow Android cases only for observed reads or app-side aggregation — no forwarding wrapper and no repository.
 - No `private let`/`private val` holding a `Gem*Service` at file scope. A service comes from the initializer or from Hilt, so a test can substitute it.
-- Its store and both adapters are documented where the migration needs them, and its line in the plan below is removed.
+- Its store and both adapters are documented where the migration needs them, and its line in [TODO.md](TODO.md) is deleted.
 
 ## Screen services
 
@@ -230,7 +230,7 @@ One Core service per screen, held by the screen's view model on both apps. The s
 | `GemRecipientService` | — | `RecipientSceneViewModel` (+ `nameService`) | `RecipientViewModel` (+ `GemNameServiceInterface`) |
 | `GemRewardsService` | — | `RewardsViewModel`, `CreateRewardsCodeViewModel`, `RedeemRewardsCodeViewModel` | `ReferralViewModel` |
 | `GemSignMessageService` | — | `SignMessageSceneViewModel` | `WCRequestViewModel`, `WCAuthViewModel` |
-| `GemStakeService` | — | `StakeSceneViewModel`, `DelegationSceneViewModel`, `EarnSceneViewModel` | `StakeViewModel`, `DelegationViewModel` (earn flow missing, § 6) |
+| `GemStakeService` | — | `StakeSceneViewModel`, `DelegationSceneViewModel`, `EarnSceneViewModel` | `StakeViewModel`, `DelegationViewModel`, `EarnViewModel` |
 | `GemSupportService` | — | `SupportChatSceneViewModel` | `SupportChatSceneViewModel` |
 | `GemSwapQuoteService` | `GemSwapSession` | `SwapSceneViewModel` | `SwapViewModel` |
 | `GemTransactionDetailsService` | — | `TransactionSceneViewModel` | `GetTransactionDetailsImpl` (observed read + links) |
