@@ -125,7 +125,7 @@ public struct PerpetualPositionViewModel {
     }
 
     public var liquidationPriceField: ListItemField? {
-        guard let price = data.position.liquidationPrice, price > 0 else { return .none }
+        guard let price = row.liquidationPrice else { return .none }
         return ListItemField(
             title: TextValue(text: Localized.Info.Perpetual.LiquidationPrice.title, style: .body),
             value: TextValue(text: currencyFormatter.string(price), style: liquidationPriceTextStyle),

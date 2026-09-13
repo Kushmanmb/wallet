@@ -29,8 +29,9 @@ class GetPerpetualPositionImpl @Inject constructor(
 
 class PerpetualPositionDetailsDataAggregateImpl(
     private val data: PerpetualPositionData,
+    private val positionData: PerpetualPositionDataAggregateImpl = PerpetualPositionDataAggregateImpl(data),
 ) : PerpetualPositionDetailsDataAggregate,
-    PerpetualPositionDataAggregate by PerpetualPositionDataAggregateImpl(data) {
+    PerpetualPositionDataAggregate by positionData {
 
     private val amountFormatter = CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = Currency.USD)
     private val priceFormatter = CurrencyFormatter(currency = Currency.USD)
@@ -39,10 +40,7 @@ class PerpetualPositionDetailsDataAggregateImpl(
 
     override val entryPrice: String = priceFormatter.string(data.position.entryPrice)
 
-    override val liquidationPrice: String = data.position.liquidationPrice
-        ?.takeIf { it > 0.0 }
-        ?.let { priceFormatter.string(it) }
-        ?: ""
+    override val liquidationPrice: String = positionData.liquidationPrice?.let { priceFormatter.string(it) } ?: ""
 
     override val marginType: PerpetualMarginType = data.position.marginType
 
