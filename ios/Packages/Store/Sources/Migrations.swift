@@ -527,6 +527,11 @@ struct Migrations {
             try PriceAlertRecord.create(db: db)
         }
 
+        migrator.registerMigration("Delete \(FiatRateRecord.databaseTableName) rows with an unknown currency") { db in
+            let known = Currency.allCases.map { "'\($0.rawValue)'" }.joined(separator: ",")
+            try db.execute(sql: "DELETE FROM \(FiatRateRecord.databaseTableName) WHERE \(FiatRateRecord.Columns.symbol.name) NOT IN (\(known))")
+        }
+
         try migrator.migrate(dbQueue)
     }
 }
