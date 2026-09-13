@@ -9,7 +9,6 @@ One item, one commit, both apps built and tested. Core rule + test, regenerate b
 Blocking: three shapes answer to the word, so there is no reference to copy. [`fiat/session.rs`](../core/gemstone/src/services/fiat/session.rs) is the one to keep.
 
 - **V1** **M** [`confirm/session.rs`](../core/gemstone/src/services/confirm/session.rs) — an Object with `async load`/`state`/`execute`. It is a service; rename it.
-- **V4** **S** Add a session column to the [screen services table](SERVICES.md#screen-services), and the rows it lacks: `GemNftService`, `GemBannerService`, `GemRecentActivityService`, `GemWalletSessionService`, `GemAvatarService`, `GemAppUpdateService` are held by view models and untabled.
 
 ## 1. Lists get a row record
 

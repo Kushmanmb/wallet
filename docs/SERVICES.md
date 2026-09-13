@@ -198,41 +198,47 @@ The precedent that made this work: `GemWalletStore.get_wallets`/`get_wallet` are
 
 ## Screen services
 
-One Core service per screen, held by the screen's view model on both apps. Re-run the holder sweep (`rg -l "Gem<Name>ServiceProtocol"` under `ios/Features`, `"Gem<Name>ServiceInterface"` under `android/features`) before adding a service: a screen service that only one app holds is the next consolidation, and a second Core service in a view model is the one to remove.
+One Core service per screen, held by the screen's view model on both apps. The session column names the screen's [state record](ARCHITECTURE.md#a-screen-whose-state-changes-is-a-session) where it has one; a dash means the screen reads without driving state, or has not been migrated. Re-run the holder sweep (`rg -l "Gem<Name>ServiceProtocol"` under `ios/Features`, `"Gem<Name>ServiceInterface"` under `android/features`) before adding a service: a screen service that only one app holds is the next consolidation, and a second Core service in a view model is the one to remove.
 
-| Core service | iOS | Android |
-| --- | --- | --- |
-| `GemAddAssetService` | `AddAssetSceneViewModel` | `AddAssetViewModel` |
-| `GemAmountService` | `AmountSceneViewModel` and its providers | `AmountViewModel`, `AmountPerpetualProvider` |
-| `GemAssetDetailsService` | `AssetSceneViewModel` | `AssetDetailsViewModel` |
-| `GemAssetSelectionService` | `SelectAssetViewModel`, `WalletSearchSceneViewModel`, `AssetsResultsSceneViewModel` | `BaseAssetSelectViewModel` and its subclasses |
-| `GemChainSettingsService` | `ChainSettingsSceneViewModel`, `AddNodeSceneViewModel` | `NetworksViewModel`, `AddNodeViewModel` |
-| `GemChartService` | `ChartSceneViewModel` | `ChartViewModel` |
-| `GemCollectibleService` | `CollectibleViewModel`, `ReportNftViewModel` | `NftDetailsViewModel` (+ `GetNftAssetDetails` observed read) |
-| `GemConfirmSession` (from `GemConfirmTransferService::session`) | `ConfirmTransferSceneViewModel` | `ConfirmViewModel` |
-| `GemContactService` | `ContactsViewModel` | `ContactsViewModel` |
-| `GemCurrencyService` | `CurrencySceneViewModel` | `CurrenciesViewModel` (+ session currency cases) |
-| `GemDeveloperService` | `DeveloperViewModel` (+ the iOS stores it wipes) | `DevelopViewModel` |
-| `GemFiatQuoteService` | `FiatSceneViewModel` | `FiatViewModel` |
-| `GemManageContactService` | `ManageContactViewModel` (+ `nameService`) | `ManageContactViewModel` (+ `GemNameServiceInterface`) |
-| `GemNotificationService` | `InAppNotificationsViewModel` | `InAppNotificationsViewModel` |
-| `GemNotificationsService` | `NotificationsViewModel` | — (`SettingsViewModel` uses push cases) |
-| `GemPerpetualDetailsService` | `PerpetualSceneViewModel` | `PerpetualDetailsViewModel` |
-| `GemPerpetualService` | `PerpetualsSceneViewModel` (+ recent activity) | `PerpetualMarketViewModel` (+ recent activity) |
-| `GemPortfolioService` | `PortfolioSceneViewModel` | `PortfolioChartViewModel` |
-| `GemPriceAlertService` | `PriceAlertsSceneViewModel`, `SetPriceAlertViewModel` | `PriceAlertViewModel`, `PriceAlertTargetViewModel` |
-| `GemReceiveService` | `ReceiveViewModel` | `ReceiveViewModel` |
-| `GemRecipientService` | `RecipientSceneViewModel` (+ `nameService`) | `RecipientViewModel` (+ `GemNameServiceInterface`) |
-| `GemRewardsService` | `RewardsViewModel`, `CreateRewardsCodeViewModel`, `RedeemRewardsCodeViewModel` | `ReferralViewModel` |
-| `GemSignMessageService` | `SignMessageSceneViewModel` | `WCRequestViewModel`, `WCAuthViewModel` |
-| `GemStakeService` | `StakeSceneViewModel`, `DelegationSceneViewModel`, `EarnSceneViewModel` | `StakeViewModel`, `DelegationViewModel` (earn flow missing, § 6) |
-| `GemSupportService` | `SupportChatSceneViewModel` | `SupportChatSceneViewModel` |
-| `GemSwapQuoteService` | `SwapSceneViewModel` | `SwapViewModel` |
-| `GemTransactionDetailsService` | `TransactionSceneViewModel` | `GetTransactionDetailsImpl` (observed read + links) |
-| `GemTransactionsService` | `TransactionsViewModel` | `TransactionsViewModel` |
-| `GemWalletConnectService` | `WalletConnectorService` | `WCRequestViewModel`, `ProposalSceneViewModel`, `WCAuthViewModel` |
-| `GemWalletHomeService` | `WalletSceneViewModel`, `NetworkAssetsSceneViewModel` | `AssetsViewModel`, `NetworkAssetsViewModel` |
-| `GemWalletService` | onboarding and manage-wallet view models (`WalletsSceneViewModel` gates on `can_add_wallet`, `WalletDetailViewModel` exports the secret through `export_secret`) | `CreateWalletViewModel`, `ImportViewModel`, `WalletsViewModel` (`can_add_wallet`), `WalletViewModel` / `SetupWalletViewModel` (`rename`), `WalletSecretDataViewModel` (`export_secret`), wallet cases |
+| Core service | Session | iOS | Android |
+| --- | --- | --- | --- |
+| `GemAddAssetService` | — | `AddAssetSceneViewModel` | `AddAssetViewModel` |
+| `GemAmountService` | — | `AmountSceneViewModel` and its providers | `AmountViewModel`, `AmountPerpetualProvider` |
+| `GemAppUpdateService` | — | `AboutUsViewModel` | — (Play in-app update instead) |
+| `GemAssetDetailsService` | — | `AssetSceneViewModel` | `AssetDetailsViewModel` |
+| `GemAssetSelectionService` | — | `SelectAssetViewModel`, `WalletSearchSceneViewModel`, `AssetsResultsSceneViewModel` | `BaseAssetSelectViewModel` and its subclasses |
+| `GemAvatarService` | — | `WalletImageViewModel`, vended by `CreateWalletModel` and `ImportWalletViewModel` | — (no avatar surface) |
+| `GemBannerService` | — | — (a collaborator inside `GemAssetDetailsService` and `GemWalletHomeService`) | `BannersViewModel` |
+| `GemChainSettingsService` | — | `ChainSettingsSceneViewModel`, `AddNodeSceneViewModel` | `NetworksViewModel`, `AddNodeViewModel` |
+| `GemChartService` | — | `ChartSceneViewModel` | `ChartViewModel` |
+| `GemCollectibleService` | — | `CollectibleViewModel`, `ReportNftViewModel` | `NftDetailsViewModel` (+ `GetNftAssetDetails` observed read) |
+| `GemConfirmTransferService` | `GemConfirmSession` (an object with I/O today, see TODO V1) | `ConfirmTransferSceneViewModel` | `ConfirmViewModel` |
+| `GemContactService` | — | `ContactsViewModel` | `ContactsViewModel` |
+| `GemCurrencyService` | — | `CurrencySceneViewModel` | `CurrenciesViewModel` (+ session currency cases) |
+| `GemDeveloperService` | — | `DeveloperViewModel` (+ the iOS stores it wipes) | `DevelopViewModel` |
+| `GemFiatQuoteService` | `GemFiatSession` | `FiatSceneViewModel` | `FiatViewModel` |
+| `GemManageContactService` | — | `ManageContactViewModel` (+ `nameService`) | `ManageContactViewModel` (+ `GemNameServiceInterface`) |
+| `GemNftService` | — | `CollectionsViewModel`, `CollectionViewModel`, `UnverifiedCollectionsViewModel` | `NftListViewModels`, `ReceiveNftChainsViewModel` |
+| `GemNotificationService` | — | `InAppNotificationsViewModel` | `InAppNotificationsViewModel` |
+| `GemNotificationsService` | — | `NotificationsViewModel` | — (`SettingsViewModel` uses push cases) |
+| `GemPerpetualDetailsService` | — | `PerpetualSceneViewModel` | `PerpetualDetailsViewModel` |
+| `GemPerpetualService` | — | `PerpetualsSceneViewModel` (+ recent activity) | `PerpetualMarketViewModel` (+ recent activity) |
+| `GemPortfolioService` | — | `PortfolioSceneViewModel` | `PortfolioChartViewModel` |
+| `GemPriceAlertService` | — | `PriceAlertsSceneViewModel`, `SetPriceAlertViewModel` | `PriceAlertViewModel`, `PriceAlertTargetViewModel` |
+| `GemReceiveService` | — | `ReceiveViewModel` | `ReceiveViewModel` |
+| `GemRecentActivityService` | — | `RecentsSceneViewModel`, `SelectAssetViewModel`, `PerpetualsSceneViewModel` | `RecentsSheetViewModel`, `PerpetualMarketViewModel` |
+| `GemRecipientService` | — | `RecipientSceneViewModel` (+ `nameService`) | `RecipientViewModel` (+ `GemNameServiceInterface`) |
+| `GemRewardsService` | — | `RewardsViewModel`, `CreateRewardsCodeViewModel`, `RedeemRewardsCodeViewModel` | `ReferralViewModel` |
+| `GemSignMessageService` | — | `SignMessageSceneViewModel` | `WCRequestViewModel`, `WCAuthViewModel` |
+| `GemStakeService` | — | `StakeSceneViewModel`, `DelegationSceneViewModel`, `EarnSceneViewModel` | `StakeViewModel`, `DelegationViewModel` (earn flow missing, § 6) |
+| `GemSupportService` | — | `SupportChatSceneViewModel` | `SupportChatSceneViewModel` |
+| `GemSwapQuoteService` | `GemSwapSession` | `SwapSceneViewModel` | `SwapViewModel` |
+| `GemTransactionDetailsService` | — | `TransactionSceneViewModel` | `GetTransactionDetailsImpl` (observed read + links) |
+| `GemTransactionsService` | — | `TransactionsViewModel` | `TransactionsViewModel` |
+| `GemWalletConnectService` | — | `WalletConnectorService` | `WCRequestViewModel`, `ProposalSceneViewModel`, `WCAuthViewModel` |
+| `GemWalletHomeService` | — | `WalletSceneViewModel`, `NetworkAssetsSceneViewModel` | `AssetsViewModel`, `NetworkAssetsViewModel` |
+| `GemWalletService` | — | onboarding and manage-wallet view models (`WalletsSceneViewModel` gates on `can_add_wallet`, `WalletDetailViewModel` exports the secret through `export_secret`) | `CreateWalletViewModel`, `ImportViewModel`, `WalletsViewModel` (`can_add_wallet`), `WalletViewModel` / `SetupWalletViewModel` (`rename`), `WalletSecretDataViewModel` (`export_secret`), wallet cases |
+| `GemWalletSessionService` | — | `SettingsViewModel` | `SettingsViewModel` |
 
 Android holds an observed Room read beside the service where the screen lists rows (a `Get*` case); that is the platform's reactive read, not a second service.
 
