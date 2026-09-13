@@ -26,6 +26,9 @@ public struct AutocloseOption: WheelPickerDisplayable, Sendable {
     }
 
     public var displayText: String {
-        value == 0 ? Localized.Common.none : "\(value)%"
+        guard let percent = GemPerpetual(provider: .hypercore).autoclosePercent(value: value) else {
+            return Localized.Common.none
+        }
+        return "\(percent)%"
     }
 }

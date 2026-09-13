@@ -189,7 +189,8 @@ fun PreferencesScene(
 
 @Composable
 private fun autocloseLabel(percent: Int): String =
-    if (percent == 0) stringResource(R.string.common_none) else "$percent%"
+    GemPerpetual(PerpetualProvider.HYPERCORE).use { it.autoclosePercent(percent.toUByte()) }
+        ?.let { "$it%" } ?: stringResource(R.string.common_none)
 
 @Composable
 private fun appearanceLabel(appearance: Appearance): String = stringResource(

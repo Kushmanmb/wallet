@@ -23,6 +23,6 @@ public struct LeverageOption: WheelPickerDisplayable, Sendable {
     }
 
     public var displayText: String {
-        "\(value)x"
+        GemPerpetual(provider: .hypercore).leverageText(value: value)
     }
 }

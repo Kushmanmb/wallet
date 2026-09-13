@@ -50,6 +50,14 @@ impl GemPerpetual {
         }
     }
 
+    pub fn leverage_text(&self, value: u8) -> String {
+        leverage_text(value)
+    }
+
+    pub fn autoclose_percent(&self, value: u8) -> Option<u8> {
+        (value != 0).then_some(value)
+    }
+
     pub fn leverage_options(&self, max_leverage: Option<u8>) -> Vec<u8> {
         match max_leverage {
             Some(max_leverage) => leverage_options(max_leverage),
@@ -301,5 +309,22 @@ mod tests {
                 },
             })
         );
+    }
+}
+
+pub fn leverage_text(value: u8) -> String {
+    format!("{value}x")
+}
+
+#[cfg(test)]
+mod option_tests {
+    use super::*;
+
+    #[test]
+    fn test_no_autoclose_percent_stands_for_none_and_leverage_carries_its_suffix() {
+        let perpetual = GemPerpetual::new(PerpetualProvider::Hypercore);
+        assert_eq!(perpetual.autoclose_percent(0), None);
+        assert_eq!(perpetual.autoclose_percent(25), Some(25));
+        assert_eq!(perpetual.leverage_text(40), "40x");
     }
 }

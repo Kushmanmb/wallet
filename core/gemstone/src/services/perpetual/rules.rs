@@ -506,7 +506,7 @@ pub fn position_row(perpetual: &Perpetual, asset: &Asset, position: &PerpetualPo
             true => perpetual.name.clone(),
             false => asset.symbol.clone(),
         },
-        leverage: format!("{}x", position.leverage),
+        leverage: crate::perpetual::leverage_text(position.leverage),
         direction: position.direction.clone(),
     }
 }

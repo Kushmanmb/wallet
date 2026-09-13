@@ -1,4 +1,4 @@
-use primitives::{ApplicationMetadata, ApplicationMetadataSource};
+use primitives::ApplicationMetadata;
 use url::{Host, Url, form_urlencoded};
 
 use crate::config::public::ASSETS_URL;
@@ -72,6 +72,7 @@ fn public_url(url: &str) -> Option<Url> {
 
 #[cfg(test)]
 mod tests {
+    use primitives::ApplicationMetadataSource;
     #[test]
     fn test_a_connection_without_a_host_has_no_subtitle_and_takes_its_initial_from_the_name() {
         let service = GemApplicationMetadataService::new();
