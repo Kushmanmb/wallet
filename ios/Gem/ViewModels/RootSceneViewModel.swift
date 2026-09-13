@@ -36,7 +36,6 @@ final class RootSceneViewModel {
     private let walletSessionService: any GemWalletSessionServiceProtocol
     let walletConnectorPresenter: WalletConnectorPresenter
     let lockManager: any LockWindowManageable
-    private let scenePhases = AsyncStream<ScenePhase>.makeStream()
 
     var currentWallet: Wallet? {
         walletSessionService.currentWalletId.flatMap { try? viewModelFactory.storeManager.walletStore.getWallet(id: $0) }
@@ -113,16 +112,11 @@ extension RootSceneViewModel {
         Task { await checkForUpdate() }
         Task { await appLifecycleService.setup() }
         Task { await setupWallets() }
-        Task { await handleScenePhases() }
     }
 
     func onScenePhaseChanged(_: ScenePhase, _ newPhase: ScenePhase) {
-        scenePhases.continuation.yield(newPhase)
-    }
-
-    private func handleScenePhases() async {
-        for await phase in scenePhases.stream {
-            await appLifecycleService.handleScenePhase(phase)
+        Task {
+            await appLifecycleService.handleScenePhase(newPhase)
         }
     }
 

@@ -24,7 +24,6 @@ public actor AppLifecycleService: Sendable {
     private let perpetualObserver: any PerpetualObservable
     private let walletSessionService: any GemWalletSessionServiceProtocol
     private let transactionStateService: any GemTransactionStateServiceProtocol
-    private var pendingTransactionsTask: Task<Void, Never>?
 
     public init(
         walletConnector: any WalletConnectorServiceable,
@@ -116,11 +115,8 @@ extension AppLifecycleService {
         async let connection: () = connectionStatusObserver.start()
         async let stream: () = streamObserverService.connect()
         async let perpetual: () = connectPerpetual()
-        _ = await (connection, stream, perpetual)
-        pendingTransactionsTask?.cancel()
-        pendingTransactionsTask = Task { [weak self] in
-            await self?.trackPendingTransactions()
-        }
+        async let pending: () = trackPendingTransactions()
+        _ = await (connection, stream, perpetual, pending)
     }
 
     private func trackPendingTransactions() async {
@@ -146,8 +142,6 @@ extension AppLifecycleService {
     }
 
     private func disconnectObservers() async {
-        pendingTransactionsTask?.cancel()
-        pendingTransactionsTask = nil
         transactionStateService.stopTracking()
         async let connection: () = connectionStatusObserver.stop()
         async let price: () = streamObserverService.disconnect()
