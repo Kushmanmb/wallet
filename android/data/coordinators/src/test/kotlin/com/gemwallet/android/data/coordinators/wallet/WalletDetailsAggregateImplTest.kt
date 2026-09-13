@@ -40,6 +40,7 @@ class WalletDetailsAggregateImplTest {
                 subtitle = GemWalletSubtitle.Multicoin,
                 placeholder = GemWalletPlaceholder.Multicoin,
                 showsWatchBadge = false,
+                isPinned = false,
                 hasAvatar = false,
                 imageUrl = null,
             ),

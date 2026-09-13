@@ -38,6 +38,6 @@ class WalletsViewModel @Inject constructor(
 
     fun togglePin(walletId: WalletId) = viewModelScope.launch(Dispatchers.IO) {
         val wallet = wallets.value.firstOrNull { it.row.id == walletId.id } ?: return@launch
-        service.setPinned(walletId.id, !wallet.isPinned)
+        service.setPinned(walletId.id, !wallet.row.isPinned)
     }
 }

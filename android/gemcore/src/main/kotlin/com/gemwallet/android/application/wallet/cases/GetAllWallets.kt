@@ -11,7 +11,7 @@ interface GetAllWallets {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun Flow<List<WalletDataAggregate>>.pinned(): Flow<List<WalletDataAggregate>> = this.mapLatest { items -> items.filter { it.isPinned } }
+fun Flow<List<WalletDataAggregate>>.pinned(): Flow<List<WalletDataAggregate>> = this.mapLatest { items -> items.filter { it.row.isPinned } }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun Flow<List<WalletDataAggregate>>.unpinned(): Flow<List<WalletDataAggregate>> = this.mapLatest { items -> items.filter { !it.isPinned } }
+fun Flow<List<WalletDataAggregate>>.unpinned(): Flow<List<WalletDataAggregate>> = this.mapLatest { items -> items.filter { !it.row.isPinned } }

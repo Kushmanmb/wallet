@@ -20,12 +20,11 @@ public struct SelectWalletViewModel: SelectableListAdoptable {
 
     public init(
         rows: [GemWalletRow],
-        pinnedIds: Set<String>,
         selectedRow: GemWalletRow,
     ) {
         let sections: [ListSection<GemWalletRow>] = [
-            (Localized.Common.pinned, Images.System.pin, rows.filter { pinnedIds.contains($0.id) }),
-            (nil, nil, rows.filter { !pinnedIds.contains($0.id) }),
+            (Localized.Common.pinned, Images.System.pin, rows.filter(\.isPinned)),
+            (nil, nil, rows.filter { !$0.isPinned }),
         ]
         .filter(\.2.isNotEmpty)
         .map { title, image, items in

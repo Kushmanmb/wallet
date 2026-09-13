@@ -126,6 +126,7 @@ pub fn row(wallet: &Wallet) -> GemWalletRow {
         subtitle,
         placeholder,
         shows_watch_badge,
+        is_pinned: wallet.is_pinned,
         has_avatar: wallet.image_url.as_ref().is_some_and(|url| !url.is_empty()),
         image_url: wallet.image_url.clone(),
     };

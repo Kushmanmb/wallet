@@ -5,5 +5,4 @@ import uniffi.gemstone.GemWalletRow
 interface WalletDataAggregate {
     val isCurrent: Boolean
     val row: GemWalletRow
-    val isPinned: Boolean
 }

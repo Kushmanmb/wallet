@@ -50,8 +50,8 @@ internal fun LazyListScope.wallets(
             },
             menuItems = {
                 WalletDropDownItem(
-                    if (item.isPinned) R.string.common_unpin else R.string.common_pin,
-                    if (item.isPinned) R.drawable.keep_off else AppIcons.PushPin,
+                    if (item.row.isPinned) R.string.common_unpin else R.string.common_pin,
+                    if (item.row.isPinned) R.drawable.keep_off else AppIcons.PushPin,
                 ) {
                     onTogglePin(walletId)
                     longPressedWallet.value = ""

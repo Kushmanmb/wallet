@@ -45,7 +45,6 @@ class GetAllWalletsImpl(
                 val rows = walletRows(items.map { it.toGem() })
                 items.mapIndexed { index, wallet ->
                     WalletDataAggregateImpl(
-                        wallet = wallet,
                         row = rows[index],
                         isCurrent = wallet.id == currentWalletId,
                     )
@@ -58,10 +57,6 @@ class GetAllWalletsImpl(
 
 @Stable
 class WalletDataAggregateImpl(
-    wallet: Wallet,
     override val row: GemWalletRow,
     override val isCurrent: Boolean,
-) : WalletDataAggregate {
-
-    override val isPinned: Boolean = wallet.isPinned
-}
+) : WalletDataAggregate

@@ -27,7 +27,6 @@ public struct ConnectionProposalViewModel {
         self.pairingProposal = pairingProposal
         walletSelectorModel = SelectWalletViewModel(
             rows: walletRows(wallets: pairingProposal.proposal.wallets.map { $0.map() }),
-            pinnedIds: Set(pairingProposal.proposal.wallets.filter(\.isPinned).map(\.id.id)),
             selectedRow: walletRow(wallet: pairingProposal.proposal.defaultWallet.map()),
         )
     }

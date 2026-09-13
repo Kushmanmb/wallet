@@ -46,9 +46,9 @@ class WalletsScreenTest {
             subtitle = GemWalletSubtitle.Multicoin,
             placeholder = GemWalletPlaceholder.Multicoin,
             showsWatchBadge = false,
+            isPinned = isPinned,
             hasAvatar = false,
             imageUrl = null,
         )
-        override val isPinned: Boolean = isPinned
     }
 }

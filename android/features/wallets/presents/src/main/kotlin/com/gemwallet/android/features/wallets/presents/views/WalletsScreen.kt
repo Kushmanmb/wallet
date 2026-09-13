@@ -81,7 +81,7 @@ internal data class WalletSections(
 }
 
 internal fun List<WalletDataAggregate>.toWalletSections(): WalletSections {
-    val (pinnedWallets, unpinnedWallets) = partition { it.isPinned }
+    val (pinnedWallets, unpinnedWallets) = partition { it.row.isPinned }
     return WalletSections(
         pinnedWallets = pinnedWallets,
         unpinnedWallets = unpinnedWallets,
@@ -97,39 +97,39 @@ fun PreviewWalletScreen() {
                 unpinnedWallets = listOf(
                     object : WalletDataAggregate {
                         override val isCurrent: Boolean = true
-                        override val isPinned: Boolean = false
                         override val row: GemWalletRow = GemWalletRow(
                             id = "1",
                             name = "Foo wallet #1",
                             subtitle = GemWalletSubtitle.Multicoin,
                             placeholder = GemWalletPlaceholder.Multicoin,
                             showsWatchBadge = false,
+                            isPinned = false,
                             hasAvatar = false,
                             imageUrl = null,
                         )
                     },
                     object : WalletDataAggregate {
                         override val isCurrent: Boolean = false
-                        override val isPinned: Boolean = false
                         override val row: GemWalletRow = GemWalletRow(
                             id = "2",
                             name = "Foo wallet #2",
                             subtitle = GemWalletSubtitle.Multicoin,
                             placeholder = GemWalletPlaceholder.Multicoin,
                             showsWatchBadge = false,
+                            isPinned = false,
                             hasAvatar = false,
                             imageUrl = null,
                         )
                     },
                     object : WalletDataAggregate {
                         override val isCurrent: Boolean = false
-                        override val isPinned: Boolean = false
                         override val row: GemWalletRow = GemWalletRow(
                             id = "3",
                             name = "Foo wallet #3",
                             subtitle = GemWalletSubtitle.Multicoin,
                             placeholder = GemWalletPlaceholder.Multicoin,
                             showsWatchBadge = false,
+                            isPinned = false,
                             hasAvatar = false,
                             imageUrl = null,
                         )
@@ -139,13 +139,13 @@ fun PreviewWalletScreen() {
 
                     object : WalletDataAggregate {
                         override val isCurrent: Boolean = true
-                        override val isPinned: Boolean = true
                         override val row: GemWalletRow = GemWalletRow(
                             id = "4",
                             name = "Foo wallet #4",
                             subtitle = GemWalletSubtitle.Multicoin,
                             placeholder = GemWalletPlaceholder.Multicoin,
                             showsWatchBadge = false,
+                            isPinned = false,
                             hasAvatar = false,
                             imageUrl = null,
                         )

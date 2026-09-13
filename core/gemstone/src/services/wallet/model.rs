@@ -75,6 +75,7 @@ pub struct GemWalletRow {
     pub subtitle: GemWalletSubtitle,
     pub placeholder: GemWalletPlaceholder,
     pub shows_watch_badge: bool,
+    pub is_pinned: bool,
     pub has_avatar: bool,
     pub image_url: Option<String>,
 }

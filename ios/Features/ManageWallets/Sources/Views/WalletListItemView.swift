@@ -79,7 +79,7 @@ struct WalletListItemView: View {
                     action: { onEdit(wallet) },
                 ),
                 .pin(
-                    isPinned: wallet.isPinned,
+                    isPinned: row.isPinned,
                     onPin: { onPin(wallet) },
                 ),
                 .delete { onDelete(wallet) },

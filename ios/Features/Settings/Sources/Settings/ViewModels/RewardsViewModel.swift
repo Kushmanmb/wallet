@@ -109,7 +109,6 @@ public final class RewardsViewModel: Sendable {
     var walletSelectorModel: SelectWalletViewModel {
         SelectWalletViewModel(
             rows: walletRows(wallets: wallets.map { $0.map() }),
-            pinnedIds: Set(wallets.filter(\.isPinned).map(\.id.id)),
             selectedRow: selectedWalletRow,
         )
     }
