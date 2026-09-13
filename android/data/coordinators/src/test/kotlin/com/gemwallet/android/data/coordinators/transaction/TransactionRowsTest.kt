@@ -1,5 +1,6 @@
 package com.gemwallet.android.data.coordinators.transaction
 
+import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.testkit.mockTransaction
 import com.gemwallet.android.testkit.mockTransactionExtended
 import com.gemwallet.android.testkit.mockTransactionId
@@ -7,11 +8,19 @@ import com.wallet.core.primitives.TransactionState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.Test
+import uniffi.gemstone.GemTransactionsServiceInterface
+import uniffi.gemstone.TransactionExtended
+import uniffi.gemstone.transactionRow
 
 class TransactionRowsTest {
 
-    private val subject = TransactionRows()
+    private val service = mockk<GemTransactionsServiceInterface> {
+        every { rows(any()) } answers { firstArg<List<TransactionExtended>>().map { transactionRow(it) } }
+    }
+    private val subject = TransactionRows(service)
 
     private fun transaction(hash: String, state: TransactionState = TransactionState.Confirmed) =
         mockTransactionExtended(transaction = mockTransaction(id = mockTransactionId(hash = hash), state = state))

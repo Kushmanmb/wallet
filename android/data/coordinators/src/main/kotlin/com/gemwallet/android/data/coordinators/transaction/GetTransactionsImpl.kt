@@ -29,6 +29,8 @@ import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStatus
 import uniffi.gemstone.GemTransactionRowValue
 import uniffi.gemstone.GemTransactionTitle
+import uniffi.gemstone.GemTransactionRow
+import uniffi.gemstone.GemTransactionsServiceInterface
 
 private val usdFiatFormatter = CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = Currency.USD)
 private val valueFormatter = ValueFormatter(style = ValueFormatter.Style.Short)
@@ -36,6 +38,7 @@ private val valueFormatter = ValueFormatter(style = ValueFormatter.Style.Short)
 class GetTransactionsImpl(
     private val getCurrentWalletId: GetCurrentWalletId,
     private val transactionStore: GemstoneTransactionStore,
+    private val service: GemTransactionsServiceInterface,
 ) : GetTransactions {
 
     override fun getTransactions(
@@ -45,29 +48,32 @@ class GetTransactionsImpl(
         .flowOn(Dispatchers.IO)
 
     private fun Flow<List<TransactionExtended>>.aggregates(): Flow<List<TransactionDataAggregate>> = flow {
-        val rows = TransactionRows()
+        val rows = TransactionRows(service)
         collect { emit(rows.aggregates(it)) }
     }
 }
 
-internal class TransactionRows {
+internal class TransactionRows(private val service: GemTransactionsServiceInterface) {
 
     private var previous: Map<TransactionExtended, TransactionDataAggregate> = emptyMap()
 
     fun aggregates(items: List<TransactionExtended>): List<TransactionDataAggregate> {
         val reused = previous
-        val rows = items.map { reused[it] ?: TransactionDataAggregateImpl(it) }
-        previous = items.zip(rows).toMap()
-        return rows
+        val missing = items.filterNot(reused::containsKey).distinct()
+        val built = missing.zip(service.rows(missing.map { it.toGem() })) { data, row ->
+            data to TransactionDataAggregateImpl(data, row)
+        }.toMap()
+        val aggregates = items.mapNotNull { reused[it] ?: built[it] }
+        previous = items.zip(aggregates).toMap()
+        return aggregates
     }
 }
 
 @Stable
 class TransactionDataAggregateImpl(
     data: TransactionExtended,
+    private val row: GemTransactionRow,
 ) : TransactionDataAggregate {
-
-    private val row = transactionRow(data.toGem())
 
     override val id: TransactionId = data.transaction.id
 

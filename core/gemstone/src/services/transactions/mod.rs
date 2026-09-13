@@ -7,7 +7,7 @@ use crate::services::error::GemServiceError;
 use std::sync::Arc;
 
 use chrono::Utc;
-use primitives::{AssetId, Chain, Currency, Wallet, WalletId};
+use primitives::{AssetId, Chain, Currency, TransactionExtended, Wallet, WalletId};
 
 pub use details::GemTransactionDetailsService;
 pub use model::{
@@ -40,6 +40,10 @@ pub struct GemTransactionsService {
 
 #[uniffi::export]
 impl GemTransactionsService {
+    pub fn rows(&self, transactions: Vec<TransactionExtended>) -> Vec<GemTransactionRow> {
+        transactions.iter().map(rules::row).collect()
+    }
+
     #[uniffi::constructor]
     pub fn new(
         api: Arc<GemDeviceApiClient>,

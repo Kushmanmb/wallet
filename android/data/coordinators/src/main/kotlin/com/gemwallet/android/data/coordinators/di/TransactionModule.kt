@@ -19,6 +19,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.session.cases.GetCurrentWalletId
+import uniffi.gemstone.GemTransactionsServiceInterface
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -28,8 +29,8 @@ object TransactionModule {
     fun provideGetTransactions(
         getCurrentWalletId: GetCurrentWalletId,
         transactionStore: GemstoneTransactionStore,
-        addressService: GemAddressService,
-    ): GetTransactions = GetTransactionsImpl(getCurrentWalletId, transactionStore)
+        service: GemTransactionsServiceInterface,
+    ): GetTransactions = GetTransactionsImpl(getCurrentWalletId, transactionStore, service)
 
     @Provides
     @Singleton
