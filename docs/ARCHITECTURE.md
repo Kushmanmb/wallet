@@ -181,7 +181,7 @@ public var name: String {
 }
 ```
 
-`GemValidatorRow`, `GemFiatQuoteRow` and `GemBalanceRow` are the same shape for their lists. The thing to look for in a row model is a decision the record could carry: if both apps compute it, it belongs in the record, not in two view models.
+`GemValidatorRow`, `GemFiatQuoteRow`, `GemWalletRow` and `GemBalanceRow` are the same shape for their lists. An adapter over a single value is a row model too, never a session: `WalletViewModel` takes a `Wallet`, holds the `GemWalletRow` Core decided, and exposes `Image` and `AssetImage` from it. A session is for a screen the user drives, with events and a derived view state; a projection of one value that answers the same way every time is a row. The thing to look for in a row model is a decision the record could carry: if both apps compute it, it belongs in the record, not in two view models.
 
 ### Sections, actions and destinations are records too
 
