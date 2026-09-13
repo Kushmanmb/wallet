@@ -19,7 +19,7 @@ public struct SupportChatScene: View {
             ScrollView {
                 VStack(spacing: .small) {
                     ForEach(model.days) { day in
-                        SupportDateSeparator(date: day.date)
+                        SupportDateSeparator(title: day.title)
                         ForEach(day.groups) { group in
                             groupView(group)
                         }

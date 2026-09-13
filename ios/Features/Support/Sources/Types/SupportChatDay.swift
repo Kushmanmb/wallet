@@ -5,6 +5,7 @@ import Primitives
 
 struct SupportChatDay: Identifiable {
     let date: Date
+    let title: String
     let groups: [SupportChatGroup]
 
     var id: Date { date }

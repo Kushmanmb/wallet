@@ -26,7 +26,6 @@ Rejected: no row model besides `WalletViewModel` was a pure forwarder — `ListA
 
 Copy: [`GemPerpetualMarketCounts::sections`](../core/gemstone/src/services/perpetual/model.rs) → [iOS](../ios/Features/Perpetuals/Sources/ViewModels/PerpetualsSceneViewModel.swift), [Android](../android/features/perpetual/presents/src/main/kotlin/com/gemwallet/android/features/perpetual/views/market/PerpetualMarketScene.kt).
 
-- **C6** **S** Day sections elsewhere — [`SupportChatDayBuilder`](../ios/Features/Support/Sources/Types/SupportChatDayBuilder.swift) and [`SupportChatModels`](../android/features/settings/settings/viewmodels/src/main/kotlin/com/gemwallet/android/features/settings/settings/viewmodels/SupportChatModels.kt) still group and label their own days; [`SupportDateSeparator`](../ios/Features/Support/Sources/Views/SupportDateSeparator.swift) builds its formatter inside a `View` body. Take `GemDayBoundaries` the way the transactions list does.
 - **C5** **M** Audit remaining screens for action lists assembled app-side; `GemStakeActionItem`, `GemHeaderButtonKind`, `GemAssetAction`, `GemFiatButtonAction` are the shape.
 
 ## 3. Screens get a session

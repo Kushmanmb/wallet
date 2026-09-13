@@ -1,7 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
+import struct Gemstone.GemDayBoundaries
 import GemstonePrimitives
+import PrimitivesComponents
 import Primitives
 import func Gemstone.supportChatGroups
 
@@ -11,10 +13,15 @@ struct SupportChatDayBuilder {
     let imageAction: (SupportMessageImage) -> Void
 
     func build() -> [SupportChatDay] {
-        Dictionary(grouping: messages) { Calendar.current.startOfDay(for: $0.createdAt) }
+        let boundaries = GemDayBoundaries.current
+        return Dictionary(grouping: messages) { Calendar.current.startOfDay(for: $0.createdAt) }
             .sorted { $0.key < $1.key }
             .map { day in
-                SupportChatDay(date: day.key, groups: groups(from: day.value))
+                SupportChatDay(
+                    date: day.key,
+                    title: TransactionDateFormatter(date: day.key, boundaries: boundaries).section,
+                    groups: groups(from: day.value),
+                )
             }
     }
 }

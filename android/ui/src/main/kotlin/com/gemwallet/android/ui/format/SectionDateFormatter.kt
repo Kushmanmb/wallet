@@ -29,4 +29,4 @@ class SectionDateFormatter(
     }
 }
 
-internal fun LocalDate.gemDay(): GemDay = GemDay(year = year, month = monthValue.toUInt(), day = dayOfMonth.toUInt())
+fun LocalDate.gemDay(): GemDay = GemDay(year = year, month = monthValue.toUInt(), day = dayOfMonth.toUInt())
