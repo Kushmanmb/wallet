@@ -27,6 +27,6 @@ public final class UnverifiedCollectionsViewModel: CollectionsViewable, Sendable
     }
 
     public var content: CollectionsContent {
-        CollectionsContent(items: service.listItems(data: query.value.map { $0.map() }, list: .unverified).map(NFTGridPosterBuilder.item))
+        CollectionsContent(items: NFTGridPosterBuilder.items(service.listItems(data: query.value.map { $0.map() }, list: .unverified)))
     }
 }

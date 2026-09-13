@@ -87,7 +87,7 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
     }
 
     var collectionsContent: CollectionsContent {
-        CollectionsContent(items: previewNFTs.map(NFTGridPosterBuilder.item))
+        CollectionsContent(items: NFTGridPosterBuilder.items(previewNFTs))
     }
 
     var sections: WalletSearchSections {

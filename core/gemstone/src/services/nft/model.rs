@@ -16,6 +16,20 @@ pub enum GemNftItem {
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemNftRow {
+    pub id: String,
+    pub title: String,
+    pub image_url: String,
+    pub count: Option<u32>,
+    pub is_verified: bool,
+}
+
+#[uniffi::export]
+pub fn nft_rows(items: Vec<GemNftItem>) -> Vec<GemNftRow> {
+    items.iter().map(super::rules::row).collect()
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemCollectibleDetails {
     pub can_send: bool,
     pub sections: Vec<GemCollectibleSection>,

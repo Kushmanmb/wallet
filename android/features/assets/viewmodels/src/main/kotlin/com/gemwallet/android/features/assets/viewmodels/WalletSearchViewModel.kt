@@ -21,7 +21,6 @@ import com.gemwallet.android.features.asset_select.viewmodels.models.UIState
 import com.gemwallet.android.model.RecentAssetsRequest
 import com.gemwallet.android.ui.models.AssetToast
 import com.gemwallet.android.ui.models.NftItemUIModel
-import com.gemwallet.android.ui.models.toUIModel
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.RecentActivityType
 import com.wallet.core.primitives.AssetId
@@ -41,6 +40,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+import com.gemwallet.android.ui.models.toUIModels
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -141,7 +141,7 @@ class WalletSearchViewModel @Inject constructor(
     private fun assetsLimit(query: String): Int = limits(query).assets.toInt()
 
     private fun searchNfts(data: List<NFTData>, query: String): List<NftItemUIModel> =
-        service.searchCollections(data.map { it.toGem() }, query).map { it.toUIModel() }
+        service.searchCollections(data.map { it.toGem() }, query).toUIModels()
 
     override fun assetsSearchLimit(query: String): Int = limits(query).fetch.toInt()
 

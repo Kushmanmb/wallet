@@ -36,7 +36,7 @@ public final class CollectionsViewModel: CollectionsViewable, Sendable {
         let data = query.value.map { $0.map() }
         let unverifiedCount = service.unverifiedCollections(data: data).count
         return CollectionsContent(
-            items: service.listItems(data: data, list: .collections).map(NFTGridPosterBuilder.item),
+            items: NFTGridPosterBuilder.items(service.listItems(data: data, list: .collections)),
             unverifiedCount: unverifiedCount > 0 ? unverifiedCount.asString : nil,
         )
     }

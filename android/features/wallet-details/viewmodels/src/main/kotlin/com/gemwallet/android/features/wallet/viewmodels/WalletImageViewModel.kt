@@ -20,6 +20,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import com.gemwallet.android.ext.serviceMessage
+import com.gemwallet.android.ui.models.toUIModels
+import com.gemwallet.android.ext.toGem
+import com.wallet.core.primitives.NFTAssetData
+import uniffi.gemstone.GemNftItem
 
 @HiltViewModel
 class WalletImageViewModel @Inject constructor(
@@ -38,7 +42,7 @@ class WalletImageViewModel @Inject constructor(
 
     val nftImages: StateFlow<List<NftItemUIModel>> = getListNftCase.getListNft(walletId)
         .map { data ->
-            data.flatMap { nftData -> nftData.assets.map { NftItemUIModel(nftData.collection, it) } }
+            data.flatMap { nftData -> nftData.assets.map { asset -> GemNftItem.Asset(NFTAssetData(nftData.collection, asset).toGem()) } }.toUIModels()
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 

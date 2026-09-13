@@ -10,7 +10,6 @@ import com.gemwallet.android.application.nft.cases.GetNftCollections
 import android.util.Log
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.application.session.cases.GetSession
-import com.gemwallet.android.ui.models.toUIModel
 import com.wallet.core.primitives.NFTData
 import com.wallet.core.primitives.WalletId
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +24,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.gemwallet.android.ui.models.toUIModels
 
 @HiltViewModel
 class NftListViewModels @Inject constructor(
@@ -51,7 +51,7 @@ class NftListViewModels @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val collections = nftData
-        .map { data -> nftService.listItems(data.map { it.toGem() }, list).map { it.toUIModel() } }
+        .map { data -> nftService.listItems(data.map { it.toGem() }, list).toUIModels() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val unverifiedCount = nftData

@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use primitives::{Account, AddressFormatStyle, BlockExplorerLink, Chain, NFTAssetData, NFTAttribute, NFTAttributeType, NFTData, VerificationStatus, Wallet, WalletType};
 
 use super::model::{
-    GemCollectibleAttribute, GemCollectibleAttributeValue, GemCollectibleDetails, GemCollectibleIdentifier, GemCollectibleRow, GemCollectibleSection, GemNftItem,
+    GemCollectibleAttribute, GemCollectibleAttributeValue, GemCollectibleDetails, GemCollectibleIdentifier, GemCollectibleRow, GemCollectibleSection, GemNftItem, GemNftRow,
     GemNftList,
 };
 use crate::address_formatter::format_address;
@@ -46,6 +46,25 @@ pub fn search_collections(data: Vec<NFTData>, query: &str) -> Vec<GemNftItem> {
             asset_items(data)
         })
         .collect()
+}
+
+pub fn row(item: &GemNftItem) -> GemNftRow {
+    match item {
+        GemNftItem::Collection { data } => GemNftRow {
+            id: data.collection.id.to_string(),
+            title: data.collection.name.clone(),
+            image_url: data.collection.images.preview.url.clone(),
+            count: Some(data.assets.len() as u32),
+            is_verified: data.collection.status == VerificationStatus::Verified,
+        },
+        GemNftItem::Asset { data } => GemNftRow {
+            id: data.asset.id.to_string(),
+            title: data.asset.name.clone(),
+            image_url: data.asset.images.preview.url.clone(),
+            count: None,
+            is_verified: data.collection.status == VerificationStatus::Verified,
+        },
+    }
 }
 
 fn item(mut data: NFTData) -> GemNftItem {
@@ -193,6 +212,27 @@ fn collections(data: Vec<NFTData>, verified: bool) -> Vec<NFTData> {
 mod tests {
     use super::*;
     use primitives::{AssetLink, LinkType, NFTAsset, NFTCollection, NFTData, Wallet};
+
+    #[test]
+    fn test_a_collection_row_counts_its_assets_and_an_asset_row_does_not() {
+        let data = NFTData::mock_with("zebra", VerificationStatus::Verified, 2);
+        let collection = row(&GemNftItem::Collection { data: data.clone() });
+        let asset = row(&GemNftItem::Asset {
+            data: NFTAssetData {
+                collection: data.collection.clone(),
+                asset: data.assets[0].clone(),
+            },
+        });
+
+        assert_eq!(collection.title, data.collection.name);
+        assert_eq!(collection.count, Some(2));
+        assert_eq!(collection.image_url, data.collection.images.preview.url);
+        assert!(collection.is_verified);
+        assert_eq!(asset.title, data.assets[0].name);
+        assert_eq!(asset.count, None, "one asset is not a count");
+        assert_eq!(asset.image_url, data.assets[0].images.preview.url);
+        assert!(asset.is_verified, "an asset takes the verification of its collection");
+    }
 
     #[test]
     fn test_receive_accounts_keeps_nft_chains_matching_the_query() {
