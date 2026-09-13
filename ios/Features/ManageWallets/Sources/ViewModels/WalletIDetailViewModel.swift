@@ -7,9 +7,12 @@ import PrimitivesComponents
 import Store
 import Style
 import SwiftUI
-import enum Gemstone.GemWalletSecret
-import enum Gemstone.GemWalletSecretKind
+import struct Gemstone.GemWalletRow
 import func Gemstone.walletRow
+import enum Gemstone.GemWalletSecret
+import struct Gemstone.GemWalletRow
+import func Gemstone.walletRow
+import enum Gemstone.GemWalletSecretKind
 import func Gemstone.walletSecretKind
 import protocol Gemstone.GemWalletServiceProtocol
 import GemstoneServices
@@ -47,8 +50,12 @@ public final class WalletDetailViewModel {
         walletQuery = ObservableQuery(WalletRequest(walletId: wallet.id), initialValue: wallet)
     }
 
+    var row: GemWalletRow {
+        walletRow(wallet: wallet.map())
+    }
+
     var name: String {
-        wallet.name
+        row.name
     }
 
     var title: String {
@@ -60,10 +67,8 @@ public final class WalletDetailViewModel {
     }
 
     var address: WalletDetailAddress? {
-        switch walletRow(wallet: wallet.map()).subtitle {
-        case .multicoin: .none
-        case let .account(chain, address): .account(SimpleAccount(name: .none, chain: Primitives.Chain(core: chain), address: address, assetImage: .none))
-        }
+        guard let account = wallet.accounts.first, wallet.type != .multicoin else { return .none }
+        return .account(SimpleAccount(name: .none, chain: account.chain, address: account.address, assetImage: .none))
     }
 
     func addressLink(account: SimpleAccount) -> BlockExplorerLink {
@@ -71,7 +76,7 @@ public final class WalletDetailViewModel {
     }
 
     func avatarAssetImage(for wallet: Wallet) -> AssetImage {
-        let avatar = WalletViewModel(wallet: wallet).avatarImage
+        let avatar = walletRow(wallet: wallet.map()).avatarImage
         return AssetImage(
             type: avatar.type,
             imageURL: avatar.imageURL,

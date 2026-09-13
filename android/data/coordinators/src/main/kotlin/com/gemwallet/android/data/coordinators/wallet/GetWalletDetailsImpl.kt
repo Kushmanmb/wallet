@@ -23,18 +23,15 @@ class GetWalletDetailsImpl(
 
     override fun getWallet(walletId: WalletId): Flow<WalletDetailsAggregate?> {
         return  walletStore.observeWallet(walletId)
-            .mapLatest { dto -> dto?.let { WalletDetailsAggregateImpl(it) } }
+            .mapLatest { dto -> dto?.let { WalletDetailsAggregateImpl(it, walletRow(it.toGem())) } }
     }
 }
 
 @Stable
-class WalletDetailsAggregateImpl(wallet: Wallet) : WalletDetailsAggregate {
+class WalletDetailsAggregateImpl(wallet: Wallet, override val row: GemWalletRow) : WalletDetailsAggregate {
     override val id: WalletId = wallet.id
-    override val name: String = wallet.name
     override val secretKind: GemWalletSecretKind? = walletSecretKind(wallet.toGem())
-    override val row: GemWalletRow = walletRow(wallet.toGem())
     override val accounts: List<ChainAddress> = wallet.accounts.map {
         ChainAddress(chain = it.chain, address = it.address)
     }
-    override val imageUrl: String? = wallet.imageUrl
 }

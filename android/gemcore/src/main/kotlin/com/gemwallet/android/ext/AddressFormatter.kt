@@ -8,20 +8,7 @@ class AddressFormatter(
     private val addressService: GemAddressService,
     private val address: String,
     private val chain: Chain? = null,
-    private val style: Style = Style.Short,
+    private val style: GemAddressFormatStyle = GemAddressFormatStyle.Short,
 ) {
-    sealed class Style {
-        data object Short : Style()
-        data object Full : Style()
-        data class Extra(val count: Int) : Style()
-    }
-
-    fun value(): String {
-        val gemstoneStyle = when (style) {
-            is Style.Short -> GemAddressFormatStyle.Short
-            is Style.Full -> GemAddressFormatStyle.Full
-            is Style.Extra -> GemAddressFormatStyle.Extra(style.count.coerceAtLeast(0).toUInt())
-        }
-        return addressService.format(address, chain?.string, gemstoneStyle)
-    }
+    fun value(): String = addressService.format(address, chain?.string, style)
 }

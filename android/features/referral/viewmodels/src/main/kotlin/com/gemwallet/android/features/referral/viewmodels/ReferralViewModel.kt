@@ -12,6 +12,7 @@ import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Wallet
 import uniffi.gemstone.GemRewardsServiceInterface
+import uniffi.gemstone.walletRows
 import uniffi.gemstone.GemRewardsRedemption
 import uniffi.gemstone.RewardRedemptionOption
 import uniffi.gemstone.Rewards
@@ -55,6 +56,9 @@ class ReferralViewModel @Inject constructor(
     val availableWallets = getWallets().mapLatest { wallets -> service.wallets(wallets.map { it.toGem() }).map { it.toPrimitives() } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    val availableWalletRows = availableWallets.mapLatest { wallets -> walletRows(wallets.map { it.toGem() }) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     private val session = getSession()
         .filterNotNull()
         .combine(availableWallets) { session, wallets -> service.selectedWallet(session?.wallet?.toGem(), wallets.map { it.toGem() })?.toPrimitives() }
@@ -72,7 +76,8 @@ class ReferralViewModel @Inject constructor(
     .onEach { sync(it, SyncType.Init) }
     .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    fun setWallet(wallet: Wallet) {
+    fun setWallet(walletId: String) {
+        val wallet = availableWallets.value.firstOrNull { it.id.id == walletId } ?: return
         currentWallet.update { wallet }
     }
 

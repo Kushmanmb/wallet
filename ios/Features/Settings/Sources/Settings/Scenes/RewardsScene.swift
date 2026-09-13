@@ -65,9 +65,9 @@ public struct RewardsScene: View {
             case .walletSelector:
                 SelectableListNavigationStack(
                     model: model.walletSelectorModel,
-                    onFinishSelection: { wallets in
-                        if let wallet = wallets.first {
-                            model.selectWallet(wallet)
+                    onFinishSelection: { rows in
+                        if let row = rows.first {
+                            model.selectWallet(id: row.id)
                         }
                         model.isPresentingSheet = nil
                     },

@@ -9,7 +9,7 @@ import com.gemwallet.android.data.services.gemstone.stores.GemstoneWalletStore
 import com.gemwallet.android.domains.wallet.aggregates.WalletDataAggregate
 import com.wallet.core.primitives.Wallet
 import uniffi.gemstone.GemWalletRow
-import uniffi.gemstone.walletRow
+import uniffi.gemstone.walletRows
 import uniffi.gemstone.GemWalletService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.CoroutineScope
@@ -42,10 +42,12 @@ class GetAllWalletsImpl(
             walletStore.observeWallets().map { items ->
                 walletService.sortedWallets(items.map { it.toGem() }).map { it.toPrimitives() }
             }.mapLatest { items ->
-                items.map {
+                val rows = walletRows(items.map { it.toGem() })
+                items.mapIndexed { index, wallet ->
                     WalletDataAggregateImpl(
-                        wallet = it,
-                        isCurrent = it.id == currentWalletId,
+                        wallet = wallet,
+                        row = rows[index],
+                        isCurrent = wallet.id == currentWalletId,
                     )
                 }
             }
@@ -56,17 +58,10 @@ class GetAllWalletsImpl(
 
 @Stable
 class WalletDataAggregateImpl(
-    private val wallet: Wallet,
+    wallet: Wallet,
+    override val row: GemWalletRow,
     override val isCurrent: Boolean,
 ) : WalletDataAggregate {
 
-    override val id: String = wallet.id.id
-
-    override val name: String = wallet.name
-
-    override val row: GemWalletRow = walletRow(wallet.toGem())
-
     override val isPinned: Boolean = wallet.isPinned
-
-    override val imageUrl: String? = wallet.imageUrl
 }

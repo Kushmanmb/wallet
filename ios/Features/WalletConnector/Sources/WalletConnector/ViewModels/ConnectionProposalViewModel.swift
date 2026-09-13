@@ -6,6 +6,8 @@ import enum Gemstone.GemVerificationLevel
 import func Gemstone.verificationLevel
 import GemstonePrimitives
 import Localization
+import func Gemstone.walletRow
+import func Gemstone.walletRows
 import Primitives
 import PrimitivesComponents
 import Style
@@ -24,8 +26,9 @@ public struct ConnectionProposalViewModel {
         self.confirmTransferDelegate = confirmTransferDelegate
         self.pairingProposal = pairingProposal
         walletSelectorModel = SelectWalletViewModel(
-            wallets: pairingProposal.proposal.wallets,
-            selectedWallet: pairingProposal.proposal.defaultWallet,
+            rows: walletRows(wallets: pairingProposal.proposal.wallets.map { $0.map() }),
+            pinnedIds: Set(pairingProposal.proposal.wallets.filter(\.isPinned).map(\.id.id)),
+            selectedRow: walletRow(wallet: pairingProposal.proposal.defaultWallet.map()),
         )
     }
 
@@ -139,6 +142,6 @@ extension ConnectionProposalViewModel {
         guard let selectedWallet = walletSelectorModel.selectedItems.first else {
             return
         }
-        confirmTransferDelegate(.success(selectedWallet.id.id))
+        confirmTransferDelegate(.success(selectedWallet.id))
     }
 }

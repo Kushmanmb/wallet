@@ -1,15 +1,16 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import struct Gemstone.GemWalletRow
 import Localization
 import Primitives
 import PrimitivesComponents
 
 struct ConfirmSenderViewModel {
-    private let wallet: Wallet
+    private let row: GemWalletRow
 
-    init(wallet: Wallet) {
-        self.wallet = wallet
+    init(row: GemWalletRow) {
+        self.row = row
     }
 }
 
@@ -17,12 +18,11 @@ struct ConfirmSenderViewModel {
 
 extension ConfirmSenderViewModel: ItemModelProvidable {
     var itemModel: ConfirmTransferItemModel {
-        let walletViewModel = WalletViewModel(wallet: wallet)
-        return .sender(
+        .sender(
             ListItemModel(
                 title: Localized.Common.wallet,
-                subtitle: wallet.name,
-                imageStyle: ListItemImageStyle.list(assetImage: walletViewModel.avatarImage),
+                subtitle: row.name,
+                imageStyle: ListItemImageStyle.list(assetImage: row.avatarImage),
             ),
         )
     }

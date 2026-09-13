@@ -29,7 +29,7 @@ class BuildConfirmPropertiesImpl(
         val chain = transfer.asset.id.chain
         return withContext(Dispatchers.IO) {
             mutableListOf<ConfirmProperty?>().apply {
-                add(ConfirmProperty.Source(wallet.name, walletRow(wallet.toGem()), wallet.imageUrl))
+                add(ConfirmProperty.Source(walletRow(wallet.toGem())))
                 (transfer.inputType as? TransactionInputType.Generic)?.let { add(ConfirmProperty.Destination.Generic(it.metadata.name)) }
                 add(
                     when (val destination = ConfirmProperty.Destination.map(transfer.destination()?.withAddressName(addressName?.toGem()), chain, addressName)) {

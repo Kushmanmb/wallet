@@ -9,57 +9,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.gemwallet.android.ext.AddressFormatter
-import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toChain
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.image.IconWithBadge
 import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.image.walletImageModel
 import com.gemwallet.android.ui.icons.AppIcons
+import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.Spacer8
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.space0
-import com.wallet.core.primitives.Wallet
 import uniffi.gemstone.GemWalletPlaceholder
 import uniffi.gemstone.GemWalletRow
 import uniffi.gemstone.GemWalletSubtitle
-import uniffi.gemstone.walletRow
-import androidx.compose.runtime.remember
 
 @Composable
 fun WalletItem(
-    wallet: Wallet,
-    isCurrent: Boolean,
-    modifier: Modifier = Modifier,
-    listPosition: ListPosition,
-    onEdit: ((String) -> Unit)? = null,
-) {
-    WalletItem(
-        modifier = modifier,
-        id = wallet.id.id,
-        name = wallet.name,
-        row = remember(wallet) { walletRow(wallet.toGem()) },
-        isCurrent = isCurrent,
-        imageUrl = wallet.imageUrl,
-        listPosition = listPosition,
-        onEdit = onEdit
-    )
-}
-
-@Composable
-fun WalletItem(
-    id: String,
-    name: String,
     row: GemWalletRow,
     isCurrent: Boolean,
     modifier: Modifier = Modifier,
     listPosition: ListPosition,
-    imageUrl: String? = null,
     onEdit: ((String) -> Unit)? = null,
 ) {
     val context = LocalContext.current
@@ -70,24 +42,15 @@ fun WalletItem(
         trailingContentEndPadding = paddingSmall,
         leading = @Composable {
             IconWithBadge(
-                icon = walletImageModel(context, imageUrl) ?: row.placeholder.iconModel(),
+                icon = walletImageModel(context, row.imageUrl) ?: row.placeholder.iconModel(),
                 supportIcon = row.supportIcon(),
             )
         },
         title = {
-            ListItemTitleText(text = name)
+            ListItemTitleText(text = row.name)
         },
         subtitle = {
-            val subtitle = when (val subtitle = row.subtitle) {
-                GemWalletSubtitle.Multicoin -> stringResource(R.string.wallet_multicoin)
-                is GemWalletSubtitle.Account -> AddressFormatter(
-                    LocalAddressService.current,
-                    subtitle.address,
-                    chain = subtitle.chain.toChain(),
-                    style = AddressFormatter.Style.Extra(1),
-                ).value()
-            }
-            ListItemSupportText(subtitle)
+            ListItemSupportText(row.subtitle.string())
         },
         listPosition = listPosition,
         trailing = {
@@ -100,7 +63,7 @@ fun WalletItem(
                 }
                 if (onEdit != null) {
                     Spacer8()
-                    WalletEditButton(onClick = { onEdit(id) })
+                    WalletEditButton(onClick = { onEdit(row.id) })
                 }
             }
         }
@@ -136,9 +99,15 @@ fun GemWalletRow.supportIcon(): String? = if (showsWatchBadge) {
 fun PreviewWalletItem() {
     MaterialTheme {
         WalletItem(
-            id = "1",
-            name = "Foo wallet name",
-            row = GemWalletRow(GemWalletSubtitle.Multicoin, GemWalletPlaceholder.Multicoin, showsWatchBadge = false),
+            row = GemWalletRow(
+                id = "1",
+                name = "Foo wallet name",
+                subtitle = GemWalletSubtitle.Multicoin,
+                placeholder = GemWalletPlaceholder.Multicoin,
+                showsWatchBadge = false,
+                hasAvatar = false,
+                imageUrl = null,
+            ),
             listPosition = ListPosition.Single,
             isCurrent = true,
             onEdit = {},

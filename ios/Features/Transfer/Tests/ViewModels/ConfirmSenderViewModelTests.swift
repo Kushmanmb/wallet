@@ -1,7 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Localization
-@testable import Primitives
+@testable import func Gemstone.walletRow
+import Primitives
 import PrimitivesTestKit
 import Testing
 @testable import Transfer
@@ -11,7 +12,7 @@ struct ConfirmSenderViewModelTests {
     @Test
     func wallet() {
         let wallet = Wallet.mock()
-        let model = ConfirmSenderViewModel(wallet: wallet)
+        let model = ConfirmSenderViewModel(row: walletRow(wallet: wallet.map()))
 
         guard case let .sender(item) = model.itemModel else { return }
         #expect(item.title == Localized.Common.wallet)

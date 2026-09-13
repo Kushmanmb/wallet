@@ -33,19 +33,16 @@ internal fun LazyListScope.wallets(
     if (isPinned && wallets.isNotEmpty()) {
         pinnedHeader()
     }
-    itemsIndexed(items = wallets, key = { _, item -> item.id }) { index, item ->
-        val walletId = WalletId(item.id)
+    itemsIndexed(items = wallets, key = { _, item -> item.row.id }) { index, item ->
+        val walletId = WalletId(item.row.id)
 
         DropDownContextItem(
-            isExpanded = longPressedWallet.value == item.id,
+            isExpanded = longPressedWallet.value == item.row.id,
             onDismiss = { longPressedWallet.value = "" },
             content = {
                 WalletItem(
-                    id = item.id,
-                    name = item.name,
                     row = item.row,
                     isCurrent = item.isCurrent,
-                    imageUrl = item.imageUrl,
                     listPosition = ListPosition.getPosition(index, wallets.size),
                     onEdit = { onEdit(walletId) },
                     modifier = it
@@ -68,7 +65,7 @@ internal fun LazyListScope.wallets(
                     longPressedWallet.value = ""
                 }
             },
-            onLongClick = { longPressedWallet.value = item.id }
+            onLongClick = { longPressedWallet.value = item.row.id }
         ) { onSelectWallet(walletId) }
     }
 }

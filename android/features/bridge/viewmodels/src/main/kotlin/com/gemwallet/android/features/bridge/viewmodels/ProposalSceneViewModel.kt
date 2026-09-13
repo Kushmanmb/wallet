@@ -27,7 +27,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemWalletConnectException
+import com.gemwallet.android.ext.toGem
 import uniffi.gemstone.GemWalletConnectServiceInterface
+import uniffi.gemstone.walletRows
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import javax.inject.Inject
 
@@ -48,6 +50,9 @@ class ProposalSceneViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val availableWallets = _sessionProposal.map { it?.wallets.orEmpty() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val availableWalletRows = availableWallets.map { wallets -> walletRows(wallets.map { it.toGem() }) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val _selectedWallet = MutableStateFlow<com.wallet.core.primitives.Wallet?>(null)

@@ -59,7 +59,7 @@ pub enum GemWalletSecret {
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemWalletSubtitle {
     Multicoin,
-    Account { chain: Chain, address: String },
+    Address { value: String },
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
@@ -70,14 +70,23 @@ pub enum GemWalletPlaceholder {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemWalletRow {
+    pub id: String,
+    pub name: String,
     pub subtitle: GemWalletSubtitle,
     pub placeholder: GemWalletPlaceholder,
     pub shows_watch_badge: bool,
+    pub has_avatar: bool,
+    pub image_url: Option<String>,
 }
 
 #[uniffi::export]
 pub fn wallet_row(wallet: Wallet) -> GemWalletRow {
     rules::row(&wallet)
+}
+
+#[uniffi::export]
+pub fn wallet_rows(wallets: Vec<Wallet>) -> Vec<GemWalletRow> {
+    rules::rows(&wallets)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

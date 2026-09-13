@@ -8,6 +8,7 @@ import Components
 import Foundation
 import enum Gemstone.GemConfirmError
 import struct Gemstone.GemConfirmLoadOptions
+import func Gemstone.walletRow
 import protocol Gemstone.GemConfirmSessionProtocol
 import struct Gemstone.GemConfirmSimulationState
 import enum Gemstone.GemExecuteResult
@@ -190,7 +191,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
         case .app:
             ConfirmAppViewModel(transfer: request.data)
         case .sender:
-            ConfirmSenderViewModel(wallet: wallet)
+            ConfirmSenderViewModel(row: walletRow(wallet: wallet.map()))
         case .network:
             ConfirmNetworkViewModel(transfer: request.data)
         case .recipient:

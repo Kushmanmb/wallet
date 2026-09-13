@@ -4,6 +4,7 @@ import protocol Gemstone.GemAvatarServiceProtocol
 import Components
 import Foundation
 import func Gemstone.walletAvatarEmojis
+import func Gemstone.walletRow
 import Localization
 import Primitives
 import PrimitivesComponents
@@ -65,11 +66,11 @@ public final class WalletImageViewModel: Sendable {
     }
 
     var hasAvatar: Bool {
-        WalletViewModel(wallet: wallet).hasAvatar
+        walletRow(wallet: wallet.map()).hasAvatar
     }
 
     func avatarAssetImage(for wallet: Wallet) -> AssetImage {
-        WalletViewModel(wallet: wallet).avatarImage
+        walletRow(wallet: wallet.map()).avatarImage
     }
 
     func buildNftAssetsItems(from list: [NFTData]) -> [NFTAssetImageItem] {

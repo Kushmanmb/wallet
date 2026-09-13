@@ -8,6 +8,7 @@ import GemstonePrimitivesTestKit
 import GemstoneServicesTestKit
 import Foundation
 import struct Gemstone.SimulationHeader
+import func Gemstone.walletRow
 import Primitives
 import PrimitivesComponents
 import PrimitivesTestKit
@@ -154,7 +155,7 @@ struct SignMessageSceneViewModelTests {
             confirmTransferDelegate: { _ in },
         )
 
-        #expect(viewModel.walletAssetImage == WalletViewModel(wallet: payload.wallet).avatarImage)
+        #expect(viewModel.walletAssetImage == walletRow(wallet: payload.wallet.map()).avatarImage)
         #expect(viewModel.networkAssetImage == AssetIdViewModel(assetId: payload.chain.asset.id).networkAssetImage)
     }
 

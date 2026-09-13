@@ -181,7 +181,23 @@ public var name: String {
 }
 ```
 
-`GemValidatorRow`, `GemFiatQuoteRow`, `GemWalletRow` and `GemBalanceRow` are the same shape for their lists. An adapter over a single value is a row model too, never a session: `WalletViewModel` takes a `Wallet`, holds the `GemWalletRow` Core decided, and exposes `Image` and `AssetImage` from it. A session is for a screen the user drives, with events and a derived view state; a projection of one value that answers the same way every time is a row. The thing to look for in a row model is a decision the record could carry: if both apps compute it, it belongs in the record, not in two view models.
+`GemValidatorRow`, `GemFiatQuoteRow`, `GemWalletRow` and `GemBalanceRow` are the same shape for their lists. A session is for a screen the user drives, with events and a derived view state; a projection of one value that answers the same way every time is a row. The thing to look for in a row model is a decision the record could carry: if both apps compute it, it belongs in the record, not in two view models.
+
+### A row is projected from its value, never fetched from a service
+
+`walletRow(wallet)` and `walletRows(wallets)` are pure functions of the value, so they are exported as functions, not hung off a service. Reading a row must never require a service the screen does not otherwise have — that is what forces a second service into a view model, a row to be passed down as a constructor argument, or a factory to call `service.walletRow(...)` at the composition root. All three were tried on the wallet row and all three read as the same mistake: a projection dressed up as a dependency. This is the one exception to [no free exports](#no-trivial-exports): a projection has no owner to be a receiver on, because the value it projects is a remote record and Rust allows no inherent `impl` for it.
+
+A view model that already owns the screen's service still asks that service for anything the *screen* decides. The line is whether the answer depends on state the service holds.
+
+### The row carries the whole answer; the view model only reads it
+
+Once Core owns the row, the app-side model has nothing left to decide, and a model whose every property is a one-line read of the record should not exist. `WalletViewModel` was deleted for exactly this: `GemWalletRow` carries `id`, `name`, `subtitle`, `placeholder`, `showsWatchBadge`, `hasAvatar` and `imageUrl`, and both apps now hand the record straight to the view. Android passes `row: GemWalletRow` to `WalletItem`; iOS passes it to `WalletListItemView`.
+
+Two things a record cannot carry are a localized string and a bundled image asset, and both have one home per platform.
+
+**Every Core case that becomes localized text maps in one file per module.** iOS has `Gemstone+Localized.swift`, Android `GemstoneText.kt`; both hold `GemTransactionTitle`, `GemWalletSubtitle` and every case that follows. Core returns the case, the file returns the string. Do not add a per-type `Gem*+Localized.swift`, and never push the app's string catalog into Core through `GemLocalizer` — that trades a maintained translation for an FFI crossing per row. `GemLocalizer` is for text Core composes itself, such as a default wallet name.
+
+**A Core case that becomes a bundled image maps in that type's own extension.** `GemWalletRow+PrimitivesComponents.swift` turns `placeholder` into an `Image` and the row into an `AssetImage`; Android's `GemWalletPlaceholder.iconModel()` and `GemWalletRow.supportIcon()` are the same two mappings. One place per platform, read by every screen.
 
 ### Sections, actions and destinations are records too
 
@@ -551,6 +567,8 @@ Encoding members are scaffolding, not a pattern to copy. `core/bin/generate/remo
 An iOS view model holds **at most one** Core service, named `service`, and it is **`private`**; a model that does not need Core holds none. Reuse the owning domain service when it already answers the screen. Add a screen-level service only when it genuinely composes collaborators or returns a cohesive screen result — never to satisfy a field-count rule. An Android view model holds the same Core service through its generated `GemFooServiceInterface` (`private val service`), plus the observed reads the screen watches as narrow application cases (a Room `Flow` behind `GetPriceAlerts`, `GetRecentAssets`, `SelectSearch`) and `GetSession`. A case that only forwards a Core call is migration debt: delete it and call the service. `SetPriceAlertsEnabled` over `set_enabled` and `SearchCustomToken` over `ensure_token_asset` were two such, both removed. A non-private service on iOS usually means the view is reaching through the model for a dependency.
 
 This limit does not count explicit platform ports such as a signer, keystore, observation source or navigation builder. Those remain narrow injected dependencies; they do not decide shared product behavior.
+
+A second service is never the way to reach a value the screen renders. When a view model needs an answer its own service does not hold, the fix is one of three, in order: the answer is a pure projection and becomes a function of the value it projects ([a row is projected from its value](#a-row-is-projected-from-its-value-never-fetched-from-a-service)); the screen's own service or session already receives the input and returns the answer alongside the rest of its view state; or the screen was drawn around the wrong service. Widening the constructor is not on the list, and neither is having the composition root call the other service and pass the result in — a factory line that reads `walletService.walletRow(...)` next to an unrelated service is the same coupling with a longer path.
 
 When a real screen-level service is needed, name it for the screen it backs, not for the layer: `GemManageContactService` backs the add-and-edit screen. No `Scene` or `Facade` in the name. A `GemContactsService` that only forwarded calls to `GemContactService` was wrapper debt, not the pattern, and is deleted: the list screen holds the owning `GemContactService`. When a screen needs a cohesive answer from several Core owners, Core composes them:
 

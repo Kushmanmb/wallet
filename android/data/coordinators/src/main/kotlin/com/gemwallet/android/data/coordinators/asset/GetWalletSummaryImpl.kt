@@ -11,7 +11,6 @@ import com.gemwallet.android.application.session.cases.GetSession
 import uniffi.gemstone.GemPercentageStyle
 import com.gemwallet.android.domains.percentage.formatAsPercentage
 import com.gemwallet.android.domains.price.values.EquivalentValue
-import com.gemwallet.android.domains.wallet.aggregates.WalletIcon
 import com.gemwallet.android.domains.wallet.aggregates.WalletSummaryAggregate
 import com.gemwallet.android.model.CurrencyFormatter
 import com.wallet.core.primitives.BannerEvent
@@ -32,6 +31,7 @@ import com.gemwallet.android.ext.toGem
 import uniffi.gemstone.GemHeaderActions
 import uniffi.gemstone.GemWalletHomeServiceInterface
 import uniffi.gemstone.TotalFiatValue as GemTotalFiatValue
+import uniffi.gemstone.GemWalletRow
 import uniffi.gemstone.walletRow
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -69,7 +69,7 @@ class GetWalletSummaryImpl(
             )
 
             WalletSummaryAggregateImpl(
-                wallet = wallet,
+                walletRow = walletRow(wallet.toGem()),
                 displayState = buildWalletSummaryDisplayState(
                     currency = session.currency,
                     total = state.totalValue,
@@ -130,19 +130,12 @@ internal data class WalletSummaryDisplayState(
 
 @Stable
 internal class WalletSummaryAggregateImpl(
-    wallet: Wallet,
+    override val walletRow: GemWalletRow,
     displayState: WalletSummaryDisplayState,
     override val isBalanceHidden: Boolean,
     override val headerActions: GemHeaderActions,
     override val showCollections: Boolean,
 ) : WalletSummaryAggregate {
-    override val walletName: String = wallet.name
-
-    override val walletIcon: WalletIcon = WalletIcon(
-        imageUrl = wallet.imageUrl,
-        placeholder = walletRow(wallet.toGem()).placeholder,
-    )
-
     override val walletTotalValue: String = displayState.totalValue
 
     override val changedValue: EquivalentValue? = displayState.changedValue

@@ -3,6 +3,9 @@ use primitives::{Account, AddressName, AddressType, Chain, NameRecord, Verificat
 
 use super::error::GemWalletImportError;
 use super::model::{GemWalletImportKind, GemWalletImportType, GemWalletPlaceholder, GemWalletRow, GemWalletSecretKind, GemWalletSubtitle};
+use crate::address_formatter::{GemAddressFormatStyle, format_address};
+
+const WALLET_ADDRESS_STYLE: GemAddressFormatStyle = GemAddressFormatStyle::Extra { extra: 1 };
 use crate::address::{checksum_address, validate_address};
 use crate::keystore::GemKeystoreAccount;
 use crate::signer::decode_private_key;
@@ -117,21 +120,29 @@ pub fn secret_kind(wallet: &Wallet) -> Option<GemWalletSecretKind> {
 }
 
 pub fn row(wallet: &Wallet) -> GemWalletRow {
+    let common = |subtitle, placeholder, shows_watch_badge| GemWalletRow {
+        id: wallet.id.id(),
+        name: wallet.name.clone(),
+        subtitle,
+        placeholder,
+        shows_watch_badge,
+        has_avatar: wallet.image_url.as_ref().is_some_and(|url| !url.is_empty()),
+        image_url: wallet.image_url.clone(),
+    };
     match &wallet.id {
-        WalletId::Multicoin(_) => GemWalletRow {
-            subtitle: GemWalletSubtitle::Multicoin,
-            placeholder: GemWalletPlaceholder::Multicoin,
-            shows_watch_badge: false,
-        },
-        WalletId::Single(chain, address) | WalletId::PrivateKey(chain, address) | WalletId::View(chain, address) => GemWalletRow {
-            subtitle: GemWalletSubtitle::Account {
-                chain: *chain,
-                address: address.clone(),
+        WalletId::Multicoin(_) => common(GemWalletSubtitle::Multicoin, GemWalletPlaceholder::Multicoin, false),
+        WalletId::Single(chain, address) | WalletId::PrivateKey(chain, address) | WalletId::View(chain, address) => common(
+            GemWalletSubtitle::Address {
+                value: format_address(address, Some(*chain), WALLET_ADDRESS_STYLE),
             },
-            placeholder: GemWalletPlaceholder::Chain { chain: *chain },
-            shows_watch_badge: matches!(wallet.id, WalletId::View(..)),
-        },
+            GemWalletPlaceholder::Chain { chain: *chain },
+            matches!(wallet.id, WalletId::View(..)),
+        ),
     }
+}
+
+pub fn rows(wallets: &[Wallet]) -> Vec<GemWalletRow> {
+    wallets.iter().map(row).collect()
 }
 
 pub fn view_wallet(name: String, chain: Chain, address: String) -> Wallet {
@@ -392,9 +403,8 @@ mod tests {
         let view = row(&wallet(WalletId::View(Chain::Ethereum, "0x2".to_string()), WalletType::View, &[Chain::Ethereum]));
         assert_eq!(
             view.subtitle,
-            GemWalletSubtitle::Account {
-                chain: Chain::Ethereum,
-                address: "0x2".to_string()
+            GemWalletSubtitle::Address {
+                value: format_address("0x2", Some(Chain::Ethereum), WALLET_ADDRESS_STYLE),
             }
         );
         assert_eq!(view.placeholder, GemWalletPlaceholder::Chain { chain: Chain::Ethereum });

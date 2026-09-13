@@ -2,10 +2,10 @@ package com.gemwallet.android.domains.wallet.aggregates
 
 import com.gemwallet.android.domains.price.values.EquivalentValue
 import uniffi.gemstone.GemHeaderActions
+import uniffi.gemstone.GemWalletRow
 
 interface WalletSummaryAggregate {
-    val walletName: String
-    val walletIcon: WalletIcon
+    val walletRow: GemWalletRow
     val walletTotalValue: String
     val changedValue: EquivalentValue?
     val isBalanceHidden: Boolean

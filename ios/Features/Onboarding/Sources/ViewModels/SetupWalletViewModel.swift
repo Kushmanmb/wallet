@@ -8,6 +8,7 @@ import PrimitivesComponents
 import Store
 import Style
 import protocol Gemstone.GemWalletServiceProtocol
+import func Gemstone.walletRow
 import GemstonePrimitives
 
 @MainActor
@@ -46,7 +47,7 @@ public final class SetupWalletViewModel: Sendable {
     }
 
     var avatarAssetImage: AssetImage {
-        let avatar = WalletViewModel(wallet: wallet).avatarImage
+        let avatar = walletRow(wallet: wallet.map()).avatarImage
         return AssetImage(
             type: avatar.type,
             imageURL: avatar.imageURL,

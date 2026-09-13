@@ -226,10 +226,10 @@ fun ConfirmScreen(
                     is ConfirmProperty.Source -> PropertyItem(
                         title = { PropertyTitleText(R.string.common_wallet) },
                         data = {
-                            val walletIcon = walletImageModel(context, item.walletImageUrl)
+                            val walletIcon = walletImageModel(context, item.walletRow.imageUrl)
                                 ?: item.walletRow.placeholder.iconModel()
                             PropertyDataText(
-                                text = item.data,
+                                text = item.walletRow.name,
                                 badge = walletIcon?.let { { DataBadgeChevron(icon = it, isShowChevron = false) } },
                             )
                         },

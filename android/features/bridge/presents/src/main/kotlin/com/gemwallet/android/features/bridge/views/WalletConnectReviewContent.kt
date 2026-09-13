@@ -28,6 +28,7 @@ import com.gemwallet.android.ui.models.PayloadField
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.Wallet
 import com.wallet.core.primitives.WalletId
+import uniffi.gemstone.GemWalletRow
 
 internal fun LazyListScope.walletConnectTextMessage(message: String) {
     item {
@@ -102,7 +103,7 @@ internal fun WalletConnectFullMessageSheet(
 @Composable
 internal fun WalletSelectionSheet(
     isVisible: Boolean,
-    wallets: List<Wallet>,
+    walletRows: List<GemWalletRow>,
     selectedWalletId: WalletId?,
     onWalletSelected: (WalletId) -> Unit,
     onDismissRequest: () -> Unit,
@@ -114,13 +115,13 @@ internal fun WalletSelectionSheet(
     ) {
         LazyColumn {
             item { SubheaderItem(R.string.wallets_title) }
-            itemsIndexed(wallets) { index, wallet ->
+            itemsIndexed(walletRows) { index, row ->
                 WalletItem(
-                    wallet = wallet,
-                    isCurrent = wallet.id == selectedWalletId,
-                    listPosition = ListPosition.getPosition(index, wallets.size),
+                    row = row,
+                    isCurrent = row.id == selectedWalletId?.id,
+                    listPosition = ListPosition.getPosition(index, walletRows.size),
                     modifier = Modifier.clickable {
-                        onWalletSelected(wallet.id)
+                        onWalletSelected(WalletId(row.id))
                         onDismissRequest()
                     },
                 )

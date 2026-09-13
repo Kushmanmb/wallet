@@ -45,6 +45,7 @@ fun ReferralNavScreen(
     var showErrorDialog by remember { mutableStateOf<Throwable?>(null) }
 
     val availableWallets by viewModel.availableWallets.collectAsStateWithLifecycle()
+    val availableWalletRows by viewModel.availableWalletRows.collectAsStateWithLifecycle()
     val currentWallet by viewModel.currentWallet.collectAsStateWithLifecycle()
     val rewards by viewModel.rewards.collectAsStateWithLifecycle()
     val referralLink by viewModel.referralLink.collectAsStateWithLifecycle()
@@ -86,13 +87,13 @@ fun ReferralNavScreen(
         title = stringResource(R.string.wallets_title),
     ) {
         LazyColumn {
-            itemsIndexed(availableWallets) { index, item ->
+            itemsIndexed(availableWalletRows) { index, item ->
                 WalletItem(
-                    wallet = item,
-                    isCurrent = item.id == currentWallet?.id,
-                    listPosition = ListPosition.getPosition(index, availableWallets.size),
+                    row = item,
+                    isCurrent = item.id == currentWallet?.id?.id,
+                    listPosition = ListPosition.getPosition(index, availableWalletRows.size),
                     modifier = Modifier.clickable {
-                        viewModel.setWallet(wallet = item)
+                        viewModel.setWallet(walletId = item.id)
                         isShowSelectWallets = false
                     }
                 )

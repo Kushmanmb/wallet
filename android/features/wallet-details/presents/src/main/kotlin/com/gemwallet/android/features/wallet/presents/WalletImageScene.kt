@@ -72,12 +72,12 @@ internal fun WalletImageScene(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             WalletAvatar(
-                imageUrl = wallet.imageUrl,
+                imageUrl = wallet.row.imageUrl,
                 placeholder = wallet.row.placeholder.iconModel(),
                 size = extraLargeIconSize,
                 modifier = Modifier.padding(top = paddingDefault),
                 supportIcon = wallet.row.supportIcon(),
-                onRemove = if (wallet.hasAvatar) {
+                onRemove = if (wallet.row.hasAvatar) {
                     { onAction(WalletImageAction.ResetToDefault) }
                 } else {
                     null

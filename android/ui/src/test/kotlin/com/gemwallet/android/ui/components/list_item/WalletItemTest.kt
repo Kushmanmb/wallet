@@ -12,7 +12,7 @@ class WalletItemTest {
 
     @Test
     fun `a row with the watch badge points at the badge drawable`() {
-        val row = GemWalletRow(GemWalletSubtitle.Multicoin, GemWalletPlaceholder.Multicoin, showsWatchBadge = true)
+        val row = GemWalletRow(id = "1", name = "Wallet", subtitle = GemWalletSubtitle.Multicoin, placeholder = GemWalletPlaceholder.Multicoin, showsWatchBadge = true, hasAvatar = false, imageUrl = null)
 
         assertEquals(
             "android.resource://com.gemwallet.android/drawable/${R.drawable.watch_badge}",
@@ -22,7 +22,7 @@ class WalletItemTest {
 
     @Test
     fun `a row without the watch badge has no support icon`() {
-        val row = GemWalletRow(GemWalletSubtitle.Multicoin, GemWalletPlaceholder.Multicoin, showsWatchBadge = false)
+        val row = GemWalletRow(id = "1", name = "Wallet", subtitle = GemWalletSubtitle.Multicoin, placeholder = GemWalletPlaceholder.Multicoin, showsWatchBadge = false, hasAvatar = false, imageUrl = null)
 
         assertNull(row.supportIcon())
     }

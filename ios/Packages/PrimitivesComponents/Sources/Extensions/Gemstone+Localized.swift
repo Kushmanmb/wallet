@@ -2,6 +2,7 @@
 
 import enum Gemstone.PerpetualDirection
 import enum Gemstone.GemTransactionTitle
+import enum Gemstone.GemWalletSubtitle
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -40,5 +41,14 @@ extension GemTransactionTitle {
     ) -> String {
         guard let direction else { return fallback }
         return directionTitle(PerpetualDirectionViewModel(direction: direction.map()).title)
+    }
+}
+
+extension GemWalletSubtitle {
+    public var text: String {
+        switch self {
+        case .multicoin: Localized.Wallet.multicoin
+        case let .address(value): value
+        }
     }
 }

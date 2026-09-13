@@ -1,6 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import struct Gemstone.GemSignMessagePreview
+import struct Gemstone.GemWalletRow
+import func Gemstone.walletRow
 import protocol Gemstone.GemSignMessageServiceProtocol
 import Components
 import Foundation
@@ -22,6 +24,7 @@ public final class SignMessageSceneViewModel {
     private let payload: SignMessagePayload
     private let confirmTransferDelegate: TransferDataCallback.ConfirmTransferDelegate
     private let preview: GemSignMessagePreview
+    private let row: GemWalletRow
 
     public var isPresentingUrl: URL?
     public var isPresentingPayloadDetails: Bool = false
@@ -36,6 +39,7 @@ public final class SignMessageSceneViewModel {
         self.service = service
         self.payload = payload
         self.confirmTransferDelegate = confirmTransferDelegate
+        row = walletRow(wallet: payload.wallet.map())
         preview = service.preview(message: payload.message, simulation: payload.simulation, assets: payload.assets.map { $0.map() })
     }
 
@@ -72,7 +76,7 @@ public final class SignMessageSceneViewModel {
     }
 
     public var walletAssetImage: AssetImage {
-        WalletViewModel(wallet: payload.wallet).avatarImage
+        row.avatarImage
     }
 
     public var networkAssetImage: AssetImage {

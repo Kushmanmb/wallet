@@ -80,8 +80,8 @@ public final class AssetSceneViewModel: Sendable {
         assetData.asset
     }
 
-    private var wallet: Wallet {
-        walletModel.wallet
+    public var wallet: Wallet {
+        input.wallet
     }
 
     public var title: String {
@@ -222,10 +222,6 @@ public final class AssetSceneViewModel: Sendable {
 
     public var assetModel: AssetViewModel {
         AssetViewModel(asset: assetData.asset)
-    }
-
-    public var walletModel: WalletViewModel {
-        WalletViewModel(wallet: input.wallet)
     }
 
     public var optionsImage: Image {

@@ -5,6 +5,7 @@ import Formatters
 import Foundation
 import struct Gemstone.GemBannerContent
 import protocol Gemstone.GemWalletHomeServiceProtocol
+import func Gemstone.walletRow
 import GemstonePrimitives
 import GemstoneServices
 import InfoSheet
@@ -108,10 +109,10 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
 
 
     public var walletBarModel: WalletBarViewViewModel {
-        let walletModel = WalletViewModel(wallet: wallet)
+        let row = walletRow(wallet: wallet.map())
         return WalletBarViewViewModel(
-            name: walletModel.name,
-            image: walletModel.avatarImage,
+            name: row.name,
+            image: row.avatarImage,
         )
     }
 

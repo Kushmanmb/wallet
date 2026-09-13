@@ -41,8 +41,8 @@ internal fun WalletScene(
     wallet ?: return
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    var walletName by remember(wallet.name) {
-        mutableStateOf(wallet.name)
+    var walletName by remember(wallet.row.name) {
+        mutableStateOf(wallet.row.name)
     }
     Scene(
         title = stringResource(id = R.string.common_wallet),
@@ -113,7 +113,7 @@ private fun WalletAvatarHeader(
     onClick: () -> Unit,
 ) {
     WalletAvatar(
-        imageUrl = wallet.imageUrl,
+        imageUrl = wallet.row.imageUrl,
         placeholder = wallet.row.placeholder.iconModel(),
         size = extraLargeIconSize,
         modifier = Modifier.padding(vertical = paddingDefault),

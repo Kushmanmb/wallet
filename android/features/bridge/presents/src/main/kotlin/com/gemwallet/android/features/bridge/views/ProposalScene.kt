@@ -66,6 +66,7 @@ fun ProposalScene(
     val peer by viewModel.proposal.collectAsStateWithLifecycle()
     val selectedWallet by viewModel.selectedWallet.collectAsStateWithLifecycle()
     val availableWallets by viewModel.availableWallets.collectAsStateWithLifecycle()
+    val availableWalletRows by viewModel.availableWalletRows.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
     val unknownErrorMessage = stringResource(id = R.string.errors_unknown_try_again)
 
@@ -97,6 +98,7 @@ fun ProposalScene(
             state = state,
             selectedWallet = selectedWallet,
             availableWallets = availableWallets,
+            availableWalletRows = availableWalletRows,
             buttonState = buttonState,
             onReject = viewModel::onReject,
             onApprove = { viewModel.onApprove { message -> onError(message.ifBlank { unknownErrorMessage }) } },
@@ -111,6 +113,7 @@ private fun Proposal(
     state: ProposalSceneState,
     selectedWallet: com.wallet.core.primitives.Wallet?,
     availableWallets: List<com.wallet.core.primitives.Wallet>,
+    availableWalletRows: List<uniffi.gemstone.GemWalletRow>,
     buttonState: ButtonState,
     onReject: () -> Unit,
     onApprove: () -> Unit,
@@ -191,7 +194,7 @@ private fun Proposal(
 
     WalletSelectionSheet(
         isVisible = isShowSelectWallets,
-        wallets = availableWallets,
+        walletRows = availableWalletRows,
         selectedWalletId = selectedWallet?.id,
         onWalletSelected = onWalletSelected,
         onDismissRequest = { isShowSelectWallets = false },

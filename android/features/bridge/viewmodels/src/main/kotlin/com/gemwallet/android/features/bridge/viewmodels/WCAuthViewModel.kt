@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.getKeystorePassword
 import com.gemwallet.android.application.wallet_connect.cases.PrepareSessionProposal
 import com.gemwallet.android.ext.toGem
+import uniffi.gemstone.GemWalletRow
+import uniffi.gemstone.walletRows
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.serializer.decodeJson
 import com.gemwallet.android.application.wallet_connect.ActiveWalletConnectRequest
@@ -107,6 +109,7 @@ class WCAuthViewModel @Inject constructor(
                     AuthSceneState.Request(
                         peer = prepared.proposal.metadata.toSessionUI(),
                         availableWallets = prepared.proposal.wallets,
+                        availableWalletRows = walletRows(prepared.proposal.wallets.map { it.toGem() }),
                         selectedWallet = selectedWallet,
                         approval = approval,
                     )
@@ -320,6 +323,7 @@ sealed interface AuthSceneState {
     sealed interface Content : AuthSceneState, WalletConnectReviewModel {
         val peer: SessionUI
         val availableWallets: List<Wallet>
+        val availableWalletRows: List<GemWalletRow>
         val selectedWallet: Wallet
         val approval: AuthApproval
 
@@ -336,6 +340,7 @@ sealed interface AuthSceneState {
     data class Request(
         override val peer: SessionUI,
         override val availableWallets: List<Wallet>,
+        override val availableWalletRows: List<GemWalletRow>,
         override val selectedWallet: Wallet,
         override val approval: AuthApproval,
     ) : Content
@@ -345,6 +350,7 @@ sealed interface AuthSceneState {
     ) : Content {
         override val peer: SessionUI get() = request.peer
         override val availableWallets: List<Wallet> get() = request.availableWallets
+        override val availableWalletRows: List<GemWalletRow> get() = request.availableWalletRows
         override val selectedWallet: Wallet get() = request.selectedWallet
         override val approval: AuthApproval get() = request.approval
     }

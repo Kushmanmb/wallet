@@ -121,7 +121,7 @@ private fun AuthRequestContent(
 
     WalletSelectionSheet(
         isVisible = isShowSelectWallets,
-        wallets = state.availableWallets,
+        walletRows = state.availableWalletRows,
         selectedWalletId = state.selectedWallet.id,
         onWalletSelected = onWalletSelected,
         onDismissRequest = { isShowSelectWallets = false },

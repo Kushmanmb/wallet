@@ -61,7 +61,7 @@ fun WalletsScreen(
 
     deleteWalletId?.let { pendingDeleteWalletId ->
         ConfirmWalletDeleteDialog(
-            walletName = walletSections.allWallets.firstOrNull { it.id == pendingDeleteWalletId.id }?.name ?: "",
+            walletName = walletSections.allWallets.firstOrNull { it.row.id == pendingDeleteWalletId.id }?.row?.name ?: "",
             onConfirm = {
                 deleteWalletId = null
                 viewModel.deleteWallet(walletId = pendingDeleteWalletId, onBoard)
@@ -96,39 +96,59 @@ fun PreviewWalletScreen() {
             WalletsScene(
                 unpinnedWallets = listOf(
                     object : WalletDataAggregate {
-                        override val id: String = "1"
-                        override val name: String = "Foo wallet #1"
                         override val isCurrent: Boolean = true
                         override val isPinned: Boolean = false
-                        override val row: GemWalletRow = GemWalletRow(GemWalletSubtitle.Multicoin, GemWalletPlaceholder.Multicoin, showsWatchBadge = false)
-                        override val imageUrl: String? = null
+                        override val row: GemWalletRow = GemWalletRow(
+                            id = "1",
+                            name = "Foo wallet #1",
+                            subtitle = GemWalletSubtitle.Multicoin,
+                            placeholder = GemWalletPlaceholder.Multicoin,
+                            showsWatchBadge = false,
+                            hasAvatar = false,
+                            imageUrl = null,
+                        )
                     },
                     object : WalletDataAggregate {
-                        override val id: String = "1"
-                        override val name: String = "Foo wallet #3"
                         override val isCurrent: Boolean = false
                         override val isPinned: Boolean = false
-                        override val row: GemWalletRow = GemWalletRow(GemWalletSubtitle.Multicoin, GemWalletPlaceholder.Multicoin, showsWatchBadge = false)
-                        override val imageUrl: String? = null
+                        override val row: GemWalletRow = GemWalletRow(
+                            id = "2",
+                            name = "Foo wallet #2",
+                            subtitle = GemWalletSubtitle.Multicoin,
+                            placeholder = GemWalletPlaceholder.Multicoin,
+                            showsWatchBadge = false,
+                            hasAvatar = false,
+                            imageUrl = null,
+                        )
                     },
                     object : WalletDataAggregate {
-                        override val id: String = "1"
-                        override val name: String = "Foo wallet #2"
                         override val isCurrent: Boolean = false
                         override val isPinned: Boolean = false
-                        override val row: GemWalletRow = GemWalletRow(GemWalletSubtitle.Multicoin, GemWalletPlaceholder.Multicoin, showsWatchBadge = false)
-                        override val imageUrl: String? = null
+                        override val row: GemWalletRow = GemWalletRow(
+                            id = "3",
+                            name = "Foo wallet #3",
+                            subtitle = GemWalletSubtitle.Multicoin,
+                            placeholder = GemWalletPlaceholder.Multicoin,
+                            showsWatchBadge = false,
+                            hasAvatar = false,
+                            imageUrl = null,
+                        )
                     },
                 ),
                 pinnedWallets = listOf(
 
                     object : WalletDataAggregate {
-                        override val id: String = "1"
-                        override val name: String = "Foo wallet #4"
                         override val isCurrent: Boolean = true
                         override val isPinned: Boolean = true
-                        override val row: GemWalletRow = GemWalletRow(GemWalletSubtitle.Multicoin, GemWalletPlaceholder.Multicoin, showsWatchBadge = false)
-                        override val imageUrl: String? = null
+                        override val row: GemWalletRow = GemWalletRow(
+                            id = "4",
+                            name = "Foo wallet #4",
+                            subtitle = GemWalletSubtitle.Multicoin,
+                            placeholder = GemWalletPlaceholder.Multicoin,
+                            showsWatchBadge = false,
+                            hasAvatar = false,
+                            imageUrl = null,
+                        )
                     },
                 ),
                 onAction = {},

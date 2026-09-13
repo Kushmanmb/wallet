@@ -4,6 +4,9 @@ import struct Gemstone.Rewards
 import struct Gemstone.GemRewardsRedemption
 import struct Gemstone.RewardRedemptionOption
 import protocol Gemstone.GemRewardsServiceProtocol
+import struct Gemstone.GemWalletRow
+import func Gemstone.walletRow
+import func Gemstone.walletRows
 import struct Gemstone.GemRewardsState
 import GemstonePrimitives
 import Components
@@ -35,7 +38,12 @@ public final class RewardsViewModel: Sendable {
     var isPresentingSheet: RewardsSheetType?
     var isPresentingAlert: AlertMessage?
 
-    public init?(service: any GemRewardsServiceProtocol, wallets: [Wallet], currentWallet: Wallet?, activateCode: String? = nil) {
+    public init?(
+        service: any GemRewardsServiceProtocol,
+        wallets: [Wallet],
+        currentWallet: Wallet?,
+        activateCode: String? = nil,
+    ) {
         let core = wallets.map { $0.map() }
         guard let wallet = service.selectedWallet(current: currentWallet?.map(), wallets: core).map({ $0.map() }) else { return nil }
         self.service = service
@@ -99,7 +107,11 @@ public final class RewardsViewModel: Sendable {
     }
 
     var walletSelectorModel: SelectWalletViewModel {
-        SelectWalletViewModel(wallets: wallets, selectedWallet: selectedWallet)
+        SelectWalletViewModel(
+            rows: walletRows(wallets: wallets.map { $0.map() }),
+            pinnedIds: Set(wallets.filter(\.isPinned).map(\.id.id)),
+            selectedRow: selectedWalletRow,
+        )
     }
 
     var rewards: Rewards? {
@@ -165,9 +177,12 @@ public final class RewardsViewModel: Sendable {
         rewardsState.canActivatePendingReferral ? .primary() : .primary(.disabled)
     }
 
+    var selectedWalletRow: GemWalletRow {
+        walletRow(wallet: selectedWallet.map())
+    }
+
     var walletBarViewModel: WalletBarViewViewModel {
-        let walletVM = WalletViewModel(wallet: selectedWallet)
-        return WalletBarViewViewModel(name: walletVM.name, image: walletVM.avatarImage)
+        WalletBarViewViewModel(name: selectedWalletRow.name, image: selectedWalletRow.avatarImage)
     }
 
     var rewardsUrl: URL {
@@ -197,7 +212,8 @@ public final class RewardsViewModel: Sendable {
 
     // MARK: - Actions
 
-    func selectWallet(_ wallet: Wallet) {
+    func selectWallet(id: String) {
+        guard let wallet = wallets.first(where: { $0.id.id == id }) else { return }
         selectedWallet = wallet
         Task { await load(wallet: wallet) }
     }

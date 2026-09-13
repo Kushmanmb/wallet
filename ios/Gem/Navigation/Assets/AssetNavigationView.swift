@@ -41,7 +41,7 @@ struct AssetNavigationView: View {
                 InfoSheetScene(type: type)
             case let .transfer(data):
                 ConfirmTransferNavigationStack(
-                    wallet: model.walletModel.wallet,
+                    wallet: model.wallet,
                     transferData: data,
                     onComplete: model.onTransferComplete,
                 )

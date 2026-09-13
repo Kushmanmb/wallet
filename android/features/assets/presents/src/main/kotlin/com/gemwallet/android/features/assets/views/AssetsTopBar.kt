@@ -37,8 +37,8 @@ internal fun AssetsTopBar(
     onSearch: () -> Unit,
     onScan: () -> Unit,
 ) {
-    val walletIcon = walletImageModel(LocalContext.current, walletSummary?.walletIcon?.imageUrl)
-        ?: walletSummary?.walletIcon?.placeholder?.iconModel()
+    val walletIcon = walletImageModel(LocalContext.current, walletSummary?.walletRow?.imageUrl)
+        ?: walletSummary?.walletRow?.placeholder?.iconModel()
 
     CenterAlignedTopAppBar(
         title = {
@@ -52,7 +52,7 @@ internal fun AssetsTopBar(
                         Spacer(modifier = Modifier.size(paddingSmall))
                     }
                     Text(
-                        text = walletSummary?.walletName ?: "",
+                        text = walletSummary?.walletRow?.name ?: "",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface,

@@ -68,7 +68,7 @@ fun SetupWalletScreen(
         ) {
             Spacer(modifier = Modifier.size(paddingDefault))
             WalletAvatar(
-                imageUrl = uiState.imageUrl,
+                imageUrl = uiState.row?.imageUrl,
                 placeholder = uiState.row?.placeholder?.iconModel(),
                 size = extraLargeIconSize,
                 supportIcon = R.drawable.ic_edit_badge,

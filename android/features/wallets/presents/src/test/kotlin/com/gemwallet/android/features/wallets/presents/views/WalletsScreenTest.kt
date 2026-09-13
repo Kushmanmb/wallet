@@ -22,7 +22,7 @@ class WalletsScreenTest {
         assertEquals(listOf(unpinnedWallet), sections.unpinnedWallets)
         assertEquals(
             listOf("pinned", "second-pinned", "unpinned"),
-            sections.allWallets.map { it.id }
+            sections.allWallets.map { it.row.id }
         )
     }
 
@@ -39,11 +39,16 @@ class WalletsScreenTest {
         id: String,
         isPinned: Boolean,
     ) = object : WalletDataAggregate {
-        override val id: String = id
         override val isCurrent: Boolean = false
-        override val name: String = id
-        override val row: GemWalletRow = GemWalletRow(GemWalletSubtitle.Multicoin, GemWalletPlaceholder.Multicoin, showsWatchBadge = false)
+        override val row: GemWalletRow = GemWalletRow(
+            id = id,
+            name = id,
+            subtitle = GemWalletSubtitle.Multicoin,
+            placeholder = GemWalletPlaceholder.Multicoin,
+            showsWatchBadge = false,
+            hasAvatar = false,
+            imageUrl = null,
+        )
         override val isPinned: Boolean = isPinned
-        override val imageUrl: String? = null
     }
 }

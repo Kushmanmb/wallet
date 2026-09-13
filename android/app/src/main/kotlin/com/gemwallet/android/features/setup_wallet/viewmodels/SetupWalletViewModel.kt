@@ -43,7 +43,6 @@ class SetupWalletViewModel @AssistedInject constructor(
                             walletName = wallet.name,
                             walletSource = wallet.source,
                             row = walletRow(wallet.toGem()),
-                            imageUrl = wallet.imageUrl,
                         )
                     }
                 }
@@ -72,6 +71,5 @@ data class SetupWalletViewModelState(
     val walletName: String = "",
     val walletSource: WalletSource = WalletSource.Create,
     val row: GemWalletRow? = null,
-    val imageUrl: String? = null,
     val error: String? = null,
 )
