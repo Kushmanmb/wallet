@@ -78,6 +78,10 @@ impl GemStakeService {
         rules::validator_row(&validator)
     }
 
+    pub fn validator_rows(&self, validators: Vec<DelegationValidator>) -> Vec<GemValidatorRow> {
+        validators.iter().map(rules::validator_row).collect()
+    }
+
     pub fn validator_url(&self, validator: DelegationValidator) -> Option<BlockExplorerLink> {
         let address = rules::validator_explorer_address(&validator)?;
         self.explorer.get_validator_url(validator.chain, address)
