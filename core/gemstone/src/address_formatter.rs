@@ -1,4 +1,4 @@
-use primitives::{AddressFormatStyle, AddressFormatter, Chain};
+use primitives::{AddressFormatStyle, AddressFormatter, Chain, ChainAddress};
 
 pub type GemAddressFormatStyle = AddressFormatStyle;
 
@@ -25,6 +25,10 @@ impl GemAddressService {
 
     pub fn format(&self, address: String, chain: Option<Chain>, style: GemAddressFormatStyle) -> String {
         format_address(&address, chain, style)
+    }
+
+    pub fn format_all(&self, addresses: Vec<ChainAddress>, style: GemAddressFormatStyle) -> Vec<String> {
+        addresses.iter().map(|entry| format_address(&entry.address, Some(entry.chain), style)).collect()
     }
 
     pub fn display(&self, name: Option<String>, address: String, has_image: bool) -> GemAddressDisplay {
@@ -62,6 +66,36 @@ mod display_tests {
         assert_eq!(
             service.display(Some("Ada".into()), address, false),
             GemAddressDisplay::NameWithAddress { name: "Ada".into() }
+        );
+    }
+}
+
+#[cfg(test)]
+mod format_tests {
+    use super::*;
+
+    #[test]
+    fn test_format_all_answers_one_string_per_address_in_order() {
+        let service = GemAddressService::new();
+        let addresses = vec![
+            ChainAddress {
+                chain: Chain::Ethereum,
+                address: "0x1234567890abcdef".to_string(),
+            },
+            ChainAddress {
+                chain: Chain::Bitcoin,
+                address: "bc1qxy2kgdygjrsqtzq2n0yrf249".to_string(),
+            },
+        ];
+
+        let formatted = service.format_all(addresses.clone(), GemAddressFormatStyle::Short);
+
+        assert_eq!(
+            formatted,
+            addresses
+                .iter()
+                .map(|entry| service.format(entry.address.clone(), Some(entry.chain), GemAddressFormatStyle::Short))
+                .collect::<Vec<_>>()
         );
     }
 }

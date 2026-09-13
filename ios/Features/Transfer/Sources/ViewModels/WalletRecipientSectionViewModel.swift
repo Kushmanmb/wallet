@@ -19,18 +19,22 @@ struct WalletRecipientSectionViewModel {
     }
 
     var listItems: [ListItemValue<GemRecipient>] {
-        wallets
+        let entries = wallets
             .filter(walletFilter)
-            .compactMap { wallet -> ListItemValue<GemRecipient>? in
-                guard let account = wallet.accounts.first(where: { $0.chain == chain }) else {
-                    return nil
-                }
-                return ListItemValue(
-                    title: wallet.name,
-                    subtitle: GemAddressService.shared.format(address: account.address, chain: account.chain),
-                    value: GemRecipient(address: account.address, name: wallet.name),
-                )
+            .compactMap { wallet -> (Wallet, Account)? in
+                wallet.accounts.first { $0.chain == chain }.map { (wallet, $0) }
             }
+        let subtitles = GemAddressService.shared.formatAll(
+            addresses: entries.map { ChainAddress(chain: $0.1.chain, address: $0.1.address).map() },
+            style: .short,
+        )
+        return zip(entries, subtitles).map { entry, subtitle in
+            ListItemValue(
+                title: entry.0.name,
+                subtitle: subtitle,
+                value: GemRecipient(address: entry.1.address, name: entry.0.name),
+            )
+        }
     }
 
     private func walletFilter(_ wallet: Wallet) -> Bool {

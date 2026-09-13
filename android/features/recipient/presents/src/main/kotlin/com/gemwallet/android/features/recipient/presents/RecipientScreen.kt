@@ -10,9 +10,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +46,8 @@ import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Wallet
 import com.gemwallet.android.ui.theme.SceneSizing
+import com.gemwallet.android.features.recipient.presents.components.rememberContactAddresses
+import com.gemwallet.android.features.recipient.presents.components.rememberWalletAddresses
 
 @Composable
 fun RecipientScreen(
@@ -125,6 +127,8 @@ internal fun RecipientScreen(
     buttonState: ButtonState,
     onAction: (RecipientAction) -> Unit,
 ) {
+    val contactAddresses = rememberContactAddresses(contacts)
+    val walletAddresses = rememberWalletAddresses(wallets, asset.chain)
     val isKeyBoardOpen = WindowInsets.isKeyboardVisible
     val density = LocalDensity.current
     val isSmallScreen = with(density) {
@@ -170,7 +174,7 @@ internal fun RecipientScreen(
                 onMemo = { onAction(RecipientAction.SetMemo(it)) },
                 onQrScan = { onAction(RecipientAction.Scan(it)) },
             )
-            contactsDestination(contacts = contacts) { contact ->
+            contactsDestination(contacts = contacts, addresses = contactAddresses) { contact ->
                 onAction(RecipientAction.SetMemo(contact.memo ?: ""))
                 onAction(
                     RecipientAction.Select(
@@ -181,7 +185,7 @@ internal fun RecipientScreen(
                     )
                 )
             }
-            walletsDestination(toChain = asset.chain, items = wallets) { wallet, account ->
+            walletsDestination(toChain = asset.chain, items = wallets, addresses = walletAddresses) { wallet, account ->
                 onAction(
                     RecipientAction.Select(
                         GemRecipient(
