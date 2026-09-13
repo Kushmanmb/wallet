@@ -62,6 +62,7 @@ let package = Package(
                 "Formatters",
                 "Gemstone",
                 "GemstonePrimitives",
+                "PrimitivesComponents",
             ],
             path: "TestKit",
         ),

@@ -6,6 +6,7 @@ import Perpetuals
 import Primitives
 import class Gemstone.GemAutocloseEstimator
 import GemstonePrimitives
+import PrimitivesComponents
 
 public extension AutocloseViewModel {
     static func mock(
