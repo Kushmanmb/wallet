@@ -26,4 +26,42 @@ impl GemAddressService {
     pub fn format(&self, address: String, chain: Option<Chain>, style: GemAddressFormatStyle) -> String {
         format_address(&address, chain, style)
     }
+
+    pub fn display(&self, name: Option<String>, address: String, has_image: bool) -> GemAddressDisplay {
+        match name.filter(|name| !name.is_empty() && *name != address) {
+            None => GemAddressDisplay::Address,
+            Some(name) if has_image || address.is_empty() => GemAddressDisplay::Name { name },
+            Some(name) => GemAddressDisplay::NameWithAddress { name },
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
+pub enum GemAddressDisplay {
+    Address,
+    Name { name: String },
+    NameWithAddress { name: String },
+}
+
+#[cfg(test)]
+mod display_tests {
+    use super::*;
+
+    #[test]
+    fn test_a_name_that_repeats_the_address_is_not_a_name_and_an_imageless_one_keeps_its_address() {
+        let service = GemAddressService::new();
+        let address = "0xabc".to_string();
+
+        assert_eq!(service.display(None, address.clone(), false), GemAddressDisplay::Address);
+        assert_eq!(service.display(Some(address.clone()), address.clone(), false), GemAddressDisplay::Address);
+        assert_eq!(service.display(Some(String::new()), address.clone(), false), GemAddressDisplay::Address);
+        assert_eq!(
+            service.display(Some("Ada".into()), address.clone(), true),
+            GemAddressDisplay::Name { name: "Ada".into() }
+        );
+        assert_eq!(
+            service.display(Some("Ada".into()), address, false),
+            GemAddressDisplay::NameWithAddress { name: "Ada".into() }
+        );
+    }
 }

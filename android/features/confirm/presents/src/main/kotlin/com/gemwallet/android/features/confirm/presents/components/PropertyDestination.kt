@@ -20,6 +20,8 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.domains.confirm.ConfirmProperty
 import com.wallet.core.primitives.AddressType
 import uniffi.gemstone.contactInitials
+import uniffi.gemstone.GemAddressDisplay
+import com.wallet.core.primitives.Chain
 
 @Composable
 fun PropertyDestination(
@@ -36,7 +38,7 @@ fun PropertyDestination(
             }
             AddressPropertyItem(
                 title = R.string.transaction_recipient,
-                displayText = model.domain ?: AddressFormatter(LocalAddressService.current, model.address, chain = model.chain).value(),
+                displayText = destinationText(model.domain, model.address, model.chain, icon != null),
                 copyValue = model.address,
                 icon = icon,
                 placeholderText = initials,
@@ -109,4 +111,14 @@ internal fun ConfirmProperty.Destination.displayData(): String = when (this) {
     is ConfirmProperty.Destination.Transfer -> domain ?: address
     is ConfirmProperty.Destination.Generic -> appName
     is ConfirmProperty.Destination.PerpetualOper -> providerName
+}
+
+@Composable
+private fun destinationText(name: String?, address: String, chain: Chain?, hasImage: Boolean): String {
+    val formatted = AddressFormatter(LocalAddressService.current, address, chain = chain).value()
+    return when (val display = LocalAddressService.current.display(name, formatted, hasImage)) {
+        is GemAddressDisplay.Address -> formatted
+        is GemAddressDisplay.Name -> display.name
+        is GemAddressDisplay.NameWithAddress -> "${display.name} ($formatted)"
+    }
 }
