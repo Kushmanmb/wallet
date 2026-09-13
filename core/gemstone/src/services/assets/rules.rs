@@ -9,7 +9,7 @@ use primitives::{
 
 use super::model::{
     GemAssetSectionIds,
-    AssetList, GemAssetAction, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetNetworkDestination, GemAssetRow, GemAssetRowSubtitle, GemAssetRowTitle,
+    AssetList, GemAssetAction, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput, GemAssetNetworkDestination, GemAssetRow, GemAssetRowSubtitle, GemAssetRowTitle,
     GemAssetRowTrailing, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow, GemSelectAssetScope, GemSelectAssetType, GemSelectRowAction,
     GemWalletSearchLimits,
 };
@@ -26,6 +26,20 @@ use swapper::AssetList as SwapAssetList;
 use crate::models::asset::{wallet_asset_is_enabled, wallet_default_assets};
 use primitives::AssetType;
 use crate::services::collections::{missing, missing_by, unique};
+
+pub fn menu_actions(input: &GemAssetMenuInput) -> Vec<GemAssetMenuAction> {
+    [
+        Some(GemAssetMenuAction::Pin { is_pinned: input.is_pinned }),
+        input.offers_hide.then_some(GemAssetMenuAction::Hide),
+        (input.offers_add_to_wallet && !input.is_balance_enabled).then_some(GemAssetMenuAction::AddToWallet),
+        (!input.address.is_empty()).then(|| GemAssetMenuAction::CopyAddress {
+            address: input.address.clone(),
+        }),
+    ]
+    .into_iter()
+    .flatten()
+    .collect()
+}
 
 pub fn asset_list_versions(versions: &ConfigVersions) -> [(AssetList, i32); 3] {
     [
@@ -366,6 +380,49 @@ pub fn details_state(
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn test_asset_menu_offers_pin_always_and_the_rest_only_when_they_apply() {
+        let input = GemAssetMenuInput {
+            is_pinned: false,
+            is_balance_enabled: false,
+            address: "0xabc".to_string(),
+            offers_hide: true,
+            offers_add_to_wallet: true,
+        };
+
+        assert_eq!(
+            menu_actions(&input),
+            vec![
+                GemAssetMenuAction::Pin { is_pinned: false },
+                GemAssetMenuAction::Hide,
+                GemAssetMenuAction::AddToWallet,
+                GemAssetMenuAction::CopyAddress { address: "0xabc".to_string() },
+            ]
+        );
+        assert_eq!(
+            menu_actions(&GemAssetMenuInput {
+                is_balance_enabled: true,
+                ..input.clone()
+            }),
+            vec![
+                GemAssetMenuAction::Pin { is_pinned: false },
+                GemAssetMenuAction::Hide,
+                GemAssetMenuAction::CopyAddress { address: "0xabc".to_string() },
+            ],
+            "an asset already in the wallet cannot be added again"
+        );
+        assert_eq!(
+            menu_actions(&GemAssetMenuInput {
+                address: String::new(),
+                offers_hide: false,
+                offers_add_to_wallet: false,
+                ..input
+            }),
+            vec![GemAssetMenuAction::Pin { is_pinned: false }],
+            "there is nothing to copy without an address"
+        );
+    }
     use super::*;
 
     #[test]

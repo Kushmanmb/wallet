@@ -24,7 +24,7 @@ Rejected: transaction, transaction detail, delegation, validator, asset select/s
 
 Copy: [`GemPerpetualMarketCounts::sections`](../core/gemstone/src/services/perpetual/model.rs) → [iOS](../ios/Features/Perpetuals/Sources/ViewModels/PerpetualsSceneViewModel.swift), [Android](../android/features/perpetual/presents/src/main/kotlin/com/gemwallet/android/features/perpetual/views/market/PerpetualMarketScene.kt).
 
-- **C5** **M** Audit remaining screens for action lists assembled app-side; `GemStakeActionItem`, `GemHeaderButtonKind`, `GemAssetAction`, `GemFiatButtonAction` are the shape.
+- **C5** **S** The wallet tab bar is the last list still assembled app-side, and it carries no decision worth crossing. Re-audit when a screen grows a conditional action.
 
 ## 3. Screens get a session
 

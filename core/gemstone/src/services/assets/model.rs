@@ -295,6 +295,28 @@ pub enum GemHeaderButtonKind {
     Swap,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
+pub enum GemAssetMenuAction {
+    Pin { is_pinned: bool },
+    Hide,
+    AddToWallet,
+    CopyAddress { address: String },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct GemAssetMenuInput {
+    pub is_pinned: bool,
+    pub is_balance_enabled: bool,
+    pub address: String,
+    pub offers_hide: bool,
+    pub offers_add_to_wallet: bool,
+}
+
+#[uniffi::export]
+pub fn asset_menu_actions(input: GemAssetMenuInput) -> Vec<GemAssetMenuAction> {
+    super::rules::menu_actions(&input)
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct GemHeaderButton {
     pub kind: GemHeaderButtonKind,

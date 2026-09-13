@@ -19,6 +19,9 @@ import com.gemwallet.android.ui.components.clipboard.setPlainText
 import com.gemwallet.android.ui.icons.AppIcons
 import com.wallet.core.primitives.AssetId
 import com.gemwallet.android.ui.components.clipboard.clipboardManager
+import uniffi.gemstone.GemAssetMenuAction
+import uniffi.gemstone.GemAssetMenuInput
+import uniffi.gemstone.assetMenuActions
 
 @Immutable
 data class AssetContextActions(
@@ -53,39 +56,47 @@ fun rememberAssetContextMenuItems(
     val clipboard = LocalContext.current.clipboardManager()
     return remember(assetId, address, isPinned, isBalanceEnabled, actions) {
         if (actions.isEmpty) return@remember emptyList()
-        listOfNotNull(
-            actions.onTogglePin?.let { cb ->
-                AssetContextMenuItem(
-                    titleRes = if (isPinned) R.string.common_unpin else R.string.common_pin,
-                    icon = {
-                        if (isPinned) Icon(painterResource(R.drawable.keep_off), null)
-                        else Icon(AppIcons.PushPin, null)
-                    },
-                    onClick = { cb(assetId) },
-                )
-            },
-            actions.onHide?.let { cb ->
-                AssetContextMenuItem(
-                    titleRes = R.string.common_hide,
-                    icon = { Icon(AppIcons.VisibilityOff, null) },
-                    onClick = { cb(assetId) },
-                )
-            },
-            actions.onAddToWallet?.takeUnless { isBalanceEnabled }?.let { cb ->
-                AssetContextMenuItem(
-                    titleRes = R.string.asset_add_to_wallet,
-                    icon = { Icon(AppIcons.AddCircleOutlined, null) },
-                    onClick = { cb(assetId) },
-                )
-            },
-            address?.takeUnless(String::isEmpty)?.let { addr ->
-                AssetContextMenuItem(
+        assetMenuActions(
+            GemAssetMenuInput(
+                isPinned = isPinned,
+                isBalanceEnabled = isBalanceEnabled,
+                address = address.orEmpty(),
+                offersHide = actions.onHide != null,
+                offersAddToWallet = actions.onAddToWallet != null,
+            )
+        ).mapNotNull { action ->
+            when (action) {
+                is GemAssetMenuAction.Pin -> actions.onTogglePin?.let { cb ->
+                    AssetContextMenuItem(
+                        titleRes = if (action.isPinned) R.string.common_unpin else R.string.common_pin,
+                        icon = {
+                            if (action.isPinned) Icon(painterResource(R.drawable.keep_off), null)
+                            else Icon(AppIcons.PushPin, null)
+                        },
+                        onClick = { cb(assetId) },
+                    )
+                }
+                GemAssetMenuAction.Hide -> actions.onHide?.let { cb ->
+                    AssetContextMenuItem(
+                        titleRes = R.string.common_hide,
+                        icon = { Icon(AppIcons.VisibilityOff, null) },
+                        onClick = { cb(assetId) },
+                    )
+                }
+                GemAssetMenuAction.AddToWallet -> actions.onAddToWallet?.let { cb ->
+                    AssetContextMenuItem(
+                        titleRes = R.string.asset_add_to_wallet,
+                        icon = { Icon(AppIcons.AddCircleOutlined, null) },
+                        onClick = { cb(assetId) },
+                    )
+                }
+                is GemAssetMenuAction.CopyAddress -> AssetContextMenuItem(
                     titleRes = R.string.wallet_copy_address,
                     icon = { Icon(AppIcons.ContentCopy, null) },
-                    onClick = { clipboard.setPlainText(context, addr) },
+                    onClick = { clipboard.setPlainText(context, action.address) },
                 )
-            },
-        )
+            }
+        }
     }
 }
 
