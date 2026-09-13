@@ -295,6 +295,8 @@ A record crosses by copy. Every call carries its arguments and its result across
 
 **Build rows once per data change, and memoize.** Android wraps row construction in a map keyed by the source value; iOS builds them inside the `ObservableQuery` that produced the rows. Neither rebuilds per render, and that is the requirement, not an optimization.
 
+**A crossing costs more on Android than on iOS.** iOS reaches Rust through a direct C call; Android goes through JNA, which is enough slower that a per-item crossing shows up in a list. Size the design for Android: batch per list, and where a rule is three lines that each platform's own framework already answers identically — a calendar's today/yesterday, a locale's grouping separator — leaving it in both apps is cheaper and no more likely to drift than paying a crossing per row to share it. That trade is only correct when the two implementations genuinely cannot disagree; write down which it is.
+
 **Derive the view state; do not store it.** Android composes it declaratively — `combine(session, isUrlLoading, assetPrice) { session.viewState(...) }` — and iOS's equivalent is a computed property, because the inputs a screen does not own arrive from a database observation it cannot hook. Storing the result and updating it by hand goes stale the moment one of those inputs changes without a call site remembering. Derive on read, and keep the crossings down with `DerivedValue`, which recomputes only when a named `Equatable` input changes:
 
 ```swift

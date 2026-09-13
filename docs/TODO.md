@@ -27,7 +27,6 @@ Rejected: transaction, transaction detail, delegation, validator, asset select/s
 Copy: [`GemPerpetualMarketCounts::sections`](../core/gemstone/src/services/perpetual/model.rs) → [iOS](../ios/Features/Perpetuals/Sources/ViewModels/PerpetualsSceneViewModel.swift), [Android](../android/features/perpetual/presents/src/main/kotlin/com/gemwallet/android/features/perpetual/views/market/PerpetualMarketScene.kt).
 
 - **C5** **M** Audit remaining screens for action lists assembled app-side; `GemStakeActionItem`, `GemHeaderButtonKind`, `GemAssetAction`, `GemFiatButtonAction` are the shape.
-- **C6** **M** Day sections for every dated list — iOS [`DateSectionBuilder`](../ios/Packages/PrimitivesComponents/Sources/Types/DateSectionBuilder.swift) and [`TransactionDateFormatter`](../ios/Packages/PrimitivesComponents/Sources/Formatters/TransactionDateFormatter.swift), Android [`DateGroupedList`](../android/ui/src/main/kotlin/com/gemwallet/android/ui/components/list_item/DateGroupedList.kt) and [`SectionDateFormatter`](../android/ui/src/main/kotlin/com/gemwallet/android/ui/format/SectionDateFormatter.kt). Start-of-day grouping and the today/yesterday/long-date header are written twice and feed transactions, notifications, recents, fiat activity and support; [`support_chat_groups`](../core/gemstone/src/services/support/model.rs) is the shape.
 
 ## 3. Screens get a session
 
