@@ -295,6 +295,28 @@ A record crosses by copy. Every call carries its arguments and its result across
 
 **Build rows once per data change, and memoize.** Android wraps row construction in a map keyed by the source value; iOS builds them inside the `ObservableQuery` that produced the rows. Neither rebuilds per render, and that is the requirement, not an optimization.
 
+**Hand over the rule, not an answer per item.** When a decision compares each item against a small fixed set — three cases, a threshold, a set of ids — Core can hand the app the *boundaries* once and let the app compare locally, at zero further cost. A day header is today, yesterday, or a date, so Core answers what today and yesterday are and the app matches each section against those two values:
+
+```rust
+#[uniffi::export]
+impl GemDay {
+    pub fn boundaries(&self) -> GemDayBoundaries {
+        GemDayBoundaries { today: *self, yesterday: /* one calendar day back */ }
+    }
+}
+```
+
+```swift
+let boundaries = GemDayBoundaries.current          // one crossing per list build
+switch date.gemDay {
+case boundaries.today: Localized.Date.today
+case boundaries.yesterday: Localized.Date.yesterday
+default: sectionFormatter.string(from: date)
+}
+```
+
+Core still owns what could drift — that yesterday is exactly one calendar day back, across month, year and leap boundaries, and that anything else is a plain date — while the per-section work is a value comparison. Prefer this to a call per item, and to a batch call, whenever the rule can be expressed as a small set of values the app can hold. Grouping stays platform work either way: Core has no device time zone.
+
 **A crossing costs more on Android than on iOS.** iOS reaches Rust through a direct C call; Android goes through JNA, which is enough slower that a per-item crossing shows up in a list. Size the design for Android: batch per list, and where a rule is three lines that each platform's own framework already answers identically — a calendar's today/yesterday, a locale's grouping separator — leaving it in both apps is cheaper and no more likely to drift than paying a crossing per row to share it. That trade is only correct when the two implementations genuinely cannot disagree; write down which it is.
 
 **Derive the view state; do not store it.** Android composes it declaratively — `combine(session, isUrlLoading, assetPrice) { session.viewState(...) }` — and iOS's equivalent is a computed property, because the inputs a screen does not own arrive from a database observation it cannot hook. Storing the result and updating it by hand goes stale the moment one of those inputs changes without a call site remembering. Derive on read, and keep the crossings down with `DerivedValue`, which recomputes only when a named `Equatable` input changes:

@@ -14,7 +14,9 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.format.SectionDateFormatter
 import com.gemwallet.android.ui.models.ListPosition
+import com.gemwallet.android.ui.format.gemDay
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -25,13 +27,14 @@ fun <T> LazyListScope.dateGroupedList(
     itemContent: @Composable LazyItemScope.(ListPosition, T) -> Unit,
 ) {
     val zone = ZoneId.systemDefault()
+    val boundaries = LocalDate.now(zone).gemDay().boundaries()
     items.groupBy { Instant.ofEpochMilli(createdAt(it)).atZone(zone).toLocalDate() }
         .forEach { (date, entries) ->
             stickyHeader {
                 val todayLabel = stringResource(R.string.date_today)
                 val yesterdayLabel = stringResource(R.string.date_yesterday)
-                val formatter = remember(todayLabel, yesterdayLabel) {
-                    SectionDateFormatter(todayLabel, yesterdayLabel)
+                val formatter = remember(todayLabel, yesterdayLabel, boundaries) {
+                    SectionDateFormatter(todayLabel, yesterdayLabel, boundaries)
                 }
                 SubheaderItem(
                     title = formatter.format(date, LocalConfiguration.current.locales[0]),

@@ -1,6 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
+import struct Gemstone.GemDayBoundaries
+import GemstonePrimitives
 import Localization
 
 public struct TransactionDateFormatter {
@@ -26,26 +28,32 @@ public struct TransactionDateFormatter {
     }()
 
     private let date: Date
+    private let boundaries: GemDayBoundaries
 
-    public init(date: Date) {
+    public init(date: Date, boundaries: GemDayBoundaries = .current) {
         self.date = date
+        self.boundaries = boundaries
     }
 
     public var section: String {
-        if Calendar.current.isDateInToday(date) {
-            return Localized.Date.today
-        } else if Calendar.current.isDateInYesterday(date) {
-            return Localized.Date.yesterday
+        switch dayLabel {
+        case let .some(label): label
+        case .none: Self.sectionFormatter.string(from: date)
         }
-        return Self.sectionFormatter.string(from: date)
     }
 
     public var row: String {
-        if Calendar.current.isDateInToday(date) {
-            return String(format: "%@, %@", Localized.Date.today, Self.rowTimeFormatter.string(from: date))
-        } else if Calendar.current.isDateInYesterday(date) {
-            return String(format: "%@, %@", Localized.Date.yesterday, Self.rowTimeFormatter.string(from: date))
+        switch dayLabel {
+        case let .some(label): String(format: "%@, %@", label, Self.rowTimeFormatter.string(from: date))
+        case .none: Self.rowFormatter.string(from: date)
         }
-        return Self.rowFormatter.string(from: date)
+    }
+
+    private var dayLabel: String? {
+        switch date.gemDay {
+        case boundaries.today: Localized.Date.today
+        case boundaries.yesterday: Localized.Date.yesterday
+        default: nil
+        }
     }
 }

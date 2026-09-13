@@ -273,7 +273,6 @@ Open work lives in [TODO.md](TODO.md): the architecture migration to row records
 
 - The stream reconnect cap is 30 seconds because the price stream must resume within half a minute. The 60 seconds one app used to carry was an untouched import default, not a decision.
 - The confirm button on the autoclose screen differs by design: one app enables it on any pending change and reveals validation after a tap, the other keeps it disabled until the change can build. Both read the same Core outcome; only the moment errors appear differs.
-- Day section headers (today / yesterday / a date) stay in both apps. `Calendar.isDateInToday` and `LocalDate == today` already answer it identically and handle their own DST, while a Core rule would cost a crossing per section on every list rebuild — and Android's crossings are the expensive ones. Grouping by start-of-day must stay platform anyway, since Core has no device time zone.
 - The iOS reading of a typed number into a plain one stays in the app. Core owns the rule and Android calls it, but the price widget links the formatter package without the Rust library, and the validators package may not import Gemstone at all, so the iOS copy is the price of those two boundaries.
 - A view model may hold more than one Core service when it is a launch host or a flow parent vending child models, and the extra services are private. A non-private service is the real defect: the view is reaching through the model, so have the parent vend the child model instead.
 
