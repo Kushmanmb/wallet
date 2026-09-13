@@ -146,6 +146,15 @@ impl From<SwapAssetList> for GemAssetFilter {
 
 #[uniffi::export]
 impl GemAssetAction {
+    pub fn recent_activity_types(&self) -> Vec<RecentActivityType> {
+        match self {
+            Self::SwapPay | Self::SwapReceive => vec![RecentActivityType::SwapSelect, RecentActivityType::Swap],
+            Self::Open | Self::Send | Self::Receive | Self::Buy | Self::Sell => RecentActivityType::iter().collect(),
+        }
+    }
+}
+
+impl GemAssetAction {
     pub fn filters(&self) -> Vec<GemAssetFilter> {
         match self {
             Self::Open => Vec::new(),
@@ -158,15 +167,6 @@ impl GemAssetAction {
         }
     }
 
-    pub fn recent_activity_types(&self) -> Vec<RecentActivityType> {
-        match self {
-            Self::SwapPay | Self::SwapReceive => vec![RecentActivityType::SwapSelect, RecentActivityType::Swap],
-            Self::Open | Self::Send | Self::Receive | Self::Buy | Self::Sell => RecentActivityType::iter().collect(),
-        }
-    }
-}
-
-impl GemAssetAction {
     pub fn recent_activity_type(&self, asset: &Asset) -> Option<RecentActivityType> {
         match self {
             Self::Open => Some(match asset.asset_type {
