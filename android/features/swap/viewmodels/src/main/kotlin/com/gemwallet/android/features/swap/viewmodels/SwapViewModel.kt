@@ -13,7 +13,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.swap.cases.RequestSwapQuotes
-import com.gemwallet.android.application.swap.cases.SwapQuoteRequestKey
 import com.gemwallet.android.application.swap.cases.SwapQuoteRequestParams
 import com.gemwallet.android.application.swap.cases.SwapQuotesResult
 import com.gemwallet.android.application.swap.cases.create
@@ -78,6 +77,7 @@ import java.math.BigInteger
 import javax.inject.Inject
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.domains.gemConfig
+import uniffi.gemstone.GemSwapRequest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -303,7 +303,7 @@ class SwapViewModel @Inject constructor(
 
     fun refresh() {
         val params = quoteRequestParams.value ?: return
-        session.update { it.onRefreshRequested(params.key.toGem()) }
+        session.update { it.onRefreshRequested(params.key) }
         refreshRequests.tryEmit(Unit)
     }
 
@@ -366,11 +366,11 @@ class SwapViewModel @Inject constructor(
     }
 
     private fun onQuoteRequestParamsChanged(params: SwapQuoteRequestParams?) {
-        session.update { it.onRequestChanged(params?.key?.toGem()) }
+        session.update { it.onRequestChanged(params?.key) }
     }
 
-    private fun onQuoteFetchStarted(requestKey: SwapQuoteRequestKey) {
-        session.update { it.onFetchStarted(requestKey.toGem()) }
+    private fun onQuoteFetchStarted(requestKey: GemSwapRequest) {
+        session.update { it.onFetchStarted(requestKey) }
     }
 
     private fun onQuoteResults(results: SwapQuotesResult?) {

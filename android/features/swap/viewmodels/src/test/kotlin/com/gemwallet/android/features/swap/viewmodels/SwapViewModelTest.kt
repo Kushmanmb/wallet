@@ -4,7 +4,6 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.SavedStateHandle
 import com.gemwallet.android.application.swap.cases.RequestSwapQuotes
-import com.gemwallet.android.application.swap.cases.SwapQuoteRequestKey
 import com.gemwallet.android.application.swap.cases.SwapQuoteRequestParams
 import com.gemwallet.android.application.swap.cases.SwapQuotesResult
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
@@ -86,6 +85,7 @@ import uniffi.gemstone.SwapperSlippage
 import uniffi.gemstone.SwapperSlippageMode
 import uniffi.gemstone.GemSwapButtonAction
 import uniffi.gemstone.SwapperException
+import uniffi.gemstone.GemSwapRequest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SwapViewModelTest {
@@ -481,7 +481,7 @@ class SwapViewModelTest {
     @Test
     fun `quote fetch started callback shows quote loading for refreshes`() = runTest(testDispatcher) {
         val quotesFlow = MutableSharedFlow<SwapQuotesResult?>(replay = 1)
-        val onFetchStarted = slot<(SwapQuoteRequestKey) -> Unit>()
+        val onFetchStarted = slot<(GemSwapRequest) -> Unit>()
         every {
             requestSwapQuotes.invoke(any(), any(), any(), capture(onFetchStarted), any(), any())
         } returns quotesFlow
