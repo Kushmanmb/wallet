@@ -5,6 +5,7 @@ import java.math.MathContext
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import uniffi.gemstone.GemPrecision
+import uniffi.gemstone.abbreviationThreshold
 import uniffi.gemstone.adaptivePrecision as gemAdaptivePrecision
 
 internal sealed interface Precision {
@@ -41,4 +42,4 @@ internal fun adaptivePrecision(magnitude: BigDecimal): Precision = when (val pre
     is GemPrecision.Significant -> Precision.Significant(max = precision.max.toInt())
 }
 
-internal val ABBREVIATION_THRESHOLD: BigDecimal = BigDecimal(100_000)
+internal val ABBREVIATION_THRESHOLD: BigDecimal by lazy { BigDecimal.valueOf(abbreviationThreshold()) }

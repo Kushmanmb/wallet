@@ -7,6 +7,8 @@ import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Locale
+import uniffi.gemstone.GemCurrencyStyle
+import uniffi.gemstone.GemPrecision
 
 class CurrencyFormatter(
     private val type: Type = Type.Currency,
@@ -35,15 +37,21 @@ class CurrencyFormatter(
     fun string(value: Double): String = string(BigDecimal.valueOf(value))
 
     fun string(value: BigDecimal): String =
-        if (type == Type.Abbreviated && value.abs() >= ABBREVIATION_THRESHOLD) {
+        if (style.abbreviates(value.abs().toDouble())) {
             abbreviatedFormatter.format(value)
         } else {
             currencyFormatter.format(value, precision(value.abs()))
         }
 
-    private fun precision(magnitude: BigDecimal): Precision =
-        when {
-            type == Type.Fiat -> Precision.twoPlaces
-            else -> adaptivePrecision(magnitude)
+    private val style: GemCurrencyStyle
+        get() = when (type) {
+            Type.Currency -> GemCurrencyStyle.CURRENCY
+            Type.Fiat -> GemCurrencyStyle.FIAT
+            Type.Abbreviated -> GemCurrencyStyle.ABBREVIATED
         }
+
+    private fun precision(magnitude: BigDecimal): Precision = when (val precision = style.precision(magnitude.toDouble())) {
+        is GemPrecision.Fraction -> Precision.Fraction(min = precision.min.toInt(), max = precision.max.toInt())
+        is GemPrecision.Significant -> Precision.Significant(max = precision.max.toInt())
+    }
 }

@@ -71,6 +71,5 @@ class ValueFormatter(
         private val ROUNDING_MODE: RoundingMode = RoundingMode.DOWN
         private val SMALL_AMOUNT_THRESHOLD: BigDecimal = BigDecimal("0.1")
         private val DUST_THRESHOLD: BigDecimal = BigDecimal("0.0001")
-        val ABBREVIATION_THRESHOLD: BigDecimal = BigDecimal(100_000)
     }
 }
