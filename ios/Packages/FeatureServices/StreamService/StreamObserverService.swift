@@ -68,6 +68,7 @@ public actor StreamObserverService: Sendable {
         do {
             let shouldConnect = try await service.prepareConnection()
             try Task.checkCancellation()
+            debugLog("stream connecting: \(shouldConnect)")
             if shouldConnect {
                 for await event in await webSocket.connect() {
                     try Task.checkCancellation()
@@ -86,12 +87,14 @@ public actor StreamObserverService: Sendable {
         do {
             switch event {
             case .connected:
+                debugLog("stream connected")
                 health.report(isHealthy: true)
                 try await service.connected()
             case let .message(data):
                 let event = try await service.handle(event: String(decoding: data, as: UTF8.self))
                 debugLog("stream event: \(event)")
             case .disconnected:
+                debugLog("stream disconnected")
                 if isActive {
                     health.report(isHealthy: false)
                 }
