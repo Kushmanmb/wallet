@@ -1,6 +1,6 @@
 # Open work
 
-x Contracts are in [ARCHITECTURE.md](ARCHITECTURE.md). **Delete an item's line in the commit that lands it.**
+Every open item carries a stable id (V vocabulary, R rows, C composition, S sessions, B view boundary, F formatting, P parity, D decisions, O ownership, X platform, G guidance) and a size (**S**/**M**/**L**). Contracts are in [ARCHITECTURE.md](ARCHITECTURE.md). **Delete an item's line in the commit that lands it** — ids are never reused.
 
 One item, one commit, both apps built and tested. Core rule + test, regenerate bindings, delete the app code it replaced on both sides, clear that screen's view leak while you are in it.
 
