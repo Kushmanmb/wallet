@@ -29,6 +29,7 @@ import uniffi.gemstone.GemWalletPlaceholder
 import uniffi.gemstone.GemWalletRow
 import uniffi.gemstone.GemWalletSubtitle
 import uniffi.gemstone.walletRow
+import androidx.compose.runtime.remember
 
 @Composable
 fun WalletItem(
@@ -42,7 +43,7 @@ fun WalletItem(
         modifier = modifier,
         id = wallet.id.id,
         name = wallet.name,
-        row = walletRow(wallet.toGem()),
+        row = remember(wallet) { walletRow(wallet.toGem()) },
         isCurrent = isCurrent,
         imageUrl = wallet.imageUrl,
         listPosition = listPosition,

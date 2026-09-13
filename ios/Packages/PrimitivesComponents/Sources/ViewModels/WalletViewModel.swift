@@ -11,8 +11,10 @@ import SwiftUI
 
 public struct WalletViewModel: Sendable {
     public let wallet: Wallet
+    private let row: GemWalletRow
 
     public init(wallet: Wallet) {
+        row = walletRow(wallet: wallet.map())
         self.wallet = wallet
     }
 
@@ -36,10 +38,6 @@ public struct WalletViewModel: Sendable {
 
     public var subImage: Image? {
         row.showsWatchBadge ? Images.Wallets.watch : nil
-    }
-
-    private var row: GemWalletRow {
-        walletRow(wallet: wallet.map())
     }
 
     public var hasAvatar: Bool {
