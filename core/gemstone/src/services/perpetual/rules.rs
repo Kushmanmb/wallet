@@ -1,11 +1,12 @@
 use chrono::Utc;
+use primitives::PriceChangeCalculator;
 use number_formatter::{BigNumberFormatter, NumberFormatterError};
 use primitives::chart::{ChartCandleStick, ChartCandleUpdate};
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
 use primitives::perpetual::{PerpetualBalance, PerpetualData};
 use primitives::{Asset, AssetBasic, AssetId, AssetPrice, AssetProperties, AssetScore, AssetType, Chain, ChartPeriod, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, WalletType};
 
-use super::model::{GemAutocloseSummary, GemMarketsRefreshTrigger, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionKind, GemPerpetualMarketRow, GemPerpetualPositionRow, GemPerpetualTransferData};
+use super::model::{GemAutocloseSummary, GemMarketsRefreshTrigger, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionKind, GemCandleTooltip, GemPerpetualMarketRow, GemPerpetualPositionRow, GemPerpetualTransferData};
 use crate::models::custom_types::GemBigInt;
 use crate::perpetual::GemPerpetual;
 use crate::services::error::GemServiceError;
@@ -493,6 +494,17 @@ pub fn market_sections(counts: &GemPerpetualMarketCounts, is_searching: bool, is
     }
 }
 
+pub fn candle_tooltip(candle: &ChartCandleStick) -> GemCandleTooltip {
+    GemCandleTooltip {
+        open: candle.open,
+        high: candle.high,
+        low: candle.low,
+        close: candle.close,
+        change_percentage: PriceChangeCalculator::percentage(candle.open, candle.close),
+        volume: candle.volume * candle.close,
+    }
+}
+
 pub fn market_row(perpetual: &Perpetual) -> GemPerpetualMarketRow {
     GemPerpetualMarketRow {
         title: perpetual.name.clone(),
@@ -727,6 +739,23 @@ mod tests {
 
         assert!(!GemMarketsRefreshTrigger::Scheduled.should_sync_markets(just_synced, 10_000));
         assert!(GemMarketsRefreshTrigger::UserRequested.should_sync_markets(just_synced, 10_000));
+    }
+
+    #[test]
+    fn test_a_candle_tooltip_quotes_volume_in_the_close_price() {
+        let candle = ChartCandleStick {
+            date: Utc::now(),
+            open: 100.0,
+            high: 120.0,
+            low: 90.0,
+            close: 110.0,
+            volume: 2.0,
+        };
+        let tooltip = candle_tooltip(&candle);
+
+        assert_eq!(tooltip.volume, 220.0);
+        assert_eq!(tooltip.change_percentage, 10.0);
+        assert_eq!(tooltip.high, 120.0);
     }
 
     #[test]

@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import class Gemstone.PriceChangeCalculator
+import struct Gemstone.GemCandleTooltip
+import func Gemstone.candleTooltip
 import Components
 import Formatters
 import Localization
@@ -9,16 +10,17 @@ import Style
 import SwiftUI
 
 public struct CandleTooltipViewModel {
-    private let priceChangeCalculator = PriceChangeCalculator()
     private static let titleStyle = TextStyle(font: .caption2, color: Colors.secondaryText, fontWeight: .medium)
     private static let subtitleStyle = TextStyle(font: .caption2.monospacedDigit(), color: Colors.black, fontWeight: .semibold)
     private static let volumeFormatter = CurrencyFormatter(type: .abbreviated, currencyCode: Currency.usd.rawValue)
 
     private let candle: ChartCandleStick
+    private let tooltip: GemCandleTooltip
     private let formatter: NumericFormatter
 
     public init(candle: ChartCandleStick, formatter: NumericFormatter = NumericFormatter()) {
         self.candle = candle
+        tooltip = candleTooltip(candle: candle.map())
         self.formatter = formatter
     }
 
@@ -51,7 +53,7 @@ public struct CandleTooltipViewModel {
     }
 
     var changeField: ListItemField {
-        let change = priceChangeCalculator.percentage(from: candle.open, to: candle.close)
+        let change = tooltip.changePercentage
         return ListItemField(
             title: TextValue(text: Localized.Charts.Price.change, style: Self.titleStyle, lineLimit: 1),
             value: TextValue(text: PercentFormatter.signed.string(change), style: TextStyle(font: .caption2.monospacedDigit(), color: PriceChangeColor.color(for: change), fontWeight: .semibold), lineLimit: 1),
@@ -61,7 +63,7 @@ public struct CandleTooltipViewModel {
     var volumeField: ListItemField {
         ListItemField(
             title: TextValue(text: Localized.Perpetual.volume, style: Self.titleStyle, lineLimit: 1),
-            value: TextValue(text: Self.volumeFormatter.string(candle.volume * candle.close), style: Self.subtitleStyle, lineLimit: 1),
+            value: TextValue(text: Self.volumeFormatter.string(tooltip.volume), style: Self.subtitleStyle, lineLimit: 1),
         )
     }
 }

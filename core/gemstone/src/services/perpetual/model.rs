@@ -136,6 +136,21 @@ pub struct GemPerpetualChartLayout {
     pub lines: Vec<GemPerpetualChartLine>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, uniffi::Record)]
+pub struct GemCandleTooltip {
+    pub open: f64,
+    pub high: f64,
+    pub low: f64,
+    pub close: f64,
+    pub change_percentage: f64,
+    pub volume: f64,
+}
+
+#[uniffi::export]
+pub fn candle_tooltip(candle: ChartCandleStick) -> GemCandleTooltip {
+    rules::candle_tooltip(&candle)
+}
+
 #[uniffi::export]
 pub fn perpetual_chart_layout(candles: Vec<ChartCandleStick>, position: Option<PerpetualPosition>) -> GemPerpetualChartLayout {
     rules::chart_layout(&candles, position.as_ref())
