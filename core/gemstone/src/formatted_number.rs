@@ -105,11 +105,6 @@ pub fn formatted_adaptive(value: f64, symbol: Option<String>) -> GemFormattedNum
 }
 
 #[uniffi::export]
-pub fn formatted_percentage(value: f64, style: GemPercentageStyle) -> GemFormattedNumber {
-    GemFormattedNumber::percentage(value, style)
-}
-
-#[uniffi::export]
 pub fn formatted_currency(value: f64, code: String, style: GemCurrencyStyle) -> GemFormattedNumber {
     GemFormattedNumber::currency_code(value, code, style)
 }
