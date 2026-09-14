@@ -62,7 +62,6 @@ Ownership, injection and threads:
 
 - **O2** **M** iOS [`Config.swift`](../ios/Packages/GemstonePrimitives/Sources/Config.swift) keeps `.shared` singletons of `GemAddressService`, `GemApplicationMetadataService`, `GemAssetConfigService`, `GemChainService` and `GemConnectionService` that [`ServicesFactory`](../ios/Gem/Services/ServicesFactory.swift) constructs again; about 25 feature call sites read the globals, and `ImportWalletViewModel` hands `GemChainService.shared` to its child.
 
-- **O8** **S** A price payload now skips the entries this build cannot read instead of dropping the whole message, so one unknown currency no longer stops every price update. What is left is the app side: `Currency` and `Chain` still cross as `String` and the generated mappers crash on an unknown one — [iOS `fatalError`](../ios/Packages/GemstonePrimitives/Sources/Generated/RemoteTypeMappers.swift), [Android `IllegalStateException`](../android/gemcore/src/main/kotlin/com/gemwallet/android/ext/RemoteTypeMappers.kt). A wallet must not crash on a wire value, so decide the unknown case there.
 
 Platform items:
 
