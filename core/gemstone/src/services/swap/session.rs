@@ -66,14 +66,39 @@ pub enum GemSwapButtonState {
     Enabled,
 }
 
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemSwapErrorDisplay {
+    NotSupportedAsset,
+    NoQuote,
+    MinimumAmount { min_amount: GemBigInt },
+    AmountTooSmall,
+}
+
+impl GemSwapErrorDisplay {
+    fn new(error: &SwapperError) -> Self {
+        match error {
+            SwapperError::NotSupportedChain | SwapperError::NotSupportedAsset => Self::NotSupportedAsset,
+            SwapperError::NoQuoteAvailable
+            | SwapperError::NoAvailableProvider
+            | SwapperError::InvalidRoute
+            | SwapperError::ComputeQuoteError(_)
+            | SwapperError::TransactionError(_) => Self::NoQuote,
+            SwapperError::InputAmountError { .. } => match rules::minimum_amount(Some(error)) {
+                Some(min_amount) => Self::MinimumAmount { min_amount },
+                None => Self::AmountTooSmall,
+            },
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemSwapViewState {
     pub action: GemSwapSessionAction,
     pub button_action: GemSwapButtonAction,
     pub button_state: GemSwapButtonState,
     pub quote: Option<SwapperQuote>,
-    pub quote_error: Option<SwapperError>,
-    pub error: Option<SwapperError>,
+    pub quote_error: Option<GemSwapErrorDisplay>,
+    pub error: Option<GemSwapErrorDisplay>,
     pub is_quote_loading: bool,
     pub is_transfer_loading: bool,
     pub is_input_empty: bool,
@@ -222,8 +247,8 @@ impl GemSwapSession {
             button_state: self.button_state(button_action.clone()),
             button_action,
             quote: self.quote(),
-            quote_error: self.quote_error(),
-            error: self.error(),
+            quote_error: self.quote_error_display(),
+            error: self.error_display(),
             is_quote_loading: self.is_quote_loading(),
             is_transfer_loading: self.is_transfer_loading(),
             is_input_empty: self.is_input_empty(),
@@ -244,6 +269,14 @@ impl GemSwapSession {
 
     fn error(&self) -> Option<SwapperError> {
         self.transfer_error().or_else(|| self.quote_error())
+    }
+
+    fn quote_error_display(&self) -> Option<GemSwapErrorDisplay> {
+        self.quote_error().as_ref().map(GemSwapErrorDisplay::new)
+    }
+
+    fn error_display(&self) -> Option<GemSwapErrorDisplay> {
+        self.error().as_ref().map(GemSwapErrorDisplay::new)
     }
 
     fn is_quote_loading(&self) -> bool {
@@ -329,6 +362,39 @@ mod tests {
     use super::*;
     use num_bigint::BigUint;
     use primitives::{Account, Asset, AssetType, Chain, Wallet};
+
+    #[test]
+    fn test_the_error_display_collapses_every_no_quote_cause_into_one() {
+        for error in [
+            SwapperError::NoQuoteAvailable,
+            SwapperError::NoAvailableProvider,
+            SwapperError::InvalidRoute,
+            SwapperError::ComputeQuoteError("status 500".to_string()),
+            SwapperError::TransactionError("bad transaction".to_string()),
+        ] {
+            assert_eq!(GemSwapErrorDisplay::new(&error), GemSwapErrorDisplay::NoQuote);
+        }
+        assert_eq!(GemSwapErrorDisplay::new(&SwapperError::NotSupportedChain), GemSwapErrorDisplay::NotSupportedAsset);
+        assert_eq!(GemSwapErrorDisplay::new(&SwapperError::NotSupportedAsset), GemSwapErrorDisplay::NotSupportedAsset);
+    }
+
+    #[test]
+    fn test_a_minimum_only_reaches_the_app_when_it_parses_to_a_positive_amount() {
+        let display = |min_amount: Option<&str>| {
+            GemSwapErrorDisplay::new(&SwapperError::InputAmountError {
+                min_amount: min_amount.map(str::to_string),
+            })
+        };
+        assert_eq!(
+            display(Some("123456")),
+            GemSwapErrorDisplay::MinimumAmount {
+                min_amount: GemBigInt::from(123456)
+            }
+        );
+        assert_eq!(display(Some("0")), GemSwapErrorDisplay::AmountTooSmall);
+        assert_eq!(display(Some("not a number")), GemSwapErrorDisplay::AmountTooSmall);
+        assert_eq!(display(None), GemSwapErrorDisplay::AmountTooSmall);
+    }
 
     fn request(value: u32) -> GemSwapRequest {
         GemSwapRequest {

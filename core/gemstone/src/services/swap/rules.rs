@@ -240,7 +240,7 @@ pub fn is_retryable(error: Option<&SwapperError>) -> bool {
     }
 }
 
-fn minimum_amount(error: Option<&SwapperError>) -> Option<BigInt> {
+pub fn minimum_amount(error: Option<&SwapperError>) -> Option<BigInt> {
     let SwapperError::InputAmountError { min_amount } = error? else {
         return None;
     };

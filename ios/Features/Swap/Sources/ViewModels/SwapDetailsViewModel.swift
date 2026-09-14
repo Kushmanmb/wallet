@@ -145,11 +145,6 @@ public final class SwapDetailsViewModel {
             value: valueFormatter.string(minReceiveValue, asset: toAssetPrice.asset),
         )
     }
-
-    var fromAsset: Asset {
-        fromAssetPrice.asset
-    }
-
 }
 
 // MARK: - Actions

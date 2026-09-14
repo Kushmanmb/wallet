@@ -11,6 +11,7 @@ import struct Gemstone.GemSwapSession
 import struct Gemstone.GemSwapViewState
 import protocol Gemstone.GemSwapQuoteServiceProtocol
 import func Gemstone.swapperQuoteSummary
+import enum Gemstone.GemSwapErrorDisplay
 import enum Gemstone.SwapperError
 import struct Gemstone.SwapperQuote
 import struct Gemstone.SwapQuote
@@ -190,7 +191,7 @@ public final class SwapSceneViewModel {
         viewState.isTransferLoading
     }
 
-    var error: (any Error)? {
+    var error: GemSwapErrorDisplay? {
         viewState.error
     }
 
@@ -207,7 +208,7 @@ public final class SwapSceneViewModel {
     }
 
     var errorInfoAction: VoidAction {
-        guard let error = viewState.quoteError, case .NoQuoteAvailable = error else {
+        guard let error = viewState.error, case .noQuote = error else {
             return nil
         }
         return VoidAction { [weak self] in
@@ -373,7 +374,7 @@ extension SwapSceneViewModel {
             return .loading
         }
         if let error = viewState.quoteError {
-            return .error(error)
+            return .error(error.asError(asset: fromAsset?.asset))
         }
         if let quotes = session.quotes?.quotes {
             return .data(quotes)

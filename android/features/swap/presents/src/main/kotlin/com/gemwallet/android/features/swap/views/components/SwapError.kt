@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import com.gemwallet.android.features.swap.viewmodels.models.SwapFailure
+import com.gemwallet.android.ext.boldMarkdown
 import com.gemwallet.android.features.swap.viewmodels.models.SwapUiState
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.ValueFormatter
@@ -18,6 +18,7 @@ import com.gemwallet.android.ui.components.list_item.WarningItem
 import com.gemwallet.android.ui.models.ListPosition
 import com.wallet.core.primitives.Asset
 import java.math.BigInteger
+import uniffi.gemstone.GemSwapErrorDisplay
 import uniffi.gemstone.GemValueStyle
 
 @Composable
@@ -26,18 +27,19 @@ internal fun SwapError(state: SwapUiState, pay: AssetInfo?) {
     val error = state.error ?: return
 
     val errorText = when (error) {
-        SwapFailure.UnsupportedAsset -> stringResource(R.string.errors_swap_not_supported_asset)
-        SwapFailure.NoQuote -> stringResource(R.string.errors_swap_no_quote_available)
-        is SwapFailure.AmountTooSmall ->
-            "${stringResource(R.string.errors_swap_amount_too_small)} ${minimumAmount(error.minAmount, pay?.asset)}"
-        is SwapFailure.Unknown -> "${stringResource(R.string.errors_unknown_try_again)}: ${error.message}"
+        is GemSwapErrorDisplay.NotSupportedAsset -> stringResource(R.string.errors_swap_not_supported_asset)
+        is GemSwapErrorDisplay.NoQuote -> stringResource(R.string.errors_swap_no_quote_available)
+        is GemSwapErrorDisplay.MinimumAmount -> pay?.asset
+            ?.let { stringResource(R.string.errors_swap_minimum_amount, minimumAmount(error.minAmount, it).boldMarkdown()) }
+            ?: stringResource(R.string.errors_swap_amount_too_small)
+        is GemSwapErrorDisplay.AmountTooSmall -> stringResource(R.string.errors_swap_amount_too_small)
     }
 
     val infoSheetEntity = when (error) {
-        SwapFailure.NoQuote -> InfoSheetEntity.NoQuoteInfo
-        SwapFailure.UnsupportedAsset,
-        is SwapFailure.AmountTooSmall,
-        is SwapFailure.Unknown -> null
+        is GemSwapErrorDisplay.NoQuote -> InfoSheetEntity.NoQuoteInfo
+        is GemSwapErrorDisplay.NotSupportedAsset,
+        is GemSwapErrorDisplay.MinimumAmount,
+        is GemSwapErrorDisplay.AmountTooSmall -> null
     }
 
     WarningItem(
@@ -53,7 +55,5 @@ internal fun SwapError(state: SwapUiState, pay: AssetInfo?) {
     }
 }
 
-private fun minimumAmount(minAmount: BigInteger?, asset: Asset?): String {
-    if (minAmount == null || asset == null) return ""
-    return ValueFormatter(style = GemValueStyle.AUTO).string(minAmount, asset)
-}
+private fun minimumAmount(minAmount: BigInteger, asset: Asset): String =
+    ValueFormatter(style = GemValueStyle.AUTO).string(minAmount, asset)
