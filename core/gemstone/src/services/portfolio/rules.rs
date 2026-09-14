@@ -1,6 +1,6 @@
 use primitives::{
-    ChartPeriod, ChartValuePercentage, Currency, PerpetualPortfolio, PerpetualPortfolioTimeframeData, PortfolioAssets, PortfolioChartData, PortfolioChartType,
-    PortfolioData, PortfolioMarginUsage, PortfolioStatistic, PortfolioType,
+    ChartPeriod, ChartValuePercentage, Currency, PerpetualPortfolio, PerpetualPortfolioTimeframeData, PortfolioAssets, PortfolioChartData, PortfolioChartType, PortfolioData,
+    PortfolioMarginUsage, PortfolioStatistic, PortfolioType,
 };
 
 use super::model::GemPortfolioValues;
@@ -130,7 +130,11 @@ mod tests {
 
     #[test]
     fn test_a_perpetuals_portfolio_is_quoted_in_dollars() {
-        assert_eq!(portfolio_currency(PortfolioType::Perpetuals, Currency::EUR), Currency::USD, "perpetual collateral is dollars whatever the wallet is set to");
+        assert_eq!(
+            portfolio_currency(PortfolioType::Perpetuals, Currency::EUR),
+            Currency::USD,
+            "perpetual collateral is dollars whatever the wallet is set to"
+        );
         assert_eq!(portfolio_currency(PortfolioType::Wallet, Currency::EUR), Currency::EUR);
     }
 

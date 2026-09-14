@@ -64,12 +64,7 @@ pub fn delegation_actions(wallet_type: WalletType, delegation: &Delegation) -> V
 }
 
 pub fn earn_apr(providers: &[DelegationValidator], asset_apr: Option<f64>) -> f64 {
-    providers
-        .first()
-        .map(|provider| provider.apr)
-        .filter(|apr| *apr > 0.0)
-        .or(asset_apr)
-        .unwrap_or_default()
+    providers.first().map(|provider| provider.apr).filter(|apr| *apr > 0.0).or(asset_apr).unwrap_or_default()
 }
 
 pub fn can_claim_rewards(wallet_type: WalletType, delegation: &Delegation) -> bool {
@@ -774,7 +769,11 @@ mod tests {
     fn test_the_earn_rate_prefers_the_provider_that_would_take_the_deposit() {
         let provider = |apr: f64| DelegationValidator { apr, ..validator("earn") };
 
-        assert_eq!(earn_apr(&[provider(4.5), provider(9.9)], Some(1.0)), 4.5, "the first provider is the one that would take the deposit");
+        assert_eq!(
+            earn_apr(&[provider(4.5), provider(9.9)], Some(1.0)),
+            4.5,
+            "the first provider is the one that would take the deposit"
+        );
         assert_eq!(earn_apr(&[provider(0.0)], Some(1.5)), 1.5, "a provider quoting nothing falls back to the asset's rate");
         assert_eq!(earn_apr(&[], Some(2.5)), 2.5);
         assert_eq!(earn_apr(&[], None), 0.0);

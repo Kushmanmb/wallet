@@ -13,10 +13,10 @@ mod transfer;
 use std::sync::Arc;
 use std::time::Duration;
 
+pub use confirmation::GemConfirmation;
 pub use error::GemConfirmError;
 pub use model::*;
 pub use rules::acquire_asset_flow;
-pub use confirmation::GemConfirmation;
 pub use signer::GemTransactionSigner;
 pub use transfer::GemConfirmTransferService;
 

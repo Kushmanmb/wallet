@@ -368,7 +368,12 @@ pub fn sanitize_number_input(decimal_separator: &str, text: &str, maximum_fracti
         Some(position) => {
             let integer: String = typed.chars().take(position).collect();
             let fraction: String = typed.chars().skip(position + 1).filter(|character| !is_separator(character)).collect();
-            format!("{}{}{}", limit(&integer, maximum_integer_digits), decimal_separator, limit(&fraction, maximum_fraction_digits))
+            format!(
+                "{}{}{}",
+                limit(&integer, maximum_integer_digits),
+                decimal_separator,
+                limit(&fraction, maximum_fraction_digits)
+            )
         }
     }
 }
@@ -430,10 +435,7 @@ fn standard_decimal(decimal_separator: &str, text: &str) -> String {
 fn is_grouping_dot(text: &str) -> bool {
     match text.split_once('.') {
         Some((before, after)) => {
-            !before.is_empty()
-                && before.chars().all(|character| character.is_ascii_digit())
-                && after.len() == 3
-                && after.chars().all(|character| character.is_ascii_digit())
+            !before.is_empty() && before.chars().all(|character| character.is_ascii_digit()) && after.len() == 3 && after.chars().all(|character| character.is_ascii_digit())
         }
         None => false,
     }

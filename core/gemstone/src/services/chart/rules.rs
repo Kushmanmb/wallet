@@ -73,7 +73,11 @@ fn price_alert_section(price: Option<f64>, price_alerts: Vec<PriceAlert>) -> Opt
         return None;
     }
     let count = displayed_price_alert_ids(price_alerts).len() as u32;
-    Some(if count > 0 { GemChartSection::PriceAlerts { count } } else { GemChartSection::SetPriceAlert })
+    Some(if count > 0 {
+        GemChartSection::PriceAlerts { count }
+    } else {
+        GemChartSection::SetPriceAlert
+    })
 }
 
 fn market_section(market: &AssetMarket) -> Vec<GemAssetMarketRow> {

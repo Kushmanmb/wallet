@@ -142,13 +142,7 @@ mod tests {
     fn test_an_amount_carries_its_symbol_and_reads_dust_below_the_threshold() {
         let dust = GemFormattedNumber::amount(0.00001, Some("BTC".to_string()), GemValueStyle::Short);
         assert_eq!(dust.unit, GemNumberUnit::Symbol { symbol: "BTC".to_string() });
-        assert_eq!(
-            dust.display,
-            GemNumberDisplay::BelowThreshold {
-                threshold: 0.0001,
-                places: 4
-            }
-        );
+        assert_eq!(dust.display, GemNumberDisplay::BelowThreshold { threshold: 0.0001, places: 4 });
 
         let plain = GemFormattedNumber::amount(0.5, None, GemValueStyle::Auto);
         assert_eq!(plain.unit, GemNumberUnit::Plain);

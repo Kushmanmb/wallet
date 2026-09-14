@@ -1,6 +1,6 @@
-pub mod session;
 pub mod model;
 pub mod rules;
+pub mod session;
 pub mod settings;
 pub mod store;
 #[cfg(test)]

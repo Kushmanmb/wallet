@@ -1,5 +1,5 @@
-use crate::formatted_number::GemFormattedNumber;
 use super::rules;
+use crate::formatted_number::GemFormattedNumber;
 use crate::services::balance::GemBalanceRequirement;
 use crate::services::swap::GemAssetRate;
 use primitives::{FiatProviderName, FiatTransactionStatus};

@@ -163,7 +163,10 @@ mod tests {
 
     #[test]
     fn test_importing_leaves_the_screen_ready_for_the_next_url() {
-        let imported = GemAddNodeSession::new(Chain::Ethereum).on_input("https://node".to_string()).on_checked(check()).on_imported();
+        let imported = GemAddNodeSession::new(Chain::Ethereum)
+            .on_input("https://node".to_string())
+            .on_checked(check())
+            .on_imported();
 
         assert_eq!(imported, GemAddNodeSession::new(Chain::Ethereum));
     }

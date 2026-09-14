@@ -23,8 +23,7 @@ mod tests {
 
     #[test]
     fn test_an_entry_this_build_cannot_read_is_skipped_and_the_rest_arrive() {
-        let payload: Payload =
-            serde_json::from_str(r#"{"rates":[{"symbol":"USD","rate":1.0},{"symbol":"ZZZ","rate":2.0},{"symbol":"EUR","rate":3.0}]}"#).unwrap();
+        let payload: Payload = serde_json::from_str(r#"{"rates":[{"symbol":"USD","rate":1.0},{"symbol":"ZZZ","rate":2.0},{"symbol":"EUR","rate":3.0}]}"#).unwrap();
 
         assert_eq!(payload.rates.len(), 2);
         assert_eq!(payload.rates[0].symbol, Currency::USD);

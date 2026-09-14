@@ -204,4 +204,3 @@ mod session_tests {
         assert!(!failed.view_state().can_add);
     }
 }
-

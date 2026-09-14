@@ -162,7 +162,6 @@ mod tests {
         assert!(GemPriceAlertKind::Decrease.groups_by_asset());
     }
 
-
     use super::*;
     use primitives::{AssetId, Chain, currency::Currency};
 

@@ -5,8 +5,8 @@ use swapper::{Quote, SwapperError, SwapperSlippage};
 
 use super::slippage::{GemSlippageSelection, GemSlippageSession};
 
-use super::rules;
 use super::model::{GemSwapPairSelection, GemSwapSide};
+use super::rules;
 use super::{GemSwapPairSuggestion, GemSwapService, GemSwapSession, GemSwapTransfer};
 use crate::config::swap_config::{get_default_slippage, get_swap_config};
 use crate::models::custom_types::GemBigUint;

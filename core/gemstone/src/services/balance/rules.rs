@@ -152,7 +152,10 @@ mod tests {
             is_active,
         };
 
-        assert!(changed_balances(vec![stored.clone()], vec![token(10, true)]).is_empty(), "same value and state is not a change");
+        assert!(
+            changed_balances(vec![stored.clone()], vec![token(10, true)]).is_empty(),
+            "same value and state is not a change"
+        );
         assert_eq!(changed_balances(vec![stored.clone()], vec![token(11, true)]).len(), 1, "a new value is");
         assert_eq!(changed_balances(vec![stored.clone()], vec![token(10, false)]).len(), 1, "so is an activation change alone");
         assert_eq!(changed_balances(vec![], vec![token(10, true)]).len(), 1, "a balance with no stored row is always written");
@@ -169,7 +172,10 @@ mod tests {
             },
             is_active: true,
         };
-        assert!(changed_balances(vec![stored.clone()], vec![stake.clone()]).is_empty(), "a stake update leaves the coin's available alone and compares its own fields");
+        assert!(
+            changed_balances(vec![stored.clone()], vec![stake.clone()]).is_empty(),
+            "a stake update leaves the coin's available alone and compares its own fields"
+        );
 
         let folded = changed_balances(vec![stored], vec![token(11, true), stake]);
         assert_eq!(folded.len(), 1, "two updates for one asset fold into one row");

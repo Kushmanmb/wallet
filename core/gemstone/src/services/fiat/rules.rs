@@ -4,9 +4,9 @@ use primitives::{FiatProviderName, FiatQuote, FiatQuoteType, FiatTransactionStat
 use rand::RngExt;
 
 use super::model::{GemFiatAmountCheck, GemFiatQuoteRow, GemFiatTransactionBadge, GemFiatTransactionStatus};
+use crate::config::fiat_config::FiatConfig;
 use crate::formatted_number::GemFormattedNumber;
 use crate::precision::{GemCurrencyStyle, GemValueStyle};
-use crate::config::fiat_config::FiatConfig;
 use crate::services::balance::GemBalanceRequirement;
 use crate::services::swap::GemAssetRate;
 

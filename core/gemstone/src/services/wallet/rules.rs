@@ -263,9 +263,7 @@ mod tests {
         assert!(GemWalletImportKind::Phrase.supports_phrase_suggestions() && !GemWalletImportKind::Address.supports_phrase_suggestions());
         assert!(GemWalletImportKind::Address.shows_view_only_warning() && !GemWalletImportKind::Phrase.shows_view_only_warning());
         assert!(
-            GemWalletImportKind::Address.resolves_names()
-                && !GemWalletImportKind::Phrase.resolves_names()
-                && !GemWalletImportKind::PrivateKey.resolves_names(),
+            GemWalletImportKind::Address.resolves_names() && !GemWalletImportKind::Phrase.resolves_names() && !GemWalletImportKind::PrivateKey.resolves_names(),
             "only an address can be typed as a name"
         );
     }

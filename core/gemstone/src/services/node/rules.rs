@@ -205,7 +205,12 @@ mod tests {
             ..plain.clone()
         };
         assert_eq!(plain.title(), GemNodeRowTitle::Host { host: "rpc.example.com".into() });
-        assert_eq!(gem.title(), GemNodeRowTitle::GemNode { flag: "\u{1f1fa}\u{1f1f8}".into() });
+        assert_eq!(
+            gem.title(),
+            GemNodeRowTitle::GemNode {
+                flag: "\u{1f1fa}\u{1f1f8}".into()
+            }
+        );
     }
 
     #[test]

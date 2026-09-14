@@ -48,7 +48,10 @@ mod tests {
             created_at: chrono::Utc::now(),
             item,
         };
-        let read = InAppNotification { read_at: Some(chrono::Utc::now()), ..unread.clone() };
+        let read = InAppNotification {
+            read_at: Some(chrono::Utc::now()),
+            ..unread.clone()
+        };
 
         assert!(notification_row(unread.clone()).is_unread);
         assert!(!notification_row(read).is_unread);
