@@ -124,6 +124,7 @@ class ConfirmViewModelRetryTest {
                                 options = GemFeeOptions(emptyMap()),
                                 feeAsset = asset.id.chain.string,
                             ),
+                            additionalFees = emptyList(),
                             selectedPriority = FeePriority.Normal.toGem(),
                             feeRates = emptyList(),
                             metadata = GemTransactionLoadMetadata.None,

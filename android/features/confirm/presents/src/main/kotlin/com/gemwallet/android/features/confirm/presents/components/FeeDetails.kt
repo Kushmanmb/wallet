@@ -237,6 +237,7 @@ private fun FeeRates(
                 showedCryptoAmount = true,
             )
         }
+        // TODO: Present currentFee.feeItems in a separate section when nonempty.
     }
 }
 

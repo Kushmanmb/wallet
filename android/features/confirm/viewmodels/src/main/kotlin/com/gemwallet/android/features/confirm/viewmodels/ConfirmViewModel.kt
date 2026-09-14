@@ -253,6 +253,7 @@ class ConfirmViewModel @Inject constructor(
             } else {
                 FeeUIModel.FeeInfo(
                     amount = confirmData.fee.fee,
+                    additionalFees = confirmData.additionalFees,
                     feeAsset = content.feeAssetUIModel.asset,
                     price = content.feeAssetUIModel.price?.price?.price,
                     currency = content.currency,

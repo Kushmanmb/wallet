@@ -42,6 +42,7 @@ public extension GemConfirmData {
         GemConfirmData(
             input: input,
             fee: fee,
+            additionalFees: [],
             selectedPriority: selectedPriority,
             feeRates: feeRates,
             metadata: metadata,

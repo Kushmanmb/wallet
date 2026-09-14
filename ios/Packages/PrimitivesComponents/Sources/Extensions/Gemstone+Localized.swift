@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import enum Gemstone.PerpetualDirection
+import enum Gemstone.FeeOption
 import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.GemSimulationWarningKind
 import enum Gemstone.GemTransactionTitle
@@ -9,6 +10,14 @@ import GemstonePrimitives
 import Localization
 import Primitives
 
+
+extension FeeOption {
+    public var title: String {
+        switch self {
+        case .tokenAccountCreation: Localized.Banner.AccountActivation.title
+        }
+    }
+}
 
 extension GemTransactionTitle {
     public var title: String {

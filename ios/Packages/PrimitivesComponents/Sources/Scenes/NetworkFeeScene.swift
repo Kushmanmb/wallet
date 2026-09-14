@@ -72,6 +72,7 @@ public struct NetworkFeeScene: View {
                 subtitleExtra: model.fiatValue,
                 placeholders: [.subtitle],
             )
+            // TODO: Present model.feeItems in a separate section when nonempty.
         }
         .contentMargins(.top, .scene.top, for: .scrollContent)
         .navigationTitle(model.title)
