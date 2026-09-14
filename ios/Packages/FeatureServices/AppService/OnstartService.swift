@@ -49,14 +49,17 @@ public struct OnstartService: Sendable {
     public func setupWallets() async {
         do {
             let failures = try await keystore.migrateV3Keystores(for: await session.getWallets())
+            if failures.isNotEmpty {
+                faultLog("v3 keystore migration failed for \(failures.count) wallet(s), each left on its legacy password")
+            }
             for failure in failures {
                 debugLog("v3 keystore migration failed for \(failure.walletId.id): \(failure.error)")
             }
         } catch {
-            debugLog("v3 keystore migration could not enumerate wallets: \(error)")
+            faultLog("v3 keystore migration could not enumerate wallets: \(error)")
         }
         for failure in await appStartService.setupWallets() {
-            debugLog("wallet setup \(failure.step) failed: \(failure.message)")
+            faultLog("wallet setup \(failure.step) failed: \(failure.message)")
         }
     }
 }
