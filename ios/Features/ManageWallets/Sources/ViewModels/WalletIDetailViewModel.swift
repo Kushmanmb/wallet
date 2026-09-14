@@ -68,11 +68,10 @@ public final class WalletDetailViewModel {
 
     var address: WalletDetailAddress? {
         guard let account = wallet.accounts.first, wallet.type != .multicoin else { return .none }
-        return .account(SimpleAccount(name: .none, chain: account.chain, address: account.address, assetImage: .none))
-    }
-
-    func addressLink(account: SimpleAccount) -> BlockExplorerLink {
-        service.addressUrl(chain: account.chain.rawValue, address: account.address).map()
+        return .account(
+            SimpleAccount(name: .none, chain: account.chain, address: account.address, assetImage: .none),
+            link: service.addressUrl(chain: account.chain.rawValue, address: account.address).map(),
+        )
     }
 
     func avatarAssetImage(for wallet: Wallet) -> AssetImage {

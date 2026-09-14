@@ -67,13 +67,13 @@ public struct WalletDetailScene: View {
                 }
                 Section {
                     switch model.address {
-                    case let .account(account):
+                    case let .account(account, link):
                         AddressListItemView(
                             model: AddressListItemViewModel(
                                 title: Localized.Common.address,
                                 account: account,
                                 mode: .auto(addressStyle: .short),
-                                addressLink: model.addressLink(account: account),
+                                addressLink: link,
                             ),
                         )
                     case .none:
