@@ -7,16 +7,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import com.gemwallet.android.features.swap.viewmodels.models.SwapFailure
+import com.gemwallet.android.features.swap.viewmodels.models.SwapUiState
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.ValueFormatter
-import com.wallet.core.primitives.Asset
-import uniffi.gemstone.SwapperException
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.InfoBottomSheet
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.list_item.WarningItem
 import com.gemwallet.android.ui.models.ListPosition
-import com.gemwallet.android.features.swap.viewmodels.models.SwapUiState
+import com.wallet.core.primitives.Asset
+import java.math.BigInteger
 
 @Composable
 internal fun SwapError(state: SwapUiState, pay: AssetInfo?) {
@@ -24,24 +25,18 @@ internal fun SwapError(state: SwapUiState, pay: AssetInfo?) {
     val error = state.error ?: return
 
     val errorText = when (error) {
-        is SwapperException.NotSupportedChain,
-        is SwapperException.NotSupportedAsset -> stringResource(R.string.errors_swap_not_supported_asset)
-        is SwapperException.NoQuoteAvailable,
-        is SwapperException.NoAvailableProvider,
-        is SwapperException.InvalidRoute,
-        is SwapperException.ComputeQuoteException,
-        is SwapperException.TransactionException -> stringResource(R.string.errors_swap_no_quote_available)
-        is SwapperException.InputAmountException -> "${stringResource(R.string.errors_swap_amount_too_small)} ${minimumAmount(error.minAmount, pay?.asset)}"
-        else -> "${stringResource(R.string.errors_unknown_try_again)}: ${error.message.orEmpty()}"
+        SwapFailure.UnsupportedAsset -> stringResource(R.string.errors_swap_not_supported_asset)
+        SwapFailure.NoQuote -> stringResource(R.string.errors_swap_no_quote_available)
+        is SwapFailure.AmountTooSmall ->
+            "${stringResource(R.string.errors_swap_amount_too_small)} ${minimumAmount(error.minAmount, pay?.asset)}"
+        is SwapFailure.Unknown -> "${stringResource(R.string.errors_unknown_try_again)}: ${error.message}"
     }
 
     val infoSheetEntity = when (error) {
-        is SwapperException.NoQuoteAvailable,
-        is SwapperException.NoAvailableProvider,
-        is SwapperException.InvalidRoute,
-        is SwapperException.ComputeQuoteException,
-        is SwapperException.TransactionException -> InfoSheetEntity.NoQuoteInfo
-        else -> null
+        SwapFailure.NoQuote -> InfoSheetEntity.NoQuoteInfo
+        SwapFailure.UnsupportedAsset,
+        is SwapFailure.AmountTooSmall,
+        is SwapFailure.Unknown -> null
     }
 
     WarningItem(
@@ -57,8 +52,7 @@ internal fun SwapError(state: SwapUiState, pay: AssetInfo?) {
     }
 }
 
-private fun minimumAmount(minAmount: String?, asset: Asset?): String {
-    val value = minAmount?.toBigIntegerOrNull() ?: return ""
-    val asset = asset ?: return ""
-    return ValueFormatter(style = ValueFormatter.Style.Auto).string(value, asset)
+private fun minimumAmount(minAmount: BigInteger?, asset: Asset?): String {
+    if (minAmount == null || asset == null) return ""
+    return ValueFormatter(style = ValueFormatter.Style.Auto).string(minAmount, asset)
 }

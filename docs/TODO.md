@@ -44,7 +44,7 @@ Rejected: confirm, swap and fiat already hold a session; wallet home already has
 
 Copy: [`FiatScene.swift`](../ios/Features/FiatConnect/Sources/Scenes/FiatScene.swift) names no Core type. Most of this is absorbed by § 1 to § 3.
 
-- **B6** **S** [`SwapUiState`](../android/features/swap/viewmodels/src/main/kotlin/com/gemwallet/android/features/swap/viewmodels/models/SwapUiState.kt) still exposes `error: SwapperException?`, which [`SwapError`](../android/features/swap/presents/src/main/kotlin/com/gemwallet/android/features/swap/views/components/SwapError.kt) branches over for a message and an info sheet — the interpolated minimum amount needs the composable, so translate it to an app sealed class rather than a `@StringRes`. Its `action` is read by nothing but tests. Audited and clean: every other UI state class holds platform values only; `FiatUiState` names Core types solely in the translator beside it, which is the pattern.
+- **B6** **S** [`SwapUiState.action`](../android/features/swap/viewmodels/src/main/kotlin/com/gemwallet/android/features/swap/viewmodels/models/SwapUiState.kt) carries `GemSwapSessionAction` for the view model tests alone; no composable reads it. It is the only handle the tests have on the session phase, so retire it only together with a phase the screen itself renders.
 - **B2** **L** Android, 88 files under `presents/`, about 35 branching on a Core enum inside the composable. Move the `when` into the view model, or fold the branch into the screen record the way [`GemRewardsState`](../core/gemstone/src/services/rewards/model.rs) carries the referral rows.
 
 ## 5. Numbers cross as a value and a style
