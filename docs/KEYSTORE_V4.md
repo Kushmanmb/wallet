@@ -267,6 +267,6 @@ v4 files are plaintext JSON, so `cat`/`jq` work directly for debugging. The meta
 
 ## Migration failures
 
-A v3 keystore that will not migrate is not destructive: Core leaves that wallet on its legacy password and it keeps working, so there is nothing for the user to recover and no recovery screen to show. What was missing was any trace in a released build, and `faultLog` now records the failure count at start without naming a wallet.
+A v3 keystore that will not migrate is not destructive: Core leaves that wallet on its legacy password and it keeps working, so there is nothing for the user to recover and no recovery screen to show. iOS records migration failures at startup through `debugLog`, only in debug builds.
 
 The synchronous `Keystore` trait is shaped for a platform that stores a secret behind a blocking call. A browser backend would need an in-memory mirror to satisfy it; reopen that when there is a browser backend to satisfy, not before.

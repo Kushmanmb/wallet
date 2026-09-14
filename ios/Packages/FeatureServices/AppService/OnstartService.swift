@@ -1,11 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import GemstonePrimitives
-import GemstoneServices
 import Foundation
 import protocol Gemstone.GemAppStartServiceProtocol
 import protocol Gemstone.GemPreferencesServiceProtocol
 import protocol Gemstone.GemWalletSessionServiceProtocol
+import GemstonePrimitives
+import GemstoneServices
 import Primitives
 import UIKit
 
@@ -48,18 +48,15 @@ public struct OnstartService: Sendable {
 
     public func setupWallets() async {
         do {
-            let failures = try await keystore.migrateV3Keystores(for: await session.getWallets())
-            if failures.isNotEmpty {
-                faultLog("v3 keystore migration failed for \(failures.count) wallet(s), each left on its legacy password")
-            }
+            let failures = try await keystore.migrateV3Keystores(for: session.getWallets())
             for failure in failures {
                 debugLog("v3 keystore migration failed for \(failure.walletId.id): \(failure.error)")
             }
         } catch {
-            faultLog("v3 keystore migration could not enumerate wallets: \(error)")
+            debugLog("v3 keystore migration could not enumerate wallets: \(error)")
         }
         for failure in await appStartService.setupWallets() {
-            faultLog("wallet setup \(failure.step) failed: \(failure.message)")
+            debugLog("wallet setup \(failure.step) failed: \(failure.message)")
         }
     }
 }

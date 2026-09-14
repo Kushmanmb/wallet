@@ -77,7 +77,7 @@ public actor StreamObserverService: Sendable {
             }
         } catch is CancellationError {
         } catch {
-            faultLog("stream connection error: \(error)")
+            debugLog("stream connection error: \(error)")
         }
         await webSocket.disconnect()
         await service.disconnected()
@@ -101,7 +101,7 @@ public actor StreamObserverService: Sendable {
                 await service.disconnected()
             }
         } catch {
-            faultLog("stream dropped an event: \(error)")
+            debugLog("stream dropped an event: \(error)")
         }
     }
 }
