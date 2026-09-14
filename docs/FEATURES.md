@@ -77,6 +77,8 @@ Review cadence: weekly, and immediately when a referenced Core mapping changes.
 
 <sub>Reviewed 2026-09-02. Sources: [chain list](../core/crates/primitives/src/chain.rs), [feature configuration](../core/crates/primitives/src/chain_config.rs), [Squid chain coverage](../core/crates/swapper/src/squid/mod.rs), [address-history contract](../core/crates/chain_traits/src/lib.rs), [simulation implementations](../core/crates/gem_evm/src/provider/simulation.rs), [Solana](../core/crates/gem_solana/src/provider/simulation.rs), [Sui](../core/crates/gem_sui/src/provider/simulation.rs), [TON](../core/crates/gem_ton/src/provider/simulation.rs), [Tron](../core/crates/gem_tron/src/provider/simulation.rs), [WalletConnect chain configuration](../core/gemstone/src/config/wallet_connect.rs), and [WalletConnect request handlers](../core/crates/gem_wallet_connect/src/request_handler/mod.rs).</sub>
 
+The Cetus package-version guard is not a stub: it turns one on-chain failure into a message the swap screen can show, and it clears itself when the built-in version catches up.
+
 ## WalletConnect
 
 The status is based on both the chains returned by Core configuration and the methods accepted by the Core request dispatcher. Method-set links open the chain-specific handler.
