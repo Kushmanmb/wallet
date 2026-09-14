@@ -262,11 +262,11 @@ Core has no observation primitive and no lifecycle, which is why the reactive ha
 
 ### A number crosses as a value and a style, never as a string or a callback
 
-Formatting is the largest duplication left in the apps: the precision ladder, the adaptive rule and its constants (`0.99`, `1e-10`, `100_000`, `0.1`, `0.0001`), the fiat-pins-to-two-places rule and the dust threshold are written out in [`Precision+Constants.swift`](../ios/Packages/Formatters/Sources/Precision+Constants.swift) and [`Precision.kt`](../android/gemcore/src/main/kotlin/com/gemwallet/android/model/Precision.kt) as line-for-line ports. Those are decisions, so they belong in Core.
+The precision ladder, the adaptive rule and its constants (`0.99`, `1e-10`, `100_000`, `0.1`, `0.0001`), the fiat-pins-to-two-places rule and the dust threshold are decisions, and they live in Core: `GemCurrencyStyle::precision`, `GemValueStyle::precision`, `adaptive_precision`, `abbreviation_threshold` and `dust_threshold`. Both apps ask for the precision and render it with their own locale formatter. What is left is the numbers themselves: a row that carries a bare `f64` still leaves each app to pick the style.
 
 Two mechanisms are tempting and both are wrong.
 
-**Do not export a formatter as a foreign trait.** A `GemCurrencyFormatter` the apps implement would let Core call back for every number, and a view state with fifty rows and three numbers each becomes a hundred and fifty reverse crossings inside one call — the most expensive direction there is, against the rule above. It also breaks a real boundary: [`Formatters`](../ios/Packages/Formatters/) and `Validators` cannot import Gemstone, because the price widget links `Formatters` without the Rust library. And it makes a session impure, so a screen's state can no longer be asserted as one literal in a Rust test.
+**Do not export a formatter as a foreign trait.** A `GemCurrencyFormatter` the apps implement would let Core call back for every number, and a view state with fifty rows and three numbers each becomes a hundred and fifty reverse crossings inside one call — the most expensive direction there is, against the rule above. It also breaks a real boundary: [`Formatters`](../ios/Packages/Formatters/) and `Validators` cannot import Gemstone, because the price widget links `Formatters` without the Rust library — which is why the formatters that read a Core rule live in `GemstonePrimitives`. And it makes a session impure, so a screen's state can no longer be asserted as one literal in a Rust test.
 
 **Do not return a finished string either.** Core's formatter is not locale-aware, so a Core-formatted amount regresses every locale that groups or separates differently.
 
