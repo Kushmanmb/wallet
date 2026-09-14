@@ -186,7 +186,7 @@ static CHAIN_CONFIGS: LazyLock<Vec<ChainConfig>> = LazyLock::new(|| {
             chain_type: ChainType::Solana,
             default_asset_type: Some(AssetType::SPL),
             account_activation_fee: None,
-            token_activation_fee: Some(2_039_280),
+            token_activation_fee: Some(1_488_440),
             minimum_account_balance: Some(890_880),
             block_time: 500,
             rank: 80,

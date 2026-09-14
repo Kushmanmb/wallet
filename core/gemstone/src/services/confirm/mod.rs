@@ -140,6 +140,7 @@ impl GemConfirmService {
         }
 
         Ok(GemConfirmData {
+            additional_fees: fee.options.items(),
             input,
             fee,
             selected_priority: selected.priority,

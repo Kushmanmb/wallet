@@ -955,6 +955,7 @@ mod tests {
         let input = SendInput {
             wallet: wallet.clone(),
             confirm: GemConfirmData {
+                additional_fees: vec![],
                 input: GemConfirmInput {
                     from: Account::mock(Chain::Solana, "sender"),
                     transfer: GemTransferData {

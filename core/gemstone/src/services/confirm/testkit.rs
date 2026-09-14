@@ -230,6 +230,7 @@ impl GemTransactionStatusService for UnusedTransactionStatus {
 
 pub(super) fn confirm_data(chain: Chain, input_type: TransactionInputType, from: &str) -> GemConfirmData {
     GemConfirmData {
+        additional_fees: vec![],
         input: GemConfirmInput {
             from: Account::mock(chain, from),
             transfer: GemTransferData {
