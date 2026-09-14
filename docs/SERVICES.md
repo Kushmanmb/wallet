@@ -278,6 +278,7 @@ Open work lives in [TODO.md](TODO.md): the architecture migration to row records
 - The privacy lock is iOS-only and WalletConnect one-click auth is Android-only. Both were reviewed on 2026-09-14 and kept one-sided; neither is a Core decision waiting to be shared.
 - The biometric gate is per call site on Android and per secret read on iOS. Core does not mark which operations need authentication, so an Android caller that reaches the config store directly is not prompted. Reviewed on 2026-09-14 and left as is; a new Android secret read must request auth at its call site.
 - The wallet home takes prices from the socket and refreshes on pull only. It does not carry the `refresh_interval` timer the asset, transactions and perpetuals screens use; reviewed on 2026-09-14 and left that way.
+- The recipient address error appears on submit on iOS and on the Continue tap on Android. iOS keeps Continue disabled until the address is valid, so the keyboard return is the moment Core's `shows_error` is read; Android leaves the button enabled and reads it there. Both show the same message.
 - The Android notification adapter holding an application context is correct, not a leak: reading whether notifications are granted and opening the system settings both work from one, and the settings intent carries `FLAG_ACTIVITY_NEW_TASK` because of it. The one operation that needs an activity — the permission request itself — already goes through the activity collector.
 
 ## Verification
