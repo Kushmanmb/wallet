@@ -65,6 +65,7 @@ import uniffi.gemstone.GemCollectibleSection
 import java.text.DateFormat
 import java.util.Date
 import com.gemwallet.android.ui.components.list_item.property.SocialLinkUIModel
+import com.wallet.core.primitives.VerificationStatus
 
 @Composable
 fun NFTDetailsScene(
@@ -92,7 +93,7 @@ fun NFTDetailsScene(
         titleContent = {
             NftTitle(
                 name = model.asset.name,
-                status = model.collection.status,
+                isVerified = model.collection.status == VerificationStatus.Verified,
                 iconSize = compactIconSize,
             )
         },

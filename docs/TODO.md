@@ -8,8 +8,6 @@ One item, one commit, both apps built and tested. Core rule + test, regenerate b
 
 Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](../ios/Packages/PrimitivesComponents/Sources/ViewModels/ListAssetItemViewModel.swift), [Android](../android/gemcore/src/main/kotlin/com/gemwallet/android/domains/asset/aggregates/AssetInfoDataAggregate.kt).
 
-- **R11** **S** NFT list variants drop the verified badge the grid shows, and the asset count sits in a different place on each — [iOS list](../ios/Features/NFT/Sources/Views/CollectionsPreviewView.swift), [`NftListItem`](../android/ui/src/main/kotlin/com/gemwallet/android/ui/components/list_item/NftListItem.kt). `GemNftRow` already answers both; what is left is the design call on where they belong. Needs product input.
-- **R13** **S** Fiat transaction — [iOS](../ios/Packages/PrimitivesComponents/Sources/ViewModels/FiatTransactionViewModel.swift), [Android](../android/features/buy/presents/src/main/kotlin/com/gemwallet/android/features/buy/views/FiatTransactionItem.kt). The provider name and the badge case come from Core; the badge colour is each app's palette, which is [where a colour belongs](ARCHITECTURE.md#a-list-row-is-a-record-of-choices). What is left is amount as a subtitle against a trailing, which is a design call, not a record.
 
 Rejected: transaction, transaction detail, delegation, validator, asset select/search, wallet, price alert, fiat quote, currency, fee rate, simulation warning, asset market, collectible detail and banner rows already have a record; network list, recents chips, earn APR, swap detail, price list and onboarding rows carry no choice; swap provider rows and the QR scan-type hint table are iOS only; swap price impact already crosses as `impactType`/`isHigh`/`showsInSummary`; the delegation completion countdown is computed twice but belongs to the delegation record if anywhere.
 
@@ -61,7 +59,6 @@ Platform items:
 
 
 
-- **X8** **S** The service status row now takes its `<name> <flag>` title from `GemServiceEndpoint::title` on both apps, and the Android row holds the endpoint record instead of a partial twin of it. What is left is one design-parity call: a curated asset list puts its count in the subtitle on [iOS](../ios/Features/WalletTab/Sources/ViewModels/AssetListItemViewModel.swift) and in a trailing badge on [Android](../android/features/assets/presents/src/main/kotlin/com/gemwallet/android/features/assets/views/WalletSearchScreen.kt). Both already take the count from Core; only the placement differs.
 
 
 
