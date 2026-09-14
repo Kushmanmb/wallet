@@ -447,12 +447,12 @@ public struct ViewModelFactory: Sendable {
 
     @MainActor
     public func walletImageScene(wallet: Wallet) -> WalletImageViewModel {
-        WalletImageViewModel(wallet: wallet, avatarService: avatarService)
+        WalletImageViewModel(wallet: wallet, service: walletService)
     }
 
     @MainActor
     public func createWalletScene(onComplete: VoidAction) -> CreateWalletModel {
-        CreateWalletModel(service: walletService, preferences: observablePreferences, avatarService: avatarService, onComplete: onComplete)
+        CreateWalletModel(service: walletService, preferences: observablePreferences, onComplete: onComplete)
     }
 
     @MainActor
@@ -461,7 +461,6 @@ public struct ViewModelFactory: Sendable {
             service: walletService,
             preferences: observablePreferences,
             nameService: nameService,
-            avatarService: avatarService,
             importWalletType: importWalletTypeScene,
             onComplete: onComplete,
         )

@@ -3,6 +3,7 @@
 import enum Gemstone.PerpetualDirection
 import enum Gemstone.FeeOption
 import enum Gemstone.GemFiatTransactionBadge
+import enum Gemstone.GemLocalizedText
 import enum Gemstone.GemPriceAlertLabel
 import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemPriceAlertText
@@ -20,6 +21,17 @@ extension FeeOption {
     public var title: String {
         switch self {
         case .tokenAccountCreation: Localized.Banner.AccountActivation.title
+        }
+    }
+}
+
+extension GemLocalizedText {
+    public var text: String {
+        switch self {
+        case let .walletDefaultName(index):
+            Localized.Wallet.defaultName(Int(index))
+        case let .walletDefaultNameChain(chain, index):
+            Localized.Wallet.defaultNameChain(Chain(core: chain).networkName, Int(index))
         }
     }
 }

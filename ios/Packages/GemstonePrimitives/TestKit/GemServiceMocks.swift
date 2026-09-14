@@ -987,16 +987,6 @@ public final class GemSearchServiceMock: GemSearchServiceProtocol, @unchecked Se
     }
 }
 
-public final class GemAvatarServiceMock: GemAvatarServiceProtocol, @unchecked Sendable {
-    public init() {}
-
-    public func setImage(walletId _: Gemstone.WalletId, image _: Data) async throws {}
-
-    public func setImageUrl(walletId _: Gemstone.WalletId, url _: String) async throws {}
-
-    public func removeImage(walletId _: Gemstone.WalletId) async throws {}
-}
-
 public final class GemWalletPreferencesStoreMock: GemWalletPreferencesStore, @unchecked Sendable {
     private let lock = NSLock()
     private var values: [String: String] = [:]

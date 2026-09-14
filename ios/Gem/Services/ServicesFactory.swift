@@ -91,6 +91,7 @@ struct ServicesFactory {
         )
         let recentAssetsService = GemRecentActivityService(store: GemstoneRecentActivityStore(store: storeManager.recentActivityStore), session: walletSessionService)
         let explorerService = Gemstone.GemExplorerService(preferences: preferencesService)
+        let avatarService = Gemstone.GemAvatarService(wallets: gemstoneWalletStore, files: gemstoneFileStore, provider: nativeProvider)
         let walletService = Gemstone.GemWalletService(
             keystore: storages.keystore.gemKeystore,
             password: GemstoneKeystorePassword(keystore: storages.keystore),
@@ -101,9 +102,8 @@ struct ServicesFactory {
             preferences: walletPreferencesService,
             explorer: explorerService,
             addresses: gemstoneAddressStore,
-            localizer: GemstoneLocalizer(),
+            avatar: avatarService,
         )
-        let avatarService = Gemstone.GemAvatarService(wallets: gemstoneWalletStore, files: gemstoneFileStore, provider: nativeProvider)
         let webSocket = Self.makeWebSocket(deviceKeyService: deviceKeyService, reconnection: connectionService)
         let gemstonePriceAlertStore = GemstonePriceAlertStore(store: storeManager.priceAlertStore)
         let gemstoneBalanceStore = GemstoneBalanceStore(store: storeManager.balanceStore)
@@ -478,16 +478,5 @@ extension ServicesFactory {
         let requestProvider = AuthenticatedRequestProvider(deviceKeyService: deviceKeyService)
         let configuration = WebSocketConfiguration(requestProvider: requestProvider, reconnection: reconnection)
         return WebSocketConnection(configuration: configuration)
-    }
-}
-
-final class GemstoneLocalizer: GemLocalizer, Sendable {
-    func text(text: GemLocalizedText) -> String {
-        switch text {
-        case let .walletDefaultName(index):
-            Localized.Wallet.defaultName(Int(index))
-        case let .walletDefaultNameChain(chain, index):
-            Localized.Wallet.defaultNameChain(Chain(core: chain).networkName, Int(index))
-        }
     }
 }

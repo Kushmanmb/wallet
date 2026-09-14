@@ -1,5 +1,7 @@
 package com.gemwallet.android.features.create_wallet.views
 
+import com.gemwallet.android.ui.localization.string
+import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemWalletDefaultName
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -118,7 +120,7 @@ private fun UI(
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalContext.current.clipboardManager()
-    val name = defaultName?.name.orEmpty()
+    val name = defaultName?.text?.string(context).orEmpty()
     Scene(
         title = stringResource(id = R.string.wallet_new_title),
         onClose = onCancel,
@@ -168,7 +170,7 @@ fun PreviewCreateUI() {
     WalletTheme {
         Column {
             UI(
-                defaultName = GemWalletDefaultName("Wallet #2", true),
+                defaultName = GemWalletDefaultName(GemLocalizedText.WalletDefaultName(2), true),
                 data = listOf(
                     "cinnamon", "two", "three", "cinnamon", "five", "six",
                     "seven", "eight", "cinnamon", "ten", "eleven", "twelve"

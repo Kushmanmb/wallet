@@ -50,7 +50,10 @@ import com.gemwallet.android.AppUrl
 import com.gemwallet.android.model.ImportType
 import com.gemwallet.android.ui.DetectScreenshot
 import com.gemwallet.android.ui.DisableScreenShooting
+import androidx.compose.ui.platform.LocalContext
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.localization.string
+import uniffi.gemstone.GemLocalizedText
 import com.gemwallet.android.ui.components.InfoBottomSheet
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.buttons.MainActionButton
@@ -170,7 +173,7 @@ private fun ImportScene(
     inputState: MutableState<TextFieldValue>,
     importType: ImportType,
     tabs: List<GemWalletImportKind>,
-    defaultWalletName: String,
+    defaultWalletName: GemLocalizedText?,
     chainName: String,
     nameResolveState: GemNameRecordState,
     dataError: Throwable?,
@@ -186,7 +189,7 @@ private fun ImportScene(
         is ImportSceneTitle.Resource -> stringResource(sceneTitle.resId)
         is ImportSceneTitle.Text -> sceneTitle.value
     }
-    val generatedName = defaultWalletName
+    val generatedName = defaultWalletName?.string(LocalContext.current).orEmpty()
     var dataErrorState by remember(dataError) { mutableStateOf(dataError) }
 
     Scene(
@@ -366,7 +369,7 @@ fun PreviewImportAddress() {
                 inputState = remember { mutableStateOf(TextFieldValue()) },
                 importType = ImportType(GemWalletImportKind.ADDRESS, Chain.Bitcoin),
                 tabs = listOf(GemWalletImportKind.PHRASE, GemWalletImportKind.ADDRESS),
-                defaultWalletName = "Wallet #1",
+                defaultWalletName = GemLocalizedText.WalletDefaultName(1),
                 chainName = "Ethereum",
                 nameResolveState = GemNameRecordState.None,
                 dataError = null,

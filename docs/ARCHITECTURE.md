@@ -26,6 +26,18 @@ A rule is anything that could produce a different answer on one platform than th
 
 Everything else is platform work: rendering, navigation, observation, secure storage, keychain and biometrics, and the SQL that stores rows.
 
+## Leave it better than you found it
+
+**A change that adds to a shape you know is wrong is not finished.** When the code you are about to extend already violates a rule here, fix the shape first and then add to the fixed one. Adding a fifth argument to a call that should take one, a second copy of a decision, or another service to a view model that should hold one, buys today's feature by making tomorrow's harder — and the cost is never paid back on its own, because the next change inherits the same excuse.
+
+Three questions before you add anything:
+
+1. **Would I write it this way from scratch?** If not, what stops you is the fix.
+2. **Am I threading something through a place that does not use it?** A parameter a function only passes on means the wiring is in the wrong place, not that the function needs another parameter.
+3. **Is this the second time?** The first copy of a decision is a choice; the second is a defect. Move it to Core before adding the second.
+
+When the fix is genuinely larger than the change in hand, say so plainly, land the smaller piece, and add the larger one to [Open work](TODO.md) with the shape it should take — never leave it unsaid. What is not allowed is to add to a shape you know is wrong and stay quiet about it.
+
 ## Layout
 
 ```

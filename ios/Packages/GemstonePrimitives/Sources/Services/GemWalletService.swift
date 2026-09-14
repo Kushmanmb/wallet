@@ -50,4 +50,16 @@ public extension GemWalletServiceProtocol {
     func getWallets() async throws -> [Wallet] {
         try await wallets().map { $0.toPrimitives() }
     }
+
+    func setImage(data: Data, for wallet: Wallet) async throws {
+        try await setAvatarImage(walletId: wallet.id.id, image: data)
+    }
+
+    func setImage(url: URL, for wallet: Wallet) async throws {
+        try await setAvatarImageUrl(walletId: wallet.id.id, url: url.absoluteString)
+    }
+
+    func removeImage(for wallet: Wallet) async throws {
+        try await removeAvatarImage(walletId: wallet.id.id)
+    }
 }

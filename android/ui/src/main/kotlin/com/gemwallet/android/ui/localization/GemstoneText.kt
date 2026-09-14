@@ -1,8 +1,11 @@
 package com.gemwallet.android.ui.localization
 
+import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import com.gemwallet.android.ext.asset
+import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.R
 import com.wallet.core.primitives.PerpetualDirection
@@ -10,6 +13,7 @@ import uniffi.gemstone.DelegationState
 import uniffi.gemstone.GemAddNodeFailure
 import uniffi.gemstone.GemDelegationStatus
 import uniffi.gemstone.GemFiatTransactionBadge
+import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemSimulationWarningKind
 import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.GemTransactionFilter
@@ -119,4 +123,10 @@ private fun perpetualTitle(direction: uniffi.gemstone.PerpetualDirection?, @Stri
         null -> return stringResource(fallback)
     }
     return stringResource(directionTitle, side)
+}
+
+fun GemLocalizedText.string(context: Context): String = when (this) {
+    is GemLocalizedText.WalletDefaultName -> context.getString(R.string.wallet_default_name, index)
+    is GemLocalizedText.WalletDefaultNameChain ->
+        context.getString(R.string.wallet_default_name_chain, chain.requireChain().asset().name, index)
 }

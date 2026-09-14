@@ -1,3 +1,4 @@
+use crate::services::localization::GemLocalizedText;
 use primitives::{Chain, Wallet};
 
 use super::rules;
@@ -38,7 +39,7 @@ impl GemWalletImportKind {
 
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct GemWalletDefaultName {
-    pub name: String,
+    pub text: GemLocalizedText,
     pub has_existing_wallets: bool,
 }
 

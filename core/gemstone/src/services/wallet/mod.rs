@@ -34,10 +34,11 @@ use primitives::{Chain, NameRecord, Wallet, WalletId, WalletSource, WalletType};
 
 use crate::keystore::decode_password;
 use crate::keystore::{GemImportType, GemKeystore, GemWalletImport, keystore_id_for_wallet};
+use crate::services::avatar::GemAvatarService;
 use crate::services::error::GemServiceError;
 use crate::services::explorer::GemExplorerService;
 use crate::services::file::GemFileStore;
-use crate::services::localization::{GemLocalizedText, GemLocalizer};
+use crate::services::localization::GemLocalizedText;
 use crate::services::name::GemAddressStore;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_preferences::GemWalletPreferencesService;
@@ -68,7 +69,7 @@ pub struct GemWalletService {
     preferences: Arc<GemWalletPreferencesService>,
     explorer: Arc<GemExplorerService>,
     addresses: Arc<dyn GemAddressStore>,
-    localizer: Arc<dyn GemLocalizer>,
+    avatar: Arc<GemAvatarService>,
 }
 
 #[uniffi::export]
@@ -84,7 +85,7 @@ impl GemWalletService {
         preferences: Arc<GemWalletPreferencesService>,
         explorer: Arc<GemExplorerService>,
         addresses: Arc<dyn GemAddressStore>,
-        localizer: Arc<dyn GemLocalizer>,
+        avatar: Arc<GemAvatarService>,
     ) -> Self {
         Self {
             keystore,
@@ -96,7 +97,7 @@ impl GemWalletService {
             preferences,
             explorer,
             addresses,
-            localizer,
+            avatar,
         }
     }
 
@@ -118,12 +119,11 @@ impl GemWalletService {
 
     pub async fn default_wallet_name(&self, chain: Option<Chain>) -> Result<GemWalletDefaultName, GemServiceError> {
         let index = rules::next_wallet_index(&self.store.get_wallets().await?);
-        let text = match chain {
-            Some(chain) => GemLocalizedText::WalletDefaultNameChain { chain, index },
-            None => GemLocalizedText::WalletDefaultName { index },
-        };
         Ok(GemWalletDefaultName {
-            name: self.localizer.text(text),
+            text: match chain {
+                Some(chain) => GemLocalizedText::WalletDefaultNameChain { chain, index },
+                None => GemLocalizedText::WalletDefaultName { index },
+            },
             has_existing_wallets: index > 1,
         })
     }
@@ -278,6 +278,18 @@ impl GemWalletService {
         self.store.set_pinned(wallet_id, pinned).await
     }
 
+    pub async fn set_avatar_image(&self, wallet_id: WalletId, image: Vec<u8>) -> Result<(), GemServiceError> {
+        self.avatar.set_image(wallet_id, image).await
+    }
+
+    pub async fn set_avatar_image_url(&self, wallet_id: WalletId, url: String) -> Result<(), GemServiceError> {
+        self.avatar.set_image_url(wallet_id, url).await
+    }
+
+    pub async fn remove_avatar_image(&self, wallet_id: WalletId) -> Result<(), GemServiceError> {
+        self.avatar.remove_image(wallet_id).await
+    }
+
     pub async fn rename(&self, wallet_id: WalletId, name: String) -> Result<(), GemServiceError> {
         let wallet = self.store.get_wallet(wallet_id.clone()).await?.ok_or_else(|| GemServiceError::NotFound {
             msg: format!("wallet {} not found", wallet_id.id()),
@@ -369,8 +381,9 @@ mod tests {
 
     use super::testkit::{MemoryAddressStore, MemoryKeystorePassword, MemoryWalletStore, TEST_PASSWORD};
     use super::*;
+    use crate::services::avatar::GemAvatarService;
+    use crate::testkit::TestAlienProvider;
     use crate::services::file::testkit::NoopFileStore;
-    use crate::services::localization::testkit::EnglishLocalizer;
     use crate::services::preferences::testkit::MemoryPreferencesStore;
     use crate::services::wallet_preferences::testkit::MemoryWalletPreferencesStore;
     use crate::services::wallet_session::testkit::MemoryWalletSessionStore;
@@ -410,7 +423,7 @@ mod tests {
                 Arc::new(GemWalletPreferencesService::new(Arc::new(MemoryWalletPreferencesStore::default()))),
                 Arc::new(GemExplorerService::new(app_preferences)),
                 addresses.clone(),
-                Arc::new(EnglishLocalizer),
+                Arc::new(GemAvatarService::new(wallets.clone(), Arc::new(NoopFileStore), Arc::new(TestAlienProvider::new(crate::alien::AlienResponse::new(None, Vec::new()))))),
             );
             Self {
                 service,
