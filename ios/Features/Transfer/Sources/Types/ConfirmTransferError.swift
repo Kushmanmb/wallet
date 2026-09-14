@@ -10,7 +10,7 @@ enum ConfirmTransferError {
 
     init(error: Error) {
         switch error {
-        case let error as GemConfirmError where error.hasInfoSheet:
+        case let error as GemConfirmError where error.display().hasInfoSheet():
             self = .confirm(error)
         default:
             self = .other(error)

@@ -5,63 +5,56 @@ import Formatters
 import Foundation
 import struct Gemstone.Asset
 import enum Gemstone.GemConfirmError
+import enum Gemstone.GemConfirmErrorDisplay
 import GemstonePrimitives
 import Localization
 import Primitives
 
 extension GemConfirmError: @retroactive LocalizedError {
-    public var errorDescription: String? {
+    public var errorDescription: String? { display().text }
+}
+
+extension GemConfirmErrorDisplay {
+    var text: String {
         switch self {
-        case .Offline: Localized.Errors.networkOffline
-        case .ScanMalicious: Localized.Errors.ScanTransaction.Malicious.description
-        case let .ScanMemoRequired(symbol): Localized.Errors.ScanTransaction.memoRequired(symbol.boldMarkdown())
-        case .FeeRatesMissing: Localized.Errors.unableEstimateNetworkFee
-        case .Cancelled: Localized.Errors.cancelled
-        case .BalanceMissing: String(describing: self)
-        case .AccountMissing: Localized.Errors.walletAccountMissing
-        case .SenderMismatch: Localized.Errors.unknown
-        case let .InsufficientBalance(asset, requirement):
+        case .offline: Localized.Errors.networkOffline
+        case .malicious: Localized.Errors.ScanTransaction.Malicious.description
+        case let .memoRequired(symbol): Localized.Errors.ScanTransaction.memoRequired(symbol.boldMarkdown())
+        case .feeRatesMissing: Localized.Errors.unableEstimateNetworkFee
+        case .cancelled: Localized.Errors.cancelled
+        case .accountMissing: Localized.Errors.walletAccountMissing
+        case .unknown: Localized.Errors.unknown
+        case let .balanceRequired(asset, requirement):
             Localized.Info.balanceRequiredDescription(
                 Self.amount(requirement.required, asset: asset).boldMarkdown(),
                 Self.amount(requirement.available, asset: asset),
                 Self.amount(requirement.shortfall, asset: asset),
             )
-        case let .InsufficientNetworkFee(asset, requirement):
-            if let requirement {
-                Localized.Info.InsufficientNetworkFeeBalance.description(
-                    Self.amount(requirement.required, asset: asset).boldMarkdown(),
-                    asset.toPrimitives().chain.networkName.boldMarkdown(),
-                    Self.amount(requirement.available, asset: asset),
-                    Self.amount(requirement.shortfall, asset: asset),
-                )
-            } else {
-                Localized.Transfer.insufficientNetworkFeeBalance(Self.title(asset: asset))
-            }
-        case let .MinimumAccountBalanceTooLow(asset, requirement):
-            Localized.Transfer.minimumAccountBalance(ValueFormatter(style: .full).string(requirement.required, asset: asset.toPrimitives()).boldMarkdown())
-        case let .BelowSwapMinimum(asset, _, providerName, requirement):
+        case let .networkFeeRequired(asset, requirement):
+            Localized.Info.InsufficientNetworkFeeBalance.description(
+                Self.amount(requirement.required, asset: asset).boldMarkdown(),
+                asset.toPrimitives().chain.networkName.boldMarkdown(),
+                Self.amount(requirement.available, asset: asset),
+                Self.amount(requirement.shortfall, asset: asset),
+            )
+        case let .networkFeeMissing(asset):
+            Localized.Transfer.insufficientNetworkFeeBalance(Self.title(asset: asset))
+        case let .minimumAccountBalance(asset, required):
+            Localized.Transfer.minimumAccountBalance(Self.amount(required, asset: asset).boldMarkdown())
+        case let .swapMinimum(asset, _, providerName, requirement):
             Localized.Info.swapMinimumAmountDescription(
                 providerName.boldMarkdown(),
                 Self.amount(requirement.required, asset: asset).boldMarkdown(),
                 Self.amount(requirement.available, asset: asset),
                 Self.amount(requirement.shortfall, asset: asset),
             )
-        case .Sign(.dustThreshold, _, _): Localized.Errors.dustThresholdShort
-        case .Sign(.insufficientFunds, _, _): Localized.Info.InsufficientBalance.title
-        case let .Network(msg), let .Load(msg), let .Broadcast(_, msg), let .Record(msg), let .Sign(_, _, msg), let .ApprovalInvalid(msg): msg
-        }
-    }
-}
-
-extension GemConfirmError {
-    var hasInfoSheet: Bool {
-        switch self {
-        case .ScanMalicious, .ScanMemoRequired, .InsufficientBalance, .InsufficientNetworkFee, .MinimumAccountBalanceTooLow, .BelowSwapMinimum, .Sign(.dustThreshold, _, _): true
-        case .FeeRatesMissing, .Offline, .Network, .Load, .Broadcast, .Record, .AccountMissing, .BalanceMissing, .SenderMismatch, .Sign, .ApprovalInvalid, .Cancelled: false
+        case .dustThreshold: Localized.Errors.dustThresholdShort
+        case .insufficientFunds: Localized.Info.InsufficientBalance.title
+        case let .message(msg): msg
         }
     }
 
-    private static func amount(_ value: BigInt, asset: Gemstone.Asset) -> String {
+    static func amount(_ value: BigInt, asset: Gemstone.Asset) -> String {
         ValueFormatter(style: .full).string(value, asset: asset.toPrimitives())
     }
 

@@ -13,11 +13,10 @@ import uniffi.gemstone.GemConfirmFailure
 import uniffi.gemstone.GemConfirmStage
 import com.gemwallet.android.domains.confirm.FeeUIModel
 import com.gemwallet.android.features.confirm.presents.AcquireAssetAction
-import com.gemwallet.android.features.confirm.presents.localization.toPreloadLabel
+import com.gemwallet.android.features.confirm.presents.localization.text
 import com.gemwallet.android.ext.toPrimitives
 import uniffi.gemstone.GemBalanceRequirement
-import uniffi.gemstone.GemConfirmException
-import uniffi.gemstone.GemSignerError
+import uniffi.gemstone.GemConfirmErrorDisplay
 import com.gemwallet.android.model.AssetPriceValue
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
@@ -51,25 +50,23 @@ internal fun ConfirmErrorInfo(
     var buyAmount by remember { mutableStateOf<Int?>(null) }
 
     val error = failure?.takeIf { it.stage == GemConfirmStage.LOAD }?.error ?: return
-    val requiredAsset = when (error) {
-        is GemConfirmException.InsufficientBalance -> error.asset.toPrimitives()
-        is GemConfirmException.InsufficientNetworkFee -> error.asset.toPrimitives()
-        is GemConfirmException.BelowSwapMinimum -> error.asset.toPrimitives()
-        is GemConfirmException.MinimumAccountBalanceTooLow,
-        is GemConfirmException.Sign,
-        is GemConfirmException.ScanMalicious,
-        is GemConfirmException.ScanMemoRequired,
-        is GemConfirmException.FeeRatesMissing,
-        is GemConfirmException.Offline,
-        is GemConfirmException.Network,
-        is GemConfirmException.Load,
-        is GemConfirmException.Broadcast,
-        is GemConfirmException.Record,
-        is GemConfirmException.AccountMissing,
-        is GemConfirmException.BalanceMissing,
-        is GemConfirmException.SenderMismatch,
-        is GemConfirmException.ApprovalInvalid,
-        is GemConfirmException.Cancelled -> null
+    val display = error.display()
+    val requiredAsset = when (display) {
+        is GemConfirmErrorDisplay.BalanceRequired -> display.asset.toPrimitives()
+        is GemConfirmErrorDisplay.NetworkFeeRequired -> display.asset.toPrimitives()
+        is GemConfirmErrorDisplay.NetworkFeeMissing -> display.asset.toPrimitives()
+        is GemConfirmErrorDisplay.SwapMinimum -> display.asset.toPrimitives()
+        is GemConfirmErrorDisplay.MinimumAccountBalance,
+        is GemConfirmErrorDisplay.DustThreshold,
+        is GemConfirmErrorDisplay.Offline,
+        is GemConfirmErrorDisplay.Malicious,
+        is GemConfirmErrorDisplay.MemoRequired,
+        is GemConfirmErrorDisplay.FeeRatesMissing,
+        is GemConfirmErrorDisplay.Cancelled,
+        is GemConfirmErrorDisplay.AccountMissing,
+        is GemConfirmErrorDisplay.Unknown,
+        is GemConfirmErrorDisplay.InsufficientFunds,
+        is GemConfirmErrorDisplay.Message -> null
     }
     val onSelectAcquireAsset: (Asset, Int?) -> Unit = { asset, amount ->
         isShowInfoSheet = false
@@ -81,11 +78,11 @@ internal fun ConfirmErrorInfo(
             onAcquireAsset(AcquireAssetAction.Buy(amount), asset.id)
         }
     }
-    val infoSheetEntity = error.toInfoSheetEntity(fee, assetPrice, acquireFlow, networkFeeBuyAmount, onSelectAcquireAsset)
+    val infoSheetEntity = display.toInfoSheetEntity(fee, assetPrice, acquireFlow, networkFeeBuyAmount, onSelectAcquireAsset)
 
     WarningItem(
         title = stringResource(R.string.errors_error_occurred),
-        message = error.toPreloadLabel(),
+        message = display.text(),
         color = MaterialTheme.colorScheme.error,
         position = ListPosition.Single,
         onClick = infoSheetEntity?.let { { isShowInfoSheet = true } },
@@ -110,81 +107,75 @@ internal fun ConfirmErrorInfo(
 }
 
 @Composable
-private fun GemConfirmException.toInfoSheetEntity(
+private fun GemConfirmErrorDisplay.toInfoSheetEntity(
     fee: FeeUIModel.FeeInfo?,
     assetPrice: AssetPriceValue?,
     acquireFlow: (Asset) -> GemAcquireAssetFlow,
     networkFeeBuyAmount: Int,
     onAcquireAsset: (Asset, Int?) -> Unit,
-): InfoSheetEntity? {
-    return when (this) {
-        is GemConfirmException.InsufficientBalance -> {
-            val asset = asset.toPrimitives()
-            val formatted = requirement.formatted(asset)
-            BalanceRequiredInfo(
-                asset = asset,
-                required = formatted.required,
-                available = formatted.available,
-                shortfall = formatted.shortfall,
-                actionLabel = asset.acquireActionLabel(acquireFlow(asset)),
-                action = { onAcquireAsset(asset, null) },
-            )
-        }
-        is GemConfirmException.InsufficientNetworkFee -> {
-            val asset = asset.toPrimitives()
-            val formatted = requirement?.formatted(asset)
-            if (formatted == null) {
-                NetworkFeeRequiredInfo(
-                    chain = asset.chain,
-                    actionLabel = asset.acquireActionLabel(acquireFlow(asset)),
-                    action = { onAcquireAsset(asset, networkFeeBuyAmount) },
-                )
-            } else {
-                NetworkBalanceRequiredInfo(
-                    chain = asset.chain,
-                    required = fee?.cryptoAmountWithFiat ?: formatted.required,
-                    available = formatted.available,
-                    shortfall = formatted.shortfall,
-                    actionLabel = asset.acquireActionLabel(acquireFlow(asset)),
-                    action = { onAcquireAsset(asset, networkFeeBuyAmount) },
-                )
-            }
-        }
-        is GemConfirmException.BelowSwapMinimum -> {
-            val asset = asset.toPrimitives()
-            val formatted = requirement.formatted(asset)
-            SwapMinimumAmountInfo(
-                provider = provider,
-                providerName = providerName,
-                required = assetPrice.amountWithFiat(requirement.required, asset),
-                available = formatted.available,
-                shortfall = formatted.shortfall,
-                actionLabel = asset.acquireActionLabel(acquireFlow(asset)),
-                action = { onAcquireAsset(asset, null) },
-            )
-        }
-        is GemConfirmException.MinimumAccountBalanceTooLow -> {
-            val asset = asset.toPrimitives()
-            InfoSheetEntity.MinimumAccountBalanceInfo(
-                asset = asset,
-                value = ValueFormatter(style = GemValueStyle.FULL).string(requirement.required, asset),
-            )
-        }
-        is GemConfirmException.Sign -> InfoSheetEntity.DustThresholdInfo(chain = chain.requireChain()).takeIf { error == GemSignerError.DustThreshold }
-        is GemConfirmException.ScanMalicious,
-        is GemConfirmException.ScanMemoRequired,
-        is GemConfirmException.FeeRatesMissing,
-        is GemConfirmException.Offline,
-        is GemConfirmException.Network,
-        is GemConfirmException.Load,
-        is GemConfirmException.Broadcast,
-        is GemConfirmException.Record,
-        is GemConfirmException.AccountMissing,
-        is GemConfirmException.BalanceMissing,
-        is GemConfirmException.SenderMismatch,
-        is GemConfirmException.ApprovalInvalid,
-        is GemConfirmException.Cancelled -> null
+): InfoSheetEntity? = when (this) {
+    is GemConfirmErrorDisplay.BalanceRequired -> {
+        val asset = asset.toPrimitives()
+        val formatted = requirement.formatted(asset)
+        BalanceRequiredInfo(
+            asset = asset,
+            required = formatted.required,
+            available = formatted.available,
+            shortfall = formatted.shortfall,
+            actionLabel = asset.acquireActionLabel(acquireFlow(asset)),
+            action = { onAcquireAsset(asset, null) },
+        )
     }
+    is GemConfirmErrorDisplay.NetworkFeeRequired -> {
+        val asset = asset.toPrimitives()
+        val formatted = requirement.formatted(asset)
+        NetworkBalanceRequiredInfo(
+            chain = asset.chain,
+            required = fee?.cryptoAmountWithFiat ?: formatted.required,
+            available = formatted.available,
+            shortfall = formatted.shortfall,
+            actionLabel = asset.acquireActionLabel(acquireFlow(asset)),
+            action = { onAcquireAsset(asset, networkFeeBuyAmount) },
+        )
+    }
+    is GemConfirmErrorDisplay.NetworkFeeMissing -> {
+        val asset = asset.toPrimitives()
+        NetworkFeeRequiredInfo(
+            chain = asset.chain,
+            actionLabel = asset.acquireActionLabel(acquireFlow(asset)),
+            action = { onAcquireAsset(asset, networkFeeBuyAmount) },
+        )
+    }
+    is GemConfirmErrorDisplay.SwapMinimum -> {
+        val asset = asset.toPrimitives()
+        val formatted = requirement.formatted(asset)
+        SwapMinimumAmountInfo(
+            provider = provider,
+            providerName = providerName,
+            required = assetPrice.amountWithFiat(requirement.required, asset),
+            available = formatted.available,
+            shortfall = formatted.shortfall,
+            actionLabel = asset.acquireActionLabel(acquireFlow(asset)),
+            action = { onAcquireAsset(asset, null) },
+        )
+    }
+    is GemConfirmErrorDisplay.MinimumAccountBalance -> {
+        val asset = asset.toPrimitives()
+        InfoSheetEntity.MinimumAccountBalanceInfo(
+            asset = asset,
+            value = ValueFormatter(style = GemValueStyle.FULL).string(required, asset),
+        )
+    }
+    is GemConfirmErrorDisplay.DustThreshold -> InfoSheetEntity.DustThresholdInfo(chain = chain.requireChain())
+    is GemConfirmErrorDisplay.Malicious,
+    is GemConfirmErrorDisplay.MemoRequired,
+    is GemConfirmErrorDisplay.Offline,
+    is GemConfirmErrorDisplay.FeeRatesMissing,
+    is GemConfirmErrorDisplay.Cancelled,
+    is GemConfirmErrorDisplay.AccountMissing,
+    is GemConfirmErrorDisplay.Unknown,
+    is GemConfirmErrorDisplay.InsufficientFunds,
+    is GemConfirmErrorDisplay.Message -> null
 }
 
 @Composable

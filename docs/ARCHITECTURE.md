@@ -705,20 +705,28 @@ impl From<GemServiceError> for GemConfirmError {
 
 Use `map_err` only when the call site adds context or deliberately selects a non-default category, such as `Record`, or when a named mapper preserves structured `Offline`/`Network` gateway cases.
 
-The app **localizes Core's error directly** — it does not translate it into a parallel app-side enum first:
+The app **localizes Core's error directly** — it does not translate it into a parallel app-side enum first. A duplicate taxonomy costs a mapping function, re-derives data Core already carries, and drifts. Classify Core's error where a screen needs to branch; do not re-wrap it.
 
-```swift
-extension GemConfirmError: @retroactive LocalizedError {
-    public var errorDescription: String? {
-        switch self {
-        case let .ScanMemoRequired(symbol): Localized.Errors.ScanTransaction.memoRequired(symbol.boldMarkdown())
-        ...
+### An error crosses to the app as a display, not as itself
+
+Cases an error enum distinguishes for control flow are rarely the cases a screen distinguishes for presentation. When the two differ, give the error a `display()` returning a presentation enum, and let every app switch on that:
+
+```rust
+#[uniffi::export]
+impl GemConfirmError {
+    pub fn display(&self) -> GemConfirmErrorDisplay {
+        match self {
+            Self::InsufficientNetworkFee { asset, requirement } => match requirement {
+                Some(requirement) => GemConfirmErrorDisplay::NetworkFeeRequired { .. },
+                None => GemConfirmErrorDisplay::NetworkFeeMissing { .. },
+            },
+            ...
         }
     }
 }
 ```
 
-A duplicate taxonomy costs a mapping function, re-derives data Core already carries, and drifts. Classify Core's error where a screen needs to branch; do not re-wrap it.
+The collapse is the point. Variants that read the same to a user merge into one display case; a nested error, an optional payload or a `from`/`signer` pair the screen never shows stops reaching the app at all. Without it each app re-derives the same branch, and the two drift on the case nobody checked. Answer per-variant questions the apps would otherwise each answer — whether a case has a detail sheet, say — on the display enum, so the app reads the decision rather than repeating the list.
 
 ## 10. Tests
 

@@ -3,7 +3,7 @@
 import Components
 import Foundation
 import enum Gemstone.GemAcquireAssetFlow
-import enum Gemstone.GemConfirmError
+import enum Gemstone.GemConfirmErrorDisplay
 import GemstonePrimitives
 import InfoSheet
 import Localization
@@ -22,14 +22,14 @@ enum ConfirmInfoSheetBuilder {
     ) -> InfoSheetType? {
         switch error {
         case let .confirm(error):
-            confirmSheet(for: error, feePrice: feePrice, prices: prices, currency: currency, acquireFlow: acquireFlow, networkFeeBuyAmount: networkFeeBuyAmount, onGetAsset: onGetAsset)
+            confirmSheet(for: error.display(), feePrice: feePrice, prices: prices, currency: currency, acquireFlow: acquireFlow, networkFeeBuyAmount: networkFeeBuyAmount, onGetAsset: onGetAsset)
         case .other:
             nil
         }
     }
 
     private static func confirmSheet(
-        for error: GemConfirmError,
+        for display: GemConfirmErrorDisplay,
         feePrice: Price?,
         prices: [AssetId: Price],
         currency: String,
@@ -37,18 +37,23 @@ enum ConfirmInfoSheetBuilder {
         networkFeeBuyAmount: Int,
         onGetAsset: @escaping @MainActor @Sendable (Asset, Int?) -> Void,
     ) -> InfoSheetType? {
-        switch error {
-        case let .InsufficientBalance(asset, requirement):
+        switch display {
+        case let .balanceRequired(asset, requirement):
             let asset = asset.toPrimitives()
             return .balanceRequired(asset, image: image(for: asset), requirement: requirement.toPrimitives(), button: acquireButton(asset, flow: acquireFlow(asset)) { onGetAsset(asset, nil) })
-        case let .InsufficientNetworkFee(asset, requirement):
+        case let .networkFeeRequired(asset, requirement):
             let asset = asset.toPrimitives()
-            return .insufficientNetworkFee(asset, image: image(for: asset), requirement: requirement?.toPrimitives(), price: feePrice, currency: currency, button: acquireButton(asset, flow: acquireFlow(asset)) {
+            return .insufficientNetworkFee(asset, image: image(for: asset), requirement: requirement.toPrimitives(), price: feePrice, currency: currency, button: acquireButton(asset, flow: acquireFlow(asset)) {
                 onGetAsset(asset, networkFeeBuyAmount)
             })
-        case let .MinimumAccountBalanceTooLow(asset, requirement):
-            return .accountMinimalBalance(asset.toPrimitives(), required: requirement.required)
-        case let .BelowSwapMinimum(asset, provider, providerName, requirement):
+        case let .networkFeeMissing(asset):
+            let asset = asset.toPrimitives()
+            return .insufficientNetworkFee(asset, image: image(for: asset), requirement: nil, price: feePrice, currency: currency, button: acquireButton(asset, flow: acquireFlow(asset)) {
+                onGetAsset(asset, networkFeeBuyAmount)
+            })
+        case let .minimumAccountBalance(asset, required):
+            return .accountMinimalBalance(asset.toPrimitives(), required: required)
+        case let .swapMinimum(asset, provider, providerName, requirement):
             let asset = asset.toPrimitives()
             return .swapMinimumAmount(
                 asset,
@@ -59,12 +64,12 @@ enum ConfirmInfoSheetBuilder {
                 currency: currency,
                 button: acquireButton(asset, flow: acquireFlow(asset)) { onGetAsset(asset, nil) },
             )
-        case let .Sign(.dustThreshold, chain, _):
+        case let .dustThreshold(chain):
             let chain = Chain(core: chain)
             return .dustThreshold(chain, image: image(for: chain.asset))
-        case .ScanMalicious: return .maliciousTransaction
-        case let .ScanMemoRequired(symbol): return .memoRequired(symbol: symbol)
-        case .FeeRatesMissing, .Offline, .Network, .Load, .Broadcast, .Record, .AccountMissing, .BalanceMissing, .SenderMismatch, .Sign, .ApprovalInvalid, .Cancelled:
+        case .malicious: return .maliciousTransaction
+        case let .memoRequired(symbol): return .memoRequired(symbol: symbol)
+        case .feeRatesMissing, .offline, .accountMissing, .unknown, .insufficientFunds, .cancelled, .message:
             return nil
         }
     }
