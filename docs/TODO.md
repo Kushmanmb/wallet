@@ -11,9 +11,29 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 
 - **R16** **S** `GemSwapProgressStep` is switched on inside the view on both apps to pick a marker glyph and a tone — [iOS](../ios/Features/Transactions/Sources/Views/TransactionSwapProgressView.swift) plus [its extension](../ios/Features/Transactions/Sources/ItemModels/TransactionSwapProgressItemModel.swift), [Android](../android/features/activities/presents/src/main/kotlin/com/gemwallet/android/features/activities/presents/details/components/SwapProgressItem.kt) — and the two have drifted: `refunded` reads as an arrow-swap in orange on iOS and as a red close icon on Android, and `waiting` is an ellipsis glyph against three hand-drawn dots. Copy [`GemTransactionStateTone`](../core/gemstone/src/services/transactions/model.rs): the step answers a tone and a marker kind, each app maps those to its own palette and icon set. Live divergence, not drift prevention.
 
+- **R17** **L** Settings has no Core service at all: the row set, its order, the icons and which rows appear (developer, rewards, WalletConnect) are written twice — [iOS `SettingsViewModel`](../ios/Features/Settings/Sources/Settings/ViewModels/SettingsViewModel.swift) as `xTitle`/`xImage` pairs, [Android `SettingsScene`](../android/features/settings/settings/presents/src/main/kotlin/com/gemwallet/android/features/settings/settings/presents/views/SettingsScene.kt) inline in the composable. Add a `settings` service with a row record carrying the key, the icon key and the destination, and let each app map the key to its own image and string. `PreferencesViewModel`, `SecurityViewModel` and `AboutUsViewModel` are the same screen family and go with it.
+- **R18** **S** The NFT collection screen takes its title as a navigation string: [`CollectionViewModel`](../ios/Features/NFT/Sources/ViewModels/CollectionViewModel.swift) stores `collectionName` passed in by the caller rather than reading it from the collection the screen already loads. The name belongs to the collection record; a navigation value carries the id.
+- **R19** **M** WalletConnect connections — [`ConnectionsViewModel`](../ios/Features/WalletConnector/Sources/WalletConnector/ViewModels/ConnectionsViewModel.swift) and `ConnectionSceneViewModel` hold no Core record and build the row and the detail fields themselves; Android's bridge screens do the same. `GemConnectionRow` already exists and answers part of it.
+- **R20** **M** Chain settings and nodes — `ChainSettingsSceneViewModel`, `ChainNodeViewModel` and `ServiceStatusItemViewModel` on iOS against the Android networks screens. `GemNodeSelection` and `GemServiceEndpoint` cross, but the section titles, the node subtitle and the explorer row are each app's.
+- **R21** **M** Stake and delegation — `StakeSceneViewModel`, `DelegationSceneViewModel` and `DelegationViewModel` build nine section and field titles app-side against the Android earn screens.
+- **R22** **S** Contacts list and support chat rows carry no Core record on either app (`ContactsViewModel`, `SupportChatSceneViewModel` and their Android counterparts).
+- **R23** **S** In-app notifications and the fiat transaction list build their rows app-side on both apps.
+
 Rejected: transaction, transaction detail, delegation, validator, asset select/search, wallet, price alert, fiat quote, currency, fee rate, simulation warning, asset market, collectible detail and banner rows already have a record; network list, recents chips, earn APR, swap detail, price list and onboarding rows carry no choice; swap provider rows and the QR scan-type hint table are iOS only; swap price impact already crosses as `impactType`/`isHigh`/`showsInSummary`; the delegation completion countdown is computed twice but belongs to the delegation record if anywhere.
 
 ## 2. Sections, actions, destinations and limits
+
+Per-variant labels: a primitives enum both apps map to a string themselves is a decision written twice. The migrated shape is a Core text key each app resolves once in its own `Gemstone+Localized.swift` / `GemstoneText.kt` — `GemTransactionTitle`, `GemBannerTitle` and `GemWalletSubtitle` already work that way. These do not:
+
+- **V3** **S** `Appearance` — [iOS](../ios/Features/Settings/Sources/Settings/Types/Appearance+Title.swift), Android inline in `PreferencesScene`.
+- **V4** **S** `ChartPeriod` — 12 cases across [iOS](../ios/Packages/PrimitivesComponents/Sources/Extensions/ChartPeriod+PrimitivesComponents.swift) and Android `PeriodsPanel`.
+- **V5** **M** `LinkType` — 28 cases, the largest of these: [iOS `AssetLinkViewModel`](../ios/Packages/PrimitivesComponents/Sources/ViewModels/AssetLinkViewModel.swift), Android `SocialLink`. The set and the order of social links is a product decision living in two places.
+- **V6** **S** `MessageType` — the sign-message screen on both apps.
+- **V7** **S** `PerpetualMarginType` — cross vs isolated, four cases.
+- **V8** **S** `Resource` — Tron bandwidth and energy, four cases.
+- **V9** **S** `ReportReason` — [iOS `ReportReasonViewModel`](../ios/Features/NFT/Sources/ViewModels/ReportReasonViewModel.swift) and Android `NftDetailsScene.titleRes` map the same five reasons, and the order comes from each language's enum declaration rather than from Core.
+- **V10** **M** The recipient `Destination` and the fee `FeePriority` labels are mapped on both apps; roughly forty more one-sided maps are listed by the label sweep and each needs the other app's screen checked before filing.
+
 
 Copy: [`GemPerpetualMarketCounts::sections`](../core/gemstone/src/services/perpetual/model.rs) → [iOS](../ios/Features/Perpetuals/Sources/ViewModels/PerpetualsSceneViewModel.swift), [Android](../android/features/perpetual/presents/src/main/kotlin/com/gemwallet/android/features/perpetual/views/market/PerpetualMarketScene.kt).
 
@@ -58,6 +78,7 @@ Product or security decisions, one question each:
 
 Ownership, injection and threads:
 
+- **O10** **S** [`ImportWalletViewModel`](../ios/Features/Onboarding/Sources/ViewModels/ImportWalletViewModel.swift) holds three Core services plus a child vendor. It is a flow parent, which [§ 7 allows](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android), but the import flow is the clearest case for an import screen service that composes wallet, name and avatar behind one object.
 - **O9** **M** Six Android view models hold two or three Core services where iOS composes one screen service: [`TransactionsViewModel`](../android/features/activities/viewmodels/src/main/kotlin/com/gemwallet/android/features/activities/viewmodels/TransactionsViewModel.kt), `RecentsSheetViewModel`, `WCAuthViewModel` (three), `WCRequestViewModel`, `PerpetualMarketViewModel` and `SettingsViewModel`. Copy the screen-service shape in [SERVICES.md](SERVICES.md#the-screen-service-map); a launch host or a flow parent vending child models is [allowed to hold several](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android) and these are neither.
 
 
