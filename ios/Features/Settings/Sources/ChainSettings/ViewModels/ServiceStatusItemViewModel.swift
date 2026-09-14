@@ -19,7 +19,7 @@ struct ServiceStatusItemViewModel: Identifiable {
     }
 
     var id: String { endpoint.url }
-    var title: String { "\(name) \(endpoint.flag)" }
+    var title: String { endpoint.title(name: name) }
     var subtitle: String { endpoint.host }
     var titleTag: String? { statusTag.text }
     var titleTagType: TitleTagType { statusTag.type }

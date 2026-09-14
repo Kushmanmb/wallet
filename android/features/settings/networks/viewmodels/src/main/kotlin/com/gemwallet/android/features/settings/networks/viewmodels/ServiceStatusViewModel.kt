@@ -60,11 +60,5 @@ class ServiceStatusViewModel @Inject constructor(
 }
 
 private fun GemServiceEndpoint.toRow(statusState: GemLatencyStatus): ServiceStatusRowUiModel {
-    return ServiceStatusRowUiModel(
-        id = url,
-        type = endpointType,
-        flag = flag,
-        host = host,
-        statusState = statusState,
-    )
+    return ServiceStatusRowUiModel(endpoint = this, statusState = statusState)
 }
