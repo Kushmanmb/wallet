@@ -74,7 +74,6 @@ Platform items:
 
 - **X2** **L** iOS untyped `.map()` naming — Android names the direction. Generator pair in [`remote_mappers.rs`](../core/bin/generate/src/remote_mappers.rs), ~890 call sites.
 - **X14** **M** Core constants that should be data: [`gem_auth/signature.rs`](../core/crates/gem_auth/src/signature.rs) verifies Ethereum signatures only and returns false for every other chain type; [TON verified collections](../core/crates/nft/src/providers/ton/verified.rs) is a hardcoded allowlist; [THORChain deposit gas](../core/crates/swapper/src/thorchain/mod.rs) is a flat 90k instead of memo-sized. The Stellar fee now comes from the joined transaction, with the 100-stroop base fee only as the fallback.
-- **X10** **S** Dated Core deprecations with no owner: the singular transaction route in [`api/devices`](../core/apps/api/src/devices/mod.rs) is due after 2026-11-15. The other two are gated, not forgotten: the legacy locale compat in [`device_locale.rs`](../core/crates/primitives/src/device_locale.rs) answers installed clients that still send a raw platform code, and `CetusAggregator` in [`swap_provider.rs`](../core/crates/primitives/src/swap_provider.rs) is a wire value a stored swap can still carry, so it goes with the **O8** decision, not before it.
 
 Guides:
 
