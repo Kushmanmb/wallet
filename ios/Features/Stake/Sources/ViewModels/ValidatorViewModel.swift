@@ -11,7 +11,7 @@ import PrimitivesComponents
 import Style
 import SwiftUI
 
-public struct ValidatorViewModel {
+public struct ValidatorViewModel: Sendable {
     public let row: GemValidatorRow
 
     public init(row: GemValidatorRow) {

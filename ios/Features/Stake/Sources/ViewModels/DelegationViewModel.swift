@@ -19,6 +19,7 @@ public struct DelegationViewModel: Sendable {
     private let formatter: ValueFormatter
     private let service: any GemStakeServiceProtocol
     private let priceFormatter: CurrencyFormatter
+    public let validatorModel: ValidatorViewModel
 
     public init(
         service: any GemStakeServiceProtocol,
@@ -33,6 +34,7 @@ public struct DelegationViewModel: Sendable {
         self.formatter = formatter
         self.service = service
         priceFormatter = CurrencyFormatter(type: .currency, currencyCode: currencyCode)
+        validatorModel = ValidatorViewModel(row: service.validatorRow(validator: delegation.validator.map()))
     }
 
     public var status: GemDelegationStatus {
@@ -83,10 +85,6 @@ public struct DelegationViewModel: Sendable {
             let rewards = try? formatter.double(from: delegation.base.rewards, decimals: asset.decimals.asInt)
         else { return nil }
         return priceFormatter.string(price.price * rewards)
-    }
-
-    public var validatorModel: ValidatorViewModel {
-        ValidatorViewModel(row: service.validatorRow(validator: delegation.validator.map()))
     }
 
     public var validatorText: String {

@@ -7,13 +7,11 @@ import SwiftUI
 
 public struct ImportWalletTypeViewModel {
     private let service: any GemChainServiceProtocol
+    private let allChains: [Chain]
 
     public init(service: any GemChainServiceProtocol) {
         self.service = service
-    }
-
-    func filterChains(for query: String) -> [Chain] {
-        service.getChains(query: query).map { Chain(core: $0) }
+        allChains = service.getChains(query: .empty).map { Chain(core: $0) }
     }
 
     var title: String {
@@ -21,7 +19,7 @@ public struct ImportWalletTypeViewModel {
     }
 
     func items(for searchText: String) -> [Chain] {
-        filterChains(for: searchText)
+        searchText.isEmpty ? allChains : service.getChains(query: searchText).map { Chain(core: $0) }
     }
 }
 
@@ -29,7 +27,7 @@ public struct ImportWalletTypeViewModel {
 
 extension ImportWalletTypeViewModel: Equatable {
     public static func == (lhs: ImportWalletTypeViewModel, rhs: ImportWalletTypeViewModel) -> Bool {
-        lhs.filterChains(for: "") == rhs.filterChains(for: "")
+        lhs.allChains == rhs.allChains
     }
 }
 
@@ -37,6 +35,6 @@ extension ImportWalletTypeViewModel: Equatable {
 
 extension ImportWalletTypeViewModel: Hashable {
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(filterChains(for: ""))
+        hasher.combine(allChains)
     }
 }
