@@ -80,6 +80,9 @@ async fn update_prices(store: &dyn GemPriceStore, prices: Vec<AssetPrice>, curre
 }
 
 async fn update_rates(store: &dyn GemPriceStore, rates: Vec<FiatRate>, currency: Currency) -> Result<(), GemServiceError> {
+    if rates.is_empty() {
+        return Ok(());
+    }
     let changed = rules::changed_rates(store.get_rates().await?, rates);
     if changed.is_empty() {
         return Ok(());
@@ -170,6 +173,15 @@ mod tests {
         futures::executor::block_on(update_rates(&store, rates, Currency::JPY)).unwrap();
 
         assert_eq!(*store.converted.lock().unwrap(), vec![(Currency::EUR, 0.9)]);
+    }
+
+    #[test]
+    fn test_a_price_event_without_rates_leaves_the_rate_table_unread() {
+        let store = MemoryPriceStore::default();
+
+        futures::executor::block_on(update_rates(&store, vec![], Currency::EUR)).unwrap();
+
+        assert_eq!(*store.rate_reads.lock().unwrap(), 0, "a tick carries no rates and must not read the table");
     }
 
     #[test]
