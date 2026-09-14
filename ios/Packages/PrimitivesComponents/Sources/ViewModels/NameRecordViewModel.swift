@@ -19,25 +19,26 @@ public final class NameRecordViewModel {
     }
 
     public func getNameRecord(name: String, chain: Chain) {
-        guard name != state.requestedName() else { return }
-        nameRecordTask?.cancel()
-
-        guard nameService.isNameSupported(name: name) else {
-            state = .none
+        switch nameService.nameInputStep(state: state, name: name, hasChain: true) {
+        case .unchanged:
             return
+        case .reset:
+            reset()
+        case let .resolve(name, debounceMilliseconds):
+            nameRecordTask?.cancel()
+            state = .loading(name: name)
+            nameRecordTask = Task { await resolve(name: name, chain: chain, debounceMilliseconds: debounceMilliseconds) }
         }
+    }
 
-        state = .loading(name: name)
-        nameRecordTask = Task {
-            do {
-                try await Task.sleep(for: .milliseconds(nameService.nameRecordDebounceMilliseconds()))
-                let resolved = try await nameService.getNameRecord(name: name, chain: chain)
-                guard state == .loading(name: name) else { return }
-                state = resolved
-            } catch {
-                guard !error.isCancelled, state == .loading(name: name) else { return }
-                state = .error
-            }
+    private func resolve(name: String, chain: Chain, debounceMilliseconds: UInt64) async {
+        do {
+            try await Task.sleep(for: .milliseconds(debounceMilliseconds))
+            let resolved = try await nameService.getNameRecord(name: name, chain: chain)
+            state = nameService.resolvedState(state: state, name: name, resolved: resolved)
+        } catch {
+            guard !error.isCancelled else { return }
+            state = nameService.resolvedState(state: state, name: name, resolved: .error)
         }
     }
 

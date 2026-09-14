@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemNameInputStep
 import uniffi.gemstone.GemNameRecordState
 import uniffi.gemstone.GemNameServiceInterface
 
@@ -23,34 +24,27 @@ class NameRecordController(
     val state: StateFlow<GemNameRecordState> = _state.asStateFlow()
 
     fun getNameRecord(value: String, chain: Chain?) {
-        if (value.isEmpty()) {
-            reset()
-            return
+        when (val step = nameService.nameInputStep(_state.value, value, chain != null)) {
+            GemNameInputStep.Unchanged -> return
+            GemNameInputStep.Reset -> reset()
+            is GemNameInputStep.Resolve -> resolve(step, requireNotNull(chain))
         }
-        if (value == _state.value.requestedName()) {
-            return
-        }
-        loadNameRecord(value, chain)
     }
 
-    private fun loadNameRecord(input: String, chain: Chain?) {
+    private fun resolve(step: GemNameInputStep.Resolve, chain: Chain) {
         job?.cancel()
-        _state.value = GemNameRecordState.None
-        if (chain == null || !nameService.isNameSupported(input)) {
-            return
-        }
-        _state.value = GemNameRecordState.Loading(input)
+        _state.value = GemNameRecordState.Loading(step.name)
         job = scope.launch {
-            delay(nameService.nameRecordDebounceMilliseconds().toLong())
+            delay(step.debounceMilliseconds.toLong())
             val resolved = try {
-                nameService.getNameRecord(input, chain)
+                nameService.getNameRecord(step.name, chain)
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Throwable) {
                 GemNameRecordState.Error
             }
             ensureActive()
-            _state.value = resolved
+            _state.value = nameService.resolvedState(_state.value, step.name, resolved)
         }
     }
 

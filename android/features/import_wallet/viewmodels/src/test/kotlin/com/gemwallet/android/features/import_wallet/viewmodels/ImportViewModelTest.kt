@@ -26,6 +26,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemNameInputStep
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ImportViewModelTest {
@@ -44,6 +45,21 @@ class ImportViewModelTest {
         fun service(): GemNameServiceInterface = mockk(relaxed = true) {
             every { isNameSupported(any()) } answers { firstArg<String>().split(".").size >= 2 }
             every { nameRecordDebounceMilliseconds() } returns 500u
+            every { nameInputStep(any(), any(), any()) } answers {
+                val state = firstArg<GemNameRecordState>()
+                val name = secondArg<String>()
+                when {
+                    name.isEmpty() -> GemNameInputStep.Reset
+                    state.requestedName() == name -> GemNameInputStep.Unchanged
+                    !thirdArg<Boolean>() || name.split(".").size < 2 -> GemNameInputStep.Reset
+                    else -> GemNameInputStep.Resolve(name, 500u)
+                }
+            }
+            every { resolvedState(any(), any(), any()) } answers {
+                val state = firstArg<GemNameRecordState>()
+                val name = secondArg<String>()
+                if (state is GemNameRecordState.Loading && state.name == name) thirdArg() else state
+            }
             coEvery { getNameRecord(any(), any()) } answers {
                 requests.add(firstArg<String>() to Chain.entries.first { it.string == secondArg<String>() })
                 GemNameRecordState.Complete(result.toGem())

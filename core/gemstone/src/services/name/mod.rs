@@ -11,7 +11,7 @@ use crate::api::{GemApiError, GemDeviceApiClient};
 use crate::services::recipient::{GemRecipientError, GemRecipientValidation, rules as recipient_rules};
 use crate::services::transfer::GemRecipient;
 
-pub use model::GemNameRecordState;
+pub use model::{GemNameInputStep, GemNameRecordState};
 pub use store::GemAddressStore;
 
 #[derive(uniffi::Object)]
@@ -41,6 +41,14 @@ impl GemNameService {
 
     pub fn name_record_debounce_milliseconds(&self) -> u64 {
         rules::name_record_debounce_milliseconds()
+    }
+
+    pub fn name_input_step(&self, state: GemNameRecordState, name: String, has_chain: bool) -> GemNameInputStep {
+        rules::name_input_step(&state, &name, has_chain)
+    }
+
+    pub fn resolved_state(&self, state: GemNameRecordState, name: String, resolved: GemNameRecordState) -> GemNameRecordState {
+        rules::resolved_state(&state, &name, resolved)
     }
 
     pub async fn get_name_record(&self, name: String, chain: Chain) -> Result<GemNameRecordState, GemServiceError> {

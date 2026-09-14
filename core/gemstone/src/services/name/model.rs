@@ -38,3 +38,10 @@ impl GemNameRecordState {
         }
     }
 }
+
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemNameInputStep {
+    Unchanged,
+    Reset,
+    Resolve { name: String, debounce_milliseconds: u64 },
+}

@@ -7,6 +7,7 @@ import GemstonePrimitives
 import Primitives
 import PrimitivesTestKit
 import struct Gemstone.GemPriceAlertSession
+import enum Gemstone.GemNameInputStep
 
 public actor GemDeviceServiceMock: GemDeviceServiceProtocol {
     private let syncError: Error?
@@ -533,6 +534,23 @@ public final class GemNameServiceMock: GemNameServiceProtocol, @unchecked Sendab
 
     public func isNameSupported(name: String) -> Bool {
         name.split(separator: ".").count >= 2
+    }
+
+    public func nameInputStep(state: GemNameRecordState, name: String, hasChain: Bool) -> GemNameInputStep {
+        if name.isEmpty {
+            return .reset
+        }
+        if state.requestedName() == name {
+            return .unchanged
+        }
+        guard hasChain, isNameSupported(name: name) else {
+            return .reset
+        }
+        return .resolve(name: name, debounceMilliseconds: nameRecordDebounceMilliseconds())
+    }
+
+    public func resolvedState(state: GemNameRecordState, name: String, resolved: GemNameRecordState) -> GemNameRecordState {
+        state == .loading(name: name) ? resolved : state
     }
 
     public func nameRecordDebounceMilliseconds() -> UInt64 {
