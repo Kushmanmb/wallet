@@ -191,7 +191,6 @@ public final class FiatSceneViewModel {
                     asset: asset,
                     row: $0,
                     isSelected: $0.provider == selectedQuote?.provider,
-                    formatter: currencyFormatter,
                 )
             })
         })
@@ -297,7 +296,7 @@ extension FiatSceneViewModel {
 
     private var selectedQuoteViewModel: FiatQuoteViewModel? {
         guard let selectedQuote else { return nil }
-        return FiatQuoteViewModel(asset: asset, row: selectedQuote, formatter: currencyFormatter)
+        return FiatQuoteViewModel(asset: asset, row: selectedQuote)
     }
 
     private func applyAmount(_ text: String, isImmediate: Bool) {

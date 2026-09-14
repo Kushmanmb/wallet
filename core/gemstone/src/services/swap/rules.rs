@@ -1,3 +1,4 @@
+use crate::formatted_number::GemFormattedNumber;
 use num_bigint::BigInt;
 use num_bigint::BigUint;
 use number_formatter::BigNumberFormatter;
@@ -108,7 +109,7 @@ fn asset_rate(base: &Asset, quote: &Asset, value: f64) -> GemAssetRate {
     GemAssetRate {
         base_symbol: base.symbol.clone(),
         quote_symbol: quote.symbol.clone(),
-        value,
+        value: GemFormattedNumber::adaptive(value, Some(quote.symbol.clone())),
     }
 }
 
@@ -319,11 +320,11 @@ mod tests {
 
         let rate = swap_rate(&eth, &one_eth, &usdc, &two_thousand_usdc).unwrap();
         assert_eq!(
-            (rate.direct.base_symbol.as_str(), rate.direct.quote_symbol.as_str(), rate.direct.value),
+            (rate.direct.base_symbol.as_str(), rate.direct.quote_symbol.as_str(), rate.direct.value.value),
             ("ETH", "USDC", 2000.0)
         );
         assert_eq!(
-            (rate.inverse.base_symbol.as_str(), rate.inverse.quote_symbol.as_str(), rate.inverse.value),
+            (rate.inverse.base_symbol.as_str(), rate.inverse.quote_symbol.as_str(), rate.inverse.value.value),
             ("USDC", "ETH", 0.0005)
         );
 

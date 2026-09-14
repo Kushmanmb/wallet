@@ -35,13 +35,35 @@ impl GemFormattedNumber {
         }
     }
 
-    pub fn amount(value: f64, symbol: Option<String>, style: GemValueStyle) -> Self {
-        let unit = match symbol {
-            Some(symbol) => GemNumberUnit::Symbol { symbol },
-            None => GemNumberUnit::Plain,
-        };
-        Self { value, unit, display: value_display(value, style) }
+    pub fn adaptive(value: f64, symbol: Option<String>) -> Self {
+        Self {
+            value,
+            unit: unit(symbol),
+            display: GemNumberDisplay::Number {
+                precision: crate::precision::adaptive_precision(value),
+            },
+        }
     }
+
+    pub fn amount(value: f64, symbol: Option<String>, style: GemValueStyle) -> Self {
+        Self {
+            value,
+            unit: unit(symbol),
+            display: value_display(value, style),
+        }
+    }
+}
+
+fn unit(symbol: Option<String>) -> GemNumberUnit {
+    match symbol {
+        Some(symbol) => GemNumberUnit::Symbol { symbol },
+        None => GemNumberUnit::Plain,
+    }
+}
+
+#[uniffi::export]
+pub fn formatted_adaptive(value: f64, symbol: Option<String>) -> GemFormattedNumber {
+    GemFormattedNumber::adaptive(value, symbol)
 }
 
 #[uniffi::export]
@@ -96,6 +118,22 @@ mod tests {
             GemFormattedNumber::currency(1_000_000.0, "USD".to_string(), GemCurrencyStyle::Currency).display,
             GemNumberDisplay::Number {
                 precision: GemPrecision::Fraction { min: 2, max: 2 }
+            }
+        );
+    }
+
+    #[test]
+    fn test_an_adaptive_number_keeps_two_places_from_one_up_and_four_digits_below() {
+        assert_eq!(
+            GemFormattedNumber::adaptive(100.0, Some("USDT".to_string())).display,
+            GemNumberDisplay::Number {
+                precision: GemPrecision::Fraction { min: 2, max: 2 }
+            }
+        );
+        assert_eq!(
+            GemFormattedNumber::adaptive(0.000838216, None).display,
+            GemNumberDisplay::Number {
+                precision: GemPrecision::Significant { max: 4 }
             }
         );
     }

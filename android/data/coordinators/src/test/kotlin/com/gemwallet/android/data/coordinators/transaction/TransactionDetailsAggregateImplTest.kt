@@ -29,6 +29,7 @@ import uniffi.gemstone.GemSwapAgain
 import uniffi.gemstone.GemSwapProgress
 import uniffi.gemstone.GemSwapProgressStep
 import uniffi.gemstone.GemAssetRate
+import uniffi.gemstone.formattedAdaptive
 import uniffi.gemstone.GemSwapRate
 import uniffi.gemstone.GemTransactionDetailRows
 import uniffi.gemstone.GemTransactionHeader
@@ -182,8 +183,8 @@ class TransactionDetailsAggregateImplTest {
     @Test
     fun testRate_formatsBothDirectionsFromTheCoreRate() {
         val rate = GemSwapRate(
-            direct = GemAssetRate(baseSymbol = "ETH", quoteSymbol = "USDT", value = 3000.0),
-            inverse = GemAssetRate(baseSymbol = "USDT", quoteSymbol = "ETH", value = 1 / 3000.0),
+            direct = GemAssetRate(baseSymbol = "ETH", quoteSymbol = "USDT", value = formattedAdaptive(3000.0, null)),
+            inverse = GemAssetRate(baseSymbol = "USDT", quoteSymbol = "ETH", value = formattedAdaptive(1 / 3000.0, null)),
         )
 
         val formatted = createAggregate(rows = mockGemTransactionDetailRows(rate = rate)).rate

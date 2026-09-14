@@ -6,13 +6,14 @@ use primitives::{Asset, AssetId};
 use swapper::{Quote, SwapperError};
 
 use super::rules;
+use crate::formatted_number::GemFormattedNumber;
 use primitives::TransactionInputType;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemAssetRate {
     pub base_symbol: String,
     pub quote_symbol: String,
-    pub value: f64,
+    pub value: GemFormattedNumber,
 }
 
 #[uniffi::export]
@@ -137,7 +138,7 @@ mod tests {
         let rate = GemAssetRate {
             base_symbol: "BTC".to_string(),
             quote_symbol: "USDT".to_string(),
-            value: 100.0,
+            value: crate::formatted_number::GemFormattedNumber::adaptive(100.0, Some("USDT".to_string())),
         };
         assert_eq!(rate.text("100.00 USDT".to_string()), "1 BTC ≈ 100.00 USDT");
     }

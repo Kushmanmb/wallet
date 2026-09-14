@@ -1,6 +1,8 @@
 package com.gemwallet.android.features.buy.viewmodels.models
 
 import uniffi.gemstone.GemAssetRate
+import uniffi.gemstone.GemCurrencyStyle
+import uniffi.gemstone.formattedCurrency
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.testkit.mockAsset
 import com.gemwallet.android.testkit.mockFiatQuoteRow
@@ -23,7 +25,7 @@ class BuyFiatProviderUIModelTest {
 
     @Test
     fun `a rate reads as one unit of the asset and is empty without one`() {
-        val rate = GemAssetRate(baseSymbol = testAsset.symbol, quoteSymbol = Currency.USD.string, value = 102500.0)
+        val rate = GemAssetRate(baseSymbol = testAsset.symbol, quoteSymbol = Currency.USD.string, value = formattedCurrency(102500.0, Currency.USD.string, GemCurrencyStyle.CURRENCY))
         assertEquals("1 ${testAsset.symbol} ≈ ${formatter.string(102500.0)}", mockFiatQuoteRow(rate = rate).toProviderUIModel(testAsset, Currency.USD).rate)
         assertEquals("", mockFiatQuoteRow(rate = null).toProviderUIModel(testAsset, Currency.USD).rate)
     }

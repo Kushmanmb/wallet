@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import Formatters
+import Foundation
 import GemstonePrimitives
 import struct Gemstone.GemFiatQuoteRow
 import Primitives
@@ -14,18 +14,18 @@ struct FiatQuoteViewModel {
     let isSelected: Bool
 
     private let asset: Asset
-    private let formatter: CurrencyFormatter
+    private let locale: Locale
 
     init(
         asset: Asset,
         row: GemFiatQuoteRow,
         isSelected: Bool = false,
-        formatter: CurrencyFormatter,
+        locale: Locale = .current,
     ) {
         self.asset = asset
         self.row = row
         self.isSelected = isSelected
-        self.formatter = formatter
+        self.locale = locale
     }
 
     var title: String {
@@ -33,12 +33,12 @@ struct FiatQuoteViewModel {
     }
 
     var amountText: String {
-        row.cryptoAmount.text()
+        row.cryptoAmount.text(locale: locale)
     }
 
     var rateText: String {
         guard let rate = row.rate else { return "" }
-        return rate.text(formattedValue: formatter.string(rate.value))
+        return rate.text(formattedValue: rate.value.text(locale: locale))
     }
 }
 
@@ -67,7 +67,7 @@ extension FiatQuoteViewModel: SimpleListItemViewable {
     }
 
     var subtitleExtra: String? {
-        row.fiatAmount.text()
+        row.fiatAmount.text(locale: locale)
     }
 
     var subtitleStyle: TextStyle {

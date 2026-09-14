@@ -192,7 +192,7 @@ final class FiatSceneViewModelTests {
         #expect(model.allowSelectProvider)
         #expect(model.actionButtonState == .normal)
 
-        model.onSelectQuotes([FiatQuoteViewModel(asset: model.asset, row: .mock(provider: .transak), formatter: CurrencyFormatter(locale: .US, currencyCode: Currency.usd.rawValue))])
+        model.onSelectQuotes([FiatQuoteViewModel(asset: model.asset, row: .mock(provider: .transak))])
 
         #expect(model.selectedQuote?.quoteId == unaffordable.id)
         #expect(model.inputValidationModel.isInvalid)

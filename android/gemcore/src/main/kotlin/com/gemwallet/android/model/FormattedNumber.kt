@@ -28,7 +28,7 @@ private fun GemFormattedNumber.appendSymbol(text: String): String =
     symbol?.let { "$text $it" } ?: text
 
 private fun GemFormattedNumber.numberText(value: BigDecimal, precision: Precision, locale: Locale): String {
-    val formatter = (numberFormat(locale) as DecimalFormat).apply { roundingMode = RoundingMode.DOWN }
+    val formatter = (numberFormat(locale) as DecimalFormat).apply { roundingMode = RoundingMode.HALF_EVEN }
     return formatter.format(value, precision)
 }
 
@@ -37,7 +37,7 @@ private fun GemFormattedNumber.abbreviatedText(value: BigDecimal, locale: Locale
         setSignificantDigitsUsed(false)
         minimumFractionDigits = 0
         maximumFractionDigits = 2
-        roundingMode = android.icu.math.BigDecimal.ROUND_DOWN
+        roundingMode = android.icu.math.BigDecimal.ROUND_HALF_EVEN
         currencyCode?.let { currency = android.icu.util.Currency.getInstance(it) }
     }
     return formatter.format(value)
