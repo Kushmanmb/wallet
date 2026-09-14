@@ -4,18 +4,55 @@ import BigInt
 import Formatters
 import Foundation
 import struct Gemstone.Asset
+import enum Gemstone.GemAmountError
 import enum Gemstone.GemConfirmError
 import enum Gemstone.GemConfirmErrorDisplay
 import GemstonePrimitives
 import Localization
 import Primitives
 
-extension GemConfirmError: @retroactive LocalizedError {
-    public var errorDescription: String? { display().text }
+enum ConfirmTransferError {
+    case confirm(GemConfirmError)
+    case other(Error)
+
+    init(error: Error) {
+        switch error {
+        case let error as GemConfirmError where error.display().hasInfoSheet():
+            self = .confirm(error)
+        default:
+            self = .other(error)
+        }
+    }
+
+    var displayError: Error {
+        switch self {
+        case let .confirm(error): error
+        case let .other(error): error
+        }
+    }
 }
 
-extension GemConfirmErrorDisplay {
-    var text: String {
+extension GemAmountError: @retroactive LocalizedError {
+    public var errorDescription: String? {
+        switch display() {
+        case .none: nil
+        case .invalidAmount: Localized.Errors.invalidAmount
+        case let .belowMinimum(asset, minimum):
+            Localized.Transfer.minimumAmount(ValueFormatter(style: .auto).string(minimum, asset: asset.toPrimitives()).boldMarkdown())
+        case let .insufficientBalance(title):
+            Localized.Transfer.insufficientBalance(title.boldMarkdown())
+        }
+    }
+}
+
+extension GemConfirmError: @retroactive LocalizedError {
+    public var errorDescription: String? { display().errorDescription }
+}
+
+extension GemConfirmErrorDisplay: @retroactive Error {}
+
+extension GemConfirmErrorDisplay: @retroactive LocalizedError {
+    public var errorDescription: String? {
         switch self {
         case .offline: Localized.Errors.networkOffline
         case .malicious: Localized.Errors.ScanTransaction.Malicious.description
@@ -54,7 +91,7 @@ extension GemConfirmErrorDisplay {
         }
     }
 
-    static func amount(_ value: BigInt, asset: Gemstone.Asset) -> String {
+    private static func amount(_ value: BigInt, asset: Gemstone.Asset) -> String {
         ValueFormatter(style: .full).string(value, asset: asset.toPrimitives())
     }
 

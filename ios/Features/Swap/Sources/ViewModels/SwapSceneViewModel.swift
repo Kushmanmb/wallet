@@ -56,7 +56,7 @@ public final class SwapSceneViewModel {
         if let cache = viewStateCache, cache.session == session, cache.value == value, cache.availableBalance == availableBalance {
             return cache.state
         }
-        let state = session.viewState(value: value, availableBalance: availableBalance)
+        let state = session.viewState(value: value, availableBalance: availableBalance, payAsset: fromAsset?.asset.toGem())
         viewStateCache = (session, value, availableBalance, state)
         return state
     }
@@ -374,7 +374,7 @@ extension SwapSceneViewModel {
             return .loading
         }
         if let error = viewState.quoteError {
-            return .error(error.asError(asset: fromAsset?.asset))
+            return .error(error)
         }
         if let quotes = session.quotes?.quotes {
             return .data(quotes)

@@ -8,8 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ext.boldMarkdown
+import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.swap.viewmodels.models.SwapUiState
-import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.InfoBottomSheet
@@ -22,16 +22,15 @@ import uniffi.gemstone.GemSwapErrorDisplay
 import uniffi.gemstone.GemValueStyle
 
 @Composable
-internal fun SwapError(state: SwapUiState, pay: AssetInfo?) {
+internal fun SwapError(state: SwapUiState) {
     var isShowInfoSheet by remember { mutableStateOf(false) }
     val error = state.error ?: return
 
     val errorText = when (error) {
         is GemSwapErrorDisplay.NotSupportedAsset -> stringResource(R.string.errors_swap_not_supported_asset)
         is GemSwapErrorDisplay.NoQuote -> stringResource(R.string.errors_swap_no_quote_available)
-        is GemSwapErrorDisplay.MinimumAmount -> pay?.asset
-            ?.let { stringResource(R.string.errors_swap_minimum_amount, minimumAmount(error.minAmount, it).boldMarkdown()) }
-            ?: stringResource(R.string.errors_swap_amount_too_small)
+        is GemSwapErrorDisplay.MinimumAmount ->
+            stringResource(R.string.errors_swap_minimum_amount, minimumAmount(error.minAmount, error.asset.toPrimitives()).boldMarkdown())
         is GemSwapErrorDisplay.AmountTooSmall -> stringResource(R.string.errors_swap_amount_too_small)
     }
 

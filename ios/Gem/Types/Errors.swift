@@ -4,6 +4,7 @@ import Foundation
 import Gemstone
 import Localization
 import Primitives
+import Swap
 
 extension KeystoreError: @retroactive LocalizedError {
     public var errorDescription: String? {
@@ -82,14 +83,7 @@ extension Gemstone.GemWalletConnectError: @retroactive LocalizedError {
 
 extension Gemstone.SwapperError: @retroactive LocalizedError {
     public var errorDescription: String? {
-        switch self {
-        case .NotSupportedChain, .NotSupportedAsset:
-            Localized.Errors.Swap.notSupportedAsset
-        case .NoQuoteAvailable, .NoAvailableProvider, .InvalidRoute,
-             .ComputeQuoteError, .TransactionError:
-            Localized.Errors.Swap.noQuoteAvailable
-        case .InputAmountError: Localized.Errors.Swap.amountTooSmall
-        }
+        swapErrorDisplay(error: self, payAsset: nil).errorDescription
     }
 }
 
