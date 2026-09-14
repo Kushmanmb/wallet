@@ -64,15 +64,15 @@ extension GemConfirmErrorDisplay: @retroactive LocalizedError {
         case let .balanceRequired(asset, requirement):
             Localized.Info.balanceRequiredDescription(
                 Self.amount(requirement.required, asset: asset).boldMarkdown(),
-                Self.amount(requirement.available, asset: asset),
-                Self.amount(requirement.shortfall, asset: asset),
+                Self.amount(requirement.available, asset: asset).boldMarkdown(),
+                Self.amount(requirement.shortfall, asset: asset).boldMarkdown(),
             )
         case let .networkFeeRequired(asset, requirement):
             Localized.Info.InsufficientNetworkFeeBalance.description(
                 Self.amount(requirement.required, asset: asset).boldMarkdown(),
                 asset.toPrimitives().chain.networkName.boldMarkdown(),
-                Self.amount(requirement.available, asset: asset),
-                Self.amount(requirement.shortfall, asset: asset),
+                Self.amount(requirement.available, asset: asset).boldMarkdown(),
+                Self.amount(requirement.shortfall, asset: asset).boldMarkdown(),
             )
         case let .networkFeeMissing(asset):
             Localized.Transfer.insufficientNetworkFeeBalance(Self.title(asset: asset))
@@ -82,8 +82,8 @@ extension GemConfirmErrorDisplay: @retroactive LocalizedError {
             Localized.Info.swapMinimumAmountDescription(
                 providerName.boldMarkdown(),
                 Self.amount(requirement.required, asset: asset).boldMarkdown(),
-                Self.amount(requirement.available, asset: asset),
-                Self.amount(requirement.shortfall, asset: asset),
+                Self.amount(requirement.available, asset: asset).boldMarkdown(),
+                Self.amount(requirement.shortfall, asset: asset).boldMarkdown(),
             )
         case .dustThreshold: Localized.Errors.dustThresholdShort
         case .insufficientFunds: Localized.Info.InsufficientBalance.title

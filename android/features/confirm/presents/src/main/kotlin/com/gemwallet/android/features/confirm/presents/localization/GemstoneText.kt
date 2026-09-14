@@ -69,8 +69,8 @@ internal fun GemConfirmErrorDisplay.text(): String = when (this) {
         stringResource(
             R.string.info_balance_required_description,
             amount(requirement.required, asset).boldMarkdown(),
-            amount(requirement.available, asset),
-            amount(requirement.shortfall, asset),
+            amount(requirement.available, asset).boldMarkdown(),
+            amount(requirement.shortfall, asset).boldMarkdown(),
         )
     }
     is GemConfirmErrorDisplay.NetworkFeeRequired -> {
@@ -79,8 +79,8 @@ internal fun GemConfirmErrorDisplay.text(): String = when (this) {
             R.string.info_insufficient_network_fee_balance_description,
             amount(requirement.required, asset).boldMarkdown(),
             asset.id.chain.networkName().boldMarkdown(),
-            amount(requirement.available, asset),
-            amount(requirement.shortfall, asset),
+            amount(requirement.available, asset).boldMarkdown(),
+            amount(requirement.shortfall, asset).boldMarkdown(),
         )
     }
     is GemConfirmErrorDisplay.NetworkFeeMissing ->
@@ -93,8 +93,8 @@ internal fun GemConfirmErrorDisplay.text(): String = when (this) {
             R.string.info_swap_minimum_amount_description,
             providerName.boldMarkdown(),
             amount(requirement.required, asset).boldMarkdown(),
-            amount(requirement.available, asset),
-            amount(requirement.shortfall, asset),
+            amount(requirement.available, asset).boldMarkdown(),
+            amount(requirement.shortfall, asset).boldMarkdown(),
         )
     }
     is GemConfirmErrorDisplay.DustThreshold -> stringResource(R.string.errors_dust_threshold_short)
