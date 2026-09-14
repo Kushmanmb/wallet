@@ -48,7 +48,6 @@ Not in scope: `Formatters` and `Validators` on iOS still cannot import Gemstone,
 
 Core exports these and one app calls them. Establish whether it is a missing feature or a duplicated decision first. Exports that belong to a screen already listed above are noted on that item (V2, S3, S5, S9, S16, F8).
 
-- **P8** **S** Two exports remain app-facing for tests alone, and both are projections of a value the app already holds rather than a service reach-through, so they stay: `transaction_type` in [`transfer/rules.rs`](../core/gemstone/src/services/transfer/rules.rs) is how the iOS amount view model tests name the transfer they built, and `decode_url` in [`payment.rs`](../core/gemstone/src/payment.rs) is what the Android instrumentation test decodes the [documented QR cases](PAYMENTS.md) with. About 67 exported records and enums are named by neither app; review before deleting, a nested field or a test may reach them.
 
 Legitimately one-sided, not gaps: `isVersionHigher` (Play update), `migrateToSharedPassword` (Android password store), `set_price_alerts_enabled` (Android one-off migration), `signWithKeystore` (iOS keystore), `isOriginRejected`, `authentication_chain_ids`, `authentication_accounts`, `authentication_methods` in the auth flow (Android-only one-click auth, D4; proposal and sign check the origin inside Core on both), `scanTransaction` (both scan through `GemConfirmService`).
 
