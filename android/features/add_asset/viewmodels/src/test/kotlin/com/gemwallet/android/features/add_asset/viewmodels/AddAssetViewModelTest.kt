@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
-import com.gemwallet.android.features.add_asset.viewmodels.models.TokenSearchState
+import uniffi.gemstone.GemAddAssetPhase
 import com.gemwallet.android.testkit.mockAccount
 import com.gemwallet.android.testkit.mockAsset
 import com.gemwallet.android.testkit.mockSession
@@ -33,6 +33,8 @@ import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GemAddAssetServiceInterface
 import uniffi.gemstone.GemServiceException
+import com.gemwallet.android.ext.toPrimitives
+import uniffi.gemstone.GemAddAssetSession
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AddAssetViewModelTest {
@@ -40,6 +42,9 @@ class AddAssetViewModelTest {
     private val wallet = mockWallet(accounts = listOf(mockAccount(chain = Chain.Ethereum)))
     private val token = mockAsset(chain = Chain.Ethereum, tokenId = "0x1", name = "Token", symbol = "TKN", decimals = 18, type = AssetType.ERC20)
     private val service = mockk<GemAddAssetServiceInterface> {
+        every { newSession(any()) } answers {
+            GemAddAssetSession(chain = firstArg(), address = "", asset = null, isLoading = false, failed = false)
+        }
         every { chains(any()) } returns listOf(Chain.Ethereum.string)
         every { defaultChain(any()) } returns Chain.Ethereum.string
         every { matchingChains(any(), any()) } answers { firstArg() }
@@ -64,7 +69,7 @@ class AddAssetViewModelTest {
                 Snapshot.sendApplyNotifications()
             }
 
-            assertEquals(TokenSearchState.Found(token), viewModel.searchState.first { it is TokenSearchState.Found })
+            assertEquals(token, (viewModel.searchState.first { it is GemAddAssetPhase.Found } as GemAddAssetPhase.Found).asset.toPrimitives())
             assertEquals(token, viewModel.token.first { it != null })
         } finally {
             viewModel.viewModelScope.coroutineContext.job.cancelAndJoin()

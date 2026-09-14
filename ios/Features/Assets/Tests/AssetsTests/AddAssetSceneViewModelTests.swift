@@ -27,7 +27,6 @@ struct AddAssetSceneViewModelTests {
         model.onChangeAddress()
         #expect(model.loadTrigger == AddAssetLoadTrigger(chain: .ethereum, address: "0x2", isImmediate: true))
 
-        model.state = .loading
         model.input.address = nil
         model.onChangeAddress()
         #expect(model.loadTrigger == nil)

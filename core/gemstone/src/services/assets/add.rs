@@ -11,6 +11,107 @@ use crate::services::error::GemServiceError;
 use crate::services::explorer::GemExplorerService;
 use primitives::BlockExplorerLink;
 
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemAddAssetPhase {
+    Idle,
+    Loading,
+    Found { asset: Asset },
+    Failed,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAddAssetViewState {
+    pub phase: GemAddAssetPhase,
+    pub can_add: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAddAssetSession {
+    pub chain: Option<Chain>,
+    pub address: String,
+    pub asset: Option<Asset>,
+    pub is_loading: bool,
+    pub failed: bool,
+}
+
+impl GemAddAssetSession {
+    pub fn new(chain: Option<Chain>) -> Self {
+        Self {
+            chain,
+            address: String::new(),
+            asset: None,
+            is_loading: false,
+            failed: false,
+        }
+    }
+
+    fn cleared(&self, chain: Option<Chain>, address: String) -> Self {
+        Self {
+            chain,
+            address,
+            asset: None,
+            is_loading: false,
+            failed: false,
+        }
+    }
+}
+
+#[uniffi::export]
+impl GemAddAssetSession {
+    pub fn on_chain(&self, chain: Option<Chain>) -> Self {
+        self.cleared(chain, self.address.clone())
+    }
+
+    pub fn on_address(&self, address: String) -> Self {
+        self.cleared(self.chain, address.trim().to_string())
+    }
+
+    pub fn on_loading(&self) -> Self {
+        Self {
+            is_loading: self.searches_token(),
+            ..self.cleared(self.chain, self.address.clone())
+        }
+    }
+
+    pub fn on_found(&self, asset: Asset) -> Self {
+        Self {
+            asset: Some(asset),
+            is_loading: false,
+            failed: false,
+            ..self.clone()
+        }
+    }
+
+    pub fn on_failed(&self) -> Self {
+        Self {
+            asset: None,
+            is_loading: false,
+            failed: true,
+            ..self.clone()
+        }
+    }
+
+    pub fn searches_token(&self) -> bool {
+        self.chain.is_some() && !self.address.is_empty()
+    }
+
+    pub fn view_state(&self) -> GemAddAssetViewState {
+        let phase = if self.is_loading {
+            GemAddAssetPhase::Loading
+        } else if let Some(asset) = &self.asset {
+            GemAddAssetPhase::Found { asset: asset.clone() }
+        } else if self.failed {
+            GemAddAssetPhase::Failed
+        } else {
+            GemAddAssetPhase::Idle
+        };
+        GemAddAssetViewState {
+            can_add: matches!(phase, GemAddAssetPhase::Found { .. }),
+            phase,
+        }
+    }
+}
+
 #[derive(uniffi::Object)]
 pub struct GemAddAssetService {
     assets: Arc<GemAssetsService>,
@@ -23,6 +124,10 @@ impl GemAddAssetService {
     #[uniffi::constructor]
     pub fn new(assets: Arc<GemAssetsService>, balances: Arc<GemBalanceService>, explorer: Arc<GemExplorerService>) -> Self {
         Self { assets, balances, explorer }
+    }
+
+    pub fn new_session(&self, chain: Option<Chain>) -> GemAddAssetSession {
+        GemAddAssetSession::new(chain)
     }
 
     pub fn chains(&self, wallet: Wallet) -> Vec<Chain> {
@@ -55,3 +160,48 @@ impl GemAddAssetService {
         self.balances.set_assets_enabled(wallet.id, vec![asset.id], true).await
     }
 }
+
+#[cfg(test)]
+mod session_tests {
+    use super::*;
+
+    fn asset() -> Asset {
+        Asset::from_chain(Chain::Ethereum)
+    }
+
+    #[test]
+    fn test_a_token_is_searched_only_with_a_chain_and_an_address() {
+        let session = GemAddAssetSession::new(Some(Chain::Ethereum));
+
+        assert!(!session.searches_token(), "an empty address searches nothing");
+        assert!(!session.on_address("   ".to_string()).searches_token(), "whitespace is not an address");
+        assert!(session.on_address("0xabc".to_string()).searches_token());
+        assert!(!session.on_address("0xabc".to_string()).on_chain(None).searches_token());
+    }
+
+    #[test]
+    fn test_a_new_address_drops_the_token_found_for_the_previous_one() {
+        let found = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_found(asset());
+        assert!(found.view_state().can_add);
+
+        let retyped = found.on_address("0xdef".to_string());
+        assert_eq!(retyped.view_state().phase, GemAddAssetPhase::Idle);
+        assert!(!retyped.view_state().can_add, "a token that was never looked up cannot be added");
+    }
+
+    #[test]
+    fn test_switching_chain_starts_over() {
+        let found = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_found(asset());
+
+        assert_eq!(found.on_chain(Some(Chain::SmartChain)).view_state().phase, GemAddAssetPhase::Idle);
+    }
+
+    #[test]
+    fn test_a_failed_lookup_is_not_an_empty_screen() {
+        let failed = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_failed();
+
+        assert_eq!(failed.view_state().phase, GemAddAssetPhase::Failed);
+        assert!(!failed.view_state().can_add);
+    }
+}
+

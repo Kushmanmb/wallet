@@ -32,7 +32,6 @@ Copy: [`fiat/session.rs`](../core/gemstone/src/services/fiat/session.rs) → [iO
 
 A session is a plain Record: the screen's service vends it, `on_*` events return a new one, and `view_state()` derives what the screen shows. It performs no I/O — the app awaits its own service and hands the result back through an event. Do not let the flow that collects a session also write to it; drive loads from the period or trigger that changed.
 
-- **S5** **M** Add asset — [iOS](../ios/Features/Assets/Sources/ViewModels/AddAssetSceneViewModel.swift), [Android](../android/features/add_asset/viewmodels/src/main/kotlin/com/gemwallet/android/features/add_asset/viewmodels/AddAssetViewModel.kt). Only Android calls Core's `matching_chains`.
 - **S6** **M** Wallet search — [iOS](../ios/Features/WalletTab/Sources/ViewModels/WalletSearchSceneViewModel.swift), [Android](../android/features/assets/viewmodels/src/main/kotlin/com/gemwallet/android/features/assets/viewmodels/WalletSearchViewModel.kt). Take the limits item in § 2 first.
 - **S7** **M** Import wallet — [iOS](../ios/Features/Onboarding/Sources/ViewModels/ImportWalletSceneViewModel.swift), [Android](../android/features/import_wallet/viewmodels/src/main/kotlin/com/gemwallet/android/features/import_wallet/viewmodels/ImportViewModel.kt).
 - **S8** **M** Transactions list and filter — [iOS](../ios/Features/Transactions/Sources/ViewModels/TransactionsViewModel.swift), [Android](../android/features/activities/viewmodels/src/main/kotlin/com/gemwallet/android/features/activities/viewmodels/TransactionsViewModel.kt).

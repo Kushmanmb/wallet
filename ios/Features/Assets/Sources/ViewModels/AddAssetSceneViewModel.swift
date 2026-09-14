@@ -1,6 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import protocol Gemstone.GemAddAssetServiceProtocol
+import enum Gemstone.GemAddAssetPhase
+import struct Gemstone.GemAddAssetSession
 import Components
 import Foundation
 import GemstonePrimitives
@@ -16,7 +18,7 @@ public final class AddAssetSceneViewModel {
     private let service: any GemAddAssetServiceProtocol
     private let wallet: Wallet
 
-    var state: StateViewType<AddAssetViewModel> = .noData
+    private var session: GemAddAssetSession
     var input: AddAssetInput
 
     var isPresentingScanner = false
@@ -27,7 +29,20 @@ public final class AddAssetSceneViewModel {
         self.service = service
         self.wallet = wallet
         let chains = service.chains(wallet: wallet)
-        input = AddAssetInput(chains: chains, chain: service.defaultChain(chains: chains))
+        let input = AddAssetInput(chains: chains, chain: service.defaultChain(chains: chains))
+        session = service.newSession(chain: input.chain?.rawValue)
+        self.input = input
+    }
+
+    var state: StateViewType<AddAssetViewModel> {
+        switch session.viewState().phase {
+        case .idle: return .noData
+        case .loading: return .loading
+        case let .found(core):
+            let asset = core.map()
+            return .data(AddAssetViewModel(asset: asset, link: service.tokenUrl(chain: asset.chain, tokenId: asset.tokenId ?? "")))
+        case .failed: return .error(AnyError(Localized.Errors.errorOccurred))
+        }
     }
 
     var title: String {
@@ -114,22 +129,19 @@ extension AddAssetSceneViewModel {
 
     func load() async {
         guard let trigger = loadTrigger else { return }
-
-        state = .loading
-
+        session = session.onLoading()
         do {
-            let asset = try await service.token(chain: trigger.chain, address: trigger.address)
-            state = .data(AddAssetViewModel(asset: asset, link: service.tokenUrl(chain: asset.chain, tokenId: asset.tokenId ?? "")))
+            session = try await session.onFound(asset: service.token(chain: trigger.chain.rawValue, address: trigger.address))
         } catch {
-            state.setError(error)
+            session = session.onFailed()
         }
     }
 
     func onSelectImportToken(onComplete: VoidAction) {
-        guard case let .data(asset) = state else { return }
+        guard let asset = session.asset?.map() else { return }
         Task {
             do {
-                try await service.add(wallet: wallet, assetId: asset.asset.id)
+                try await service.add(wallet: wallet.map(), assetId: asset.id.identifier)
                 onComplete?()
             } catch {
                 isPresentingAlertMessage = AlertMessage(error: error)
@@ -138,8 +150,8 @@ extension AddAssetSceneViewModel {
     }
 
     private func setLoadTrigger(isImmediate: Bool) {
-        guard let chain = input.chain, let address = input.address, !address.isEmpty else {
-            state = .noData
+        session = session.onChain(chain: input.chain?.rawValue).onAddress(address: input.address ?? "")
+        guard session.searchesToken(), let chain = input.chain, let address = input.address else {
             loadTrigger = nil
             return
         }

@@ -48,7 +48,7 @@ import com.gemwallet.android.ui.theme.compactIconSize
 import com.gemwallet.android.ui.theme.space24
 import com.gemwallet.android.ui.theme.defaultPadding
 import com.gemwallet.android.ui.theme.sceneContentPadding
-import com.gemwallet.android.features.add_asset.viewmodels.models.TokenSearchState
+import uniffi.gemstone.GemAddAssetPhase
 import com.gemwallet.android.ui.components.fields.AddressChainField
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.BlockExplorerLink
@@ -59,7 +59,7 @@ private val networkItemHeight = 64.dp
 
 @Composable
 internal fun AddAssetScene(
-    searchState: TokenSearchState,
+    searchState: GemAddAssetPhase,
     addressState: MutableState<String>,
     network: Asset?,
     token: Asset?,
@@ -112,12 +112,12 @@ internal fun AddAssetScene(
                 onQrScanner = { onAction(AddAssetAction.Scan) },
             )
         }
-        if (searchState is TokenSearchState.Loading) {
+        if (searchState is GemAddAssetPhase.Loading) {
             Box {
                 CircularProgressIndicator16(modifier = Modifier.align(Alignment.Center))
             }
         }
-        if (searchState is TokenSearchState.Error) {
+        if (searchState is GemAddAssetPhase.Failed) {
             Card(
                 modifier = Modifier.padding(horizontal = sceneContentPadding()),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),

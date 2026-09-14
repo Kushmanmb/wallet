@@ -12,7 +12,6 @@ import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.add_asset.viewmodels.models.AddAssetUIState
-import com.gemwallet.android.features.add_asset.viewmodels.models.TokenSearchState
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.buttonState
 import com.wallet.core.primitives.Asset
@@ -35,6 +34,8 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAddAssetServiceInterface
 import javax.inject.Inject
 import com.gemwallet.android.ext.serviceMessage
+import uniffi.gemstone.GemAddAssetPhase
+import uniffi.gemstone.GemAddAssetSession
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -72,25 +73,29 @@ class AddAssetViewModel @Inject constructor(
 
     val addressState = mutableStateOf("")
 
-    val searchState = snapshotFlow { addressState.value }.combine(selectedChain) { address, chain -> chain to address }
+    private val session = snapshotFlow { addressState.value }.combine(selectedChain) { address, chain -> chain to address }
         .flatMapLatest { (chain, address) ->
             flow {
-                if (address.isEmpty() || chain == null) {
-                    emit(TokenSearchState.Idle)
+                val input = service.newSession(chain?.string).onAddress(address)
+                if (!input.searchesToken()) {
+                    emit(input)
                     return@flow
                 }
-                emit(TokenSearchState.Loading)
-                emit(searchToken(chain, address))
+                emit(input.onLoading())
+                emit(searchToken(input, requireNotNull(chain), address))
             }
         }
         .flowOn(Dispatchers.IO)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, TokenSearchState.Idle)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, service.newSession(null))
 
-    val token = searchState.map { (it as? TokenSearchState.Found)?.asset }
+    val searchState = session.map { it.viewState().phase }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, GemAddAssetPhase.Idle)
+
+    val token = session.map { it.asset?.toPrimitives() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val buttonState = combine(token, uiState) { token, uiState ->
-        buttonState(enabled = token != null, loading = uiState.isLoading)
+    val buttonState = combine(session, uiState) { session, uiState ->
+        buttonState(enabled = session.viewState().canAdd, loading = uiState.isLoading)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Disabled)
 
     val explorerLink = token.map { token ->
@@ -148,9 +153,9 @@ class AddAssetViewModel @Inject constructor(
 
     fun clearError() = state.update { it.copy(error = null) }
 
-    private suspend fun searchToken(chain: Chain, address: String): TokenSearchState =
-        runCatchingCancellable { TokenSearchState.Found(service.token(chain.string, address).toPrimitives()) }
-            .getOrDefault(TokenSearchState.Error)
+    private suspend fun searchToken(session: GemAddAssetSession, chain: Chain, address: String): GemAddAssetSession =
+        runCatchingCancellable { session.onFound(service.token(chain.string, address)) }
+            .getOrDefault(session.onFailed())
 
 
     private data class State(
