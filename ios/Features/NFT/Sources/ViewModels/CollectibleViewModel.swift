@@ -19,6 +19,7 @@ import Style
 import SwiftUI
 import func Gemstone.socialLinks
 import typealias Gemstone.AssetLink
+import enum Gemstone.GemCollectibleRow
 
 @Observable
 @MainActor
@@ -119,6 +120,34 @@ public final class CollectibleViewModel {
             placeholder: ChainImage(chain: chain).image,
             chainPlaceholder: .none,
         )
+    }
+
+    func infoRows(_ rows: [GemCollectibleRow]) -> [CollectibleInfoRowModel] {
+        rows.map(infoRow)
+    }
+
+    private func infoRow(_ row: GemCollectibleRow) -> CollectibleInfoRowModel {
+        switch row {
+        case let .collection(name):
+            return CollectibleInfoRowModel(title: Localized.Nft.collection, subtitle: name)
+        case let .network(chain):
+            let chain = Primitives.Chain(core: chain)
+            return CollectibleInfoRowModel(title: Localized.Transfer.network, subtitle: chain.networkName, assetImage: networkImage(chain: chain))
+        case let .contract(identifier):
+            return CollectibleInfoRowModel(
+                title: Localized.Asset.contract,
+                subtitle: identifier.text,
+                copyValue: .address(value: identifier.value, chain: assetData.asset.chain),
+                explorer: identifier.explorer.map { $0.map() },
+            )
+        case let .tokenId(identifier):
+            return CollectibleInfoRowModel(
+                title: Localized.Asset.tokenId,
+                subtitle: identifier.text,
+                copyValue: .plain(identifier.value),
+                explorer: identifier.explorer.map { $0.map() },
+            )
+        }
     }
 
     func socialLinksModel(_ links: [Gemstone.AssetLink]) -> SocialLinksViewModel {
@@ -247,4 +276,22 @@ extension CollectibleViewModel {
         let saver = ImageGalleryService()
         try await saver.saveImageFromURL(url)
     }
+}
+
+public struct CollectibleInfoRowModel: Identifiable {
+    public let title: String
+    public let subtitle: String
+    public let assetImage: AssetImage?
+    public let copyValue: CopyValue?
+    public let explorer: BlockExplorerLink?
+
+    init(title: String, subtitle: String, assetImage: AssetImage? = nil, copyValue: CopyValue? = nil, explorer: BlockExplorerLink? = nil) {
+        self.title = title
+        self.subtitle = subtitle
+        self.assetImage = assetImage
+        self.copyValue = copyValue
+        self.explorer = explorer
+    }
+
+    public var id: String { "\(title)-\(subtitle)" }
 }

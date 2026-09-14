@@ -1,8 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import struct Gemstone.GemCollectibleIdentifier
-import enum Gemstone.GemCollectibleRow
 import GemstonePrimitives
 import InfoSheet
 import Localization
@@ -30,7 +28,7 @@ public struct CollectibleScene: View {
                     }
                 case let .info(rows):
                     Section {
-                        ForEach(rows, id: \.self, content: infoRowView)
+                        ForEach(model.infoRows(rows), content: infoRowView)
                     }
                 case let .attributes(attributes):
                     Section(Localized.Nft.properties) {
@@ -97,36 +95,17 @@ extension CollectibleScene {
     }
 
     @ViewBuilder
-    private func infoRowView(_ row: GemCollectibleRow) -> some View {
-        switch row {
-        case let .collection(name):
-            ListItemView(title: Localized.Nft.collection, subtitle: name)
-        case let .network(chain):
-            let chain = Primitives.Chain(core: chain)
-            ListItemImageView(
-                title: Localized.Transfer.network,
-                subtitle: chain.networkName,
-                assetImage: model.networkImage(chain: chain),
-            )
-        case let .contract(identifier):
-            identifierRowView(
-                title: Localized.Asset.contract,
-                identifier: identifier,
-                copyValue: .address(value: identifier.value, chain: model.assetData.asset.chain),
-            )
-        case let .tokenId(identifier):
-            identifierRowView(title: Localized.Asset.tokenId, identifier: identifier, copyValue: .plain(identifier.value))
-        }
-    }
-
-    @ViewBuilder
-    private func identifierRowView(title: String, identifier: GemCollectibleIdentifier, copyValue: CopyValue) -> some View {
-        if let explorer = identifier.explorer {
-            ListItemView(title: title, subtitle: identifier.text)
-                .explorerContext(ExplorerContextData(copyValue: copyValue, explorerLink: explorer.map()))
+    private func infoRowView(_ row: CollectibleInfoRowModel) -> some View {
+        if let assetImage = row.assetImage {
+            ListItemImageView(title: row.title, subtitle: row.subtitle, assetImage: assetImage)
+        } else if let copyValue = row.copyValue, let explorer = row.explorer {
+            ListItemView(title: row.title, subtitle: row.subtitle)
+                .explorerContext(ExplorerContextData(copyValue: copyValue, explorerLink: explorer))
+        } else if let copyValue = row.copyValue {
+            ListItemView(title: row.title, subtitle: row.subtitle)
+                .contextMenu(.copy(value: copyValue.rawValue, onCopy: model.onSelectCopyValue))
         } else {
-            ListItemView(title: title, subtitle: identifier.text)
-                .contextMenu(.copy(value: identifier.value, onCopy: model.onSelectCopyValue))
+            ListItemView(title: row.title, subtitle: row.subtitle)
         }
     }
 }

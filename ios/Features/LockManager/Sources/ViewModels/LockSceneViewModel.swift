@@ -7,6 +7,7 @@ import Localization
 import Observation
 import Style
 import SwiftUI
+import class Gemstone.GemSecurityService
 
 @MainActor
 @Observable
@@ -183,5 +184,18 @@ extension LockSceneViewModel {
         } catch {
             return .lockedCanceled
         }
+    }
+}
+
+// MARK: - Previews
+
+extension LockSceneViewModel {
+    static var preview: LockSceneViewModel {
+        LockSceneViewModel(
+            service: BiometryAuthenticationService(
+                keystorePassword: LocalKeystorePassword(),
+                securityService: GemSecurityService(),
+            ),
+        )
     }
 }
