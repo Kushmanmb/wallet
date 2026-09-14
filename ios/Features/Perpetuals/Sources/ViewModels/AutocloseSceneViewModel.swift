@@ -3,7 +3,9 @@
 import Components
 import Formatters
 import Foundation
+import enum Gemstone.GemAutocloseConfirmPolicy
 import struct Gemstone.GemAutocloseModify
+import struct Gemstone.GemAutocloseSession
 import struct Gemstone.GemAutocloseField
 import GemstonePrimitives
 import Localization
@@ -86,8 +88,12 @@ public final class AutocloseSceneViewModel {
         }
     }
 
+    private var session: GemAutocloseSession {
+        GemAutocloseSession(modify: modify, policy: .whenBuildable, submitAttempted: false)
+    }
+
     public var confirmButtonType: ButtonType {
-        .primary(modify.canBuild() ? .normal : .disabled)
+        .primary(session.viewState().confirmEnabled ? .normal : .disabled)
     }
 }
 
@@ -107,7 +113,7 @@ public extension AutocloseSceneViewModel {
         input.update()
 
         let modify = modify
-        guard modify.canBuild() else { return }
+        guard session.onSubmitAttempt().viewState().confirmEnabled else { return }
 
         switch type {
         case let .modify(position, onTransferAction):

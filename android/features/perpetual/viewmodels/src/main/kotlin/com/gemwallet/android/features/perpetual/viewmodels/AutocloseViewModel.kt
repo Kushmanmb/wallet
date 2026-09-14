@@ -36,6 +36,8 @@ import java.util.Locale
 import javax.inject.Inject
 import com.gemwallet.android.serializer.toJson
 import com.gemwallet.android.ext.toGem
+import uniffi.gemstone.GemAutocloseConfirmPolicy
+import uniffi.gemstone.GemAutocloseSession
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -113,7 +115,7 @@ class AutocloseViewModel @Inject constructor(
         val takeProfitField = autocloseField(position, TpslType.TakeProfit, takeProfitText.value)
         val stopLossField = autocloseField(position, TpslType.StopLoss, stopLossText.value)
         val modify = GemAutocloseModify(position.position.direction.toGem(), assetIndex, takeProfitField.toGem(), stopLossField.toGem())
-        if (!modify.canBuild()) return
+        if (!GemAutocloseSession(modify, GemAutocloseConfirmPolicy.UNTIL_SUBMITTED, true).viewState().confirmEnabled) return
         _confirmRequests.tryEmit(modify.transfer(position.perpetual.provider.toGem(), position.asset.toGem()))
     }
 
@@ -125,17 +127,17 @@ class AutocloseViewModel @Inject constructor(
     ): AutocloseUIModel {
         val takeProfit = autocloseField(position, TpslType.TakeProfit, takeProfitText)
         val stopLoss = autocloseField(position, TpslType.StopLoss, stopLossText)
-        val confirmEnabled = if (submitAttempted) {
-            GemAutocloseModify(position.position.direction.toGem(), 0, takeProfit.toGem(), stopLoss.toGem()).canBuild()
-        } else {
-            takeProfit.toGem().hasPendingChange() || stopLoss.toGem().hasPendingChange()
-        }
+        val state = GemAutocloseSession(
+            GemAutocloseModify(position.position.direction.toGem(), 0, takeProfit.toGem(), stopLoss.toGem()),
+            GemAutocloseConfirmPolicy.UNTIL_SUBMITTED,
+            submitAttempted,
+        ).viewState()
         return AutocloseUIModelFactory.create(
             position = position,
             takeProfit = takeProfit,
             stopLoss = stopLoss,
-            confirmEnabled = confirmEnabled,
-            showErrors = submitAttempted,
+            confirmEnabled = state.confirmEnabled,
+            showErrors = state.showsErrors,
         )
     }
 

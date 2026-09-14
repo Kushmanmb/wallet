@@ -106,8 +106,96 @@ impl GemAutocloseModify {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemAutocloseConfirmPolicy {
+    WhenBuildable,
+    UntilSubmitted,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAutocloseViewState {
+    pub confirm_enabled: bool,
+    pub shows_errors: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAutocloseSession {
+    pub modify: GemAutocloseModify,
+    pub policy: GemAutocloseConfirmPolicy,
+    pub submit_attempted: bool,
+}
+
+#[uniffi::export]
+impl GemAutocloseSession {
+    pub fn on_modify(&self, modify: GemAutocloseModify) -> Self {
+        Self { modify, ..self.clone() }
+    }
+
+    pub fn on_submit_attempt(&self) -> Self {
+        Self {
+            submit_attempted: true,
+            ..self.clone()
+        }
+    }
+
+    pub fn view_state(&self) -> GemAutocloseViewState {
+        let can_build = self.modify.can_build();
+        GemAutocloseViewState {
+            confirm_enabled: match (self.policy, self.submit_attempted) {
+                (GemAutocloseConfirmPolicy::WhenBuildable, _) | (GemAutocloseConfirmPolicy::UntilSubmitted, true) => can_build,
+                (GemAutocloseConfirmPolicy::UntilSubmitted, false) => {
+                    self.modify.take_profit.has_pending_change() || self.modify.stop_loss.has_pending_change()
+                }
+            },
+            shows_errors: self.submit_attempted,
+        }
+    }
+}
+
+impl GemAutocloseSession {
+    pub fn new(modify: GemAutocloseModify, policy: GemAutocloseConfirmPolicy) -> Self {
+        Self {
+            modify,
+            policy,
+            submit_attempted: false,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn test_each_platform_gates_confirm_the_way_its_policy_says() {
+        let changed = GemAutocloseModify {
+            direction: PerpetualDirection::Long,
+            asset_index: 0,
+            take_profit: field(Some(110.0), Some(100.0), true, None),
+            stop_loss: field(None, None, true, None),
+        };
+        let ios = GemAutocloseSession::new(changed.clone(), GemAutocloseConfirmPolicy::WhenBuildable);
+        let android = GemAutocloseSession::new(changed, GemAutocloseConfirmPolicy::UntilSubmitted);
+
+        assert_eq!(ios.view_state().confirm_enabled, ios.modify.can_build());
+        assert!(android.view_state().confirm_enabled, "a pending change is enough before a submit");
+        assert_eq!(android.on_submit_attempt().view_state().confirm_enabled, android.modify.can_build());
+    }
+
+    #[test]
+    fn test_errors_only_show_after_a_submit_attempt() {
+        let session = GemAutocloseSession::new(
+            GemAutocloseModify {
+                direction: PerpetualDirection::Long,
+                asset_index: 0,
+                take_profit: field(Some(110.0), None, false, None),
+                stop_loss: field(None, None, true, None),
+            },
+            GemAutocloseConfirmPolicy::UntilSubmitted,
+        );
+
+        assert!(!session.view_state().shows_errors);
+        assert!(session.on_submit_attempt().view_state().shows_errors);
+    }
     use super::*;
 
     fn field(price: Option<f64>, original_price: Option<f64>, is_valid: bool, order_id: Option<u64>) -> GemAutocloseField {
