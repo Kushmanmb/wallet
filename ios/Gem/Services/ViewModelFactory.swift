@@ -90,6 +90,7 @@ import class Gemstone.GemAssetDetailsService
 import class Gemstone.GemAddAssetService
 import class Gemstone.GemAssetSelectionService
 import class Gemstone.GemBannerService
+import class Gemstone.GemChainService
 import class Gemstone.GemTransactionsService
 import enum Gemstone.GemRecipientType
 import struct Gemstone.GemTransferData
@@ -98,6 +99,7 @@ import struct Gemstone.SimulationResult
 public struct ViewModelFactory: Sendable {
     let apiClient: GemApiClient
     let assetConfig: GemAssetConfigService
+    let chainService: GemChainService
     let assetDiscoveryService: GemAssetDiscoveryService
     let assetsService: GemAssetsService
     let avatarService: GemAvatarService
@@ -218,7 +220,7 @@ public struct ViewModelFactory: Sendable {
 
     @MainActor
     public func chainListSettingsScene() -> ChainListSettingsViewModel {
-        ChainListSettingsViewModel(service: GemChainService())
+        ChainListSettingsViewModel(service: chainService)
     }
 
     @MainActor
@@ -460,8 +462,14 @@ public struct ViewModelFactory: Sendable {
             preferences: observablePreferences,
             nameService: nameService,
             avatarService: avatarService,
+            importWalletType: importWalletTypeScene,
             onComplete: onComplete,
         )
+    }
+
+    @MainActor
+    public func importWalletTypeScene() -> ImportWalletTypeViewModel {
+        ImportWalletTypeViewModel(service: chainService)
     }
 
     @MainActor
