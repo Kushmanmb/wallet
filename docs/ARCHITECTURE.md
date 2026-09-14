@@ -522,6 +522,8 @@ The `flowOn` above is not decoration. A synchronous Core call such as `transacti
 
 The coordinator dispatches; it does not leave that to its caller. Whether a Core method touches a store is Core's business and can change without the call site noticing.
 
+The one call that stays on the calling thread is a preference read a synchronous Core rule takes as an argument. `UserConfig` reads a locally stored fact and hands it to the rule; moving it off main would turn a synchronous answer into an asynchronous one for no gain. Every other Core call takes the dispatcher at its boundary.
+
 ```kotlin
 // suspend: move the call
 override suspend fun invoke(...): List<FiatQuote> = withContext(Dispatchers.IO) {
