@@ -52,7 +52,6 @@ Legitimately one-sided, not gaps: `isVersionHigher` (Play update), `migrateToSha
 
 Product or security decisions, one question each:
 
-- **D9** Swap max-amount fee trim — [SWAPPER.md](SWAPPER.md) records that confirmed and signed amounts can differ by up to the fee on providers outside the [reserve rule](../core/crates/swapper/src/fees/reserve.rs). Decide whether the signer or the quote owns the trim.
 
 Ownership, injection and threads:
 
