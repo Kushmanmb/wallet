@@ -8,7 +8,7 @@ use alloy_primitives::{Address, U256, hex::encode_prefixed as HexEncode};
 use alloy_sol_types::SolCall;
 use primitives::swap::ApprovalData;
 
-use super::{DEFAULT_DEPOSIT_GAS_LIMIT, asset::THORChainAsset, contracts::RouterInterface, model::RouteData};
+use super::{asset::THORChainAsset, contracts::RouterInterface, deposit_gas_limit, model::RouteData};
 use crate::{SwapperQuoteData, approval::get_swap_gas_limit_with_approval};
 
 pub fn map_quote_data(
@@ -19,7 +19,7 @@ pub fn map_quote_data(
     memo: String,
     approval: Option<ApprovalData>,
 ) -> SwapperQuoteData {
-    let gas_limit = get_swap_gas_limit_with_approval(&approval, None, DEFAULT_DEPOSIT_GAS_LIMIT);
+    let gas_limit = get_swap_gas_limit_with_approval(&approval, None, deposit_gas_limit(&memo));
 
     if from_asset.use_evm_router() {
         let router_address = route_data.router_address.clone().unwrap_or_default();
@@ -159,7 +159,17 @@ mod tests {
         assert_eq!(result.to, "0xD37BbE5744D730a1d98d8DC97c42F0Ca46aD7146");
         assert_eq!(result.value, BigUint::from(0u64));
         assert_eq!(result.approval, approval);
-        assert_eq!(result.gas_limit, Some("90000".to_string()));
+        assert_eq!(result.gas_limit, Some(deposit_gas_limit("memo").to_string()));
+    }
+
+    #[test]
+    fn a_longer_memo_raises_the_deposit_gas_limit() {
+        let short = deposit_gas_limit("=:ETH.ETH:0xabc");
+        let long = deposit_gas_limit("=:ETH.ETH:0xabc:100000000/1/0:gem:20");
+
+        assert!(long > short);
+        assert_eq!(long - short, ("=:ETH.ETH:0xabc:100000000/1/0:gem:20".len() - "=:ETH.ETH:0xabc".len()) as u64 * 16);
+        assert_eq!(deposit_gas_limit(""), 90_000);
     }
 
     #[test]

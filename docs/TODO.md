@@ -72,7 +72,7 @@ Platform items:
 
 
 - **X2** **L** iOS untyped `.map()` naming — Android names the direction. Generator pair in [`remote_mappers.rs`](../core/bin/generate/src/remote_mappers.rs), ~890 call sites.
-- **X14** **M** Core constants that should be data: [`gem_auth/signature.rs`](../core/crates/gem_auth/src/signature.rs) verifies Ethereum signatures only and returns false for every other chain type; [TON verified collections](../core/crates/nft/src/providers/ton/verified.rs) is a hardcoded allowlist; [THORChain deposit gas](../core/crates/swapper/src/thorchain/mod.rs) is a flat 90k instead of memo-sized. The Stellar fee now comes from the joined transaction, with the 100-stroop base fee only as the fallback.
+- **X14** **S** Core constants that should be data: [`gem_auth/signature.rs`](../core/crates/gem_auth/src/signature.rs) verifies Ethereum signatures only and returns false for every other chain type, and [TON verified collections](../core/crates/nft/src/providers/ton/verified.rs) is a hardcoded allowlist that belongs server-side. The THORChain deposit gas is now sized from the memo it carries, and the Stellar fee comes from the joined transaction with the 100-stroop base fee only as the fallback.
 
 Guides:
 
