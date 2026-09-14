@@ -17,13 +17,13 @@ public extension GemWalletServiceProtocol {
     }
 
     func sorted(wallets: [Wallet]) -> [Wallet] {
-        sortedWallets(wallets: wallets.map { $0.map() }).map { $0.map() }
+        sortedWallets(wallets: wallets.map { $0.toGem() }).map { $0.toPrimitives() }
     }
 
     func importWallet(name: String, type: GemWalletImportType, source: Primitives.WalletSource) async throws -> WalletImportResult {
-        return switch try await importWallet(name: name, import: type, source: source.map()) {
-        case let .new(wallet): .new(wallet.map())
-        case let .existing(wallet): .existing(wallet.map())
+        return switch try await importWallet(name: name, import: type, source: source.toGem()) {
+        case let .new(wallet): .new(wallet.toPrimitives())
+        case let .existing(wallet): .existing(wallet.toPrimitives())
         }
     }
 
@@ -48,6 +48,6 @@ public extension GemWalletServiceProtocol {
     }
 
     func getWallets() async throws -> [Wallet] {
-        try await wallets().map { $0.map() }
+        try await wallets().map { $0.toPrimitives() }
     }
 }

@@ -81,7 +81,7 @@ public final class CollectibleViewModel {
     }
 
     var details: GemCollectibleDetails {
-        service.details(walletType: wallet.type.map(), assetData: assetData.map(), isOwned: query.value.isOwned)
+        service.details(walletType: wallet.type.toGem(), assetData: assetData.toGem(), isOwned: query.value.isOwned)
     }
 
     var sections: [GemCollectibleSection] {
@@ -138,14 +138,14 @@ public final class CollectibleViewModel {
                 title: Localized.Asset.contract,
                 subtitle: identifier.text,
                 copyValue: .address(value: identifier.value, chain: assetData.asset.chain),
-                explorer: identifier.explorer.map { $0.map() },
+                explorer: identifier.explorer.map { $0.toPrimitives() },
             )
         case let .tokenId(identifier):
             return CollectibleInfoRowModel(
                 title: Localized.Asset.tokenId,
                 subtitle: identifier.text,
                 copyValue: .plain(identifier.value),
-                explorer: identifier.explorer.map { $0.map() },
+                explorer: identifier.explorer.map { $0.toPrimitives() },
             )
         }
     }
@@ -176,7 +176,7 @@ extension CollectibleViewModel {
         switch type {
         case .send:
             isPresentingSelectedAssetInput.wrappedValue = SelectedAssetInput(
-                type: .send(.nft(nftAsset: assetData.asset.map())),
+                type: .send(.nft(nftAsset: assetData.asset.toGem())),
                 assetData: .with(asset: account.chain.asset, account: account),
             )
         case .buy, .sell, .receive, .swap, .stake, .more, .deposit, .withdraw:

@@ -42,7 +42,7 @@ public struct NetworkFeeScene: View {
                                 model: model.rowItem(for: feeRate),
                             ),
                         ) {
-                            model.select(.priority(priority: feeRate.priority.map()))
+                            model.select(.priority(priority: feeRate.priority.toGem()))
                             dismiss()
                         }
                     }

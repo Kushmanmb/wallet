@@ -23,7 +23,7 @@ public struct FiatTransactionViewModel: Sendable {
     }
 
     public var listItemModel: ListItemModel {
-        let status = fiatTransactionStatus(status: info.status.map())
+        let status = fiatTransactionStatus(status: info.status.toGem())
         return ListItemModel(
             title: typeTitle,
             titleStyle: TextStyle(font: Font.system(.body, weight: .medium), color: .primary),

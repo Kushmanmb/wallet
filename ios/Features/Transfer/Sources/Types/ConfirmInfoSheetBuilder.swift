@@ -39,22 +39,22 @@ enum ConfirmInfoSheetBuilder {
     ) -> InfoSheetType? {
         switch error {
         case let .InsufficientBalance(asset, requirement):
-            let asset = asset.map()
-            return .balanceRequired(asset, image: image(for: asset), requirement: requirement.map(), button: acquireButton(asset, flow: acquireFlow(asset)) { onGetAsset(asset, nil) })
+            let asset = asset.toPrimitives()
+            return .balanceRequired(asset, image: image(for: asset), requirement: requirement.toPrimitives(), button: acquireButton(asset, flow: acquireFlow(asset)) { onGetAsset(asset, nil) })
         case let .InsufficientNetworkFee(asset, requirement):
-            let asset = asset.map()
-            return .insufficientNetworkFee(asset, image: image(for: asset), requirement: requirement?.map(), price: feePrice, currency: currency, button: acquireButton(asset, flow: acquireFlow(asset)) {
+            let asset = asset.toPrimitives()
+            return .insufficientNetworkFee(asset, image: image(for: asset), requirement: requirement?.toPrimitives(), price: feePrice, currency: currency, button: acquireButton(asset, flow: acquireFlow(asset)) {
                 onGetAsset(asset, networkFeeBuyAmount)
             })
         case let .MinimumAccountBalanceTooLow(asset, requirement):
-            return .accountMinimalBalance(asset.map(), required: requirement.required)
+            return .accountMinimalBalance(asset.toPrimitives(), required: requirement.required)
         case let .BelowSwapMinimum(asset, provider, providerName, requirement):
-            let asset = asset.map()
+            let asset = asset.toPrimitives()
             return .swapMinimumAmount(
                 asset,
                 providerName: providerName,
-                image: AssetImage(placeholder: provider.map().image),
-                requirement: requirement.map(),
+                image: AssetImage(placeholder: provider.toPrimitives().image),
+                requirement: requirement.toPrimitives(),
                 price: prices[asset.id],
                 currency: currency,
                 button: acquireButton(asset, flow: acquireFlow(asset)) { onGetAsset(asset, nil) },

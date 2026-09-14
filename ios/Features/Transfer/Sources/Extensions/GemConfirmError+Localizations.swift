@@ -30,7 +30,7 @@ extension GemConfirmError: @retroactive LocalizedError {
             if let requirement {
                 Localized.Info.InsufficientNetworkFeeBalance.description(
                     Self.amount(requirement.required, asset: asset).boldMarkdown(),
-                    asset.map().chain.networkName.boldMarkdown(),
+                    asset.toPrimitives().chain.networkName.boldMarkdown(),
                     Self.amount(requirement.available, asset: asset),
                     Self.amount(requirement.shortfall, asset: asset),
                 )
@@ -38,7 +38,7 @@ extension GemConfirmError: @retroactive LocalizedError {
                 Localized.Transfer.insufficientNetworkFeeBalance(Self.title(asset: asset))
             }
         case let .MinimumAccountBalanceTooLow(asset, requirement):
-            Localized.Transfer.minimumAccountBalance(ValueFormatter(style: .full).string(requirement.required, asset: asset.map()).boldMarkdown())
+            Localized.Transfer.minimumAccountBalance(ValueFormatter(style: .full).string(requirement.required, asset: asset.toPrimitives()).boldMarkdown())
         case let .BelowSwapMinimum(asset, _, providerName, requirement):
             Localized.Info.swapMinimumAmountDescription(
                 providerName.boldMarkdown(),
@@ -62,7 +62,7 @@ extension GemConfirmError {
     }
 
     private static func amount(_ value: BigInt, asset: Gemstone.Asset) -> String {
-        ValueFormatter(style: .full).string(value, asset: asset.map())
+        ValueFormatter(style: .full).string(value, asset: asset.toPrimitives())
     }
 
     private static func title(asset: Gemstone.Asset) -> String {

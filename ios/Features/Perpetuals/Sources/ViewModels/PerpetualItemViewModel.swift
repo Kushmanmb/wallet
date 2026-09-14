@@ -18,7 +18,7 @@ struct PerpetualItemViewModel: ListAssetItemViewable {
         model: PerpetualViewModel,
     ) {
         self.model = model
-        row = perpetualMarketRow(perpetual: model.perpetual.map())
+        row = perpetualMarketRow(perpetual: model.perpetual.toGem())
     }
 
     var name: String {

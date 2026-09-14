@@ -14,14 +14,14 @@ import Style
 public extension GemTransactionAmount {
     func display(currency: String, formatter: ValueFormatter, textStyle: TextStyle? = nil) -> AmountDisplay {
         .numeric(
-            data: AssetValuePrice(asset: asset.map(), value: BigInt(value), price: price.map { $0.map().mapToPrice() }),
+            data: AssetValuePrice(asset: asset.toPrimitives(), value: BigInt(value), price: price.map { $0.toPrimitives().mapToPrice() }),
             style: AmountDisplayStyle(sign: sign, formatter: formatter, currencyCode: currency, textStyle: textStyle),
         )
     }
 
     func swapAmountField(currency: String) -> SwapAmountField {
         let display = display(currency: currency, formatter: .auto)
-        let assetId = asset.map().id
+        let assetId = asset.toPrimitives().id
         return SwapAmountField(
             assetId: assetId,
             assetImage: AssetIdViewModel(assetId: assetId).assetImage,
@@ -37,7 +37,7 @@ public extension GemTransactionRowValue {
         case .none:
             nil
         case let .assetSymbol(asset):
-            AmountDisplay.symbol(asset: asset.map()).amount
+            AmountDisplay.symbol(asset: asset.toPrimitives()).amount
         case let .amount(amount):
             amount.display(currency: currency, formatter: formatter, textStyle: textStyle).amount
         case let .fiat(value):
@@ -69,9 +69,9 @@ public extension GemTransactionHeader {
                 ),
             )
         case let .symbol(asset):
-            .amount(.symbol(asset: asset.map()))
+            .amount(.symbol(asset: asset.toPrimitives()))
         case let .assetImage(asset):
-            .asset(image: AssetViewModel(asset: asset.map()).assetImage)
+            .asset(image: AssetViewModel(asset: asset.toPrimitives()).assetImage)
         }
     }
 }

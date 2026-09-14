@@ -23,7 +23,7 @@ extension TransactionSwapProgressViewModel: ItemModelProvidable {
         guard let progress else {
             return .empty
         }
-        let fromAsset = progress.fromAsset.map()
+        let fromAsset = progress.fromAsset.toPrimitives()
         let amount = ValueFormatter.auto.string(BigInt(progress.fromValue), asset: fromAsset)
         return .swapProgress(TransactionSwapProgressItemModel(
             transfer: .init(

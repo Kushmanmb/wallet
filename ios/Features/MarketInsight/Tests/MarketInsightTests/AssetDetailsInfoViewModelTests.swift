@@ -48,7 +48,7 @@ struct AssetDetailsInfoViewModelTests {
         let tokenId = try #require(Asset.mockEthereumUSDT().id.tokenId)
         let link = BlockExplorerLink(name: "Etherscan", link: "https://etherscan.io/token/\(tokenId)")
         let values = AssetDetailsInfoViewModel.mock().marketValues([
-            .contract(tokenId: tokenId, explorer: link.map()),
+            .contract(tokenId: tokenId, explorer: link.toGem()),
             .contract(tokenId: tokenId, explorer: nil),
         ])
 

@@ -119,7 +119,7 @@ public final class SwapSceneViewModel {
 
     public var swapDetailsViewModel: SwapDetailsViewModel? {
         guard let selectedSwapQuote, let fromAsset, let toAsset else { return nil }
-        let summary = swapperQuoteSummary(quote: selectedSwapQuote, fromAsset: fromAsset.asset.map(), toAsset: toAsset.asset.map())
+        let summary = swapperQuoteSummary(quote: selectedSwapQuote, fromAsset: fromAsset.asset.toGem(), toAsset: toAsset.asset.toGem())
         let selectedQuote = summary.quote
         let fromAssetPrice = AssetPriceValue(asset: fromAsset.asset, price: fromAsset.price)
         let toAssetPrice = AssetPriceValue(asset: toAsset.asset, price: toAsset.price)

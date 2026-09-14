@@ -41,7 +41,7 @@ public final class ReceiveViewModel: Sendable {
         networkAssetIds = service.networkAssetIds(
             assetId: asset.id.identifier,
             associations: associations.map(\.assetId.identifier),
-            wallet: wallet.map(),
+            wallet: wallet.toGem(),
         ).map { AssetId(core: $0) }
     }
 
@@ -188,7 +188,7 @@ extension ReceiveViewModel {
 
         Task {
             do {
-                let asset = try await service.asset(assetId: assetId.identifier).map()
+                let asset = try await service.asset(assetId: assetId.identifier).toPrimitives()
                 let account = try wallet.account(for: asset.chain)
                 assetModel = AssetViewModel(asset: asset)
                 address = account.address

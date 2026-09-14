@@ -55,7 +55,7 @@ public final class AmountPerpetualViewModel: AmountDataProvidable {
     }
 
     private var direction: PerpetualDirection {
-        transferData.direction.map()
+        transferData.direction.toPrimitives()
     }
 
     var autocloseText: (subtitle: String, subtitleExtra: String?) {
@@ -93,7 +93,7 @@ public final class AmountPerpetualViewModel: AmountDataProvidable {
 
     func makeAutocloseData(size: Double) -> AutocloseOpenData {
         AutocloseOpenData(
-            assetId: transferData.asset.map().id,
+            assetId: transferData.asset.toPrimitives().id,
             symbol: transferData.asset.symbol,
             direction: direction,
             marketPrice: transferData.price,
@@ -127,7 +127,7 @@ public final class AmountPerpetualViewModel: AmountDataProvidable {
         let maxLeverage = openData.leverage
         let textStyle = TextStyle(
             font: .callout,
-            color: PerpetualDirectionViewModel(direction: openData.direction.map()).color,
+            color: PerpetualDirectionViewModel(direction: openData.direction.toPrimitives()).color,
         )
         let selection = SelectionState(
             options: LeverageOption.options(maxLeverage: maxLeverage),

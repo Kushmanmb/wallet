@@ -20,7 +20,7 @@ struct PriceAlertItemViewModel: ListAssetItemViewable {
     init(data: PriceAlertData, currency: String) {
         self.data = data
         row = PriceAlertFormatter.shared.row(
-            alert: data.priceAlert.map(),
+            alert: data.priceAlert.toGem(),
             currentPrice: data.price?.price,
             priceChangePercentage24h: data.price?.priceChangePercentage24h,
             priceCurrency: currency,

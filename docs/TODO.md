@@ -69,7 +69,6 @@ Platform items:
 - **X8** **S** The same row reads differently on each app rather than by a Core decision: a curated asset list puts its count in the subtitle on [iOS](../ios/Features/WalletTab/Sources/ViewModels/AssetListItemViewModel.swift) and in a trailing badge on [Android](../android/features/assets/presents/src/main/kotlin/com/gemwallet/android/features/assets/views/WalletSearchScreen.kt), and a service status endpoint composes `"<name> <flag>"` separately in [iOS](../ios/Features/Settings/Sources/ChainSettings/ViewModels/ServiceStatusItemViewModel.swift) and [Android](../android/features/settings/networks/presents/src/main/kotlin/com/gemwallet/android/features/settings/networks/presents/ServiceStatusItem.kt). Both already take the title, icon and flag from Core, so what is left is a design-parity call, not a record.
 
 
-- **X2** **L** iOS untyped `.map()` naming — Android names the direction. Generator pair in [`remote_mappers.rs`](../core/bin/generate/src/remote_mappers.rs), ~890 call sites.
 
 Guides:
 

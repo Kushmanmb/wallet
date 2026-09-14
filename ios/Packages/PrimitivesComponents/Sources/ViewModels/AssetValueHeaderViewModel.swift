@@ -20,7 +20,7 @@ struct AssetValueHeaderViewModel: ValueHeaderViewModel {
     let buttons: [HeaderButton] = []
 
     var assetImage: AssetImage? {
-        AssetViewModel(asset: data.asset.map()).assetImage
+        AssetViewModel(asset: data.asset.toPrimitives()).assetImage
     }
 
     var title: String {

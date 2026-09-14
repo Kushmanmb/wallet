@@ -18,8 +18,8 @@ public enum NFTGridPosterBuilder {
 
     private static func item(_ item: GemNftItem, _ row: GemNftRow) -> GridPosterViewItem {
         switch item {
-        case let .collection(data): collection(data.map(), row)
-        case let .asset(data): asset(data.map(), row)
+        case let .collection(data): collection(data.toPrimitives(), row)
+        case let .asset(data): asset(data.toPrimitives(), row)
         }
     }
 

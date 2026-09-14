@@ -5,6 +5,6 @@ import Primitives
 
 public extension GemRecipientServiceProtocol {
     func recipientWallets(wallets: [Wallet]) -> [Wallet] {
-        recipientWallets(wallets: wallets.map { $0.map() }).map { $0.map() }
+        recipientWallets(wallets: wallets.map { $0.toGem() }).map { $0.toPrimitives() }
     }
 }

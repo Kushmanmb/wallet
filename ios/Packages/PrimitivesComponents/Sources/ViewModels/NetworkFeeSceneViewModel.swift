@@ -72,16 +72,16 @@ public struct NetworkFeeSceneViewModel {
     // MARK: - Fee Rates
 
     public var feeRatesViewModels: [FeeRateViewModel] {
-        rows.map { feeRateViewModel(priority: $0.priority.map(), displayValue: $0.displayValue, fee: $0.fee) }
+        rows.map { feeRateViewModel(priority: $0.priority.toPrimitives(), displayValue: $0.displayValue, fee: $0.fee) }
     }
 
     public var selectedFeeRateViewModel: FeeRateViewModel? {
-        guard let priority = selection.selectedPriority()?.map() else { return nil }
+        guard let priority = selection.selectedPriority()?.toPrimitives() else { return nil }
         return feeRatesViewModels.first(where: { $0.priority == priority })
     }
 
     public func isSelected(_ rate: FeeRateViewModel) -> Bool {
-        selection.selectedPriority()?.map() == rate.priority
+        selection.selectedPriority()?.toPrimitives() == rate.priority
     }
 
     public func rowItem(for rate: FeeRateViewModel) -> ListItemModel {
@@ -130,7 +130,7 @@ public struct NetworkFeeSceneViewModel {
 
 private extension NetworkFeeSceneViewModel {
     var rows: [GemFeeRateRow] { feeRates?.rows ?? [] }
-    var unitType: FeeUnitType { feeRates?.unitType.map() ?? .native }
+    var unitType: FeeUnitType { feeRates?.unitType.toPrimitives() ?? .native }
     var unitDecimals: Int { feeRates.map { Int($0.unitDecimals) } ?? feeAsset.decimals.asInt }
 
     func feeRateViewModel(priority: FeePriority, displayValue: BigInt, fee: BigInt?) -> FeeRateViewModel {

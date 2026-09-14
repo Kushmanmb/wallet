@@ -25,7 +25,7 @@ struct WalletRecipientSectionViewModel {
                 wallet.accounts.first { $0.chain == chain }.map { (wallet, $0) }
             }
         let subtitles = GemAddressService.shared.formatAll(
-            addresses: entries.map { ChainAddress(chain: $0.1.chain, address: $0.1.address).map() },
+            addresses: entries.map { ChainAddress(chain: $0.1.chain, address: $0.1.address).toGem() },
             style: .short,
         )
         return zip(entries, subtitles).map { entry, subtitle in

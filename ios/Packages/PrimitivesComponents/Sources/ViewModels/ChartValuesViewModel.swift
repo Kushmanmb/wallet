@@ -24,7 +24,7 @@ public struct ChartValuesViewModel: Sendable {
         lineColor: Color = Colors.blue,
         formatter: CurrencyFormatter,
     ) {
-        guard let values = try? ChartValues.from(charts: chartData.values.map { $0.map() }) else {
+        guard let values = try? ChartValues.from(charts: chartData.values.map { $0.toPrimitives() }) else {
             return nil
         }
         self.period = period

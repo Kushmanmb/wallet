@@ -64,7 +64,7 @@ public final class SelectAssetViewModel {
         let filter = AssetsFilterViewModel(
             flow: flow,
             model: ChainsFilterViewModel(
-                chains: service.filterChains(wallet: wallet.map()).map { Chain(core: $0) },
+                chains: service.filterChains(wallet: wallet.toGem()).map { Chain(core: $0) },
                 selected: chains,
             ),
         )
@@ -73,7 +73,7 @@ public final class SelectAssetViewModel {
         assetsQuery = ObservableQuery(AssetsRequest(walletId: wallet.id, scope: flow.requestScope, filters: filter.filters), initialValue: [])
         recentModel = RecentAssetsModel(
             walletId: wallet.id,
-            types: flow.action?.recentActivityTypes().map { $0.map() } ?? RecentActivityType.allCases,
+            types: flow.action?.recentActivityTypes().map { $0.toPrimitives() } ?? RecentActivityType.allCases,
             filters: flow.requestFilters,
             service: recentAssetsService,
         )
@@ -113,7 +113,7 @@ public final class SelectAssetViewModel {
     }
 
     public var showAddToken: Bool {
-        flow.showsAddToken(supportsTokens: service.supportsTokens(wallet: wallet.map()), hasChains: filterModel.chainsFilter.hasChains)
+        flow.showsAddToken(supportsTokens: service.supportsTokens(wallet: wallet.toGem()), hasChains: filterModel.chainsFilter.hasChains)
     }
 
     public var showFilter: Bool {
@@ -218,7 +218,7 @@ extension SelectAssetViewModel {
     func displayAssetData(_ assetData: AssetData) -> AssetData {
         guard flow.depositAssetDisplay else { return assetData }
         return AssetData(
-            asset: GemPerpetual(provider: .hypercore).depositAsset().map(),
+            asset: GemPerpetual(provider: .hypercore).depositAsset().toPrimitives(),
             balance: assetData.balance,
             account: assetData.account,
             price: assetData.price,
@@ -257,7 +257,7 @@ extension SelectAssetViewModel {
         if let action = flow.action {
             Task { [service] in
                 do {
-                    try await service.addRecent(action: action, asset: asset.map())
+                    try await service.addRecent(action: action, asset: asset.toGem())
                 } catch {
                     debugLog("Failed to update recent activity: \(error)")
                 }
@@ -277,7 +277,7 @@ extension SelectAssetViewModel {
 
     private func searchAssets(query: String) async {
         do {
-            let assets = try await service.searchAssets(query: query).map { $0.map() }
+            let assets = try await service.searchAssets(query: query).map { $0.toPrimitives() }
             state = .data(assets)
         } catch {
             handle(error: error)

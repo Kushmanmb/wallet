@@ -213,7 +213,7 @@ extension WalletConnectorService {
         let payloadTopic = WCPairingProposal(
             pairingId: proposal.pairingTopic,
             proposal: payload,
-            verificationStatus: status.map(),
+            verificationStatus: status.toPrimitives(),
         )
         let approvedWalletId = try await walletConnectorInteractor.sessionApproval(payload: payloadTopic)
         let selectedWallet = try await walletSessionService.getWallet(walletId: approvedWalletId)

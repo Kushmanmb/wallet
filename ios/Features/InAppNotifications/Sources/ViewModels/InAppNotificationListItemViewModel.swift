@@ -21,7 +21,7 @@ public struct InAppNotificationListItemViewModel: Identifiable, Sendable {
     public init(notification: InAppNotification) {
         id = notification.id
         item = notification.item
-        row = notificationRow(notification: notification.map())
+        row = notificationRow(notification: notification.toGem())
         url = notification.item.url?.asURL
     }
 

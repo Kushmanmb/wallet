@@ -42,7 +42,7 @@ extension GemTransactionTitle {
         _ fallback: String,
     ) -> String {
         guard let direction else { return fallback }
-        return directionTitle(PerpetualDirectionViewModel(direction: direction.map()).title)
+        return directionTitle(PerpetualDirectionViewModel(direction: direction.toPrimitives()).title)
     }
 }
 

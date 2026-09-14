@@ -25,7 +25,7 @@ public struct PerpetualPositionViewModel {
         currencyStyle: GemCurrencyStyle = .currency,
     ) {
         self.data = data
-        row = perpetualPositionRow(perpetual: data.perpetual.map(), asset: data.asset.map(), position: data.position.map())
+        row = perpetualPositionRow(perpetual: data.perpetual.toGem(), asset: data.asset.toGem(), position: data.position.toGem())
         currencyFormatter = CurrencyFormatter(type: currencyStyle, currencyCode: Currency.usd.rawValue)
         autocloseFormatter = AutocloseFormatter(
             currencyFormatter: currencyFormatter,

@@ -10,7 +10,7 @@ struct AutocloseTextValidator: TextValidator {
     private let validator: AutocloseValidator
 
     init(type: TpslType, direction: PerpetualDirection, marketPrice: Double) {
-        validator = AutocloseValidator(triggerType: type.map(), direction: direction.map(), marketPrice: marketPrice)
+        validator = AutocloseValidator(triggerType: type.toGem(), direction: direction.toGem(), marketPrice: marketPrice)
     }
 
     func validate(_ text: String) throws {

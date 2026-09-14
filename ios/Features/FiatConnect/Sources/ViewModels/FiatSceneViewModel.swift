@@ -80,7 +80,7 @@ public final class FiatSceneViewModel {
 
     var type: FiatQuoteType {
         get { session.type }
-        set { session = session.onTypeChanged(quoteType: newValue.map()) }
+        set { session = session.onTypeChanged(quoteType: newValue.toGem()) }
     }
 
     var viewState: GemFiatViewState {
@@ -213,7 +213,7 @@ public final class FiatSceneViewModel {
     }
 
     func providerAssetImage(_ provider: Gemstone.FiatProviderName) -> AssetImage? {
-        .image(provider.map().image)
+        .image(provider.toPrimitives().image)
     }
 }
 
@@ -327,7 +327,7 @@ extension FiatSceneViewModel {
         case .valid: nil
         case let .belowMinimum(minimum): AnyError(Localized.Transfer.minimumAmount(minimum.text(locale: locale)))
         case let .aboveMaximum(maximum): AnyError(Localized.Transfer.maximumAmount(maximum.text(locale: locale)))
-        case let .insufficientBalance(requirement): TransferAmountCalculatorError.insufficientBalance(asset, requirement: requirement.map())
+        case let .insufficientBalance(requirement): TransferAmountCalculatorError.insufficientBalance(asset, requirement: requirement.toPrimitives())
         }
     }
 

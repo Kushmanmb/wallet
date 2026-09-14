@@ -145,11 +145,11 @@ extension TransactionSceneViewModel {
 
 extension TransactionSceneViewModel {
     private var rows: GemTransactionDetailRows {
-        service.detailRows(transaction: transactionExtended.map())
+        service.detailRows(transaction: transactionExtended.toGem())
     }
 
     private var explorerViewModel: TransactionExplorerViewModel {
-        TransactionExplorerViewModel(transactionLink: rows.explorer.map())
+        TransactionExplorerViewModel(transactionLink: rows.explorer.toPrimitives())
     }
 
     private var headerAction: TransactionHeaderAction? {
@@ -165,10 +165,10 @@ extension TransactionSceneViewModel {
     var feeDetailsViewModel: NetworkFeeSceneViewModel {
         let fee = rows.fee
         return NetworkFeeSceneViewModel(
-            feeAsset: fee.asset.map(),
+            feeAsset: fee.asset.toPrimitives(),
             currency: Currency(core: service.getCurrency()),
             selection: .priority(priority: .normal),
-            feeAssetPrice: fee.price.map { $0.map().mapToPrice() },
+            feeAssetPrice: fee.price.map { $0.toPrimitives().mapToPrice() },
             feeAmount: BigInt(fee.value),
         )
     }

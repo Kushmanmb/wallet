@@ -543,7 +543,7 @@ public struct ViewModelFactory: Sendable {
                 delegate: confirmTransferDelegate,
             ),
             wallet: wallet,
-            confirmation: confirmTransferService().confirmation(wallet: wallet.map(), transfer: data, simulation: simulation),
+            confirmation: confirmTransferService().confirmation(wallet: wallet.toGem(), transfer: data, simulation: simulation),
             onComplete: { [toastPresenter] in
                 Task { toastPresenter.present(.transfer(for: data.inputType)) }
                 onComplete?()

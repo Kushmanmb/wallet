@@ -54,7 +54,7 @@ struct AssetDetailsInfoViewModel {
                 title: Localized.Asset.contract,
                 subtitle: GemAddressService.shared.format(address: tokenId, chain: asset.chain),
                 action: explorer.map {
-                    .explorer(ExplorerContextData(copyValue: .address(value: tokenId, chain: asset.chain), explorerLink: $0.map()))
+                    .explorer(ExplorerContextData(copyValue: .address(value: tokenId, chain: asset.chain), explorerLink: $0.toPrimitives()))
                 } ?? .none,
             )
         case let .circulatingSupply(value):
@@ -64,9 +64,9 @@ struct AssetDetailsInfoViewModel {
         case let .maxSupply(value):
             MarketValueViewModel(title: Localized.Info.MaxSupply.title, subtitle: supply(value), action: .info(.maxSupply))
         case let .allTimeHigh(value):
-            allTimeValue(Localized.Asset.allTimeHigh, chartValue: value.map())
+            allTimeValue(Localized.Asset.allTimeHigh, chartValue: value.toPrimitives())
         case let .allTimeLow(value):
-            allTimeValue(Localized.Asset.allTimeLow, chartValue: value.map())
+            allTimeValue(Localized.Asset.allTimeLow, chartValue: value.toPrimitives())
         }
     }
 

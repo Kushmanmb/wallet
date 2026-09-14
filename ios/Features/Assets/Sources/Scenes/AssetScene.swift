@@ -91,7 +91,7 @@ public struct AssetScene: View {
                 switch details.networkDestination {
                 case let .asset(asset):
                     NavigationLink(
-                        value: Scenes.Asset(asset: asset.map()),
+                        value: Scenes.Asset(asset: asset.toPrimitives()),
                         label: { networkView },
                     )
                 case let .assets(chain):

@@ -23,7 +23,7 @@ public final class AmountTransferViewModel: AmountDataProvidable {
     }
 
     var displayAsset: Asset {
-        transfer.displayAsset(asset: asset.map()).map()
+        transfer.displayAsset(asset: asset.toGem()).toPrimitives()
     }
 
     var title: String {
@@ -43,6 +43,6 @@ public final class AmountTransferViewModel: AmountDataProvidable {
     }
 
     func makeTransferData(value: BigInt, useMaxAmount: Bool) async throws -> GemTransferData {
-        try await service.transferData(asset: asset.map(), transfer: transfer, value: value, useMaxAmount: useMaxAmount)
+        try await service.transferData(asset: asset.toGem(), transfer: transfer, value: value, useMaxAmount: useMaxAmount)
     }
 }

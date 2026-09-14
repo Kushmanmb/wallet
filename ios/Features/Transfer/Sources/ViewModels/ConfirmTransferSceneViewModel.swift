@@ -195,12 +195,12 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
         case .app:
             ConfirmAppViewModel(transfer: request.data)
         case .sender:
-            ConfirmSenderViewModel(row: walletRow(wallet: wallet.map()))
+            ConfirmSenderViewModel(row: walletRow(wallet: wallet.toGem()))
         case .network:
             ConfirmNetworkViewModel(transfer: request.data)
         case .recipient:
             ConfirmRecipientViewModel(
-                destination: request.data.destination()?.withAddressName(addressName: state.addressName?.map()),
+                destination: request.data.destination()?.withAddressName(addressName: state.addressName?.toGem()),
                 chain: dataModel.chain,
                 memo: dataModel.recipient.memo,
                 addressName: state.addressName,

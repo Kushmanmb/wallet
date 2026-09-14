@@ -13,7 +13,7 @@ public extension ToastMessage {
             return nil
         }
         return switch perpetualType {
-        case let .open(data): .success(Localized.Perpetual.openDirection(PerpetualDirectionViewModel(direction: data.direction.map()).title))
+        case let .open(data): .success(Localized.Perpetual.openDirection(PerpetualDirectionViewModel(direction: data.direction.toPrimitives()).title))
         case .close: .success(Localized.Perpetual.closePosition)
         case .modify: .success(Localized.Perpetual.modifyPosition)
         case .increase: .success(Localized.Perpetual.increasePosition)

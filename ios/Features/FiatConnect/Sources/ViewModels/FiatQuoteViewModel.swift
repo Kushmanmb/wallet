@@ -44,7 +44,7 @@ struct FiatQuoteViewModel {
 
 extension FiatQuoteViewModel: Identifiable {
     var id: String {
-        "\(asset.id.identifier)\(row.provider.map().rawValue)\(row.cryptoAmount.value)"
+        "\(asset.id.identifier)\(row.provider.toPrimitives().rawValue)\(row.cryptoAmount.value)"
     }
 }
 
@@ -57,7 +57,7 @@ extension FiatQuoteViewModel: SimpleListItemViewable {
 
     var assetImage: AssetImage {
         AssetImage(
-            placeholder: row.provider.map().image,
+            placeholder: row.provider.toPrimitives().image,
             chainPlaceholder: isSelected ? Images.Wallets.selected : nil,
         )
     }

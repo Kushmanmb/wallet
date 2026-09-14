@@ -109,7 +109,7 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
 
 
     public var walletBarModel: WalletBarViewViewModel {
-        let row = walletRow(wallet: wallet.map())
+        let row = walletRow(wallet: wallet.toGem())
         return WalletBarViewViewModel(
             name: row.name,
             image: row.avatarImage,
@@ -128,7 +128,7 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
         return WalletHomeState(
             sections: AssetsSections.from(assets),
             header: WalletHeaderViewModel(
-                totalValue: viewState.totalValue.map(),
+                totalValue: viewState.totalValue.toPrimitives(),
                 currencyCode: currencyCode,
                 showsPnl: viewState.showsPnl,
                 actions: viewState.headerActions,
@@ -136,7 +136,7 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
             currencyCode: currencyCode,
             showPerpetuals: observablePreferences.showPerpetuals(for: wallet),
             showCollections: viewState.showCollections,
-            visibleBanners: viewState.visibleBanners.map { $0.map() },
+            visibleBanners: viewState.visibleBanners.map { $0.toPrimitives() },
         )
     }
 

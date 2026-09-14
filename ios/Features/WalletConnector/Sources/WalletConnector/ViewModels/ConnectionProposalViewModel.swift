@@ -26,8 +26,8 @@ public struct ConnectionProposalViewModel {
         self.confirmTransferDelegate = confirmTransferDelegate
         self.pairingProposal = pairingProposal
         walletSelectorModel = SelectWalletViewModel(
-            rows: walletRows(wallets: pairingProposal.proposal.wallets.map { $0.map() }),
-            selectedRow: walletRow(wallet: pairingProposal.proposal.defaultWallet.map()),
+            rows: walletRows(wallets: pairingProposal.proposal.wallets.map { $0.toGem() }),
+            selectedRow: walletRow(wallet: pairingProposal.proposal.defaultWallet.toGem()),
         )
     }
 
@@ -73,7 +73,7 @@ public struct ConnectionProposalViewModel {
     }
 
     private var verification: GemVerificationLevel {
-        verificationLevel(status: pairingProposal.verificationStatus.map())
+        verificationLevel(status: pairingProposal.verificationStatus.toGem())
     }
 
     var verificationImage: Image {

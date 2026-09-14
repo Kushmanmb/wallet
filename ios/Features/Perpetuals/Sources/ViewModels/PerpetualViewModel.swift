@@ -45,7 +45,7 @@ public struct PerpetualViewModel {
     }
 
     public var fundingRateField: ListItemField {
-        let annualized = GemPerpetual(provider: perpetual.provider.map()).fundingApr(funding: perpetual.funding)
+        let annualized = GemPerpetual(provider: perpetual.provider.toGem()).fundingApr(funding: perpetual.funding)
         return ListItemField(title: Localized.Info.Perpetual.FundingApr.title, value: percentFormatter.string(annualized))
     }
 

@@ -37,12 +37,12 @@ public struct DelegationViewModel: Sendable {
         self.formatter = formatter
         self.service = service
         priceFormatter = CurrencyFormatter(type: .currency, currencyCode: currencyCode)
-        validatorModel = ValidatorViewModel(row: service.validatorRow(validator: delegation.validator.map()))
+        validatorModel = ValidatorViewModel(row: service.validatorRow(validator: delegation.validator.toGem()))
         self.destination = destination
     }
 
     public var status: GemDelegationStatus {
-        delegationStatus(delegation: delegation.map())
+        delegationStatus(delegation: delegation.toGem())
     }
 
     public var stateModel: DelegationStateViewModel {
@@ -74,7 +74,7 @@ public struct DelegationViewModel: Sendable {
     }
 
     private var showsRewards: Bool {
-        service.showsRewards(delegation: delegation.base.map())
+        service.showsRewards(delegation: delegation.base.toGem())
     }
 
     public var rewardsText: String? {
@@ -100,7 +100,7 @@ public struct DelegationViewModel: Sendable {
     }
 
     public var validatorUrl: URL? {
-        service.validatorUrl(validator: delegation.validator.map()).map { $0.map() }?.url
+        service.validatorUrl(validator: delegation.validator.toGem()).map { $0.toPrimitives() }?.url
     }
 
     public var completionDateText: String? {

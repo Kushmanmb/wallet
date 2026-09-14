@@ -10,7 +10,7 @@ public extension Primitives.Banner {
         GemBannerKey(
             walletId: walletId?.id,
             assetId: asset?.id.identifier,
-            event: event.map(),
+            event: event.toGem(),
         )
     }
 }

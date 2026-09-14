@@ -66,11 +66,11 @@ public final class WalletImageViewModel: Sendable {
     }
 
     var hasAvatar: Bool {
-        walletRow(wallet: wallet.map()).hasAvatar
+        walletRow(wallet: wallet.toGem()).hasAvatar
     }
 
     func avatarAssetImage(for wallet: Wallet) -> AssetImage {
-        walletRow(wallet: wallet.map()).avatarImage
+        walletRow(wallet: wallet.toGem()).avatarImage
     }
 
     func buildNftAssetsItems(from list: [NFTData]) -> [NFTAssetImageItem] {

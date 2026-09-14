@@ -35,10 +35,10 @@ public final class ChartSceneViewModel: ChartListViewable {
 
     private var session: GemChartSession
     public var selectedPeriod: ChartPeriod {
-        get { session.period.map() }
+        get { session.period.toPrimitives() }
         set {
-            session = session.onSelectPeriod(period: newValue.map())
-            try? service.setChartPeriod(period: newValue.map())
+            session = session.onSelectPeriod(period: newValue.toGem())
+            try? service.setChartPeriod(period: newValue.toGem())
         }
     }
 
@@ -72,11 +72,11 @@ public final class ChartSceneViewModel: ChartListViewable {
     var sections: [GemChartSection] {
         guard let priceData else { return [] }
         return service.sections(
-            asset: priceData.asset.map(),
+            asset: priceData.asset.toGem(),
             price: priceData.price?.price,
-            market: priceData.market?.map(),
-            priceAlerts: priceData.priceAlerts.map { $0.map() },
-            links: priceData.links.map { $0.map() },
+            market: priceData.market?.toGem(),
+            priceAlerts: priceData.priceAlerts.map { $0.toGem() },
+            links: priceData.links.map { $0.toGem() },
         )
     }
 
@@ -110,7 +110,7 @@ public extension ChartSceneViewModel {
     func load() async {
         session = session.onRefresh()
         do {
-            session = try await session.onLoaded(chart: service.syncCharts(assetId: assetModel.asset.id.identifier, period: selectedPeriod.map()))
+            session = try await session.onLoaded(chart: service.syncCharts(assetId: assetModel.asset.id.identifier, period: selectedPeriod.toGem()))
             if priceData?.priceAlerts.isNotEmpty == true {
                 Task {
                     do {

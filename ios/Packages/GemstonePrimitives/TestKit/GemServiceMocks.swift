@@ -90,7 +90,7 @@ public final class GemPreferencesServiceMock: GemPreferencesServiceProtocol, @un
     }
 
     public func getChartPeriod() -> Gemstone.ChartPeriod {
-        Primitives.ChartPeriod.day.map()
+        Primitives.ChartPeriod.day.toGem()
     }
 
     public func setChartPeriod(period _: Gemstone.ChartPeriod) throws {}
@@ -243,7 +243,7 @@ public final class GemPriceAlertServiceMock: GemPriceAlertServiceProtocol, @unch
     }
 
     public func priceAlertId(alert: Gemstone.PriceAlert) -> String {
-        alert.map().id
+        alert.toPrimitives().id
     }
 }
 
@@ -461,7 +461,7 @@ public final class GemFiatQuoteServiceMock: GemFiatQuoteServiceProtocol, @unchec
     }
 
     private func defaultAmount(quoteType: Gemstone.FiatQuoteType) -> UInt32 {
-        quoteType.map() == .sell ? 100 : 50
+        quoteType.toPrimitives() == .sell ? 100 : 50
     }
 
     public func newSession(quoteType: Gemstone.FiatQuoteType, amount: UInt32?) -> GemFiatSession {
@@ -533,7 +533,7 @@ public final class GemNameServiceMock: GemNameServiceProtocol, @unchecked Sendab
     public func getNameRecord(name: String, chain _: String) async throws -> GemNameRecordState {
         requestedNames.append(name)
         if let error { throw error }
-        return nameRecord.map { .complete(record: $0.map()) } ?? .error
+        return nameRecord.map { .complete(record: $0.toGem()) } ?? .error
     }
 
     public func isNameSupported(name: String) -> Bool {
@@ -586,7 +586,7 @@ public final class GemPortfolioServiceMock: GemPortfolioServiceProtocol, @unchec
     public func portfolioData(wallet _: Gemstone.Wallet, portfolioType _: Gemstone.PortfolioType, period _: Gemstone.ChartPeriod) async throws -> Gemstone.PortfolioData {
         Gemstone.PortfolioData(
             charts: [Gemstone.PortfolioChartData(chartType: .value, values: [])],
-            statistics: [allTimeHigh.map { .allTimeHigh(value: $0.map()) }, allTimeLow.map { .allTimeLow(value: $0.map()) }].compactMap(\.self),
+            statistics: [allTimeHigh.map { .allTimeHigh(value: $0.toGem()) }, allTimeLow.map { .allTimeLow(value: $0.toGem()) }].compactMap(\.self),
             availablePeriods: [.day, .week, .month, .year, .all],
         )
     }
@@ -843,10 +843,10 @@ public final class GemPerpetualServiceMock: GemPerpetualServiceProtocol, @unchec
             connectionFailures -= 1
             throw AnyError("connection unavailable")
         }
-        guard let account = wallet.map().hyperliquidAccount else { return nil }
+        guard let account = wallet.toPrimitives().hyperliquidAccount else { return nil }
         return try Gemstone.GemPerpetualConnection(
             address: account.address,
-            mode: Primitives.PerpetualAccountMode.standard.map(),
+            mode: Primitives.PerpetualAccountMode.standard.toGem(),
         )
     }
 
@@ -985,7 +985,7 @@ public final class GemSearchServiceMock: GemSearchServiceProtocol, @unchecked Se
     }
 
     public func searchAssets(wallet _: Gemstone.Wallet, query _: String, currency _: Gemstone.Currency) async throws -> [Gemstone.AssetBasic] {
-        assets.map { $0.map() }
+        assets.map { $0.toGem() }
     }
 }
 
@@ -1031,7 +1031,7 @@ public extension Gemstone.GemFeeAsset {
         price: Gemstone.AssetPrice? = nil,
     ) -> Gemstone.GemFeeAsset {
         Gemstone.GemFeeAsset(
-            asset: asset.map(),
+            asset: asset.toGem(),
             balance: balance ?? .mock(assetId: asset.id.identifier),
             price: price,
         )

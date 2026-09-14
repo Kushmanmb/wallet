@@ -59,7 +59,7 @@ public struct PerpetualDetailsViewModel: Sendable, Identifiable {
     }
 
     var directionViewModel: PerpetualDirectionViewModel {
-        PerpetualDirectionViewModel(direction: details.direction.map())
+        PerpetualDirectionViewModel(direction: details.direction.toPrimitives())
     }
 
     var leverageText: String {

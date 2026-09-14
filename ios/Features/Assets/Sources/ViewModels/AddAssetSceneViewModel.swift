@@ -39,7 +39,7 @@ public final class AddAssetSceneViewModel {
         case .idle: return .noData
         case .loading: return .loading
         case let .found(core):
-            let asset = core.map()
+            let asset = core.toPrimitives()
             return .data(AddAssetViewModel(asset: asset, link: service.tokenUrl(chain: asset.chain, tokenId: asset.tokenId ?? "")))
         case .failed: return .error(AnyError(Localized.Errors.errorOccurred))
         }
@@ -138,10 +138,10 @@ extension AddAssetSceneViewModel {
     }
 
     func onSelectImportToken(onComplete: VoidAction) {
-        guard let asset = session.asset?.map() else { return }
+        guard let asset = session.asset?.toPrimitives() else { return }
         Task {
             do {
-                try await service.add(wallet: wallet.map(), assetId: asset.id.identifier)
+                try await service.add(wallet: wallet.toGem(), assetId: asset.id.identifier)
                 onComplete?()
             } catch {
                 isPresentingAlertMessage = AlertMessage(error: error)

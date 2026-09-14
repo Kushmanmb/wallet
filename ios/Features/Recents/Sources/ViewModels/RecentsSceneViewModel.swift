@@ -84,7 +84,7 @@ extension RecentsSceneViewModel {
     func onSelectClear() {
         Task { [service, types = query.request.types] in
             do {
-                try await service.clear(types: types.map { $0.map() })
+                try await service.clear(types: types.map { $0.toGem() })
             } catch {
                 debugLog("RecentsSceneViewModel clear error: \(error)")
             }

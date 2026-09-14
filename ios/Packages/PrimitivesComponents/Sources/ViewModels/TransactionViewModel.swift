@@ -18,7 +18,7 @@ public struct TransactionViewModel: Sendable, Identifiable, Equatable {
     private let row: GemTransactionRow
 
     public init(transaction: TransactionExtended) {
-        self.init(transaction: transaction, row: transactionRow(transaction: transaction.map()))
+        self.init(transaction: transaction, row: transactionRow(transaction: transaction.toGem()))
     }
 
     public init(transaction: TransactionExtended, row: GemTransactionRow) {
@@ -31,7 +31,7 @@ public struct TransactionViewModel: Sendable, Identifiable, Equatable {
     }
 
     public static func sections(_ transactions: [TransactionExtended]) -> [ListSection<TransactionViewModel>] {
-        let models = zip(transactions, transactionRows(transactions: transactions.map { $0.map() }))
+        let models = zip(transactions, transactionRows(transactions: transactions.map { $0.toGem() }))
             .map { TransactionViewModel(transaction: $0, row: $1) }
         return DateSectionBuilder(items: models, dateKeyPath: \.transaction.transaction.createdAt).build()
     }
@@ -142,6 +142,6 @@ public struct TransactionViewModel: Sendable, Identifiable, Equatable {
     }
 
     private func resourceTitle(prefix: String, resource: Gemstone.Resource) -> String {
-        String(format: "%@ %@", prefix, ResourceViewModel(resource: resource.map()).title)
+        String(format: "%@ %@", prefix, ResourceViewModel(resource: resource.toPrimitives()).title)
     }
 }

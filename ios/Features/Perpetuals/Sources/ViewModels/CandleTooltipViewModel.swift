@@ -21,7 +21,7 @@ public struct CandleTooltipViewModel {
 
     public init(candle: ChartCandleStick, formatter: NumericFormatter = NumericFormatter()) {
         self.candle = candle
-        tooltip = candleTooltip(candle: candle.map())
+        tooltip = candleTooltip(candle: candle.toGem())
         self.formatter = formatter
     }
 

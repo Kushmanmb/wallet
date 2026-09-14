@@ -41,7 +41,7 @@ final class FiatSceneViewModelTests {
     private static func load(_ model: FiatSceneViewModel, quotes: [FiatQuote], amount: Double = 50, type: FiatQuoteType = .buy, error: GemServiceError? = nil) {
         model.session = model.session.onQuoteResults(
             results: GemFiatQuotesResult(
-                request: GemFiatQuoteRequest(quoteType: type.map(), amount: amount),
+                request: GemFiatQuoteRequest(quoteType: type.toGem(), amount: amount),
                 quotes: quotes,
                 error: error,
             ),

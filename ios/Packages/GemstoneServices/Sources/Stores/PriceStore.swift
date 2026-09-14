@@ -22,20 +22,20 @@ public final class GemstonePriceStore: GemPriceStore, @unchecked Sendable {
     }
 
     public func getPrices(assetIds: [Gemstone.AssetId]) throws -> [Gemstone.AssetPrice] {
-        try priceStore.getPrices(for: assetIds).map { $0.map() }
+        try priceStore.getPrices(for: assetIds).map { $0.toGem() }
     }
 
     public func getRate(currency: Gemstone.Currency) async throws -> Gemstone.FiatRate? {
         let currency = try Primitives.Currency(id: currency)
-        return try priceStore.getRate(currency: currency.rawValue).map { Primitives.FiatRate(symbol: currency, rate: $0.rate).map() }
+        return try priceStore.getRate(currency: currency.rawValue).map { Primitives.FiatRate(symbol: currency, rate: $0.rate).toGem() }
     }
 
     public func getRates() async throws -> [Gemstone.FiatRate] {
-        try priceStore.getRates().map { Primitives.FiatRate(symbol: $0.symbol, rate: $0.rate).map() }
+        try priceStore.getRates().map { Primitives.FiatRate(symbol: $0.symbol, rate: $0.rate).toGem() }
     }
 
     public func saveRates(rates: [Gemstone.FiatRate]) async throws {
-        try fiatRateStore.add(rates.map { $0.map() })
+        try fiatRateStore.add(rates.map { $0.toPrimitives() })
     }
 
     public func savePrices(currency _: Gemstone.Currency, prices: [GemPriceUpdate]) async throws {
@@ -55,6 +55,6 @@ public final class GemstonePriceStore: GemPriceStore, @unchecked Sendable {
     }
 
     public func saveMarket(assetId: Gemstone.AssetId, market: Gemstone.AssetMarket) async throws {
-        try priceStore.updateMarket(assetId: assetId, market: market.map())
+        try priceStore.updateMarket(assetId: assetId, market: market.toPrimitives())
     }
 }

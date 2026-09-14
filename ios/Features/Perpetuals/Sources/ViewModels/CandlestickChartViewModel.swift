@@ -34,7 +34,7 @@ struct CandlestickChartViewModel {
         numericFormatter: NumericFormatter = NumericFormatter(),
     ) {
         self.candles = candles
-        layout = perpetualChartLayout(candles: candles.map { $0.map() }, position: position?.map())
+        layout = perpetualChartLayout(candles: candles.map { $0.toGem() }, position: position?.toGem())
         self.period = period
         self.formatter = formatter
         self.numericFormatter = numericFormatter

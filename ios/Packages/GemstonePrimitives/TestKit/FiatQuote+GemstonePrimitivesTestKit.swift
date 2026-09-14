@@ -25,7 +25,7 @@ public extension FiatQuote {
     ) -> FiatQuote {
         FiatQuote(
             id: id,
-            asset: Primitives.Asset.mock().map(),
+            asset: Primitives.Asset.mock().toGem(),
             provider: .mock(id: providerId),
             quoteType: type,
             fiatAmount: fiatAmount,

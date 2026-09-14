@@ -167,7 +167,7 @@ extension RootSceneViewModel {
 extension RootSceneViewModel {
     private func setup(wallet: Wallet) {
         Task {
-            for failure in await appStartService.setupWallet(wallet: wallet.map()) {
+            for failure in await appStartService.setupWallet(wallet: wallet.toGem()) {
                 debugLog("wallet start \(failure.step) failed: \(failure.message)")
             }
             await appLifecycleService.updateWalletConnections()

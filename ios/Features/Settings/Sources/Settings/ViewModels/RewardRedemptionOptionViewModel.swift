@@ -48,7 +48,7 @@ struct RewardRedemptionOptionViewModel: Identifiable {
         switch option.redemptionType {
         case .asset, .giftAsset:
             guard let asset = option.asset else { return option.value.description }
-            return ValueFormatter.short.string(BigInt(option.value), asset: asset.map())
+            return ValueFormatter.short.string(BigInt(option.value), asset: asset.toPrimitives())
         }
     }
 

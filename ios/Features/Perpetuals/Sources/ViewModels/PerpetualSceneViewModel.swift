@@ -204,18 +204,18 @@ public extension PerpetualSceneViewModel {
 
     func onClosePosition() {
         do {
-            onTransferData?(try service.closeTransfer(perpetual: perpetual.map(), asset: asset.map(), position: positions.first?.position.map()))
+            onTransferData?(try service.closeTransfer(perpetual: perpetual.toGem(), asset: asset.toGem(), position: positions.first?.position.toGem()))
         } catch {
             isPresentingAlertMessage = AlertMessage(error: error)
         }
     }
 
     func onOpenLongPosition() {
-        onPositionAction(.open(direction: PerpetualDirection.long.map()))
+        onPositionAction(.open(direction: PerpetualDirection.long.toGem()))
     }
 
     func onOpenShortPosition() {
-        onPositionAction(.open(direction: PerpetualDirection.short.map()))
+        onPositionAction(.open(direction: PerpetualDirection.short.toGem()))
     }
 
     func onIncreasePosition() {
@@ -238,7 +238,7 @@ public extension PerpetualSceneViewModel {
 private extension PerpetualSceneViewModel {
     func subscribeMarket() async {
         do {
-            try await observerService.subscribe(service.marketSubscription(perpetual: perpetual.map()))
+            try await observerService.subscribe(service.marketSubscription(perpetual: perpetual.toGem()))
         } catch {
             debugLog("Market data subscription failed: \(error)")
         }
@@ -246,7 +246,7 @@ private extension PerpetualSceneViewModel {
 
     func unsubscribeMarket() async {
         do {
-            try await observerService.unsubscribe(service.marketSubscription(perpetual: perpetual.map()))
+            try await observerService.unsubscribe(service.marketSubscription(perpetual: perpetual.toGem()))
         } catch {
             debugLog("Market data unsubscribe failed: \(error)")
         }
@@ -254,7 +254,7 @@ private extension PerpetualSceneViewModel {
 
     func onPositionAction(_ kind: GemPerpetualPositionKind) {
         do {
-            let positionAction = try service.positionAction(perpetual: perpetual.map(), asset: asset.map(), position: positions.first?.position.map(), kind: kind)
+            let positionAction = try service.positionAction(perpetual: perpetual.toGem(), asset: asset.toGem(), position: positions.first?.position.toGem(), kind: kind)
             onPerpetualPosition?(positionAction)
         } catch {
             isPresentingAlertMessage = AlertMessage(error: error)

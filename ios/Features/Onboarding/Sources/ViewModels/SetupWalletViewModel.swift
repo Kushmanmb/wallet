@@ -47,7 +47,7 @@ public final class SetupWalletViewModel: Sendable {
     }
 
     var avatarAssetImage: AssetImage {
-        let avatar = walletRow(wallet: wallet.map()).avatarImage
+        let avatar = walletRow(wallet: wallet.toGem()).avatarImage
         return AssetImage(
             type: avatar.type,
             imageURL: avatar.imageURL,

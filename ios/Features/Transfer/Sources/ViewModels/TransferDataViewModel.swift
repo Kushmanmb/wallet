@@ -56,9 +56,9 @@ struct TransferDataViewModel {
         case .freeze: Localized.Transfer.Freeze.title
         case .unfreeze: Localized.Transfer.Unfreeze.title
         case .activateAsset: Localized.Transfer.ActivateAsset.title
-        case let .perpetualOpen(direction): PerpetualDirectionViewModel(direction: direction.map()).title
-        case let .perpetualIncrease(direction): PerpetualDirectionViewModel(direction: direction.map()).increaseTitle
-        case let .perpetualReduce(direction): PerpetualDirectionViewModel(direction: direction.map()).reduceTitle
+        case let .perpetualOpen(direction): PerpetualDirectionViewModel(direction: direction.toPrimitives()).title
+        case let .perpetualIncrease(direction): PerpetualDirectionViewModel(direction: direction.toPrimitives()).increaseTitle
+        case let .perpetualReduce(direction): PerpetualDirectionViewModel(direction: direction.toPrimitives()).reduceTitle
         case .perpetualClose: Localized.Perpetual.closePosition
         case .perpetualModify: Localized.Perpetual.modifyPosition
         }
@@ -77,7 +77,7 @@ struct TransferDataViewModel {
              .perpetual,
              .earn: .none
         case let .generic(_, metadata, _):
-            URL(string: metadata.map().url)
+            URL(string: metadata.toPrimitives().url)
         }
     }
 

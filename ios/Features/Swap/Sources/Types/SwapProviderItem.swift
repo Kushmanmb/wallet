@@ -87,7 +87,7 @@ extension SwapProviderItem: SimpleListItemViewable {
 
     public var assetImage: AssetImage {
         AssetImage(
-            placeholder: swapQuote.providerData.provider.map().image,
+            placeholder: swapQuote.providerData.provider.toPrimitives().image,
             chainPlaceholder: isSelected ? Images.Wallets.selected : nil,
         )
     }
@@ -112,7 +112,7 @@ extension SwapProviderItem: Identifiable {
         [
             swapQuote.toValue.description,
             swapQuote.fromValue.description,
-            swapQuote.providerData.provider.map().rawValue,
+            swapQuote.providerData.provider.toPrimitives().rawValue,
         ].joined(separator: "_")
     }
 }

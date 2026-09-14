@@ -155,7 +155,7 @@ struct SignMessageSceneViewModelTests {
             confirmTransferDelegate: { _ in },
         )
 
-        #expect(viewModel.walletAssetImage == walletRow(wallet: payload.wallet.map()).avatarImage)
+        #expect(viewModel.walletAssetImage == walletRow(wallet: payload.wallet.toGem()).avatarImage)
         #expect(viewModel.networkAssetImage == AssetIdViewModel(assetId: payload.chain.asset.id).networkAssetImage)
     }
 
@@ -393,7 +393,7 @@ struct SignMessageSceneViewModelTests {
             confirmTransferDelegate: { _ in },
         )
 
-        #expect(viewModel.headerData == GemSimulationValue(asset: asset.map(), value: .unlimited))
+        #expect(viewModel.headerData == GemSimulationValue(asset: asset.toGem(), value: .unlimited))
         #expect(!(viewModel.payloadModel.primaryFields + viewModel.payloadModel.secondaryFields).contains { $0.kind == .value })
     }
 

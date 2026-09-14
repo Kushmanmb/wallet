@@ -7,7 +7,7 @@ import Gemstone
 import Primitives
 
 private let chainAssets: [Primitives.Chain: Primitives.ChainAsset] = Primitives.Chain.allCases.reduce(into: [:]) { result, chain in
-    result[chain] = GemAssetConfigService.shared.chainAsset(chain: chain.rawValue).map()
+    result[chain] = GemAssetConfigService.shared.chainAsset(chain: chain.rawValue).toPrimitives()
 }
 
 public extension Primitives.Chain {
@@ -29,7 +29,7 @@ public extension Primitives.Chain {
     }
 
     var type: Primitives.ChainType {
-        ChainConfig.config(chain: self).chainType.map()
+        ChainConfig.config(chain: self).chainType.toPrimitives()
     }
 
     var iconChain: Primitives.Chain {
@@ -37,10 +37,10 @@ public extension Primitives.Chain {
     }
 
     func defaultAsset(type: Primitives.AssetType) -> Primitives.Asset {
-        guard let asset = GemAssetConfigService.shared.defaultAsset(chain: map(), assetType: type.map()) else {
+        guard let asset = GemAssetConfigService.shared.defaultAsset(chain: toGem(), assetType: type.toGem()) else {
             preconditionFailure("Missing \(type) default asset for \(self)")
         }
-        return asset.map()
+        return asset.toPrimitives()
     }
 
 }
@@ -56,11 +56,11 @@ private extension Primitives.Chain {
 
 public extension [Primitives.Asset] {
     func matching(query: String) -> [Primitives.Asset] {
-        let assets = map { $0.map() }
-        return GemAssetConfigService.shared.matchingAssets(assets: assets, query: query).map { $0.map() }
+        let assets = map { $0.toGem() }
+        return GemAssetConfigService.shared.matchingAssets(assets: assets, query: query).map { $0.toPrimitives() }
     }
 
     func matchingIds(query: String) -> [String] {
-        GemAssetConfigService.shared.matchingAssetIds(assets: map { $0.map() }, query: query)
+        GemAssetConfigService.shared.matchingAssetIds(assets: map { $0.toGem() }, query: query)
     }
 }

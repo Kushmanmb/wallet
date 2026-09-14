@@ -62,8 +62,8 @@ public final class SetPriceAlertViewModel {
 
     private var session: GemPriceAlertSession {
         service.newAlertSession(assetId: asset.id.identifier)
-            .onType(notificationType: state.type.notificationType.map())
-            .onDirection(selectedDirection: state.selectedDirection.map())
+            .onType(notificationType: state.type.notificationType.toGem())
+            .onDirection(selectedDirection: state.selectedDirection.toGem())
             .onInput(input: amountValue)
             .onPrice(currentPrice: assetData.price?.price)
             .onSaving(isSaving: isSaving)
@@ -74,7 +74,7 @@ public final class SetPriceAlertViewModel {
     }
 
     var alertDirection: Primitives.PriceAlertDirection? {
-        session.viewState().direction.map { $0.map() }
+        session.viewState().direction.map { $0.toPrimitives() }
     }
 
     var alertDirectionTitle: String {
@@ -147,7 +147,7 @@ public final class SetPriceAlertViewModel {
     }
 
     private func priceAlert() -> Primitives.PriceAlert? {
-        session.alert().map { $0.map() }
+        session.alert().map { $0.toPrimitives() }
     }
 
     private func toggleAlertDirection() {

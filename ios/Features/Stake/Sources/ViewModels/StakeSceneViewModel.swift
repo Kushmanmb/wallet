@@ -69,7 +69,7 @@ public final class StakeSceneViewModel {
     }
 
     private func selectable(_ validators: [DelegationValidator]) -> [DelegationValidator] {
-        service.selectableValidators(validators: validators.map { $0.map() }).map { $0.map() }
+        service.selectableValidators(validators: validators.map { $0.toGem() }).map { $0.toPrimitives() }
     }
 
     var stakeTitle: String {
@@ -146,7 +146,7 @@ public final class StakeSceneViewModel {
     }
 
     private func destination(for delegation: Delegation) -> DelegationDestination {
-        switch service.delegationDestination(walletType: wallet.type.map(), asset: asset.map(), delegation: delegation.map()) {
+        switch service.delegationDestination(walletType: wallet.type.toGem(), asset: asset.toGem(), delegation: delegation.toGem()) {
         case let .withdraw(transfer): .withdraw(transfer)
         case .details: .details
         }
@@ -196,16 +196,16 @@ public final class StakeSceneViewModel {
 
     var stakeDestination: any Hashable {
         destination(
-            type: .stake(.stake(validators: validators.map { $0.map() }, validator: nil)),
+            type: .stake(.stake(validators: validators.map { $0.toGem() }, validator: nil)),
         )
     }
 
     var freezeDestination: any Hashable {
-        destination(type: .stake(.freeze(resource: Resource.bandwidth.map())))
+        destination(type: .stake(.freeze(resource: Resource.bandwidth.toGem())))
     }
 
     var unfreezeDestination: any Hashable {
-        destination(type: .stake(.unfreeze(resource: Resource.bandwidth.map())))
+        destination(type: .stake(.unfreeze(resource: Resource.bandwidth.toGem())))
     }
 
     var showFreeze: Bool {
@@ -277,16 +277,16 @@ extension StakeSceneViewModel {
 
     private var stakeActions: [GemStakeActionItem] {
         service.stakeActions(
-            walletType: wallet.type.map(),
+            walletType: wallet.type.toGem(),
             chain: chain.chain.rawValue,
             hasValidators: validators.isNotEmpty,
             balance: GemAssetBalance(assetData.balance, assetId: asset.id, isActive: assetData.metadata.isActive),
-            delegations: delegations.map { $0.map() },
+            delegations: delegations.map { $0.toGem() },
         )
     }
 
     private var claimRewards: GemClaimRewards {
-        service.claimRewards(chain: chain.chain.rawValue, delegations: delegations.map { $0.map() })
+        service.claimRewards(chain: chain.chain.rawValue, delegations: delegations.map { $0.toGem() })
     }
 
     private func stakeAction(_ action: GemStakeAction) -> GemStakeActionItem? {

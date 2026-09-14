@@ -13,7 +13,7 @@ public struct WalletConnectionViewModel: Sendable {
 
     init(connection: WalletConnection) {
         self.connection = connection
-        row = GemApplicationMetadataService.shared.connectionRow(metadata: connection.session.metadata.map())
+        row = GemApplicationMetadataService.shared.connectionRow(metadata: connection.session.metadata.toGem())
     }
 
     var nameText: String {

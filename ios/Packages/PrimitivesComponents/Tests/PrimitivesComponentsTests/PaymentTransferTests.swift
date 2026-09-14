@@ -134,10 +134,10 @@ struct PaymentTransferTests {
                 url: "https://example.com",
                 icon: "https://example.com/icon.png",
                 source: .payment,
-            ).map(),
-            account: Primitives.ChainAddress(chain: .solana, address: "account").map(),
+            ).toGem(),
+            account: Primitives.ChainAddress(chain: .solana, address: "account").toGem(),
             transaction: "encoded-transaction",
-            transactionType: Primitives.TransactionType.transfer.map(),
+            transactionType: Primitives.TransactionType.transfer.toGem(),
             memo: memo,
             request: request,
         )

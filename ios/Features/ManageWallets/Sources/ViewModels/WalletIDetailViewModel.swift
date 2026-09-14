@@ -51,7 +51,7 @@ public final class WalletDetailViewModel {
     }
 
     var row: GemWalletRow {
-        walletRow(wallet: wallet.map())
+        walletRow(wallet: wallet.toGem())
     }
 
     var name: String {
@@ -63,19 +63,19 @@ public final class WalletDetailViewModel {
     }
 
     var secretKind: GemWalletSecretKind? {
-        walletSecretKind(wallet: wallet.map())
+        walletSecretKind(wallet: wallet.toGem())
     }
 
     var address: WalletDetailAddress? {
         guard let account = wallet.accounts.first, wallet.type != .multicoin else { return .none }
         return .account(
             SimpleAccount(name: .none, chain: account.chain, address: account.address, assetImage: .none),
-            link: service.addressUrl(chain: account.chain.rawValue, address: account.address).map(),
+            link: service.addressUrl(chain: account.chain.rawValue, address: account.address).toPrimitives(),
         )
     }
 
     func avatarAssetImage(for wallet: Wallet) -> AssetImage {
-        let avatar = walletRow(wallet: wallet.map()).avatarImage
+        let avatar = walletRow(wallet: wallet.toGem()).avatarImage
         return AssetImage(
             type: avatar.type,
             imageURL: avatar.imageURL,

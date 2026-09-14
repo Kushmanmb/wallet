@@ -119,14 +119,14 @@ public final class AssetSceneViewModel: Sendable {
     var details: GemAssetDetails {
         service.details(
             input: GemAssetDetailsInput(
-                walletType: wallet.type.map(),
-                asset: asset.map(),
+                walletType: wallet.type.toGem(),
+                asset: asset.toGem(),
                 ownerAddress: assetDataModel.address,
-                metadata: assetData.metadata.map(),
+                metadata: assetData.metadata.toGem(),
                 balance: stakeBalance,
                 price: assetData.price?.price,
-                bannerEvents: visibleBanners.map { $0.event.map() },
-                priceAlerts: assetData.priceAlerts.map { $0.map() },
+                bannerEvents: visibleBanners.map { $0.event.toGem() },
+                priceAlerts: assetData.priceAlerts.map { $0.toGem() },
             ),
         )
     }
@@ -192,17 +192,17 @@ public final class AssetSceneViewModel: Sendable {
     }
 
     var visibleBanners: [Banner] {
-        bannerContext.visibleBanners(stored: banners.map { $0.map() }).map { $0.map() }
+        bannerContext.visibleBanners(stored: banners.map { $0.toGem() }).map { $0.toPrimitives() }
     }
 
     func bannerContent(for banner: Banner) -> GemBannerContent {
-        service.bannerContent(event: banner.event.map(), asset: banner.asset?.map())
+        service.bannerContent(event: banner.event.toGem(), asset: banner.asset?.toGem())
     }
 
     private var bannerContext: GemBannerContext {
         GemBannerContext(
-            wallet: wallet.map(),
-            asset: asset.map(),
+            wallet: wallet.toGem(),
+            asset: asset.toGem(),
             isStakeable: assetData.metadata.isStakeEnabled,
             hasStakeBalance: stakedValue > .zero,
             hasAvailableBalance: assetData.balance.available > 0,
@@ -248,7 +248,7 @@ public final class AssetSceneViewModel: Sendable {
     }
 
     var statusViewModel: VerificationStatusViewModel? {
-        details.verificationStatus.map { VerificationStatusViewModel(status: $0.map()) }
+        details.verificationStatus.map { VerificationStatusViewModel(status: $0.toPrimitives()) }
     }
 
     var swapAssetType: SelectedAssetType {
@@ -298,7 +298,7 @@ public extension AssetSceneViewModel {
         let selectType: SelectedAssetType = switch buttonType {
         case .buy: .buy(assetData.asset, amount: nil)
         case .sell: .sell(assetData.asset, amount: nil)
-        case .send: .send(.asset(asset: assetData.asset.map()))
+        case .send: .send(.asset(asset: assetData.asset.toGem()))
         case .swap: swapAssetType
         case .receive: .receive(.asset)
         case .stake: .stake(assetData.asset)

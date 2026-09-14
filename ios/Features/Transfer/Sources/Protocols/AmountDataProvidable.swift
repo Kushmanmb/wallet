@@ -24,12 +24,12 @@ extension AmountDataProvidable {
     }
 
     func input(from assetData: AssetData) -> GemAmountInput {
-        gemAmountType.input(asset: asset.map(), balance: GemAssetBalance(assetData.balance, assetId: asset.id, isActive: assetData.metadata.isActive))
+        gemAmountType.input(asset: asset.toGem(), balance: GemAssetBalance(assetData.balance, assetId: asset.id, isActive: assetData.metadata.isActive))
     }
 
     func entry(from assetData: AssetData, inputType: GemAmountInputType, text: String) -> GemAmountEntry {
         gemAmountType.entry(
-            asset: asset.map(),
+            asset: asset.toGem(),
             input: input(from: assetData),
             price: assetData.price?.price,
             inputType: inputType,

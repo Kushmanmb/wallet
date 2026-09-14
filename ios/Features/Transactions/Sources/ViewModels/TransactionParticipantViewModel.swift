@@ -37,7 +37,7 @@ extension TransactionParticipantViewModel: ItemModelProvidable {
 
 extension TransactionParticipantViewModel {
     private func participantItemModel(_ participant: GemTransactionParticipant) -> TransactionItemModel {
-        let name = participant.name?.map()
+        let name = participant.name?.toPrimitives()
         let account = SimpleAccount(
             name: name?.name,
             chain: chain,
@@ -50,7 +50,7 @@ extension TransactionParticipantViewModel {
             TransactionParticipantItemModel(
                 title: title(for: participant.role),
                 account: account,
-                addressLink: participant.link.map(),
+                addressLink: participant.link.toPrimitives(),
                 onAddContact: participant.canAddContact ? onAddContact : nil,
             ),
         )

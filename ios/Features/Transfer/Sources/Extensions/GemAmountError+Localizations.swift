@@ -12,7 +12,7 @@ extension GemAmountError: @retroactive LocalizedError {
         case .none: nil
         case .invalidAmount: Localized.Errors.invalidAmount
         case let .belowMinimum(asset, minimum):
-            Localized.Transfer.minimumAmount(ValueFormatter(style: .auto).string(minimum, asset: asset.map()).boldMarkdown())
+            Localized.Transfer.minimumAmount(ValueFormatter(style: .auto).string(minimum, asset: asset.toPrimitives()).boldMarkdown())
         case let .insufficientBalance(title):
             Localized.Transfer.insufficientBalance(title.boldMarkdown())
         }

@@ -8,7 +8,7 @@ public struct PerpetualFormatter {
     private let perpetual: Gemstone.GemPerpetual
 
     public init(provider: Primitives.PerpetualProvider) {
-        perpetual = Gemstone.GemPerpetual(provider: provider.map())
+        perpetual = Gemstone.GemPerpetual(provider: provider.toGem())
     }
 
     public func formatPrice(_ price: Double, decimals: Int32) -> String {
