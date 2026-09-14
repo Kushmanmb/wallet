@@ -12,6 +12,8 @@ import com.gemwallet.android.domains.confirm.pack
 import com.gemwallet.android.domains.confirm.perpetualType
 import com.gemwallet.android.domains.confirm.swapData
 import com.gemwallet.android.domains.confirm.toAsset
+import com.gemwallet.android.domains.confirm.applicationMetadata
+import com.wallet.core.primitives.ApplicationMetadataSource
 import com.gemwallet.android.domains.confirm.confirmLoadOptions
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -41,6 +43,9 @@ import uniffi.gemstone.perpetualDetails
 import uniffi.gemstone.swapQuoteSummary
 import com.gemwallet.android.model.Crypto
 import uniffi.gemstone.GemConfirmFeeSelection
+import uniffi.gemstone.GemPerpetual
+import uniffi.gemstone.PerpetualProvider
+import uniffi.gemstone.TransactionInputType
 import com.gemwallet.android.model.FeeAssetSelection
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.gemwallet.android.ui.models.perpetual.PerpetualConfirmDetailsUIModelFactory
@@ -103,6 +108,15 @@ class ConfirmViewModel @Inject constructor(
         .filterNotNull()
         .mapNotNull { paramsPack -> unpackTransferData(paramsPack) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val title = request.map { it?.title() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val isExternalRequest = request.map { it?.inputType?.applicationMetadata != null }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val isPaymentRequest = request.map { it?.inputType?.applicationMetadata?.source == ApplicationMetadataSource.Payment }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val session = getSession()
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -207,6 +221,15 @@ class ConfirmViewModel @Inject constructor(
             currency = content.currency,
         )
     }
+    .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val headerAsset = combine(request, amountUIModel) { request, amount ->
+        when (request?.inputType) {
+            is TransactionInputType.Withdrawal -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.depositAsset() }.toPrimitives()
+            else -> amount?.asset
+        }
+    }
+    .flowOn(Dispatchers.IO)
     .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val detailElements = combine(request, content, ::buildDetailElements)

@@ -30,7 +30,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.features.confirm.models.ConfirmDetailElement
-import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.features.confirm.presents.localization.buttonLabel
 import com.gemwallet.android.features.confirm.presents.localization.string
@@ -49,17 +48,13 @@ import com.gemwallet.android.features.confirm.presents.components.PropertyDestin
 import com.gemwallet.android.features.confirm.viewmodels.ConfirmViewModel
 import com.gemwallet.android.features.confirm.viewmodels.reorderRequestProperties
 import com.gemwallet.android.model.AuthRequest
-import com.gemwallet.android.domains.confirm.applicationMetadata
-import com.gemwallet.android.domains.confirm.asset
 import uniffi.gemstone.GemTransferData
 import uniffi.gemstone.GemTransactionHeaderKind
-import uniffi.gemstone.TransactionInputType
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.perpetual.AutocloseSummaryRow
 import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsBottomSheet
 import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsSummaryItem
 import com.wallet.core.primitives.AssetId
-import com.wallet.core.primitives.ApplicationMetadataSource
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.image.walletImageModel
 import com.gemwallet.android.ui.components.list_head.AmountListHead
@@ -90,8 +85,6 @@ import com.gemwallet.android.ui.requestAuth
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.features.confirm.presents.components.confirmBalanceChangesContent
 import uniffi.gemstone.SimulationResult
-import uniffi.gemstone.GemPerpetual
-import uniffi.gemstone.PerpetualProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,9 +112,10 @@ fun ConfirmScreen(
     val payloadAddressNames by viewModel.payloadAddressNames.collectAsStateWithLifecycle()
     val button by viewModel.button.collectAsStateWithLifecycle()
     val assetPrice by viewModel.assetPrice.collectAsStateWithLifecycle()
-    val applicationMetadata = input?.inputType?.applicationMetadata
-    val isExternalRequest = applicationMetadata != null
-    val isPayment = applicationMetadata?.source == ApplicationMetadataSource.Payment
+    val title by viewModel.title.collectAsStateWithLifecycle()
+    val isExternalRequest by viewModel.isExternalRequest.collectAsStateWithLifecycle()
+    val isPayment by viewModel.isPaymentRequest.collectAsStateWithLifecycle()
+    val headerAsset by viewModel.headerAsset.collectAsStateWithLifecycle()
     val displayTransactionProperties = if (isExternalRequest) transactionProperties.reorderRequestProperties() else transactionProperties
 
     var showSelectTxSpeed by remember { mutableStateOf(false) }
@@ -144,7 +138,7 @@ fun ConfirmScreen(
     }
 
     Scene(
-        title = input?.let { it.title().string() }.orEmpty(),
+        title = title?.string().orEmpty(),
         closeIcon = isExternalRequest,
         onClose = { cancelAction() },
         mainAction = {
@@ -171,7 +165,7 @@ fun ConfirmScreen(
                             .alpha(0f)
                             .clearAndSetSemantics { },
                     ) {
-                        AmountListHead(amount = "", icon = input.asset)
+                        AmountListHead(amount = "", icon = headerAsset)
                     }
                     simulation.header != null -> AssetValueListHead(requireNotNull(simulation.header))
                     amountModel?.headerKind is GemTransactionHeaderKind.Swap -> {
@@ -198,11 +192,7 @@ fun ConfirmScreen(
                     else -> AmountListHead(
                         amount = amountModel?.cryptoAmount ?: "",
                         equivalent = amountModel?.amountEquivalent?.takeIf { (amountModel?.headerKind as? GemTransactionHeaderKind.Amount)?.showsFiat != false },
-                        icon = if (input?.inputType is TransactionInputType.Withdrawal) {
-                            GemPerpetual(PerpetualProvider.HYPERCORE).use { it.depositAsset() }.toPrimitives()
-                        } else {
-                            amountModel?.asset
-                        },
+                        icon = headerAsset,
                     )
                 }
             }
