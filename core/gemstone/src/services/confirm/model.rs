@@ -246,7 +246,6 @@ pub struct GemConfirmFailure {
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct GemConfirmScreen {
     pub phase: GemConfirmPhase,
-    pub amount_failed: bool,
     pub has_critical_warning: bool,
     pub failure: Option<GemConfirmFailure>,
 }

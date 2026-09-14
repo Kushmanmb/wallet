@@ -43,7 +43,7 @@ struct ConfirmErrorViewModelTests {
     @Test
     func transferFailure() {
         let input = GemConfirmPreload.mock(amount: .error(error: .InsufficientBalance(asset: Asset.mock().toGem(), requirement: GemBalanceRequirement(required: 1, available: 0, shortfall: 1))))
-        let state = ConfirmTransferState.mock(load: .mock(preload: input), screen: .mock(phase: .ready, amountFailed: true))
+        let state = ConfirmTransferState.mock(load: .mock(preload: input), screen: .mock(phase: .ready))
         let model = ConfirmErrorViewModel(error: state.transactionError, onSelectListError: { _ in })
 
         guard case .error = model.itemModel else {

@@ -10,7 +10,6 @@ impl GemConfirmScreen {
     pub fn initial(simulation: Option<&SimulationResult>) -> Self {
         Self {
             phase: GemConfirmPhase::Loading,
-            amount_failed: false,
             has_critical_warning: simulation.is_some_and(SimulationResult::has_critical_warning),
             failure: None,
         }
@@ -32,8 +31,7 @@ impl GemConfirmScreen {
         match self.phase {
             GemConfirmPhase::Loading | GemConfirmPhase::Confirming => button(GemConfirmButtonKind::Confirm, GemConfirmButtonState::Loading),
             GemConfirmPhase::Failed => button(GemConfirmButtonKind::Retry, GemConfirmButtonState::Enabled),
-            GemConfirmPhase::Ready if self.amount_failed => button(GemConfirmButtonKind::Retry, GemConfirmButtonState::Enabled),
-            GemConfirmPhase::Ready if self.has_critical_warning => button(GemConfirmButtonKind::Confirm, GemConfirmButtonState::Disabled),
+            GemConfirmPhase::Ready if self.failure.is_some() || self.has_critical_warning => button(GemConfirmButtonKind::Confirm, GemConfirmButtonState::Disabled),
             GemConfirmPhase::Ready => button(GemConfirmButtonKind::Confirm, GemConfirmButtonState::Enabled),
         }
     }
@@ -50,7 +48,7 @@ impl GemConfirmScreen {
         match self.phase {
             GemConfirmPhase::Loading | GemConfirmPhase::Confirming => None,
             GemConfirmPhase::Failed => Some(GemConfirmAction::Load),
-            GemConfirmPhase::Ready if self.amount_failed => Some(GemConfirmAction::Load),
+            GemConfirmPhase::Ready if self.failure.is_some() => None,
             GemConfirmPhase::Ready => Some(GemConfirmAction::Execute),
         }
     }
@@ -58,18 +56,23 @@ impl GemConfirmScreen {
     pub fn on_load_started(&self) -> GemConfirmScreen {
         Self {
             phase: GemConfirmPhase::Loading,
-            amount_failed: false,
             has_critical_warning: self.has_critical_warning,
             failure: None,
         }
     }
 
     pub fn on_loaded(&self, load: GemConfirmLoad) -> GemConfirmScreen {
+        let amount_error = load.preload.as_ref().and_then(|preload| match &preload.amount {
+            GemTransferAmountResult::Error { error } => Some(error.clone()),
+            GemTransferAmountResult::Amount { .. } => None,
+        });
         Self {
             phase: GemConfirmPhase::Ready,
-            amount_failed: load.preload.as_ref().is_some_and(|preload| matches!(preload.amount, GemTransferAmountResult::Error { .. })),
             has_critical_warning: load.simulation.simulation.as_ref().is_some_and(|simulation| simulation.has_critical_warning),
-            failure: None,
+            failure: amount_error.map(|error| GemConfirmFailure {
+                stage: GemConfirmStage::Load,
+                error,
+            }),
         }
     }
 
@@ -109,11 +112,13 @@ mod tests {
 
     #[test]
     fn test_confirm_button_follows_the_phase_and_the_ready_checks() {
-        let screen = |phase, amount_failed, has_critical_warning| GemConfirmScreen {
+        let screen = |phase, failed: bool, has_critical_warning| GemConfirmScreen {
             phase,
-            amount_failed,
             has_critical_warning,
-            failure: None,
+            failure: failed.then(|| GemConfirmFailure {
+                stage: GemConfirmStage::Load,
+                error: GemConfirmError::Load { msg: "down".to_string() },
+            }),
         };
         let button = |kind, state| GemConfirmButton { kind, state };
 
@@ -130,8 +135,8 @@ mod tests {
             button(GemConfirmButtonKind::Retry, GemConfirmButtonState::Enabled)
         );
         assert_eq!(
-            screen(GemConfirmPhase::Ready, true, true).button(),
-            button(GemConfirmButtonKind::Retry, GemConfirmButtonState::Enabled)
+            screen(GemConfirmPhase::Ready, true, false).button(),
+            button(GemConfirmButtonKind::Confirm, GemConfirmButtonState::Disabled)
         );
         assert_eq!(
             screen(GemConfirmPhase::Ready, false, true).button(),
@@ -147,7 +152,6 @@ mod tests {
     fn test_confirm_fee_row_waits_for_the_preload_and_gives_up_on_failure() {
         let screen = |phase| GemConfirmScreen {
             phase,
-            amount_failed: true,
             has_critical_warning: true,
             failure: None,
         };
@@ -168,7 +172,7 @@ mod tests {
         let mut load = load_without_preload();
         let ready = started.on_loaded(load.clone());
         assert_eq!(ready.phase, GemConfirmPhase::Ready);
-        assert!(!ready.amount_failed);
+        assert!(ready.failure.is_none());
         assert_eq!(ready.action(), Some(GemConfirmAction::Execute));
 
         load.preload = Some(GemConfirmPreload {
@@ -176,8 +180,16 @@ mod tests {
             amount: GemTransferAmountResult::Error { error: failed_load() },
         });
         let amount_failed = started.on_loaded(load);
-        assert!(amount_failed.amount_failed);
-        assert_eq!(amount_failed.action(), Some(GemConfirmAction::Load));
+        assert_eq!(amount_failed.phase, GemConfirmPhase::Ready);
+        assert_eq!(amount_failed.failure.as_ref().map(|failure| failure.stage), Some(GemConfirmStage::Load));
+        assert_eq!(
+            amount_failed.button(),
+            GemConfirmButton {
+                kind: GemConfirmButtonKind::Confirm,
+                state: GemConfirmButtonState::Disabled,
+            }
+        );
+        assert_eq!(amount_failed.action(), None, "an amount the wallet cannot cover is not retried by pressing the button");
 
         let load_failed = started.on_load_failed(failed_load());
         assert_eq!(load_failed.phase, GemConfirmPhase::Failed);

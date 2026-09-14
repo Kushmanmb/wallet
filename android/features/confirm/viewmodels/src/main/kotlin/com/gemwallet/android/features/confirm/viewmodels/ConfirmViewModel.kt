@@ -97,7 +97,7 @@ class ConfirmViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val restart = MutableStateFlow(false)
-    val screen = MutableStateFlow(GemConfirmScreen(phase = GemConfirmPhase.LOADING, amountFailed = false, hasCriticalWarning = false, failure = null))
+    val screen = MutableStateFlow(GemConfirmScreen(phase = GemConfirmPhase.LOADING, hasCriticalWarning = false, failure = null))
 
     val isNetworkFeeSheetVisible = MutableStateFlow(false)
     val feeSelection = MutableStateFlow<GemConfirmFeeSelection>(GemConfirmFeeSelection.Priority(FeePriority.Normal.toGem()))
@@ -196,10 +196,7 @@ class ConfirmViewModel @Inject constructor(
     private val transferAmount = content.map { content ->
         when (val amount = content?.load?.preload?.amount ?: return@map null) {
             is GemTransferAmountResult.Amount -> amount.amount.value
-            is GemTransferAmountResult.Error -> {
-                showError(amount.error)
-                null
-            }
+            is GemTransferAmountResult.Error -> null
         }
     }
     .stateIn(viewModelScope, SharingStarted.Eagerly, null)
