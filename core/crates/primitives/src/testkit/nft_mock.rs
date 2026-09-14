@@ -78,7 +78,6 @@ impl NFTCollection {
             images: NFTImages {
                 preview: NFTResource::new(String::new(), String::new()),
             },
-            is_verified: status == VerificationStatus::Verified,
             status,
             links: vec![],
         }
