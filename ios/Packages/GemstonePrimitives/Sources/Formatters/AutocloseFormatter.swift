@@ -26,14 +26,28 @@ public struct AutocloseFormatter: Sendable {
         takeProfitCanceled: Bool = false,
         stopLossCanceled: Bool = false,
     ) -> (subtitle: String, subtitleExtra: String?) {
+        format(
+            takeProfitText: takeProfit.map { currencyFormatter.string($0) },
+            stopLossText: stopLoss.map { currencyFormatter.string($0) },
+            takeProfitCanceled: takeProfitCanceled,
+            stopLossCanceled: stopLossCanceled,
+        )
+    }
+
+    public func format(
+        takeProfitText: String?,
+        stopLossText: String?,
+        takeProfitCanceled: Bool = false,
+        stopLossCanceled: Bool = false,
+    ) -> (subtitle: String, subtitleExtra: String?) {
         let tp: String? = {
             if takeProfitCanceled { return perpetual.triggerOrderText(label: takeProfitLabel, formattedPrice: nil) }
-            return takeProfit.map { perpetual.triggerOrderText(label: takeProfitLabel, formattedPrice: currencyFormatter.string($0)) }
+            return takeProfitText.map { perpetual.triggerOrderText(label: takeProfitLabel, formattedPrice: $0) }
         }()
 
         let sl: String? = {
             if stopLossCanceled { return perpetual.triggerOrderText(label: stopLossLabel, formattedPrice: nil) }
-            return stopLoss.map { perpetual.triggerOrderText(label: stopLossLabel, formattedPrice: currencyFormatter.string($0)) }
+            return stopLossText.map { perpetual.triggerOrderText(label: stopLossLabel, formattedPrice: $0) }
         }()
 
         switch (tp, sl) {

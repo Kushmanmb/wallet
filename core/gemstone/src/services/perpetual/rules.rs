@@ -17,7 +17,6 @@ use super::model::{
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigInt;
 use crate::perpetual::GemPerpetual;
-use crate::precision::GemCurrencyStyle;
 use crate::services::error::GemServiceError;
 use crate::services::transfer::GemTransferData;
 use num_bigint::BigUint;
@@ -108,8 +107,8 @@ pub fn autoclose_summary(data: &PerpetualModifyConfirmData) -> Option<GemAutoclo
         return None;
     }
     Some(GemAutocloseSummary {
-        take_profit,
-        stop_loss,
+        take_profit: take_profit.map(GemFormattedNumber::usd),
+        stop_loss: stop_loss.map(GemFormattedNumber::usd),
         take_profit_cleared,
         stop_loss_cleared,
     })
@@ -523,12 +522,11 @@ pub fn candle_tooltip(candle: &ChartCandleStick) -> GemCandleTooltip {
 }
 
 pub fn market_row(perpetual: &Perpetual) -> GemPerpetualMarketRow {
-    let abbreviated = |value: f64| GemFormattedNumber::usd(value, GemCurrencyStyle::Abbreviated);
     GemPerpetualMarketRow {
         title: perpetual.name.clone(),
         shows_price: perpetual.price != 0.0,
-        volume_24h: abbreviated(perpetual.volume_24h),
-        open_interest: abbreviated(perpetual.open_interest),
+        volume_24h: GemFormattedNumber::usd_abbreviated(perpetual.volume_24h),
+        open_interest: GemFormattedNumber::usd_abbreviated(perpetual.open_interest),
     }
 }
 
@@ -540,7 +538,7 @@ pub fn position_row(perpetual: &Perpetual, asset: &Asset, position: &PerpetualPo
         },
         leverage: crate::perpetual::leverage_text(position.leverage),
         direction: position.direction.clone(),
-        liquidation_price: position.liquidation_price.filter(|price| *price > 0.0),
+        liquidation_price: position.liquidation_price.filter(|value| *value > 0.0).map(GemFormattedNumber::usd),
     }
 }
 
@@ -621,8 +619,8 @@ mod tests {
     #[test]
     fn test_autoclose_summary_reads_new_prices_and_cleared_orders() {
         let both = autoclose_summary(&modify_data(vec![tpsl(Some("65000"), Some("55000"))], None, None)).unwrap();
-        assert_eq!(both.take_profit, Some(65000.0));
-        assert_eq!(both.stop_loss, Some(55000.0));
+        assert_eq!(both.take_profit, Some(GemFormattedNumber::usd(65000.0)));
+        assert_eq!(both.stop_loss, Some(GemFormattedNumber::usd(55000.0)));
         assert!(!both.take_profit_cleared && !both.stop_loss_cleared);
 
         let cleared = autoclose_summary(&modify_data(vec![cancel(vec![111, 222])], Some(111), Some(222))).unwrap();
@@ -631,7 +629,7 @@ mod tests {
         assert!(cleared.take_profit_cleared && cleared.stop_loss_cleared);
 
         let replaced = autoclose_summary(&modify_data(vec![tpsl(Some("70000"), None), cancel(vec![111])], Some(111), None)).unwrap();
-        assert_eq!(replaced.take_profit, Some(70000.0));
+        assert_eq!(replaced.take_profit, Some(GemFormattedNumber::usd(70000.0)));
         assert!(!replaced.take_profit_cleared, "a replaced order is not a cleared one");
 
         assert!(autoclose_summary(&modify_data(vec![], None, None)).is_none());
@@ -845,7 +843,7 @@ mod tests {
             ..position("one")
         };
 
-        assert_eq!(position_row(&market, &asset, &priced).liquidation_price, Some(12.5));
+        assert_eq!(position_row(&market, &asset, &priced).liquidation_price, Some(GemFormattedNumber::usd(12.5)));
         assert_eq!(position_row(&market, &asset, &zero).liquidation_price, None, "a zero price is no liquidation price");
         assert_eq!(position_row(&market, &asset, &absent).liquidation_price, None);
     }

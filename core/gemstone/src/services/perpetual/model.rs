@@ -65,8 +65,8 @@ pub struct GemPerpetualConnection {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemAutocloseSummary {
-    pub take_profit: Option<f64>,
-    pub stop_loss: Option<f64>,
+    pub take_profit: Option<GemFormattedNumber>,
+    pub stop_loss: Option<GemFormattedNumber>,
     pub take_profit_cleared: bool,
     pub stop_loss_cleared: bool,
 }
@@ -96,7 +96,7 @@ pub struct GemPerpetualPositionRow {
     pub title: String,
     pub leverage: String,
     pub direction: PerpetualDirection,
-    pub liquidation_price: Option<f64>,
+    pub liquidation_price: Option<GemFormattedNumber>,
 }
 
 #[uniffi::export]

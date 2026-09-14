@@ -45,13 +45,17 @@ impl GemFormattedNumber {
         }
     }
 
-    /// Perpetual and reward values settle in USD, whatever currency the wallet displays.
-    pub fn usd(value: f64, style: GemCurrencyStyle) -> Self {
-        Self::currency(value, Currency::USD, style)
+    /// Perpetual and transaction values settle in USD, whatever currency the wallet displays.
+    pub fn usd(value: f64) -> Self {
+        Self::currency(value, Currency::USD, GemCurrencyStyle::Currency)
     }
 
-    pub fn signed_usd(value: f64, style: GemCurrencyStyle) -> Self {
-        Self::signed_currency(value, Currency::USD, style)
+    pub fn signed_usd(value: f64) -> Self {
+        Self::signed_currency(value, Currency::USD, GemCurrencyStyle::Currency)
+    }
+
+    pub fn usd_abbreviated(value: f64) -> Self {
+        Self::currency(value, Currency::USD, GemCurrencyStyle::Abbreviated)
     }
 
     pub fn signed_currency(value: f64, currency: Currency, style: GemCurrencyStyle) -> Self {
