@@ -451,6 +451,22 @@ fn without_leading_zeros(text: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn test_an_amount_confirms_only_when_it_is_positive_and_has_no_error() {
+        let entry = |value: Option<i32>, error: Option<GemAmountError>| GemAmountEntry {
+            value: value.map(num_bigint::BigInt::from),
+            error,
+            equivalent: None,
+            is_max: false,
+            reserved_fee: None,
+        };
+
+        assert!(entry(Some(1), None).allows_confirm());
+        assert!(!entry(None, None).allows_confirm(), "nothing typed is nothing to send");
+        assert!(!entry(Some(0), None).allows_confirm(), "zero is not an amount");
+        assert!(!entry(Some(1), Some(GemAmountError::Zero)).allows_confirm());
+    }
     use super::*;
     use crate::config::perpetual_config::HYPERLIQUID_DEPOSIT_ADDRESS;
     use crate::models::custom_types::GemBigUint;

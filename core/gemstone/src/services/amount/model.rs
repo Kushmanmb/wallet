@@ -101,6 +101,13 @@ pub struct GemAmountEntry {
     pub reserved_fee: Option<GemBigInt>,
 }
 
+#[uniffi::export]
+impl GemAmountEntry {
+    pub fn allows_confirm(&self) -> bool {
+        self.error.is_none() && self.value.as_ref().is_some_and(|value| value.sign() == num_bigint::Sign::Plus)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemAmountMaxEntry {
     pub input_type: GemAmountInputType,

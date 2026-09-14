@@ -108,7 +108,7 @@ public final class AmountSceneViewModel {
 
     var actionButtonState: ButtonState {
         if transferState.isLoading { return .loading() }
-        return amountInputModel.text.isNotEmpty && amountInputModel.isValid ? .normal : .disabled
+        return entry.allowsConfirm() ? .normal : .disabled
     }
 
     var infoText: String? {

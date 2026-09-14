@@ -104,7 +104,7 @@ class AmountViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     val buttonState: StateFlow<ButtonState> = entry.map { entry ->
-        buttonState(enabled = (entry?.value?.signum() ?: 0) > 0 && entry?.error == null)
+        buttonState(enabled = entry?.allowsConfirm() == true)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Disabled)
 
     init {
