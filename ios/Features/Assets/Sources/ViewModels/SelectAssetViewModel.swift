@@ -6,6 +6,7 @@ import class Gemstone.GemAssetConfigService
 import protocol Gemstone.GemAssetSelectionServiceProtocol
 import protocol Gemstone.GemRecentActivityServiceProtocol
 import struct Gemstone.GemSelectAssetFlow
+import enum Gemstone.GemSelectAssetState
 import GemstonePrimitives
 import GemstoneServices
 import Localization
@@ -123,12 +124,16 @@ public final class SelectAssetViewModel {
         flow.networkSearch
     }
 
+    var listState: GemSelectAssetState {
+        flow.state(hasItems: sections.pinned.isNotEmpty || sections.assets.isNotEmpty, isSearching: state.isLoading)
+    }
+
     var showLoading: Bool {
-        state.isLoading && showEmpty
+        listState == .loading
     }
 
     var showEmpty: Bool {
-        sections.pinned.isEmpty && sections.assets.isEmpty
+        listState != .idle
     }
 
     var showRecents: Bool {
@@ -153,11 +158,10 @@ extension SelectAssetViewModel {
     }
 
     func search(query: String) async {
-        let query = query.trim()
-        if query.isEmpty {
-            return
+        switch flow.searchStep(query: query) {
+        case .idle: break
+        case let .search(query): await searchAssets(query: query)
         }
-        await searchAssets(query: query)
     }
 
     func handleAction(assetId: AssetId, enabled: Bool) async {

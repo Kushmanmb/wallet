@@ -104,10 +104,39 @@ pub struct GemSelectAssetFlow {
     pub deposit_asset_display: bool,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
+pub enum GemAssetSearchStep {
+    Idle,
+    Search { query: String },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemSelectAssetState {
+    Idle,
+    Loading,
+    Empty,
+}
+
 #[uniffi::export]
 impl GemSelectAssetFlow {
     pub fn shows_recents(&self, is_searching: bool, has_recents: bool) -> bool {
         self.recents && !is_searching && has_recents
+    }
+
+    pub fn search_step(&self, query: String) -> GemAssetSearchStep {
+        let query = query.trim();
+        match self.network_search && !query.is_empty() {
+            true => GemAssetSearchStep::Search { query: query.to_string() },
+            false => GemAssetSearchStep::Idle,
+        }
+    }
+
+    pub fn state(&self, has_items: bool, is_searching: bool) -> GemSelectAssetState {
+        match (has_items, is_searching) {
+            (true, _) => GemSelectAssetState::Idle,
+            (false, true) => GemSelectAssetState::Loading,
+            (false, false) => GemSelectAssetState::Empty,
+        }
     }
 
     pub fn shows_add_token(&self, supports_tokens: bool, has_chains: bool) -> bool {
@@ -192,8 +221,30 @@ impl GemAssetAction {
 
 #[cfg(test)]
 mod tests {
-    use super::{Asset, AssetType, GemAssetAction, GemAssetFilter, RecentActivityType};
+    use super::{Asset, AssetType, GemAssetAction, GemAssetFilter, GemAssetSearchStep, GemSelectAssetState, GemSelectAssetType, RecentActivityType};
     use primitives::Chain;
+
+    #[test]
+    fn test_a_search_runs_only_on_a_trimmed_query_a_network_flow_accepts() {
+        let network = GemSelectAssetType::Buy.flow();
+        assert!(network.network_search);
+        assert_eq!(network.search_step("  btc ".to_string()), GemAssetSearchStep::Search { query: "btc".to_string() });
+        assert_eq!(network.search_step("   ".to_string()), GemAssetSearchStep::Idle);
+        assert_eq!(network.search_step(String::new()), GemAssetSearchStep::Idle);
+
+        let local = GemSelectAssetType::Deposit.flow();
+        assert!(!local.network_search);
+        assert_eq!(local.search_step("btc".to_string()), GemAssetSearchStep::Idle);
+    }
+
+    #[test]
+    fn test_the_list_reads_as_loading_only_while_a_search_finds_nothing() {
+        let flow = GemSelectAssetType::Buy.flow();
+        assert_eq!(flow.state(true, true), GemSelectAssetState::Idle);
+        assert_eq!(flow.state(true, false), GemSelectAssetState::Idle);
+        assert_eq!(flow.state(false, true), GemSelectAssetState::Loading);
+        assert_eq!(flow.state(false, false), GemSelectAssetState::Empty);
+    }
 
     #[test]
     fn test_every_recorded_recent_type_is_shown_by_the_same_action() {
