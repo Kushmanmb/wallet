@@ -2,6 +2,8 @@
 
 Every open item carries a stable id (V vocabulary, R rows, C composition, S sessions, B view boundary, F formatting, P parity, D decisions, O ownership, X platform, G guidance) and a size (**S**/**M**/**L**). Contracts are in [ARCHITECTURE.md](ARCHITECTURE.md). **Delete an item's line in the commit that lands it** — ids are never reused.
 
+The goal is that Gemstone decides once and both clients read that decision. An item belongs on this list when the same choice — a label, an order, a row's shape, a number's style, a threshold — is made in two places.
+
 One item, one commit, both apps built and tested. Core rule + test, regenerate bindings, delete the app code it replaced on both sides, clear that screen's view leak while you are in it.
 
 ## 1. Lists get a row record
@@ -131,6 +133,7 @@ Ownership, injection and threads:
 
 Platform items:
 
+- **X19** **S** Dead code, most of it orphaned by migrations that already landed: Android [`Precision.kt`](../android/gemcore/src/main/kotlin/com/gemwallet/android/model/Precision.kt) still declares `twoPlaces`, `fourSignificant` and `ABBREVIATION_THRESHOLD` after the value ladder moved to Core, and iOS has six unread `Localized` keys, five unused `AuthenticationPolicy` cases, three unread `Locale` identifiers, `String.numberOfOccurrencesOf`, `DevicePlatform.deviceInfo`, `WalletConnectorInteractor.signTransaction` and `DefaultCryptoProvider.recoverPubKey`. A sweep that re-finds these must skip the false-positive classes: `Gem*Store` foreign-trait implementations on both apps, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables and framework overrides are all called by something a token search cannot see.
 - **X18** **S** Two exports have no production reader on either app, only mocks and tests: `name_record_debounce_milliseconds` in [`services/name/mod.rs`](../core/gemstone/src/services/name/mod.rs), superseded by the debounce `name_input_step` already returns, and `requested_name` on [`GemNameRecordState`](../core/gemstone/src/services/name/model.rs). Un-export both and keep the Rust functions, which Core calls. Of 523 exported methods these are the only two without a caller a test does not create; the rest of that sweep is dry.
 
 
