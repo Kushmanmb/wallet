@@ -44,11 +44,11 @@ fun ConnectionScene(
         LazyColumn {
             connection?.let {
                 item { ConnectionItem(it, ListPosition.Single) }
-                item { PropertyItem(R.string.common_wallet, it.wallet.name, listPosition = ListPosition.First) }
+                item { PropertyItem(R.string.common_wallet, it.connection.wallet.name, listPosition = ListPosition.First) }
                 item {
                     PropertyItem(
                         title = R.string.transaction_date,
-                        data = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(it.session.expireAt)),
+                        data = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(it.connection.session.expireAt)),
                         listPosition = ListPosition.Last,
                     )
                 }

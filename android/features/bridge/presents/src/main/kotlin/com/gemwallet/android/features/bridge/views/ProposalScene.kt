@@ -27,7 +27,7 @@ import com.gemwallet.android.application.wallet_connect.WalletConnectVerifyConte
 import com.gemwallet.android.features.bridge.viewmodels.ProposalSceneState
 import com.gemwallet.android.features.bridge.viewmodels.ProposalSceneViewModel
 import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
-import com.gemwallet.android.features.bridge.viewmodels.model.SessionUI
+import uniffi.gemstone.GemConnectionRow
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.models.ButtonState
@@ -109,7 +109,7 @@ fun ProposalScene(
 
 @Composable
 private fun Proposal(
-    peer: SessionUI,
+    peer: GemConnectionRow,
     state: ProposalSceneState,
     selectedWallet: com.wallet.core.primitives.Wallet?,
     availableWallets: List<com.wallet.core.primitives.Wallet>,
@@ -140,9 +140,9 @@ private fun Proposal(
         ) {
             item {
                 CenteredListHead(
-                    icon = peer.icon,
-                    title = peer.name,
-                    subtitle = peer.uri,
+                    icon = peer.iconUrl,
+                    title = peer.title,
+                    subtitle = peer.host.orEmpty(),
                     contentDescription = "wallet_connect_app_icon",
                     subtitleLayout = CenteredListHeadSubtitleLayout.Vertical,
                 )

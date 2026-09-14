@@ -14,6 +14,7 @@ use chrono::{DateTime, Utc};
 use gem_wallet_connect::validate_sign_message_account;
 use primitives::{Account, ApplicationMetadata, Chain, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionVerificationStatus};
 
+use crate::application::{GemApplicationMetadataService, GemConnectionRow};
 use crate::services::assets::GemAssetsService;
 use crate::services::error::GemServiceError;
 use crate::services::simulation::GemSimulationService;
@@ -32,6 +33,7 @@ pub use store::GemConnectionStore;
 #[derive(uniffi::Object)]
 pub struct GemWalletConnectService {
     wallet_connect: WalletConnect,
+    metadata: GemApplicationMetadataService,
     simulation: Arc<GemSimulationService>,
     store: Arc<dyn GemConnectionStore>,
     signer: Arc<dyn GemWalletConnectSigner>,
@@ -54,6 +56,7 @@ impl GemWalletConnectService {
     ) -> Self {
         Self {
             wallet_connect: WalletConnect::new(),
+            metadata: GemApplicationMetadataService::new(),
             simulation,
             store,
             signer,
@@ -138,6 +141,10 @@ impl GemWalletConnectService {
             },
             verification_status,
         })
+    }
+
+    pub fn connection_row(&self, metadata: ApplicationMetadata) -> GemConnectionRow {
+        self.metadata.connection_row(metadata)
     }
 
     pub fn application_metadata(&self, name: String, description: String, url: String, icons: Vec<String>) -> ApplicationMetadata {

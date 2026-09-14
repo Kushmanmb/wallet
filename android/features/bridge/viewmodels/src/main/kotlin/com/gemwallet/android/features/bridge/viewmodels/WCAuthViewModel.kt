@@ -1,6 +1,7 @@
 package com.gemwallet.android.features.bridge.viewmodels
 
 import uniffi.gemstone.GemChainServiceInterface
+import uniffi.gemstone.GemConnectionRow
 import uniffi.gemstone.GemWalletConnectAuthAccount
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import androidx.lifecycle.ViewModel
@@ -21,9 +22,7 @@ import com.gemwallet.android.application.wallet_connect.fromWalletConnectChainId
 import com.gemwallet.android.ext.getAccount
 import com.gemwallet.android.features.bridge.viewmodels.model.map
 import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
-import com.gemwallet.android.features.bridge.viewmodels.model.SessionUI
 import com.gemwallet.android.features.bridge.viewmodels.model.WalletConnectReviewModel
-import com.gemwallet.android.features.bridge.viewmodels.model.toSessionUI
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.PayloadField
 import com.gemwallet.android.ui.models.buttonState
@@ -107,7 +106,7 @@ class WCAuthViewModel @Inject constructor(
                 }
                 _state.update {
                     AuthSceneState.Request(
-                        peer = prepared.proposal.metadata.toSessionUI(),
+                        peer = walletConnectService.connectionRow(prepared.proposal.metadata.toGem()),
                         availableWallets = prepared.proposal.wallets,
                         availableWalletRows = walletRows(prepared.proposal.wallets.map { it.toGem() }),
                         selectedWallet = selectedWallet,
@@ -321,15 +320,15 @@ sealed interface AuthSceneState {
     class Error(val message: String?, val cause: Throwable? = null) : AuthSceneState
 
     sealed interface Content : AuthSceneState, WalletConnectReviewModel {
-        val peer: SessionUI
+        val peer: GemConnectionRow
         val availableWallets: List<Wallet>
         val availableWalletRows: List<GemWalletRow>
         val selectedWallet: Wallet
         val approval: AuthApproval
 
-        override val icon: String? get() = peer.icon
-        override val name: String get() = peer.name
-        override val uri: String get() = peer.uri
+        override val icon: String? get() = peer.iconUrl
+        override val name: String get() = peer.title
+        override val uri: String get() = peer.host.orEmpty()
         override val chain: Chain get() = approval.chain
         override val primaryPayloadFields: List<PayloadField> get() = approval.primaryPayloadFields
         override val secondaryPayloadFields: List<PayloadField> get() = approval.secondaryPayloadFields
@@ -338,7 +337,7 @@ sealed interface AuthSceneState {
     }
 
     data class Request(
-        override val peer: SessionUI,
+        override val peer: GemConnectionRow,
         override val availableWallets: List<Wallet>,
         override val availableWalletRows: List<GemWalletRow>,
         override val selectedWallet: Wallet,
@@ -348,7 +347,7 @@ sealed interface AuthSceneState {
     data class Approving(
         private val request: Request,
     ) : Content {
-        override val peer: SessionUI get() = request.peer
+        override val peer: GemConnectionRow get() = request.peer
         override val availableWallets: List<Wallet> get() = request.availableWallets
         override val availableWalletRows: List<GemWalletRow> get() = request.availableWalletRows
         override val selectedWallet: Wallet get() = request.selectedWallet

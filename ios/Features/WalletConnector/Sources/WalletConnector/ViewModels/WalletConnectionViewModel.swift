@@ -9,9 +9,11 @@ import PrimitivesComponents
 
 public struct WalletConnectionViewModel: Sendable {
     let connection: WalletConnection
+    private let row: GemConnectionRow
 
-    private var row: GemConnectionRow {
-        GemApplicationMetadataService.shared.connectionRow(metadata: connection.session.metadata.map())
+    init(connection: WalletConnection) {
+        self.connection = connection
+        row = GemApplicationMetadataService.shared.connectionRow(metadata: connection.session.metadata.map())
     }
 
     var nameText: String {
@@ -19,7 +21,7 @@ public struct WalletConnectionViewModel: Sendable {
     }
 
     var imageUrl: URL? {
-        connection.session.metadata.iconURL
+        row.iconUrl.flatMap(URL.init(string:))
     }
 
     var hostText: String? {

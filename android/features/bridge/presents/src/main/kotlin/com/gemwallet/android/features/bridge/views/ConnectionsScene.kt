@@ -1,6 +1,6 @@
 package com.gemwallet.android.features.bridge.views
 
-import com.gemwallet.android.ext.iconUrl
+import com.gemwallet.android.features.bridge.viewmodels.model.ConnectionRowModel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -21,8 +21,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gemwallet.android.ext.host
-import com.gemwallet.android.ext.shortName
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.DocsInfoButton
 import com.gemwallet.android.ui.components.QrCodeScannerModal
@@ -39,12 +37,9 @@ import com.gemwallet.android.ui.components.screen.showSnackbar
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.features.bridge.viewmodels.ConnectionsViewModel
-import com.wallet.core.primitives.WalletConnection
 import kotlinx.coroutines.launch
 import com.gemwallet.android.AppUrl
 import com.gemwallet.android.ui.components.clipboard.clipboardManager
-import uniffi.gemstone.GemApplicationMetadataService
-import com.gemwallet.android.ext.toGem
 
 @Composable
 fun ConnectionsScene(
@@ -141,16 +136,16 @@ fun ConnectionsScene(
 
 @Composable
 fun ConnectionItem(
-    connection: WalletConnection,
+    model: ConnectionRowModel,
     listPosition: ListPosition,
     onClick: ((String) -> Unit)? = null,
 ) {
-    val row = GemApplicationMetadataService().use { it.connectionRow(connection.session.metadata.toGem()) }
+    val row = model.row
     ListItem(
-        modifier = if (onClick == null) Modifier else Modifier.clickable { onClick(connection.session.id) },
+        modifier = if (onClick == null) Modifier else Modifier.clickable { onClick(model.connection.session.id) },
         leading = {
             IconWithBadge(
-                connection.session.metadata.iconUrl,
+                row.iconUrl,
                 placeholder = row.initial ?: "WC",
             )
         },

@@ -1,5 +1,7 @@
 package com.gemwallet.android.features.bridge.viewmodels
 
+import com.gemwallet.android.ext.toGem
+
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -165,9 +167,12 @@ class WCRequestViewModel @Inject constructor(
         respond(sessionRequest, service.userRejectedError().toJsonRpcResponse(), onError = { Log.e(TAG, "Request rejection failed id=${sessionRequest.request.id}: $it") })
     }
 
-    private fun toRequest(pending: WalletConnectPendingRequest): WCRequest = when (pending) {
-        is WalletConnectPendingRequest.SignMessage -> WCRequest.SignMessage(pending, signMessageService)
-        is WalletConnectPendingRequest.Transaction -> WCRequest.Transaction(pending)
+    private fun toRequest(pending: WalletConnectPendingRequest): WCRequest {
+        val row = service.connectionRow(pending.appMetadata.toGem())
+        return when (pending) {
+            is WalletConnectPendingRequest.SignMessage -> WCRequest.SignMessage(pending, row, signMessageService)
+            is WalletConnectPendingRequest.Transaction -> WCRequest.Transaction(pending, row)
+        }
     }
 
     private fun respond(sessionRequest: WalletConnectSessionRequest, response: WalletConnectJsonRpcResponse, onError: (String) -> Unit) {

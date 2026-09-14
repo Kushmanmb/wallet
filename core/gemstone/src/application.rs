@@ -26,6 +26,7 @@ impl GemApplicationMetadataService {
             initial: name.chars().next().map(|first| first.to_uppercase().to_string()),
             title: name,
             host: Some(url_host(&metadata.url)).filter(|host| !host.is_empty()),
+            icon_url: self.icon_url(metadata),
         }
     }
 
@@ -88,8 +89,11 @@ mod tests {
         assert_eq!(hosted.host.as_deref(), Some("app.uniswap.org"));
         assert_eq!(hosted.initial.as_deref(), Some("U"));
 
+        assert_eq!(hosted.icon_url.as_deref(), Some("https://assets.gemwallet.com/proxy/icon?url=https%3A%2F%2Fapp.uniswap.org&size=256"));
+
         assert_eq!(service.connection_row(metadata("", "Uniswap")).host, None);
         assert_eq!(service.connection_row(metadata("", "")).initial, None);
+        assert_eq!(service.connection_row(metadata("", "Uniswap")).icon_url, None);
     }
 
     use super::*;
@@ -174,4 +178,5 @@ pub struct GemConnectionRow {
     pub title: String,
     pub host: Option<String>,
     pub initial: Option<String>,
+    pub icon_url: Option<String>,
 }

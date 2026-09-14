@@ -12,7 +12,6 @@ import com.gemwallet.android.application.wallet_connect.WalletConnectVerifyConte
 import com.wallet.core.primitives.WalletConnectionSessionProposal
 import com.gemwallet.android.features.bridge.viewmodels.model.map
 import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
-import com.gemwallet.android.features.bridge.viewmodels.model.toSessionUI
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.buttonState
 import com.wallet.core.primitives.WalletId
@@ -46,7 +45,7 @@ class ProposalSceneViewModel @Inject constructor(
     private val _proposal = MutableStateFlow<WalletConnectSessionProposal?>(null)
     private val _sessionProposal = MutableStateFlow<WalletConnectionSessionProposal?>(null)
 
-    val proposal = _sessionProposal.map { it?.metadata?.toSessionUI() }
+    val proposal = _sessionProposal.map { proposal -> proposal?.metadata?.let { walletConnectService.connectionRow(it.toGem()) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val availableWallets = _sessionProposal.map { it?.wallets.orEmpty() }
