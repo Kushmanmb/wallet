@@ -8,6 +8,7 @@ import Localization
 import Primitives
 import Style
 import SwiftUI
+import class Gemstone.CryptoFiatConverter
 
 public struct AssetDataViewModel: Sendable {
     private let assetData: AssetData
@@ -129,11 +130,17 @@ public struct AssetDataViewModel: Sendable {
         else {
             return .empty
         }
-        let value = balanceViewModel.balanceAmount * price.price
+        guard let value = try? CryptoFiatConverter().toFiat(
+            value: balanceViewModel.total,
+            decimals: UInt32(asset.decimals),
+            price: price.price,
+        ) else {
+            return .empty
+        }
         return CurrencyFormatter(
             type: .currency,
             currencyCode: currencyCode,
-        ).string(value)
+        ).string(Double(value) ?? .zero)
     }
 
     public var isEnabled: Bool {

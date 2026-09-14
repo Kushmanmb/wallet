@@ -58,7 +58,6 @@ The largest duplication left. Contract: [a number crosses as a value and a style
 - **F4** **S** `CurrencyFormatter` type-to-precision — Android now asks `GemCurrencyStyle`; [iOS](../ios/Packages/Formatters/Sources/CurrencyFormatter.swift) still decides its own because `Formatters` cannot import Gemstone. Finishes with **F2**.
 - **F6** **M** Carry `GemFormattedNumber` in the row records and view states that carry a bare `f64` today, starting with `GemFiatQuoteRow` in [`fiat/model.rs`](../core/gemstone/src/services/fiat/model.rs).
 - **F7** **S** Then `FiatSceneViewModel` holds no `CurrencyFormatter` or `ValueFormatter`; the session's view state carries the numbers and the scene renders them.
-- **F8** **S** Crypto-to-fiat — only Android calls [`to_fiat`](../core/gemstone/src/crypto_fiat_converter.rs); iOS converts in Swift.
 
 Not in scope: `Formatters` and `Validators` on iOS still cannot import Gemstone, so the renderer that applies a `GemPrecision` must stay dependency-free. That is why this is a value-plus-style contract and not a foreign trait.
 
