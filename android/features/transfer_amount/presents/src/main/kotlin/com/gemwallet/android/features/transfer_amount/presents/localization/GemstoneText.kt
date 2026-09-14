@@ -1,4 +1,4 @@
-package com.gemwallet.android.features.transfer_amount.presents
+package com.gemwallet.android.features.transfer_amount.presents.localization
 
 import com.gemwallet.android.ext.toPrimitives
 import androidx.compose.runtime.Composable

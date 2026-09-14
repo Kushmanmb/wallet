@@ -195,7 +195,7 @@ Once Core owns the row, the app-side model has nothing left to decide, and a mod
 
 Two things a record cannot carry are a localized string and a bundled image asset, and both have one home per platform.
 
-**Every Core case that becomes localized text maps in one file per module.** iOS has `Gemstone+Localized.swift`, Android `GemstoneText.kt`; both hold `GemTransactionTitle`, `GemWalletSubtitle` and every case that follows. Core returns the case, the file returns the string. Do not add a per-type `Gem*+Localized.swift`, and never push the app's string catalog into Core through `GemLocalizer` — that trades a maintained translation for an FFI crossing per row. `GemLocalizer` is for text Core composes itself, such as a default wallet name.
+**Every Core case that becomes localized text maps in one file per module.** iOS has `Gemstone+Localized.swift`, Android a `localization/GemstoneText.kt` in each feature module that needs one; both hold `GemTransactionTitle`, `GemWalletSubtitle` and every case that follows. Core returns the case, the file returns the string. Do not add a per-type `Gem*+Localized.swift`, and never push the app's string catalog into Core through `GemLocalizer` — that trades a maintained translation for an FFI crossing per row. `GemLocalizer` is for text Core composes itself, such as a default wallet name.
 
 **A Core case that becomes a bundled image maps in that type's own extension.** `GemWalletRow+PrimitivesComponents.swift` turns `placeholder` into an `Image` and the row into an `AssetImage`; Android's `GemWalletPlaceholder.iconModel()` and `GemWalletRow.supportIcon()` are the same two mappings. One place per platform, read by every screen.
 

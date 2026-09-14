@@ -47,6 +47,7 @@ import com.gemwallet.android.ui.theme.space4
 import com.gemwallet.android.ui.theme.space6
 import com.gemwallet.android.ui.theme.space8
 import com.gemwallet.android.ui.theme.space24
+import com.gemwallet.android.features.activities.presents.localization.stringRes
 import uniffi.gemstone.GemSwapProgressStep
 
 private val connectorWidth = 1.5.dp
@@ -234,7 +235,7 @@ private fun ProgressMarker(status: GemSwapProgressStep) {
 
 @Composable
 private fun StatusTag(status: GemSwapProgressStep) {
-    val labelRes = status.labelRes() ?: return
+    val labelRes = status.stringRes() ?: return
     val color = status.color()
     Text(
         modifier = Modifier
@@ -246,18 +247,6 @@ private fun StatusTag(status: GemSwapProgressStep) {
         overflow = TextOverflow.Ellipsis,
         style = MaterialTheme.typography.labelMedium,
     )
-}
-
-@StringRes
-internal fun GemSwapProgressStep.labelRes(): Int? {
-    return when (this) {
-        GemSwapProgressStep.COMPLETED -> R.string.transaction_status_completed
-        GemSwapProgressStep.PENDING -> R.string.transaction_status_inprogress
-        GemSwapProgressStep.WAITING -> null
-        GemSwapProgressStep.FAILED -> R.string.transaction_status_failed
-        GemSwapProgressStep.REVERTED -> R.string.transaction_status_reverted
-        GemSwapProgressStep.REFUNDED -> R.string.transaction_status_refunded
-    }
 }
 
 @Composable

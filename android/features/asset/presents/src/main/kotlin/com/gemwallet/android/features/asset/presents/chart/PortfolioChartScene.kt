@@ -29,6 +29,7 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.StateViewType
 import com.wallet.core.primitives.PortfolioType
+import com.gemwallet.android.features.asset.presents.localization.stringRes
 import uniffi.gemstone.PortfolioChartType
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -89,7 +90,7 @@ private fun ChartTypeSelector(selected: PortfolioChartType, onSelect: (Portfolio
     TextButton(onClick = { expanded = true }) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = stringResource(selected.titleRes()),
+                text = stringResource(selected.stringRes()),
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -103,7 +104,7 @@ private fun ChartTypeSelector(selected: PortfolioChartType, onSelect: (Portfolio
     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
         PortfolioChartType.entries.forEach { type ->
             DropdownMenuItem(
-                text = { Text(stringResource(type.titleRes())) },
+                text = { Text(stringResource(type.stringRes())) },
                 onClick = {
                     onSelect(type)
                     expanded = false
@@ -128,9 +129,4 @@ private fun PortfolioChart(viewModel: PortfolioChartViewModel) {
 private fun PortfolioType.titleRes(): Int = when (this) {
     PortfolioType.Wallet -> R.string.wallet_portfolio_title
     PortfolioType.Perpetuals -> R.string.perpetuals_title
-}
-
-private fun PortfolioChartType.titleRes(): Int = when (this) {
-    PortfolioChartType.VALUE -> R.string.perpetual_value
-    PortfolioChartType.PNL -> R.string.perpetual_pnl
 }
