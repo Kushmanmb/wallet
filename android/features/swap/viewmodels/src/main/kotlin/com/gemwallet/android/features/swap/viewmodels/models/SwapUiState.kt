@@ -6,6 +6,8 @@ import uniffi.gemstone.GemSwapButtonState
 import uniffi.gemstone.GemSwapViewState
 import uniffi.gemstone.GemSwapSessionAction
 import uniffi.gemstone.SwapperException
+import androidx.annotation.StringRes
+import com.gemwallet.android.ui.R
 
 data class SwapItemInteraction(
     val isAmountEditable: Boolean,
@@ -29,7 +31,8 @@ data class SwapItemInteraction(
 
 data class SwapUiState(
     val action: GemSwapSessionAction = GemSwapSessionAction.None,
-    val buttonAction: GemSwapButtonAction = GemSwapButtonAction.Swap,
+    @StringRes val actionTitle: Int = R.string.wallet_swap,
+    internal val buttonAction: GemSwapButtonAction = GemSwapButtonAction.Swap,
     val buttonState: ButtonState = ButtonState.Disabled,
     val error: SwapperException? = null,
     val isQuoteLoading: Boolean = false,
@@ -52,6 +55,13 @@ data class SwapUiState(
 internal fun createSwapUiState(state: GemSwapViewState) = SwapUiState(
     action = state.action,
     buttonAction = state.buttonAction,
+    actionTitle = when (state.buttonAction) {
+        GemSwapButtonAction.InsufficientBalance -> R.string.transfer_insufficient_balance
+        is GemSwapButtonAction.UseMinimumAmount -> R.string.swap_use_minimum_amount
+        GemSwapButtonAction.RetryQuote,
+        GemSwapButtonAction.RetryTransfer -> R.string.common_try_again
+        GemSwapButtonAction.Swap -> R.string.wallet_swap
+    },
     buttonState = when (state.buttonState) {
         GemSwapButtonState.DISABLED -> ButtonState.Disabled
         GemSwapButtonState.LOADING -> ButtonState.Loading
