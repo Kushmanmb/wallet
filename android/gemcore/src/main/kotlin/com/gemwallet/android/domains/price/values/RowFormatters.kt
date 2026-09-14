@@ -10,12 +10,8 @@ import uniffi.gemstone.GemValueStyle
 class RowFormatters {
     val value = ValueFormatter(style = GemValueStyle.SHORT)
     private val currencies = mutableMapOf<Currency, CurrencyFormatter>()
-    private val abbreviated = mutableMapOf<Currency, CurrencyFormatter>()
 
     fun currency(currency: Currency): CurrencyFormatter = currencies.getOrPut(currency) { CurrencyFormatter(currency = currency) }
-
-    fun abbreviated(currency: Currency): CurrencyFormatter =
-        abbreviated.getOrPut(currency) { CurrencyFormatter(type = CurrencyFormatter.Type.Abbreviated, currency = currency) }
 
     fun price(currency: Currency, value: Double?, changePercentage: Double?): PriceValue {
         val priceValue = value?.takeIf(Double::isFinite)

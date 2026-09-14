@@ -7,7 +7,10 @@ use primitives::perpetual::{PerpetualBalance, PerpetualData};
 use primitives::{Asset, AssetBasic, AssetId, AssetPrice, AssetProperties, AssetScore, AssetType, Chain, ChartPeriod, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, WalletType};
 
 use super::model::{GemAutocloseSummary, GemMarketsRefreshTrigger, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionKind, GemCandleTooltip, GemPerpetualMarketRow, GemPerpetualPositionRow, GemPerpetualTransferData};
+use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigInt;
+use crate::precision::GemCurrencyStyle;
+use primitives::Currency;
 use crate::perpetual::GemPerpetual;
 use crate::services::error::GemServiceError;
 use crate::services::transfer::GemTransferData;
@@ -512,9 +515,12 @@ pub fn candle_tooltip(candle: &ChartCandleStick) -> GemCandleTooltip {
 }
 
 pub fn market_row(perpetual: &Perpetual) -> GemPerpetualMarketRow {
+    let abbreviated = |value: f64| GemFormattedNumber::currency(value, Currency::USD.as_ref().to_string(), GemCurrencyStyle::Abbreviated);
     GemPerpetualMarketRow {
         title: perpetual.name.clone(),
         shows_price: perpetual.price != 0.0,
+        volume_24h: abbreviated(perpetual.volume_24h),
+        open_interest: abbreviated(perpetual.open_interest),
     }
 }
 
@@ -781,6 +787,22 @@ mod tests {
         assert!(market_row(&priced).shows_price);
         assert!(!market_row(&unpriced).shows_price);
         assert_eq!(market_row(&priced).title, "BTC");
+    }
+
+    #[test]
+    fn test_a_market_row_abbreviates_its_volume_and_open_interest_in_usd() {
+        let row = market_row(&Perpetual {
+            volume_24h: 1_500_000.0,
+            open_interest: 5_250_000.0,
+            ..market("BTC")
+        });
+
+        for number in [&row.volume_24h, &row.open_interest] {
+            assert_eq!(number.unit, crate::formatted_number::GemNumberUnit::Currency { code: "USD".to_string() });
+            assert_eq!(number.display, crate::formatted_number::GemNumberDisplay::Abbreviated);
+        }
+        assert_eq!(row.volume_24h.value, 1_500_000.0);
+        assert_eq!(row.open_interest.value, 5_250_000.0);
     }
 
     #[test]

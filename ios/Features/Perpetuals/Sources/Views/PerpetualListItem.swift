@@ -1,6 +1,5 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemCurrencyStyle
 import Components
 import Formatters
 import GemstonePrimitives
@@ -10,18 +9,15 @@ import SwiftUI
 
 public struct PerpetualListItem: View {
     let perpetualData: PerpetualData
-    let currencyStyle: GemCurrencyStyle
     let onPin: (PerpetualData) -> Void
     let onSelect: (Asset) -> Void
 
     public init(
         perpetualData: PerpetualData,
-        currencyStyle: GemCurrencyStyle = .abbreviated,
         onPin: @escaping (PerpetualData) -> Void,
         onSelect: @escaping (Asset) -> Void,
     ) {
         self.perpetualData = perpetualData
-        self.currencyStyle = currencyStyle
         self.onPin = onPin
         self.onSelect = onSelect
     }
@@ -30,10 +26,7 @@ public struct PerpetualListItem: View {
         NavigationCustomLink(
             with: ListAssetItemView(
                 model: PerpetualItemViewModel(
-                    model: PerpetualViewModel(
-                        perpetual: perpetualData.perpetual,
-                        currencyStyle: currencyStyle,
-                    ),
+                    model: PerpetualViewModel(perpetual: perpetualData.perpetual),
                 ),
             ),
             action: { onSelect(perpetualData.asset) },

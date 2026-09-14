@@ -1,4 +1,5 @@
 use super::rules;
+use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigInt;
 use crate::perpetual::GemPerpetual;
 use crate::services::failures::StepFailure;
@@ -107,6 +108,8 @@ pub fn perpetual_position_row(perpetual: Perpetual, asset: Asset, position: Perp
 pub struct GemPerpetualMarketRow {
     pub title: String,
     pub shows_price: bool,
+    pub volume_24h: GemFormattedNumber,
+    pub open_interest: GemFormattedNumber,
 }
 
 #[uniffi::export]

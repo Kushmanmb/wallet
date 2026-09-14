@@ -1,11 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemCurrencyStyle
 import Components
 import Formatters
 import Foundation
 import GemstonePrimitives
 import class Gemstone.GemPerpetual
+import struct Gemstone.GemPerpetualMarketRow
+import func Gemstone.perpetualMarketRow
 import Localization
 import Primitives
 import PrimitivesComponents
@@ -14,22 +15,21 @@ import SwiftUI
 
 public struct PerpetualViewModel {
     public let perpetual: Perpetual
-    private let marketValueFormatter: CurrencyFormatter
+    public let row: GemPerpetualMarketRow
     private let priceFormatter: CurrencyFormatter
     private let percentFormatter = PercentFormatter.signed
 
     public init(
         perpetual: Perpetual,
-        currencyStyle: GemCurrencyStyle = .abbreviated,
         priceFormatter: CurrencyFormatter = .usd,
     ) {
         self.perpetual = perpetual
         self.priceFormatter = priceFormatter
-        marketValueFormatter = CurrencyFormatter(type: currencyStyle, currencyCode: Currency.usd.rawValue)
+        row = perpetualMarketRow(perpetual: perpetual.toGem())
     }
 
     public var name: String {
-        perpetual.name
+        row.title
     }
 
     public var assetImage: AssetImage {
@@ -37,11 +37,11 @@ public struct PerpetualViewModel {
     }
 
     public var volumeField: ListItemField {
-        ListItemField(title: Localized.Markets.dailyVolume, value: marketValueFormatter.string(perpetual.volume24h))
+        ListItemField(title: Localized.Markets.dailyVolume, value: row.volume24h.text())
     }
 
     public var openInterestField: ListItemField {
-        ListItemField(title: Localized.Info.Perpetual.OpenInterest.title, value: marketValueFormatter.string(perpetual.openInterest))
+        ListItemField(title: Localized.Info.Perpetual.OpenInterest.title, value: row.openInterest.text())
     }
 
     public var fundingRateField: ListItemField {
