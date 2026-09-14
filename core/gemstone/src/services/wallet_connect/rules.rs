@@ -510,6 +510,7 @@ mod tests {
         assert_eq!(metadata.name, "app.example.com");
         assert_eq!(metadata.icon, "https://x/icon.PNG");
         assert!(session_methods().contains(&"personal_sign".to_string()));
+        assert!(!session_methods().contains(&"eth_sendRawTransaction".to_string()));
         assert!(session_events().contains(&"accountsChanged".to_string()));
     }
 
