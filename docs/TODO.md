@@ -34,7 +34,6 @@ Rejected: confirm, swap and fiat already hold a session; wallet home already has
 
 Copy: [`FiatScene.swift`](../ios/Features/FiatConnect/Sources/Scenes/FiatScene.swift) names no Core type. Most of this is absorbed by § 1 to § 3.
 
-- **B6** **S** [`SwapUiState.action`](../android/features/swap/viewmodels/src/main/kotlin/com/gemwallet/android/features/swap/viewmodels/models/SwapUiState.kt) carries `GemSwapSessionAction` for the view model tests alone; no composable reads it. It is the only handle the tests have on the session phase, so retire it only together with a phase the screen itself renders.
 
 ## 5. Numbers cross as a value and a style
 
