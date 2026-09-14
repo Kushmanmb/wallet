@@ -11,7 +11,7 @@ use super::model::{
     GemAssetSectionIds,
     AssetList, GemAssetAction, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput, GemAssetNetworkDestination, GemAssetRow, GemAssetRowSubtitle, GemAssetRowTitle,
     GemAssetRowTrailing, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow, GemSelectAssetScope, GemSelectAssetType, GemSelectRowAction,
-    GemWalletSearchLimits,
+    GemWalletSearchCounts, GemWalletSearchLimits, GemWalletSearchPhase,
 };
 use crate::config::search_config::{ASSETS_INITIAL_LIMIT, ASSETS_SEARCH_LIMIT, NFTS_PREVIEW_LIMIT, PERPETUALS_PREVIEW_LIMIT, RESULTS_LIMIT};
 use crate::config::stake::EARN_OFFERED;
@@ -301,6 +301,15 @@ pub fn asset_sections(ids: Vec<AssetId>, pinned_ids: Vec<AssetId>, shows_popular
         }
         sections
     })
+}
+
+pub fn wallet_search_phase(counts: &GemWalletSearchCounts, is_loading: bool) -> GemWalletSearchPhase {
+    let shown = counts.recents + counts.pinned + counts.assets + counts.perpetuals + counts.lists + counts.nfts;
+    match (shown > 0, is_loading) {
+        (true, _) => GemWalletSearchPhase::Results,
+        (false, true) => GemWalletSearchPhase::Loading,
+        (false, false) => GemWalletSearchPhase::Empty,
+    }
 }
 
 pub fn wallet_search_limits(query: &str) -> GemWalletSearchLimits {
@@ -643,6 +652,27 @@ mod tests {
         let hidden = asset_sections(ids, vec![], false, popular);
         assert!(hidden.popular.is_empty());
         assert_eq!(hidden.assets.len(), 3);
+    }
+
+    #[test]
+    fn test_the_search_screen_shows_results_whenever_any_section_has_something() {
+        let empty = GemWalletSearchCounts {
+            recents: 0,
+            pinned: 0,
+            assets: 0,
+            perpetuals: 0,
+            lists: 0,
+            nfts: 0,
+        };
+
+        assert_eq!(wallet_search_phase(&empty, false), GemWalletSearchPhase::Empty);
+        assert_eq!(wallet_search_phase(&empty, true), GemWalletSearchPhase::Loading);
+        assert_eq!(
+            wallet_search_phase(&GemWalletSearchCounts { nfts: 1, ..empty }, true),
+            GemWalletSearchPhase::Results,
+            "a section with results is not a loading screen"
+        );
+        assert_eq!(wallet_search_phase(&GemWalletSearchCounts { recents: 2, ..empty }, false), GemWalletSearchPhase::Results);
     }
 
     #[test]

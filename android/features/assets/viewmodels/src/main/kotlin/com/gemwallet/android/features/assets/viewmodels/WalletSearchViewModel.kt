@@ -41,6 +41,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import com.gemwallet.android.ui.models.toUIModels
+import uniffi.gemstone.GemWalletSearchCounts
+import uniffi.gemstone.GemWalletSearchPhase
+import uniffi.gemstone.walletSearchPhase
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -132,7 +135,18 @@ class WalletSearchViewModel @Inject constructor(
     val state: StateFlow<UIState> = combine(
         uiState, previewPerpetuals, pinnedPerpetuals, previewNfts,
     ) { base, preview, pinnedPerps, nfts ->
-        if (preview.isNotEmpty() || pinnedPerps.isNotEmpty() || nfts.isNotEmpty()) UIState.Idle else base
+        val counts = GemWalletSearchCounts(
+            recents = 0u,
+            pinned = pinnedPerps.size.toUInt(),
+            assets = 0u,
+            perpetuals = preview.size.toUInt(),
+            lists = 0u,
+            nfts = nfts.size.toUInt(),
+        )
+        when (walletSearchPhase(counts, base is UIState.Loading)) {
+            GemWalletSearchPhase.RESULTS -> UIState.Idle
+            GemWalletSearchPhase.LOADING, GemWalletSearchPhase.EMPTY -> base
+        }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, UIState.Idle)
 

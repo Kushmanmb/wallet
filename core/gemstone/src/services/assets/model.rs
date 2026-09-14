@@ -295,6 +295,28 @@ pub enum GemHeaderButtonKind {
     Swap,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
+pub struct GemWalletSearchCounts {
+    pub recents: u32,
+    pub pinned: u32,
+    pub assets: u32,
+    pub perpetuals: u32,
+    pub lists: u32,
+    pub nfts: u32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemWalletSearchPhase {
+    Results,
+    Loading,
+    Empty,
+}
+
+#[uniffi::export]
+pub fn wallet_search_phase(counts: GemWalletSearchCounts, is_loading: bool) -> GemWalletSearchPhase {
+    super::rules::wallet_search_phase(&counts, is_loading)
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
 pub enum GemAssetMenuAction {
     Pin { is_pinned: bool },

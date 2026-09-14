@@ -16,6 +16,8 @@ import Recents
 import Store
 import Style
 import SwiftUI
+import struct Gemstone.GemWalletSearchCounts
+import func Gemstone.walletSearchPhase
 
 @Observable
 @MainActor
@@ -115,16 +117,28 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
     }
 
     var searchState: SearchContentState {
-        guard showEmpty else { return .results }
-        if state.isLoading { return .loading }
-        return .empty(.search(
-            type: .assets,
-            action: showAddToken ? { [weak self] in self?.onSelectAddCustomToken() } : nil,
-        ))
+        switch walletSearchPhase(counts: searchCounts, isLoading: state.isLoading) {
+        case .results:
+            return .results
+        case .loading:
+            return .loading
+        case .empty:
+            return .empty(.search(
+                type: .assets,
+                action: showAddToken ? { [weak self] in self?.onSelectAddCustomToken() } : nil,
+            ))
+        }
     }
 
-    var showEmpty: Bool {
-        !showRecents && !showPinned && !showAssets && !showPerpetuals && !showLists && !showNFTs
+    private var searchCounts: GemWalletSearchCounts {
+        GemWalletSearchCounts(
+            recents: showRecents ? 1 : 0,
+            pinned: showPinned ? 1 : 0,
+            assets: showAssets ? 1 : 0,
+            perpetuals: showPerpetuals ? 1 : 0,
+            lists: showLists ? 1 : 0,
+            nfts: showNFTs ? 1 : 0,
+        )
     }
 
     var showPinned: Bool {
@@ -309,4 +323,11 @@ extension WalletSearchSceneViewModel {
         service.flow(selectType: .walletSearch).row
     }
 
+}
+
+extension SearchContentState {
+    var isResults: Bool {
+        if case .results = self { return true }
+        return false
+    }
 }
