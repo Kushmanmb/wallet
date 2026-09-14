@@ -275,6 +275,9 @@ Open work lives in [TODO.md](TODO.md): the architecture migration to row records
 - The confirm button on the autoclose screen differs by design: one app enables it on any pending change and reveals validation after a tap, the other keeps it disabled until the change can build. Both read the same Core outcome; only the moment errors appear differs.
 - The iOS reading of a typed number into a plain one stays in the app. Core owns the rule and Android calls it, but the price widget links the formatter package without the Rust library, and the validators package may not import Gemstone at all, so the iOS copy is the price of those two boundaries.
 - A view model may hold more than one Core service when it is a launch host or a flow parent vending child models, and the extra services are private. A non-private service is the real defect: the view is reaching through the model, so have the parent vend the child model instead.
+- The privacy lock is iOS-only and WalletConnect one-click auth is Android-only. Both were reviewed on 2026-09-14 and kept one-sided; neither is a Core decision waiting to be shared.
+- The biometric gate is per call site on Android and per secret read on iOS. Core does not mark which operations need authentication, so an Android caller that reaches the config store directly is not prompted. Reviewed on 2026-09-14 and left as is; a new Android secret read must request auth at its call site.
+- The wallet home takes prices from the socket and refreshes on pull only. It does not carry the `refresh_interval` timer the asset, transactions and perpetuals screens use; reviewed on 2026-09-14 and left that way.
 
 ## Verification
 
