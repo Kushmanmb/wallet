@@ -81,17 +81,22 @@ run: build
 
 # Fastest compile check while iterating: builds one package with SwiftPM, no xcodebuild.
 # ~1-2s warm against ~30s for `just build`, and reports every error in the package
-# instead of stopping at the first failing file.
+# instead of stopping at the first failing file. SwiftPM builds for the host, so this
+# only works for packages that never import UIKit or SwiftUI; the rest need `just build`.
 # Example: just check GemstonePrimitives
 check PACKAGE:
-    @cd Packages/{{PACKAGE}} && swift build
+    @dir=$(ls -d Packages/{{PACKAGE}} Features/{{PACKAGE}} 2>/dev/null | head -1); \
+    if [ -z "$dir" ]; then echo "no package or feature named {{PACKAGE}}"; exit 1; fi; \
+    cd "$dir" && swift build
 
-# Runs one package's tests with SwiftPM. Only works for packages that do not depend on
-# Gemstone — the static library is built for the iOS simulator and will not link on the
-# host. For those use `just test <TestTarget>`.
+# Runs one package's tests with SwiftPM. Same host-build limits as `just check`, plus
+# packages that depend on Gemstone cannot link — the static library is built for the
+# iOS simulator. For those use `just test <TestTarget>`.
 # Example: just check-test Primitives
 check-test PACKAGE:
-    @cd Packages/{{PACKAGE}} && swift test
+    @dir=$(ls -d Packages/{{PACKAGE}} Features/{{PACKAGE}} 2>/dev/null | head -1); \
+    if [ -z "$dir" ]; then echo "no package or feature named {{PACKAGE}}"; exit 1; fi; \
+    cd "$dir" && swift test
 
 # Example: just build-package Primitives
 build-package PACKAGE:
