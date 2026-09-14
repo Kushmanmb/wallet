@@ -95,7 +95,6 @@ Ownership, injection and threads:
 
 Platform items:
 
-- **X15** **S** `ConnectionComponent.api` and `.nodes` are named only by tests on both apps; production feeds `.internet` and `.stream` on both. Feed them from the API and node clients or drop the variants from [`connection_component.rs`](../core/crates/primitives/src/connection_component.rs).
 - **X16** **S** [`debugLog`](../ios/Packages/Primitives/Sources/DebugLog.swift) compiles out in release, so the stream's connect, event and error lines exist in debug builds only and a released app leaves no trace of a dropped event. Decide a release-safe channel for the always-on paths or accept that field reports carry no log.
 
 

@@ -115,7 +115,7 @@ mod tests {
             "losing internet keeps what is known"
         );
         assert!(
-            !resets_component_health(GemConnectionComponent::Api, true, Some(false)),
+            !resets_component_health(GemConnectionComponent::Stream, true, Some(false)),
             "only internet recovery invalidates the other components"
         );
     }

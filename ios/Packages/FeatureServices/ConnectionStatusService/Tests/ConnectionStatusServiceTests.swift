@@ -21,13 +21,13 @@ struct ConnectionStatusServiceTests {
 
         #expect(observer.status == .online)
 
-        observer.update(component: .api, isHealthy: false)
+        observer.update(component: .stream, isHealthy: false)
         #expect(observer.status == .noService)
 
         observer.update(component: .internet, isHealthy: false)
         #expect(observer.status == .noInternet)
 
-        observer.update(component: .api, isHealthy: true)
+        observer.update(component: .stream, isHealthy: true)
         observer.update(component: .internet, isHealthy: true)
         #expect(observer.status == .online)
     }
@@ -38,13 +38,12 @@ struct ConnectionStatusServiceTests {
         let observer = ConnectionStatusObserver(connectionService: GemConnectionService(), monitors: [])
 
         observer.update(component: .internet, isHealthy: false)
-        observer.update(component: .api, isHealthy: false)
-        observer.update(component: .nodes, isHealthy: false)
+        observer.update(component: .stream, isHealthy: false)
         #expect(observer.status == .noInternet)
 
         observer.update(component: .internet, isHealthy: true)
         #expect(observer.status == .online)
-        #expect(observer.isHealthyByComponent[.api] == nil)
+        #expect(observer.isHealthyByComponent[.stream] == nil)
     }
 
     @Test
@@ -53,7 +52,7 @@ struct ConnectionStatusServiceTests {
         let observer = ConnectionStatusObserver(connectionService: GemConnectionService(), monitors: [])
 
         observer.update(component: .internet, isHealthy: true)
-        observer.update(component: .api, isHealthy: false)
+        observer.update(component: .stream, isHealthy: false)
         observer.update(component: .internet, isHealthy: true)
 
         #expect(observer.status == .noService)

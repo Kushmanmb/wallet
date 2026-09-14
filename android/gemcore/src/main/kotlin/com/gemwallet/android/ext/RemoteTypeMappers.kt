@@ -188,15 +188,11 @@ fun com.wallet.core.primitives.ChartPeriod.toGem(): uniffi.gemstone.ChartPeriod 
 
 fun uniffi.gemstone.ConnectionComponent.toPrimitives(): com.wallet.core.primitives.ConnectionComponent = when (this) {
     uniffi.gemstone.ConnectionComponent.INTERNET -> com.wallet.core.primitives.ConnectionComponent.Internet
-    uniffi.gemstone.ConnectionComponent.API -> com.wallet.core.primitives.ConnectionComponent.Api
-    uniffi.gemstone.ConnectionComponent.NODES -> com.wallet.core.primitives.ConnectionComponent.Nodes
     uniffi.gemstone.ConnectionComponent.STREAM -> com.wallet.core.primitives.ConnectionComponent.Stream
 }
 
 fun com.wallet.core.primitives.ConnectionComponent.toGem(): uniffi.gemstone.ConnectionComponent = when (this) {
     com.wallet.core.primitives.ConnectionComponent.Internet -> uniffi.gemstone.ConnectionComponent.INTERNET
-    com.wallet.core.primitives.ConnectionComponent.Api -> uniffi.gemstone.ConnectionComponent.API
-    com.wallet.core.primitives.ConnectionComponent.Nodes -> uniffi.gemstone.ConnectionComponent.NODES
     com.wallet.core.primitives.ConnectionComponent.Stream -> uniffi.gemstone.ConnectionComponent.STREAM
 }
 

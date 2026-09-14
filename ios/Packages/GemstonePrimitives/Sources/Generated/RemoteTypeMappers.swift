@@ -280,8 +280,6 @@ public extension Gemstone.ConnectionComponent {
     func map() -> Primitives.ConnectionComponent {
         switch self {
         case .internet: .internet
-        case .api: .api
-        case .nodes: .nodes
         case .stream: .stream
         }
     }
@@ -291,8 +289,6 @@ public extension Primitives.ConnectionComponent {
     func map() -> Gemstone.ConnectionComponent {
         switch self {
         case .internet: .internet
-        case .api: .api
-        case .nodes: .nodes
         case .stream: .stream
         }
     }

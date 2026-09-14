@@ -129,8 +129,6 @@ pub enum ChartPeriod {
 #[uniffi::remote(Enum)]
 pub enum ConnectionComponent {
     Internet,
-    Api,
-    Nodes,
     Stream,
 }
 
