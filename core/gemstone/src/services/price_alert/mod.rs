@@ -1,3 +1,4 @@
+pub mod session;
 pub mod rules;
 pub mod store;
 
@@ -10,6 +11,7 @@ use crate::api::{GemApiError, GemDeviceApiClient};
 use crate::services::banner::GemNotificationPermissions;
 use crate::services::device::GemDeviceService;
 use crate::services::preferences::GemPreferencesService;
+use session::GemPriceAlertSession;
 
 pub use store::GemPriceAlertStore;
 
@@ -57,6 +59,10 @@ impl GemPriceAlertService {
         }
         self.preferences.set_price_alerts_enabled(enabled)?;
         self.device.synchronize().await.map(|_| ())
+    }
+
+    pub fn new_alert_session(&self, asset_id: AssetId) -> GemPriceAlertSession {
+        GemPriceAlertSession::new(asset_id, self.get_currency())
     }
 
     pub fn get_currency(&self) -> Currency {

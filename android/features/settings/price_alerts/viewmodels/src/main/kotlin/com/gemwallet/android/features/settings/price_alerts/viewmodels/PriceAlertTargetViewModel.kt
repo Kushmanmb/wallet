@@ -43,6 +43,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.asStateFlow
 import com.gemwallet.android.ext.serviceMessage
 import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemPriceAlertSession
+import uniffi.gemstone.GemPriceAlertViewState
 
 @HiltViewModel
 class PriceAlertTargetViewModel @Inject constructor(
@@ -53,7 +55,6 @@ class PriceAlertTargetViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val numericFormatter = NumericFormatter()
-    private val suggestionOffsetPercent = 5.0
 
     val value = TextFieldState()
 
@@ -78,40 +79,43 @@ class PriceAlertTargetViewModel @Inject constructor(
         it?.price?.price?.priceChangePercentage24h.toValueDirection()
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ValueDirection.None)
 
-    val priceSuggestions: StateFlow<List<Pair<String, String>>> = currentPriceValue.map { price ->
-        if (price <= 0.0) return@map emptyList()
-        val fmt = CurrencyFormatter(currency = currency)
-        priceAlertFormatter.roundedValues(price, suggestionOffsetPercent).map { value ->
-            fmt.string(BigDecimal.valueOf(value)) to value.toBigDecimal().stripTrailingZeros().toPlainString()
-        }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    val percentageSuggestions: StateFlow<List<Int>> = currentPriceValue.map { price ->
-        priceAlertFormatter.percentageSuggestions(price)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, listOf(5, 10, 15))
-
     private val _direction = MutableStateFlow(PriceAlertDirection.Up)
     val direction: StateFlow<PriceAlertDirection> = _direction
 
     private val _type = MutableStateFlow(PriceAlertNotificationType.Price)
     val type: StateFlow<PriceAlertNotificationType> = _type
 
-    val resolvedDirection: StateFlow<PriceAlertDirection?> = combine(
-        snapshotFlow { value.text }, currentPriceValue, _type, _direction,
-    ) { text, currentPrice, type, selectedDirection ->
-        priceAlertFormatter.alertDirection(
-            notificationType = type.toGem(),
-            inputValue = numericFormatter.double(text.toString()),
-            currentPrice = currentPrice,
-            selectedDirection = selectedDirection.toGem(),
-        )?.toPrimitives()
-    }
+    private val isSaving = MutableStateFlow(false)
+
+    private val session: StateFlow<GemPriceAlertSession> = combine(
+        snapshotFlow { value.text }, currentPriceValue, _type, _direction, isSaving,
+    ) { text, currentPrice, type, selectedDirection, saving ->
+        service.newAlertSession(assetId.toIdentifier())
+            .onType(type.toGem())
+            .onDirection(selectedDirection.toGem())
+            .onInput(numericFormatter.double(text.toString()))
+            .onPrice(currentPrice)
+            .onSaving(saving)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, service.newAlertSession(assetId.toIdentifier()))
+
+    private val viewState: StateFlow<GemPriceAlertViewState> = session.map { it.viewState() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, session.value.viewState())
+
+    val resolvedDirection: StateFlow<PriceAlertDirection?> = viewState.map { it.direction?.toPrimitives() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val isSaving = MutableStateFlow(false)
-    val buttonState: StateFlow<ButtonState> = combine(resolvedDirection, isSaving) { direction, saving ->
-        buttonState(enabled = direction != null, loading = saving)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, buttonState(enabled = false))
+    val buttonState: StateFlow<ButtonState> = viewState.map { buttonState(enabled = it.canConfirm, loading = it.isSaving) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, buttonState(enabled = false))
+
+    val priceSuggestions: StateFlow<List<Pair<String, String>>> = viewState.map { state ->
+        val fmt = CurrencyFormatter(currency = currency)
+        state.priceSuggestions.map { value ->
+            fmt.string(BigDecimal.valueOf(value)) to value.toBigDecimal().stripTrailingZeros().toPlainString()
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val percentageSuggestions: StateFlow<List<Int>> = viewState.map { it.percentageSuggestions }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val errorState = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = errorState.asStateFlow()
@@ -128,18 +132,10 @@ class PriceAlertTargetViewModel @Inject constructor(
         val inputValue = numericFormatter.double(value.text.toString()) ?: return
         val type = type.value
         val direction = resolvedDirection.value ?: return
-        val price = if (type == PriceAlertNotificationType.Price) inputValue else null
-        val percentage = if (type == PriceAlertNotificationType.PricePercentChange) inputValue else null
-        val priceAlert = PriceAlert(
-            assetId = assetId,
-            currency = currency,
-            price = price,
-            pricePercentChange = percentage,
-            priceDirection = direction,
-        )
+        val priceAlert = session.value.alert() ?: return
         isSaving.value = true
         viewModelScope.launch {
-            runCatchingCancellable { withContext(Dispatchers.IO) { service.enablePriceAlert(priceAlert.toGem()) } }
+            runCatchingCancellable { withContext(Dispatchers.IO) { service.enablePriceAlert(priceAlert) } }
                 .onSuccess { onSaved(PriceAlertConfirmResult(type, direction, type.formatAmount(inputValue, currency))) }
                 .onFailure { errorState.value = it.serviceMessage() }
             isSaving.value = false

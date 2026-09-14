@@ -4,6 +4,8 @@ import Components
 import Formatters
 import Foundation
 import Gemstone
+import struct Gemstone.GemPriceAlertSession
+import struct Gemstone.GemPriceAlertViewState
 import protocol Gemstone.GemPriceAlertServiceProtocol
 import GemstoneServices
 import Localization
@@ -20,7 +22,6 @@ public final class SetPriceAlertViewModel {
     private let onComplete: StringAction
     private let currencyFormatter: CurrencyFormatter
     private let numericFormatter = NumericFormatter()
-    private let suggestionOffsetPercent: Double = 5
 
     var state: SetPriceAlertViewModelState
     var isPresentingAlertMessage: AlertMessage?
@@ -46,19 +47,12 @@ public final class SetPriceAlertViewModel {
     }
 
     func percentageSuggestions(for price: Primitives.Price?) -> [PercentageSuggestion] {
-        guard let currentPrice = price?.price else { return [] }
-        return PriceAlertFormatter.shared.percentageSuggestions(price: currentPrice).map {
-            PercentageSuggestion(value: $0.asInt)
-        }
+        viewState(price: price).percentageSuggestions.map { PercentageSuggestion(value: $0.asInt) }
     }
 
     func priceSuggestions(for price: Primitives.Price?) -> [PriceSuggestion] {
-        guard let currentPrice = price?.price else { return [] }
-        return PriceAlertFormatter.shared.roundedValues(price: currentPrice, byPercent: suggestionOffsetPercent).map {
-            PriceSuggestion(
-                title: currencyFormatter.string($0),
-                value: $0,
-            )
+        viewState(price: price).priceSuggestions.map {
+            PriceSuggestion(title: currencyFormatter.string($0), value: $0)
         }
     }
 
@@ -66,14 +60,21 @@ public final class SetPriceAlertViewModel {
         state.amount = suggestion.inputValue
     }
 
+    private var session: GemPriceAlertSession {
+        service.newAlertSession(assetId: asset.id.identifier)
+            .onType(notificationType: state.type.notificationType.map())
+            .onDirection(selectedDirection: state.selectedDirection.map())
+            .onInput(input: amountValue)
+            .onPrice(currentPrice: assetData.price?.price)
+            .onSaving(isSaving: isSaving)
+    }
+
+    private func viewState(price: Primitives.Price?) -> GemPriceAlertViewState {
+        session.onPrice(currentPrice: price?.price).viewState()
+    }
+
     var alertDirection: Primitives.PriceAlertDirection? {
-        PriceAlertFormatter.shared.alertDirection(
-            notificationType: state.type.notificationType.map(),
-            inputValue: amountValue,
-            currentPrice: assetData.price?.price,
-            selectedDirection: state.selectedDirection.map(),
-        )?
-        .map()
+        session.viewState().direction.map { $0.map() }
     }
 
     var alertDirectionTitle: String {
@@ -93,7 +94,7 @@ public final class SetPriceAlertViewModel {
     }
 
     var isEnabledConfirmButton: Bool {
-        alertDirection != nil
+        session.viewState().canConfirm
     }
 
     var confirmButtonState: ButtonState {
@@ -145,19 +146,8 @@ public final class SetPriceAlertViewModel {
         return Localized.PriceAlerts.addedFor(message)
     }
 
-    private func priceAlert() -> Primitives.PriceAlert {
-        let (price, pricePercentChange): (Double?, Double?) = switch state.type {
-        case .price: (amountValue, nil)
-        case .percentage: (nil, amountValue)
-        }
-        return Primitives.PriceAlert(
-            assetId: asset.id,
-            currency: Currency(core: service.getCurrency()),
-            price: price,
-            pricePercentChange: pricePercentChange,
-            priceDirection: alertDirection,
-            lastNotifiedAt: .none,
-        )
+    private func priceAlert() -> Primitives.PriceAlert? {
+        session.alert().map { $0.map() }
     }
 
     private func toggleAlertDirection() {
@@ -172,9 +162,10 @@ public final class SetPriceAlertViewModel {
 
 extension SetPriceAlertViewModel {
     func setPriceAlert() async {
+        guard let alert = priceAlert() else { return }
         isSaving = true
         do {
-            try await service.enable(priceAlert: priceAlert())
+            try await service.enable(priceAlert: alert)
             onComplete?(completeMessage)
         } catch {
             isPresentingAlertMessage = AlertMessage(error: error)

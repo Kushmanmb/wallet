@@ -6,6 +6,7 @@ import Gemstone
 import GemstonePrimitives
 import Primitives
 import PrimitivesTestKit
+import struct Gemstone.GemPriceAlertSession
 
 public actor GemDeviceServiceMock: GemDeviceServiceProtocol {
     private let syncError: Error?
@@ -202,6 +203,18 @@ public final class GemPriceAlertServiceMock: GemPriceAlertServiceProtocol, @unch
 
     public init(enabled: Bool = false) {
         self.enabled = enabled
+    }
+
+    public func newAlertSession(assetId: Gemstone.AssetId) -> GemPriceAlertSession {
+        GemPriceAlertSession(
+            assetId: assetId,
+            currency: getCurrency(),
+            notificationType: .price,
+            selectedDirection: .up,
+            input: nil,
+            currentPrice: nil,
+            isSaving: false,
+        )
     }
 
     public func isEnabled() -> Bool {
