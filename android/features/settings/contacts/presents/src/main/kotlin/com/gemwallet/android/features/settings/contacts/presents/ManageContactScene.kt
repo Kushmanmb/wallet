@@ -18,7 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.gemwallet.android.ext.AddressFormatter
+import com.gemwallet.android.ui.format.rememberFormattedAddress
 import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactAvatarState
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.ManageContactUIState
@@ -147,7 +147,7 @@ private fun ContactAddressItem(
         title = { ListItemTitleText(text = address.chain.networkName()) },
         subtitle = {
             Text(
-                text = AddressFormatter(LocalAddressService.current, address = address.address, chain = address.chain).value(),
+                text = rememberFormattedAddress(address.address, address.chain),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary,
             )

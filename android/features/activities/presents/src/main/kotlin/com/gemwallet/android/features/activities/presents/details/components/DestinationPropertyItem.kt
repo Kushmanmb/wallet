@@ -2,7 +2,7 @@ package com.gemwallet.android.features.activities.presents.details.components
 
 import com.gemwallet.android.ui.LocalAddressService
 import androidx.compose.runtime.Composable
-import com.gemwallet.android.ext.AddressFormatter
+import com.gemwallet.android.ui.format.rememberFormattedAddress
 import com.gemwallet.android.domains.transaction.values.TransactionDetailsValue
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.property.AddressPropertyItem
@@ -26,7 +26,7 @@ fun DestinationPropertyItem(property: TransactionDetailsValue.Destination, listP
                 is TransactionDetailsValue.Destination.Validator -> R.string.stake_validator
                 is TransactionDetailsValue.Destination.ProviderAddress -> R.string.common_provider
             },
-            displayText = property.name ?: AddressFormatter(LocalAddressService.current, property.data, chain = property.chain).value(),
+            displayText = property.name ?: rememberFormattedAddress(property.data, property.chain),
             copyValue = property.data,
             explorerLink = property.explorerLink,
             listPosition = listPosition,

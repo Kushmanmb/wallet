@@ -3,7 +3,7 @@ package com.gemwallet.android.features.asset.presents.chart
 import com.gemwallet.android.ui.LocalAddressService
 import android.content.Context
 import androidx.compose.foundation.clickable
-import com.gemwallet.android.ext.AddressFormatter
+import com.gemwallet.android.ui.format.rememberFormattedAddress
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -167,7 +167,7 @@ private fun MarketProperty(chain: Chain, item: MarketInfoUIModel, position: List
         )
         MarketInfoUIModel.MarketInfoTypeUIModel.Contract -> AddressPropertyItem(
             title = R.string.asset_contract,
-            displayText = AddressFormatter(LocalAddressService.current, item.value, chain = chain).value(),
+            displayText = rememberFormattedAddress(item.value, chain),
             copyValue = item.value,
             explorerLink = item.explorerLink,
             listPosition = position,

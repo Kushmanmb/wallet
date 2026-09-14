@@ -2,7 +2,7 @@ package com.gemwallet.android.features.wallet.presents.components
 
 import com.gemwallet.android.ui.LocalAddressService
 import androidx.compose.runtime.Composable
-import com.gemwallet.android.ext.AddressFormatter
+import com.gemwallet.android.ui.format.rememberFormattedAddress
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.property.AddressPropertyItem
 import com.gemwallet.android.ui.models.ListPosition
@@ -16,7 +16,7 @@ internal fun WalletAddress(
 
     AddressPropertyItem(
         title = R.string.common_address,
-        displayText = AddressFormatter(LocalAddressService.current, address = account.address, chain = account.chain).value(),
+        displayText = rememberFormattedAddress(account.address, account.chain),
         copyValue = account.address,
         listPosition = ListPosition.Single,
     )

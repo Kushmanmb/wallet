@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
-import com.gemwallet.android.ext.AddressFormatter
+import com.gemwallet.android.ui.format.rememberFormattedAddress
 import com.gemwallet.android.ui.R
 import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ui.components.image.walletImageModel
@@ -48,7 +48,7 @@ fun PropertyDestination(
         }
         is ConfirmProperty.Destination.Contract -> AddressPropertyItem(
             title = R.string.asset_contract,
-            displayText = AddressFormatter(LocalAddressService.current, model.address, chain = model.chain).value(),
+            displayText = rememberFormattedAddress(model.address, model.chain),
             copyValue = model.address,
             explorerLink = model.explorerLink,
             listPosition = listPosition,
@@ -115,7 +115,7 @@ internal fun ConfirmProperty.Destination.displayData(): String = when (this) {
 
 @Composable
 private fun destinationText(name: String?, address: String, chain: Chain?, hasImage: Boolean): String {
-    val formatted = AddressFormatter(LocalAddressService.current, address, chain = chain).value()
+    val formatted = rememberFormattedAddress(address, chain)
     return when (val display = LocalAddressService.current.display(name, formatted, hasImage)) {
         is GemAddressDisplay.Address -> formatted
         is GemAddressDisplay.Name -> display.name
