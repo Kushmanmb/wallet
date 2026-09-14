@@ -157,7 +157,7 @@ pub enum GemApprovalValue {
 
 ### A list row is a record of choices
 
-A row is the smallest case of this rule and the one the codebase repeats most. Core returns what the row *means* — which name it shows, whether the symbol would repeat that name, what sits underneath, what trails it — and the app turns each case into a widget. The record carries no formatted text: Core's value formatter is not locale-aware, so a formatted string regresses every locale that groups or separates differently. It carries the choices that would otherwise be re-made, differently, in each list on each platform.
+A row is the smallest case of this rule and the one the codebase repeats most. Core returns what the row *means* — which name it shows, whether the symbol would repeat that name, what sits underneath, what trails it — and the app turns each case into a widget. A list whose entries are fixed and unconditional is not one of these: the tab bar names three or four destinations with no rule behind them, so it stays app-side until a destination becomes conditional. The record carries no formatted text: Core's value formatter is not locale-aware, so a formatted string regresses every locale that groups or separates differently. It carries the choices that would otherwise be re-made, differently, in each list on each platform.
 
 ```rust
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
