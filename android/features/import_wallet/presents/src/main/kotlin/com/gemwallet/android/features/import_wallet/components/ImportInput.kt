@@ -43,6 +43,7 @@ import com.gemwallet.android.ui.components.fields.NameResolveIndicator
 import uniffi.gemstone.GemNameRecordState
 import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.space8
+import com.gemwallet.android.features.import_wallet.localization.fieldStringRes
 import uniffi.gemstone.GemWalletImportKind
 import com.gemwallet.android.ui.components.clipboard.clipboardManager
 
@@ -84,11 +85,7 @@ internal fun ImportInput(
                 decorationBox = { innerTextField ->
                     if (inputState.text.isEmpty()) {
                         Text(
-                            text = when (importType.kind) {
-                                GemWalletImportKind.ADDRESS -> stringResource(R.string.wallet_import_address_field)
-                                GemWalletImportKind.PRIVATE_KEY -> stringResource(R.string.common_private_key)
-                                GemWalletImportKind.PHRASE -> stringResource(R.string.common_secret_phrase)
-                            },
+                            text = stringResource(importType.kind.fieldStringRes()),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.secondary,
                         )

@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gemwallet.android.features.import_wallet.localization.string
 import uniffi.gemstone.GemWalletImportException
 import com.gemwallet.android.application.wallet_import.values.WalletImportResult
 import com.gemwallet.android.features.import_wallet.components.ImportInput
@@ -328,13 +329,7 @@ private fun TypeSelection(
 @Composable
 private fun ErrorMessage(error: Throwable?) {
     val text = when (error) {
-        is GemWalletImportException.InvalidSecretPhraseWords -> stringResource(
-            R.string.errors_import_invalid_secret_phrase_word,
-            error.words.joinToString()
-        )
-        is GemWalletImportException.InvalidSecretPhrase -> stringResource(R.string.errors_import_invalid_secret_phrase)
-        is GemWalletImportException.InvalidAddress -> stringResource(R.string.errors_invalid_address_name)
-        is GemWalletImportException.InvalidPrivateKey -> stringResource(R.string.errors_import_invalid_private_key)
+        is GemWalletImportException -> error.string()
         null -> return
         else -> stringResource(
             R.string.errors_create_wallet,

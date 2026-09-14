@@ -18,6 +18,7 @@ import com.gemwallet.android.features.bridge.viewmodels.WCAuthViewModel
 import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
 import com.gemwallet.android.application.wallet_connect.WalletConnectAuthenticationRequest
 import com.gemwallet.android.application.wallet_connect.WalletConnectVerifyContext
+import com.gemwallet.android.features.bridge.localization.walletConnectMessage
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron

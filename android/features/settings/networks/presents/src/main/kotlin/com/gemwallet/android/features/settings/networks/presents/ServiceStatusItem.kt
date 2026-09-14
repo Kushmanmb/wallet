@@ -2,14 +2,12 @@ package com.gemwallet.android.features.settings.networks.presents
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.features.settings.networks.viewmodels.models.ServiceStatusRowUiModel
-import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemSupportText
 import com.gemwallet.android.ui.components.list_item.ListItemTitleText
 import com.gemwallet.android.ui.models.ListPosition
-import uniffi.gemstone.GemServiceEndpointType
+import com.gemwallet.android.features.settings.networks.presents.localization.string
 
 @Composable
 internal fun ServiceStatusItem(
@@ -19,7 +17,7 @@ internal fun ServiceStatusItem(
     ListItem(
         title = {
             ListItemTitleText(
-                text = model.title(),
+                text = "${model.type.string()} ${model.flag}",
                 titleBadge = {
                     LatencyStatusBadge(status = model.statusState)
                 },
@@ -33,13 +31,4 @@ internal fun ServiceStatusItem(
         },
         listPosition = listPosition,
     )
-}
-
-@Composable
-private fun ServiceStatusRowUiModel.title(): String {
-    val name = when (type) {
-        GemServiceEndpointType.API -> "API"
-        GemServiceEndpointType.GEM_NODE -> stringResource(R.string.nodes_gem_wallet_node)
-    }
-    return "$name $flag"
 }

@@ -18,6 +18,7 @@ import com.gemwallet.android.ui.theme.alpha10
 import com.gemwallet.android.ui.theme.paddingHalfSmall
 import com.gemwallet.android.ui.theme.space0
 import com.gemwallet.android.ui.theme.space2
+import com.gemwallet.android.features.import_wallet.localization.tabStringRes
 import uniffi.gemstone.GemWalletImportKind
 
 private val tabHeight = 32.dp
@@ -49,11 +50,7 @@ internal fun ImportKindTab(
         onClick = { onTypeChange(type) },
         text = {
             Text(
-                text = when (type) {
-                    GemWalletImportKind.ADDRESS -> stringResource(id = R.string.common_address)
-                    GemWalletImportKind.PHRASE -> stringResource(id = R.string.common_phrase)
-                    GemWalletImportKind.PRIVATE_KEY -> stringResource(id = R.string.common_private_key)
-                },
+                text = stringResource(type.tabStringRes()),
                 maxLines = 1,
                 color = MaterialTheme.colorScheme.onSurface,
             )

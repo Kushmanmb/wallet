@@ -24,6 +24,7 @@ import com.gemwallet.android.ui.components.screen.LoadingScene
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.ConfirmTransactionAction
+import com.gemwallet.android.features.earn.delegation.presents.localization.stringRes
 import uniffi.gemstone.GemDelegationAction
 import com.gemwallet.android.features.earn.delegation.models.DelegationProperty
 import com.gemwallet.android.features.earn.delegation.presents.components.DelegationState
@@ -110,13 +111,19 @@ fun DelegationScene(
                 item { SubheaderItem(R.string.common_manage) }
             }
             itemsPositioned(actions) { position, item ->
-                when (item) {
-                    GemDelegationAction.REDELEGATE -> PropertyItem(R.string.transfer_redelegate_title, onClick = { viewModel.onRedelegate(onAmount) }, listPosition = position)
-                    GemDelegationAction.STAKE -> PropertyItem(R.string.transfer_stake_title, onClick = { viewModel.onStake(onAmount) }, listPosition = position)
-                    GemDelegationAction.UNSTAKE -> PropertyItem(R.string.transfer_unstake_title, onClick = { viewModel.onUnstake(onAmount, onConfirm) }, listPosition = position)
-                    GemDelegationAction.WITHDRAW -> PropertyItem(R.string.transfer_withdraw_title, onClick = { viewModel.onWithdraw(onAmount, onConfirm) }, listPosition = position)
-                    GemDelegationAction.DEPOSIT -> PropertyItem(R.string.wallet_deposit, onClick = { viewModel.onDeposit(onAmount) }, listPosition = position)
-                }
+                PropertyItem(
+                    action = item.stringRes(),
+                    onClick = {
+                        when (item) {
+                            GemDelegationAction.REDELEGATE -> viewModel.onRedelegate(onAmount)
+                            GemDelegationAction.STAKE -> viewModel.onStake(onAmount)
+                            GemDelegationAction.UNSTAKE -> viewModel.onUnstake(onAmount, onConfirm)
+                            GemDelegationAction.WITHDRAW -> viewModel.onWithdraw(onAmount, onConfirm)
+                            GemDelegationAction.DEPOSIT -> viewModel.onDeposit(onAmount)
+                        }
+                    },
+                    listPosition = position,
+                )
             }
         }
     }

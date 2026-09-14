@@ -22,6 +22,7 @@ import com.gemwallet.android.ui.components.list_item.property.PropertyTitleText
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.theme.secondaryFaded
+import com.gemwallet.android.features.stake.presents.localization.stringRes
 import uniffi.gemstone.GemStakeAction
 import uniffi.gemstone.GemStakeActionItem
 import com.wallet.core.primitives.AssetId
@@ -41,12 +42,6 @@ internal fun LazyListScope.stakeActions(
     }
     itemsPositioned(actions) { position, item ->
         val action = item.action
-        val title = when (action) {
-            GemStakeAction.CLAIM_REWARDS -> R.string.transfer_claim_rewards_title
-            GemStakeAction.STAKE -> R.string.transfer_stake_title
-            GemStakeAction.FREEZE -> R.string.transfer_freeze_title
-            GemStakeAction.UNFREEZE -> R.string.transfer_unfreeze_title
-        }
         val onClick = when (action) {
             GemStakeAction.STAKE -> {
                 { amountAction(AmountParams.Stake.Delegate(assetId)) }
@@ -67,7 +62,7 @@ internal fun LazyListScope.stakeActions(
             },
             title = {
                 PropertyTitleText(
-                    text = title,
+                    text = action.stringRes(),
                     color = if (item.requiresFrozenBalance) MaterialTheme.colorScheme.secondaryFaded else MaterialTheme.colorScheme.onSurface,
                     info = info,
                 )

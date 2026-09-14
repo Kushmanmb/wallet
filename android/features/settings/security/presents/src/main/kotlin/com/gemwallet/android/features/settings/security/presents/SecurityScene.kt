@@ -21,12 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.annotation.StringRes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.features.settings.security.viewmodels.SecurityViewModel
 import com.gemwallet.android.model.AuthRequest
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.features.settings.security.presents.localization.stringRes
 import uniffi.gemstone.GemLockPeriod
 import uniffi.gemstone.lockPeriodFromMinutes
 import uniffi.gemstone.lockPeriods
@@ -103,7 +103,7 @@ private fun LazyListScope.requiredAuthDelay(
             modifier = Modifier.clickable(onClick = { isShowLockDelays = true }),
             title = { PropertyTitleText(R.string.lock_require_authentication) },
             data = {
-                PropertyDataText(text = stringResource(currentPeriod.label()))
+                PropertyDataText(text = stringResource(currentPeriod.stringRes()))
                 DropdownMenu(
                     expanded = isShowLockDelays,
                     onDismissRequest = { isShowLockDelays = false },
@@ -118,7 +118,7 @@ private fun LazyListScope.requiredAuthDelay(
                                         Icon(AppIcons.Check, null, modifier = Modifier.size(compactIconSize))
                                     } ?: Spacer(modifier = Modifier.size(compactIconSize))
                                     Spacer4()
-                                    Text(stringResource(period.label()))
+                                    Text(stringResource(period.stringRes()))
                                 }
                             },
                             {
@@ -150,14 +150,4 @@ private fun LazyListScope.hideBalanceItem(
             listPosition = ListPosition.Single,
         )
     }
-}
-
-@StringRes
-private fun GemLockPeriod.label(): Int = when (this) {
-    GemLockPeriod.IMMEDIATE -> R.string.lock_immediately
-    GemLockPeriod.ONE_MINUTE -> R.string.lock_one_minute
-    GemLockPeriod.FIVE_MINUTES -> R.string.lock_five_minutes
-    GemLockPeriod.FIFTEEN_MINUTES -> R.string.lock_fifteen_minutes
-    GemLockPeriod.ONE_HOUR -> R.string.lock_one_hour
-    GemLockPeriod.SIX_HOURS -> R.string.lock_six_hours
 }

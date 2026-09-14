@@ -20,7 +20,7 @@ import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.WalletTheme
 import com.gemwallet.android.ui.theme.paddingSmall
-import uniffi.gemstone.GemNodeRowTitle
+import com.gemwallet.android.features.settings.networks.presents.localization.string
 import uniffi.gemstone.GemNodeSelection
 import uniffi.gemstone.GemNodeStatusState
 import uniffi.gemstone.Latency
@@ -42,7 +42,7 @@ internal fun NodeItem(
             modifier = Modifier.clickable(onClick = { onSelect(model.url) }),
             title = {
                 ListItemTitleText(
-                    text = model.title(),
+                    text = model.node.title().string(),
                     titleBadge = {
                         LatencyStatusBadge(status = model.statusState.latencyStatus())
                     },
@@ -83,12 +83,6 @@ internal fun NodeItem(
         onCollapsed = onDeleteCollapse,
         content = content,
     )
-}
-
-@Composable
-private fun NodeRowUiModel.title(): String = when (val title = node.title()) {
-    is GemNodeRowTitle.Host -> title.host
-    is GemNodeRowTitle.GemNode -> "${stringResource(R.string.nodes_gem_wallet_node)} ${title.flag}"
 }
 
 @Composable
