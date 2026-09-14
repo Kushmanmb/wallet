@@ -11,7 +11,7 @@ use crate::services::transfer::GemTransferData;
 use crate::services::wallet::GemKeystoreAuthentication;
 
 #[derive(uniffi::Object)]
-pub struct GemConfirmSession {
+pub struct GemConfirmation {
     service: Arc<GemConfirmTransferService>,
     wallet: Wallet,
     transfer: GemTransferData,
@@ -19,7 +19,7 @@ pub struct GemConfirmSession {
     screen: Mutex<Option<GemConfirmLoad>>,
 }
 
-impl GemConfirmSession {
+impl GemConfirmation {
     pub(super) fn new(service: Arc<GemConfirmTransferService>, wallet: Wallet, transfer: GemTransferData, simulation: Option<SimulationResult>) -> Self {
         Self {
             service,
@@ -32,7 +32,7 @@ impl GemConfirmSession {
 }
 
 #[uniffi::export]
-impl GemConfirmSession {
+impl GemConfirmation {
     pub fn screen(&self) -> GemConfirmScreen {
         GemConfirmScreen::initial(self.simulation.as_ref())
     }
@@ -134,9 +134,9 @@ mod tests {
                 value: 0.into(),
                 use_max_amount: false,
             };
-            let session = testkit.service.session(wallet.clone(), transfer, None);
+            let confirmation = testkit.service.confirmation(wallet.clone(), transfer, None);
 
-            let state = session.state().await.unwrap();
+            let state = confirmation.state().await.unwrap();
 
             assert_eq!(state.sender.address, wallet.accounts[0].address);
             assert_eq!(state.sender.chain, Chain::Tron);
@@ -148,13 +148,13 @@ mod tests {
                 fee_selection: GemConfirmFeeSelection::Priority { priority: FeePriority::Normal },
                 fee_asset_id: None,
             };
-            assert!(session.load(options).await.is_err());
+            assert!(confirmation.load(options).await.is_err());
             assert_eq!(*testkit.balances.requests.lock().unwrap(), vec![wallet.id.clone(), wallet.id]);
         });
     }
 
     #[test]
-    fn test_execute_refuses_a_session_without_a_preload() {
+    fn test_execute_refuses_a_confirmation_without_a_preload() {
         block_on(async {
             let wallet = Wallet::mock_with_accounts(vec![Account::mock(Chain::Tron, "TJRyWwFs9wTFGZg3JbrVriFbNfCug5tDeC")]);
             let testkit = ConfirmTestkit::new(wallet.clone(), wallet.clone());
@@ -166,11 +166,11 @@ mod tests {
                 value: 0.into(),
                 use_max_amount: false,
             };
-            let session = testkit.service.session(wallet, transfer, None);
+            let confirmation = testkit.service.confirmation(wallet, transfer, None);
 
-            assert!(matches!(session.execute().await, Err(GemConfirmError::Load { .. })));
-            session.state().await.unwrap();
-            assert!(matches!(session.execute().await, Err(GemConfirmError::Load { .. })));
+            assert!(matches!(confirmation.execute().await, Err(GemConfirmError::Load { .. })));
+            confirmation.state().await.unwrap();
+            assert!(matches!(confirmation.execute().await, Err(GemConfirmError::Load { .. })));
         });
     }
 
@@ -193,9 +193,9 @@ mod tests {
                 value: 0.into(),
                 use_max_amount: false,
             };
-            let session = testkit.service.session(wallet, transfer, Some(simulation.clone()));
+            let confirmation = testkit.service.confirmation(wallet, transfer, Some(simulation.clone()));
 
-            let state = session.state().await.unwrap();
+            let state = confirmation.state().await.unwrap();
 
             assert_eq!(state.simulation.result, Some(simulation));
             assert_eq!(state.simulation.warnings.len(), 1);

@@ -212,7 +212,7 @@ One Core service per screen, held by the screen's view model on both apps. The s
 | `GemChainSettingsService` | — | `ChainSettingsSceneViewModel`, `AddNodeSceneViewModel` | `NetworksViewModel`, `AddNodeViewModel` |
 | `GemChartService` | — | `ChartSceneViewModel` | `ChartViewModel` |
 | `GemCollectibleService` | — | `CollectibleViewModel`, `ReportNftViewModel` | `NftDetailsViewModel` (+ `GetNftAssetDetails` observed read) |
-| `GemConfirmTransferService` | `GemConfirmSession` (an object with I/O today, see TODO V1) | `ConfirmTransferSceneViewModel` | `ConfirmViewModel` |
+| `GemConfirmTransferService` | `GemConfirmation` (one confirmation in flight; it loads and executes, so it is not a session) | `ConfirmTransferSceneViewModel` | `ConfirmViewModel` |
 | `GemContactService` | — | `ContactsViewModel` | `ContactsViewModel` |
 | `GemCurrencyService` | — | `CurrencySceneViewModel` | `CurrenciesViewModel` (+ session currency cases) |
 | `GemDeveloperService` | — | `DeveloperViewModel` (+ the iOS stores it wipes) | `DevelopViewModel` |

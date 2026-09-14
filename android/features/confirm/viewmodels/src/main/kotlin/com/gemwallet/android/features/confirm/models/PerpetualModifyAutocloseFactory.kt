@@ -5,13 +5,13 @@ import com.gemwallet.android.ui.theme.Placeholder
 import com.wallet.core.primitives.Currency
 import uniffi.gemstone.PerpetualModifyConfirmData
 import uniffi.gemstone.GemAutocloseSummary
-import uniffi.gemstone.GemConfirmSessionInterface
+import uniffi.gemstone.GemConfirmationInterface
 
 object PerpetualModifyAutocloseFactory {
 
     fun create(
         data: PerpetualModifyConfirmData,
-        session: GemConfirmSessionInterface,
+        session: GemConfirmationInterface,
     ): ConfirmDetailElement.PerpetualModifyAutoclose? =
         session.autocloseSummary(data)?.let(::element)
 

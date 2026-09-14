@@ -9,7 +9,7 @@ import Foundation
 import enum Gemstone.GemConfirmError
 import struct Gemstone.GemConfirmLoadOptions
 import func Gemstone.walletRow
-import protocol Gemstone.GemConfirmSessionProtocol
+import protocol Gemstone.GemConfirmationProtocol
 import struct Gemstone.GemConfirmSimulationState
 import enum Gemstone.GemExecuteResult
 import protocol Gemstone.GemPreferencesServiceProtocol
@@ -52,24 +52,24 @@ public final class ConfirmTransferSceneViewModel {
     private let wallet: Wallet
     private let onComplete: VoidAction
 
-    private let session: any GemConfirmSessionProtocol
+    private let confirmation: any GemConfirmationProtocol
 
     public init(
         request: ConfirmTransferRequest,
         wallet: Wallet,
-        session: any GemConfirmSessionProtocol,
+        confirmation: any GemConfirmationProtocol,
         onComplete: VoidAction,
     ) {
         self.request = request
         self.wallet = wallet
-        self.session = session
+        self.confirmation = confirmation
         self.onComplete = onComplete
 
         let feeSelection = GemConfirmFeeSelection.priority(priority: request.data.defaultFeePriority())
         let state = ConfirmTransferState(
             transfer: request.data,
             simulation: ConfirmSimulationState(result: request.simulation, chain: request.data.chain),
-            screen: session.screen(),
+            screen: confirmation.screen(),
         )
         let screen = state.screen
         self.feeSelection = feeSelection
@@ -132,7 +132,7 @@ public final class ConfirmTransferSceneViewModel {
     var confirmButtonModel: ConfirmButtonViewModel {
         ConfirmButtonViewModel(
             button: button,
-            authentication: session.authentication(),
+            authentication: confirmation.authentication(),
             onAction: { [weak self] in self?.onSelectConfirm() },
         )
     }
@@ -141,7 +141,7 @@ public final class ConfirmTransferSceneViewModel {
         ConfirmDetailsViewModel(
             type: request.data.inputType,
             metadata: state.metadata,
-            session: session,
+            confirmation: confirmation,
         )
     }
 
@@ -152,12 +152,12 @@ public final class ConfirmTransferSceneViewModel {
     public var feeModel: NetworkFeeSceneViewModel {
         NetworkFeeSceneViewModel(
             feeAsset: state.feeAsset,
-            currency: session.currency,
+            currency: confirmation.currency,
             selection: feeSelection,
             feeRates: feeRates,
             feeAssetPrice: state.metadata?.feePrice,
             feeAmount: state.fee?.fee,
-            feeAssets: state.feeAssets.map { $0.feeAssetItem(currency: session.currency) },
+            feeAssets: state.feeAssets.map { $0.feeAssetItem(currency: confirmation.currency) },
             onSelect: { [weak self] in self?.feeSelection = $0 },
             onSelectFeeAsset: { [weak self] in self?.selectFeeAsset($0) },
         )
@@ -189,7 +189,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
     public func itemModel(for item: ConfirmTransferItem) -> any ItemModelProvidable<ConfirmTransferItemModel> {
         switch item {
         case .header:
-            ConfirmHeaderViewModel(request: request, state: state, currency: session.currency)
+            ConfirmHeaderViewModel(request: request, state: state, currency: confirmation.currency)
         case .warnings:
             ConfirmTransferItemModel.warnings(simulationWarningModels)
         case .app:
@@ -237,9 +237,9 @@ extension ConfirmTransferSceneViewModel {
             for: error,
             feePrice: state.metadata?.feePrice,
             prices: state.metadata?.assetPrices ?? [:],
-            currency: session.currency.rawValue,
-            acquireFlow: { session.acquireAssetFlow(chain: $0.chain.rawValue) },
-            networkFeeBuyAmount: Int(session.insufficientNetworkFeeBuyAmount()),
+            currency: confirmation.currency.rawValue,
+            acquireFlow: { confirmation.acquireAssetFlow(chain: $0.chain.rawValue) },
+            networkFeeBuyAmount: Int(confirmation.insufficientNetworkFeeBuyAmount()),
             onGetAsset: { [weak self] asset, buyAmount in self?.onSelectGetAsset(asset, buyAmount: buyAmount) },
         ) else { return }
         isPresentingSheet = .info(sheet)
@@ -290,8 +290,8 @@ extension ConfirmTransferSceneViewModel {
     func load() async {
         state.screen = state.screen.onLoadStarted()
         do {
-            state = try ConfirmTransferState(await session.state(), screen: state.screen)
-            let load = try await session.load(options: options(selection: feeSelection, feeAssetSelection: feeAssetSelection))
+            state = try ConfirmTransferState(await confirmation.state(), screen: state.screen)
+            let load = try await confirmation.load(options: options(selection: feeSelection, feeAssetSelection: feeAssetSelection))
             state = try ConfirmTransferState(load, screen: state.screen.onLoaded(load: load))
         } catch {
             guard !Task.isCancelled else { return }
@@ -324,7 +324,7 @@ extension ConfirmTransferSceneViewModel {
 
 extension ConfirmTransferSceneViewModel {
     private func onSelectGetAsset(_ asset: Asset, buyAmount: Int? = nil) {
-        switch session.acquireAssetFlow(chain: asset.chain.rawValue) {
+        switch confirmation.acquireAssetFlow(chain: asset.chain.rawValue) {
         case .options:
             isPresentingSheet = .getAsset(asset, buyAmount: buyAmount)
         case .fiat:
@@ -377,7 +377,7 @@ extension ConfirmTransferSceneViewModel {
 
 extension ConfirmTransferSceneViewModel {
     func explorerLink(chain: Chain, address: String) -> BlockExplorerLink {
-        session.explorerLink(chain: chain, address: address)
+        confirmation.explorerLink(chain: chain, address: address)
     }
 
     private func options(selection: GemConfirmFeeSelection, feeAssetSelection: FeeAssetSelection) -> GemConfirmLoadOptions {
@@ -390,7 +390,7 @@ extension ConfirmTransferSceneViewModel {
     func submit(request: ConfirmTransferRequest) async throws {
         let result: GemExecuteResult
         do {
-            result = try await session.execute()
+            result = try await confirmation.execute()
         } catch let GemConfirmError.Broadcast(hashes, msg) {
             hashes.forEach { request.delegate?(.success($0)) }
             throw GemConfirmError.Broadcast(hashes: hashes, msg: msg)

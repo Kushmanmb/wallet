@@ -1,11 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
-import protocol Gemstone.GemConfirmSessionProtocol
+import protocol Gemstone.GemConfirmationProtocol
 import struct Gemstone.GemConfirmSimulationState
 import Primitives
 
-public extension GemConfirmSessionProtocol {
+public extension GemConfirmationProtocol {
     var currency: Primitives.Currency {
         Primitives.Currency(core: getCurrency())
     }

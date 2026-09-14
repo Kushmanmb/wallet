@@ -34,7 +34,7 @@ import uniffi.gemstone.GemConfirmFeeRow
 import uniffi.gemstone.GemConfirmLoad
 import uniffi.gemstone.GemConfirmPhase
 import uniffi.gemstone.GemConfirmScreen
-import uniffi.gemstone.GemConfirmSession
+import uniffi.gemstone.GemConfirmation
 import uniffi.gemstone.GemAcquireAssetFlow
 import uniffi.gemstone.GemConfirmTransferServiceInterface
 import uniffi.gemstone.GemExecuteResult
@@ -108,24 +108,24 @@ class ConfirmViewModel @Inject constructor(
     val session = getSession()
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val confirmSession = combine(request.filterNotNull(), session.filterNotNull()) { request, session ->
-        confirmService.session(session.wallet.toGem(), request, requestSimulation).also { screen.value = it.screen() }
+    private val confirmation = combine(request.filterNotNull(), session.filterNotNull()) { request, session ->
+        confirmService.confirmation(session.wallet.toGem(), request, requestSimulation).also { screen.value = it.screen() }
     }
     .flowOn(Dispatchers.IO)
     .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val currency = confirmSession.filterNotNull()
+    private val currency = confirmation.filterNotNull()
         .map { it.getCurrency().toCurrency() }
         .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val networkFeeBuyAmount = confirmSession.filterNotNull()
+    val networkFeeBuyAmount = confirmation.filterNotNull()
         .map { it.insufficientNetworkFeeBuyAmount() }
         .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0)
 
     private val load = combine(
-        confirmSession.filterNotNull(),
+        confirmation.filterNotNull(),
         feeSelection,
         feeAssetSelection,
         restart,
@@ -150,7 +150,7 @@ class ConfirmViewModel @Inject constructor(
     .flowOn(Dispatchers.IO)
     .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val content = combine(confirmSession.filterNotNull(), load.filterNotNull(), currency.filterNotNull()) { session, load, currency ->
+    private val content = combine(confirmation.filterNotNull(), load.filterNotNull(), currency.filterNotNull()) { session, load, currency ->
         ConfirmContent(session, currency, load)
     }
     .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -295,7 +295,7 @@ class ConfirmViewModel @Inject constructor(
             GemConfirmAction.EXECUTE -> screen.update { it.onExecuteStarted() }
             null -> return@launch
         }
-        val session = confirmSession.value ?: return@launch
+        val session = confirmation.value ?: return@launch
 
         try {
             val transactionHash = when (val result = session.execute()) {
@@ -315,7 +315,7 @@ class ConfirmViewModel @Inject constructor(
     }
 
     private data class ConfirmContent(
-        val session: GemConfirmSession,
+        val session: GemConfirmation,
         val currency: Currency,
         val load: GemConfirmLoad,
     ) {
@@ -345,7 +345,7 @@ class ConfirmViewModel @Inject constructor(
         perpetualType: PerpetualType?,
     ): ConfirmDetailElement? = when (val type = perpetualType) {
         null -> null
-        is PerpetualType.Modify -> confirmSession.value?.let { PerpetualModifyAutocloseFactory.create(type.data, it) }
+        is PerpetualType.Modify -> confirmation.value?.let { PerpetualModifyAutocloseFactory.create(type.data, it) }
         else -> perpetualDetails(type)
             ?.let(PerpetualConfirmDetailsUIModelFactory::create)
             ?.let(ConfirmDetailElement::PerpetualDetails)
@@ -386,7 +386,7 @@ class ConfirmViewModel @Inject constructor(
         return ConfirmDetailElement.SwapDetails(model)
     }
 
-    fun acquireFlow(asset: Asset): GemAcquireAssetFlow = requireNotNull(confirmSession.value).acquireAssetFlow(asset.chain.string)
+    fun acquireFlow(asset: Asset): GemAcquireAssetFlow = requireNotNull(confirmation.value).acquireAssetFlow(asset.chain.string)
 }
 
 private fun Throwable.toConfirmError(): GemConfirmException = this as? GemConfirmException ?: GemConfirmException.Load(msg = message.orEmpty())

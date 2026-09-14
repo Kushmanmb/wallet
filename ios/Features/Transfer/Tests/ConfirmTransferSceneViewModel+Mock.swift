@@ -30,7 +30,7 @@ extension ConfirmTransferSceneViewModel {
         return ConfirmTransferSceneViewModel(
             request: request ?? ConfirmTransferRequest(data: data, simulation: simulation),
             wallet: wallet,
-            session: GemConfirmSessionMock(
+            confirmation: GemConfirmationMock(
                 state: .mock(feeAsset: data.feeAsset().map(), simulation: gemConfirmService.simulation, preload: nil),
                 load: load,
                 execute: execute,

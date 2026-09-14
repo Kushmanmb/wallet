@@ -35,7 +35,7 @@ import uniffi.gemstone.GemConfirmException
 import uniffi.gemstone.GemConfirmInput
 import uniffi.gemstone.GemConfirmPhase
 import uniffi.gemstone.GemConfirmScreen
-import uniffi.gemstone.GemConfirmSession
+import uniffi.gemstone.GemConfirmation
 import uniffi.gemstone.GemConfirmTransferService
 import uniffi.gemstone.GemRecipient
 import uniffi.gemstone.GemTransferData
@@ -48,7 +48,7 @@ class ConfirmViewModelNetworkFeeSheetTest {
     private val asset = mockAssetSolana()
     private val account = mockAccount(chain = Chain.Solana)
     private val confirmService = mockk<GemConfirmTransferService>(relaxed = true)
-    private val confirmSession = mockk<GemConfirmSession>()
+    private val confirmation = mockk<GemConfirmation>()
 
     @Before
     fun setUp() = Dispatchers.setMain(testDispatcher)
@@ -83,12 +83,12 @@ class ConfirmViewModelNetworkFeeSheetTest {
             value = BigInteger.TEN,
         )
         val input = GemConfirmInput(from = account.toGem(), transfer = transfer)
-        every { confirmSession.getCurrency() } returns Currency.USD.toGem()
-        every { confirmSession.insufficientNetworkFeeBuyAmount() } returns 10
-        every { confirmService.session(any(), transfer, any()) } returns confirmSession
-        every { confirmSession.screen() } returns GemConfirmScreen(GemConfirmPhase.LOADING, false, false, null)
-        coEvery { confirmSession.state() } returns mockGemConfirmLoad(asset, preload = null)
-        coEvery { confirmSession.load(any()) } answers {
+        every { confirmation.getCurrency() } returns Currency.USD.toGem()
+        every { confirmation.insufficientNetworkFeeBuyAmount() } returns 10
+        every { confirmService.confirmation(any(), transfer, any()) } returns confirmation
+        every { confirmation.screen() } returns GemConfirmScreen(GemConfirmPhase.LOADING, false, false, null)
+        coEvery { confirmation.state() } returns mockGemConfirmLoad(asset, preload = null)
+        coEvery { confirmation.load(any()) } answers {
             throw GemConfirmException.InsufficientNetworkFee(asset = asset.toGem(), requirement = null)
         }
         return ConfirmViewModel(

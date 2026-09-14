@@ -12,14 +12,14 @@ import java.util.Locale
 import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.GemConfirmSimulation
 import uniffi.gemstone.GemConfirmSimulationState
-import uniffi.gemstone.GemConfirmSession
+import uniffi.gemstone.GemConfirmation
 import uniffi.gemstone.GemSimulationBalanceChange
 import com.wallet.core.primitives.Chain
 import java.math.BigInteger
 
 class SimulationTest {
 
-    private val confirmSession = mockk<GemConfirmSession>()
+    private val confirmation = mockk<GemConfirmation>()
 
     @Before
     fun setUp() {
@@ -35,7 +35,7 @@ class SimulationTest {
                 GemSimulationBalanceChange(asset = solana.toGem(), value = BigInteger("-100005000"), sign = GemAmountSign.OUTGOING),
                 GemSimulationBalanceChange(asset = usdc.toGem(), value = BigInteger("750000"), sign = GemAmountSign.INCOMING),
             ),
-        ).toSimulation(confirmSession)
+        ).toSimulation(confirmation)
 
         assertEquals(
             listOf("-0.100005 SOL", "+0.75 USDC"),

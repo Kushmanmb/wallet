@@ -1,10 +1,10 @@
 #![allow(clippy::result_large_err)]
 
+mod confirmation;
 mod error;
 mod model;
 pub(crate) mod rules;
 pub(crate) mod screen;
-mod session;
 mod signer;
 #[cfg(test)]
 mod testkit;
@@ -16,7 +16,7 @@ use std::time::Duration;
 pub use error::GemConfirmError;
 pub use model::*;
 pub use rules::acquire_asset_flow;
-pub use session::GemConfirmSession;
+pub use confirmation::GemConfirmation;
 pub use signer::GemTransactionSigner;
 pub use transfer::GemConfirmTransferService;
 

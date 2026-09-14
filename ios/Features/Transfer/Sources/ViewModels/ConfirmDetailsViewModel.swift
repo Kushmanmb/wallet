@@ -2,7 +2,7 @@
 
 import GemstonePrimitives
 import struct Gemstone.GemConfirmMetadata
-import protocol Gemstone.GemConfirmSessionProtocol
+import protocol Gemstone.GemConfirmationProtocol
 import enum Gemstone.TransactionInputType
 import struct Gemstone.GemSwapQuoteSummary
 import func Gemstone.perpetualDetails
@@ -16,16 +16,16 @@ import Swap
 public struct ConfirmDetailsViewModel {
     private let type: TransactionInputType
     private let metadata: GemConfirmMetadata?
-    private let session: any GemConfirmSessionProtocol
+    private let confirmation: any GemConfirmationProtocol
 
     init(
         type: TransactionInputType,
         metadata: GemConfirmMetadata?,
-        session: any GemConfirmSessionProtocol,
+        confirmation: any GemConfirmationProtocol,
     ) {
         self.type = type
         self.metadata = metadata
-        self.session = session
+        self.confirmation = confirmation
     }
 }
 
@@ -47,7 +47,7 @@ extension ConfirmDetailsViewModel: ItemModelProvidable {
                     selectedQuote: quote,
                     slippage: .manual(bps: quote.slippageBps),
                     rate: summary.rate,
-                    currency: session.currency.rawValue,
+                    currency: confirmation.currency.rawValue,
                     swapPriceImpact: fromAssetPrice.swapValue(quote.fromValue)
                         .priceImpact(receive: toAssetPrice.swapValue(quote.toValue)),
                     minReceiveValue: BigInt(summary.minReceiveValue),
@@ -56,7 +56,7 @@ extension ConfirmDetailsViewModel: ItemModelProvidable {
             )
         case let .perpetual(_, perpetualType):
             if case let .modify(data) = perpetualType {
-                return .perpetualModifyPosition(PerpetualModifyViewModel(summary: session.autocloseSummary(data: data)))
+                return .perpetualModifyPosition(PerpetualModifyViewModel(summary: confirmation.autocloseSummary(data: data)))
             }
             guard let details = perpetualDetails(perpetualType: perpetualType) else { return .empty }
             return .perpetualDetails(PerpetualDetailsViewModel(details: details))

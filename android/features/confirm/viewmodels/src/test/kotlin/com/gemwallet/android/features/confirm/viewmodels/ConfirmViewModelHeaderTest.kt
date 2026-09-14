@@ -35,7 +35,7 @@ import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GemConfirmPhase
 import uniffi.gemstone.GemConfirmScreen
-import uniffi.gemstone.GemConfirmSession
+import uniffi.gemstone.GemConfirmation
 import uniffi.gemstone.GemConfirmTransferService
 import uniffi.gemstone.GemRecipient
 import uniffi.gemstone.TransactionInputType
@@ -92,13 +92,13 @@ class ConfirmViewModelHeaderTest {
     )
 
     private fun viewModel(transfer: GemTransferData): ConfirmViewModel {
-        val confirmSession = mockk<GemConfirmSession>()
-        every { confirmSession.getCurrency() } returns Currency.USD.toGem()
-        every { confirmSession.insufficientNetworkFeeBuyAmount() } returns 10
-        every { confirmSession.screen() } returns GemConfirmScreen(GemConfirmPhase.LOADING, false, false, null)
-        coEvery { confirmSession.state() } returns mockGemConfirmLoad(asset, preload = null)
-        coEvery { confirmSession.load(any()) } coAnswers { awaitCancellation() }
-        every { confirmService.session(any(), transfer, any()) } returns confirmSession
+        val confirmation = mockk<GemConfirmation>()
+        every { confirmation.getCurrency() } returns Currency.USD.toGem()
+        every { confirmation.insufficientNetworkFeeBuyAmount() } returns 10
+        every { confirmation.screen() } returns GemConfirmScreen(GemConfirmPhase.LOADING, false, false, null)
+        coEvery { confirmation.state() } returns mockGemConfirmLoad(asset, preload = null)
+        coEvery { confirmation.load(any()) } coAnswers { awaitCancellation() }
+        every { confirmService.confirmation(any(), transfer, any()) } returns confirmation
         return ConfirmViewModel(
             getSession = mockk<GetSession> {
                 every { this@mockk() } returns MutableStateFlow(

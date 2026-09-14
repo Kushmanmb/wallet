@@ -9,14 +9,14 @@ public import struct Gemstone.GemAutocloseSummary
 public import struct Gemstone.GemConfirmLoad
 public import struct Gemstone.GemConfirmLoadOptions
 public import struct Gemstone.GemConfirmScreen
-public import protocol Gemstone.GemConfirmSessionProtocol
+public import protocol Gemstone.GemConfirmationProtocol
 public import enum Gemstone.GemExecuteResult
 public import enum Gemstone.GemKeystoreAuthentication
 public import typealias Gemstone.PerpetualModifyConfirmData
 import GemstonePrimitivesTestKit
 import Primitives
 
-public final class GemConfirmSessionMock: GemConfirmSessionProtocol, @unchecked Sendable {
+public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Sendable {
     private let initialState: GemConfirmLoad
     private let loadResult: Result<GemConfirmLoad, any Error>
     private let executeResult: Result<GemExecuteResult, any Error>

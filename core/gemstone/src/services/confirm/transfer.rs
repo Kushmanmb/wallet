@@ -9,7 +9,7 @@ use crate::models::custom_types::GemBigInt;
 use crate::services::assets::config::GemAssetConfigService;
 use crate::services::confirm::rules::is_insufficient_network_fee;
 use crate::services::confirm::{
-    GemAcquireAssetFlow, GemConfirmData, GemConfirmError, GemConfirmFeeLoad, GemConfirmInput, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmService, GemConfirmSession,
+    GemAcquireAssetFlow, GemConfirmData, GemConfirmError, GemConfirmFeeLoad, GemConfirmInput, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmService, GemConfirmation,
     GemConfirmSimulationState, GemExecuteResult, GemFeeAsset, GemTransactionSigner, SendInput,
 };
 use crate::services::explorer::GemExplorerService;
@@ -60,8 +60,8 @@ impl GemConfirmTransferService {
         }
     }
 
-    pub fn session(self: Arc<Self>, wallet: Wallet, transfer: GemTransferData, simulation: Option<SimulationResult>) -> Arc<GemConfirmSession> {
-        Arc::new(GemConfirmSession::new(self, wallet, transfer, simulation))
+    pub fn confirmation(self: Arc<Self>, wallet: Wallet, transfer: GemTransferData, simulation: Option<SimulationResult>) -> Arc<GemConfirmation> {
+        Arc::new(GemConfirmation::new(self, wallet, transfer, simulation))
     }
 
     pub fn address_url(&self, chain: Chain, address: String) -> BlockExplorerLink {

@@ -275,10 +275,10 @@ struct ConfirmTransferSceneViewModelTests {
     }
 
     @Test
-    func reloadKeepsTheLoadedFeeRowUntilTheSessionAnswers() async {
+    func reloadKeepsTheLoadedFeeRowUntilTheConfirmationAnswers() async {
         let data = GemTransferData.mock()
         let wallet = Wallet.mock(accounts: [.mock(chain: data.chain)])
-        let session = GemConfirmSessionMock(
+        let confirmationMock = GemConfirmationMock(
             state: .mock(preload: nil),
             load: .success(.mock(preload: .mock(confirmData: .mock(feeRates: [
                 GemFeeRate(priority: .normal, gasPriceType: .regular(gasPrice: 20)),
@@ -288,13 +288,13 @@ struct ConfirmTransferSceneViewModelTests {
         let model = ConfirmTransferSceneViewModel(
             request: ConfirmTransferRequest(data: data, simulation: nil),
             wallet: wallet,
-            session: session,
+            confirmation: confirmationMock,
             onComplete: nil,
         )
         await model.load()
 
         await confirmation { reloading in
-            session.onLoad = {
+            confirmationMock.onLoad = {
                 let feeItem = model.itemModel(for: .networkFee) as? ConfirmNetworkFeeViewModel
                 guard case let .networkFee(listItem, selectable) = feeItem?.itemModel else { return }
                 #expect(model.state.screen.phase == .loading)
@@ -313,19 +313,19 @@ struct ConfirmTransferSceneViewModelTests {
     func firstLoadShowsTheScreenBeforeThePreloadArrives() async {
         let data = GemTransferData.mock()
         let wallet = Wallet.mock(accounts: [.mock(chain: data.chain)])
-        let session = GemConfirmSessionMock(
+        let confirmationMock = GemConfirmationMock(
             state: .mock(addressName: .mock(name: "vitalik.eth"), preload: nil),
             load: .success(.mock(addressName: .mock(name: "vitalik.eth"))),
         )
         let model = ConfirmTransferSceneViewModel(
             request: ConfirmTransferRequest(data: data, simulation: nil),
             wallet: wallet,
-            session: session,
+            confirmation: confirmationMock,
             onComplete: nil,
         )
 
         await confirmation { preloading in
-            session.onLoad = {
+            confirmationMock.onLoad = {
                 #expect(model.state.screen.phase == .loading)
                 #expect(model.state.addressName?.name == "vitalik.eth")
                 preloading()
@@ -602,7 +602,7 @@ struct ConfirmTransferSceneViewModelTests {
             Issue.record("Expected fiatConnect sheet")
             return
         }
-        #expect(amount == Int(GemConfirmSessionMock.networkFeeBuyAmount))
+        #expect(amount == Int(GemConfirmationMock.networkFeeBuyAmount))
     }
 
     @Test
@@ -736,7 +736,7 @@ struct ConfirmTransferSceneViewModelTests {
             return
         }
         #expect(asset.id == Asset.mockTron().id)
-        #expect(buyAmount == Int(GemConfirmSessionMock.networkFeeBuyAmount))
+        #expect(buyAmount == Int(GemConfirmationMock.networkFeeBuyAmount))
     }
 
     private func verifyNonEmpty(_ model: any ItemModelProvidable<ConfirmTransferItemModel>) {

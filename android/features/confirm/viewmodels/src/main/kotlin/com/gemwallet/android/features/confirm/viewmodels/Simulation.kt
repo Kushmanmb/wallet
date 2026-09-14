@@ -9,7 +9,7 @@ import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.models.PayloadField
 import com.gemwallet.android.ui.models.withExplorerLinks
 import uniffi.gemstone.GemConfirmSimulationState
-import uniffi.gemstone.GemConfirmSessionInterface
+import uniffi.gemstone.GemConfirmationInterface
 import com.gemwallet.android.ext.requireChain
 import uniffi.gemstone.GemSimulationWarningRow
 
@@ -23,7 +23,7 @@ data class Simulation(
 )
 
 fun GemConfirmSimulationState.toSimulation(
-    session: GemConfirmSessionInterface,
+    session: GemConfirmationInterface,
 ): Simulation {
     val simulationWarnings = warnings
     val details = simulation ?: return Simulation(warnings = simulationWarnings)
