@@ -12,6 +12,8 @@ import uniffi.gemstone.GemTransferData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import uniffi.gemstone.GemAmountType
@@ -55,7 +57,7 @@ class AmountTransferProvider(
     fun displayAsset(asset: Asset): Asset = transfer.displayAsset(asset.toGem()).toPrimitives()
 
     override suspend fun buildTransfer(amount: Crypto, isMax: Boolean): GemTransferData {
-        val current = assetInfo.value ?: error("assetInfo not loaded")
+        val current = assetInfo.filterNotNull().first()
         return service.transferData(current.asset.toGem(), transfer, amount.atomicValue, isMax)
     }
 }

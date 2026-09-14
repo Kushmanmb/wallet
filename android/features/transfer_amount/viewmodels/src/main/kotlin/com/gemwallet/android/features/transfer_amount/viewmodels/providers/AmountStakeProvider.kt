@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
@@ -173,7 +174,7 @@ class AmountStakeProvider(
             .stateIn(scope, SharingStarted.Eagerly, null)
 
     override suspend fun buildTransfer(amount: Crypto, isMax: Boolean): GemTransferData {
-        val current = assetInfo.value ?: error("assetInfo not loaded")
+        val current = assetInfo.filterNotNull().first()
         val confirmed = selected.value?.confirmed(selectedResource.value) ?: throw missingSelection()
         return service.stakeTransferData(current.asset.toGem(), confirmed.stakeType(), amount.atomicValue, isMax)
     }
