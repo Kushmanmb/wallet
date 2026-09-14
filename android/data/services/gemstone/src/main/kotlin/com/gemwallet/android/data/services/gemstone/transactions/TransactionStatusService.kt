@@ -10,10 +10,12 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Transaction
 import com.wallet.core.primitives.Wallet
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemTransactionStateService
 import uniffi.gemstone.GemTransactionStatusService
 
@@ -21,7 +23,8 @@ private const val TAG = "TransactionStatusService"
 
 class TransactionStatusService(
     private val stateService: GemTransactionStateService,
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + ioDispatcher),
 ) : CreateTransaction, GemTransactionStatusService {
 
     fun start() {
@@ -35,11 +38,11 @@ class TransactionStatusService(
         stateService.stopTracking()
     }
 
-    override suspend fun createNotificationTransaction(wallet: Wallet, assetId: AssetId, transaction: Transaction): Asset? {
+    override suspend fun createNotificationTransaction(wallet: Wallet, assetId: AssetId, transaction: Transaction): Asset? = withContext(ioDispatcher) {
         val asset = stateService.addNotificationTransaction(wallet.toGem(), assetId.toIdentifier(), transaction.toGem())
-            ?.toPrimitives() ?: return null
+            ?.toPrimitives() ?: return@withContext null
         track(wallet.id.id, listOf(transaction.toGem()))
-        return asset
+        asset
     }
 
     override fun track(walletId: String, transactions: List<uniffi.gemstone.Transaction>) {

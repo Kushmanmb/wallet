@@ -13,14 +13,17 @@ import com.gemwallet.android.data.service.store.ConfigStore
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.model.NotificationsAvailable
 import dagger.Lazy
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import uniffi.gemstone.GemDeviceService
 import uniffi.gemstone.GemNotificationsService
@@ -33,14 +36,15 @@ class DevicePushSettings(
     private val preferencesService: GemPreferencesService,
     private val deviceService: Lazy<GemDeviceService>,
     private val notificationsService: Lazy<GemNotificationsService>,
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + ioDispatcher),
 ) : SwitchPushEnabled, GetPushEnabled, GetPushToken, SetPushToken {
 
     private val Context.dataStore by preferencesDataStore(name = "device_config")
 
     private val pushEnabledState = MutableStateFlow(false)
 
-    override suspend fun switchPushEnabled(enabled: Boolean) {
+    override suspend fun switchPushEnabled(enabled: Boolean) = withContext(ioDispatcher) {
         pushEnabledState.value = runCatchingCancellable {
             notificationsService.get().setEnabled(enabled)
         }.getOrElse {
@@ -52,7 +56,7 @@ class DevicePushSettings(
     override fun getPushEnabled(): Flow<Boolean> = pushEnabledState.onStart {
         migratePushEnabled()
         pushEnabledState.value = notificationsService.get().isEnabled()
-    }
+    }.flowOn(ioDispatcher)
 
     override fun setPushToken(token: String) {
         val stored = if (notificationsAvailable) token else ""
