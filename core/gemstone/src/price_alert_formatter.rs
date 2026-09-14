@@ -17,10 +17,6 @@ impl PriceAlertFormatter {
         price_suggestion::percentage_suggestions(price)
     }
 
-    pub fn rounded_values(&self, price: f64, by_percent: f64) -> Vec<f64> {
-        price_suggestion::price_rounded_values(price, by_percent)
-    }
-
     pub fn alert_id(&self, alert: PriceAlert) -> String {
         alert.id()
     }

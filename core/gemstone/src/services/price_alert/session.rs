@@ -50,16 +50,6 @@ impl GemPriceAlertSession {
         }
     }
 
-    pub fn on_toggle_direction(&self) -> Self {
-        Self {
-            selected_direction: match self.selected_direction {
-                PriceAlertDirection::Up => PriceAlertDirection::Down,
-                PriceAlertDirection::Down => PriceAlertDirection::Up,
-            },
-            ..self.clone()
-        }
-    }
-
     pub fn on_direction(&self, selected_direction: PriceAlertDirection) -> Self {
         Self {
             selected_direction,
@@ -172,11 +162,5 @@ mod tests {
         assert!(without_price.view_state().price_suggestions.is_empty());
         assert!(without_price.on_price(Some(0.0)).view_state().percentage_suggestions.is_empty());
         assert!(!session().view_state().price_suggestions.is_empty());
-    }
-
-    #[test]
-    fn test_toggling_flips_the_selected_direction() {
-        assert_eq!(session().on_toggle_direction().selected_direction, PriceAlertDirection::Down);
-        assert_eq!(session().on_toggle_direction().on_toggle_direction().selected_direction, PriceAlertDirection::Up);
     }
 }

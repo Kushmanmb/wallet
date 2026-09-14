@@ -41,10 +41,6 @@ impl GemAssetConfigService {
         asset_icon(&asset_id)
     }
 
-    pub fn popular_ids(&self) -> Vec<AssetId> {
-        popular_asset_ids()
-    }
-
     pub fn matching_assets(&self, assets: Vec<Asset>, query: String) -> Vec<Asset> {
         matching_assets(assets, &query)
     }

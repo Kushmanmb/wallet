@@ -33,11 +33,6 @@ pub struct GemChartCurrent {
 }
 
 #[uniffi::export]
-pub fn price_chart_data(chart: GemChart) -> Option<GemChartData> {
-    rules::price_chart_data(chart)
-}
-
-#[uniffi::export]
 pub fn chart_header(value_type: GemChartValueType, base: f64, value: f64, shows_secondary_value: bool) -> GemChartHeader {
     rules::header(value_type, base, value, None, shows_secondary_value)
 }
