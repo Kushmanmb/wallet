@@ -90,6 +90,7 @@ fun RecipientScreen(
                         is RecipientAction.SetMemo -> viewModel.onMemo(action.memo)
                         is RecipientAction.Scan -> scan = action.field
                         RecipientAction.Next -> viewModel.onNext(currentState, amountAction, confirmAction)
+                        RecipientAction.ValidateAddress -> viewModel.onValidateAddress()
                         is RecipientAction.Select -> viewModel.onDestination(currentState, action.destination, amountAction, confirmAction)
                         RecipientAction.Cancel -> cancelAction()
                     }
@@ -173,6 +174,7 @@ internal fun RecipientScreen(
                 onAddress = { onAction(RecipientAction.SetAddress(it)) },
                 onMemo = { onAction(RecipientAction.SetMemo(it)) },
                 onQrScan = { onAction(RecipientAction.Scan(it)) },
+                onSubmitAddress = { onAction(RecipientAction.ValidateAddress) },
             )
             contactsDestination(contacts = contacts, addresses = contactAddresses) { contact ->
                 onAction(RecipientAction.SetMemo(contact.memo ?: ""))

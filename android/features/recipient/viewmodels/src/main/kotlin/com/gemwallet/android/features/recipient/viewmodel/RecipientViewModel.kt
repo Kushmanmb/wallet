@@ -152,6 +152,10 @@ class RecipientViewModel @Inject constructor(
         savedStateHandle.optionalPaymentRecipient(RouteArgument.Payment)?.let(::updateFrom)
     }
 
+    fun onValidateAddress() {
+        addressInput.validate()
+    }
+
     fun onNext(
         recipient: RecipientState.Ready,
         amountAction: AmountTransactionAction,
