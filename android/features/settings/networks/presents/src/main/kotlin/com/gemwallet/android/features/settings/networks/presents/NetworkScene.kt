@@ -39,10 +39,12 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.paddingSmall
+import androidx.compose.material3.SnackbarHostState
 
 @Composable
 internal fun NetworkScene(
     state: NetworksUIState,
+    snackbar: SnackbarHostState? = null,
     onAction: (NetworkAction) -> Unit,
 ) {
     val chain = state.chain ?: return
@@ -52,6 +54,7 @@ internal fun NetworkScene(
 
     Scene(
         title = chain.networkName(),
+        snackbar = snackbar,
         actions = {
             if (state.availableAddNode) {
                 IconButton(onClick = { isShowAddSource = true }) {

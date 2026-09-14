@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import com.gemwallet.android.ext.runCatchingCancellable
+import com.gemwallet.android.ext.serviceMessage
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -74,15 +76,17 @@ class NetworksViewModel @Inject constructor(
     fun onSelectNode(url: String) {
         val chain = state.value.chain ?: return
         viewModelScope.launch {
-            service.selectNode(chain.string, url)
-            loadNodes(chain)
+            runCatchingCancellable { service.selectNode(chain.string, url) }
+                .onSuccess { loadNodes(chain) }
+                .onFailure { error -> updateState { it.copy(error = error.serviceMessage()) } }
         }
     }
 
     fun onSelectBlockExplorer(name: String) {
         val chain = state.value.chain ?: return
-        service.setExplorerName(chain.string, name)
-        updateState { it.copy(currentExplorer = name) }
+        runCatching { service.setExplorerName(chain.string, name) }
+            .onSuccess { updateState { it.copy(currentExplorer = name) } }
+            .onFailure { error -> updateState { it.copy(error = error.serviceMessage()) } }
     }
 
     fun onSelectChain() {
@@ -92,10 +96,13 @@ class NetworksViewModel @Inject constructor(
     fun onDeleteNode(url: String) {
         val chain = state.value.chain ?: return
         viewModelScope.launch {
-            service.deleteNode(chain.string, url)
-            loadNodes(chain)
+            runCatchingCancellable { service.deleteNode(chain.string, url) }
+                .onSuccess { loadNodes(chain) }
+                .onFailure { error -> updateState { it.copy(error = error.serviceMessage()) } }
         }
     }
+
+    fun clearError() = updateState { it.copy(error = null) }
 
     private fun observeNodes(chain: Chain) {
         observeNodesJob?.cancel()
@@ -195,6 +202,7 @@ class NetworksViewModel @Inject constructor(
         val selectChain: Boolean = true,
         val availableAddNode: Boolean = true,
         val refreshNonce: Long = 0,
+        val error: String? = null,
     ) {
         fun toUIState(): NetworksUIState {
             return NetworksUIState(
@@ -205,6 +213,7 @@ class NetworksViewModel @Inject constructor(
                 currentExplorer = currentExplorer,
                 availableAddNode = availableAddNode,
                 nodeRows = nodes.map { it.copy(statusState = nodeStates[it.id] ?: GemNodeStatusState.Loading) },
+                error = error,
             )
         }
     }

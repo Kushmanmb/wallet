@@ -87,6 +87,7 @@ public struct ChainSettingsScene: View {
                 AddNodeScene(model: model.addNodeModel(), onDismiss: model.onDismissImportNode)
             }
         }
+        .alertSheet($model.isPresentingAlertMessage)
         .navigationTitle(model.title)
         .listSectionSpacing(.compact)
         .taskOnce {

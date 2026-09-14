@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
 import Formatters
 import Foundation
 import protocol Gemstone.GemChainSettingsServiceProtocol
@@ -19,6 +20,7 @@ public final class ChainSettingsSceneViewModel {
     var nodeDelete: GemNodeSelection?
     var explorers: [String]
     var isPresentingImportNode: Bool = false
+    var isPresentingAlertMessage: AlertMessage?
 
     private let formatter = ValueFormatter.full_US
 
@@ -80,8 +82,7 @@ extension ChainSettingsSceneViewModel {
             try await loadNodes()
             await loadNodesStates()
         } catch {
-            // TODO: - handle error
-            debugLog("chain settings scene: load error \(error)")
+            isPresentingAlertMessage = AlertMessage(error: error)
         }
     }
 
@@ -90,7 +91,7 @@ extension ChainSettingsSceneViewModel {
         do {
             try service.setExplorerName(chain: chain.rawValue, name: name)
         } catch {
-            debugLog("chain settings scene: on explorer select error \(error)")
+            isPresentingAlertMessage = AlertMessage(error: error)
         }
     }
 
@@ -100,8 +101,7 @@ extension ChainSettingsSceneViewModel {
                 try await service.selectNode(chain: chain.rawValue, url: url)
                 try await loadNodes()
             } catch {
-                // TODO: - handle error
-                debugLog("chain settings scene: on chain select error \(error)")
+                isPresentingAlertMessage = AlertMessage(error: error)
             }
         }
     }
@@ -126,8 +126,7 @@ extension ChainSettingsSceneViewModel {
             do {
                 try await delete()
             } catch {
-                // TODO: - handle error
-                debugLog("chain settings scene: on delete error \(error)")
+                isPresentingAlertMessage = AlertMessage(error: error)
             }
         }
     }
