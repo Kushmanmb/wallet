@@ -1,11 +1,12 @@
 use crate::percentage::GemPercentageStyle;
 use crate::precision::{GemCurrencyStyle, GemPrecision, GemValueStyle};
+use primitives::Currency;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemNumberUnit {
     Currency { code: String },
     Symbol { symbol: String },
-    Percent { shows_sign: bool },
+    Percent,
     Plain,
 }
 
@@ -21,12 +22,19 @@ pub struct GemFormattedNumber {
     pub value: f64,
     pub unit: GemNumberUnit,
     pub display: GemNumberDisplay,
+    pub shows_sign: bool,
 }
 
 impl GemFormattedNumber {
-    pub fn currency(value: f64, code: String, style: GemCurrencyStyle) -> Self {
+    pub fn currency(value: f64, currency: Currency, style: GemCurrencyStyle) -> Self {
+        Self::currency_code(value, currency.as_ref().to_string(), style)
+    }
+
+    /// For a currency code that comes from outside, such as a quote a provider returned.
+    pub fn currency_code(value: f64, code: String, style: GemCurrencyStyle) -> Self {
         Self {
             value,
+            shows_sign: false,
             unit: GemNumberUnit::Currency { code },
             display: match style.abbreviates(value) {
                 true => GemNumberDisplay::Abbreviated,
@@ -37,9 +45,26 @@ impl GemFormattedNumber {
         }
     }
 
+    /// Perpetual and reward values settle in USD, whatever currency the wallet displays.
+    pub fn usd(value: f64, style: GemCurrencyStyle) -> Self {
+        Self::currency(value, Currency::USD, style)
+    }
+
+    pub fn signed_usd(value: f64, style: GemCurrencyStyle) -> Self {
+        Self::signed_currency(value, Currency::USD, style)
+    }
+
+    pub fn signed_currency(value: f64, currency: Currency, style: GemCurrencyStyle) -> Self {
+        Self {
+            shows_sign: true,
+            ..Self::currency(value, currency, style)
+        }
+    }
+
     pub fn adaptive(value: f64, symbol: Option<String>) -> Self {
         Self {
             value,
+            shows_sign: false,
             unit: unit(symbol),
             display: GemNumberDisplay::Number {
                 precision: crate::precision::adaptive_precision(value),
@@ -51,7 +76,8 @@ impl GemFormattedNumber {
         let format = style.format();
         Self {
             value,
-            unit: GemNumberUnit::Percent { shows_sign: format.shows_sign },
+            shows_sign: format.shows_sign,
+            unit: GemNumberUnit::Percent,
             display: GemNumberDisplay::Number { precision: format.precision },
         }
     }
@@ -59,6 +85,7 @@ impl GemFormattedNumber {
     pub fn amount(value: f64, symbol: Option<String>, style: GemValueStyle) -> Self {
         Self {
             value,
+            shows_sign: false,
             unit: unit(symbol),
             display: value_display(value, style),
         }
@@ -84,7 +111,7 @@ pub fn formatted_percentage(value: f64, style: GemPercentageStyle) -> GemFormatt
 
 #[uniffi::export]
 pub fn formatted_currency(value: f64, code: String, style: GemCurrencyStyle) -> GemFormattedNumber {
-    GemFormattedNumber::currency(value, code, style)
+    GemFormattedNumber::currency_code(value, code, style)
 }
 
 #[uniffi::export]
@@ -113,7 +140,7 @@ mod tests {
 
     #[test]
     fn test_a_currency_number_carries_its_code_and_its_precision() {
-        let fiat = GemFormattedNumber::currency(12.3456, "USD".to_string(), GemCurrencyStyle::Fiat);
+        let fiat = GemFormattedNumber::currency(12.3456, Currency::USD, GemCurrencyStyle::Fiat);
         assert_eq!(fiat.value, 12.3456);
         assert_eq!(fiat.unit, GemNumberUnit::Currency { code: "USD".to_string() });
         assert_eq!(
@@ -127,11 +154,11 @@ mod tests {
     #[test]
     fn test_only_an_abbreviating_style_reads_as_abbreviated() {
         assert_eq!(
-            GemFormattedNumber::currency(1_000_000.0, "USD".to_string(), GemCurrencyStyle::Abbreviated).display,
+            GemFormattedNumber::currency(1_000_000.0, Currency::USD, GemCurrencyStyle::Abbreviated).display,
             GemNumberDisplay::Abbreviated
         );
         assert_eq!(
-            GemFormattedNumber::currency(1_000_000.0, "USD".to_string(), GemCurrencyStyle::Currency).display,
+            GemFormattedNumber::currency(1_000_000.0, Currency::USD, GemCurrencyStyle::Currency).display,
             GemNumberDisplay::Number {
                 precision: GemPrecision::Fraction { min: 2, max: 2 }
             }
@@ -142,7 +169,8 @@ mod tests {
     fn test_a_percentage_carries_its_sign_rule_with_it() {
         let signed = GemFormattedNumber::percentage(-2.0, GemPercentageStyle::Signed);
         assert_eq!(signed.value, -2.0);
-        assert_eq!(signed.unit, GemNumberUnit::Percent { shows_sign: true });
+        assert_eq!(signed.unit, GemNumberUnit::Percent);
+        assert!(signed.shows_sign);
         assert_eq!(
             signed.display,
             GemNumberDisplay::Number {
@@ -150,10 +178,7 @@ mod tests {
             }
         );
 
-        assert_eq!(
-            GemFormattedNumber::percentage(5.0, GemPercentageStyle::Unsigned).unit,
-            GemNumberUnit::Percent { shows_sign: false }
-        );
+        assert_eq!(GemFormattedNumber::percentage(5.0, GemPercentageStyle::Unsigned).shows_sign, false);
     }
 
     #[test]

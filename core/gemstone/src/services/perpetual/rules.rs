@@ -21,7 +21,6 @@ use crate::precision::GemCurrencyStyle;
 use crate::services::error::GemServiceError;
 use crate::services::transfer::GemTransferData;
 use num_bigint::BigUint;
-use primitives::Currency;
 use primitives::{PerpetualConfirmData, PerpetualModifyConfirmData, PerpetualModifyPositionType, PerpetualReduceData, PerpetualType};
 use std::cmp::Ordering;
 use std::collections::HashSet;
@@ -524,7 +523,7 @@ pub fn candle_tooltip(candle: &ChartCandleStick) -> GemCandleTooltip {
 }
 
 pub fn market_row(perpetual: &Perpetual) -> GemPerpetualMarketRow {
-    let abbreviated = |value: f64| GemFormattedNumber::currency(value, Currency::USD.as_ref().to_string(), GemCurrencyStyle::Abbreviated);
+    let abbreviated = |value: f64| GemFormattedNumber::usd(value, GemCurrencyStyle::Abbreviated);
     GemPerpetualMarketRow {
         title: perpetual.name.clone(),
         shows_price: perpetual.price != 0.0,

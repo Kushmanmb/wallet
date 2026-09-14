@@ -45,7 +45,7 @@ impl GemFiatQuoteService {
     }
 
     pub fn amount_check(&self, quote_type: FiatQuoteType, amount: f64, quote: Option<FiatQuote>, available: GemBigUint) -> GemFiatAmountCheck {
-        rules::amount_check(&get_fiat_config(), quote_type, amount, quote.as_ref(), &available, CURRENCY.as_ref())
+        rules::amount_check(&get_fiat_config(), quote_type, amount, quote.as_ref(), &available, CURRENCY)
     }
 
     pub fn quote_debounce_milliseconds(&self) -> u64 {

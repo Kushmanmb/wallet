@@ -1,3 +1,4 @@
+use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigUint;
 use crate::services::swap::model::GemSwapRate;
 use primitives::{AddressName, Asset, AssetId, AssetPrice, Chain, NFTAssetId, PerpetualDirection, Resource, TransactionExtended, TransactionType};
@@ -248,8 +249,8 @@ pub struct GemTransactionDetailRows {
     pub memo: Option<String>,
     pub resource: Option<Resource>,
     pub rate: Option<GemSwapRate>,
-    pub pnl: Option<f64>,
-    pub price: Option<f64>,
+    pub pnl: Option<GemFormattedNumber>,
+    pub price: Option<GemFormattedNumber>,
     pub fee: GemTransactionAmount,
     pub explorer: BlockExplorerLink,
 }

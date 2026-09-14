@@ -15,7 +15,9 @@ use super::model::{
 };
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::config::image::GemImage;
+use crate::formatted_number::GemFormattedNumber;
 use crate::models::asset::wallet_default_assets;
+use crate::precision::GemCurrencyStyle;
 use crate::services::collections::unique;
 use crate::services::swap::model::GemSwapRate;
 use crate::services::swap::rules as swap_rules;
@@ -108,8 +110,8 @@ pub fn detail_rows(extended: &TransactionExtended, participant: Option<GemTransa
         memo: transaction.memo.clone().filter(|memo| !memo.is_empty()),
         resource: resource(transaction),
         rate: swap_rate(extended),
-        pnl: details.pnl,
-        price: details.price,
+        pnl: details.pnl.map(|pnl| GemFormattedNumber::signed_usd(pnl, GemCurrencyStyle::Currency)),
+        price: details.price.map(|price| GemFormattedNumber::usd(price, GemCurrencyStyle::Currency)),
         fee: GemTransactionAmount {
             asset: extended.fee_asset.clone(),
             value: transaction.fee.clone(),

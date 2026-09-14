@@ -92,7 +92,11 @@ pub fn price_alert_enabled(alerts: &[PriceAlert]) -> bool {
 }
 
 pub fn price_alert_row(data: &PriceAlertData, price_currency: Currency) -> GemPriceAlertRow {
-    let PriceAlertData { asset, price: market, price_alert: alert } = data;
+    let PriceAlertData {
+        asset,
+        price: market,
+        price_alert: alert,
+    } = data;
     let current_price = market.map(|price| price.price);
     let price_change_percentage_24h = market.map(|price| price.price_change_percentage_24h);
     let kind = alert_kind(alert);
@@ -101,7 +105,7 @@ pub fn price_alert_row(data: &PriceAlertData, price_currency: Currency) -> GemPr
             Some(_) => alert.currency.clone(),
             None => price_currency,
         };
-        GemFormattedNumber::currency(price, currency.as_ref().to_string(), GemCurrencyStyle::Currency)
+        GemFormattedNumber::currency(price, currency, GemCurrencyStyle::Currency)
     });
     let percent = alert
         .price_percent_change
@@ -255,16 +259,13 @@ mod tests {
         let asset_id = asset.id.clone();
         let row = |alert: &PriceAlert| price_alert_row(&data(alert, &asset, Some(100.0), Some(-2.0)), Currency::USD);
         let is_price = |text: &GemPriceAlertText| matches!(text, GemPriceAlertText::Number { value } if matches!(value.unit, GemNumberUnit::Currency { .. }));
-        let is_percent = |text: &GemPriceAlertText| matches!(text, GemPriceAlertText::Number { value } if matches!(value.unit, GemNumberUnit::Percent { .. }));
+        let is_percent = |text: &GemPriceAlertText| matches!(text, GemPriceAlertText::Number { value } if matches!(value.unit, GemNumberUnit::Percent));
 
         let auto = row(&PriceAlert::new_auto(asset_id.clone(), Currency::USD));
         assert!(is_price(&auto.prefix), "an auto alert leads with the price");
         assert!(is_percent(&auto.suffix), "and follows with the day's change");
 
-        for (direction, label) in [
-            (PriceAlertDirection::Up, GemPriceAlertLabel::Over),
-            (PriceAlertDirection::Down, GemPriceAlertLabel::Under),
-        ] {
+        for (direction, label) in [(PriceAlertDirection::Up, GemPriceAlertLabel::Over), (PriceAlertDirection::Down, GemPriceAlertLabel::Under)] {
             let priced = row(&PriceAlert::new_price(asset_id.clone(), Currency::USD, 120.0, direction));
             assert_eq!(priced.prefix, GemPriceAlertText::Label { label });
             assert!(is_price(&priced.suffix), "a price alert shows the target it waits for");
@@ -319,12 +320,20 @@ mod tests {
                 title: asset.name.clone(),
                 symbol: asset.symbol.clone(),
                 kind: GemPriceAlertKind::Auto,
-                prefix: GemPriceAlertText::Number { value: GemFormattedNumber::currency(100.0, "EUR".to_string(), GemCurrencyStyle::Currency) },
-                suffix: GemPriceAlertText::Number { value: GemFormattedNumber::percentage(-2.0, GemPercentageStyle::Signed) },
+                prefix: GemPriceAlertText::Number {
+                    value: GemFormattedNumber::currency(100.0, Currency::EUR, GemCurrencyStyle::Currency)
+                },
+                suffix: GemPriceAlertText::Number {
+                    value: GemFormattedNumber::percentage(-2.0, GemPercentageStyle::Signed)
+                },
                 direction: Some(PriceAlertDirection::Down),
             }
         );
-        assert_eq!(price_alert_row(&data(&auto, &asset, Some(100.0), None), Currency::USD).direction, None, "no change is neutral");
+        assert_eq!(
+            price_alert_row(&data(&auto, &asset, Some(100.0), None), Currency::USD).direction,
+            None,
+            "no change is neutral"
+        );
 
         let over = PriceAlert::new_price(asset_id.clone(), Currency::USD, 120.0, PriceAlertDirection::Up);
         assert_eq!(
@@ -335,7 +344,9 @@ mod tests {
                 symbol: asset.symbol.clone(),
                 kind: GemPriceAlertKind::Over,
                 prefix: GemPriceAlertText::Label { label: GemPriceAlertLabel::Over },
-                suffix: GemPriceAlertText::Number { value: GemFormattedNumber::currency(120.0, "USD".to_string(), GemCurrencyStyle::Currency) },
+                suffix: GemPriceAlertText::Number {
+                    value: GemFormattedNumber::currency(120.0, Currency::USD, GemCurrencyStyle::Currency)
+                },
                 direction: Some(PriceAlertDirection::Up),
             },
             "the alert's own direction wins over the day's change"
@@ -366,13 +377,18 @@ mod tests {
                 symbol: asset.symbol.clone(),
                 kind: GemPriceAlertKind::Under,
                 prefix: GemPriceAlertText::Label { label: GemPriceAlertLabel::Under },
-                suffix: GemPriceAlertText::Number { value: GemFormattedNumber::currency(80.0, "USD".to_string(), GemCurrencyStyle::Currency) },
+                suffix: GemPriceAlertText::Number {
+                    value: GemFormattedNumber::currency(80.0, Currency::USD, GemCurrencyStyle::Currency)
+                },
                 direction: Some(PriceAlertDirection::Down),
             }
         );
 
         let decrease = PriceAlert::new_price_percent(asset_id.clone(), Currency::USD, 5.0, PriceAlertDirection::Down);
-        assert_eq!(price_alert_row(&data(&decrease, &asset, Some(100.0), None), Currency::USD).kind, GemPriceAlertKind::Decrease);
+        assert_eq!(
+            price_alert_row(&data(&decrease, &asset, Some(100.0), None), Currency::USD).kind,
+            GemPriceAlertKind::Decrease
+        );
 
         assert_eq!(
             price_alert_row(&data(&auto, &asset, None, None), Currency::USD).direction,
@@ -391,8 +407,12 @@ mod tests {
                 title: asset.name.clone(),
                 symbol: asset.symbol.clone(),
                 kind: GemPriceAlertKind::Auto,
-                prefix: GemPriceAlertText::Number { value: GemFormattedNumber::currency(120.0, "USD".to_string(), GemCurrencyStyle::Currency) },
-                suffix: GemPriceAlertText::Number { value: GemFormattedNumber::percentage(-2.0, GemPercentageStyle::Signed) },
+                prefix: GemPriceAlertText::Number {
+                    value: GemFormattedNumber::currency(120.0, Currency::USD, GemCurrencyStyle::Currency)
+                },
+                suffix: GemPriceAlertText::Number {
+                    value: GemFormattedNumber::percentage(-2.0, GemPercentageStyle::Signed)
+                },
                 direction: Some(PriceAlertDirection::Up),
             },
             "a target without a direction points at the price it waits for"

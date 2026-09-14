@@ -37,26 +37,34 @@ private extension GemFormattedNumber {
         }
     }
 
-    var percentSign: Bool? {
+    var isPercent: Bool {
         switch unit {
-        case let .percent(showsSign): showsSign
-        case .currency, .symbol, .plain: nil
+        case .percent: true
+        case .currency, .symbol, .plain: false
         }
     }
 
+    var numberSign: NumberFormatStyleConfiguration.SignDisplayStrategy {
+        showsSign ? .always(includingZero: false) : .automatic
+    }
+
+    var currencySign: CurrencyFormatStyleConfiguration.SignDisplayStrategy {
+        showsSign ? .always(showZero: false) : .automatic
+    }
+
     func numberText(precision: GemPrecision, locale: Locale) -> String {
-        if let percentSign {
+        if isPercent {
             return value.formatted(
                 .percent.locale(locale)
                     .precision(precision.formatStyle)
-                    .sign(strategy: percentSign ? .always(includingZero: false) : .never)
+                    .sign(strategy: showsSign ? .always(includingZero: false) : .never)
                     .scale(1),
             )
         }
         guard let currencyCode else {
-            return value.formatted(.number.locale(locale).precision(precision.formatStyle))
+            return value.formatted(.number.locale(locale).precision(precision.formatStyle).sign(strategy: numberSign))
         }
-        return value.formatted(.currency(code: currencyCode).locale(locale).precision(precision.formatStyle))
+        return value.formatted(.currency(code: currencyCode).locale(locale).precision(precision.formatStyle).sign(strategy: currencySign))
     }
 
     func abbreviatedText(locale: Locale) -> String {

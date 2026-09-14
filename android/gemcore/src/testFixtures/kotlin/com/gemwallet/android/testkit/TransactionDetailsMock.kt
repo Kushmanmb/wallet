@@ -3,11 +3,14 @@ package com.gemwallet.android.testkit
 import com.gemwallet.android.ext.toGem
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetPrice
+import com.wallet.core.primitives.Currency
 import uniffi.gemstone.BlockExplorerLink
 import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.GemSwapAgain
 import uniffi.gemstone.GemSwapProgress
+import uniffi.gemstone.GemCurrencyStyle
 import uniffi.gemstone.GemSwapRate
+import uniffi.gemstone.formattedCurrency
 import uniffi.gemstone.GemTransactionAmount
 import uniffi.gemstone.GemTransactionDetailRows
 import uniffi.gemstone.GemTransactionHeader
@@ -46,6 +49,7 @@ fun mockGemTransactionDetailRows(
     rate: GemSwapRate? = null,
     pnl: Double? = null,
     price: Double? = null,
+    currency: Currency = Currency.USD,
     fee: GemTransactionAmount = mockGemTransactionAmount(),
     explorer: BlockExplorerLink = BlockExplorerLink("Explorer", "https://example.com"),
 ) = GemTransactionDetailRows(
@@ -60,8 +64,8 @@ fun mockGemTransactionDetailRows(
     memo = memo,
     resource = resource,
     rate = rate,
-    pnl = pnl,
-    price = price,
+    pnl = pnl?.let { formattedCurrency(it, currency.string, GemCurrencyStyle.CURRENCY).copy(showsSign = true) },
+    price = price?.let { formattedCurrency(it, currency.string, GemCurrencyStyle.CURRENCY) },
     fee = fee,
     explorer = explorer,
     status = status,

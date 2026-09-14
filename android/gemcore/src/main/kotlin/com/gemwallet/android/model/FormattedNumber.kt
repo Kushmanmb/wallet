@@ -11,8 +11,10 @@ import uniffi.gemstone.GemNumberDisplay
 import uniffi.gemstone.GemNumberUnit
 
 fun GemFormattedNumber.text(locale: Locale = Locale.getDefault()): String = when (val display = display) {
-    is GemNumberDisplay.Number -> percentSign?.let { percentText(BigDecimal.valueOf(value), display.precision.toPrecision(), it, locale) }
-        ?: appendSymbol(numberText(BigDecimal.valueOf(value), display.precision.toPrecision(), locale))
+    is GemNumberDisplay.Number -> when (unit) {
+        is GemNumberUnit.Percent -> percentText(BigDecimal.valueOf(value), display.precision.toPrecision(), showsSign, locale)
+        else -> appendSymbol(numberText(BigDecimal.valueOf(value), display.precision.toPrecision(), locale))
+    }
     is GemNumberDisplay.Abbreviated -> appendSymbol(abbreviatedText(BigDecimal.valueOf(value), locale))
     is GemNumberDisplay.BelowThreshold -> appendSymbol(
         "<${numberText(BigDecimal.valueOf(display.threshold), Precision.Fraction(display.places.toInt(), display.places.toInt()), locale)}"
@@ -24,9 +26,6 @@ private val GemFormattedNumber.currencyCode: String?
 
 private val GemFormattedNumber.symbol: String?
     get() = (unit as? GemNumberUnit.Symbol)?.symbol
-
-private val GemFormattedNumber.percentSign: Boolean?
-    get() = (unit as? GemNumberUnit.Percent)?.showsSign
 
 private fun percentText(value: BigDecimal, precision: Precision, showsSign: Boolean, locale: Locale): String {
     val fraction = precision as Precision.Fraction
@@ -48,7 +47,12 @@ private fun GemFormattedNumber.appendSymbol(text: String): String =
     symbol?.let { "$text $it" } ?: text
 
 private fun GemFormattedNumber.numberText(value: BigDecimal, precision: Precision, locale: Locale): String {
-    val formatter = (numberFormat(locale) as DecimalFormat).apply { roundingMode = RoundingMode.HALF_EVEN }
+    val formatter = (numberFormat(locale) as DecimalFormat).apply {
+        roundingMode = RoundingMode.HALF_EVEN
+        if (showsSign) {
+            positivePrefix = "+" + positivePrefix
+        }
+    }
     return formatter.format(value, precision)
 }
 

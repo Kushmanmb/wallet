@@ -1,8 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import Formatters
 import Foundation
+import struct Gemstone.GemFormattedNumber
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -10,12 +10,10 @@ import Style
 import SwiftUI
 
 struct TransactionPnlViewModel {
-    private let pnl: Double?
-    private let currencyFormatter: CurrencyFormatter
+    private let pnl: GemFormattedNumber?
 
-    init(pnl: Double?, currencyFormatter: CurrencyFormatter = .usd) {
+    init(pnl: GemFormattedNumber?) {
         self.pnl = pnl
-        self.currencyFormatter = currencyFormatter
     }
 }
 
@@ -24,15 +22,10 @@ extension TransactionPnlViewModel: ItemModelProvidable {
         guard let pnl else {
             return .empty
         }
-
-        let sign = pnl >= 0 ? "+" : ""
-        let pnlFormatted = currencyFormatter.string(pnl)
-        let color = pnl >= 0 ? Colors.green : Colors.red
-
         return .pnl(
             title: Localized.Perpetual.pnl,
-            value: "\(sign)\(pnlFormatted)",
-            color: color,
+            value: pnl.text(),
+            color: PriceChangeColor.color(for: pnl.value),
         )
     }
 }
