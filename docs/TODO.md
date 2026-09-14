@@ -72,7 +72,6 @@ Legitimately one-sided, not gaps: `isVersionHigher` (Play update), `migrateToSha
 Product or security decisions, one question each:
 
 - **D5** Earn is built on both apps and hidden behind `EARN_OFFERED` in [`config/stake.rs`](../core/gemstone/src/config/stake.rs). Reviewed on 2026-09-14: it stays hidden, and the flag is the only switch — do not delete the surface behind it.
-- **D6** Universal links — [DEEPLINKS.md](DEEPLINKS.md) says `/perpetuals` and `/rewards` are not iOS Universal Links and the [Android manifest](../android/app/src/main/AndroidManifest.xml) does not declare `/rewards`; the AASA is server-side. Decide the paths, then declare them on both.
 - **D8** Keystore v4 follow-ups from [KEYSTORE_V4.md](KEYSTORE_V4.md): whether migration failures need durable telemetry or user-visible recovery, and the synchronous [`Keystore` trait](../core/crates/gem_keystore/src/storage/secret.rs) that a browser backend would need an in-memory mirror for.
 - **D9** Swap max-amount fee trim — [SWAPPER.md](SWAPPER.md) records that confirmed and signed amounts can differ by up to the fee on providers outside the [reserve rule](../core/crates/swapper/src/fees/reserve.rs). Decide whether the signer or the quote owns the trim.
 
