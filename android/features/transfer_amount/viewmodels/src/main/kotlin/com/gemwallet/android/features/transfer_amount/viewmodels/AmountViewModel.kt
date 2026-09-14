@@ -134,7 +134,7 @@ class AmountViewModel @Inject constructor(
         Crypto(value).value(asset.decimals).stripTrailingZeros().toPlainString()
 
     fun switchInputType() {
-        amountInputType.update { if (it == GemAmountInputType.ASSET) GemAmountInputType.FIAT else GemAmountInputType.ASSET }
+        amountInputType.update { it.toggled() }
         amount = ""
     }
 

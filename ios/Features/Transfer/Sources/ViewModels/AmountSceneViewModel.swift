@@ -172,7 +172,7 @@ extension AmountSceneViewModel {
     }
 
     func onSelectInputButton() {
-        amountInputType = amountInputType == .asset ? .fiat : .asset
+        amountInputType = amountInputType.toggled()
         cleanInput()
     }
 

@@ -86,6 +86,16 @@ pub enum GemAmountInputType {
     Fiat,
 }
 
+#[uniffi::export]
+impl GemAmountInputType {
+    pub fn toggled(&self) -> Self {
+        match self {
+            Self::Asset => Self::Fiat,
+            Self::Fiat => Self::Asset,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemAmountEquivalent {
     Fiat { amount: f64 },
@@ -197,6 +207,13 @@ impl GemNumberFormat {
 mod tests {
     use super::*;
     use primitives::Chain;
+
+    #[test]
+    fn test_the_input_type_toggles_between_the_asset_and_the_fiat_side() {
+        assert_eq!(GemAmountInputType::Asset.toggled(), GemAmountInputType::Fiat);
+        assert_eq!(GemAmountInputType::Fiat.toggled(), GemAmountInputType::Asset);
+        assert_eq!(GemAmountInputType::Asset.toggled().toggled(), GemAmountInputType::Asset);
+    }
 
     #[test]
     fn test_a_zero_amount_shows_nothing_and_a_short_balance_names_the_asset() {
