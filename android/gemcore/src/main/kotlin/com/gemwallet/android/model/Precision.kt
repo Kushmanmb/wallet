@@ -5,17 +5,11 @@ import java.math.MathContext
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import uniffi.gemstone.GemPrecision
-import uniffi.gemstone.abbreviationThreshold
 import uniffi.gemstone.adaptivePrecision as gemAdaptivePrecision
 
 internal sealed interface Precision {
     data class Fraction(val min: Int, val max: Int) : Precision
     data class Significant(val max: Int) : Precision
-
-    companion object {
-        val twoPlaces = Fraction(min = 2, max = 2)
-        val fourSignificant = Significant(max = 4)
-    }
 }
 
 internal fun BigDecimal.rounded(precision: Precision, roundingMode: RoundingMode): BigDecimal = when (precision) {
@@ -40,5 +34,3 @@ internal fun GemPrecision.toPrecision(): Precision = when (this) {
     is GemPrecision.Fraction -> Precision.Fraction(min = min.toInt(), max = max.toInt())
     is GemPrecision.Significant -> Precision.Significant(max = max.toInt())
 }
-
-internal val ABBREVIATION_THRESHOLD: BigDecimal by lazy { BigDecimal.valueOf(abbreviationThreshold()) }
