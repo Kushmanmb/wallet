@@ -3,14 +3,15 @@ use crate::perpetual::GemPerpetual;
 use crate::services::transfer::GemTransferData;
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
 use primitives::perpetual::{CancelOrderData, PerpetualModifyConfirmData, PerpetualModifyPositionType, TPSLOrderData};
-use primitives::{Asset, PerpetualDirection, PerpetualProvider, PerpetualType};
+use primitives::{Asset, AutocloseValidation, PerpetualDirection, PerpetualProvider, PerpetualType, TpslType};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemAutocloseField {
+    pub tpsl_type: TpslType,
     pub price: Option<f64>,
     pub original_price: Option<f64>,
     pub formatted_price: Option<String>,
-    pub is_valid: bool,
+    pub validation: AutocloseValidation,
     pub order_id: Option<u64>,
 }
 
@@ -18,6 +19,10 @@ pub struct GemAutocloseField {
 impl GemAutocloseField {
     pub fn has_pending_change(&self) -> bool {
         self.is_cleared() || (self.price.is_some() && self.has_changed())
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.price.is_some() && self.validation == AutocloseValidation::Valid
     }
 }
 
@@ -31,7 +36,7 @@ impl GemAutocloseField {
     }
 
     fn should_set(&self) -> bool {
-        self.is_valid && self.has_changed()
+        self.is_valid() && self.has_changed()
     }
 
     fn should_update(&self) -> bool {
@@ -43,7 +48,7 @@ impl GemAutocloseField {
     }
 
     fn is_acceptable(&self) -> bool {
-        self.price.is_none() || self.is_valid
+        self.price.is_none() || self.is_valid()
     }
 
     fn cancel(&self, asset_index: i32) -> Option<CancelOrderData> {
@@ -200,10 +205,11 @@ mod tests {
 
     fn field(price: Option<f64>, original_price: Option<f64>, is_valid: bool, order_id: Option<u64>) -> GemAutocloseField {
         GemAutocloseField {
+            tpsl_type: TpslType::TakeProfit,
             price,
             original_price,
             formatted_price: price.map(|price| format!("{price:.1}")),
-            is_valid,
+            validation: if is_valid { AutocloseValidation::Valid } else { AutocloseValidation::InvalidAmount },
             order_id,
         }
     }

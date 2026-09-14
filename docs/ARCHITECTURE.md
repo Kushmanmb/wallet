@@ -293,6 +293,8 @@ A row or view state carries `GemFormattedNumber` where it carries a bare `f64` t
 
 A row model that copies `url`, `host` and `isSelected` out of a Core record is a partial twin: the copy has to be maintained, and a field added in Core reaches the screen only after someone widens the copy. Hold the record and read through it.
 
+The test is what the model carries that the record cannot, not how much they overlap. A screen input that holds two app assets and a max-amount flag and *projects* the Core request from them is not a twin, however many field names rhyme; a record that carries the same fields re-typed, so that both have to move together, is one whatever it is called.
+
 ```kotlin
 data class NodeRowUiModel(
     val node: GemNodeSelection,

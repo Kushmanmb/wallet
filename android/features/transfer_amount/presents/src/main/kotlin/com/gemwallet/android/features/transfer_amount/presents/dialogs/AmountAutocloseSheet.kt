@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import uniffi.gemstone.GemAutocloseEstimator
-import com.gemwallet.android.domains.perpetual.autoclose.AutocloseField
+import uniffi.gemstone.GemAutocloseField
 import uniffi.gemstone.AutocloseValidator
 import com.gemwallet.android.ext.PerpetualFormatter
 import com.gemwallet.android.features.transfer_amount.viewmodels.providers.AmountPerpetualProvider
@@ -196,8 +196,8 @@ private fun buildField(
     estimator: GemAutocloseEstimator,
     showErrors: Boolean,
 ): AutocloseUIModel.Field {
-    val field = AutocloseField(
-        type = type,
+    val field = GemAutocloseField(
+        tpslType = type.toGem(),
         price = price,
         originalPrice = null,
         formattedPrice = null,

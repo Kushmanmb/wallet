@@ -1,6 +1,7 @@
 package com.gemwallet.android.testkit
 
-import com.gemwallet.android.domains.perpetual.autoclose.AutocloseField
+import com.gemwallet.android.ext.toGem
+import uniffi.gemstone.GemAutocloseField
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Perpetual
@@ -105,8 +106,8 @@ fun mockAutocloseField(
     formattedPrice: String? = price?.toString(),
     validation: AutocloseValidation = AutocloseValidation.VALID,
     orderId: ULong? = null,
-) = AutocloseField(
-    type = type,
+) = GemAutocloseField(
+    tpslType = type.toGem(),
     price = price,
     originalPrice = originalPrice,
     formattedPrice = formattedPrice,

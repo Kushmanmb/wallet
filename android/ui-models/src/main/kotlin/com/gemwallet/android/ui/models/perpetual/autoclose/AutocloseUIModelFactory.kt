@@ -1,11 +1,12 @@
 package com.gemwallet.android.ui.models.perpetual.autoclose
 
 import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toPrimitives
 import uniffi.gemstone.GemPercentageStyle
 import com.gemwallet.android.domains.percentage.formatAsPercentage
 import com.gemwallet.android.domains.perpetual.aggregates.PerpetualPositionDataAggregateImpl
 import uniffi.gemstone.GemAutocloseEstimator
-import com.gemwallet.android.domains.perpetual.autoclose.AutocloseField
+import uniffi.gemstone.GemAutocloseField
 import com.gemwallet.android.domains.price.ValueDirection
 import com.gemwallet.android.domains.price.toValueDirection
 import com.gemwallet.android.model.CurrencyFormatter
@@ -22,8 +23,8 @@ object AutocloseUIModelFactory {
 
     fun create(
         position: PerpetualPositionData,
-        takeProfit: AutocloseField,
-        stopLoss: AutocloseField,
+        takeProfit: GemAutocloseField,
+        stopLoss: GemAutocloseField,
         confirmEnabled: Boolean,
         showErrors: Boolean = false,
     ): AutocloseUIModel {
@@ -44,16 +45,16 @@ object AutocloseUIModelFactory {
     }
 
     fun createField(
-        field: AutocloseField,
+        field: GemAutocloseField,
         estimator: GemAutocloseEstimator,
         showErrors: Boolean = true,
     ): AutocloseUIModel.Field {
         val priceForEstimation = field.price.takeIf { field.validation == AutocloseValidation.VALID }
         val pnl = priceForEstimation?.let { estimator.pnl(it) }
         val roe = priceForEstimation?.let { estimator.roe(it) }
-        val isProfit = pnl?.let { it >= 0.0 } ?: (field.type == TpslType.TakeProfit)
+        val isProfit = pnl?.let { it >= 0.0 } ?: (field.tpslType == uniffi.gemstone.TpslType.TAKE_PROFIT)
         return AutocloseUIModel.Field(
-            type = field.type,
+            type = field.tpslType.toPrimitives(),
             isProfit = isProfit,
             pnlText = pnlText(pnl, roe, estimator.hasSize()),
             pnlDirection = roe?.toValueDirection() ?: ValueDirection.None,
