@@ -5,9 +5,11 @@ import Formatters
 import Foundation
 import enum Gemstone.GemAssetMarketRow
 import struct Gemstone.GemChart
+import enum Gemstone.GemChartPhase
 import enum Gemstone.GemChartSection
+import struct Gemstone.GemChartSession
 import protocol Gemstone.GemChartServiceProtocol
-import func Gemstone.priceChartData
+import enum Gemstone.GemServiceError
 import GemstonePrimitives
 import GemstoneServices
 import InfoSheet
@@ -29,9 +31,13 @@ public final class ChartSceneViewModel: ChartListViewable {
     let walletId: WalletId
     let assetModel: AssetViewModel
 
-    private var chart: StateViewType<GemChart> = .loading
+    private var session: GemChartSession
     public var selectedPeriod: ChartPeriod {
-        didSet { try? service.setChartPeriod(period: selectedPeriod.map()) }
+        get { session.period.map() }
+        set {
+            session = session.onSelectPeriod(period: newValue.map())
+            try? service.setChartPeriod(period: newValue.map())
+        }
     }
 
     public let priceQuery: ObservableQuery<PriceRequest>
@@ -51,7 +57,14 @@ public final class ChartSceneViewModel: ChartListViewable {
     }
 
     public var chartState: StateViewType<ChartValuesViewModel> {
-        chart.flatMap { chartValuesViewModel(from: $0).map { .data($0) } ?? .noData }
+        switch session.viewState().phase {
+        case .loading: .loading
+        case let .data(data):
+            ChartValuesViewModel(period: selectedPeriod, chartData: data, formatter: CurrencyFormatter(currencyCode: currencyCode))
+                .map { .data($0) } ?? .noData
+        case .noData: .noData
+        case let .failed(error): .error(error)
+        }
     }
 
     var sections: [GemChartSection] {
@@ -74,7 +87,7 @@ public final class ChartSceneViewModel: ChartListViewable {
         self.service = service
         self.assetModel = assetModel
         self.walletId = walletId
-        selectedPeriod = service.chartPeriod().map()
+        session = service.newSession()
         priceQuery = ObservableQuery(PriceRequest(assetId: assetModel.asset.id), initialValue: .with(asset: assetModel.asset))
         self.onSetPriceAlert = onSetPriceAlert
     }
@@ -83,23 +96,15 @@ public final class ChartSceneViewModel: ChartListViewable {
         AssetDetailsInfoViewModel(asset: asset, currency: currencyCode).marketValues(rows)
     }
 
-    private func chartValuesViewModel(from chart: GemChart) -> ChartValuesViewModel? {
-        guard let chartData = priceChartData(chart: chart) else {
-            return nil
-        }
-        return ChartValuesViewModel(period: selectedPeriod, chartData: chartData, formatter: CurrencyFormatter(currencyCode: currencyCode))
-    }
 }
 
 // MARK: - Business Logic
 
 public extension ChartSceneViewModel {
     func load() async {
-        if chart.value == nil {
-            chart = .loading
-        }
+        session = session.onRefresh()
         do {
-            chart = try await .data(service.syncCharts(assetId: assetModel.asset.id.identifier, period: selectedPeriod.map()))
+            session = try await session.onLoaded(chart: service.syncCharts(assetId: assetModel.asset.id.identifier, period: selectedPeriod.map()))
             if priceData?.priceAlerts.isNotEmpty == true {
                 Task {
                     do {
@@ -110,7 +115,7 @@ public extension ChartSceneViewModel {
                 }
             }
         } catch {
-            chart.setError(error)
+            session = session.onFailed(error: .Core(msg: error.localizedDescription))
         }
     }
 

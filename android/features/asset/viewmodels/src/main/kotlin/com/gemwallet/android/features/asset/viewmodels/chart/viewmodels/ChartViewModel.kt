@@ -6,18 +6,17 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
-import com.gemwallet.android.features.asset.viewmodels.chart.models.AssetChartState
 import com.gemwallet.android.features.asset.viewmodels.chart.models.ChartUIModel
 import com.gemwallet.android.features.asset.viewmodels.chart.models.StopTimeoutMillis
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.ui.models.StateViewType
-import com.gemwallet.android.ui.models.flatMap
 import com.gemwallet.android.ui.models.navigation.requireAssetId
 import com.gemwallet.android.ext.toIdentifier
 import com.wallet.core.primitives.AssetId
 import uniffi.gemstone.GemChartService
 import uniffi.gemstone.GemChartServiceInterface
-import uniffi.gemstone.priceChartData
+import uniffi.gemstone.GemChartPhase
+import uniffi.gemstone.GemServiceException
 import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.Currency
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,42 +41,44 @@ class ChartViewModel internal constructor(
     private val chartService: GemChartServiceInterface,
     private val assetId: AssetId,
 ) : ViewModel() {
-    private val selectedPeriod = MutableStateFlow(chartService.chartPeriod().toPrimitives())
+    private val selectedPeriod = MutableStateFlow(chartService.chartPeriod())
     private val refreshController = ChartRefreshController()
 
     val isRefreshing = refreshController.isRefreshing
 
-    private val chartPrices = combine(
+    private val loaded = combine(
         selectedPeriod,
         getCurrentCurrency.getCurrency(),
         refreshController.trigger,
-    ) { period, currency, _ -> AssetChartState(period, currency) }
-        .transformLatest { state ->
-            emit(state)
-            val chart = try {
-                chartService.syncCharts(assetId.toIdentifier(), state.period.toGem())
+    ) { period, currency, _ -> period to currency }
+        .transformLatest { (period, currency) ->
+            val loading = chartService.newSession().onSelectPeriod(period)
+            emit(loading.viewState() to currency)
+            val next = try {
+                loading.onLoaded(chartService.syncCharts(assetId.toIdentifier(), period))
             } catch (e: Exception) {
                 currentCoroutineContext().ensureActive()
-                null
+                loading.onFailed(GemServiceException.Core(e.message.orEmpty()))
             }
             refreshController.stopRefreshing()
-            emit(state.copy(prices = chart?.let { StateViewType.Data(it) } ?: StateViewType.Error))
+            emit(next.viewState() to currency)
         }
         .flowOn(Dispatchers.IO)
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(StopTimeoutMillis),
-            AssetChartState(selectedPeriod.value, Currency.USD),
+            chartService.newSession().viewState() to Currency.USD,
         )
 
-    val chartUIState = chartPrices.map { state ->
-        val currencyFormatter = CurrencyFormatter(currency = state.currency)
+    val chartUIState = loaded.map { (state, currency) ->
+        val currencyFormatter = CurrencyFormatter(currency = currency)
         ChartUIModel.State(
-            period = state.period,
-            chart = state.prices.flatMap { chart ->
-                priceChartData(chart)
-                    ?.let { StateViewType.Data(ChartUIModel(it, currencyFormatter::string)) }
-                    ?: StateViewType.NoData
+            period = state.period.toPrimitives(),
+            chart = when (val phase = state.phase) {
+                GemChartPhase.Loading -> StateViewType.Loading
+                is GemChartPhase.Data -> StateViewType.Data(ChartUIModel(phase.data, currencyFormatter::string))
+                GemChartPhase.NoData -> StateViewType.NoData
+                is GemChartPhase.Failed -> StateViewType.Error
             },
         )
     }
@@ -85,11 +86,11 @@ class ChartViewModel internal constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(StopTimeoutMillis), ChartUIModel.State())
 
     fun setPeriod(period: ChartPeriod) {
-        if (period == selectedPeriod.value) {
+        if (period.toGem() == selectedPeriod.value) {
             return
         }
         viewModelScope.launch(Dispatchers.IO) { chartService.setChartPeriod(period.toGem()) }
-        selectedPeriod.value = period
+        selectedPeriod.value = period.toGem()
     }
 
     fun refresh() {

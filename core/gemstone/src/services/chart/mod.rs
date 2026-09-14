@@ -1,3 +1,4 @@
+pub mod session;
 pub mod model;
 pub mod rules;
 
@@ -13,6 +14,7 @@ use crate::services::explorer::GemExplorerService;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::price::GemPriceService;
 use crate::services::price_alert::GemPriceAlertService;
+use session::GemChartSession;
 
 pub use model::{GemAssetMarketRow, GemChartData, GemChartHeader, GemChartSection, GemChartValueType};
 
@@ -78,6 +80,10 @@ impl GemChartService {
     ) -> Vec<GemChartSection> {
         let contract_explorer = asset.id.token_id.clone().and_then(|token_id| self.explorer.get_token_url(asset.id.chain, token_id));
         rules::chart_sections(&asset, price, market.as_ref(), price_alerts, links, contract_explorer)
+    }
+
+    pub fn new_session(&self) -> GemChartSession {
+        GemChartSession::new(self.chart_period())
     }
 
     pub fn get_currency(&self) -> Currency {

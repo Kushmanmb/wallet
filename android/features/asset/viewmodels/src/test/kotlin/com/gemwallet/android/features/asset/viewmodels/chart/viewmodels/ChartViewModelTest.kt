@@ -31,6 +31,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemChartSession
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ChartViewModelTest {
@@ -49,6 +50,9 @@ class ChartViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         every { chartService.chartPeriod() } returns ChartPeriod.Day.toGem()
+        every { chartService.newSession() } answers {
+            GemChartSession(chartService.chartPeriod(), chart = null, error = null, isLoading = true, isRefreshing = false)
+        }
     }
 
     @After
