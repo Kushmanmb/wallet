@@ -5,7 +5,7 @@ Use the iOS `justfile` commands by default.
 ## Build and Test
 
 ```bash
-just bootstrap              # first-time setup
+just install                # first-time setup
 just clean                  # clean DerivedData and build artifacts
 just build                  # build the app
 just build-for-testing      # build once for repeated test runs
@@ -65,4 +65,4 @@ just spm-resolve-all
 - Use `just` commands for builds and tests, not `xcrun swift test`
 - Build logs live under `build/DerivedData`
 - If `just build` is insufficient for debugging, use `xcodebuild` directly against `Gem.xcodeproj`
-- `just bootstrap` installs `swiftformat`
+- `just install` installs `swiftformat`, `swiftlint`, and `xcbeautify`

@@ -5,6 +5,12 @@ mod core 'core/justfile'
 default:
     @just --list
 
+install:
+    @just core install-rust
+    @just core install-typeshare
+    @just ios install
+    @just android install
+
 setup-git:
     @echo "==> Setup iOS git submodules"
     @git submodule sync --recursive

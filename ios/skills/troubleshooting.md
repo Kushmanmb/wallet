@@ -19,10 +19,10 @@ just build
 
 If SwiftPM cannot resolve `Gemstone` in a fresh checkout, or the build fails with missing `libgemstone.a` or undefined `ffi_gemstone_*` symbols:
 ```bash
-just bootstrap
+just install
 just build
 ```
-`just bootstrap` creates the local UniFFI Swift/header sources and iOS Rust static libraries needed by SwiftPM and Xcode. From the repo root, use `just generate-stone`, then `just run-ios`. The optional `GemStone` Xcode scheme combines cached Gemstone generation with the normal app build.
+`just install` creates the local UniFFI Swift/header sources and iOS Rust static libraries needed by SwiftPM and Xcode. From the repo root, use `just generate-stone`, then `just run-ios`. The optional `GemStone` Xcode scheme combines cached Gemstone generation with the normal app build.
 
 ### Multiple Simulators Match the Destination
 
@@ -46,7 +46,7 @@ Do not patch generated files to make tests pass.
 
 ```bash
 just clean
-just bootstrap
+just install
 just build
 ```
 
@@ -59,7 +59,7 @@ When package resolution hangs or fails after branch switches or submodule update
 just spm-resolve
 just spm-resolve-all
 ```
-If still stuck, clear DerivedData: `just clean`, then `just bootstrap`.
+If still stuck, clear DerivedData: `just clean`, then `just install`.
 
 ### Failing Tests
 
