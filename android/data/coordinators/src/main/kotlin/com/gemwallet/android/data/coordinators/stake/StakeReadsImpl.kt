@@ -14,8 +14,10 @@ import com.wallet.core.primitives.DelegationValidator
 import com.wallet.core.primitives.StakeProviderType
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.WalletId
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemStakeService
@@ -34,11 +36,13 @@ class SyncStakeDelegationsImpl(
 class GetValidatorsImpl(
     private val stakeStore: GemstoneStakeStore,
     private val stakeService: GemStakeServiceInterface,
+    private val ioDispatcher: CoroutineDispatcher,
 ) : GetValidators {
 
     override fun invoke(assetId: AssetId, providerType: StakeProviderType): Flow<List<DelegationValidator>> =
         stakeStore.observeValidators(assetId, providerType)
             .map { validators -> stakeService.selectableValidators(validators.map { it.toGem() }).map { it.toPrimitives() } }
+            .flowOn(ioDispatcher)
 }
 
 class GetDelegationsImpl(
