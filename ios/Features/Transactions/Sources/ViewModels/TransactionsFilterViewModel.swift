@@ -7,6 +7,7 @@ import Localization
 import Primitives
 import PrimitivesComponents
 import Store
+import enum Gemstone.GemTransactionFilter
 
 @Observable
 @MainActor
@@ -45,6 +46,16 @@ public final class TransactionsFilterViewModel {
             limit: Int(transactionsListLimit()),
         )
         query = ObservableQuery(MappedRequest(request, transform: TransactionViewModel.sections), initialValue: [])
+    }
+
+    public func onFinishChainsSelection(_ value: SelectionResult<Chain>) -> Bool {
+        chainsFilter.selectedChains = value.items
+        return value.isConfirmed
+    }
+
+    public func onFinishTypesSelection(_ value: SelectionResult<GemTransactionFilter>) -> Bool {
+        transactionTypesFilter.selectedTypes = value.items
+        return value.isConfirmed
     }
 
     public var isAnyFilterSpecified: Bool {
