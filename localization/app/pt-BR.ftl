@@ -608,6 +608,7 @@ nft_report_reason_spam = Spam
 nft_report_reason_malicious = Malicioso
 nft_report_reason_inappropriate = Conteúdo impróprio
 nft_report_reason_copyright = Direitos autorais
+nft_report_reason_other = Outro
 nft_report_report_button_title = Denunciar
 
 # Permissions

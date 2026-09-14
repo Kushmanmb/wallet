@@ -608,6 +608,7 @@ nft_report_reason_spam = Spam
 nft_report_reason_malicious = Berniat jahat
 nft_report_reason_inappropriate = Kandungan Tidak Sesuai
 nft_report_reason_copyright = Hak Cipta
+nft_report_reason_other = Lain-lain
 nft_report_report_button_title = Laporan
 
 # Permissions

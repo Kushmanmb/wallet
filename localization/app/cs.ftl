@@ -608,6 +608,7 @@ nft_report_reason_spam = Spam
 nft_report_reason_malicious = Zlomyslný
 nft_report_reason_inappropriate = Nevhodný obsah
 nft_report_reason_copyright = Autorská práva
+nft_report_reason_other = Ostatní
 nft_report_report_button_title = Nahlásit
 
 # Permissions

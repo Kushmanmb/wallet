@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">दुर्भावनापूर्ण</string>
   <string name="nft_report_reason_inappropriate">अनुपयुक्त सामग्री</string>
   <string name="nft_report_reason_copyright">कॉपीराइट</string>
+  <string name="nft_report_reason_other">अन्य</string>
   <string name="nft_report_report_button_title">रिपोर्ट करें</string>
   <string name="permissions_access_denied">पहुंच अस्वीकृत</string>
   <string name="permissions_image_photo_access_denied_description">इस ऐप को आपकी फोटो लाइब्रेरी तक पहुंचने की अनुमति नहीं है। कृपया अपनी डिवाइस सेटिंग में पहुंच सक्षम करें।</string>

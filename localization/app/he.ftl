@@ -608,6 +608,7 @@ nft_report_reason_spam = ספאם
 nft_report_reason_malicious = זְדוֹנִי
 nft_report_reason_inappropriate = תוכן לא הולם
 nft_report_reason_copyright = זְכוּת יְוֹצרִים
+nft_report_reason_other = אחר
 nft_report_report_button_title = דווח
 
 # Permissions

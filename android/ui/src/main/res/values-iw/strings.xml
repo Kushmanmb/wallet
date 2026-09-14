@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">זְדוֹנִי</string>
   <string name="nft_report_reason_inappropriate">תוכן לא הולם</string>
   <string name="nft_report_reason_copyright">זְכוּת יְוֹצרִים</string>
+  <string name="nft_report_reason_other">אחר</string>
   <string name="nft_report_report_button_title">דווח</string>
   <string name="permissions_access_denied">הגִישָׁה נִדחֲתָה</string>
   <string name="permissions_image_photo_access_denied_description">לאפליקציה הזו אין הרשאה לגשת לספריית התמונות שלך. אפשר גישה בהגדרות המכשיר שלך.</string>

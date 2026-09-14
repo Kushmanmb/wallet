@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">Шкідливий</string>
   <string name="nft_report_reason_inappropriate">Неприйнятний контент</string>
   <string name="nft_report_reason_copyright">Авторське право</string>
+  <string name="nft_report_reason_other">Інше</string>
   <string name="nft_report_report_button_title">Поскаржитися</string>
   <string name="permissions_access_denied">Доступ заборонено</string>
   <string name="permissions_image_photo_access_denied_description">Ця програма не має дозволу на доступ до вашої бібліотеки фотографій. Увімкніть доступ у налаштуваннях пристрою.</string>

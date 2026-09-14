@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">Malisyoso</string>
   <string name="nft_report_reason_inappropriate">Hindi Naaangkop na Nilalaman</string>
   <string name="nft_report_reason_copyright">Copyright</string>
+  <string name="nft_report_reason_other">Iba pa</string>
   <string name="nft_report_report_button_title">I-report</string>
   <string name="permissions_access_denied">Tinanggihan ang Access</string>
   <string name="permissions_image_photo_access_denied_description">Walang pahintulot ang app na ito na i-access ang iyong library ng larawan. Mangyaring paganahin ang pag-access sa mga setting ng iyong device.</string>

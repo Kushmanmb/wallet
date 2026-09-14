@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">Hasidi</string>
   <string name="nft_report_reason_inappropriate">Maudhui Yasiyofaa</string>
   <string name="nft_report_reason_copyright">Hakimiliki</string>
+  <string name="nft_report_reason_other">Nyingine</string>
   <string name="nft_report_report_button_title">Ripoti</string>
   <string name="permissions_access_denied">Ufikiaji Umekataliwa</string>
   <string name="permissions_image_photo_access_denied_description">Programu hii haina ruhusa ya kufikia maktaba yako ya picha. Tafadhali wezesha ufikiaji katika mipangilio ya kifaa chako.</string>

@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">悪質</string>
   <string name="nft_report_reason_inappropriate">不適切なコンテンツ</string>
   <string name="nft_report_reason_copyright">著作権</string>
+  <string name="nft_report_reason_other">その他</string>
   <string name="nft_report_report_button_title">通報</string>
   <string name="permissions_access_denied">アクセスが拒否されました</string>
   <string name="permissions_image_photo_access_denied_description">このアプリには写真ライブラリにアクセスする権限がありません。デバイスの設定でアクセスを有効にしてください。</string>

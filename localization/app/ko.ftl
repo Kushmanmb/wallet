@@ -608,6 +608,7 @@ nft_report_reason_spam = 스팸
 nft_report_reason_malicious = 악의 있는
 nft_report_reason_inappropriate = 부적절한 콘텐츠
 nft_report_reason_copyright = 저작권
+nft_report_reason_other = 기타
 nft_report_report_button_title = 신고
 
 # Permissions

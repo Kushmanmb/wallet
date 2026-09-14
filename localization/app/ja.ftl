@@ -608,6 +608,7 @@ nft_report_reason_spam = スパム
 nft_report_reason_malicious = 悪質
 nft_report_reason_inappropriate = 不適切なコンテンツ
 nft_report_reason_copyright = 著作権
+nft_report_reason_other = その他
 nft_report_report_button_title = 通報
 
 # Permissions

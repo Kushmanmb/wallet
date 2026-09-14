@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">Вредоносный</string>
   <string name="nft_report_reason_inappropriate">Неприемлемый контент</string>
   <string name="nft_report_reason_copyright">Авторские права</string>
+  <string name="nft_report_reason_other">Прочее</string>
   <string name="nft_report_report_button_title">Пожаловаться</string>
   <string name="permissions_access_denied">Доступ запрещен</string>
   <string name="permissions_image_photo_access_denied_description">У этого приложения нет разрешения на доступ к вашей библиотеке фотографий. Пожалуйста, включите доступ в настройках вашего устройства.</string>

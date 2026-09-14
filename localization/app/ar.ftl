@@ -608,6 +608,7 @@ nft_report_reason_spam = رسائل إلكترونية مزعجة
 nft_report_reason_malicious = خبيث
 nft_report_reason_inappropriate = محتوى غير لائق
 nft_report_reason_copyright = حقوق الطبع والنشر
+nft_report_reason_other = آخر
 nft_report_report_button_title = تقرير
 
 # Permissions

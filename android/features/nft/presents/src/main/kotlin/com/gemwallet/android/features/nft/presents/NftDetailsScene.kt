@@ -200,7 +200,7 @@ private val ReportReason.titleRes: Int
         ReportReason.Malicious -> R.string.nft_report_reason_malicious
         ReportReason.Inappropriate -> R.string.nft_report_reason_inappropriate
         ReportReason.Copyright -> R.string.nft_report_reason_copyright
-        ReportReason.Other -> R.string.transfer_other_title
+        ReportReason.Other -> R.string.nft_report_reason_other
     }
 
 @Composable

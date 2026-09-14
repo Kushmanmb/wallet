@@ -608,6 +608,7 @@ nft_report_reason_spam = هرزنامه
 nft_report_reason_malicious = مخرب
 nft_report_reason_inappropriate = محتوای نامناسب
 nft_report_reason_copyright = حق نشر
+nft_report_reason_other = دیگر
 nft_report_report_button_title = گزارش
 
 # Permissions

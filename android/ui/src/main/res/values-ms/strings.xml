@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">Berniat jahat</string>
   <string name="nft_report_reason_inappropriate">Kandungan Tidak Sesuai</string>
   <string name="nft_report_reason_copyright">Hak Cipta</string>
+  <string name="nft_report_reason_other">Lain-lain</string>
   <string name="nft_report_report_button_title">Laporan</string>
   <string name="permissions_access_denied">Akses Ditolak</string>
   <string name="permissions_image_photo_access_denied_description">Apl ini tidak mempunyai kebenaran untuk mengakses pustaka foto anda. Sila dayakan akses dalam tetapan peranti anda.</string>

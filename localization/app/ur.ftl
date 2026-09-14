@@ -608,6 +608,7 @@ nft_report_reason_spam = سپیم
 nft_report_reason_malicious = بدنیتی پر مبنی
 nft_report_reason_inappropriate = نامناسب مواد
 nft_report_reason_copyright = کاپی رائٹ
+nft_report_reason_other = دیگر
 nft_report_report_button_title = رپورٹ
 
 # Permissions

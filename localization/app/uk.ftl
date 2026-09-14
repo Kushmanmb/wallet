@@ -608,6 +608,7 @@ nft_report_reason_spam = Спам
 nft_report_reason_malicious = Шкідливий
 nft_report_reason_inappropriate = Неприйнятний контент
 nft_report_reason_copyright = Авторське право
+nft_report_reason_other = Інше
 nft_report_report_button_title = Поскаржитися
 
 # Permissions

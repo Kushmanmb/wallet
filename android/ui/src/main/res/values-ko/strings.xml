@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">악의 있는</string>
   <string name="nft_report_reason_inappropriate">부적절한 콘텐츠</string>
   <string name="nft_report_reason_copyright">저작권</string>
+  <string name="nft_report_reason_other">기타</string>
   <string name="nft_report_report_button_title">신고</string>
   <string name="permissions_access_denied">접근 불가</string>
   <string name="permissions_image_photo_access_denied_description">이 앱은 사진 라이브러리에 액세스할 권한이 없습니다. 기기 설정에서 액세스를 활성화하세요.</string>

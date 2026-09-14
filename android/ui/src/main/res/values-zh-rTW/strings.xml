@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">惡意</string>
   <string name="nft_report_reason_inappropriate">不當內容</string>
   <string name="nft_report_reason_copyright">版權</string>
+  <string name="nft_report_reason_other">其他</string>
   <string name="nft_report_report_button_title">檢舉</string>
   <string name="permissions_access_denied">存取遭拒</string>
   <string name="permissions_image_photo_access_denied_description">此應用程式無權存取照片圖庫。請在裝置設定中啟用存取權限。</string>

@@ -1119,6 +1119,8 @@ nft_report_reason_malicious = Malicious
 nft_report_reason_inappropriate = Inappropriate Content
 # Used in NFT detail and NFT collection screens for the report reason copyright label.
 nft_report_reason_copyright = Copyright
+# Used in NFT detail and NFT collection screens for the report reason other label.
+nft_report_reason_other = Other
 # Used in NFT detail and NFT collection screens for the report report button title.
 nft_report_report_button_title = Report
 

@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">مخرب</string>
   <string name="nft_report_reason_inappropriate">محتوای نامناسب</string>
   <string name="nft_report_reason_copyright">حق نشر</string>
+  <string name="nft_report_reason_other">دیگر</string>
   <string name="nft_report_report_button_title">گزارش</string>
   <string name="permissions_access_denied">دسترسی ممنوع شد</string>
   <string name="permissions_image_photo_access_denied_description">این برنامه اجازه دسترسی به کتابخانه عکس شما را ندارد. لطفاً دسترسی را در تنظیمات دستگاه خود فعال کنید.</string>

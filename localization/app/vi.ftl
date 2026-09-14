@@ -608,6 +608,7 @@ nft_report_reason_spam = Thư rác
 nft_report_reason_malicious = Độc hại
 nft_report_reason_inappropriate = Nội dung không phù hợp
 nft_report_reason_copyright = Bản quyền
+nft_report_reason_other = Khác
 nft_report_report_button_title = Báo cáo
 
 # Permissions

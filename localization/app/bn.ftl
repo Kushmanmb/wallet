@@ -608,6 +608,7 @@ nft_report_reason_spam = স্প্যাম
 nft_report_reason_malicious = দূষিত
 nft_report_reason_inappropriate = অনুপযুক্ত কন্টেন্ট
 nft_report_reason_copyright = কপিরাইট
+nft_report_reason_other = অন্যান্য
 nft_report_report_button_title = রিপোর্ট করুন
 
 # Permissions

@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">Zlomyslný</string>
   <string name="nft_report_reason_inappropriate">Nevhodný obsah</string>
   <string name="nft_report_reason_copyright">Autorská práva</string>
+  <string name="nft_report_reason_other">Ostatní</string>
   <string name="nft_report_report_button_title">Nahlásit</string>
   <string name="permissions_access_denied">Přístup odepřen</string>
   <string name="permissions_image_photo_access_denied_description">Tato aplikace nemá oprávnění k přístupu do vaší knihovny fotografií. Povolte přístup v nastavení zařízení.</string>

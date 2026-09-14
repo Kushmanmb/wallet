@@ -17,7 +17,7 @@ struct ReportReasonViewModel: Identifiable, Hashable {
         case .malicious: Localized.Nft.Report.Reason.malicious
         case .inappropriate: Localized.Nft.Report.Reason.inappropriate
         case .copyright: Localized.Nft.Report.Reason.copyright
-        case .other: Localized.Transfer.Other.title
+        case .other: Localized.Nft.Report.Reason.other
         }
     }
 

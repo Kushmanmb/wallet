@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">Mai mugunta</string>
   <string name="nft_report_reason_inappropriate">Abun ciki mara dacewa</string>
   <string name="nft_report_reason_copyright">Haƙƙin mallaka</string>
+  <string name="nft_report_reason_other">Sauran</string>
   <string name="nft_report_report_button_title">Yi korafi</string>
   <string name="permissions_access_denied">An hana shiga</string>
   <string name="permissions_image_photo_access_denied_description">Wannan app ɗin bashi da izinin shiga ɗakin karatu na hoton ku. Da fatan za a ba da damar shiga cikin saitunan na\'urar ku.</string>

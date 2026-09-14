@@ -608,6 +608,7 @@ nft_report_reason_spam = Spam
 nft_report_reason_malicious = Mai mugunta
 nft_report_reason_inappropriate = Abun ciki mara dacewa
 nft_report_reason_copyright = Haƙƙin mallaka
+nft_report_reason_other = Sauran
 nft_report_report_button_title = Yi korafi
 
 # Permissions

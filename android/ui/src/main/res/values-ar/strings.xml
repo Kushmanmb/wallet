@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">خبيث</string>
   <string name="nft_report_reason_inappropriate">محتوى غير لائق</string>
   <string name="nft_report_reason_copyright">حقوق الطبع والنشر</string>
+  <string name="nft_report_reason_other">آخر</string>
   <string name="nft_report_report_button_title">تقرير</string>
   <string name="permissions_access_denied">تم الرفض</string>
   <string name="permissions_image_photo_access_denied_description">لا يتوفر لهذا التطبيق إذن بالوصول إلى مكتبة الصور الخاصة بك. يُرجى تمكين هذا الإذن في إعدادات جهازك.</string>

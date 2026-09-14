@@ -608,6 +608,7 @@ nft_report_reason_spam = Spam
 nft_report_reason_malicious = Ondsindet
 nft_report_reason_inappropriate = Upassende indhold
 nft_report_reason_copyright = Ophavsret
+nft_report_reason_other = Andet
 nft_report_report_button_title = Rapport
 
 # Permissions

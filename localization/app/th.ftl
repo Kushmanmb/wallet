@@ -608,6 +608,7 @@ nft_report_reason_spam = สแปม
 nft_report_reason_malicious = อันตราย
 nft_report_reason_inappropriate = เนื้อหาที่ไม่เหมาะสม
 nft_report_reason_copyright = ลิขสิทธิ์
+nft_report_reason_other = อื่นๆ
 nft_report_report_button_title = รายงานปัญหา
 
 # Permissions

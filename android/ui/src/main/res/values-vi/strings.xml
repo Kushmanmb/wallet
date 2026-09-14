@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">Độc hại</string>
   <string name="nft_report_reason_inappropriate">Nội dung không phù hợp</string>
   <string name="nft_report_reason_copyright">Bản quyền</string>
+  <string name="nft_report_reason_other">Khác</string>
   <string name="nft_report_report_button_title">Báo cáo</string>
   <string name="permissions_access_denied">Truy cập bị từ chối</string>
   <string name="permissions_image_photo_access_denied_description">Ứng dụng này không có quyền truy cập vào thư viện ảnh của bạn. Vui lòng bật quyền truy cập trong cài đặt thiết bị của bạn.</string>

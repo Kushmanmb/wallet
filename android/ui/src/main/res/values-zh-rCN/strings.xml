@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">恶意</string>
   <string name="nft_report_reason_inappropriate">不当内容</string>
   <string name="nft_report_reason_copyright">版权</string>
+  <string name="nft_report_reason_other">其他</string>
   <string name="nft_report_report_button_title">举报</string>
   <string name="permissions_access_denied">拒绝访问</string>
   <string name="permissions_image_photo_access_denied_description">此应用无权访问照片库。请在设备设置中启用访问权限。</string>

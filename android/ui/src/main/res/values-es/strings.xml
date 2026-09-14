@@ -497,6 +497,7 @@
   <string name="nft_report_reason_malicious">Malicioso</string>
   <string name="nft_report_reason_inappropriate">Contenido inapropiado</string>
   <string name="nft_report_reason_copyright">Derechos de autor</string>
+  <string name="nft_report_reason_other">Otro</string>
   <string name="nft_report_report_button_title">Reportar</string>
   <string name="permissions_access_denied">Acceso denegado</string>
   <string name="permissions_image_photo_access_denied_description">Esta aplicación no tiene permiso para acceder a tu biblioteca de fotos. Habilita el acceso en la configuración de tu dispositivo.</string>

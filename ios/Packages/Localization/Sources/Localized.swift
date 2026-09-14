@@ -797,6 +797,8 @@ public enum Localized {
         public static let inappropriate = Localized.tr("Localizable", "nft.report.reason.inappropriate", fallback: "Inappropriate Content")
         /// Malicious
         public static let malicious = Localized.tr("Localizable", "nft.report.reason.malicious", fallback: "Malicious")
+        /// Other
+        public static let other = Localized.tr("Localizable", "nft.report.reason.other", fallback: "Other")
         /// Spam
         public static let spam = Localized.tr("Localizable", "nft.report.reason.spam", fallback: "Spam")
       }

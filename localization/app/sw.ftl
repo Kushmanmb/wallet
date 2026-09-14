@@ -608,6 +608,7 @@ nft_report_reason_spam = Barua taka
 nft_report_reason_malicious = Hasidi
 nft_report_reason_inappropriate = Maudhui Yasiyofaa
 nft_report_reason_copyright = Hakimiliki
+nft_report_reason_other = Nyingine
 nft_report_report_button_title = Ripoti
 
 # Permissions

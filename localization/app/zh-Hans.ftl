@@ -608,6 +608,7 @@ nft_report_reason_spam = 垃圾信息
 nft_report_reason_malicious = 恶意
 nft_report_reason_inappropriate = 不当内容
 nft_report_reason_copyright = 版权
+nft_report_reason_other = 其他
 nft_report_report_button_title = 举报
 
 # Permissions
