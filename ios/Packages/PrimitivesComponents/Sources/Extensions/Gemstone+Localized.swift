@@ -3,18 +3,54 @@
 import enum Gemstone.PerpetualDirection
 import enum Gemstone.FeeOption
 import enum Gemstone.GemFiatTransactionBadge
+import enum Gemstone.GemPriceAlertLabel
+import struct Gemstone.GemPriceAlertRow
+import enum Gemstone.GemPriceAlertText
 import enum Gemstone.GemSimulationWarningKind
 import enum Gemstone.GemTransactionTitle
 import enum Gemstone.GemWalletSubtitle
 import GemstonePrimitives
 import Localization
 import Primitives
+import Style
+import SwiftUI
 
 
 extension FeeOption {
     public var title: String {
         switch self {
         case .tokenAccountCreation: Localized.Banner.AccountActivation.title
+        }
+    }
+}
+
+extension GemPriceAlertText {
+    public var text: String {
+        switch self {
+        case .empty: Placeholder.empty
+        case let .number(value): value.text()
+        case let .label(label): label.text
+        }
+    }
+}
+
+extension GemPriceAlertRow {
+    public var prefixText: String {
+        prefix.text
+    }
+
+    public var suffixText: String {
+        suffix.text
+    }
+}
+
+extension GemPriceAlertLabel {
+    public var text: String {
+        switch self {
+        case .over: Localized.PriceAlerts.Direction.over
+        case .under: Localized.PriceAlerts.Direction.under
+        case .increasesBy: Localized.PriceAlerts.Direction.increasesBy
+        case .decreasesBy: Localized.PriceAlerts.Direction.decreasesBy
         }
     }
 }

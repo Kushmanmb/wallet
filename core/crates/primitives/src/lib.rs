@@ -226,7 +226,7 @@ pub use self::wallet_connector::{
 pub mod nft;
 pub use self::nft::{NFTAsset, NFTAssetData, NFTAssetId, NFTAttribute, NFTAttributeType, NFTCollection, NFTCollectionId, NFTData, NFTImages, NFTResource, NFTType, ReportNft};
 pub mod price_alert;
-pub use self::price_alert::{DevicePriceAlert, PriceAlert, PriceAlertDirection, PriceAlertNotificationType, PriceAlertType, PriceAlerts};
+pub use self::price_alert::{DevicePriceAlert, PriceAlert, PriceAlertData, PriceAlertDirection, PriceAlertNotificationType, PriceAlertType, PriceAlerts};
 pub mod rewards;
 pub use self::rewards::{
     RedemptionResult, RedemptionStatus, ReferralAllowance, ReferralCode, ReferralLeader, ReferralLeaderboard, ReferralQuota, RewardEvent, RewardEventType, RewardLevel,

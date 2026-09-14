@@ -315,6 +315,64 @@ data class NodeRowUiModel(
 
 The model adds only what Core does not own — here whether the row can be deleted and the status of its last check. This is the same rule as [no hand-written twins](#6-where-derived-domain-answers-live), applied to the presentation layer, and it keeps the two apps' row models the same shape: iOS's `ChainNodeViewModel` holds `node: GemNodeSelection` for the same reason.
 
+### A row model conforms to a UI protocol; it stores nothing but the row
+
+A row model still earns its place when a list protocol demands one — it is the type that conforms. What it may not do is keep a second source of truth beside the record:
+
+```swift
+struct PriceAlertItemViewModel: ListAssetItemViewable {
+    private let row: GemPriceAlertRow
+
+    var name: String { row.title }
+    var symbol: String? { row.symbol }
+}
+```
+
+```kotlin
+class PriceAlertDataAggregateImpl(
+    private val row: GemPriceAlertRow,
+) : PriceAlertDataAggregate {
+    override val title: String = row.title
+    override val titleBadge: String = row.symbol.uppercase()
+}
+```
+
+One stored property, and every member reads through it. When a member cannot — a title, a symbol, an id for the image — that field belongs on the Core row, not on a second thing the model holds alongside it. Holding the domain object *and* the row is the twin this rule exists to prevent: the model then has two places to answer the same question, and the two apps answer it differently.
+
+Three questions settle where a member goes, in order:
+
+1. **Is it a decision?** Which label, which order, which style, whether a thing is shown — it goes in the Core row. Never recompute it from the domain object the row was built from.
+2. **Is it a number?** It crosses as a `GemFormattedNumber` and renders through the one `text()` each app already has — prices, amounts and percentages alike. Never add a per-row text helper; if a number needs a new shape, give `GemNumberUnit` that shape once so every row gets it.
+3. **Is it which slot a value lands in?** Whether a row shows a label on the left and a price on the right, or a price and a percentage, is a decision. Core names the slots — `prefix` and `suffix` carrying a text key, a number, or nothing — so neither app switches on the kind to lay the row out.
+4. **Is it a platform value?** A `Color`, an `Image`, a Compose or SwiftUI value — these are the only things the apps still decide, and they go on a row extension beside the module's other Gemstone mappers, never inline in the row model. The model reads `row.directionColor`; it never switches on a Core enum itself.
+
+A row model whose body is anything but `row.` lookups has taken back a decision Core had already made. If you are writing `switch row.kind` in an app, the row is missing a field.
+
+```swift
+public extension GemPriceAlertRow {
+    var directionColor: Color { direction?.color ?? Colors.gray }
+    var prefixText: String { prefix.text }
+}
+```
+
+```kotlin
+@Composable
+internal fun GemPriceAlertText.string(): String = when (this) {
+    is GemPriceAlertText.Empty -> EMPTY
+    is GemPriceAlertText.Number -> value.text()
+    is GemPriceAlertText.Label -> label.string()
+}
+```
+
+**Two mapper files per module, never one per type.** Every Core value a module turns into an app value goes into one of exactly two files, and a new `SomeGemType+Module.swift` is always the wrong answer:
+
+| | iOS | Android |
+|---|---|---|
+| Core key → localized text | `Gemstone+Localized.swift` | `localization/GemstoneText.kt` |
+| Core enum → colour, image, or other platform value | `Gemstone+Style.swift` | the module's style mapper |
+
+A number's text never belongs in either — it comes from `GemFormattedNumber.text()`, which both apps already have once.
+
 ### Keep the crossings few
 
 A record crosses by copy. Every call carries its arguments and its result across the boundary, so the cost of this design is counted in calls, not in Rust work. Four rules keep it flat.

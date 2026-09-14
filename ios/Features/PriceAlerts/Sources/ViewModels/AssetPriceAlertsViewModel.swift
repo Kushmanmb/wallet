@@ -62,11 +62,14 @@ public final class AssetPriceAlertsViewModel: Sendable {
         )
     }
 
-    var alertsModel: [PriceAlertItemViewModel] {
+    var alerts: [PriceAlertData] {
         priceAlerts
             .filter { $0.priceAlert.type != .auto }
             .displayedAlerts
-            .map { PriceAlertItemViewModel(data: $0, currency: service.getCurrency()) }
+    }
+
+    var currencyCode: String {
+        service.getCurrency()
     }
 }
 

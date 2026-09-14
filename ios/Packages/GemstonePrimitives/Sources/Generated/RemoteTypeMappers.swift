@@ -2871,6 +2871,26 @@ public extension Primitives.PriceAlert {
     }
 }
 
+public extension Gemstone.PriceAlertData {
+    func toPrimitives() -> Primitives.PriceAlertData {
+        Primitives.PriceAlertData(
+            asset: asset.toPrimitives(),
+            price: price.map { $0.toPrimitives() },
+            priceAlert: priceAlert.toPrimitives(),
+        )
+    }
+}
+
+public extension Primitives.PriceAlertData {
+    func toGem() -> Gemstone.PriceAlertData {
+        Gemstone.PriceAlertData(
+            asset: asset.toGem(),
+            price: price.map { $0.toGem() },
+            priceAlert: priceAlert.toGem(),
+        )
+    }
+}
+
 public extension Gemstone.Release {
     func toPrimitives() -> Primitives.Release {
         Primitives.Release(

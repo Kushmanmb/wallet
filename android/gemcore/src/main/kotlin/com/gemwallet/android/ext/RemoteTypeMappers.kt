@@ -1893,6 +1893,18 @@ fun com.wallet.core.primitives.PriceAlert.toGem(): uniffi.gemstone.PriceAlert = 
     identifier = "",
 )
 
+fun uniffi.gemstone.PriceAlertData.toPrimitives(): com.wallet.core.primitives.PriceAlertData = com.wallet.core.primitives.PriceAlertData(
+    asset = asset.toPrimitives(),
+    price = price?.let { it.toPrimitives() },
+    priceAlert = priceAlert.toPrimitives(),
+)
+
+fun com.wallet.core.primitives.PriceAlertData.toGem(): uniffi.gemstone.PriceAlertData = uniffi.gemstone.PriceAlertData(
+    asset = asset.toGem(),
+    price = price?.let { it.toGem() },
+    priceAlert = priceAlert.toGem(),
+)
+
 fun uniffi.gemstone.Release.toPrimitives(): com.wallet.core.primitives.Release = com.wallet.core.primitives.Release(
     version = version,
     store = store.toPrimitives(),

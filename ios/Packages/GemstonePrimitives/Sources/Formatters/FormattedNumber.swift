@@ -26,18 +26,33 @@ private extension GemFormattedNumber {
     var currencyCode: String? {
         switch unit {
         case let .currency(code): code
-        case .symbol, .plain: nil
+        case .percent, .symbol, .plain: nil
         }
     }
 
     var symbol: String? {
         switch unit {
         case let .symbol(symbol): symbol
-        case .currency, .plain: nil
+        case .currency, .percent, .plain: nil
+        }
+    }
+
+    var percentSign: Bool? {
+        switch unit {
+        case let .percent(showsSign): showsSign
+        case .currency, .symbol, .plain: nil
         }
     }
 
     func numberText(precision: GemPrecision, locale: Locale) -> String {
+        if let percentSign {
+            return value.formatted(
+                .percent.locale(locale)
+                    .precision(precision.formatStyle)
+                    .sign(strategy: percentSign ? .always(includingZero: false) : .never)
+                    .scale(1),
+            )
+        }
         guard let currencyCode else {
             return value.formatted(.number.locale(locale).precision(precision.formatStyle))
         }

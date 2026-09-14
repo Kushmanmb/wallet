@@ -1,9 +1,11 @@
+use crate::percentage::GemPercentageStyle;
 use crate::precision::{GemCurrencyStyle, GemPrecision, GemValueStyle};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemNumberUnit {
     Currency { code: String },
     Symbol { symbol: String },
+    Percent { shows_sign: bool },
     Plain,
 }
 
@@ -45,6 +47,15 @@ impl GemFormattedNumber {
         }
     }
 
+    pub fn percentage(value: f64, style: GemPercentageStyle) -> Self {
+        let format = style.format();
+        Self {
+            value,
+            unit: GemNumberUnit::Percent { shows_sign: format.shows_sign },
+            display: GemNumberDisplay::Number { precision: format.precision },
+        }
+    }
+
     pub fn amount(value: f64, symbol: Option<String>, style: GemValueStyle) -> Self {
         Self {
             value,
@@ -64,6 +75,11 @@ fn unit(symbol: Option<String>) -> GemNumberUnit {
 #[uniffi::export]
 pub fn formatted_adaptive(value: f64, symbol: Option<String>) -> GemFormattedNumber {
     GemFormattedNumber::adaptive(value, symbol)
+}
+
+#[uniffi::export]
+pub fn formatted_percentage(value: f64, style: GemPercentageStyle) -> GemFormattedNumber {
+    GemFormattedNumber::percentage(value, style)
 }
 
 #[uniffi::export]
@@ -119,6 +135,24 @@ mod tests {
             GemNumberDisplay::Number {
                 precision: GemPrecision::Fraction { min: 2, max: 2 }
             }
+        );
+    }
+
+    #[test]
+    fn test_a_percentage_carries_its_sign_rule_with_it() {
+        let signed = GemFormattedNumber::percentage(-2.0, GemPercentageStyle::Signed);
+        assert_eq!(signed.value, -2.0);
+        assert_eq!(signed.unit, GemNumberUnit::Percent { shows_sign: true });
+        assert_eq!(
+            signed.display,
+            GemNumberDisplay::Number {
+                precision: GemPrecision::Fraction { min: 2, max: 2 }
+            }
+        );
+
+        assert_eq!(
+            GemFormattedNumber::percentage(5.0, GemPercentageStyle::Unsigned).unit,
+            GemNumberUnit::Percent { shows_sign: false }
         );
     }
 

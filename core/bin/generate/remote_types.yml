@@ -160,6 +160,7 @@ remote:
   - PortfolioStatistic
   - PortfolioData
   - PriceAlert
+  - PriceAlertData
   - PriceAlertDirection
   - PriceAlertNotificationType
   - ReportNft
