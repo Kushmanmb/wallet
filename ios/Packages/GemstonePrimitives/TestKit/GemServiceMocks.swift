@@ -544,21 +544,19 @@ public final class GemNameServiceMock: GemNameServiceProtocol, @unchecked Sendab
         if name.isEmpty {
             return .reset
         }
-        if state.requestedName() == name {
-            return .unchanged
+        switch state {
+        case let .loading(loading) where loading == name: return .unchanged
+        case let .complete(record) where record.name == name: return .unchanged
+        default: break
         }
         guard hasChain, isNameSupported(name: name) else {
             return .reset
         }
-        return .resolve(name: name, debounceMilliseconds: nameRecordDebounceMilliseconds())
+        return .resolve(name: name, debounceMilliseconds: 0)
     }
 
     public func resolvedState(state: GemNameRecordState, name: String, resolved: GemNameRecordState) -> GemNameRecordState {
         state == .loading(name: name) ? resolved : state
-    }
-
-    public func nameRecordDebounceMilliseconds() -> UInt64 {
-        0
     }
 
     public func validateRecipient(chain: Gemstone.Chain, input: String, state: GemNameRecordState) -> GemRecipientValidation {
