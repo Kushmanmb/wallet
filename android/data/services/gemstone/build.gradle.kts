@@ -73,6 +73,7 @@ dependencies {
     testImplementation(libs.mockk.android)
     androidTestImplementation(testFixtures(project(":gemcore")))
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.junit.runner)
     androidTestImplementation(libs.room.runtime)
     androidTestImplementation(libs.kotlinx.coroutines.android)
 }
