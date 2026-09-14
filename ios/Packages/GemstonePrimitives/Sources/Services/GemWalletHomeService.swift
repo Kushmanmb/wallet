@@ -33,7 +33,7 @@ public extension GemWalletHomeServiceProtocol {
         bannerContent(event: banner.event.map(), asset: banner.asset?.map())
     }
 
-    func applyAction(_ action: BannerAction) async throws {
-        try await applyBannerAction(key: action.banner.gemKey, action: action.type.gemAction)
+    func close(_ banner: Banner) async throws {
+        try await closeBanner(key: banner.gemKey)
     }
 }

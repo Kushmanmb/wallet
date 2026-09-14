@@ -6,7 +6,7 @@ use primitives::{Asset, AssetId, BannerEvent, Deeplink};
 use crate::deeplink::GemDeeplinkService;
 use crate::models::custom_types::GemBigUint;
 use crate::services::balance::GemBalanceService;
-use crate::services::banner::{GemBannerAction, GemBannerContent, GemBannerKey, GemBannerService};
+use crate::services::banner::{GemBannerContent, GemBannerKey, GemBannerService};
 use crate::services::error::GemServiceError;
 use crate::services::explorer::GemExplorerService;
 use crate::services::price_alert::GemPriceAlertService;
@@ -148,8 +148,8 @@ impl GemAssetDetailsService {
         self.banners.banner_content(event, asset)
     }
 
-    pub async fn apply_banner_action(&self, key: GemBannerKey, action: GemBannerAction) -> Result<(), GemServiceError> {
-        self.banners.apply_action(key, action).await
+    pub async fn close_banner(&self, key: GemBannerKey) -> Result<(), GemServiceError> {
+        self.banners.close(key).await
     }
 
     pub fn details(&self, input: GemAssetDetailsInput) -> GemAssetDetails {

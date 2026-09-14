@@ -4,12 +4,14 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.banner.cases.GetActiveBanners
+import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toGemKey
 import com.gemwallet.android.serializer.toJson
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Banner
+import com.wallet.core.primitives.BannerEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,7 +23,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import uniffi.gemstone.GemBannerAction
 import uniffi.gemstone.GemBannerContent
 import uniffi.gemstone.GemBannerServiceInterface
 import javax.inject.Inject
@@ -38,6 +39,7 @@ private data class BannerScene(val asset: Asset?, val isGlobal: Boolean)
 class BannersViewModel @Inject constructor(
     getActiveBanners: GetActiveBanners,
     private val service: GemBannerServiceInterface,
+    private val userConfig: UserConfig,
 ) : ViewModel() {
 
     private val scene = MutableStateFlow<BannerScene?>(null)
@@ -52,13 +54,15 @@ class BannersViewModel @Inject constructor(
         scene.value = BannerScene(asset, isGlobal)
     }
 
-    fun onSelect(banner: Banner) = apply(banner, GemBannerAction.Event(banner.event.toGem()))
+    fun onSelect(banner: Banner) {
+        if (banner.event == BannerEvent.TradePerpetuals) {
+            userConfig.setPerpetualEnabled(true)
+        }
+    }
 
-    fun onCancel(banner: Banner) = apply(banner, GemBannerAction.Close)
-
-    private fun apply(banner: Banner, action: GemBannerAction) = viewModelScope.launch(Dispatchers.IO) {
-        runCatchingCancellable { service.applyAction(banner.toGemKey(), action) }
-            .onFailure { Log.e(TAG, "banner ${banner.event} action failed", it) }
+    fun onCancel(banner: Banner) = viewModelScope.launch(Dispatchers.IO) {
+        runCatchingCancellable { service.close(banner.toGemKey()) }
+            .onFailure { Log.e(TAG, "banner ${banner.event} close failed", it) }
     }
 
     private companion object {

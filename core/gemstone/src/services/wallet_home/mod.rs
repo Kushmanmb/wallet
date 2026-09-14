@@ -9,7 +9,7 @@ use crate::services::assets::model::{GemAssetRow, GemHeaderActions};
 use crate::services::assets::rules as asset_rules;
 use crate::services::balance::GemBalanceService;
 use crate::services::balance::rules as balance_rules;
-use crate::services::banner::{GemBannerAction, GemBannerContent, GemBannerContext, GemBannerKey, GemBannerService};
+use crate::services::banner::{GemBannerContent, GemBannerContext, GemBannerKey, GemBannerService};
 use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_preferences::{GemDiscoveryStep, GemWalletPreferencesService};
@@ -111,8 +111,8 @@ impl GemWalletHomeService {
         self.banners.banner_content(event, asset)
     }
 
-    pub async fn apply_banner_action(&self, key: GemBannerKey, action: GemBannerAction) -> Result<(), GemServiceError> {
-        self.banners.apply_action(key, action).await
+    pub async fn close_banner(&self, key: GemBannerKey) -> Result<(), GemServiceError> {
+        self.banners.close(key).await
     }
 }
 

@@ -196,9 +196,10 @@ public extension WalletSceneViewModel {
 
     internal func onBanner(action: BannerAction) {
         switch action.type {
-        case .event, .closeBanner:
+        case .event: break
+        case .closeBanner:
             Task {
-                try await handleBanner(action: action)
+                try await service.close(action.banner)
             }
         case let .button(bannerButton):
             switch bannerButton {
@@ -249,10 +250,6 @@ extension WalletSceneViewModel {
 
     private var shouldShowInitialLoadingAssets: Bool {
         (try? service.showsInitialLoading()) ?? false
-    }
-
-    private func handleBanner(action: BannerAction) async throws {
-        try await service.applyAction(action)
     }
 
     func setAssetPinned(_ assetId: AssetId, pinned: Bool) async throws {

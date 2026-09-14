@@ -9,7 +9,7 @@ use std::sync::Arc;
 use primitives::{Asset, BannerEvent, BannerState, Wallet};
 
 pub use model::{
-    GemBannerAction, GemBannerAmount, GemBannerContent, GemBannerContext, GemBannerDescription, GemBannerIcon, GemBannerItem, GemBannerKey, GemBannerLink, GemBannerTitle,
+    GemBannerAmount, GemBannerContent, GemBannerContext, GemBannerDescription, GemBannerIcon, GemBannerItem, GemBannerKey, GemBannerLink, GemBannerTitle,
 };
 pub use permissions::GemNotificationPermissions;
 pub use store::GemBannerStore;
@@ -28,13 +28,6 @@ impl GemBannerService {
 
     pub async fn setup_wallet(&self, wallet: Wallet) -> Result<(), GemServiceError> {
         self.add_missing_banners(rules::wallet_setup_keys(&wallet)).await
-    }
-
-    pub async fn apply_action(&self, key: GemBannerKey, action: GemBannerAction) -> Result<(), GemServiceError> {
-        match action.is_dismissal() {
-            true => self.close(key).await,
-            false => Ok(()),
-        }
     }
 
     pub async fn close(&self, key: GemBannerKey) -> Result<(), GemServiceError> {

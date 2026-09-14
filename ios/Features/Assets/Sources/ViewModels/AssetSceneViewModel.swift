@@ -331,11 +331,8 @@ public extension AssetSceneViewModel {
                 )
             case .accountActivation,
                  .accountBlockedMultiSignature,
-                 .onboarding:
-                Task {
-                    try await service.applyBannerAction(key: action.banner.gemKey, action: action.type.gemAction)
-                }
-            case .suspiciousAsset: break
+                 .onboarding,
+                 .suspiciousAsset: break
             case .tradePerpetuals:
                 UIApplication.shared.open(service.deeplinkGemUrl(deeplink: .perpetuals).asURL!)
                 preferences.isPerpetualEnabled = true
@@ -347,7 +344,7 @@ public extension AssetSceneViewModel {
             }
         case .closeBanner:
             Task {
-                try await service.applyBannerAction(key: action.banner.gemKey, action: action.type.gemAction)
+                try await service.closeBanner(key: action.banner.gemKey)
             }
         }
         onSelect(url: action.url)

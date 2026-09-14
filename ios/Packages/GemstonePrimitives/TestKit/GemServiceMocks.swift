@@ -867,7 +867,7 @@ public extension GemTransactionDetailsService {
 }
 
 public final class GemWalletHomeServiceMock: GemWalletHomeServiceProtocol, @unchecked Sendable {
-    public private(set) var handledActions: [GemBannerAction] = []
+    public private(set) var closedKeys: [GemBannerKey] = []
     public private(set) var pinned: [(assetId: Gemstone.AssetId, pinned: Bool)] = []
     public private(set) var enabled: [(assetIds: [Gemstone.AssetId], enabled: Bool)] = []
     public var showsLoading = false
@@ -925,8 +925,8 @@ public final class GemWalletHomeServiceMock: GemWalletHomeServiceProtocol, @unch
         GemBannerContent(icon: .none, title: .none, description: .none, link: .none)
     }
 
-    public func applyBannerAction(key _: GemBannerKey, action: GemBannerAction) async throws {
-        handledActions.append(action)
+    public func closeBanner(key: GemBannerKey) async throws {
+        closedKeys.append(key)
     }
 }
 
@@ -957,16 +957,11 @@ public final class GemCurrencyServiceMock: GemCurrencyServiceProtocol, @unchecke
 
 public final class GemBannerServiceMock: GemBannerServiceProtocol, @unchecked Sendable {
     public private(set) var closedKeys: [GemBannerKey] = []
-    public private(set) var handledActions: [GemBannerAction] = []
 
     public init() {}
 
     public func close(key: GemBannerKey) async throws {
         closedKeys.append(key)
-    }
-
-    public func applyAction(key _: GemBannerKey, action: GemBannerAction) async throws {
-        handledActions.append(action)
     }
 
     public func setup() async throws {}
