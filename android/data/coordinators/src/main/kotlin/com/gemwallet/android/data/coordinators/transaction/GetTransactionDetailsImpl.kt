@@ -44,6 +44,7 @@ import uniffi.gemstone.GemTransactionParticipant
 import uniffi.gemstone.GemTransactionParticipantRole
 import uniffi.gemstone.GemTransactionTitle
 import uniffi.gemstone.transactionDetailSections
+import uniffi.gemstone.GemValueStyle
 
 class GetTransactionDetailsImpl(
     private val getSession: GetSession,
@@ -68,7 +69,7 @@ class TransactionDetailsAggregateImpl(
     override val currency: Currency,
 ) : TransactionDetailsAggregate {
 
-    private val valueFormatter = ValueFormatter(style = ValueFormatter.Style.Auto)
+    private val valueFormatter = ValueFormatter(style = GemValueStyle.AUTO)
     private val usdFormatter = CurrencyFormatter(currency = Currency.USD)
     private val rateFormatter = AssetRateFormatter()
 

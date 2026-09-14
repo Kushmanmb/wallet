@@ -33,6 +33,7 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
 import com.gemwallet.android.ext.requireChain
 import java.math.BigInteger
+import uniffi.gemstone.GemValueStyle
 
 @Composable
 internal fun ConfirmErrorInfo(
@@ -152,7 +153,7 @@ private fun Throwable.toInfoSheetEntity(
             val asset = asset.toPrimitives()
             InfoSheetEntity.MinimumAccountBalanceInfo(
                 asset = asset,
-                value = ValueFormatter(style = ValueFormatter.Style.Full).string(requirement.required, asset),
+                value = ValueFormatter(style = GemValueStyle.FULL).string(requirement.required, asset),
             )
         }
         is GemConfirmException.Sign -> InfoSheetEntity.DustThresholdInfo(chain = chain.requireChain()).takeIf { error == GemSignerError.DustThreshold }
@@ -167,13 +168,13 @@ private fun Asset.acquireActionLabel(flow: GemAcquireAssetFlow): String = string
 )
 
 private fun AssetPriceValue?.amountWithFiat(value: BigInteger, asset: Asset): String {
-    val amount = ValueFormatter(style = ValueFormatter.Style.Full).string(value, asset)
+    val amount = ValueFormatter(style = GemValueStyle.FULL).string(value, asset)
     val fiat = this?.let { formatFiat(it.calculateFiat(value)) }.orEmpty()
     return if (fiat.isEmpty()) amount else "$amount (~$fiat)"
 }
 
 private fun GemBalanceRequirement.formatted(asset: Asset): FormattedBalanceRequirement {
-    val formatter = ValueFormatter(style = ValueFormatter.Style.Full)
+    val formatter = ValueFormatter(style = GemValueStyle.FULL)
     return FormattedBalanceRequirement(
         required = formatter.string(required, asset),
         available = formatter.string(available, asset),

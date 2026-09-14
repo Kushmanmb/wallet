@@ -40,6 +40,7 @@ import uniffi.gemstone.GemAmountServiceInterface
 import uniffi.gemstone.GemTransferData
 import java.math.BigInteger
 import javax.inject.Inject
+import uniffi.gemstone.GemValueStyle
 
 @HiltViewModel
 class AmountViewModel @Inject constructor(
@@ -48,7 +49,7 @@ class AmountViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val valueFormatter = ValueFormatter(style = ValueFormatter.Style.Auto)
+    private val valueFormatter = ValueFormatter(style = GemValueStyle.AUTO)
 
     private val params: AmountParams = savedStateHandle.requireAmountParams()
     val provider: AmountDataProvider = factory.create(params, viewModelScope)

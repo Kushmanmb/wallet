@@ -18,6 +18,7 @@ import com.gemwallet.android.ui.components.list_item.WarningItem
 import com.gemwallet.android.ui.models.ListPosition
 import com.wallet.core.primitives.Asset
 import java.math.BigInteger
+import uniffi.gemstone.GemValueStyle
 
 @Composable
 internal fun SwapError(state: SwapUiState, pay: AssetInfo?) {
@@ -54,5 +55,5 @@ internal fun SwapError(state: SwapUiState, pay: AssetInfo?) {
 
 private fun minimumAmount(minAmount: BigInteger?, asset: Asset?): String {
     if (minAmount == null || asset == null) return ""
-    return ValueFormatter(style = ValueFormatter.Style.Auto).string(minAmount, asset)
+    return ValueFormatter(style = GemValueStyle.AUTO).string(minAmount, asset)
 }

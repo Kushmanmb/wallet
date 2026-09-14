@@ -10,6 +10,7 @@ import java.math.BigInteger
 import uniffi.gemstone.GemSwapRate
 import uniffi.gemstone.SwapProvider
 import uniffi.gemstone.SwapperProviderType
+import uniffi.gemstone.GemValueStyle
 
 object SwapProviderUIModelFactory {
     fun create(
@@ -37,7 +38,7 @@ object SwapProviderUIModelFactory {
             id = providerId,
             title = title,
             icon = providerId,
-            amount = ValueFormatter(style = ValueFormatter.Style.Auto)
+            amount = ValueFormatter(style = GemValueStyle.AUTO)
                 .string(toValue, receiveAsset.asset),
             fiat = receiveAsset.formatFiat(fiatValue),
         )
@@ -82,7 +83,7 @@ object SwapDetailsUIModelFactory {
             providers = input.providers,
             rate = rate,
             priceImpact = priceImpact,
-            minimumReceive = ValueFormatter(style = ValueFormatter.Style.Auto)
+            minimumReceive = ValueFormatter(style = GemValueStyle.AUTO)
                 .string(minReceiveAtomic, input.receiveAsset.asset),
             slippageText = slippagePercent.formatAsPercentage(style = GemPercentageStyle.UNSIGNED),
             slippageBps = input.slippageBps,

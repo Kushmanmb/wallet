@@ -52,6 +52,7 @@ import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.Delegation
 import uniffi.gemstone.GemValidatorRow
 import java.math.BigInteger
+import uniffi.gemstone.GemValueStyle
 
 @Composable
 internal fun StakeScene(
@@ -148,7 +149,7 @@ private fun LazyListScope.stakeInfoSection(assetInfo: AssetInfo, lockTimeDays: I
         when (row) {
             is StakeInfoRow.MinAmount -> PropertyItem(
                 title = stringResource(id = R.string.stake_minimum_amount, ""),
-                data = ValueFormatter(style = ValueFormatter.Style.Auto)
+                data = ValueFormatter(style = GemValueStyle.AUTO)
                     .string(row.value, row.chain.asset()),
                 listPosition = position,
             )

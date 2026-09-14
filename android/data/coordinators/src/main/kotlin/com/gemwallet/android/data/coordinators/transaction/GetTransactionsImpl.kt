@@ -32,9 +32,10 @@ import uniffi.gemstone.GemTransactionRowValue
 import uniffi.gemstone.GemTransactionTitle
 import uniffi.gemstone.GemTransactionRow
 import uniffi.gemstone.GemTransactionsServiceInterface
+import uniffi.gemstone.GemValueStyle
 
 private val usdFiatFormatter = CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = Currency.USD)
-private val valueFormatter = ValueFormatter(style = ValueFormatter.Style.Short)
+private val valueFormatter = ValueFormatter(style = GemValueStyle.SHORT)
 
 class GetTransactionsImpl(
     private val getCurrentWalletId: GetCurrentWalletId,

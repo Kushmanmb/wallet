@@ -13,6 +13,7 @@ import uniffi.gemstone.GemAssetMarketRow
 import uniffi.gemstone.GemChartSection
 import java.math.BigDecimal
 import javax.inject.Inject
+import uniffi.gemstone.GemValueStyle
 
 class AssetMarketUIModelFactory @Inject constructor() {
 
@@ -34,7 +35,7 @@ class AssetMarketUIModelFactory @Inject constructor() {
 
     private class RowMapper(private val asset: Asset, currency: Currency) {
         private val currencyFormatter = CurrencyFormatter(type = CurrencyFormatter.Type.Abbreviated, currency = currency)
-        private val supplyFormatter = ValueFormatter(style = ValueFormatter.Style.Short)
+        private val supplyFormatter = ValueFormatter(style = GemValueStyle.SHORT)
 
         fun row(row: GemAssetMarketRow): MarketRowUIModel = when (row) {
             is GemAssetMarketRow.MarketCap -> MarketInfoUIModel(

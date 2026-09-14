@@ -2,28 +2,23 @@
 
 import BigInt
 import Foundation
+import Formatters
+import func Gemstone.abbreviationThreshold
+import func Gemstone.dustThreshold
+import func Gemstone.dustThresholdPlaces
+import enum Gemstone.GemValueStyle
 import Primitives
 
 public struct ValueFormatter: Sendable {
-    public enum Style: Sendable {
-        case full, short, auto
-    }
-
-    private static let smallAmountThreshold = Decimal(sign: .plus, exponent: -1, significand: 1)
-    private static let dustThreshold = Decimal(sign: .plus, exponent: -4, significand: 1)
-
     private let locale: Locale
-    private let style: Style
-    private let abbreviationThreshold: Decimal
+    private let style: GemValueStyle
 
     public init(
         locale: Locale = .current,
-        style: Style,
-        abbreviationThreshold: Decimal = defaultAbbreviationThreshold,
+        style: GemValueStyle,
     ) {
         self.locale = locale
         self.style = style
-        self.abbreviationThreshold = abbreviationThreshold
     }
 
     public func string(_ value: BigInt, asset: Asset) -> String {
@@ -37,13 +32,14 @@ public struct ValueFormatter: Sendable {
         if value.isZero {
             return appendingCurrency("0", currency: currency)
         }
-        if style == .short, abs(decimal) >= abbreviationThreshold, let abbreviated = abbreviatedFormatter.string(from: decimal) {
+        let magnitude = decimal.doubleValue
+        if style.abbreviates(magnitude: magnitude), let abbreviated = abbreviatedFormatter.string(from: decimal) {
             return appendingCurrency(abbreviated, currency: currency)
         }
-        if style == .short, abs(decimal) < Self.dustThreshold {
+        if style.isDust(magnitude: magnitude) {
             return appendingCurrency("<\(formattedDustThreshold)", currency: currency)
         }
-        return appendingCurrency(decimal.formatted(formatStyle(for: decimal)), currency: currency)
+        return appendingCurrency(decimal.formatted(formatStyle(for: magnitude)), currency: currency)
     }
 
     public func double(from number: BigInt, decimals: Int) throws -> Double {
@@ -54,35 +50,27 @@ public struct ValueFormatter: Sendable {
     }
 }
 
+// MARK: - Private
+
 private extension ValueFormatter {
     var abbreviatedFormatter: AbbreviatedFormatter {
-        AbbreviatedFormatter(locale: locale, threshold: abbreviationThreshold)
+        AbbreviatedFormatter(locale: locale, threshold: Decimal(abbreviationThreshold()))
     }
 
     var formattedDustThreshold: String {
-        Self.dustThreshold.formatted(
+        Decimal(dustThreshold()).formatted(
             Decimal.FormatStyle()
                 .locale(locale)
-                .precision(.fractionLength(4)),
+                .precision(.fractionLength(Int(dustThresholdPlaces()))),
         )
     }
 
-    func formatStyle(for decimal: Decimal) -> Decimal.FormatStyle {
+    func formatStyle(for magnitude: Double) -> Decimal.FormatStyle {
         Decimal.FormatStyle()
             .locale(locale)
             .grouping(.automatic)
             .rounded(rule: .towardZero)
-            .precision(precision(for: abs(decimal)))
-    }
-
-    func precision(for magnitude: Decimal) -> NumberFormatStyleConfiguration.Precision {
-        switch (style, magnitude) {
-        case (.full, _): .full
-        case (.short, Self.smallAmountThreshold...): .upToTwoPlaces
-        case (.short, _): .upToFourPlaces
-        case (.auto, 1...): .upToTwoPlaces
-        case (.auto, _): .fourSignificant
-        }
+            .precision(style.precision(magnitude: magnitude).formatStyle)
     }
 
     func appendingCurrency(_ value: String, currency: String) -> String {

@@ -22,6 +22,7 @@ import uniffi.gemstone.GemAssetDetails
 import uniffi.gemstone.GemBalanceRow
 import javax.inject.Inject
 import java.math.BigInteger
+import uniffi.gemstone.GemValueStyle
 
 class AssetInfoUIModelFactory @Inject constructor() {
 
@@ -33,7 +34,7 @@ class AssetInfoUIModelFactory @Inject constructor() {
         val price = assetInfo.price?.price?.price ?: 0.0
         val currency = assetInfo.price?.currency ?: Currency.USD
         val currencyFormatter = CurrencyFormatter(currency = currency)
-        val valueFormatter = ValueFormatter(style = ValueFormatter.Style.Auto)
+        val valueFormatter = ValueFormatter(style = GemValueStyle.AUTO)
         val fiatTotal = if (balances.fiatTotalAmount == 0.0) "" else currencyFormatter.string(balances.fiatTotalAmount)
         return AssetInfoUIModel(
             assetInfo = assetInfo,

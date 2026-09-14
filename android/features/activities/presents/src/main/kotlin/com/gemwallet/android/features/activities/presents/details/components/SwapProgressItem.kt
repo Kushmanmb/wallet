@@ -49,13 +49,14 @@ import com.gemwallet.android.ui.theme.space8
 import com.gemwallet.android.ui.theme.space24
 import com.gemwallet.android.features.activities.presents.localization.stringRes
 import uniffi.gemstone.GemSwapProgressStep
+import uniffi.gemstone.GemValueStyle
 
 private val connectorWidth = 1.5.dp
 
 @Composable
 internal fun SwapProgressItem(progress: TransactionDetailsValue.SwapProgress) {
     val chainName = progress.fromAsset.chain.networkName()
-    val transferValue = ValueFormatter(style = ValueFormatter.Style.Auto)
+    val transferValue = ValueFormatter(style = GemValueStyle.AUTO)
         .string(progress.fromValue, progress.fromAsset)
 
     val transferStatus = progress.transfer

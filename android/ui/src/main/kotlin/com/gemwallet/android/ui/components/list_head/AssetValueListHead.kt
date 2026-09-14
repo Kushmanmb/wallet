@@ -7,11 +7,12 @@ import uniffi.gemstone.GemApprovalValue
 import uniffi.gemstone.GemSimulationValue
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
+import uniffi.gemstone.GemValueStyle
 
 @Composable
 fun AssetValueListHead(header: GemSimulationValue) {
     val amount = when (val value = header.value) {
-        is GemApprovalValue.Exact -> ValueFormatter(style = ValueFormatter.Style.Full).string(value.value, header.asset.toPrimitives())
+        is GemApprovalValue.Exact -> ValueFormatter(style = GemValueStyle.FULL).string(value.value, header.asset.toPrimitives())
         GemApprovalValue.Unlimited -> stringResource(R.string.simulation_header_unlimited_asset, header.asset.symbol)
     }
     AmountListHead(amount = amount, icon = header.asset.toPrimitives())

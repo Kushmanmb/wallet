@@ -17,6 +17,7 @@ import uniffi.gemstone.GemConfirmException
 import uniffi.gemstone.GemConfirmScreen
 import uniffi.gemstone.GemConfirmTitle
 import uniffi.gemstone.GemSignerError
+import uniffi.gemstone.GemValueStyle
 
 @Composable
 internal fun GemConfirmTitle.string(): String = when (this) {
@@ -71,7 +72,7 @@ private fun GemConfirmException.string(): String = when (this) {
     is GemConfirmException.SenderMismatch -> stringResource(R.string.errors_unknown)
     is GemConfirmException.BalanceMissing -> toString()
     is GemConfirmException.InsufficientBalance -> {
-        val formatter = ValueFormatter(style = ValueFormatter.Style.Full)
+        val formatter = ValueFormatter(style = GemValueStyle.FULL)
         val asset = asset.toPrimitives()
         stringResource(
             R.string.info_balance_required_description,
@@ -81,7 +82,7 @@ private fun GemConfirmException.string(): String = when (this) {
         )
     }
     is GemConfirmException.InsufficientNetworkFee -> {
-        val formatter = ValueFormatter(style = ValueFormatter.Style.Full)
+        val formatter = ValueFormatter(style = GemValueStyle.FULL)
         val asset = asset.toPrimitives()
         requirement?.let {
             stringResource(
@@ -95,10 +96,10 @@ private fun GemConfirmException.string(): String = when (this) {
     }
     is GemConfirmException.MinimumAccountBalanceTooLow -> stringResource(
         R.string.transfer_minimum_account_balance,
-        ValueFormatter(style = ValueFormatter.Style.Full).string(requirement.required, asset.toPrimitives()).boldMarkdown(),
+        ValueFormatter(style = GemValueStyle.FULL).string(requirement.required, asset.toPrimitives()).boldMarkdown(),
     )
     is GemConfirmException.BelowSwapMinimum -> {
-        val formatter = ValueFormatter(style = ValueFormatter.Style.Full)
+        val formatter = ValueFormatter(style = GemValueStyle.FULL)
         val asset = asset.toPrimitives()
         stringResource(
             R.string.info_swap_minimum_amount_description,

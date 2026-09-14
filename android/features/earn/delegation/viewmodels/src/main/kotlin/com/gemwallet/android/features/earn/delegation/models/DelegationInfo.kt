@@ -10,6 +10,7 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.Delegation
 import uniffi.gemstone.GemValidatorRow
+import uniffi.gemstone.GemValueStyle
 
 @Stable
 class HeadDelegationInfo(
@@ -37,7 +38,7 @@ class HeadDelegationInfo(
     override val asset: Asset
         get() = assetInfo.asset
 
-    override val cryptoFormatted: String by lazy { ValueFormatter(style = ValueFormatter.Style.Auto).string(delegation.base.balance, asset) }
+    override val cryptoFormatted: String by lazy { ValueFormatter(style = GemValueStyle.AUTO).string(delegation.base.balance, asset) }
 
     override val fiatFormatted: String by lazy { super<FiatFormattedUIModel>.fiatFormatted }
 

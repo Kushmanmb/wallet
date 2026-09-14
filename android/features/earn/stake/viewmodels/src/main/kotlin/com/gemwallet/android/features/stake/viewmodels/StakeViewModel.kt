@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.update
 import com.gemwallet.android.ext.secondsToDays
 import java.math.BigInteger
 import javax.inject.Inject
+import uniffi.gemstone.GemValueStyle
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -115,7 +116,7 @@ class StakeViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val rewardsText = combine(claimRewards.filterNotNull(), assetInfo.filterNotNull()) { claimRewards, assetInfo ->
-        ValueFormatter(style = ValueFormatter.Style.Auto).string(claimRewards.value, assetInfo.asset)
+        ValueFormatter(style = GemValueStyle.AUTO).string(claimRewards.value, assetInfo.asset)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     val actions = combine(

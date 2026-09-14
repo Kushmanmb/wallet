@@ -5,9 +5,10 @@ import com.gemwallet.android.domains.price.toValueDirection
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.ValueFormatter
 import com.wallet.core.primitives.Currency
+import uniffi.gemstone.GemValueStyle
 
 class RowFormatters {
-    val value = ValueFormatter(style = ValueFormatter.Style.Short)
+    val value = ValueFormatter(style = GemValueStyle.SHORT)
     private val currencies = mutableMapOf<Currency, CurrencyFormatter>()
     private val abbreviated = mutableMapOf<Currency, CurrencyFormatter>()
 

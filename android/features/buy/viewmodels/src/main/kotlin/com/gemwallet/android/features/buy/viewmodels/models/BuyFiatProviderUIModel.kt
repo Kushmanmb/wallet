@@ -10,6 +10,7 @@ import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.FiatProviderName
 import java.math.BigDecimal
 import uniffi.gemstone.GemFiatQuoteRow
+import uniffi.gemstone.GemValueStyle
 
 @Stable
 data class BuyFiatProviderUIModel(
@@ -29,7 +30,7 @@ data class BuyFiatProviderUIModel(
     override val cryptoFormatted: String by lazy { "≈ $cryptoText" }
 
     val cryptoText: String by lazy {
-        ValueFormatter(style = ValueFormatter.Style.Auto).string(BigDecimal.valueOf(cryptoAmount), asset.symbol)
+        ValueFormatter(style = GemValueStyle.AUTO).string(BigDecimal.valueOf(cryptoAmount), asset.symbol)
     }
 
     val fiatFormatted: String by lazy { fiatFormatter.string(row.fiatAmount) }

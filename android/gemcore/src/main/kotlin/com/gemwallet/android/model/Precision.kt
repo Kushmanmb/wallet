@@ -14,10 +14,7 @@ internal sealed interface Precision {
 
     companion object {
         val twoPlaces = Fraction(min = 2, max = 2)
-        val upToTwoPlaces = Fraction(min = 0, max = 2)
-        val upToFourPlaces = Fraction(min = 0, max = 4)
         val fourSignificant = Significant(max = 4)
-        val full = Fraction(min = 0, max = 32)
     }
 }
 
@@ -37,9 +34,11 @@ internal fun DecimalFormat.format(value: BigDecimal, precision: Precision): Stri
     }.format(value.rounded(precision, roundingMode))
 }
 
-internal fun adaptivePrecision(magnitude: BigDecimal): Precision = when (val precision = gemAdaptivePrecision(magnitude.toDouble())) {
-    is GemPrecision.Fraction -> Precision.Fraction(min = precision.min.toInt(), max = precision.max.toInt())
-    is GemPrecision.Significant -> Precision.Significant(max = precision.max.toInt())
+internal fun adaptivePrecision(magnitude: BigDecimal): Precision = gemAdaptivePrecision(magnitude.toDouble()).toPrecision()
+
+internal fun GemPrecision.toPrecision(): Precision = when (this) {
+    is GemPrecision.Fraction -> Precision.Fraction(min = min.toInt(), max = max.toInt())
+    is GemPrecision.Significant -> Precision.Significant(max = max.toInt())
 }
 
 internal val ABBREVIATION_THRESHOLD: BigDecimal by lazy { BigDecimal.valueOf(abbreviationThreshold()) }

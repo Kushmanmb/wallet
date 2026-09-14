@@ -38,6 +38,7 @@ import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.fiatProviderName
 import uniffi.gemstone.fiatTransactionStatus
 import java.math.BigInteger
+import uniffi.gemstone.GemValueStyle
 
 @Composable
 fun FiatTransactionItem(
@@ -52,7 +53,7 @@ fun FiatTransactionItem(
         FiatQuoteType.Sell -> stringResource(R.string.wallet_sell)
     }
 
-    val cryptoAmount = ValueFormatter(style = ValueFormatter.Style.Short)
+    val cryptoAmount = ValueFormatter(style = GemValueStyle.SHORT)
         .string(BigInteger(info.value), asset)
 
     val fiatCurrency = info.fiatCurrency.toCurrency()

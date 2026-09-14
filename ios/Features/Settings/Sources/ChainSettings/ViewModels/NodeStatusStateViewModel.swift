@@ -3,6 +3,7 @@
 import BigInt
 import Components
 import Formatters
+import GemstonePrimitives
 import enum Gemstone.GemNodeStatusState
 import Primitives
 import Style

@@ -29,6 +29,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import uniffi.gemstone.GemRewardsRedemption
 import uniffi.gemstone.GemRewardsState
 import uniffi.gemstone.RewardRedemptionOption
+import uniffi.gemstone.GemValueStyle
 
 internal fun LazyListScope.referralInfo(
     uiState: GemRewardsState,
@@ -126,5 +127,5 @@ private fun RewardRedemptionOption.confirmationMessage(pointsText: String): Stri
 
 private val RewardRedemptionOption.valueText: String
     get() = asset?.let {
-        ValueFormatter(style = ValueFormatter.Style.Short).string(value, it.toPrimitives())
+        ValueFormatter(style = GemValueStyle.SHORT).string(value, it.toPrimitives())
     } ?: ""

@@ -16,6 +16,7 @@ import uniffi.gemstone.SwapPriceImpact
 import uniffi.gemstone.SwapPriceImpactType
 import uniffi.gemstone.SwapProvider
 import java.math.BigInteger
+import uniffi.gemstone.GemValueStyle
 
 class SwapDetailsUIModelFactoryTest {
 
@@ -219,7 +220,7 @@ class SwapDetailsUIModelFactoryTest {
     )
 
     private fun formattedReceiveAmount(atomicValue: String) =
-        ValueFormatter(style = ValueFormatter.Style.Auto)
+        ValueFormatter(style = GemValueStyle.AUTO)
             .string(java.math.BigInteger(atomicValue), receiveAsset.asset)
 
     private companion object {

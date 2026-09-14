@@ -7,6 +7,7 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.DelegationBase
 import java.math.BigInteger
+import uniffi.gemstone.GemValueStyle
 
 open class BalanceInfoUIModel(
     override val asset: Asset,
@@ -32,7 +33,7 @@ class RewardsInfoUIModel(
     price = assetInfo.price?.price?.price,
     currency = assetInfo.price?.currency ?: Currency.USD,
 ) {
-    override val cryptoFormatted: String by lazy { ValueFormatter(style = ValueFormatter.Style.Auto).string(balance, asset) }
+    override val cryptoFormatted: String by lazy { ValueFormatter(style = GemValueStyle.AUTO).string(balance, asset) }
 }
 
 class DelegationBalanceInfoUIModel(

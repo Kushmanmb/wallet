@@ -12,6 +12,7 @@ import uniffi.gemstone.GemConfirmSimulationState
 import uniffi.gemstone.GemConfirmationInterface
 import com.gemwallet.android.ext.requireChain
 import uniffi.gemstone.GemSimulationWarningRow
+import uniffi.gemstone.GemValueStyle
 
 data class Simulation(
     val warnings: List<GemSimulationWarningRow> = emptyList(),
@@ -42,7 +43,7 @@ fun GemConfirmSimulationState.toSimulation(
 }
 
 fun GemSimulationBalanceChange.formattedValue(): String =
-    sign.format(ValueFormatter(style = ValueFormatter.Style.Full).string(value.abs(), asset.decimals, asset.symbol))
+    sign.format(ValueFormatter(style = GemValueStyle.FULL).string(value.abs(), asset.decimals, asset.symbol))
 
 fun GemSimulationBalanceChange.valueDirection(): ValueDirection = when (sign) {
     GemAmountSign.INCOMING -> ValueDirection.Up

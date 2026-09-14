@@ -2,6 +2,7 @@
 
 import BigInt
 import Foundation
+import Primitives
 
 public final class BigNumberFormatter: Sendable {
     public static let standard: BigNumberFormatter = .init(locale: Locale(identifier: "en_US"))
@@ -37,7 +38,7 @@ public final class BigNumberFormatter: Sendable {
         return "\(integerString)\(decimalSeparator)\(fractionalString)"
     }
 
-    func decimal(from number: BigInt, decimals: Int) -> Decimal? {
+    public func decimal(from number: BigInt, decimals: Int) -> Decimal? {
         let dividend = BigInt(10).power(decimals)
         let (integerPart, remainder) = number.quotientAndRemainder(dividingBy: dividend)
         let integerString = integerPart.description
@@ -48,7 +49,7 @@ public final class BigNumberFormatter: Sendable {
         return Decimal(string: "\(integerString)\(decimalSeparator)\(fractionalString)", locale: locale)
     }
 
-    func double(from number: BigInt, decimals: Int) -> Double? {
+    public func double(from number: BigInt, decimals: Int) -> Double? {
         guard let decimal = decimal(from: number, decimals: decimals) else {
             return .none
         }

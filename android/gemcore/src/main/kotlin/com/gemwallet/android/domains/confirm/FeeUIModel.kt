@@ -7,6 +7,7 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.FeePriority
 import java.math.BigInteger
+import uniffi.gemstone.GemValueStyle
 
 sealed interface FeeUIModel {
     data object Calculating : FeeUIModel
@@ -19,7 +20,7 @@ sealed interface FeeUIModel {
         val priority: FeePriority,
     ) : FeeUIModel {
         val cryptoAmount: String by lazy {
-            ValueFormatter(style = ValueFormatter.Style.Auto).string(amount, feeAsset)
+            ValueFormatter(style = GemValueStyle.AUTO).string(amount, feeAsset)
         }
 
         val fiatAmount: String by lazy {

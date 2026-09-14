@@ -6,6 +6,7 @@ import com.gemwallet.android.model.ValueFormatter
 import uniffi.gemstone.GemFeeRateRows
 import uniffi.gemstone.GemCustomFee
 import java.math.BigInteger
+import uniffi.gemstone.GemValueStyle
 
 data class CustomFee(
     val rate: BigInteger?,
@@ -37,7 +38,7 @@ data class CustomFee(
             ).use { estimate ->
                 CustomFee(
                     rate = rate,
-                    placeholder = ValueFormatter(style = ValueFormatter.Style.Auto).string(baseTotal, decimals),
+                    placeholder = ValueFormatter(style = GemValueStyle.AUTO).string(baseTotal, decimals),
                     networkFee = FeeUIModel.FeeInfo(estimate.feeValue(), currentFee.feeAsset, currentFee.price, currentFee.currency, currentFee.priority),
                     maxRateText = format(estimate.maxRate(), decimals),
                     minRateText = estimate.minimumRate()?.let { format(it, decimals) } ?: "",
@@ -52,6 +53,6 @@ data class CustomFee(
             value.toBigDecimal().movePointLeft(decimals).stripTrailingZeros().toPlainString()
 
         fun formatRate(value: BigInteger, decimals: Int, unitSymbol: String): String =
-            ValueFormatter(style = ValueFormatter.Style.Auto).string(value, decimals, unitSymbol)
+            ValueFormatter(style = GemValueStyle.AUTO).string(value, decimals, unitSymbol)
     }
 }

@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import BigInt
-@testable import Formatters
+@testable import GemstonePrimitives
 import Foundation
 import Testing
 

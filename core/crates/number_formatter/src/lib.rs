@@ -5,7 +5,7 @@ pub use crypto_fiat_converter::CryptoFiatConverter;
 pub mod currency;
 pub mod number_formatter;
 pub mod precision;
-pub use precision::{ABBREVIATION_THRESHOLD, Precision};
+pub use precision::{ABBREVIATION_THRESHOLD, Precision, VALUE_DUST_PLACES, VALUE_DUST_THRESHOLD};
 pub use number_formatter::NumberFormatter;
 pub mod price_suggestion;
 pub mod value_formatter;

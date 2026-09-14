@@ -2,6 +2,7 @@
 
 import Components
 import Formatters
+import GemstonePrimitives
 import enum Gemstone.GemNodeRowTitle
 import struct Gemstone.GemNodeSelection
 import enum Gemstone.GemNodeStatusState
