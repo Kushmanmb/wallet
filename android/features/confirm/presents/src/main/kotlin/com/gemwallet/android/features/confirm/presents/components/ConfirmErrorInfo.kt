@@ -13,7 +13,7 @@ import uniffi.gemstone.GemConfirmFailure
 import uniffi.gemstone.GemConfirmStage
 import com.gemwallet.android.domains.confirm.FeeUIModel
 import com.gemwallet.android.features.confirm.presents.AcquireAssetAction
-import com.gemwallet.android.features.confirm.presents.toPreloadLabel
+import com.gemwallet.android.features.confirm.presents.localization.toPreloadLabel
 import com.gemwallet.android.ext.toPrimitives
 import uniffi.gemstone.GemBalanceRequirement
 import uniffi.gemstone.GemConfirmException
