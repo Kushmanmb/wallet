@@ -35,6 +35,7 @@ import uniffi.gemstone.GemTransactionFilter
 import com.gemwallet.android.ui.theme.iconSize
 import com.wallet.core.primitives.Chain
 import com.gemwallet.android.ui.localization.getLabel
+import uniffi.gemstone.transactionFilters
 
 @Composable
 fun TransactionsFilter(
@@ -136,10 +137,10 @@ fun TransactionsFilter(
         onDismiss = { showedSubFilter = null },
     ) { selectedItems, onToggle ->
         val query = rememberTextFieldState()
-        val chainService = LocalChainService.current
+        val matchingChains = rememberMatchingChains(availableChains, query.text.toString())
         SearchBar(query)
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            selectFilterChain(availableChains, selectedItems, query.text.toString(), chainService, onToggle)
+            selectFilterChain(matchingChains, selectedItems, onToggle)
         }
     }
     SubFilterDialog(
@@ -156,8 +157,9 @@ fun TransactionsFilter(
         },
         onDismiss = { showedSubFilter = null },
     ) { selectedItems, onToggle ->
+        val filters = remember { transactionFilters() }
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            selectFilterTransactionType(selectedItems, onToggle)
+            selectFilterTransactionType(filters, selectedItems, onToggle)
         }
     }
 }

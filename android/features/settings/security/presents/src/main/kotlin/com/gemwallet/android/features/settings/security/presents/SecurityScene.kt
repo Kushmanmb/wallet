@@ -48,6 +48,8 @@ fun SecurityScene(
     var authRequired by remember { mutableStateOf(viewModel.authRequired()) }
     val hideBalances by viewModel.isHideBalances.collectAsStateWithLifecycle()
     val lockInterval by viewModel.lockInterval.collectAsStateWithLifecycle()
+    val lockPeriods = remember { lockPeriods() }
+    val currentLockPeriod = remember(lockInterval) { lockPeriodFromMinutes(lockInterval.toUInt()) }
 
     Scene(
         title = stringResource(id = (R.string.settings_security)),
@@ -59,7 +61,7 @@ fun SecurityScene(
                 authRequired = it
             }
             if (authRequired) {
-                requiredAuthDelay(lockInterval, viewModel::setLockInterval)
+                requiredAuthDelay(lockPeriods, lockInterval, currentLockPeriod, viewModel::setLockInterval)
             }
             hideBalanceItem(hideBalances, viewModel::setHideBalances)
         }
@@ -90,17 +92,18 @@ private fun LazyListScope.enablePasscode(
 }
 
 private fun LazyListScope.requiredAuthDelay(
+    locks: List<GemLockPeriod>,
     currentInterval: Int,
+    currentPeriod: GemLockPeriod,
     onSelect: (Int) -> Unit,
 ) {
-    val locks = lockPeriods()
     item {
         var isShowLockDelays by remember { mutableStateOf(false) }
         PropertyItem(
             modifier = Modifier.clickable(onClick = { isShowLockDelays = true }),
             title = { PropertyTitleText(R.string.lock_require_authentication) },
             data = {
-                PropertyDataText(text = stringResource(lockPeriodFromMinutes(currentInterval.toUInt()).label()))
+                PropertyDataText(text = stringResource(currentPeriod.label()))
                 DropdownMenu(
                     expanded = isShowLockDelays,
                     onDismissRequest = { isShowLockDelays = false },

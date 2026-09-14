@@ -28,6 +28,7 @@ fun AssetsFilter(
     val query = rememberTextFieldState()
     val chainService = LocalChainService.current
 
+    val matchingChains = rememberMatchingChains(availableChains, query.text.toString())
     FormDialog(
         isVisible = isVisible,
         title = stringResource(R.string.filter_title),
@@ -39,7 +40,7 @@ fun AssetsFilter(
             HasBalances(isActive = balanceFilter, onBalanceFilter)
         }
         LazyColumn(modifier = Modifier.Companion.fillMaxSize()) {
-            selectFilterChain(availableChains, chainFilter, query.text.toString(), chainService, onChainFilter)
+            selectFilterChain(matchingChains, chainFilter, onChainFilter)
         }
     }
 }

@@ -64,6 +64,7 @@ import uniffi.gemstone.GemCollectibleRow
 import uniffi.gemstone.GemCollectibleSection
 import java.text.DateFormat
 import java.util.Date
+import com.gemwallet.android.ui.components.list_item.property.SocialLinkUIModel
 
 @Composable
 fun NFTDetailsScene(
@@ -80,6 +81,10 @@ fun NFTDetailsScene(
     val refreshFailed = stringResource(R.string.errors_error_occurred)
 
     val model = assetData ?: return
+    val socialLinkModels = remember(model.details.sections) {
+        model.details.sections.filterIsInstance<GemCollectibleSection.Links>()
+            .flatMap { socialLinks(it.links).toSocialLinks() }
+    }
     var isReportVisible by remember { mutableStateOf(false) }
     val reported = stringResource(R.string.transaction_status_confirmed)
     val avatarSet = stringResource(R.string.nft_set_as_avatar)
@@ -142,7 +147,7 @@ fun NFTDetailsScene(
                     is GemCollectibleSection.Status -> verificationStatusItem(section.status.toPrimitives())
                     is GemCollectibleSection.Info -> itemsPositioned(section.rows) { position, row -> InfoRow(row, position) }
                     is GemCollectibleSection.Attributes -> nftAttributes(section.attributes.map { it.name to it.value.text() })
-                    is GemCollectibleSection.Links -> nftLinks(section.links.map { it.toPrimitives() }) { uriHandler.openUri(it) }
+                    is GemCollectibleSection.Links -> nftLinks(socialLinkModels) { uriHandler.openUri(it) }
                 }
             }
         }
@@ -233,8 +238,7 @@ private fun LazyListScope.nftAttributes(attributes: List<Pair<String, String>>) 
     }
 }
 
-private fun LazyListScope.nftLinks(links: List<AssetLink>, onLinkClick: (String) -> Unit) {
-    val models = socialLinks(links.map { it.toGem() }).toSocialLinks()
+private fun LazyListScope.nftLinks(models: List<SocialLinkUIModel>, onLinkClick: (String) -> Unit) {
     if (models.isEmpty()) {
         return
     }

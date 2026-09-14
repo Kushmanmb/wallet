@@ -11,16 +11,16 @@ import com.gemwallet.android.ui.components.list_item.property.PropertyItem
 import com.gemwallet.android.ui.components.list_item.property.PropertyTitleText
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import uniffi.gemstone.GemTransactionFilter
-import uniffi.gemstone.transactionFilters
 
 fun LazyListScope.selectFilterTransactionType(
+    filters: List<GemTransactionFilter>,
     filter: List<GemTransactionFilter>,
     onFilter: (GemTransactionFilter) -> Unit,
 ) {
     item {
         SubheaderItem(R.string.filter_types)
     }
-    itemsPositioned(transactionFilters()) { position, item ->
+    itemsPositioned(filters) { position, item ->
         PropertyItem(
             modifier = Modifier.clickable { onFilter(item) },
             title = { PropertyTitleText(item.getLabel()) },
