@@ -1,0 +1,49 @@
+package com.gemwallet.android.model
+
+import android.icu.text.CompactDecimalFormat
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.Locale
+import uniffi.gemstone.GemFormattedNumber
+import uniffi.gemstone.GemNumberDisplay
+import uniffi.gemstone.GemNumberUnit
+
+fun GemFormattedNumber.text(locale: Locale = Locale.getDefault()): String = when (val display = display) {
+    is GemNumberDisplay.Number -> appendSymbol(numberText(BigDecimal.valueOf(value), display.precision.toPrecision(), locale))
+    is GemNumberDisplay.Abbreviated -> appendSymbol(abbreviatedText(BigDecimal.valueOf(value), locale))
+    is GemNumberDisplay.BelowThreshold -> appendSymbol(
+        "<${numberText(BigDecimal.valueOf(display.threshold), Precision.Fraction(display.places.toInt(), display.places.toInt()), locale)}"
+    )
+}
+
+private val GemFormattedNumber.currencyCode: String?
+    get() = (unit as? GemNumberUnit.Currency)?.code
+
+private val GemFormattedNumber.symbol: String?
+    get() = (unit as? GemNumberUnit.Symbol)?.symbol
+
+private fun GemFormattedNumber.appendSymbol(text: String): String =
+    symbol?.let { "$text $it" } ?: text
+
+private fun GemFormattedNumber.numberText(value: BigDecimal, precision: Precision, locale: Locale): String {
+    val formatter = (numberFormat(locale) as DecimalFormat).apply { roundingMode = RoundingMode.DOWN }
+    return formatter.format(value, precision)
+}
+
+private fun GemFormattedNumber.abbreviatedText(value: BigDecimal, locale: Locale): String {
+    val formatter = CompactDecimalFormat.getInstance(locale, CompactDecimalFormat.CompactStyle.SHORT).apply {
+        setSignificantDigitsUsed(false)
+        minimumFractionDigits = 0
+        maximumFractionDigits = 2
+        roundingMode = android.icu.math.BigDecimal.ROUND_DOWN
+        currencyCode?.let { currency = android.icu.util.Currency.getInstance(it) }
+    }
+    return formatter.format(value)
+}
+
+private fun GemFormattedNumber.numberFormat(locale: Locale): NumberFormat =
+    currencyCode?.let { code ->
+        NumberFormat.getCurrencyInstance(locale).apply { currency = java.util.Currency.getInstance(code) }
+    } ?: NumberFormat.getInstance(locale)

@@ -17,9 +17,9 @@ struct FiatQuoteViewModelTests {
 
     @Test
     func amountText() {
-        #expect(model(cryptoAmount: 0).amountText == "0.00 BTC")
+        #expect(model(cryptoAmount: 0).amountText == "0 BTC")
         #expect(model(cryptoAmount: 15.12).amountText == "15.12 BTC")
-        #expect(model(cryptoAmount: 15).amountText == "15.00 BTC")
+        #expect(model(cryptoAmount: 15).amountText == "15 BTC")
     }
 
     @Test

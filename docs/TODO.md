@@ -41,7 +41,6 @@ The largest duplication left. Contract: [a number crosses as a value and a style
 
 
   Shape it this way: `Formatters` keeps a dependency-free `NumberPrecision` (`.fraction(min:max:)` / `.significant(max:)`) and the mapping to `NumberFormatStyleConfiguration.Precision` — that is the renderer the note below says must stay. What leaves is `adaptive(for:)`: `CurrencyFormatter.string` and `NumericFormatter.string` take the precision instead of choosing it, and `GemstonePrimitives` maps `GemPrecision` to `NumberPrecision`. The cost is the blast radius, not the design: 39 `CurrencyFormatter(` and 23 `NumericFormatter(` construction sites, every number the app renders. Land it behind a screen-by-screen check, not in a sweep. The two rules do agree today — same 1e-10 and 0.99 thresholds, same two-place and four-significant shapes — so this is drift prevention, not a live bug.
-- **F6** **M** Carry `GemFormattedNumber` in the row records and view states that carry a bare `f64` today, starting with `GemFiatQuoteRow` in [`fiat/model.rs`](../core/gemstone/src/services/fiat/model.rs).
 - **F7** **S** Then `FiatSceneViewModel` holds no `CurrencyFormatter` or `ValueFormatter`; the session's view state carries the numbers and the scene renders them.
 
 Not in scope: `Formatters` and `Validators` on iOS still cannot import Gemstone, so the renderer that applies a `GemPrecision` must stay dependency-free. That is why this is a value-plus-style contract and not a foreign trait.

@@ -3,14 +3,12 @@ package com.gemwallet.android.features.buy.viewmodels.models
 import androidx.compose.runtime.Stable
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.CurrencyFormatter
-import com.gemwallet.android.model.ValueFormatter
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.models.CryptoFormattedUIModel
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.FiatProviderName
-import java.math.BigDecimal
 import uniffi.gemstone.GemFiatQuoteRow
-import uniffi.gemstone.GemValueStyle
 
 @Stable
 data class BuyFiatProviderUIModel(
@@ -25,15 +23,13 @@ data class BuyFiatProviderUIModel(
 
     val providerImageUrl: String? get() = row.providerImageUrl
 
-    override val cryptoAmount: Double get() = row.cryptoAmount
+    override val cryptoAmount: Double get() = row.cryptoAmount.value
 
     override val cryptoFormatted: String by lazy { "≈ $cryptoText" }
 
-    val cryptoText: String by lazy {
-        ValueFormatter(style = GemValueStyle.AUTO).string(BigDecimal.valueOf(cryptoAmount), asset.symbol)
-    }
+    val cryptoText: String by lazy { row.cryptoAmount.text() }
 
-    val fiatFormatted: String by lazy { fiatFormatter.string(row.fiatAmount) }
+    val fiatFormatted: String by lazy { row.fiatAmount.text() }
 
     val rate: String by lazy {
         row.rate?.let { it.text(fiatFormatter.string(it.value)) }.orEmpty()

@@ -1,5 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import func Gemstone.formattedAmount
+import func Gemstone.formattedCurrency
 import BigInt
 import Foundation
 import struct Gemstone.FiatProvider
@@ -67,8 +69,8 @@ public extension GemFiatQuoteRow {
             provider: provider,
             providerName: providerName,
             providerImageUrl: providerImageUrl,
-            cryptoAmount: cryptoAmount,
-            fiatAmount: fiatAmount,
+            cryptoAmount: formattedAmount(value: cryptoAmount, symbol: "BTC", style: .auto),
+            fiatAmount: formattedCurrency(value: fiatAmount, code: "USD", style: .fiat),
             rate: rate,
         )
     }

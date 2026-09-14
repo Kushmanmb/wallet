@@ -33,7 +33,7 @@ struct FiatQuoteViewModel {
     }
 
     var amountText: String {
-        NumericFormatter().string(row.cryptoAmount, symbol: asset.symbol)
+        row.cryptoAmount.text()
     }
 
     var rateText: String {
@@ -44,7 +44,7 @@ struct FiatQuoteViewModel {
 
 extension FiatQuoteViewModel: Identifiable {
     var id: String {
-        "\(asset.id.identifier)\(row.provider.map().rawValue)\(row.cryptoAmount)"
+        "\(asset.id.identifier)\(row.provider.map().rawValue)\(row.cryptoAmount.value)"
     }
 }
 
@@ -67,7 +67,7 @@ extension FiatQuoteViewModel: SimpleListItemViewable {
     }
 
     var subtitleExtra: String? {
-        formatter.string(row.fiatAmount)
+        row.fiatAmount.text()
     }
 
     var subtitleStyle: TextStyle {

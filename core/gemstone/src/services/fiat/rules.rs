@@ -4,6 +4,8 @@ use primitives::{FiatProviderName, FiatQuote, FiatQuoteType, FiatTransactionStat
 use rand::RngExt;
 
 use super::model::{GemFiatAmountCheck, GemFiatQuoteRow, GemFiatTransactionBadge, GemFiatTransactionStatus};
+use crate::formatted_number::GemFormattedNumber;
+use crate::precision::{GemCurrencyStyle, GemValueStyle};
 use crate::config::fiat_config::FiatConfig;
 use crate::services::balance::GemBalanceRequirement;
 use crate::services::swap::GemAssetRate;
@@ -74,8 +76,8 @@ pub fn quote_row(quote: &FiatQuote, asset_price: Option<f64>) -> GemFiatQuoteRow
         provider: quote.provider.id,
         provider_name: quote.provider.name.clone(),
         provider_image_url: quote.provider.image_url.clone(),
-        crypto_amount: quote.crypto_amount,
-        fiat_amount,
+        crypto_amount: GemFormattedNumber::amount(quote.crypto_amount, Some(quote.asset.symbol.clone()), GemValueStyle::Auto),
+        fiat_amount: GemFormattedNumber::currency(fiat_amount, quote.fiat_currency.clone(), GemCurrencyStyle::Fiat),
         rate: (quote.crypto_amount > 0.0).then(|| GemAssetRate {
             base_symbol: quote.asset.symbol.clone(),
             quote_symbol: quote.fiat_currency.clone(),
@@ -106,6 +108,8 @@ pub fn quote_value(quote: &FiatQuote) -> Option<BigUint> {
 
 #[cfg(test)]
 mod tests {
+    use crate::formatted_number::GemNumberUnit;
+
     #[test]
     fn test_a_fiat_transaction_row_badges_pending_and_failed_and_dims_what_did_not_complete() {
         let status = transaction_status;
@@ -166,13 +170,17 @@ mod tests {
         buy.crypto_amount = 2.0;
         buy.fiat_amount = 100.0;
 
-        assert_eq!(quote_row(&buy, Some(30.0)).fiat_amount, 60.0);
-        assert_eq!(quote_row(&buy, Some(0.0)).fiat_amount, 100.0);
-        assert_eq!(quote_row(&buy, None).fiat_amount, 100.0);
+        assert_eq!(quote_row(&buy, Some(30.0)).fiat_amount.value, 60.0);
+        assert_eq!(quote_row(&buy, Some(0.0)).fiat_amount.value, 100.0);
+        assert_eq!(quote_row(&buy, None).fiat_amount.value, 100.0);
 
         let mut sell = buy.clone();
         sell.quote_type = FiatQuoteType::Sell;
-        assert_eq!(quote_row(&sell, Some(30.0)).fiat_amount, 100.0);
+        assert_eq!(quote_row(&sell, Some(30.0)).fiat_amount.value, 100.0);
+
+        let row = quote_row(&buy, Some(30.0));
+        assert_eq!(row.fiat_amount.unit, GemNumberUnit::Currency { code: buy.fiat_currency.clone() });
+        assert_eq!(row.crypto_amount.unit, GemNumberUnit::Symbol { symbol: buy.asset.symbol.clone() });
     }
 
     #[test]

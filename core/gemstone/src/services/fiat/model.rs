@@ -1,3 +1,4 @@
+use crate::formatted_number::GemFormattedNumber;
 use super::rules;
 use crate::services::balance::GemBalanceRequirement;
 use crate::services::swap::GemAssetRate;
@@ -17,8 +18,8 @@ pub struct GemFiatQuoteRow {
     pub provider: FiatProviderName,
     pub provider_name: String,
     pub provider_image_url: Option<String>,
-    pub crypto_amount: f64,
-    pub fiat_amount: f64,
+    pub crypto_amount: GemFormattedNumber,
+    pub fiat_amount: GemFormattedNumber,
     pub rate: Option<GemAssetRate>,
 }
 

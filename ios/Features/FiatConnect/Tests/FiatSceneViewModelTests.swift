@@ -157,7 +157,7 @@ final class FiatSceneViewModelTests {
         FiatSceneViewModelTests.load(model, quotes: [.mock(fiatAmount: 1200, cryptoAmount: 2.0)])
 
         #expect(model.rateValue == "1 \(model.asset.symbol) ≈ $600.00")
-        #expect(model.cryptoAmountValue == "≈ 2.00 BTC")
+        #expect(model.cryptoAmountValue == "≈ 2 BTC")
     }
 
     @Test

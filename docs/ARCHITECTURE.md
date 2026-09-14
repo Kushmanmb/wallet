@@ -274,20 +274,30 @@ Two mechanisms are tempting and both are wrong.
 
 ```rust
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
-pub enum GemPrecision {
-    Fraction { min: u32, max: u32 },
-    Significant { max: u32 },
+pub enum GemNumberUnit {
+    Currency { code: String },
+    Symbol { symbol: String },
+    Plain,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemNumberDisplay {
+    Number { precision: GemPrecision },
+    Abbreviated,
+    BelowThreshold { threshold: f64, places: u32 },
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemFormattedNumber {
     pub value: f64,
-    pub style: GemNumberStyle,
-    pub precision: GemPrecision,
+    pub unit: GemNumberUnit,
+    pub display: GemNumberDisplay,
 }
 ```
 
-A row or view state carries `GemFormattedNumber` where it carries a bare `f64` today, and the app turns it into text with `NumberFormatter` or `DecimalFormat`. The adaptive rule, the abbreviation threshold and the dust cut live once, in Core, with tests that fail if a constant moves.
+The style is resolved when the record is built, not carried for the app to re-ask: `GemFormattedNumber::currency` and `GemFormattedNumber::amount` take the value and a `GemCurrencyStyle` or `GemValueStyle` and settle the precision, the abbreviation and the dust cut once. The app reads `display` and renders with `NumberFormatter` or `DecimalFormat`, so a view state with fifty rows costs no crossings at all.
+
+A row or view state carries `GemFormattedNumber` where it carries a bare `f64` today. The adaptive rule, the abbreviation threshold and the dust cut live once, in Core, with tests that fail if a constant moves.
 
 ### An app row model holds the Core record; it does not restate its fields
 
