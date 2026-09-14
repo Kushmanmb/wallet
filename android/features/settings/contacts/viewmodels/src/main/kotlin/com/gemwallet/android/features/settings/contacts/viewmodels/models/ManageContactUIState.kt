@@ -23,10 +23,8 @@ data class ManageContactUIState(
     val isSaving: Boolean = false,
     val saved: Boolean = false,
     val error: String? = null,
-) {
-    val isSaveEnabled: Boolean
-        get() = name.trim().isNotEmpty() && !isSaving
-}
+    val isSaveEnabled: Boolean = false,
+)
 
 data class ManageContactState(
     val isEdit: Boolean = false,

@@ -70,8 +70,20 @@ pub fn stale_addresses(existing: Vec<ContactAddress>, addresses: &[ContactAddres
     stale_by(existing, addresses.iter().map(|address| address.id.clone()), |address| address.id.clone())
 }
 
+pub fn can_save_contact(name: &str, is_saving: bool) -> bool {
+    !name.trim().is_empty() && !is_saving
+}
+
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn test_a_contact_needs_a_name_and_cannot_be_saved_twice() {
+        assert!(can_save_contact("Ada", false));
+        assert!(!can_save_contact("   ", false), "spaces are not a name");
+        assert!(!can_save_contact("", false));
+        assert!(!can_save_contact("Ada", true), "a save already running blocks another");
+    }
     use super::*;
     use chrono::Utc;
     use primitives::Chain;

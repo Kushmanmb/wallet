@@ -81,6 +81,7 @@ class ManageContactViewModel @Inject constructor(
             isSaving = current.isSaving,
             saved = current.saved,
             error = current.error,
+            isSaveEnabled = service.canSave(current.name, current.isSaving),
             addressInput = current.form?.let { form ->
                 ContactAddressInput(
                     editingId = form.editingId,
