@@ -5,7 +5,7 @@ use gem_client::ReqwestClient;
 
 use crate::config::DefiProviderConfig;
 use crate::provider::DefiProvider;
-use crate::providers::{DeBankClient, JupiterClient, ZerionClient};
+use crate::providers::{JupiterClient, ZerionClient};
 
 pub struct DefiProviderFactory;
 
@@ -23,7 +23,6 @@ impl DefiProviderFactory {
         vec![
             Arc::new(ZerionClient::new(zerion_client)),
             Arc::new(JupiterClient::new_with_client(jupiter_client)),
-            Arc::new(DeBankClient),
         ]
     }
 }
