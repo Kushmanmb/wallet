@@ -41,6 +41,38 @@ struct AddressInputViewModelTests {
     }
 
     @Test
+    func aNameStillResolvingIsNotYetAnError() {
+        let model = AddressInputViewModel.mock()
+
+        model.inputModel.text = "test.eth"
+        model.nameRecordViewModel.state = .loading(name: "test.eth")
+
+        #expect(model.validate() == false)
+        #expect(model.inputModel.error == nil, "a name the resolver still owns must not read as a bad address")
+
+        model.nameRecordViewModel.state = .complete(record: NameRecord.mock().map())
+        #expect(model.validate())
+        #expect(model.inputModel.error == nil)
+    }
+
+    @Test
+    func anAddressThatIsNotOneShowsTheError() {
+        let model = AddressInputViewModel.mock()
+
+        model.inputModel.text = "gemcoder"
+        #expect(model.validate() == false)
+        #expect(model.inputModel.error != nil)
+
+        model.inputModel.text = ""
+        #expect(model.validate() == false)
+        #expect(model.inputModel.error != nil, "an empty field still reads as required")
+
+        model.inputModel.text = "0x5615e8ab93b9d695b6d4d6545f7792aa59e1069a"
+        #expect(model.validate())
+        #expect(model.inputModel.error == nil)
+    }
+
+    @Test
     func chainChangeResetsState() {
         let model = AddressInputViewModel.mock()
 

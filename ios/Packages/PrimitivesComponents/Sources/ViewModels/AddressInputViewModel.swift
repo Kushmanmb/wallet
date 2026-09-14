@@ -37,7 +37,7 @@ public final class AddressInputViewModel {
         self.nameService = nameService
         inputModel = InputValidationViewModel(
             mode: .manual,
-            validators: Self.validators(chain: chain, placeholder: placeholder, nameService: nameService),
+            validators: Self.validators(placeholder: placeholder),
         )
     }
 
@@ -87,11 +87,12 @@ public final class AddressInputViewModel {
 
     @discardableResult
     public func validate() -> Bool {
-        if nameRecordViewModel.isNameSupported(name: text) {
-            isValid
-        } else {
-            update()
+        guard text.isNotEmpty else {
+            return update()
         }
+        let validation = self.validation
+        update(error: validation.showsError ? TransferError.invalidAddress(asset: chain.asset) : nil)
+        return validation.isValid
     }
 
 }
@@ -126,18 +127,18 @@ extension AddressInputViewModel {
 
         inputModel = InputValidationViewModel(
             mode: .manual,
-            validators: Self.validators(chain: chain, placeholder: placeholder, nameService: nameService),
+            validators: Self.validators(placeholder: placeholder),
         )
         text = currentText
 
         if nameRecordViewModel.isNameSupported(name: currentText) {
             nameRecordViewModel.getNameRecord(name: currentText, chain: chain)
         } else if currentText.isNotEmpty {
-            inputModel.update()
+            validate()
         }
     }
 
-    private static func validators(chain: Chain, placeholder: String, nameService: any GemNameServiceProtocol) -> [any TextValidator] {
-        [.required(requireName: placeholder), .address(chain.asset, nameService: nameService)]
+    private static func validators(placeholder: String) -> [any TextValidator] {
+        [.required(requireName: placeholder)]
     }
 }
