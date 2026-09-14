@@ -1,7 +1,7 @@
 use crate::block_explorer::BlockExplorer;
 use crate::chain_evm::EVMChain;
 use crate::explorers::metadata::{Explorer, Metadata};
-use crate::explorers::{BlockScout, TempoExplorer};
+use crate::explorers::{BlockScout, OkxExplorer, RouteScan, TempoExplorer};
 
 pub struct EtherScan;
 
@@ -36,7 +36,8 @@ impl EtherScan {
             EVMChain::Robinhood => BlockScout::new_robinhood(),
             EVMChain::Stable => Explorer::boxed(Metadata::with_token("Stablescan", "https://stablescan.xyz")),
             EVMChain::Tempo => TempoExplorer::boxed(),
-            _ => todo!(),
+            EVMChain::Ink => RouteScan::new_ink(),
+            EVMChain::XLayer => OkxExplorer::new_xlayer(),
         }
     }
 }
