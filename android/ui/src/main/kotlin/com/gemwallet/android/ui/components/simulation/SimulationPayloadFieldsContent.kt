@@ -80,14 +80,14 @@ private fun fieldTitleRes(field: SimulationPayloadField): Int? = when (field.kin
     SimulationPayloadFieldKind.SPENDER -> R.string.transfer_to
     SimulationPayloadFieldKind.VALUE -> R.string.perpetual_value
     SimulationPayloadFieldKind.EXPIRATION -> R.string.common_expiration
-    else -> null
+    SimulationPayloadFieldKind.CUSTOM -> null
 }
 
 @Composable
 private fun fieldValue(payload: PayloadField, addressNames: Map<String, String>): String = when (payload.field.fieldType) {
     SimulationPayloadFieldType.ADDRESS -> addressDisplay(payload, addressNames)
     SimulationPayloadFieldType.TIMESTAMP -> payload.field.value.toTimestampText()
-    else -> payload.field.value
+    SimulationPayloadFieldType.TEXT -> payload.field.value
 }
 
 @Composable

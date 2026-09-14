@@ -105,7 +105,10 @@ fun GemSimulationWarningRow.descriptionRes(): Int? = when (kind) {
 @Composable
 fun GemSimulationWarningRow.descriptionText(): String? = when (kind) {
     GemSimulationWarningKind.VALIDATION_ERROR -> if (severity != SimulationSeverity.CRITICAL) message.orEmpty() else message ?: stringResource(R.string.errors_error_occurred)
-    else -> message ?: descriptionRes()?.let { stringResource(it) }
+    GemSimulationWarningKind.UNLIMITED_APPROVAL,
+    GemSimulationWarningKind.NFT_COLLECTION_APPROVAL,
+    GemSimulationWarningKind.EXTERNALLY_OWNED_SPENDER,
+    GemSimulationWarningKind.SUSPICIOUS_SPENDER -> message ?: descriptionRes()?.let { stringResource(it) }
 }
 
 @Composable

@@ -57,7 +57,7 @@ extension GemConfirmError {
     var hasInfoSheet: Bool {
         switch self {
         case .ScanMalicious, .ScanMemoRequired, .InsufficientBalance, .InsufficientNetworkFee, .MinimumAccountBalanceTooLow, .BelowSwapMinimum, .Sign(.dustThreshold, _, _): true
-        default: false
+        case .FeeRatesMissing, .Offline, .Network, .Load, .Broadcast, .Record, .AccountMissing, .BalanceMissing, .SenderMismatch, .Sign, .ApprovalInvalid, .Cancelled: false
         }
     }
 

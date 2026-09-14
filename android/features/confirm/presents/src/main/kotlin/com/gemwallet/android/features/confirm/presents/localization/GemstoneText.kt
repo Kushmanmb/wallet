@@ -112,7 +112,9 @@ private fun GemConfirmException.string(): String = when (this) {
     is GemConfirmException.Sign -> when (error) {
         GemSignerError.DustThreshold -> stringResource(R.string.errors_dust_threshold_short)
         GemSignerError.InsufficientFunds -> stringResource(R.string.info_insufficient_balance_title)
-        else -> msg
+        is GemSignerError.InvalidInput,
+        is GemSignerError.SigningError,
+        is GemSignerError.SwapValueBelowMinimum -> msg
     }
     is GemConfirmException.Network -> msg
     is GemConfirmException.Load -> msg

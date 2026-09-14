@@ -36,7 +36,10 @@ internal fun BannerItem(
                 }
 
                 BannerEvent.TradePerpetuals -> onOpenPerpetuals()
-                else -> {}
+                BannerEvent.AccountActivation,
+                BannerEvent.AccountBlockedMultiSignature,
+                BannerEvent.SuspiciousAsset,
+                BannerEvent.Onboarding -> Unit
             }
         },
         false

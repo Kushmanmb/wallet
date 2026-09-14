@@ -55,7 +55,21 @@ internal fun ConfirmErrorInfo(
         is GemConfirmException.InsufficientBalance -> error.asset.toPrimitives()
         is GemConfirmException.InsufficientNetworkFee -> error.asset.toPrimitives()
         is GemConfirmException.BelowSwapMinimum -> error.asset.toPrimitives()
-        else -> null
+        is GemConfirmException.MinimumAccountBalanceTooLow,
+        is GemConfirmException.Sign,
+        is GemConfirmException.ScanMalicious,
+        is GemConfirmException.ScanMemoRequired,
+        is GemConfirmException.FeeRatesMissing,
+        is GemConfirmException.Offline,
+        is GemConfirmException.Network,
+        is GemConfirmException.Load,
+        is GemConfirmException.Broadcast,
+        is GemConfirmException.Record,
+        is GemConfirmException.AccountMissing,
+        is GemConfirmException.BalanceMissing,
+        is GemConfirmException.SenderMismatch,
+        is GemConfirmException.ApprovalInvalid,
+        is GemConfirmException.Cancelled -> null
     }
     val onSelectAcquireAsset: (Asset, Int?) -> Unit = { asset, amount ->
         isShowInfoSheet = false
@@ -96,7 +110,7 @@ internal fun ConfirmErrorInfo(
 }
 
 @Composable
-private fun Throwable.toInfoSheetEntity(
+private fun GemConfirmException.toInfoSheetEntity(
     fee: FeeUIModel.FeeInfo?,
     assetPrice: AssetPriceValue?,
     acquireFlow: (Asset) -> GemAcquireAssetFlow,
@@ -157,7 +171,19 @@ private fun Throwable.toInfoSheetEntity(
             )
         }
         is GemConfirmException.Sign -> InfoSheetEntity.DustThresholdInfo(chain = chain.requireChain()).takeIf { error == GemSignerError.DustThreshold }
-        else -> null
+        is GemConfirmException.ScanMalicious,
+        is GemConfirmException.ScanMemoRequired,
+        is GemConfirmException.FeeRatesMissing,
+        is GemConfirmException.Offline,
+        is GemConfirmException.Network,
+        is GemConfirmException.Load,
+        is GemConfirmException.Broadcast,
+        is GemConfirmException.Record,
+        is GemConfirmException.AccountMissing,
+        is GemConfirmException.BalanceMissing,
+        is GemConfirmException.SenderMismatch,
+        is GemConfirmException.ApprovalInvalid,
+        is GemConfirmException.Cancelled -> null
     }
 }
 
