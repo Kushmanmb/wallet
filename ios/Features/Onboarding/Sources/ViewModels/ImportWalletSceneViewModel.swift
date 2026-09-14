@@ -113,7 +113,7 @@ extension ImportWalletSceneViewModel {
 
     func onChangeInput(_: String, newValue: String) {
         wordsSuggestion = wordSuggester.wordSuggestionCalculate(value: newValue)
-        if importType == .address, let chain {
+        if importType.resolvesNames(), let chain {
             nameRecordViewModel?.getNameRecord(name: newValue, chain: chain)
         } else {
             nameRecordViewModel?.reset()

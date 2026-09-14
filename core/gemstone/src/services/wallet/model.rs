@@ -30,6 +30,10 @@ impl GemWalletImportKind {
     pub fn shows_view_only_warning(&self) -> bool {
         matches!(self, Self::Address)
     }
+
+    pub fn resolves_names(&self) -> bool {
+        matches!(self, Self::Address)
+    }
 }
 
 #[derive(Debug, Clone, uniffi::Record)]

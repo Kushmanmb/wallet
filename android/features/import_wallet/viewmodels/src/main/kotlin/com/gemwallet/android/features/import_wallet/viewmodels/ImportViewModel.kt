@@ -60,10 +60,10 @@ class ImportViewModel @Inject constructor(
 
     fun onInput(value: String) {
         val importType = state.value.importType
-        when (importType.kind) {
-            GemWalletImportKind.ADDRESS -> nameRecordController.getNameRecord(value, importType.chain)
-            GemWalletImportKind.PHRASE,
-            GemWalletImportKind.PRIVATE_KEY -> nameRecordController.reset()
+        if (importType.kind.resolvesNames()) {
+            nameRecordController.getNameRecord(value, importType.chain)
+        } else {
+            nameRecordController.reset()
         }
     }
 
