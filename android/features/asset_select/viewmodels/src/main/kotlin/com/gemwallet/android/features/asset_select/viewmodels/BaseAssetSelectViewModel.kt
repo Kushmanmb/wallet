@@ -58,6 +58,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.wallet.core.primitives.WalletType
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 open class BaseAssetSelectViewModel(
@@ -190,7 +191,14 @@ open class BaseAssetSelectViewModel(
     }
     .stateIn(viewModelScope, SharingStarted.Eagerly, UIState.Idle)
 
-    val isAddAssetAvailable = getSession().map { flow.addCustomToken && service.supportsTokens(it?.wallet?.toGem()) }
+    val isChainFilterAvailable = combine(getSession(), availableChains) { session, chains ->
+        flow.showsChainFilter(session?.wallet?.type == WalletType.Multicoin, chains.isNotEmpty())
+    }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val isAddAssetAvailable = combine(getSession(), availableChains) { session, chains ->
+        flow.showsAddToken(service.supportsTokens(session?.wallet?.toGem()), chains.isNotEmpty())
+    }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     fun onSelected(asset: Asset) {

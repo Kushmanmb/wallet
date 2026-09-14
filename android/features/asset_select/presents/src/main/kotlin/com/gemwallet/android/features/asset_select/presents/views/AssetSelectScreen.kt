@@ -91,6 +91,7 @@ fun AssetSelectScreen(
     val recent by viewModel.recent.collectAsStateWithLifecycle()
     val showRecents = flow.showsRecents(viewModel.queryState.text.isNotEmpty(), recent.isNotEmpty()) && onSelectRecent != null
     val isAddAvailable by viewModel.isAddAssetAvailable.collectAsStateWithLifecycle()
+    val isChainFilterAvailable by viewModel.isChainFilterAvailable.collectAsStateWithLifecycle()
     val availableChains by viewModel.availableChains.collectAsStateWithLifecycle()
     val chainsFilter by viewModel.chainFilter.collectAsStateWithLifecycle()
     val balanceFilter by viewModel.balanceFilter.collectAsStateWithLifecycle()
@@ -117,7 +118,7 @@ fun AssetSelectScreen(
         availableChains = availableChains,
         chainsFilter = chainsFilter,
         balanceFilter = balanceFilter,
-        showFilter = showFilter ?: flow.chainFilter,
+        showFilter = showFilter ?: isChainFilterAvailable,
         showBalanceFilter = flow.balanceFilter,
         onAction = { action ->
             when (action) {

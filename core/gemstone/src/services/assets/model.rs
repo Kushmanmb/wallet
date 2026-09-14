@@ -109,6 +109,14 @@ impl GemSelectAssetFlow {
     pub fn shows_recents(&self, is_searching: bool, has_recents: bool) -> bool {
         self.recents && !is_searching && has_recents
     }
+
+    pub fn shows_add_token(&self, supports_tokens: bool, has_chains: bool) -> bool {
+        self.add_custom_token && supports_tokens && has_chains
+    }
+
+    pub fn shows_chain_filter(&self, is_multicoin: bool, has_chains: bool) -> bool {
+        self.chain_filter && is_multicoin && has_chains
+    }
 }
 
 #[uniffi::export]

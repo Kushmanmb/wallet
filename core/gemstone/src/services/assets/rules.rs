@@ -999,6 +999,19 @@ mod tests {
     }
 
     #[test]
+    fn test_add_token_and_the_chain_filter_need_chains_to_act_on() {
+        let flow = select_asset_flow(GemSelectAssetType::Send, None);
+        let manage = select_asset_flow(GemSelectAssetType::Manage, None);
+
+        assert!(manage.add_custom_token && manage.shows_add_token(true, true));
+        assert!(!manage.shows_add_token(false, true), "a wallet that holds no tokens cannot add one");
+        assert!(!manage.shows_add_token(true, false), "there is nothing to add a token to without a chain");
+        assert!(!flow.shows_chain_filter(true, true) || flow.chain_filter);
+        assert!(!manage.shows_chain_filter(false, true), "a single chain wallet has nothing to filter");
+        assert!(!manage.shows_chain_filter(true, false));
+    }
+
+    #[test]
     fn test_details_state_offers_earn_until_there_is_an_earn_balance() {
         let earn_enabled = metadata(true, false, false, true);
 

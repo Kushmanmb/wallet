@@ -112,11 +112,11 @@ public final class SelectAssetViewModel {
     }
 
     public var showAddToken: Bool {
-        flow.addCustomToken && service.supportsTokens(wallet: wallet.map()) && filterModel.chainsFilter.hasChains
+        flow.showsAddToken(supportsTokens: service.supportsTokens(wallet: wallet.map()), hasChains: filterModel.chainsFilter.hasChains)
     }
 
     public var showFilter: Bool {
-        flow.chainFilter && wallet.isMultiCoins && filterModel.chainsFilter.hasChains
+        flow.showsChainFilter(isMulticoin: wallet.isMultiCoins, hasChains: filterModel.chainsFilter.hasChains)
     }
 
     var isNetworkSearchEnabled: Bool {
