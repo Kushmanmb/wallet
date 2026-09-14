@@ -6,6 +6,7 @@ mod access_token_cacher;
 pub use self::access_token_cacher::{AccessTokenCacher, AccessTokenFuture};
 
 #[macro_use]
+pub mod known_entries;
 pub mod string_serde;
 
 mod async_result;
