@@ -4,6 +4,7 @@ import Components
 import func Gemstone.delegationStatus
 import struct Gemstone.GemDelegationStatus
 import protocol Gemstone.GemStakeServiceProtocol
+import struct Gemstone.GemTransferData
 import GemstonePrimitives
 import Formatters
 import Foundation
@@ -20,6 +21,7 @@ public struct DelegationViewModel: Sendable {
     private let service: any GemStakeServiceProtocol
     private let priceFormatter: CurrencyFormatter
     public let validatorModel: ValidatorViewModel
+    public let destination: DelegationDestination
 
     public init(
         service: any GemStakeServiceProtocol,
@@ -27,6 +29,7 @@ public struct DelegationViewModel: Sendable {
         asset: Asset,
         formatter: ValueFormatter = .short,
         currencyCode: String,
+        destination: DelegationDestination = .details,
     ) {
         self.delegation = delegation
         self.currencyCode = currencyCode
@@ -35,6 +38,7 @@ public struct DelegationViewModel: Sendable {
         self.service = service
         priceFormatter = CurrencyFormatter(type: .currency, currencyCode: currencyCode)
         validatorModel = ValidatorViewModel(row: service.validatorRow(validator: delegation.validator.map()))
+        self.destination = destination
     }
 
     public var status: GemDelegationStatus {
@@ -142,4 +146,9 @@ extension DelegationViewModel: ValueHeaderViewModel {
     public var subtitleColor: Color {
         .secondary
     }
+}
+
+public enum DelegationDestination: Hashable, Sendable {
+    case details
+    case withdraw(GemTransferData)
 }

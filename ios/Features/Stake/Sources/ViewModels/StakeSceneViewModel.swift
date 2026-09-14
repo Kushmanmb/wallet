@@ -139,9 +139,16 @@ public final class StakeSceneViewModel {
     }
 
     func navigationDestination(for delegation: DelegationViewModel) -> any Hashable {
-        switch service.delegationDestination(walletType: wallet.type.map(), asset: asset.map(), delegation: delegation.delegation.map()) {
+        switch delegation.destination {
         case let .withdraw(transfer): transfer
         case .details: delegation.delegation
+        }
+    }
+
+    private func destination(for delegation: Delegation) -> DelegationDestination {
+        switch service.delegationDestination(walletType: wallet.type.map(), asset: asset.map(), delegation: delegation.map()) {
+        case let .withdraw(transfer): .withdraw(transfer)
+        case .details: .details
         }
     }
 
@@ -153,7 +160,16 @@ public final class StakeSceneViewModel {
     }
 
     var delegationsViewState: StateViewType<[DelegationViewModel]> {
-        let delegationModels = delegations.map { DelegationViewModel(service: service, delegation: $0, asset: asset, currencyCode: service.getCurrency()) }
+        let currencyCode = service.getCurrency()
+        let delegationModels = delegations.map { delegation in
+            DelegationViewModel(
+                service: service,
+                delegation: delegation,
+                asset: asset,
+                currencyCode: currencyCode,
+                destination: destination(for: delegation),
+            )
+        }
 
         switch delegationsState {
         case .noData: return .noData
