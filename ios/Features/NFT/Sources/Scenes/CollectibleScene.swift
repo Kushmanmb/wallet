@@ -1,7 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import func Gemstone.socialLinks
 import struct Gemstone.GemCollectibleIdentifier
 import enum Gemstone.GemCollectibleRow
 import GemstonePrimitives
@@ -41,7 +40,7 @@ public struct CollectibleScene: View {
                     }
                 case let .links(links):
                     Section(Localized.Social.links) {
-                        SocialLinksView(model: SocialLinksViewModel(links: socialLinks(links: links)))
+                        SocialLinksView(model: model.socialLinksModel(links))
                     }
                 }
             }

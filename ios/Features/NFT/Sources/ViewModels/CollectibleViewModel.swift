@@ -17,6 +17,8 @@ import PrimitivesComponents
 import Store
 import Style
 import SwiftUI
+import func Gemstone.socialLinks
+import typealias Gemstone.AssetLink
 
 @Observable
 @MainActor
@@ -117,6 +119,10 @@ public final class CollectibleViewModel {
             placeholder: ChainImage(chain: chain).image,
             chainPlaceholder: .none,
         )
+    }
+
+    func socialLinksModel(_ links: [Gemstone.AssetLink]) -> SocialLinksViewModel {
+        SocialLinksViewModel(links: socialLinks(links: links))
     }
 
     func attributeText(_ value: GemCollectibleAttributeValue) -> String {

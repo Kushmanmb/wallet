@@ -7,6 +7,8 @@ import enum Gemstone.GemAssetMarketRow
 import struct Gemstone.GemChart
 import enum Gemstone.GemChartPhase
 import enum Gemstone.GemChartSection
+import func Gemstone.socialLinks
+import typealias Gemstone.AssetLink
 import struct Gemstone.GemChartSession
 import protocol Gemstone.GemChartServiceProtocol
 import enum Gemstone.GemServiceError
@@ -90,6 +92,10 @@ public final class ChartSceneViewModel: ChartListViewable {
         session = service.newSession()
         priceQuery = ObservableQuery(PriceRequest(assetId: assetModel.asset.id), initialValue: .with(asset: assetModel.asset))
         self.onSetPriceAlert = onSetPriceAlert
+    }
+
+    func socialLinksModel(_ links: [Gemstone.AssetLink]) -> SocialLinksViewModel {
+        SocialLinksViewModel(links: socialLinks(links: links))
     }
 
     func marketValues(_ rows: [GemAssetMarketRow]) -> [MarketValueViewModel] {
