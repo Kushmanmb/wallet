@@ -100,7 +100,6 @@ Copy: [`FiatScene.swift`](../ios/Features/FiatConnect/Sources/Scenes/FiatScene.s
 
 Contract: [a number crosses as a value and a style](ARCHITECTURE.md#a-number-crosses-as-a-value-and-a-style-never-as-a-string-or-a-callback). The precision rules, the value ladder, the abbreviation threshold and the dust cut are Core's, and `GemFormattedNumber` carries a number with its resolved display. What is left is the records that still hand the apps a bare `f64` and let each pick a style. Copy [`GemFiatQuoteRow`](../core/gemstone/src/services/fiat/model.rs) and [`GemAmountError::display`](../core/gemstone/src/services/amount/model.rs).
 
-- **F13** **S** Rewards redemption — `option.value` is formatted with the short style and the option's asset on [iOS](../ios/Features/Settings/Sources/Settings/ViewModels/RewardRedemptionOptionViewModel.swift) and [Android](../android/features/referral/presents/src/main/kotlin/com/gemwallet/android/features/referral/views/components/ReferralInfo.kt).
 
 - **F14** **M** Chart numbers — `GemChartHeader` (value, secondary value, change percentage), `GemCandleTooltip` (open, high, low, close, change, volume) and `GemPerpetualChartLine` (price) all cross as bare `f64` and each app picks the style.
 - **F15** **M** Perpetual position and autoclose — `GemAutocloseSummary`, `GemPerpetualAutoclose`, `GemAutocloseField` and `GemPerpetualPositionRow.liquidation_price`.

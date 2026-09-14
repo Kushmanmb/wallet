@@ -1,4 +1,7 @@
 use chrono::{DateTime, Utc};
+use number_formatter::BigNumberFormatter;
+use crate::formatted_number::GemFormattedNumber;
+use crate::precision::GemValueStyle;
 use primitives::{CoreEmoji, RewardRedemptionOption, RewardStatus, Rewards};
 
 use super::model::{GemRewardsRedemption, GemRewardsState};
@@ -41,11 +44,15 @@ fn redemptions(rewards: &Rewards) -> Vec<GemRewardsRedemption> {
     rewards
         .redemption_options
         .iter()
-        .filter(|option| option.asset.is_some())
-        .map(|option| GemRewardsRedemption {
-            points_text: points_text(option.points),
-            option: option.clone(),
-            can_redeem: can_redeem(rewards, option),
+        .filter_map(|option| {
+            let asset = option.asset.as_ref()?;
+            let value = BigNumberFormatter::value_as_f64(&option.value.to_string(), asset.decimals as u32).ok()?;
+            Some(GemRewardsRedemption {
+                points_text: points_text(option.points),
+                value: GemFormattedNumber::amount(value, Some(asset.symbol.clone()), GemValueStyle::Short),
+                option: option.clone(),
+                can_redeem: can_redeem(rewards, option),
+            })
         })
         .collect()
 }
@@ -99,6 +106,23 @@ mod tests {
             value: BigUint::from(1u32),
             remaining,
         }
+    }
+
+    #[test]
+    fn test_a_redemption_carries_its_payout_as_a_short_amount_in_the_assets_symbol() {
+        let asset = Asset::mock_eth();
+        let rewards = Rewards {
+            points: 1000,
+            redemption_options: vec![RewardRedemptionOption {
+                value: BigUint::from(25_000_000_000_000_000u64),
+                ..option("one", 10, None, Some(asset.clone()))
+            }],
+            ..Rewards::default()
+        };
+
+        let redemption = redemptions(&rewards).pop().expect("an option with an asset is offered");
+        assert_eq!(redemption.value.value, 0.025);
+        assert_eq!(redemption.value.unit, crate::formatted_number::GemNumberUnit::Symbol { symbol: asset.symbol });
     }
 
     #[test]

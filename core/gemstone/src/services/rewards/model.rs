@@ -1,3 +1,4 @@
+use crate::formatted_number::GemFormattedNumber;
 use chrono::{DateTime, Utc};
 use primitives::RewardRedemptionOption;
 
@@ -26,4 +27,5 @@ pub struct GemRewardsRedemption {
     pub option: RewardRedemptionOption,
     pub can_redeem: bool,
     pub points_text: String,
+    pub value: GemFormattedNumber,
 }
