@@ -13,7 +13,6 @@ import com.gemwallet.android.domains.confirm.perpetualType
 import com.gemwallet.android.domains.confirm.swapData
 import com.gemwallet.android.domains.confirm.toAsset
 import com.gemwallet.android.domains.confirm.confirmLoadOptions
-import com.gemwallet.android.domains.confirm.toGem
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -41,7 +40,7 @@ import uniffi.gemstone.GemExecuteResult
 import uniffi.gemstone.perpetualDetails
 import uniffi.gemstone.swapQuoteSummary
 import com.gemwallet.android.model.Crypto
-import com.gemwallet.android.model.FeeSelection
+import uniffi.gemstone.GemConfirmFeeSelection
 import com.gemwallet.android.model.FeeAssetSelection
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.gemwallet.android.ui.models.perpetual.PerpetualConfirmDetailsUIModelFactory
@@ -96,7 +95,7 @@ class ConfirmViewModel @Inject constructor(
     val screen = MutableStateFlow(GemConfirmScreen(phase = GemConfirmPhase.LOADING, amountFailed = false, hasCriticalWarning = false, failure = null))
 
     val isNetworkFeeSheetVisible = MutableStateFlow(false)
-    val feeSelection = MutableStateFlow<FeeSelection>(FeeSelection.Preset(FeePriority.Normal))
+    val feeSelection = MutableStateFlow<GemConfirmFeeSelection>(GemConfirmFeeSelection.Priority(FeePriority.Normal.toGem()))
     private val feeAssetSelection = MutableStateFlow<FeeAssetSelection>(FeeAssetSelection.Automatic)
     private var requestSimulation: SimulationResult? = null
 
@@ -247,7 +246,7 @@ class ConfirmViewModel @Inject constructor(
 
     fun init(transfer: GemTransferData, simulationResult: SimulationResult? = null) {
         requestSimulation = simulationResult
-        feeSelection.value = FeeSelection.Preset(transfer.defaultFeePriority().toPrimitives())
+        feeSelection.value = GemConfirmFeeSelection.Priority(transfer.defaultFeePriority())
         viewModelScope.launch(Dispatchers.IO) {
             val pack = transfer.pack()
             if (savedStateHandle.get<String?>(RouteArgument.Params.key) == pack) {
@@ -267,12 +266,12 @@ class ConfirmViewModel @Inject constructor(
         isNetworkFeeSheetVisible.value = error is GemConfirmException.InsufficientNetworkFee
     }
 
-    fun feeDetailsModel(currentFee: FeeUIModel.FeeInfo, feeAsset: FeeAssetUIModel, selection: FeeSelection): FeeDetailsModel? {
+    fun feeDetailsModel(currentFee: FeeUIModel.FeeInfo, feeAsset: FeeAssetUIModel, selection: GemConfirmFeeSelection): FeeDetailsModel? {
         val confirmData = content.value?.confirmData ?: return null
-        return FeeDetailsModel(currentFee, feeAsset, confirmData.feeRateRows(selection.toGem(), feeAsset.asset.toGem()))
+        return FeeDetailsModel(currentFee, feeAsset, confirmData.feeRateRows(selection, feeAsset.asset.toGem()))
     }
 
-    fun changeFeeSelection(selection: FeeSelection) {
+    fun changeFeeSelection(selection: GemConfirmFeeSelection) {
         if (selection == feeSelection.value) return
         screen.update { it.onLoadStarted() }
         feeSelection.update { selection }

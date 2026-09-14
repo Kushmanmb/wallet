@@ -39,7 +39,8 @@ import com.gemwallet.android.domains.confirm.FeeAssetUIModel
 import com.gemwallet.android.domains.confirm.FeeDetailsModel
 import com.gemwallet.android.domains.confirm.FeeRateUIModel
 import com.gemwallet.android.domains.confirm.FeeUIModel
-import com.gemwallet.android.model.FeeSelection
+import com.gemwallet.android.ext.toPrimitives
+import uniffi.gemstone.GemConfirmFeeSelection
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.SuffixTextField
 import com.gemwallet.android.ui.components.title
@@ -74,11 +75,11 @@ import uniffi.gemstone.Config
 fun FeeDetails(
     isVisible: Boolean,
     currentFee: FeeUIModel.FeeInfo?,
-    selection: FeeSelection,
-    feeDetailsModel: (FeeUIModel.FeeInfo, FeeAssetUIModel, FeeSelection) -> FeeDetailsModel?,
+    selection: GemConfirmFeeSelection,
+    feeDetailsModel: (FeeUIModel.FeeInfo, FeeAssetUIModel, GemConfirmFeeSelection) -> FeeDetailsModel?,
     feeAsset: FeeAssetUIModel?,
     feeAssets: List<FeeAssetUIModel>,
-    onSelect: (FeeSelection) -> Unit,
+    onSelect: (GemConfirmFeeSelection) -> Unit,
     onSelectFeeAsset: (AssetId) -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -90,16 +91,16 @@ fun FeeDetails(
     val unitSymbol = feeUnitSuffix(model.feeUnitType, feeAsset.asset.symbol)
     val decimals = model.decimals
 
-    val selectedCustomRate = (selection as? FeeSelection.Custom)?.gasPrice
+    val selectedCustomRate = selection.customGasPrice()
     val showFeeAssets = feeAssets.any { it.asset.id != currentFee.feeAsset.id }
     var page by remember(isVisible) { mutableStateOf(FeeDetailsPage.Details) }
     val customModel = remember(page, model, selection) {
-        NetworkFeeCustomViewModel(model, selection, selectedCustomRate)
+        NetworkFeeCustomViewModel(model, selectedCustomRate)
     }
     val navigateToDetails: () -> Unit = { page = FeeDetailsPage.Details }
     val confirmCustomFee: () -> Unit = {
         customModel.rate?.let {
-            onSelect(FeeSelection.Custom(it))
+            onSelect(GemConfirmFeeSelection.Custom(it))
             onCancel()
         }
     }
@@ -167,7 +168,7 @@ fun FeeDetails(
 @Composable
 private fun FeeRates(
     currentFee: FeeUIModel.FeeInfo,
-    selection: FeeSelection,
+    selection: GemConfirmFeeSelection,
     feeRateModels: List<FeeRateUIModel>,
     feeAsset: FeeAssetUIModel,
     unitSymbol: String,
@@ -175,7 +176,7 @@ private fun FeeRates(
     customRateText: String?,
     customFiat: String?,
     showFeeAssets: Boolean,
-    onSelect: (FeeSelection) -> Unit,
+    onSelect: (GemConfirmFeeSelection) -> Unit,
     onCustom: () -> Unit,
     onFeeAssets: () -> Unit,
 ) {
@@ -200,9 +201,9 @@ private fun FeeRates(
                     title = feeRate.priority.title(),
                     rate = feeRate.price,
                     fiat = feeRate.fiatValue,
-                    isSelected = selection is FeeSelection.Preset && selection.priority == feeRate.priority,
+                    isSelected = selection.selectedPriority()?.toPrimitives() == feeRate.priority,
                     position = position,
-                    onClick = { onSelect(FeeSelection.Preset(feeRate.priority)) },
+                    onClick = { onSelect(GemConfirmFeeSelection.Priority(feeRate.priority.toGem())) },
                 )
             }
             if (supportsCustomFee) {
@@ -212,7 +213,7 @@ private fun FeeRates(
                         title = stringResource(R.string.fee_rate_custom),
                         rate = customRateText,
                         fiat = customFiat,
-                        isSelected = selection is FeeSelection.Custom,
+                        isSelected = selection.customGasPrice() != null,
                         position = ListPosition.getPosition(feeRateModels.size, totalCount),
                         onClick = onCustom,
                     )

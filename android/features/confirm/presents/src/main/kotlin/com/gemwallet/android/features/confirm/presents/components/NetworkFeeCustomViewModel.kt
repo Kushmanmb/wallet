@@ -9,12 +9,10 @@ import com.gemwallet.android.domains.confirm.FeeDetailsModel
 import com.gemwallet.android.domains.confirm.FeeUIModel
 import uniffi.gemstone.GemNumberFormat
 import java.text.DecimalFormatSymbols
-import com.gemwallet.android.model.FeeSelection
 import java.math.BigInteger
 
 class NetworkFeeCustomViewModel(
     private val model: FeeDetailsModel,
-    private val selection: FeeSelection,
     initialRate: BigInteger?,
 ) {
     private val decimals: Int = model.decimals
@@ -22,7 +20,7 @@ class NetworkFeeCustomViewModel(
     var input by mutableStateOf(initialRate?.let { CustomFee.format(it, decimals) } ?: "")
         private set
 
-    private val custom by derivedStateOf { model.customFee(input, selection) }
+    private val custom by derivedStateOf { model.customFee(input) }
 
     val placeholder: String get() = custom.placeholder
     val networkFee: FeeUIModel.FeeInfo get() = custom.networkFee
