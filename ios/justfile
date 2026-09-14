@@ -79,6 +79,20 @@ run: build
     @echo "==> Launching app..."
     @xcrun simctl launch --console-pty "{{SIMULATOR_NAME}}" com.gemwallet.ios
 
+# Fastest compile check while iterating: builds one package with SwiftPM, no xcodebuild.
+# ~1-2s warm against ~30s for `just build`, and reports every error in the package
+# instead of stopping at the first failing file.
+# Example: just check GemstonePrimitives
+check PACKAGE:
+    @cd Packages/{{PACKAGE}} && swift build
+
+# Runs one package's tests with SwiftPM. Only works for packages that do not depend on
+# Gemstone — the static library is built for the iOS simulator and will not link on the
+# host. For those use `just test <TestTarget>`.
+# Example: just check-test Primitives
+check-test PACKAGE:
+    @cd Packages/{{PACKAGE}} && swift test
+
 # Example: just build-package Primitives
 build-package PACKAGE:
     @set -o pipefail && xcodebuild -project Gem.xcodeproj \
