@@ -29,6 +29,8 @@ import com.gemwallet.android.ui.icons.AppIcons
 import uniffi.gemstone.GemTransactionFilter
 import com.wallet.core.primitives.Chain
 import com.gemwallet.android.ui.theme.space0
+import uniffi.gemstone.GemTransactionsEmptyState
+import uniffi.gemstone.transactionsEmptyState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +73,7 @@ internal fun TransactionsScene(
                     item {
                         EmptyContentView(
                             type = transactionsEmptyContentType(
-                                hasFilters = chainsFilter.isNotEmpty() || typeFilter.isNotEmpty(),
+                                hasFilters = transactionsEmptyState(chainsFilter.map { it.string }, typeFilter) == GemTransactionsEmptyState.NO_RESULTS,
                                 showBuyAction = showBuyAction,
                                 showReceiveAction = showReceiveAction,
                                 onAction = onAction,

@@ -1,6 +1,6 @@
 use crate::models::custom_types::GemBigUint;
 use crate::services::swap::model::GemSwapRate;
-use primitives::{AddressName, Asset, AssetId, AssetPrice, NFTAssetId, PerpetualDirection, Resource, TransactionExtended, TransactionType};
+use primitives::{AddressName, Asset, AssetId, AssetPrice, Chain, NFTAssetId, PerpetualDirection, Resource, TransactionExtended, TransactionType};
 
 use super::rules;
 use primitives::BlockExplorerLink;
@@ -156,6 +156,20 @@ pub struct GemTransactionRow {
     pub value: GemTransactionRowValue,
     pub equivalent_value: GemTransactionRowValue,
     pub nft_image_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemTransactionsEmptyState {
+    NoActivity,
+    NoResults,
+}
+
+#[uniffi::export]
+pub fn transactions_empty_state(chains: Vec<Chain>, filters: Vec<GemTransactionFilter>) -> GemTransactionsEmptyState {
+    match chains.is_empty() && filters.is_empty() {
+        true => GemTransactionsEmptyState::NoActivity,
+        false => GemTransactionsEmptyState::NoResults,
+    }
 }
 
 #[uniffi::export]
