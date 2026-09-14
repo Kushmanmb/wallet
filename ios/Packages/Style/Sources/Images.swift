@@ -161,7 +161,7 @@ public enum Images {
         public static let reddit = Image(.reddit)
         public static let youtube = Image(.youtube)
         public static let website = Image(.website)
-        public static let facebook = Image("") // TODO:
+        public static let facebook = Image(.website)
         public static let coinmarketcap = Image(.coinmarketcap)
         public static let opensea = Image(.opensea)
         public static let magiceden = Image(.magiceden)

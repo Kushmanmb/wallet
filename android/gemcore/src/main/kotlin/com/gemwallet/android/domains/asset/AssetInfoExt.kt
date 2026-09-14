@@ -4,9 +4,7 @@ import uniffi.gemstone.GemSwapValue
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.toAssetPriceValue
 import com.gemwallet.android.model.ValueFormatter
-import com.gemwallet.android.model.CurrencyFormatter
 import com.wallet.core.primitives.Chain
-import com.wallet.core.primitives.StakeChain
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -19,15 +17,8 @@ val AssetInfo.decimals: Int
 val AssetInfo.title: String
     get() = asset.title
 
-val AssetInfo.stakeChain: StakeChain? // TODO: Out to StakeExt
-    get() = asset.stakeChain
-
 val AssetInfo.chain: Chain
     get() = asset.chain
-
-val AssetInfo.availableBalanceFormatted: String // TODO: Out to BalanceExt
-    get() = ValueFormatter(style = ValueFormatter.Style.Auto)
-        .string(balance.balance.available, balance.asset)
 
 val AssetInfo.availableBalanceAmount: String
     get() = ValueFormatter(style = ValueFormatter.Style.Auto)

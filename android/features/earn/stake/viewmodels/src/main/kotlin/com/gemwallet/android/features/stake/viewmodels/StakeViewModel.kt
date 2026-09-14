@@ -72,7 +72,7 @@ class StakeViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, getWalletAssets().value.firstOrNull { it.asset.id == initialAssetId })
 
     val stakeInfoUrl = assetInfo
-        .mapLatest { it?.stakeChain?.let { chain -> AppUrl.staking(chain.string) } }
+        .mapLatest { it?.asset?.stakeChain?.let { chain -> AppUrl.staking(chain.string) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val lockTimeDays = assetInfo
