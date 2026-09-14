@@ -22,7 +22,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import uniffi.gemstone.GemAssetConfigServiceInterface
 import uniffi.gemstone.GemRecentActivityServiceInterface
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.Dispatchers
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -42,6 +43,7 @@ class RecentsSheetViewModel @Inject constructor(
     private val recentAssetsService: RecentAssetsService,
     private val recentActivityService: GemRecentActivityServiceInterface,
     private val assetConfig: GemAssetConfigServiceInterface,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     val query = TextFieldState()
@@ -61,7 +63,7 @@ class RecentsSheetViewModel @Inject constructor(
                 ::buildUIModel,
             )
         }
-        .flowOn(Dispatchers.IO)
+        .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, RecentsSheetUIModel.Empty)
 
     fun show(filters: Set<AssetFilter> = emptySet(), types: List<RecentActivityType> = RecentActivityType.entries) {
@@ -75,7 +77,7 @@ class RecentsSheetViewModel @Inject constructor(
 
     fun onClear() {
         val types = config.value?.types ?: RecentActivityType.entries
-        viewModelScope.launch(Dispatchers.IO) { recentActivityService.clear(types.map { it.toGem() }) }
+        viewModelScope.launch(ioDispatcher) { recentActivityService.clear(types.map { it.toGem() }) }
     }
 
     private fun buildUIModel(items: List<RecentAsset>, searchText: String): RecentsSheetUIModel {

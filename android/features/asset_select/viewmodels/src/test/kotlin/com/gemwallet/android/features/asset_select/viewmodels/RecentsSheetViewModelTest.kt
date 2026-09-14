@@ -63,7 +63,7 @@ class RecentsSheetViewModelTest {
 
     @Test
     fun `show makes visible and dismiss hides`() = runTest(testDispatcher) {
-        val vm = RecentsSheetViewModel(recentAssetsService, recentActivityService, GemAssetConfigService())
+        val vm = RecentsSheetViewModel(recentAssetsService, recentActivityService, GemAssetConfigService(), testDispatcher)
 
         assertFalse(vm.visible.value)
 
@@ -79,7 +79,7 @@ class RecentsSheetViewModelTest {
     @Test
     fun `uiModel keeps content after dismiss`() = runTest(testDispatcher) {
         every { recentAssetsService.getRecentAssets(any()) } returns flowOf(recentItems)
-        val vm = RecentsSheetViewModel(recentAssetsService, recentActivityService, GemAssetConfigService())
+        val vm = RecentsSheetViewModel(recentAssetsService, recentActivityService, GemAssetConfigService(), testDispatcher)
 
         vm.show()
         vm.uiModel.first { it.items.isNotEmpty() }
@@ -91,7 +91,7 @@ class RecentsSheetViewModelTest {
 
     @Test
     fun `clear delegates to coordinator with current types`() = runTest(testDispatcher) {
-        val vm = RecentsSheetViewModel(recentAssetsService, recentActivityService, GemAssetConfigService())
+        val vm = RecentsSheetViewModel(recentAssetsService, recentActivityService, GemAssetConfigService(), testDispatcher)
         val types = listOf(RecentActivityType.Swap)
         vm.show(types = types)
         advanceUntilIdle()

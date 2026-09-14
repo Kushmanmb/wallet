@@ -20,7 +20,8 @@ import com.wallet.core.primitives.AssetMarket
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PriceAlert
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -40,6 +41,7 @@ class AssetChartViewModel internal constructor(
     getPriceAlerts: GetPriceAlerts,
     getCurrentCurrency: GetCurrentCurrency,
     private val marketUIModelFactory: AssetMarketUIModelFactory,
+    private val ioDispatcher: CoroutineDispatcher,
     val assetId: AssetId,
 ) : ViewModel() {
 
@@ -58,7 +60,7 @@ class AssetChartViewModel internal constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, storedAssetInfo?.asset?.name.orEmpty())
 
     val marketUIModel = combine(assetInfo, links, market, priceAlerts, getCurrentCurrency.getCurrency(), ::marketUIModel)
-        .flowOn(Dispatchers.IO)
+        .flowOn(ioDispatcher)
         .stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
@@ -95,6 +97,7 @@ class AssetChartViewModel internal constructor(
         getPriceAlerts: GetPriceAlerts,
         getCurrentCurrency: GetCurrentCurrency,
         marketUIModelFactory: AssetMarketUIModelFactory,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher,
         savedStateHandle: SavedStateHandle,
     ) : this(
         getAssetTokenInfo = getAssetTokenInfo,
@@ -105,6 +108,7 @@ class AssetChartViewModel internal constructor(
         getPriceAlerts = getPriceAlerts,
         getCurrentCurrency = getCurrentCurrency,
         marketUIModelFactory = marketUIModelFactory,
+        ioDispatcher = ioDispatcher,
         assetId = savedStateHandle.requireAssetId(),
     )
 }

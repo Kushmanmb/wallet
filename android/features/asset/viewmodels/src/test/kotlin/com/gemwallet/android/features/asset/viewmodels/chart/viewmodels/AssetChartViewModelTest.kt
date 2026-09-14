@@ -151,6 +151,7 @@ class AssetChartViewModelTest {
         getPriceAlerts = getPriceAlerts,
         getCurrentCurrency = getCurrentCurrency,
         marketUIModelFactory = AssetMarketUIModelFactory(),
+        ioDispatcher = testDispatcher,
         assetId = asset.id,
     ).also(viewModels::add)
 }
