@@ -4,6 +4,7 @@ use primitives::{Chain, Latency};
 
 use super::model::{GemAddNodeError, GemNodeCheck, GemNodeSelection, GemNodeStatusState};
 use super::rules;
+use super::session::GemAddNodeSession;
 use crate::gateway::GemGateway;
 use crate::services::chain::rules as chain_rules;
 use crate::services::error::GemServiceError;
@@ -71,6 +72,10 @@ impl GemChainSettingsService {
             },
             Ok(_) | Err(_) => GemNodeStatusState::Error,
         }
+    }
+
+    pub fn new_add_node_session(&self, chain: Chain) -> GemAddNodeSession {
+        GemAddNodeSession::new(chain)
     }
 
     pub fn node_check_debounce_milliseconds(&self) -> u64 {

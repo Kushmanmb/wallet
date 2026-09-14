@@ -7,6 +7,7 @@ import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.R
 import com.wallet.core.primitives.PerpetualDirection
 import uniffi.gemstone.DelegationState
+import uniffi.gemstone.GemAddNodeFailure
 import uniffi.gemstone.GemDelegationStatus
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemSimulationWarningKind
@@ -51,6 +52,15 @@ fun GemWalletSubtitle.string(): String = when (this) {
     GemWalletSubtitle.Multicoin -> stringResource(R.string.wallet_multicoin)
     is GemWalletSubtitle.Address -> value
 }
+
+@Composable
+fun GemAddNodeFailure.string(): String = stringResource(
+    when (this) {
+        GemAddNodeFailure.INVALID_URL -> R.string.errors_invalid_url
+        GemAddNodeFailure.INVALID_NETWORK_ID -> R.string.errors_invalid_network_id
+        GemAddNodeFailure.UNAVAILABLE -> R.string.errors_error_occurred
+    }
+)
 
 @Composable
 fun GemDelegationStatus.stateText(): String = stringResource(

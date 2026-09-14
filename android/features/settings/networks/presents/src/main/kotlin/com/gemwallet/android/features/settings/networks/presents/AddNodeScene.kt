@@ -44,6 +44,7 @@ import com.gemwallet.android.ui.theme.Spacer16
 import com.wallet.core.primitives.Chain
 import java.text.NumberFormat
 import com.gemwallet.android.ui.components.clipboard.clipboardManager
+import com.gemwallet.android.ui.localization.string
 
 @Composable
 fun AddNodeScene(chain: Chain, onCancel: () -> Unit) {
@@ -81,7 +82,7 @@ fun AddNodeScene(chain: Chain, onCancel: () -> Unit) {
         )
         UrlField(
             value = viewModel.url,
-            error = uiModel.errorResId?.let { stringResource(it) }.orEmpty(),
+            error = uiModel.failure?.string().orEmpty(),
             onValueChange = viewModel::onUrlChange,
             onQRScan = {
                 isShowQRScan = true
