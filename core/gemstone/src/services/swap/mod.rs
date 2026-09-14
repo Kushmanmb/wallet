@@ -1,8 +1,8 @@
-pub mod slippage;
 pub mod model;
 pub mod quote;
 pub mod rules;
 pub mod session;
+pub mod slippage;
 pub mod store;
 
 use crate::keystore::decode_password;
@@ -22,7 +22,9 @@ use crate::message::signer::MessageSigner;
 use crate::models::swap::GemSwapQuoteData;
 use crate::services::error::GemServiceError;
 use crate::services::wallet::GemKeystorePassword;
-pub use model::{GemAssetRate, GemSwapButtonAction, GemSwapButtonInput, GemSwapPair, GemSwapPairSuggestion, GemSwapQuoteSummary, GemSwapTransfer, swap_quote_summary, swapper_quote_summary};
+pub use model::{
+    GemAssetRate, GemSwapButtonAction, GemSwapButtonInput, GemSwapPair, GemSwapPairSuggestion, GemSwapQuoteSummary, GemSwapTransfer, swap_quote_summary, swapper_quote_summary,
+};
 use primitives::{AssetId, WalletId};
 pub use session::{GemSwapButtonState, GemSwapQuotePhase, GemSwapQuotesResult, GemSwapRequest, GemSwapSession, GemSwapSessionAction, GemSwapTransferPhase};
 pub use store::GemSwapStore;

@@ -952,20 +952,10 @@ mod tests {
     fn test_row_shows_the_counterparty_name_when_the_wallet_knows_the_address() {
         let mut incoming = extended_with(typed(TransactionType::Transfer, TransactionState::Confirmed, TransactionDirection::Incoming), vec![]);
         incoming.from_address = Some(named("from", "Alice"));
-        assert_eq!(
-            row(&incoming).subtitle,
-            GemTransactionRowSubtitle::FromAddress {
-                participant: "Alice".to_string()
-            }
-        );
+        assert_eq!(row(&incoming).subtitle, GemTransactionRowSubtitle::FromAddress { participant: "Alice".to_string() });
 
         let outgoing = extended_with(typed(TransactionType::Transfer, TransactionState::Confirmed, TransactionDirection::Outgoing), vec![]);
-        assert_eq!(
-            row(&outgoing).subtitle,
-            GemTransactionRowSubtitle::ToAddress {
-                participant: "to".to_string()
-            }
-        );
+        assert_eq!(row(&outgoing).subtitle, GemTransactionRowSubtitle::ToAddress { participant: "to".to_string() });
         match row(&outgoing).value {
             GemTransactionRowValue::Amount { amount } => assert_eq!(
                 (amount.asset.id, amount.value, amount.sign),
@@ -1078,21 +1068,30 @@ mod tests {
             "a transfer has no swap sections and shows its memo beside the recipient"
         );
 
-        let pending = extended_with(swap(TransactionState::Pending, Some("near_intents"), Some(720)).transaction, vec![Asset::mock_eth(), Asset::mock_btc()]);
+        let pending = extended_with(
+            swap(TransactionState::Pending, Some("near_intents"), Some(720)).transaction,
+            vec![Asset::mock_eth(), Asset::mock_btc()],
+        );
         assert_eq!(
             rows_of(detail_sections(&detail_rows(&pending, participant(&pending, link), explorer.clone()))),
             vec![vec![Header], vec![SwapProgress], vec![Date, Status, Rate, Network, Provider], vec![Fee], vec![Explorer]],
             "a swap in flight shows its progress instead of a confirmation estimate, and its provider instead of a participant"
         );
 
-        let confirmed = extended_with(swap(TransactionState::Confirmed, Some("near_intents"), None).transaction, vec![Asset::mock_eth(), Asset::mock_btc()]);
+        let confirmed = extended_with(
+            swap(TransactionState::Confirmed, Some("near_intents"), None).transaction,
+            vec![Asset::mock_eth(), Asset::mock_btc()],
+        );
         assert_eq!(
             rows_of(detail_sections(&detail_rows(&confirmed, participant(&confirmed, link), explorer.clone())))[1],
             vec![SwapAgain],
             "a confirmed swap offers to swap again"
         );
 
-        let mut open = extended_with(typed(TransactionType::PerpetualOpenPosition, TransactionState::Confirmed, TransactionDirection::Outgoing), vec![]);
+        let mut open = extended_with(
+            typed(TransactionType::PerpetualOpenPosition, TransactionState::Confirmed, TransactionDirection::Outgoing),
+            vec![],
+        );
         open.transaction.metadata = Some(
             serde_json::to_value(TransactionPerpetualMetadata {
                 pnl: -3.5,
@@ -1221,8 +1220,11 @@ mod tests {
     fn test_a_zero_swap_leg_price_is_not_a_price() {
         let mut swap = extended_with(swap(TransactionState::Confirmed, None, None).transaction, vec![Asset::mock_eth(), Asset::mock_btc()]);
         let ethereum = AssetId::from_chain(Chain::Ethereum);
-        let leg_price =
-            |extended: &TransactionExtended| swap_leg(extended, SwapLeg::From, GemAmountSign::Outgoing).and_then(|amount| amount.price).map(|price| price.price);
+        let leg_price = |extended: &TransactionExtended| {
+            swap_leg(extended, SwapLeg::From, GemAmountSign::Outgoing)
+                .and_then(|amount| amount.price)
+                .map(|price| price.price)
+        };
 
         swap.prices = vec![AssetPrice::new(ethereum.clone(), 0.0, 0.0, Utc::now())];
         assert_eq!(leg_price(&swap), None);

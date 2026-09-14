@@ -239,11 +239,7 @@ mod tests {
             ..asset
         };
         assert_eq!(
-            GemAmountError::InsufficientBalance {
-                asset: same.clone(),
-                requirement,
-            }
-            .display(),
+            GemAmountError::InsufficientBalance { asset: same.clone(), requirement }.display(),
             GemAmountErrorDisplay::InsufficientBalance { title: same.symbol }
         );
     }

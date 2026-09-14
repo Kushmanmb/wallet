@@ -143,9 +143,7 @@ impl GemAutocloseSession {
         GemAutocloseViewState {
             confirm_enabled: match (self.policy, self.submit_attempted) {
                 (GemAutocloseConfirmPolicy::WhenBuildable, _) | (GemAutocloseConfirmPolicy::UntilSubmitted, true) => can_build,
-                (GemAutocloseConfirmPolicy::UntilSubmitted, false) => {
-                    self.modify.take_profit.has_pending_change() || self.modify.stop_loss.has_pending_change()
-                }
+                (GemAutocloseConfirmPolicy::UntilSubmitted, false) => self.modify.take_profit.has_pending_change() || self.modify.stop_loss.has_pending_change(),
             },
             shows_errors: self.submit_attempted,
         }
@@ -256,7 +254,9 @@ mod tests {
         assert!(matches!(&set_only[..], [PerpetualModifyPositionType::Tpsl { order }] if order.take_profit.as_deref() == Some("110.0") && order.stop_loss.is_none()));
 
         let cancel_only = modify(field(None, Some(100.0), false, Some(12345)), none.clone()).build();
-        assert!(matches!(&cancel_only[..], [PerpetualModifyPositionType::Cancel { orders: cancels }] if cancels.len() == 1 && cancels[0].order_id == 12345 && cancels[0].asset_index == 5));
+        assert!(
+            matches!(&cancel_only[..], [PerpetualModifyPositionType::Cancel { orders: cancels }] if cancels.len() == 1 && cancels[0].order_id == 12345 && cancels[0].asset_index == 5)
+        );
 
         let both = modify(field(Some(120.0), Some(100.0), true, Some(12345)), field(Some(80.0), Some(90.0), true, Some(67890))).build();
         assert_eq!(both.len(), 2);

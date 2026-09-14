@@ -12,8 +12,8 @@ use primitives::{
 use super::model::{GemConfirmDestination, GemConfirmTitle, GemPendingTransactionInput, GemRecentActivity, GemRecipient, GemTransferData, GemTransferOutput};
 use crate::config::chain::is_memo_supported;
 use crate::models::transaction::{GemTransactionLoadInput, transaction_metadata_block_number, transaction_metadata_sequence};
-use crate::services::assets::rules as asset_rules;
 use crate::services::amount::model::GemAmountError;
+use crate::services::assets::rules as asset_rules;
 use crate::services::balance::GemAssetBalance;
 use crate::services::transactions::GemTransactionHeaderKind;
 
@@ -127,8 +127,12 @@ impl TransferInput for TransactionInputType {
                 EarnType::Withdraw(_) => GemConfirmTitle::Withdraw,
             },
             Self::Perpetual { perpetual_type, .. } => match perpetual_type {
-                PerpetualType::Open { data } => GemConfirmTitle::PerpetualOpen { direction: data.direction.clone() },
-                PerpetualType::Increase { data } => GemConfirmTitle::PerpetualIncrease { direction: data.direction.clone() },
+                PerpetualType::Open { data } => GemConfirmTitle::PerpetualOpen {
+                    direction: data.direction.clone(),
+                },
+                PerpetualType::Increase { data } => GemConfirmTitle::PerpetualIncrease {
+                    direction: data.direction.clone(),
+                },
                 PerpetualType::Reduce { data } => GemConfirmTitle::PerpetualReduce {
                     direction: data.position_direction.clone(),
                 },
@@ -644,7 +648,9 @@ mod tests {
     fn perpetual_input(asset: Asset) -> TransactionInputType {
         TransactionInputType::Perpetual {
             asset,
-            perpetual_type: PerpetualType::Open { data: PerpetualConfirmData::mock(PerpetualDirection::Long, 0, None, None) },
+            perpetual_type: PerpetualType::Open {
+                data: PerpetualConfirmData::mock(PerpetualDirection::Long, 0, None, None),
+            },
         }
     }
 

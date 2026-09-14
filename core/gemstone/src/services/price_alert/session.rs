@@ -62,10 +62,7 @@ impl GemPriceAlertSession {
     }
 
     pub fn on_price(&self, current_price: Option<f64>) -> Self {
-        Self {
-            current_price,
-            ..self.clone()
-        }
+        Self { current_price, ..self.clone() }
     }
 
     pub fn on_saving(&self, is_saving: bool) -> Self {
@@ -108,12 +105,7 @@ impl GemPriceAlertSession {
 
 impl GemPriceAlertSession {
     fn direction(&self) -> Option<PriceAlertDirection> {
-        rules::alert_direction(
-            self.notification_type.clone(),
-            self.input,
-            self.current_price,
-            self.selected_direction.clone(),
-        )
+        rules::alert_direction(self.notification_type.clone(), self.input, self.current_price, self.selected_direction.clone())
     }
 }
 
@@ -137,11 +129,7 @@ mod tests {
     #[test]
     fn test_a_price_alert_carries_the_price_and_a_percentage_alert_the_percentage() {
         let price = session().on_input(Some(120.0)).alert().unwrap();
-        let percent = session()
-            .on_type(PriceAlertNotificationType::PricePercentChange)
-            .on_input(Some(5.0))
-            .alert()
-            .unwrap();
+        let percent = session().on_type(PriceAlertNotificationType::PricePercentChange).on_input(Some(5.0)).alert().unwrap();
 
         assert_eq!((price.price, price.price_percent_change), (Some(120.0), None));
         assert_eq!((percent.price, percent.price_percent_change), (None, Some(5.0)));

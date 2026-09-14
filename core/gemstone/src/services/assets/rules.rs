@@ -8,10 +8,9 @@ use primitives::{
 };
 
 use super::model::{
-    GemAssetSectionIds,
-    AssetList, GemAssetAction, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput, GemAssetNetworkDestination, GemAssetRow, GemAssetRowSubtitle, GemAssetRowTitle,
-    GemAssetRowTrailing, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow, GemSelectAssetScope, GemSelectAssetType, GemSelectRowAction,
-    GemWalletSearchCounts, GemWalletSearchLimits, GemWalletSearchPhase,
+    AssetList, GemAssetAction, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput, GemAssetNetworkDestination, GemAssetRow,
+    GemAssetRowSubtitle, GemAssetRowTitle, GemAssetRowTrailing, GemAssetSectionIds, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow,
+    GemSelectAssetScope, GemSelectAssetType, GemSelectRowAction, GemWalletSearchCounts, GemWalletSearchLimits, GemWalletSearchPhase,
 };
 use crate::config::search_config::{ASSETS_INITIAL_LIMIT, ASSETS_SEARCH_LIMIT, NFTS_PREVIEW_LIMIT, PERPETUALS_PREVIEW_LIMIT, RESULTS_LIMIT};
 use crate::config::stake::EARN_OFFERED;
@@ -24,17 +23,15 @@ use crate::services::price_alert::rules::{displayed_price_alert_ids, price_alert
 use swapper::AssetList as SwapAssetList;
 
 use crate::models::asset::{wallet_asset_is_enabled, wallet_default_assets};
-use primitives::AssetType;
 use crate::services::collections::{missing, missing_by, unique, unique_by};
+use primitives::AssetType;
 
 pub fn menu_actions(input: &GemAssetMenuInput) -> Vec<GemAssetMenuAction> {
     [
         Some(GemAssetMenuAction::Pin { is_pinned: input.is_pinned }),
         input.offers_hide.then_some(GemAssetMenuAction::Hide),
         (input.offers_add_to_wallet && !input.is_balance_enabled).then_some(GemAssetMenuAction::AddToWallet),
-        (!input.address.is_empty()).then(|| GemAssetMenuAction::CopyAddress {
-            address: input.address.clone(),
-        }),
+        (!input.address.is_empty()).then(|| GemAssetMenuAction::CopyAddress { address: input.address.clone() }),
     ]
     .into_iter()
     .flatten()

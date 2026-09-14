@@ -183,7 +183,14 @@ impl GemFiatSession {
     fn amount_check(&self) -> GemFiatAmountCheck {
         let operation = self.current();
         match operation.parsed_amount() {
-            Some(amount) => rules::amount_check(&get_fiat_config(), operation.quote_type, amount, operation.selected_quote().as_ref(), &self.available, super::quote::CURRENCY.as_ref()),
+            Some(amount) => rules::amount_check(
+                &get_fiat_config(),
+                operation.quote_type,
+                amount,
+                operation.selected_quote().as_ref(),
+                &self.available,
+                super::quote::CURRENCY.as_ref(),
+            ),
             None => GemFiatAmountCheck::Valid,
         }
     }
@@ -513,7 +520,11 @@ mod tests {
                 quote_type: FiatQuoteType::Buy,
                 amount: 100.0,
             })
-            .on_quote_results(results(FiatQuoteType::Buy, 100.0, vec![quote(FiatProviderName::Banxa, 2.0), quote(FiatProviderName::MoonPay, 1.0)]));
+            .on_quote_results(results(
+                FiatQuoteType::Buy,
+                100.0,
+                vec![quote(FiatProviderName::Banxa, 2.0), quote(FiatProviderName::MoonPay, 1.0)],
+            ));
 
         let state = session.view_state(Some(50.0), false);
         assert_eq!(state.quote_type, FiatQuoteType::Buy);

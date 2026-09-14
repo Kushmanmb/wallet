@@ -228,7 +228,10 @@ pub use self::nft::{NFTAsset, NFTAssetData, NFTAssetId, NFTAttribute, NFTAttribu
 pub mod price_alert;
 pub use self::price_alert::{DevicePriceAlert, PriceAlert, PriceAlertDirection, PriceAlertNotificationType, PriceAlertType, PriceAlerts};
 pub mod rewards;
-pub use self::rewards::{RedemptionResult, RedemptionStatus, ReferralAllowance, ReferralCode, ReferralLeader, ReferralLeaderboard, ReferralQuota, RewardEvent, RewardEventType, RewardLevel, RewardRedemption, RewardRedemptionOption, RewardRedemptionType, RewardStatus, Rewards};
+pub use self::rewards::{
+    RedemptionResult, RedemptionStatus, ReferralAllowance, ReferralCode, ReferralLeader, ReferralLeaderboard, ReferralQuota, RewardEvent, RewardEventType, RewardLevel,
+    RewardRedemption, RewardRedemptionOption, RewardRedemptionType, RewardStatus, Rewards,
+};
 pub mod tag;
 pub use self::tag::AssetTag;
 pub mod chain_cosmos;

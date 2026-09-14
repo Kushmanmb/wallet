@@ -132,7 +132,11 @@ impl GemAssetBalance {
                 }
             }
             GemBalanceUpdateType::Earn { balance: earn } => balance.earn = earn.clone(),
-            GemBalanceUpdateType::Perpetual { available, reserved, withdrawable } => {
+            GemBalanceUpdateType::Perpetual {
+                available,
+                reserved,
+                withdrawable,
+            } => {
                 balance.available = available.clone();
                 balance.reserved = reserved.clone();
                 balance.withdrawable = withdrawable.clone();

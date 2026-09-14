@@ -1,20 +1,27 @@
 use chrono::Utc;
-use primitives::PriceChangeCalculator;
 use number_formatter::{BigNumberFormatter, NumberFormatterError};
+use primitives::PriceChangeCalculator;
 use primitives::chart::{ChartCandleStick, ChartCandleUpdate};
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
 use primitives::perpetual::{PerpetualBalance, PerpetualData};
-use primitives::{Asset, AssetBasic, AssetId, AssetPrice, AssetProperties, AssetScore, AssetType, Chain, ChartPeriod, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, WalletType};
+use primitives::{
+    Asset, AssetBasic, AssetId, AssetPrice, AssetProperties, AssetScore, AssetType, Chain, ChartPeriod, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType,
+    PerpetualPosition, PerpetualProvider, WalletType,
+};
 
-use super::model::{GemAutocloseSummary, GemMarketsRefreshTrigger, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionKind, GemCandleTooltip, GemPerpetualMarketRow, GemPerpetualPositionRow, GemPerpetualTransferData};
+use super::model::{
+    GemAutocloseSummary, GemCandleTooltip, GemMarketsRefreshTrigger, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput,
+    GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput,
+    GemPerpetualPositionAction, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualTransferData,
+};
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigInt;
-use crate::precision::GemCurrencyStyle;
-use primitives::Currency;
 use crate::perpetual::GemPerpetual;
+use crate::precision::GemCurrencyStyle;
 use crate::services::error::GemServiceError;
 use crate::services::transfer::GemTransferData;
 use num_bigint::BigUint;
+use primitives::Currency;
 use primitives::{PerpetualConfirmData, PerpetualModifyConfirmData, PerpetualModifyPositionType, PerpetualReduceData, PerpetualType};
 use std::cmp::Ordering;
 use std::collections::HashSet;
@@ -301,7 +308,9 @@ pub fn order(provider: PerpetualProvider, input: GemPerpetualOrderInput) -> Perp
     match input.action {
         GemPerpetualOrderAction::Open => PerpetualType::Open { data },
         GemPerpetualOrderAction::Increase => PerpetualType::Increase { data },
-        GemPerpetualOrderAction::Reduce { position_direction } => PerpetualType::Reduce { data: PerpetualReduceData { data, position_direction } },
+        GemPerpetualOrderAction::Reduce { position_direction } => PerpetualType::Reduce {
+            data: PerpetualReduceData { data, position_direction },
+        },
     }
 }
 
@@ -580,7 +589,6 @@ mod tests {
         assert!(!sections.shows_empty);
     }
 
-
     fn modify_data(modify_types: Vec<PerpetualModifyPositionType>, take_profit_order_id: Option<u64>, stop_loss_order_id: Option<u64>) -> PerpetualModifyConfirmData {
         PerpetualModifyConfirmData {
             base_asset: Asset::mock(),
@@ -811,7 +819,10 @@ mod tests {
         let mut held = position("one");
         held.leverage = 40;
         let symboled = Asset::from_chain(Chain::HyperCore);
-        let unsymboled = Asset { symbol: String::new(), ..symboled.clone() };
+        let unsymboled = Asset {
+            symbol: String::new(),
+            ..symboled.clone()
+        };
 
         assert_eq!(position_row(&market, &symboled, &held).title, symboled.symbol);
         assert_eq!(position_row(&market, &unsymboled, &held).title, "BTC");
@@ -1167,7 +1178,12 @@ mod tests {
         assert_eq!(open.action, GemPerpetualDetailsAction::Open);
         assert_eq!(open.direction, PerpetualDirection::Long);
 
-        assert!(details(&PerpetualType::Modify { data: modify_data(vec![], None, None) }).is_none());
+        assert!(
+            details(&PerpetualType::Modify {
+                data: modify_data(vec![], None, None)
+            })
+            .is_none()
+        );
     }
 
     #[test]
@@ -1187,7 +1203,9 @@ mod tests {
         assert_eq!(data.fiat_value, 200.0);
         assert_eq!(data.margin_amount, 50.0);
         assert!(matches!(increase, PerpetualType::Increase { .. }));
-        let PerpetualType::Reduce { data: reduce } = reduce else { panic!("expected a reduce order") };
+        let PerpetualType::Reduce { data: reduce } = reduce else {
+            panic!("expected a reduce order")
+        };
         assert_eq!(reduce.position_direction, PerpetualDirection::Short);
     }
 

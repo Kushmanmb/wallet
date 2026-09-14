@@ -1,10 +1,10 @@
 use crate::GemstoneError;
 use crate::gateway::GatewayError;
+use crate::models::custom_types::GemBigInt;
 use crate::services::balance::GemBalanceRequirement;
 use crate::services::error::GemServiceError;
 use crate::signer::GemSignerError;
 use primitives::{Asset, AssetId, Chain, SwapProvider};
-use crate::models::custom_types::GemBigInt;
 
 #[derive(Debug, Clone, uniffi::Error)]
 pub enum GemConfirmError {
@@ -70,24 +70,41 @@ pub enum GemConfirmError {
 pub enum GemConfirmErrorDisplay {
     Offline,
     Malicious,
-    MemoRequired { symbol: String },
+    MemoRequired {
+        symbol: String,
+    },
     FeeRatesMissing,
     Cancelled,
     AccountMissing,
     Unknown,
-    BalanceRequired { asset: Asset, requirement: GemBalanceRequirement },
-    NetworkFeeRequired { asset: Asset, requirement: GemBalanceRequirement },
-    NetworkFeeMissing { asset: Asset },
-    MinimumAccountBalance { asset: Asset, required: GemBigInt },
+    BalanceRequired {
+        asset: Asset,
+        requirement: GemBalanceRequirement,
+    },
+    NetworkFeeRequired {
+        asset: Asset,
+        requirement: GemBalanceRequirement,
+    },
+    NetworkFeeMissing {
+        asset: Asset,
+    },
+    MinimumAccountBalance {
+        asset: Asset,
+        required: GemBigInt,
+    },
     SwapMinimum {
         asset: Asset,
         provider: SwapProvider,
         provider_name: String,
         requirement: GemBalanceRequirement,
     },
-    DustThreshold { chain: Chain },
+    DustThreshold {
+        chain: Chain,
+    },
     InsufficientFunds,
-    Message { msg: String },
+    Message {
+        msg: String,
+    },
 }
 
 #[uniffi::export]
@@ -134,12 +151,9 @@ impl GemConfirmError {
                     GemConfirmErrorDisplay::Message { msg: msg.clone() }
                 }
             },
-            Self::BalanceMissing { .. }
-            | Self::Network { .. }
-            | Self::Load { .. }
-            | Self::Broadcast { .. }
-            | Self::Record { .. }
-            | Self::ApprovalInvalid { .. } => GemConfirmErrorDisplay::Message { msg: self.to_string() },
+            Self::BalanceMissing { .. } | Self::Network { .. } | Self::Load { .. } | Self::Broadcast { .. } | Self::Record { .. } | Self::ApprovalInvalid { .. } => {
+                GemConfirmErrorDisplay::Message { msg: self.to_string() }
+            }
         }
     }
 }
@@ -156,13 +170,7 @@ impl GemConfirmErrorDisplay {
             | Self::MinimumAccountBalance { .. }
             | Self::SwapMinimum { .. }
             | Self::DustThreshold { .. } => true,
-            Self::Offline
-            | Self::FeeRatesMissing
-            | Self::Cancelled
-            | Self::AccountMissing
-            | Self::Unknown
-            | Self::InsufficientFunds
-            | Self::Message { .. } => false,
+            Self::Offline | Self::FeeRatesMissing | Self::Cancelled | Self::AccountMissing | Self::Unknown | Self::InsufficientFunds | Self::Message { .. } => false,
         }
     }
 }
@@ -251,7 +259,10 @@ mod tests {
     #[test]
     fn test_a_cancelled_keystore_prompt_is_a_cancel_not_a_load_failure() {
         assert!(matches!(GemConfirmError::from(GemServiceError::Cancelled), GemConfirmError::Cancelled));
-        assert!(matches!(GemConfirmError::from(GemServiceError::Store { msg: "x".to_string() }), GemConfirmError::Load { .. }));
+        assert!(matches!(
+            GemConfirmError::from(GemServiceError::Store { msg: "x".to_string() }),
+            GemConfirmError::Load { .. }
+        ));
     }
 
     #[test]

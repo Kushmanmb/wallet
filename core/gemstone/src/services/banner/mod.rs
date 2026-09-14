@@ -8,9 +8,7 @@ use std::sync::Arc;
 
 use primitives::{Asset, BannerEvent, BannerState, Wallet};
 
-pub use model::{
-    GemBannerAmount, GemBannerContent, GemBannerContext, GemBannerDescription, GemBannerIcon, GemBannerItem, GemBannerKey, GemBannerLink, GemBannerTitle,
-};
+pub use model::{GemBannerAmount, GemBannerContent, GemBannerContext, GemBannerDescription, GemBannerIcon, GemBannerItem, GemBannerKey, GemBannerLink, GemBannerTitle};
 pub use permissions::GemNotificationPermissions;
 pub use store::GemBannerStore;
 
@@ -61,8 +59,8 @@ impl GemBannerService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use futures::executor::block_on;
     use async_trait::async_trait;
+    use futures::executor::block_on;
     use primitives::{Account, WalletSource};
     use std::collections::HashMap;
     use std::sync::Mutex;
