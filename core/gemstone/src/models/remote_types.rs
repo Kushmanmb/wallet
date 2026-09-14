@@ -1320,7 +1320,6 @@ pub struct NFTCollection {
     pub chain: Chain,
     pub contract_address: String,
     pub images: NFTImages,
-    pub is_verified: bool,
     pub status: VerificationStatus,
     pub links: Vec<AssetLink>,
 }

@@ -172,7 +172,7 @@ impl GemFiatSession {
         self.selected_quote().map(|quote| rules::quote_row(&quote, asset_price))
     }
 
-    pub fn selected_quote(&self) -> Option<FiatQuote> {
+    fn selected_quote(&self) -> Option<FiatQuote> {
         self.current().selected_quote()
     }
 

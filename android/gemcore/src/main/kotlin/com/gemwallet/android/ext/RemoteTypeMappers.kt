@@ -1605,7 +1605,6 @@ fun com.wallet.core.primitives.NFTCollection.toGem(): uniffi.gemstone.NftCollect
     chain = chain.toGem(),
     contractAddress = contractAddress,
     images = images.toGem(),
-    isVerified = false,
     status = status.toGem(),
     links = links.map { it.toGem() },
 )

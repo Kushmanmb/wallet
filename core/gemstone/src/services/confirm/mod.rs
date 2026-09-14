@@ -52,6 +52,12 @@ pub struct GemConfirmService {
 
 #[uniffi::export]
 impl GemConfirmService {
+    pub async fn metadata(&self, wallet_id: WalletId, asset_id: AssetId, fee_asset_id: AssetId, extra_asset_ids: Vec<AssetId>) -> Result<GemConfirmMetadata, GemConfirmError> {
+        let asset_ids = rules::metadata_asset_ids(&asset_id, &fee_asset_id, extra_asset_ids);
+        let (balances, prices) = futures::join!(self.balance.balances(wallet_id, asset_ids.clone()), self.price.prices(asset_ids));
+        rules::build_metadata(asset_id, fee_asset_id, balances?, prices?)
+    }
+
     #[uniffi::constructor]
     pub fn new(
         gateway: Arc<GemGateway>,
@@ -74,12 +80,6 @@ impl GemConfirmService {
             transaction_status,
             simulation_formatter: GemSimulationFormatter::new(),
         }
-    }
-
-    pub async fn metadata(&self, wallet_id: WalletId, asset_id: AssetId, fee_asset_id: AssetId, extra_asset_ids: Vec<AssetId>) -> Result<GemConfirmMetadata, GemConfirmError> {
-        let asset_ids = rules::metadata_asset_ids(&asset_id, &fee_asset_id, extra_asset_ids);
-        let (balances, prices) = futures::join!(self.balance.balances(wallet_id, asset_ids.clone()), self.price.prices(asset_ids));
-        rules::build_metadata(asset_id, fee_asset_id, balances?, prices?)
     }
 
     pub async fn sync_missing_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, crate::services::error::GemServiceError> {

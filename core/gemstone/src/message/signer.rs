@@ -96,7 +96,7 @@ impl MessageSigner {
         Ok(payload_preview)
     }
 
-    pub fn hash(&self) -> Result<Vec<u8>, GemstoneError> {
+    fn hash(&self) -> Result<Vec<u8>, GemstoneError> {
         match &self.message.sign_type {
             SignDigestType::SuiPersonal => {
                 let message = PersonalMessage(Cow::Borrowed(&self.message.data));

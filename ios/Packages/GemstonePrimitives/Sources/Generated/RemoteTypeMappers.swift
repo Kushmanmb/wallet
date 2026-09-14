@@ -2421,7 +2421,6 @@ public extension Primitives.NFTCollection {
             chain: chain.rawValue,
             contractAddress: contractAddress,
             images: images.map(),
-            isVerified: false,
             status: status.map(),
             links: links.map { $0.map() },
         )

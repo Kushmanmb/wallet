@@ -115,7 +115,6 @@ mod tests {
                 chain: Chain::Ethereum,
                 contract_address: "0xcollection".into(),
                 images: images.clone(),
-                is_verified: true,
                 status: VerificationStatus::Verified,
                 links: vec![],
             },

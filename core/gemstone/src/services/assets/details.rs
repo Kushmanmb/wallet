@@ -186,10 +186,6 @@ impl GemAssetDetailsService {
         self.price_alerts.sync(asset_id).await
     }
 
-    pub fn deeplink_url(&self, deeplink: Deeplink) -> String {
-        self.deeplinks.build_url(deeplink)
-    }
-
     pub fn deeplink_gem_url(&self, deeplink: Deeplink) -> String {
         self.deeplinks.build_gem_url(deeplink)
     }

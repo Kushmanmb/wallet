@@ -26,10 +26,6 @@ impl GemBannerService {
         Self { store }
     }
 
-    pub async fn setup(&self) -> Result<(), GemServiceError> {
-        self.add_missing_banners(rules::setup_keys()).await
-    }
-
     pub async fn setup_wallet(&self, wallet: Wallet) -> Result<(), GemServiceError> {
         self.add_missing_banners(rules::wallet_setup_keys(&wallet)).await
     }
@@ -51,6 +47,10 @@ impl GemBannerService {
 }
 
 impl GemBannerService {
+    pub async fn setup(&self) -> Result<(), GemServiceError> {
+        self.add_missing_banners(rules::setup_keys()).await
+    }
+
     async fn add_missing_banners(&self, keys: Vec<GemBannerKey>) -> Result<(), GemServiceError> {
         let mut missing = Vec::new();
         for key in keys {
