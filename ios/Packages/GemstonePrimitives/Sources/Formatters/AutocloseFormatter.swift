@@ -1,12 +1,14 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
+import class Gemstone.GemPerpetual
 import Primitives
 
 public struct AutocloseFormatter: Sendable {
     private let currencyFormatter: CurrencyFormatter
     private let takeProfitLabel: String
     private let stopLossLabel: String
+    private let perpetual = GemPerpetual(provider: .hypercore)
 
     public init(
         currencyFormatter: CurrencyFormatter = .usd,
@@ -25,13 +27,13 @@ public struct AutocloseFormatter: Sendable {
         stopLossCanceled: Bool = false,
     ) -> (subtitle: String, subtitleExtra: String?) {
         let tp: String? = {
-            if takeProfitCanceled { return "\(takeProfitLabel): -" }
-            return takeProfit.map { "\(takeProfitLabel): \(currencyFormatter.string($0))" }
+            if takeProfitCanceled { return perpetual.triggerOrderText(label: takeProfitLabel, formattedPrice: nil) }
+            return takeProfit.map { perpetual.triggerOrderText(label: takeProfitLabel, formattedPrice: currencyFormatter.string($0)) }
         }()
 
         let sl: String? = {
-            if stopLossCanceled { return "\(stopLossLabel): -" }
-            return stopLoss.map { "\(stopLossLabel): \(currencyFormatter.string($0))" }
+            if stopLossCanceled { return perpetual.triggerOrderText(label: stopLossLabel, formattedPrice: nil) }
+            return stopLoss.map { perpetual.triggerOrderText(label: stopLossLabel, formattedPrice: currencyFormatter.string($0)) }
         }()
 
         switch (tp, sl) {

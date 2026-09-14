@@ -21,6 +21,7 @@ use crate::services::transfer::model::{GemRecipient, GemTransferData};
 use primitives::TransactionInputType;
 
 const HYPERLIQUID_NAME: &str = "Hyperliquid";
+const EMPTY_VALUE: &str = "-";
 
 #[derive(Debug, uniffi::Object)]
 pub struct GemPerpetual {
@@ -32,6 +33,14 @@ impl GemPerpetual {
     #[uniffi::constructor]
     pub fn new(provider: PerpetualProvider) -> Self {
         Self { provider }
+    }
+
+    pub fn margin_text(&self, formatted_amount: String, margin_type_name: String) -> String {
+        format!("{} ({})", formatted_amount, margin_type_name)
+    }
+
+    pub fn trigger_order_text(&self, label: String, formatted_price: Option<String>) -> String {
+        format!("{}: {}", label, formatted_price.as_deref().unwrap_or(EMPTY_VALUE))
     }
 
     pub fn format_price(&self, price: f64, decimals: i32) -> String {
@@ -273,6 +282,15 @@ mod tests {
     use serde_json::json;
 
     use super::*;
+
+    #[test]
+    fn test_the_margin_and_trigger_templates_read_the_same_on_both_apps() {
+        let perpetual = GemPerpetual::new(PerpetualProvider::Hypercore);
+
+        assert_eq!(perpetual.margin_text("$12.50".to_string(), "Cross".to_string()), "$12.50 (Cross)");
+        assert_eq!(perpetual.trigger_order_text("Take Profit".to_string(), Some("$120.00".to_string())), "Take Profit: $120.00");
+        assert_eq!(perpetual.trigger_order_text("Stop Loss".to_string(), None), "Stop Loss: -");
+    }
 
     #[test]
     fn test_autoclose_validator_treats_an_unset_price_as_valid() {

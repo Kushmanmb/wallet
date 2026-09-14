@@ -22,6 +22,8 @@ import com.gemwallet.android.ui.theme.paddingMiddle
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PerpetualMarginType
 import com.gemwallet.android.ui.theme.Placeholder
+import uniffi.gemstone.PerpetualProvider
+import uniffi.gemstone.GemPerpetual
 
 private val usdFormatter = CurrencyFormatter(currency = Currency.USD)
 
@@ -110,9 +112,11 @@ private fun AutocloseRow(
     )
 }
 
+private val perpetual = GemPerpetual(PerpetualProvider.HYPERCORE)
+
 @Composable
 private fun PerpetualPositionDetailsDataAggregate.marginText(): String {
-    return "$marginAmount (${marginType.title()})"
+    return perpetual.marginText(marginAmount, marginType.title())
 }
 
 @Composable
@@ -124,5 +128,5 @@ private fun PerpetualMarginType.title(): String {
 }
 
 private fun Double?.formatTriggerOrder(label: String): String? {
-    return this?.let { "$label: ${usdFormatter.string(it)}" }
+    return this?.let { perpetual.triggerOrderText(label, usdFormatter.string(it)) }
 }

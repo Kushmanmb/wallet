@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import class Gemstone.GemPerpetual
 import enum Gemstone.GemCurrencyStyle
 import Components
 import Formatters
@@ -108,7 +109,8 @@ public struct PerpetualPositionViewModel {
 
     public var marginField: ListItemField {
         let marginAmount = currencyFormatter.string(data.position.marginAmount)
-        return ListItemField(title: Localized.Perpetual.margin, value: "\(marginAmount) (\(data.position.marginType.title))")
+        let value = GemPerpetual(provider: .hypercore).marginText(formattedAmount: marginAmount, marginTypeName: data.position.marginType.title)
+        return ListItemField(title: Localized.Perpetual.margin, value: value)
     }
 
     public var fundingPaymentsField: ListItemField {
