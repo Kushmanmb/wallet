@@ -9,6 +9,8 @@ One item, one commit, both apps built and tested. Core rule + test, regenerate b
 Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](../ios/Packages/PrimitivesComponents/Sources/ViewModels/ListAssetItemViewModel.swift), [Android](../android/gemcore/src/main/kotlin/com/gemwallet/android/domains/asset/aggregates/AssetInfoDataAggregate.kt).
 
 
+- **R16** **S** `GemSwapProgressStep` is switched on inside the view on both apps to pick a marker glyph and a tone — [iOS](../ios/Features/Transactions/Sources/Views/TransactionSwapProgressView.swift) plus [its extension](../ios/Features/Transactions/Sources/ItemModels/TransactionSwapProgressItemModel.swift), [Android](../android/features/activities/presents/src/main/kotlin/com/gemwallet/android/features/activities/presents/details/components/SwapProgressItem.kt) — and the two have drifted: `refunded` reads as an arrow-swap in orange on iOS and as a red close icon on Android, and `waiting` is an ellipsis glyph against three hand-drawn dots. Copy [`GemTransactionStateTone`](../core/gemstone/src/services/transactions/model.rs): the step answers a tone and a marker kind, each app maps those to its own palette and icon set. Live divergence, not drift prevention.
+
 Rejected: transaction, transaction detail, delegation, validator, asset select/search, wallet, price alert, fiat quote, currency, fee rate, simulation warning, asset market, collectible detail and banner rows already have a record; network list, recents chips, earn APR, swap detail, price list and onboarding rows carry no choice; swap provider rows and the QR scan-type hint table are iOS only; swap price impact already crosses as `impactType`/`isHigh`/`showsInSummary`; the delegation completion countdown is computed twice but belongs to the delegation record if anywhere.
 
 ## 2. Sections, actions, destinations and limits
@@ -32,10 +34,13 @@ Copy: [`FiatScene.swift`](../ios/Features/FiatConnect/Sources/Scenes/FiatScene.s
 
 ## 5. Numbers cross as a value and a style
 
-The largest duplication left. Contract: [a number crosses as a value and a style](ARCHITECTURE.md#a-number-crosses-as-a-value-and-a-style-never-as-a-string-or-a-callback). Do F1 first; the rest depend on it.
+Contract: [a number crosses as a value and a style](ARCHITECTURE.md#a-number-crosses-as-a-value-and-a-style-never-as-a-string-or-a-callback). The precision rules, the value ladder, the abbreviation threshold and the dust cut are Core's, and `GemFormattedNumber` carries a number with its resolved display. What is left is the records that still hand the apps a bare `f64` and let each pick a style. Copy [`GemFiatQuoteRow`](../core/gemstone/src/services/fiat/model.rs) and [`GemAmountError::display`](../core/gemstone/src/services/amount/model.rs).
 
-
-  Shape it this way: `Formatters` keeps a dependency-free `NumberPrecision` (`.fraction(min:max:)` / `.significant(max:)`) and the mapping to `NumberFormatStyleConfiguration.Precision` — that is the renderer the note below says must stay. What leaves is `adaptive(for:)`: `CurrencyFormatter.string` and `NumericFormatter.string` take the precision instead of choosing it, and `GemstonePrimitives` maps `GemPrecision` to `NumberPrecision`. The cost is the blast radius, not the design: 39 `CurrencyFormatter(` and 23 `NumericFormatter(` construction sites, every number the app renders. Land it behind a screen-by-screen check, not in a sweep. The two rules do agree today — same 1e-10 and 0.99 thresholds, same two-place and four-significant shapes — so this is drift prevention, not a live bug.
+- **F9** **S** `GemConfirmError` — both apps format `requirement.required`, `available` and `shortfall` with the full style and compose the same three-part message, in [iOS](../ios/Features/Transfer/Sources/Extensions/GemConfirmError+Localizations.swift) and [Android](../android/features/confirm/presents/src/main/kotlin/com/gemwallet/android/features/confirm/presents/components/ConfirmErrorInfo.kt). iOS also decides `hasInfoSheet` per variant while Android maps its own info-sheet entity, so the same per-variant question is answered twice. Give it a `display()` the way `GemAmountError` has one.
+- **F10** **S** `SwapperError` — Android re-cases it into an app-side [`SwapFailure`](../android/features/swap/viewmodels/src/main/kotlin/com/gemwallet/android/features/swap/viewmodels/models/SwapFailure.kt) twin, and the two apps compose different text: [iOS](../ios/Features/Swap/Sources/Extensions/SwapperError+Swap.swift) switches to "minimum amount X" when a minimum is known, Android appends the minimum to "amount too small". Give `SwapperError` a `display()` and delete the twin.
+- **F11** **S** Perpetual market values — `perpetual.volume24h` and `perpetual.openInterest` cross as bare `f64` and both apps abbreviate them in USD: [iOS](../ios/Features/Perpetuals/Sources/ViewModels/PerpetualViewModel.swift), [Android](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/perpetuals/GetPerpetualImpl.kt).
+- **F12** **S** [`GemPriceAlertRow`](../core/gemstone/src/services/price_alert/rules.rs) carries `price` and `percent` as bare `f64` and each app picks the style from a different input: [iOS](../ios/Features/PriceAlerts/Sources/ViewModels/PriceAlertItemViewModel.swift) switches on `row.kind`, [Android](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/pricealerts/GetPriceAlertsImpl.kt) on whether `pricePercentChange` is set, so the percent sign can differ for the same alert.
+- **F13** **S** Rewards redemption — `option.value` is formatted with the short style and the option's asset on [iOS](../ios/Features/Settings/Sources/Settings/ViewModels/RewardRedemptionOptionViewModel.swift) and [Android](../android/features/referral/presents/src/main/kotlin/com/gemwallet/android/features/referral/views/components/ReferralInfo.kt).
 
 Not in scope: `Formatters` and `Validators` on iOS still cannot import Gemstone, so the renderer that applies a `GemPrecision` must stay dependency-free. That is why this is a value-plus-style contract and not a foreign trait.
 
@@ -53,9 +58,13 @@ Product or security decisions, one question each:
 
 Ownership, injection and threads:
 
+- **O9** **M** Six Android view models hold two or three Core services where iOS composes one screen service: [`TransactionsViewModel`](../android/features/activities/viewmodels/src/main/kotlin/com/gemwallet/android/features/activities/viewmodels/TransactionsViewModel.kt), `RecentsSheetViewModel`, `WCAuthViewModel` (three), `WCRequestViewModel`, `PerpetualMarketViewModel` and `SettingsViewModel`. Copy the screen-service shape in [SERVICES.md](SERVICES.md#the-screen-service-map); a launch host or a flow parent vending child models is [allowed to hold several](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android) and these are neither.
+
 
 
 Platform items:
+
+- **X18** **S** Two exports have no production reader on either app, only mocks and tests: `name_record_debounce_milliseconds` in [`services/name/mod.rs`](../core/gemstone/src/services/name/mod.rs), superseded by the debounce `name_input_step` already returns, and `requested_name` on [`GemNameRecordState`](../core/gemstone/src/services/name/model.rs). Un-export both and keep the Rust functions, which Core calls. Of 523 exported methods these are the only two without a caller a test does not create; the rest of that sweep is dry.
 
 
 
