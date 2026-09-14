@@ -36,9 +36,11 @@ import com.gemwallet.android.ui.navigation.routes.assetsRoute
 import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.application.wallet_connect.ActiveWalletConnectRequest
 import com.gemwallet.android.WalletConnectRequestContent
+import uniffi.gemstone.GemDeeplinkService
 
 @Composable
 fun WalletApp(
+    deeplinkService: GemDeeplinkService,
     pendingRoutes: List<NavKey> = emptyList(),
     onPendingNavigationConsumed: () -> Unit = {},
     onContentReady: () -> Unit = {},
@@ -56,6 +58,7 @@ fun WalletApp(
     val navigator = rememberWalletNavigationState(
         startDestination = start,
         currentTab = currentTab,
+        deeplinkService = deeplinkService,
     )
     var confirmPendingNavigation by remember(pendingRoutes) { mutableStateOf(false) }
     val currentOnContentReady by rememberUpdatedState(onContentReady)

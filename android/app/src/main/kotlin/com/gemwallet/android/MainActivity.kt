@@ -23,10 +23,8 @@ import com.gemwallet.android.ui.LocalAddressService
 import com.gemwallet.android.ui.LocalConnectionStatus
 import com.gemwallet.android.ui.LocalStreamConnected
 import com.wallet.core.primitives.ConnectionComponent
-import com.gemwallet.android.ui.LocalAssetConfigService
 import com.gemwallet.android.ui.LocalChainService
 import com.gemwallet.android.ui.LocalAssetsService
-import com.gemwallet.android.ui.LocalDeeplinkService
 import uniffi.gemstone.GemAssetConfigService
 import uniffi.gemstone.GemAssetsService
 import uniffi.gemstone.GemChainService
@@ -65,7 +63,6 @@ class MainActivity : FragmentActivity(), AuthRequester {
     @Inject lateinit var deeplinkService: GemDeeplinkService
     @Inject lateinit var assetsService: GemAssetsService
     @Inject lateinit var chainService: GemChainService
-    @Inject lateinit var assetConfigService: GemAssetConfigService
 
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         pendingNotificationPermission?.complete(granted)
@@ -127,13 +124,12 @@ class MainActivity : FragmentActivity(), AuthRequester {
                 LocalConnectionStatus provides connectionStatusObserver.status,
                 LocalStreamConnected provides streamConnected,
                 LocalAddressService provides addressService,
-                LocalDeeplinkService provides deeplinkService,
                 LocalAssetsService provides assetsService,
                 LocalChainService provides chainService,
-                LocalAssetConfigService provides assetConfigService,
             ) {
                 MainContent(
                     state = state,
+                    deeplinkService = deeplinkService,
                     darkTheme = darkTheme,
                     pendingNavigation = pendingNavigation,
                     systemAuthEnrollmentMissing = systemAuthEnrollmentMissing,

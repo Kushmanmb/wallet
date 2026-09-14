@@ -1,7 +1,6 @@
 package com.gemwallet.android.ui.navigation
 
 import com.gemwallet.android.ui.LocalAssetsService
-import com.gemwallet.android.ui.LocalDeeplinkService
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.key
@@ -117,8 +116,8 @@ data class SwapSelection(
 fun rememberWalletNavigationState(
     startDestination: NavKey,
     currentTab: MutableState<String>,
+    deeplinkService: GemDeeplinkService,
 ): WalletNavigator {
-    val deeplinkService = LocalDeeplinkService.current
     val assetsService = LocalAssetsService.current
     val scope = rememberCoroutineScope()
     return key(startDestination) {
