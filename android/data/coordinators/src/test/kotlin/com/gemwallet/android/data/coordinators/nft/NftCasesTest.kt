@@ -100,8 +100,6 @@ private fun dbCollection(id: NFTCollectionId) = DbNFTCollection(
     chain = id.chain,
     contractAddress = id.contractAddress,
     imageUrl = "",
-    previewImageUrl = "",
-    originalSourceUrl = "",
     status = VerificationStatus.Verified,
 )
 
@@ -114,6 +112,4 @@ private fun dbAsset(id: NFTAssetId, collectionId: NFTCollectionId) = DbNFTAsset(
     chain = id.chain,
     contractAddress = id.contractAddress,
     imageUrl = "",
-    previewImageUrl = "",
-    originalSourceUrl = "",
 )

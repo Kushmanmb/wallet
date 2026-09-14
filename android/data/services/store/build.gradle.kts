@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.ktx.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.junit.runner)
     androidTestImplementation(libs.room.testing)
     androidTestImplementation(testFixtures(project(":gemcore")))
 }
