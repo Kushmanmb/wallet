@@ -22,11 +22,11 @@ import com.gemwallet.android.ui.theme.WalletTheme
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingHalfSmall
 import com.gemwallet.android.ui.theme.tinyIconSize
-import com.gemwallet.android.features.referral.views.previewRewards
-import uniffi.gemstone.Rewards
+import com.gemwallet.android.features.referral.views.previewRewardsState
+import uniffi.gemstone.GemRewardsState
 
-internal fun LazyListScope.referralError(rewards: Rewards) {
-    val reason = rewards.disableReason ?: return
+internal fun LazyListScope.referralError(uiState: GemRewardsState) {
+    val reason = uiState.disableReason ?: return
     item {
         Column(
             modifier = Modifier
@@ -56,7 +56,7 @@ private fun ReferralErrorPreview() {
     WalletTheme {
         LazyColumn {
             referralError(
-                previewRewards(disableReason = "Account verification required")
+                previewRewardsState(disableReason = "Account verification required")
             )
         }
     }

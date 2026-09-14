@@ -5,7 +5,10 @@ use super::model::{GemRewardsRedemption, GemRewardsState};
 
 pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
     let Some(rewards) = rewards else {
-        return GemRewardsState::default();
+        return GemRewardsState {
+            invite_reward_points: Rewards::default().invite_reward_points,
+            ..GemRewardsState::default()
+        };
     };
     let has_referral_code = has_value(rewards.code.as_deref());
     let has_used_referral_code = has_value(rewards.used_referral_code.as_deref());
@@ -19,6 +22,13 @@ pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
         is_unverified: has_referral_code && rewards.status == RewardStatus::Unverified && !has_pending_referral,
         has_pending_referral,
         can_activate_pending_referral: has_pending_referral && rewards.verify_after.is_some_and(|verify_after| now >= verify_after),
+        invite_reward_points: rewards.invite_reward_points,
+        referral_code: rewards.code.clone().filter(|code| !code.is_empty()),
+        used_referral_code: rewards.used_referral_code.clone().filter(|code| !code.is_empty()),
+        verify_after: rewards.verify_after,
+        disable_reason: rewards.disable_reason.clone(),
+        referral_count_text: rewards.referral_count.to_string(),
+        points_text: points_text(rewards.points),
         redemptions: redemptions(rewards),
     }
 }
@@ -120,8 +130,47 @@ mod tests {
     }
 
     #[test]
-    fn test_state_without_rewards_offers_nothing() {
-        assert_eq!(state(None, now()), GemRewardsState::default());
+    fn test_state_without_rewards_offers_nothing_but_still_names_the_invite_reward() {
+        let state = state(None, now());
+
+        assert_eq!(
+            state,
+            GemRewardsState {
+                invite_reward_points: 100,
+                ..GemRewardsState::default()
+            },
+            "a wallet whose rewards failed to load still reads the invite pitch"
+        );
+    }
+
+    #[test]
+    fn test_state_carries_the_values_the_info_rows_read() {
+        let rewards = Rewards {
+            code: Some("gem".to_string()),
+            used_referral_code: Some("friend".to_string()),
+            referral_count: 5,
+            points: 250,
+            invite_reward_points: 150,
+            disable_reason: Some("verification required".to_string()),
+            ..rewards(Some("gem"), RewardStatus::Verified)
+        };
+
+        let state = state(Some(&rewards), now());
+
+        assert_eq!(state.referral_code.as_deref(), Some("gem"));
+        assert_eq!(state.used_referral_code.as_deref(), Some("friend"));
+        assert_eq!(state.referral_count_text, "5");
+        assert_eq!(state.points_text, "250 \u{1f48e}");
+        assert_eq!(state.invite_reward_points, 150);
+        assert_eq!(state.disable_reason.as_deref(), Some("verification required"));
+    }
+
+    #[test]
+    fn test_state_reads_an_empty_code_as_no_code() {
+        let state = state(Some(&rewards(Some(""), RewardStatus::Unverified)), now());
+
+        assert_eq!(state.referral_code, None);
+        assert_eq!(state.used_referral_code, None);
     }
 
     #[test]

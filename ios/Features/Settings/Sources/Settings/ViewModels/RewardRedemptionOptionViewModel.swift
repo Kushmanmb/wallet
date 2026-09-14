@@ -1,7 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import struct Gemstone.GemRewardsRedemption
-import struct Gemstone.Rewards
 import struct Gemstone.RewardRedemptionOption
 import BigInt
 import Components

@@ -47,7 +47,6 @@ fun ReferralNavScreen(
     val availableWallets by viewModel.availableWallets.collectAsStateWithLifecycle()
     val availableWalletRows by viewModel.availableWalletRows.collectAsStateWithLifecycle()
     val currentWallet by viewModel.currentWallet.collectAsStateWithLifecycle()
-    val rewards by viewModel.rewards.collectAsStateWithLifecycle()
     val referralLink by viewModel.referralLink.collectAsStateWithLifecycle()
     val inSync by viewModel.inSync.collectAsStateWithLifecycle()
     val referralCode by viewModel.referralCode.collectAsStateWithLifecycle()
@@ -57,11 +56,9 @@ fun ReferralNavScreen(
         inSync = inSync,
         isAvailableWalletSelect = availableWallets.size > 1,
         referralCode = referralCode,
-        rewards = rewards,
         referralLink = referralLink,
         uiState = uiState,
         currentWallet = currentWallet,
-        joinPointsCost = 100,
         onUsername = viewModel::createReferral,
         onCode = viewModel::useCode,
         onCancelCode = viewModel::cancelCode,

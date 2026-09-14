@@ -14,7 +14,6 @@ import com.wallet.core.primitives.Wallet
 import uniffi.gemstone.GemRewardsServiceInterface
 import uniffi.gemstone.walletRows
 import uniffi.gemstone.GemRewardsRedemption
-import uniffi.gemstone.RewardRedemptionOption
 import uniffi.gemstone.Rewards
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +43,7 @@ class ReferralViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val currentWallet = MutableStateFlow<Wallet?>(null)
-    val rewards = MutableStateFlow<Rewards?>(null)
+    private val rewards = MutableStateFlow<Rewards?>(null)
     val inSync = MutableStateFlow(SyncType.Init)
 
     val uiState = rewards.mapLatest { service.state(it) }

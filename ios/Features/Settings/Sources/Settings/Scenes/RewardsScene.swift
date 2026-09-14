@@ -1,6 +1,5 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import struct Gemstone.Rewards
 import struct Gemstone.GemRewardsRedemption
 import struct Gemstone.RewardRedemptionOption
 import Components
@@ -24,14 +23,14 @@ public struct RewardsScene: View {
                 CenterLoadingView()
             case let .error(error):
                 stateErrorView(error: error)
-            case let .data(rewards):
+            case .data:
                 inviteFriendsSection
                 if let disableReason = model.disableReason {
                     disableReasonSection(reason: disableReason)
                 }
                 statusSection
                 if model.rewardsState.showsInfo {
-                    infoSection(rewards: rewards)
+                    infoSection
                 }
                 if model.redemptions.isNotEmpty {
                     redemptionOptionsSection(redemptions: model.redemptions)
@@ -211,9 +210,10 @@ public struct RewardsScene: View {
         }
     }
 
-    private func infoSection(rewards: Rewards) -> some View {
+    @ViewBuilder
+    private var infoSection: some View {
         Section {
-            if let code = rewards.code {
+            if let code = model.referralCode {
                 ListItemView(
                     title: model.myReferralCodeTitle,
                     subtitle: code,
@@ -222,13 +222,13 @@ public struct RewardsScene: View {
             }
             ListItemView(
                 title: model.referralCountTitle,
-                subtitle: "\(rewards.referralCount)",
+                subtitle: model.referralCountText,
             )
             ListItemView(
                 title: model.pointsTitle,
-                subtitle: "\(rewards.points) 💎",
+                subtitle: model.pointsText,
             )
-            if let invitedBy = rewards.usedReferralCode {
+            if let invitedBy = model.invitedBy {
                 ListItemView(
                     title: model.invitedByTitle,
                     subtitle: invitedBy,
