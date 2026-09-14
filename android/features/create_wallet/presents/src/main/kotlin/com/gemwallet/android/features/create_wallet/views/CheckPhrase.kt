@@ -35,7 +35,6 @@ import com.gemwallet.android.ui.theme.WindowDimension
 import com.gemwallet.android.ui.theme.isCompactDimension
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.sceneContentPaddingValues
-import uniffi.gemstone.DocsUrl
 import kotlin.math.min
 
 private const val wordsPerGroup = 4
@@ -50,7 +49,7 @@ internal fun CheckPhrase(
     onCancel: () -> Unit,
 ) {
     DisableScreenShooting()
-    DetectScreenshot(AppUrl.docs(DocsUrl.HowToSecureSecretPhrase))
+    DetectScreenshot(AppUrl.howToSecureSecretPhrase)
 
     val random = remember {
         val shuffled = mutableListOf<Pair<Int, String>>()

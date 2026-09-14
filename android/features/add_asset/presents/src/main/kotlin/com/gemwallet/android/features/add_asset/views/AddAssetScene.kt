@@ -52,7 +52,6 @@ import uniffi.gemstone.GemAddAssetPhase
 import com.gemwallet.android.ui.components.fields.AddressChainField
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.BlockExplorerLink
-import uniffi.gemstone.DocsUrl
 import androidx.compose.material3.SnackbarHostState
 
 private val networkItemHeight = 64.dp
@@ -76,7 +75,7 @@ internal fun AddAssetScene(
         title = stringResource(id = R.string.wallet_add_token_title),
         snackbar = snackbar,
         actions = {
-            DocsInfoButton(AppUrl.docs(DocsUrl.AddCustomToken))
+            DocsInfoButton(AppUrl.addCustomToken)
         },
         mainAction = {
             MainActionButton(
@@ -152,7 +151,7 @@ internal fun AddAssetScene(
             Card(
                 modifier = Modifier.padding(horizontal = sceneContentPadding()),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-                onClick = { uriHandler.open(context, AppUrl.docs(DocsUrl.TokenVerification)) },
+                onClick = { uriHandler.open(context, AppUrl.tokenVerification) },
             ) {
                 Row(modifier = Modifier.defaultPadding()) {
                     Text(text = Emoji.warning, fontSize = space24.value.sp)

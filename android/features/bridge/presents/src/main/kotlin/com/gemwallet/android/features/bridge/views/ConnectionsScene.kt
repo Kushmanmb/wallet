@@ -42,7 +42,6 @@ import com.gemwallet.android.features.bridge.viewmodels.ConnectionsViewModel
 import com.wallet.core.primitives.WalletConnection
 import kotlinx.coroutines.launch
 import com.gemwallet.android.AppUrl
-import uniffi.gemstone.DocsUrl
 import com.gemwallet.android.ui.components.clipboard.clipboardManager
 import uniffi.gemstone.GemApplicationMetadataService
 import com.gemwallet.android.ext.toGem
@@ -68,7 +67,7 @@ fun ConnectionsScene(
         title = stringResource(id = R.string.wallet_connect_title),
         snackbar = snackbar,
         actions = {
-            DocsInfoButton(AppUrl.docs(DocsUrl.WalletConnect))
+            DocsInfoButton(AppUrl.walletConnect)
         },
         onClose = onCancel,
     ) {

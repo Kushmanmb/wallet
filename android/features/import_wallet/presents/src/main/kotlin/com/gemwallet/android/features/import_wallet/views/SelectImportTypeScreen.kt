@@ -26,7 +26,6 @@ import com.gemwallet.android.ui.components.list_item.ChainItem
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.ListPosition
 import com.wallet.core.primitives.Chain
-import uniffi.gemstone.DocsUrl
 
 @Composable
 fun SelectImportTypeScreen(
@@ -55,7 +54,7 @@ private fun SelectImportTypeScene(
     Scene(
         title = stringResource(id = R.string.wallet_import_title),
         actions = {
-            DocsInfoButton(AppUrl.docs(DocsUrl.MigrateWallet))
+            DocsInfoButton(AppUrl.migrateWallet)
         },
         onClose = onClose,
     ) {

@@ -71,7 +71,6 @@ import uniffi.gemstone.GemNameRecordState
 import uniffi.gemstone.GemWalletImportKind
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import uniffi.gemstone.DocsUrl
 import com.gemwallet.android.ext.serviceMessage
 
 private val loadingDialogSize = 100.dp
@@ -96,7 +95,7 @@ fun ImportScreen(
     onCancel: () -> Unit
 ) {
     DisableScreenShooting()
-    DetectScreenshot(AppUrl.docs(DocsUrl.HowToSecureSecretPhrase))
+    DetectScreenshot(AppUrl.howToSecureSecretPhrase)
 
     val viewModel: ImportViewModel = hiltViewModel()
 

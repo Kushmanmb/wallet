@@ -34,7 +34,6 @@ import com.gemwallet.android.features.create_wallet.viewmodels.CreateWalletViewM
 import com.gemwallet.android.ui.DetectScreenshot
 import com.gemwallet.android.ui.DisableScreenShooting
 import com.gemwallet.android.ui.R
-import uniffi.gemstone.DocsUrl
 import com.gemwallet.android.ui.components.buttons.CopyButton
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.clipboard.setPlainText
@@ -57,7 +56,7 @@ fun CreateWalletScreen(
     onCreated: (walletId: WalletId?) -> Unit,
 ) {
     DisableScreenShooting()
-    DetectScreenshot(AppUrl.docs(DocsUrl.HowToSecureSecretPhrase))
+    DetectScreenshot(AppUrl.howToSecureSecretPhrase)
 
     val viewModel: CreateWalletViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

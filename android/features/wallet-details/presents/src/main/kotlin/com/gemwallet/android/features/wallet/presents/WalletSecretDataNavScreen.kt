@@ -37,7 +37,6 @@ import com.gemwallet.android.ui.theme.paddingMiddle
 import com.gemwallet.android.ui.theme.sceneContentPaddingValues
 import com.gemwallet.android.ui.theme.space8
 import com.gemwallet.android.ui.components.list_item.titleRes
-import uniffi.gemstone.DocsUrl
 import uniffi.gemstone.GemWalletSecret
 import com.gemwallet.android.ui.components.clipboard.clipboardManager
 
@@ -47,7 +46,7 @@ fun WalletSecretDataNavScreen(
     viewModel: WalletSecretDataViewModel = hiltViewModel()
 ) {
     DisableScreenShooting()
-    DetectScreenshot(AppUrl.docs(DocsUrl.HowToSecureSecretPhrase))
+    DetectScreenshot(AppUrl.howToSecureSecretPhrase)
 
     val result by viewModel.secret.collectAsStateWithLifecycle()
     val title = stringResource(viewModel.secretKind.titleRes)
@@ -69,7 +68,7 @@ fun WalletSecretDataNavScreen(
         title = title,
         padding = sceneContentPaddingValues(),
         actions = {
-            DocsInfoButton(AppUrl.docs(DocsUrl.HowToSecureSecretPhrase))
+            DocsInfoButton(AppUrl.howToSecureSecretPhrase)
         },
         onClose = onCancel,
     ) {
