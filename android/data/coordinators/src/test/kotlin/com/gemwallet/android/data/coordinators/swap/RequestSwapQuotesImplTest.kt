@@ -38,6 +38,8 @@ import uniffi.gemstone.GemSwapTransfer
 import uniffi.gemstone.SwapperQuote
 import java.math.BigDecimal
 import java.math.BigInteger
+import uniffi.gemstone.GemSlippageSelection
+import uniffi.gemstone.GemSlippageSession
 
 class RequestSwapQuotesImplTest {
 
@@ -332,6 +334,8 @@ class RequestSwapQuotesImplTest {
         override fun slippageBps(): UInt? = null
 
         override fun slippageCheck(bps: UInt): GemSlippageCheck = throw UnsupportedOperationException()
+
+        override fun newSlippageSession(selection: GemSlippageSelection): GemSlippageSession = throw UnsupportedOperationException()
 
         override fun slippageBpsFromPercent(percent: Double): UInt? = throw UnsupportedOperationException()
 

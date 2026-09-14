@@ -3,6 +3,8 @@ package com.gemwallet.android.ui.models.swap
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import uniffi.gemstone.GemSlippageSession
+import uniffi.gemstone.GemSlippageViewState
 
 class SwapSlippageTest {
     private val slippagePercent = { bps: UInt -> bps.toDouble() / 100 }
@@ -34,13 +36,19 @@ class SwapSlippageTest {
 
     @Test
     fun suggestions_formatToExpectedLabels() {
-        assertEquals(listOf(30u, 50u, 300u), SwapSlippage.suggestionsBps)
-        assertEquals(listOf("0.3", "0.5", "3"), SwapSlippage.suggestionsBps.map { SwapSlippage.format(it, slippagePercent) })
+        val suggestions = state().suggestionsBps
+
+        assertEquals(listOf(30u, 50u, 300u), suggestions)
+        assertEquals(listOf("0.3%", "0.5%", "3%"), suggestions.map { SwapSlippage.percentLabel(it, slippagePercent) })
     }
 
     @Test
-    fun sanitize_limitsFractionAndIntegerDigits() {
-        assertEquals("0.11", SwapSlippage.sanitize("0.111111"))
-        assertEquals("33", SwapSlippage.sanitize("33333312312"))
+    fun sanitize_limitsDigitsToWhatCoreAllows() {
+        val state = state()
+
+        assertEquals("0.11", SwapSlippage.sanitize("0.111111", state))
+        assertEquals("33", SwapSlippage.sanitize("33333312312", state))
     }
+
+    private fun state(): GemSlippageViewState = GemSlippageSession(isAuto = false, bps = 100u).viewState()
 }

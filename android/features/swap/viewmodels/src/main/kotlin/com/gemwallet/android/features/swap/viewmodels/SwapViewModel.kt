@@ -78,6 +78,8 @@ import javax.inject.Inject
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.domains.gemConfig
 import uniffi.gemstone.GemSwapRequest
+import uniffi.gemstone.GemSlippageSession
+import uniffi.gemstone.GemSlippageSelection
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -101,7 +103,8 @@ class SwapViewModel @Inject constructor(
     private val selectedSlippageBps = MutableStateFlow<UInt?>(null)
     val selectedSlippage: StateFlow<UInt?> = selectedSlippageBps.asStateFlow()
 
-    fun slippageCheck(bps: UInt): GemSlippageCheck = swapQuoteService.slippageCheck(bps)
+    fun newSlippageSession(bps: UInt?): GemSlippageSession =
+        swapQuoteService.newSlippageSession(bps?.let { GemSlippageSelection.Manual(it) } ?: GemSlippageSelection.Auto)
 
     fun slippageBps(percent: Double): UInt? = swapQuoteService.slippageBpsFromPercent(percent)
 

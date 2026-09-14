@@ -1,27 +1,20 @@
 package com.gemwallet.android.ui.models.swap
 
 import com.gemwallet.android.math.parseInputNumberOrNull
-import uniffi.gemstone.Config
 import uniffi.gemstone.GemNumberFormat
+import uniffi.gemstone.GemSlippageViewState
 import java.text.DecimalFormatSymbols
-import java.math.BigDecimal
-import com.gemwallet.android.domains.gemConfig
 
 object SwapSlippage {
-    private val config by lazy { gemConfig.getSwapConfig() }
-    val suggestionsBps: List<UInt> = config.slippageSuggestionsBps
-    val maxBps: UInt = config.maxSlippageBps
-    private val minBps: UInt = config.minSlippageBps
 
-    fun maxPercentLabel(slippagePercent: (UInt) -> Double): String = "${format(maxBps, slippagePercent)}%"
-
-    fun minPercentLabel(slippagePercent: (UInt) -> Double): String = "${format(minBps, slippagePercent)}%"
+    fun percentLabel(bps: UInt, slippagePercent: (UInt) -> Double): String = "${format(bps, slippagePercent)}%"
 
     fun format(bps: UInt, slippagePercent: (UInt) -> Double): String =
         slippagePercent(bps).toBigDecimal().stripTrailingZeros().toPlainString()
 
-    fun sanitize(input: String): String =
-        GemNumberFormat(DecimalFormatSymbols.getInstance().decimalSeparator.toString()).sanitize(input, 2u, 2u)
+    fun sanitize(input: String, state: GemSlippageViewState): String =
+        GemNumberFormat(DecimalFormatSymbols.getInstance().decimalSeparator.toString())
+            .sanitize(input, state.maximumFractionDigits, state.maximumIntegerDigits)
 
     fun parseBps(input: String, slippageBps: (Double) -> UInt?): UInt? {
         val percent = input.parseInputNumberOrNull() ?: return null

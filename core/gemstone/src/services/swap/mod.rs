@@ -1,3 +1,4 @@
+pub mod slippage;
 pub mod model;
 pub mod quote;
 pub mod rules;

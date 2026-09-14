@@ -5,6 +5,9 @@ import Foundation
 import class Gemstone.Config
 import struct Gemstone.GemNumberFormat
 import enum Gemstone.GemSlippageCheck
+import enum Gemstone.GemSlippageSelection
+import struct Gemstone.GemSlippageSession
+import struct Gemstone.GemSlippageViewState
 import protocol Gemstone.GemSwapQuoteServiceProtocol
 import GemstonePrimitives
 import InfoSheet
@@ -16,13 +19,10 @@ import Validators
 @MainActor
 @Observable
 public final class SwapSlippageViewModel {
-    private static let maxFractionDigits: Int = 2
     private nonisolated static let formatter = NumericFormatter()
 
     private let service: any GemSwapQuoteServiceProtocol
     private let onSelect: (SwapSlippage) -> Void
-    private let suggestionsBps: [UInt32]
-    private let maxPercent: Double
 
     let placeholder: String
     var isAuto: Bool
@@ -33,8 +33,6 @@ public final class SwapSlippageViewModel {
         self.service = service
         self.onSelect = onSelect
         let config = Config.shared.swapConfig()
-        suggestionsBps = config.slippageSuggestionsBps
-        maxPercent = Double(config.maxSlippageBps) / 100
         placeholder = Self.format(bps: service.defaultSlippage(chain: chain.rawValue).bps)
         let input: String
         switch slippage {
@@ -78,17 +76,21 @@ public final class SwapSlippageViewModel {
         inputModel.error?.localizedDescription
     }
 
+    private var viewState: GemSlippageViewState {
+        service.newSlippageSession(selection: isAuto ? .auto : .manual(bps: selectedBps)).viewState()
+    }
+
     var isConfirmEnabled: Bool {
-        isAuto || service.slippageCheck(bps: selectedBps).allowsConfirm()
+        viewState.allowsConfirm
     }
 
     var warningText: String? {
-        guard inputModel.isValid, service.slippageCheck(bps: selectedBps) == .high else { return nil }
+        guard inputModel.isValid, viewState.showsWarning else { return nil }
         return Localized.Swap.slippageWarning
     }
 
     var suggestions: [SlippageSuggestion] {
-        suggestionsBps.map { SlippageSuggestion(bps: $0, percentText: Self.format(bps: $0)) }
+        viewState.suggestionsBps.map { SlippageSuggestion(bps: $0, percentText: Self.format(bps: $0)) }
     }
 
     func onSelect(suggestion: SlippageSuggestion) {
@@ -100,10 +102,11 @@ public final class SwapSlippageViewModel {
     }
 
     func sanitize(_ text: String) -> String {
-        GemNumberFormat(decimalSeparator: Locale.current.decimalSeparator ?? ".").sanitize(
+        let state = viewState
+        return GemNumberFormat(decimalSeparator: Locale.current.decimalSeparator ?? ".").sanitize(
             input: text,
-            maximumFractionDigits: UInt32(Self.maxFractionDigits),
-            maximumIntegerDigits: UInt32(String(Int(maxPercent)).count),
+            maximumFractionDigits: state.maximumFractionDigits,
+            maximumIntegerDigits: state.maximumIntegerDigits,
         )
     }
 

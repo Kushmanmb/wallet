@@ -3,6 +3,8 @@ use std::sync::Arc;
 use primitives::{Asset, AssetId, Chain, Currency};
 use swapper::{Quote, SwapperError, SwapperSlippage};
 
+use super::slippage::{GemSlippageSelection, GemSlippageSession};
+
 use super::rules;
 use super::model::{GemSwapPairSelection, GemSwapSide};
 use super::{GemSwapPairSuggestion, GemSwapService, GemSwapSession, GemSwapTransfer};
@@ -61,6 +63,10 @@ impl GemSwapQuoteService {
 
     pub fn select_pair_asset(&self, selection: GemSwapPairSelection, side: GemSwapSide, asset_id: AssetId) -> GemSwapPairSelection {
         rules::select_pair_asset(selection, side, asset_id)
+    }
+
+    pub fn new_slippage_session(&self, selection: GemSlippageSelection) -> GemSlippageSession {
+        GemSlippageSession::new(selection)
     }
 
     pub fn slippage_bps_from_percent(&self, percent: f64) -> Option<u32> {

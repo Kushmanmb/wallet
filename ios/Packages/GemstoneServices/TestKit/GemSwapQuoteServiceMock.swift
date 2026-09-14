@@ -22,6 +22,8 @@ import GemstonePrimitives
 import GemstonePrimitivesTestKit
 import Primitives
 import PrimitivesTestKit
+import enum Gemstone.GemSlippageSelection
+import struct Gemstone.GemSlippageSession
 
 public final class GemSwapQuoteServiceMock: GemSwapQuoteServiceProtocol, @unchecked Sendable {
     private let quotes: @Sendable (BigInt) -> [SwapperQuote]
@@ -88,6 +90,13 @@ public final class GemSwapQuoteServiceMock: GemSwapQuoteServiceProtocol, @unchec
 
     public func slippageCheck(bps _: UInt32) -> GemSlippageCheck {
         slippageCheckResult
+    }
+
+    public func newSlippageSession(selection: GemSlippageSelection) -> GemSlippageSession {
+        switch selection {
+        case .auto: GemSlippageSession(isAuto: true, bps: 0)
+        case let .manual(bps): GemSlippageSession(isAuto: false, bps: bps)
+        }
     }
 
     public func slippageBpsFromPercent(percent: Double) -> UInt32? {
