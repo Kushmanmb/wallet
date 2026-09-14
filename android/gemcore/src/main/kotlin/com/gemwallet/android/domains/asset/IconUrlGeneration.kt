@@ -16,7 +16,7 @@ import com.wallet.core.primitives.TransactionNFTTransferMetadata
 private val assetIcons = ConcurrentHashMap<String, GemAssetIcon>()
 private val nftImages = ConcurrentHashMap<String, String>()
 
-private fun AssetId.icon(): GemAssetIcon = assetIcons.computeIfAbsent(toIdentifier(), assetConfig::assetIcon)
+fun AssetId.icon(): GemAssetIcon = assetIcons.computeIfAbsent(toIdentifier(), assetConfig::assetIcon)
 
 fun Chain.iconChain(): Chain = chainConfig().iconChain.toChain()
 
