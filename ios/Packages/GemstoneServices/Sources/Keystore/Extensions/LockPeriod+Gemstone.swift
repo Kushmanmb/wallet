@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import enum Gemstone.GemLockPeriod
+import func Gemstone.lockPeriodFromMinutes
 import func Gemstone.lockPeriods
 import Primitives
 
@@ -33,5 +34,9 @@ public extension GemLockPeriod {
 public extension LockPeriod {
     static var offered: [LockPeriod] {
         lockPeriods().map { $0.lockPeriod }
+    }
+
+    static var `default`: LockPeriod {
+        lockPeriodFromMinutes(minutes: nil).lockPeriod
     }
 }
