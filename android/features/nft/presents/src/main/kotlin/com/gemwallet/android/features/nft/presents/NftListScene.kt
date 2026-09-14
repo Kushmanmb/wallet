@@ -40,6 +40,7 @@ import com.gemwallet.android.ui.models.actions.NftAssetIdAction
 import com.gemwallet.android.ui.models.actions.NftCollectionIdAction
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
+import com.gemwallet.android.features.nft.presents.localization.stringRes
 import uniffi.gemstone.GemNftList
 
 private val collectibleCellMinSize = 150.dp
@@ -94,11 +95,7 @@ internal fun NftListScene(
     val showReceiveAction = list != GemNftList.UNVERIFIED
 
     Scene(
-        title = when (list) {
-            GemNftList.COLLECTIONS,
-            GemNftList.COLLECTION -> stringResource(R.string.nft_collections)
-            GemNftList.UNVERIFIED -> stringResource(R.string.asset_verification_unverified)
-        },
+        title = stringResource(list.stringRes()),
         actions = {
             if (showReceiveAction) {
                 IconButton(onClick = { onAction(NftListAction.Receive) }) {
