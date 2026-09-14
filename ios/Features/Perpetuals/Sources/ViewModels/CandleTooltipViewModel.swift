@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import GemstonePrimitives
 import struct Gemstone.GemCandleTooltip
 import func Gemstone.candleTooltip
 import Components

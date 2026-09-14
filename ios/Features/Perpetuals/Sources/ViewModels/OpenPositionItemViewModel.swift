@@ -3,6 +3,7 @@
 import Components
 import Formatters
 import Foundation
+import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
 import Style

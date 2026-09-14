@@ -1,9 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemCurrencyStyle
 import BigInt
 import Components
 import Formatters
 import Foundation
+import GemstonePrimitives
 import Localization
 import Primitives
 import Style
@@ -21,7 +23,7 @@ public struct AssetDataViewModel: Sendable {
         assetData: AssetData,
         formatter: ValueFormatter,
         currencyCode: String,
-        currencyFormatterType: CurrencyFormatterType = .currency,
+        currencyFormatterType: GemCurrencyStyle = .currency,
     ) {
         self.assetData = assetData
         priceViewModel = PriceViewModel(

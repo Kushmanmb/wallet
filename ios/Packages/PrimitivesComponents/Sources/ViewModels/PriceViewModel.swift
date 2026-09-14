@@ -1,8 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemCurrencyStyle
 import Components
 import Formatters
 import Foundation
+import GemstonePrimitives
 import Primitives
 import Style
 import SwiftUI
@@ -16,7 +18,7 @@ public struct PriceViewModel: Sendable {
     public init(
         price: Price?,
         currencyCode: String,
-        currencyFormatterType: CurrencyFormatterType = .currency,
+        currencyFormatterType: GemCurrencyStyle = .currency,
     ) {
         self.price = price
         currencyFormatter = CurrencyFormatter(type: currencyFormatterType, currencyCode: currencyCode)

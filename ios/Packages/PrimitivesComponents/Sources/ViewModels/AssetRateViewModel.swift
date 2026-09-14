@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Formatters
+import GemstonePrimitives
 import struct Gemstone.GemSwapRate
 
 public struct AssetRateViewModel {

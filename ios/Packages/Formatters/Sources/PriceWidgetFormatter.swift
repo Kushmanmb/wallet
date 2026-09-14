@@ -1,40 +1,29 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
-import Primitives
 
-public enum CurrencyFormatterType: Sendable, Hashable {
-    case currency
-    case fiat
-    case abbreviated
-}
+public struct PriceWidgetFormatter: Sendable, Hashable {
+    public enum Style: Sendable, Hashable {
+        case plain, abbreviated
+    }
 
-public struct CurrencyFormatter: Sendable, Hashable {
     private let locale: Locale
-    private let type: CurrencyFormatterType
-    public let currencyCode: String
+    private let style: Style
+    private let currencyCode: String
 
     public init(
-        type: CurrencyFormatterType = .currency,
+        style: Style = .plain,
         locale: Locale = Locale.current,
         currencyCode: String,
     ) {
-        self.type = type
+        self.style = style
         self.locale = locale
         self.currencyCode = currencyCode
     }
 
-    public var symbol: String {
-        let formatter = NumberFormatter()
-        formatter.locale = locale
-        formatter.numberStyle = .currency
-        formatter.currencyCode = currencyCode
-        return formatter.currencySymbol
-    }
-
     public func string(_ value: Double) -> String {
-        switch type {
-        case .currency, .fiat: currencyString(value)
+        switch style {
+        case .plain: currencyString(value)
         case .abbreviated: abbreviatedFormatter.string(from: value, currency: currencyCode) ?? currencyString(value)
         }
     }
@@ -42,7 +31,10 @@ public struct CurrencyFormatter: Sendable, Hashable {
 
 // MARK: - Private
 
-private extension CurrencyFormatter {
+private extension PriceWidgetFormatter {
+    static let smallValueThreshold: Double = 0.99
+    static let dustThreshold: Double = 1e-10
+
     var abbreviatedFormatter: AbbreviatedFormatter {
         AbbreviatedFormatter(locale: locale)
     }
@@ -52,9 +44,9 @@ private extension CurrencyFormatter {
     }
 
     func precision(for magnitude: Double) -> NumberFormatStyleConfiguration.Precision {
-        switch type {
-        case .fiat: .twoPlaces
-        case .currency, .abbreviated: .adaptive(for: magnitude)
+        switch magnitude {
+        case Self.dustThreshold ..< Self.smallValueThreshold: .fourSignificant
+        default: .twoPlaces
         }
     }
 }

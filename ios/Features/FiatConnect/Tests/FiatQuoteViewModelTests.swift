@@ -2,6 +2,7 @@
 
 @testable import FiatConnect
 import Formatters
+import GemstonePrimitives
 import struct Gemstone.GemAssetRate
 import GemstonePrimitivesTestKit
 import Primitives

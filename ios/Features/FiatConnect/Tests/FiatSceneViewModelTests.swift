@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import GemstonePrimitives
 import GemstonePrimitivesTestKit
 import struct Gemstone.FiatQuote
 import struct Gemstone.GemBalanceRequirement

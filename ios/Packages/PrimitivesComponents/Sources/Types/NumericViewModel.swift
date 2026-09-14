@@ -1,6 +1,7 @@
 import BigInt
 import Components
 import Formatters
+import GemstonePrimitives
 import enum Gemstone.GemAmountSign
 import Primitives
 import Style

@@ -2,6 +2,7 @@
 
 import Formatters
 import Foundation
+import GemstonePrimitives
 import struct Gemstone.ChartDateValue
 import struct Gemstone.GemChartData
 import struct Gemstone.GemChartHeader

@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Formatters
+import GemstonePrimitives
 @testable import Perpetuals
 import PerpetualsTestKit
 import Primitives

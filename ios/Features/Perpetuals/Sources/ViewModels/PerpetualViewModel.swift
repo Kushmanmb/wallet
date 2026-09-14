@@ -1,8 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemCurrencyStyle
 import Components
 import Formatters
 import Foundation
+import GemstonePrimitives
 import class Gemstone.GemPerpetual
 import Localization
 import Primitives
@@ -18,7 +20,7 @@ public struct PerpetualViewModel {
 
     public init(
         perpetual: Perpetual,
-        currencyStyle: CurrencyFormatterType = .abbreviated,
+        currencyStyle: GemCurrencyStyle = .abbreviated,
         priceFormatter: CurrencyFormatter = .usd,
     ) {
         self.perpetual = perpetual

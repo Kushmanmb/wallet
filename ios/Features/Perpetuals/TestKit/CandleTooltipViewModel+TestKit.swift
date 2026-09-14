@@ -2,6 +2,7 @@
 
 import Formatters
 import Foundation
+import GemstonePrimitives
 @testable import Perpetuals
 import Primitives
 

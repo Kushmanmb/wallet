@@ -1,8 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemCurrencyStyle
 import Components
 import Formatters
 import Foundation
+import GemstonePrimitives
 import struct Gemstone.GemPerpetualPositionRow
 import func Gemstone.perpetualPositionRow
 import Localization
@@ -20,7 +22,7 @@ public struct PerpetualPositionViewModel {
 
     public init(
         _ data: PerpetualPositionData,
-        currencyStyle: CurrencyFormatterType = .currency,
+        currencyStyle: GemCurrencyStyle = .currency,
     ) {
         self.data = data
         row = perpetualPositionRow(perpetual: data.perpetual.map(), asset: data.asset.map(), position: data.position.map())

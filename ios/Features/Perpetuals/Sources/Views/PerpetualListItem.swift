@@ -1,20 +1,22 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemCurrencyStyle
 import Components
 import Formatters
+import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
 import SwiftUI
 
 public struct PerpetualListItem: View {
     let perpetualData: PerpetualData
-    let currencyStyle: CurrencyFormatterType
+    let currencyStyle: GemCurrencyStyle
     let onPin: (PerpetualData) -> Void
     let onSelect: (Asset) -> Void
 
     public init(
         perpetualData: PerpetualData,
-        currencyStyle: CurrencyFormatterType = .abbreviated,
+        currencyStyle: GemCurrencyStyle = .abbreviated,
         onPin: @escaping (PerpetualData) -> Void,
         onSelect: @escaping (Asset) -> Void,
     ) {

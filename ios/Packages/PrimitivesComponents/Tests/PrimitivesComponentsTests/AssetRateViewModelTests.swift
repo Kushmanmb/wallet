@@ -2,6 +2,7 @@
 
 import Formatters
 import Foundation
+import GemstonePrimitives
 import struct Gemstone.GemAssetRate
 import struct Gemstone.GemSwapRate
 @testable import PrimitivesComponents

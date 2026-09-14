@@ -3,6 +3,7 @@
 import Components
 import Formatters
 import Foundation
+import GemstonePrimitives
 import struct Gemstone.GemChartHeader
 import enum Gemstone.GemChartValueType
 import Primitives
