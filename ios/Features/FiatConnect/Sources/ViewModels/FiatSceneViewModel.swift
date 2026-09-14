@@ -38,6 +38,7 @@ public final class FiatSceneViewModel {
     private let wallet: Wallet
     private let assetAddress: AssetAddress
     private let currencyFormatter: CurrencyFormatter
+    private let locale: Locale
     private let valueFormatter = ValueFormatter(locale: .US, style: .auto)
 
     public let priceUsdQuery: ObservableQuery<PriceUsdRequest>
@@ -63,6 +64,7 @@ public final class FiatSceneViewModel {
         locale: Locale = .current,
     ) {
         self.service = service
+        self.locale = locale
         currencyFormatter = CurrencyFormatter(locale: locale, currencyCode: service.currency.rawValue)
         self.assetAddress = assetAddress
         self.wallet = wallet
@@ -191,6 +193,7 @@ public final class FiatSceneViewModel {
                     asset: asset,
                     row: $0,
                     isSelected: $0.provider == selectedQuote?.provider,
+                    locale: locale,
                 )
             })
         })
@@ -296,7 +299,7 @@ extension FiatSceneViewModel {
 
     private var selectedQuoteViewModel: FiatQuoteViewModel? {
         guard let selectedQuote else { return nil }
-        return FiatQuoteViewModel(asset: asset, row: selectedQuote)
+        return FiatQuoteViewModel(asset: asset, row: selectedQuote, locale: locale)
     }
 
     private func applyAmount(_ text: String, isImmediate: Bool) {
@@ -322,8 +325,8 @@ extension FiatSceneViewModel {
     private func amountCheckError(_ check: GemFiatAmountCheck) -> (any Error)? {
         switch check {
         case .valid: nil
-        case let .belowMinimum(minimum): AnyError(Localized.Transfer.minimumAmount(currencyFormatter.string(Double(minimum))))
-        case let .aboveMaximum(maximum): AnyError(Localized.Transfer.maximumAmount(currencyFormatter.string(Double(maximum))))
+        case let .belowMinimum(minimum): AnyError(Localized.Transfer.minimumAmount(minimum.text(locale: locale)))
+        case let .aboveMaximum(maximum): AnyError(Localized.Transfer.maximumAmount(maximum.text(locale: locale)))
         case let .insufficientBalance(requirement): TransferAmountCalculatorError.insufficientBalance(asset, requirement: requirement.map())
         }
     }

@@ -6,8 +6,8 @@ use primitives::{FiatProviderName, FiatTransactionStatus};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemFiatAmountCheck {
-    BelowMinimum { minimum: u32 },
-    AboveMaximum { maximum: u32 },
+    BelowMinimum { minimum: GemFormattedNumber },
+    AboveMaximum { maximum: GemFormattedNumber },
     InsufficientBalance { requirement: GemBalanceRequirement },
     Valid,
 }

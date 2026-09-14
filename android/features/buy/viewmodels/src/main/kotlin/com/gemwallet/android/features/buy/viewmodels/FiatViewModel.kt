@@ -53,6 +53,7 @@ import uniffi.gemstone.GemFiatAmountCheck
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.gemwallet.android.ui.R
 import android.content.Context
+import com.gemwallet.android.model.text
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
@@ -134,8 +135,8 @@ class FiatViewModel @Inject constructor(
     }
 
     private fun amountCheckText(check: GemFiatAmountCheck, assetName: String, assetSymbol: String): String? = when (check) {
-        is GemFiatAmountCheck.BelowMinimum -> context.getString(R.string.transfer_minimum_amount, "${check.minimum}$")
-        is GemFiatAmountCheck.AboveMaximum -> context.getString(R.string.transfer_maximum_amount, "${check.maximum}$")
+        is GemFiatAmountCheck.BelowMinimum -> context.getString(R.string.transfer_minimum_amount, check.minimum.text())
+        is GemFiatAmountCheck.AboveMaximum -> context.getString(R.string.transfer_maximum_amount, check.maximum.text())
         is GemFiatAmountCheck.InsufficientBalance -> context.getString(R.string.transfer_insufficient_balance, "$assetName ($assetSymbol)")
         GemFiatAmountCheck.Valid -> null
     }

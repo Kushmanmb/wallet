@@ -12,7 +12,7 @@ use crate::services::balance::GemBalanceService;
 use crate::services::error::GemServiceError;
 use crate::services::wallet_session::GemWalletSessionService;
 
-const CURRENCY: Currency = Currency::USD;
+pub(super) const CURRENCY: Currency = Currency::USD;
 
 #[derive(uniffi::Object)]
 pub struct GemFiatQuoteService {
@@ -45,7 +45,7 @@ impl GemFiatQuoteService {
     }
 
     pub fn amount_check(&self, quote_type: FiatQuoteType, amount: f64, quote: Option<FiatQuote>, available: GemBigUint) -> GemFiatAmountCheck {
-        rules::amount_check(&get_fiat_config(), quote_type, amount, quote.as_ref(), &available)
+        rules::amount_check(&get_fiat_config(), quote_type, amount, quote.as_ref(), &available, CURRENCY.as_ref())
     }
 
     pub fn quote_debounce_milliseconds(&self) -> u64 {

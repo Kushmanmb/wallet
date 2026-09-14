@@ -21,15 +21,15 @@ pub fn random_amount(config: &FiatConfig) -> u32 {
     rand::rng().random_range(config.default_buy_amount as u32..config.random_max_amount as u32)
 }
 
-pub fn amount_check(config: &FiatConfig, quote_type: FiatQuoteType, amount: f64, quote: Option<&FiatQuote>, available: &BigUint) -> GemFiatAmountCheck {
+pub fn amount_check(config: &FiatConfig, quote_type: FiatQuoteType, amount: f64, quote: Option<&FiatQuote>, available: &BigUint, currency: &str) -> GemFiatAmountCheck {
     if amount < config.minimum_amount as f64 {
         return GemFiatAmountCheck::BelowMinimum {
-            minimum: config.minimum_amount as u32,
+            minimum: GemFormattedNumber::currency(config.minimum_amount as f64, currency.to_string(), GemCurrencyStyle::Currency),
         };
     }
     if amount > config.maximum_amount as f64 {
         return GemFiatAmountCheck::AboveMaximum {
-            maximum: config.maximum_amount as u32,
+            maximum: GemFormattedNumber::currency(config.maximum_amount as f64, currency.to_string(), GemCurrencyStyle::Currency),
         };
     }
     match (quote_type, quote.and_then(quote_value)) {
@@ -213,26 +213,30 @@ mod tests {
     fn test_amount_check_orders_range_before_balance() {
         let config = get_fiat_config();
         assert_eq!(
-            amount_check(&config, FiatQuoteType::Buy, 4.99, None, &BigUint::ZERO),
-            GemFiatAmountCheck::BelowMinimum { minimum: 5 }
+            amount_check(&config, FiatQuoteType::Buy, 4.99, None, &BigUint::ZERO, "USD"),
+            GemFiatAmountCheck::BelowMinimum {
+                minimum: GemFormattedNumber::currency(5.0, "USD".to_string(), GemCurrencyStyle::Currency)
+            }
         );
         assert_eq!(
-            amount_check(&config, FiatQuoteType::Sell, 10_001.0, Some(&quote(1)), &BigUint::ZERO),
-            GemFiatAmountCheck::AboveMaximum { maximum: 10_000 }
+            amount_check(&config, FiatQuoteType::Sell, 10_001.0, Some(&quote(1)), &BigUint::ZERO, "USD"),
+            GemFiatAmountCheck::AboveMaximum {
+                maximum: GemFormattedNumber::currency(10_000.0, "USD".to_string(), GemCurrencyStyle::Currency)
+            }
         );
         assert_eq!(
-            amount_check(&config, FiatQuoteType::Sell, 100.0, Some(&quote(200)), &BigUint::from(100u32)),
+            amount_check(&config, FiatQuoteType::Sell, 100.0, Some(&quote(200)), &BigUint::from(100u32), "USD"),
             GemFiatAmountCheck::InsufficientBalance {
                 requirement: GemBalanceRequirement::new(BigInt::from(200), BigInt::from(100))
             }
         );
         assert_eq!(
-            amount_check(&config, FiatQuoteType::Sell, 100.0, Some(&quote(100)), &BigUint::from(100u32)),
+            amount_check(&config, FiatQuoteType::Sell, 100.0, Some(&quote(100)), &BigUint::from(100u32), "USD"),
             GemFiatAmountCheck::Valid
         );
-        assert_eq!(amount_check(&config, FiatQuoteType::Sell, 100.0, None, &BigUint::ZERO), GemFiatAmountCheck::Valid);
+        assert_eq!(amount_check(&config, FiatQuoteType::Sell, 100.0, None, &BigUint::ZERO, "USD"), GemFiatAmountCheck::Valid);
         assert_eq!(
-            amount_check(&config, FiatQuoteType::Buy, 100.0, Some(&quote(200)), &BigUint::ZERO),
+            amount_check(&config, FiatQuoteType::Buy, 100.0, Some(&quote(200)), &BigUint::ZERO, "USD"),
             GemFiatAmountCheck::Valid
         );
     }
