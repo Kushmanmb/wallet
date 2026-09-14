@@ -19,6 +19,15 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 - **R22** **S** Contacts list and support chat rows carry no Core record on either app (`ContactsViewModel`, `SupportChatSceneViewModel` and their Android counterparts).
 - **R23** **S** In-app notifications and the fiat transaction list build their rows app-side on both apps.
 
+- **R24** **L** The shared row models in [`PrimitivesComponents`](../ios/Packages/PrimitivesComponents/Sources/ViewModels) are the largest unmigrated group: 29 models, 57 user-facing strings, none holding a Core record — `AssetViewModel`, `AddressListItemViewModel`, `AssetDataViewModel`, `NetworkSelectorViewModel`, `WalletHeaderViewModel`, `MarketValueViewModel`. Android mirrors each in `ui-models` and `gemcore/domains`. Take them one row at a time; `GemAssetRow` is the exemplar and several already have a Core record they do not hold.
+- **R25** **M** Perpetuals — `PerpetualSceneViewModel` alone decides nine section and button titles, with `AutocloseViewModel`, `PerpetualsHeaderViewModel` and `ChartLineViewModel` behind it, against the Android perpetual screens.
+- **R26** **M** Onboarding — ten models across import, setup, phrase verification and secret display decide their own titles and footer text against the Android `import_wallet` and `create_wallet` screens.
+- **R27** **M** Transfer — `AmountSceneViewModel`, `ReceiveViewModel` and `AmountPerpetualViewModel` against the Android `transfer_amount` and `receive` screens.
+- **R28** **S** Transaction filters — `TransactionTypesSelectorViewModel` and `TransactionsFilterViewModel` decide the selector titles on both apps.
+- **R29** **S** Add asset — `AddAssetViewModel` decides five field titles against the Android `add_asset` screen.
+- **R30** **S** Swap details — `SwapProvidersViewModel` and `PriceImpactViewModel` decide the provider and impact titles on both apps.
+- **R31** **S** Market value and QR scanner errors — `MarketValueViewModel` (5 strings) and `QRScannerErrorViewModel` against their Android counterparts.
+
 Rejected: transaction, transaction detail, delegation, validator, asset select/search, wallet, price alert, fiat quote, currency, fee rate, simulation warning, asset market, collectible detail and banner rows already have a record; network list, recents chips, earn APR, swap detail, price list and onboarding rows carry no choice; swap provider rows and the QR scan-type hint table are iOS only; swap price impact already crosses as `impactType`/`isHigh`/`showsInSummary`; the delegation completion countdown is computed twice but belongs to the delegation record if anywhere.
 
 ## 2. Sections, actions, destinations and limits
@@ -28,11 +37,40 @@ Per-variant labels: a primitives enum both apps map to a string themselves is a 
 - **V3** **S** `Appearance` — [iOS](../ios/Features/Settings/Sources/Settings/Types/Appearance+Title.swift), Android inline in `PreferencesScene`.
 - **V4** **S** `ChartPeriod` — 12 cases across [iOS](../ios/Packages/PrimitivesComponents/Sources/Extensions/ChartPeriod+PrimitivesComponents.swift) and Android `PeriodsPanel`.
 - **V5** **M** `LinkType` — 28 cases, the largest of these: [iOS `AssetLinkViewModel`](../ios/Packages/PrimitivesComponents/Sources/ViewModels/AssetLinkViewModel.swift), Android `SocialLink`. The set and the order of social links is a product decision living in two places.
-- **V6** **S** `MessageType` — the sign-message screen on both apps.
 - **V7** **S** `PerpetualMarginType` — cross vs isolated, four cases.
 - **V8** **S** `Resource` — Tron bandwidth and energy, four cases.
 - **V9** **S** `ReportReason` — [iOS `ReportReasonViewModel`](../ios/Features/NFT/Sources/ViewModels/ReportReasonViewModel.swift) and Android `NftDetailsScene.titleRes` map the same five reasons, and the order comes from each language's enum declaration rather than from Core.
-- **V10** **M** The recipient `Destination` and the fee `FeePriority` labels are mapped on both apps; roughly forty more one-sided maps are listed by the label sweep and each needs the other app's screen checked before filing.
+- **V10** **S** QR scan type — 8 cases, [iOS](../ios/Features/QRScanner/Sources/ViewModels/QRScannerSceneViewModel.swift), Android `QRScanner.kt`.
+- **V11** **S** Simulation payload field kind — 7 cases, `SimulationPayloadFieldViewModel` against `SimulationPayloadFieldsContent.kt`.
+- **V12** **S** Portfolio statistic — 7 cases, `PortfolioSceneViewModel` against `PortfolioStatistics.kt`.
+- **V13** **S** Transaction row subtitle kind — 6 cases, `TransactionViewModel` against `TransactionDataAggregateExt.kt`.
+- **V14** **S** Transaction participant role — 6 cases, `TransactionParticipantViewModel` against `DestinationPropertyItem.kt`.
+- **V15** **S** Transaction state title — 6 cases, `TransactionStateViewModel` against `TransactionStateExt.kt`. Core answers the tone already; the title is still each app's.
+- **V16** **S** Price alert kind — 5 cases, `PriceAlertItemViewModel` against `PriceAlertListItem.kt`. Lands with **F12**.
+- **V17** **S** Perpetual position action — 5 cases, `ToastMessage+PrimitivesComponents` against `PerpetualConfirmDetailsComponents.kt`.
+- **V18** **S** Swap button action — 5 cases, `SwapButtonViewModel` against `SwapUiState.kt`.
+- **V19** **S** Asset context menu action — 4 cases, `AssetContextMenu` on both apps.
+- **V20** **S** Collectible row kind — 4 cases, `CollectibleViewModel` against `NftDetailsScene.kt`.
+- **V21** **S** Chart scene section — 4 cases, `ChartScene` against `AssetChartScene.kt`.
+- **V22** **S** `GemFiatAmountCheck` — a Core enum both apps map to text themselves, `FiatSceneViewModel` against `FiatViewModel.kt`. Lands with **F9**'s shape.
+- **V23** **S** Verification status — 3 cases, mapped twice on iOS (`VerificationStatusViewModel` and `ConnectionProposalViewModel`) and once on Android.
+- **V24** **S** Connection status — 3 cases, `ConnectionStatusViewModel` against `MainActivity.kt`.
+- **V25** **S** Fee unit type — gwei, native, sat/vB, `FeeUnitViewModel` against `FeeDetails.kt`.
+- **V26** **S** Price alert direction — up, down, none, `SetPriceAlertViewModel` against `PriceAlertTargetNavScreen.kt`.
+- **V27** **S** Perpetual direction — long and short, `PerpetualDirectionViewModel` against `PerpetualDirectionValue.kt`.
+- **V28** **S** Fiat quote type — buy and sell, mapped in `FiatTransactionViewModel` and `FiatSceneViewModel` against `FiatNavScreen.kt`.
+- **V29** **S** Fee priority — fast and normal, `FeeRateViewModel` against `FeePriorityExt.kt`.
+- **V30** **S** Approval value — exact and unlimited, `AssetValueHeaderViewModel` against `AssetValueListHead.kt`.
+- **V32** **L** Info sheets — [iOS `InfoSheetModelFactory`](../ios/Features/InfoSheet/Sources/Factory/InfoSheetModelFactory.swift) decides a title, description and link for 30 cases; Android's [`InfoSheetEntity`](../android/ui/src/main/kotlin/com/gemwallet/android/ui/components/InfoBottomSheet.kt) does the same for 14. The counts differ, so the two apps do not offer the same explanations. Core should answer which sheet a screen opens and what it says.
+- **V33** **M** Empty states — [iOS `EmptyContentTypeViewModel`](../ios/Packages/PrimitivesComponents/Sources/ViewModels/EmptyContentTypeViewModel.swift) against Android `EmptyStateView` and `EmptyContentView`: the title, the description and the action for every empty list are decided twice.
+- **V34** **M** The confirm screen's row set — `ConfirmTransferScene.itemModel` maps 15 cases on iOS against the Android confirm screen.
+- **V35** **S** Select-asset presentation — 11 cases of title and empty text on [iOS](../ios/Features/Assets/Sources/Types/SelectAssetPresentation.swift) against the Android select screens.
+- **V36** **S** Asset details info rows — 9 cases in `AssetDetailsInfoViewModel` against the Android asset info section.
+- **V37** **S** iOS keeps a local `HeaderButtonType` with 9 label cases while `GemHeaderButtonKind` already crosses and both apps use it; the local enum is the leftover.
+- **V38** **M** Error descriptions — [`Gem/Types/Errors.swift`](../ios/Gem/Types/Errors.swift) maps seven separate Core error enums to text, against Android's `Throwable.serviceMessage()` and its per-module `GemstoneText.kt`. Check each enum: some already have a Core text key and some do not.
+- **V39** **S** Stake amount action — 7 cases in `AmountStakeViewModel` against the Android amount providers.
+
+- **V31** **S** Scan/receive mode, portfolio type (wallet and perpetuals), autoclose type (take profit and stop loss), wallet source (create and import), wallet secret kind (phrase and private key), fiat button action and the swap select side (pay and receive) — seven two-case maps, each duplicated, each its own commit.
 
 
 Copy: [`GemPerpetualMarketCounts::sections`](../core/gemstone/src/services/perpetual/model.rs) → [iOS](../ios/Features/Perpetuals/Sources/ViewModels/PerpetualsSceneViewModel.swift), [Android](../android/features/perpetual/presents/src/main/kotlin/com/gemwallet/android/features/perpetual/views/market/PerpetualMarketScene.kt).
@@ -61,6 +99,14 @@ Contract: [a number crosses as a value and a style](ARCHITECTURE.md#a-number-cro
 - **F11** **S** Perpetual market values — `perpetual.volume24h` and `perpetual.openInterest` cross as bare `f64` and both apps abbreviate them in USD: [iOS](../ios/Features/Perpetuals/Sources/ViewModels/PerpetualViewModel.swift), [Android](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/perpetuals/GetPerpetualImpl.kt).
 - **F12** **S** [`GemPriceAlertRow`](../core/gemstone/src/services/price_alert/rules.rs) carries `price` and `percent` as bare `f64` and each app picks the style from a different input: [iOS](../ios/Features/PriceAlerts/Sources/ViewModels/PriceAlertItemViewModel.swift) switches on `row.kind`, [Android](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/pricealerts/GetPriceAlertsImpl.kt) on whether `pricePercentChange` is set, so the percent sign can differ for the same alert.
 - **F13** **S** Rewards redemption — `option.value` is formatted with the short style and the option's asset on [iOS](../ios/Features/Settings/Sources/Settings/ViewModels/RewardRedemptionOptionViewModel.swift) and [Android](../android/features/referral/presents/src/main/kotlin/com/gemwallet/android/features/referral/views/components/ReferralInfo.kt).
+
+- **F14** **M** Chart numbers — `GemChartHeader` (value, secondary value, change percentage), `GemCandleTooltip` (open, high, low, close, change, volume) and `GemPerpetualChartLine` (price) all cross as bare `f64` and each app picks the style.
+- **F15** **M** Perpetual position and autoclose — `GemAutocloseSummary`, `GemPerpetualAutoclose`, `GemAutocloseField` and `GemPerpetualPositionRow.liquidation_price`.
+- **F16** **S** Price surfaces — `GemPriceUpdate`, `GemAssetDetailsInput.price` and `GemPriceAlertSession` (input and current price).
+- **F17** **S** `GemTransactionDetailRows` carries `pnl` and `price` as bare numbers.
+- **F18** **S** `GemBalanceValue.amount`, `GemRewardsState.invite_reward_points` and `GemNftRow.count` are rendered as text from a bare number.
+
+Not in scope: counts a screen uses to build sections (`GemWalletSearchCounts`, `GemPerpetualMarketCounts`, `GemNetworkAssetCounts`, `GemRecentsCounts`), decimals, bps, indices, timeouts and chart geometry stay numbers — the contract is about numbers the app renders as text.
 
 Not in scope: `Formatters` and `Validators` on iOS still cannot import Gemstone, so the renderer that applies a `GemPrecision` must stay dependency-free. That is why this is a value-plus-style contract and not a foreign trait.
 
