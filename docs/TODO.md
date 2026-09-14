@@ -59,7 +59,6 @@ Product or security decisions, one question each:
 
 Ownership, injection and threads:
 
-- **O2** **S** The flow parent no longer reaches for a global: `ViewModelFactory` holds the `GemChainService` the root builds and vends `ImportWalletTypeViewModel` from it, the way it vends `ManageContactViewModel`. What is left are the `.shared` reads in [`Config.swift`](../ios/Packages/GemstonePrimitives/Sources/Config.swift): the ones in extensions on a primitive have no constructor to take a service, but `AddressListItemViewModel`, `CopyTypeViewModel`, `AssetIdViewModel`, `NetworkSelectorViewModel` and `SimulationPayloadFieldViewModel` are row models a view builds from a value, and the answer they reach for belongs in the row record instead.
 
 
 Platform items:
