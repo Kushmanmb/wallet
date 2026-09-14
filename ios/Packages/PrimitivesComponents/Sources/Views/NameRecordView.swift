@@ -1,7 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import enum Gemstone.GemNameRecordState
 import Primitives
 import Style
 import SwiftUI
@@ -15,11 +14,10 @@ public struct NameRecordView: View {
 
     public var body: some View {
         VStack(alignment: .center, spacing: 0) {
-            switch model.state {
-            case .none: EmptyView()
-            case .error: Images.NameResolve.error
-            case .loading: LoadingView()
-            case .complete: Images.NameResolve.success
+            if model.isResolving {
+                LoadingView()
+            } else if let image = model.resolveImage {
+                image
             }
         }.frame(width: 16, height: 16)
     }

@@ -49,17 +49,13 @@ public struct SignMessageScene: View {
 
             if model.hasWarnings {
                 Section {
-                    SimulationWarningsContent(warnings: model.simulationWarnings)
+                    SimulationWarningsContent(models: model.simulationWarningModels)
                 }
             }
 
             if model.payloadModel.hasFields {
                 Section {
-                    SimulationPayloadFieldsContent(
-                        fields: model.payloadModel.primaryFields,
-                        fieldViewModel: model.payloadModel.fieldViewModel(for:),
-                        contextMenuItems: model.contextMenuItems(for:),
-                    )
+                    SimulationPayloadFieldsContent(models: model.fieldModels(for: model.payloadModel.primaryFields))
 
                     NavigationCustomLink(with: ListItemView(title: Localized.Common.details)) {
                         model.onViewPayloadDetails()
@@ -88,10 +84,8 @@ public struct SignMessageScene: View {
             if model.payloadModel.hasFields {
                 NavigationStack {
                     SimulationPayloadDetailsScene(
-                        primaryFields: model.payloadModel.primaryFields,
-                        secondaryFields: model.payloadModel.secondaryFields,
-                        fieldViewModel: model.payloadModel.fieldViewModel(for:),
-                        contextMenuItems: model.contextMenuItems(for:),
+                        primaryModels: model.fieldModels(for: model.payloadModel.primaryFields),
+                        secondaryModels: model.fieldModels(for: model.payloadModel.secondaryFields),
                         actionTitle: Localized.SignMessage.viewFullMessage,
                         actionDestination: AnyView(TextMessageScene(model: model.textMessageViewModel)),
                     )

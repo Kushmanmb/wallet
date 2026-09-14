@@ -123,6 +123,10 @@ public final class ConfirmTransferSceneViewModel {
         state.simulation.warnings
     }
 
+    var simulationWarningModels: [SimulationWarningViewModel] {
+        simulationWarnings.map(SimulationWarningViewModel.init)
+    }
+
     public var payloadModel: SimulationPayloadModel { state.simulation.payload }
 
     var confirmButtonModel: ConfirmButtonViewModel {
@@ -187,7 +191,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
         case .header:
             ConfirmHeaderViewModel(request: request, state: state, currency: session.currency)
         case .warnings:
-            ConfirmTransferItemModel.warnings(simulationWarnings)
+            ConfirmTransferItemModel.warnings(simulationWarningModels)
         case .app:
             ConfirmAppViewModel(transfer: request.data)
         case .sender:
@@ -207,7 +211,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
         case .details:
             detailsViewModel
         case .payload:
-            ConfirmTransferItemModel.payload(payloadModel.primaryFields)
+            ConfirmTransferItemModel.payload(fieldModels(for: payloadModel.primaryFields))
         case let .balanceChange(index):
             ConfirmTransferItemModel.balanceChange(balanceChangeModels[index])
         case .networkFee:
@@ -245,9 +249,9 @@ extension ConfirmTransferSceneViewModel {
         isPresentingSheet = .info(.networkFee(state.feeAsset))
     }
 
-    public func contextMenuItems(for field: SimulationPayloadField) -> [ContextMenuItemType] {
-        payloadModel.contextMenuItems(
-            for: field,
+    public func fieldModels(for fields: [SimulationPayloadField]) -> [SimulationPayloadFieldViewModel] {
+        payloadModel.fieldModels(
+            for: fields,
             explorerLink: { explorerLink(chain: dataModel.chain, address: $0) },
             onOpenURL: { [weak self] in self?.isPresentingSheet = .url($0) },
         )

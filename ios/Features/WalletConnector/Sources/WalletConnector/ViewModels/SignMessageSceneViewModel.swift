@@ -107,6 +107,10 @@ public final class SignMessageSceneViewModel {
         TextMessageViewModel(message: preview.text)
     }
 
+    public var simulationWarningModels: [SimulationWarningViewModel] {
+        simulationWarnings.map(SimulationWarningViewModel.init)
+    }
+
     public var simulationWarnings: [GemSimulationWarningRow] {
         simulationWarningRows(warnings: payload.simulation.warnings)
     }
@@ -158,9 +162,9 @@ public extension SignMessageSceneViewModel {
         }
     }
 
-    func contextMenuItems(for field: SimulationPayloadField) -> [ContextMenuItemType] {
-        payloadModel.contextMenuItems(
-            for: field,
+    func fieldModels(for fields: [SimulationPayloadField]) -> [SimulationPayloadFieldViewModel] {
+        payloadModel.fieldModels(
+            for: fields,
             explorerLink: { service.addressUrl(chain: payload.chain.rawValue, address: $0).map() },
             onOpenURL: { [weak self] in self?.isPresentingUrl = $0 },
         )

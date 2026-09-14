@@ -30,10 +30,8 @@ struct ConfirmTransferNavigationView: View {
                 case .payloadDetails:
                     NavigationStack {
                         SimulationPayloadDetailsScene(
-                            primaryFields: model.payloadModel.primaryFields,
-                            secondaryFields: model.payloadModel.secondaryFields,
-                            fieldViewModel: model.payloadModel.fieldViewModel(for:),
-                            contextMenuItems: model.contextMenuItems(for:),
+                            primaryModels: model.fieldModels(for: model.payloadModel.primaryFields),
+                            secondaryModels: model.fieldModels(for: model.payloadModel.secondaryFields),
                         )
                         .presentationDetents([.large])
                         .presentationBackground(Colors.grayBackground)
