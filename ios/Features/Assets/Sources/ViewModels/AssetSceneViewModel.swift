@@ -253,13 +253,6 @@ public final class AssetSceneViewModel: Sendable {
         value == GemBigUint(BigInt.zero.description) ? aprModel(for: .stake).text : balanceText(value)
     }
 
-    func balanceTitle(for type: StakeProviderType) -> String {
-        switch type {
-        case .stake: Localized.Wallet.stake
-        case .earn: Localized.Common.earn
-        }
-    }
-
     func aprModel(for type: StakeProviderType) -> AprViewModel {
         AprViewModel(apr: assetDataModel.apr(for: type) ?? .zero)
     }

@@ -163,7 +163,7 @@ public struct AssetScene: View {
                             EmojiView(color: Colors.grayVeryLight, emoji: Emoji.WalletAvatar.moneyBag.rawValue)
                                 .frame(size: .image.asset)
                             ListItemView(
-                                title: model.balanceTitle(for: .earn),
+                                title: StakeProviderType.earn.title,
                                 subtitle: model.aprModel(for: .earn).text,
                                 subtitleStyle: model.aprModel(for: .earn).subtitle.style,
                             )
