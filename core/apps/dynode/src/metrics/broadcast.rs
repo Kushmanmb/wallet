@@ -38,13 +38,14 @@ impl Metrics {
         }
     }
 
-    pub(crate) fn record_transaction_broadcast(&self, request: &ProxyRequest, response: &Result<ProxyResponse, BoxError>, providers: &BroadcastProviders) {
+    pub(crate) fn record_transaction_broadcast(&self, request: &ProxyRequest, response: &Result<ProxyResponse, BoxError>, providers: &BroadcastProviders, remote_host: &str) {
         let outcome = match broadcast_result(request.chain, response, providers) {
             Ok(transaction_id) => {
                 info_with_fields!(
                     "Broadcast accepted",
                     id = request.id.as_str(),
                     chain = request.chain.as_ref(),
+                    remote_host = remote_host,
                     transaction_id = transaction_id.as_str(),
                 );
                 "success"
@@ -55,6 +56,7 @@ impl Metrics {
                     id = request.id.as_str(),
                     chain = request.chain.as_ref(),
                     group = chain_group(request.chain),
+                    remote_host = remote_host,
                     error = error.as_str(),
                 );
                 "failure"
@@ -269,7 +271,7 @@ mod tests {
             HeaderMap::new(),
             br#"{"jsonrpc":"2.0","id":1,"result":"private-identifier"}"#.to_vec(),
         ));
-        metrics.record_transaction_broadcast(&request, &response, &providers);
+        metrics.record_transaction_broadcast(&request, &response, &providers, "rpc.example.com");
         let encoded = metrics.get_metrics();
         assert_eq!(encoded.find("private-identifier"), None);
         for name in ["dynode_transaction_broadcasts_total", "dynode_transaction_broadcast_latency_milliseconds_count"] {

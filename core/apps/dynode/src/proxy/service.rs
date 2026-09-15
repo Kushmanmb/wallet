@@ -69,7 +69,13 @@ impl ProxyRequestService {
         headers
     }
 
-    pub async fn handle_request(&self, request: &ProxyRequest, active_url: &Url, chain_config: &ChainConfig) -> Result<ProxyResponse, BoxError> {
+    pub async fn handle_request(
+        &self,
+        request: &ProxyRequest,
+        active_url: &Url,
+        chain_config: &ChainConfig,
+        broadcast_host: &mut Option<String>,
+    ) -> Result<ProxyResponse, BoxError> {
         let chain = request.chain;
         let request_type = request.request_type();
 
@@ -80,6 +86,9 @@ impl ProxyRequestService {
 
         let resolved_url = chain_config.resolve_url(active_url, rpc_method, Some(&request.path));
         let url = RequestUrl::from_parts(resolved_url, &request.path_with_query);
+        if request.is_broadcast(&self.broadcast_providers) {
+            *broadcast_host = url.url.host_str().map(str::to_owned);
+        }
         let headers = self.build_headers(&request.headers);
 
         let methods_for_metrics = request_type.get_methods_for_metrics();
