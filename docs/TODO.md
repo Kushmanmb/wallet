@@ -90,11 +90,6 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 
 ## 11. Missing tests
 
-### Core behaviour with no test
-
-Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them declare records or forward to a `rules.rs` that is already tested — `GemStakeAmountInput`'s four methods and `candlestick_header` are both covered from their rules module. What is left is the orchestration below: each named function has a body of its own and no test anywhere in the crate calls it. Several need a store or gateway mock first; `services/*/testkit.rs` is the pattern, and `asset_discovery/testkit.rs` now assembles the balance, discovery, transactions and NFT graph behind one constructor, with `TestAlienProvider::with_json_by_path` answering each endpoint differently.
-
-
 ### Hardcoded user-visible strings
 
 Swept on 2026-09-15 over every non-preview, non-test iOS file: 25 hits, of which 20 are the developer screen (a debug screen that is deliberately untranslated) and 4 are inside a `PreviewProvider`. The one real hit was the wallet screen's "Trade Perpetuals" row, now `perpetuals_trade`. The same sweep over Android found none.
@@ -205,6 +200,10 @@ The WalletConnect items resolved on the same pass. `message_preview`, `message_a
 
 
 ### iOS does not read an Android-read decision
+
+### 11. Core behaviour with no test
+
+All eight closed on 2026-09-15. The orchestration in `wallet_home`, `asset_discovery`, `assets/details`, `app_start`, `rewards` and `perpetual` now has tests. `asset_discovery/testkit.rs` assembles the balance, discovery, transactions and NFT graph behind one constructor; `app_start` and `rewards` build on the wallet testkit so they sign with a real keystore; and `TestAlienProvider::with_json_by_path` answers each endpoint with its own body.
 
 ### 10. Exports no app calls at all
 Closed on 2026-09-15 with no change. The sweep counted **app** callers, which is the wrong test for a `rules.rs` function: rules are called by the service that owns them, and the app calls the service. Every function listed here has Core callers — `sanitize_number_input` has fifteen, `node_url` twenty-three, `price_alert_toggle` is read by the asset row, `shows_header` by the confirm screen — and the explorer getters are used by nine other services. A Core export with no caller anywhere is still worth finding; counting app callers alone does not find it.
