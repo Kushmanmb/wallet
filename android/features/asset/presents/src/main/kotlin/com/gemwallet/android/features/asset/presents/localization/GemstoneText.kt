@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.asset.presents.localization
 
+import com.gemwallet.android.features.asset.viewmodels.chart.models.ChartSectionUIModel
 import androidx.annotation.StringRes
 import com.gemwallet.android.ui.R
 import uniffi.gemstone.PortfolioChartType
@@ -20,4 +21,12 @@ internal fun PortfolioStatistic.stringRes(): Int = when (this) {
     is PortfolioStatistic.MarginUsage -> R.string.perpetual_margin_usage
     is PortfolioStatistic.AllTimePnl -> R.string.perpetual_all_time_pnl
     is PortfolioStatistic.Volume -> R.string.perpetual_volume
+}
+
+@StringRes
+internal fun ChartSectionUIModel.stringRes(): Int? = when (this) {
+    is ChartSectionUIModel.PriceAlerts -> R.string.settings_price_alerts_title
+    ChartSectionUIModel.SetPriceAlert -> R.string.price_alerts_set_alert_title
+    is ChartSectionUIModel.Links -> R.string.social_links
+    is ChartSectionUIModel.Market -> null
 }

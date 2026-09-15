@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.asset.presents.chart
 
+import com.gemwallet.android.features.asset.presents.localization.stringRes
 import com.gemwallet.android.ui.LocalAddressService
 import android.content.Context
 import androidx.compose.foundation.clickable
@@ -97,14 +98,14 @@ fun AssetChartScene(
                 marketModel?.let { model ->
                     model.sections.forEach { section ->
                         when (section) {
-                            is ChartSectionUIModel.PriceAlerts -> item {
-                                PriceAlertsItem(R.string.settings_price_alerts_title, section.count.toString()) { onPriceAlerts(viewModel.assetId) }
+                            is ChartSectionUIModel.PriceAlerts -> section.stringRes()?.let { title ->
+                                item { PriceAlertsItem(title, section.count.toString()) { onPriceAlerts(viewModel.assetId) } }
                             }
-                            ChartSectionUIModel.SetPriceAlert -> item {
-                                PriceAlertsItem(R.string.price_alerts_set_alert_title, "") { onAddPriceAlertTarget(viewModel.assetId) }
+                            ChartSectionUIModel.SetPriceAlert -> section.stringRes()?.let { title ->
+                                item { PriceAlertsItem(title, "") { onAddPriceAlertTarget(viewModel.assetId) } }
                             }
                             is ChartSectionUIModel.Market -> marketRows(model.chain, model.currency, section.rows)
-                            is ChartSectionUIModel.Links -> links(section.links, uriHandler, context)
+                            is ChartSectionUIModel.Links -> links(section.stringRes(), section.links, uriHandler, context)
                         }
                     }
                 }
@@ -125,9 +126,9 @@ private fun PriceAlertsItem(@StringRes title: Int, data: String, onClick: () -> 
     )
 }
 
-private fun LazyListScope.links(links: List<SocialLinkUIModel>, uriHandler: UriHandler, context: Context) {
-    if (links.isEmpty()) return
-    item { SubheaderItem(R.string.social_links) }
+private fun LazyListScope.links(@StringRes title: Int?, links: List<SocialLinkUIModel>, uriHandler: UriHandler, context: Context) {
+    if (links.isEmpty() || title == null) return
+    item { SubheaderItem(title) }
     itemsIndexed(links) { index, item ->
         PropertyItem(
             modifier = Modifier.clickable { uriHandler.open(context, item.url) },

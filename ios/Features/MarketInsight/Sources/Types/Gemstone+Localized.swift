@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import enum Gemstone.GemAssetMarketRow
+import enum Gemstone.GemChartSection
 import Localization
 
 extension GemAssetMarketRow {
@@ -15,6 +16,17 @@ extension GemAssetMarketRow {
         case .maxSupply: Localized.Info.MaxSupply.title
         case .allTimeHigh: Localized.Asset.allTimeHigh
         case .allTimeLow: Localized.Asset.allTimeLow
+        }
+    }
+}
+
+extension GemChartSection {
+    var title: String? {
+        switch self {
+        case .priceAlerts: Localized.Settings.PriceAlerts.title
+        case .setPriceAlert: Localized.PriceAlerts.SetAlert.title
+        case .links: Localized.Social.links
+        case .market: nil
         }
     }
 }
