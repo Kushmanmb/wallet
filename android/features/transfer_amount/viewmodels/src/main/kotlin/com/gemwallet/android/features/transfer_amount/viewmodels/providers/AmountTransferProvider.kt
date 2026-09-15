@@ -42,6 +42,8 @@ class AmountTransferProvider(
 
     override val amountType: StateFlow<GemAmountType?> = MutableStateFlow(transfer.amountType())
 
+    override val prefilledAmount: String? get() = transfer.prefilledAmount()
+
     override val assetInfo: StateFlow<AssetInfo?> =
         getAssetInfo(params.assetId)
             .flowOn(Dispatchers.IO)

@@ -22,6 +22,8 @@ abstract class AmountDataProvider(
     abstract val assetInfo: StateFlow<AssetInfo?>
     abstract val amountType: StateFlow<GemAmountType?>
 
+    open val prefilledAmount: String? get() = null
+
     val title: StateFlow<GemAmountTitle?> by lazy {
         amountType.map { it?.title() }.stateIn(scope, SharingStarted.Eagerly, null)
     }

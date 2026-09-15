@@ -100,7 +100,6 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 - **P32** **M** `perpetual/mod.rs` `sync_markets_if_needed`, `sync_markets`, `sync_current_positions`, `clear_markets`, `markets_updated_at` — Android schedules the same five itself.
 - **P34** **S** `assets/add.rs` `on_chain`.
 - **P35** **S** `perpetual/autoclose.rs` `on_submit_attempt`.
-- **P36** **S** `amount/model.rs` `prefilled_amount`.
 - **P38** **S** `avatar/mod.rs` `set_image` and `remove_image`.
 - **P39** **S** `wallet_preferences/mod.rs` `reset_transactions_timestamp`.
 - **P40** **M** `wallet/mod.rs` `setup_chains` — Android runs its own chain setup after import.
