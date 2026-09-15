@@ -461,14 +461,9 @@ public struct ViewModelFactory: Sendable {
             service: walletService,
             preferences: observablePreferences,
             nameService: nameService,
-            importWalletType: importWalletTypeScene,
+            chainService: chainService,
             onComplete: onComplete,
         )
-    }
-
-    @MainActor
-    public func importWalletTypeScene() -> ImportWalletTypeViewModel {
-        ImportWalletTypeViewModel(service: chainService)
     }
 
     @MainActor

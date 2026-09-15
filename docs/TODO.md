@@ -120,7 +120,6 @@ Product or security decisions, one question each:
 
 Ownership, injection and threads:
 
-- **O10** **S** [`ImportWalletViewModel`](../ios/Features/Onboarding/Sources/ViewModels/ImportWalletViewModel.swift) is down to the wallet and name services after the avatar moved behind `GemWalletService`. The name service is the last one it only passes down, to `ImportWalletSceneViewModel` for recipient name resolution. Decide whether resolving a name while importing is a wallet-service answer — if it is, the parent holds one service and the threading is gone.
 - **O9** **M** Six Android view models hold two or three Core services where iOS composes one screen service: [`TransactionsViewModel`](../android/features/activities/viewmodels/src/main/kotlin/com/gemwallet/android/features/activities/viewmodels/TransactionsViewModel.kt), `RecentsSheetViewModel`, `WCAuthViewModel` (three), `WCRequestViewModel`, `PerpetualMarketViewModel` and `SettingsViewModel`. Copy the screen-service shape in [SERVICES.md](SERVICES.md#the-screen-service-map); a launch host or a flow parent vending child models is [allowed to hold several](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android) and these are neither.
 
 
