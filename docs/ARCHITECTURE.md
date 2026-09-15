@@ -755,7 +755,23 @@ private fun errorText(phase: GemFiatQuotePhase): String? = when (phase) {
 }
 ```
 
-Two greps keep this honest, because nothing else will: no file under an iOS feature's `Sources/Scenes/` and no file under an Android feature's `presents/` should name `Gemstone` or `uniffi.gemstone`.
+Naming a Core type is not the test; deciding from one is. A view that iterates a row key and hands each case to a component is doing what [§ 3](#3-return-one-record-that-answers-the-whole-question) asks — the key is the screen's contract, and the switch over it is exhaustive on purpose. Twelve of the seventy-five iOS scene files and just under half of the Android `presents/` files name a Core type for exactly that reason.
+
+What to grep for is a view that answers a question instead of asking one: a `switch`/`when` over a Core type whose arms produce `Localized.` or `stringResource` — the localized text belongs to the module's mapper, not the body — or a Core record passed into a child view's initializer. On Android:
+
+```
+rg -tkotlin -U 'when \([^)]*\)\s*\{[^}]*(stringResource|R\.string)' android/features/*/presents --glob '!**/localization/**'
+```
+
+and its Swift equivalent over `Sources/Scenes/` and `Sources/Views/`, excluding the module's `Gemstone+Localized.swift`. A hit is a decision that has to move one layer down; everything else the type-name grep finds is the contract working.
+
+### One mapper per module names every Core key it renders
+
+A module resolves every Core key it shows in one file: `Sources/Types/Gemstone+Localized.swift` on iOS, `presents/localization/GemstoneText.kt` on Android, with `Gemstone+Style.swift` / `presents/style/GemstoneStyle.kt` beside them for the icon and colour a key picks. A view model, a scene or a composable that maps a key somewhere else has taken the module's vocabulary private, and the two apps drift one key at a time — `GemAmountTitle.rewards` read "Claim Rewards" on one app and "Rewards" on the other for exactly this reason, and the import screen labelled the same field two ways.
+
+The mapper is the only place a `Localized.`/`R.string` is chosen from a Core variant, which is what makes the two apps comparable: parse each app's mapper files into variant → key and report every variant the two resolve differently. That check only works while no other file maps a key.
+
+Two files per module, no exceptions: if a screen needs a second phrasing of the same key — a tab title and a field label — both live in that one file under different names, the way Android's `tabStringRes` and `fieldStringRes` do.
 
 ### A UI state class translates the view state; it does not re-shape it
 

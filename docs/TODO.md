@@ -10,8 +10,6 @@ This list was rebuilt on 2026-09-15 from scripted sweeps over the whole repo. Ea
 
 ## 0. Guidance that no longer matches the code
 
-- **G2** **S** [§ 5's two greps](ARCHITECTURE.md#a-view-never-names-a-core-type) say no file under an iOS `Sources/Scenes/` or an Android `presents/` may name `Gemstone`/`uniffi.gemstone`. 12 of 75 iOS scene files and 118 of 258 Android `presents/` files do, and almost all of them are the row-key contract § 3 prescribes: the view dispatches on a Core row key and reads its text from the module's mapper. The rule as written condemns the pattern the rest of the document mandates. Replace it with the test that actually separates the two — a view may *name* a Core key it dispatches on, and may not *decide* from one (pick a localized string, re-derive a value the model should expose) — and give the grep that finds the second.
-- **G3** **S** The "one localized-text file per module" convention (`Gemstone+Localized.swift`, `presents/localization/GemstoneText.kt`, with a matching style file) is followed by every module but is written down nowhere in [ARCHITECTURE.md](ARCHITECTURE.md). Add it beside § 5 so the mapper's home is a rule, not folklore; V43–V56 below are all cases of it being ignored.
 
 ## 1. The same Core key, two answers
 
