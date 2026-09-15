@@ -26,7 +26,7 @@ impl<C: Client> ChainTransactionBroadcast for HyperCoreClient<C> {
 }
 
 impl ChainTransactionDecode for BroadcastProvider {
-    fn decode_transaction_broadcast(&self, response: &str) -> Option<String> {
-        map_transaction_broadcast_from_str(response).ok()
+    fn decode_transaction_broadcast(&self, response: &str) -> Result<String, Box<dyn Error + Sync + Send>> {
+        map_transaction_broadcast_from_str(response)
     }
 }

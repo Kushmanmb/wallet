@@ -1,7 +1,7 @@
 use gem_tracing::info_with_fields;
 use primitives::{Chain, ValueAccess};
 use prometheus_client::encoding::EncodeLabelSet;
-use serde_json::Value;
+use serde_json::{Error as JsonError, Value};
 use settings_chain::BroadcastProviders;
 
 use super::Metrics;
@@ -67,25 +67,25 @@ impl Metrics {
 }
 
 fn broadcast_result(chain: Chain, response: &Result<ProxyResponse, BoxError>, providers: &BroadcastProviders) -> Result<String, String> {
-    if let Ok(response) = response
-        && (200..300).contains(&response.status)
-        && let Some(identifier) = providers.decode_transaction_broadcast(chain, &response.body)
-        && !identifier.is_empty()
-    {
-        return Ok(identifier);
+    match response {
+        Ok(upstream) => match providers.decode_transaction_broadcast(chain, &upstream.body) {
+            Ok(identifier) if (200..300).contains(&upstream.status) && !identifier.is_empty() => Ok(identifier),
+            Ok(_) => Err(broadcast_error_message(response)),
+            Err(error) if error.is::<JsonError>() => Err(broadcast_error_message(response)),
+            Err(error) => Err(format_broadcast_error_message(&error.to_string())),
+        },
+        Err(_) => Err(broadcast_error_message(response)),
     }
-    Err(broadcast_error_message(response))
 }
 
 fn broadcast_error_message(response: &Result<ProxyResponse, BoxError>) -> String {
-    const MAX_ERROR_LENGTH: usize = 1024;
     let message = match response {
         Err(error) => FailureReason::from_error(error.as_ref()).to_string(),
         Ok(response) => serde_json::from_slice::<Value>(&response.body)
             .ok()
             .and_then(|body| {
                 body.get_value("error")
-                    .and_then(|error| error.get_string("message"))
+                    .and_then(|error| error.get_string("message").or_else(|_| error.string()))
                     .or_else(|_| body.get_string("message"))
                     .ok()
                     .filter(|message| !message.trim().is_empty())
@@ -93,6 +93,11 @@ fn broadcast_error_message(response: &Result<ProxyResponse, BoxError>) -> String
             })
             .unwrap_or_else(|| format!("Broadcast rejected or response could not be decoded (HTTP {})", response.status)),
     };
+    format_broadcast_error_message(&message)
+}
+
+fn format_broadcast_error_message(message: &str) -> String {
+    const MAX_ERROR_LENGTH: usize = 1024;
     message.split_whitespace().collect::<Vec<_>>().join(" ").chars().take(MAX_ERROR_LENGTH).collect()
 }
 
@@ -114,7 +119,7 @@ mod tests {
                 Chain::Ethereum,
                 200,
                 r#"{"jsonrpc":"2.0","id":1,"error":{"code":-32000,"message":"insufficient funds"}}"#,
-                Err("insufficient funds"),
+                Err("insufficient funds (-32000)"),
             ),
             (
                 Chain::Ethereum,
@@ -146,6 +151,90 @@ mod tests {
             assert_eq!(broadcast_result(chain, &response, &providers).as_deref().map_err(String::as_str), expected);
         }
         assert_eq!(broadcast_result(Chain::Ethereum, &Err("connection failed".into()), &providers), Err("request_error".into()));
+    }
+
+    #[test]
+    fn test_bitcoin_http_error_preserves_broadcast_message() {
+        let providers = BroadcastProviders::from_chains([Chain::Bitcoin]);
+        for (body, message) in [
+            (br#"{"error":"-26: min relay fee not met, 432 < 576"}"#.as_slice(), "-26: min relay fee not met, 432 < 576"),
+            (
+                br#"{"error":{"message":"transaction already in block chain"}}"#.as_slice(),
+                "transaction already in block chain",
+            ),
+        ] {
+            let response = Ok(ProxyResponse::new(400, HeaderMap::new(), body.to_vec()));
+            assert_eq!(broadcast_result(Chain::Bitcoin, &response, &providers), Err(message.to_string()));
+        }
+    }
+
+    #[test]
+    fn test_broadcast_result_preserves_chain_errors() {
+        let cases = [
+            (
+                Chain::Solana,
+                br#"{"id":1,"error":{"code":-32002,"message":"Transaction simulation failed"}}"#.as_slice(),
+                "Transaction simulation failed (-32002)",
+            ),
+            (
+                Chain::Cosmos,
+                br#"{"tx_response":{"txhash":"abc","code":4,"raw_log":"signature verification failed"}}"#.as_slice(),
+                "signature verification failed",
+            ),
+            (
+                Chain::Tron,
+                include_bytes!("../../../../crates/gem_tron/testdata/transaction_broadcast_error.json").as_slice(),
+                "Contract validate error : Cannot transfer TRX to yourself.",
+            ),
+            (Chain::Ton, br#"{"message":"invalid BOC"}"#.as_slice(), "invalid BOC"),
+            (Chain::Sui, b"\x00\x00\x00\x00\x00".as_slice(), "missing Sui broadcast transaction digest"),
+            (
+                Chain::Xrp,
+                br#"{"id":1,"result":{"accepted":false,"engine_result_message":"Insufficient XRP balance"}}"#.as_slice(),
+                "Transaction rejected: Insufficient XRP balance",
+            ),
+            (
+                Chain::Near,
+                br#"{"id":1,"error":{"code":-32000,"message":"Invalid nonce"}}"#.as_slice(),
+                "Invalid nonce (-32000)",
+            ),
+            (Chain::Aptos, br#"{"message":"SEQUENCE_NUMBER_TOO_OLD"}"#.as_slice(), "SEQUENCE_NUMBER_TOO_OLD"),
+            (
+                Chain::Stellar,
+                br#"{"tx_status":"ERROR","title":"Transaction Failed"}"#.as_slice(),
+                "Broadcast error: Transaction Failed",
+            ),
+            (
+                Chain::Algorand,
+                include_bytes!("../../../../crates/gem_algorand/testdata/transaction_broadcast_error.json").as_slice(),
+                "txgroup had 0 in fees, which is less than the minimum 1 * 1000",
+            ),
+            (Chain::Cardano, br#"{"errors":[{"message":"BadInputsUTxO"}]}"#.as_slice(), "Failed to broadcast transaction"),
+            (
+                Chain::Polkadot,
+                br#"{"error":"Invalid Transaction","cause":"Stale"}"#.as_slice(),
+                "Invalid Transaction: Stale",
+            ),
+            (
+                Chain::HyperCore,
+                include_bytes!("../../../../crates/gem_hypercore/testdata/order_broadcast_error.json").as_slice(),
+                "Reduce only order would increase position. asset=159",
+            ),
+        ];
+        let providers = BroadcastProviders::from_chains(cases.iter().map(|(chain, _, _)| *chain));
+        for (chain, body, message) in cases {
+            let response = Ok(ProxyResponse::new(400, HeaderMap::new(), body.to_vec()));
+            assert_eq!(broadcast_result(chain, &response, &providers), Err(message.to_string()), "{chain}");
+        }
+    }
+
+    #[test]
+    fn test_broadcast_result_preserves_sui_response_protocols() {
+        let providers = BroadcastProviders::from_chains([Chain::Sui]);
+        for body in [br#"{"digest":"abc"}"#.as_slice(), b"\x00\x00\x00\x00\x07\x0a\x05\x0a\x03abc".as_slice()] {
+            let response = Ok(ProxyResponse::new(200, HeaderMap::new(), body.to_vec()));
+            assert_eq!(broadcast_result(Chain::Sui, &response, &providers), Ok("abc".to_string()));
+        }
     }
 
     #[test]

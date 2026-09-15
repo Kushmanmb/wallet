@@ -53,7 +53,7 @@ impl DynodeBroadcastWebhookClient {
     }
 
     fn extract_payload(&self, request: &ProxyRequest, response_body: &[u8], broadcast_providers: &BroadcastProviders) -> Option<TransactionId> {
-        let identifier = broadcast_providers.decode_transaction_broadcast(request.chain, response_body)?;
+        let identifier = broadcast_providers.decode_transaction_broadcast(request.chain, response_body).ok()?;
         Some(TransactionId::new(request.chain, identifier))
     }
 
