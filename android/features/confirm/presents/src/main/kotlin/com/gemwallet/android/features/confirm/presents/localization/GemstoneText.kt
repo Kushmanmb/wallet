@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.confirm.presents.localization
 
+import com.wallet.core.primitives.FeeUnitType
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.domains.asset.title
@@ -103,3 +104,10 @@ internal fun GemConfirmErrorDisplay.text(): String = when (this) {
 }
 
 private fun amount(value: BigInteger, asset: Asset): String = ValueFormatter(style = GemValueStyle.FULL).string(value, asset)
+
+@Composable
+internal fun FeeUnitType.suffix(assetSymbol: String): String = when (this) {
+    FeeUnitType.SatVb -> stringResource(R.string.fee_rate_satvB)
+    FeeUnitType.Gwei -> stringResource(R.string.fee_rate_gwei)
+    FeeUnitType.Native -> assetSymbol
+}

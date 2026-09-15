@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.confirm.presents.components
 
+import com.gemwallet.android.features.confirm.presents.localization.suffix
 import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.components.screen.SheetExpansion
 import com.gemwallet.android.ext.toGem
@@ -416,11 +417,8 @@ private fun EmojiCircle(emoji: String, size: Dp, isSelected: Boolean = false) {
 }
 
 @Composable
-private fun feeUnitSuffix(feeUnitType: FeeUnitType?, assetSymbol: String): String = when (feeUnitType) {
-    FeeUnitType.SatVb -> stringResource(R.string.fee_rate_satvB)
-    FeeUnitType.Gwei -> stringResource(R.string.fee_rate_gwei)
-    else -> assetSymbol
-}
+private fun feeUnitSuffix(feeUnitType: FeeUnitType?, assetSymbol: String): String =
+    feeUnitType?.suffix(assetSymbol) ?: assetSymbol
 
 private enum class FeeDetailsPage {
     Details,

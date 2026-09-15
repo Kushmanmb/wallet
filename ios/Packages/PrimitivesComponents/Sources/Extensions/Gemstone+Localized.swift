@@ -299,3 +299,13 @@ extension ConnectionStatus {
         }
     }
 }
+
+extension FeeUnitType {
+    public func suffix(symbol: String) -> String {
+        switch self {
+        case .satVb: Localized.FeeRate.satvB
+        case .gwei: Localized.FeeRate.gwei
+        case .native: symbol
+        }
+    }
+}
