@@ -25,7 +25,6 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 
 
 
-- **R19** **M** WalletConnect connections — [`ConnectionsViewModel`](../ios/Features/WalletConnector/Sources/WalletConnector/ViewModels/ConnectionsViewModel.swift) and `ConnectionSceneViewModel` hold no Core record and build the row and the detail fields themselves; Android's bridge screens do the same. `GemConnectionRow` already exists and answers part of it.
 - **R20** **M** Chain settings and nodes — `ChainSettingsSceneViewModel`, `ChainNodeViewModel` and `ServiceStatusItemViewModel` on iOS against the Android networks screens. `GemNodeSelection` and `GemServiceEndpoint` cross, but the section titles, the node subtitle and the explorer row are each app's.
 - **R21** **M** Stake and delegation — `StakeSceneViewModel`, `DelegationSceneViewModel` and `DelegationViewModel` build nine section and field titles app-side against the Android earn screens.
 

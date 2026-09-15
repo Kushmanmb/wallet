@@ -1,5 +1,9 @@
+use crate::application::GemConnectionRow;
+use crate::models::custom_types::DateTimeUtc;
 use crate::services::transfer::GemTransferData;
-use primitives::{Account, Asset, Chain, SimulationResult, Wallet, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionVerificationStatus};
+use primitives::{
+    Account, Asset, Chain, SimulationResult, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionVerificationStatus,
+};
 
 use crate::message::sign_type::SignMessage;
 use crate::wallet_connect::WalletConnectResponseType;
@@ -131,6 +135,32 @@ pub fn verification_level(status: WalletConnectionVerificationStatus) -> GemVeri
         WalletConnectionVerificationStatus::Unknown => GemVerificationLevel::Unverified,
         WalletConnectionVerificationStatus::Invalid | WalletConnectionVerificationStatus::Malicious => GemVerificationLevel::Suspicious,
     }
+}
+
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct GemConnection {
+    pub connection: WalletConnection,
+    pub row: GemConnectionRow,
+}
+
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct GemConnectionSection {
+    pub title: String,
+    pub connections: Vec<GemConnection>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemConnectionDetailRow {
+    Wallet,
+    Date,
+}
+
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct GemConnectionDetails {
+    pub connection: GemConnection,
+    pub rows: Vec<GemConnectionDetailRow>,
+    pub wallet: String,
+    pub date: DateTimeUtc,
 }
 
 #[cfg(test)]

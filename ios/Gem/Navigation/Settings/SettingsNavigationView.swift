@@ -83,7 +83,7 @@ struct SettingsNavigationView: View {
         }
         .navigationDestination(for: Scenes.WalletConnect.self) { _ in
             ConnectionsScene(
-                model: ConnectionsViewModel(
+                model: viewModelFactory.connectionsScene(
                     connector: walletConnector,
                     walletConnectorPresenter: walletConnectorPresenter,
                 ),

@@ -27,8 +27,9 @@ use crate::wallet_connect::{WalletConnect, WalletConnectAction, WalletConnectCha
 
 pub use error::GemWalletConnectError;
 pub use model::{
-    GemSessionApproval, GemSessionProposal, GemWalletConnectAuthAccount, GemWalletConnectFailure, GemWalletConnectMessageRequest, GemWalletConnectOutcome,
-    GemWalletConnectResponse, GemWalletConnectRpcError, GemWalletConnectSessionRequest, GemWalletConnectTransactionAction, GemWalletConnectTransactionRequest,
+    GemConnection, GemConnectionDetailRow, GemConnectionDetails, GemConnectionSection, GemSessionApproval, GemSessionProposal, GemWalletConnectAuthAccount,
+    GemWalletConnectFailure, GemWalletConnectMessageRequest, GemWalletConnectOutcome, GemWalletConnectResponse, GemWalletConnectRpcError,
+    GemWalletConnectSessionRequest, GemWalletConnectTransactionAction, GemWalletConnectTransactionRequest,
 };
 pub use sign_message::{GemSignMessagePreview, GemSignMessageService};
 pub use signer::GemWalletConnectSigner;
@@ -168,6 +169,25 @@ impl GemWalletConnectService {
 
     pub fn connection_row(&self, metadata: ApplicationMetadata) -> GemConnectionRow {
         self.metadata.connection_row(metadata)
+    }
+
+    pub fn connection_sections(&self, connections: Vec<WalletConnection>) -> Vec<GemConnectionSection> {
+        rules::connection_groups(connections)
+            .into_iter()
+            .map(|(wallet, connections)| GemConnectionSection {
+                title: wallet.name,
+                connections: connections.into_iter().map(|connection| self.gem_connection(connection)).collect(),
+            })
+            .collect()
+    }
+
+    pub fn connection_details(&self, connection: WalletConnection) -> GemConnectionDetails {
+        GemConnectionDetails {
+            rows: vec![GemConnectionDetailRow::Wallet, GemConnectionDetailRow::Date],
+            wallet: connection.wallet.name.clone(),
+            date: connection.session.created_at,
+            connection: self.gem_connection(connection),
+        }
     }
 
     pub fn application_metadata(&self, name: String, description: String, url: String, icons: Vec<String>) -> ApplicationMetadata {
@@ -368,6 +388,13 @@ impl GemWalletConnectService {
         self.store.get_connection(session_id.to_string()).await?.ok_or_else(|| GemServiceError::NotFound {
             msg: format!("WalletConnect session {session_id} not found"),
         })
+    }
+
+    fn gem_connection(&self, connection: WalletConnection) -> GemConnection {
+        GemConnection {
+            row: self.metadata.connection_row(connection.session.metadata.clone()),
+            connection,
+        }
     }
 }
 

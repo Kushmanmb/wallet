@@ -26,6 +26,21 @@ pub const USER_REJECTED_ERROR_CODE: i32 = 4001;
 const SESSION_REQUEST_EXPIRED_ERROR_CODE: i32 = 8000;
 const METHOD_NOT_FOUND_ERROR_CODE: i32 = -32601;
 
+pub fn connection_groups(connections: Vec<WalletConnection>) -> Vec<(Wallet, Vec<WalletConnection>)> {
+    let mut groups: Vec<(Wallet, Vec<WalletConnection>)> = Vec::new();
+    for connection in connections {
+        match groups.iter_mut().find(|(wallet, _)| wallet.id == connection.wallet.id) {
+            Some((_, grouped)) => grouped.push(connection),
+            None => groups.push((connection.wallet.clone(), vec![connection])),
+        }
+    }
+    groups.sort_by_key(|(wallet, _)| wallet.index);
+    for (_, grouped) in groups.iter_mut() {
+        grouped.sort_by_key(|connection| std::cmp::Reverse(connection.session.created_at));
+    }
+    groups
+}
+
 pub fn session_account(connection: &WalletConnection, chain: Chain) -> Result<Account, GemServiceError> {
     validate_session_chain(&connection.session, chain)?;
     connection
@@ -372,6 +387,38 @@ mod tests {
             wallet_type,
             ..Wallet::mock_with_accounts(Account::mock_chains(chains, "address"))
         }
+    }
+
+    #[test]
+    fn test_connections_group_by_wallet_in_wallet_order_and_newest_first() {
+        let wallet = |id: &str, index: i32| Wallet {
+            index,
+            ..wallet(id, WalletType::Multicoin, &[Chain::Ethereum])
+        };
+        let connection = |wallet: &Wallet, id: &str, minutes: i64| WalletConnection {
+            session: WalletConnectionSession {
+                created_at: Utc::now() - chrono::Duration::minutes(minutes),
+                ..session_with(id, WalletConnectionState::Active, &[Chain::Ethereum])
+            },
+            wallet: wallet.clone(),
+        };
+        let second = wallet("second", 2);
+        let first = wallet("first", 1);
+
+        let groups = connection_groups(vec![
+            connection(&second, "old-second", 30),
+            connection(&first, "old-first", 20),
+            connection(&second, "new-second", 1),
+            connection(&first, "new-first", 5),
+        ]);
+
+        let titles: Vec<&str> = groups.iter().map(|(wallet, _)| wallet.name.as_str()).collect();
+        assert_eq!(titles, vec!["first", "second"], "sections follow the order the wallets are listed in");
+        let ids: Vec<Vec<&str>> = groups
+            .iter()
+            .map(|(_, connections)| connections.iter().map(|connection| connection.session.id.as_str()).collect())
+            .collect();
+        assert_eq!(ids, vec![vec!["new-first", "old-first"], vec!["new-second", "old-second"]], "the newest connection leads each section");
     }
 
     fn session_with(id: &str, state: WalletConnectionState, chains: &[Chain]) -> WalletConnectionSession {

@@ -63,16 +63,12 @@ public final class SignMessageSceneViewModel {
         Localized.Transfer.confirm
     }
 
-    public var connectionViewModel: WalletConnectionViewModel {
-        WalletConnectionViewModel(connection: WalletConnection(session: payload.session, wallet: payload.wallet))
-    }
-
     public var appName: String {
         payload.session.metadata.shortName
     }
 
     public var appAssetImage: AssetImage {
-        AssetImage(imageURL: connectionViewModel.imageUrl)
+        AssetImage(imageURL: payload.session.metadata.iconURL)
     }
 
     public var walletAssetImage: AssetImage {
@@ -91,7 +87,7 @@ public final class SignMessageSceneViewModel {
         AppPreviewModel(
             assetImage: appAssetImage,
             name: appName,
-            subtitleSymbol: connectionViewModel.hostText,
+            subtitleSymbol: payload.session.metadata.host,
         )
     }
 

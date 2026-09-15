@@ -226,14 +226,19 @@ struct ServicesFactory {
         )
         let walletConnectorPresenter = WalletConnectorPresenter()
         let walletConnectorInteractor = WalletConnectorInteractor(presenter: walletConnectorPresenter)
-        let walletConnector = Self.makeWalletConnector(
-            connectionsStore: storeManager.connectionsStore,
-            interactor: walletConnectorInteractor,
-            transactionSimulationService: transactionSimulationService,
+        let walletConnectService = Gemstone.GemWalletConnectService(
+            simulation: transactionSimulationService,
+            store: GemstoneConnectionStore(store: storeManager.connectionsStore),
+            signer: walletConnectorInteractor,
+            session: walletSessionService,
+            assets: assetsService,
+            signMessage: signMessageService,
+        )
+        let walletConnector = WalletConnectorService(
             walletSessionService: walletSessionService,
-            assetsService: assetsService,
+            interactor: walletConnectorInteractor,
+            service: walletConnectService,
             chainService: chainService,
-            signMessageService: signMessageService,
         )
 
         let assetDiscoveryService = Gemstone.GemAssetDiscoveryService(
@@ -391,6 +396,7 @@ struct ServicesFactory {
             transactionsService: transactionsService,
             walletService: walletService,
             walletSessionService: walletSessionService,
+            walletConnectService: walletConnectService,
             serviceStatusService: serviceStatusService,
             appUpdateService: appUpdateService,
             inAppNotificationService: inAppNotificationService,
@@ -452,30 +458,6 @@ extension ServicesFactory {
         Gemstone.GemDeviceApiClient(
             provider: provider,
             deviceKey: deviceKey,
-        )
-    }
-
-    private static func makeWalletConnector(
-        connectionsStore: ConnectionStore,
-        interactor: WalletConnectorInteractor,
-        transactionSimulationService: GemSimulationService,
-        walletSessionService: GemWalletSessionService,
-        assetsService: GemAssetsService,
-        chainService: Gemstone.GemChainService,
-        signMessageService: Gemstone.GemSignMessageService,
-    ) -> WalletConnectorService {
-        WalletConnectorService(
-            walletSessionService: walletSessionService,
-            interactor: interactor,
-            service: GemWalletConnectService(
-                simulation: transactionSimulationService,
-                store: GemstoneConnectionStore(store: connectionsStore),
-                signer: interactor,
-                session: walletSessionService,
-                assets: assetsService,
-                signMessage: signMessageService,
-            ),
-            chainService: chainService,
         )
     }
 

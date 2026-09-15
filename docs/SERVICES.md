@@ -248,7 +248,7 @@ One Core service per screen, held by the screen's view model on both apps. The s
 | `GemSwapQuoteService` | `GemSwapSession` | `SwapSceneViewModel` | `SwapViewModel` |
 | `GemTransactionDetailsService` | — | `TransactionSceneViewModel` | `GetTransactionDetailsImpl` (observed read + links) |
 | `GemTransactionsService` | — | `TransactionsViewModel` | `TransactionsViewModel` |
-| `GemWalletConnectService` | — | `WalletConnectorService` | `WCRequestViewModel`, `ProposalSceneViewModel`, `WCAuthViewModel` |
+| `GemWalletConnectService` | — | `WalletConnectorService`, `ConnectionsViewModel` | `WCRequestViewModel`, `ProposalSceneViewModel`, `WCAuthViewModel`, `ConnectionsViewModel`, `ConnectionViewModel` |
 | `GemWalletHomeService` | — | `WalletSceneViewModel`, `NetworkAssetsSceneViewModel` | `AssetsViewModel`, `NetworkAssetsViewModel` |
 | `GemWalletService` | — | onboarding and manage-wallet view models (`WalletsSceneViewModel` gates on `can_add_wallet`, `WalletDetailViewModel` exports the secret through `export_secret`) | `CreateWalletViewModel`, `ImportViewModel`, `WalletsViewModel` (`can_add_wallet`), `WalletViewModel` / `SetupWalletViewModel` (`rename`), `WalletSecretDataViewModel` (`export_secret`), wallet cases |
 | `GemWalletSessionService` | — | `RootSceneViewModel`, `NavigationHandler` | `SessionCoordinator` (+ the services it composes) |

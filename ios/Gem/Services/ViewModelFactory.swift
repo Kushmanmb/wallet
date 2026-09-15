@@ -59,6 +59,7 @@ import class Gemstone.GemTransactionDetailsService
 import class Gemstone.GemTransactionStateService
 import class Gemstone.GemWalletHomeService
 import class Gemstone.GemWalletService
+import class Gemstone.GemWalletConnectService
 import class Gemstone.GemWalletSessionService
 import Assets
 import InAppNotifications
@@ -133,6 +134,7 @@ public struct ViewModelFactory: Sendable {
     let transactionsService: GemTransactionsService
     let walletService: GemWalletService
     let walletSessionService: GemWalletSessionService
+    let walletConnectService: GemWalletConnectService
     let serviceStatusService: GemServiceStatus
     let appUpdateService: GemAppUpdateService
     let inAppNotificationService: GemNotificationService
@@ -218,6 +220,18 @@ public struct ViewModelFactory: Sendable {
             service: preferencesService,
             settings: GemSettingsService(preferences: preferencesService),
             preferences: observablePreferences,
+        )
+    }
+
+    @MainActor
+    public func connectionsScene(
+        connector: any WalletConnectorServiceable,
+        walletConnectorPresenter: WalletConnectorPresenter,
+    ) -> ConnectionsViewModel {
+        ConnectionsViewModel(
+            connector: connector,
+            service: walletConnectService,
+            walletConnectorPresenter: walletConnectorPresenter,
         )
     }
 
