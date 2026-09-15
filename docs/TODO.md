@@ -351,15 +351,13 @@ Each pair below resolves to the same English text and to the same text in every 
 
 ### App-side twins of Core types
 
-[No hand-written twins](ARCHITECTURE.md): an FFI-only type is used as the uniffi type; a twin is only for a type an app persists.
+[No hand-written twins](ARCHITECTURE.md): an FFI-only type is used as the uniffi type; a twin is only for a type an app persists. Each of the three below has the same cases and the same payload types as its Core counterpart and is never written to storage.
 
-- **X98** **S** `ios/Packages/GemstoneServices/Sources/Keystore/KeystoreAuthentication.swift` twins `GemKeystoreAuthentication`, and `GemstoneKeystorePassword.authentication()` maps one to the other case by case.
-- **X99** **S** `ios/Packages/Primitives/Sources/LockPeriod.swift` twins `GemLockPeriod`.
-- **X100** **S** `ios/Packages/Primitives/Sources/WalletImportResult.swift` twins `GemWalletImportResult`.
-- **X101** **S** `ios/Packages/GemstonePrimitives/Sources/Types/AmountType.swift` twins `GemAmountType`, `SelectAssetType.swift` twins `GemSelectAssetType`.
-- **X102** **S** `ios/Packages/PrimitivesComponents/Sources/Types/PaymentDestination.swift` twins `GemPaymentDestination`.
-- **X103** **S** `ios/Features/Transactions/Sources/Types/TransactionHeaderAction.swift` twins `GemTransactionHeaderAction`.
-- **X104** **S** `ios/Features/Stake/.../DelegationViewModel.swift` declares `DelegationDestination` against Core's `GemDelegationDestination`.
+- **X100** **S** `ios/Packages/Primitives/Sources/WalletImportResult.swift` twins `GemWalletImportResult` case for case.
+- **X103** **S** `ios/Features/Transactions/Sources/Types/TransactionHeaderAction.swift` twins `GemTransactionHeaderAction` case for case.
+- **X104** **S** `ios/Features/Stake/.../DelegationViewModel.swift` declares `DelegationDestination`, which twins `GemDelegationDestination` case for case.
+
+Checked and kept: `KeystoreAuthentication` and `LockPeriod` are both written to the keychain by raw value, which the rule allows; `AmountType` carries a recipient its Core namesake does not; `SelectAssetType` and `PaymentDestination` are navigation types carrying app payloads and already map to Core through `flowType`.
 
 ### Core hardening (second pass)
 
