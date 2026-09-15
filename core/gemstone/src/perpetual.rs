@@ -5,13 +5,14 @@ use gem_hypercore::{
     perpetual_formatter::PerpetualFormatter,
     provider::{websocket_mapper::account_subscriptions, websocket_subscriptions::WebSocketSubscriptions},
 };
+use primitives::contract_constants::HYPERLIQUID_ARBITRUM_DEPOSIT_ADDRESS;
 use primitives::known_assets::ARBITRUM_USDC;
 use primitives::{
     Asset, AutocloseEstimator as Estimator, AutocloseValidation, AutocloseValidator as Validator, PerpetualAccountMode, PerpetualConfirmData, PerpetualDirection,
     PerpetualProvider, PerpetualType, TpslType,
 };
 
-use crate::config::perpetual_config::{HYPERLIQUID_DEPOSIT_ADDRESS, LEVERAGE_OPTIONS, STOP_LOSS_PERCENT_OPTIONS, TAKE_PROFIT_PERCENT_OPTIONS, leverage_options};
+use crate::config::perpetual_config::{LEVERAGE_OPTIONS, STOP_LOSS_PERCENT_OPTIONS, TAKE_PROFIT_PERCENT_OPTIONS, leverage_options};
 use crate::models::GemAsset;
 use crate::models::custom_types::GemBigInt;
 use crate::models::perpetual::GemPerpetualSubscription;
@@ -105,7 +106,7 @@ impl GemPerpetual {
 impl GemPerpetual {
     pub fn deposit_recipient(&self) -> GemRecipient {
         let address = match self.provider {
-            PerpetualProvider::Hypercore => HYPERLIQUID_DEPOSIT_ADDRESS.to_string(),
+            PerpetualProvider::Hypercore => HYPERLIQUID_ARBITRUM_DEPOSIT_ADDRESS.to_string(),
         };
         GemRecipient { address, ..self.recipient() }
     }

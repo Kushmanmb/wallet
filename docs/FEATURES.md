@@ -162,7 +162,7 @@ Core's session-wide method list, consumed by both platform approval paths and by
 
 ## Security providers
 
-Security checks cover malicious addresses, address poisoning, websites, and tokens. Staking transactions use local security checks only.
+Security checks cover malicious addresses, address poisoning, websites, and tokens. Core confirmation requests transaction scans only for `Transfer`, `Swap`, `TokenApprove`, and `Generic` inputs. All other input types skip the scan API entirely. Staking requests from older clients still use local security checks only on the backend.
 
 | Provider | Address security | Address poisoning | Website security | Token security |
 | --- | --- | --- | :---: | --- |

@@ -538,11 +538,11 @@ mod tests {
         assert!(!entry(Some(1), Some(GemAmountError::Zero)).allows_confirm());
     }
     use super::*;
-    use crate::config::perpetual_config::HYPERLIQUID_DEPOSIT_ADDRESS;
     use crate::models::custom_types::GemBigUint;
     use crate::payment::GemPaymentRecipient;
     use primitives::Resource;
     use primitives::asset_balance::BalanceMetadata;
+    use primitives::contract_constants::HYPERLIQUID_ARBITRUM_DEPOSIT_ADDRESS;
     use primitives::{AssetId, AssetType, Delegation, DelegationBase, DelegationState, DelegationValidator, StakeProviderType};
 
     #[test]
@@ -1214,7 +1214,7 @@ mod tests {
 
         let deposit = transfer_data(usdc(), GemAmountTransfer::Deposit, None, GemBigInt::from(2), true).unwrap();
         assert!(matches!(deposit.input_type, TransactionInputType::Deposit { .. }));
-        assert_eq!(deposit.recipient.address, HYPERLIQUID_DEPOSIT_ADDRESS);
+        assert_eq!(deposit.recipient.address, HYPERLIQUID_ARBITRUM_DEPOSIT_ADDRESS);
         assert!(deposit.use_max_amount);
 
         let withdraw = transfer_data(usdc(), GemAmountTransfer::Withdraw, Some(owner.clone()), GemBigInt::from(3), false).unwrap();

@@ -1,16 +1,18 @@
 use std::error::Error;
 use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use cacher::{AccessTokenCacherClient, CacherClient};
 use gem_client::ReqwestClient;
 use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::{AssetId, ChainAddress, ScanTransaction, ScanTransactionPayload, TransactionType, asset_score::AssetRank};
+use reqwest::Url;
 use rocket::futures::future;
 use security_provider::providers::goplus::GoPlusProvider;
 use security_provider::{
     AddressPoisoningTarget, AddressScanProviderConfig, AddressTarget, ScanProviderFactory, ScanProviderRemoteConfig, ScanResult, TransactionScanProviders, WebsiteTarget,
 };
+use serde_json::json;
 use settings::Settings;
 use storage::{AssetsRepository, Database, ScanAddressesRepository};
 
@@ -49,6 +51,7 @@ impl ScanClient {
     pub async fn get_scan_transaction(&self, payload: ScanTransactionPayload) -> Result<ScanTransaction, Box<dyn Error + Send + Sync>> {
         let local_scan = self.get_scan_transaction_local(payload.clone())?;
         if local_scan.is_malicious == Some(true) {
+            Self::log_scan_transaction(&payload, &local_scan);
             return Ok(local_scan);
         }
 
@@ -56,9 +59,9 @@ impl ScanClient {
             return Ok(local_scan);
         };
         let (address_scans, poisoning_scans, website_scans) = future::join3(
-            self.scan_address_providers(address_target.clone()),
-            self.scan_address_poisoning_providers(poisoning_target),
-            self.scan_website_providers(website_target.clone()),
+            self.scan_address_providers(address_target.clone(), &payload.transaction_type),
+            self.scan_address_poisoning_providers(poisoning_target, &payload.transaction_type),
+            self.scan_website_providers(website_target.clone(), &payload.transaction_type),
         )
         .await;
 
@@ -77,14 +80,35 @@ impl ScanClient {
             .collect::<Vec<_>>();
         let is_scan_complete = Self::is_scan_complete(self.config.enable, self.config.required_successes, &completed_scans);
 
-        Ok(ScanTransaction {
+        let scan = ScanTransaction {
             is_malicious: Some(!malicious_addresses.is_empty() || malicious_website.is_some()),
             is_memo_required: local_scan.is_memo_required,
             is_scan_complete,
             malicious_addresses: Some(malicious_addresses),
             malicious_assets: local_scan.malicious_assets,
             malicious_website,
-        })
+        };
+        if scan.is_malicious == Some(true) {
+            Self::log_scan_transaction(&payload, &scan);
+        }
+        Ok(scan)
+    }
+
+    fn log_scan_transaction(payload: &ScanTransactionPayload, scan: &ScanTransaction) {
+        let scan = ScanTransaction {
+            malicious_website: scan.malicious_website.as_deref().and_then(Self::website_host),
+            ..scan.clone()
+        };
+        info_with_fields!(
+            "security transaction blocked",
+            transaction_type = payload.transaction_type.as_ref(),
+            chain = payload.target.asset_id.chain.as_ref(),
+            scan = json!(scan)
+        );
+    }
+
+    fn website_host(website: &str) -> Option<String> {
+        Url::parse(website).ok()?.host_str().map(str::to_string)
     }
 
     fn get_scan_transaction_local(&self, payload: ScanTransactionPayload) -> Result<ScanTransaction, Box<dyn Error + Send + Sync>> {
@@ -169,7 +193,7 @@ impl ScanClient {
         targets
     }
 
-    pub async fn scan_address_providers(&self, target: AddressTarget) -> Vec<Option<ScanResult<AddressTarget>>> {
+    async fn scan_address_providers(&self, target: AddressTarget, transaction_type: &TransactionType) -> Vec<Option<ScanResult<AddressTarget>>> {
         if !self.config.enable {
             return Vec::new();
         }
@@ -179,31 +203,51 @@ impl ScanClient {
                 .addresses
                 .iter()
                 .filter(|provider| provider.supports_chain(target.chain))
-                .map(|provider| async { (provider.name(), provider.scan_address(&target).await) }),
+                .map(|provider| async {
+                    let start = Instant::now();
+                    let result = provider.scan_address(&target).await;
+                    (provider.name(), result, start.elapsed().as_millis())
+                }),
         )
         .await
         .into_iter()
-        .map(|(provider, result)| match result {
+        .map(|(provider, result, duration_ms)| match result {
             Ok(result) => {
                 info_with_fields!(
                     "security scan result",
                     kind = "address",
+                    transaction_type = transaction_type.as_ref(),
+                    duration_ms = duration_ms,
                     provider = result.provider.as_str(),
                     chain = result.target.chain.as_ref(),
                     malicious = result.is_malicious,
+                    address = format!("{:?}", target.address),
                     reason = result.reason.as_deref().unwrap_or_default()
                 );
                 Some(result)
             }
             Err(error) => {
-                error_with_fields!("security scan failed", error.as_ref(), kind = "address", provider = provider, chain = target.chain.as_ref());
+                error_with_fields!(
+                    "security scan failed",
+                    error.as_ref(),
+                    kind = "address",
+                    transaction_type = transaction_type.as_ref(),
+                    duration_ms = duration_ms,
+                    provider = provider,
+                    chain = target.chain.as_ref(),
+                    address = format!("{:?}", target.address)
+                );
                 None
             }
         })
         .collect()
     }
 
-    async fn scan_address_poisoning_providers(&self, target: Option<AddressPoisoningTarget>) -> Vec<Option<ScanResult<AddressPoisoningTarget>>> {
+    async fn scan_address_poisoning_providers(
+        &self,
+        target: Option<AddressPoisoningTarget>,
+        transaction_type: &TransactionType,
+    ) -> Vec<Option<ScanResult<AddressPoisoningTarget>>> {
         if !self.config.enable {
             return Vec::new();
         }
@@ -216,18 +260,25 @@ impl ScanClient {
                 .poisoning
                 .iter()
                 .filter(|provider| provider.supports_chain(target.target.chain))
-                .map(|provider| async { (provider.name(), provider.scan_address_poisoning(&target).await) }),
+                .map(|provider| async {
+                    let start = Instant::now();
+                    let result = provider.scan_address_poisoning(&target).await;
+                    (provider.name(), result, start.elapsed().as_millis())
+                }),
         )
         .await
         .into_iter()
-        .map(|(provider, result)| match result {
+        .map(|(provider, result, duration_ms)| match result {
             Ok(result) => {
                 info_with_fields!(
                     "security scan result",
                     kind = "address_poisoning",
+                    transaction_type = transaction_type.as_ref(),
+                    duration_ms = duration_ms,
                     provider = result.provider.as_str(),
                     chain = result.target.target.chain.as_ref(),
                     malicious = result.is_malicious,
+                    address = format!("{:?}", target.target.address),
                     reason = result.reason.as_deref().unwrap_or_default()
                 );
                 Some(result)
@@ -237,8 +288,11 @@ impl ScanClient {
                     "security scan failed",
                     error.as_ref(),
                     kind = "address_poisoning",
+                    transaction_type = transaction_type.as_ref(),
+                    duration_ms = duration_ms,
                     provider = provider,
-                    chain = target.target.chain.as_ref()
+                    chain = target.target.chain.as_ref(),
+                    address = format!("{:?}", target.target.address)
                 );
                 None
             }
@@ -246,35 +300,44 @@ impl ScanClient {
         .collect()
     }
 
-    async fn scan_website_providers(&self, target: Option<WebsiteTarget>) -> Vec<Option<ScanResult<WebsiteTarget>>> {
+    async fn scan_website_providers(&self, target: Option<WebsiteTarget>, transaction_type: &TransactionType) -> Vec<Option<ScanResult<WebsiteTarget>>> {
         if !self.config.enable {
             return Vec::new();
         }
         let Some(target) = target else {
             return Vec::new();
         };
-        future::join_all(
-            self.config
-                .providers
-                .websites
-                .iter()
-                .map(|provider| async { (provider.name(), provider.scan_website(&target).await) }),
-        )
+        future::join_all(self.config.providers.websites.iter().map(|provider| async {
+            let start = Instant::now();
+            let result = provider.scan_website(&target).await;
+            (provider.name(), result, start.elapsed().as_millis())
+        }))
         .await
         .into_iter()
-        .map(|(provider, result)| match result {
+        .map(|(provider, result, duration_ms)| match result {
             Ok(result) => {
                 info_with_fields!(
                     "security scan result",
                     kind = "website",
+                    transaction_type = transaction_type.as_ref(),
+                    duration_ms = duration_ms,
                     provider = result.provider.as_str(),
                     malicious = result.is_malicious,
+                    website_host = format!("{:?}", Self::website_host(&target.website)),
                     reason = result.reason.as_deref().unwrap_or_default()
                 );
                 Some(result)
             }
             Err(error) => {
-                error_with_fields!("security scan failed", error.as_ref(), kind = "website", provider = provider);
+                error_with_fields!(
+                    "security scan failed",
+                    error.as_ref(),
+                    kind = "website",
+                    transaction_type = transaction_type.as_ref(),
+                    duration_ms = duration_ms,
+                    provider = provider,
+                    website_host = format!("{:?}", Self::website_host(&target.website))
+                );
                 None
             }
         })
@@ -300,6 +363,15 @@ mod tests {
             website: website.map(str::to_string),
             transaction_type,
         }
+    }
+
+    #[test]
+    fn test_website_host_excludes_credentials_and_query_values() {
+        assert_eq!(
+            ScanClient::website_host("https://user:password@example.com/path?token=secret#fragment"),
+            Some("example.com".into())
+        );
+        assert_eq!(ScanClient::website_host("invalid website"), None);
     }
 
     #[test]

@@ -100,7 +100,10 @@ impl GemConfirmService {
         };
 
         // A scanner outage fails open by design: the send continues without a verdict.
-        let scan_future = async { self.scanner.scan_transaction(rules::scan_payload(preload_input.clone())).await.ok() };
+        let scan_future = async {
+            let payload = rules::scan_payload(preload_input.clone())?;
+            self.scanner.scan_transaction(payload).await.ok()
+        };
         let (metadata, fee_rates, scan, simulation) = futures::join!(
             self.gateway.get_transaction_preload(chain, preload_input.clone()),
             self.gateway.get_fee_rates(chain, transfer.input_type.clone()),
