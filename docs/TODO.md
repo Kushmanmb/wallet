@@ -8,20 +8,7 @@ Keep each item independently reviewable. Shared decision changes land in Core an
 
 This list was rebuilt on 2026-09-15 from scripted sweeps over the whole repo. Each item names the file the sweep hit, so it can be confirmed before it is started.
 
-## 0. Guidance that no longer matches the code
-
-
-## 1. The same Core key, two answers
-
-A Core enum both apps map is only safe while both maps agree. These were found by comparing each app's mapper, variant by variant.
-
-
-## 1a. Enum-to-string mapping that escaped its module's mapper file
-
-Each of these picks a literal `Localized.`/`R.string.` from a Core variant outside its module's mapper, which is how V40–V42 happened. Verified file by file on 2026-09-15: a `when`/`switch` that calls the mapper (`row.stringRes()`, `row.title`) is the contract working and is not listed.
-
-
-Rejected after checking the file: iOS `NFT/CollectibleViewModel`, `Settings/GemAddNodeFailure+Settings`, `Swap/SwapSlippageViewModel`, `Swap/Views/SwapDetailsView`, `Transfer/Types/ConfirmInfoSheetBuilder`, `Transfer/ConfirmRecipientViewModel`, `Transfer/RecipientSceneViewModel`; Android `earn`, `import_wallet` and `perpetual` — each either calls its module mapper or switches over an app type, not a Core one.
+These files were checked during the 2026-09-15 mapper sweep and need no change — each calls its module mapper or switches over an app type, not a Core one: iOS `NFT/CollectibleViewModel`, `Settings/GemAddNodeFailure+Settings`, `Swap/SwapSlippageViewModel`, `Swap/Views/SwapDetailsView`, `Transfer/Types/ConfirmInfoSheetBuilder`, `Transfer/ConfirmRecipientViewModel`, `Transfer/RecipientSceneViewModel`; Android `earn`, `import_wallet`, `perpetual`.
 
 ## 2. Lists and screens without a row record
 
@@ -29,7 +16,6 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 
 - **R36** **M** `Transfer/Sources/ViewModels/RecipientSceneViewModel.swift` (9) against the Android `recipient` screens.
 - **R37** **M** `WalletConnector/.../ViewModels/ConnectionProposalViewModel.swift` (8) against Android `ProposalSceneViewModel`.
-- **R38** **S** `Stake/Sources/ViewModels/DelegationStateViewModel.swift` (6) — the state row already has `GemDelegationStatus`; give it the text keys too.
 - **R39** **M** `Settings/Sources/ChainSettings/ViewModels/AddNodeSceneViewModel.swift` (6) against Android `AddNodeViewModel`.
 - **R40** **S** `Perpetuals/Sources/ViewModels/CandleTooltipViewModel.swift` (6) against Android `CandlestickTooltip.kt`.
 - **R41** **M** `Contacts/Sources/ViewModels/ManageContactViewModel.swift` (6) against Android `ManageContactViewModel`.
@@ -43,7 +29,6 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 - **R49** **S** `Settings/Sources/ChainSettings/ViewModels/AddNodeResultViewModel.swift` (4).
 - **R50** **S** `QRScanner/Sources/ViewModels/QRScannerErrorViewModel.swift` (4) — check the scanner divergence note in SERVICES.md first; only the non-platform half moves.
 - **R51** **M** `Perpetuals/Sources/ViewModels/PerpetualsSceneViewModel.swift` (4) against Android `PerpetualMarketViewModel`.
-- **R52** **S** `Perpetuals/Sources/ViewModels/ChartLineViewModel.swift` (4).
 - **R53** **S** `Contacts/Sources/ViewModels/ManageContactAddressViewModel.swift` (4).
 
 ## 3. Views that decide
