@@ -487,7 +487,6 @@ public struct ViewModelFactory: Sendable {
             service: walletService,
             preferences: observablePreferences,
             nameService: nameService,
-            chainService: chainService,
             onComplete: onComplete,
         )
     }
