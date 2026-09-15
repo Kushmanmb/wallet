@@ -39,7 +39,6 @@ Rejected: a screen's chrome — its sheet title and its cancel, clear and done b
 Per-variant labels: a primitives enum both apps map to a string themselves is a decision written twice. Both languages force a `switch`/`when` over a Core enum to be exhaustive, so these sets cannot silently drift — every one checked below maps the same variants to the same meaning. That makes the V series maintenance cost and a place for drift to start, not a live bug; the exception is a catch-all branch, which **X20** covers. The migrated shape is a Core text key each app resolves once in its own `Gemstone+Localized.swift` / `GemstoneText.kt` — `GemTransactionTitle`, `GemBannerTitle` and `GemWalletSubtitle` already work that way. These do not:
 
 - **V11** **S** Simulation payload field kind — 7 cases, `SimulationPayloadFieldViewModel` against `SimulationPayloadFieldsContent.kt`.
-- **V12** **S** Portfolio statistic — 7 cases, `PortfolioSceneViewModel` against `PortfolioStatistics.kt`.
 - **V13** **S** Transaction row subtitle kind — 6 cases, `TransactionViewModel` against `TransactionDataAggregateExt.kt`.
 - **V14** **S** Transaction participant role — 6 cases, `TransactionParticipantViewModel` against `DestinationPropertyItem.kt`.
 - **V15** **S** Transaction state title — 6 cases, `TransactionStateViewModel` against `TransactionStateExt.kt`. Core answers the tone already; the title is still each app's.

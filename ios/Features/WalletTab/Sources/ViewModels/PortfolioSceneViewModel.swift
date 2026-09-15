@@ -121,24 +121,18 @@ extension PortfolioSceneViewModel {
     }
 
     func statisticModel(_ statistic: PortfolioStatistic) -> ListItemModel {
+        let title = statistic.title
         switch statistic {
-        case let .allTimeHigh(chartValue):
-            allTimeModel(title: Localized.Asset.allTimeHigh, chartValue: chartValue.toPrimitives())
-        case let .allTimeLow(chartValue):
-            allTimeModel(title: Localized.Asset.allTimeLow, chartValue: chartValue.toPrimitives())
-        case let .unrealizedPnl(value):
-            pnlModel(title: Localized.Perpetual.unrealizedPnl, value: value)
+        case let .allTimeHigh(chartValue), let .allTimeLow(chartValue):
+            return allTimeModel(title: title, chartValue: chartValue.toPrimitives())
+        case let .unrealizedPnl(value), let .allTimePnl(value):
+            return pnlModel(title: title, value: value)
         case let .accountLeverage(value):
-            ListItemModel(
-                title: Localized.Perpetual.accountLeverage,
-                subtitle: value.formatted(.number.precision(.fractionLength(2))) + "x",
-            )
+            return ListItemModel(title: title, subtitle: value.formatted(.number.precision(.fractionLength(2))) + "x")
         case let .marginUsage(margin):
-            marginModel(margin)
-        case let .allTimePnl(value):
-            pnlModel(title: Localized.Perpetual.allTimePnl, value: value)
+            return marginModel(title: title, margin)
         case let .volume(value):
-            ListItemModel(title: Localized.Perpetual.volume, subtitle: perpetualFormatter.string(value))
+            return ListItemModel(title: title, subtitle: perpetualFormatter.string(value))
         }
     }
 }
@@ -169,9 +163,9 @@ extension PortfolioSceneViewModel {
         return ListItemModel(title: title, subtitle: pnl.text ?? "-", subtitleStyle: pnl.textStyle)
     }
 
-    private func marginModel(_ margin: PortfolioMarginUsage) -> ListItemModel {
+    private func marginModel(title: String, _ margin: PortfolioMarginUsage) -> ListItemModel {
         let value = perpetualFormatter.string(margin.accountValue * margin.usage)
         let percent = PercentFormatter.unsigned.string(margin.usage * 100)
-        return ListItemModel(title: Localized.Perpetual.marginUsage, subtitle: "\(value) (\(percent))")
+        return ListItemModel(title: title, subtitle: "\(value) (\(percent))")
     }
 }
