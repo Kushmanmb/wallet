@@ -69,7 +69,7 @@ import Contacts
 import FiatConnect
 import Foundation
 import GemstoneServices
-import LockManager
+import AppLock
 import ManageWallets
 import MarketInsight
 import NFT

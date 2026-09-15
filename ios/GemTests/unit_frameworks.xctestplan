@@ -51,9 +51,9 @@
     },
     {
       "target": {
-        "containerPath": "container:Features\/LockManager",
-        "identifier": "LockManagerTests",
-        "name": "LockManagerTests"
+        "containerPath": "container:Features\/AppLock",
+        "identifier": "AppLockTests",
+        "name": "AppLockTests"
       }
     },
     {

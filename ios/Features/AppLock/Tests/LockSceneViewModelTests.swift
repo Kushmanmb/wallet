@@ -5,7 +5,7 @@ import Primitives
 import Foundation
 import GemstoneServices
 import LocalAuthentication
-@testable import LockManager
+@testable import AppLock
 import Testing
 
 @MainActor

@@ -3,7 +3,7 @@
 import SwiftUI
 
 @MainActor
-public protocol LockWindowManageable: Observable {
+public protocol LockWindowPresentable: Observable {
     var lockModel: LockSceneViewModel { get }
     var overlayWindow: UIWindow? { get }
 

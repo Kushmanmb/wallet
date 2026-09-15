@@ -3,15 +3,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "LockManager",
+    name: "AppLock",
     platforms: [
         .iOS(.v17),
         .macOS(.v15),
     ],
     products: [
         .library(
-            name: "LockManager",
-            targets: ["LockManager"],
+            name: "AppLock",
+            targets: ["AppLock"],
         ),
     ],
     dependencies: [
@@ -24,7 +24,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "LockManager",
+            name: "AppLock",
             dependencies: [
                 "Style",
                 "Components",
@@ -36,9 +36,9 @@ let package = Package(
             path: "Sources",
         ),
         .testTarget(
-            name: "LockManagerTests",
+            name: "AppLockTests",
             dependencies: [
-                "LockManager",
+                "AppLock",
                 "Gemstone",
                 "GemstoneServices",
                 "Primitives",

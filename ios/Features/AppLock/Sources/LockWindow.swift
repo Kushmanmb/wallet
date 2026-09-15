@@ -4,7 +4,7 @@ import SwiftUI
 
 @Observable
 @MainActor
-public final class LockWindowManager: LockWindowManageable {
+public final class LockWindow: LockWindowPresentable {
     public var lockModel: LockSceneViewModel
     public var overlayWindow: UIWindow?
 
@@ -53,7 +53,7 @@ public final class LockWindowManager: LockWindowManageable {
 
 // MARK: - Private
 
-extension LockWindowManager {
+extension LockWindow {
     private func presentLockWindow() {
         if overlayWindow == nil,
            let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene

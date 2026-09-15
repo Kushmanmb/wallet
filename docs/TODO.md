@@ -240,7 +240,6 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 
 ## 13. Names the guides forbid
 
-- **N5** **S** `ios/Features/LockManager` — the module, `LockWindowManager.swift` and its view modifier.
 
 ## 14. Documentation that has fallen behind
 

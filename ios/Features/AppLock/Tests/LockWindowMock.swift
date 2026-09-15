@@ -2,11 +2,11 @@
 
 import Primitives
 import GemstoneServices
-@testable import LockManager
+@testable import AppLock
 import SwiftUI
 
 @MainActor
-final class LockWindowManagerMock: LockWindowManageable {
+final class LockWindowMock: LockWindowPresentable {
     var lockModel: LockSceneViewModel
     var overlayWindow: UIWindow?
 
@@ -88,7 +88,7 @@ final class LockWindowManagerMock: LockWindowManageable {
         availableAuth: KeystoreAuthentication = .biometrics,
         isPrivacyLockEnabled: Bool = false,
         lockPeriod: LockPeriod = .oneMinute,
-    ) -> LockWindowManagerMock {
+    ) -> LockWindowMock {
         let service = MockBiometryAuthenticationService(
             isAuthEnabled: isAuthEnabled,
             availableAuth: availableAuth,

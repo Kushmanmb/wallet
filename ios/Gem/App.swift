@@ -3,7 +3,7 @@
 import AppService
 import Components
 import GemstoneServices
-import LockManager
+import AppLock
 import Primitives
 import Store
 import Style
@@ -30,7 +30,7 @@ struct GemApp: App {
                     pushNotificationEnablerService: resolver.services.pushNotificationEnablerService,
                     appLifecycleService: resolver.services.appLifecycleService,
                     navigationHandler: resolver.services.navigationHandler,
-                    lockWindowManager: LockWindowManager(lockModel: resolver.services.viewModelFactory.lockScene()),
+                    lockWindowManager: LockWindow(lockModel: resolver.services.viewModelFactory.lockScene()),
                     viewModelFactory: resolver.services.viewModelFactory,
                     walletSessionService: resolver.services.walletSessionService,
                     appUpdateService: resolver.services.appUpdateService,
