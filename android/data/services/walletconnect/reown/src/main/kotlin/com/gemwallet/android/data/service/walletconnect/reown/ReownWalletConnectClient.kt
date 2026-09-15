@@ -272,7 +272,6 @@ class ReownWalletConnectClient @Inject constructor(
     }
 
     override fun onSessionRequest(sessionRequest: Wallet.Model.SessionRequest, verifyContext: Wallet.Model.VerifyContext) {
-        Log.d(TAG, "Session request received method=${sessionRequest.request.method} chainId=${sessionRequest.chainId} id=${sessionRequest.request.id}")
         walletEvents.tryEmit(WalletConnectEvent.SessionRequest(sessionRequest.toWalletConnectSessionRequest(), verifyContext.toWalletConnectVerifyContext()))
     }
 

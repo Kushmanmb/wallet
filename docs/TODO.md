@@ -280,17 +280,7 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 
 ### Logging left in shipping paths
 
-122 `print`/`debugLog` sites on iOS and 69 `Log.`/`println` on Android. This is a wallet: confirm each line is free of addresses, amounts and secrets while removing it.
-
-- **X75** **S** iOS `WalletConnectorService.swift` (11) — sessions and request payloads.
-- **X76** **S** iOS `StreamObserverService.swift` (7), `AppLifecycleService.swift` (7), `OnstartService.swift` (6).
-- **X77** **S** iOS `SwapSceneViewModel.swift` (5) and `AssetSceneViewModel.swift` (4).
-- **X78** **S** iOS `RootSceneViewModel.swift` (4), `NavigationHandler.swift` (4), `AssetActions.swift` (4).
-- **X79** **S** iOS `PerpetualsSceneViewModel.swift` (4) and `PerpetualSceneViewModel.swift` (4).
-- **X80** **S** iOS the remaining 40 files.
-- **X81** **S** Android `BaseAssetSelectViewModel.kt` (6) and `StreamObserverService.kt` (5).
-- **X82** **S** Android `PerpetualMarketViewModel.kt` (4), `AssetsViewModel.kt` (4), `HyperliquidObserverService.kt` (4).
-- **X83** **S** Android the remaining 31 files.
+Re-checked on 2026-09-15 by separating what actually ships: 116 of the 122 iOS sites are `debugLog`, which compiles to nothing outside `DEBUG`, and the remaining six `print` calls are inside a `#Preview` or a macOS-only availability note. On Android 60 of the 69 are `Log.e` on a real failure. The seven `Log.d` that shipped are gone — they were logging WalletConnect request method, chain and id, the whole stream payload, and connection transitions into logcat on a release build — and the two migration errors that were logged at debug level now log as errors. X75–X83 are closed.
 
 ### iOS layout numbers outside Style
 

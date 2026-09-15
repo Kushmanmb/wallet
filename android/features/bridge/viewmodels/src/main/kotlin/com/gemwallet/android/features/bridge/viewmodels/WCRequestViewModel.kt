@@ -85,7 +85,6 @@ class WCRequestViewModel @Inject constructor(
         requestJob?.cancel()
         pendingRequests.current.value?.takeIf { it.sessionId == sessionRequest.topic }?.reject()
         state.update { RequestViewModelState(sessionRequest = sessionRequest) }
-        Log.d(TAG, "Resolving request method=${sessionRequest.request.method} chainId=${sessionRequest.chainId} id=${sessionRequest.request.id}")
         val job = viewModelScope.launch {
             val outcome = withContext(Dispatchers.IO) {
                 service.processRequest(
