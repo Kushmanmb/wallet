@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">请求访问整个 NFT 系列</string>
   <string name="simulation_warning_unlimited_token_approval_title">无限额度代币授权</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">需要相机权限以扫描二维码。\n请授予权限。</string>
-  <string name="notifications_permission_request_notification">需要 Push 通知权限才能获取新交易的通知。\n请授予权限。</string>
   <string name="rootcheck_security_alert">安全警告</string>
   <string name="rootcheck_body">检测到设备已获取 root 权限，可能显著增加安全风险。在已 root 的设备上使用此应用可能导致资产遭到未经授权的访问并造成损失。为保障资金安全，强烈建议使用非 root 设备。</string>
   <string name="rootcheck_ignore">忽略</string>

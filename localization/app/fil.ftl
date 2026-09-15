@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = Kinakailangan ng pahintulot sa camera para sa pag-scan ng QR Code.\nPakibigay ng pahintulot.
 
 # Notifications Permission
 
-notifications_permission_request_notification = Kinakailangan ang pahintulot sa Post Notifications para makakuha ng mga notification tungkol sa mga bagong transaksyon.\nMangyaring magbigay ng pahintulot.
 
 # Confirm
 

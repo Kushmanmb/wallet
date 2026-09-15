@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">Запрошен полный доступ к коллекции NFT.</string>
   <string name="simulation_warning_unlimited_token_approval_title">Неограниченное количество одобрений токенов</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">Требуется разрешение камеры для сканирования QR-кода.\nПожалуйста, предоставьте разрешение.</string>
-  <string name="notifications_permission_request_notification">Разрешение Post Notifications требуется для получения уведомлений о новых транзакциях.\nПожалуйста, предоставьте это разрешение.</string>
   <string name="rootcheck_security_alert">Предупреждение о безопасности</string>
   <string name="rootcheck_body">Похоже, что у вашего устройства есть root-доступ, что может значительно повысить риски безопасности. Использование этого приложения на root-устройстве может подвергнуть ваши активы несанкционированному доступу и потенциальной потере. Для безопасности ваших средств мы настоятельно рекомендуем использовать не root-устройство.</string>
   <string name="rootcheck_ignore">Игнорировать</string>

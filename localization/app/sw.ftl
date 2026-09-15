@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = Ruhusa ya kamera inahitajika ili kuchanganua Msimbo wa QR.\nTafadhali toa ruhusa.
 
 # Notifications Permission
 
-notifications_permission_request_notification = Ruhusa ya Arifa za Machapisho inahitajika ili kupata arifa kuhusu miamala mipya.\nTafadhali toa ruhusa.
 
 # Confirm
 

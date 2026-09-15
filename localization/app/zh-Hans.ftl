@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = 需要相机权限以扫描二维码。\n请授予权限。
 
 # Notifications Permission
 
-notifications_permission_request_notification = 需要 Push 通知权限才能获取新交易的通知。\n请授予权限。
 
 # Confirm
 

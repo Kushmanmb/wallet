@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">Ufikiaji kamili wa ukusanyaji wa NFT umeombwa</string>
   <string name="simulation_warning_unlimited_token_approval_title">Idhini ya tokeni isiyo na kikomo</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">Ruhusa ya kamera inahitajika ili kuchanganua Msimbo wa QR.\nTafadhali toa ruhusa.</string>
-  <string name="notifications_permission_request_notification">Ruhusa ya Arifa za Machapisho inahitajika ili kupata arifa kuhusu miamala mipya.\nTafadhali toa ruhusa.</string>
   <string name="rootcheck_security_alert">Onyo la Usalama</string>
   <string name="rootcheck_body">Kifaa chako kinaonekana kuwa na ufikiaji wa mizizi, ambayo inaweza kuongeza hatari za usalama kwa kiasi kikubwa. Kutumia programu hii kwenye kifaa kilichozinduliwa kunaweza kufichua mali yako kwa ufikiaji usioidhinishwa na uwezekano wa hasara. Kwa usalama wa pesa zako, tunapendekeza sana kutumia kifaa kisicho na mizizi.</string>
   <string name="rootcheck_ignore">Puuza</string>

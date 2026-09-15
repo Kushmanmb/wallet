@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = مطلوب إذن الكاميرا لمسح رمز الاستجابة السريعة.\nيرجى منح الإذن.
 
 # Notifications Permission
 
-notifications_permission_request_notification = مطلوب إذن نشر الإشعارات للحصول على إشعارات حول المعاملات الجديدة.\nيرجى منح الإذن.
 
 # Confirm
 

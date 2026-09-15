@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = Cameratoestemming vereist voor QR-codescan.\nVerleen toestemming.
 
 # Notifications Permission
 
-notifications_permission_request_notification = Toestemming voor het plaatsen van meldingen vereist voor het ontvangen van meldingen over nieuwe transacties.\nVerleen toestemming.
 
 # Confirm
 

@@ -237,7 +237,6 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 
 ### Keys with no reader
 
-- **L13** **S** `camera_permission_request_camera` and `notifications_permission_request_notification` have no Kotlin or Swift reader either, but permission copy is often referenced from a manifest or plist — find the reader or delete the pair. (`application_name` is read by `AndroidManifest.xml` and stays.)
 
 ## 13. Names the guides forbid
 

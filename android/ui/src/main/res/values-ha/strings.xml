@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">An nemi cikakken damar tattara NFT</string>
   <string name="simulation_warning_unlimited_token_approval_title">Amincewa da alamar mara iyaka</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">Ana buƙatar izinin kyamara don duba lambar QR.\nDa fatan za a ba da izini.</string>
-  <string name="notifications_permission_request_notification">Izinin Fadakarwa da ake buƙata don samun sanarwa game da sabbin ma\'amaloli.\nDon Allah a ba da izini.</string>
   <string name="rootcheck_security_alert">Gargadin Tsaro</string>
   <string name="rootcheck_body">Na\'urarka ta bayyana tana da tushen shiga, wanda zai iya ƙara haɗarin tsaro sosai. Yin amfani da wannan ƙa\'idar akan na\'ura mai tushe na iya fallasa kadarorin ku zuwa shiga mara izini da yuwuwar asara. Don amincin kuɗin ku, muna ba da shawarar yin amfani da na\'urar da ba ta da tushe.</string>
   <string name="rootcheck_ignore">Yi watsi da shi</string>

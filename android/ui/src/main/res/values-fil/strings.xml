@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">Hiniling ang kumpletong access sa koleksyon ng NFT</string>
   <string name="simulation_warning_unlimited_token_approval_title">Walang limitasyong pag-apruba ng token</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">Kinakailangan ng pahintulot sa camera para sa pag-scan ng QR Code.\nPakibigay ng pahintulot.</string>
-  <string name="notifications_permission_request_notification">Kinakailangan ang pahintulot sa Post Notifications para makakuha ng mga notification tungkol sa mga bagong transaksyon.\nMangyaring magbigay ng pahintulot.</string>
   <string name="rootcheck_security_alert">Babala sa Seguridad</string>
   <string name="rootcheck_body">Mukhang may root access ang iyong device, na maaaring makabuluhang magpapataas ng mga panganib sa seguridad. Ang paggamit ng app na ito sa isang naka-root na device ay maaaring maglantad sa iyong mga asset sa hindi awtorisadong pag-access at potensyal na pagkawala. Para sa kaligtasan ng iyong mga pondo, lubos naming inirerekomenda ang paggamit ng hindi naka-root na device.</string>
   <string name="rootcheck_ignore">Huwag pansinin</string>

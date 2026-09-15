@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = क्यूआर कोड स्कैन के लिए कैमरे की अनुमति आवश्यक है।\nकृपया अनुमति दें।
 
 # Notifications Permission
 
-notifications_permission_request_notification = नए लेनदेन के बारे में सूचनाएं प्राप्त करने के लिए अधिसूचना पोस्ट करने की अनुमति आवश्यक है।\nकृपया अनुमति प्रदान करें।
 
 # Confirm
 

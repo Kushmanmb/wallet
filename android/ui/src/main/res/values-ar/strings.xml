@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">تم طلب الوصول الكامل إلى مجموعة NFT</string>
   <string name="simulation_warning_unlimited_token_approval_title">الموافقة على الرموز المميزة غير محدودة</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">مطلوب إذن الكاميرا لمسح رمز الاستجابة السريعة.\nيرجى منح الإذن.</string>
-  <string name="notifications_permission_request_notification">مطلوب إذن نشر الإشعارات للحصول على إشعارات حول المعاملات الجديدة.\nيرجى منح الإذن.</string>
   <string name="rootcheck_security_alert">تحذير أمني</string>
   <string name="rootcheck_body">يبدو أن جهازك يتمتع بصلاحيات الجذر، مما قد يزيد من مخاطر الأمان بشكل كبير. قد يؤدي استخدام هذا التطبيق على جهاز به صلاحيات الجذر إلى تعريض أصولك لوصول غير مصرح به وخسارة محتملة. ولضمان سلامة أموالك، نوصي بشدة باستخدام جهاز غير متجذر.</string>
   <string name="rootcheck_ignore">يتجاهل</string>

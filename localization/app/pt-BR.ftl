@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = É necessária a permissão da câmera para a leitura do código QR.\nPor favor, conceda a permissão.
 
 # Notifications Permission
 
-notifications_permission_request_notification = A permissão Post Notifications é necessária para receber notificações sobre novas transações.\nPor favor, conceda a permissão.
 
 # Confirm
 

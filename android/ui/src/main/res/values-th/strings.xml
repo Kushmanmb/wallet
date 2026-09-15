@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">ขอสิทธิ์เข้าถึงคอลเลกชัน NFT ทั้งหมด</string>
   <string name="simulation_warning_unlimited_token_approval_title">อนุมัติโทเค็นได้ไม่จำกัดจำนวน</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">ต้องได้รับอนุญาตจากกล้องสำหรับการสแกน QR Code\nโปรดให้สิทธิ์</string>
-  <string name="notifications_permission_request_notification">จำเป็นต้องอนุญาตการโพสต์การแจ้งเตือนเพื่อรับการแจ้งเตือนเกี่ยวกับธุรกรรมใหม่\nโปรดให้สิทธิ์</string>
   <string name="rootcheck_security_alert">คำเตือนด้านความปลอดภัย</string>
   <string name="rootcheck_body">อุปกรณ์ของคุณดูเหมือนจะมีสิทธิ์เข้าถึงรูท ซึ่งอาจเพิ่มความเสี่ยงด้านความปลอดภัยได้อย่างมาก การใช้แอปนี้บนอุปกรณ์ที่รูทแล้วอาจทำให้ทรัพย์สินของคุณถูกเข้าถึงโดยไม่ได้รับอนุญาตและอาจสูญหายได้ เพื่อความปลอดภัยของเงินของคุณ เราขอแนะนำอย่างยิ่งให้ใช้อุปกรณ์ที่ไม่ได้รับการรูท</string>
   <string name="rootcheck_ignore">ไม่สนใจ</string>

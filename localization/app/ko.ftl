@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = QR코드 스캔을 위해서는 카메라 권한이 필요합니다.\n권한을 부여해 주세요.
 
 # Notifications Permission
 
-notifications_permission_request_notification = 새로운 거래에 대한 알림을 받으려면 게시물 알림 권한이 필요합니다.\n권한을 부여해 주세요.
 
 # Confirm
 

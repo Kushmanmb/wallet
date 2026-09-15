@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = QR কোড স্ক্যানের জন্য ক্যামেরার অনুমতি প্রয়োজন।\nঅনুগ্রহ করে অনুমতি দিন।
 
 # Notifications Permission
 
-notifications_permission_request_notification = নতুন লেনদেন সম্পর্কে বিজ্ঞপ্তি পেতে পোস্ট বিজ্ঞপ্তি অনুমতি প্রয়োজন।\nঅনুগ্রহ করে অনুমতি দিন।
 
 # Confirm
 

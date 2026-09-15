@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = נדרשת הרשאת מצלמה לסריקת קוד QR.\nאנא הענק הרשאה.
 
 # Notifications Permission
 
-notifications_permission_request_notification = נדרשת הרשאת פרסום הודעות כדי לקבל הודעות על עסקאות חדשות.\nאנא הענק הרשאה.
 
 # Confirm
 

@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = Ana buƙatar izinin kyamara don duba lambar QR.\nDa fatan za a ba da izini.
 
 # Notifications Permission
 
-notifications_permission_request_notification = Izinin Fadakarwa da ake buƙata don samun sanarwa game da sabbin ma'amaloli.\nDon Allah a ba da izini.
 
 # Confirm
 

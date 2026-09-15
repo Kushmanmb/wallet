@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">সম্পূর্ণ NFT সংগ্রহের অ্যাক্সেসের অনুরোধ করা হয়েছে</string>
   <string name="simulation_warning_unlimited_token_approval_title">সীমাহীন টোকেন অনুমোদন</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">QR কোড স্ক্যানের জন্য ক্যামেরার অনুমতি প্রয়োজন।\nঅনুগ্রহ করে অনুমতি দিন।</string>
-  <string name="notifications_permission_request_notification">নতুন লেনদেন সম্পর্কে বিজ্ঞপ্তি পেতে পোস্ট বিজ্ঞপ্তি অনুমতি প্রয়োজন।\nঅনুগ্রহ করে অনুমতি দিন।</string>
   <string name="rootcheck_security_alert">নিরাপত্তা সতর্কতা</string>
   <string name="rootcheck_body">আপনার ডিভাইসে রুট অ্যাক্সেস আছে বলে মনে হচ্ছে, যা উল্লেখযোগ্যভাবে নিরাপত্তা ঝুঁকি বাড়াতে পারে। রুট করা ডিভাইসে এই অ্যাপটি ব্যবহার করলে আপনার সম্পদ অননুমোদিত অ্যাক্সেস এবং সম্ভাব্য ক্ষতির সম্মুখীন হতে পারে। আপনার তহবিলের নিরাপত্তার জন্য, আমরা দৃঢ়ভাবে একটি নন-রুটেড ডিভাইস ব্যবহার করার পরামর্শ দিই।</string>
   <string name="rootcheck_ignore">উপেক্ষা করুন</string>

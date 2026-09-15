@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">要求存取整個 NFT 系列</string>
   <string name="simulation_warning_unlimited_token_approval_title">無限額代幣授權</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">需要相機權限才能掃描 QR 碼。\n請允許存取相機。</string>
-  <string name="notifications_permission_request_notification">需要通知權限才能接收新交易通知。\n請允許傳送通知。</string>
   <string name="rootcheck_security_alert">安全警告</string>
   <string name="rootcheck_body">此裝置似乎具有 root 存取權限，這會顯著增加安全風險。在已取得 root 權限的裝置上使用此應用程式可能會使資產遭受未經授權的存取並可能造成損失。為了資金安全，我們強烈建議使用未取得 root 權限的裝置。</string>
   <string name="rootcheck_ignore">忽略</string>

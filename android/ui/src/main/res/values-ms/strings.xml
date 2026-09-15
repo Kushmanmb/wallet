@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">Akses koleksi NFT penuh diminta</string>
   <string name="simulation_warning_unlimited_token_approval_title">Kelulusan token tanpa had</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">Kebenaran kamera diperlukan untuk imbasan Kod QR.\nSila berikan kebenaran.</string>
-  <string name="notifications_permission_request_notification">Kebenaran Siar Pemberitahuan diperlukan untuk mendapatkan pemberitahuan tentang transaksi baharu.\nSila berikan kebenaran.</string>
   <string name="rootcheck_security_alert">Amaran Keselamatan</string>
   <string name="rootcheck_body">Peranti anda nampaknya mempunyai akses root, yang boleh meningkatkan risiko keselamatan dengan ketara. Menggunakan apl ini pada peranti berakar boleh mendedahkan aset anda kepada akses tanpa kebenaran dan potensi kerugian. Untuk keselamatan dana anda, kami amat mengesyorkan anda menggunakan peranti yang tidak berakar.</string>
   <string name="rootcheck_ignore">Abaikan</string>

@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = Требуется разрешение камеры для сканирования QR-кода.\nПожалуйста, предоставьте разрешение.
 
 # Notifications Permission
 
-notifications_permission_request_notification = Разрешение Post Notifications требуется для получения уведомлений о новых транзакциях.\nПожалуйста, предоставьте это разрешение.
 
 # Confirm
 

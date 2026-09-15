@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">Požadován plný přístup k NFT kolekci</string>
   <string name="simulation_warning_unlimited_token_approval_title">Neomezené schvalování tokenů</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">Pro skenování QR kódu je vyžadováno oprávnění k fotoaparátu.\nUdělte prosím oprávnění.</string>
-  <string name="notifications_permission_request_notification">Chcete-li dostávat oznámení o nových transakcích, je vyžadováno oprávnění k odesílání oznámení.\nUdělte prosím oprávnění.</string>
   <string name="rootcheck_security_alert">Bezpečnostní varování</string>
   <string name="rootcheck_body">Zdá se, že vaše zařízení má přístup root, což může výrazně zvýšit bezpečnostní rizika. Používání této aplikace na zakořeněném zařízení může vystavit váš majetek neoprávněnému přístupu a potenciální ztrátě. Pro bezpečnost vašich finančních prostředků důrazně doporučujeme používat nerootované zařízení.</string>
   <string name="rootcheck_ignore">Ignorovat</string>

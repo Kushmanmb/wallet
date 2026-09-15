@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">مکمل NFT جمع کرنے تک رسائی کی درخواست کی گئی۔</string>
   <string name="simulation_warning_unlimited_token_approval_title">لامحدود ٹوکن کی منظوری</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">QR کوڈ اسکین کے لیے کیمرے کی اجازت درکار ہے۔\nبراہ کرم اجازت دیں۔</string>
-  <string name="notifications_permission_request_notification">نئی لین دین کے بارے میں اطلاعات حاصل کرنے کے لیے اطلاعات پوسٹ کرنے کی اجازت درکار ہے۔\nبراہ کرم اجازت دیں۔</string>
   <string name="rootcheck_security_alert">سیکیورٹی وارننگ</string>
   <string name="rootcheck_body">ایسا لگتا ہے کہ آپ کے آلے کو روٹ تک رسائی حاصل ہے، جس سے سیکورٹی کے خطرات میں نمایاں اضافہ ہو سکتا ہے۔ اس ایپ کو روٹڈ ڈیوائس پر استعمال کرنے سے آپ کے اثاثوں کو غیر مجاز رسائی اور ممکنہ نقصان کا سامنا کرنا پڑ سکتا ہے۔ آپ کے فنڈز کی حفاظت کے لیے، ہم ایک غیر جڑ والا آلہ استعمال کرنے کی سختی سے سفارش کرتے ہیں۔</string>
   <string name="rootcheck_ignore">نظر انداز کرنا</string>

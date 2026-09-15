@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = Autorisation de l'appareil photo requise pour la numérisation du code QR.\nVeuillez accorder l'autorisation.
 
 # Notifications Permission
 
-notifications_permission_request_notification = Autorisation de publication de notifications requise pour recevoir des notifications sur les nouvelles transactions.\nVeuillez accorder l'autorisation.
 
 # Confirm
 

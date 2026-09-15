@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = 需要相機權限才能掃描 QR 碼。\n請允許存取相機。
 
 # Notifications Permission
 
-notifications_permission_request_notification = 需要通知權限才能接收新交易通知。\n請允許傳送通知。
 
 # Confirm
 

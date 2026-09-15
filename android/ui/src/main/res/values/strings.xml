@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">Full NFT collection access requested</string>
   <string name="simulation_warning_unlimited_token_approval_title">Unlimited token approval</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">Camera permission required for QR Code scan.\nPlease grant permission.</string>
-  <string name="notifications_permission_request_notification">Post Notifications permission required for get notifications about new transactions.\nPlease grant permission.</string>
   <string name="rootcheck_security_alert">Security Warning</string>
   <string name="rootcheck_body">Your device appears to have root access, which can significantly increase security risks. Using this app on a rooted device may expose your assets to unauthorized access and potential loss. For the safety of your funds, we strongly recommend using a non-rooted device.</string>
   <string name="rootcheck_ignore">Ignore</string>

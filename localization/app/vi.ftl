@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = Cần có sự cho phép của máy ảnh để quét Mã QR.\nVui lòng cấp quyền.
 
 # Notifications Permission
 
-notifications_permission_request_notification = Cần có quyền Đăng thông báo để nhận thông báo về các giao dịch mới.\nVui lòng cấp quyền.
 
 # Confirm
 

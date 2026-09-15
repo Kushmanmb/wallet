@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">התבקשה גישה מלאה לאוסף NFT</string>
   <string name="simulation_warning_unlimited_token_approval_title">אישור אסימונים ללא הגבלה</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">נדרשת הרשאת מצלמה לסריקת קוד QR.\nאנא הענק הרשאה.</string>
-  <string name="notifications_permission_request_notification">נדרשת הרשאת פרסום הודעות כדי לקבל הודעות על עסקאות חדשות.\nאנא הענק הרשאה.</string>
   <string name="rootcheck_security_alert">אזהרת אבטחה</string>
   <string name="rootcheck_body">נראה שלמכשיר שלך יש גישת שורש, מה שיכול להגביר משמעותית את סיכוני האבטחה. שימוש באפליקציה זו במכשיר שורשי עלול לחשוף את הנכסים שלך לגישה לא מורשית ואובדן פוטנציאלי. למען בטיחות הכספים שלך, אנו ממליצים בחום להשתמש במכשיר ללא שורש.</string>
   <string name="rootcheck_ignore">התעלם</string>

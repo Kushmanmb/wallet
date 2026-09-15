@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">संपूर्ण एनएफटी संग्रह तक पहुंच का अनुरोध किया गया है</string>
   <string name="simulation_warning_unlimited_token_approval_title">असीमित टोकन अनुमोदन</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">क्यूआर कोड स्कैन के लिए कैमरे की अनुमति आवश्यक है।\nकृपया अनुमति दें।</string>
-  <string name="notifications_permission_request_notification">नए लेनदेन के बारे में सूचनाएं प्राप्त करने के लिए अधिसूचना पोस्ट करने की अनुमति आवश्यक है।\nकृपया अनुमति प्रदान करें।</string>
   <string name="rootcheck_security_alert">सुरक्षा चेतावनी</string>
   <string name="rootcheck_body">ऐसा लगता है कि आपके डिवाइस में रूट एक्सेस है, जो सुरक्षा जोखिमों को काफी हद तक बढ़ा सकता है। रूट किए गए डिवाइस पर इस ऐप का उपयोग करने से आपकी संपत्ति अनधिकृत पहुंच और संभावित नुकसान के संपर्क में आ सकती है। आपके फंड की सुरक्षा के लिए, हम दृढ़ता से गैर-रूट किए गए डिवाइस का उपयोग करने की सलाह देते हैं।</string>
   <string name="rootcheck_ignore">नजरअंदाज करें</string>

@@ -1359,13 +1359,9 @@ application_name = Gem
 
 # Camera Permission
 
-# Used in camera UI for the permission request camera label.
-camera_permission_request_camera = Camera permission required for QR Code scan.\nPlease grant permission.
 
 # Notifications Permission
 
-# Used in in-app notification screens for the permission request notification label.
-notifications_permission_request_notification = Post Notifications permission required for get notifications about new transactions.\nPlease grant permission.
 
 # Confirm
 

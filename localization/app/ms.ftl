@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = Kebenaran kamera diperlukan untuk imbasan Kod QR.\nSila berikan kebenaran.
 
 # Notifications Permission
 
-notifications_permission_request_notification = Kebenaran Siar Pemberitahuan diperlukan untuk mendapatkan pemberitahuan tentang transaksi baharu.\nSila berikan kebenaran.
 
 # Confirm
 

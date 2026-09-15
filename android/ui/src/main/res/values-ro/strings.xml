@@ -592,8 +592,6 @@
   <string name="simulation_warning_nft_collection_approval_title">Acces complet la colecția NFT solicitat</string>
   <string name="simulation_warning_unlimited_token_approval_title">Aprobare nelimitată de tokenuri</string>
   <string name="application_name">Gem</string>
-  <string name="camera_permission_request_camera">Este necesară permisiunea camerei pentru scanarea codului QR.\nVă rugăm să acordați permisiunea.</string>
-  <string name="notifications_permission_request_notification">Este necesară permisiunea de a posta notificări pentru a primi notificări despre tranzacții noi.\nVă rugăm să acordați permisiunea.</string>
   <string name="rootcheck_security_alert">Avertisment de securitate</string>
   <string name="rootcheck_body">Dispozitivul dvs. pare să aibă acces root, ceea ce poate crește semnificativ riscurile de securitate. Utilizarea acestei aplicații pe un dispozitiv înrădăcinat poate expune activele dvs. la acces neautorizat și la o potențială pierdere. Pentru siguranța fondurilor dvs., vă recomandăm insistent să utilizați un dispozitiv care nu este rootat.</string>
   <string name="rootcheck_ignore">Ignora</string>

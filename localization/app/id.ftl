@@ -751,11 +751,9 @@ application_name = Gem
 
 # Camera Permission
 
-camera_permission_request_camera = Izin kamera diperlukan untuk memindai kode QR.\nHarap berikan izin.
 
 # Notifications Permission
 
-notifications_permission_request_notification = Izin notifikasi dibutuhkan untuk menerima pemberitahuan tentang transaksi baru.\nHarap berikan izin.
 
 # Confirm
 
