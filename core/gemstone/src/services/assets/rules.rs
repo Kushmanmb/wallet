@@ -10,7 +10,8 @@ use primitives::{
 use super::model::{
     AssetList, GemAssetAction, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput, GemAssetNetworkDestination, GemAssetRow,
     GemAssetRowSubtitle, GemAssetRowTitle, GemAssetRowTrailing, GemAssetSectionIds, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow,
-    GemSelectAssetScope, GemSelectAssetType, GemSelectRowAction, GemWalletSearchCounts, GemWalletSearchLimits, GemWalletSearchPhase,
+    GemSelectAssetScope, GemSelectAssetSection, GemSelectAssetTitle, GemSelectAssetType, GemSelectRowAction, GemWalletSearchCounts, GemWalletSearchLimits,
+    GemWalletSearchPhase,
 };
 use crate::config::search_config::{ASSETS_INITIAL_LIMIT, ASSETS_SEARCH_LIMIT, NFTS_PREVIEW_LIMIT, PERPETUALS_PREVIEW_LIMIT, RESULTS_LIMIT};
 use crate::config::stake::EARN_OFFERED;
@@ -167,6 +168,39 @@ pub fn wallet_row() -> GemAssetRow {
     }
 }
 
+pub fn select_asset_title(select_type: &GemSelectAssetType) -> GemSelectAssetTitle {
+    match select_type {
+        GemSelectAssetType::Send => GemSelectAssetTitle::Send,
+        GemSelectAssetType::Receive => GemSelectAssetTitle::Receive,
+        GemSelectAssetType::ReceiveCollection => GemSelectAssetTitle::ReceiveCollection,
+        GemSelectAssetType::Buy => GemSelectAssetTitle::Buy,
+        GemSelectAssetType::SwapPay => GemSelectAssetTitle::SwapPay,
+        GemSelectAssetType::SwapReceive { .. } => GemSelectAssetTitle::SwapReceive,
+        GemSelectAssetType::Manage => GemSelectAssetTitle::ManageTokenList,
+        GemSelectAssetType::PriceAlert => GemSelectAssetTitle::SelectAsset,
+        GemSelectAssetType::Deposit => GemSelectAssetTitle::Deposit,
+        GemSelectAssetType::Withdraw => GemSelectAssetTitle::Withdraw,
+        GemSelectAssetType::WalletSearch | GemSelectAssetType::WalletSearchResults => GemSelectAssetTitle::Search,
+    }
+}
+
+fn select_asset_section(select_type: &GemSelectAssetType) -> GemSelectAssetSection {
+    match select_type {
+        GemSelectAssetType::ReceiveCollection => GemSelectAssetSection::Networks,
+        GemSelectAssetType::Send
+        | GemSelectAssetType::Receive
+        | GemSelectAssetType::Buy
+        | GemSelectAssetType::SwapPay
+        | GemSelectAssetType::SwapReceive { .. }
+        | GemSelectAssetType::Manage
+        | GemSelectAssetType::PriceAlert
+        | GemSelectAssetType::Deposit
+        | GemSelectAssetType::Withdraw
+        | GemSelectAssetType::WalletSearch
+        | GemSelectAssetType::WalletSearchResults => GemSelectAssetSection::Assets,
+    }
+}
+
 pub fn select_asset_flow(select_type: GemSelectAssetType, swap_receive_assets: Option<SwapAssetList>) -> GemSelectAssetFlow {
     let row = |shows_symbol: bool, subtitle: GemAssetRowSubtitle, trailing: GemAssetRowTrailing| GemAssetRow {
         title: GemAssetRowTitle::CanonicalAsset,
@@ -174,7 +208,11 @@ pub fn select_asset_flow(select_type: GemSelectAssetType, swap_receive_assets: O
         subtitle,
         trailing,
     };
+    let title = select_asset_title(&select_type);
+    let assets_section = select_asset_section(&select_type);
     let flow = |row_action: GemSelectRowAction, action: Option<GemAssetAction>| GemSelectAssetFlow {
+        title,
+        assets_section,
         row: row(false, GemAssetRowSubtitle::Network, GemAssetRowTrailing::Balance),
         row_action,
         action,
@@ -1013,6 +1051,23 @@ mod tests {
         assert_eq!(state(vec![auto, manual.clone()]).price_alert, GemPriceAlertToggle::Enabled);
         assert_eq!(state(vec![manual]).price_alert, GemPriceAlertToggle::Disabled);
         assert_eq!(state(vec![]).price_alerts_count, 0);
+    }
+
+    #[test]
+    fn test_every_select_flow_names_its_own_screen() {
+        assert_eq!(select_asset_flow(GemSelectAssetType::Manage, None).title, GemSelectAssetTitle::ManageTokenList);
+        assert_eq!(select_asset_flow(GemSelectAssetType::SwapPay, None).title, GemSelectAssetTitle::SwapPay);
+        assert_eq!(
+            select_asset_flow(GemSelectAssetType::SwapReceive { pay_asset_id: None }, None).title,
+            GemSelectAssetTitle::SwapReceive
+        );
+        assert_eq!(select_asset_flow(GemSelectAssetType::PriceAlert, None).title, GemSelectAssetTitle::SelectAsset);
+        assert_eq!(
+            select_asset_flow(GemSelectAssetType::ReceiveCollection, None).assets_section,
+            GemSelectAssetSection::Networks,
+            "a collection is received on a network, not on an asset"
+        );
+        assert_eq!(select_asset_flow(GemSelectAssetType::Receive, None).assets_section, GemSelectAssetSection::Assets);
     }
 
     #[test]

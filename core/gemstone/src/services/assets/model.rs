@@ -88,8 +88,31 @@ pub struct GemAssetRow {
     pub trailing: GemAssetRowTrailing,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemSelectAssetTitle {
+    Send,
+    Receive,
+    ReceiveCollection,
+    Buy,
+    SwapPay,
+    SwapReceive,
+    ManageTokenList,
+    SelectAsset,
+    Deposit,
+    Withdraw,
+    Search,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemSelectAssetSection {
+    Assets,
+    Networks,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct GemSelectAssetFlow {
+    pub title: GemSelectAssetTitle,
+    pub assets_section: GemSelectAssetSection,
     pub row: GemAssetRow,
     pub row_action: GemSelectRowAction,
     pub action: Option<GemAssetAction>,

@@ -10,6 +10,8 @@ import enum Gemstone.GemApprovalValue
 import enum Gemstone.GemAssetInfoKind
 import enum Gemstone.GemEmptyStateAction
 import enum Gemstone.GemErrorText
+import enum Gemstone.GemSelectAssetSection
+import enum Gemstone.GemSelectAssetTitle
 import enum Gemstone.GemEmptyStateText
 import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.LinkType
@@ -454,6 +456,33 @@ extension GemErrorText {
         case .maliciousOrigin: Localized.Errors.Connections.maliciousOrigin
         case .noSupportedWallets: Localized.Errors.Connections.noSupportedWallets
         case let .message(text): text
+        }
+    }
+}
+
+extension GemSelectAssetTitle {
+    public var text: String {
+        switch self {
+        case .send: Localized.Wallet.send
+        case .receive: Localized.Wallet.receive
+        case .receiveCollection: Localized.Wallet.receiveCollection
+        case .buy: Localized.Wallet.buy
+        case .swapPay: Localized.Swap.youPay
+        case .swapReceive: Localized.Swap.youReceive
+        case .manageTokenList: Localized.Wallet.manageTokenList
+        case .selectAsset: Localized.Assets.selectAsset
+        case .deposit: Localized.Wallet.deposit
+        case .withdraw: Localized.Wallet.withdraw
+        case .search: Localized.Assets.selectAsset
+        }
+    }
+}
+
+extension GemSelectAssetSection {
+    public var text: String {
+        switch self {
+        case .assets: Localized.Assets.title
+        case .networks: Localized.Settings.Networks.title
         }
     }
 }

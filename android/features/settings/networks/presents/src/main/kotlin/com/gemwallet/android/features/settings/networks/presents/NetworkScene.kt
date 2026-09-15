@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOut
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -15,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,7 +41,6 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.paddingSmall
-import androidx.compose.material3.SnackbarHostState
 
 @Composable
 internal fun NetworkScene(
@@ -68,7 +69,7 @@ internal fun NetworkScene(
             isRefreshing = false,
             onRefresh = { onAction(NetworkAction.Refresh) },
         ) {
-            LazyColumn {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
                 item {
                     SubheaderItem(R.string.settings_networks_source)
                 }

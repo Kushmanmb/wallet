@@ -24,7 +24,6 @@ public final class SelectAssetViewModel {
     private let service: any GemAssetSelectionServiceProtocol
     let selectType: SelectAssetType
     let flow: GemSelectAssetFlow
-    let presentation: SelectAssetPresentation
 
     public let wallet: Wallet
 
@@ -58,7 +57,6 @@ public final class SelectAssetViewModel {
         self.wallet = wallet
         self.selectType = selectType
         flow = service.flow(selectType: selectType.flowType)
-        presentation = selectType.presentation()
         onSelectAssetAction = selectAssetAction
 
         let filter = AssetsFilterViewModel(
@@ -80,7 +78,7 @@ public final class SelectAssetViewModel {
     }
 
     var title: String {
-        presentation.title
+        flow.title.text
     }
 
     var sections: AssetsSections {
@@ -109,7 +107,7 @@ public final class SelectAssetViewModel {
     }
 
     var assetsTitle: String {
-        presentation.assetsSectionTitle
+        flow.assetsSection.text
     }
 
     public var showAddToken: Bool {
