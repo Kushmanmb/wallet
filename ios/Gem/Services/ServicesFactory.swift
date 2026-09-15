@@ -160,6 +160,7 @@ struct ServicesFactory {
             balance: balanceService,
             walletPreferences: walletPreferencesService,
             session: walletSessionService,
+            recentActivity: recentAssetsService,
         )
         let portfolioService = Gemstone.GemPortfolioService(
             api: deviceApiClient,

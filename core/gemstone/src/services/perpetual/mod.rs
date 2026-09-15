@@ -15,7 +15,7 @@ use gem_hypercore::models::websocket::HyperliquidSocketMessage;
 use gem_hypercore::provider::websocket_mapper::{diff_clearinghouse_positions, diff_open_orders_positions, parse_websocket_data};
 use primitives::perpetual::PerpetualBalance;
 use primitives::portfolio::PerpetualPortfolio;
-use primitives::{AssetId, Chain, ChartPeriod, PerpetualAccountMode, PerpetualModifyConfirmData, PerpetualProvider, Wallet, WalletId};
+use primitives::{Asset, AssetId, Chain, ChartPeriod, PerpetualAccountMode, PerpetualModifyConfirmData, PerpetualProvider, Wallet, WalletId};
 use std::collections::HashMap;
 
 use crate::config::perpetual_config::PRICES_UPDATE_INTERVAL_SECONDS;
@@ -31,10 +31,11 @@ pub use store::GemPerpetualStore;
 
 use crate::gateway::GemGateway;
 use crate::models::perpetual::GemChartCandleStick;
-use crate::services::assets::GemAssetStore;
+use crate::services::assets::{GemAssetAction, GemAssetStore};
 use crate::services::balance::GemBalanceService;
 use crate::services::price::GemPriceService;
 use crate::services::stream::rules::hyperliquid_account;
+use crate::services::transfer::GemRecentActivityService;
 use crate::services::wallet_preferences::GemWalletPreferencesService;
 use crate::services::wallet_session::GemWalletSessionService;
 
@@ -48,6 +49,7 @@ pub struct GemPerpetualService {
     balance: Arc<GemBalanceService>,
     wallet_preferences: Arc<GemWalletPreferencesService>,
     session: Arc<GemWalletSessionService>,
+    recent_activity: Arc<GemRecentActivityService>,
 }
 
 #[uniffi::export]
@@ -62,6 +64,7 @@ impl GemPerpetualService {
         balance: Arc<GemBalanceService>,
         wallet_preferences: Arc<GemWalletPreferencesService>,
         session: Arc<GemWalletSessionService>,
+        recent_activity: Arc<GemRecentActivityService>,
     ) -> Self {
         Self {
             gateway,
@@ -72,7 +75,12 @@ impl GemPerpetualService {
             balance,
             wallet_preferences,
             session,
+            recent_activity,
         }
+    }
+
+    pub async fn add_recent(&self, action: GemAssetAction, asset: Asset) -> Result<(), GemServiceError> {
+        self.recent_activity.add_recent(action, asset).await
     }
 
     pub fn autoclose_summary(&self, data: PerpetualModifyConfirmData) -> Option<GemAutocloseSummary> {
