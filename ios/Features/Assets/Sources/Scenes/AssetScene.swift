@@ -110,13 +110,13 @@ public struct AssetScene: View {
                         switch row {
                         case let .available(value):
                             ListItemView(
-                                title: model.assetDataModel.availableBalanceTitle,
+                                title: row.title(stakeProvider: .stake),
                                 subtitle: model.balanceText(value),
                             )
                         case let .staked(value):
                             NavigationCustomLink(
                                 with: ListItemView(
-                                    title: model.balanceTitle(for: .stake),
+                                    title: row.title(stakeProvider: .stake),
                                     subtitle: model.stakeBalanceText(value),
                                 ),
                                 action: { model.onSelectStake() },
@@ -125,7 +125,7 @@ public struct AssetScene: View {
                         case let .earn(value):
                             NavigationCustomLink(
                                 with: ListItemView(
-                                    title: model.balanceTitle(for: .earn),
+                                    title: row.title(stakeProvider: .earn),
                                     subtitle: model.balanceText(value),
                                 ),
                                 action: { model.onSelectEarn() },
@@ -133,7 +133,7 @@ public struct AssetScene: View {
                             .accessibilityIdentifier("earn")
                         case let .pendingUnconfirmed(value):
                             ListItemView(
-                                title: model.assetDataModel.pendingUnconfirmedBalanceTitle,
+                                title: row.title(stakeProvider: .stake),
                                 subtitle: model.balanceText(value),
                                 infoAction: model.onSelectPendingUnconfirmedInfo,
                             )
@@ -141,13 +141,13 @@ public struct AssetScene: View {
                             if let url = url.flatMap(URL.init) {
                                 SafariNavigationLink(url: url) {
                                     ListItemView(
-                                        title: model.assetDataModel.reservedBalanceTitle,
+                                        title: row.title(stakeProvider: .stake),
                                         subtitle: model.balanceText(value),
                                     )
                                 }
                             } else {
                                 ListItemView(
-                                    title: model.assetDataModel.reservedBalanceTitle,
+                                    title: row.title(stakeProvider: .stake),
                                     subtitle: model.balanceText(value),
                                 )
                             }

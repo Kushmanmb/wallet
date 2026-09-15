@@ -28,7 +28,7 @@ import com.gemwallet.android.ext.asset
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.icons.AppIcons
-import com.gemwallet.android.ui.models.subtitleSymbol
+import com.gemwallet.android.domains.asset.subtitleSymbol
 import com.gemwallet.android.ui.open
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.theme.paddingLarge

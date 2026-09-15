@@ -39,18 +39,6 @@ public struct AssetDataViewModel: Sendable {
         self.currency = currency
     }
 
-    public var availableBalanceTitle: String {
-        Localized.Asset.Balances.available
-    }
-
-    public var reservedBalanceTitle: String {
-        Localized.Asset.Balances.reserved
-    }
-
-    public var pendingUnconfirmedBalanceTitle: String {
-        Localized.Stake.pending
-    }
-
     // asset
 
     public var assetImage: AssetImage {

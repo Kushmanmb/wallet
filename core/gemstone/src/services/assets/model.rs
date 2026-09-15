@@ -80,6 +80,19 @@ pub enum GemAssetRowTrailing {
     None,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct GemAssetText {
+    pub title: String,
+    pub subtitle_symbol: Option<String>,
+    pub network_name: String,
+    pub network_full_name: String,
+}
+
+#[uniffi::export]
+pub fn asset_text(asset: Asset) -> GemAssetText {
+    super::rules::asset_text(&asset)
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
 pub struct GemAssetRow {
     pub title: GemAssetRowTitle,

@@ -3,13 +3,13 @@ use std::str::FromStr;
 
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
 use primitives::{
-    Asset, AssetBasic, AssetId, AssetMetaData, AssetPrice, AssetProperties, AssetScore, BannerEvent, Chain, ConfigVersions, PerpetualProvider, PriceAlert, StakeChain,
+    Asset, AssetBasic, AssetId, AssetMetaData, AssetPrice, AssetProperties, AssetScore, BannerEvent, Chain, ChainAsset, ConfigVersions, PerpetualProvider, PriceAlert, StakeChain,
     VerificationStatus, Wallet, WalletType,
 };
 
 use super::model::{
     AssetList, GemAssetAction, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput, GemAssetNetworkDestination, GemAssetRow,
-    GemAssetRowSubtitle, GemAssetRowTitle, GemAssetRowTrailing, GemAssetSectionIds, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow,
+    GemAssetRowSubtitle, GemAssetText, GemAssetRowTitle, GemAssetRowTrailing, GemAssetSectionIds, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow,
     GemSelectAssetScope, GemSelectAssetSection, GemSelectAssetTitle, GemSelectAssetType, GemSelectRowAction, GemWalletSearchCounts, GemWalletSearchLimits,
     GemWalletSearchPhase,
 };
@@ -157,6 +157,22 @@ pub fn verification_status(asset: &Asset, rank: i32) -> Option<VerificationStatu
 fn with_filter(mut flow: GemSelectAssetFlow, filter: Option<GemAssetFilter>) -> GemSelectAssetFlow {
     flow.filters.extend(filter);
     flow
+}
+
+pub fn asset_text(asset: &Asset) -> GemAssetText {
+    let network_name = ChainAsset::from_chain(asset.chain()).network_name;
+    GemAssetText {
+        title: match asset.name == asset.symbol {
+            true => asset.name.clone(),
+            false => format!("{} ({})", asset.name, asset.symbol),
+        },
+        subtitle_symbol: (asset.name != asset.symbol).then(|| asset.symbol.clone()),
+        network_full_name: match asset.id.is_native() {
+            true => network_name.clone(),
+            false => format!("{} ({})", network_name, asset.asset_type.as_ref()),
+        },
+        network_name,
+    }
 }
 
 pub fn wallet_row() -> GemAssetRow {
@@ -428,6 +444,20 @@ pub fn details_state(
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn test_asset_text_names_the_asset_and_its_network_once() {
+        let ethereum = asset_text(&Asset::from_chain(Chain::Ethereum));
+        assert_eq!(ethereum.title, "Ethereum (ETH)");
+        assert_eq!(ethereum.subtitle_symbol.as_deref(), Some("ETH"));
+        assert_eq!(ethereum.network_full_name, "Ethereum", "a coin's network needs no type");
+
+        let token = Asset::new(AssetId::from_token(Chain::Ethereum, "0xusdc"), "USDC".into(), "USDC".into(), 6, primitives::AssetType::ERC20);
+        let usdc = asset_text(&token);
+        assert_eq!(usdc.title, "USDC", "a name that already is the symbol is not repeated");
+        assert_eq!(usdc.subtitle_symbol, None);
+        assert_eq!(usdc.network_full_name, "Ethereum (ERC20)");
+    }
 
     #[test]
     fn test_asset_menu_offers_pin_always_and_the_rest_only_when_they_apply() {

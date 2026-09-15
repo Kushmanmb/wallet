@@ -59,7 +59,7 @@ import com.gemwallet.android.ui.components.screen.LoadingScene
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.ListPosition
-import com.gemwallet.android.ui.models.subtitleSymbol
+import com.gemwallet.android.domains.asset.subtitleSymbol
 import com.gemwallet.android.ui.shareText
 import com.gemwallet.android.ui.theme.WindowDimension
 import com.gemwallet.android.ui.theme.isCompactDimension
