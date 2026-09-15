@@ -62,15 +62,7 @@ Decide before building; a read-only screen is a row, not a session.
 
 ### Hardcoded dp (Android rule: theme constants only)
 
-84 sites across 40 files. Grouped by where they are. A private `Metrics` object is already the local-constant pattern, so the work is to point the values that have a theme equivalent at it and leave the rest named — `ui/components/chart` kept five (a 2.5 dp stroke, an 88 dp label column, an 18 dp label offset, a 3 dp dash gap and a 1.5 dp ring).
-
-- **X23** **M** the rest of `android/ui` — `QRScanner.kt` (4), `SearchBar.kt` (3), `buttons/CopyButton.kt` (2), `filters/FormDialog.kt` (2) and the remainder of the 56 in that module.
-- **X24** **S** `features/settings/settings/presents` — `SupportMessageBubble.kt` (7) and one more.
-- **X25** **S** `features/receive/presents` — `ReceiveScreen.kt` (4) and one more.
-- **X26** **S** `features/perpetual/presents` (3).
-- **X27** **S** `features/buy/presents` — `FiatScene.kt` (2).
-- **X28** **S** `features/import_wallet/presents` (2).
-- **X29** **S** One site each in `app`, `features/activities/presents`, `features/add_asset/presents`, `features/create_wallet/presents`, `features/nft/presents`, `features/referral/presents`.
+Re-checked on 2026-09-15 by separating a `\d+.dp` written at a call site from one written as a named constant: **Android has none of the former**. All 58 remaining sites are `private val name = N.dp` declarations, which is the pattern the codebase already uses for a component's own dimensions, and only a handful of those carried a value the theme also names for the same kind of thing — those now read from the theme. What is left is a QR finder's 25 dp corner, a 42 dp search bar, a 296 dp slippage sheet and the like: dimensions with no theme equivalent, each named where it is used. X23–X29 are closed with no change.
 
 ### Swallowed errors
 

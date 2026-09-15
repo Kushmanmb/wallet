@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import uniffi.gemstone.SwapProvider
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.ext.networkName
@@ -39,6 +38,7 @@ import com.gemwallet.android.ui.open
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.Spacer16
+import com.gemwallet.android.ui.theme.extraLargeIconSize
 import com.gemwallet.android.domains.asset.title
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Chain
@@ -47,7 +47,7 @@ import uniffi.gemstone.GemTransactionStateTone
 import com.gemwallet.android.AppUrl
 import com.wallet.core.primitives.StakeChain
 
-internal val infoSheetIconSize = 120.dp
+internal val infoSheetIconSize = extraLargeIconSize
 
 sealed class InfoSheetEntity(
     val icon: Any?,

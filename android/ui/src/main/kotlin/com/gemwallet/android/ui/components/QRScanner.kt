@@ -72,6 +72,8 @@ import com.gemwallet.android.ui.theme.alpha50
 import com.gemwallet.android.ui.theme.padding16
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.space24
+import com.gemwallet.android.ui.theme.paddingLarge
+import com.gemwallet.android.ui.theme.space4
 import com.wallet.core.primitives.QRScanType
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -89,10 +91,10 @@ private val QR_ANALYSIS_RESOLUTION = Size(1280, 720)
 private const val SCAN_FROM_GALLERY_TAG = "scanFromGallery"
 private const val FINDER_SCALE = 0.66f
 private val HINT_SPACING = space24
-private val HINT_HORIZONTAL_PADDING = 32.dp
+private val HINT_HORIZONTAL_PADDING = paddingLarge
 private val FINDER_CORNER_RADIUS = 25.dp
 private val FINDER_CORNER_LENGTH = 25.dp
-private val FINDER_STROKE_WIDTH = 4.dp
+private val FINDER_STROKE_WIDTH = space4
 private const val FINDER_DIM_ALPHA = 0.33f
 
 @OptIn(ExperimentalPermissionsApi::class)
