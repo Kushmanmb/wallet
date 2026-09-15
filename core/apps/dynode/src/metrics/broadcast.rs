@@ -39,7 +39,7 @@ impl Metrics {
     }
 
     pub(crate) fn record_transaction_broadcast(&self, request: &ProxyRequest, response: &Result<ProxyResponse, BoxError>, providers: &BroadcastProviders, remote_host: &str) {
-        let outcome = match broadcast_result(request.chain, response, providers) {
+        let outcome = match broadcast_result(request.chain, &request.body, response, providers) {
             Ok(transaction_id) => {
                 info_with_fields!(
                     "Broadcast accepted",
@@ -68,9 +68,9 @@ impl Metrics {
     }
 }
 
-fn broadcast_result(chain: Chain, response: &Result<ProxyResponse, BoxError>, providers: &BroadcastProviders) -> Result<String, String> {
+fn broadcast_result(chain: Chain, request: &[u8], response: &Result<ProxyResponse, BoxError>, providers: &BroadcastProviders) -> Result<String, String> {
     match response {
-        Ok(upstream) => match providers.decode_transaction_broadcast(chain, &upstream.body) {
+        Ok(upstream) => match providers.decode_transaction_broadcast(chain, request, &upstream.body) {
             Ok(identifier) if (200..300).contains(&upstream.status) && !identifier.is_empty() => Ok(identifier),
             Ok(_) => Err(broadcast_error_message(response)),
             Err(error) if error.is::<JsonError>() => Err(broadcast_error_message(response)),
@@ -113,6 +113,14 @@ mod tests {
     use crate::testkit::config::metrics_config;
 
     #[test]
+    fn test_broadcast_result_hypercore() {
+        let providers = BroadcastProviders::from_chains([Chain::HyperCore]);
+        let request = br#"{"action":{"type":"updateLeverage"},"nonce":123}"#;
+        let response = Ok(ProxyResponse::new(200, HeaderMap::new(), br#"{"status":"ok","response":{"type":"default"}}"#.to_vec()));
+        assert_eq!(broadcast_result(Chain::HyperCore, request, &response, &providers), Ok("action:123".to_string()));
+    }
+
+    #[test]
     fn test_broadcast_result_requires_chain_acceptance() {
         let providers = BroadcastProviders::from_chains([Chain::Ethereum, Chain::Tron]);
         for (chain, status, body, expected) in [
@@ -150,9 +158,12 @@ mod tests {
             ),
         ] {
             let response = Ok(ProxyResponse::new(status, HeaderMap::new(), body.as_bytes().to_vec()));
-            assert_eq!(broadcast_result(chain, &response, &providers).as_deref().map_err(String::as_str), expected);
+            assert_eq!(broadcast_result(chain, b"", &response, &providers).as_deref().map_err(String::as_str), expected);
         }
-        assert_eq!(broadcast_result(Chain::Ethereum, &Err("connection failed".into()), &providers), Err("request_error".into()));
+        assert_eq!(
+            broadcast_result(Chain::Ethereum, b"", &Err("connection failed".into()), &providers),
+            Err("request_error".into())
+        );
     }
 
     #[test]
@@ -166,7 +177,7 @@ mod tests {
             ),
         ] {
             let response = Ok(ProxyResponse::new(400, HeaderMap::new(), body.to_vec()));
-            assert_eq!(broadcast_result(Chain::Bitcoin, &response, &providers), Err(message.to_string()));
+            assert_eq!(broadcast_result(Chain::Bitcoin, b"", &response, &providers), Err(message.to_string()));
         }
     }
 
@@ -226,7 +237,7 @@ mod tests {
         let providers = BroadcastProviders::from_chains(cases.iter().map(|(chain, _, _)| *chain));
         for (chain, body, message) in cases {
             let response = Ok(ProxyResponse::new(400, HeaderMap::new(), body.to_vec()));
-            assert_eq!(broadcast_result(chain, &response, &providers), Err(message.to_string()), "{chain}");
+            assert_eq!(broadcast_result(chain, b"", &response, &providers), Err(message.to_string()), "{chain}");
         }
     }
 
@@ -235,7 +246,7 @@ mod tests {
         let providers = BroadcastProviders::from_chains([Chain::Sui]);
         for body in [br#"{"digest":"abc"}"#.as_slice(), b"\x00\x00\x00\x00\x07\x0a\x05\x0a\x03abc".as_slice()] {
             let response = Ok(ProxyResponse::new(200, HeaderMap::new(), body.to_vec()));
-            assert_eq!(broadcast_result(Chain::Sui, &response, &providers), Ok("abc".to_string()));
+            assert_eq!(broadcast_result(Chain::Sui, b"", &response, &providers), Ok("abc".to_string()));
         }
     }
 

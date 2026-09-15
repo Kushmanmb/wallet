@@ -25,15 +25,15 @@ impl ChainTransactionBroadcast for SuiProvider {
 }
 
 impl ChainTransactionDecode for BroadcastProvider {
-    fn decode_transaction_broadcast(&self, response: &str) -> Result<String, Box<dyn Error + Sync + Send>> {
+    fn decode_transaction_broadcast(&self, _request: &[u8], response: &str) -> Result<String, Box<dyn Error + Sync + Send>> {
         map_transaction_broadcast_response_from_str(response)
     }
 
-    fn decode_transaction_broadcast_bytes(&self, response: &[u8]) -> Result<String, Box<dyn Error + Sync + Send>> {
+    fn decode_transaction_broadcast_bytes(&self, request: &[u8], response: &[u8]) -> Result<String, Box<dyn Error + Sync + Send>> {
         if let Ok(response) = str::from_utf8(response)
             && response.trim_start().starts_with('{')
         {
-            self.decode_transaction_broadcast(response)
+            self.decode_transaction_broadcast(request, response)
         } else {
             map_transaction_broadcast_response_from_grpc(response)
         }
