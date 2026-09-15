@@ -23,6 +23,8 @@ import uniffi.gemstone.GemAddNodeFailure
 import uniffi.gemstone.GemApprovalValue
 import uniffi.gemstone.GemAssetMenuAction
 import uniffi.gemstone.GemDelegationStatus
+import uniffi.gemstone.GemEmptyStateAction
+import uniffi.gemstone.GemEmptyStateText
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemSimulationWarningKind
@@ -284,4 +286,47 @@ fun GemTransactionRowSubtitle.prefixRes(): Int? = when (this) {
     is GemTransactionRowSubtitle.FromAddress, is GemTransactionRowSubtitle.FromResource -> R.string.transfer_from
     is GemTransactionRowSubtitle.Price -> R.string.asset_price
     GemTransactionRowSubtitle.None -> null
+}
+
+@Composable
+fun GemEmptyStateText.text(symbol: String): String = when (this) {
+    GemEmptyStateText.NFTS_TITLE -> stringResource(R.string.nft_state_empty_title)
+    GemEmptyStateText.NFTS_DESCRIPTION -> stringResource(R.string.nft_state_empty_description)
+    GemEmptyStateText.PRICE_ALERTS_TITLE -> stringResource(R.string.price_alerts_state_empty_title)
+    GemEmptyStateText.PRICE_ALERTS_DESCRIPTION -> stringResource(R.string.price_alerts_state_empty_description)
+    GemEmptyStateText.CONTACTS_TITLE -> stringResource(R.string.contacts_state_empty_title)
+    GemEmptyStateText.CONTACTS_DESCRIPTION -> stringResource(R.string.contacts_state_empty_description)
+    GemEmptyStateText.ASSET_TITLE -> stringResource(R.string.asset_state_empty_title)
+    GemEmptyStateText.ASSET_DESCRIPTION -> stringResource(R.string.asset_state_empty_description, symbol)
+    GemEmptyStateText.ACTIVITY_TITLE -> stringResource(R.string.activity_state_empty_title)
+    GemEmptyStateText.ACTIVITY_DESCRIPTION -> stringResource(R.string.activity_state_empty_description)
+    GemEmptyStateText.STAKE_TITLE -> stringResource(R.string.stake_state_empty_title)
+    GemEmptyStateText.STAKE_DESCRIPTION -> stringResource(R.string.stake_state_empty_description, symbol)
+    GemEmptyStateText.EARN_TITLE -> stringResource(R.string.earn_state_empty_title)
+    GemEmptyStateText.EARN_DESCRIPTION -> stringResource(R.string.earn_state_empty_description, symbol)
+    GemEmptyStateText.WALLET_CONNECT_TITLE -> stringResource(R.string.wallet_connect_no_active_connections)
+    GemEmptyStateText.WALLET_CONNECT_DESCRIPTION -> stringResource(R.string.wallet_connect_state_empty_description)
+    GemEmptyStateText.RECENTS_TITLE -> stringResource(R.string.recent_activity_state_empty_title)
+    GemEmptyStateText.RECENTS_DESCRIPTION -> stringResource(R.string.recent_activity_state_empty_description)
+    GemEmptyStateText.NOTIFICATIONS_TITLE -> stringResource(R.string.notifications_inapp_state_empty_title)
+    GemEmptyStateText.NOTIFICATIONS_DESCRIPTION -> stringResource(R.string.notifications_inapp_state_empty_description)
+    GemEmptyStateText.WATCH_WALLET_TITLE -> stringResource(R.string.wallet_watch_empty_state_title)
+    GemEmptyStateText.WATCH_WALLET_DESCRIPTION -> stringResource(R.string.info_watch_wallet_description)
+    GemEmptyStateText.NO_ASSETS_FOUND_TITLE -> stringResource(R.string.assets_no_assets_found)
+    GemEmptyStateText.SEARCH_DESCRIPTION -> stringResource(R.string.search_state_empty_description)
+    GemEmptyStateText.SEARCH_ASSETS_DESCRIPTION -> stringResource(R.string.assets_state_empty_search_description)
+    GemEmptyStateText.SEARCH_ACTIVITY_TITLE -> stringResource(R.string.activity_state_empty_search_title)
+    GemEmptyStateText.SEARCH_ACTIVITY_DESCRIPTION -> stringResource(R.string.activity_state_empty_search_description)
+    GemEmptyStateText.SEARCH_NETWORKS_TITLE -> stringResource(R.string.networks_state_empty_search_title)
+    GemEmptyStateText.SEARCH_PERPETUALS_TITLE -> stringResource(R.string.perpetuals_empty_state_no_markets_found)
+}
+
+@StringRes
+fun GemEmptyStateAction.title(): Int = when (this) {
+    GemEmptyStateAction.BUY -> R.string.wallet_buy
+    GemEmptyStateAction.SWAP -> R.string.wallet_swap
+    GemEmptyStateAction.RECEIVE -> R.string.wallet_receive
+    GemEmptyStateAction.ADD_CUSTOM_TOKEN -> R.string.assets_add_custom_token
+    GemEmptyStateAction.MANAGE_TOKEN_LIST -> R.string.wallet_manage_token_list
+    GemEmptyStateAction.CLEAR_FILTERS -> R.string.filter_clear
 }

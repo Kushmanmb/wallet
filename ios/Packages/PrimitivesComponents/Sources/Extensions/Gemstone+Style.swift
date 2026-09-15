@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemEmptyStateImage
 import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemTransactionStateTone
@@ -17,6 +18,21 @@ extension PriceAlertDirection {
         switch self {
         case .up: Colors.green
         case .down: Colors.red
+        }
+    }
+}
+
+extension GemEmptyStateImage {
+    public var image: Image {
+        switch self {
+        case .nfts: Images.EmptyContent.nft
+        case .priceAlerts: Images.EmptyContent.priceAlerts
+        case .contacts: Images.EmptyContent.contacts
+        case .activity, .wallet: Images.EmptyContent.activity
+        case .stake: Images.EmptyContent.stake
+        case .walletConnect: Images.EmptyContent.walletConnect
+        case .notifications: Images.System.bell
+        case .search: Images.EmptyContent.search
         }
     }
 }

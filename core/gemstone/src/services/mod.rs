@@ -18,6 +18,7 @@ pub mod contact;
 pub mod currency;
 pub mod developer;
 pub mod device;
+pub mod empty_state;
 pub mod error;
 pub mod explorer;
 pub mod failures;

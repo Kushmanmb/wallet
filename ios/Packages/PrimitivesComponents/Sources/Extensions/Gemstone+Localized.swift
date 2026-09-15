@@ -8,6 +8,8 @@ import enum Gemstone.GemAssetMenuAction
 import enum Gemstone.PerpetualType
 import enum Gemstone.GemApprovalValue
 import enum Gemstone.GemAssetInfoKind
+import enum Gemstone.GemEmptyStateAction
+import enum Gemstone.GemEmptyStateText
 import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.LinkType
 import enum Gemstone.GemHeaderButtonKind
@@ -385,6 +387,55 @@ extension FiatQuoteType {
         switch self {
         case .buy: Localized.Wallet.buy
         case .sell: Localized.Wallet.sell
+        }
+    }
+}
+
+extension GemEmptyStateText {
+    public func text(symbol: String) -> String {
+        switch self {
+        case .nftsTitle: Localized.Nft.State.Empty.title
+        case .nftsDescription: Localized.Nft.State.Empty.description
+        case .priceAlertsTitle: Localized.PriceAlerts.State.Empty.title
+        case .priceAlertsDescription: Localized.PriceAlerts.State.Empty.description
+        case .contactsTitle: Localized.Contacts.State.Empty.title
+        case .contactsDescription: Localized.Contacts.State.Empty.description
+        case .assetTitle: Localized.Asset.State.Empty.title
+        case .assetDescription: Localized.Asset.State.Empty.description(symbol)
+        case .activityTitle: Localized.Activity.State.Empty.title
+        case .activityDescription: Localized.Activity.State.Empty.description
+        case .stakeTitle: Localized.Stake.State.Empty.title
+        case .stakeDescription: Localized.Stake.State.Empty.description(symbol)
+        case .earnTitle: Localized.Earn.State.Empty.title
+        case .earnDescription: Localized.Earn.State.Empty.description(symbol)
+        case .walletConnectTitle: Localized.WalletConnect.noActiveConnections
+        case .walletConnectDescription: Localized.WalletConnect.State.Empty.description
+        case .recentsTitle: Localized.RecentActivity.State.Empty.title
+        case .recentsDescription: Localized.RecentActivity.State.Empty.description
+        case .notificationsTitle: Localized.Notifications.Inapp.State.Empty.title
+        case .notificationsDescription: Localized.Notifications.Inapp.State.Empty.description
+        case .watchWalletTitle: Localized.Wallet.watchEmptyStateTitle
+        case .watchWalletDescription: Localized.Info.WatchWallet.description
+        case .noAssetsFoundTitle: Localized.Assets.noAssetsFound
+        case .searchDescription: Localized.Search.State.Empty.description
+        case .searchAssetsDescription: Localized.Assets.State.Empty.searchDescription
+        case .searchActivityTitle: Localized.Activity.State.Empty.searchTitle
+        case .searchActivityDescription: Localized.Activity.State.Empty.searchDescription
+        case .searchNetworksTitle: Localized.Networks.State.Empty.searchTitle
+        case .searchPerpetualsTitle: Localized.Perpetuals.EmptyState.noMarketsFound
+        }
+    }
+}
+
+extension GemEmptyStateAction {
+    public var title: String {
+        switch self {
+        case .buy: Localized.Wallet.buy
+        case .swap: Localized.Wallet.swap
+        case .receive: Localized.Wallet.receive
+        case .addCustomToken: Localized.Assets.addCustomToken
+        case .manageTokenList: Localized.Wallet.manageTokenList
+        case .clearFilters: Localized.Filter.clear
         }
     }
 }
