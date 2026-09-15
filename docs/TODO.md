@@ -96,7 +96,6 @@ Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them de
 
 - **T1** **S** `services/perpetual/mod.rs` — `refresh`, `sync_enablement`, `sync_markets_if_needed`, `sync_current_positions` and `account_mode` still have no test. `on_socket_message` now does, and `perpetual/testkit.rs` assembles the whole service graph for the rest.
 - **T2** **M** `services/assets/details.rs` `refresh` (26 lines) — the concurrent detail load and its per-step failures.
-- **T5** **M** `services/app_start/mod.rs` `setup_wallets`.
 
 ### Hardcoded user-visible strings
 

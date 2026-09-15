@@ -126,7 +126,7 @@ pub const OTHER_PHRASE: [&str; 12] = [
 ];
 
 pub struct WalletTestkit {
-    pub service: GemWalletService,
+    pub service: Arc<GemWalletService>,
     pub wallets: Arc<MemoryWalletStore>,
     pub passwords: Arc<MemoryKeystorePassword>,
     pub addresses: Arc<MemoryAddressStore>,
@@ -144,7 +144,7 @@ impl WalletTestkit {
         let keystore = GemKeystore::new(directory.path().to_string_lossy().to_string()).unwrap();
         let session = Arc::new(GemWalletSessionService::new(Arc::new(MemoryWalletSessionStore::default()), wallets.clone()));
         let app_preferences = Arc::new(GemPreferencesService::new(preferences.clone()));
-        let service = GemWalletService::new(
+        let service = Arc::new(GemWalletService::new(
             keystore.clone(),
             passwords.clone(),
             wallets.clone(),
@@ -159,7 +159,7 @@ impl WalletTestkit {
                 Arc::new(NoopFileStore),
                 Arc::new(TestAlienProvider::new(crate::alien::AlienResponse::new(None, Vec::new()))),
             )),
-        );
+        ));
         Self {
             service,
             wallets,

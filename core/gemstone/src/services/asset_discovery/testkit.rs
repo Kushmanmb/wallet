@@ -40,6 +40,8 @@ impl GemTransactionStatusService for RecordingTransactionStatus {
 
 pub struct DiscoveryTestkit {
     pub discovery: Arc<GemAssetDiscoveryService>,
+    pub assets: Arc<GemAssetsService>,
+    pub wallets: Arc<MemoryWalletStore>,
     pub balance: Arc<GemBalanceService>,
     pub provider: Arc<TestAlienProvider>,
     pub balances: Arc<RecordingBalanceStore>,
@@ -70,7 +72,7 @@ impl DiscoveryTestkit {
         let gateway = Arc::new(GemGateway::new(provider.clone(), preferences_store, Arc::new(EmptyPreferences)));
         let device_api = Arc::new(GemDeviceApiClient::new(provider.clone(), Arc::new(GemDeviceKeyService::new(Arc::new(EmptyPreferences)))));
         let asset_store = Arc::new(MemoryAssetStore::default());
-        let assets = Arc::new(GemAssetsService::new(
+        let assets: Arc<GemAssetsService> = Arc::new(GemAssetsService::new(
             Arc::new(GemApiClient::new(provider.clone())),
             gateway.clone(),
             asset_store.clone(),
@@ -90,7 +92,7 @@ impl DiscoveryTestkit {
         let wallet_preferences = Arc::new(GemWalletPreferencesService::new(Arc::new(MemoryWalletPreferencesStore::default())));
         let transactions = Arc::new(GemTransactionsService::new(
             device_api.clone(),
-            assets,
+            assets.clone(),
             Arc::new(MemoryTransactionStore::default()),
             Arc::new(MemoryAddressStore::default()),
             wallet_preferences.clone(),
@@ -100,15 +102,17 @@ impl DiscoveryTestkit {
         ));
         let nft = Arc::new(GemNftService::new(device_api.clone(), Arc::new(MemoryNftStore::default()), session.clone()));
         let discovery = Arc::new(GemAssetDiscoveryService::new(
-            device_api,
+            device_api.clone(),
             balance.clone(),
             transactions,
             nft,
-            wallets,
+            wallets.clone(),
             wallet_preferences.clone(),
         ));
         Self {
             discovery,
+            assets,
+            wallets,
             balance,
             provider,
             balances,
