@@ -353,7 +353,6 @@ Each pair below resolves to the same English text and to the same text in every 
 
 [No hand-written twins](ARCHITECTURE.md): an FFI-only type is used as the uniffi type; a twin is only for a type an app persists. Each of the three below has the same cases and the same payload types as its Core counterpart and is never written to storage.
 
-- **X100** **S** `ios/Packages/Primitives/Sources/WalletImportResult.swift` twins `GemWalletImportResult` case for case.
 
 Checked and kept: `KeystoreAuthentication` and `LockPeriod` are both written to the keychain by raw value, which the rule allows; `AmountType` carries a recipient its Core namesake does not; `SelectAssetType` and `PaymentDestination` are navigation types carrying app payloads and already map to Core through `flowType`.
 
