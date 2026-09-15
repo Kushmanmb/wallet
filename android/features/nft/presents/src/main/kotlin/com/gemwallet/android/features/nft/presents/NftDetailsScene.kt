@@ -200,10 +200,10 @@ private fun ReportReasonSheet(
 @Composable
 private fun InfoRow(row: GemCollectibleRow, position: ListPosition) {
     when (row) {
-        is GemCollectibleRow.Collection -> PropertyItem(R.string.nft_collection, row.name, listPosition = position)
+        is GemCollectibleRow.Collection -> PropertyItem(row.stringRes(), row.name, listPosition = position)
         is GemCollectibleRow.Network -> PropertyNetworkItem(row.chain.toChain(), listPosition = position)
-        is GemCollectibleRow.Contract -> IdentifierRow(R.string.asset_contract, row.identifier, position)
-        is GemCollectibleRow.TokenId -> IdentifierRow(R.string.asset_token_id, row.identifier, position)
+        is GemCollectibleRow.Contract -> IdentifierRow(row.stringRes(), row.identifier, position)
+        is GemCollectibleRow.TokenId -> IdentifierRow(row.stringRes(), row.identifier, position)
     }
 }
 

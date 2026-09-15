@@ -130,20 +130,20 @@ public final class CollectibleViewModel {
     private func infoRow(_ row: GemCollectibleRow) -> CollectibleInfoRowModel {
         switch row {
         case let .collection(name):
-            return CollectibleInfoRowModel(title: Localized.Nft.collection, subtitle: name)
+            return CollectibleInfoRowModel(title: row.title, subtitle: name)
         case let .network(chain):
             let chain = Primitives.Chain(core: chain)
-            return CollectibleInfoRowModel(title: Localized.Transfer.network, subtitle: chain.networkName, assetImage: networkImage(chain: chain))
+            return CollectibleInfoRowModel(title: row.title, subtitle: chain.networkName, assetImage: networkImage(chain: chain))
         case let .contract(identifier):
             return CollectibleInfoRowModel(
-                title: Localized.Asset.contract,
+                title: row.title,
                 subtitle: identifier.text,
                 copyValue: .address(value: identifier.value, chain: assetData.asset.chain),
                 explorer: identifier.explorer.map { $0.toPrimitives() },
             )
         case let .tokenId(identifier):
             return CollectibleInfoRowModel(
-                title: Localized.Asset.tokenId,
+                title: row.title,
                 subtitle: identifier.text,
                 copyValue: .plain(identifier.value),
                 explorer: identifier.explorer.map { $0.toPrimitives() },
