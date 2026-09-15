@@ -5,7 +5,6 @@ use super::model::GemAssetSectionIds;
 use super::rules::{asset_sections, default_asset_basic, popular_asset_ids};
 use crate::models::asset::{chain_asset_wrapper, default_token_rank};
 use crate::services::confirm::{GemAcquireAssetFlow, acquire_asset_flow};
-use crate::services::search::rules::matching_assets;
 
 #[derive(Default, uniffi::Object)]
 pub struct GemAssetConfigService {}
@@ -39,10 +38,6 @@ impl GemAssetConfigService {
 
     pub fn asset_icon(&self, asset_id: AssetId) -> GemAssetIcon {
         asset_icon(&asset_id)
-    }
-
-    pub fn matching_assets(&self, assets: Vec<Asset>, query: String) -> Vec<Asset> {
-        matching_assets(assets, &query)
     }
 
     pub fn asset_sections(&self, ids: Vec<AssetId>, pinned_ids: Vec<AssetId>, shows_popular: bool) -> GemAssetSectionIds {

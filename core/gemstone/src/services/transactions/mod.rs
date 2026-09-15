@@ -67,10 +67,6 @@ impl GemTransactionsService {
         chain_rules::wallet_chains_by_rank(&wallet)
     }
 
-    pub fn listed_asset_rank(&self) -> i32 {
-        crate::models::asset::default_token_rank()
-    }
-
     pub fn get_currency(&self) -> Currency {
         self.preferences.get_currency()
     }

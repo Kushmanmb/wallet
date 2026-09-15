@@ -44,8 +44,7 @@ object TransactionModule {
     fun provideGetPendingTransactionsCount(
         getCurrentWalletId: GetCurrentWalletId,
         transactionStore: GemstoneTransactionStore,
-        transactionsService: GemTransactionsServiceInterface,
-    ): GetPendingTransactionsCount = GetPendingTransactionsCountImpl(getCurrentWalletId, transactionStore, transactionsService)
+    ): GetPendingTransactionsCount = GetPendingTransactionsCountImpl(getCurrentWalletId, transactionStore)
 
 
     @Provides
