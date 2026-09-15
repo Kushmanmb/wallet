@@ -4,6 +4,8 @@ pub mod rules;
 pub mod session;
 pub mod slippage;
 pub mod store;
+#[cfg(test)]
+pub mod testkit;
 
 use crate::keystore::decode_password;
 use crate::models::custom_types::GemBigUint;
@@ -136,5 +138,108 @@ impl GemSwapService {
             .map_err(|error| SwapperError::TransactionError(error.to_string()))?;
         let signature = primitives::hex::decode_hex(&signature).map_err(|error| SwapperError::TransactionError(error.to_string()))?;
         Ok(Permit2Data { permit_single, signature })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use primitives::{Account, Chain};
+
+    use super::testkit::MemorySwapStore;
+    use super::*;
+    use crate::services::preferences::testkit::MemoryPreferencesStore;
+    use crate::services::wallet::testkit::MemoryKeystorePassword;
+    use crate::testkit::TestAlienProvider;
+    use futures::executor::block_on;
+
+    fn asset_id(chain: Chain) -> AssetId {
+        chain.as_asset_id()
+    }
+
+    fn service(store: Arc<MemorySwapStore>) -> GemSwapService {
+        GemSwapService::new(
+            Arc::new(GemSwapper::new(
+                Arc::new(TestAlienProvider::with_status(200)),
+                Arc::new(MemoryPreferencesStore::default()),
+            )),
+            GemKeystore::new(std::env::temp_dir().to_string_lossy().to_string()).unwrap(),
+            Arc::new(MemoryKeystorePassword::default()),
+            store,
+        )
+    }
+
+    fn wallet() -> Wallet {
+        Wallet::mock_with_accounts(Account::mock_chains(&[Chain::Ethereum, Chain::Solana], "address"))
+    }
+
+    #[test]
+    fn test_a_wallet_that_has_never_paid_with_anything_gets_no_suggestion() {
+        block_on(async {
+            let store = Arc::new(MemorySwapStore::default());
+
+            assert_eq!(service(store).suggest_pair(wallet(), None).await.unwrap(), None);
+        });
+    }
+
+    #[test]
+    fn test_the_pay_asset_comes_from_the_store_only_when_the_caller_names_none() {
+        block_on(async {
+            let store = Arc::new(MemorySwapStore::default());
+            *store.pay_asset_ids.lock().unwrap() = vec![asset_id(Chain::Solana)];
+            let service = service(store);
+
+            let stored = service.suggest_pair(wallet(), None).await.unwrap().unwrap();
+            let named = service.suggest_pair(wallet(), Some(asset_id(Chain::Ethereum))).await.unwrap().unwrap();
+
+            assert_eq!(stored.pay_asset_id, asset_id(Chain::Solana));
+            assert_eq!(named.pay_asset_id, asset_id(Chain::Ethereum));
+        });
+    }
+
+    #[test]
+    fn test_a_past_swap_pair_outranks_a_recent_asset() {
+        block_on(async {
+            let store = Arc::new(MemorySwapStore::default());
+            *store.pairs.lock().unwrap() = vec![GemSwapPair {
+                from_asset_id: asset_id(Chain::Ethereum),
+                to_asset_id: asset_id(Chain::Solana),
+            }];
+            *store.recent_asset_ids.lock().unwrap() = vec![asset_id(Chain::Bitcoin)];
+
+            let suggestion = service(store).suggest_pair(wallet(), Some(asset_id(Chain::Ethereum))).await.unwrap().unwrap();
+
+            assert_eq!(suggestion.receive_asset_id, Some(asset_id(Chain::Solana)));
+        });
+    }
+
+    #[test]
+    fn test_a_recent_asset_is_used_when_no_pair_was_ever_swapped() {
+        block_on(async {
+            let store = Arc::new(MemorySwapStore::default());
+            *store.recent_asset_ids.lock().unwrap() = vec![asset_id(Chain::Ethereum), asset_id(Chain::Bitcoin)];
+
+            let suggestion = service(store).suggest_pair(wallet(), Some(asset_id(Chain::Ethereum))).await.unwrap().unwrap();
+
+            assert_eq!(suggestion.receive_asset_id, Some(asset_id(Chain::Bitcoin)), "the pay asset is never its own receive asset");
+        });
+    }
+
+    #[test]
+    fn test_the_last_resort_only_asks_for_chains_the_wallet_has_an_account_on() {
+        block_on(async {
+            let store = Arc::new(MemorySwapStore::default());
+            *store.receive_asset_ids.lock().unwrap() = vec![asset_id(Chain::Solana)];
+            let store_ref = store.clone();
+
+            let suggestion = service(store).suggest_pair(wallet(), Some(asset_id(Chain::Ethereum))).await.unwrap().unwrap();
+
+            assert_eq!(suggestion.receive_asset_id, Some(asset_id(Chain::Solana)));
+            let (chains, asset_ids) = store_ref.receive_requests.lock().unwrap().first().cloned().unwrap();
+            assert!(chains.iter().all(|chain| [Chain::Ethereum, Chain::Solana].contains(chain)), "{chains:?}");
+            assert!(
+                asset_ids.iter().all(|asset_id| [Chain::Ethereum, Chain::Solana].contains(&asset_id.chain)),
+                "{asset_ids:?}"
+            );
+        });
     }
 }

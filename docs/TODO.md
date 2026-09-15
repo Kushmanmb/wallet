@@ -210,7 +210,6 @@ Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them de
 
 - **T1** **M** `services/perpetual/mod.rs` — `on_socket_message` (27 lines, five socket message kinds, each writing positions, balances or prices), plus `refresh`, `sync_enablement`, `sync_markets_if_needed`, `sync_current_positions`, `account_mode`.
 - **T2** **M** `services/assets/details.rs` `refresh` (26 lines) — the concurrent detail load and its per-step failures.
-- **T3** **S** `services/swap/mod.rs` `suggest_pair`.
 - **T4** **S** `services/wallet_home/mod.rs` `refresh`.
 - **T5** **M** `services/app_start/mod.rs` `setup_wallets`.
 - **T7** **S** `services/asset_discovery/mod.rs` `discover`.
