@@ -88,8 +88,9 @@ impl GemAssetsService {
         if assets.is_empty() {
             return Ok(());
         }
-        self.store.save_assets(assets.clone()).await?;
-        self.price.update_prices(rules::asset_prices(&assets), currency).await
+        let prices = rules::asset_prices(&assets);
+        self.store.save_assets(assets).await?;
+        self.price.update_prices(prices, currency).await
     }
 
     pub async fn sync_missing_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, GemServiceError> {
@@ -99,8 +100,9 @@ impl GemAssetsService {
             return Ok(vec![]);
         }
         let assets = self.get_assets(missing, None).await?;
-        self.store.save_assets(assets.clone()).await?;
-        Ok(assets.into_iter().map(|asset| asset.asset.id).collect())
+        let asset_ids = assets.iter().map(|asset| asset.asset.id.clone()).collect();
+        self.store.save_assets(assets).await?;
+        Ok(asset_ids)
     }
 
     pub async fn open_asset(&self, asset_id: AssetId) -> Result<Option<Asset>, GemServiceError> {
@@ -341,6 +343,22 @@ mod tests {
             assert_eq!(saved.len(), 1);
             assert_eq!((saved[0].score.rank, saved[0].properties.is_buyable, saved[0].properties.earn_apr), (34, true, Some(4.68)));
             assert_eq!(provider.requested_paths(), vec!["/v1/assets".to_string()]);
+        });
+    }
+
+    #[test]
+    fn test_sync_missing_assets_returns_the_ids_of_the_batch_it_saved() {
+        block_on(async {
+            let provider = Arc::new(TestAlienProvider::with_json(200, USDT_RESPONSE));
+            let (service, store) = service(provider);
+
+            let ids = service.sync_missing_assets(vec![usdt(), usdt()]).await.unwrap();
+
+            assert_eq!(ids, vec![usdt()], "a duplicated request is asked for and returned once");
+            let saved = store.assets.lock().unwrap().clone();
+            assert_eq!(saved.len(), 1);
+            assert_eq!(saved[0].score.rank, 34, "the saved batch keeps the backend metadata");
+            assert!(service.sync_missing_assets(vec![usdt()]).await.unwrap().is_empty(), "a stored asset is no longer missing");
         });
     }
 
