@@ -19,7 +19,6 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 - **R39** **M** `Settings/Sources/ChainSettings/ViewModels/AddNodeSceneViewModel.swift` (6) against Android `AddNodeViewModel`.
 - **R41** **M** `Contacts/Sources/ViewModels/ManageContactViewModel.swift` (6) against Android `ManageContactViewModel`.
 - **R42** **M** `Assets/Sources/ViewModels/AddAssetSceneViewModel.swift` (6) against Android `AddAssetViewModel`.
-- **R43** **S** `Transfer/Sources/ViewModels/ReceiveViewModel.swift` (5) — the memo warning already crosses; the warning sentence is still joined twice.
 - **R44** **S** `Transfer/Sources/ViewModels/ConfirmRecipientViewModel.swift` (5).
 - **R45** **S** `Transactions/Sources/ViewModels/TransactionTypesSelectorViewModel.swift` (5) against the Android filter sheet.
 - **R46** **M** `Onboarding/Sources/ViewModels/ImportWalletSceneViewModel.swift` (5) against Android `ImportViewModel`.

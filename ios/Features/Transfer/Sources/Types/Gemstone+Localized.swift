@@ -10,6 +10,7 @@ import enum Gemstone.GemConfirmButtonKind
 import enum Gemstone.GemConfirmError
 import enum Gemstone.GemConfirmErrorDisplay
 import enum Gemstone.GemConfirmTitle
+import enum Gemstone.GemReceiveWarning
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -132,5 +133,15 @@ extension GemConfirmErrorDisplay: @retroactive LocalizedError {
     private static func title(asset: Gemstone.Asset) -> String {
         let title = asset.name == asset.symbol ? asset.name : String(format: "%@ (%@)", asset.name, asset.symbol)
         return title.boldMarkdown()
+    }
+}
+
+extension GemReceiveWarning {
+    func text(asset: AssetViewModel) -> String {
+        switch self {
+        case .assetNetwork: Localized.Receive.warning(asset.symbol.boldMarkdown(), asset.networkFullName.boldMarkdown())
+        case .noDestinationTagRequired: Localized.Wallet.Receive.noDestinationTagRequired
+        case .noMemoRequired: Localized.Wallet.Receive.noMemoRequired
+        }
     }
 }
