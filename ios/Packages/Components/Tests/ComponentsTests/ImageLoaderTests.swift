@@ -42,33 +42,49 @@ struct ImageLoaderTests {
     }
 
     @Test
-    func cachedDecodesTheStoredResponseWithoutLoading() throws {
+    func theStoredResponseIsDecodedByTheLoadAndNotByTheLookup() async throws {
         let cache = URLCache(memoryCapacity: 1024 * 1024, diskCapacity: 0)
         let loader = ImageLoader(cache: cache)
         let request = ImageRequest(url: url, maxPixelSize: 44, scale: 2)
-        #expect(loader.cached(request) == nil)
-
         let response = try #require(HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil))
         cache.storeCachedResponse(CachedURLResponse(response: response, data: png(side: 200)), for: URLRequest(url: url))
 
-        let image = try #require(loader.cached(request))
+        #expect(loader.cached(request) == nil, "the lookup reads decoded images only")
+
+        let image = try await loader.image(for: request)
+        #expect(image.cgImage?.width == 44)
+        #expect(loader.cached(request) === image, "the load leaves the decoded image for the next lookup")
+    }
+
+    @Test
+    func aLocalFileIsDecodedByTheLoadWithoutNetwork() async throws {
+        let loader = ImageLoader(cache: URLCache(memoryCapacity: 0, diskCapacity: 0))
+        let file = URL.temporaryDirectory.appending(path: "\(UUID().uuidString).png")
+        let request = ImageRequest(url: file, maxPixelSize: 44, scale: 2)
+        try png(side: 200).write(to: file)
+        defer { try? FileManager.default.removeItem(at: file) }
+
+        #expect(loader.cached(request) == nil)
+
+        let image = try await loader.image(for: request)
         #expect(image.cgImage?.width == 44)
         #expect(loader.cached(request) === image)
     }
 
     @Test
-    func cachedDecodesALocalFileWithoutLoading() throws {
+    func concurrentColdRequestsDecodeOnce() async throws {
         let loader = ImageLoader(cache: URLCache(memoryCapacity: 0, diskCapacity: 0))
         let file = URL.temporaryDirectory.appending(path: "\(UUID().uuidString).png")
         let request = ImageRequest(url: file, maxPixelSize: 44, scale: 2)
-        #expect(loader.cached(request) == nil)
-
         try png(side: 200).write(to: file)
         defer { try? FileManager.default.removeItem(at: file) }
 
-        let image = try #require(loader.cached(request))
-        #expect(image.cgImage?.width == 44)
-        #expect(loader.cached(request) === image)
+        async let first = loader.image(for: request)
+        async let second = loader.image(for: request)
+        let images = try await [first, second]
+
+        #expect(images[0] === images[1], "both consumers get the one decoded image")
+        #expect(loader.cached(request) === images[0])
     }
 
     @Test

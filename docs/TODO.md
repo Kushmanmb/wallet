@@ -8,11 +8,10 @@ Keep each item independently reviewable. Shared decision changes land in Core an
 
 ## 0. Performance on primary screens
 
-These are code-backed candidates, not measured speedups. Capture a before/after trace for each implemented item; use controlled completion order for concurrency tests rather than timing assertions. Preserve domain outputs, ordering, errors, wallet context, and security gates. Prefer changes that also remove duplicate code, clarify ownership, or simplify state; added caches and coordination must earn their complexity. Start with the small cleanups PERF10–PERF14, then PERF15–PERF16 and PERF2–PERF6. PERF7–PERF9 require investigation before changing behavior.
+These are code-backed candidates, not measured speedups. Capture a before/after trace for each implemented item; use controlled completion order for concurrency tests rather than timing assertions. Preserve domain outputs, ordering, errors, wallet context, and security gates. Prefer changes that also remove duplicate code, clarify ownership, or simplify state; added caches and coordination must earn their complexity. Start with PERF2–PERF6. PERF7–PERF9 require investigation before changing behavior.
 
 ### Small codebase improvements
 
-- **PERF15** **M** Make the image cache lookup memory-only — [`CachedAsyncImage`](../ios/Packages/Components/Sources/CachedAsyncImage.swift) calls [`ImageLoader.cached`](../ios/Packages/Components/Sources/ImageLoader.swift) from its initializer, but that method can read a local file or cached response and decode pixels synchronously. Keep the synchronous lookup limited to decoded images in `NSCache`; put file/response reads and decoding into the existing coalesced asynchronous load path with explicit worker execution. Retain immediate decoded-image hits, local-file support, URL-cache reuse, size/scale keys, downsampling, and the memory limit. Update [`ImageLoaderTests`](../ios/Packages/Components/Tests/ComponentsTests/ImageLoaderTests.swift) to verify the fast lookup never decodes, concurrent cold requests decode once, and local/cached responses need no network. This gives lookup and loading distinct responsibilities without introducing another image loader.
 
 ### Implementation candidates
 
