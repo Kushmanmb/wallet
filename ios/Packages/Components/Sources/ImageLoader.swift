@@ -105,7 +105,7 @@ final class ImageLoader: @unchecked Sendable {
     }
 }
 
-private actor InFlightLoads {
+actor InFlightLoads {
     private var tasks: [ImageRequest: Task<UIImage, Error>] = [:]
 
     func task(for request: ImageRequest, load: @escaping @Sendable () async throws -> UIImage) -> Task<UIImage, Error> {

@@ -82,6 +82,28 @@ struct ImageLoaderTests {
         #expect(small.cacheKey == ImageRequest(url: url, maxPixelSize: 44, scale: 2).cacheKey)
     }
 
+    @Test
+    func oneLoadIsSharedAndOutlivesACanceledConsumer() async throws {
+        let loads = InFlightLoads()
+        let request = ImageRequest(url: url, maxPixelSize: 44, scale: 2)
+        let expected = try #require(ImageLoader.decode(png(side: 200), request: request))
+        let loadCount = LoadCount()
+        let load: @Sendable () async throws -> UIImage = {
+            loadCount.increment()
+            try await Task.sleep(for: .milliseconds(50))
+            return expected
+        }
+
+        let shared = await loads.task(for: request, load: load)
+        _ = await loads.task(for: request, load: load)
+
+        let consumer = Task { try await shared.value }
+        consumer.cancel()
+
+        #expect(try await shared.value === expected, "a dismissed consumer does not cancel the load another consumer waits on")
+        #expect(loadCount.value == 1, "the second request joins the load in flight")
+    }
+
     private func png(side: Int, height: Int? = nil) -> Data {
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
@@ -90,5 +112,13 @@ struct ImageLoaderTests {
             UIColor.red.setFill()
             context.fill(CGRect(origin: .zero, size: size))
         }
+    }
+}
+
+private final class LoadCount: @unchecked Sendable {
+    private(set) var value = 0
+
+    func increment() {
+        value += 1
     }
 }
