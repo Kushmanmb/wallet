@@ -51,8 +51,10 @@ pub struct DiscoveryTestkit {
 
 impl DiscoveryTestkit {
     pub fn with_response(provider: TestAlienProvider) -> Self {
-        let wallet = Wallet::mock();
-        let provider = Arc::new(provider);
+        Self::with_provider(Arc::new(provider), Wallet::mock())
+    }
+
+    pub fn with_provider(provider: Arc<TestAlienProvider>, wallet: Wallet) -> Self {
         let preferences_store = Arc::new(MemoryPreferencesStore::default());
         let preferences = Arc::new(GemPreferencesService::new(preferences_store.clone()));
         let wallets = Arc::new(MemoryWalletStore {

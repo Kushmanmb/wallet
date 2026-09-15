@@ -24,7 +24,7 @@ impl TestAlienProvider {
                 .iter()
                 .map(|(path, body)| ((*path).to_string(), Arc::new(AlienResponse::new(Some(status), body.as_bytes().to_vec()))))
                 .collect(),
-            ..Self::with_status(status)
+            ..Self::with_json(status, "[]")
         }
     }
 
