@@ -104,8 +104,7 @@ public final class FiatSceneViewModel {
 
     var title: String {
         switch type {
-        case .buy: Localized.Buy.title(asset.name)
-        case .sell: Localized.Sell.title(asset.name)
+        case .buy, .sell: type.title(asset: asset.name)
         }
     }
 
@@ -148,8 +147,7 @@ public final class FiatSceneViewModel {
         switch viewState.phase {
         case .noInput, .invalidInput:
             switch type {
-            case .buy: Localized.Input.enterAmountTo(Localized.Wallet.buy)
-            case .sell: Localized.Input.enterAmountTo(Localized.Wallet.sell)
+            case .buy, .sell: Localized.Input.enterAmountTo(type.action)
             }
         case .invalid, .loading, .ready, .noQuotes, .failed: Localized.Buy.noResults
         }

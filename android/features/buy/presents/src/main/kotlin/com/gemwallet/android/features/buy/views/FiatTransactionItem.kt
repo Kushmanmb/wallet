@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.buy.views
 
+import com.gemwallet.android.features.buy.localization.actionRes
 import com.gemwallet.android.ui.components.image.iconModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -47,10 +48,7 @@ fun FiatTransactionItem(
 ) {
     val asset = info.asset
 
-    val typeTitle = when (info.transactionType) {
-        FiatQuoteType.Buy -> stringResource(R.string.wallet_buy)
-        FiatQuoteType.Sell -> stringResource(R.string.wallet_sell)
-    }
+    val typeTitle = stringResource(info.transactionType.actionRes())
 
     val cryptoAmount = ValueFormatter(style = GemValueStyle.SHORT)
         .string(BigInteger(info.value), asset)
