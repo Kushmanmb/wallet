@@ -80,10 +80,7 @@ public final class SecurityViewModel {
     }
 
     var authenticationTitle: String {
-        switch service.availableAuthentication {
-        case .biometrics: Localized.Settings.enableValue("Face ID")
-        case .passcode, .none: Localized.Settings.enablePasscode
-        }
+        service.availableAuthentication.enableTitle
     }
 }
 

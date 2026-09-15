@@ -23,7 +23,6 @@ Each of these picks a literal `Localized.`/`R.string.` from a Core variant outsi
 - **V43** **S** iOS Assets — `Assets/Sources/ViewModels/AssetSceneViewModel.swift` (stake and earn balance titles).
 - **V45** **S** iOS Onboarding — `Onboarding/Sources/Navigation/ExportWalletNavigationStack.swift` and `Onboarding/Sources/Types/WalletImportError.swift`.
 - **V46** **S** iOS Perpetuals — `Perpetuals/Sources/ViewModels/ChartLineViewModel.swift`.
-- **V47** **S** iOS Settings — `Settings/Sources/Settings/ViewModels/SecurityViewModel.swift`.
 - **V48** **S** iOS Stake — `Stake/Sources/ViewModels/DelegationSceneViewModel.swift` and `DelegationStateViewModel.swift`.
 - **V49** **S** iOS Swap — `Swap/Sources/Errors/Errors.swift`, the counterpart of the Android mapper V56 added.
 - **V50** **M** iOS Transfer — `Transfer/Sources/Errors/Errors.swift`, `ViewModels/ConfirmButtonViewModel.swift`, `ViewModels/RecipientSceneViewModel.swift`, `ViewModels/TransferDataViewModel.swift`.

@@ -6,6 +6,7 @@ import enum Gemstone.GemPreferencesRow
 import enum Gemstone.GemSettingsRow
 import enum Gemstone.GemChainSettingsSection
 import enum Gemstone.GemNodeSubtitle
+import enum GemstoneServices.KeystoreAuthentication
 import Localization
 import Primitives
 
@@ -85,6 +86,20 @@ extension GemNodeSubtitle {
     var title: String {
         switch self {
         case .latestBlock: Localized.Nodes.ImportNode.latestBlock
+        }
+    }
+}
+
+extension KeystoreAuthentication {
+    var enableTitle: String {
+        switch self {
+        case .biometrics:
+            if let name = KeystoreAuthentication.availableBiometryName {
+                Localized.Settings.enableValue(name)
+            } else {
+                Localized.Settings.enablePasscode
+            }
+        case .passcode, .none: Localized.Settings.enablePasscode
         }
     }
 }
