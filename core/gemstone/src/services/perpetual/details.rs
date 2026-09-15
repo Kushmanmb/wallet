@@ -3,7 +3,9 @@ use std::sync::Arc;
 use primitives::chart::ChartCandleUpdate;
 use primitives::{Asset, AssetId, Chain, ChartPeriod, Currency, Perpetual, PerpetualPosition};
 
-use super::model::{GemPerpetualPositionAction, GemPerpetualPositionKind};
+use super::model::{
+    GemPerpetualButton, GemPerpetualInfoRow, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualSection,
+};
 use super::{GemPerpetualService, rules};
 use crate::models::perpetual::{GemChartCandleStick, GemPerpetualSubscription};
 use crate::services::error::GemServiceError;
@@ -39,6 +41,26 @@ impl GemPerpetualDetailsService {
 
     pub fn get_currency(&self) -> Currency {
         self.preferences.get_currency()
+    }
+
+    pub fn sections(&self, has_position: bool) -> Vec<GemPerpetualSection> {
+        rules::perpetual_sections(has_position)
+    }
+
+    pub fn position_detail_rows(&self, position: PerpetualPosition) -> Vec<GemPerpetualPositionDetailRow> {
+        rules::position_detail_rows(&position)
+    }
+
+    pub fn info_rows(&self) -> Vec<GemPerpetualInfoRow> {
+        rules::info_rows()
+    }
+
+    pub fn buttons(&self, has_position: bool) -> Vec<GemPerpetualButton> {
+        rules::perpetual_buttons(has_position)
+    }
+
+    pub fn modify_buttons(&self) -> Vec<GemPerpetualButton> {
+        rules::modify_buttons()
     }
 
     pub fn position_action(

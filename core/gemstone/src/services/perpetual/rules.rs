@@ -13,7 +13,8 @@ use primitives::{
 use super::model::{
     GemAutocloseSummary, GemCandleTooltip, GemMarketsRefreshTrigger, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput,
     GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput,
-    GemPerpetualPositionAction, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualTransferData,
+    GemPerpetualButton, GemPerpetualInfoRow, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection,
+    GemPerpetualTransferData,
 };
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigInt;
@@ -555,6 +556,43 @@ pub fn position_row(perpetual: &Perpetual, asset: &Asset, position: &PerpetualPo
     }
 }
 
+pub fn perpetual_sections(has_position: bool) -> Vec<GemPerpetualSection> {
+    [has_position.then_some(GemPerpetualSection::Position), Some(GemPerpetualSection::Info)]
+        .into_iter()
+        .flatten()
+        .collect()
+}
+
+pub fn position_detail_rows(position: &PerpetualPosition) -> Vec<GemPerpetualPositionDetailRow> {
+    [
+        Some(GemPerpetualPositionDetailRow::Pnl),
+        Some(GemPerpetualPositionDetailRow::Autoclose),
+        Some(GemPerpetualPositionDetailRow::Size),
+        Some(GemPerpetualPositionDetailRow::EntryPrice),
+        position.liquidation_price.filter(|value| *value > 0.0).map(|_| GemPerpetualPositionDetailRow::LiquidationPrice),
+        Some(GemPerpetualPositionDetailRow::Margin),
+        Some(GemPerpetualPositionDetailRow::FundingPayments),
+    ]
+    .into_iter()
+    .flatten()
+    .collect()
+}
+
+pub fn info_rows() -> Vec<GemPerpetualInfoRow> {
+    vec![GemPerpetualInfoRow::DailyVolume, GemPerpetualInfoRow::OpenInterest, GemPerpetualInfoRow::FundingRate]
+}
+
+pub fn perpetual_buttons(has_position: bool) -> Vec<GemPerpetualButton> {
+    match has_position {
+        true => vec![GemPerpetualButton::Modify, GemPerpetualButton::Close],
+        false => vec![GemPerpetualButton::Long, GemPerpetualButton::Short],
+    }
+}
+
+pub fn modify_buttons() -> Vec<GemPerpetualButton> {
+    vec![GemPerpetualButton::Increase, GemPerpetualButton::Reduce]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -564,6 +602,40 @@ mod tests {
     use num_bigint::BigUint;
     use primitives::PerpetualId;
     use primitives::TransactionInputType;
+
+    #[test]
+    fn test_the_perpetual_screen_names_its_sections_rows_and_buttons_from_the_position() {
+        assert_eq!(perpetual_sections(false), vec![GemPerpetualSection::Info]);
+        assert_eq!(perpetual_sections(true), vec![GemPerpetualSection::Position, GemPerpetualSection::Info]);
+        assert_eq!(perpetual_buttons(false), vec![GemPerpetualButton::Long, GemPerpetualButton::Short]);
+        assert_eq!(perpetual_buttons(true), vec![GemPerpetualButton::Modify, GemPerpetualButton::Close]);
+
+        let without_liquidation = PerpetualPosition {
+            liquidation_price: Some(0.0),
+            ..position("open")
+        };
+        assert!(
+            !position_detail_rows(&without_liquidation).contains(&GemPerpetualPositionDetailRow::LiquidationPrice),
+            "a zero liquidation price is no liquidation price"
+        );
+        assert!(!position_detail_rows(&position("open")).contains(&GemPerpetualPositionDetailRow::LiquidationPrice));
+        let liquidatable = PerpetualPosition {
+            liquidation_price: Some(1.0),
+            ..without_liquidation
+        };
+        assert_eq!(
+            position_detail_rows(&liquidatable),
+            vec![
+                GemPerpetualPositionDetailRow::Pnl,
+                GemPerpetualPositionDetailRow::Autoclose,
+                GemPerpetualPositionDetailRow::Size,
+                GemPerpetualPositionDetailRow::EntryPrice,
+                GemPerpetualPositionDetailRow::LiquidationPrice,
+                GemPerpetualPositionDetailRow::Margin,
+                GemPerpetualPositionDetailRow::FundingPayments,
+            ]
+        );
+    }
 
     #[test]
     fn test_market_sections_hide_recents_mid_search_and_answer_empty_only_while_searching() {

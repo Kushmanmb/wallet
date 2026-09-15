@@ -105,6 +105,22 @@ class PerpetualDetailsViewModel @Inject constructor(
         .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    val sections = position
+        .map { service.sections(it != null) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val positionRows = position
+        .map { position -> position?.let { service.positionDetailRows(it.position.toGem()) }.orEmpty() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val infoRows = service.infoRows()
+
+    val buttons = position
+        .map { service.buttons(it != null) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val modifyButtons = service.modifyButtons()
+
     val transactions = combine(
         getTransactions.getTransactions(transactionFilters),
         transactionSync,

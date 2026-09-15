@@ -188,6 +188,40 @@ impl StepFailure for GemPerpetualRefreshFailure {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemPerpetualSection {
+    Position,
+    Info,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemPerpetualPositionDetailRow {
+    Pnl,
+    Autoclose,
+    Size,
+    EntryPrice,
+    LiquidationPrice,
+    Margin,
+    FundingPayments,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemPerpetualInfoRow {
+    DailyVolume,
+    OpenInterest,
+    FundingRate,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemPerpetualButton {
+    Long,
+    Short,
+    Modify,
+    Close,
+    Increase,
+    Reduce,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, uniffi::Enum)]
 pub enum GemPerpetualPositionKind {
     Open { direction: PerpetualDirection },
