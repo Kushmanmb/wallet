@@ -8,7 +8,7 @@ use primitives::{
 };
 
 use super::model::{
-    GemAmountSign, GemSwapAgain, GemSwapProgress, GemSwapProgressMarker, GemSwapProgressStep, GemTransactionAmount, GemTransactionDetailRow, GemTransactionDetailRows,
+    GemAmountSign, GemSwapAgain, GemSwapProgress, GemSwapProgressStep, GemTransactionAmount, GemTransactionDetailRow, GemTransactionDetailRows,
     GemTransactionDetailSection, GemTransactionDetails, GemTransactionFilter, GemTransactionHeader, GemTransactionHeaderAction, GemTransactionHeaderKind,
     GemTransactionParticipant, GemTransactionParticipantRole, GemTransactionRow, GemTransactionRowSubtitle, GemTransactionRowValue, GemTransactionStateTone, GemTransactionStatus,
     GemTransactionSubtitle, GemTransactionTitle, GemTransactionValue,
@@ -103,6 +103,12 @@ pub fn detail_rows(extended: &TransactionExtended, participant: Option<GemTransa
     let transaction = &extended.transaction;
     let details = details(extended);
     GemTransactionDetailRows {
+        id: transaction.id.clone(),
+        asset: extended.asset.clone(),
+        transaction_type: transaction.transaction_type.clone(),
+        direction: transaction.direction.clone(),
+        state: transaction.state,
+        created_at: transaction.created_at,
         status: status(transaction.state),
         title: transaction_title(transaction),
         header: header(extended),
@@ -596,6 +602,7 @@ mod tests {
         assert_eq!(filter_transaction_types(GemTransactionFilter::Perpetuals).len(), 3);
     }
 
+    use super::super::model::GemSwapProgressMarker;
     use super::*;
     use chrono::Utc;
     use num_bigint::BigUint;

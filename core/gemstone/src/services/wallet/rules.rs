@@ -1,8 +1,8 @@
 use gem_keystore::Mnemonic;
-use primitives::{Account, AddressName, AddressType, Chain, NameRecord, VerificationStatus, Wallet, WalletId, WalletSource, WalletType};
+use primitives::{Account, AddressName, AddressType, Chain, ChainAddress, NameRecord, VerificationStatus, Wallet, WalletId, WalletSource, WalletType};
 
 use super::error::GemWalletImportError;
-use super::model::{GemWalletImportKind, GemWalletImportType, GemWalletPlaceholder, GemWalletRow, GemWalletSecretKind, GemWalletSubtitle};
+use super::model::{GemWalletDetails, GemWalletImportKind, GemWalletImportType, GemWalletPlaceholder, GemWalletRow, GemWalletSecretKind, GemWalletSubtitle};
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
 
 const WALLET_ADDRESS_STYLE: GemAddressFormatStyle = GemAddressFormatStyle::Extra { extra: 1 };
@@ -144,6 +144,17 @@ pub fn row(wallet: &Wallet) -> GemWalletRow {
 
 pub fn rows(wallets: &[Wallet]) -> Vec<GemWalletRow> {
     wallets.iter().map(row).collect()
+}
+
+pub fn details(wallet: &Wallet) -> GemWalletDetails {
+    GemWalletDetails {
+        row: row(wallet),
+        secret_kind: secret_kind(wallet),
+        address: match wallet.accounts.as_slice() {
+            [account] => Some(ChainAddress::new(account.chain, account.address.clone())),
+            _ => None,
+        },
+    }
 }
 
 pub fn view_wallet(name: String, chain: Chain, address: String) -> Wallet {
@@ -396,6 +407,18 @@ mod tests {
         assert_eq!(secret_kind(&phrase), Some(GemWalletSecretKind::Phrase));
         assert_eq!(secret_kind(&private_key), Some(GemWalletSecretKind::PrivateKey));
         assert_eq!(secret_kind(&view), None);
+    }
+
+    #[test]
+    fn test_details_show_one_address_only_when_the_wallet_has_one_account() {
+        let single = wallet(WalletId::Single(Chain::Ethereum, "0x2".to_string()), WalletType::Single, &[Chain::Ethereum]);
+        let multicoin = wallet(WalletId::Multicoin("0x1".to_string()), WalletType::Multicoin, &[Chain::Ethereum, Chain::Bitcoin]);
+
+        let single_details = details(&single);
+        assert_eq!(single_details.row.id, single.id.id());
+        assert_eq!(single_details.secret_kind, Some(GemWalletSecretKind::Phrase));
+        assert_eq!(single_details.address, Some(ChainAddress::new(Chain::Ethereum, "address".to_string())));
+        assert_eq!(details(&multicoin).address, None);
     }
 
     #[test]

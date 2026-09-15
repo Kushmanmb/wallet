@@ -1,5 +1,5 @@
 use crate::services::localization::GemLocalizedText;
-use primitives::{Chain, Wallet};
+use primitives::{Chain, ChainAddress, Wallet};
 
 use super::rules;
 
@@ -93,6 +93,18 @@ pub fn wallet_row(wallet: Wallet) -> GemWalletRow {
 #[uniffi::export]
 pub fn wallet_rows(wallets: Vec<Wallet>) -> Vec<GemWalletRow> {
     rules::rows(&wallets)
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemWalletDetails {
+    pub row: GemWalletRow,
+    pub secret_kind: Option<GemWalletSecretKind>,
+    pub address: Option<ChainAddress>,
+}
+
+#[uniffi::export]
+pub fn wallet_details(wallet: Wallet) -> GemWalletDetails {
+    rules::details(&wallet)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

@@ -247,6 +247,12 @@ pub fn transaction_detail_sections(rows: GemTransactionDetailRows) -> Vec<GemTra
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemTransactionDetailRows {
+    pub id: TransactionId,
+    pub asset: Asset,
+    pub transaction_type: TransactionType,
+    pub direction: TransactionDirection,
+    pub state: TransactionState,
+    pub created_at: DateTime<Utc>,
     pub status: GemTransactionStatus,
     pub title: GemTransactionTitle,
     pub header: GemTransactionHeader,

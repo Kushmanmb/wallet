@@ -66,14 +66,15 @@ class TransactionDetailsAggregateImplTest {
     )
 
     private fun createAggregate(
-        data: TransactionExtended = createExtended(),
-        rows: GemTransactionDetailRows = mockGemTransactionDetailRows(),
+        rows: GemTransactionDetailRows = mockGemTransactionDetailRows(transaction = createExtended()),
         currency: Currency = Currency.USD,
-    ) = TransactionDetailsAggregateImpl(data = data, rows = rows, currency = currency)
+    ) = TransactionDetailsAggregateImpl(rows = rows, currency = currency)
 
     @Test
     fun testBasicProperties() {
-        val aggregate = createAggregate(rows = mockGemTransactionDetailRows(explorer = BlockExplorerLink("Mempool", "https://mempool.space/tx/1")))
+        val aggregate = createAggregate(
+            rows = mockGemTransactionDetailRows(transaction = createExtended(), explorer = BlockExplorerLink("Mempool", "https://mempool.space/tx/1")),
+        )
 
         Assert.assertEquals("bitcoin_tx123", aggregate.id)
         Assert.assertEquals(btcAsset, aggregate.asset)
@@ -168,7 +169,7 @@ class TransactionDetailsAggregateImplTest {
     @Test
     fun testDate() {
         val data = createExtended()
-        val date = createAggregate(data).date
+        val date = createAggregate(rows = mockGemTransactionDetailRows(transaction = data)).date
 
         Assert.assertTrue(date.data.contains("January 6, 2026"))
         Assert.assertTrue(date.data.contains(DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(data.transaction.createdAt))))
@@ -176,7 +177,7 @@ class TransactionDetailsAggregateImplTest {
 
     @Test
     fun testStatusAndNetwork() {
-        val aggregate = createAggregate(createExtended(state = TransactionState.Pending))
+        val aggregate = createAggregate(rows = mockGemTransactionDetailRows(transaction = createExtended(state = TransactionState.Pending)))
 
         Assert.assertEquals(TransactionState.Pending, aggregate.status.data)
         Assert.assertEquals(btcAsset, aggregate.network.data)
@@ -235,7 +236,9 @@ class TransactionDetailsAggregateImplTest {
 
     @Test
     fun testProvider_namesTheCoreProvider() {
-        val aggregate = createAggregate(createExtended(type = TransactionType.Swap), rows = mockGemTransactionDetailRows(providerName = "unswap"))
+        val aggregate = createAggregate(
+            rows = mockGemTransactionDetailRows(transaction = createExtended(type = TransactionType.Swap), providerName = "unswap"),
+        )
 
         Assert.assertEquals("unswap", aggregate.provider?.data)
         Assert.assertNull(createAggregate().provider)

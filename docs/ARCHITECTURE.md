@@ -213,6 +213,37 @@ Two things a record cannot carry are a localized string and a bundled image asse
 
 A row model earns its place only by owning something the record cannot: formatting that depends on locale or user preference, a binding, a bundled asset, or a join to app-side data. Keep it for those and read the record for everything else. A model whose every property is a one-line read of the record owns nothing, and the view takes the record instead.
 
+### A details screen gets a details record, not a row plus the object it came from
+
+A row is shaped for a list, and a details screen of the same value always needs more: the identity it navigates with, the state it gates on, the one address it shows. Holding the row *and* the domain object it was projected from is how that extra arrives in an app, and it makes both sides answer the same question — the app reads `wallet.accounts` while Core already knows whether there is a single account to show. The details record carries the row and the rest of the screen's answers:
+
+```rust
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemWalletDetails {
+    pub row: GemWalletRow,
+    pub secret_kind: Option<GemWalletSecretKind>,
+    pub address: Option<ChainAddress>,
+}
+```
+
+Android's `WalletDetailsAggregateImpl(details)` and iOS's `WalletDetailViewModel.details` then read it, and neither keeps the `Wallet` for anything the record answers:
+
+```kotlin
+class WalletDetailsAggregateImpl(details: GemWalletDetails) : WalletDetailsAggregate {
+    override val row: GemWalletRow = details.row
+    override val address: ChainAddress? = details.address?.toPrimitives()
+}
+```
+
+```swift
+var address: WalletDetailAddress? {
+    guard let account = details.address?.toPrimitives() else { return .none }
+    return .account(SimpleAccount(chain: account.chain, address: account.address), link: ...)
+}
+```
+
+`GemTransactionRow` and `GemTransactionDetailRows` are the same split for one value: the list row and the details record each carry the transaction's id, asset, type, direction, state and creation date, so neither screen needs the `TransactionExtended` beside it.
+
 ### Sections, actions and destinations are records too
 
 A row is not the only choice a screen makes, and the other three recur often enough to have the same answer.

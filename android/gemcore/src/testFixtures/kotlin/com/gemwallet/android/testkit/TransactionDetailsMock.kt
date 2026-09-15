@@ -1,9 +1,11 @@
 package com.gemwallet.android.testkit
 
 import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toIdentifier
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetPrice
 import com.wallet.core.primitives.Currency
+import com.wallet.core.primitives.TransactionExtended
 import uniffi.gemstone.BlockExplorerLink
 import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.GemSwapAgain
@@ -36,6 +38,7 @@ fun mockGemTransactionAmount(
 )
 
 fun mockGemTransactionDetailRows(
+    transaction: TransactionExtended = mockTransactionExtended(),
     status: GemTransactionStatus = mockGemTransactionStatus(),
     title: GemTransactionTitle = GemTransactionTitle.Sent,
     header: GemTransactionHeader = GemTransactionHeader.Amount(mockGemTransactionAmount(), showsFiat = true),
@@ -54,6 +57,12 @@ fun mockGemTransactionDetailRows(
     fee: GemTransactionAmount = mockGemTransactionAmount(),
     explorer: BlockExplorerLink = BlockExplorerLink("Explorer", "https://example.com"),
 ) = GemTransactionDetailRows(
+    id = transaction.transaction.id.toIdentifier(),
+    asset = transaction.asset.toGem(),
+    transactionType = transaction.transaction.type.toGem(),
+    direction = transaction.transaction.direction.toGem(),
+    state = transaction.transaction.state.toGem(),
+    createdAt = transaction.transaction.createdAt,
     title = title,
     header = header,
     headerAction = headerAction,
