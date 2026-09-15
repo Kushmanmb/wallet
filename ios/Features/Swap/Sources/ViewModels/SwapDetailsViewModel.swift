@@ -5,6 +5,8 @@ import Components
 import Formatters
 import GemstonePrimitives
 import Foundation
+import enum Gemstone.GemSwapDetailRow
+import struct Gemstone.GemSwapQuoteSummary
 import struct Gemstone.GemSwapRate
 import struct Gemstone.SwapperQuote
 import struct Gemstone.SwapPriceImpact
@@ -22,6 +24,7 @@ public final class SwapDetailsViewModel {
     private let fromAssetPrice: AssetPriceValue
     private let toAssetPrice: AssetPriceValue
     private let providerViewModel: SwapProviderViewModel
+    private let summary: GemSwapQuoteSummary
     private let selectedQuote: Gemstone.SwapQuote
     private let slippage: SwapSlippage
     private let rate: GemSwapRate?
@@ -37,29 +40,31 @@ public final class SwapDetailsViewModel {
         state: StateViewType<[SwapProviderItem]> = .data([]),
         fromAssetPrice: AssetPriceValue,
         toAssetPrice: AssetPriceValue,
-        selectedQuote: Gemstone.SwapQuote,
+        summary: GemSwapQuoteSummary,
         slippage: SwapSlippage,
-        rate: GemSwapRate?,
         currency: String,
         isProviderSelectionEnabled: Bool = true,
         swapPriceImpact: SwapPriceImpact?,
-        minReceiveValue: BigInt,
-        etaSeconds: UInt32?,
         swapProviderSelectAction: ((SwapperQuote) -> Void)? = nil,
     ) {
         self.state = state
         self.fromAssetPrice = fromAssetPrice
         self.toAssetPrice = toAssetPrice
-        providerViewModel = SwapProviderViewModel(providerData: selectedQuote.providerData)
-        self.selectedQuote = selectedQuote
+        providerViewModel = SwapProviderViewModel(providerData: summary.quote.providerData)
+        self.summary = summary
+        selectedQuote = summary.quote
         self.slippage = slippage
-        self.rate = rate
+        rate = summary.rate
         priceViewModel = PriceViewModel(price: toAssetPrice.price, currencyCode: currency)
         self.isProviderSelectionEnabled = isProviderSelectionEnabled
         self.swapPriceImpact = swapPriceImpact
-        self.minReceiveValue = minReceiveValue
-        self.etaSeconds = etaSeconds
+        minReceiveValue = BigInt(summary.minReceiveValue)
+        etaSeconds = summary.quote.etaInSeconds
         self.swapProviderSelectAction = swapProviderSelectAction
+    }
+
+    var detailRows: [GemSwapDetailRow] {
+        summary.rows(showsPriceImpact: shouldShowPriceImpactInDetails)
     }
 
     // MARK: - Provider
@@ -96,13 +101,13 @@ public final class SwapDetailsViewModel {
         guard let etaSeconds else { return nil }
         let estimationTime = EstimatedConfirmationFormatter().string(seconds: etaSeconds)
         guard estimationTime.isEmpty == false else { return nil }
-        return ListItemField(title: Localized.Swap.EstimatedTime.title, value: estimationTime)
+        return ListItemField(title: GemSwapDetailRow.estimatedTime.title, value: estimationTime)
     }
 
     // MARK: - Rate
 
     var rateTitle: String {
-        Localized.Buy.rate
+        GemSwapDetailRow.rate.title
     }
 
     var rateText: String? {
@@ -134,14 +139,14 @@ public final class SwapDetailsViewModel {
         case .auto: Localized.Swap.slippageAuto
         case let .manual(bps): percentSignLessFormatter.string((Double(bps) / 100).rounded(toPlaces: 2))
         }
-        return ListItemField(title: Localized.Swap.slippage, value: value)
+        return ListItemField(title: GemSwapDetailRow.slippage.title, value: value)
     }
 
     // MARK: - Min receive
 
     var minReceiveField: ListItemField {
         ListItemField(
-            title: Localized.Swap.minReceive,
+            title: GemSwapDetailRow.minimumReceive.title,
             value: valueFormatter.string(minReceiveValue, asset: toAssetPrice.asset),
         )
     }

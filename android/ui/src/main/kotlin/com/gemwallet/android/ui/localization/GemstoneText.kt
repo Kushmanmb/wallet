@@ -26,6 +26,7 @@ import uniffi.gemstone.GemAssetMenuAction
 import uniffi.gemstone.GemDelegationStatus
 import uniffi.gemstone.GemEmptyStateAction
 import uniffi.gemstone.GemErrorText
+import uniffi.gemstone.GemSwapDetailRow
 import uniffi.gemstone.GemEmptyStateText
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemLocalizedText
@@ -348,3 +349,13 @@ fun GemErrorText.text(context: Context): String = when (this) {
 
 @Composable
 fun GemErrorText.text(): String = text(LocalContext.current)
+
+@StringRes
+fun GemSwapDetailRow.stringRes(): Int = when (this) {
+    GemSwapDetailRow.PROVIDER -> R.string.common_provider
+    GemSwapDetailRow.RATE -> R.string.buy_rate
+    GemSwapDetailRow.ESTIMATED_TIME -> R.string.swap_estimated_time_title
+    GemSwapDetailRow.PRICE_IMPACT -> R.string.swap_price_impact
+    GemSwapDetailRow.MINIMUM_RECEIVE -> R.string.swap_min_receive
+    GemSwapDetailRow.SLIPPAGE -> R.string.swap_slippage
+}

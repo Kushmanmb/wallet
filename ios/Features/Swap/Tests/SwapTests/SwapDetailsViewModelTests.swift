@@ -51,13 +51,10 @@ extension SwapDetailsViewModel {
         return SwapDetailsViewModel(
             fromAssetPrice: AssetPriceValue(asset: .mockEthereum(), price: .mock()),
             toAssetPrice: AssetPriceValue(asset: .mockEthereumUSDT(), price: .mock()),
-            selectedQuote: selectedQuote,
+            summary: summary,
             slippage: .auto,
-            rate: summary.rate,
             currency: Currency.usd.rawValue,
             swapPriceImpact: nil,
-            minReceiveValue: BigInt(summary.minReceiveValue),
-            etaSeconds: selectedQuote.etaInSeconds,
             swapProviderSelectAction: nil,
         )
     }

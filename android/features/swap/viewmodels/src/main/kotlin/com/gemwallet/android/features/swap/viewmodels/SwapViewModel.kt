@@ -211,16 +211,14 @@ class SwapViewModel @Inject constructor(
                 SwapDetailsUIModelInput(
                     payAsset = quote.pay.toAssetPriceValue(),
                     receiveAsset = quote.receive.toAssetPriceValue(),
-                    rate = summary.rate,
+                    summary = summary,
                     provider = provider,
                     providers = providers,
                     slippageBps = quote.quote.data.slippageBps,
                     selectedSlippage = selectedSlippageBps.value,
-                    etaInSeconds = quote.quote.etaInSeconds,
                     isProviderSelectable = providers.size > 1,
                     priceImpact = quote.pay.swapValue(quote.quote.fromValue)
                         .priceImpact(quote.receive.swapValue(quote.quote.toValue)),
-                    minReceiveValue = summary.minReceiveValue,
                 ),
             )
         }

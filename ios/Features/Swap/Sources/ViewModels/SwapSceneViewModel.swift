@@ -128,15 +128,12 @@ public final class SwapSceneViewModel {
             state: quotesState.map { providerItems($0, selectedQuote: selectedQuote, toAssetPrice: toAssetPrice) },
             fromAssetPrice: fromAssetPrice,
             toAssetPrice: toAssetPrice,
-            selectedQuote: selectedQuote,
+            summary: summary,
             slippage: selectedSlippage,
-            rate: summary.rate,
             currency: service.currency.rawValue,
             isProviderSelectionEnabled: isQuoteInteractionEnabled,
             swapPriceImpact: fromAssetPrice.swapValue(selectedQuote.fromValue)
                 .priceImpact(receive: toAssetPrice.swapValue(selectedQuote.toValue)),
-            minReceiveValue: BigInt(summary.minReceiveValue),
-            etaSeconds: selectedQuote.etaInSeconds,
             swapProviderSelectAction: { [weak self] quote in
                 self?.onFinishSwapProviderSelection(quote)
             },
