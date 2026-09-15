@@ -871,7 +871,6 @@ public final class GemWalletHomeServiceMock: GemWalletHomeServiceProtocol, @unch
     public private(set) var pinned: [(assetId: Gemstone.AssetId, pinned: Bool)] = []
     public private(set) var enabled: [(assetIds: [Gemstone.AssetId], enabled: Bool)] = []
     public var showsLoading = false
-    public private(set) var viewStateCalls = 0
 
     public init() {}
 
@@ -884,7 +883,6 @@ public final class GemWalletHomeServiceMock: GemWalletHomeServiceProtocol, @unch
     }
 
     public func viewState(wallet: Gemstone.Wallet, balances: [Gemstone.AssetFiatValue], perpetual: Gemstone.PerpetualBalance?, banners: [Gemstone.Banner], isWalletEmpty: Bool) -> GemWalletHomeViewState {
-        viewStateCalls += 1
         let value = balances.reduce(0.0) { $0 + $1.amount * $1.price } + (perpetual.map { $0.available + $0.reserved } ?? 0)
         let total = Gemstone.TotalFiatValue(value: value, pnlAmount: 0, pnlPercentage: 0)
         let isEnabled = !banners.contains { $0.event == .accountBlockedMultiSignature }
