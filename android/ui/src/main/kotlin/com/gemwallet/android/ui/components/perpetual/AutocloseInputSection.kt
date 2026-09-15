@@ -1,5 +1,6 @@
 package com.gemwallet.android.ui.components.perpetual
 
+import com.gemwallet.android.ui.localization.autocloseRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,12 +47,7 @@ fun AutocloseInputSection(
     onFocusChanged: (Boolean) -> Unit,
 ) {
     SubheaderItem(
-        title = stringResource(
-            when (field.type) {
-                TpslType.TakeProfit -> R.string.perpetual_auto_close_take_profit
-                TpslType.StopLoss -> R.string.perpetual_auto_close_stop_loss
-            },
-        ),
+        title = stringResource(field.type.autocloseRes()),
     )
     GemTextField(
         modifier = Modifier.onFocusChanged { onFocusChanged(it.isFocused) },

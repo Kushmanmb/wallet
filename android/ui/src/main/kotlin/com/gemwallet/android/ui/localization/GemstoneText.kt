@@ -16,6 +16,7 @@ import com.wallet.core.primitives.PerpetualDirection
 import com.wallet.core.primitives.QRScanType
 import com.wallet.core.primitives.Resource
 import com.wallet.core.primitives.ScanReceiveMode
+import com.wallet.core.primitives.TpslType
 import com.wallet.core.primitives.TransactionState
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.GemAddNodeFailure
@@ -261,4 +262,10 @@ fun GemAssetMenuAction.stringRes(): Int = when (this) {
 fun ScanReceiveMode.stringRes(): Int = when (this) {
     ScanReceiveMode.Scan -> R.string.wallet_scan
     ScanReceiveMode.Receive -> R.string.wallet_receive
+}
+
+@StringRes
+fun TpslType.autocloseRes(): Int = when (this) {
+    TpslType.TakeProfit -> R.string.perpetual_auto_close_take_profit
+    TpslType.StopLoss -> R.string.perpetual_auto_close_stop_loss
 }

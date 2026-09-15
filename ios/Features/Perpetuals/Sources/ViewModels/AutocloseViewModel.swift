@@ -37,10 +37,7 @@ public struct AutocloseViewModel {
     }
 
     public var title: String {
-        switch type {
-        case .takeProfit: Localized.Perpetual.AutoClose.takeProfit
-        case .stopLoss: Localized.Perpetual.AutoClose.stopLoss
-        }
+        type.autocloseTitle
     }
 
     public var profitTitle: String {
