@@ -92,20 +92,15 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 
 Each of these is an `#[uniffi::export]` the sweep found named in one app and in neither the other app's Kotlin nor its Swift. The first run skipped every iOS file whose name ends `+Gemstone.swift`; the list below is the corrected one.
 
-**Read the preamble before starting one.** The sweep measures which *export* each app names, which is not the same as which app *owns* the decision. Eleven were checked on 2026-09-15 and closed with no change, because the app that never calls the export still reads the same Core answer through a different one: Android reads the abbreviation cutoff through `GemValueStyle.abbreviates`, the price-alert kind through the aggregate's `kind.groupsByAsset()`, the dApp name through `GemConfirmDestination.Generic` and `connection_row`, whether to show a memo through the confirm row set, the latest block through the node row's `GemNodeSubtitle.LatestBlock`, the swap minimum through `GemSwapButtonAction.UseMinimumAmount`, and whether to offer rewards through the `GemSettingsRow.REWARDS` the settings service emits from it; the developer screen simply offers fewer actions than the iOS one. Three more closed the same way on the second pass: Android never needs `is_cancelled` because it shows no error for a failed prompt at all — it silently cancels the request and reads the retry delay off the same enum; both apps read the recommended validators out of the stake selection record; and `named` is not an export at all, it is a Core-internal constructor with six Core callers that the sweep's name match picked up. So for each item below, first find what the other app renders for the same thing — only if it computes the answer itself is there work here.
+**Read the preamble before starting one.** The sweep measures which *export* each app names, which is not the same as which app *owns* the decision. Eleven were checked on 2026-09-15 and closed with no change, because the app that never calls the export still reads the same Core answer through a different one: Android reads the abbreviation cutoff through `GemValueStyle.abbreviates`, the price-alert kind through the aggregate's `kind.groupsByAsset()`, the dApp name through `GemConfirmDestination.Generic` and `connection_row`, whether to show a memo through the confirm row set, the latest block through the node row's `GemNodeSubtitle.LatestBlock`, the swap minimum through `GemSwapButtonAction.UseMinimumAmount`, and whether to offer rewards through the `GemSettingsRow.REWARDS` the settings service emits from it.
+
+The second pass closed ten more. Three were never exported: `named`, `synchronize` and the avatar service's `set_image` / `remove_image` sit in plain `impl` blocks that the sweep's name match picked up, and the avatar methods reach both apps through `GemWalletService`. Four are the same Core answer asked for differently: Android passes `submit_attempted` straight into the autoclose session constructor instead of calling `on_submit_attempt`, clears the add-asset form with `new_session` instead of `on_chain`, reads the recommended validators out of the stake selection record, takes `swap_quote` through `swapper_quote_summary`, and reads the swap error display off the session rather than through the free function iOS uses to give `SwapperError` a description. The rest are platform plumbing, not decisions: Android shows no error at all for a failed biometric prompt so it has nothing to gate on `is_cancelled`, its image loader caches a support attachment by URL so it never needs `image_file`, and the developer screen simply offers fewer actions than the iOS one. So for each item below, first find what the other app renders for the same thing — only if it computes the answer itself is there work here.
 
 ### Android does not read an iOS-read decision
 
-- **P28** **S** `support/mod.rs` `image_file`.
 - **P32** **M** `perpetual/mod.rs` `sync_markets_if_needed`, `sync_markets`, `sync_current_positions`, `clear_markets`, `markets_updated_at` — Android schedules the same five itself.
-- **P34** **S** `assets/add.rs` `on_chain`.
-- **P35** **S** `perpetual/autoclose.rs` `on_submit_attempt`.
-- **P38** **S** `avatar/mod.rs` `set_image` and `remove_image`.
-- **P39** **S** `wallet_preferences/mod.rs` `reset_transactions_timestamp`.
 - **P40** **M** `wallet/mod.rs` `setup_chains` — Android runs its own chain setup after import.
 - **P42** **M** `message/signer.rs` `sign_with_keystore` — security-critical; confirm what Android signs with before changing anything.
-- **P43** **S** `swap/session.rs` `swap_error_display` and `swap/model.rs` `swap_quote`.
-- **P44** **S** `device/mod.rs` `synchronize`.
 
 ### iOS does not read an Android-read decision
 
