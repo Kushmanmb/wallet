@@ -250,7 +250,6 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 
 ## 14. Documentation that has fallen behind
 
-- **G4** **M** Twenty Gemstone services are not named anywhere in [SERVICES.md](SERVICES.md): `GemAppStartService`, `GemAssetDiscoveryService`, `GemAssetsService`, `GemAuthService`, `GemConfigService`, `GemConnectionService`, `GemDeviceKeyService`, `GemExplorerService`, `GemFiatService`, `GemPerpetualStreamService`, `GemPriceService`, `GemPushNotificationService`, `GemScanService`, `GemSearchService`, `GemSecurityService`, `GemSimulationService`, `GemStreamSubscriptionService`, `GemSubscriptionService`, `GemSwapService`, `GemWalletConfigurationService`.
 - **G5** **S** The screen-service map in SERVICES.md predates the row records added since; walk it against the current `ViewModelFactory.swift` and `di/` modules.
 - **G6** **S** ARCHITECTURE.md's implementation index still points at examples that moved during the row migration; re-resolve every link.
 - **G7** **S** [PERFORMANCE.md](PERFORMANCE.md) records budgets for screens whose data path moved to Core sessions; restate each budget against the current path or mark it unmeasured.

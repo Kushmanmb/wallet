@@ -257,6 +257,33 @@ One Core service per screen, held by the screen's view model on both apps. The s
 | `GemWalletService` | — | onboarding and manage-wallet view models (`WalletsSceneViewModel` gates on `can_add_wallet`, `WalletDetailViewModel` exports the secret through `export_secret`) | `CreateWalletViewModel`, `ImportViewModel`, `WalletsViewModel` (`can_add_wallet`), `WalletViewModel` / `SetupWalletViewModel` (`rename`), `WalletSecretDataViewModel` (`export_secret`), wallet cases |
 | `GemWalletSessionService` | — | `RootSceneViewModel`, `NavigationHandler` | `SessionCoordinator` (+ the services it composes) |
 
+### Services no screen holds
+
+These are not screen services and must not be added to the table above. Each is either a collaborator another Core service composes, or an app-lifecycle service the platform holds outside any screen. A screen view model that starts holding one of these has taken on a second service, which [§ 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android) forbids.
+
+| Core service | Held by |
+| --- | --- |
+| `GemAssetsService` | composed by `app_start`, `assets`, `balance`, `confirm`, `fiat`, `receive`, `search`, `transaction_state`, `transactions`, `wallet_connect` |
+| `GemExplorerService` | composed by `assets`, `chart`, `confirm`, `nft`, `node`, `stake`, `transactions`, `wallet`, `wallet_connect` |
+| `GemPriceService` | composed by `assets`, `chart`, `confirm`, `currency`, `perpetual`, `portfolio`, `search`, `stream` |
+| `GemStreamSubscriptionService` | composed by `assets`, `balance`, `stream`, `swap` |
+| `GemSwapService` | composed by `assets` and `swap` |
+| `GemSimulationService` | composed by `confirm` and `wallet_connect` |
+| `GemScanService` | composed by `confirm` |
+| `GemSearchService` | composed by `assets` |
+| `GemFiatService` | composed by `fiat` and `stream` |
+| `GemAssetDiscoveryService` | composed by `wallet_home` |
+| `GemAuthService` | composed by `rewards` |
+| `GemConfigService` | composed by `app_start` and `app_update` |
+| `GemWalletConfigurationService` | composed by `app_start` |
+| `GemDeviceKeyService` | composed by `auth` and the device signer |
+| `GemSubscriptionService` | composed by `device` |
+| `GemAppStartService` | iOS `OnstartService`, Android `MainViewModel` — launch orchestration, not a screen |
+| `GemConnectionService` | iOS `ConnectionStatusObserver`, Android `RefreshInterval` |
+| `GemPerpetualStreamService` | `HyperliquidObserverService` on both apps |
+| `GemPushNotificationService` | iOS `NavigationHandler`, Android notification routing |
+| `GemSecurityService` | iOS `LockSceneViewModel` and `BiometryAuthenticationService`, Android `LockTimer` |
+
 Android holds an observed Room read beside the service where the screen lists rows (a `Get*` case); that is the platform's reactive read, not a second service.
 
 A view model depends on the generated abstraction, never the concrete Core class, so a test can substitute it. Re-run both sweeps before touching a screen: a hit means a second service crept in, or a Hilt module binds only the class.
