@@ -66,8 +66,7 @@ Re-checked on 2026-09-15 by separating a `\d+.dp` written at a call site from on
 
 ### Swallowed errors
 
-- **X30** **S** Four empty `catch`/`onFailure` blocks in `android/ui`. Each drops an error with no log and no state.
-- **X31** **S** The same in `android/app`, `features/settings/price_alerts/presents` and `features/transfer_amount/presents`.
+Closed on 2026-09-15. Four of the six were the same `try { focusRequester.requestFocus() } catch {}` written out in four screens — Compose throws when the target is not attached yet, so the catch is right and the duplication was the problem; they now call `requestFocusIfAttached()`. The other two were real: binding the camera use cases swallowed its failure, so a camera that could not start showed a blank preview with nothing in logcat, and the collectible details flow swallowed its load error and stayed null forever. Both report now.
 
 ### Deferred notes still in the code
 
@@ -236,10 +235,6 @@ Twenty English strings exist under two keys — `wallet_send` / `transfer_send_t
 What went wrong in V40 and V41 was not the pair; it was one app's mapper reaching for the other half of a pair. That is only visible by comparing the two apps.
 
 ### Keys with no reader
-
-
-## 13. Names the guides forbid
-
 
 ## 14. Documentation that has fallen behind
 

@@ -1,5 +1,6 @@
 package com.gemwallet.android.ui.components
 
+import android.util.Log
 import com.gemwallet.android.ui.localization.stringRes
 import android.Manifest
 import android.content.ContentResolver
@@ -282,7 +283,9 @@ fun QRScanner(listener: (String) -> Unit) {
                 preview,
                 imageAnalyzer,
             )
-        } catch (_: Throwable) { }
+        } catch (error: Throwable) {
+            Log.e(TAG, "Camera preview did not start", error)
+        }
     }
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
@@ -395,3 +398,5 @@ private fun ByteBuffer.toByteArray(): ByteArray {
         get(it)
     }
 }
+
+private const val TAG = "QRScanner"
