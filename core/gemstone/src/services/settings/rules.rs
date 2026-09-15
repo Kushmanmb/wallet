@@ -40,6 +40,14 @@ pub struct GemPreferencesSection {
 pub struct GemPreferencesState {
     pub currency: GemCurrencyRow,
     pub sections: Vec<GemPreferencesSection>,
+    pub perpetual_defaults: GemPerpetualDefaults,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
+pub struct GemPerpetualDefaults {
+    pub leverage: u8,
+    pub take_profit_percent: u8,
+    pub stop_loss_percent: u8,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

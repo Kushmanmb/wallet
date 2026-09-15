@@ -218,7 +218,6 @@ public struct ViewModelFactory: Sendable {
     @MainActor
     public func preferencesScene() -> PreferencesViewModel {
         PreferencesViewModel(
-            service: preferencesService,
             settings: GemSettingsService(preferences: preferencesService),
             preferences: observablePreferences,
         )

@@ -25,6 +25,7 @@ import org.junit.Test
 import uniffi.gemstone.GemCurrencyRow
 import uniffi.gemstone.GemPreferencesRow
 import uniffi.gemstone.GemPreferencesSection
+import uniffi.gemstone.GemPerpetualDefaults
 import uniffi.gemstone.GemPreferencesState
 import uniffi.gemstone.GemSettingsServiceInterface
 
@@ -45,6 +46,7 @@ class PreferencesViewModelTest {
             GemPreferencesState(
                 currency = GemCurrencyRow(firstArg(), "🏳"),
                 sections = listOf(GemPreferencesSection(listOf(GemPreferencesRow.CURRENCY))),
+                perpetualDefaults = GemPerpetualDefaults(leverage = 2u, takeProfitPercent = 25u, stopLossPercent = 10u),
             )
         }
     }

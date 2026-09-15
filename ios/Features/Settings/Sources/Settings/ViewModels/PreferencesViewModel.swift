@@ -4,7 +4,7 @@ import Components
 import struct Gemstone.GemPreferencesState
 import protocol Gemstone.GemSettingsServiceProtocol
 import Foundation
-import protocol Gemstone.GemPreferencesServiceProtocol
+import struct Gemstone.GemPerpetualDefaults
 import GemstonePrimitives
 import Localization
 import GemstoneServices
@@ -17,7 +17,6 @@ import SwiftUI
 @MainActor
 public final class PreferencesViewModel {
     private let preferences: ObservablePreferences
-    private let service: any GemPreferencesServiceProtocol
     private let settings: any GemSettingsServiceProtocol
 
     var isPresentingLeveragePicker = false
@@ -25,16 +24,15 @@ public final class PreferencesViewModel {
     var isPresentingStopLossPicker = false
 
     public init(
-        service: any GemPreferencesServiceProtocol,
         settings: any GemSettingsServiceProtocol,
         preferences: ObservablePreferences,
     ) {
-        self.service = service
         self.settings = settings
         self.preferences = preferences
-        perpetualLeverage = LeverageOption(value: service.getPerpetualLeverage())
-        perpetualTakeProfit = AutocloseOption(value: service.getPerpetualTakeProfitPercent())
-        perpetualStopLoss = AutocloseOption(value: service.getPerpetualStopLossPercent())
+        let defaults = settings.preferences(currency: preferences.currency.toGem(), perpetualsEnabled: preferences.isPerpetualEnabled).perpetualDefaults
+        perpetualLeverage = LeverageOption(value: defaults.leverage)
+        perpetualTakeProfit = AutocloseOption(value: defaults.takeProfitPercent)
+        perpetualStopLoss = AutocloseOption(value: defaults.stopLossPercent)
     }
 
     var state: GemPreferencesState {
@@ -62,7 +60,7 @@ public final class PreferencesViewModel {
     }
 
     var perpetualLeverage: LeverageOption {
-        didSet { persist { try service.setPerpetualLeverage(leverage: perpetualLeverage.value) } }
+        didSet { persistPerpetualDefaults() }
     }
 
     var defaultLeverageValue: String {
@@ -74,16 +72,22 @@ public final class PreferencesViewModel {
     }
 
     var perpetualTakeProfit: AutocloseOption {
-        didSet { persist { try service.setPerpetualTakeProfitPercent(percent: perpetualTakeProfit.value) } }
+        didSet { persistPerpetualDefaults() }
     }
 
     var perpetualStopLoss: AutocloseOption {
-        didSet { persist { try service.setPerpetualStopLossPercent(percent: perpetualStopLoss.value) } }
+        didSet { persistPerpetualDefaults() }
     }
 
-    private func persist(_ write: () throws -> Void) {
+    private func persistPerpetualDefaults() {
         do {
-            try write()
+            try settings.setPerpetualDefaults(
+                defaults: GemPerpetualDefaults(
+                    leverage: perpetualLeverage.value,
+                    takeProfitPercent: perpetualTakeProfit.value,
+                    stopLossPercent: perpetualStopLoss.value,
+                ),
+            )
         } catch {
             debugLog("preferences write error: \(error)")
         }
