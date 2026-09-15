@@ -28,7 +28,7 @@ public struct ChartValuesViewModel: Sendable {
         self.period = period
         self.chartData = chartData
         self.lineColor = lineColor
-        formatter = CurrencyFormatter(currencyCode: chartData.currency)
+        formatter = CurrencyFormatter(currencyCode: chartData.currency.toPrimitives().rawValue)
         self.values = values
     }
 

@@ -48,7 +48,7 @@ public final class PortfolioSceneViewModel: ChartListViewable {
         self.wallet = wallet
         self.service = service
         self.preferences = preferences
-        perpetualFormatter = CurrencyFormatter(type: .currency, currencyCode: service.currency(portfolioType: PortfolioType.perpetuals.toGem()))
+        perpetualFormatter = CurrencyFormatter(type: .currency, currencyCode: service.currency(portfolioType: PortfolioType.perpetuals.toGem()).toPrimitives().rawValue)
         let currencyCode = preferences.currency.rawValue
         currencyFormatter = CurrencyFormatter(type: .currency, currencyCode: currencyCode)
         priceFormatter = CurrencyFormatter(currencyCode: currencyCode)

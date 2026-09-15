@@ -1,6 +1,6 @@
 package com.gemwallet.android.features.asset.viewmodels.chart.models
 
-import com.gemwallet.android.ext.toCurrency
+import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.math.getRelativeDate
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.ui.components.chart.ChartPoint
@@ -14,7 +14,7 @@ internal const val StopTimeoutMillis = 5_000L
 data class ChartUIModel(
     val chart: GemChartData,
 ) {
-    private val priceFormatter by lazy { CurrencyFormatter(currency = chart.currency.toCurrency()) }
+    private val priceFormatter by lazy { CurrencyFormatter(currency = chart.currency.toPrimitives()) }
 
     val renderPoints: List<ChartPoint> by lazy {
         chart.values.mapIndexed { index, value -> ChartPoint(x = index.toFloat(), y = value.value.toFloat()) }

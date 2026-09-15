@@ -2,7 +2,7 @@
 
 import Foundation
 import struct Gemstone.ChartDateValue
-import typealias Gemstone.Currency
+import enum Gemstone.Currency
 import struct Gemstone.GemChartData
 import struct Gemstone.GemChartHeader
 import enum Gemstone.GemChartValueType
@@ -28,7 +28,7 @@ public extension GemChartData {
         valueType: GemChartValueType = .price,
         base: Double? = nil,
         showsSecondaryValue: Bool = false,
-        currency: Gemstone.Currency = Primitives.Currency.usd.rawValue,
+        currency: Gemstone.Currency = Primitives.Currency.usd.toGem(),
     ) -> GemChartData {
         GemChartData(
             valueType: valueType,

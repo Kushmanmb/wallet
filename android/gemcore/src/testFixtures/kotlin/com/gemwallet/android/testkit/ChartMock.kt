@@ -1,6 +1,7 @@
 package com.gemwallet.android.testkit
 
 import com.wallet.core.primitives.ChartValue
+import com.gemwallet.android.ext.toGem
 import com.wallet.core.primitives.Currency
 import uniffi.gemstone.GemChartData
 import uniffi.gemstone.GemChartHeader
@@ -27,7 +28,7 @@ fun mockChartHeader(
     valueType = valueType,
     base = base,
     showsSecondaryValue = showsSecondaryValue,
-    currency = currency.string,
+    currency = currency.toGem(),
     values = emptyList(),
     header = null,
 ).headerAt(value)

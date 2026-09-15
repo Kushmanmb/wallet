@@ -20,7 +20,6 @@ import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PortfolioType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import com.gemwallet.android.ext.toCurrency
 import uniffi.gemstone.GemPortfolioServiceInterface
 import uniffi.gemstone.PortfolioChartType
 import uniffi.gemstone.portfolioChartData
@@ -112,7 +111,7 @@ class PortfolioChartViewModel internal constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(StopTimeoutMillis), emptyList())
 
     val currency = portfolio
-        .map { service.currency(it.type.toGem()).toCurrency() }
+        .map { service.currency(it.type.toGem()).toPrimitives() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(StopTimeoutMillis), Currency.USD)
 
     val availablePeriods = portfolio

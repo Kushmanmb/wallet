@@ -51,7 +51,7 @@ class ChartViewModelTest {
         Dispatchers.setMain(testDispatcher)
         every { chartService.chartPeriod() } returns ChartPeriod.Day.toGem()
         every { chartService.newSession() } answers {
-            GemChartSession(chartService.chartPeriod(), currencyFlow.value.string, chart = null, error = null, isLoading = true, isRefreshing = false)
+            GemChartSession(chartService.chartPeriod(), currencyFlow.value.toGem(), chart = null, error = null, isLoading = true, isRefreshing = false)
         }
     }
 

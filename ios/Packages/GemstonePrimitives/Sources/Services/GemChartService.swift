@@ -6,6 +6,6 @@ import Primitives
 
 public extension GemChartServiceProtocol {
     var currency: Primitives.Currency {
-        Primitives.Currency(core: getCurrency())
+        getCurrency().toPrimitives()
     }
 }
