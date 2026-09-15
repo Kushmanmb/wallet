@@ -16,6 +16,103 @@ pub struct GemSettingsSection {
     pub rows: Vec<GemSettingsRow>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemPreferencesRow {
+    Currency,
+    Language,
+    Appearance,
+    Networks,
+    Contacts,
+    Perpetuals,
+    PerpetualLeverage,
+    PerpetualTakeProfit,
+    PerpetualStopLoss,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct GemPreferencesSection {
+    pub rows: Vec<GemPreferencesRow>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemSecurityRow {
+    Authentication,
+    LockPeriod,
+    PrivacyLock,
+    HideBalance,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct GemSecuritySection {
+    pub rows: Vec<GemSecurityRow>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemAboutRow {
+    TermsOfService,
+    PrivacyPolicy,
+    Website,
+    Community,
+    Version,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct GemAboutSection {
+    pub rows: Vec<GemAboutRow>,
+}
+
+pub fn preferences_sections(perpetuals_enabled: bool) -> Vec<GemPreferencesSection> {
+    [
+        vec![
+            GemPreferencesRow::Currency,
+            GemPreferencesRow::Language,
+            GemPreferencesRow::Appearance,
+            GemPreferencesRow::Networks,
+            GemPreferencesRow::Contacts,
+        ],
+        [
+            Some(GemPreferencesRow::Perpetuals),
+            perpetuals_enabled.then_some(GemPreferencesRow::PerpetualLeverage),
+            perpetuals_enabled.then_some(GemPreferencesRow::PerpetualTakeProfit),
+            perpetuals_enabled.then_some(GemPreferencesRow::PerpetualStopLoss),
+        ]
+        .into_iter()
+        .flatten()
+        .collect(),
+    ]
+    .into_iter()
+    .map(|rows| GemPreferencesSection { rows })
+    .collect()
+}
+
+pub fn security_sections(authentication_enabled: bool) -> Vec<GemSecuritySection> {
+    [
+        [
+            Some(GemSecurityRow::Authentication),
+            authentication_enabled.then_some(GemSecurityRow::LockPeriod),
+            authentication_enabled.then_some(GemSecurityRow::PrivacyLock),
+        ]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>(),
+        vec![GemSecurityRow::HideBalance],
+    ]
+    .into_iter()
+    .map(|rows| GemSecuritySection { rows })
+    .collect()
+}
+
+pub fn about_sections() -> Vec<GemAboutSection> {
+    [
+        vec![GemAboutRow::TermsOfService, GemAboutRow::PrivacyPolicy, GemAboutRow::Website],
+        vec![GemAboutRow::Community],
+        vec![GemAboutRow::Version],
+    ]
+    .into_iter()
+    .map(|rows| GemAboutSection { rows })
+    .collect()
+}
+
 pub fn sections(notifications_available: bool, wallet_connect_available: bool, shows_rewards: bool, developer_enabled: bool) -> Vec<GemSettingsSection> {
     [
         vec![GemSettingsRow::Wallets, GemSettingsRow::Security],
@@ -46,6 +143,32 @@ pub fn sections(notifications_available: bool, wallet_connect_available: bool, s
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_the_perpetual_defaults_show_only_once_perpetuals_are_on() {
+        assert_eq!(
+            preferences_sections(false).last().map(|section| section.rows.clone()),
+            Some(vec![GemPreferencesRow::Perpetuals])
+        );
+        assert_eq!(preferences_sections(true).last().map(|section| section.rows.len()), Some(4));
+    }
+
+    #[test]
+    fn test_the_lock_rows_show_only_once_authentication_is_on() {
+        assert_eq!(
+            security_sections(false).first().map(|section| section.rows.clone()),
+            Some(vec![GemSecurityRow::Authentication])
+        );
+        assert_eq!(
+            security_sections(true).first().map(|section| section.rows.clone()),
+            Some(vec![GemSecurityRow::Authentication, GemSecurityRow::LockPeriod, GemSecurityRow::PrivacyLock])
+        );
+        assert_eq!(
+            security_sections(true).last().map(|section| section.rows.clone()),
+            Some(vec![GemSecurityRow::HideBalance]),
+            "hiding the balance is its own choice, not part of the lock"
+        );
+    }
 
     #[test]
     fn test_the_settings_rows_follow_what_the_device_and_wallet_offer() {

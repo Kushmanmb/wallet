@@ -51,7 +51,6 @@ fun SettingsScene(
     scrollState: ScrollState = rememberScrollState()
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val walletsCount by viewModel.walletsCount.collectAsStateWithLifecycle()
     val pushEnabled by viewModel.pushEnabled.collectAsStateWithLifecycle()

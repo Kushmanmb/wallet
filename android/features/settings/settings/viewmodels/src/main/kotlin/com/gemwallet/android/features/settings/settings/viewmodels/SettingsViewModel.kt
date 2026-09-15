@@ -69,6 +69,10 @@ class SettingsViewModel @Inject constructor(
     val isPerpetualEnabled = userConfig.isPerpetualEnabled()
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val preferencesSections = isPerpetualEnabled
+        .map { enabled -> settingsService.preferencesSections(enabled) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, settingsService.preferencesSections(false))
+
     val appearance = userConfig.appearance()
         .stateIn(viewModelScope, SharingStarted.Eagerly, Appearance.System)
 

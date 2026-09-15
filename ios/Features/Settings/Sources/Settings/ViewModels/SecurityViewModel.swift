@@ -2,6 +2,8 @@
 
 import Primitives
 import Components
+import struct Gemstone.GemSecuritySection
+import protocol Gemstone.GemSettingsServiceProtocol
 import Foundation
 import GemstoneServices
 import Localization
@@ -10,6 +12,7 @@ import Localization
 @MainActor
 public final class SecurityViewModel {
     private let service: any BiometryAuthenticatable
+    private let settings: any GemSettingsServiceProtocol
     private let preferences: ObservablePreferences
 
     static let reason: String = Localized.Settings.Security.authentication
@@ -36,14 +39,20 @@ public final class SecurityViewModel {
 
     public init(
         service: any BiometryAuthenticatable,
+        settings: any GemSettingsServiceProtocol,
         preferences: ObservablePreferences,
     ) {
         self.service = service
+        self.settings = settings
         self.preferences = preferences
 
         lockPeriod = service.lockPeriod
         isEnabled = service.requiresAuthentication
         isPrivacyLockEnabled = service.isPrivacyLockEnabled
+    }
+
+    var sections: [GemSecuritySection] {
+        settings.securitySections(authenticationEnabled: isEnabled)
     }
 
     var title: String {

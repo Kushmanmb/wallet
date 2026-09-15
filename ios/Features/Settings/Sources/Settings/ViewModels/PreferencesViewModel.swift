@@ -1,6 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import struct Gemstone.GemPreferencesSection
+import protocol Gemstone.GemSettingsServiceProtocol
 import Foundation
 import protocol Gemstone.GemPreferencesServiceProtocol
 import GemstonePrimitives
@@ -16,6 +18,7 @@ import SwiftUI
 public final class PreferencesViewModel {
     private let preferences: ObservablePreferences
     private let service: any GemPreferencesServiceProtocol
+    private let settings: any GemSettingsServiceProtocol
     private let currencyModel: CurrencySceneViewModel
 
     var isPresentingLeveragePicker = false
@@ -25,35 +28,32 @@ public final class PreferencesViewModel {
     public init(
         currencyModel: CurrencySceneViewModel,
         service: any GemPreferencesServiceProtocol,
+        settings: any GemSettingsServiceProtocol,
         preferences: ObservablePreferences,
     ) {
         self.currencyModel = currencyModel
         self.service = service
+        self.settings = settings
         self.preferences = preferences
         perpetualLeverage = LeverageOption(value: service.getPerpetualLeverage())
         perpetualTakeProfit = AutocloseOption(value: service.getPerpetualTakeProfitPercent())
         perpetualStopLoss = AutocloseOption(value: service.getPerpetualStopLossPercent())
     }
 
+    var sections: [GemPreferencesSection] {
+        settings.preferencesSections(perpetualsEnabled: isPerpetualEnabled)
+    }
+
     var title: String {
         Localized.Settings.Preferences.title
     }
 
-    var currencyTitle: String {
-        Localized.Settings.currency
-    }
 
     var currencyValue: String {
         currencyModel.selectedCurrencyValue
     }
 
-    var currencyImage: AssetImage {
-        AssetImage.image(Images.Settings.currency)
-    }
 
-    var languageTitle: String {
-        Localized.Settings.language
-    }
 
     var languageValue: String {
         guard let code = Locale.current.language.languageCode?.identifier else {
@@ -62,33 +62,12 @@ public final class PreferencesViewModel {
         return Locale.current.localizedString(forLanguageCode: code)?.capitalized ?? ""
     }
 
-    var languageImage: AssetImage {
-        AssetImage.image(Images.Settings.language)
-    }
 
-    var networksTitle: String {
-        Localized.Settings.Networks.title
-    }
 
-    var networksImage: AssetImage {
-        AssetImage.image(Images.Settings.networks)
-    }
 
-    var contactsTitle: String {
-        Localized.Contacts.title
-    }
 
-    var contactsImage: AssetImage {
-        AssetImage.image(Images.Settings.contacts)
-    }
 
-    var appearanceTitle: String {
-        Localized.Settings.appearanceTitle
-    }
 
-    var appearanceImage: AssetImage {
-        AssetImage.image(Images.Settings.appearance)
-    }
 
     var appearanceValue: String {
         preferences.appearance.title
@@ -99,21 +78,12 @@ public final class PreferencesViewModel {
         set { preferences.isPerpetualEnabled = newValue }
     }
 
-    var perpetualsTitle: String {
-        Localized.Perpetuals.title
-    }
 
-    var perpetualsImage: AssetImage {
-        AssetImage.image(Images.Settings.perpetuals)
-    }
 
     var perpetualLeverage: LeverageOption {
         didSet { persist { try service.setPerpetualLeverage(leverage: perpetualLeverage.value) } }
     }
 
-    var defaultLeverageTitle: String {
-        Localized.Settings.Preferences.Perpetual.defaultLeverage
-    }
 
     var defaultLeverageValue: String {
         "\(perpetualLeverage.value)x"
@@ -139,13 +109,7 @@ public final class PreferencesViewModel {
         }
     }
 
-    var defaultTakeProfitTitle: String {
-        Localized.Settings.Preferences.Perpetual.defaultTakeProfit
-    }
 
-    var defaultStopLossTitle: String {
-        Localized.Settings.Preferences.Perpetual.defaultStopLoss
-    }
 
     var defaultTakeProfitValue: String {
         perpetualTakeProfit.displayText

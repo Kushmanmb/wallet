@@ -7,7 +7,7 @@ use primitives::Wallet;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_session::GemWalletSessionService;
 
-pub use rules::{GemSettingsRow, GemSettingsSection};
+pub use rules::{GemAboutRow, GemAboutSection, GemPreferencesRow, GemPreferencesSection, GemSecurityRow, GemSecuritySection, GemSettingsRow, GemSettingsSection};
 
 #[derive(uniffi::Object)]
 pub struct GemSettingsService {
@@ -22,6 +22,14 @@ impl GemSettingsService {
         Self { preferences, session }
     }
 
+    pub fn preferences_sections(&self, perpetuals_enabled: bool) -> Vec<GemPreferencesSection> {
+        rules::preferences_sections(perpetuals_enabled)
+    }
+
+    pub fn security_sections(&self, authentication_enabled: bool) -> Vec<GemSecuritySection> {
+        rules::security_sections(authentication_enabled)
+    }
+
     pub fn sections(&self, wallets: Vec<Wallet>, notifications_available: bool, wallet_connect_available: bool) -> Vec<GemSettingsSection> {
         rules::sections(
             notifications_available,
@@ -30,4 +38,9 @@ impl GemSettingsService {
             self.preferences.is_developer_enabled(),
         )
     }
+}
+
+#[uniffi::export]
+pub fn about_sections() -> Vec<GemAboutSection> {
+    rules::about_sections()
 }

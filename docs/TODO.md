@@ -28,7 +28,6 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 
 
 
-- **R17** **M** The settings family's sibling screens still name their own rows: [iOS `PreferencesViewModel`](../ios/Features/Settings/Sources/Settings/ViewModels/PreferencesViewModel.swift), `SecurityViewModel` and `AboutUsViewModel` against the Android preferences, security and about screens. The settings screen itself now reads `GemSettingsService.sections`; give each sibling the same shape — a row key per screen that each app maps to its own image and string.
 - **R19** **M** WalletConnect connections — [`ConnectionsViewModel`](../ios/Features/WalletConnector/Sources/WalletConnector/ViewModels/ConnectionsViewModel.swift) and `ConnectionSceneViewModel` hold no Core record and build the row and the detail fields themselves; Android's bridge screens do the same. `GemConnectionRow` already exists and answers part of it.
 - **R20** **M** Chain settings and nodes — `ChainSettingsSceneViewModel`, `ChainNodeViewModel` and `ServiceStatusItemViewModel` on iOS against the Android networks screens. `GemNodeSelection` and `GemServiceEndpoint` cross, but the section titles, the node subtitle and the explorer row are each app's.
 - **R21** **M** Stake and delegation — `StakeSceneViewModel`, `DelegationSceneViewModel` and `DelegationViewModel` build nine section and field titles app-side against the Android earn screens.
@@ -94,7 +93,7 @@ Product or security decisions, one question each:
 
 Ownership, injection and threads:
 
-- **O9** **S** `SettingsViewModel` on Android still holds the currency service beside the settings service because the preferences screen shares that view model; it drops it when the preferences rows move to Core with **R17**.
+- **O9** **S** `SettingsViewModel` on Android serves both the settings screen and the preferences screen, so it holds the currency service and the appearance and perpetual preferences that only the preferences rows read. Give the preferences screen its own view model and leave each with the one Core service its rows need.
 
 
 
