@@ -136,7 +136,7 @@ Measure before and after; these are code-backed candidates, not measured regress
 
 ## 9. Core decides it, only one app reads it
 
-Each of these is an `#[uniffi::export]` the sweep found named in one app and in neither the other app's Kotlin nor its Swift. The app that does not call it still answers the same question locally, so the two answers can drift. Confirm the local answer before moving it — a few of these are genuinely platform-only.
+Each of these is an `#[uniffi::export]` the sweep found named in one app and in neither the other app's Kotlin nor its Swift. The first run of this sweep skipped every iOS file whose name ends `+Gemstone.swift`; the list below is the corrected one. The app that does not call it still answers the same question locally, so the two answers can drift. Confirm the local answer before moving it — a few of these are genuinely platform-only.
 
 ### Android does not read an iOS-read decision
 
@@ -150,12 +150,9 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 - **P22** **M** `developer/mod.rs` `clear_preferences`, `delete_wallet_preferences`, `clear_perpetual_markets`, `deeplink_url` — Android's `DevelopViewModel.kt` reimplements the developer menu.
 - **P23** **S** `assets/details.rs` `deeplink_gem_url`.
 - **P24** **S** `assets/config.rs` `default_token_rank` and `matching_assets`.
-- **P25** **S** `asset_discovery/mod.rs` `discover`.
-- **P26** **S** `auth/mod.rs` `get_nonce`.
 - **P27** **S** `confirm/error.rs` `has_info_sheet` — Android decides which confirm errors open a sheet.
 - **P28** **S** `support/mod.rs` `image_file`.
 - **P29** **S** `security/rules.rs` `is_cancelled`.
-- **P30** **S** `device/keys.rs` `key_pair`.
 - **P31** **S** `node/model.rs` `latest_block`.
 - **P32** **M** `perpetual/mod.rs` `sync_markets_if_needed`, `sync_markets`, `sync_current_positions`, `clear_markets`, `markets_updated_at` — Android schedules the same five itself.
 - **P33** **S** `swap/rules.rs` `minimum_amount`.
@@ -170,6 +167,7 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 - **P42** **M** `message/signer.rs` `sign_with_keystore` — security-critical; confirm what Android signs with before changing anything.
 - **P43** **S** `swap/session.rs` `swap_error_display` and `swap/model.rs` `swap_quote`.
 - **P44** **S** `device/mod.rs` `synchronize`.
+- **P62** **S** `transfer/model.rs` `named`.
 
 ### iOS does not read an Android-read decision
 
@@ -183,7 +181,7 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 - **P52** **S** `mnemonic.rs` `find_invalid_words` — iOS surfaces invalid words only through the import error.
 - **P53** **S** `app_update/mod.rs` `is_version_higher` — iOS compares versions inside `newest`; pick one.
 - **P54** **S** `transactions/mod.rs` `listed_asset_rank`.
-- **P55** **S** `security/rules.rs` `lock_periods`, `lock_period_from_minutes`, `retry_delay_milliseconds` — iOS's `LockPeriod` enum answers all three.
+- **P55** **S** `security/rules.rs` `retry_delay_milliseconds` — iOS retries biometry prompts on its own schedule. (iOS does read `lock_periods` and `lock_period_from_minutes` through `LockPeriod+Gemstone.swift`.)
 - **P56** **M** `wallet/mod.rs` `migrate_to_shared_password` and `preview_import` — security-critical keystore paths; read [KEYSTORE_V4](KEYSTORE_V4.md) first.
 - **P57** **S** `swap/slippage.rs` `on_auto`.
 - **P58** **S** `swap/session.rs` `on_quote_invalidated` and `on_refresh_requested` — iOS drives quote refresh from the view model.
