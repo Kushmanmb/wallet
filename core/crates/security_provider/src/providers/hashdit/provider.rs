@@ -190,6 +190,12 @@ mod tests {
     async fn test_scan_bsc_address_verdicts() {
         let cases = [
             (
+                "0x123",
+                include_str!("../../../testdata/hashdit/address_security_medium_risk_response.json"),
+                false,
+                "Medium Risk",
+            ),
+            (
                 "0x0f9adaaccd7caecc5019194e15ad19624fed95fa",
                 include_str!("../../../testdata/hashdit/address_security_significant_risk_response.json"),
                 true,
@@ -266,7 +272,7 @@ mod tests {
         };
         let result = HashDitProvider::new(client, "api-key").scan_token(&target).await.unwrap();
 
-        assert!(result.is_malicious);
+        assert!(!result.is_malicious);
         assert_eq!(result.reason.as_deref(), Some("Medium Risk"));
     }
 
