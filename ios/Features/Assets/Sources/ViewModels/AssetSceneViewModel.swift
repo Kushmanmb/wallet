@@ -106,11 +106,11 @@ public final class AssetSceneViewModel: Sendable {
     }
 
     var energyField: ListItemField {
-        ListItemField(title: ResourceViewModel(resource: .energy).title, value: feeAssetDataModel.energyText)
+        ListItemField(title: Resource.energy.title, value: feeAssetDataModel.energyText)
     }
 
     var bandwidthField: ListItemField {
-        ListItemField(title: ResourceViewModel(resource: .bandwidth).title, value: feeAssetDataModel.bandwidthText)
+        ListItemField(title: Resource.bandwidth.title, value: feeAssetDataModel.bandwidthText)
     }
 
     var balanceRows: [GemBalanceRow] {

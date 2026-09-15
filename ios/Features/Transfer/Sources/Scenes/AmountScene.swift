@@ -78,7 +78,7 @@ public struct AmountScene: View {
                     Section {
                         Picker("", selection: $resourceSelection.selected) {
                             ForEach(resourceSelection.options) { resource in
-                                Text(ResourceViewModel(resource: resource).title)
+                                Text(resource.title)
                                     .tag(resource)
                             }
                         }

@@ -11,7 +11,7 @@ import com.gemwallet.android.ui.format.rememberFormattedAddress
 import com.gemwallet.android.ui.R
 import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ui.components.image.walletImageModel
-import com.gemwallet.android.ui.components.titleRes
+import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.components.list_item.property.AddressPropertyItem
 import com.gemwallet.android.ui.components.list_item.property.PropertyDataText
 import com.gemwallet.android.ui.components.list_item.property.PropertyItem
@@ -55,7 +55,7 @@ fun PropertyDestination(
         )
         is ConfirmProperty.Destination.Resource -> PropertyItem(
             title = { PropertyTitleText(R.string.stake_resource) },
-            data = { PropertyDataText(stringResource(model.resource.titleRes())) },
+            data = { PropertyDataText(stringResource(model.resource.stringRes())) },
             listPosition = listPosition,
         )
         is ConfirmProperty.Destination.Stake -> {

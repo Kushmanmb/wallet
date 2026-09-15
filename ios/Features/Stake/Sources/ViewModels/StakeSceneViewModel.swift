@@ -93,11 +93,11 @@ public final class StakeSceneViewModel {
     }
 
     var energyField: ListItemField {
-        ListItemField(title: ResourceViewModel(resource: .energy).title, value: balanceModel.energyText)
+        ListItemField(title: Resource.energy.title, value: balanceModel.energyText)
     }
 
     var bandwidthField: ListItemField {
-        ListItemField(title: ResourceViewModel(resource: .bandwidth).title, value: balanceModel.bandwidthText)
+        ListItemField(title: Resource.bandwidth.title, value: balanceModel.bandwidthText)
     }
 
     var freezeTitle: String {

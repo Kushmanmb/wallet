@@ -212,3 +212,12 @@ extension PerpetualMarginType {
         }
     }
 }
+
+extension Resource {
+    public var title: String {
+        switch self {
+        case .bandwidth: Localized.Stake.Resource.bandwidth
+        case .energy: Localized.Stake.Resource.energy
+        }
+    }
+}

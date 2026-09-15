@@ -1,5 +1,6 @@
 package com.gemwallet.android.ui.components.list_item.transaction
 
+import com.gemwallet.android.ui.localization.stringRes
 import androidx.annotation.StringRes
 import com.gemwallet.android.ext.toPrimitives
 import androidx.compose.material3.MaterialTheme
@@ -38,8 +39,8 @@ fun TransactionDataAggregate.getBadgeColor(): Color = status.tone.color()
 fun TransactionDataAggregate.formatAddress(): String? = when (val subtitle = subtitle) {
     is GemTransactionRowSubtitle.ToAddress -> prefixed(R.string.transfer_to, subtitle.participant)
     is GemTransactionRowSubtitle.FromAddress -> prefixed(R.string.transfer_from, subtitle.participant)
-    is GemTransactionRowSubtitle.ToResource -> prefixed(R.string.transfer_to, stringResource(subtitle.resource.toPrimitives().titleRes()))
-    is GemTransactionRowSubtitle.FromResource -> prefixed(R.string.transfer_from, stringResource(subtitle.resource.toPrimitives().titleRes()))
+    is GemTransactionRowSubtitle.ToResource -> prefixed(R.string.transfer_to, stringResource(subtitle.resource.toPrimitives().stringRes()))
+    is GemTransactionRowSubtitle.FromResource -> prefixed(R.string.transfer_from, stringResource(subtitle.resource.toPrimitives().stringRes()))
     is GemTransactionRowSubtitle.Price -> "${stringResource(R.string.asset_price)}: ${usdFiatFormatter.string(subtitle.value)}"
     GemTransactionRowSubtitle.None -> null
 }

@@ -142,6 +142,6 @@ public struct TransactionViewModel: Sendable, Identifiable, Equatable {
     }
 
     private func resourceTitle(prefix: String, resource: Gemstone.Resource) -> String {
-        String(format: "%@ %@", prefix, ResourceViewModel(resource: resource.toPrimitives()).title)
+        String(format: "%@ %@", prefix, resource.toPrimitives().title)
     }
 }

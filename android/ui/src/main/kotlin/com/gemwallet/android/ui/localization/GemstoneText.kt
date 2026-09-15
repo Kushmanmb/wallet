@@ -10,6 +10,7 @@ import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.R
 import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.PerpetualDirection
+import com.wallet.core.primitives.Resource
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.GemAddNodeFailure
 import uniffi.gemstone.GemDelegationStatus
@@ -159,4 +160,10 @@ fun LinkType.stringRes(): Int = when (this) {
     LinkType.MAGIC_EDEN -> R.string.social_magiceden
     LinkType.COIN_MARKET_CAP -> R.string.social_coinmarketcap
     LinkType.TIK_TOK -> R.string.social_tiktok
+}
+
+@StringRes
+fun Resource.stringRes(): Int = when (this) {
+    Resource.Bandwidth -> R.string.stake_resource_bandwidth
+    Resource.Energy -> R.string.stake_resource_energy
 }
