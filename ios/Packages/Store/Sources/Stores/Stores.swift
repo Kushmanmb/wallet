@@ -2,7 +2,7 @@
 
 import Foundation
 
-public struct StoreManager: Sendable {
+public struct Stores: Sendable {
     public let assetStore: AssetStore
     public let balanceStore: BalanceStore
     public let fiatRateStore: FiatRateStore

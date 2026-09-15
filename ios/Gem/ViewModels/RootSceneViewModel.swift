@@ -38,7 +38,7 @@ final class RootSceneViewModel {
     let lockManager: any LockWindowManageable
 
     var currentWallet: Wallet? {
-        walletSessionService.currentWalletId.flatMap { try? viewModelFactory.storeManager.walletStore.getWallet(id: $0) }
+        walletSessionService.currentWalletId.flatMap { try? viewModelFactory.stores.walletStore.getWallet(id: $0) }
     }
     var currentWalletId: WalletId? { walletSessionService.currentWalletId }
     var colorScheme: ColorScheme? { observablePreferences.appearance.colorScheme }

@@ -151,7 +151,7 @@ public struct ViewModelFactory: Sendable {
     let developerService: GemDeveloperService
     let deviceService: GemDeviceService
     let notificationPermissions: any GemNotificationPermissions
-    let storeManager: StoreManager
+    let stores: Stores
     let supportService: any GemSupportServiceProtocol
     let supportTyping: ObservableSupportTyping
 
@@ -425,11 +425,11 @@ public struct ViewModelFactory: Sendable {
         DeveloperViewModel(
             walletId: walletId,
             service: developerService,
-            transactionStore: storeManager.transactionStore,
-            assetStore: storeManager.assetStore,
-            stakeStore: storeManager.stakeStore,
-            bannerStore: storeManager.bannerStore,
-            priceStore: storeManager.priceStore,
+            transactionStore: stores.transactionStore,
+            assetStore: stores.assetStore,
+            stakeStore: stores.stakeStore,
+            bannerStore: stores.bannerStore,
+            priceStore: stores.priceStore,
         )
     }
 
@@ -624,7 +624,7 @@ public struct ViewModelFactory: Sendable {
     }
 
     private func currentWallets() -> [Wallet] {
-        (try? storeManager.walletStore.getWallets()) ?? []
+        (try? stores.walletStore.getWallets()) ?? []
     }
 
     private func currentWallet(in wallets: [Wallet]) -> Wallet? {
