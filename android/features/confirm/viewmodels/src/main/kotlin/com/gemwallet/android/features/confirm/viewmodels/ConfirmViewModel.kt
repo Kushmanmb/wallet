@@ -106,6 +106,7 @@ class ConfirmViewModel @Inject constructor(
     private val request = savedStateHandle.getStateFlow<String?>(RouteArgument.Params.key, null)
         .filterNotNull()
         .mapNotNull { paramsPack -> unpackTransferData(paramsPack) }
+        .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val title = request.map { it?.title() }
@@ -169,6 +170,7 @@ class ConfirmViewModel @Inject constructor(
 
     val simulation = content
         .map { it?.load?.simulation?.toSimulation(it.session) ?: Simulation() }
+        .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.Eagerly, Simulation())
 
     val payloadAddressNames = content
@@ -230,6 +232,7 @@ class ConfirmViewModel @Inject constructor(
 
     val detailElements = combine(request, content, ::buildDetailElements)
         .distinctUntilChanged()
+        .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val transactionProperties = combine(request, session, content) { request, session, content ->
