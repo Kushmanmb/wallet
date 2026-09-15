@@ -30,10 +30,7 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 
 ## 3. Views that decide
 
-- **B9** **S** Re-run the § 5 grep over the 12 iOS scene files that name `Gemstone` once G2 lands, and move anything that decides into its model. Most are row-key dispatch and stay.
-- **B10** **M** The same pass over the 94 Android `presents/` composables that name `uniffi.gemstone`.
-
-Rejected: `import_wallet/views/ImportScreen.kt` switches over a `Throwable` and delegates its Core arm to the module mapper already.
+Both closed on 2026-09-15. **B9**: all 21 iOS scenes and views that name `Gemstone` `switch` over a row key or read a row record — the contract working — and the two that branch on a Core value (`TransactionSwapProgressView` showing the estimated time on the spinner step, `SupportMessageBubble`) make the same call Android makes in the same place. **B10**: of 52 Android composables that `when` over a Core enum, the branch is an icon, a colour or a painter in almost every case — the style half of the mapper contract — and `android/ui` was keeping it in eight ad-hoc files. The tone, state and verification mappings now live in `ui/style/GemstoneStyle.kt` beside the header-button icon. What is left branches on a Core value to pick a keyboard, a paste handler or a trailing composable, which is rendering.
 
 ## 4. Ownership
 

@@ -46,6 +46,7 @@ import com.wallet.core.primitives.TransactionState
 import uniffi.gemstone.GemTransactionStateTone
 import com.gemwallet.android.AppUrl
 import com.wallet.core.primitives.StakeChain
+import com.gemwallet.android.ui.style.badgeIconRes
 
 internal val infoSheetIconSize = extraLargeIconSize
 

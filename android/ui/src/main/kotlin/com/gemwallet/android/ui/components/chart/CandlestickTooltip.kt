@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import com.gemwallet.android.model.text
-import com.gemwallet.android.ui.components.list_item.color
+import com.gemwallet.android.ui.style.color
 import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall

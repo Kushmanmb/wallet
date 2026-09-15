@@ -1,4 +1,4 @@
-package com.gemwallet.android.ui.components
+package com.gemwallet.android.ui.style
 
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.localization.infoDescriptionRes
@@ -8,7 +8,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import uniffi.gemstone.GemTransactionStateTone
 
-class TransactionStateExtTest {
+class GemstoneStyleTest {
     @Test
     fun everyStateNamesItsOwnLabel() {
         assertEquals(R.string.transaction_status_pending, TransactionState.Pending.statusLabelRes())

@@ -62,6 +62,7 @@ import com.gemwallet.android.ui.components.mask
 import com.gemwallet.android.ui.components.image.AssetIcon
 import com.gemwallet.android.ui.components.image.IconWithBadge
 import com.gemwallet.android.ui.components.list_item.color
+import com.gemwallet.android.ui.style.color
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.Spacer8
