@@ -17,6 +17,13 @@ enum ConfirmTransferError {
         }
     }
 
+    var hasInfoSheet: Bool {
+        switch self {
+        case .confirm: true
+        case .other: false
+        }
+    }
+
     var displayError: Error {
         switch self {
         case let .confirm(error): error

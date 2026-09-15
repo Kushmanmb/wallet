@@ -92,17 +92,14 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 
 Each of these is an `#[uniffi::export]` the sweep found named in one app and in neither the other app's Kotlin nor its Swift. The first run skipped every iOS file whose name ends `+Gemstone.swift`; the list below is the corrected one.
 
-**Read the preamble before starting one.** The sweep measures which *export* each app names, which is not the same as which app *owns* the decision. Eight were checked on 2026-09-15 and closed with no change, because the app that never calls the export still reads the same Core answer through a different one: Android reads the abbreviation cutoff through `GemValueStyle.abbreviates`, the price-alert kind through the aggregate's `kind.groupsByAsset()`, the dApp name through `GemConfirmDestination.Generic` and `connection_row`, and whether to show a memo through the confirm row set; the developer screen simply offers fewer actions than the iOS one. So for each item below, first find what the other app renders for the same thing — only if it computes the answer itself is there work here.
+**Read the preamble before starting one.** The sweep measures which *export* each app names, which is not the same as which app *owns* the decision. Eleven were checked on 2026-09-15 and closed with no change, because the app that never calls the export still reads the same Core answer through a different one: Android reads the abbreviation cutoff through `GemValueStyle.abbreviates`, the price-alert kind through the aggregate's `kind.groupsByAsset()`, the dApp name through `GemConfirmDestination.Generic` and `connection_row`, whether to show a memo through the confirm row set, the latest block through the node row's `GemNodeSubtitle.LatestBlock`, the swap minimum through `GemSwapButtonAction.UseMinimumAmount`, and whether to offer rewards through the `GemSettingsRow.REWARDS` the settings service emits from it; the developer screen simply offers fewer actions than the iOS one. So for each item below, first find what the other app renders for the same thing — only if it computes the answer itself is there work here.
 
 ### Android does not read an iOS-read decision
 
 - **P24** **S** `assets/config.rs` `default_token_rank` and `matching_assets`.
-- **P27** **S** `confirm/error.rs` `has_info_sheet` — Android decides which confirm errors open a sheet.
 - **P28** **S** `support/mod.rs` `image_file`.
 - **P29** **S** `security/rules.rs` `is_cancelled`.
-- **P31** **S** `node/model.rs` `latest_block`.
 - **P32** **M** `perpetual/mod.rs` `sync_markets_if_needed`, `sync_markets`, `sync_current_positions`, `clear_markets`, `markets_updated_at` — Android schedules the same five itself.
-- **P33** **S** `swap/rules.rs` `minimum_amount`.
 - **P34** **S** `assets/add.rs` `on_chain`.
 - **P35** **S** `perpetual/autoclose.rs` `on_submit_attempt`.
 - **P36** **S** `amount/model.rs` `prefilled_amount`.
@@ -110,7 +107,6 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 - **P38** **S** `avatar/mod.rs` `set_image` and `remove_image`.
 - **P39** **S** `wallet_preferences/mod.rs` `reset_transactions_timestamp`.
 - **P40** **M** `wallet/mod.rs` `setup_chains` — Android runs its own chain setup after import.
-- **P41** **S** `wallet_session/mod.rs` `shows_rewards`.
 - **P42** **M** `message/signer.rs` `sign_with_keystore` — security-critical; confirm what Android signs with before changing anything.
 - **P43** **S** `swap/session.rs` `swap_error_display` and `swap/model.rs` `swap_quote`.
 - **P44** **S** `device/mod.rs` `synchronize`.
