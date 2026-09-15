@@ -272,7 +272,6 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 
 ## 13. Names the guides forbid
 
-- **N1** **S** `ios/Features/Swap/.../SwapSceneViewModel.swift` — `applyQuote`, `applyPercentToFromValue`, `applyMinAmount`.
 - **N2** **S** `ios/Features/FiatConnect/.../FiatSceneViewModel.swift` `applyAmount`, `ios/Features/Assets/.../SelectAssetViewModel.swift` `applySelectionEffect`.
 - **N3** **S** `ios/Packages/Store/Sources/Requests` — `applyFilter`, `applyFilters`, `fetchAllAssetRecordsRequest`.
 - **N4** **S** `ios/Packages/Store/Sources/Stores/StoreManager.swift` and `ios/Packages/Primitives/Sources/Extensions/NSFileManager+Primitives.swift`.
