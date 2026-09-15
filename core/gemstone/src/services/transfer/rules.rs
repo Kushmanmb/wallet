@@ -569,7 +569,7 @@ mod tests {
         let swap = (TransactionInputType::Swap {
             from_asset: from.clone(),
             to_asset: to.clone(),
-            swap_data: crate::models::swap::GemSwapData::mock(),
+            swap_data: SwapData::mock(),
         })
         .recent_activity()
         .unwrap();

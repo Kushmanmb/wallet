@@ -7,7 +7,6 @@ pub use primitives::swap::{ApprovalData, SwapData, SwapPriceImpact, SwapPriceImp
 pub use swapper::SwapperProvider;
 
 pub type GemApprovalData = ApprovalData;
-pub type GemSwapData = SwapData;
 pub type GemSwapQuoteData = SwapQuoteData;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

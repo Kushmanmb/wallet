@@ -17,16 +17,8 @@ impl PriceChangeCalculator {
         Self {}
     }
 
-    pub fn percentage(&self, from: f64, to: f64) -> f64 {
-        Calculator::percentage(from, to)
-    }
-
     pub fn pnl_percentage(&self, pnl: f64, margin: f64) -> f64 {
         Calculator::pnl_percentage(pnl, margin)
-    }
-
-    pub fn amount(&self, percentage: f64, value: f64) -> f64 {
-        Calculator::amount(percentage, value)
     }
 
     pub fn sign(&self, value: f64) -> GemAmountSign {

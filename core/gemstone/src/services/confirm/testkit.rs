@@ -33,7 +33,6 @@ pub struct ConfirmTestkit {
     pub service: Arc<GemConfirmTransferService>,
     pub confirm: Arc<GemConfirmService>,
     pub balances: Arc<MemoryBalanceStore>,
-    pub provider: Arc<TestAlienProvider>,
 }
 
 impl ConfirmTestkit {
@@ -99,7 +98,7 @@ impl ConfirmTestkit {
         ));
         let confirm = Arc::new(GemConfirmService::new(
             gateway,
-            Arc::new(GemSimulationService::new(provider.clone(), Arc::new(EmptyPreferences))),
+            Arc::new(GemSimulationService::new(provider, Arc::new(EmptyPreferences))),
             Arc::new(GemScanService::new(device_api.clone())),
             transactions,
             balance,
@@ -117,12 +116,7 @@ impl ConfirmTestkit {
             Arc::new(GemRecentActivityService::new(Arc::new(MemoryRecentActivityStore::default()), session)),
             preferences,
         ));
-        Self {
-            service,
-            confirm,
-            balances,
-            provider,
-        }
+        Self { service, confirm, balances }
     }
 }
 
