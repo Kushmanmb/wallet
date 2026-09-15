@@ -355,7 +355,6 @@ Each pair below resolves to the same English text and to the same text in every 
 
 - **X100** **S** `ios/Packages/Primitives/Sources/WalletImportResult.swift` twins `GemWalletImportResult` case for case.
 - **X103** **S** `ios/Features/Transactions/Sources/Types/TransactionHeaderAction.swift` twins `GemTransactionHeaderAction` case for case.
-- **X104** **S** `ios/Features/Stake/.../DelegationViewModel.swift` declares `DelegationDestination`, which twins `GemDelegationDestination` case for case.
 
 Checked and kept: `KeystoreAuthentication` and `LockPeriod` are both written to the keychain by raw value, which the rule allows; `AmountType` carries a recipient its Core namesake does not; `SelectAssetType` and `PaymentDestination` are navigation types carrying app payloads and already map to Core through `flowType`.
 
