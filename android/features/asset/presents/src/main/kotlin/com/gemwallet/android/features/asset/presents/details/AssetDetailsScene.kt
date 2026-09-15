@@ -22,6 +22,7 @@ import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.list_item.energyItem
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.list_item.property.verificationStatusItem
+import com.gemwallet.android.ui.components.list_item.rememberDateSections
 import com.gemwallet.android.ui.components.list_item.transaction.transactionsList
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
@@ -93,6 +94,7 @@ internal fun AssetDetailsScene(
         onClose = { onAction(AssetDetailsAction.Close) },
         snackbar = snackBar,
     ) {
+        val transactionSections = rememberDateSections(transactions) { it.createdAt }
         PullToRefreshBox(
             modifier = Modifier.fillMaxSize(),
             isRefreshing = isRefreshing,
@@ -181,7 +183,7 @@ internal fun AssetDetailsScene(
                         onSwap = if (detailsState.emptyTransactionsAction == GemAssetEmptyAction.SWAP) swapAction else null,
                     )
                 }
-                transactionsList(transactions) { onAction(AssetDetailsAction.OpenTransaction(it)) }
+                transactionsList(transactionSections) { onAction(AssetDetailsAction.OpenTransaction(it)) }
             }
         }
     }

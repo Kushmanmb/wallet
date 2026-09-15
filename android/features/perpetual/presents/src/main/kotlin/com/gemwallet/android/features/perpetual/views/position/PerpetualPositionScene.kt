@@ -21,6 +21,7 @@ import com.gemwallet.android.features.perpetual.views.components.PerpetualPositi
 import com.gemwallet.android.features.perpetual.views.components.perpetualInfo
 import com.gemwallet.android.features.perpetual.views.components.positionProperties
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.list_item.rememberDateSections
 import com.gemwallet.android.ui.components.list_item.transaction.transactionsList
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
@@ -61,6 +62,7 @@ internal fun PerpetualPositionScene(
         onClose = { onAction(PerpetualDetailsAction.Close) },
         snackbar = snackbar,
     ) {
+        val transactionSections = rememberDateSections(transactions) { it.createdAt }
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = { onAction(PerpetualDetailsAction.Refresh) },
@@ -91,7 +93,7 @@ internal fun PerpetualPositionScene(
                 }
                 perpetual?.let { perpetualInfo(it) }
                 if (transactions.isNotEmpty()) {
-                    transactionsList(transactions) { onAction(PerpetualDetailsAction.OpenTransaction(it)) }
+                    transactionsList(transactionSections) { onAction(PerpetualDetailsAction.OpenTransaction(it)) }
                 }
             }
         }
