@@ -187,6 +187,18 @@ The precedent that made this work: `GemWalletStore.get_wallets`/`get_wallet` are
 
 **Tests.** iOS mocks the protocol from [`GemstoneServices/TestKit`](../ios/Packages/GemstoneServices/TestKit/); Android fakes the case interface, or mocks `Gem*Service` with MockK, using fixtures from `gemcore` `testFixtures`. Never mock a dependency-free constructible service (`GemAssetConfigService`, `GemChainService`, …) — construct the real one, or the test asserts the mock. Never fabricate I/O to reach a rule either: an offline `AlienProvider`, in-memory preference and secure stores and empty row stores, stood up so a test can touch rules that use none of them, is always the wrong answer — pass the answer in from the caller that owns the service, or mock the service and state the premise plainly. Neither app tests a rule that lives in Core — that test stays with its owning Core implementation.
 
+### 6. Publish a multi-source refresh as one batch
+
+A refresh that asks several sources at once — [`GemBalanceService.update`](../core/gemstone/src/services/balance/mod.rs) asks every chain of a wallet concurrently — publishes **one** store write carrying every source that answered. The contract each app's observers rely on:
+
+- **One write per refresh, and it is atomic.** Both adapters write the batch inside a single database transaction, so an observed query never sees a wallet half updated and a portfolio total never mixes rows from two different refreshes of the same call.
+- **A source that fails holds nothing back.** The sources that answered are written; the first failure in request order is returned after the write, so the caller can report it without discarding good data. `published_balances` owns that split and is tested on its own.
+- **A source that fails leaves its rows as they were.** There is no "unknown" state: the previous values stay and stay visible, so a total computed while one chain is offline is a total of older values for that chain, not a total missing it.
+- **The wallet is named, not implied.** Every write is keyed by the `WalletId` the refresh was asked for, so a response that lands after the user switched wallets writes the wallet it belongs to and never the one on screen.
+- **Only rows whose values differ are written.** The refresh reads the stored rows, folds its updates onto them by kind — a stake answer does not clear a coin's available balance — and drops the rows that come back equal.
+
+What the contract does **not** give you, and what any move to per-source publication has to add first: two refreshes of the same wallet in flight together each read, fold and write independently, so the slower one can publish over the newer values; nothing fences a write by the age of what it read. Splitting one batch into several also multiplies observer notifications and makes mixed-age totals the normal case rather than the exception, so the policy for both has to be decided before the split, not after.
+
 ### Done means
 
 - Core has the flow, the rules and their tests; the app code it replaced is deleted in the same commit.
