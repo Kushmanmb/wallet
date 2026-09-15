@@ -152,6 +152,12 @@ impl Default for MultiChainExplorer {
     }
 }
 
+impl Metadata {
+    pub fn explorer(self) -> Box<dyn BlockExplorer> {
+        Box::new(Explorer { config: self })
+    }
+}
+
 impl MultiChainExplorer {
     pub fn new() -> Self {
         Self { configs: HashMap::new() }
