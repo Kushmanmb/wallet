@@ -21,6 +21,7 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 import com.gemwallet.android.features.confirm.presents.AcquireAssetAction
 import com.wallet.core.primitives.AssetId
+import com.gemwallet.android.ui.localization.text
 
 @Composable
 fun PerpetualPositionNavScreen(
@@ -48,7 +49,7 @@ fun PerpetualPositionNavScreen(
     val period by viewModel.period.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
-    val snackbar = rememberSnackbarState(message = error, iconRes = R.drawable.ic_error, onShown = viewModel::clearError)
+    val snackbar = rememberSnackbarState(message = error?.text(), iconRes = R.drawable.ic_error, onShown = viewModel::clearError)
     var showAutoclose by remember { mutableStateOf(false) }
 
     PerpetualPositionScene(

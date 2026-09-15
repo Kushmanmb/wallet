@@ -59,7 +59,8 @@ import com.wallet.core.primitives.WalletId
 import com.wallet.core.primitives.WalletSource
 import com.wallet.core.primitives.WalletType
 import uniffi.gemstone.GemRewardsRedemption
-import com.gemwallet.android.ext.serviceMessage
+import com.gemwallet.android.ext.errorText
+import com.gemwallet.android.ui.localization.text
 
 private val referralCodeMaxWidth = 250.dp
 
@@ -175,11 +176,12 @@ fun ReferralScene(
                 referralUnverified(uiState)
                 referralConfirmCode(uiState) {
                     onCode(it) { error ->
+                        val message = error?.errorText()?.text(context)
                         scope.launch {
-                            if (error == null) {
+                            if (message == null) {
                                 snackbar.showSnackbar(successStr, R.drawable.ic_check_circle)
                             } else {
-                                snackbar.showSnackbar(error.serviceMessage(), R.drawable.ic_error)
+                                snackbar.showSnackbar(message, R.drawable.ic_error)
                             }
                         }
                         onRefresh()

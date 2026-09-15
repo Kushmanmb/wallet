@@ -5,6 +5,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemChainSettingsServiceInterface
 import uniffi.gemstone.GemNodeSelection
 import uniffi.gemstone.GemNodeStatusState
@@ -26,7 +27,7 @@ import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import com.gemwallet.android.ext.runCatchingCancellable
-import com.gemwallet.android.ext.serviceMessage
+import com.gemwallet.android.ext.errorText
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -78,7 +79,7 @@ class NetworksViewModel @Inject constructor(
         viewModelScope.launch {
             runCatchingCancellable { service.selectNode(chain.string, url) }
                 .onSuccess { loadNodes(chain) }
-                .onFailure { error -> updateState { it.copy(error = error.serviceMessage()) } }
+                .onFailure { error -> updateState { it.copy(error = error.errorText()) } }
         }
     }
 
@@ -86,7 +87,7 @@ class NetworksViewModel @Inject constructor(
         val chain = state.value.chain ?: return
         runCatching { service.setExplorerName(chain.string, name) }
             .onSuccess { updateState { it.copy(currentExplorer = name) } }
-            .onFailure { error -> updateState { it.copy(error = error.serviceMessage()) } }
+            .onFailure { error -> updateState { it.copy(error = error.errorText()) } }
     }
 
     fun onSelectChain() {
@@ -98,7 +99,7 @@ class NetworksViewModel @Inject constructor(
         viewModelScope.launch {
             runCatchingCancellable { service.deleteNode(chain.string, url) }
                 .onSuccess { loadNodes(chain) }
-                .onFailure { error -> updateState { it.copy(error = error.serviceMessage()) } }
+                .onFailure { error -> updateState { it.copy(error = error.errorText()) } }
         }
     }
 
@@ -202,7 +203,7 @@ class NetworksViewModel @Inject constructor(
         val selectChain: Boolean = true,
         val availableAddNode: Boolean = true,
         val refreshNonce: Long = 0,
-        val error: String? = null,
+        val error: GemErrorText? = null,
     ) {
         fun toUIState(): NetworksUIState {
             return NetworksUIState(

@@ -2,12 +2,13 @@ package com.gemwallet.android.features.asset.viewmodels.details.viewmodels
 
 import android.util.Log
 import com.gemwallet.android.ext.runCatchingCancellable
-import com.gemwallet.android.ext.serviceMessage
+import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toGemKey
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.domains.banner.BannerRow
+import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemPriceAlertToggle
 import uniffi.gemstone.GemAssetDetailsInput
 import uniffi.gemstone.GemAssetDetailsServiceInterface
@@ -72,8 +73,8 @@ class AssetDetailsViewModel @Inject constructor(
 
     val isRefreshing = MutableStateFlow(false)
 
-    private val errorState = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = errorState.asStateFlow()
+    private val errorState = MutableStateFlow<GemErrorText?>(null)
+    val error: StateFlow<GemErrorText?> = errorState.asStateFlow()
 
     private val assetId = savedStateHandle.requireAssetId()
 
@@ -183,7 +184,7 @@ class AssetDetailsViewModel @Inject constructor(
     fun togglePriceAlert(assetId: AssetId) = viewModelScope.launch(Dispatchers.IO) {
         val toggled = uiModel.value?.detailsState?.priceAlert?.toggled() ?: return@launch
         runCatchingCancellable { assetDetailsService.setPriceAlert(assetId.toIdentifier(), toggled == GemPriceAlertToggle.ENABLED) }
-            .onFailure { errorState.value = it.serviceMessage() }
+            .onFailure { errorState.value = it.errorText() }
     }
 
     fun closeBanner(banner: Banner) = viewModelScope.launch(Dispatchers.IO) {

@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemContactAddressInput
 import uniffi.gemstone.GemContactAvatar
 import uniffi.gemstone.GemContactInput
@@ -38,7 +39,7 @@ import uniffi.gemstone.GemManageContactServiceInterface
 import uniffi.gemstone.GemNameServiceInterface
 import java.util.UUID
 import javax.inject.Inject
-import com.gemwallet.android.ext.serviceMessage
+import com.gemwallet.android.ext.errorText
 
 @HiltViewModel
 class ManageContactViewModel @Inject constructor(
@@ -233,7 +234,7 @@ class ManageContactViewModel @Inject constructor(
             runCatchingCancellable { service.saveContact(input) }
                 .onSuccess { state.update { it.copy(saved = true) } }
                 .onFailure { error ->
-                    state.update { it.copy(isSaving = false, error = error.serviceMessage()) }
+                    state.update { it.copy(isSaving = false, error = error.errorText()) }
                 }
         }
     }

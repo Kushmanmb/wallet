@@ -48,10 +48,11 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemPerpetualDetailsServiceInterface
 import uniffi.gemstone.GemPerpetualPositionKind
 import javax.inject.Inject
-import com.gemwallet.android.ext.serviceMessage
+import com.gemwallet.android.ext.errorText
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -184,8 +185,8 @@ class PerpetualDetailsViewModel @Inject constructor(
         this.period.update { period }
     }
 
-    private val errorState = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = errorState.asStateFlow()
+    private val errorState = MutableStateFlow<GemErrorText?>(null)
+    val error: StateFlow<GemErrorText?> = errorState.asStateFlow()
 
     fun fetch() {
         refreshTrigger.update { it + 1 }
@@ -212,7 +213,7 @@ class PerpetualDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatchingCancellable { buildPerpetualParams.position(perpetualId, kind) }
                 .onSuccess { params -> params?.let(amountAction::invoke) }
-                .onFailure { errorState.value = it.serviceMessage() }
+                .onFailure { errorState.value = it.errorText() }
         }
     }
 
@@ -221,7 +222,7 @@ class PerpetualDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatchingCancellable { buildPerpetualParams.close(perpetualId) }
                 .onSuccess { input -> input?.let(confirmAction::invoke) }
-                .onFailure { errorState.value = it.serviceMessage() }
+                .onFailure { errorState.value = it.errorText() }
         }
     }
 

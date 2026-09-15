@@ -1,6 +1,7 @@
 package com.gemwallet.android.features.settings.contacts.viewmodels.models
 
 import com.gemwallet.android.ext.isMemoSupport
+import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemNameRecordState
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.ContactAddress
@@ -22,7 +23,7 @@ data class ManageContactUIState(
     val addressInput: ContactAddressInput? = null,
     val isSaving: Boolean = false,
     val saved: Boolean = false,
-    val error: String? = null,
+    val error: GemErrorText? = null,
     val isSaveEnabled: Boolean = false,
 )
 
@@ -36,7 +37,7 @@ data class ManageContactState(
     val form: ContactAddressForm? = null,
     val isSaving: Boolean = false,
     val saved: Boolean = false,
-    val error: String? = null,
+    val error: GemErrorText? = null,
 )
 
 data class ContactAddressForm(

@@ -9,6 +9,7 @@ import enum Gemstone.PerpetualType
 import enum Gemstone.GemApprovalValue
 import enum Gemstone.GemAssetInfoKind
 import enum Gemstone.GemEmptyStateAction
+import enum Gemstone.GemErrorText
 import enum Gemstone.GemEmptyStateText
 import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.LinkType
@@ -436,6 +437,23 @@ extension GemEmptyStateAction {
         case .addCustomToken: Localized.Assets.addCustomToken
         case .manageTokenList: Localized.Wallet.manageTokenList
         case .clearFilters: Localized.Filter.clear
+        }
+    }
+}
+
+extension GemErrorText {
+    public var text: String {
+        switch self {
+        case .cancelled: Localized.Errors.cancelled
+        case .networkOffline: Localized.Errors.networkOffline
+        case let .networkStatus(status): Localized.Errors.networkError(status)
+        case .invalidNetworkId: Localized.Errors.invalidNetworkId
+        case .invalidUrl: Localized.Errors.invalidUrl
+        case .notSupported: Localized.Errors.notSupported
+        case .unsupportedChain: Localized.Errors.Connections.unsupportedChain
+        case .maliciousOrigin: Localized.Errors.Connections.maliciousOrigin
+        case .noSupportedWallets: Localized.Errors.Connections.noSupportedWallets
+        case let .message(text): text
         }
     }
 }

@@ -20,6 +20,7 @@ pub mod developer;
 pub mod device;
 pub mod empty_state;
 pub mod error;
+pub mod error_text;
 pub mod explorer;
 pub mod failures;
 pub mod fiat;

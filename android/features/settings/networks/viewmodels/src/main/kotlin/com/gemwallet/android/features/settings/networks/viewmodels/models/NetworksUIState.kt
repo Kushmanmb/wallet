@@ -1,6 +1,7 @@
 package com.gemwallet.android.features.settings.networks.viewmodels.models
 
 import com.wallet.core.primitives.Chain
+import uniffi.gemstone.GemErrorText
 
 data class NetworksUIState(
     val selectChain: Boolean = true,
@@ -10,5 +11,5 @@ data class NetworksUIState(
     val currentExplorer: String? = null,
     val availableAddNode: Boolean = false,
     val nodeRows: List<NodeRowUiModel> = emptyList(),
-    val error: String? = null,
+    val error: GemErrorText? = null,
 )

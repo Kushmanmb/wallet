@@ -3,6 +3,7 @@ package com.gemwallet.android.ui.localization
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.ext.requireChain
@@ -24,6 +25,7 @@ import uniffi.gemstone.GemApprovalValue
 import uniffi.gemstone.GemAssetMenuAction
 import uniffi.gemstone.GemDelegationStatus
 import uniffi.gemstone.GemEmptyStateAction
+import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemEmptyStateText
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemLocalizedText
@@ -330,3 +332,19 @@ fun GemEmptyStateAction.title(): Int = when (this) {
     GemEmptyStateAction.MANAGE_TOKEN_LIST -> R.string.wallet_manage_token_list
     GemEmptyStateAction.CLEAR_FILTERS -> R.string.filter_clear
 }
+
+fun GemErrorText.text(context: Context): String = when (this) {
+    GemErrorText.Cancelled -> context.getString(R.string.errors_cancelled)
+    GemErrorText.NetworkOffline -> context.getString(R.string.errors_network_offline)
+    is GemErrorText.NetworkStatus -> context.getString(R.string.errors_network_error, status.toString())
+    GemErrorText.InvalidNetworkId -> context.getString(R.string.errors_invalid_network_id)
+    GemErrorText.InvalidUrl -> context.getString(R.string.errors_invalid_url)
+    GemErrorText.NotSupported -> context.getString(R.string.errors_not_supported)
+    GemErrorText.UnsupportedChain -> context.getString(R.string.errors_connections_unsupported_chain)
+    GemErrorText.MaliciousOrigin -> context.getString(R.string.errors_connections_malicious_origin)
+    GemErrorText.NoSupportedWallets -> context.getString(R.string.errors_connections_no_supported_wallets)
+    is GemErrorText.Message -> text
+}
+
+@Composable
+fun GemErrorText.text(): String = text(LocalContext.current)
