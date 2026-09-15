@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.buy.viewmodels
 
+import com.gemwallet.android.features.buy.localization.string
 import com.gemwallet.android.features.buy.localization.titleRes
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
@@ -122,7 +123,7 @@ class FiatViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, createFiatUiState(viewState.value, null))
 
     private fun errorText(state: GemFiatViewState, assetName: String, assetSymbol: String): String? = when (val phase = state.phase) {
-        is GemFiatQuotePhase.Invalid -> amountCheckText(phase.check, assetName, assetSymbol)
+        is GemFiatQuotePhase.Invalid -> phase.check.string(context, assetName, assetSymbol)
         GemFiatQuotePhase.InvalidInput -> context.getString(R.string.errors_invalid_amount)
         GemFiatQuotePhase.NoInput -> context.getString(
             R.string.input_enter_amount_to,
@@ -131,15 +132,9 @@ class FiatViewModel @Inject constructor(
         GemFiatQuotePhase.NoQuotes -> context.getString(R.string.buy_no_results)
         is GemFiatQuotePhase.Failed -> context.getString(R.string.errors_unknown_try_again)
         is GemFiatQuotePhase.Loading -> null
-        GemFiatQuotePhase.Ready -> amountCheckText(state.amountCheck, assetName, assetSymbol)
+        GemFiatQuotePhase.Ready -> state.amountCheck.string(context, assetName, assetSymbol)
     }
 
-    private fun amountCheckText(check: GemFiatAmountCheck, assetName: String, assetSymbol: String): String? = when (check) {
-        is GemFiatAmountCheck.BelowMinimum -> context.getString(R.string.transfer_minimum_amount, check.minimum.text())
-        is GemFiatAmountCheck.AboveMaximum -> context.getString(R.string.transfer_maximum_amount, check.maximum.text())
-        is GemFiatAmountCheck.InsufficientBalance -> context.getString(R.string.transfer_insufficient_balance, "$assetName ($assetSymbol)")
-        GemFiatAmountCheck.Valid -> null
-    }
 
     val providers = combine(assetInfoUIModel.filterNotNull(), viewState) { asset, state ->
         state.quoteRows.map { row -> row.toProviderUIModel(asset.asset, currency) }

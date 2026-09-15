@@ -3,6 +3,9 @@ package com.gemwallet.android.features.buy.localization
 import androidx.annotation.StringRes
 import com.gemwallet.android.ui.R
 import com.wallet.core.primitives.FiatQuoteType
+import android.content.Context
+import com.gemwallet.android.model.text
+import uniffi.gemstone.GemFiatAmountCheck
 import uniffi.gemstone.GemFiatButtonAction
 
 @StringRes
@@ -21,4 +24,11 @@ fun FiatQuoteType.actionRes(): Int = when (this) {
 fun GemFiatButtonAction.stringRes(): Int = when (this) {
     GemFiatButtonAction.CONTINUE -> R.string.common_continue
     GemFiatButtonAction.RETRY_QUOTE -> R.string.common_try_again
+}
+
+fun GemFiatAmountCheck.string(context: Context, assetName: String, assetSymbol: String): String? = when (this) {
+    is GemFiatAmountCheck.BelowMinimum -> context.getString(R.string.transfer_minimum_amount, minimum.text())
+    is GemFiatAmountCheck.AboveMaximum -> context.getString(R.string.transfer_maximum_amount, maximum.text())
+    is GemFiatAmountCheck.InsufficientBalance -> context.getString(R.string.transfer_insufficient_balance, "$assetName ($assetSymbol)")
+    GemFiatAmountCheck.Valid -> null
 }

@@ -319,9 +319,7 @@ extension FiatSceneViewModel {
 
     private func amountCheckError(_ check: GemFiatAmountCheck) -> (any Error)? {
         switch check {
-        case .valid: nil
-        case let .belowMinimum(minimum): AnyError(Localized.Transfer.minimumAmount(minimum.text(locale: locale)))
-        case let .aboveMaximum(maximum): AnyError(Localized.Transfer.maximumAmount(maximum.text(locale: locale)))
+        case .valid, .belowMinimum, .aboveMaximum: check.limitDescription(locale: locale).map { AnyError($0) }
         case let .insufficientBalance(requirement): TransferAmountCalculatorError.insufficientBalance(asset, requirement: requirement.toPrimitives())
         }
     }
