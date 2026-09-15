@@ -27,6 +27,7 @@ fun AddAssetScreen(
     val chains by viewModel.chains.collectAsStateWithLifecycle()
     val network by viewModel.selectedChain.collectAsStateWithLifecycle()
     val token by viewModel.token.collectAsStateWithLifecycle()
+    val assetRows by viewModel.assetRows.collectAsStateWithLifecycle()
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val explorerLink by viewModel.explorerLink.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
@@ -57,6 +58,7 @@ fun AddAssetScreen(
                 addressState = viewModel.addressState,
                 network = network?.asset(),
                 token = token,
+                assetRows = assetRows,
                 explorerLink = explorerLink,
                 buttonState = buttonState,
                 canSelectChain = (availableChains?.size ?: 0) > 1,

@@ -40,7 +40,7 @@ public final class AddAssetSceneViewModel {
         case .loading: return .loading
         case let .found(core):
             let asset = core.toPrimitives()
-            return .data(AddAssetViewModel(asset: asset, link: service.tokenUrl(chain: asset.chain, tokenId: asset.tokenId ?? "")))
+            return .data(AddAssetViewModel(rows: session.assetRows(), link: service.tokenUrl(chain: asset.chain, tokenId: asset.tokenId ?? "")))
         case .failed: return .error(AnyError(Localized.Errors.errorOccurred))
         }
     }

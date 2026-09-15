@@ -94,6 +94,9 @@ class AddAssetViewModel @Inject constructor(
     val token = session.map { it.asset?.toPrimitives() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    val assetRows = session.map { it.assetRows() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     val buttonState = combine(session, uiState) { session, uiState ->
         buttonState(enabled = session.viewState().canAdd, loading = uiState.isLoading)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Disabled)

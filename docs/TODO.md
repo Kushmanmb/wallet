@@ -24,7 +24,6 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 - **R26** **M** Onboarding — ten models across import, setup, phrase verification and secret display decide their own titles and footer text against the Android `import_wallet` and `create_wallet` screens.
 - **R27** **M** Transfer — `AmountSceneViewModel`, `ReceiveViewModel` and `AmountPerpetualViewModel` against the Android `transfer_amount` and `receive` screens.
 - **R28** **S** Transaction filters — `TransactionTypesSelectorViewModel` and `TransactionsFilterViewModel` decide the selector titles on both apps.
-- **R29** **S** Add asset — `AddAssetViewModel` decides five field titles against the Android `add_asset` screen.
 - **R30** **S** Swap details — `SwapProvidersViewModel` and `PriceImpactViewModel` decide the provider and impact titles on both apps.
 - **R31** **S** Market value and QR scanner errors — `MarketValueViewModel` (5 strings) and `QRScannerErrorViewModel` against their Android counterparts.
 

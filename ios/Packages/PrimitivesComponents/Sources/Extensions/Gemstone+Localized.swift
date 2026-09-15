@@ -2,6 +2,7 @@
 
 import enum Gemstone.PerpetualDirection
 import enum Gemstone.FeeOption
+import enum Gemstone.GemAssetInfoKind
 import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemLocalizedText
@@ -153,6 +154,17 @@ extension GemHeaderButtonKind {
         case .deposit: Localized.Wallet.deposit
         case .withdraw: Localized.Wallet.withdraw
         case .more: Localized.Wallet.more
+        }
+    }
+}
+
+extension GemAssetInfoKind {
+    public var title: String {
+        switch self {
+        case .name: Localized.Asset.name
+        case .symbol: Localized.Asset.symbol
+        case .decimals: Localized.Asset.decimals
+        case .kind: Localized.Common.type
         }
     }
 }
