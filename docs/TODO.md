@@ -71,7 +71,7 @@ Closed on 2026-09-15. Four of the six were the same `try { focusRequester.reques
 ### Deferred notes still in the code
 
 - **X33** **S** `ios/Packages/Components/Sources/TextFields/CurrencyTextField.swift` pins the field height to work around <https://developer.apple.com/forums/thread/806828>. Remove the `.frame(height:)` and check the amount field on the oldest supported iOS and the newest; if the text no longer jumps, the pin goes.
-- **X35** **S** `ios/Packages/Gemstone/Package.swift` pins Swift 5 language mode until `GemstoneFFI` is Swift 6 clean. Re-check against the current toolchain.
+- **X35** **S** `ios/Packages/Gemstone/Package.swift` pins Swift 5 language mode. Re-checked on 2026-09-15 against the current toolchain: dropping the pin fails on two `uniffiFutureContinuationCallback` sites in the generated `Gemstone.swift` — "passing closure as a 'sending' parameter risks causing data races". The fix is upstream in uniffi's Swift bindgen, not here; re-check after the next uniffi bump.
 - **X36** **S** Two dated iOS removals: `GemstoneServices/Sources/Keystore/LocalKeystore.swift` and `Store/Sources/DB.swift` are both marked for 2026. Confirm the install base and delete, or re-date them with the reason.
 - **X38** **M** `core/crates/gem_auth/src/signature.rs` verifies one chain type and answers `false` for the rest. SERVICES.md records this as fail-closed by construction; either widen it or delete the note that says it is temporary.
 - **X39** **M** `core/crates/nft/src/providers/ton/verified.rs` hardcodes the verified-collection allowlist. Backend gap; track it where the backend work lives or close the note.
