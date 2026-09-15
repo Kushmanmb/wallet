@@ -18,22 +18,21 @@ A Core enum both apps map is only safe while both maps agree. These were found b
 
 ## 1a. Enum-to-string mapping that escaped its module's mapper file
 
-Each module already has a mapper; these files map a Core enum to a localized string somewhere else, which is how V40–V42 happened.
+Each of these picks a literal `Localized.`/`R.string.` from a Core variant outside its module's mapper, which is how V40–V42 happened. Verified file by file on 2026-09-15: a `when`/`switch` that calls the mapper (`row.stringRes()`, `row.title`) is the contract working and is not listed.
 
-- **V43** **S** iOS Assets — `Assets/Sources/ViewModels/AssetSceneViewModel.swift`.
-- **V44** **S** iOS NFT — `NFT/Sources/ViewModels/CollectibleViewModel.swift`.
-- **V45** **S** iOS Onboarding — `Onboarding/Sources/Navigation/ExportWalletNavigationStack.swift`, `Onboarding/Sources/Types/WalletImportError.swift`.
+- **V43** **S** iOS Assets — `Assets/Sources/ViewModels/AssetSceneViewModel.swift` (stake and earn balance titles).
+- **V45** **S** iOS Onboarding — `Onboarding/Sources/Navigation/ExportWalletNavigationStack.swift` and `Onboarding/Sources/Types/WalletImportError.swift`.
 - **V46** **S** iOS Perpetuals — `Perpetuals/Sources/ViewModels/ChartLineViewModel.swift`.
-- **V47** **S** iOS Settings — `Settings/Sources/ChainSettings/ViewModels/GemAddNodeFailure+Settings.swift`, `Settings/Sources/Settings/ViewModels/SecurityViewModel.swift`.
-- **V48** **S** iOS Stake — `Stake/Sources/ViewModels/DelegationSceneViewModel.swift`, `Stake/Sources/ViewModels/DelegationStateViewModel.swift`.
-- **V49** **S** iOS Swap — `Swap/Sources/Errors/Errors.swift`, `Swap/Sources/ViewModels/SwapSlippageViewModel.swift`, `Swap/Sources/Views/SwapDetailsView.swift`.
-- **V50** **M** iOS Transfer — `Transfer/Sources/Errors/Errors.swift`, `Transfer/Sources/Types/ConfirmInfoSheetBuilder.swift`, `Transfer/Sources/ViewModels/ConfirmButtonViewModel.swift`, `ConfirmRecipientViewModel.swift`, `RecipientSceneViewModel.swift`.
-- **V51** **S** iOS WalletConnector — `WalletConnector/Sources/WalletConnector/ViewModels/SignMessageSceneViewModel.swift`.
+- **V47** **S** iOS Settings — `Settings/Sources/Settings/ViewModels/SecurityViewModel.swift`.
+- **V48** **S** iOS Stake — `Stake/Sources/ViewModels/DelegationSceneViewModel.swift` and `DelegationStateViewModel.swift`.
+- **V49** **S** iOS Swap — `Swap/Sources/Errors/Errors.swift`, the counterpart of the Android mapper V56 added.
+- **V50** **M** iOS Transfer — `Transfer/Sources/Errors/Errors.swift`, `ViewModels/ConfirmButtonViewModel.swift`, `ViewModels/RecipientSceneViewModel.swift`, `ViewModels/TransferDataViewModel.swift`.
+- **V51** **S** iOS WalletConnector — `WalletConnector/.../ViewModels/SignMessageSceneViewModel.swift`.
 - **V52** **S** Android buy — `features/buy/viewmodels/FiatViewModel.kt`.
-- **V53** **S** Android earn — `features/earn/delegation/presents/DelegationScene.kt`, `features/stake/presents/StakeScene.kt`.
-- **V54** **S** Android import_wallet — `features/import_wallet/views/ImportScreen.kt`.
-- **V55** **S** Android perpetual — `features/perpetual/views/components/PerpetualInfo.kt`.
-- **V56** **S** Android swap — `features/swap/views/components/SwapError.kt`.
+- **V57** **S** iOS shared — `Packages/PrimitivesComponents/Sources/Formatters/TransactionDateFormatter.swift` maps `GemDateSectionLabel` to `Localized.Date.*`; `PrimitivesComponents` has a `Gemstone+Localized.swift` already.
+- **V58** **S** Android shared — `ui/components/list_head/AmountListHead.kt` maps a Core header-button kind to `wallet_send`/`wallet_receive`/`wallet_buy`/`wallet_swap`; `android/ui` has `ui/localization/GemstoneText.kt` already.
+
+Rejected after checking the file: iOS `NFT/CollectibleViewModel`, `Settings/GemAddNodeFailure+Settings`, `Swap/SwapSlippageViewModel`, `Swap/Views/SwapDetailsView`, `Transfer/Types/ConfirmInfoSheetBuilder`, `Transfer/ConfirmRecipientViewModel`; Android `earn`, `import_wallet` and `perpetual` — each either calls its module mapper or switches over an app type, not a Core one.
 
 ## 2. Lists and screens without a row record
 
@@ -60,10 +59,10 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 
 ## 3. Views that decide
 
-- **B7** **S** `android/features/swap/.../views/components/SwapError.kt` picks a localized string from `GemSwapErrorDisplay` inside the composable.
-- **B8** **S** `android/features/import_wallet/.../views/ImportScreen.kt` picks one from `GemWalletImportException` inside the composable.
 - **B9** **S** Re-run the § 5 grep over the 12 iOS scene files that name `Gemstone` once G2 lands, and move anything that decides into its model. Most are row-key dispatch and stay.
 - **B10** **M** The same pass over the 94 Android `presents/` composables that name `uniffi.gemstone`.
+
+Rejected: `import_wallet/views/ImportScreen.kt` switches over a `Throwable` and delegates its Core arm to the module mapper already.
 
 ## 4. Ownership
 
