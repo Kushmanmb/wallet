@@ -10,6 +10,7 @@ import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
+import uniffi.gemstone.GemHeaderButtonKind
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.FeePriority
@@ -358,4 +359,15 @@ fun GemSwapDetailRow.stringRes(): Int = when (this) {
     GemSwapDetailRow.PRICE_IMPACT -> R.string.swap_price_impact
     GemSwapDetailRow.MINIMUM_RECEIVE -> R.string.swap_min_receive
     GemSwapDetailRow.SLIPPAGE -> R.string.swap_slippage
+}
+
+@StringRes
+fun GemHeaderButtonKind.stringRes(): Int = when (this) {
+    GemHeaderButtonKind.SEND -> R.string.wallet_send
+    GemHeaderButtonKind.RECEIVE -> R.string.wallet_receive
+    GemHeaderButtonKind.BUY -> R.string.wallet_buy
+    GemHeaderButtonKind.SWAP -> R.string.wallet_swap
+    GemHeaderButtonKind.DEPOSIT -> R.string.wallet_deposit
+    GemHeaderButtonKind.WITHDRAW -> R.string.wallet_withdraw
+    GemHeaderButtonKind.MORE -> R.string.wallet_more
 }
