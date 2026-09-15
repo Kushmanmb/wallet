@@ -43,10 +43,7 @@ public struct DelegationSceneViewModel {
     }
 
     public var title: String {
-        switch providerType {
-        case .stake: Localized.Transfer.Stake.title
-        case .earn: Localized.Common.earn
-        }
+        providerType.title
     }
 
     public var rows: [GemDelegationRow] {
