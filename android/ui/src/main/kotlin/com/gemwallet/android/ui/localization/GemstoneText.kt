@@ -31,6 +31,7 @@ import uniffi.gemstone.GemTransactionFilter
 import uniffi.gemstone.LinkType
 import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemVerificationLevel
+import uniffi.gemstone.GemWalletSecretKind
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
 import uniffi.gemstone.GemTransactionTitle
@@ -268,4 +269,10 @@ fun ScanReceiveMode.stringRes(): Int = when (this) {
 fun TpslType.autocloseRes(): Int = when (this) {
     TpslType.TakeProfit -> R.string.perpetual_auto_close_take_profit
     TpslType.StopLoss -> R.string.perpetual_auto_close_stop_loss
+}
+
+@StringRes
+fun GemWalletSecretKind.stringRes(): Int = when (this) {
+    GemWalletSecretKind.PHRASE -> R.string.common_secret_phrase
+    GemWalletSecretKind.PRIVATE_KEY -> R.string.common_private_key
 }
