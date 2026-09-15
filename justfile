@@ -74,5 +74,8 @@ localize:
     @just ios localize
     @just android localize
 
+check-mappers:
+    @python3 ./scripts/check-mapper-parity.py
+
 bump TARGET="patch":
     @bash ./scripts/bump.sh {{TARGET}}

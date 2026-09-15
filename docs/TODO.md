@@ -264,7 +264,6 @@ Twenty English strings exist under two keys — `wallet_send` / `transfer_send_t
 
 What went wrong in V40 and V41 was not the pair; it was one app's mapper reaching for the other half of a pair. That is only visible by comparing the two apps.
 
-- **L1** **M** Add the comparison as a check: for every Core enum both apps map, resolve each variant to its English string on both sides and fail when they differ. The two mapper files per module make this mechanical. Run it over the current tree first and land the divergences it finds as their own commits before wiring it into CI.
 
 ### Keys with no reader
 
