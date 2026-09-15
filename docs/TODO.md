@@ -62,9 +62,8 @@ Decide before building; a read-only screen is a row, not a session.
 
 ### Hardcoded dp (Android rule: theme constants only)
 
-84 sites across 40 files. Grouped by where they are.
+84 sites across 40 files. Grouped by where they are. A private `Metrics` object is already the local-constant pattern, so the work is to point the values that have a theme equivalent at it and leave the rest named — `ui/components/chart` kept five (a 2.5 dp stroke, an 88 dp label column, an 18 dp label offset, a 3 dp dash gap and a 1.5 dp ring).
 
-- **X21** **S** `ui/components/chart` — `GemLineChart.kt` (11), `GemCandlestickChart.kt` (7), `CandlestickTooltip.kt` (3).
 - **X22** **S** `ui/components/list_item` — `ListItemPositionClip.kt` (5), `SubheaderItem.kt` (3).
 - **X23** **M** the rest of `android/ui` — `QRScanner.kt` (4), `SearchBar.kt` (3), `buttons/CopyButton.kt` (2), `filters/FormDialog.kt` (2) and the remainder of the 56 in that module.
 - **X24** **S** `features/settings/settings/presents` — `SupportMessageBubble.kt` (7) and one more.
@@ -253,7 +252,6 @@ Twenty English strings exist under two keys — `wallet_send` / `transfer_send_t
 
 What went wrong in V40 and V41 was not the pair; it was one app's mapper reaching for the other half of a pair. That is only visible by comparing the two apps.
 
-
 ### Keys with no reader
 
 - **L12** **S** Thirteen keys in `localization/app/en.ftl` have no `R.string.` reader in Kotlin and no `Localized.` reader in Swift: `common_no_thanks`, `transfer_amount_title`, `errors_transfer`, `errors_decoding`, `errors_connections_invalid_send_parameters`, `errors_connections_invalid_sign_parameters`, `errors_connections_unsupported_method`, `errors_token_unable_fetch_token_information`, `update_app_downloading`, `banner_enable_notifications_title`, `banner_enable_notifications_description`, `perpetuals_empty_state_no_markets`, `confirm_fee_error`. Deleting a key retires it in every locale, so confirm each against the generated accessors first.
@@ -328,7 +326,6 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 ### App-side twins of Core types
 
 [No hand-written twins](ARCHITECTURE.md): an FFI-only type is used as the uniffi type; a twin is only for a type an app persists. Each of the three below has the same cases and the same payload types as its Core counterpart and is never written to storage.
-
 
 Checked and kept: `KeystoreAuthentication` and `LockPeriod` are both written to the keychain by raw value, which the rule allows; `AmountType` carries a recipient its Core namesake does not; `SelectAssetType` and `PaymentDestination` are navigation types carrying app payloads and already map to Core through `flowType`.
 
