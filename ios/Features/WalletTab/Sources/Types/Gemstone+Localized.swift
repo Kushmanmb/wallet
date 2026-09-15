@@ -2,6 +2,7 @@
 
 import enum Gemstone.PortfolioStatistic
 import Localization
+import Primitives
 
 extension PortfolioStatistic {
     var title: String {
@@ -13,6 +14,15 @@ extension PortfolioStatistic {
         case .marginUsage: Localized.Perpetual.marginUsage
         case .allTimePnl: Localized.Perpetual.allTimePnl
         case .volume: Localized.Perpetual.volume
+        }
+    }
+}
+
+extension PortfolioType {
+    var title: String {
+        switch self {
+        case .wallet: Localized.Wallet.Portfolio.title
+        case .perpetuals: Localized.Perpetuals.title
         }
     }
 }

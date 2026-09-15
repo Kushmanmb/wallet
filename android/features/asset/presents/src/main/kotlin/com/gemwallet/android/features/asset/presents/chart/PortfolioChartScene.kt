@@ -52,7 +52,7 @@ fun PortfolioChartScene(
             if (showSegmentedControl) {
                 PortfolioTypeSelector(selected = selectedType, onSelect = viewModel::setType)
             } else {
-                Text(stringResource(selectedType.titleRes()))
+                Text(stringResource(selectedType.stringRes()))
             }
         },
         onClose = onCancel,
@@ -80,7 +80,7 @@ fun PortfolioChartScene(
 @Composable
 private fun PortfolioTypeSelector(selected: PortfolioType, onSelect: (PortfolioType) -> Unit) {
     TabsBar(PortfolioType.entries, selected, onSelect) { type ->
-        Text(stringResource(type.titleRes()))
+        Text(stringResource(type.stringRes()))
     }
 }
 
@@ -126,7 +126,3 @@ private fun PortfolioChart(viewModel: PortfolioChartViewModel) {
     )
 }
 
-private fun PortfolioType.titleRes(): Int = when (this) {
-    PortfolioType.Wallet -> R.string.wallet_portfolio_title
-    PortfolioType.Perpetuals -> R.string.perpetuals_title
-}

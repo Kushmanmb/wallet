@@ -107,10 +107,7 @@ extension PortfolioSceneViewModel {
     }
 
     func typeTitle(for type: PortfolioType) -> String {
-        switch type {
-        case .wallet: Localized.Wallet.Portfolio.title
-        case .perpetuals: Localized.Perpetuals.title
-        }
+        type.title
     }
 
     func chartTypeTitle(for type: PortfolioChartType) -> String {
