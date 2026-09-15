@@ -204,27 +204,20 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 
 ## 11. Missing tests
 
-### Core files with rules and no `#[cfg(test)]`
+### Core behaviour with no test
 
-- **T1** **S** `services/perpetual/mod.rs` (262 lines) — refresh orchestration and socket application.
-- **T3** **S** `services/device/mod.rs` (190).
-- **T4** **S** `services/assets/details.rs` (186).
-- **T5** **S** `services/stake/model.rs` (165).
-- **T6** **S** `services/contact/mod.rs` (141).
-- **T7** **S** `services/swap/mod.rs` (140) and `services/swap/quote.rs` (117).
-- **T8** **S** `services/wallet_home/mod.rs` (131).
-- **T9** **S** `services/assets/selection.rs` (126).
-- **T10** **S** `services/app_start/mod.rs` (122).
-- **T11** **S** `services/amount/mod.rs` (118).
-- **T12** **S** `services/chart/mod.rs` (116).
-- **T13** **S** `services/node/settings.rs` (115).
-- **T14** **S** `services/wallet/model.rs` (114) and `services/perpetual/details.rs` (114).
-- **T15** **S** `services/transactions/mod.rs` (107).
-- **T16** **S** `services/asset_discovery/mod.rs` (94), `services/portfolio/mod.rs` (93), `services/search/mod.rs` (90).
-- **T17** **S** `services/support/mod.rs` (88), `services/name/mod.rs` (87), `services/wallet_connect/sign_message.rs` (86).
-- **T18** **S** `services/rewards/mod.rs` (84), `services/explorer/mod.rs` (80), `services/developer/mod.rs` (78).
-- **T19** **S** `services/perpetual/stream.rs` (77), `alien/provider.rs` (76), `services/fiat/quote.rs` (73).
-- **T20** **S** `services/transaction_state/model.rs` (71) and `services/nft/model.rs` (71).
+Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them declare records or forward to a `rules.rs` that is already tested — `GemStakeAmountInput`'s four methods and `candlestick_header` are both covered from their rules module. What is left is the orchestration below: each named function has a body of its own and no test anywhere in the crate calls it. Several need a store or gateway mock first; `services/*/testkit.rs` is the pattern.
+
+- **T1** **M** `services/perpetual/mod.rs` — `on_socket_message` (27 lines, five socket message kinds, each writing positions, balances or prices), plus `refresh`, `sync_enablement`, `sync_markets_if_needed`, `sync_current_positions`, `account_mode`.
+- **T2** **M** `services/assets/details.rs` `refresh` (26 lines) — the concurrent detail load and its per-step failures.
+- **T3** **S** `services/swap/mod.rs` `suggest_pair`.
+- **T4** **S** `services/wallet_home/mod.rs` `refresh`.
+- **T5** **M** `services/app_start/mod.rs` `setup_wallets`.
+- **T6** **S** `services/node/settings.rs` — `explorer_rows` (which name is selected), `node_row`, and `node_status` (a zero block number is an error, not a result).
+- **T7** **S** `services/asset_discovery/mod.rs` `discover`.
+- **T8** **M** `services/rewards/mod.rs` — `create_referral`, `use_referral_code`, `redeem`. Money paths with no test.
+- **T9** **S** `services/explorer/mod.rs` `get_transaction_link` (13 lines of explorer selection).
+- **T10** **S** `services/fiat/quote.rs` `quote_url` — it enables the asset as a side effect of fetching the URL.
 
 ### iOS view models with no test file
 
