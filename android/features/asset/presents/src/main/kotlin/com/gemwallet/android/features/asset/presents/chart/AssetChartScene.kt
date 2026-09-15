@@ -149,24 +149,20 @@ private fun LazyListScope.marketRows(chain: Chain, currency: Currency, items: Li
 
 @Composable
 private fun MarketProperty(chain: Chain, item: MarketInfoUIModel, position: ListPosition) {
-    when (item.type) {
-        MarketInfoUIModel.MarketInfoTypeUIModel.FDV,
-        MarketInfoUIModel.MarketInfoTypeUIModel.TradingVolume,
-        MarketInfoUIModel.MarketInfoTypeUIModel.CirculatingSupply,
-        MarketInfoUIModel.MarketInfoTypeUIModel.TotalSupply,
-        MarketInfoUIModel.MarketInfoTypeUIModel.MaxSupply -> PropertyItem(item.type.label, item.value, listPosition = position, info = item.info)
-        MarketInfoUIModel.MarketInfoTypeUIModel.MarketCap -> PropertyItem(
+    when (item.layout) {
+        MarketInfoUIModel.Layout.Plain -> PropertyItem(item.label, item.value, listPosition = position, info = item.info)
+        MarketInfoUIModel.Layout.Badge -> PropertyItem(
             title = {
                 PropertyTitleText(
-                    text = item.type.label,
-                    badge = item.badge?.let { { ChipBadge(it) } }
+                    text = item.label,
+                    badge = item.badge?.let { { ChipBadge(it) } },
                 )
             },
             data = { PropertyDataText(item.value) },
-            listPosition = position
+            listPosition = position,
         )
-        MarketInfoUIModel.MarketInfoTypeUIModel.Contract -> AddressPropertyItem(
-            title = R.string.asset_contract,
+        MarketInfoUIModel.Layout.Address -> AddressPropertyItem(
+            title = item.label,
             displayText = rememberFormattedAddress(item.value, chain),
             copyValue = item.value,
             explorerLink = item.explorerLink,

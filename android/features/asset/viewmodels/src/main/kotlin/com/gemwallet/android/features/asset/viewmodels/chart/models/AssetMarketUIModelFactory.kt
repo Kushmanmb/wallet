@@ -4,6 +4,7 @@ import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.ValueFormatter
+import com.gemwallet.android.features.asset.viewmodels.localization.stringRes
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.list_item.property.toSocialLinks
 import uniffi.gemstone.socialLinks
@@ -39,36 +40,38 @@ class AssetMarketUIModelFactory @Inject constructor() {
 
         fun row(row: GemAssetMarketRow): MarketRowUIModel = when (row) {
             is GemAssetMarketRow.MarketCap -> MarketInfoUIModel(
-                type = MarketInfoUIModel.MarketInfoTypeUIModel.MarketCap,
+                label = row.stringRes(),
                 value = currencyFormatter.string(row.value),
+                layout = MarketInfoUIModel.Layout.Badge,
                 badge = row.rank?.let { "#$it" },
             )
             is GemAssetMarketRow.FullyDilutedValuation -> MarketInfoUIModel(
-                type = MarketInfoUIModel.MarketInfoTypeUIModel.FDV,
+                label = row.stringRes(),
                 value = currencyFormatter.string(row.value),
                 info = InfoSheetEntity.FullyDilutedValuation,
             )
             is GemAssetMarketRow.TradingVolume -> MarketInfoUIModel(
-                type = MarketInfoUIModel.MarketInfoTypeUIModel.TradingVolume,
+                label = row.stringRes(),
                 value = currencyFormatter.string(row.value),
             )
             is GemAssetMarketRow.Contract -> MarketInfoUIModel(
-                type = MarketInfoUIModel.MarketInfoTypeUIModel.Contract,
+                label = row.stringRes(),
                 value = row.tokenId,
+                layout = MarketInfoUIModel.Layout.Address,
                 explorerLink = row.explorer?.toPrimitives(),
             )
             is GemAssetMarketRow.CirculatingSupply -> MarketInfoUIModel(
-                type = MarketInfoUIModel.MarketInfoTypeUIModel.CirculatingSupply,
+                label = row.stringRes(),
                 value = supply(row.value),
                 info = InfoSheetEntity.CirculatingSupply,
             )
             is GemAssetMarketRow.TotalSupply -> MarketInfoUIModel(
-                type = MarketInfoUIModel.MarketInfoTypeUIModel.TotalSupply,
+                label = row.stringRes(),
                 value = supply(row.value),
                 info = InfoSheetEntity.TotalSupply,
             )
             is GemAssetMarketRow.MaxSupply -> MarketInfoUIModel(
-                type = MarketInfoUIModel.MarketInfoTypeUIModel.MaxSupply,
+                label = row.stringRes(),
                 value = supply(row.value),
                 info = InfoSheetEntity.MaxSupply,
             )
