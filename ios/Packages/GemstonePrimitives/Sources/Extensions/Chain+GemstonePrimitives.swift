@@ -59,8 +59,4 @@ public extension [Primitives.Asset] {
         let assets = map { $0.toGem() }
         return GemAssetConfigService.shared.matchingAssets(assets: assets, query: query).map { $0.toPrimitives() }
     }
-
-    func matchingIds(query: String) -> [String] {
-        GemAssetConfigService.shared.matchingAssetIds(assets: map { $0.toGem() }, query: query)
-    }
 }
