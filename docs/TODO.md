@@ -237,7 +237,6 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 
 ### Keys with no reader
 
-- **L12** **S** Thirteen keys in `localization/app/en.ftl` have no `R.string.` reader in Kotlin and no `Localized.` reader in Swift: `common_no_thanks`, `transfer_amount_title`, `errors_transfer`, `errors_decoding`, `errors_connections_invalid_send_parameters`, `errors_connections_invalid_sign_parameters`, `errors_connections_unsupported_method`, `errors_token_unable_fetch_token_information`, `update_app_downloading`, `banner_enable_notifications_title`, `banner_enable_notifications_description`, `perpetuals_empty_state_no_markets`, `confirm_fee_error`. Deleting a key retires it in every locale, so confirm each against the generated accessors first.
 - **L13** **S** `camera_permission_request_camera` and `notifications_permission_request_notification` have no Kotlin or Swift reader either, but permission copy is often referenced from a manifest or plist — find the reader or delete the pair. (`application_name` is read by `AndroidManifest.xml` and stays.)
 
 ## 13. Names the guides forbid
