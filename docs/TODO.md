@@ -240,7 +240,6 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 
 ## 13. Names the guides forbid
 
-- **N3** **S** `ios/Packages/Store/Sources/Requests` — `applyFilter`, `applyFilters`, `fetchAllAssetRecordsRequest`.
 - **N4** **S** `ios/Packages/Store/Sources/Stores/StoreManager.swift` and `ios/Packages/Primitives/Sources/Extensions/NSFileManager+Primitives.swift`.
 - **N5** **S** `ios/Features/LockManager` — the module, `LockWindowManager.swift` and its view modifier.
 - **N6** **S** `ios/GemPriceWidget/Services/WidgetPriceService.swift` — `fetchTopCoinPrices`, `fetchRemoteImage`.
