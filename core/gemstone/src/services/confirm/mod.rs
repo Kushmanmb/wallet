@@ -337,3 +337,69 @@ impl GemConfirmService {
         self.metadata(wallet_id, input_type.transaction_asset().id, fee_asset_id, input_type.asset_ids()).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use futures::executor::block_on;
+    use primitives::{Account, Asset, Chain, FeePriority, PerpetualConfirmData, PerpetualDirection, PerpetualType, TransactionInputType, Wallet};
+
+    use super::testkit::ConfirmTestkit;
+    use super::{GemConfirmData, GemConfirmError, GemConfirmFeeSelection, GemConfirmLoadOptions};
+    use crate::services::transfer::{GemRecipient, GemTransferData};
+    use crate::testkit::TestAlienProvider;
+
+    fn perpetual_transfer() -> GemTransferData {
+        GemTransferData {
+            input_type: TransactionInputType::Perpetual {
+                asset: Asset::from_chain(Chain::HyperCore),
+                perpetual_type: PerpetualType::Open {
+                    data: PerpetualConfirmData::mock(PerpetualDirection::Long, 0, None, None),
+                },
+            },
+            recipient: GemRecipient::address("0xrecipient".into()),
+            value: 0.into(),
+            use_max_amount: false,
+        }
+    }
+
+    fn load_with_scan(scan: &str) -> (Result<GemConfirmData, GemConfirmError>, Vec<String>) {
+        block_on(async {
+            let wallet = Wallet::mock_with_accounts(vec![Account::mock(Chain::HyperCore, "0xsender")]);
+            let provider = Arc::new(TestAlienProvider::with_json(200, scan));
+            let testkit = ConfirmTestkit::with_provider(wallet.clone(), wallet.clone(), provider.clone());
+            let input = testkit.service.confirm_input(wallet, perpetual_transfer()).unwrap();
+            let options = GemConfirmLoadOptions {
+                fee_selection: GemConfirmFeeSelection::Priority { priority: FeePriority::Normal },
+                fee_asset_id: None,
+            };
+
+            let result = testkit.confirm.load(input, options).await;
+            (result, provider.requested_paths())
+        })
+    }
+
+    #[test]
+    fn test_a_malicious_verdict_stops_the_load_before_it_asks_the_chain() {
+        let (result, requests) = load_with_scan(r#"{"isMalicious":true,"isScanComplete":true}"#);
+
+        assert!(matches!(result, Err(GemConfirmError::ScanMalicious)));
+        assert_eq!(
+            requests,
+            vec!["/v2/devices/scan/transaction"],
+            "a rejected input never reaches the transaction load, so the chain is never asked and no agent credential is created for it"
+        );
+    }
+
+    #[test]
+    fn test_a_clean_verdict_lets_the_load_ask_the_chain() {
+        let (_, requests) = load_with_scan(r#"{"isMalicious":false,"isScanComplete":true}"#);
+
+        assert_eq!(
+            requests,
+            vec!["/v2/devices/scan/transaction", "https://gemnodes.com/hypercore/info"],
+            "the transaction load runs once the scan clears, and only then"
+        );
+    }
+}

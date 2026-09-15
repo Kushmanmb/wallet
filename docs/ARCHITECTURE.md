@@ -129,6 +129,28 @@ The method is thin: gather inputs, call the rule, return. Product or domain-deci
 
 **Point reads should be synchronous.** `GemWalletStore.get_wallet` is a sync trait method, so `GemWalletSessionService` answers a session lookup without `await`. Do the same for any single-row read — an `async` point read pushes the caller back to the store, which is how the confirm screen ended up reading `AssetStore` directly for two years.
 
+### A staged load names what each stage waits for
+
+A load that fans out and then narrows is a graph, not a list, and the graph has to be written down before anyone reorders it. [`GemConfirmService.load`](../core/gemstone/src/services/confirm/mod.rs) is the worked example:
+
+```
+        ┌─ preload ────────┐ metadata
+start ──┼─ fee rates ──────┼──▶ validate scan ──▶ select fee rate ──▶ transaction load ──▶ confirm data
+        ├─ scan ───────────┤                                          (metadata + gas price)
+        └─ simulate ───────┘
+```
+
+The four openers run together and every one of them is awaited before the first gate. What comes after is ordered for two different reasons, and they are not interchangeable:
+
+- **Data.** The transaction load needs the preload's metadata and the gas price of the selected fee rate. It needs nothing from the scan or the simulation.
+- **Policy.** The scan verdict and the simulation gate the load anyway, because a rejected input must cost no provider work. A transport failure in the preload or the fee rates is reported before the scan verdict is read, so a malicious verdict is only ever surfaced for an input that would otherwise have loaded.
+
+**The scanner fails open.** A scanner outage yields no verdict and the send continues; only an explicit `is_malicious` or an unmet `is_memo_required` stops it. That is the policy, not an oversight; changing it is a product decision rather than a performance one.
+
+Before moving any stage earlier, audit what the stage actually does on every provider — "load" is not a promise of read-only. Every chain family but one answers `get_transaction_load` with RPC estimates and local arithmetic. HyperCore is the exception: its swap and perpetual path creates and persists an agent keypair in the secure store and writes approval-cache preferences, so starting it before the scan verdict would provision durable credentials for transactions the scanner then rejects. That single provider is why the gate stays where it is, and an implementation commit has to move the provisioning out of the load first — the overlap is safe for the read-only families only once each one is pinned as read-only.
+
+The order itself is tested, not assumed: a malicious verdict must leave the chain unasked, and a clean verdict must let the load through.
+
 ## 3. Return one record that answers the whole question
 
 A screen that needs five things should make one call, not five. Core assembles the answer.

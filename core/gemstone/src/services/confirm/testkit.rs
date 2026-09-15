@@ -31,12 +31,17 @@ use primitives::{Account, FeePriority, GasPriceType, TransactionInputType};
 
 pub struct ConfirmTestkit {
     pub service: Arc<GemConfirmTransferService>,
+    pub confirm: Arc<GemConfirmService>,
     pub balances: Arc<MemoryBalanceStore>,
+    pub provider: Arc<TestAlienProvider>,
 }
 
 impl ConfirmTestkit {
     pub fn new(wallet: Wallet, selected_wallet: Wallet) -> Self {
-        let provider = Arc::new(TestAlienProvider::with_status(503));
+        Self::with_provider(wallet, selected_wallet, Arc::new(TestAlienProvider::with_status(503)))
+    }
+
+    pub fn with_provider(wallet: Wallet, selected_wallet: Wallet, provider: Arc<TestAlienProvider>) -> Self {
         let preferences_store = Arc::new(MemoryPreferencesStore::default());
         let preferences = Arc::new(GemPreferencesService::new(preferences_store.clone()));
         let selected = Arc::new(MemoryWalletSessionStore {
@@ -94,7 +99,7 @@ impl ConfirmTestkit {
         ));
         let confirm = Arc::new(GemConfirmService::new(
             gateway,
-            Arc::new(GemSimulationService::new(provider, Arc::new(EmptyPreferences))),
+            Arc::new(GemSimulationService::new(provider.clone(), Arc::new(EmptyPreferences))),
             Arc::new(GemScanService::new(device_api.clone())),
             transactions,
             balance,
@@ -103,7 +108,7 @@ impl ConfirmTestkit {
             Arc::new(UnusedTransactionStatus),
         ));
         let service = Arc::new(GemConfirmTransferService::new(
-            confirm,
+            confirm.clone(),
             explorer,
             Arc::new(GemNameService::new(device_api, addresses)),
             Arc::new(GemAssetConfigService::new()),
@@ -112,7 +117,12 @@ impl ConfirmTestkit {
             Arc::new(GemRecentActivityService::new(Arc::new(MemoryRecentActivityStore::default()), session)),
             preferences,
         ));
-        Self { service, balances }
+        Self {
+            service,
+            confirm,
+            balances,
+            provider,
+        }
     }
 }
 
