@@ -5,6 +5,7 @@ import Formatters
 import enum Gemstone.PerpetualDirection
 import enum Gemstone.FeeOption
 import enum Gemstone.GemAssetMenuAction
+import enum Gemstone.PerpetualType
 import enum Gemstone.GemApprovalValue
 import enum Gemstone.GemAssetInfoKind
 import enum Gemstone.GemFiatTransactionBadge
@@ -317,6 +318,18 @@ extension GemAssetMenuAction {
         case .addToWallet: Localized.Asset.addToWallet
         case .copyAddress: Localized.Wallet.copyAddress
         case .pin, .hide: nil
+        }
+    }
+}
+
+extension PerpetualType {
+    public var confirmedTitle: String {
+        switch self {
+        case let .open(data): Localized.Perpetual.openDirection(data.direction.toPrimitives().title)
+        case .close: Localized.Perpetual.closePosition
+        case .modify: Localized.Perpetual.modifyPosition
+        case .increase: Localized.Perpetual.increasePosition
+        case .reduce: Localized.Perpetual.reducePosition
         }
     }
 }
