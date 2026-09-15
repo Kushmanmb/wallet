@@ -14,7 +14,7 @@ use crate::{
 impl<C: Client> ChainTransactionBroadcast for TonClient<C> {
     async fn transaction_broadcast(&self, data: String, _options: BroadcastOptions) -> Result<String, Box<dyn Error + Sync + Send>> {
         let response = self.broadcast_transaction(data).await?;
-        map_transaction_broadcast(response.result)
+        map_transaction_broadcast(response)
     }
 }
 
