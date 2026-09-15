@@ -194,7 +194,7 @@ pub use self::gorush::{FailedNotification, GorushNotification, GorushNotificatio
 pub mod admin;
 pub use self::admin::{AdminDevice, AdminWalletOverview};
 pub mod scan;
-pub use self::scan::{AddressType, ScanAddress, ScanAddressTarget, ScanProvider, ScanTransaction, ScanTransactionPayload};
+pub use self::scan::{AddressType, ScanAddress, ScanAddressTarget, ScanProvider, ScanSource, ScanTransaction, ScanTransactionPayload};
 pub mod hex;
 pub use self::hex::{HexError, decode_hex, decode_hex_array};
 pub mod transaction_metadata_types;

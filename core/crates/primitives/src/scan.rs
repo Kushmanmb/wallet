@@ -4,6 +4,13 @@ use typeshare::typeshare;
 
 use crate::{AssetId, Chain, ChainAddress, TransactionType};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, AsRefStr)]
+#[strum(serialize_all = "lowercase")]
+pub enum ScanSource {
+    Local,
+    Remote,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, AsRefStr, EnumIter)]
 #[strum(serialize_all = "lowercase")]
 pub enum ScanProvider {

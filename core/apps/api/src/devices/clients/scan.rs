@@ -5,7 +5,7 @@ use std::time::{Duration, Instant};
 use cacher::{AccessTokenCacherClient, CacherClient};
 use gem_client::ReqwestClient;
 use gem_tracing::{error_with_fields, info_with_fields};
-use primitives::{AssetId, ChainAddress, ConfigKey, ConfigParamKey, ScanProvider, ScanTransaction, ScanTransactionPayload, TransactionType, asset_score::AssetRank};
+use primitives::{AssetId, ChainAddress, ConfigKey, ConfigParamKey, ScanProvider, ScanSource, ScanTransaction, ScanTransactionPayload, TransactionType, asset_score::AssetRank};
 use reqwest::Url;
 use rocket::futures::future;
 use security_provider::providers::goplus::GoPlusProvider;
@@ -51,13 +51,14 @@ impl ScanClient {
         if !self.database.client()?.get_config_bool(ConfigKey::ScanEnable)? {
             return Ok(ScanTransaction::disabled());
         }
-        let local_scan = self.get_scan_transaction_local(payload.clone())?;
-        if local_scan.is_malicious == Some(true) {
-            Self::log_scan_transaction(&payload, &local_scan);
+        let (local_scan, is_target_verified) = self.get_scan_transaction_local(&payload)?;
+        if local_scan.is_malicious == Some(true) || is_target_verified {
+            Self::log_scan_transaction(&payload, &local_scan, ScanSource::Local);
             return Ok(local_scan);
         }
 
         let Some((address_target, poisoning_target, website_target)) = Self::provider_targets(&payload) else {
+            Self::log_scan_transaction(&payload, &local_scan, ScanSource::Local);
             return Ok(local_scan);
         };
         let enabled = {
@@ -101,21 +102,32 @@ impl ScanClient {
             malicious_assets: local_scan.malicious_assets,
             malicious_website,
         };
-        if scan.is_malicious == Some(true) {
-            Self::log_scan_transaction(&payload, &scan);
-        }
+        let source = if address_scans.is_empty() && poisoning_scans.is_empty() && website_scans.is_empty() {
+            ScanSource::Local
+        } else {
+            ScanSource::Remote
+        };
+        Self::log_scan_transaction(&payload, &scan, source);
         Ok(scan)
     }
 
-    fn log_scan_transaction(payload: &ScanTransactionPayload, scan: &ScanTransaction) {
+    fn log_scan_transaction(payload: &ScanTransactionPayload, scan: &ScanTransaction, source: ScanSource) {
         let scan = ScanTransaction {
             malicious_website: scan.malicious_website.as_deref().and_then(Self::website_host),
             ..scan.clone()
         };
+        let message = if scan.is_malicious == Some(true) {
+            "security transaction blocked"
+        } else {
+            "security transaction result"
+        };
         info_with_fields!(
-            "security transaction blocked",
+            message,
             transaction_type = payload.transaction_type.as_ref(),
             chain = payload.target.asset_id.chain.as_ref(),
+            source = source.as_ref(),
+            origin_asset_id = payload.origin.asset_id,
+            target_asset_id = payload.target.asset_id,
             scan = json!(scan)
         );
     }
@@ -124,13 +136,13 @@ impl ScanClient {
         Url::parse(website).ok()?.host_str().map(str::to_string)
     }
 
-    fn get_scan_transaction_local(&self, payload: ScanTransactionPayload) -> Result<ScanTransaction, Box<dyn Error + Send + Sync>> {
+    fn get_scan_transaction_local(&self, payload: &ScanTransactionPayload) -> Result<(ScanTransaction, bool), Box<dyn Error + Send + Sync>> {
         let queries = [
             (payload.origin.asset_id.chain, payload.origin.address.as_str()),
             (payload.target.asset_id.chain, payload.target.address.as_str()),
         ];
         let addresses = self.database.scan_addresses()?.get_scan_addresses(&queries)?;
-        let token_asset_ids = Self::token_asset_ids(&payload);
+        let token_asset_ids = Self::token_asset_ids(payload);
         let token_assets = self.database.assets()?.get_assets_basic(token_asset_ids)?;
         let malicious_addresses = addresses
             .iter()
@@ -138,20 +150,26 @@ impl ScanClient {
             .map(|address| ChainAddress::new(address.chain.0, address.address.clone()))
             .collect::<Vec<_>>();
         let is_memo_required = addresses.iter().any(|address| address.is_memo_required);
+        let is_target_verified = addresses
+            .iter()
+            .any(|address| address.is_verified_for(payload.target.asset_id.chain, &payload.target.address));
         let malicious_assets = token_assets
             .into_iter()
             .filter(|asset| Self::is_malicious_asset_rank(asset.score.rank))
             .map(|asset| asset.asset.id)
             .collect::<Vec<_>>();
 
-        Ok(ScanTransaction {
-            is_malicious: Some(!malicious_addresses.is_empty() || !malicious_assets.is_empty()),
-            is_memo_required: Some(is_memo_required),
-            is_scan_complete: true,
-            malicious_addresses: Some(malicious_addresses),
-            malicious_assets: Some(malicious_assets),
-            malicious_website: None,
-        })
+        Ok((
+            ScanTransaction {
+                is_malicious: Some(!malicious_addresses.is_empty() || !malicious_assets.is_empty()),
+                is_memo_required: Some(is_memo_required),
+                is_scan_complete: true,
+                malicious_addresses: Some(malicious_addresses),
+                malicious_assets: Some(malicious_assets),
+                malicious_website: None,
+            },
+            is_target_verified,
+        ))
     }
 
     fn provider_targets(payload: &ScanTransactionPayload) -> Option<(AddressTarget, Option<AddressPoisoningTarget>, Option<WebsiteTarget>)> {
