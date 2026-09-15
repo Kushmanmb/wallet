@@ -151,7 +151,7 @@ public final class SelectAssetViewModel {
 
 extension SelectAssetViewModel {
     func selectAsset(asset: Asset) {
-        applySelectionEffect(asset: asset)
+        recordSelection(asset: asset)
         onSelectAssetAction?(asset)
     }
 
@@ -209,7 +209,7 @@ extension SelectAssetViewModel {
     }
 
     func onSelectAsset(_ assetData: AssetData) {
-        applySelectionEffect(asset: assetData.asset)
+        recordSelection(asset: assetData.asset)
         assetSelection = SelectAssetInput(type: selectType, assetData: assetData)
     }
 
@@ -246,7 +246,7 @@ extension SelectAssetViewModel {
 // MARK: - Private
 
 extension SelectAssetViewModel {
-    private func applySelectionEffect(asset: Asset) {
+    private func recordSelection(asset: Asset) {
         if flow.enablesPriceAlert {
             Task {
                 await setPriceAlert(assetId: asset.id, enabled: true)

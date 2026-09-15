@@ -236,7 +236,7 @@ extension FiatSceneViewModel {
             .onBalanceChanged(available: BigUInt(newValue.balance.available))
             .onSellEnabledChanged(isSellEnabled: newValue.metadata.isSellEnabled)
         if session.type != type {
-            applyAmount(viewState.amount, isImmediate: true)
+            setAmount(viewState.amount, isImmediate: true)
         }
         updateAmountError()
     }
@@ -250,11 +250,11 @@ extension FiatSceneViewModel {
 
     func onSelect(amount: Int) {
         guard inputValidationModel.text != String(amount) else { return }
-        applyAmount(String(amount), isImmediate: true)
+        setAmount(String(amount), isImmediate: true)
     }
 
     func onSelectRandomAmount() {
-        applyAmount(String(service.randomAmount()), isImmediate: true)
+        setAmount(String(service.randomAmount()), isImmediate: true)
     }
 
     func onSelectFiatProviders() {
@@ -276,7 +276,7 @@ extension FiatSceneViewModel {
 
     func onChangeAmountText(_: String, text: String) {
         guard text != viewState.amount else { return }
-        applyAmount(text, isImmediate: false)
+        setAmount(text, isImmediate: false)
     }
 }
 
@@ -296,7 +296,7 @@ extension FiatSceneViewModel {
         return FiatQuoteViewModel(asset: asset, row: quote, locale: locale)
     }
 
-    private func applyAmount(_ text: String, isImmediate: Bool) {
+    private func setAmount(_ text: String, isImmediate: Bool) {
         session = session.onAmountChanged(amount: text)
         inputValidationModel.text = text
         updateAmountError()
