@@ -20,7 +20,6 @@ A Core enum both apps map is only safe while both maps agree. These were found b
 
 Each of these picks a literal `Localized.`/`R.string.` from a Core variant outside its module's mapper, which is how V40–V42 happened. Verified file by file on 2026-09-15: a `when`/`switch` that calls the mapper (`row.stringRes()`, `row.title`) is the contract working and is not listed.
 
-- **V52** **S** Android buy — `features/buy/viewmodels/FiatViewModel.kt`.
 
 Rejected after checking the file: iOS `NFT/CollectibleViewModel`, `Settings/GemAddNodeFailure+Settings`, `Swap/SwapSlippageViewModel`, `Swap/Views/SwapDetailsView`, `Transfer/Types/ConfirmInfoSheetBuilder`, `Transfer/ConfirmRecipientViewModel`, `Transfer/RecipientSceneViewModel`; Android `earn`, `import_wallet` and `perpetual` — each either calls its module mapper or switches over an app type, not a Core one.
 
