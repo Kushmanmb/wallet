@@ -289,3 +289,13 @@ extension GemApprovalValue {
         }
     }
 }
+
+extension ConnectionStatus {
+    public var bannerTitle: String? {
+        switch self {
+        case .online: nil
+        case .noInternet: Localized.Errors.noInternetConnection
+        case .noService: Localized.Errors.noServiceConnection
+        }
+    }
+}
