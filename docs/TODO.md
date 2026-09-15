@@ -258,21 +258,13 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 
 ## 12. Localization hygiene
 
-### Two keys, one English string
+### Keeping both apps on the same key for the same Core variant
 
-Each pair below resolves to the same English text and to the same text in every locale checked. Two keys mean two places to translate and two chances to drift; V40 and V42 were both caused by a mapper picking the other one of a pair.
+Twenty English strings exist under two keys — `wallet_send` / `transfer_send_title`, `wallet_stake` / `transfer_stake_title`, `wallet_import_address_field` / `transfer_recipient_address_field` and seventeen more. Checked on 2026-09-15: each pair carries its own context comment in `localization/app/en.ftl` and names a different place in the product, so the pairs are deliberate and must not be merged — a language that needs a different form for a label and a screen title depends on them being separate.
 
-- **L1** **S** `wallet_stake` / `transfer_stake_title` ("Stake") — the assets and stake mappers pick different ones today.
-- **L2** **S** `wallet_send` / `transfer_send_title` ("Send").
-- **L3** **S** `wallet_withdraw` / `transfer_withdraw_title` ("Withdraw").
-- **L4** **S** `wallet_import_address_field` / `transfer_recipient_address_field` ("Address or Name") — the pair behind V40.
-- **L5** **S** `transfer_rewards_title` / `stake_rewards` / `rewards_title` ("Rewards") — the trio behind V41.
-- **L6** **S** `common_wallet` / `wallet_title`, `common_all` / `charts_all`.
-- **L7** **S** `wallet_name` / `asset_name`, `transfer_amount` / `transfer_amount_title`.
-- **L8** **S** `transfer_network_fee` / `info_network_fee_title`, `transfer_confirm` / `verify_phrase_title`.
-- **L9** **S** `transfer_recipient_title` / `transaction_recipient`, `transaction_status_pending` / `stake_pending`.
-- **L10** **S** `buy_title` / `asset_buy_asset`, `asset_get_asset` / `rewards_ways_spend_asset_title`, `markets_title` / `perpetuals_markets`.
-- **L11** **S** `common_required_field` / `errors_required`, `transfer_other_title` / `nft_report_reason_other`, `support_message_placeholder` / `sign_message_message`, `wallet_connect_title` / `wallet_connect_brand_name`.
+What went wrong in V40 and V41 was not the pair; it was one app's mapper reaching for the other half of a pair. That is only visible by comparing the two apps.
+
+- **L1** **M** Add the comparison as a check: for every Core enum both apps map, resolve each variant to its English string on both sides and fail when they differ. The two mapper files per module make this mechanical. Run it over the current tree first and land the divergences it finds as their own commits before wiring it into CI.
 
 ### Keys with no reader
 
