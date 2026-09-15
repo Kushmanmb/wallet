@@ -190,8 +190,12 @@ mod tests {
         let rows = service.node_rows(Chain::Ethereum, nodes, statuses);
 
         assert_eq!(rows.len(), 2);
-        assert_eq!(rows[0].subtitle, GemNodeSubtitle::LatestBlock { value: None }, "a node with no status yet is still loading");
-        assert_eq!(rows[1].subtitle, GemNodeSubtitle::LatestBlock { value: Some(21_000_000) });
+        assert_eq!(
+            rows[0].subtitle,
+            GemNodeSubtitle::LatestBlock { value: "-".to_string() },
+            "a node with no status yet is still loading"
+        );
+        assert_eq!(rows[1].subtitle, GemNodeSubtitle::LatestBlock { value: "21,000,000".to_string() });
         assert!(!rows[0].can_delete);
         assert!(rows[1].can_delete);
     }
@@ -204,7 +208,7 @@ mod tests {
         let default_row = service.node_row(Chain::Ethereum, selections[0].clone(), GemNodeStatusState::Loading);
 
         assert!(!default_row.can_delete);
-        assert_eq!(default_row.subtitle, GemNodeSubtitle::LatestBlock { value: None });
+        assert_eq!(default_row.subtitle, GemNodeSubtitle::LatestBlock { value: "-".to_string() });
 
         let added = GemNodeSelection {
             url: "https://node.example.com".to_string(),
@@ -222,6 +226,6 @@ mod tests {
         );
 
         assert!(added_row.can_delete);
-        assert_eq!(added_row.subtitle, GemNodeSubtitle::LatestBlock { value: Some(21_000_000) });
+        assert_eq!(added_row.subtitle, GemNodeSubtitle::LatestBlock { value: "21,000,000".to_string() });
     }
 }

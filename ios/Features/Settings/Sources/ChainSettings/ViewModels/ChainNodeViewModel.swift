@@ -1,8 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import BigInt
 import Components
-import Formatters
 import GemstonePrimitives
 import struct Gemstone.GemNodeRow
 import struct Gemstone.GemNodeSelection
@@ -12,11 +10,8 @@ import Style
 struct ChainNodeViewModel {
     let row: GemNodeRow
 
-    private let formatter: ValueFormatter
-
-    init(row: GemNodeRow, formatter: ValueFormatter) {
+    init(row: GemNodeRow) {
         self.row = row
-        self.formatter = formatter
     }
 
     var node: GemNodeSelection {
@@ -44,9 +39,7 @@ struct ChainNodeViewModel {
 
     var titleExtra: String? {
         switch row.subtitle {
-        case let .latestBlock(value):
-            let text = value.map { formatter.string(BigInt($0), decimals: 0) } ?? "-"
-            return "\(row.subtitle.title): \(text)"
+        case let .latestBlock(value): "\(row.subtitle.title): \(value)"
         }
     }
 

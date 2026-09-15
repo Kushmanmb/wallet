@@ -25,7 +25,9 @@ impl GemNodeStatusState {
     }
 
     pub fn subtitle(&self) -> GemNodeSubtitle {
-        GemNodeSubtitle::LatestBlock { value: self.latest_block() }
+        GemNodeSubtitle::LatestBlock {
+            value: rules::block_number_text(self.latest_block()),
+        }
     }
 }
 
@@ -36,6 +38,43 @@ pub struct GemNodeCheck {
     pub latest_block_number: u64,
     pub is_in_sync: bool,
     pub latency: Latency,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemNodeSyncState {
+    InSync,
+    OutOfSync,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemNodeCheckRow {
+    ChainId { value: String },
+    InSync { state: GemNodeSyncState },
+    LatestBlock { value: String },
+    Latency { milliseconds: u32 },
+}
+
+#[uniffi::export]
+impl GemNodeCheck {
+    pub fn rows(&self) -> Vec<GemNodeCheckRow> {
+        vec![
+            GemNodeCheckRow::ChainId {
+                value: rules::text_or_placeholder(self.chain_id.as_deref()),
+            },
+            GemNodeCheckRow::InSync {
+                state: match self.is_in_sync {
+                    true => GemNodeSyncState::InSync,
+                    false => GemNodeSyncState::OutOfSync,
+                },
+            },
+            GemNodeCheckRow::LatestBlock {
+                value: rules::block_number_text(Some(self.latest_block_number)),
+            },
+            GemNodeCheckRow::Latency {
+                milliseconds: self.latency.value as u32,
+            },
+        ]
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -50,9 +89,9 @@ pub struct GemExplorerRow {
     pub is_selected: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
 pub enum GemNodeSubtitle {
-    LatestBlock { value: Option<u64> },
+    LatestBlock { value: String },
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -127,12 +166,51 @@ mod tests {
             latency: Latency::from_milliseconds(120),
         };
 
-        assert_eq!(result.subtitle(), GemNodeSubtitle::LatestBlock { value: Some(21_000_000) });
-        assert_eq!(GemNodeStatusState::Loading.subtitle(), GemNodeSubtitle::LatestBlock { value: None });
+        assert_eq!(result.subtitle(), GemNodeSubtitle::LatestBlock { value: "21,000,000".to_string() });
+        assert_eq!(GemNodeStatusState::Loading.subtitle(), GemNodeSubtitle::LatestBlock { value: "-".to_string() });
         assert_eq!(
             GemNodeStatusState::Error.subtitle(),
-            GemNodeSubtitle::LatestBlock { value: None },
+            GemNodeSubtitle::LatestBlock { value: "-".to_string() },
             "a node that failed still shows the block row, with nothing in it"
+        );
+    }
+
+    #[test]
+    fn test_a_checked_node_shows_the_same_four_rows_whatever_it_answered() {
+        let check = GemNodeCheck {
+            url: "https://node".to_string(),
+            chain_id: None,
+            latest_block_number: 21_000_000,
+            is_in_sync: false,
+            latency: Latency::from_milliseconds(120),
+        };
+
+        assert_eq!(
+            check.rows(),
+            vec![
+                GemNodeCheckRow::ChainId { value: "-".to_string() },
+                GemNodeCheckRow::InSync {
+                    state: GemNodeSyncState::OutOfSync
+                },
+                GemNodeCheckRow::LatestBlock { value: "21,000,000".to_string() },
+                GemNodeCheckRow::Latency { milliseconds: 120 },
+            ]
+        );
+
+        let synced = GemNodeCheck {
+            chain_id: Some("1".to_string()),
+            is_in_sync: true,
+            ..check
+        };
+
+        assert_eq!(
+            synced.rows(),
+            vec![
+                GemNodeCheckRow::ChainId { value: "1".to_string() },
+                GemNodeCheckRow::InSync { state: GemNodeSyncState::InSync },
+                GemNodeCheckRow::LatestBlock { value: "21,000,000".to_string() },
+                GemNodeCheckRow::Latency { milliseconds: 120 },
+            ]
         );
     }
 }

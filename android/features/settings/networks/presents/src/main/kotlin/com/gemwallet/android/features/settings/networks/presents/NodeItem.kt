@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.settings.networks.presents
 
-import android.icu.text.DecimalFormat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +27,6 @@ import uniffi.gemstone.GemNodeSubtitle
 import uniffi.gemstone.GemNodeRowTitle
 import uniffi.gemstone.Latency
 import uniffi.gemstone.LatencyType
-import com.gemwallet.android.ui.theme.Placeholder
 
 @Composable
 internal fun NodeItem(
@@ -91,8 +89,8 @@ internal fun NodeItem(
 @Composable
 private fun GemNodeRow.subtitleText(): String {
     val value = when (val subtitle = subtitle) {
-        is GemNodeSubtitle.LatestBlock -> subtitle.value?.let { DecimalFormat.getInstance().format(it.toLong()) }
-    } ?: Placeholder.empty
+        is GemNodeSubtitle.LatestBlock -> subtitle.value
+    }
 
     return "${stringResource(subtitle.stringRes())}: $value"
 }

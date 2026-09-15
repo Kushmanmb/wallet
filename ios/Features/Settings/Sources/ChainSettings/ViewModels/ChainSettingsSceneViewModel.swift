@@ -1,7 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import Formatters
 import Foundation
 import protocol Gemstone.GemChainSettingsServiceProtocol
 import enum Gemstone.GemChainSettingsSection
@@ -23,8 +22,6 @@ public final class ChainSettingsSceneViewModel {
     var isPresentingImportNode: Bool = false
     var isPresentingAlertMessage: AlertMessage?
 
-    private let formatter = ValueFormatter.full_US
-
     private var nodes: [GemNodeSelection] = []
     private var statusStateByNodeUrl: [String: GemNodeStatusState] = [:]
 
@@ -44,7 +41,7 @@ public final class ChainSettingsSceneViewModel {
 
     var nodesModels: [ChainNodeViewModel] {
         service.nodeRows(chain: chain.rawValue, nodes: nodes, statuses: statusStateByNodeUrl)
-            .map { ChainNodeViewModel(row: $0, formatter: formatter) }
+            .map { ChainNodeViewModel(row: $0) }
     }
 
     var deleteButtonTitle: String {

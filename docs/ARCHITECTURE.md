@@ -199,7 +199,7 @@ pub enum GemApprovalValue {
 
 ### A list row is a record of choices
 
-A row is the smallest case of this rule and the one the codebase repeats most. Core returns what the row *means* — which name it shows, whether the symbol would repeat that name, what sits underneath, what trails it — and the app turns each case into a widget. A list whose entries are fixed and unconditional is not one of these: the tab bar names three or four destinations with no rule behind them, so it stays app-side until a destination becomes conditional. The record carries no formatted text: Core's value formatter is not locale-aware, so a formatted string regresses every locale that groups or separates differently. It carries the choices that would otherwise be re-made, differently, in each list on each platform.
+A row is the smallest case of this rule and the one the codebase repeats most. Core returns what the row *means* — which name it shows, whether the symbol would repeat that name, what sits underneath, what trails it — and the app turns each case into a widget. A list whose entries are fixed and unconditional is not one of these: the tab bar names three or four destinations with no rule behind them, so it stays app-side until a destination becomes conditional. The record carries the value the row shows, already formatted, and the name of every outcome the row draws. It carries the choices that would otherwise be re-made, differently, in each list on each platform.
 
 ```rust
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
@@ -224,6 +224,33 @@ public var name: String {
 ```
 
 `GemValidatorRow`, `GemFiatQuoteRow`, `GemWalletRow` and `GemBalanceRow` are the same shape for their lists. A session is for a screen the user drives, with events and a derived view state; a projection of one value that answers the same way every time is a row. The thing to look for in a row model is a decision the record could carry: if both apps compute it, it belongs in the record, not in two view models.
+
+### The record carries the finished value, not the ingredients
+
+An app that receives a number and a flag has to decide what to print, and the two apps decide differently: one groups the block height with the device locale and the other with a US formatter, one shows a dash for a missing chain id and the other an empty cell, one draws a check emoji for a synced node and the other a tinted icon. None of that is a platform capability; it is the same answer computed twice.
+
+So the row carries the text and names the outcome:
+
+```rust
+pub enum GemNodeCheckRow {
+    ChainId { value: String },
+    InSync { state: GemNodeSyncState },
+    LatestBlock { value: String },
+    Latency { milliseconds: u32 },
+}
+```
+
+`ChainId` and `LatestBlock` arrive printable — Core groups the digits and substitutes the placeholder, so neither app carries a formatter for them. `InSync` carries a named state rather than a `bool`, because a boolean forces the app to pick the glyph and the two apps pick differently; the name is mapped once in each app's style file, the way every other Core case is. `Latency` stays a number because its text is a localized template with a number in it, and that template lives in the app's catalog.
+
+The app is then a map with no branches in it:
+
+```swift
+var fields: [ListItemField] {
+    result.rows().map { ListItemField(title: $0.title, value: $0.text) }
+}
+```
+
+Two things still map per platform, and only two: the localized label for each case, and the glyph or colour for each named outcome. Anything else in a row model — a formatter, a placeholder, a ternary over a flag — is a decision that belongs in the record.
 
 ### A row that a screen only ever draws one way keeps its shape app-side
 

@@ -22,7 +22,6 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 - **R46** **M** `Onboarding/Sources/ViewModels/ImportWalletSceneViewModel.swift` (5) against Android `ImportViewModel`.
 - **R47** **S** `Transfer/Sources/ViewModels/AmountSceneViewModel.swift` (4) — balance line, reserved-fee line, max and continue.
 - **R48** **S** `Transfer/Sources/ViewModels/AmountPerpetualViewModel.swift` (4).
-- **R49** **S** `Settings/Sources/ChainSettings/ViewModels/AddNodeResultViewModel.swift` (4).
 - **R50** **S** `QRScanner/Sources/ViewModels/QRScannerErrorViewModel.swift` (4) — check the scanner divergence note in SERVICES.md first; only the non-platform half moves.
 - **R51** **M** `Perpetuals/Sources/ViewModels/PerpetualsSceneViewModel.swift` (4) against Android `PerpetualMarketViewModel`.
 - **R53** **S** `Contacts/Sources/ViewModels/ManageContactAddressViewModel.swift` (4).

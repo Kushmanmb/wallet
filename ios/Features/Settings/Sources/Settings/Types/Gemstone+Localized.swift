@@ -5,6 +5,7 @@ import enum Gemstone.GemAboutRow
 import enum Gemstone.GemPreferencesRow
 import enum Gemstone.GemSettingsRow
 import enum Gemstone.GemChainSettingsSection
+import enum Gemstone.GemNodeCheckRow
 import enum Gemstone.GemNodeSubtitle
 import enum GemstoneServices.KeystoreAuthentication
 import Localization
@@ -78,6 +79,25 @@ extension GemChainSettingsSection {
         switch self {
         case .nodes: Localized.Settings.Networks.source
         case .explorer: Localized.Settings.Networks.explorer
+        }
+    }
+}
+
+extension GemNodeCheckRow {
+    var title: String {
+        switch self {
+        case .chainId: Localized.Nodes.ImportNode.chainId
+        case .inSync: Localized.Nodes.ImportNode.inSync
+        case .latestBlock: Localized.Nodes.ImportNode.latestBlock
+        case .latency: Localized.Nodes.ImportNode.latency
+        }
+    }
+
+    var text: String {
+        switch self {
+        case let .chainId(value), let .latestBlock(value): value
+        case let .inSync(state): state.symbol
+        case let .latency(milliseconds): Localized.Common.latencyInMs(Int(milliseconds))
         }
     }
 }
