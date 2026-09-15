@@ -203,3 +203,12 @@ extension LinkType {
         }
     }
 }
+
+extension PerpetualMarginType {
+    public var title: String {
+        switch self {
+        case .cross: Localized.Perpetual.Margin.cross
+        case .isolated: Localized.Perpetual.Margin.isolated
+        }
+    }
+}

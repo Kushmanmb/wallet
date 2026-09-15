@@ -20,6 +20,7 @@ import com.gemwallet.android.ui.components.list_item.property.PropertyTitleText
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.paddingMiddle
 import com.wallet.core.primitives.Currency
+import com.gemwallet.android.features.perpetual.localization.stringRes
 import com.wallet.core.primitives.PerpetualMarginType
 import com.gemwallet.android.ui.theme.Placeholder
 import uniffi.gemstone.PerpetualProvider
@@ -116,15 +117,7 @@ private val perpetual = GemPerpetual(PerpetualProvider.HYPERCORE)
 
 @Composable
 private fun PerpetualPositionDetailsDataAggregate.marginText(): String {
-    return perpetual.marginText(marginAmount, marginType.title())
-}
-
-@Composable
-private fun PerpetualMarginType.title(): String {
-    return when (this) {
-        PerpetualMarginType.Cross -> stringResource(R.string.perpetual_margin_cross)
-        PerpetualMarginType.Isolated -> stringResource(R.string.perpetual_margin_isolated)
-    }
+    return perpetual.marginText(marginAmount, stringResource(marginType.stringRes()))
 }
 
 private fun Double?.formatTriggerOrder(label: String): String? {

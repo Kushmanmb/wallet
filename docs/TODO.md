@@ -38,7 +38,6 @@ Rejected: a screen's chrome — its sheet title and its cancel, clear and done b
 
 Per-variant labels: a primitives enum both apps map to a string themselves is a decision written twice. Both languages force a `switch`/`when` over a Core enum to be exhaustive, so these sets cannot silently drift — every one checked below maps the same variants to the same meaning. That makes the V series maintenance cost and a place for drift to start, not a live bug; the exception is a catch-all branch, which **X20** covers. The migrated shape is a Core text key each app resolves once in its own `Gemstone+Localized.swift` / `GemstoneText.kt` — `GemTransactionTitle`, `GemBannerTitle` and `GemWalletSubtitle` already work that way. These do not:
 
-- **V7** **S** `PerpetualMarginType` — cross vs isolated, four cases.
 - **V8** **S** `Resource` — Tron bandwidth and energy, four cases.
 - **V9** **S** `ReportReason` — [iOS `ReportReasonViewModel`](../ios/Features/NFT/Sources/ViewModels/ReportReasonViewModel.swift) and Android `NftDetailsScene.titleRes` map the same five reasons, and the order comes from each language's enum declaration rather than from Core.
 - **V10** **S** QR scan type — 8 cases, [iOS](../ios/Features/QRScanner/Sources/ViewModels/QRScannerSceneViewModel.swift), Android `QRScanner.kt`.
