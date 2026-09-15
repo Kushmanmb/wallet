@@ -186,7 +186,7 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 
 Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them declare records or forward to a `rules.rs` that is already tested — `GemStakeAmountInput`'s four methods and `candlestick_header` are both covered from their rules module. What is left is the orchestration below: each named function has a body of its own and no test anywhere in the crate calls it. Several need a store or gateway mock first; `services/*/testkit.rs` is the pattern.
 
-- **T1** **M** `services/perpetual/mod.rs` — `on_socket_message` (27 lines, five socket message kinds, each writing positions, balances or prices), plus `refresh`, `sync_enablement`, `sync_markets_if_needed`, `sync_current_positions`, `account_mode`.
+- **T1** **S** `services/perpetual/mod.rs` — `refresh`, `sync_enablement`, `sync_markets_if_needed`, `sync_current_positions` and `account_mode` still have no test. `on_socket_message` now does, and `perpetual/testkit.rs` assembles the whole service graph for the rest.
 - **T2** **M** `services/assets/details.rs` `refresh` (26 lines) — the concurrent detail load and its per-step failures.
 - **T4** **S** `services/wallet_home/mod.rs` `refresh`.
 - **T5** **M** `services/app_start/mod.rs` `setup_wallets`.
