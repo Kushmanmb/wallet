@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import enum Gemstone.GemPerpetualButton
+import enum Gemstone.GemPerpetualChartLineKind
 import enum Gemstone.GemPerpetualInfoRow
 import enum Gemstone.GemPerpetualPositionDetailRow
 import enum Gemstone.GemPerpetualSection
@@ -58,6 +59,17 @@ extension GemPerpetualButton {
         case .close: Localized.Perpetual.closePosition
         case .increase: Localized.Perpetual.increasePosition
         case .reduce: Localized.Perpetual.reducePosition
+        }
+    }
+}
+
+extension GemPerpetualChartLineKind {
+    var title: String {
+        switch self {
+        case .takeProfit: Localized.Perpetual.takeProfit
+        case .stopLoss: Localized.Perpetual.stopLoss
+        case .entry: Localized.Charts.entry
+        case .liquidation: Localized.Perpetual.liquidation
         }
     }
 }
