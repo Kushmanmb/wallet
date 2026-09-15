@@ -1,7 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import BigInt
+import Formatters
 import enum Gemstone.PerpetualDirection
 import enum Gemstone.FeeOption
+import enum Gemstone.GemApprovalValue
 import enum Gemstone.GemAssetInfoKind
 import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.LinkType
@@ -274,6 +277,15 @@ extension Primitives.FeePriority {
         switch self {
         case .normal: Localized.FeeRates.normal
         case .fast: Localized.FeeRates.fast
+        }
+    }
+}
+
+extension GemApprovalValue {
+    public func title(symbol: String, formatter: ValueFormatter, decimals: Int) -> String {
+        switch self {
+        case .unlimited: Localized.Simulation.Header.unlimitedAsset(symbol)
+        case let .exact(value): formatter.string(BigInt(value), decimals: decimals, currency: symbol)
         }
     }
 }

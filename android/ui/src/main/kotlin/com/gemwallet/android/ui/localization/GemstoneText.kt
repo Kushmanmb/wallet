@@ -7,7 +7,9 @@ import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toPrimitives
+import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
+import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.FeePriority
 import com.wallet.core.primitives.PerpetualDirection
@@ -16,6 +18,7 @@ import com.wallet.core.primitives.Resource
 import com.wallet.core.primitives.TransactionState
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.GemAddNodeFailure
+import uniffi.gemstone.GemApprovalValue
 import uniffi.gemstone.GemDelegationStatus
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemLocalizedText
@@ -223,4 +226,10 @@ fun PerpetualDirection.stringRes(): Int = when (this) {
 fun FeePriority.stringRes(): Int = when (this) {
     FeePriority.Normal -> R.string.fee_rates_normal
     FeePriority.Fast -> R.string.fee_rates_fast
+}
+
+@Composable
+fun GemApprovalValue.string(symbol: String, formatter: ValueFormatter, asset: Asset): String = when (this) {
+    is GemApprovalValue.Exact -> formatter.string(value, asset)
+    GemApprovalValue.Unlimited -> stringResource(R.string.simulation_header_unlimited_asset, symbol)
 }
