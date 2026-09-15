@@ -64,7 +64,6 @@ Decide before building; a read-only screen is a row, not a session.
 
 84 sites across 40 files. Grouped by where they are. A private `Metrics` object is already the local-constant pattern, so the work is to point the values that have a theme equivalent at it and leave the rest named — `ui/components/chart` kept five (a 2.5 dp stroke, an 88 dp label column, an 18 dp label offset, a 3 dp dash gap and a 1.5 dp ring).
 
-- **X22** **S** `ui/components/list_item` — `ListItemPositionClip.kt` (5), `SubheaderItem.kt` (3).
 - **X23** **M** the rest of `android/ui` — `QRScanner.kt` (4), `SearchBar.kt` (3), `buttons/CopyButton.kt` (2), `filters/FormDialog.kt` (2) and the remainder of the 56 in that module.
 - **X24** **S** `features/settings/settings/presents` — `SupportMessageBubble.kt` (7) and one more.
 - **X25** **S** `features/receive/presents` — `ReceiveScreen.kt` (4) and one more.
