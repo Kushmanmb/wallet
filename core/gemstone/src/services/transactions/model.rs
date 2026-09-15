@@ -1,7 +1,11 @@
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigUint;
 use crate::services::swap::model::GemSwapRate;
-use primitives::{AddressName, Asset, AssetId, AssetPrice, Chain, NFTAssetId, PerpetualDirection, Resource, TransactionExtended, TransactionType};
+use chrono::{DateTime, Utc};
+use primitives::{
+    AddressName, Asset, AssetId, AssetPrice, Chain, NFTAssetId, PerpetualDirection, Resource, TransactionDirection, TransactionExtended, TransactionId, TransactionState,
+    TransactionType,
+};
 
 use super::rules;
 use primitives::BlockExplorerLink;
@@ -151,6 +155,12 @@ pub struct GemTransactionStatus {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemTransactionRow {
+    pub id: TransactionId,
+    pub asset: Asset,
+    pub transaction_type: TransactionType,
+    pub direction: TransactionDirection,
+    pub state: TransactionState,
+    pub created_at: DateTime<Utc>,
     pub status: GemTransactionStatus,
     pub title: GemTransactionTitle,
     pub subtitle: GemTransactionRowSubtitle,

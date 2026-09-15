@@ -70,6 +70,12 @@ pub fn transaction_asset_ids(transactions: &[Transaction]) -> Vec<AssetId> {
 pub fn row(extended: &TransactionExtended) -> GemTransactionRow {
     let transaction = &extended.transaction;
     GemTransactionRow {
+        id: transaction.id.clone(),
+        asset: extended.asset.clone(),
+        transaction_type: transaction.transaction_type.clone(),
+        direction: transaction.direction.clone(),
+        state: transaction.state,
+        created_at: transaction.created_at,
         status: status(transaction.state),
         title: transaction_title(transaction),
         subtitle: row_subtitle(extended),
