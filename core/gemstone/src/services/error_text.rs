@@ -10,6 +10,7 @@ use crate::services::wallet_connect::error::GemWalletConnectError;
 pub enum GemErrorText {
     Cancelled,
     NetworkOffline,
+    NetworkMessage { text: String },
     NetworkStatus { status: u32 },
     InvalidNetworkId,
     InvalidUrl,
@@ -84,7 +85,7 @@ impl GemWalletConnectError {
 #[uniffi::export]
 pub fn alien_error_text(error: AlienError) -> GemErrorText {
     match error {
-        AlienError::RequestError { msg } | AlienError::ResponseError { msg } => GemErrorText::Message { text: msg },
+        AlienError::RequestError { msg } | AlienError::ResponseError { msg } => GemErrorText::NetworkMessage { text: msg },
         AlienError::Http { status, .. } => GemErrorText::NetworkStatus { status: status as u32 },
         AlienError::Offline => GemErrorText::NetworkOffline,
     }
@@ -101,6 +102,22 @@ pub fn payment_error_text(error: GemPaymentError) -> GemErrorText {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_a_transport_message_is_named_apart_from_a_service_message() {
+        assert_eq!(
+            alien_error_text(AlienError::RequestError { msg: "timeout".into() }),
+            GemErrorText::NetworkMessage { text: "timeout".into() },
+            "a transport failure reads as a network error on both apps"
+        );
+        assert_eq!(alien_error_text(AlienError::Offline), GemErrorText::NetworkOffline);
+        assert_eq!(alien_error_text(AlienError::Http { status: 503, len: 0 }), GemErrorText::NetworkStatus { status: 503 });
+        assert_eq!(
+            GatewayError::NetworkError { msg: "reverted".into() }.text(),
+            GemErrorText::Message { text: "reverted".into() },
+            "a message the gateway already phrased is shown as it is"
+        );
+    }
 
     #[test]
     fn test_a_carried_message_stays_the_message_and_a_decision_becomes_a_key() {

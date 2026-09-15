@@ -449,6 +449,7 @@ extension GemErrorText {
         switch self {
         case .cancelled: Localized.Errors.cancelled
         case .networkOffline: Localized.Errors.networkOffline
+        case let .networkMessage(text): Localized.Errors.networkError(text)
         case let .networkStatus(status): Localized.Errors.networkError(status)
         case .invalidNetworkId: Localized.Errors.invalidNetworkId
         case .invalidUrl: Localized.Errors.invalidUrl

@@ -339,6 +339,7 @@ fun GemEmptyStateAction.title(): Int = when (this) {
 fun GemErrorText.text(context: Context): String = when (this) {
     GemErrorText.Cancelled -> context.getString(R.string.errors_cancelled)
     GemErrorText.NetworkOffline -> context.getString(R.string.errors_network_offline)
+    is GemErrorText.NetworkMessage -> context.getString(R.string.errors_network_error, text)
     is GemErrorText.NetworkStatus -> context.getString(R.string.errors_network_error, status.toString())
     GemErrorText.InvalidNetworkId -> context.getString(R.string.errors_invalid_network_id)
     GemErrorText.InvalidUrl -> context.getString(R.string.errors_invalid_url)

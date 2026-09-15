@@ -132,7 +132,6 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 
 ### Android does not read an iOS-read decision
 
-- **P17** **S** `error_text.rs` `alien_error_text` and `payment_error_text` — Android maps transport and payment errors through its own `Throwable.toGemNetworkError()` and `serviceMessage()`, which is a second answer, not a second route to the same one.
 - **P24** **S** `assets/config.rs` `default_token_rank` and `matching_assets`.
 - **P27** **S** `confirm/error.rs` `has_info_sheet` — Android decides which confirm errors open a sheet.
 - **P28** **S** `support/mod.rs` `image_file`.

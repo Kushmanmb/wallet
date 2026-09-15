@@ -76,7 +76,6 @@ import com.gemwallet.android.ui.components.simulation.simulationPayloadFieldsCon
 import com.gemwallet.android.ui.components.simulation.simulationWarningsContent
 import com.gemwallet.android.ui.components.swap.SwapDetailsBottomSheet
 import com.gemwallet.android.ui.components.swap.SwapDetailsSummaryItem
-import com.gemwallet.android.ui.localizedDescription
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.actions.CancelAction
 import com.gemwallet.android.ui.models.actions.FinishConfirmAction
