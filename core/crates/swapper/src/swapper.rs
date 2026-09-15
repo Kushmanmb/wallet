@@ -532,3 +532,63 @@ mod tests {
         assert_eq!(large[0].to_value, BigUint::from(10_000_000_000_000_000_000u64));
     }
 }
+
+#[cfg(all(test, feature = "swap_integration_tests"))]
+mod timing_tests {
+    use std::{sync::Arc, time::Instant};
+
+    use num_bigint::BigUint;
+    use primitives::{AssetId, Chain, asset_constants::ETHEREUM_USDC_ASSET_ID};
+
+    use super::*;
+    use crate::{Options, QuoteRequest, alien::reqwest_provider::NativeProvider};
+
+    fn request(to_asset: AssetId, destination_address: &str) -> QuoteRequest {
+        QuoteRequest {
+            from_asset: AssetId::from_chain(Chain::Ethereum).into(),
+            to_asset: to_asset.into(),
+            wallet_address: "0xBA4D1d35bCe0e8F28E5a3403e7a0b996c5d50AC4".into(),
+            destination_address: destination_address.into(),
+            value: BigUint::from(100000000000000000u64),
+            options: Options {
+                slippage: 100.into(),
+                use_max_amount: false,
+            },
+        }
+    }
+
+    async fn report(swapper: &GemSwapper, request: &QuoteRequest, round: &str) {
+        let started = Instant::now();
+        swapper.preload_routes(&request.from_asset.asset_id(), &request.to_asset.asset_id()).await;
+        println!("{round} preload total: {}ms", started.elapsed().as_millis());
+
+        let provider_ids: BTreeSet<_> = swapper.get_providers_for_request(request).unwrap().into_iter().map(|provider| provider.id).collect();
+        let timings = swapper.swappers.iter().filter(|swapper| provider_ids.contains(&swapper.provider().id)).map(|provider| async move {
+            let started = Instant::now();
+            let outcome = provider.get_quote(request).await;
+            (provider.provider().id.id().to_string(), started.elapsed().as_millis(), outcome.is_ok())
+        });
+
+        let started = Instant::now();
+        let mut timings = futures::future::join_all(timings).await;
+        let total = started.elapsed().as_millis();
+        timings.sort_by_key(|(_, elapsed, _)| *elapsed);
+        for (provider, elapsed, quoted) in &timings {
+            println!("{round} quote {provider}: {elapsed}ms {}", if *quoted { "quoted" } else { "no quote" });
+        }
+        println!("{round} quote round total: {total}ms, slowest decides");
+    }
+
+    #[tokio::test]
+    async fn test_report_preload_and_quote_durations_per_provider() {
+        let swapper = GemSwapper::new(Arc::new(NativeProvider::new().set_debug(false)));
+
+        let on_chain = request(ETHEREUM_USDC_ASSET_ID.clone(), "0xBA4D1d35bCe0e8F28E5a3403e7a0b996c5d50AC4");
+        report(&swapper, &on_chain, "on-chain cold").await;
+        report(&swapper, &on_chain, "on-chain warm").await;
+
+        let cross_chain = request(AssetId::from_chain(Chain::Solana), "7v91N7iZ9mNicL8WfG6cgSCKyRXydQjLh6UYBWwm6y1Q");
+        report(&swapper, &cross_chain, "cross-chain cold").await;
+        report(&swapper, &cross_chain, "cross-chain warm").await;
+    }
+}

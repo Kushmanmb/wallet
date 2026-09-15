@@ -18,7 +18,6 @@ These are code-backed candidates, not measured speedups. Capture a before/after 
 
 ### Investigate before changing behavior
 
-- **PERF9** **S** Swap provider timing — [`Swapper`](../core/crates/swapper/src/swapper.rs) awaits all route preloads and all quotes. Measure per-provider discovery and quote durations, existing transport timeouts, cancellation, and cold/warm route-cache behavior. Identify the provider or phase responsible before proposing a change. Preserve [Swapper](SWAPPER.md)'s preload-before-quote contract, live quotes, route hints, ranking, and current-input checks. A new deadline changes which providers can compete and requires a separate documented policy; do not add a timeout, first-result selection, quote cache, or speculative preloading in this investigation.
 
 ## 1. Lists get a row record
 
