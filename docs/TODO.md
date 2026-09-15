@@ -77,7 +77,7 @@ Per-variant labels: a primitives enum both apps map to a string themselves is a 
 - **V35** **M** Select-asset presentation is a structural difference, not a label map: iOS reuses one modal and maps [`SelectAssetType`](../ios/Features/Assets/Sources/Types/SelectAssetPresentation.swift) to eleven titles in one place, while Android gives each caller its own screen — manage, price alert, swap pay/receive, fee asset — each naming its own title. Give Android the one presentation before the titles can cross; until then there is nothing to centralise.
 - **V38** **M** Error descriptions — [`Gem/Types/Errors.swift`](../ios/Gem/Types/Errors.swift) maps seven separate Core error enums to text, against Android's `Throwable.serviceMessage()` and its per-module `GemstoneText.kt`. Check each enum: some already have a Core text key and some do not.
 
-- **V31** **S** Fiat button action and the swap select side (pay and receive) — two two-case maps, each duplicated, each its own commit.
+- **V31** **S** The swap select side (pay and receive) is mapped inside Android's `SwapSelectScreen`; iOS already resolves it in its select-asset presentation, so this lands with **V35**.
 
 
 Copy: [`GemPerpetualMarketCounts::sections`](../core/gemstone/src/services/perpetual/model.rs) → [iOS](../ios/Features/Perpetuals/Sources/ViewModels/PerpetualsSceneViewModel.swift), [Android](../android/features/perpetual/presents/src/main/kotlin/com/gemwallet/android/features/perpetual/views/market/PerpetualMarketScene.kt).

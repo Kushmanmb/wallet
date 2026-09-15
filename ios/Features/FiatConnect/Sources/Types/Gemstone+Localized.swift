@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemFiatButtonAction
 import Localization
 import Primitives
 
@@ -15,6 +16,15 @@ extension FiatQuoteType {
         switch self {
         case .buy: Localized.Wallet.buy
         case .sell: Localized.Wallet.sell
+        }
+    }
+}
+
+extension GemFiatButtonAction {
+    var title: String {
+        switch self {
+        case .continue: Localized.Common.continue
+        case .retryQuote: Localized.Common.tryAgain
         }
     }
 }

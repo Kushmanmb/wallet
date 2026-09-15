@@ -117,10 +117,7 @@ public final class FiatSceneViewModel {
     }
 
     var actionButtonTitle: String {
-        switch viewState.buttonAction {
-        case .continue: Localized.Common.continue
-        case .retryQuote: Localized.Common.tryAgain
-        }
+        viewState.buttonAction.title
     }
 
     var actionButtonState: ButtonState {
