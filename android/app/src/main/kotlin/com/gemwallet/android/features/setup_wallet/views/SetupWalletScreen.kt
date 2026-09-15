@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.setup_wallet.views
 
+import com.gemwallet.android.localization.stringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,10 +40,7 @@ fun SetupWalletScreen(
 
     val handleDone = { onComplete() }
 
-    val title = when (uiState.walletSource) {
-        WalletSource.Create -> stringResource(id = R.string.wallet_new_title)
-        WalletSource.Import -> stringResource(id = R.string.wallet_import_title)
-    }
+    val title = stringResource(uiState.walletSource.stringRes())
 
     Scene(
         title = title,
