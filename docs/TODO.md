@@ -148,6 +148,12 @@ Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them de
 - **T7** **S** `services/asset_discovery/mod.rs` `discover`.
 - **T8** **M** `services/rewards/mod.rs` — `create_referral`, `use_referral_code`, `redeem`. Money paths with no test.
 
+### Hardcoded user-visible strings
+
+Swept on 2026-09-15 over every non-preview, non-test iOS file: 25 hits, of which 20 are the developer screen (a debug screen that is deliberately untranslated) and 4 are inside a `PreviewProvider`. The one real hit was the wallet screen's "Trade Perpetuals" row, now `perpetuals_trade`. The same sweep over Android found none.
+
+- **L14** **S** `perpetuals_trade`, `widget_empty` and `widget_empty_short` carry the English text in the other 30 locales until the next translation pass.
+
 ### iOS view models with no test file
 
 130 across `Features`, `Packages`, `Gem` and the widget — the wider count that X55–X64's preamble narrows to feature modules. Grouped by module so each item is one test target's worth of work; X55–X64 already name the heaviest.

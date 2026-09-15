@@ -973,6 +973,8 @@ public enum Localized {
     public static let markets = Localized.tr("Localizable", "perpetuals.markets", fallback: "Markets")
     /// Perpetuals
     public static let title = Localized.tr("Localizable", "perpetuals.title", fallback: "Perpetuals")
+    /// Trade Perpetuals
+    public static let trade = Localized.tr("Localizable", "perpetuals.trade", fallback: "Trade Perpetuals")
     public enum EmptyState {
       /// No markets found
       public static let noMarketsFound = Localized.tr("Localizable", "perpetuals.empty_state.no_markets_found", fallback: "No markets found")

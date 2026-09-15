@@ -679,6 +679,8 @@ perpetual_margin_isolated = पृथक
 # Perpetuals
 
 perpetuals_title = पर्पेचुअल्स
+# Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
+perpetuals_trade = Trade Perpetuals
 perpetuals_markets = बाज़ार
 perpetuals_empty_state_no_markets_found = कोई बाज़ार नहीं मिला
 

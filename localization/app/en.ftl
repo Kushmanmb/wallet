@@ -1238,6 +1238,8 @@ perpetual_margin_isolated = Isolated
 
 # Used in Perpetuals market list and positions screens as a title.
 perpetuals_title = Perpetuals
+# Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
+perpetuals_trade = Trade Perpetuals
 # Used in Perpetuals market list and positions screens for the markets label.
 perpetuals_markets = Markets
 # Used in Perpetuals market list and positions screens for the empty state no markets found label.

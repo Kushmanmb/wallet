@@ -679,6 +679,8 @@ perpetual_margin_isolated = โดดเดี่ยว
 # Perpetuals
 
 perpetuals_title = นิรันดร์
+# Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
+perpetuals_trade = Trade Perpetuals
 perpetuals_markets = ตลาด
 perpetuals_empty_state_no_markets_found = ไม่พบตลาด
 

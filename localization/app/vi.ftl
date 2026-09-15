@@ -679,6 +679,8 @@ perpetual_margin_isolated = Bị cô lập
 # Perpetuals
 
 perpetuals_title = Perpetual
+# Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
+perpetuals_trade = Trade Perpetuals
 perpetuals_markets = Thị trường
 perpetuals_empty_state_no_markets_found = Không tìm thấy thị trường
 
