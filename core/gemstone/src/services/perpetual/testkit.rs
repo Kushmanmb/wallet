@@ -3,15 +3,15 @@ use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use primitives::perpetual::PerpetualData;
-use primitives::{AssetId, PerpetualMarketData, PerpetualPosition, PerpetualProvider, Wallet, WalletId};
+use primitives::{PerpetualMarketData, PerpetualPosition, PerpetualProvider, Wallet, WalletId};
 
 use super::{GemPerpetualService, GemPerpetualStore};
 use crate::api::GemApiClient;
 use crate::gateway::{EmptyPreferences, GemGateway};
 use crate::services::assets::GemAssetsService;
 use crate::services::assets::testkit::MemoryAssetStore;
-use crate::services::balance::model::{GemAssetBalance, GemBalanceRecord};
-use crate::services::balance::{GemBalanceService, GemBalanceStore};
+use crate::services::balance::GemBalanceService;
+use crate::services::balance::testkit::RecordingBalanceStore;
 use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::preferences::testkit::MemoryPreferencesStore;
@@ -64,31 +64,6 @@ impl GemPerpetualStore for MemoryPerpetualStore {
     }
     async fn update_prices(&self, prices: HashMap<String, f64>) -> Result<(), GemServiceError> {
         self.price_writes.lock().unwrap().push(prices);
-        Ok(())
-    }
-}
-
-#[derive(Default)]
-pub struct RecordingBalanceStore {
-    pub writes: Mutex<Vec<Vec<GemBalanceRecord>>>,
-}
-
-#[async_trait]
-impl GemBalanceStore for RecordingBalanceStore {
-    async fn get_available_balances(&self, _: WalletId, _: Vec<AssetId>) -> Result<Vec<GemAssetBalance>, GemServiceError> {
-        Ok(Vec::new())
-    }
-    async fn update_balances(&self, _: WalletId, balances: Vec<GemBalanceRecord>) -> Result<(), GemServiceError> {
-        self.writes.lock().unwrap().push(balances);
-        Ok(())
-    }
-    async fn get_enabled_asset_ids(&self, _: WalletId) -> Result<Vec<AssetId>, GemServiceError> {
-        Ok(Vec::new())
-    }
-    async fn set_assets_enabled(&self, _: WalletId, _: Vec<AssetId>, _: bool) -> Result<(), GemServiceError> {
-        Ok(())
-    }
-    async fn set_asset_pinned(&self, _: WalletId, _: AssetId, _: bool) -> Result<(), GemServiceError> {
         Ok(())
     }
 }

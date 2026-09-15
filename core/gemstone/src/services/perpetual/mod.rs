@@ -304,7 +304,7 @@ mod tests {
         assert_eq!(message(&testkit, OPEN_ORDERS), GemPerpetualSocketUpdate::Applied);
 
         assert_eq!(testkit.store.position_writes.lock().unwrap().len(), 1);
-        assert!(testkit.balances.writes.lock().unwrap().is_empty(), "an orders message is not a balance");
+        assert!(testkit.balances.balance_writes.lock().unwrap().is_empty(), "an orders message is not a balance");
     }
 
     #[test]
@@ -316,7 +316,7 @@ mod tests {
         assert!(matches!(update, GemPerpetualSocketUpdate::Candle { .. }));
         assert!(testkit.store.position_writes.lock().unwrap().is_empty());
         assert!(testkit.store.price_writes.lock().unwrap().is_empty());
-        assert!(testkit.balances.writes.lock().unwrap().is_empty());
+        assert!(testkit.balances.balance_writes.lock().unwrap().is_empty());
     }
 
     #[test]
