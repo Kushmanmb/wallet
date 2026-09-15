@@ -29,6 +29,7 @@ import uniffi.gemstone.GemSimulationWarningKind
 import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.GemTransactionFilter
 import uniffi.gemstone.LinkType
+import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemVerificationLevel
 import uniffi.gemstone.GemWalletSecretKind
@@ -275,4 +276,12 @@ fun TpslType.autocloseRes(): Int = when (this) {
 fun GemWalletSecretKind.stringRes(): Int = when (this) {
     GemWalletSecretKind.PHRASE -> R.string.common_secret_phrase
     GemWalletSecretKind.PRIVATE_KEY -> R.string.common_private_key
+}
+
+@StringRes
+fun GemTransactionRowSubtitle.prefixRes(): Int? = when (this) {
+    is GemTransactionRowSubtitle.ToAddress, is GemTransactionRowSubtitle.ToResource -> R.string.transfer_to
+    is GemTransactionRowSubtitle.FromAddress, is GemTransactionRowSubtitle.FromResource -> R.string.transfer_from
+    is GemTransactionRowSubtitle.Price -> R.string.asset_price
+    GemTransactionRowSubtitle.None -> null
 }

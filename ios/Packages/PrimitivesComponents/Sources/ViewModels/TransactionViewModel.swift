@@ -106,13 +106,12 @@ public struct TransactionViewModel: Sendable, Identifiable, Equatable {
     }
 
     public var titleExtraTextValue: TextValue? {
+        let prefix = row.subtitle.prefix ?? ""
         let title: String? = switch row.subtitle {
-        case let .toAddress(participant): participantTitle(prefix: Localized.Transfer.to, participant: participant)
-        case let .fromAddress(participant): participantTitle(prefix: Localized.Transfer.from, participant: participant)
-        case let .toResource(resource): resourceTitle(prefix: Localized.Transfer.to, resource: resource)
-        case let .fromResource(resource): resourceTitle(prefix: Localized.Transfer.from, resource: resource)
+        case let .toAddress(participant), let .fromAddress(participant): participantTitle(prefix: prefix, participant: participant)
+        case let .toResource(resource), let .fromResource(resource): resourceTitle(prefix: prefix, resource: resource)
         case let .price(value):
-            String(format: "%@: %@", Localized.Asset.price, AmountDisplay.currency(value: value, currencyCode: Currency.usd.rawValue, showSign: false).text)
+            String(format: "%@: %@", prefix, AmountDisplay.currency(value: value, currencyCode: Currency.usd.rawValue, showSign: false).text)
         case .none: .none
         }
 

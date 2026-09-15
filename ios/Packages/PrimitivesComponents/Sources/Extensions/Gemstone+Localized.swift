@@ -17,6 +17,7 @@ import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemPriceAlertText
 import enum Gemstone.GemSimulationWarningKind
 import enum Gemstone.SimulationPayloadFieldKind
+import enum Gemstone.GemTransactionRowSubtitle
 import enum Gemstone.GemTransactionStateTone
 import enum Gemstone.GemTransactionTitle
 import enum Gemstone.GemWalletSubtitle
@@ -339,6 +340,17 @@ extension ScanReceiveMode {
         switch self {
         case .scan: Localized.Wallet.scan
         case .receive: Localized.Wallet.receive
+        }
+    }
+}
+
+extension GemTransactionRowSubtitle {
+    public var prefix: String? {
+        switch self {
+        case .toAddress, .toResource: Localized.Transfer.to
+        case .fromAddress, .fromResource: Localized.Transfer.from
+        case .price: Localized.Asset.price
+        case .none: nil
         }
     }
 }

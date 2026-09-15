@@ -1,5 +1,6 @@
 package com.gemwallet.android.ui.components.list_item.transaction
 
+import com.gemwallet.android.ui.localization.prefixRes
 import com.gemwallet.android.ui.localization.infoDescriptionRes
 import com.gemwallet.android.ui.localization.statusLabelRes
 import com.gemwallet.android.ui.localization.stringRes
@@ -38,17 +39,17 @@ fun TransactionDataAggregate.getBadgeColor(): Color = status.tone.color()
 
 @Composable
 fun TransactionDataAggregate.formatAddress(): String? = when (val subtitle = subtitle) {
-    is GemTransactionRowSubtitle.ToAddress -> prefixed(R.string.transfer_to, subtitle.participant)
-    is GemTransactionRowSubtitle.FromAddress -> prefixed(R.string.transfer_from, subtitle.participant)
-    is GemTransactionRowSubtitle.ToResource -> prefixed(R.string.transfer_to, stringResource(subtitle.resource.toPrimitives().stringRes()))
-    is GemTransactionRowSubtitle.FromResource -> prefixed(R.string.transfer_from, stringResource(subtitle.resource.toPrimitives().stringRes()))
-    is GemTransactionRowSubtitle.Price -> "${stringResource(R.string.asset_price)}: ${usdFiatFormatter.string(subtitle.value)}"
+    is GemTransactionRowSubtitle.ToAddress -> prefixed(subtitle.prefixRes(), subtitle.participant)
+    is GemTransactionRowSubtitle.FromAddress -> prefixed(subtitle.prefixRes(), subtitle.participant)
+    is GemTransactionRowSubtitle.ToResource -> prefixed(subtitle.prefixRes(), stringResource(subtitle.resource.toPrimitives().stringRes()))
+    is GemTransactionRowSubtitle.FromResource -> prefixed(subtitle.prefixRes(), stringResource(subtitle.resource.toPrimitives().stringRes()))
+    is GemTransactionRowSubtitle.Price -> subtitle.prefixRes()?.let { "${stringResource(it)}: ${usdFiatFormatter.string(subtitle.value)}" }
     GemTransactionRowSubtitle.None -> null
 }
 
 @Composable
-private fun prefixed(@StringRes prefix: Int, value: String): String? =
-    value.takeIf { it.isNotEmpty() }?.let { "${stringResource(prefix)} $it" }
+private fun prefixed(@StringRes prefix: Int?, value: String): String? =
+    prefix?.let { res -> value.takeIf { it.isNotEmpty() }?.let { "${stringResource(res)} $it" } }
 
 @Composable
 fun TransactionDataAggregate.getValueColor(): Color = when {
