@@ -231,6 +231,19 @@ sealed class InfoSheetEntity(
         infoUrl = { AppUrl.noQuotes },
     )
 
+    object MaliciousTransactionInfo : InfoSheetEntity(
+        icon = R.drawable.ic_splash,
+        title = R.string.errors_scan_transaction_malicious_title,
+        description = R.string.errors_scan_transaction_malicious_description,
+    )
+
+    class MemoRequiredInfo(symbol: String) : InfoSheetEntity(
+        icon = R.drawable.ic_splash,
+        title = R.string.common_warning,
+        description = R.string.errors_scan_transaction_memo_required,
+        descriptionArgs = listOf("**$symbol**"),
+    )
+
     object AssetStatusSuspiciousInfo : InfoSheetEntity(
         icon = R.drawable.suspicious,
         title = R.string.asset_verification_suspicious,
