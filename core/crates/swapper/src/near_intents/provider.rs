@@ -118,10 +118,10 @@ where
     fn build_quote_request(request: &QuoteRequest, mode: SwapType, dry: bool) -> Result<NearQuoteRequest, SwapperError> {
         let origin_asset = get_near_asset_id(&request.from_asset)?;
         let destination_asset = get_near_asset_id(&request.to_asset)?;
-        let deposit_mode = Self::resolve_deposit_mode(&request.from_asset);
+        let deposit_mode = Self::deposit_mode(&request.from_asset);
         let from_chain = request.from_asset.asset_id().chain;
         let to_chain = request.to_asset.asset_id().chain;
-        let quote_waiting_time_ms = Some(Self::resolve_quote_waiting_time(from_chain, to_chain));
+        let quote_waiting_time_ms = Some(Self::quote_waiting_time(from_chain, to_chain));
 
         let deadline_minutes = Self::get_deadline_by_chain(from_chain).max(Self::get_deadline_by_chain(to_chain));
         let deadline = (Utc::now() + Duration::minutes(deadline_minutes)).to_rfc3339();
@@ -167,7 +167,7 @@ where
         })
     }
 
-    fn resolve_deposit_mode(asset: &SwapperQuoteAsset) -> DepositMode {
+    fn deposit_mode(asset: &SwapperQuoteAsset) -> DepositMode {
         if deposit_memo_chains().contains(&asset.asset_id().chain) {
             DepositMode::Memo
         } else {
@@ -175,7 +175,7 @@ where
         }
     }
 
-    fn resolve_quote_waiting_time(from_chain: Chain, to_chain: Chain) -> u32 {
+    fn quote_waiting_time(from_chain: Chain, to_chain: Chain) -> u32 {
         if auto_quote_time_chains().contains(&from_chain) || auto_quote_time_chains().contains(&to_chain) {
             0
         } else {
