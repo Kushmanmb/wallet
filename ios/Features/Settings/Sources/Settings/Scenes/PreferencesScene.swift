@@ -2,6 +2,7 @@
 
 import Components
 import enum Gemstone.GemPreferencesRow
+import struct Gemstone.GemPreferencesState
 import Primitives
 import PrimitivesComponents
 import Style
@@ -17,12 +18,13 @@ public struct PreferencesScene: View {
     }
 
     public var body: some View {
+        let state = model.state
         List {
             Group {
-                ForEach(Array(model.sections.enumerated()), id: \.offset) { _, section in
+                ForEach(Array(state.sections.enumerated()), id: \.offset) { _, section in
                     Section {
                         ForEach(section.rows, id: \.self) { row in
-                            content(for: row)
+                            content(for: row, state: state)
                         }
                     }
                 }
@@ -56,11 +58,11 @@ public struct PreferencesScene: View {
     }
 
     @ViewBuilder
-    private func content(for row: GemPreferencesRow) -> some View {
+    private func content(for row: GemPreferencesRow, state: GemPreferencesState) -> some View {
         switch row {
         case .currency:
             NavigationLink(value: Scenes.Currency()) {
-                ListItemView(title: row.title, subtitle: model.currencyValue, imageStyle: .settings(assetImage: row.assetImage))
+                ListItemView(title: row.title, subtitle: state.currency.text(), imageStyle: .settings(assetImage: row.assetImage))
             }
         case .language:
             NavigationCustomLink(

@@ -1,3 +1,5 @@
+use crate::services::currency::GemCurrencyRow;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemSettingsRow {
     Wallets,
@@ -32,6 +34,12 @@ pub enum GemPreferencesRow {
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct GemPreferencesSection {
     pub rows: Vec<GemPreferencesRow>,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemPreferencesState {
+    pub currency: GemCurrencyRow,
+    pub sections: Vec<GemPreferencesSection>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

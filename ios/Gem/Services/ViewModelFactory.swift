@@ -207,17 +207,16 @@ public struct ViewModelFactory: Sendable {
     @MainActor
     public func settingsScene() -> SettingsViewModel {
         SettingsViewModel(
-            service: GemSettingsService(preferences: preferencesService, session: walletSessionService),
+            service: GemSettingsService(preferences: preferencesService),
             observablePreferences: observablePreferences,
         )
     }
 
     @MainActor
-    public func preferencesScene(currencyModel: CurrencySceneViewModel) -> PreferencesViewModel {
+    public func preferencesScene() -> PreferencesViewModel {
         PreferencesViewModel(
-            currencyModel: currencyModel,
             service: preferencesService,
-            settings: GemSettingsService(preferences: preferencesService, session: walletSessionService),
+            settings: GemSettingsService(preferences: preferencesService),
             preferences: observablePreferences,
         )
     }
@@ -428,7 +427,7 @@ public struct ViewModelFactory: Sendable {
     public func securityScene() -> SecurityViewModel {
         SecurityViewModel(
             service: biometryService,
-            settings: GemSettingsService(preferences: preferencesService, session: walletSessionService),
+            settings: GemSettingsService(preferences: preferencesService),
             preferences: observablePreferences,
         )
     }

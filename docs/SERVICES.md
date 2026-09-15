@@ -229,6 +229,7 @@ One Core service per screen, held by the screen's view model on both apps. The s
 | `GemRecentActivityService` | — | `RecentsSceneViewModel`, `SelectAssetViewModel`, `PerpetualsSceneViewModel` | `RecentsSheetViewModel`, `PerpetualMarketViewModel` |
 | `GemRecipientService` | — | `RecipientSceneViewModel` (+ `nameService`) | `RecipientViewModel` (+ `GemNameServiceInterface`) |
 | `GemRewardsService` | — | `RewardsViewModel`, `CreateRewardsCodeViewModel`, `RedeemRewardsCodeViewModel` | `ReferralViewModel` |
+| `GemSettingsService` | — | `SettingsViewModel`, `PreferencesViewModel`, `SecurityViewModel` | `SettingsViewModel`, `PreferencesViewModel`, `SecurityViewModel` |
 | `GemSignMessageService` | — | `SignMessageSceneViewModel` | `WCRequestViewModel`, `WCAuthViewModel` |
 | `GemStakeService` | — | `StakeSceneViewModel`, `DelegationSceneViewModel`, `EarnSceneViewModel` | `StakeViewModel`, `DelegationViewModel`, `EarnViewModel` |
 | `GemSupportService` | — | `SupportChatSceneViewModel` | `SupportChatSceneViewModel` |
@@ -238,7 +239,7 @@ One Core service per screen, held by the screen's view model on both apps. The s
 | `GemWalletConnectService` | — | `WalletConnectorService` | `WCRequestViewModel`, `ProposalSceneViewModel`, `WCAuthViewModel` |
 | `GemWalletHomeService` | — | `WalletSceneViewModel`, `NetworkAssetsSceneViewModel` | `AssetsViewModel`, `NetworkAssetsViewModel` |
 | `GemWalletService` | — | onboarding and manage-wallet view models (`WalletsSceneViewModel` gates on `can_add_wallet`, `WalletDetailViewModel` exports the secret through `export_secret`) | `CreateWalletViewModel`, `ImportViewModel`, `WalletsViewModel` (`can_add_wallet`), `WalletViewModel` / `SetupWalletViewModel` (`rename`), `WalletSecretDataViewModel` (`export_secret`), wallet cases |
-| `GemWalletSessionService` | — | `SettingsViewModel` | `SettingsViewModel` |
+| `GemWalletSessionService` | — | `RootSceneViewModel`, `NavigationHandler` | `SessionCoordinator` (+ the services it composes) |
 
 Android holds an observed Room read beside the service where the screen lists rows (a `Get*` case); that is the platform's reactive read, not a second service.
 

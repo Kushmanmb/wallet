@@ -88,25 +88,4 @@ Legitimately one-sided, not gaps: `isVersionHigher` (Play update), `migrateToSha
 
 ## 7. Everything else
 
-Product or security decisions, one question each:
-
-
-Ownership, injection and threads:
-
-- **O9** **S** `SettingsViewModel` on Android serves both the settings screen and the preferences screen, so it holds the currency service and the appearance and perpetual preferences that only the preferences rows read. Give the preferences screen its own view model and leave each with the one Core service its rows need.
-
-
-
-Platform items:
-
-
-
-
-
-
-
-
-Guides:
-
-
 Do not "fix" the [deliberate divergences](SERVICES.md#deliberate-divergences--do-not-fix-these).

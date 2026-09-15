@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import struct Gemstone.GemPreferencesSection
+import struct Gemstone.GemPreferencesState
 import protocol Gemstone.GemSettingsServiceProtocol
 import Foundation
 import protocol Gemstone.GemPreferencesServiceProtocol
@@ -19,19 +19,16 @@ public final class PreferencesViewModel {
     private let preferences: ObservablePreferences
     private let service: any GemPreferencesServiceProtocol
     private let settings: any GemSettingsServiceProtocol
-    private let currencyModel: CurrencySceneViewModel
 
     var isPresentingLeveragePicker = false
     var isPresentingTakeProfitPicker = false
     var isPresentingStopLossPicker = false
 
     public init(
-        currencyModel: CurrencySceneViewModel,
         service: any GemPreferencesServiceProtocol,
         settings: any GemSettingsServiceProtocol,
         preferences: ObservablePreferences,
     ) {
-        self.currencyModel = currencyModel
         self.service = service
         self.settings = settings
         self.preferences = preferences
@@ -40,20 +37,13 @@ public final class PreferencesViewModel {
         perpetualStopLoss = AutocloseOption(value: service.getPerpetualStopLossPercent())
     }
 
-    var sections: [GemPreferencesSection] {
-        settings.preferencesSections(perpetualsEnabled: isPerpetualEnabled)
+    var state: GemPreferencesState {
+        settings.preferences(currency: preferences.currency.toGem(), perpetualsEnabled: isPerpetualEnabled)
     }
 
     var title: String {
         Localized.Settings.Preferences.title
     }
-
-
-    var currencyValue: String {
-        currencyModel.selectedCurrencyValue
-    }
-
-
 
     var languageValue: String {
         guard let code = Locale.current.language.languageCode?.identifier else {
@@ -61,13 +51,6 @@ public final class PreferencesViewModel {
         }
         return Locale.current.localizedString(forLanguageCode: code)?.capitalized ?? ""
     }
-
-
-
-
-
-
-
 
     var appearanceValue: String {
         preferences.appearance.title
@@ -78,12 +61,9 @@ public final class PreferencesViewModel {
         set { preferences.isPerpetualEnabled = newValue }
     }
 
-
-
     var perpetualLeverage: LeverageOption {
         didSet { persist { try service.setPerpetualLeverage(leverage: perpetualLeverage.value) } }
     }
-
 
     var defaultLeverageValue: String {
         "\(perpetualLeverage.value)x"
@@ -108,8 +88,6 @@ public final class PreferencesViewModel {
             debugLog("preferences write error: \(error)")
         }
     }
-
-
 
     var defaultTakeProfitValue: String {
         perpetualTakeProfit.displayText

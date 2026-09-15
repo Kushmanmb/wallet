@@ -36,8 +36,5 @@ object SessionModule {
 
     @Singleton
     @Provides
-    fun provideGemSettingsService(
-        preferences: GemPreferencesService,
-        session: GemWalletSessionService,
-    ): GemSettingsServiceInterface = GemSettingsService(preferences, session)
+    fun provideGemSettingsService(preferences: GemPreferencesService): GemSettingsServiceInterface = GemSettingsService(preferences)
 }

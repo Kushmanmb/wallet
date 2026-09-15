@@ -106,7 +106,7 @@ struct SettingsNavigationView: View {
             CurrencyScene(model: currencyModel)
         }
         .navigationDestination(for: Scenes.Preferences.self) { _ in
-            PreferencesScene(model: viewModelFactory.preferencesScene(currencyModel: currencyModel))
+            PreferencesScene(model: viewModelFactory.preferencesScene())
         }
         .navigationDestination(for: Scenes.Appearance.self) { _ in
             AppearanceScene(model: AppearanceViewModel(preferences: observablePreferences))

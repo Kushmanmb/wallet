@@ -43,7 +43,7 @@ import com.gemwallet.android.features.settings.settings.presents.style.painter
 import uniffi.gemstone.GemPreferencesRow
 import com.gemwallet.android.ui.theme.Spacer4
 import com.gemwallet.android.ui.theme.compactIconSize
-import com.gemwallet.android.features.settings.settings.viewmodels.SettingsViewModel
+import com.gemwallet.android.features.settings.settings.viewmodels.PreferencesViewModel
 import com.wallet.core.primitives.Appearance
 import java.util.Locale
 import uniffi.gemstone.GemPerpetual
@@ -53,16 +53,15 @@ import com.gemwallet.android.math.toUnsignedInts
 @Composable
 fun PreferencesScene(
     onAction: (PreferencesAction) -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel(),
+    viewModel: PreferencesViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val isPerpetualEnabled by viewModel.isPerpetualEnabled.collectAsStateWithLifecycle()
     val appearance by viewModel.appearance.collectAsStateWithLifecycle()
     val perpetualLeverage by viewModel.perpetualLeverage.collectAsStateWithLifecycle()
     val perpetualTakeProfit by viewModel.perpetualTakeProfit.collectAsStateWithLifecycle()
     val perpetualStopLoss by viewModel.perpetualStopLoss.collectAsStateWithLifecycle()
 
-    val sections by viewModel.preferencesSections.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
     val context = LocalContext.current
 
@@ -71,7 +70,7 @@ fun PreferencesScene(
         onClose = { onAction(PreferencesAction.Cancel) },
     ) {
         LazyColumn {
-            sections.forEach { section ->
+            state.sections.forEach { section ->
                 itemsIndexed(section.rows) { index, row ->
                     val listPosition = ListPosition.getPosition(index, section.rows.size)
                     when (row) {
@@ -81,7 +80,7 @@ fun PreferencesScene(
                             listPosition = listPosition,
                             trailingContent = {
                                 PropertyDataText(
-                                    text = "${uiState.currency.flag}  ${uiState.currency.currency}",
+                                    text = state.currency.text(),
                                     badge = { DataBadgeChevron() },
                                 )
                             },
