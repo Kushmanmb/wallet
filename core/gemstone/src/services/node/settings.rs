@@ -112,8 +112,8 @@ impl GemChainSettingsService {
 mod tests {
     use primitives::node_config::NodeRegion;
 
-    use super::*;
     use super::super::model::GemNodeSubtitle;
+    use super::*;
     use crate::gateway::EmptyPreferences;
     use crate::services::node::rules;
     use crate::services::node::testkit::MemoryNodeStore;

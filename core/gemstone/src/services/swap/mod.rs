@@ -158,10 +158,7 @@ mod tests {
 
     fn service(store: Arc<MemorySwapStore>) -> GemSwapService {
         GemSwapService::new(
-            Arc::new(GemSwapper::new(
-                Arc::new(TestAlienProvider::with_status(200)),
-                Arc::new(MemoryPreferencesStore::default()),
-            )),
+            Arc::new(GemSwapper::new(Arc::new(TestAlienProvider::with_status(200)), Arc::new(MemoryPreferencesStore::default()))),
             GemKeystore::new(std::env::temp_dir().to_string_lossy().to_string()).unwrap(),
             Arc::new(MemoryKeystorePassword::default()),
             store,
@@ -236,10 +233,7 @@ mod tests {
             assert_eq!(suggestion.receive_asset_id, Some(asset_id(Chain::Solana)));
             let (chains, asset_ids) = store_ref.receive_requests.lock().unwrap().first().cloned().unwrap();
             assert!(chains.iter().all(|chain| [Chain::Ethereum, Chain::Solana].contains(chain)), "{chains:?}");
-            assert!(
-                asset_ids.iter().all(|asset_id| [Chain::Ethereum, Chain::Solana].contains(&asset_id.chain)),
-                "{asset_ids:?}"
-            );
+            assert!(asset_ids.iter().all(|asset_id| [Chain::Ethereum, Chain::Solana].contains(&asset_id.chain)), "{asset_ids:?}");
         });
     }
 }

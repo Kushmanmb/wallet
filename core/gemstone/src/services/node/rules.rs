@@ -2,10 +2,10 @@ use super::model::{GemNodeSelection, GemNodeStatusState};
 use crate::service_status::GemLatencyStatus;
 use crate::services::collections::unique_by;
 use primitives::Chain;
-use primitives::node::{Node, NodeState};
-use primitives::node_status::NodeStatus;
 use primitives::Latency;
+use primitives::node::{Node, NodeState};
 use primitives::node_config::{self, NodePriority, NodeRegion};
+use primitives::node_status::NodeStatus;
 use url::Url;
 
 const NODE_URL_SCHEME: &str = "https";
