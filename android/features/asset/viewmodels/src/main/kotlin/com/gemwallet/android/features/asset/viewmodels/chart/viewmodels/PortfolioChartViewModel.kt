@@ -23,8 +23,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import com.gemwallet.android.ext.toCurrency
 import uniffi.gemstone.GemPortfolioServiceInterface
 import uniffi.gemstone.PortfolioChartType
-import uniffi.gemstone.PortfolioData
 import uniffi.gemstone.portfolioChartData
+import uniffi.gemstone.PortfolioData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
@@ -95,20 +95,11 @@ class PortfolioChartViewModel internal constructor(
         )
 
     val chartUIState = combine(portfolio, selectedChartType) { state, chartType ->
-        val currencyFormatter = CurrencyFormatter(currency = service.currency(state.type.toGem()).toCurrency())
         ChartUIModel.State(
             period = state.period,
             chart = state.data.flatMap { data ->
-                portfolioChartData(data, state.type.toGem(), chartType)
-                    ?.let {
-                        StateViewType.Data(
-                            ChartUIModel(
-                                chart = it,
-                                priceFormatter = currencyFormatter::string,
-                                priceChangeFormatter = PriceChangeFormatter(currencyFormatter)::string,
-                            ),
-                        )
-                    }
+                portfolioChartData(data, state.type.toGem(), chartType, service.currency(state.type.toGem()))
+                    ?.let { StateViewType.Data(ChartUIModel(chart = it)) }
                     ?: StateViewType.NoData
             },
         )
