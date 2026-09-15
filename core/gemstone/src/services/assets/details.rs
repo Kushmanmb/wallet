@@ -15,7 +15,7 @@ use crate::services::swap::GemSwapService;
 use crate::services::transactions::GemTransactionsService;
 use crate::services::wallet_session::GemWalletSessionService;
 
-use crate::services::failures::{StepFailure, record};
+use crate::services::failures::{StepFailure, record, record_both};
 
 use super::{GemAssetDetails, GemAssetDetailsInput, GemAssetsService, rules};
 
@@ -109,16 +109,13 @@ impl GemAssetDetailsService {
             .await;
         }
 
-        record(
+        record_both(
             &mut failures,
-            GemAssetRefreshStep::UpdateBalances,
-            self.balances.update(wallet_id.clone(), vec![asset_id.clone()]),
-        )
-        .await;
-        record(
-            &mut failures,
-            GemAssetRefreshStep::SyncTransactions,
-            self.transactions.sync_wallet(wallet_id, Some(asset_id)),
+            (
+                GemAssetRefreshStep::UpdateBalances,
+                self.balances.update(wallet_id.clone(), vec![asset_id.clone()]),
+            ),
+            (GemAssetRefreshStep::SyncTransactions, self.transactions.sync_wallet(wallet_id, Some(asset_id))),
         )
         .await;
         failures
