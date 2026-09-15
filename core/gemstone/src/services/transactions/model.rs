@@ -279,9 +279,15 @@ pub struct GemSwapProgress {
     pub from_asset: Asset,
     pub from_value: GemBigUint,
     pub provider_name: String,
-    pub transfer: GemSwapProgressStep,
-    pub swap: GemSwapProgressStep,
+    pub transfer: GemSwapProgressState,
+    pub swap: GemSwapProgressState,
     pub eta_seconds: Option<u32>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
+pub struct GemSwapProgressState {
+    pub step: GemSwapProgressStep,
+    pub marker: GemSwapProgressMarker,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -292,6 +298,34 @@ pub enum GemSwapProgressStep {
     Failed,
     Reverted,
     Refunded,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemSwapProgressMarker {
+    Check,
+    Spinner,
+    Dots,
+    Cross,
+    Swap,
+}
+
+impl GemSwapProgressStep {
+    pub fn state(self) -> GemSwapProgressState {
+        GemSwapProgressState {
+            step: self,
+            marker: self.marker(),
+        }
+    }
+
+    fn marker(self) -> GemSwapProgressMarker {
+        match self {
+            Self::Completed => GemSwapProgressMarker::Check,
+            Self::Pending => GemSwapProgressMarker::Spinner,
+            Self::Waiting => GemSwapProgressMarker::Dots,
+            Self::Failed | Self::Reverted => GemSwapProgressMarker::Cross,
+            Self::Refunded => GemSwapProgressMarker::Swap,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]

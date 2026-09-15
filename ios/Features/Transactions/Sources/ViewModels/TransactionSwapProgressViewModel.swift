@@ -29,12 +29,12 @@ extension TransactionSwapProgressViewModel: ItemModelProvidable {
             transfer: .init(
                 title: Localized.Transfer.title,
                 subtitle: "\(amount) (\(fromAsset.id.chain.networkName))",
-                status: progress.transfer,
+                state: progress.transfer,
             ),
             swap: .init(
                 title: Localized.Wallet.swap,
                 subtitle: progress.providerName,
-                status: progress.swap,
+                state: progress.swap,
             ),
             estimatedTime: progress.etaSeconds.map { EstimatedConfirmationFormatter().string(seconds: $0) },
         ))

@@ -27,6 +27,8 @@ import uniffi.gemstone.BlockExplorerLink
 import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.GemSwapAgain
 import uniffi.gemstone.GemSwapProgress
+import uniffi.gemstone.GemSwapProgressMarker
+import uniffi.gemstone.GemSwapProgressState
 import uniffi.gemstone.GemSwapProgressStep
 import uniffi.gemstone.GemAssetRate
 import uniffi.gemstone.formattedAdaptive
@@ -247,8 +249,8 @@ class TransactionDetailsAggregateImplTest {
                     fromAsset = ethAsset.toGem(),
                     fromValue = BigInteger("1000000000000000000"),
                     providerName = "NEAR Intents",
-                    transfer = GemSwapProgressStep.PENDING,
-                    swap = GemSwapProgressStep.WAITING,
+                    transfer = GemSwapProgressState(GemSwapProgressStep.PENDING, GemSwapProgressMarker.SPINNER),
+                    swap = GemSwapProgressState(GemSwapProgressStep.WAITING, GemSwapProgressMarker.DOTS),
                     etaSeconds = 720u,
                 ),
             ),
@@ -257,8 +259,8 @@ class TransactionDetailsAggregateImplTest {
         Assert.assertEquals(ethAsset, swapProgress?.fromAsset)
         Assert.assertEquals(BigInteger("1000000000000000000"), swapProgress?.fromValue)
         Assert.assertEquals("NEAR Intents", swapProgress?.providerName)
-        Assert.assertEquals(GemSwapProgressStep.PENDING, swapProgress?.transfer)
-        Assert.assertEquals(GemSwapProgressStep.WAITING, swapProgress?.swap)
+        Assert.assertEquals(GemSwapProgressStep.PENDING, swapProgress?.transfer?.step)
+        Assert.assertEquals(GemSwapProgressStep.WAITING, swapProgress?.swap?.step)
         Assert.assertEquals(720u, swapProgress?.etaInSeconds)
 
         val again = createAggregate(
