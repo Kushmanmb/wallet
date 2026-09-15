@@ -76,16 +76,6 @@ public final class LocalKeystore: Keystore, @unchecked Sendable {
         }
     }
 
-    public func signMessage(signer: MessageSigner, wallet: Primitives.Wallet) async throws -> String {
-        let password = try await getPassword()
-        let keystoreId = gemKeystore.keystoreId(walletId: wallet.id.id)
-        return try await queue.asyncTask { [gemKeystore] in
-            try withV4Password(keystore: gemKeystore, password) { passwordBytes in
-                try signer.signWithKeystore(keystore: gemKeystore, keystoreId: keystoreId, password: passwordBytes)
-            }
-        }
-    }
-
     public func getPasswordAuthentication() throws -> KeystoreAuthentication {
         try keystorePassword.getAuthentication()
     }
