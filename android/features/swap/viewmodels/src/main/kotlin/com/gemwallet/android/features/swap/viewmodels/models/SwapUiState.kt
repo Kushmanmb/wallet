@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.swap.viewmodels.models
 
+import com.gemwallet.android.features.swap.viewmodels.localization.stringRes
 import com.gemwallet.android.ui.models.ButtonState
 import uniffi.gemstone.GemSwapButtonAction
 import uniffi.gemstone.GemSwapErrorDisplay
@@ -55,13 +56,7 @@ data class SwapUiState(
 internal fun createSwapUiState(state: GemSwapViewState) = SwapUiState(
     action = state.action,
     buttonAction = state.buttonAction,
-    actionTitle = when (state.buttonAction) {
-        GemSwapButtonAction.InsufficientBalance -> R.string.transfer_insufficient_balance
-        is GemSwapButtonAction.UseMinimumAmount -> R.string.swap_use_minimum_amount
-        GemSwapButtonAction.RetryQuote,
-        GemSwapButtonAction.RetryTransfer -> R.string.common_try_again
-        GemSwapButtonAction.Swap -> R.string.wallet_swap
-    },
+    actionTitle = state.buttonAction.stringRes(),
     buttonState = when (state.buttonState) {
         GemSwapButtonState.DISABLED -> ButtonState.Disabled
         GemSwapButtonState.LOADING -> ButtonState.Loading
