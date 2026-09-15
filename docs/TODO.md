@@ -19,7 +19,7 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 - **R39** **M** `Settings/Sources/ChainSettings/ViewModels/AddNodeSceneViewModel.swift` (6) against Android `AddNodeViewModel`.
 - **R41** **M** `Contacts/Sources/ViewModels/ManageContactViewModel.swift` (6) against Android `ManageContactViewModel`.
 - **R42** **M** `Assets/Sources/ViewModels/AddAssetSceneViewModel.swift` (6) against Android `AddAssetViewModel`.
-- **R44** **S** `Transfer/Sources/ViewModels/ConfirmRecipientViewModel.swift` (5).
+- **R44** **S** `GemConfirmDestination`'s title is now mapped in the iOS Transfer mapper, and Android's confirm screen stopped using `transaction_recipient` for it. What is left: Android reaches the title through its own `ConfirmProperty.Destination`, so `just check-mappers` still cannot see either side of this variant. Key the Android title on `GemConfirmDestination` in the confirm module's `GemstoneText.kt` and the check covers it.
 - **R46** **M** `Onboarding/Sources/ViewModels/ImportWalletSceneViewModel.swift` (5) against Android `ImportViewModel`.
 - **R47** **S** `Transfer/Sources/ViewModels/AmountSceneViewModel.swift` (4) — balance line, reserved-fee line, max and continue.
 - **R48** **S** `Transfer/Sources/ViewModels/AmountPerpetualViewModel.swift` (4).

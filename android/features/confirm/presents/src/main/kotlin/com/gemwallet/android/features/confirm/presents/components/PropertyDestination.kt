@@ -37,7 +37,7 @@ fun PropertyDestination(
                 else -> null to null
             }
             AddressPropertyItem(
-                title = R.string.transaction_recipient,
+                title = R.string.transfer_recipient_title,
                 displayText = destinationText(model.domain, model.address, model.chain, icon != null),
                 copyValue = model.address,
                 icon = icon,

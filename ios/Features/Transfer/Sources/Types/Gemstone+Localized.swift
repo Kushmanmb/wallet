@@ -7,6 +7,7 @@ import struct Gemstone.Asset
 import enum Gemstone.GemAmountError
 import enum Gemstone.GemAmountTitle
 import enum Gemstone.GemConfirmButtonKind
+import enum Gemstone.GemConfirmDestination
 import enum Gemstone.GemConfirmError
 import enum Gemstone.GemConfirmErrorDisplay
 import enum Gemstone.GemConfirmTitle
@@ -142,6 +143,18 @@ extension GemReceiveWarning {
         case .assetNetwork: Localized.Receive.warning(asset.symbol.boldMarkdown(), asset.networkFullName.boldMarkdown())
         case .noDestinationTagRequired: Localized.Wallet.Receive.noDestinationTagRequired
         case .noMemoRequired: Localized.Wallet.Receive.noMemoRequired
+        }
+    }
+}
+
+extension GemConfirmDestination {
+    var title: String {
+        switch self {
+        case .recipient: Localized.Transfer.Recipient.title
+        case .contract: Localized.Asset.contract
+        case .validator: Localized.Stake.validator
+        case .resource: Localized.Stake.resource
+        case .provider: Localized.Common.provider
         }
     }
 }
