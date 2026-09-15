@@ -49,6 +49,8 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
 
     public var isLoadingAssets = false
 
+    @ObservationIgnored private let derivedHomeState = DerivedValue<HomeStateInput, WalletHomeState>()
+
     public init(
         service: any GemWalletHomeServiceProtocol,
         observablePreferences: ObservablePreferences,
@@ -118,31 +120,52 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
     }
 
     var homeState: WalletHomeState {
-        let currency = observablePreferences.currency
-        let viewState = service.viewState(
-            wallet: wallet,
-            balances: fiatValuesQuery.value,
-            perpetual: perpetualBalanceQuery.value,
-            banners: bannersQuery.value,
-            isWalletEmpty: assets.allSatisfy(\.balance.total.isZero),
-        )
-        return WalletHomeState(
-            sections: AssetsSections.from(assets),
-            header: WalletHeaderViewModel(
-                totalValue: viewState.totalValue.toPrimitives(),
-                currency: currency,
-                showsPnl: viewState.showsPnl,
-                actions: viewState.headerActions,
+        derivedHomeState(
+            HomeStateInput(
+                wallet: wallet,
+                assets: assets,
+                balances: fiatValuesQuery.value,
+                perpetual: perpetualBalanceQuery.value,
+                banners: bannersQuery.value,
+                currency: observablePreferences.currency,
+                showPerpetuals: observablePreferences.showPerpetuals(for: wallet),
             ),
-            currency: currency,
-            showPerpetuals: observablePreferences.showPerpetuals(for: wallet),
-            showCollections: viewState.showCollections,
-            visibleBanners: viewState.visibleBanners.map { $0.toPrimitives() },
-        )
+        ) { input in
+            let viewState = service.viewState(
+                wallet: input.wallet,
+                balances: input.balances,
+                perpetual: input.perpetual,
+                banners: input.banners,
+                isWalletEmpty: input.assets.allSatisfy(\.balance.total.isZero),
+            )
+            return WalletHomeState(
+                sections: AssetsSections.from(input.assets),
+                header: WalletHeaderViewModel(
+                    totalValue: viewState.totalValue.toPrimitives(),
+                    currency: input.currency,
+                    showsPnl: viewState.showsPnl,
+                    actions: viewState.headerActions,
+                ),
+                currency: input.currency,
+                showPerpetuals: input.showPerpetuals,
+                showCollections: viewState.showCollections,
+                visibleBanners: viewState.visibleBanners.map { $0.toPrimitives() },
+            )
+        }
     }
 
     func bannerContent(for banner: Banner) -> GemBannerContent {
         service.content(for: banner)
+    }
+
+    struct HomeStateInput: Equatable {
+        let wallet: Wallet
+        let assets: [AssetData]
+        let balances: [AssetFiatValue]
+        let perpetual: PerpetualBalance?
+        let banners: [Banner]
+        let currency: Currency
+        let showPerpetuals: Bool
     }
 }
 
