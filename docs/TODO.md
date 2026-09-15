@@ -207,7 +207,6 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 ### Core files with rules and no `#[cfg(test)]`
 
 - **T1** **S** `services/perpetual/mod.rs` (262 lines) — refresh orchestration and socket application.
-- **T2** **S** `services/balance/model.rs` (197).
 - **T3** **S** `services/device/mod.rs` (190).
 - **T4** **S** `services/assets/details.rs` (186).
 - **T5** **S** `services/stake/model.rs` (165).
