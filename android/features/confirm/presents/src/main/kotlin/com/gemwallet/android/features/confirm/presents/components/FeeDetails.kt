@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.confirm.presents.components
 
+import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.components.screen.SheetExpansion
 import com.gemwallet.android.ext.toGem
 import androidx.compose.foundation.background
@@ -43,7 +44,6 @@ import com.gemwallet.android.ext.toPrimitives
 import uniffi.gemstone.GemConfirmFeeSelection
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.SuffixTextField
-import com.gemwallet.android.ui.components.title
 import com.gemwallet.android.ui.components.image.IconWithBadge
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.AssetListItem
@@ -198,7 +198,7 @@ private fun FeeRates(
             itemsPositioned(feeRateModels, totalCount = totalCount) { position, feeRate ->
                 FeeRow(
                     emoji = feeRate.emoji,
-                    title = feeRate.priority.title(),
+                    title = stringResource(feeRate.priority.stringRes()),
                     rate = feeRate.price,
                     fiat = feeRate.fiatValue,
                     isSelected = selection.selectedPriority()?.toPrimitives() == feeRate.priority,

@@ -9,6 +9,7 @@ import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.R
 import com.wallet.core.primitives.ChartPeriod
+import com.wallet.core.primitives.FeePriority
 import com.wallet.core.primitives.PerpetualDirection
 import com.wallet.core.primitives.QRScanType
 import com.wallet.core.primitives.Resource
@@ -216,4 +217,10 @@ fun GemTransactionStateTone.infoDescriptionRes(): Int = when (this) {
 fun PerpetualDirection.stringRes(): Int = when (this) {
     PerpetualDirection.Long -> R.string.perpetual_long
     PerpetualDirection.Short -> R.string.perpetual_short
+}
+
+@StringRes
+fun FeePriority.stringRes(): Int = when (this) {
+    FeePriority.Normal -> R.string.fee_rates_normal
+    FeePriority.Fast -> R.string.fee_rates_fast
 }

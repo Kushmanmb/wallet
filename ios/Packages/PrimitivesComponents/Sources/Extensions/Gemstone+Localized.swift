@@ -268,3 +268,12 @@ extension Primitives.PerpetualDirection {
         }
     }
 }
+
+extension Primitives.FeePriority {
+    public var title: String {
+        switch self {
+        case .normal: Localized.FeeRates.normal
+        case .fast: Localized.FeeRates.fast
+        }
+    }
+}
