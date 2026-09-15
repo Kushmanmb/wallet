@@ -48,11 +48,7 @@ public final class SignMessageSceneViewModel {
     }
 
     public var title: String {
-        switch preview.messageType {
-        case .siwe: Localized.Common.signInWith(Chain.ethereum.networkName)
-        case .siws: Localized.Common.signInWith(Chain.solana.networkName)
-        case .text, .eip712: Localized.Transfer.reviewRequest
-        }
+        preview.messageType.title
     }
 
     public var walletText: String {
