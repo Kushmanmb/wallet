@@ -346,20 +346,22 @@ mod tests {
     use std::sync::Arc;
 
     use futures::executor::block_on;
-    use primitives::{Account, Asset, Chain, FeePriority, PerpetualConfirmData, PerpetualDirection, PerpetualType, TransactionInputType, Wallet};
+    use primitives::{Account, Asset, Chain, FeePriority, TransactionInputType, Wallet, asset_constants::HYPERCORE_SPOT_USDC_ASSET_ID, swap::SwapData};
 
     use super::testkit::ConfirmTestkit;
     use super::{GemConfirmData, GemConfirmError, GemConfirmFeeSelection, GemConfirmLoadOptions};
     use crate::services::transfer::{GemRecipient, GemTransferData};
     use crate::testkit::TestAlienProvider;
 
-    fn perpetual_transfer() -> GemTransferData {
+    fn spot_swap_transfer() -> GemTransferData {
         GemTransferData {
-            input_type: TransactionInputType::Perpetual {
-                asset: Asset::from_chain(Chain::HyperCore),
-                perpetual_type: PerpetualType::Open {
-                    data: PerpetualConfirmData::mock(PerpetualDirection::Long, 0, None, None),
+            input_type: TransactionInputType::Swap {
+                from_asset: Asset::from_chain(Chain::HyperCore),
+                to_asset: Asset {
+                    id: HYPERCORE_SPOT_USDC_ASSET_ID.clone(),
+                    ..Asset::from_chain(Chain::HyperCore)
                 },
+                swap_data: SwapData::mock(),
             },
             recipient: GemRecipient::address("0xrecipient".into()),
             value: 0.into(),
@@ -372,7 +374,7 @@ mod tests {
             let wallet = Wallet::mock_with_accounts(vec![Account::mock(Chain::HyperCore, "0xsender")]);
             let provider = Arc::new(TestAlienProvider::with_json(200, scan));
             let testkit = ConfirmTestkit::with_provider(wallet.clone(), wallet.clone(), provider.clone());
-            let input = testkit.service.confirm_input(wallet, perpetual_transfer()).unwrap();
+            let input = testkit.service.confirm_input(wallet, spot_swap_transfer()).unwrap();
             let options = GemConfirmLoadOptions {
                 fee_selection: GemConfirmFeeSelection::Priority { priority: FeePriority::Normal },
                 fee_asset_id: None,

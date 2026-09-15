@@ -229,7 +229,6 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
         database.clone(),
         TransactionScanConfig {
             providers: scan_providers(&settings_clone, cacher_client.clone(), config_cacher.get_duration(ConfigKey::ScanTimeout)?)?,
-            enable: config_cacher.get_bool(ConfigKey::ScanEnable)?,
             required_successes: config_cacher.get_usize(ConfigKey::ScanRequiredSuccesses)?,
         },
     );

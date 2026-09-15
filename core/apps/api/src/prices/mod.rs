@@ -8,7 +8,7 @@ use crate::responders::{ApiError, ApiResponse};
 
 mod fiat_rates;
 
-pub(crate) use fiat_rates::filter_fiat_rates;
+pub(crate) use fiat_rates::{filter_fiat_rates, filter_fiat_rates_v1};
 
 #[get("/prices/<asset_id>?<currency>")]
 pub async fn get_price(asset_id: AssetIdParam, currency: CurrencyParam, price_client: &State<PriceClient>) -> Result<ApiResponse<AssetMarketPrice>, ApiError> {
@@ -24,7 +24,7 @@ pub async fn get_assets_prices(request: Json<AssetPricesRequest>, price_client: 
 
 #[get("/fiat_rates")]
 pub async fn get_fiat_rates(price_client: &State<PriceClient>) -> Result<ApiResponse<Vec<FiatRate>>, ApiError> {
-    Ok(filter_fiat_rates(price_client.get_fiat_rates()?, None).into())
+    Ok(filter_fiat_rates_v1(price_client.get_fiat_rates()?).into())
 }
 
 #[get("/charts/<asset_id>?<period>&<currency>")]

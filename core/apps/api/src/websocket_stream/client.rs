@@ -4,7 +4,7 @@ use std::time::Duration;
 use cacher::CacherClient;
 use gem_tracing::info_with_fields;
 use pricer::PriceClient;
-use primitives::{AssetPrice, StreamEvent, StreamMessage, device_stream_channel};
+use primitives::{AssetPrice, StreamEvent, StreamMessage, Version, device_stream_channel};
 use redis::PushInfo;
 use redis::aio::MultiplexedConnection;
 use rocket::futures::SinkExt;
@@ -29,7 +29,7 @@ pub struct StreamObserverClient {
 }
 
 impl StreamObserverClient {
-    pub fn new(device_id: String, version: String, price_client: PriceClient) -> Self {
+    pub fn new(device_id: String, version: Version, price_client: PriceClient) -> Self {
         let device_channel = device_stream_channel(&device_id);
         Self {
             device_id,

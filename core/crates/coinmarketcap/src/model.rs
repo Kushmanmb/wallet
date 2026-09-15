@@ -5,16 +5,6 @@ use std::collections::HashMap;
 pub(crate) const USD_ID: u64 = 2781;
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct FiatMapResponse {
-    pub data: Vec<FiatCurrency>,
-}
-
-#[derive(Debug, Deserialize)]
-pub(crate) struct FiatCurrency {
-    pub symbol: String,
-}
-
-#[derive(Debug, Deserialize)]
 pub(crate) struct PriceConversionResponse {
     pub data: PriceConversion,
 }
