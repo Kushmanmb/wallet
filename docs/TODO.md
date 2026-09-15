@@ -94,7 +94,7 @@ Product or security decisions, one question each:
 
 Ownership, injection and threads:
 
-- **O9** **M** Four Android view models hold two or three Core services where iOS composes one screen service: [`TransactionsViewModel`](../android/features/activities/viewmodels/src/main/kotlin/com/gemwallet/android/features/activities/viewmodels/TransactionsViewModel.kt), `WCAuthViewModel` (three), `WCRequestViewModel` and `SettingsViewModel`. Copy the screen-service shape in [SERVICES.md](SERVICES.md#the-screen-service-map); a launch host or a flow parent vending child models is [allowed to hold several](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android) and these are neither.
+- **O9** **S** [`SettingsViewModel`](../android/features/settings/settings/viewmodels/src/main/kotlin/com/gemwallet/android/features/settings/settings/viewmodels/SettingsViewModel.kt) holds the currency and wallet-session services beside its own because the settings screen has no Core service to ask; it gets one with **R17** and drops them there. The other three named here now hold one: `TransactionsViewModel` reads `listedAssetRank()` from its transactions service, and the WalletConnect screens sign, preview and name addresses through `GemWalletConnectService`.
 
 
 

@@ -8,7 +8,7 @@ import uniffi.gemstone.GemSimulationValue
 import com.gemwallet.android.ui.models.PayloadField
 import com.gemwallet.android.ui.models.withExplorerLinks
 import uniffi.gemstone.GemSignMessagePreview
-import uniffi.gemstone.GemSignMessageServiceInterface
+import uniffi.gemstone.GemWalletConnectServiceInterface
 import com.wallet.core.primitives.Account
 import com.wallet.core.primitives.ApplicationMetadata
 import com.wallet.core.primitives.Chain
@@ -43,12 +43,12 @@ sealed class WCRequest(
     class SignMessage(
         private val request: WalletConnectPendingRequest.SignMessage,
         private val row: GemConnectionRow,
-        private val service: GemSignMessageServiceInterface,
+        private val service: GemWalletConnectServiceInterface,
         override val addressNames: Map<String, String> = emptyMap(),
     ) : WCRequest(request, row), WalletConnectReviewModel {
         val signMessage: GemSignMessage get() = request.message
 
-        private val preview: GemSignMessagePreview by lazy { service.preview(request.message, simulation, request.assets) }
+        private val preview: GemSignMessagePreview by lazy { service.messagePreview(request.message, simulation, request.assets) }
 
         override val messageType: MessageType get() = preview.messageType
 
@@ -68,7 +68,7 @@ sealed class WCRequest(
 
         override val secondaryPayloadFields: List<PayloadField> by lazy { preview.secondaryFields.fields() }
 
-        suspend fun addressNames(): Map<String, String> = service.addressNames(chain.string, preview)
+        suspend fun addressNames(): Map<String, String> = service.messageAddressNames(chain.string, preview)
             .map { it.toPrimitives() }
             .filter { it.name.isNotEmpty() && !it.name.equals(it.address, ignoreCase = true) }
             .associate { it.address.lowercase() to it.name }

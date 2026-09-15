@@ -217,6 +217,13 @@ struct ServicesFactory {
 
         let chainService = Gemstone.GemChainService()
         let addressService = Gemstone.GemAddressService()
+        let nameService = Gemstone.GemNameService(api: deviceApiClient, store: gemstoneAddressStore)
+        let signMessageService = Gemstone.GemSignMessageService(
+            names: nameService,
+            explorer: explorerService,
+            keystore: storages.keystore.gemKeystore,
+            password: GemstoneKeystorePassword(keystore: storages.keystore),
+        )
         let walletConnectorPresenter = WalletConnectorPresenter()
         let walletConnectorInteractor = WalletConnectorInteractor(presenter: walletConnectorPresenter)
         let walletConnector = Self.makeWalletConnector(
@@ -226,6 +233,7 @@ struct ServicesFactory {
             walletSessionService: walletSessionService,
             assetsService: assetsService,
             chainService: chainService,
+            signMessageService: signMessageService,
         )
 
         let assetDiscoveryService = Gemstone.GemAssetDiscoveryService(
@@ -275,7 +283,6 @@ struct ServicesFactory {
             ),
         )
 
-        let nameService = Gemstone.GemNameService(api: deviceApiClient, store: gemstoneAddressStore)
         let rewardsService = Gemstone.GemRewardsService(
             api: deviceApiClient,
             auth: Gemstone.GemAuthService(
@@ -397,12 +404,7 @@ struct ServicesFactory {
             amountService: Gemstone.GemAmountService(stake: stakeService, preferences: preferencesService, session: walletSessionService),
             toastPresenter: toastPresenter,
             walletPreferencesService: walletPreferencesService,
-            signMessageService: Gemstone.GemSignMessageService(
-                names: nameService,
-                explorer: explorerService,
-                keystore: storages.keystore.gemKeystore,
-                password: GemstoneKeystorePassword(keystore: storages.keystore),
-            ),
+            signMessageService: signMessageService,
             developerService: Gemstone.GemDeveloperService(
                 platform: devicePlatform,
                 preferences: preferencesService,
@@ -460,6 +462,7 @@ extension ServicesFactory {
         walletSessionService: GemWalletSessionService,
         assetsService: GemAssetsService,
         chainService: Gemstone.GemChainService,
+        signMessageService: Gemstone.GemSignMessageService,
     ) -> WalletConnectorService {
         WalletConnectorService(
             walletSessionService: walletSessionService,
@@ -470,6 +473,7 @@ extension ServicesFactory {
                 signer: interactor,
                 session: walletSessionService,
                 assets: assetsService,
+                signMessage: signMessageService,
             ),
             chainService: chainService,
         )

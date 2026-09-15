@@ -9,7 +9,6 @@ import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.ext.toPrimitives
 import uniffi.gemstone.GemTransactionFilter
 import com.wallet.core.primitives.Chain
-import uniffi.gemstone.GemAssetConfigServiceInterface
 import uniffi.gemstone.GemTransactionsServiceInterface
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.requireChain
@@ -40,7 +39,6 @@ class TransactionsViewModel @Inject constructor(
     getSession: GetSession,
     getTransactions: GetTransactions,
     private val service: GemTransactionsServiceInterface,
-    private val assetConfig: GemAssetConfigServiceInterface,
 ) : ViewModel() {
 
     private val _isRefreshing = MutableStateFlow(false)
@@ -68,7 +66,7 @@ class TransactionsViewModel @Inject constructor(
         typeFilter,
     ) { chains, types ->
         buildList {
-            addAll(TransactionsRequestFilter.activityDefaults(assetConfig))
+            addAll(TransactionsRequestFilter.activityDefaults(service.listedAssetRank()))
             if (chains.isNotEmpty()) add(TransactionsRequestFilter.Chains(chains))
             val allowedTypes = types.flatMap { filter -> filter.transactionTypes().map { type -> type.toPrimitives() } }
             if (allowedTypes.isNotEmpty()) add(TransactionsRequestFilter.Types(allowedTypes))

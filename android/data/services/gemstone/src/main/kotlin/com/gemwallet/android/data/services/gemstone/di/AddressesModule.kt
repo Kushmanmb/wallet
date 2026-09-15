@@ -55,6 +55,6 @@ object AddressesModule {
         explorer: GemExplorerService,
         keystore: GemKeystore,
         passwordStore: PasswordStore,
-    ): GemSignMessageServiceInterface = GemSignMessageService(names, explorer, keystore, GemstoneKeystorePassword(passwordStore))
+    ): GemSignMessageService = GemSignMessageService(names, explorer, keystore, GemstoneKeystorePassword(passwordStore))
 
 }

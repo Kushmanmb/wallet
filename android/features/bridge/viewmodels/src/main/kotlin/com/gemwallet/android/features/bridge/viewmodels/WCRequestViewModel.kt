@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uniffi.gemstone.GemSignMessageServiceInterface
 import uniffi.gemstone.GemWalletConnectFailure
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.GemWalletConnectSessionRequest
@@ -46,7 +45,6 @@ class WCRequestViewModel @Inject constructor(
     private val service: GemWalletConnectServiceInterface,
     private val respondWalletConnectRequest: RespondWalletConnectRequest,
     private val pendingRequests: WalletConnectPendingRequests,
-    private val signMessageService: GemSignMessageServiceInterface,
     private val activeRequest: ActiveWalletConnectRequest,
 ) : ViewModel() {
 
@@ -130,7 +128,7 @@ class WCRequestViewModel @Inject constructor(
         state.update { it.copy(responseState = RequestResponseState.Responding, approved = request) }
         viewModelScope.launch(Dispatchers.IO) {
             val signature = try {
-                signMessageService.sign(request.wallet.id.id, request.signMessage)
+                service.signMessage(request.wallet.id.id, request.signMessage)
             } catch (err: CancellationException) {
                 throw err
             } catch (err: Throwable) {
@@ -170,7 +168,7 @@ class WCRequestViewModel @Inject constructor(
     private fun toRequest(pending: WalletConnectPendingRequest): WCRequest {
         val row = service.connectionRow(pending.appMetadata.toGem())
         return when (pending) {
-            is WalletConnectPendingRequest.SignMessage -> WCRequest.SignMessage(pending, row, signMessageService)
+            is WalletConnectPendingRequest.SignMessage -> WCRequest.SignMessage(pending, row, service)
             is WalletConnectPendingRequest.Transaction -> WCRequest.Transaction(pending, row)
         }
     }
