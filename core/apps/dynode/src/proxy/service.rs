@@ -215,6 +215,11 @@ fn cacheable_response(chain: Chain, path: &str, status: u16, body: &[u8]) -> boo
     if status != StatusCode::OK.as_u16() || body.is_empty() {
         return false;
     }
+    // TODO(2027-01-01): Remove v2 cache validation with Dynode legacy wallet routes.
+    if chain == Chain::Ton && path == "/api/v2/runGetMethod" {
+        return serde_json::from_slice::<Value>(body)
+            .is_ok_and(|response| response.get("ok") == Some(&Value::Bool(true)) && response.get_value("result").and_then(|result| result.get_i64("exit_code")) == Ok(0));
+    }
     if chain == Chain::Ton && path == "/api/v3/runGetMethod" {
         return serde_json::from_slice::<Value>(body).is_ok_and(|response| response.get_i64("exit_code") == Ok(0));
     }
@@ -262,6 +267,19 @@ mod tests {
             assert_eq!(cacheable_response(Chain::Ton, "/api/v3/runGetMethod", status, body.as_bytes()), expected);
         }
         assert!(cacheable_response(Chain::Tron, "/wallet/getchainparameters", 200, b"{}"));
+    }
+
+    #[test]
+    fn test_cacheable_ton_v2_get_method_requires_success() {
+        for (body, expected) in [
+            (r#"{"ok":true,"result":{"exit_code":0,"stack":[]}}"#, true),
+            (r#"{"ok":true,"result":{"exit_code":-13,"stack":[]}}"#, false),
+            (r#"{"ok":false,"result":{"exit_code":0,"stack":[]}}"#, false),
+            (r#"{"ok":false,"error":"upstream error"}"#, false),
+            (r#"{"exit_code":0,"stack":[]}"#, false),
+        ] {
+            assert_eq!(cacheable_response(Chain::Ton, "/api/v2/runGetMethod", 200, body.as_bytes()), expected);
+        }
     }
 
     #[test]
