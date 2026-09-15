@@ -1,5 +1,6 @@
 package com.gemwallet.android.ui.components
 
+import com.gemwallet.android.ui.localization.stringRes
 import android.Manifest
 import android.content.ContentResolver
 import android.content.Context
@@ -192,7 +193,7 @@ fun QRScannerScene(
         if (isCameraGranted) {
             Box(modifier = Modifier.fillMaxSize()) {
                 QRScanner(listener = onResult)
-                ScannerHint(hint = stringResource(id = scanType.hintRes()))
+                ScannerHint(hint = stringResource(id = scanType.stringRes()))
             }
         } else {
             EmptyStateView(
@@ -309,16 +310,6 @@ private fun ScanQrCodeTitle() {
 }
 
 @StringRes
-private fun QRScanType.hintRes(): Int = when (this) {
-    QRScanType.Universal -> R.string.wallet_scan_hint
-    QRScanType.WalletConnect -> R.string.wallet_connect_title
-    QRScanType.Address -> R.string.wallet_scan_hint_address
-    QRScanType.Memo -> R.string.transfer_memo
-    QRScanType.Url -> R.string.common_url
-    QRScanType.TokenContract -> R.string.wallet_import_contract_address_field
-    QRScanType.SecretPhrase -> R.string.common_secret_phrase
-    QRScanType.PrivateKey -> R.string.common_private_key
-}
 
 @Composable
 private fun ScannerHint(hint: String) {

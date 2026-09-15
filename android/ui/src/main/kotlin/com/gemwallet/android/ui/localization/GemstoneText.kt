@@ -10,6 +10,7 @@ import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.R
 import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.PerpetualDirection
+import com.wallet.core.primitives.QRScanType
 import com.wallet.core.primitives.Resource
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.GemAddNodeFailure
@@ -166,4 +167,16 @@ fun LinkType.stringRes(): Int = when (this) {
 fun Resource.stringRes(): Int = when (this) {
     Resource.Bandwidth -> R.string.stake_resource_bandwidth
     Resource.Energy -> R.string.stake_resource_energy
+}
+
+@StringRes
+fun QRScanType.stringRes(): Int = when (this) {
+    QRScanType.Universal -> R.string.wallet_scan_hint
+    QRScanType.WalletConnect -> R.string.wallet_connect_title
+    QRScanType.Address -> R.string.wallet_scan_hint_address
+    QRScanType.Memo -> R.string.transfer_memo
+    QRScanType.Url -> R.string.common_url
+    QRScanType.TokenContract -> R.string.wallet_import_contract_address_field
+    QRScanType.SecretPhrase -> R.string.common_secret_phrase
+    QRScanType.PrivateKey -> R.string.common_private_key
 }
