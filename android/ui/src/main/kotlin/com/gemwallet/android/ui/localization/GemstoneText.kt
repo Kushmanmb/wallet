@@ -15,6 +15,7 @@ import com.wallet.core.primitives.FeePriority
 import com.wallet.core.primitives.PerpetualDirection
 import com.wallet.core.primitives.QRScanType
 import com.wallet.core.primitives.Resource
+import com.wallet.core.primitives.ScanReceiveMode
 import com.wallet.core.primitives.TransactionState
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.GemAddNodeFailure
@@ -254,4 +255,10 @@ fun GemAssetMenuAction.stringRes(): Int = when (this) {
     GemAssetMenuAction.Hide -> R.string.common_hide
     GemAssetMenuAction.AddToWallet -> R.string.asset_add_to_wallet
     is GemAssetMenuAction.CopyAddress -> R.string.wallet_copy_address
+}
+
+@StringRes
+fun ScanReceiveMode.stringRes(): Int = when (this) {
+    ScanReceiveMode.Scan -> R.string.wallet_scan
+    ScanReceiveMode.Receive -> R.string.wallet_receive
 }

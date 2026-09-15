@@ -333,3 +333,12 @@ extension PerpetualType {
         }
     }
 }
+
+extension ScanReceiveMode {
+    public var title: String {
+        switch self {
+        case .scan: Localized.Wallet.scan
+        case .receive: Localized.Wallet.receive
+        }
+    }
+}
