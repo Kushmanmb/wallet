@@ -31,6 +31,7 @@ pub mod nft;
 pub mod node;
 pub mod notification;
 pub mod notifications;
+pub mod onboarding;
 pub mod perpetual;
 pub mod portfolio;
 pub mod preferences;
