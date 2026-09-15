@@ -160,7 +160,7 @@ Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them de
 - **T26** **S** `Features/Swap` — 3 (`SwapProvidersViewModel`, `SwapTokenViewModel`, `SwapPairSelectorViewModel`).
 - **T27** **S** `Features/Transfer` — 5 (`AmountEarnViewModel`, `PerpetualModifyViewModel`, `KeystoreAuthenticationViewModel`, `ReceiveNetworkSelectorViewModel`, `ReceiveViewModel`).
 - **T28** **S** `Gem/ViewModels` — `RootSceneViewModel`, `MainTabViewModel`, `ScanReceiveViewModel`, `ScanReceiveModeViewModel`.
-- **T29** **S** `GemPriceWidget` — `PriceWidgetViewModel`, `CoinPriceRowViewModel`.
+- **T29** **S** `GemPriceWidget` — `PriceWidgetViewModel`, `CoinPriceRowViewModel`. The widget target has no test bundle at all, so this one starts by adding it to `unit_frameworks.xctestplan` and the pbxproj. While reading them, `emptyMessage` turned out to hardcode its two strings; that is fixed and `widget_empty`/`widget_empty_short` need translating out of English in the other 30 locales.
 
 ### Android view models with no test
 
