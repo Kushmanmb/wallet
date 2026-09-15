@@ -1,8 +1,6 @@
 package com.gemwallet.android.features.settings.networks.viewmodels
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import uniffi.gemstone.GemNodeSelection
 import uniffi.gemstone.GemNodeStatusState
@@ -26,40 +24,11 @@ class NetworksNodeUiStateTest {
         )
 
         val visibleStates = visibleNodeStates(
-            nodes = rows(gemNode, remainingNode),
+            nodes = listOf(gemNode, remainingNode),
             nodeStates = nodeStates,
         )
 
         assertEquals(setOf(gemNode.url, remainingNode.url), visibleStates.keys)
-    }
-
-    @Test
-    fun `buildNodeRows marks rows the delete rule allows`() {
-        val gemNode = selection("https://gemnodes.com/bitcoin")
-        val defaultNode = selection("https://default.example.com/bitcoin")
-        val customNode = selection("https://custom.example.com/bitcoin")
-
-        val rows = buildNodeRows(
-            selections = listOf(gemNode, defaultNode, customNode),
-            canDelete = { url -> url == customNode.url },
-        )
-
-        assertFalse(rows.first { it.url == gemNode.url }.canDelete)
-        assertFalse(rows.first { it.url == defaultNode.url }.canDelete)
-        assertTrue(rows.first { it.url == customNode.url }.canDelete)
-    }
-
-    @Test
-    fun `buildNodeRows selects the node core marked on a shared host`() {
-        val firstNode = selection("https://rpc.example.com/one")
-        val secondNode = selection("https://rpc.example.com/two", isSelected = true)
-
-        val rows = buildNodeRows(
-            selections = listOf(firstNode, secondNode),
-            canDelete = { true },
-        )
-
-        assertEquals(listOf(secondNode.url), rows.filter { it.selected }.map { it.url })
     }
 
     private fun selection(url: String, isSelected: Boolean = false) = GemNodeSelection(
@@ -67,10 +36,5 @@ class NetworksNodeUiStateTest {
         host = url.removePrefix("https://").substringBefore("/"),
         isSelected = isSelected,
         gemNodeFlag = null,
-    )
-
-    private fun rows(vararg selections: GemNodeSelection) = buildNodeRows(
-        selections = selections.toList(),
-        canDelete = { false },
     )
 }

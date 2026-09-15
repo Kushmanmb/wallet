@@ -4,6 +4,8 @@ import enum Gemstone.GemServiceEndpointType
 import enum Gemstone.GemAboutRow
 import enum Gemstone.GemPreferencesRow
 import enum Gemstone.GemSettingsRow
+import enum Gemstone.GemChainSettingsSection
+import enum Gemstone.GemNodeSubtitle
 import Localization
 import Primitives
 
@@ -66,6 +68,23 @@ extension GemAboutRow {
         case .website: Localized.Settings.website
         case .community: Localized.Settings.community
         case .version: Localized.Settings.version
+        }
+    }
+}
+
+extension GemChainSettingsSection {
+    var title: String {
+        switch self {
+        case .nodes: Localized.Settings.Networks.source
+        case .explorer: Localized.Settings.Networks.explorer
+        }
+    }
+}
+
+extension GemNodeSubtitle {
+    var title: String {
+        switch self {
+        case .latestBlock: Localized.Nodes.ImportNode.latestBlock
         }
     }
 }

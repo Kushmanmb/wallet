@@ -4,6 +4,8 @@ import Components
 import Formatters
 import Foundation
 import protocol Gemstone.GemChainSettingsServiceProtocol
+import enum Gemstone.GemChainSettingsSection
+import struct Gemstone.GemExplorerRow
 import struct Gemstone.GemNodeSelection
 import enum Gemstone.GemNodeStatusState
 import GemstonePrimitives
@@ -16,9 +18,8 @@ public final class ChainSettingsSceneViewModel {
     private let service: any GemChainSettingsServiceProtocol
     let chain: Chain
 
-    var selectedExplorer: String?
     var nodeDelete: GemNodeSelection?
-    var explorers: [String]
+    var explorers: [GemExplorerRow]
     var isPresentingImportNode: Bool = false
     var isPresentingAlertMessage: AlertMessage?
 
@@ -30,30 +31,24 @@ public final class ChainSettingsSceneViewModel {
     public init(chain: Chain, service: any GemChainSettingsServiceProtocol) {
         self.chain = chain
         self.service = service
-        explorers = service.explorers(chain: chain.rawValue)
-        selectedExplorer = service.explorerName(chain: chain.rawValue)
+        explorers = service.explorerRows(chain: chain.rawValue)
     }
 
     var title: String {
         chain.networkName
     }
 
-    var nodesTitle: String {
-        Localized.Settings.Networks.source
+    var sections: [GemChainSettingsSection] {
+        service.sections()
     }
 
     var nodesModels: [ChainNodeViewModel] {
         nodes.map { node in
             ChainNodeViewModel(
-                node: node,
-                statusState: statusStateByNodeUrl[node.url] ?? .loading,
+                row: service.nodeRow(chain: chain.rawValue, node: node, status: statusStateByNodeUrl[node.url] ?? .loading),
                 formatter: formatter,
             )
         }
-    }
-
-    var explorerTitle: String {
-        Localized.Settings.Networks.explorer
     }
 
     var deleteButtonTitle: String {
@@ -62,10 +57,6 @@ public final class ChainSettingsSceneViewModel {
 
     func deleteConfirmationTitle(for nodeName: String) -> String {
         Localized.Common.deleteConfirmation(nodeName)
-    }
-
-    func canDelete(url: String) -> Bool {
-        service.canDeleteNode(chain: chain.rawValue, url: url)
     }
 
     func addNodeModel() -> AddNodeSceneViewModel {
@@ -87,9 +78,9 @@ extension ChainSettingsSceneViewModel {
     }
 
     func onSelectExplorer(name: String) {
-        selectedExplorer = name
         do {
             try service.setExplorerName(chain: chain.rawValue, name: name)
+            explorers = service.explorerRows(chain: chain.rawValue)
         } catch {
             isPresentingAlertMessage = AlertMessage(error: error)
         }

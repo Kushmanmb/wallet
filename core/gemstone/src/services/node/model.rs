@@ -23,6 +23,10 @@ impl GemNodeStatusState {
             Self::Loading | Self::Error => None,
         }
     }
+
+    pub fn subtitle(&self) -> GemNodeSubtitle {
+        GemNodeSubtitle::LatestBlock { value: self.latest_block() }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -32,6 +36,32 @@ pub struct GemNodeCheck {
     pub latest_block_number: u64,
     pub is_in_sync: bool,
     pub latency: Latency,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemChainSettingsSection {
+    Nodes,
+    Explorer,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct GemExplorerRow {
+    pub name: String,
+    pub is_selected: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemNodeSubtitle {
+    LatestBlock { value: Option<u64> },
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemNodeRow {
+    pub node: GemNodeSelection,
+    pub title: GemNodeRowTitle,
+    pub subtitle: GemNodeSubtitle,
+    pub latency_status: GemLatencyStatus,
+    pub can_delete: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
@@ -83,5 +113,26 @@ impl From<GatewayError> for GemAddNodeError {
             GatewayError::NetworkIdMismatch { .. } => Self::InvalidNetworkId,
             error => Self::Gateway(error),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_a_node_row_subtitle_names_the_latest_block_and_admits_when_it_has_none() {
+        let result = GemNodeStatusState::Result {
+            latest_block_number: 21_000_000,
+            latency: Latency::from_milliseconds(120),
+        };
+
+        assert_eq!(result.subtitle(), GemNodeSubtitle::LatestBlock { value: Some(21_000_000) });
+        assert_eq!(GemNodeStatusState::Loading.subtitle(), GemNodeSubtitle::LatestBlock { value: None });
+        assert_eq!(
+            GemNodeStatusState::Error.subtitle(),
+            GemNodeSubtitle::LatestBlock { value: None },
+            "a node that failed still shows the block row, with nothing in it"
+        );
     }
 }

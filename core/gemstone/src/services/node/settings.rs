@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use primitives::{Chain, Latency};
 
-use super::model::{GemAddNodeError, GemNodeCheck, GemNodeSelection, GemNodeStatusState};
+use super::model::{GemAddNodeError, GemChainSettingsSection, GemExplorerRow, GemNodeCheck, GemNodeRow, GemNodeSelection, GemNodeStatusState};
 use super::rules;
 use super::session::GemAddNodeSession;
 use crate::gateway::GemGateway;
@@ -29,8 +29,34 @@ impl GemChainSettingsService {
         chain_rules::matching_chains(chain_rules::chains_by_rank(), &query)
     }
 
+    pub fn sections(&self) -> Vec<GemChainSettingsSection> {
+        vec![GemChainSettingsSection::Nodes, GemChainSettingsSection::Explorer]
+    }
+
     pub fn explorers(&self, chain: Chain) -> Vec<String> {
         self.explorer.get_explorers(chain)
+    }
+
+    pub fn explorer_rows(&self, chain: Chain) -> Vec<GemExplorerRow> {
+        let selected = self.explorer.get_explorer_name(chain);
+        self.explorer
+            .get_explorers(chain)
+            .into_iter()
+            .map(|name| GemExplorerRow {
+                is_selected: name == selected,
+                name,
+            })
+            .collect()
+    }
+
+    pub fn node_row(&self, chain: Chain, node: GemNodeSelection, status: GemNodeStatusState) -> GemNodeRow {
+        GemNodeRow {
+            title: node.title(),
+            subtitle: status.subtitle(),
+            latency_status: status.latency_status(),
+            can_delete: self.can_delete_node(chain, node.url.clone()),
+            node,
+        }
     }
 
     pub fn explorer_name(&self, chain: Chain) -> String {
