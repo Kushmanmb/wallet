@@ -129,6 +129,14 @@ The method is thin: gather inputs, call the rule, return. Product or domain-deci
 
 **Point reads should be synchronous.** `GemWalletStore.get_wallet` is a sync trait method, so `GemWalletSessionService` answers a session lookup without `await`. Do the same for any single-row read — an `async` point read pushes the caller back to the store, which is how the confirm screen ended up reading `AssetStore` directly for two years.
 
+### No trivial exports
+
+An export earns its place by making a decision. A function that looks up a constant for a variant, or wraps a value the app already holds so the app can ask for it back, is not a decision — it is a second spelling of a `match` the app will write anyway, plus an FFI crossing per call. Two of these were caught and reverted: an icon name per row key, and a title per enum case. Both belong on the enum as data the screen record already carries, resolved once in the app's [module mapper](#one-mapper-per-module-names-every-core-key-it-renders).
+
+The test is what the caller could not have worked out: if the answer depends only on the variant, the variant is the answer and the app maps it. If it depends on state, configuration, a chain rule or several values at once, it is a decision and Core owns it.
+
+The one exception is a **projection**: a pure function of a value Core already defines, where the value is a remote record and Rust allows no inherent `impl` to hang it off. `walletRow(wallet)` and `emptyState(input)` are that shape.
+
 ### A staged load names what each stage waits for
 
 A load that fans out and then narrows is a graph, not a list, and the graph has to be written down before anyone reorders it. [`GemConfirmService.load`](../core/gemstone/src/services/confirm/mod.rs) is the worked example:
