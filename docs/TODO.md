@@ -215,7 +215,6 @@ Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them de
 - **T5** **M** `services/app_start/mod.rs` `setup_wallets`.
 - **T7** **S** `services/asset_discovery/mod.rs` `discover`.
 - **T8** **M** `services/rewards/mod.rs` — `create_referral`, `use_referral_code`, `redeem`. Money paths with no test.
-- **T9** **S** `services/explorer/mod.rs` `get_transaction_link` (13 lines of explorer selection).
 - **T10** **S** `services/fiat/quote.rs` `quote_url` — it enables the asset as a side effect of fetching the URL.
 
 ### iOS view models with no test file
