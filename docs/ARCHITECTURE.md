@@ -217,6 +217,14 @@ public var name: String {
 
 `GemValidatorRow`, `GemFiatQuoteRow`, `GemWalletRow` and `GemBalanceRow` are the same shape for their lists. A session is for a screen the user drives, with events and a derived view state; a projection of one value that answers the same way every time is a row. The thing to look for in a row model is a decision the record could carry: if both apps compute it, it belongs in the record, not in two view models.
 
+### A row that a screen only ever draws one way keeps its shape app-side
+
+`GemAssetRow` carries the layout because the same asset row is drawn four ways: the wallet list prices it, select-asset names its network, manage-tokens toggles it, receive copies it. The choice varies, so Core makes it once and both apps switch on `subtitle` and `trailing`.
+
+The rows that do not vary keep their shape in the app. A perpetual market row always shows its price under the name and its volume at the end; a position row always shows direction and leverage under the name and its margin at the end; a price-alert row always shows the price and a toggle. Each is one row on one screen, so a `GemListItemSubtitle`/`GemListItemAccessory` that every row carried would add a crossing per row and settle nothing — the cost [§ 3 Keep the crossings few](#keep-the-crossings-few) warns about, paid for a decision no one is making twice. Reviewed on 2026-09-15 and left as is.
+
+The test is whether the same row is drawn differently somewhere: if it is, the shape is a choice and belongs in the record; if it is not, it is layout and belongs in the view.
+
 ### A row is projected from its value, never fetched from a service
 
 `walletRow(wallet)`, `walletRows(wallets)` and `emptyState(input)` are pure functions of the value, so they are exported as functions, not hung off a service. Reading a row must never require a service the screen does not otherwise have — that is what forces a second service into a view model, a row to be passed down as a constructor argument, or a factory to call `service.walletRow(...)` at the composition root. All three were tried on the wallet row and all three read as the same mistake: a projection dressed up as a dependency. This is the one exception to [no free exports](#no-trivial-exports): a projection has no owner to be a receiver on, because the value it projects is a remote record and Rust allows no inherent `impl` for it.
