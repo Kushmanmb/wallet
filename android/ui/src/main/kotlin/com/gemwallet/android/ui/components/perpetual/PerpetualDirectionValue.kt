@@ -4,17 +4,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.localization.stringRes
 import com.wallet.core.primitives.PerpetualDirection
 
 @Composable
 fun PerpetualDirection.text(leverage: String): String = "${title().uppercase()} $leverage"
 
 @Composable
-fun PerpetualDirection.title(): String = when (this) {
-    PerpetualDirection.Long -> stringResource(R.string.perpetual_long)
-    PerpetualDirection.Short -> stringResource(R.string.perpetual_short)
-}
+fun PerpetualDirection.title(): String = stringResource(stringRes())
 
 @Composable
 fun PerpetualDirection.titleAndLeverage(leverage: Int): String = "${title()} ${leverage}x"

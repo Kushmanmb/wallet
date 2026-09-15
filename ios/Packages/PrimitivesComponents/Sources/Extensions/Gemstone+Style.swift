@@ -6,6 +6,7 @@ import enum Gemstone.LinkType
 import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemValueTone
 import enum Gemstone.PriceAlertDirection
+import Primitives
 import Style
 import SwiftUI
 
@@ -84,6 +85,15 @@ extension GemTransactionStateTone {
         case .success: Colors.green
         case .pending, .refunded: Colors.orange
         case .error: Colors.red
+        }
+    }
+}
+
+extension Primitives.PerpetualDirection {
+    public var color: Color {
+        switch self {
+        case .long: Colors.green
+        case .short: Colors.red
         }
     }
 }

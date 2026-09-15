@@ -104,7 +104,7 @@ extension GemTransactionTitle {
         _ fallback: String,
     ) -> String {
         guard let direction else { return fallback }
-        return directionTitle(PerpetualDirectionViewModel(direction: direction.toPrimitives()).title)
+        return directionTitle(direction.toPrimitives().title)
     }
 }
 
@@ -256,6 +256,15 @@ extension GemTransactionStateTone {
         case .pending: Localized.Info.Transaction.Pending.description
         case .success: Localized.Info.Transaction.Success.description
         case .error, .refunded: Localized.Info.Transaction.Error.description
+        }
+    }
+}
+
+extension Primitives.PerpetualDirection {
+    public var title: String {
+        switch self {
+        case .short: Localized.Perpetual.short
+        case .long: Localized.Perpetual.long
         }
     }
 }

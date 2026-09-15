@@ -124,10 +124,9 @@ fun GemSimulationWarningRow.descriptionText(): String? = when (kind) {
 
 @Composable
 private fun perpetualTitle(direction: uniffi.gemstone.PerpetualDirection?, @StringRes directionTitle: Int, @StringRes fallback: Int): String {
-    val side = when (direction?.toPrimitives()) {
-        PerpetualDirection.Long -> stringResource(R.string.perpetual_long)
-        PerpetualDirection.Short -> stringResource(R.string.perpetual_short)
+    val side = when (val side = direction?.toPrimitives()) {
         null -> return stringResource(fallback)
+        else -> stringResource(side.stringRes())
     }
     return stringResource(directionTitle, side)
 }
@@ -211,4 +210,10 @@ fun GemTransactionStateTone.infoDescriptionRes(): Int = when (this) {
     GemTransactionStateTone.SUCCESS -> R.string.info_transaction_success_description
     GemTransactionStateTone.ERROR,
     GemTransactionStateTone.REFUNDED -> R.string.info_transaction_error_description
+}
+
+@StringRes
+fun PerpetualDirection.stringRes(): Int = when (this) {
+    PerpetualDirection.Long -> R.string.perpetual_long
+    PerpetualDirection.Short -> R.string.perpetual_short
 }
