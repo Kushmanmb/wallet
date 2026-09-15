@@ -39,6 +39,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.Spacer4
 import com.gemwallet.android.ui.theme.compactIconSize
 import com.gemwallet.android.features.settings.settings.viewmodels.SettingsViewModel
+import com.gemwallet.android.features.settings.settings.presents.localization.stringRes
 import com.wallet.core.primitives.Appearance
 import java.util.Locale
 import uniffi.gemstone.GemPerpetual
@@ -112,7 +113,7 @@ fun PreferencesScene(
                     listPosition = ListPosition.Middle,
                     icon = R.drawable.settings_appearance,
                     indented = false,
-                    label = { appearanceLabel(it) },
+                    label = { stringResource(it.stringRes()) },
                     onSelect = { viewModel.setAppearance(it) },
                 )
             }
@@ -191,15 +192,6 @@ fun PreferencesScene(
 private fun autocloseLabel(percent: Int): String =
     GemPerpetual(PerpetualProvider.HYPERCORE).use { it.autoclosePercent(percent.toUByte()) }
         ?.let { "$it%" } ?: stringResource(R.string.common_none)
-
-@Composable
-private fun appearanceLabel(appearance: Appearance): String = stringResource(
-    when (appearance) {
-        Appearance.System -> R.string.settings_appearance_system
-        Appearance.Light -> R.string.settings_appearance_light
-        Appearance.Dark -> R.string.settings_appearance_dark
-    }
-)
 
 @Composable
 private fun <T> OptionPickerLinkItem(
