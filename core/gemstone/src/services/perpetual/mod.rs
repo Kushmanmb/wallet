@@ -323,10 +323,7 @@ mod tests {
     fn test_a_subscription_reply_and_an_unreadable_channel_are_reported_not_applied() {
         let testkit = PerpetualTestkit::new();
 
-        assert!(matches!(
-            message(&testkit, SUBSCRIPTION),
-            GemPerpetualSocketUpdate::SubscriptionResponse { .. }
-        ));
+        assert!(matches!(message(&testkit, SUBSCRIPTION), GemPerpetualSocketUpdate::SubscriptionResponse { .. }));
         assert_eq!(message(&testkit, r#"{"channel":"somethingElse"}"#), GemPerpetualSocketUpdate::Unknown);
         assert!(testkit.store.position_writes.lock().unwrap().is_empty());
     }

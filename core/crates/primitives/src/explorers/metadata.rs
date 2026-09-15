@@ -229,5 +229,4 @@ mod tests {
         assert_eq!(cosmos_style.nft_path, None);
         assert_eq!(cosmos_style.validator_path, Some(VALIDATORS_PATH));
     }
-
 }

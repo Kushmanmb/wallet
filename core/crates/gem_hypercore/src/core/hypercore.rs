@@ -10,12 +10,20 @@ fn l1_action_typed_data(action: Value, nonce: u64) -> Result<String, String> {
 
 fn spot_send_typed_data(spot_send: SpotSend) -> Result<String, String> {
     let action_value = serde_json::to_value(&spot_send).map_err(|error| error.to_string())?;
-    Ok(eip712::create_user_signed_eip712_json(&action_value, "HyperliquidTransaction:SpotSend", eip712::spot_send_types()))
+    Ok(eip712::create_user_signed_eip712_json(
+        &action_value,
+        "HyperliquidTransaction:SpotSend",
+        eip712::spot_send_types(),
+    ))
 }
 
 fn usd_class_transfer_typed_data(usd_class_transfer: UsdClassTransfer) -> Result<String, String> {
     let action_value = serde_json::to_value(&usd_class_transfer).map_err(|error| error.to_string())?;
-    Ok(eip712::create_user_signed_eip712_json(&action_value, "HyperliquidTransaction:UsdClassTransfer", eip712::usd_class_transfer_types()))
+    Ok(eip712::create_user_signed_eip712_json(
+        &action_value,
+        "HyperliquidTransaction:UsdClassTransfer",
+        eip712::usd_class_transfer_types(),
+    ))
 }
 
 // L1 payload
@@ -45,19 +53,31 @@ pub fn cancel_order_typed_data(cancel: Cancel, nonce: u64) -> Result<String, Str
 // User signed payload
 pub fn withdrawal_request_typed_data(request: WithdrawalRequest) -> Result<String, String> {
     let action_value = serde_json::to_value(&request).map_err(|error| error.to_string())?;
-    Ok(eip712::create_user_signed_eip712_json(&action_value, "HyperliquidTransaction:Withdraw", eip712::withdraw_types()))
+    Ok(eip712::create_user_signed_eip712_json(
+        &action_value,
+        "HyperliquidTransaction:Withdraw",
+        eip712::withdraw_types(),
+    ))
 }
 
 // User signed payload
 pub fn approve_agent_typed_data(agent: ApproveAgent) -> Result<String, String> {
     let action_value = serde_json::to_value(&agent).map_err(|error| error.to_string())?;
-    Ok(eip712::create_user_signed_eip712_json(&action_value, "HyperliquidTransaction:ApproveAgent", eip712::approve_agent_types()))
+    Ok(eip712::create_user_signed_eip712_json(
+        &action_value,
+        "HyperliquidTransaction:ApproveAgent",
+        eip712::approve_agent_types(),
+    ))
 }
 
 // User signed payload
 pub fn approve_builder_fee_typed_data(fee: ApproveBuilderFee) -> Result<String, String> {
     let action_value = serde_json::to_value(&fee).map_err(|error| error.to_string())?;
-    Ok(eip712::create_user_signed_eip712_json(&action_value, "HyperliquidTransaction:ApproveBuilderFee", eip712::approve_builder_fee_types()))
+    Ok(eip712::create_user_signed_eip712_json(
+        &action_value,
+        "HyperliquidTransaction:ApproveBuilderFee",
+        eip712::approve_builder_fee_types(),
+    ))
 }
 
 pub fn transfer_to_hyper_evm_typed_data(spot_send: SpotSend) -> Result<String, String> {
@@ -70,7 +90,11 @@ pub fn send_spot_token_to_address_typed_data(spot_send: SpotSend) -> Result<Stri
 
 pub fn send_perps_usd_to_address_typed_data(usd_send: UsdSend) -> Result<String, String> {
     let action_value = serde_json::to_value(&usd_send).map_err(|error| error.to_string())?;
-    Ok(eip712::create_user_signed_eip712_json(&action_value, "HyperliquidTransaction:UsdSend", eip712::usd_send_types()))
+    Ok(eip712::create_user_signed_eip712_json(
+        &action_value,
+        "HyperliquidTransaction:UsdSend",
+        eip712::usd_send_types(),
+    ))
 }
 
 pub fn transfer_spot_to_perps_typed_data(usd_class_transfer: UsdClassTransfer) -> Result<String, String> {
@@ -84,18 +108,30 @@ pub fn transfer_perps_to_spot_typed_data(usd_class_transfer: UsdClassTransfer) -
 // User signed payload
 pub fn c_deposit_typed_data(c_deposit: CDeposit) -> Result<String, String> {
     let action_value = serde_json::to_value(&c_deposit).map_err(|error| error.to_string())?;
-    Ok(eip712::create_user_signed_eip712_json(&action_value, "HyperliquidTransaction:CDeposit", eip712::c_deposit_types()))
+    Ok(eip712::create_user_signed_eip712_json(
+        &action_value,
+        "HyperliquidTransaction:CDeposit",
+        eip712::c_deposit_types(),
+    ))
 }
 
 pub fn c_withdraw_typed_data(c_withdraw: CWithdraw) -> Result<String, String> {
     let action_value = serde_json::to_value(&c_withdraw).map_err(|error| error.to_string())?;
-    Ok(eip712::create_user_signed_eip712_json(&action_value, "HyperliquidTransaction:CWithdraw", eip712::c_deposit_types()))
+    Ok(eip712::create_user_signed_eip712_json(
+        &action_value,
+        "HyperliquidTransaction:CWithdraw",
+        eip712::c_deposit_types(),
+    ))
 }
 
 // User signed payload
 pub fn token_delegate_typed_data(token_delegate: TokenDelegate) -> Result<String, String> {
     let action_value = serde_json::to_value(&token_delegate).map_err(|error| error.to_string())?;
-    Ok(eip712::create_user_signed_eip712_json(&action_value, "HyperliquidTransaction:TokenDelegate", eip712::token_delegate_types()))
+    Ok(eip712::create_user_signed_eip712_json(
+        &action_value,
+        "HyperliquidTransaction:TokenDelegate",
+        eip712::token_delegate_types(),
+    ))
 }
 
 #[cfg(test)]

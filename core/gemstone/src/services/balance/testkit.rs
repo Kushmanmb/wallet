@@ -3,9 +3,9 @@ use std::sync::Mutex;
 use num_bigint::BigUint;
 use primitives::{AssetId, Chain, WalletId};
 
+use super::GemAssetBalance;
 use super::model::GemBalanceRecord;
 use super::store::GemBalanceStore;
-use super::GemAssetBalance;
 use crate::services::error::GemServiceError;
 
 impl GemAssetBalance {

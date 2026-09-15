@@ -13,8 +13,7 @@ use std::sync::{Arc, Mutex};
 use chrono::{DateTime, Utc};
 use gem_wallet_connect::validate_sign_message_account;
 use primitives::{
-    Account, ApplicationMetadata, Chain, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionVerificationStatus,
-    WalletId,
+    Account, ApplicationMetadata, Chain, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionVerificationStatus, WalletId,
 };
 
 use crate::application::{GemApplicationMetadataService, GemConnectionRow};

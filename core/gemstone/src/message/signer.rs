@@ -117,7 +117,6 @@ impl MessageSigner {
             SignDigestType::Base58 => bs58::decode(&self.message.data).into_vec().map_err(|e| GemstoneError::from(e.to_string())),
         }
     }
-
 }
 
 impl MessageSigner {

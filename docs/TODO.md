@@ -92,11 +92,10 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 
 ### Core behaviour with no test
 
-Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them declare records or forward to a `rules.rs` that is already tested — `GemStakeAmountInput`'s four methods and `candlestick_header` are both covered from their rules module. What is left is the orchestration below: each named function has a body of its own and no test anywhere in the crate calls it. Several need a store or gateway mock first; `services/*/testkit.rs` is the pattern.
+Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them declare records or forward to a `rules.rs` that is already tested — `GemStakeAmountInput`'s four methods and `candlestick_header` are both covered from their rules module. What is left is the orchestration below: each named function has a body of its own and no test anywhere in the crate calls it. Several need a store or gateway mock first; `services/*/testkit.rs` is the pattern, and `wallet_home/testkit.rs` now assembles the balance, discovery, transactions and NFT graph behind one constructor.
 
 - **T1** **S** `services/perpetual/mod.rs` — `refresh`, `sync_enablement`, `sync_markets_if_needed`, `sync_current_positions` and `account_mode` still have no test. `on_socket_message` now does, and `perpetual/testkit.rs` assembles the whole service graph for the rest.
 - **T2** **M** `services/assets/details.rs` `refresh` (26 lines) — the concurrent detail load and its per-step failures.
-- **T4** **S** `services/wallet_home/mod.rs` `refresh`.
 - **T5** **M** `services/app_start/mod.rs` `setup_wallets`.
 - **T7** **S** `services/asset_discovery/mod.rs` `discover`.
 - **T8** **M** `services/rewards/mod.rs` — `create_referral`, `use_referral_code`, `redeem`. Money paths with no test.
