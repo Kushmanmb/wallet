@@ -232,7 +232,7 @@ class RecipientViewModel @Inject constructor(
     }
 
     private fun updateFrom(payment: GemPaymentRecipient) {
-        addressInput.applyExternalAddress(payment.recipient.address)
+        addressInput.setScannedAddress(payment.recipient.address)
         payment.recipient.memo?.let { _memo.value = it }
         references = payment.recipient.references
         requestedAmount = payment.amount

@@ -117,11 +117,11 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
-    fun applyChainsFilter(chains: List<Chain>) {
+    fun setChainsFilter(chains: List<Chain>) {
         chainsFilter.update { chains }
     }
 
-    fun applyTypesFilter(types: List<GemTransactionFilter>) {
+    fun setTypesFilter(types: List<GemTransactionFilter>) {
         typeFilter.update { types }
     }
 

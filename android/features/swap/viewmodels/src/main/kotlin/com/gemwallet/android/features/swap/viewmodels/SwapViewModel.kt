@@ -327,7 +327,7 @@ class SwapViewModel @Inject constructor(
             }
             GemSwapButtonAction.RetryTransfer -> authorize { swap(onConfirm) }
             GemSwapButtonAction.RetryQuote -> refresh()
-            is GemSwapButtonAction.UseMinimumAmount -> applyMinimumAmount(action.value)
+            is GemSwapButtonAction.UseMinimumAmount -> setPayValue(action.value)
             GemSwapButtonAction.InsufficientBalance -> Unit
         }
     }
@@ -379,7 +379,7 @@ class SwapViewModel @Inject constructor(
         session.update { it.onQuoteResults(results.toGem()) }
     }
 
-    private fun applyMinimumAmount(amount: BigInteger) {
+    private fun setPayValue(amount: BigInteger) {
         val asset = payAsset.value?.asset ?: return
         payValue.clearText()
         payValue.setTextAndPlaceCursorAtEnd(Crypto(amount).value(asset.decimals).stripTrailingZeros().toPlainString())

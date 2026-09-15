@@ -165,13 +165,13 @@ class ManageContactViewModel @Inject constructor(
 
     fun setMemo(value: String) = updateInput { it.copy(memo = value) }
 
-    fun scanAddress(data: String) = applyExternalAddress(data)
+    fun scanAddress(data: String) = setScannedAddress(data)
 
-    fun pasteAddress(data: String) = applyExternalAddress(data)
+    fun pasteAddress(data: String) = setScannedAddress(data)
 
-    private fun applyExternalAddress(data: String) {
+    private fun setScannedAddress(data: String) {
         val scan = service.scannedAddress(data)
-        addressInput.applyExternalAddress(scan.address)
+        addressInput.setScannedAddress(scan.address)
         updateInput { it.copy(memo = scan.memo ?: it.memo) }
     }
 

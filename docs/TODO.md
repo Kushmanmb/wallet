@@ -276,7 +276,6 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 - **N4** **S** `ios/Packages/Store/Sources/Stores/StoreManager.swift` and `ios/Packages/Primitives/Sources/Extensions/NSFileManager+Primitives.swift`.
 - **N5** **S** `ios/Features/LockManager` — the module, `LockWindowManager.swift` and its view modifier.
 - **N6** **S** `ios/GemPriceWidget/Services/WidgetPriceService.swift` — `fetchTopCoinPrices`, `fetchRemoteImage`.
-- **N7** **S** Android `applySystemBarsAppearance`, `applyExternalAddress` (twice), `applyMinimumAmount`, `applyChainsFilter`, `applyTypesFilter`, `applyDiff`.
 - **N8** **S** Core `apply_socket_message`, `apply_candle_update` (twice), `apply_preview_display_grouping`, `apply_validator_state`.
 - **N9** **S** Core `resolve_*` in the swapper and portfolio crates — `resolve_token`, `resolve_asset_id`, `resolve_deposit_mode`, `resolve_quote_waiting_time`, `resolve_app_fees`, `resolve_asset`, `resolve_primary`, `resolve_expire_at`.
 
