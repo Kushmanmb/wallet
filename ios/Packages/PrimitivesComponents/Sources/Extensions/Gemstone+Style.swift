@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemTransactionStateTone
 import enum Gemstone.LinkType
@@ -114,5 +115,18 @@ extension VerificationStatus {
         case .unverified: AssetImage(placeholder: Images.TokenStatus.warning)
         case .suspicious: AssetImage(placeholder: Images.TokenStatus.risk)
         }
+    }
+}
+
+extension GemFiatTransactionBadge {
+    public var color: Color {
+        switch self {
+        case .pending: Colors.orange
+        case .failed: Colors.red
+        }
+    }
+
+    public var textStyle: TextStyle {
+        TextStyle(font: Font.system(.footnote, weight: .medium), color: color, background: color.opacity(.light))
     }
 }
