@@ -56,6 +56,7 @@ import com.gemwallet.android.ui.theme.sceneContentPadding
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.AssetLink
 import com.wallet.core.primitives.NFTAssetId
+import com.gemwallet.android.features.nft.presents.localization.stringRes
 import com.wallet.core.primitives.ReportReason
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemCollectibleAttributeValue
@@ -187,7 +188,7 @@ private fun ReportReasonSheet(
                         onDismiss()
                     },
                     minHeight = ListItemDefaults.plainMinHeight,
-                    title = { ListItemTitleText(stringResource(reason.titleRes)) },
+                    title = { ListItemTitleText(stringResource(reason.stringRes())) },
                     listPosition = position,
                 )
             }
@@ -195,14 +196,6 @@ private fun ReportReasonSheet(
     }
 }
 
-private val ReportReason.titleRes: Int
-    get() = when (this) {
-        ReportReason.Spam -> R.string.nft_report_reason_spam
-        ReportReason.Malicious -> R.string.nft_report_reason_malicious
-        ReportReason.Inappropriate -> R.string.nft_report_reason_inappropriate
-        ReportReason.Copyright -> R.string.nft_report_reason_copyright
-        ReportReason.Other -> R.string.nft_report_reason_other
-    }
 
 @Composable
 private fun InfoRow(row: GemCollectibleRow, position: ListPosition) {
