@@ -272,8 +272,8 @@ public struct ViewModelFactory: Sendable {
     }
 
     @MainActor
-    public func collectionScene(wallet: Wallet, collectionId: String, collectionName: String) -> CollectionViewModel {
-        CollectionViewModel(service: nftService, wallet: wallet, collectionId: collectionId, collectionName: collectionName)
+    public func collectionScene(wallet: Wallet, collectionId: String) -> CollectionViewModel {
+        CollectionViewModel(service: nftService, wallet: wallet, collectionId: collectionId)
     }
 
     @MainActor

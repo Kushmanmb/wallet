@@ -26,7 +26,7 @@ public enum NFTGridPosterBuilder {
     private static func collection(_ data: NFTData, _ row: GemNftRow) -> GridPosterViewItem {
         GridPosterViewItem(
             id: row.id,
-            destination: Scenes.Collection(id: data.collection.id.identifier, name: data.collection.name),
+            destination: Scenes.Collection(id: data.collection.id.identifier),
             model: model(row),
         )
     }
