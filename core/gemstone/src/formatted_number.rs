@@ -10,6 +10,24 @@ pub enum GemNumberUnit {
     Plain,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemValueTone {
+    Plain,
+    Neutral,
+    Positive,
+    Negative,
+}
+
+impl GemValueTone {
+    pub fn of(value: f64) -> Self {
+        match value.partial_cmp(&0.0) {
+            Some(std::cmp::Ordering::Greater) => Self::Positive,
+            Some(std::cmp::Ordering::Less) => Self::Negative,
+            _ => Self::Neutral,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemNumberNotation {
     Plain,
@@ -30,6 +48,7 @@ pub struct GemFormattedNumber {
     pub unit: GemNumberUnit,
     pub display: GemNumberDisplay,
     pub notation: GemNumberNotation,
+    pub tone: GemValueTone,
 }
 
 impl GemFormattedNumber {
@@ -41,6 +60,7 @@ impl GemFormattedNumber {
         Self {
             value,
             notation: GemNumberNotation::Plain,
+            tone: GemValueTone::Plain,
             unit: GemNumberUnit::Currency { code },
             display: match style.abbreviates(value) {
                 true => GemNumberDisplay::Abbreviated,
@@ -70,10 +90,21 @@ impl GemFormattedNumber {
         }
     }
 
+    pub fn toned(self) -> Self {
+        Self {
+            tone: GemValueTone::of(self.value),
+            ..self
+        }
+    }
+
     pub fn signed_currency(value: f64, currency: Currency, style: GemCurrencyStyle) -> Self {
+        Self::currency(value, currency, style).signed()
+    }
+
+    fn signed(self) -> Self {
         Self {
             notation: GemNumberNotation::Signed,
-            ..Self::currency(value, currency, style)
+            ..self.toned()
         }
     }
 
@@ -81,6 +112,7 @@ impl GemFormattedNumber {
         Self {
             value,
             notation: GemNumberNotation::Plain,
+            tone: GemValueTone::Plain,
             unit: unit(symbol),
             display: GemNumberDisplay::Number {
                 precision: crate::precision::adaptive_precision(value),
@@ -90,11 +122,16 @@ impl GemFormattedNumber {
 
     pub fn percentage(value: f64, style: GemPercentageStyle) -> Self {
         let format = style.format();
-        Self {
+        let percentage = Self {
             value,
-            notation: notation(format.shows_sign),
+            notation: GemNumberNotation::Plain,
+            tone: GemValueTone::Plain,
             unit: GemNumberUnit::Percent,
             display: GemNumberDisplay::Number { precision: format.precision },
+        };
+        match format.shows_sign {
+            true => percentage.signed(),
+            false => percentage,
         }
     }
 
@@ -102,16 +139,10 @@ impl GemFormattedNumber {
         Self {
             value,
             notation: GemNumberNotation::Plain,
+            tone: GemValueTone::Plain,
             unit: unit(symbol),
             display: value_display(value, style),
         }
-    }
-}
-
-fn notation(shows_sign: bool) -> GemNumberNotation {
-    match shows_sign {
-        true => GemNumberNotation::Signed,
-        false => GemNumberNotation::Plain,
     }
 }
 
@@ -197,6 +228,21 @@ mod tests {
         );
 
         assert_eq!(GemFormattedNumber::percentage(5.0, GemPercentageStyle::Unsigned).notation, GemNumberNotation::Plain);
+    }
+
+    #[test]
+    fn test_only_a_signed_number_carries_a_direction() {
+        assert_eq!(GemFormattedNumber::usd(-5.0).tone, GemValueTone::Plain, "a price is not up or down");
+        assert_eq!(GemFormattedNumber::signed_usd(-5.0).tone, GemValueTone::Negative);
+        assert_eq!(GemFormattedNumber::signed_usd(5.0).tone, GemValueTone::Positive);
+        assert_eq!(GemFormattedNumber::signed_usd(0.0).tone, GemValueTone::Neutral);
+        assert_eq!(GemFormattedNumber::percentage(-2.0, GemPercentageStyle::Signed).tone, GemValueTone::Negative);
+        assert_eq!(GemFormattedNumber::percentage(-2.0, GemPercentageStyle::Unsigned).tone, GemValueTone::Plain);
+        assert_eq!(
+            GemFormattedNumber::percentage(-2.0, GemPercentageStyle::Unsigned).toned().tone,
+            GemValueTone::Negative,
+            "an unsigned percentage can still be asked for its direction"
+        );
     }
 
     #[test]

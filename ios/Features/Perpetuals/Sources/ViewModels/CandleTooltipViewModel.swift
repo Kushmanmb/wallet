@@ -42,7 +42,7 @@ public struct CandleTooltipViewModel {
             title: TextValue(text: Localized.Charts.Price.change, style: Self.titleStyle, lineLimit: 1),
             value: TextValue(
                 text: tooltip.change.text(),
-                style: TextStyle(font: .caption2.monospacedDigit(), color: PriceChangeColor.color(for: tooltip.change.value), fontWeight: .semibold),
+                style: TextStyle(font: .caption2.monospacedDigit(), color: tooltip.change.tone.color, fontWeight: .semibold),
                 lineLimit: 1,
             ),
         )

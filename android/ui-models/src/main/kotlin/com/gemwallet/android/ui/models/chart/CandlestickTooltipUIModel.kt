@@ -1,10 +1,9 @@
 package com.gemwallet.android.ui.models.chart
 
-import com.gemwallet.android.domains.price.ValueDirection
-import com.gemwallet.android.domains.price.toValueDirection
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.model.text
 import com.wallet.core.primitives.ChartCandleStick
+import uniffi.gemstone.GemValueTone
 import uniffi.gemstone.candleTooltip
 
 data class CandlestickTooltipUIModel(
@@ -13,7 +12,7 @@ data class CandlestickTooltipUIModel(
     val low: String,
     val close: String,
     val changeText: String,
-    val changeDirection: ValueDirection,
+    val changeTone: GemValueTone,
     val volumeText: String,
 ) {
     companion object {
@@ -25,7 +24,7 @@ data class CandlestickTooltipUIModel(
                 low = tooltip.low.text(),
                 close = tooltip.close.text(),
                 changeText = tooltip.change.text(),
-                changeDirection = tooltip.change.value.toValueDirection(),
+                changeTone = tooltip.change.tone,
                 volumeText = tooltip.volume.text(),
             )
         }

@@ -6,6 +6,7 @@ import struct Gemstone.GemFormattedNumber
 import GemstonePrimitives
 import Localization
 import Primitives
+import PrimitivesComponents
 import Style
 import SwiftUI
 
@@ -25,7 +26,7 @@ extension TransactionPnlViewModel: ItemModelProvidable {
         return .pnl(
             title: Localized.Perpetual.pnl,
             value: pnl.text(),
-            color: PriceChangeColor.color(for: pnl.value),
+            color: pnl.tone.color,
         )
     }
 }

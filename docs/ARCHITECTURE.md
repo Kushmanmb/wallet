@@ -357,15 +357,57 @@ pub enum GemNumberDisplay {
     BelowThreshold { threshold: f64, places: u32 },
 }
 
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemNumberNotation {
+    Plain,
+    Signed,
+    Parenthesised,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemValueTone {
+    Plain,
+    Neutral,
+    Positive,
+    Negative,
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemFormattedNumber {
     pub value: f64,
     pub unit: GemNumberUnit,
     pub display: GemNumberDisplay,
+    pub notation: GemNumberNotation,
+    pub tone: GemValueTone,
 }
 ```
 
 The style is resolved when the record is built, not carried for the app to re-ask: `GemFormattedNumber::currency` and `GemFormattedNumber::amount` take the value and a `GemCurrencyStyle` or `GemValueStyle` and settle the precision, the abbreviation and the dust cut once. The app reads `display` and renders with `NumberFormatter` or `DecimalFormat`, so a view state with fifty rows costs no crossings at all.
+
+**A number's sign, its enclosure and its tone are decisions too, and one field each.** `notation` says whether the rendered digits get a forced `+`, get wrapped in parentheses, or neither — three mutually exclusive cases, not two booleans the app can combine into a fourth that means nothing. `tone` says whether the number reads as plain text, as a signed quantity that happens to be zero, or as up or down: a price is `Plain` however it moves, a delta is coloured by its sign. Deriving the tone app-side from `value > 0` is how the two apps drifted into colouring a chart headline differently, so the record answers it and each app maps the four cases to its own palette, once, in its module's style mapper.
+
+```swift
+extension GemValueTone {
+    public var color: Color {
+        switch self {
+        case .plain: Colors.black
+        case .neutral: Colors.gray
+        case .positive: Colors.green
+        case .negative: Colors.red
+        }
+    }
+}
+```
+
+```kotlin
+@Composable
+fun GemValueTone.color(): Color = when (this) {
+    GemValueTone.PLAIN -> MaterialTheme.colorScheme.onSurface
+    GemValueTone.NEUTRAL -> MaterialTheme.colorScheme.secondary
+    GemValueTone.POSITIVE -> MaterialTheme.colorScheme.tertiary
+    GemValueTone.NEGATIVE -> MaterialTheme.colorScheme.error
+}
+```
 
 A row or view state carries `GemFormattedNumber` where it carries a bare `f64` today. The adaptive rule, the abbreviation threshold and the dust cut live once, in Core, with tests that fail if a constant moves.
 

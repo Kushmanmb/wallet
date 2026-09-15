@@ -1,6 +1,6 @@
 package com.gemwallet.android.ui.models.chart
 
-import com.gemwallet.android.domains.price.ValueDirection
+import uniffi.gemstone.GemValueTone
 import com.wallet.core.primitives.ChartCandleStick
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -24,7 +24,7 @@ class CandlestickTooltipUIModelTest {
         assertEquals("110.00", model.high)
         assertEquals("95.00", model.low)
         assertEquals("105.00", model.close)
-        assertEquals(ValueDirection.Up, model.changeDirection)
+        assertEquals(GemValueTone.POSITIVE, model.changeTone)
         assertEquals("+5.00%", model.changeText)
     }
 
@@ -35,7 +35,7 @@ class CandlestickTooltipUIModelTest {
         )
         val model = CandlestickTooltipUIModel.from(candle)
         assertEquals("-10.00%", model.changeText)
-        assertEquals(ValueDirection.Down, model.changeDirection)
+        assertEquals(GemValueTone.NEGATIVE, model.changeTone)
     }
 
     @Test
@@ -53,7 +53,7 @@ class CandlestickTooltipUIModelTest {
             date = 0L, open = 0.0, high = 5.0, low = 0.0, close = 5.0, volume = 1.0,
         )
         val model = CandlestickTooltipUIModel.from(candle)
-        assertEquals(ValueDirection.None, model.changeDirection)
+        assertEquals(GemValueTone.NEUTRAL, model.changeTone)
         assertEquals("+0.00%", model.changeText)
     }
 }

@@ -45,7 +45,7 @@ public struct ChartHeaderViewModel {
     }
 
     public var priceColor: Color {
-        valueType == .priceChange ? PriceChangeColor.color(for: header.value.value) : Colors.black
+        header.value.tone.color
     }
 
     public var priceChangeText: String? {
@@ -53,7 +53,7 @@ public struct ChartHeaderViewModel {
     }
 
     public var priceChangeTextColor: Color {
-        PriceChangeColor.color(for: header.change?.value ?? 0)
+        header.change?.tone.color ?? Colors.gray
     }
 
     public var priceFont: Font {

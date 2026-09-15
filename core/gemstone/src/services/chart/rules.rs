@@ -185,7 +185,7 @@ pub fn header(data: &GemChartData, value: f64, change_percentage: Option<f64>) -
         secondary_value: secondary_value.map(price),
         change: shows_change.then(|| match value_type {
             GemChartValueType::Price => GemFormattedNumber::percentage(change_percentage, GemPercentageStyle::Signed),
-            GemChartValueType::PriceChange => GemFormattedNumber::percentage(change_percentage, GemPercentageStyle::Unsigned).in_parentheses(),
+            GemChartValueType::PriceChange => GemFormattedNumber::percentage(change_percentage, GemPercentageStyle::Unsigned).in_parentheses().toned(),
         }),
     }
 }
@@ -206,6 +206,7 @@ mod tests {
     }
 
     use super::*;
+    use crate::formatted_number::GemValueTone;
     use primitives::{AssetId, ChartValuePercentage, LinkType, PriceAlertDirection, currency::Currency};
 
     fn point(seconds: i64, value: f64) -> ChartDateValue {
@@ -279,7 +280,7 @@ mod tests {
             Some(GemChartHeader {
                 value: GemFormattedNumber::signed_currency(5.0, Currency::USD, GemCurrencyStyle::Currency),
                 secondary_value: Some(usd(15.0)),
-                change: Some(GemFormattedNumber::percentage(50.0, GemPercentageStyle::Unsigned).in_parentheses()),
+                change: Some(GemFormattedNumber::percentage(50.0, GemPercentageStyle::Unsigned).in_parentheses().toned()),
             })
         );
         assert_eq!(data.header_at(12.0).value.value, 2.0);
@@ -292,7 +293,24 @@ mod tests {
         assert_eq!(change_chart_data(values.clone(), false, Currency::USD).unwrap().header.unwrap().change, None);
         assert_eq!(
             change_chart_data(values, true, Currency::USD).unwrap().header.unwrap().change,
-            Some(GemFormattedNumber::percentage(20.0, GemPercentageStyle::Unsigned).in_parentheses())
+            Some(GemFormattedNumber::percentage(20.0, GemPercentageStyle::Unsigned).in_parentheses().toned())
+        );
+    }
+
+    #[test]
+    fn test_a_price_headline_is_plain_and_a_change_headline_carries_its_direction() {
+        let price = price_chart_data(chart(vec![point(1, 100.0), point(2, 90.0)], None), Currency::USD).expect("data");
+        let price_header = price.header.expect("header");
+        assert_eq!(price_header.value.tone, GemValueTone::Plain);
+        assert_eq!(price_header.change.expect("change").tone, GemValueTone::Negative);
+
+        let change = change_chart_data(vec![point(1, 100.0), point(2, 90.0)], true, Currency::USD).expect("data");
+        let change_header = change.header.expect("header");
+        assert_eq!(change_header.value.tone, GemValueTone::Negative);
+        assert_eq!(
+            change_header.change.expect("change").tone,
+            GemValueTone::Negative,
+            "the parenthesised percentage follows the headline"
         );
     }
 

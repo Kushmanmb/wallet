@@ -66,7 +66,7 @@ fun CandlestickTooltip(
         TooltipCellData(stringResource(R.string.charts_price_high), model.high, onSurface),
         TooltipCellData(stringResource(R.string.charts_price_low), model.low, onSurface),
         TooltipCellData(stringResource(R.string.charts_price_close), model.close, onSurface),
-        TooltipCellData(stringResource(R.string.charts_price_change), model.changeText, model.changeDirection.color()),
+        TooltipCellData(stringResource(R.string.charts_price_change), model.changeText, model.changeTone.color()),
         TooltipCellData(stringResource(R.string.perpetual_volume), model.volumeText, onSurface),
     )
 

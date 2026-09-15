@@ -1,6 +1,6 @@
 package com.gemwallet.android.ui.models.chart
 
-import com.gemwallet.android.domains.price.ValueDirection
+import uniffi.gemstone.GemValueTone
 import com.gemwallet.android.testkit.mockChartHeader
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -25,7 +25,8 @@ class ChartHeaderUIModelTest {
         )
         assertEquals("$110.00", model.priceText)
         assertEquals("+10.00%", model.changeText)
-        assertEquals(ValueDirection.Up, model.direction)
+        assertEquals(GemValueTone.PLAIN, model.priceTone)
+        assertEquals(GemValueTone.POSITIVE, model.changeTone)
         assertEquals("@5000", model.dateText)
         assertNull(model.headerValueText)
     }
@@ -35,7 +36,7 @@ class ChartHeaderUIModelTest {
         val model = ChartHeaderUIModel.build(header = mockChartHeader(value = 50.0, base = 100.0))
 
         assertEquals("$50.00", model.priceText)
-        assertEquals(ValueDirection.Down, model.direction)
+        assertEquals(GemValueTone.NEGATIVE, model.changeTone)
         assertNull(model.dateText)
     }
 
@@ -54,7 +55,8 @@ class ChartHeaderUIModelTest {
         assertEquals("$190.00", model.headerValueText)
         assertEquals("(90.00%)", model.changeText)
         assertEquals(GemChartValueType.PRICE_CHANGE, model.type)
-        assertEquals(ValueDirection.Up, model.direction)
+        assertEquals(GemValueTone.POSITIVE, model.priceTone)
+        assertEquals(GemValueTone.POSITIVE, model.changeTone)
     }
 
     @Test
@@ -67,6 +69,7 @@ class ChartHeaderUIModelTest {
         assertNull(model.changeText)
         assertNull(model.headerValueText)
         assertEquals(GemChartValueType.PRICE_CHANGE, model.type)
-        assertEquals(ValueDirection.Down, model.direction)
+        assertEquals(GemValueTone.NEGATIVE, model.priceTone)
+        assertEquals(GemValueTone.NEUTRAL, model.changeTone)
     }
 }

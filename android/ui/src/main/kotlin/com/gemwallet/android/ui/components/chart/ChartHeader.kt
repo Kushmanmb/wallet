@@ -45,17 +45,14 @@ fun ChartHeader(
             Text(
                 text = model.priceText,
                 style = changeStyle,
-                color = when (model.type) {
-                    GemChartValueType.PRICE -> MaterialTheme.colorScheme.onSurface
-                    GemChartValueType.PRICE_CHANGE -> model.direction.color()
-                },
+                color = model.priceTone.color(),
             )
             model.changeText?.let { change ->
                 Spacer(modifier = Modifier.width(space8))
                 Text(
                     text = change,
                     style = if (model.headerValueText != null) changeStyle else MaterialTheme.typography.bodyLarge,
-                    color = model.direction.color(),
+                    color = model.changeTone.color(),
                 )
             }
         }

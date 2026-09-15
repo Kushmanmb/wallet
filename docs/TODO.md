@@ -38,7 +38,6 @@ Rejected: transaction, transaction detail, delegation, validator, asset select/s
 
 
 - **O12** **M** `WalletId` and `Chain` still cross as bare strings, so every call unwraps one by hand on both platforms. `WalletId` is a struct in the apps and a `String` across the FFI — that is why [`GemWalletService.swift`](../ios/Packages/GemstonePrimitives/Sources/Services/GemWalletService.swift) is sixty lines of `wallet.id.id` and `.toPrimitives()`, a bridge with no decisions in it. `Chain` is declared under `codes` in [`remote_types.yml`](../core/bin/generate/remote_types.yml) and crosses the same way, so `chain.rawValue` and `Chain(core:)` litter both apps and every new Core parameter tempts the next caller to type it `String`. Make them cross as the records the apps already hold, the way `AssetId` and `Currency` do, and the bridges go with them. Check first what persists a wallet id as a raw string.
-- **R35** **S** The chart header's colours are decided twice and the two apps disagree. iOS colours the headline from the value only when the type is `PriceChange` and always colours the change from the percentage; Android derives one direction — the value for `PriceChange`, the percentage otherwise — and applies it to the whole `PriceInfo`. Both read the same two numbers and reach different screens. Decide which is right, then let the row carry the tone so neither app derives it.
 
 ## 2. Sections, actions, destinations and limits
 
