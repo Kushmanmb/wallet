@@ -57,7 +57,7 @@ public struct PerpetualPositionViewModel {
     }
 
     public var positionTypeText: String {
-        "\(directionText.uppercased()) \(leverageText)"
+        GemPerpetual(provider: .hypercore).positionText(directionName: directionText, formattedLeverage: leverageText)
     }
 
 

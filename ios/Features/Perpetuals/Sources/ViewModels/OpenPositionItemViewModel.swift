@@ -2,6 +2,7 @@
 
 import Components
 import Formatters
+import class Gemstone.GemPerpetual
 import Foundation
 import GemstonePrimitives
 import Primitives
@@ -61,6 +62,9 @@ extension OpenPositionItemViewModel {
     }
 
     private var positionTypeText: String {
-        "\(directionViewModel.title.uppercased()) \(Int(data.leverage))x"
+        GemPerpetual(provider: .hypercore).positionText(
+            directionName: directionViewModel.title,
+            formattedLeverage: GemPerpetual(provider: .hypercore).leverageText(value: data.leverage),
+        )
     }
 }

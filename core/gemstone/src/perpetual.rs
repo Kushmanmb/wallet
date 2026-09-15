@@ -39,6 +39,10 @@ impl GemPerpetual {
         format!("{} ({})", formatted_amount, margin_type_name)
     }
 
+    pub fn position_text(&self, direction_name: String, formatted_leverage: String) -> String {
+        format!("{} {}", direction_name.to_uppercase(), formatted_leverage)
+    }
+
     pub fn trigger_order_text(&self, label: String, formatted_price: Option<String>) -> String {
         format!("{}: {}", label, formatted_price.as_deref().unwrap_or(EMPTY_VALUE))
     }
@@ -350,5 +354,12 @@ mod option_tests {
         assert_eq!(perpetual.autoclose_percent(0), None);
         assert_eq!(perpetual.autoclose_percent(25), Some(25));
         assert_eq!(perpetual.leverage_text(40), "40x");
+    }
+
+    #[test]
+    fn test_a_position_row_shouts_its_direction_beside_the_leverage() {
+        let perpetual = GemPerpetual::new(PerpetualProvider::Hypercore);
+        assert_eq!(perpetual.position_text("Long".to_string(), perpetual.leverage_text(5)), "LONG 5x");
+        assert_eq!(perpetual.position_text("Short".to_string(), perpetual.leverage_text(40)), "SHORT 40x");
     }
 }
