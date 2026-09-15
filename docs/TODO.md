@@ -72,7 +72,6 @@ Closed on 2026-09-15. Four of the six were the same `try { focusRequester.reques
 
 - **X32** **S** `ios/Features/Transactions/Sources/Scenes/TransactionScene.swift` — the button corner radius is marked unresolved.
 - **X33** **S** `ios/Packages/Components/Sources/TextFields/CurrencyTextField.swift` — a fixed height works around a filed Apple bug; re-check whether it still reproduces.
-- **X34** **S** `ios/Packages/Components/Sources/ViewModifiers/NavigationStackModifier.swift` — a `Binding` extension is parked in the wrong file.
 - **X35** **S** `ios/Packages/Gemstone/Package.swift` pins Swift 5 language mode until `GemstoneFFI` is Swift 6 clean. Re-check against the current toolchain.
 - **X36** **S** Two dated iOS removals: `GemstoneServices/Sources/Keystore/LocalKeystore.swift` and `Store/Sources/DB.swift` are both marked for 2026. Confirm the install base and delete, or re-date them with the reason.
 - **X37** **S** `core/bin/generate/src/main.rs` takes a value it should read from the command line.
