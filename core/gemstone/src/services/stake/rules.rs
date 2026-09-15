@@ -12,8 +12,8 @@ use rand::seq::IndexedRandom;
 use std::str::FromStr;
 
 use super::model::{
-    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationCompletion, GemDelegationDestination, GemDelegationRow, GemDelegationStatus,
-    GemDelegationTone, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeInfoRow, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
+    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationCompletion, GemDelegationDestination, GemDelegationRow, GemDelegationStatus, GemDelegationTone,
+    GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeInfoRow, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
 };
 use crate::config::image::GemImage;
 use crate::config::stake::EARN_OFFERED;
@@ -651,7 +651,11 @@ mod tests {
 
     #[test]
     fn test_the_stake_screen_shows_only_the_info_rows_its_chain_has() {
-        assert_eq!(stake_info_rows(Chain::Cosmos, Some(0.0)), vec![GemStakeInfoRow::LockTime], "an apr of zero is not an apr row");
+        assert_eq!(
+            stake_info_rows(Chain::Cosmos, Some(0.0)),
+            vec![GemStakeInfoRow::LockTime],
+            "an apr of zero is not an apr row"
+        );
         assert_eq!(stake_info_rows(Chain::Cosmos, None), vec![GemStakeInfoRow::LockTime]);
         assert_eq!(stake_info_rows(Chain::Cosmos, Some(12.5)), vec![GemStakeInfoRow::Apr, GemStakeInfoRow::LockTime]);
         assert_eq!(
@@ -688,7 +692,10 @@ mod tests {
         assert!(!delegation_rows(&pending).contains(&GemDelegationRow::Rewards), "no rewards row without rewards");
 
         let no_apr = Delegation {
-            validator: DelegationValidator { apr: 0.0, ..active.validator.clone() },
+            validator: DelegationValidator {
+                apr: 0.0,
+                ..active.validator.clone()
+            },
             ..active
         };
         assert!(!delegation_rows(&no_apr).contains(&GemDelegationRow::Apr));

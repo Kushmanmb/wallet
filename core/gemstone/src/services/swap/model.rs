@@ -168,7 +168,10 @@ mod tests {
 
         let rows = summary.rows(false);
         assert_eq!(rows.first(), Some(&GemSwapDetailRow::Provider));
-        assert!(!rows.contains(&GemSwapDetailRow::PriceImpact), "the impact row shows only when the screen has prices for it");
+        assert!(
+            !rows.contains(&GemSwapDetailRow::PriceImpact),
+            "the impact row shows only when the screen has prices for it"
+        );
         assert_eq!(rows.last(), Some(&GemSwapDetailRow::Slippage));
         assert!(summary.rows(true).contains(&GemSwapDetailRow::PriceImpact));
     }

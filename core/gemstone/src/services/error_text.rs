@@ -1,10 +1,10 @@
+use crate::GemstoneError;
 use crate::alien::AlienError;
 use crate::gateway::GatewayError;
 use crate::payment::GemPaymentError;
 use crate::services::error::GemServiceError;
 use crate::services::node::model::GemAddNodeError;
 use crate::services::wallet_connect::error::GemWalletConnectError;
-use crate::GemstoneError;
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
 pub enum GemErrorText {
@@ -104,10 +104,7 @@ mod tests {
 
     #[test]
     fn test_a_carried_message_stays_the_message_and_a_decision_becomes_a_key() {
-        assert_eq!(
-            GemServiceError::Api { msg: "boom".into() }.text(),
-            GemErrorText::Message { text: "boom".into() }
-        );
+        assert_eq!(GemServiceError::Api { msg: "boom".into() }.text(), GemErrorText::Message { text: "boom".into() });
         assert_eq!(GemServiceError::Cancelled.text(), GemErrorText::Cancelled);
         assert_eq!(GatewayError::Offline.text(), GemErrorText::NetworkOffline);
         assert_eq!(

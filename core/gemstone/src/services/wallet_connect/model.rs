@@ -1,9 +1,7 @@
 use crate::application::GemConnectionRow;
 use crate::models::custom_types::DateTimeUtc;
 use crate::services::transfer::GemTransferData;
-use primitives::{
-    Account, Asset, Chain, SimulationResult, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionVerificationStatus,
-};
+use primitives::{Account, Asset, Chain, SimulationResult, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionVerificationStatus};
 
 use crate::message::sign_type::SignMessage;
 use crate::wallet_connect::WalletConnectResponseType;

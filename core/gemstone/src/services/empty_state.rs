@@ -218,7 +218,10 @@ mod tests {
             vec![GemEmptyStateAction::Swap]
         );
         assert!(state(GemEmptyStateKind::Asset, false, vec![]).actions.is_empty());
-        assert!(state(GemEmptyStateKind::Nfts, false, vec![]).description.is_none(), "an nft list without a receive action says only that it is empty");
+        assert!(
+            state(GemEmptyStateKind::Nfts, false, vec![]).description.is_none(),
+            "an nft list without a receive action says only that it is empty"
+        );
         assert_eq!(
             state(GemEmptyStateKind::Nfts, false, vec![GemEmptyStateAction::Receive]).description,
             Some(GemEmptyStateText::NftsDescription)

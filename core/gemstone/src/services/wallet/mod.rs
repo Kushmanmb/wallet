@@ -382,11 +382,11 @@ mod tests {
     use super::testkit::{MemoryAddressStore, MemoryKeystorePassword, MemoryWalletStore, TEST_PASSWORD};
     use super::*;
     use crate::services::avatar::GemAvatarService;
-    use crate::testkit::TestAlienProvider;
     use crate::services::file::testkit::NoopFileStore;
     use crate::services::preferences::testkit::MemoryPreferencesStore;
     use crate::services::wallet_preferences::testkit::MemoryWalletPreferencesStore;
     use crate::services::wallet_session::testkit::MemoryWalletSessionStore;
+    use crate::testkit::TestAlienProvider;
 
     const PHRASE: [&str; 12] = [
         "shoot", "island", "position", "soft", "burden", "budget", "tooth", "cruel", "issue", "economy", "destroy", "above",
@@ -423,7 +423,11 @@ mod tests {
                 Arc::new(GemWalletPreferencesService::new(Arc::new(MemoryWalletPreferencesStore::default()))),
                 Arc::new(GemExplorerService::new(app_preferences)),
                 addresses.clone(),
-                Arc::new(GemAvatarService::new(wallets.clone(), Arc::new(NoopFileStore), Arc::new(TestAlienProvider::new(crate::alien::AlienResponse::new(None, Vec::new()))))),
+                Arc::new(GemAvatarService::new(
+                    wallets.clone(),
+                    Arc::new(NoopFileStore),
+                    Arc::new(TestAlienProvider::new(crate::alien::AlienResponse::new(None, Vec::new()))),
+                )),
             );
             Self {
                 service,

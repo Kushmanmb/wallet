@@ -11,10 +11,10 @@ use primitives::{
 };
 
 use super::model::{
-    GemAutocloseSummary, GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind,
-    GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualInfoRow, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSections,
-    GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow,
-    GemPerpetualSection, GemPerpetualTransferData,
+    GemAutocloseSummary, GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine,
+    GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualInfoRow, GemPerpetualMarketCounts, GemPerpetualMarketRow,
+    GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind,
+    GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigInt;
@@ -880,14 +880,12 @@ mod tests {
 
         assert_eq!(
             tooltip.prices.iter().map(|cell| cell.row).collect::<Vec<_>>(),
-            vec![
-                GemCandleTooltipRow::Open,
-                GemCandleTooltipRow::High,
-                GemCandleTooltipRow::Low,
-                GemCandleTooltipRow::Close
-            ]
+            vec![GemCandleTooltipRow::Open, GemCandleTooltipRow::High, GemCandleTooltipRow::Low, GemCandleTooltipRow::Close]
         );
-        assert_eq!(tooltip.summary.iter().map(|cell| cell.row).collect::<Vec<_>>(), vec![GemCandleTooltipRow::Change, GemCandleTooltipRow::Volume]);
+        assert_eq!(
+            tooltip.summary.iter().map(|cell| cell.row).collect::<Vec<_>>(),
+            vec![GemCandleTooltipRow::Change, GemCandleTooltipRow::Volume]
+        );
         assert_eq!(tooltip.prices[1].value, GemFormattedNumber::adaptive(120.0, None));
         assert_eq!(tooltip.summary[0].value, GemFormattedNumber::percentage(10.0, GemPercentageStyle::Signed));
         assert_eq!(tooltip.summary[1].value, GemFormattedNumber::usd_abbreviated(220.0));

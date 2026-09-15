@@ -418,7 +418,11 @@ mod tests {
             .iter()
             .map(|(_, connections)| connections.iter().map(|connection| connection.session.id.as_str()).collect())
             .collect();
-        assert_eq!(ids, vec![vec!["new-first", "old-first"], vec!["new-second", "old-second"]], "the newest connection leads each section");
+        assert_eq!(
+            ids,
+            vec![vec!["new-first", "old-first"], vec!["new-second", "old-second"]],
+            "the newest connection leads each section"
+        );
     }
 
     fn session_with(id: &str, state: WalletConnectionState, chains: &[Chain]) -> WalletConnectionSession {

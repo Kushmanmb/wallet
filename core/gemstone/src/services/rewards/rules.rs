@@ -1,7 +1,7 @@
-use chrono::{DateTime, Utc};
-use number_formatter::BigNumberFormatter;
 use crate::formatted_number::GemFormattedNumber;
 use crate::precision::GemValueStyle;
+use chrono::{DateTime, Utc};
+use number_formatter::BigNumberFormatter;
 use primitives::{CoreEmoji, RewardRedemptionOption, RewardStatus, Rewards};
 
 use super::model::{GemRewardsRedemption, GemRewardsState};

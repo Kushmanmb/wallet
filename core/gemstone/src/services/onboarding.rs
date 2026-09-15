@@ -19,11 +19,7 @@ pub fn accept_terms_items() -> Vec<GemAcceptTermsItem> {
 
 #[uniffi::export]
 pub fn security_reminder_items() -> Vec<GemSecurityReminderItem> {
-    vec![
-        GemSecurityReminderItem::KeepSafe,
-        GemSecurityReminderItem::DoNotShare,
-        GemSecurityReminderItem::NoRecovery,
-    ]
+    vec![GemSecurityReminderItem::KeepSafe, GemSecurityReminderItem::DoNotShare, GemSecurityReminderItem::NoRecovery]
 }
 
 #[cfg(test)]

@@ -290,7 +290,11 @@ mod tests {
             Err("cosmos is offline"),
         ]);
 
-        assert_eq!(balances, vec![coin(Chain::Bitcoin), coin(Chain::Solana)], "every chain that answered is published in one batch");
+        assert_eq!(
+            balances,
+            vec![coin(Chain::Bitcoin), coin(Chain::Solana)],
+            "every chain that answered is published in one batch"
+        );
         assert_eq!(failure, Some("ethereum is offline"), "the caller hears about the first failure in request order");
 
         let (balances, failure) = published_balances::<&str>(vec![Ok(vec![coin(Chain::Bitcoin)])]);

@@ -9,9 +9,8 @@ use primitives::{
 
 use super::model::{
     AssetList, GemAssetAction, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput, GemAssetNetworkDestination, GemAssetRow,
-    GemAssetRowSubtitle, GemAssetText, GemAssetRowTitle, GemAssetRowTrailing, GemAssetSectionIds, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow,
-    GemSelectAssetScope, GemSelectAssetSection, GemSelectAssetTitle, GemSelectAssetType, GemSelectRowAction, GemWalletSearchCounts, GemWalletSearchLimits,
-    GemWalletSearchPhase,
+    GemAssetRowSubtitle, GemAssetRowTitle, GemAssetRowTrailing, GemAssetSectionIds, GemAssetText, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow,
+    GemSelectAssetScope, GemSelectAssetSection, GemSelectAssetTitle, GemSelectAssetType, GemSelectRowAction, GemWalletSearchCounts, GemWalletSearchLimits, GemWalletSearchPhase,
 };
 use crate::config::search_config::{ASSETS_INITIAL_LIMIT, ASSETS_SEARCH_LIMIT, NFTS_PREVIEW_LIMIT, PERPETUALS_PREVIEW_LIMIT, RESULTS_LIMIT};
 use crate::config::stake::EARN_OFFERED;
@@ -452,7 +451,13 @@ mod tests {
         assert_eq!(ethereum.subtitle_symbol.as_deref(), Some("ETH"));
         assert_eq!(ethereum.network_full_name, "Ethereum", "a coin's network needs no type");
 
-        let token = Asset::new(AssetId::from_token(Chain::Ethereum, "0xusdc"), "USDC".into(), "USDC".into(), 6, primitives::AssetType::ERC20);
+        let token = Asset::new(
+            AssetId::from_token(Chain::Ethereum, "0xusdc"),
+            "USDC".into(),
+            "USDC".into(),
+            6,
+            primitives::AssetType::ERC20,
+        );
         let usdc = asset_text(&token);
         assert_eq!(usdc.title, "USDC", "a name that already is the symbol is not repeated");
         assert_eq!(usdc.subtitle_symbol, None);

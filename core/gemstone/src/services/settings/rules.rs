@@ -124,13 +124,10 @@ pub fn about_sections() -> Vec<GemAboutSection> {
 pub fn sections(notifications_available: bool, wallet_connect_available: bool, shows_rewards: bool, developer_enabled: bool) -> Vec<GemSettingsSection> {
     [
         vec![GemSettingsRow::Wallets, GemSettingsRow::Security],
-        [
-            notifications_available.then_some(GemSettingsRow::Notifications),
-            Some(GemSettingsRow::Preferences),
-        ]
-        .into_iter()
-        .flatten()
-        .collect(),
+        [notifications_available.then_some(GemSettingsRow::Notifications), Some(GemSettingsRow::Preferences)]
+            .into_iter()
+            .flatten()
+            .collect(),
         wallet_connect_available.then_some(vec![GemSettingsRow::WalletConnect]).unwrap_or_default(),
         [
             Some(GemSettingsRow::Support),
@@ -187,12 +184,7 @@ mod tests {
                 vec![GemSettingsRow::Wallets, GemSettingsRow::Security],
                 vec![GemSettingsRow::Notifications, GemSettingsRow::Preferences],
                 vec![GemSettingsRow::WalletConnect],
-                vec![
-                    GemSettingsRow::Support,
-                    GemSettingsRow::Rewards,
-                    GemSettingsRow::AboutUs,
-                    GemSettingsRow::Developer
-                ],
+                vec![GemSettingsRow::Support, GemSettingsRow::Rewards, GemSettingsRow::AboutUs, GemSettingsRow::Developer],
             ]
         );
 

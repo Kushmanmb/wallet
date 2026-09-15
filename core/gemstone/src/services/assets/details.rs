@@ -111,10 +111,7 @@ impl GemAssetDetailsService {
 
         record_both(
             &mut failures,
-            (
-                GemAssetRefreshStep::UpdateBalances,
-                self.balances.update(wallet_id.clone(), vec![asset_id.clone()]),
-            ),
+            (GemAssetRefreshStep::UpdateBalances, self.balances.update(wallet_id.clone(), vec![asset_id.clone()])),
             (GemAssetRefreshStep::SyncTransactions, self.transactions.sync_wallet(wallet_id, Some(asset_id))),
         )
         .await;

@@ -9,8 +9,7 @@ use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_session;
 
 pub use rules::{
-    GemAboutRow, GemAboutSection, GemPreferencesRow, GemPreferencesSection, GemPreferencesState, GemSecurityRow, GemSecuritySection, GemSettingsRow,
-    GemSettingsSection,
+    GemAboutRow, GemAboutSection, GemPreferencesRow, GemPreferencesSection, GemPreferencesState, GemSecurityRow, GemSecuritySection, GemSettingsRow, GemSettingsSection,
 };
 
 #[derive(uniffi::Object)]

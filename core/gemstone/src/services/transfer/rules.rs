@@ -838,10 +838,7 @@ mod tests {
             },
             "1",
         );
-        assert_eq!(
-            generic.confirm_rows(),
-            vec![GemConfirmRow::App, GemConfirmRow::Sender, GemConfirmRow::Network]
-        );
+        assert_eq!(generic.confirm_rows(), vec![GemConfirmRow::App, GemConfirmRow::Sender, GemConfirmRow::Network]);
     }
 
     #[test]

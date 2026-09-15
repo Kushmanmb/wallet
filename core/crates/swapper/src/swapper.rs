@@ -563,11 +563,15 @@ mod timing_tests {
         println!("{round} preload total: {}ms", started.elapsed().as_millis());
 
         let provider_ids: BTreeSet<_> = swapper.get_providers_for_request(request).unwrap().into_iter().map(|provider| provider.id).collect();
-        let timings = swapper.swappers.iter().filter(|swapper| provider_ids.contains(&swapper.provider().id)).map(|provider| async move {
-            let started = Instant::now();
-            let outcome = provider.get_quote(request).await;
-            (provider.provider().id.id().to_string(), started.elapsed().as_millis(), outcome.is_ok())
-        });
+        let timings = swapper
+            .swappers
+            .iter()
+            .filter(|swapper| provider_ids.contains(&swapper.provider().id))
+            .map(|provider| async move {
+                let started = Instant::now();
+                let outcome = provider.get_quote(request).await;
+                (provider.provider().id.id().to_string(), started.elapsed().as_millis(), outcome.is_ok())
+            });
 
         let started = Instant::now();
         let mut timings = futures::future::join_all(timings).await;
