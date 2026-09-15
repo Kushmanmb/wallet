@@ -223,6 +223,17 @@ public var name: String {
 }
 ```
 
+```kotlin
+private fun AssetInfo.title(naming: GemAssetRowTitle): String = when (naming) {
+    GemAssetRowTitle.ASSET -> asset.name
+    GemAssetRowTitle.CANONICAL_ASSET -> when (asset.subtype) {
+        AssetSubtype.NATIVE -> asset.chain.asset().name
+        AssetSubtype.TOKEN -> asset.name
+    }
+    GemAssetRowTitle.NETWORK -> asset.id.chain.asset().name
+}
+```
+
 `GemValidatorRow`, `GemFiatQuoteRow`, `GemWalletRow` and `GemBalanceRow` are the same shape for their lists. A session is for a screen the user drives, with events and a derived view state; a projection of one value that answers the same way every time is a row. The thing to look for in a row model is a decision the record could carry: if both apps compute it, it belongs in the record, not in two view models.
 
 ### The record carries the finished value, not the ingredients
@@ -242,13 +253,27 @@ pub enum GemNodeCheckRow {
 
 `ChainId` and `LatestBlock` arrive printable — Core groups the digits and substitutes the placeholder, so neither app carries a formatter for them. `InSync` carries a named state rather than a `bool`, because a boolean forces the app to pick the glyph and the two apps pick differently; the name is mapped once in each app's style file, the way every other Core case is. `Latency` stays a number because its text is a localized template with a number in it, and that template lives in the app's catalog.
 
-The app is then a map with no branches in it:
+The app is then a map over the rows, and the only thing it decides is which widget draws each one:
 
 ```swift
 var fields: [ListItemField] {
     result.rows().map { ListItemField(title: $0.title, value: $0.text) }
 }
 ```
+
+```kotlin
+check.rows().forEach { row ->
+    when (row) {
+        is GemNodeCheckRow.InSync -> PropertyItem(
+            title = { PropertyTitleText(row.stringRes()) },
+            data = { PropertyDataText("", badge = { Icon(row.state.icon(), tint = row.state.tint()) }) },
+        )
+        else -> PropertyItem(row.stringRes(), row.text())
+    }
+}
+```
+
+iOS draws the sync state as an emoji in the value column and Android as a tinted icon beside it, so Android branches on the row to pick the widget while iOS does not. That branch is layout; both read the same `GemNodeSyncState` from their style file and neither decides what the state means.
 
 Two things still map per platform, and only two: the localized label for each case, and the glyph or colour for each named outcome. Anything else in a row model — a formatter, a placeholder, a ternary over a flag — is a decision that belongs in the record.
 
@@ -381,6 +406,12 @@ The view model's whole job on an event becomes one line, and every decision the 
 var type: FiatQuoteType {
     get { session.type }
     set { session = session.onTypeChanged(quoteType: newValue.map()) }
+}
+```
+
+```kotlin
+fun setType(type: FiatQuoteType) {
+    session.update { it.onTypeChanged(type.toGem()) }
 }
 ```
 
@@ -621,19 +652,33 @@ A record crosses by copy. Every call carries its arguments and its result across
 
 ```rust
 #[uniffi::export]
-impl GemDay {
-    pub fn boundaries(&self) -> GemDayBoundaries {
-        GemDayBoundaries { today: *self, yesterday: /* one calendar day back */ }
+impl GemDayBoundaries {
+    pub fn label(&self, day: GemDay) -> GemDayLabel {
+        match day {
+            day if day == self.today => GemDayLabel::Today,
+            day if day == self.yesterday => GemDayLabel::Yesterday,
+            _ => GemDayLabel::Date,
+        }
     }
 }
 ```
 
 ```swift
 let boundaries = GemDayBoundaries.current          // one crossing per list build
-switch date.gemDay {
-case boundaries.today: Localized.Date.today
-case boundaries.yesterday: Localized.Date.yesterday
-default: sectionFormatter.string(from: date)
+switch boundaries.label(day: date.gemDay) {
+case .today: Localized.Date.today
+case .yesterday: Localized.Date.yesterday
+case .date: Self.sectionFormatter.string(from: date)
+}
+```
+
+```kotlin
+private val boundaries = LocalDate.now().gemDay().boundaries()   // one crossing per list build
+
+fun format(date: LocalDate, locale: Locale): String = when (boundaries.label(date.gemDay())) {
+    GemDayLabel.TODAY -> todayLabel
+    GemDayLabel.YESTERDAY -> yesterdayLabel
+    GemDayLabel.DATE -> DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale).format(date)
 }
 ```
 
@@ -651,6 +696,12 @@ var viewState: GemFiatViewState {
         $0.session.viewState(assetPrice: $0.assetPrice, isUrlLoading: $0.isUrlLoading)
     }
 }
+```
+
+```kotlin
+private val viewState = combine(session, isUrlLoading, assetPriceUsd) { session, isUrlLoading, priceUsd ->
+    session.viewState(priceUsd, isUrlLoading)
+}.stateIn(viewModelScope, SharingStarted.Eagerly, session.value.viewState(null, false))
 ```
 
 The input struct names what the state depends on, so a new dependency is a compile-time edit rather than a forgotten refresh.
@@ -965,6 +1016,19 @@ public func contactsScene(mode: ContactsViewModel.Mode = .list) -> ContactsViewM
 }
 ```
 
+Android does not hit this at all for a child of the same screen: one Hilt view model owns both pages and the composable switches on the page it reports, so there is no child model for a view to assemble.
+
+```kotlin
+AnimatedContent(targetState = uiState.page) { page ->
+    when (page) {
+        ManageContactPage.Form -> ManageContactScene(state = uiState, onAction = ...)
+        ManageContactPage.Address -> uiState.addressInput?.let { input ->
+            ManageContactAddressScene(input = input, onAction = ...)
+        }
+    }
+}
+```
+
 The same applies to state: a view switching on the model's `mode` forces `mode` to be non-private. Name the decision on the model instead — `var rowAction: RowAction` — and the view switches on the answer, not the input.
 
 ### Depend on the generated abstraction, not the concrete object
@@ -1075,6 +1139,14 @@ try await service.setupWallet(wallet: created.json())
 // worth keeping — the adapter and schema, which Core cannot reach
 try store.addBanners([NewBanner(id: id, walletId: walletId, assetId: assetId, event: .stake, state: .active)])
 #expect(try store.getBanner(id: id)?.state == .active)
+```
+
+```kotlin
+// worth keeping — the query the adapter runs, which Core cannot reach
+database.bannersDao().addBanners(listOf(warning.copy(id = "other-wallet", walletId = "wallet-2")))
+val banners = database.bannersDao().observeAssetBanners("wallet-1", tokenId, assetId).first().map { it.toDTO() }
+
+assertEquals(setOf(BannerEvent.AccountBlockedMultiSignature), banners.map { it.event }.toSet())
 ```
 
 - **Never mock a dependency-free constructible service** (`GemChainService`, `GemAssetConfigService`, …). Construct the real one. An app test may substitute an I/O screen service to test mapping or state; the returned Core answer is then a stated premise, not a rule assertion.
