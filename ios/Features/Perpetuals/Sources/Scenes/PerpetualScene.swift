@@ -47,7 +47,7 @@ public struct PerpetualScene: View {
                             )
                         }
                     }
-                    .frame(height: 320)
+                    .frame(height: Sizing.chart.height)
 
                     PeriodSelectorView(selectedPeriod: $chart.currentPeriod)
                         .padding(.horizontal, Spacing.medium)

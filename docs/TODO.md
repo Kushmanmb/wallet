@@ -294,13 +294,7 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 
 ### iOS layout numbers outside Style
 
-31 sites in 27 first-party files, against the same rule Android's dp items carry.
-
-- **X84** **S** `Packages/PrimitivesComponents/Sources/Components/SwapAmountView.swift` (3) and `Views/NameRecordView.swift` (2).
-- **X85** **S** `GemPriceWidget/Views/MediumPriceWidgetView.swift` (2).
-- **X86** **S** `Packages/Components` — `SelectionView`, `LogoView`, `EmojiView`, `Buttons/ListButton`, `Lists/ListAssetItemView`, `Lists/ListItemFlexibleView`, `StateView/StateEmptyView`, `Grid/GridPosterView`.
-- **X87** **S** `Packages/PrimitivesComponents` — `BannerView`, `WalletBarView`, `SecretPhraseGridView`, `HeaderButtonsView`, `ChartHeaderView`, `ChartView`, `ChartStateView`.
-- **X88** **S** `Features` — `Transfer/AmountScene`, `Perpetuals/PerpetualScene`, `Perpetuals/CandlestickChartView`, `FiatConnect/FiatTypeToolbar`, `Onboarding/OnboardingScene`, `QRScanner/QRScannerDisplayConfiguration`, `QRScanner/CornerBracketsShape`.
+Re-checked on 2026-09-15 the way the Android dp items were: most of the 31 hits are inside a `#Preview` or are a named configuration field (`QRScannerDisplayConfiguration.default`), which is the pattern. What was real: a segmented picker width repeated in three scenes and a chart height repeated in two now read `Sizing.picker.segmentedWidth` and `Sizing.chart.height` (Android has named the chart height all along), and the `spacing: 0` / `cornerRadius: 10` / `spacing: 24` call sites read from `Spacing`. X84–X88 are closed.
 
 ### Files that have outgrown one module (second pass)
 
