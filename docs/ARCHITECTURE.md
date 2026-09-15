@@ -244,6 +244,32 @@ var address: WalletDetailAddress? {
 
 `GemTransactionRow` and `GemTransactionDetailRows` are the same split for one value: the list row and the details record each carry the transaction's id, asset, type, direction, state and creation date, so neither screen needs the `TransactionExtended` beside it.
 
+### A screen derives its record once and passes it down
+
+A Core record is derived by crossing the FFI, so *where* a screen derives it decides how many times it crosses. The rule is one derivation per render, passed down:
+
+```swift
+public var body: some View {
+    let details = model.details
+    return List {
+        ValueHeaderView(model: model.assetHeaderModel(details))
+        if details.state.showsEarn { ... }
+    }
+    .navigationTitle(details.title)
+}
+```
+
+A view model getter that derives the record itself — `var title: String { details.title }`, `var showEarnButton: Bool { details.state.showsEarn }` — looks free and is not: every getter the body reads crosses again, so one asset screen crossed a dozen times per pass. Getters that need the record take it as a parameter, and getters that are a one-line read of it are deleted: the view reads the record. Deriving inside an action (`onTogglePriceAlert`) is fine — that is one crossing per tap, not per frame.
+
+Android gets this for free by collecting, not by reading: the record is derived once in the view model's flow and the composable reads the collected value.
+
+```kotlin
+val uiModel = assetInfo.map { info -> service.details(info.toInput()) }
+    .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+```
+
+Do not reach for a memo. A cache keyed on an `Equatable` input was tried on both of these screens and removed: it saved a crossing only when the body re-ran for an unrelated reason, it had to restate every input of the derivation to stay correct, and it hid the real problem — a screen that derives more than once per render.
+
 ### Sections, actions and destinations are records too
 
 A row is not the only choice a screen makes, and the other three recur often enough to have the same answer.

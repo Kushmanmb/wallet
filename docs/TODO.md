@@ -15,7 +15,6 @@ These are code-backed candidates, not measured speedups. Capture a before/after 
 
 ### Implementation candidates
 
-- **PERF2** **M** iOS derived asset state — [`AssetSceneViewModel`](../ios/Features/Assets/Sources/ViewModels/AssetSceneViewModel.swift) calls `service.details(input:)` again in every getter that reads it (`title`, `headerModel`, `shareUrl`, `links`, `verificationStatus`, the price-alert state), so one body evaluation crosses the FFI a dozen times. Derive it once where the screen already does (`AssetScene` reads `model.details` into a local) and pass that value into the getters, instead of each getter deriving its own. A memo keyed on an `Equatable` input was tried for `WalletSceneViewModel.homeState` and reverted: its scene already reads the state once per body, so the cache only saved work on unrelated re-renders and had to restate every input to stay correct. Keep store-backed work out of render-time evaluation and preserve the existing Core records; R24 remains a separate row migration.
 
 ### Investigate before changing behavior
 

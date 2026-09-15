@@ -22,7 +22,7 @@ public struct AssetScene: View {
         return List {
             Section {} header: {
                 ValueHeaderView(
-                    model: model.assetHeaderModel,
+                    model: model.assetHeaderModel(details),
                     isPrivacyEnabled: .constant(false),
                     titleActionType: .none,
                     onHeaderAction: model.onSelectHeader,
@@ -44,7 +44,7 @@ public struct AssetScene: View {
                 .listRowInsets(.zero)
             }
 
-            if let statusViewModel = model.statusViewModel {
+            if let statusViewModel = model.statusViewModel(details) {
                 Section {
                     AssetStatusView(model: statusViewModel, action: model.onSelectTokenStatus)
                 }
@@ -156,7 +156,7 @@ public struct AssetScene: View {
                 }
             }
 
-            if model.showEarnButton {
+            if details.state.showsEarn {
                 Section {
                     NavigationCustomLink(
                         with: HStack(spacing: Spacing.medium) {
@@ -186,7 +186,7 @@ public struct AssetScene: View {
             } else {
                 Section {
                     Spacer()
-                    EmptyContentView(model: model.emptyContentModel)
+                    EmptyContentView(model: model.emptyContentModel(details))
                         .padding(.bottom, .extraLarge)
                 }
                 .cleanListRow()
@@ -197,7 +197,7 @@ public struct AssetScene: View {
         }
         .taskOnce(model.loadOnce)
         .listSectionSpacing(.compact)
-        .navigationTitle(model.title)
+        .navigationTitle(details.title)
         .contentMargins([.top], .small, for: .scrollContent)
     }
 }
