@@ -27,6 +27,7 @@ import enum Gemstone.GemTransactionStateTone
 import enum Gemstone.GemTransactionTitle
 import enum Gemstone.GemWalletSubtitle
 import GemstonePrimitives
+import enum Gemstone.GemDayLabel
 import Localization
 import Primitives
 import Style
@@ -483,6 +484,16 @@ extension GemSelectAssetSection {
         switch self {
         case .assets: Localized.Assets.title
         case .networks: Localized.Settings.Networks.title
+        }
+    }
+}
+
+extension GemDayLabel {
+    var title: String? {
+        switch self {
+        case .today: Localized.Date.today
+        case .yesterday: Localized.Date.yesterday
+        case .date: nil
         }
     }
 }

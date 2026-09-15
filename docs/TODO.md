@@ -29,7 +29,6 @@ Each of these picks a literal `Localized.`/`R.string.` from a Core variant outsi
 - **V50** **M** iOS Transfer — `Transfer/Sources/Errors/Errors.swift`, `ViewModels/ConfirmButtonViewModel.swift`, `ViewModels/RecipientSceneViewModel.swift`, `ViewModels/TransferDataViewModel.swift`.
 - **V51** **S** iOS WalletConnector — `WalletConnector/.../ViewModels/SignMessageSceneViewModel.swift`.
 - **V52** **S** Android buy — `features/buy/viewmodels/FiatViewModel.kt`.
-- **V57** **S** iOS shared — `Packages/PrimitivesComponents/Sources/Formatters/TransactionDateFormatter.swift` maps `GemDateSectionLabel` to `Localized.Date.*`; `PrimitivesComponents` has a `Gemstone+Localized.swift` already.
 - **V58** **S** Android shared — `ui/components/list_head/AmountListHead.kt` maps a Core header-button kind to `wallet_send`/`wallet_receive`/`wallet_buy`/`wallet_swap`; `android/ui` has `ui/localization/GemstoneText.kt` already.
 
 Rejected after checking the file: iOS `NFT/CollectibleViewModel`, `Settings/GemAddNodeFailure+Settings`, `Swap/SwapSlippageViewModel`, `Swap/Views/SwapDetailsView`, `Transfer/Types/ConfirmInfoSheetBuilder`, `Transfer/ConfirmRecipientViewModel`; Android `earn`, `import_wallet` and `perpetual` — each either calls its module mapper or switches over an app type, not a Core one.
