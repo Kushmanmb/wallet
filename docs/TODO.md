@@ -94,7 +94,6 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 
 Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them declare records or forward to a `rules.rs` that is already tested — `GemStakeAmountInput`'s four methods and `candlestick_header` are both covered from their rules module. What is left is the orchestration below: each named function has a body of its own and no test anywhere in the crate calls it. Several need a store or gateway mock first; `services/*/testkit.rs` is the pattern, and `asset_discovery/testkit.rs` now assembles the balance, discovery, transactions and NFT graph behind one constructor, with `TestAlienProvider::with_json_by_path` answering each endpoint differently.
 
-- **T1** **S** `services/perpetual/mod.rs` `account_mode` still has no test; the rest of the service is covered.
 
 ### Hardcoded user-visible strings
 

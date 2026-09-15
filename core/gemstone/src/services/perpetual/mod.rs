@@ -445,4 +445,38 @@ mod tests {
         assert!(!testkit.service.should_connect_perpetuals(None));
         assert!(testkit.service.should_connect_perpetuals(Some(hypercore)));
     }
+
+    #[test]
+    fn test_an_unreachable_account_mode_falls_back_to_the_stored_one() {
+        block_on(async {
+            let testkit = PerpetualTestkit::new();
+            testkit
+                .wallet_preferences
+                .set_perpetual_account_mode(testkit.wallet_id.clone(), PerpetualAccountMode::Unified)
+                .unwrap();
+
+            let mode = testkit
+                .service
+                .account_mode(testkit.wallet_id.clone(), Chain::HyperCore, "0xc64c".to_string())
+                .await
+                .unwrap();
+
+            assert_eq!(mode, PerpetualAccountMode::Unified);
+        })
+    }
+
+    #[test]
+    fn test_an_account_with_no_stored_mode_reads_as_standard() {
+        block_on(async {
+            let testkit = PerpetualTestkit::new();
+
+            let mode = testkit
+                .service
+                .account_mode(testkit.wallet_id.clone(), Chain::HyperCore, "0xc64c".to_string())
+                .await
+                .unwrap();
+
+            assert_eq!(mode, PerpetualAccountMode::Standard);
+        })
+    }
 }

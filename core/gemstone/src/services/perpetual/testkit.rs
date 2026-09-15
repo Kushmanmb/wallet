@@ -75,6 +75,7 @@ pub struct PerpetualTestkit {
     pub wallets: Arc<MemoryWalletStore>,
     pub balances: Arc<RecordingBalanceStore>,
     pub preferences: Arc<GemPreferencesService>,
+    pub wallet_preferences: Arc<GemWalletPreferencesService>,
     pub wallet_id: WalletId,
 }
 
@@ -114,6 +115,7 @@ impl PerpetualTestkit {
             assets,
             Arc::new(SubscriptionTestkit::new(&[], &[]).service),
         ));
+        let wallet_preferences = Arc::new(GemWalletPreferencesService::new(Arc::new(MemoryWalletPreferencesStore::default())));
         let store = Arc::new(MemoryPerpetualStore::default());
         let service = GemPerpetualService::new(
             gateway,
@@ -122,7 +124,7 @@ impl PerpetualTestkit {
             asset_store,
             preferences.clone(),
             balance,
-            Arc::new(GemWalletPreferencesService::new(Arc::new(MemoryWalletPreferencesStore::default()))),
+            wallet_preferences.clone(),
             session.clone(),
             Arc::new(GemRecentActivityService::new(Arc::new(MemoryRecentActivityStore::default()), session)),
         );
@@ -133,6 +135,7 @@ impl PerpetualTestkit {
             wallets,
             balances,
             preferences,
+            wallet_preferences,
             wallet_id: wallet.id,
         }
     }
