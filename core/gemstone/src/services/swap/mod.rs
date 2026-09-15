@@ -60,7 +60,7 @@ impl GemSwapService {
     ) -> Result<Vec<Quote>, SwapperError> {
         let request = rules::quote_request(&wallet, &from_asset, &to_asset, value, use_max_amount, slippage_bps)?;
         self.swapper.preload_routes(from_asset.id, to_asset.id).await;
-        Ok(rules::sort_quotes(self.swapper.get_quote(&request).await?))
+        self.swapper.get_quote(&request).await
     }
 
     pub async fn suggest_pair(&self, wallet_id: WalletId, pay_asset_id: Option<AssetId>) -> Result<Option<GemSwapPairSuggestion>, GemServiceError> {

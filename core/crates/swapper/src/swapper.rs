@@ -505,4 +505,30 @@ mod tests {
         assert_eq!(quotes[1].to_value, BigUint::from(101u64));
         assert_eq!(quotes[2].to_value, BigUint::from(100u64));
     }
+
+    #[test]
+    fn test_sort_quotes_keeps_equal_outputs_in_discovery_order_and_compares_whole_amounts() {
+        let mut quotes = [
+            Quote::mock_with_provider(SwapperProvider::UniswapV3, "100"),
+            Quote::mock_with_provider(SwapperProvider::UniswapV4, "100"),
+            Quote::mock_with_provider(SwapperProvider::PancakeswapV3, "100"),
+        ];
+
+        GemSwapper::sort_quotes_by_output_amount(&mut quotes);
+
+        assert_eq!(
+            quotes.iter().map(|quote| quote.data.provider.id).collect::<Vec<_>>(),
+            vec![SwapperProvider::UniswapV3, SwapperProvider::UniswapV4, SwapperProvider::PancakeswapV3],
+            "equal outputs keep the order the providers answered in"
+        );
+
+        let mut large = [
+            Quote::mock_with_provider(SwapperProvider::UniswapV3, "9999999999999999999"),
+            Quote::mock_with_provider(SwapperProvider::Jupiter, "10000000000000000000"),
+        ];
+
+        GemSwapper::sort_quotes_by_output_amount(&mut large);
+
+        assert_eq!(large[0].to_value, BigUint::from(10_000_000_000_000_000_000u64));
+    }
 }

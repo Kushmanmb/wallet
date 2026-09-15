@@ -65,11 +65,6 @@ pub fn slippage_check(bps: u32, config: &SwapConfig) -> GemSlippageCheck {
     }
 }
 
-pub fn sort_quotes(mut quotes: Vec<Quote>) -> Vec<Quote> {
-    quotes.sort_by_key(|quote| std::cmp::Reverse(to_value(quote)));
-    quotes
-}
-
 pub fn swap_transfer(wallet: &Wallet, quote: &Quote, data: SwapQuoteData) -> Result<GemSwapTransfer, SwapperError> {
     let to_chain = AssetId::new(&quote.request.to_asset.id).ok_or(SwapperError::NotSupportedAsset)?.chain;
     Ok(GemSwapTransfer {
@@ -173,10 +168,6 @@ fn account_address(wallet: &Wallet, chain: Chain) -> Result<String, SwapperError
         .find(|account| account.chain == chain)
         .map(|account| account.address.clone())
         .ok_or(SwapperError::NotSupportedChain)
-}
-
-fn to_value(quote: &Quote) -> BigUint {
-    quote.to_value.clone()
 }
 
 pub fn most_swapped_receive_asset(pairs: &[GemSwapPair], pay_asset_id: &AssetId) -> Option<AssetId> {
@@ -541,27 +532,6 @@ mod tests {
         assert_eq!(permit.sig_deadline, 1_000 + config.permit2_sig_deadline);
         assert_eq!(permit.details.nonce, 7);
         assert_eq!(permit.spender, "0xspender");
-    }
-
-    #[test]
-    fn test_sort_quotes_prefers_highest_output() {
-        let wallet = wallet(&[Chain::Ethereum, Chain::Solana]);
-        let quote = |to_value: u64| Quote {
-            from_value: BigUint::from(100u64),
-            min_from_value: None,
-            to_value: BigUint::from(to_value),
-            data: swapper::ProviderData {
-                provider: swapper::ProviderType::new(swapper::SwapperProvider::Jupiter),
-                slippage_bps: 50,
-                routes: vec![],
-            },
-            request: quote_request(&wallet, &asset(Chain::Ethereum), &asset(Chain::Solana), BigUint::from(100u32), false, None).unwrap(),
-            eta_in_seconds: None,
-        };
-
-        let sorted = sort_quotes(vec![quote(5), quote(50), quote(7)]);
-
-        assert_eq!(sorted.iter().map(|quote| quote.to_value.to_string()).collect::<Vec<_>>(), vec!["50", "7", "5"]);
     }
 
     fn pair(from: Chain, to: Chain) -> GemSwapPair {
