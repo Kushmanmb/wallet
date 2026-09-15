@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import struct Gemstone.GemPaymentRecipient
+import enum Gemstone.GemTransactionHeaderAction
 import enum Gemstone.GemPerpetualPositionAction
 import Support
 import class Gemstone.GemDeveloperService
@@ -397,7 +398,7 @@ public struct ViewModelFactory: Sendable {
     public func transactionScene(
         transaction: TransactionExtended,
         walletId: WalletId,
-        onHeaderAction: @escaping (TransactionHeaderAction) -> Void,
+        onHeaderAction: @escaping (GemTransactionHeaderAction) -> Void,
         onAddContact: @escaping (AddContactType) -> Void,
     ) -> TransactionSceneViewModel {
         TransactionSceneViewModel(
