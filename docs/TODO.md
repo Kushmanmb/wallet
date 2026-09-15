@@ -70,7 +70,6 @@ Closed on 2026-09-15. Four of the six were the same `try { focusRequester.reques
 
 ### Core hardening
 
-- **X44** **M** `core/crates/gem_hypercore/src/core/hypercore.rs` has 14.
 - **X45** **M** Audit the remaining production `unwrap`/`expect` sites in `core/` and either prove each infallible in a comment-free way (a type change) or return an error.
 
 ### Files that have outgrown one module

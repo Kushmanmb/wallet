@@ -82,7 +82,7 @@ impl Swapper for HyperCoreBridge {
                 let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis() as u64;
 
                 let spot_send = SpotSend::new(amount, HYPERCORE_SYSTEM_ADDRESS.to_string(), timestamp, HYPERCORE_CORE_HYPE_TOKEN_ID.to_string());
-                let typed_data = transfer_to_hyper_evm_typed_data(spot_send);
+                let typed_data = transfer_to_hyper_evm_typed_data(spot_send).map_err(SwapperError::TransactionError)?;
 
                 Ok(SwapperQuoteData::new_contract(
                     HYPERCORE_SYSTEM_ADDRESS.to_string(),
