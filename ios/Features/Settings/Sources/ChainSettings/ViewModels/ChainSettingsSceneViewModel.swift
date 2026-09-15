@@ -43,12 +43,8 @@ public final class ChainSettingsSceneViewModel {
     }
 
     var nodesModels: [ChainNodeViewModel] {
-        nodes.map { node in
-            ChainNodeViewModel(
-                row: service.nodeRow(chain: chain.rawValue, node: node, status: statusStateByNodeUrl[node.url] ?? .loading),
-                formatter: formatter,
-            )
-        }
+        service.nodeRows(chain: chain.rawValue, nodes: nodes, statuses: statusStateByNodeUrl)
+            .map { ChainNodeViewModel(row: $0, formatter: formatter) }
     }
 
     var deleteButtonTitle: String {

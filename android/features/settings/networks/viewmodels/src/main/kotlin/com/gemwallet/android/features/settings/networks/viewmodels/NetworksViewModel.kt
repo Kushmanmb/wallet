@@ -190,9 +190,6 @@ class NetworksViewModel @Inject constructor(
         state.update(transform)
     }
 
-    private fun nodeRow(chain: Chain, node: GemNodeSelection, status: GemNodeStatusState): GemNodeRow =
-        service.nodeRow(chain.string, node, status)
-
     private data class State(
         val chain: Chain? = null,
         val explorers: List<GemExplorerRow> = emptyList(),
@@ -212,9 +209,7 @@ class NetworksViewModel @Inject constructor(
         sections = sections,
         blockExplorers = explorers,
         availableAddNode = availableAddNode,
-        nodeRows = chain?.let { chain ->
-            nodes.map { nodeRow(chain, it, nodeStates[it.url] ?: GemNodeStatusState.Loading) }
-        }.orEmpty(),
+        nodeRows = chain?.let { service.nodeRows(it.string, nodes, nodeStates) }.orEmpty(),
         error = error,
     )
 }

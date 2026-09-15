@@ -108,7 +108,6 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 
 Measure before and after; these are code-backed candidates, not measured regressions.
 
-- **PERF19** **S** Android `NetworksViewModel` calls `service.nodeRow(...)` for every node on every state emission, including the per-node status updates that arrive one at a time.
 
 ## 9. Core decides it, only one app reads it
 

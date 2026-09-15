@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use primitives::Chain;
@@ -45,6 +46,16 @@ impl GemChainSettingsService {
             .map(|name| GemExplorerRow {
                 is_selected: name == selected,
                 name,
+            })
+            .collect()
+    }
+
+    pub fn node_rows(&self, chain: Chain, nodes: Vec<GemNodeSelection>, statuses: HashMap<String, GemNodeStatusState>) -> Vec<GemNodeRow> {
+        nodes
+            .into_iter()
+            .map(|node| {
+                let status = statuses.get(&node.url).cloned().unwrap_or(GemNodeStatusState::Loading);
+                self.node_row(chain, node, status)
             })
             .collect()
     }
@@ -154,6 +165,35 @@ mod tests {
             .collect();
 
         assert_eq!(selected, vec![other]);
+    }
+
+    #[test]
+    fn test_node_rows_pair_each_node_with_its_own_status_and_defaults_the_rest_to_loading() {
+        let service = service();
+        let default_url = rules::region_node(Chain::Ethereum, NodeRegion::Us).url;
+        let selections = rules::node_selections(vec![rules::region_node(Chain::Ethereum, NodeRegion::Us)], &default_url);
+        let added = GemNodeSelection {
+            url: "https://node.example.com".to_string(),
+            host: "node.example.com".to_string(),
+            is_selected: false,
+            gem_node_flag: None,
+        };
+        let nodes = vec![selections[0].clone(), added.clone()];
+        let statuses = HashMap::from([(
+            added.url.clone(),
+            GemNodeStatusState::Result {
+                latest_block_number: 21_000_000,
+                latency: primitives::Latency::from_milliseconds(120),
+            },
+        )]);
+
+        let rows = service.node_rows(Chain::Ethereum, nodes, statuses);
+
+        assert_eq!(rows.len(), 2);
+        assert_eq!(rows[0].subtitle, GemNodeSubtitle::LatestBlock { value: None }, "a node with no status yet is still loading");
+        assert_eq!(rows[1].subtitle, GemNodeSubtitle::LatestBlock { value: Some(21_000_000) });
+        assert!(!rows[0].can_delete);
+        assert!(rows[1].can_delete);
     }
 
     #[test]
