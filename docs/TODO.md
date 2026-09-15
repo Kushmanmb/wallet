@@ -70,8 +70,7 @@ Closed on 2026-09-15. Four of the six were the same `try { focusRequester.reques
 
 ### Deferred notes still in the code
 
-- **X32** **S** `ios/Features/Transactions/Sources/Scenes/TransactionScene.swift` — the button corner radius is marked unresolved.
-- **X33** **S** `ios/Packages/Components/Sources/TextFields/CurrencyTextField.swift` — a fixed height works around a filed Apple bug; re-check whether it still reproduces.
+- **X33** **S** `ios/Packages/Components/Sources/TextFields/CurrencyTextField.swift` pins the field height to work around <https://developer.apple.com/forums/thread/806828>. Remove the `.frame(height:)` and check the amount field on the oldest supported iOS and the newest; if the text no longer jumps, the pin goes.
 - **X35** **S** `ios/Packages/Gemstone/Package.swift` pins Swift 5 language mode until `GemstoneFFI` is Swift 6 clean. Re-check against the current toolchain.
 - **X36** **S** Two dated iOS removals: `GemstoneServices/Sources/Keystore/LocalKeystore.swift` and `Store/Sources/DB.swift` are both marked for 2026. Confirm the install base and delete, or re-date them with the reason.
 - **X38** **M** `core/crates/gem_auth/src/signature.rs` verifies one chain type and answers `false` for the rest. SERVICES.md records this as fail-closed by construction; either widen it or delete the note that says it is temporary.
