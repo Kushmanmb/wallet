@@ -17,7 +17,6 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 - **R36** **M** `Transfer/Sources/ViewModels/RecipientSceneViewModel.swift` (9) against the Android `recipient` screens.
 - **R37** **M** `WalletConnector/.../ViewModels/ConnectionProposalViewModel.swift` (8) against Android `ProposalSceneViewModel`.
 - **R39** **M** `Settings/Sources/ChainSettings/ViewModels/AddNodeSceneViewModel.swift` (6) against Android `AddNodeViewModel`.
-- **R40** **S** `Perpetuals/Sources/ViewModels/CandleTooltipViewModel.swift` (6) against Android `CandlestickTooltip.kt`.
 - **R41** **M** `Contacts/Sources/ViewModels/ManageContactViewModel.swift` (6) against Android `ManageContactViewModel`.
 - **R42** **M** `Assets/Sources/ViewModels/AddAssetSceneViewModel.swift` (6) against Android `AddAssetViewModel`.
 - **R43** **S** `Transfer/Sources/ViewModels/ReceiveViewModel.swift` (5) — the memo warning already crosses; the warning sentence is still joined twice.

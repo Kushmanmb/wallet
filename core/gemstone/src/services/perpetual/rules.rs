@@ -11,10 +11,10 @@ use primitives::{
 };
 
 use super::model::{
-    GemAutocloseSummary, GemCandleTooltip, GemMarketsRefreshTrigger, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput,
-    GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput,
-    GemPerpetualButton, GemPerpetualInfoRow, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection,
-    GemPerpetualTransferData,
+    GemAutocloseSummary, GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind,
+    GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualInfoRow, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSections,
+    GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow,
+    GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigInt;
@@ -526,13 +526,24 @@ pub fn market_sections(counts: &GemPerpetualMarketCounts, is_searching: bool, is
 
 pub fn candle_tooltip(candle: &ChartCandleStick) -> GemCandleTooltip {
     GemCandleTooltip {
-        open: GemFormattedNumber::adaptive(candle.open, None),
-        high: GemFormattedNumber::adaptive(candle.high, None),
-        low: GemFormattedNumber::adaptive(candle.low, None),
-        close: GemFormattedNumber::adaptive(candle.close, None),
-        change: GemFormattedNumber::percentage(PriceChangeCalculator::percentage(candle.open, candle.close), GemPercentageStyle::Signed),
-        volume: GemFormattedNumber::usd_abbreviated(candle.volume * candle.close),
+        prices: vec![
+            tooltip_cell(GemCandleTooltipRow::Open, GemFormattedNumber::adaptive(candle.open, None)),
+            tooltip_cell(GemCandleTooltipRow::High, GemFormattedNumber::adaptive(candle.high, None)),
+            tooltip_cell(GemCandleTooltipRow::Low, GemFormattedNumber::adaptive(candle.low, None)),
+            tooltip_cell(GemCandleTooltipRow::Close, GemFormattedNumber::adaptive(candle.close, None)),
+        ],
+        summary: vec![
+            tooltip_cell(
+                GemCandleTooltipRow::Change,
+                GemFormattedNumber::percentage(PriceChangeCalculator::percentage(candle.open, candle.close), GemPercentageStyle::Signed),
+            ),
+            tooltip_cell(GemCandleTooltipRow::Volume, GemFormattedNumber::usd_abbreviated(candle.volume * candle.close)),
+        ],
     }
+}
+
+fn tooltip_cell(row: GemCandleTooltipRow, value: GemFormattedNumber) -> GemCandleTooltipCell {
+    GemCandleTooltipCell { row, value }
 }
 
 pub fn market_row(perpetual: &Perpetual) -> GemPerpetualMarketRow {
@@ -569,7 +580,10 @@ pub fn position_detail_rows(position: &PerpetualPosition) -> Vec<GemPerpetualPos
         Some(GemPerpetualPositionDetailRow::Autoclose),
         Some(GemPerpetualPositionDetailRow::Size),
         Some(GemPerpetualPositionDetailRow::EntryPrice),
-        position.liquidation_price.filter(|value| *value > 0.0).map(|_| GemPerpetualPositionDetailRow::LiquidationPrice),
+        position
+            .liquidation_price
+            .filter(|value| *value > 0.0)
+            .map(|_| GemPerpetualPositionDetailRow::LiquidationPrice),
         Some(GemPerpetualPositionDetailRow::Margin),
         Some(GemPerpetualPositionDetailRow::FundingPayments),
     ]
@@ -864,9 +878,19 @@ mod tests {
         };
         let tooltip = candle_tooltip(&candle);
 
-        assert_eq!(tooltip.volume, GemFormattedNumber::usd_abbreviated(220.0));
-        assert_eq!(tooltip.change, GemFormattedNumber::percentage(10.0, GemPercentageStyle::Signed));
-        assert_eq!(tooltip.high, GemFormattedNumber::adaptive(120.0, None));
+        assert_eq!(
+            tooltip.prices.iter().map(|cell| cell.row).collect::<Vec<_>>(),
+            vec![
+                GemCandleTooltipRow::Open,
+                GemCandleTooltipRow::High,
+                GemCandleTooltipRow::Low,
+                GemCandleTooltipRow::Close
+            ]
+        );
+        assert_eq!(tooltip.summary.iter().map(|cell| cell.row).collect::<Vec<_>>(), vec![GemCandleTooltipRow::Change, GemCandleTooltipRow::Volume]);
+        assert_eq!(tooltip.prices[1].value, GemFormattedNumber::adaptive(120.0, None));
+        assert_eq!(tooltip.summary[0].value, GemFormattedNumber::percentage(10.0, GemPercentageStyle::Signed));
+        assert_eq!(tooltip.summary[1].value, GemFormattedNumber::usd_abbreviated(220.0));
     }
 
     #[test]

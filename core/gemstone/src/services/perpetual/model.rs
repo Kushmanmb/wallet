@@ -142,14 +142,26 @@ pub struct GemPerpetualChartLayout {
     pub current_price: Option<GemFormattedNumber>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemCandleTooltipRow {
+    Open,
+    High,
+    Low,
+    Close,
+    Change,
+    Volume,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemCandleTooltipCell {
+    pub row: GemCandleTooltipRow,
+    pub value: GemFormattedNumber,
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemCandleTooltip {
-    pub open: GemFormattedNumber,
-    pub high: GemFormattedNumber,
-    pub low: GemFormattedNumber,
-    pub close: GemFormattedNumber,
-    pub change: GemFormattedNumber,
-    pub volume: GemFormattedNumber,
+    pub prices: Vec<GemCandleTooltipCell>,
+    pub summary: Vec<GemCandleTooltipCell>,
 }
 
 #[uniffi::export]

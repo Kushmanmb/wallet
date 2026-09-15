@@ -38,6 +38,7 @@ import uniffi.gemstone.LinkType
 import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemVerificationLevel
+import uniffi.gemstone.GemCandleTooltipRow
 import uniffi.gemstone.GemWalletSecretKind
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
@@ -370,4 +371,14 @@ fun GemHeaderButtonKind.stringRes(): Int = when (this) {
     GemHeaderButtonKind.DEPOSIT -> R.string.wallet_deposit
     GemHeaderButtonKind.WITHDRAW -> R.string.wallet_withdraw
     GemHeaderButtonKind.MORE -> R.string.wallet_more
+}
+
+@StringRes
+fun GemCandleTooltipRow.stringRes(): Int = when (this) {
+    GemCandleTooltipRow.OPEN -> R.string.charts_price_open
+    GemCandleTooltipRow.HIGH -> R.string.charts_price_high
+    GemCandleTooltipRow.LOW -> R.string.charts_price_low
+    GemCandleTooltipRow.CLOSE -> R.string.charts_price_close
+    GemCandleTooltipRow.CHANGE -> R.string.charts_price_change
+    GemCandleTooltipRow.VOLUME -> R.string.perpetual_volume
 }

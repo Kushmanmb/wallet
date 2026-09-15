@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemCandleTooltipRow
 import enum Gemstone.GemPerpetualButton
 import enum Gemstone.GemPerpetualChartLineKind
 import enum Gemstone.GemPerpetualInfoRow
@@ -70,6 +71,19 @@ extension GemPerpetualChartLineKind {
         case .stopLoss: Localized.Perpetual.stopLoss
         case .entry: Localized.Charts.entry
         case .liquidation: Localized.Perpetual.liquidation
+        }
+    }
+}
+
+extension GemCandleTooltipRow {
+    var title: String {
+        switch self {
+        case .open: Localized.Charts.Price.open
+        case .high: Localized.Charts.Price.high
+        case .low: Localized.Charts.Price.low
+        case .close: Localized.Charts.Price.close
+        case .change: Localized.Charts.Price.change
+        case .volume: Localized.Perpetual.volume
         }
     }
 }
