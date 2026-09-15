@@ -256,5 +256,5 @@ Checked and kept: `KeystoreAuthentication` and `LockPeriod` are both written to 
 
 ### Core hardening (second pass)
 
-- **X105** **S** `core/gemstone/src/services/transaction_state/tracker.rs` — 5 `unwrap`/`expect` outside tests on the transaction state path.
+
 - **X106** **S** `core/gemstone/src/gateway/chain_factory.rs` (3), `device.rs` (2), `signer/chain.rs` (1), `block_explorer/explorer.rs` (1).
