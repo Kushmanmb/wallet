@@ -1,5 +1,7 @@
 package com.gemwallet.android.ui.components
 
+import com.gemwallet.android.ui.localization.infoDescriptionRes
+import com.gemwallet.android.ui.localization.statusLabelRes
 import com.gemwallet.android.ui.components.screen.SheetExpansion
 import androidx.annotation.StringRes
 import androidx.compose.foundation.rememberScrollState

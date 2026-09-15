@@ -40,7 +40,6 @@ Per-variant labels: a primitives enum both apps map to a string themselves is a 
 
 - **V13** **S** Transaction row subtitle kind — 6 cases, `TransactionViewModel` against `TransactionDataAggregateExt.kt`.
 - **V14** **S** Transaction participant role — 6 cases, `TransactionParticipantViewModel` against `DestinationPropertyItem.kt`.
-- **V15** **S** Transaction state title — 6 cases, `TransactionStateViewModel` against `TransactionStateExt.kt`. Core answers the tone already; the title is still each app's.
 - **V16** **S** Price alert kind — 5 cases, `PriceAlertItemViewModel` against `PriceAlertListItem.kt`. Lands with **F12**.
 - **V17** **S** Perpetual position action — 5 cases, `ToastMessage+PrimitivesComponents` against `PerpetualConfirmDetailsComponents.kt`.
 - **V18** **S** Swap button action — 5 cases, `SwapButtonViewModel` against `SwapUiState.kt`.

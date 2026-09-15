@@ -1,6 +1,8 @@
 package com.gemwallet.android.ui.components
 
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.localization.infoDescriptionRes
+import com.gemwallet.android.ui.localization.statusLabelRes
 import com.wallet.core.primitives.TransactionState
 import org.junit.Assert.assertEquals
 import org.junit.Test

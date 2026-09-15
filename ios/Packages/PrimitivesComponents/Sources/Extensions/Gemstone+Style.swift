@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import enum Gemstone.GemHeaderButtonKind
+import enum Gemstone.GemTransactionStateTone
 import enum Gemstone.LinkType
 import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemValueTone
@@ -65,6 +66,24 @@ extension LinkType {
         case .instagram: Images.Social.instagram
         case .magicEden: Images.Social.magiceden
         case .tikTok: Images.Social.tiktok
+        }
+    }
+}
+
+extension GemTransactionStateTone {
+    public var image: Image {
+        switch self {
+        case .pending: Images.Transaction.State.pending
+        case .success: Images.Transaction.State.success
+        case .error, .refunded: Images.Transaction.State.error
+        }
+    }
+
+    public var color: Color {
+        switch self {
+        case .success: Colors.green
+        case .pending, .refunded: Colors.orange
+        case .error: Colors.red
         }
     }
 }

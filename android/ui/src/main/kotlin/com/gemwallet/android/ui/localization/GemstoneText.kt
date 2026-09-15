@@ -12,6 +12,7 @@ import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.PerpetualDirection
 import com.wallet.core.primitives.QRScanType
 import com.wallet.core.primitives.Resource
+import com.wallet.core.primitives.TransactionState
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.GemAddNodeFailure
 import uniffi.gemstone.GemDelegationStatus
@@ -21,6 +22,7 @@ import uniffi.gemstone.GemSimulationWarningKind
 import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.GemTransactionFilter
 import uniffi.gemstone.LinkType
+import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemTransactionTitle
 import uniffi.gemstone.GemWalletSubtitle
 import uniffi.gemstone.SimulationPayloadFieldKind
@@ -191,4 +193,22 @@ fun SimulationPayloadFieldKind.stringRes(): Int? = when (this) {
     SimulationPayloadFieldKind.VALUE -> R.string.perpetual_value
     SimulationPayloadFieldKind.EXPIRATION -> R.string.common_expiration
     SimulationPayloadFieldKind.CUSTOM -> null
+}
+
+@StringRes
+fun TransactionState.statusLabelRes(): Int = when (this) {
+    TransactionState.Pending,
+    TransactionState.InTransit -> R.string.transaction_status_pending
+    TransactionState.Confirmed -> R.string.transaction_status_confirmed
+    TransactionState.Failed -> R.string.transaction_status_failed
+    TransactionState.Reverted -> R.string.transaction_status_reverted
+    TransactionState.Refunded -> R.string.transaction_status_refunded
+}
+
+@StringRes
+fun GemTransactionStateTone.infoDescriptionRes(): Int = when (this) {
+    GemTransactionStateTone.PENDING -> R.string.info_transaction_pending_description
+    GemTransactionStateTone.SUCCESS -> R.string.info_transaction_success_description
+    GemTransactionStateTone.ERROR,
+    GemTransactionStateTone.REFUNDED -> R.string.info_transaction_error_description
 }

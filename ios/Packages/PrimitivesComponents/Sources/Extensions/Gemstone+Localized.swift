@@ -12,6 +12,7 @@ import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemPriceAlertText
 import enum Gemstone.GemSimulationWarningKind
 import enum Gemstone.SimulationPayloadFieldKind
+import enum Gemstone.GemTransactionStateTone
 import enum Gemstone.GemTransactionTitle
 import enum Gemstone.GemWalletSubtitle
 import GemstonePrimitives
@@ -233,6 +234,28 @@ extension SimulationPayloadFieldKind {
         case .value: Localized.Perpetual.value
         case .expiration: Localized.Common.expiration
         case .custom: nil
+        }
+    }
+}
+
+extension TransactionState {
+    public var statusTitle: String {
+        switch self {
+        case .confirmed: Localized.Transaction.Status.confirmed
+        case .pending, .inTransit: Localized.Transaction.Status.pending
+        case .failed: Localized.Transaction.Status.failed
+        case .reverted: Localized.Transaction.Status.reverted
+        case .refunded: Localized.Transaction.Status.refunded
+        }
+    }
+}
+
+extension GemTransactionStateTone {
+    public var infoDescription: String {
+        switch self {
+        case .pending: Localized.Info.Transaction.Pending.description
+        case .success: Localized.Info.Transaction.Success.description
+        case .error, .refunded: Localized.Info.Transaction.Error.description
         }
     }
 }
