@@ -14,7 +14,7 @@ import com.gemwallet.android.domains.transaction.aggregates.TransactionDetailsAg
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.components.color
-import com.gemwallet.android.ui.components.titleRes
+import com.gemwallet.android.ui.localization.titleRes
 import com.gemwallet.android.model.CurrencyFormatter
 import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.GemTransactionRowSubtitle

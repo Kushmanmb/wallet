@@ -27,6 +27,9 @@ import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.GemTransactionFilter
 import uniffi.gemstone.LinkType
 import uniffi.gemstone.GemTransactionStateTone
+import uniffi.gemstone.GemVerificationLevel
+import uniffi.gemstone.WalletConnectionVerificationStatus
+import uniffi.gemstone.verificationLevel
 import uniffi.gemstone.GemTransactionTitle
 import uniffi.gemstone.GemWalletSubtitle
 import uniffi.gemstone.SimulationPayloadFieldKind
@@ -233,3 +236,13 @@ fun GemApprovalValue.string(symbol: String, formatter: ValueFormatter, asset: As
     is GemApprovalValue.Exact -> formatter.string(value, asset)
     GemApprovalValue.Unlimited -> stringResource(R.string.simulation_header_unlimited_asset, symbol)
 }
+
+@StringRes
+fun GemVerificationLevel.stringRes(): Int = when (this) {
+    GemVerificationLevel.VERIFIED -> R.string.asset_verification_verified
+    GemVerificationLevel.UNVERIFIED -> R.string.asset_verification_unverified
+    GemVerificationLevel.SUSPICIOUS -> R.string.asset_verification_suspicious
+}
+
+@StringRes
+fun WalletConnectionVerificationStatus.titleRes(): Int = verificationLevel(this).stringRes()
