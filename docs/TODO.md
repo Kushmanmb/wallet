@@ -70,7 +70,7 @@ Closed on 2026-09-15. Four of the six were the same `try { focusRequester.reques
 
 ### Core hardening
 
-- **X45** **M** Audit the remaining production `unwrap`/`expect` sites in `core/` and either prove each infallible in a comment-free way (a type change) or return an error.
+- **X45** **M** 255 production `unwrap`/`expect` sites remain in `core/`, counted on 2026-09-15 with test modules, `testkit.rs`, benches and `bin/` excluded. The three explorer registries and the thirteen Hyperliquid payload builders are done; the rest are led by `gem_stellar/provider/transactions.rs` (8), `primitives/transaction.rs` (7), `gem_bitcoin/provider/transactions.rs` (7), `swapper/thorchain/quote_data_mapper.rs` (6) and `gem_solana/provider/transactions.rs` (6). Take one file at a time and either make the value infallible by construction — the way the explorers now build their metadata directly instead of looking a key back up — or return the error.
 
 ### Files that have outgrown one module
 
