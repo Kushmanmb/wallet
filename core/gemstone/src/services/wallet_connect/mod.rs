@@ -13,8 +13,8 @@ use std::sync::{Arc, Mutex};
 use chrono::{DateTime, Utc};
 use gem_wallet_connect::validate_sign_message_account;
 use primitives::{
-    Account, AddressName, ApplicationMetadata, Asset, BlockExplorerLink, Chain, SimulationResult, Wallet, WalletConnection, WalletConnectionSession,
-    WalletConnectionSessionProposal, WalletConnectionVerificationStatus, WalletId,
+    Account, ApplicationMetadata, Chain, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionVerificationStatus,
+    WalletId,
 };
 
 use crate::application::{GemApplicationMetadataService, GemConnectionRow};
@@ -76,18 +76,6 @@ impl GemWalletConnectService {
 
     pub async fn sign_message(&self, wallet_id: WalletId, message: SignMessage) -> Result<String, GemServiceError> {
         self.sign_message.sign(wallet_id, message).await
-    }
-
-    pub fn message_preview(&self, message: SignMessage, simulation: SimulationResult, assets: Vec<Asset>) -> GemSignMessagePreview {
-        self.sign_message.preview(message, simulation, assets)
-    }
-
-    pub async fn message_address_names(&self, chain: Chain, preview: GemSignMessagePreview) -> Vec<AddressName> {
-        self.sign_message.address_names(chain, preview).await
-    }
-
-    pub fn address_url(&self, chain: Chain, address: String) -> BlockExplorerLink {
-        self.sign_message.address_url(chain, address)
     }
 
     pub fn should_process_message(&self, message_id: String) -> bool {

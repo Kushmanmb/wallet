@@ -57,4 +57,7 @@ object AddressesModule {
         passwordStore: PasswordStore,
     ): GemSignMessageService = GemSignMessageService(names, explorer, keystore, GemstoneKeystorePassword(passwordStore))
 
+    @Provides
+    fun provideGemSignMessageServiceInterface(service: GemSignMessageService): GemSignMessageServiceInterface = service
+
 }
