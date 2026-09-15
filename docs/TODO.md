@@ -37,15 +37,11 @@ Rejected: `import_wallet/views/ImportScreen.kt` switches over a `Throwable` and 
 
 ## 4. Ownership
 
+O15–O21 are closed with no change. `LockSceneViewModel` builds `GemSecurityService` only inside its `static var preview`, which is SwiftUI preview code, not wiring. The 42 "types named by neither app" are the same mistake as § 10: a type that reaches an app as a nested field or an enum payload is never spelled out in Swift or Kotlin, so naming is the wrong test. Every one of the 42 was checked — `GemAmountStakeType` is a field of `GemAmountType`, `GemCollectibleAttribute` is a payload of `GemCollectibleSection`, `GemEIP712Message` is built by the message signer — and none is unreachable. A genuinely dead Core type is still worth finding; a name search does not find it.
+
+
 - **O13** **S** `Settings/Sources/Settings/ViewModels/PreferencesViewModel.swift` holds both `GemPreferencesServiceProtocol` and `GemSettingsServiceProtocol`. [§ 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android) allows one: either the settings service answers the perpetual writes, or the preferences service answers the rows.
 - **O14** **M** `Onboarding/Sources/ViewModels/ImportWalletViewModel.swift` holds three — wallet, name and chain. The name service is the documented shared-component dependency; decide whether the chain service is the dependency-free one it may build itself.
-- **O15** **S** `Features/LockManager/Sources/ViewModels/LockSceneViewModel.swift` constructs `GemSecurityService` at the call site, against [§ 8](ARCHITECTURE.md#8-services-are-injected-never-constructed-at-a-call-site).
-- **O16** **S** Core types named by neither app — perpetual: `GemPerpetualCloseInput`, `GemPerpetualOrderAction`, `GemPerpetualOrderInput`, `GemPerpetualRefreshStep`, `GemPerpetualSocketUpdate`. Confirm each is not a nested field before removing it.
-- **O17** **S** Same, EIP-712: `GemEIP712Message`, `GemEIP712Section`, `GemEIP712Value`, `GemEIP712ValueType`.
-- **O18** **S** Same, amount: `GemAmountEarnType`, `GemAmountMaxEntry`, `GemAmountStakeType`.
-- **O19** **S** Same, chart and portfolio: `GemChartCurrent`, `GemChartViewState`, `GemPortfolioValues`.
-- **O20** **M** Same, transaction and balance: `GemTransactionData`, `GemTransactionLoadInput`, `GemTransactionPreloadInput`, `GemTransactionStateResult`, `GemTransferOutput`, `GemBalanceUpdate`, `GemBalanceUpdateType`.
-- **O21** **M** Same, the remaining 17: `GemAddAssetViewState`, `GemAppStartStep`, `GemAssetRefreshStep`, `GemAssetSectionIds`, `GemAutocloseViewState`, `GemCollectibleAttribute`, `GemContactRow`, `GemDeviceStreamRequest`, `GemDiscoveryStep`, `GemFiatTransactionStatus`, `GemPercentageFormat`, `GemPostProcessingFailure`, `GemPostProcessingStep`, `GemSelectRowAction`, `GemSimulationChange`, `GemStoredSecretMigration`, `GemSupportChatGroup`.
 
 ## 5. Screens that may want a session
 
