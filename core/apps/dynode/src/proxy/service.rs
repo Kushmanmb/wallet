@@ -4,9 +4,11 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use gem_tracing::{DurationMs, info_with_fields};
+use primitives::{Chain, ValueAccess};
 use reqwest::Client;
 use reqwest::StatusCode;
 use reqwest::header::{CONTENT_TYPE, HeaderMap, HeaderName, HeaderValue};
+use serde_json::Value;
 use settings_chain::BroadcastProviders;
 
 use crate::BoxError;
@@ -154,9 +156,8 @@ impl ProxyRequestService {
             latency = DurationMs(request.elapsed()),
         );
 
-        if status == StatusCode::OK.as_u16()
-            && !body.is_empty()
-            && let (Some(ttl), Some(key)) = (cache_ttl, cache_key)
+        if let (Some(ttl), Some(key)) = (cache_ttl, cache_key)
+            && cacheable_response(chain, &request.path, status, &body)
         {
             let cache = self.cache.clone();
             let content_type = response_headers.get(CONTENT_TYPE).and_then(|value| value.to_str().ok()).unwrap_or(JSON_CONTENT_TYPE);
@@ -210,6 +211,16 @@ impl ProxyRequestService {
     }
 }
 
+fn cacheable_response(chain: Chain, path: &str, status: u16, body: &[u8]) -> bool {
+    if status != StatusCode::OK.as_u16() || body.is_empty() {
+        return false;
+    }
+    if chain == Chain::Ton && path == "/api/v3/runGetMethod" {
+        return serde_json::from_slice::<Value>(body).is_ok_and(|response| response.get_i64("exit_code") == Ok(0));
+    }
+    true
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::Arc;
@@ -235,6 +246,22 @@ mod tests {
             DynodeBroadcastWebhookClient::disabled(),
             Arc::new(BroadcastProviders::from_chains([Chain::Ethereum])),
         )
+    }
+
+    #[test]
+    fn test_cacheable_ton_get_method_requires_success() {
+        for (status, body, expected) in [
+            (200, r#"{"exit_code":0,"stack":[{"type":"cell","value":"result"}]}"#, true),
+            (200, r#"{"exit_code":-13,"stack":[]}"#, false),
+            (200, r#"{"exit_code":"0","stack":[]}"#, false),
+            (200, r#"{"error":"upstream error"}"#, false),
+            (200, "invalid JSON", false),
+            (200, "", false),
+            (429, r#"{"exit_code":0,"stack":[]}"#, false),
+        ] {
+            assert_eq!(cacheable_response(Chain::Ton, "/api/v3/runGetMethod", status, body.as_bytes()), expected);
+        }
+        assert!(cacheable_response(Chain::Tron, "/wallet/getchainparameters", 200, b"{}"));
     }
 
     #[test]
