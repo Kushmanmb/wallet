@@ -169,16 +169,7 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 
 ## 10. Exports no app calls at all
 
-151 exported functions have no caller in either app. Most are trait methods the apps implement rather than call, or Core-internal. These are the ones whose names read like a decision an app should be reading.
-
-- **O22** **S** `confirm/rules.rs` `balance_change_sign`, `build_metadata`, `is_insufficient_network_fee`, `selectable_fee_assets`, `preload_simulation`.
-- **O23** **S** `amount/rules.rs` `amount_title`, `stake_amount_type`, `transfer_amount_type`, `transfer_display_asset`, `transfer_prefilled_amount`, `plain_number`, `value_from_input`, `sanitize_number_input`.
-- **O24** **S** `stake/rules.rs` `apply_validator_state`, `earn_validators`, `merge_validators`, `missing_validators`, `stale_delegation_ids`, `stale_validator_ids`, `validator_address_names`, `shows_stake_balance`.
-- **O25** **S** `price_alert/rules.rs` `displayed_price_alert_ids`, `price_alert_row`, `price_alert_toggle`, `reconcile`.
-- **O26** **S** `simulation.rs` `payload_fields`, `shows_header`, `warning_rows`.
-- **O27** **S** `explorer/mod.rs` — seven getters (`get_address_url`, `get_token_url`, `get_nft_url`, `get_validator_url`, `get_transaction_link`, `get_explorer_name`, `get_explorers`) with no app caller.
-- **O28** **M** `preferences/mod.rs` and `wallet_preferences/mod.rs` — roughly thirty paired getters/setters with no app caller. Decide per pair whether the app should be reading it or the pair should go.
-- **O29** **S** `node/mod.rs` `sorted_nodes` and `node_url`, `node/settings.rs` `can_delete_node`.
+Closed on 2026-09-15 with no change. The sweep counted **app** callers, which is the wrong test for a `rules.rs` function: rules are called by the service that owns them, and the app calls the service. Every function listed here has Core callers — `sanitize_number_input` has fifteen, `node_url` twenty-three, `price_alert_toggle` is read by the asset row, `shows_header` by the confirm screen — and the explorer getters are used by nine other services. A Core export with no caller anywhere is still worth finding; counting app callers alone does not find it.
 
 ## 11. Missing tests
 
