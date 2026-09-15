@@ -38,7 +38,6 @@ Rejected: a screen's chrome — its sheet title and its cancel, clear and done b
 
 Per-variant labels: a primitives enum both apps map to a string themselves is a decision written twice. Both languages force a `switch`/`when` over a Core enum to be exhaustive, so these sets cannot silently drift — every one checked below maps the same variants to the same meaning. That makes the V series maintenance cost and a place for drift to start, not a live bug; the exception is a catch-all branch, which **X20** covers. The migrated shape is a Core text key each app resolves once in its own `Gemstone+Localized.swift` / `GemstoneText.kt` — `GemTransactionTitle`, `GemBannerTitle` and `GemWalletSubtitle` already work that way. These do not:
 
-- **V4** **S** `ChartPeriod` — 12 cases across [iOS](../ios/Packages/PrimitivesComponents/Sources/Extensions/ChartPeriod+PrimitivesComponents.swift) and Android `PeriodsPanel`.
 - **V5** **S** `LinkType` — 14 cases, checked case by case: both apps map the same set to the same labels, so this is duplication with no drift. [iOS `AssetLinkViewModel`](../ios/Packages/PrimitivesComponents/Sources/ViewModels/AssetLinkViewModel.swift), Android `SocialLink`.
 - **V7** **S** `PerpetualMarginType` — cross vs isolated, four cases.
 - **V8** **S** `Resource` — Tron bandwidth and energy, four cases.

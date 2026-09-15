@@ -8,6 +8,7 @@ import com.gemwallet.android.ext.asset
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.R
+import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.PerpetualDirection
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.GemAddNodeFailure
@@ -129,4 +130,14 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     is GemLocalizedText.WalletDefaultName -> context.getString(R.string.wallet_default_name, index)
     is GemLocalizedText.WalletDefaultNameChain ->
         context.getString(R.string.wallet_default_name_chain, chain.requireChain().asset().name, index)
+}
+
+@StringRes
+fun ChartPeriod.stringRes(): Int = when (this) {
+    ChartPeriod.Hour -> R.string.charts_hour
+    ChartPeriod.Day -> R.string.charts_day
+    ChartPeriod.Week -> R.string.charts_week
+    ChartPeriod.Month -> R.string.charts_month
+    ChartPeriod.Year -> R.string.charts_year
+    ChartPeriod.All -> R.string.charts_all
 }
