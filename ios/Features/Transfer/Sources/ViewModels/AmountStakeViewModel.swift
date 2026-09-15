@@ -52,15 +52,7 @@ public final class AmountStakeViewModel: AmountDataProvidable {
     }
 
     var title: String {
-        switch action {
-        case .stake: Localized.Transfer.Stake.title
-        case .unstake: Localized.Transfer.Unstake.title
-        case .redelegate: Localized.Transfer.Redelegate.title
-        case .withdraw: Localized.Transfer.Withdraw.title
-        case .rewards: Localized.Transfer.ClaimRewards.title
-        case .freeze: Localized.Transfer.Freeze.title
-        case .unfreeze: Localized.Transfer.Unfreeze.title
-        }
+        action.title
     }
 
     var gemAmountType: GemAmountType {
