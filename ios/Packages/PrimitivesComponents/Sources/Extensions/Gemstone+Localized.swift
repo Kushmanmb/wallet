@@ -354,3 +354,21 @@ extension GemTransactionRowSubtitle {
         }
     }
 }
+
+extension VerificationStatus {
+    public var statusTitle: String {
+        switch self {
+        case .verified: ""
+        case .unverified: Localized.Asset.Verification.unverified
+        case .suspicious: Localized.Asset.Verification.suspicious
+        }
+    }
+
+    public var statusDescription: String {
+        switch self {
+        case .verified: ""
+        case .unverified: Localized.Info.AssetStatus.Unverified.description
+        case .suspicious: Localized.Info.AssetStatus.Suspicious.description
+        }
+    }
+}

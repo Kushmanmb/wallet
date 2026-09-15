@@ -6,6 +6,7 @@ import enum Gemstone.LinkType
 import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemValueTone
 import enum Gemstone.PriceAlertDirection
+import Components
 import Primitives
 import Style
 import SwiftUI
@@ -94,6 +95,24 @@ extension Primitives.PerpetualDirection {
         switch self {
         case .long: Colors.green
         case .short: Colors.red
+        }
+    }
+}
+
+extension VerificationStatus {
+    public var statusStyle: TextStyle {
+        switch self {
+        case .verified: .calloutSecondary
+        case .unverified: TextStyle(font: .callout, color: Colors.orange)
+        case .suspicious: TextStyle(font: .callout, color: Colors.red)
+        }
+    }
+
+    public var statusAssetImage: AssetImage {
+        switch self {
+        case .verified: AssetImage()
+        case .unverified: AssetImage(placeholder: Images.TokenStatus.warning)
+        case .suspicious: AssetImage(placeholder: Images.TokenStatus.risk)
         }
     }
 }
