@@ -70,7 +70,9 @@ impl GemPerpetualStore for MemoryPerpetualStore {
 
 pub struct PerpetualTestkit {
     pub service: GemPerpetualService,
+    pub provider: Arc<TestAlienProvider>,
     pub store: Arc<MemoryPerpetualStore>,
+    pub wallets: Arc<MemoryWalletStore>,
     pub balances: Arc<RecordingBalanceStore>,
     pub preferences: Arc<GemPreferencesService>,
     pub wallet_id: WalletId,
@@ -96,7 +98,7 @@ impl PerpetualTestkit {
         let price = Arc::new(GemPriceService::new(Arc::new(MemoryPriceStore::default())));
         let asset_store = Arc::new(MemoryAssetStore::default());
         let assets = Arc::new(GemAssetsService::new(
-            Arc::new(GemApiClient::new(provider)),
+            Arc::new(GemApiClient::new(provider.clone())),
             gateway.clone(),
             asset_store.clone(),
             price.clone(),
@@ -106,7 +108,7 @@ impl PerpetualTestkit {
         let balances = Arc::new(RecordingBalanceStore::default());
         let balance = Arc::new(GemBalanceService::new(
             gateway.clone(),
-            wallets,
+            wallets.clone(),
             asset_store.clone(),
             balances.clone(),
             assets,
@@ -126,7 +128,9 @@ impl PerpetualTestkit {
         );
         Self {
             service,
+            provider,
             store,
+            wallets,
             balances,
             preferences,
             wallet_id: wallet.id,

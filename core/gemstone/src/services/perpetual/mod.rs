@@ -266,6 +266,7 @@ fn provider(chain: Chain) -> Result<PerpetualProvider, GemServiceError> {
 #[cfg(test)]
 mod tests {
     use futures::executor::block_on;
+    use primitives::{Account, WalletType};
 
     use super::testkit::PerpetualTestkit;
     use super::*;
@@ -355,5 +356,93 @@ mod tests {
         );
 
         assert!(matches!(error, Err(GemServiceError::Core { .. })), "{error:?}");
+    }
+
+    #[test]
+    fn test_disabled_perpetuals_clear_the_markets_without_asking_the_gateway() {
+        block_on(async {
+            let testkit = PerpetualTestkit::new();
+            testkit.preferences.set_perpetual_enabled(false).unwrap();
+
+            assert!(!testkit.service.sync_enablement(None, GemMarketsRefreshTrigger::UserRequested).await.unwrap());
+
+            assert_eq!(*testkit.store.deleted.lock().unwrap(), 1);
+            assert!(testkit.provider.requested_paths().is_empty());
+        })
+    }
+
+    #[test]
+    fn test_a_scheduled_refresh_skips_markets_that_were_just_synced() {
+        block_on(async {
+            let testkit = PerpetualTestkit::new();
+            testkit.preferences.set_perpetual_markets_updated_at(Some(Utc::now().timestamp())).unwrap();
+
+            assert!(!testkit.service.sync_markets_if_needed(Chain::HyperCore, GemMarketsRefreshTrigger::Scheduled).await.unwrap());
+
+            assert!(testkit.provider.requested_paths().is_empty());
+        })
+    }
+
+    #[test]
+    fn test_a_user_requested_refresh_always_asks_for_the_markets() {
+        block_on(async {
+            let testkit = PerpetualTestkit::new();
+            testkit.preferences.set_perpetual_markets_updated_at(Some(Utc::now().timestamp())).unwrap();
+
+            assert!(
+                testkit
+                    .service
+                    .sync_markets_if_needed(Chain::HyperCore, GemMarketsRefreshTrigger::UserRequested)
+                    .await
+                    .is_err()
+            );
+
+            assert!(!testkit.provider.requested_paths().is_empty());
+        })
+    }
+
+    #[test]
+    fn test_refresh_reports_both_steps_when_both_fail() {
+        block_on(async {
+            let testkit = PerpetualTestkit::new();
+            let wallet = Wallet {
+                accounts: Account::mock_chains(&[Chain::HyperCore], "0xc64c"),
+                ..Wallet::mock()
+            };
+            *testkit.wallets.wallets.lock().unwrap() = vec![wallet.clone()];
+            testkit.service.session.set_current_wallet_id(Some(wallet.id.clone())).unwrap();
+
+            let failures = testkit.service.refresh(GemMarketsRefreshTrigger::UserRequested).await;
+
+            let steps: Vec<GemPerpetualRefreshStep> = failures.iter().map(|failure| failure.step).collect();
+            assert!(steps.contains(&GemPerpetualRefreshStep::Markets), "{failures:?}");
+            assert!(steps.contains(&GemPerpetualRefreshStep::Positions), "{failures:?}");
+        })
+    }
+
+    #[test]
+    fn test_a_wallet_without_a_hypercore_account_syncs_no_positions() {
+        block_on(async {
+            let testkit = PerpetualTestkit::new();
+
+            testkit.service.sync_current_positions().await.unwrap();
+
+            assert!(testkit.provider.requested_paths().is_empty());
+            assert!(testkit.store.position_writes.lock().unwrap().is_empty());
+        })
+    }
+
+    #[test]
+    fn test_perpetuals_connect_only_for_a_wallet_that_can_hold_them() {
+        let testkit = PerpetualTestkit::new();
+        testkit.preferences.set_perpetual_enabled(true).unwrap();
+        let hypercore = Wallet {
+            wallet_type: WalletType::Multicoin,
+            accounts: Account::mock_chains(&[Chain::HyperCore], "0xc64c"),
+            ..Wallet::mock()
+        };
+
+        assert!(!testkit.service.should_connect_perpetuals(None));
+        assert!(testkit.service.should_connect_perpetuals(Some(hypercore)));
     }
 }
