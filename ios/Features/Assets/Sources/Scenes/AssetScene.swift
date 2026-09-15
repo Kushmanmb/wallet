@@ -119,7 +119,7 @@ public struct AssetScene: View {
                                     title: model.balanceTitle(for: .stake),
                                     subtitle: model.stakeBalanceText(value),
                                 ),
-                                action: { model.onSelectHeader(.stake) },
+                                action: { model.onSelectStake() },
                             )
                             .accessibilityIdentifier("stake")
                         case let .earn(value):

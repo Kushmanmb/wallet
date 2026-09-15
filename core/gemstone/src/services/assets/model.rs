@@ -352,6 +352,9 @@ pub enum GemHeaderButtonKind {
     Receive,
     Buy,
     Swap,
+    Deposit,
+    Withdraw,
+    More,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]

@@ -73,7 +73,6 @@ Per-variant labels: a primitives enum both apps map to a string themselves is a 
 - **V34** **M** The confirm screen's row set — `ConfirmTransferScene.itemModel` maps 15 cases on iOS against the Android confirm screen.
 - **V35** **S** Select-asset presentation — 11 cases of title and empty text on [iOS](../ios/Features/Assets/Sources/Types/SelectAssetPresentation.swift) against the Android select screens.
 - **V36** **S** Asset details info rows — 9 cases in `AssetDetailsInfoViewModel` against the Android asset info section.
-- **V37** **S** iOS keeps a local `HeaderButtonType` with 9 label cases while `GemHeaderButtonKind` already crosses and both apps use it; the local enum is the leftover.
 - **V38** **M** Error descriptions — [`Gem/Types/Errors.swift`](../ios/Gem/Types/Errors.swift) maps seven separate Core error enums to text, against Android's `Throwable.serviceMessage()` and its per-module `GemstoneText.kt`. Check each enum: some already have a Core text key and some do not.
 - **V39** **S** Stake amount action — 7 cases in `AmountStakeViewModel` against the Android amount providers.
 

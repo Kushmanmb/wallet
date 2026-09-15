@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemHeaderButtonKind
 import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemValueTone
 import enum Gemstone.PriceAlertDirection
@@ -29,5 +30,19 @@ extension GemValueTone {
 extension GemPriceAlertRow {
     public var directionColor: Color {
         direction?.color ?? Colors.gray
+    }
+}
+
+extension GemHeaderButtonKind {
+    public var image: Image {
+        switch self {
+        case .send: Images.System.paperplane
+        case .receive: Images.System.qrCode
+        case .buy: Images.System.dollar
+        case .swap: Images.System.arrowSwap
+        case .deposit: Images.Actions.buy
+        case .withdraw: Images.Actions.send
+        case .more: Images.Actions.more
+        }
     }
 }

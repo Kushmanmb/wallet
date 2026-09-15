@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemHeaderButtonKind
 import BigInt
 import Components
 import struct Gemstone.GemAssetBalance
@@ -294,19 +295,21 @@ public extension AssetSceneViewModel {
         }
     }
 
-    internal func onSelectHeader(_ buttonType: HeaderButtonType) {
-        let selectType: SelectedAssetType = switch buttonType {
+    internal func onSelectHeader(_ buttonType: GemHeaderButtonKind) {
+        let selectType: SelectedAssetType? = switch buttonType {
         case .buy: .buy(assetData.asset, amount: nil)
-        case .sell: .sell(assetData.asset, amount: nil)
         case .send: .send(.asset(asset: assetData.asset.toGem()))
         case .swap: swapAssetType
         case .receive: .receive(.asset)
-        case .stake: .stake(assetData.asset)
-        case .more, .deposit, .withdraw:
-            fatalError()
+        case .deposit, .withdraw, .more: nil
         }
+        guard let selectType else { return }
+        onSelect(assetType: selectType)
+    }
+
+    internal func onSelect(assetType: SelectedAssetType) {
         isPresentingSelectedAssetInput.wrappedValue = SelectedAssetInput(
-            type: selectType,
+            type: assetType,
             assetData: assetData,
         )
     }
@@ -320,7 +323,7 @@ public extension AssetSceneViewModel {
         case let .event(event):
             switch event {
             case .stake:
-                onSelectHeader(.stake)
+                onSelectStake()
             case .activateAsset:
                 isPresentingAssetSheet = .transfer(
                     GemTransferData(
@@ -351,10 +354,11 @@ public extension AssetSceneViewModel {
     }
 
     internal func onSelectEarn() {
-        isPresentingSelectedAssetInput.wrappedValue = SelectedAssetInput(
-            type: .earn(assetData.asset),
-            assetData: assetData,
-        )
+        onSelect(assetType: .earn(assetData.asset))
+    }
+
+    internal func onSelectStake() {
+        onSelect(assetType: .stake(assetData.asset))
     }
 
     private func onSelectBuy() {

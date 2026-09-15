@@ -3,6 +3,7 @@
 import enum Gemstone.PerpetualDirection
 import enum Gemstone.FeeOption
 import enum Gemstone.GemFiatTransactionBadge
+import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemLocalizedText
 import enum Gemstone.GemPriceAlertLabel
 import struct Gemstone.GemPriceAlertRow
@@ -138,6 +139,20 @@ extension GemFiatTransactionBadge {
         switch self {
         case .pending: Localized.Transaction.Status.pending
         case .failed: Localized.Transaction.Status.failed
+        }
+    }
+}
+
+extension GemHeaderButtonKind {
+    public var title: String {
+        switch self {
+        case .send: Localized.Wallet.send
+        case .receive: Localized.Wallet.receive
+        case .buy: Localized.Wallet.buy
+        case .swap: Localized.Wallet.swap
+        case .deposit: Localized.Wallet.deposit
+        case .withdraw: Localized.Wallet.withdraw
+        case .more: Localized.Wallet.more
         }
     }
 }

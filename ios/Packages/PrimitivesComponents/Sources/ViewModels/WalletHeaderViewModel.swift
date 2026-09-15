@@ -58,7 +58,7 @@ extension WalletHeaderViewModel: ValueHeaderViewModel {
     public var buttons: [HeaderButton] {
         switch actions {
         case .watchOnly: []
-        case let .buttons(buttons): buttons.map { HeaderButton(type: $0.kind.headerButtonType, isEnabled: $0.isEnabled) }
+        case let .buttons(buttons): buttons.map { HeaderButton(type: $0.kind, isEnabled: $0.isEnabled) }
         }
     }
 }

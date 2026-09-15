@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemHeaderButtonKind
 import Components
 import Formatters
 import Foundation
@@ -169,7 +170,7 @@ extension CollectibleViewModel {
         isPresentingToast = .copied(value)
     }
 
-    func onSelectHeaderButton(type: HeaderButtonType) {
+    func onSelectHeaderButton(type: GemHeaderButtonKind) {
         guard let account = try? wallet.account(for: assetData.asset.chain) else {
             return
         }
@@ -179,7 +180,7 @@ extension CollectibleViewModel {
                 type: .send(.nft(nftAsset: assetData.asset.toGem())),
                 assetData: .with(asset: account.chain.asset, account: account),
             )
-        case .buy, .sell, .receive, .swap, .stake, .more, .deposit, .withdraw:
+        case .buy, .receive, .swap, .more, .deposit, .withdraw:
             fatalError()
         }
     }

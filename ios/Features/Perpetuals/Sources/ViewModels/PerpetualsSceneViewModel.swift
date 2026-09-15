@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemHeaderButtonKind
 import struct Gemstone.GemPerpetualMarketCounts
 import struct Gemstone.GemPerpetualMarketSections
 import protocol Gemstone.GemRecentActivityServiceProtocol
@@ -170,7 +171,7 @@ extension PerpetualsSceneViewModel {
         }
     }
 
-    func onSelectHeaderAction(type: HeaderButtonType) {
+    func onSelectHeaderAction(type: GemHeaderButtonKind) {
         switch type {
         case .deposit:
             onSelectAssetType?(.deposit)

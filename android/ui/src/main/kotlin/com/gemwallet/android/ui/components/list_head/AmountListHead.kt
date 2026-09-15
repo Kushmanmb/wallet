@@ -230,6 +230,9 @@ fun AssetHeadActions(
     onReceive: (() -> Unit)?,
     onBuy: (() -> Unit)?,
     onSwap: (() -> Unit)?,
+    onDeposit: (() -> Unit)? = null,
+    onWithdraw: (() -> Unit)? = null,
+    onMore: (() -> Unit)? = null,
 ) {
     var actionFontSize by remember { mutableStateOf(16.sp) }
     val buttons = when (actions) {
@@ -245,6 +248,9 @@ fun AssetHeadActions(
             GemHeaderButtonKind.RECEIVE -> AssetHeadActionItem(R.string.wallet_receive, AppIcons.Receive, button.isEnabled, onReceive)
             GemHeaderButtonKind.BUY -> AssetHeadActionItem(R.string.wallet_buy, AppIcons.Buy, button.isEnabled, onBuy, testTag = "assetBuy")
             GemHeaderButtonKind.SWAP -> AssetHeadActionItem(R.string.wallet_swap, AppIcons.SwapVert, button.isEnabled, onSwap)
+            GemHeaderButtonKind.DEPOSIT -> AssetHeadActionItem(R.string.wallet_deposit, AppIcons.Deposit, button.isEnabled, onDeposit)
+            GemHeaderButtonKind.WITHDRAW -> AssetHeadActionItem(R.string.wallet_withdraw, AppIcons.Withdraw, button.isEnabled, onWithdraw)
+            GemHeaderButtonKind.MORE -> AssetHeadActionItem(R.string.wallet_more, AppIcons.MoreVert, button.isEnabled, onMore)
         }
     }
     Row(

@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemHeaderButtonKind
 import Components
 import Formatters
 import Foundation
@@ -180,13 +181,13 @@ public extension WalletSceneViewModel {
         isPresentingSheet = .portfolio(.wallet)
     }
 
-    internal func onHeaderAction(type: HeaderButtonType) {
+    internal func onHeaderAction(type: GemHeaderButtonKind) {
         switch type {
         case .buy: isPresentingSheet = .selectAsset(.buy, chains: [])
         case .send: isPresentingSheet = .selectAsset(.send(.none), chains: [])
         case .receive: isPresentingSheet = .selectAsset(.receive(.asset), chains: [])
         case .swap: isPresentingSheet = .swap
-        case .sell, .more, .stake, .deposit, .withdraw: break
+        case .more, .deposit, .withdraw: break
         }
     }
 
