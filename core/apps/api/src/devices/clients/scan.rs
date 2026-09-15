@@ -48,18 +48,18 @@ impl ScanClient {
     }
 
     pub async fn get_scan_transaction(&self, payload: ScanTransactionPayload) -> Result<ScanTransaction, Box<dyn Error + Send + Sync>> {
-        if !self.database.client()?.get_config_bool(ConfigKey::ScanEnable)? {
+        let is_enabled = self.database.client()?.get_config_bool(ConfigKey::ScanEnable)?;
+        if !is_enabled {
             return Ok(ScanTransaction::disabled());
         }
+        let dry_run = self.database.client()?.get_config_bool(ConfigKey::ScanDryRun)?;
         let (local_scan, is_target_verified) = self.get_scan_transaction_local(&payload)?;
         if local_scan.is_malicious == Some(true) || is_target_verified {
-            Self::log_scan_transaction(&payload, &local_scan, ScanSource::Local);
-            return Ok(local_scan);
+            return Ok(Self::scan_transaction_response(&payload, local_scan, ScanSource::Local, dry_run));
         }
 
         let Some((address_target, poisoning_target, website_target)) = Self::provider_targets(&payload) else {
-            Self::log_scan_transaction(&payload, &local_scan, ScanSource::Local);
-            return Ok(local_scan);
+            return Ok(Self::scan_transaction_response(&payload, local_scan, ScanSource::Local, dry_run));
         };
         let enabled = {
             let mut database = self.database.client()?;
@@ -107,16 +107,18 @@ impl ScanClient {
         } else {
             ScanSource::Remote
         };
-        Self::log_scan_transaction(&payload, &scan, source);
-        Ok(scan)
+        Ok(Self::scan_transaction_response(&payload, scan, source, dry_run))
     }
 
-    fn log_scan_transaction(payload: &ScanTransactionPayload, scan: &ScanTransaction, source: ScanSource) {
+    fn scan_transaction_response(payload: &ScanTransactionPayload, scan: ScanTransaction, source: ScanSource, dry_run: bool) -> ScanTransaction {
+        let response = if dry_run { ScanTransaction::disabled() } else { scan.clone() };
         let scan = ScanTransaction {
             malicious_website: scan.malicious_website.as_deref().and_then(Self::website_host),
-            ..scan.clone()
+            ..scan
         };
-        let message = if scan.is_malicious == Some(true) {
+        let message = if dry_run {
+            "security transaction dry run"
+        } else if scan.is_malicious == Some(true) {
             "security transaction blocked"
         } else {
             "security transaction result"
@@ -126,10 +128,12 @@ impl ScanClient {
             transaction_type = payload.transaction_type.as_ref(),
             chain = payload.target.asset_id.chain.as_ref(),
             source = source.as_ref(),
+            dry_run = dry_run,
             origin_asset_id = payload.origin.asset_id,
             target_asset_id = payload.target.asset_id,
             scan = json!(scan)
         );
+        response
     }
 
     fn website_host(website: &str) -> Option<String> {

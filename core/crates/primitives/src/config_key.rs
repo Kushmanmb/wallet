@@ -156,6 +156,7 @@ pub enum ConfigKey {
     ScanTimerUpdateValidators,
     ScanTimerUpdateValidatorsStatic,
     ScanEnable,
+    ScanDryRun,
     ScanTimeout,
     ScanRequiredSuccesses,
 
@@ -350,6 +351,7 @@ impl ConfigKey {
             Self::ScanTimerUpdateValidators => "1d",
             Self::ScanTimerUpdateValidatorsStatic => "1h",
             Self::ScanEnable => "true",
+            Self::ScanDryRun => "false",
             Self::ScanTimeout => "1200ms",
             Self::ScanRequiredSuccesses => "1",
             Self::RewardsTimerAbuseChecker => "60s",
