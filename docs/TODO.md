@@ -269,13 +269,13 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 
 Re-checked on 2026-09-15. `Store/Migrations.swift` holds 88 of the 174 sites and they are the idempotent-migration idiom — `try? db.alter` for a column that may already exist, `try? db.drop` for a table that may not. Rewriting those against a shipped wallet database is a data-loss risk with no defect behind it, so they stay. `clearChainData` was the one that was wrong: it deleted a removed chain's rows from seven tables with `try?`, so a locked table or a constraint left the rows behind silently. It now asks `tableExists` the way `clearTables` beside it already did and lets a real error through.
 
-The rest of the sites are one or two per file and each needs reading on its own; these are the ones on a path where a swallowed error is not visible to the user.
+`WalletIdMigration.swift` had the same shape and the same one real problem: it rewrote `walletId` across ten child tables and deleted a wallet's child rows with `try?`, so a failure on any one of them left the wallet's data pointing at an id that no longer exists, and `cleanupOrphanedRecords` then swallowed the foreign-key check as well. All three now skip a table that does not exist and let a real failure roll the migration back.
 
-- **X68** **S** `ios/Packages/Store/Sources/Migrations/WalletIdMigration.swift` — 6, on the wallet-id rewrite.
-- **X69** **S** `ios/Packages/GemstoneServices/Sources/Keystore/LocalKeystore.swift` — 4, on the keystore.
-- **X70** **S** `ios/Features/Swap/.../SwapSceneViewModel.swift` — 4.
+Checked and kept: `LocalKeystore.findV3File` scans a directory and `try?` is how an unreadable file is skipped; `SwapSceneViewModel.currentInput` returns nil because "no complete input yet" is what its errors mean; `NavigationPathState` and `NavigationHandler` decode a path or a wallet id where nil is a real answer.
+
+The rest are one or two per file and each needs reading on its own.
+
 - **X71** **S** `ios/Packages/FeatureServices/WalletConnectorService/WalletConnectorService.swift` — 3.
-- **X72** **S** `ios/Gem/Navigation/NavigationHandler.swift` and `ios/Packages/Components/Sources/NavigationPathState.swift` — 3 each.
 - **X73** **S** `ios/Packages/Primitives/Sources/AnyCodableValue.swift` — 11, plus `AssetId.swift` (2) and `Store/Extensions/AnyCodableValue+Store.swift` (2).
 - **X74** **S** The remaining 24 first-party files with one or two sites each.
 
