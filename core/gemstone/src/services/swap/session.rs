@@ -271,8 +271,7 @@ impl GemSwapSession {
     }
 
     pub fn quote(&self) -> Option<SwapperQuote> {
-        self.quotes.as_ref()?;
-        self.selected_quote.clone()
+        self.current_quote().cloned()
     }
 
     fn quote_error(&self) -> Option<SwapperError> {
@@ -309,7 +308,7 @@ impl GemSwapSession {
             (GemSwapTransferPhase::Idle, GemSwapQuotePhase::Loading { .. }) => GemSwapSessionAction::QuoteLoading,
             (GemSwapTransferPhase::Idle, GemSwapQuotePhase::Failed { error, .. }) => GemSwapSessionAction::QuoteError { error: error.clone() },
             (GemSwapTransferPhase::Idle, GemSwapQuotePhase::Ready | GemSwapQuotePhase::NoInput) => {
-                if self.quote().is_some() {
+                if self.current_quote().is_some() {
                     GemSwapSessionAction::Ready
                 } else {
                     GemSwapSessionAction::None
@@ -332,7 +331,7 @@ impl GemSwapSession {
         match action {
             GemSwapButtonAction::InsufficientBalance => GemSwapButtonState::Disabled,
             _ if self.is_quote_loading() || self.is_transfer_loading() => GemSwapButtonState::Loading,
-            GemSwapButtonAction::Swap if self.quote().is_none() => GemSwapButtonState::Disabled,
+            GemSwapButtonAction::Swap if self.current_quote().is_none() => GemSwapButtonState::Disabled,
             GemSwapButtonAction::Swap | GemSwapButtonAction::RetryQuote | GemSwapButtonAction::RetryTransfer | GemSwapButtonAction::UseMinimumAmount { .. } => {
                 GemSwapButtonState::Enabled
             }
@@ -341,6 +340,11 @@ impl GemSwapSession {
 }
 
 impl GemSwapSession {
+    fn current_quote(&self) -> Option<&SwapperQuote> {
+        self.quotes.as_ref()?;
+        self.selected_quote.as_ref()
+    }
+
     pub(crate) fn transfer_error(&self) -> Option<SwapperError> {
         match &self.transfer_phase {
             GemSwapTransferPhase::Failed { error, .. } => Some(error.clone()),
@@ -581,6 +585,19 @@ mod tests {
         let failed = started.on_transfer_failed(started.transfer_phase.clone(), SwapperError::TransactionError("boom".into()));
         assert_eq!(failed.button_action(GemBigInt::from(1), GemBigInt::from(2)), GemSwapButtonAction::RetryTransfer);
         assert_eq!(failed.button_state(GemSwapButtonAction::RetryTransfer), GemSwapButtonState::Enabled);
+    }
+
+    #[test]
+    fn test_a_selected_quote_without_results_is_not_a_quote() {
+        let stale = GemSwapSession {
+            quotes: None,
+            ..ready()
+        };
+
+        assert!(stale.selected_quote.is_some(), "the selection outlives the results it came from");
+        assert!(stale.quote().is_none());
+        assert_eq!(stale.action(), GemSwapSessionAction::None);
+        assert_eq!(stale.button_state(GemSwapButtonAction::Swap), GemSwapButtonState::Disabled);
     }
 
     #[test]
