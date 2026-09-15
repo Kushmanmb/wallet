@@ -7,17 +7,15 @@ import Primitives
 
 public struct AssetViewModel: Sendable, Identifiable, AssetPreviewable {
     public let asset: Asset
+    private let text: GemAssetText
 
     public init(asset: Asset) {
         self.asset = asset
+        text = assetText(asset: asset.toGem())
     }
 
     public var id: String {
         asset.id.identifier
-    }
-
-    private var text: GemAssetText {
-        assetText(asset: asset.toGem())
     }
 
     public var title: String {

@@ -21,6 +21,7 @@ public struct PerpetualPositionViewModel {
     private let percentFormatter = PercentFormatter.signed
     private let autocloseFormatter: AutocloseFormatter
     private let row: GemPerpetualPositionRow
+    private let perpetual = GemPerpetual(provider: .hypercore)
 
     public init(
         _ data: PerpetualPositionData,
@@ -57,7 +58,7 @@ public struct PerpetualPositionViewModel {
     }
 
     public var positionTypeText: String {
-        GemPerpetual(provider: .hypercore).positionText(directionName: directionText, formattedLeverage: leverageText)
+        perpetual.positionText(directionName: directionText, formattedLeverage: leverageText)
     }
 
 
@@ -88,7 +89,7 @@ public struct PerpetualPositionViewModel {
         case .margin:
             ListItemField(
                 title: detailRow.title,
-                value: GemPerpetual(provider: .hypercore).marginText(
+                value: perpetual.marginText(
                     formattedAmount: currencyFormatter.string(data.position.marginAmount),
                     marginTypeName: data.position.marginType.title,
                 ),

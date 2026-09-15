@@ -167,6 +167,4 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 
 Measure before and after; these are code-backed candidates, not measured regressions.
 
-- **PERF17** **S** `AssetViewModel` crosses the FFI on every `title`, `subtitleSymbol`, `networkName` and `networkFullName` read, because each calls `assetText(asset:)` again. A wallet list reads several per row per render. Derive the record once per model.
-- **PERF18** **S** `PerpetualPositionViewModel.positionTypeText` and `OpenPositionItemViewModel` each construct a `GemPerpetual` object per call to compose one string.
 - **PERF19** **S** Android `NetworksViewModel` calls `service.nodeRow(...)` for every node on every state emission, including the per-node status updates that arrive one at a time.

@@ -13,6 +13,7 @@ import SwiftUI
 struct OpenPositionItemViewModel: ListAssetItemViewable {
     private let data: AutocloseOpenData
     private let currencyFormatter: CurrencyFormatter
+    private let perpetual = GemPerpetual(provider: .hypercore)
 
     var action: ((ListAssetItemAction) -> Void)?
 
@@ -62,9 +63,9 @@ extension OpenPositionItemViewModel {
     }
 
     private var positionTypeText: String {
-        GemPerpetual(provider: .hypercore).positionText(
+        perpetual.positionText(
             directionName: directionViewModel.title,
-            formattedLeverage: GemPerpetual(provider: .hypercore).leverageText(value: data.leverage),
+            formattedLeverage: perpetual.leverageText(value: data.leverage),
         )
     }
 }
