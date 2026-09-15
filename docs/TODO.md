@@ -1,12 +1,12 @@
 # Open work
 
-Every open item carries a stable id (V vocabulary, R rows, C composition, S sessions, B view boundary, F formatting, P parity, D decisions, O ownership, X platform, G guidance, PERF performance) and a size (**S**/**M**/**L**). Contracts are in [ARCHITECTURE.md](ARCHITECTURE.md) and [SERVICES.md](SERVICES.md). **Delete an item's line in the commit that lands it** — ids are never reused.
+Every open item carries a stable id (V vocabulary, R rows, C composition, S sessions, B view boundary, F formatting, P parity, D decisions, O ownership, X platform, G guidance, T tests, L localization, N naming, PERF performance) and a size (**S**/**M**/**L**). Contracts are in [ARCHITECTURE.md](ARCHITECTURE.md) and [SERVICES.md](SERVICES.md). **Delete an item's line in the commit that lands it** — ids are never reused.
 
 The goal is that Gemstone decides once and both clients read that decision. Track duplicated decisions and concrete performance work at their existing owners: shared rules and orchestration in Core; rendering, observation, scheduling, and localized formatting in the apps.
 
 Keep each item independently reviewable. Shared decision changes land in Core and both apps; platform-only work stays on that platform. Regenerate only when shared interfaces or integration change, and run the applicable [Quality Checks](../skills/quality-checks.md). Verify affected primary-screen journeys under [Performance](PERFORMANCE.md). Remove replaced paths within the item's scope; do not bundle an unrelated row migration or product change.
 
-This list was rebuilt on 2026-09-15 from scripted sweeps over the whole repo. Each item names the file the sweep hit, so it can be confirmed before it is started.
+This list was rebuilt on 2026-09-15 from scripted sweeps over the whole repo and widened the same day by a second, deeper pass. Each item names the file or symbol the sweep hit, so it can be confirmed before it is started; a sweep hit is a lead, not a verdict, and an item that turns out to be correct as written is closed by deleting its line with a one-line note in the commit.
 
 These files were checked during the 2026-09-15 mapper sweep and need no change — each calls its module mapper or switches over an app type, not a Core one: iOS `NFT/CollectibleViewModel`, `Settings/GemAddNodeFailure+Settings`, `Swap/SwapSlippageViewModel`, `Swap/Views/SwapDetailsView`, `Transfer/Types/ConfirmInfoSheetBuilder`, `Transfer/ConfirmRecipientViewModel`, `Transfer/RecipientSceneViewModel`; Android `earn`, `import_wallet`, `perpetual`.
 
@@ -133,3 +133,237 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 Measure before and after; these are code-backed candidates, not measured regressions.
 
 - **PERF19** **S** Android `NetworksViewModel` calls `service.nodeRow(...)` for every node on every state emission, including the per-node status updates that arrive one at a time.
+
+## 9. Core decides it, only one app reads it
+
+Each of these is an `#[uniffi::export]` the sweep found named in one app and in neither the other app's Kotlin nor its Swift. The app that does not call it still answers the same question locally, so the two answers can drift. Confirm the local answer before moving it — a few of these are genuinely platform-only.
+
+### Android does not read an iOS-read decision
+
+- **P15** **S** `precision.rs` `abbreviation_threshold` — Android abbreviates large numbers with its own cutoff.
+- **P16** **S** `price_alert/rules.rs` `alert_kind` and `alert_direction` — the Android price-alert row derives both.
+- **P17** **S** `error_text.rs` `alien_error_text` — Android maps transport errors in `Throwable.serviceMessage()`.
+- **P18** **S** `error_text.rs` `payment_error_text` — same, for payment decoding.
+- **P19** **S** `transfer/rules.rs` `application_short_name`.
+- **P20** **S** `transfer/rules.rs` `shows_memo` — Android decides memo visibility in the transfer screen.
+- **P21** **S** `application.rs` `short_name`.
+- **P22** **M** `developer/mod.rs` `clear_preferences`, `delete_wallet_preferences`, `clear_perpetual_markets`, `deeplink_url` — Android's `DevelopViewModel.kt` reimplements the developer menu.
+- **P23** **S** `assets/details.rs` `deeplink_gem_url`.
+- **P24** **S** `assets/config.rs` `default_token_rank` and `matching_assets`.
+- **P25** **S** `asset_discovery/mod.rs` `discover`.
+- **P26** **S** `auth/mod.rs` `get_nonce`.
+- **P27** **S** `confirm/error.rs` `has_info_sheet` — Android decides which confirm errors open a sheet.
+- **P28** **S** `support/mod.rs` `image_file`.
+- **P29** **S** `security/rules.rs` `is_cancelled`.
+- **P30** **S** `device/keys.rs` `key_pair`.
+- **P31** **S** `node/model.rs` `latest_block`.
+- **P32** **M** `perpetual/mod.rs` `sync_markets_if_needed`, `sync_markets`, `sync_current_positions`, `clear_markets`, `markets_updated_at` — Android schedules the same five itself.
+- **P33** **S** `swap/rules.rs` `minimum_amount`.
+- **P34** **S** `assets/add.rs` `on_chain`.
+- **P35** **S** `perpetual/autoclose.rs` `on_submit_attempt`.
+- **P36** **S** `amount/model.rs` `prefilled_amount`.
+- **P37** **S** `stake/rules.rs` `recommended_validators`.
+- **P38** **S** `avatar/mod.rs` `set_image` and `remove_image`.
+- **P39** **S** `wallet_preferences/mod.rs` `reset_transactions_timestamp`.
+- **P40** **M** `wallet/mod.rs` `setup_chains` — Android runs its own chain setup after import.
+- **P41** **S** `wallet_session/mod.rs` `shows_rewards`.
+- **P42** **M** `message/signer.rs` `sign_with_keystore` — security-critical; confirm what Android signs with before changing anything.
+- **P43** **S** `swap/session.rs` `swap_error_display` and `swap/model.rs` `swap_quote`.
+- **P44** **S** `device/mod.rs` `synchronize`.
+
+### iOS does not read an Android-read decision
+
+- **P45** **M** `wallet_connect/mod.rs` `authentication_accounts`, `authentication_chain_ids`, `authentication_methods` — iOS builds the SIWE authentication payload itself.
+- **P46** **S** `wallet_connect/mod.rs` `connection_row`.
+- **P47** **S** `wallet_connect/mod.rs` `is_origin_rejected` and `user_rejected_error`.
+- **P48** **S** `wallet_connect/mod.rs` `message_preview` and `message_address_names`.
+- **P49** **S** `chain/mod.rs` `chain_from_caip2`.
+- **P50** **S** `payment.rs` `decode_url` — iOS decodes payment URLs through a different entry point; confirm they agree.
+- **P51** **S** `assets/config.rs` `default_asset_basic`.
+- **P52** **S** `mnemonic.rs` `find_invalid_words` — iOS surfaces invalid words only through the import error.
+- **P53** **S** `app_update/mod.rs` `is_version_higher` — iOS compares versions inside `newest`; pick one.
+- **P54** **S** `transactions/mod.rs` `listed_asset_rank`.
+- **P55** **S** `security/rules.rs` `lock_periods`, `lock_period_from_minutes`, `retry_delay_milliseconds` — iOS's `LockPeriod` enum answers all three.
+- **P56** **M** `wallet/mod.rs` `migrate_to_shared_password` and `preview_import` — security-critical keystore paths; read [KEYSTORE_V4](KEYSTORE_V4.md) first.
+- **P57** **S** `swap/slippage.rs` `on_auto`.
+- **P58** **S** `swap/session.rs` `on_quote_invalidated` and `on_refresh_requested` — iOS drives quote refresh from the view model.
+- **P59** **S** `nft/mod.rs` `receive_accounts`.
+- **P60** **S** `assets/mod.rs` `sync_assets`.
+- **P61** **S** `perpetual/mod.rs` `update_balance`.
+
+## 10. Exports no app calls at all
+
+151 exported functions have no caller in either app. Most are trait methods the apps implement rather than call, or Core-internal. These are the ones whose names read like a decision an app should be reading.
+
+- **O22** **S** `confirm/rules.rs` `balance_change_sign`, `build_metadata`, `is_insufficient_network_fee`, `selectable_fee_assets`, `preload_simulation`.
+- **O23** **S** `amount/rules.rs` `amount_title`, `stake_amount_type`, `transfer_amount_type`, `transfer_display_asset`, `transfer_prefilled_amount`, `plain_number`, `value_from_input`, `sanitize_number_input`.
+- **O24** **S** `stake/rules.rs` `apply_validator_state`, `earn_validators`, `merge_validators`, `missing_validators`, `stale_delegation_ids`, `stale_validator_ids`, `validator_address_names`, `shows_stake_balance`.
+- **O25** **S** `price_alert/rules.rs` `displayed_price_alert_ids`, `price_alert_row`, `price_alert_toggle`, `reconcile`.
+- **O26** **S** `simulation.rs` `payload_fields`, `shows_header`, `warning_rows`.
+- **O27** **S** `explorer/mod.rs` — seven getters (`get_address_url`, `get_token_url`, `get_nft_url`, `get_validator_url`, `get_transaction_link`, `get_explorer_name`, `get_explorers`) with no app caller.
+- **O28** **M** `preferences/mod.rs` and `wallet_preferences/mod.rs` — roughly thirty paired getters/setters with no app caller. Decide per pair whether the app should be reading it or the pair should go.
+- **O29** **S** `node/mod.rs` `sorted_nodes` and `node_url`, `node/settings.rs` `can_delete_node`.
+
+## 11. Missing tests
+
+### Core files with rules and no `#[cfg(test)]`
+
+- **T1** **S** `services/perpetual/mod.rs` (262 lines) — refresh orchestration and socket application.
+- **T2** **S** `services/balance/model.rs` (197).
+- **T3** **S** `services/device/mod.rs` (190).
+- **T4** **S** `services/assets/details.rs` (186).
+- **T5** **S** `services/stake/model.rs` (165).
+- **T6** **S** `services/contact/mod.rs` (141).
+- **T7** **S** `services/swap/mod.rs` (140) and `services/swap/quote.rs` (117).
+- **T8** **S** `services/wallet_home/mod.rs` (131).
+- **T9** **S** `services/assets/selection.rs` (126).
+- **T10** **S** `services/app_start/mod.rs` (122).
+- **T11** **S** `services/amount/mod.rs` (118).
+- **T12** **S** `services/chart/mod.rs` (116).
+- **T13** **S** `services/node/settings.rs` (115).
+- **T14** **S** `services/wallet/model.rs` (114) and `services/perpetual/details.rs` (114).
+- **T15** **S** `services/transactions/mod.rs` (107).
+- **T16** **S** `services/asset_discovery/mod.rs` (94), `services/portfolio/mod.rs` (93), `services/search/mod.rs` (90).
+- **T17** **S** `services/support/mod.rs` (88), `services/name/mod.rs` (87), `services/wallet_connect/sign_message.rs` (86).
+- **T18** **S** `services/rewards/mod.rs` (84), `services/explorer/mod.rs` (80), `services/developer/mod.rs` (78).
+- **T19** **S** `services/perpetual/stream.rs` (77), `alien/provider.rs` (76), `services/fiat/quote.rs` (73).
+- **T20** **S** `services/transaction_state/model.rs` (71) and `services/nft/model.rs` (71).
+
+### iOS view models with no test file
+
+130 across `Features`, `Packages`, `Gem` and the widget — the wider count that X55–X64's preamble narrows to feature modules. Grouped by module so each item is one test target's worth of work; X55–X64 already name the heaviest.
+
+- **T21** **M** `Features/Transactions` — 16 view models, none tested.
+- **T22** **M** `Packages/PrimitivesComponents` — 24 view models, none tested.
+- **T23** **S** `Features/Perpetuals` — 6.
+- **T24** **S** `Features/Onboarding` — 9.
+- **T25** **S** `Features/NFT` — 4, and `Features/Contacts` — 1.
+- **T26** **S** `Features/Swap` — 3 (`SwapProvidersViewModel`, `SwapTokenViewModel`, `SwapPairSelectorViewModel`).
+- **T27** **S** `Features/Transfer` — 5 (`AmountEarnViewModel`, `PerpetualModifyViewModel`, `KeystoreAuthenticationViewModel`, `ReceiveNetworkSelectorViewModel`, `ReceiveViewModel`).
+- **T28** **S** `Gem/ViewModels` — `RootSceneViewModel`, `MainTabViewModel`, `ScanReceiveViewModel`, `ScanReceiveModeViewModel`.
+- **T29** **S** `GemPriceWidget` — `PriceWidgetViewModel`, `CoinPriceRowViewModel`.
+
+### Android view models with no test
+
+49 of them; X65 and X66 already name five.
+
+- **T30** **M** `features/bridge/viewmodels` — the remaining three (`ProposalSceneViewModel`, `ConnectionViewModel`, `ConnectionsViewModel`).
+- **T31** **M** `features/asset_select/viewmodels` — all five.
+- **T32** **S** `features/settings/contacts/viewmodels` — all three.
+- **T33** **S** `features/perpetual/viewmodels` — `PerpetualDetailsViewModel`, `AutocloseViewModel`, `PerpetualsPreviewViewModel`.
+- **T34** **S** `features/wallet-details/viewmodels` — all three.
+- **T35** **S** `features/activities/viewmodels` — `TransactionsViewModel`, `TransactionDetailsViewModel`.
+- **T36** **S** `features/receive/viewmodels` — both.
+- **T37** **S** `features/confirm/viewmodels` `ConfirmViewModel.kt` (412 lines) and `presents/components/NetworkFeeCustomViewModel.kt`.
+- **T38** **S** `app` — `MainViewModel`, `AppViewModel`, `MainScreenViewModel`, `SetupWalletViewModel`.
+- **T39** **S** `features/settings/security/viewmodels` `SecurityViewModel.kt` — authentication toggles with no test.
+
+## 12. Localization hygiene
+
+### Two keys, one English string
+
+Each pair below resolves to the same English text and to the same text in every locale checked. Two keys mean two places to translate and two chances to drift; V40 and V42 were both caused by a mapper picking the other one of a pair.
+
+- **L1** **S** `wallet_stake` / `transfer_stake_title` ("Stake") — the assets and stake mappers pick different ones today.
+- **L2** **S** `wallet_send` / `transfer_send_title` ("Send").
+- **L3** **S** `wallet_withdraw` / `transfer_withdraw_title` ("Withdraw").
+- **L4** **S** `wallet_import_address_field` / `transfer_recipient_address_field` ("Address or Name") — the pair behind V40.
+- **L5** **S** `transfer_rewards_title` / `stake_rewards` / `rewards_title` ("Rewards") — the trio behind V41.
+- **L6** **S** `common_wallet` / `wallet_title`, `common_all` / `charts_all`.
+- **L7** **S** `wallet_name` / `asset_name`, `transfer_amount` / `transfer_amount_title`.
+- **L8** **S** `transfer_network_fee` / `info_network_fee_title`, `transfer_confirm` / `verify_phrase_title`.
+- **L9** **S** `transfer_recipient_title` / `transaction_recipient`, `transaction_status_pending` / `stake_pending`.
+- **L10** **S** `buy_title` / `asset_buy_asset`, `asset_get_asset` / `rewards_ways_spend_asset_title`, `markets_title` / `perpetuals_markets`.
+- **L11** **S** `common_required_field` / `errors_required`, `transfer_other_title` / `nft_report_reason_other`, `support_message_placeholder` / `sign_message_message`, `wallet_connect_title` / `wallet_connect_brand_name`.
+
+### Keys with no reader
+
+- **L12** **S** Thirteen keys in `localization/app/en.ftl` have no `R.string.` reader in Kotlin and no `Localized.` reader in Swift: `common_no_thanks`, `transfer_amount_title`, `errors_transfer`, `errors_decoding`, `errors_connections_invalid_send_parameters`, `errors_connections_invalid_sign_parameters`, `errors_connections_unsupported_method`, `errors_token_unable_fetch_token_information`, `update_app_downloading`, `banner_enable_notifications_title`, `banner_enable_notifications_description`, `perpetuals_empty_state_no_markets`, `confirm_fee_error`. Deleting a key retires it in every locale, so confirm each against the generated accessors first.
+- **L13** **S** `camera_permission_request_camera` and `notifications_permission_request_notification` have no Kotlin or Swift reader either, but permission copy is often referenced from a manifest or plist — find the reader or delete the pair. (`application_name` is read by `AndroidManifest.xml` and stays.)
+
+## 13. Names the guides forbid
+
+- **N1** **S** `ios/Features/Swap/.../SwapSceneViewModel.swift` — `applyQuote`, `applyPercentToFromValue`, `applyMinAmount`.
+- **N2** **S** `ios/Features/FiatConnect/.../FiatSceneViewModel.swift` `applyAmount`, `ios/Features/Assets/.../SelectAssetViewModel.swift` `applySelectionEffect`.
+- **N3** **S** `ios/Packages/Store/Sources/Requests` — `applyFilter`, `applyFilters`, `fetchAllAssetRecordsRequest`.
+- **N4** **S** `ios/Packages/Store/Sources/Stores/StoreManager.swift` and `ios/Packages/Primitives/Sources/Extensions/NSFileManager+Primitives.swift`.
+- **N5** **S** `ios/Features/LockManager` — the module, `LockWindowManager.swift` and its view modifier.
+- **N6** **S** `ios/GemPriceWidget/Services/WidgetPriceService.swift` — `fetchTopCoinPrices`, `fetchRemoteImage`.
+- **N7** **S** Android `applySystemBarsAppearance`, `applyExternalAddress` (twice), `applyMinimumAmount`, `applyChainsFilter`, `applyTypesFilter`, `applyDiff`.
+- **N8** **S** Core `apply_socket_message`, `apply_candle_update` (twice), `apply_preview_display_grouping`, `apply_validator_state`.
+- **N9** **S** Core `resolve_*` in the swapper and portfolio crates — `resolve_token`, `resolve_asset_id`, `resolve_deposit_mode`, `resolve_quote_waiting_time`, `resolve_app_fees`, `resolve_asset`, `resolve_primary`, `resolve_expire_at`.
+
+## 14. Documentation that has fallen behind
+
+- **G4** **M** Twenty Gemstone services are not named anywhere in [SERVICES.md](SERVICES.md): `GemAppStartService`, `GemAssetDiscoveryService`, `GemAssetsService`, `GemAuthService`, `GemConfigService`, `GemConnectionService`, `GemDeviceKeyService`, `GemExplorerService`, `GemFiatService`, `GemPerpetualStreamService`, `GemPriceService`, `GemPushNotificationService`, `GemScanService`, `GemSearchService`, `GemSecurityService`, `GemSimulationService`, `GemStreamSubscriptionService`, `GemSubscriptionService`, `GemSwapService`, `GemWalletConfigurationService`.
+- **G5** **S** The screen-service map in SERVICES.md predates the row records added since; walk it against the current `ViewModelFactory.swift` and `di/` modules.
+- **G6** **S** ARCHITECTURE.md's implementation index still points at examples that moved during the row migration; re-resolve every link.
+- **G7** **S** [PERFORMANCE.md](PERFORMANCE.md) records budgets for screens whose data path moved to Core sessions; restate each budget against the current path or mark it unmeasured.
+
+## 15. More platform work
+
+### iOS errors thrown away
+
+174 `try?`/empty-catch sites in first-party code. The wallet-critical ones first.
+
+- **X67** **M** `ios/Packages/Store/Sources/Migrations.swift` — 88 sites. A migration that silently no-ops leaves a half-migrated database.
+- **X68** **S** `ios/Packages/Store/Sources/Migrations/WalletIdMigration.swift` — 6, on the wallet-id rewrite.
+- **X69** **S** `ios/Packages/GemstoneServices/Sources/Keystore/LocalKeystore.swift` — 4, on the keystore.
+- **X70** **S** `ios/Features/Swap/.../SwapSceneViewModel.swift` — 4.
+- **X71** **S** `ios/Packages/FeatureServices/WalletConnectorService/WalletConnectorService.swift` — 3.
+- **X72** **S** `ios/Gem/Navigation/NavigationHandler.swift` and `ios/Packages/Components/Sources/NavigationPathState.swift` — 3 each.
+- **X73** **S** `ios/Packages/Primitives/Sources/AnyCodableValue.swift` — 11, plus `AssetId.swift` (2) and `Store/Extensions/AnyCodableValue+Store.swift` (2).
+- **X74** **S** The remaining 24 first-party files with one or two sites each.
+
+### Logging left in shipping paths
+
+122 `print`/`debugLog` sites on iOS and 69 `Log.`/`println` on Android. This is a wallet: confirm each line is free of addresses, amounts and secrets while removing it.
+
+- **X75** **S** iOS `WalletConnectorService.swift` (11) — sessions and request payloads.
+- **X76** **S** iOS `StreamObserverService.swift` (7), `AppLifecycleService.swift` (7), `OnstartService.swift` (6).
+- **X77** **S** iOS `SwapSceneViewModel.swift` (5) and `AssetSceneViewModel.swift` (4).
+- **X78** **S** iOS `RootSceneViewModel.swift` (4), `NavigationHandler.swift` (4), `AssetActions.swift` (4).
+- **X79** **S** iOS `PerpetualsSceneViewModel.swift` (4) and `PerpetualSceneViewModel.swift` (4).
+- **X80** **S** iOS the remaining 40 files.
+- **X81** **S** Android `BaseAssetSelectViewModel.kt` (6) and `StreamObserverService.kt` (5).
+- **X82** **S** Android `PerpetualMarketViewModel.kt` (4), `AssetsViewModel.kt` (4), `HyperliquidObserverService.kt` (4).
+- **X83** **S** Android the remaining 31 files.
+
+### iOS layout numbers outside Style
+
+31 sites in 27 first-party files, against the same rule Android's dp items carry.
+
+- **X84** **S** `Packages/PrimitivesComponents/Sources/Components/SwapAmountView.swift` (3) and `Views/NameRecordView.swift` (2).
+- **X85** **S** `GemPriceWidget/Views/MediumPriceWidgetView.swift` (2).
+- **X86** **S** `Packages/Components` — `SelectionView`, `LogoView`, `EmojiView`, `Buttons/ListButton`, `Lists/ListAssetItemView`, `Lists/ListItemFlexibleView`, `StateView/StateEmptyView`, `Grid/GridPosterView`.
+- **X87** **S** `Packages/PrimitivesComponents` — `BannerView`, `WalletBarView`, `SecretPhraseGridView`, `HeaderButtonsView`, `ChartHeaderView`, `ChartView`, `ChartStateView`.
+- **X88** **S** `Features` — `Transfer/AmountScene`, `Perpetuals/PerpetualScene`, `Perpetuals/CandlestickChartView`, `FiatConnect/FiatTypeToolbar`, `Onboarding/OnboardingScene`, `QRScanner/QRScannerDisplayConfiguration`, `QRScanner/CornerBracketsShape`.
+
+### Files that have outgrown one module (second pass)
+
+- **X89** **M** `android/gemcore/.../ext/RemoteTypeMappers.kt` — 2278 lines of hand-written remote mappers. Check how many the generator could emit.
+- **X90** **M** `core/gemstone/src/models/remote_types.rs` — 1929 lines.
+- **X91** **M** `core/crates/primitives/src/chain_config.rs` — 1388.
+- **X92** **M** `core/gemstone/src/message/signer.rs` — 771.
+- **X93** **M** `ios/Packages/GemstonePrimitives/TestKit/GemServiceMocks.swift` — 1047 lines of mocks in one file.
+- **X94** **M** `ios/Packages/PrimitivesComponents/Sources/Extensions/Gemstone+Localized.swift` — 499 lines; the shared mapper is becoming the place every module's leftovers land.
+- **X95** **M** `android/ui/.../components/list_head/AmountListHead.kt` (516) and `chart/GemCandlestickChart.kt` (470).
+- **X96** **S** `android/data/services/store/.../database/di/Migration_71_72.kt` (546) and `Migration_41_42.kt` (406) — confirm both are still reachable from the oldest supported schema.
+- **X97** **M** `ios/Gem/Services/ServicesFactory.swift` (469) alongside X54's `ViewModelFactory.swift`.
+
+### App-side twins of Core types
+
+[No hand-written twins](ARCHITECTURE.md): an FFI-only type is used as the uniffi type; a twin is only for a type an app persists.
+
+- **X98** **S** `ios/Packages/GemstoneServices/Sources/Keystore/KeystoreAuthentication.swift` twins `GemKeystoreAuthentication`, and `GemstoneKeystorePassword.authentication()` maps one to the other case by case.
+- **X99** **S** `ios/Packages/Primitives/Sources/LockPeriod.swift` twins `GemLockPeriod`.
+- **X100** **S** `ios/Packages/Primitives/Sources/WalletImportResult.swift` twins `GemWalletImportResult`.
+- **X101** **S** `ios/Packages/GemstonePrimitives/Sources/Types/AmountType.swift` twins `GemAmountType`, `SelectAssetType.swift` twins `GemSelectAssetType`.
+- **X102** **S** `ios/Packages/PrimitivesComponents/Sources/Types/PaymentDestination.swift` twins `GemPaymentDestination`.
+- **X103** **S** `ios/Features/Transactions/Sources/Types/TransactionHeaderAction.swift` twins `GemTransactionHeaderAction`.
+- **X104** **S** `ios/Features/Stake/.../DelegationViewModel.swift` declares `DelegationDestination` against Core's `GemDelegationDestination`.
+
+### Core hardening (second pass)
+
+- **X105** **S** `core/gemstone/src/services/transaction_state/tracker.rs` — 5 `unwrap`/`expect` outside tests on the transaction state path.
+- **X106** **S** `core/gemstone/src/gateway/chain_factory.rs` (3), `device.rs` (2), `signer/chain.rs` (1), `block_explorer/explorer.rs` (1).
