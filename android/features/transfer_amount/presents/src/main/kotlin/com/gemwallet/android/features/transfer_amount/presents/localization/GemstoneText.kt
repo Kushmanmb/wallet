@@ -15,7 +15,7 @@ fun GemAmountTitle.asString(): String = when (this) {
     GemAmountTitle.Stake -> stringResource(R.string.transfer_stake_title)
     GemAmountTitle.Unstake -> stringResource(R.string.transfer_unstake_title)
     GemAmountTitle.Redelegate -> stringResource(R.string.transfer_redelegate_title)
-    GemAmountTitle.Rewards -> stringResource(R.string.transfer_rewards_title)
+    GemAmountTitle.Rewards -> stringResource(R.string.transfer_claim_rewards_title)
     GemAmountTitle.Freeze -> stringResource(R.string.transfer_freeze_title)
     GemAmountTitle.Unfreeze -> stringResource(R.string.transfer_unfreeze_title)
     is GemAmountTitle.PerpetualOpen -> stringResource(direction.toPrimitives().stringRes())

@@ -17,9 +17,6 @@ This list was rebuilt on 2026-09-15 from scripted sweeps over the whole repo. Ea
 
 A Core enum both apps map is only safe while both maps agree. These were found by comparing each app's mapper, variant by variant.
 
-- **V40** **S** `GemWalletImportKind.address` prints "Address" on iOS (`common_address`) and "Address or Name" on Android (`wallet_import_address_field`). One of the two is wrong for the row; pick it and map both apps to that key.
-- **V41** **S** The stake rewards amount screen is titled "Claim Rewards" on iOS and "Rewards" on Android for the same `GemAmountTitle.rewards`. Same key, two strings.
-- **V42** **S** `GemTransactionFilter.stake` maps to `transfer_stake_title` on iOS and `wallet_stake` on Android. Both read "Stake" today, so this is duplication waiting to drift rather than a live bug — delete one key.
 
 ## 1a. Enum-to-string mapping that escaped its module's mapper file
 

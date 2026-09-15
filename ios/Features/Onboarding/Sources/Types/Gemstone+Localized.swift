@@ -20,7 +20,7 @@ extension GemWalletImportKind {
         switch self {
         case .phrase: Localized.Common.secretPhrase
         case .privateKey: Localized.Common.privateKey
-        case .address: Localized.Common.address
+        case .address: Localized.Wallet.Import.addressField
         }
     }
 }
