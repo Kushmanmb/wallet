@@ -1,5 +1,7 @@
 package com.gemwallet.android.features.settings.price_alerts.presents
 
+import uniffi.gemstone.GemPriceAlertPrompt
+import com.gemwallet.android.features.settings.price_alerts.presents.localization.string
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -69,7 +71,7 @@ fun PriceAlertTargetScene(
     value: TextFieldState = rememberTextFieldState(),
     type: PriceAlertNotificationType,
     direction: PriceAlertDirection,
-    resolvedDirection: PriceAlertDirection?,
+    prompt: GemPriceAlertPrompt,
     currency: Currency,
     currentPriceFormatted: String,
     priceSuggestions: List<Pair<String, String>> = emptyList(),
@@ -152,19 +154,7 @@ fun PriceAlertTargetScene(
         ) {
             item {
                 Text(
-                    text = when (type) {
-                        PriceAlertNotificationType.Auto -> ""
-                        PriceAlertNotificationType.Price -> when (resolvedDirection) {
-                            null -> stringResource(R.string.price_alerts_set_alert_set_target_price)
-                            PriceAlertDirection.Down -> stringResource(R.string.price_alerts_set_alert_price_under)
-                            PriceAlertDirection.Up -> stringResource(R.string.price_alerts_set_alert_price_over)
-                        }
-
-                        PriceAlertNotificationType.PricePercentChange -> when (direction) {
-                            PriceAlertDirection.Up -> stringResource(R.string.price_alerts_set_alert_price_increases_by)
-                            PriceAlertDirection.Down -> stringResource(R.string.price_alerts_set_alert_price_decreases_by)
-                        }
-                    },
+                    text = prompt.string(),
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -271,7 +261,7 @@ fun PriceAlertTargetScenePricePreview() {
             type = PriceAlertNotificationType.Price,
             currency = Currency.USD,
             currentPriceFormatted = "$901.80",
-            resolvedDirection = PriceAlertDirection.Up,
+            prompt = GemPriceAlertPrompt.PRICE_OVER,
             priceSuggestions = listOf("$850" to "850", "$950" to "950"),
             percentageSuggestions = listOf(3, 6, 9),
             buttonState = ButtonState.Enabled,
@@ -293,7 +283,7 @@ fun PriceAlertTargetScenePercentagePreview() {
             type = PriceAlertNotificationType.PricePercentChange,
             currency = Currency.USD,
             currentPriceFormatted = "$901.80",
-            resolvedDirection = PriceAlertDirection.Up,
+            prompt = GemPriceAlertPrompt.PRICE_OVER,
             priceSuggestions = listOf("$850" to "850", "$950" to "950"),
             percentageSuggestions = listOf(3, 6, 9),
             buttonState = ButtonState.Enabled,

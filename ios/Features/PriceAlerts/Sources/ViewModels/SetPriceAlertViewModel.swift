@@ -80,19 +80,7 @@ public final class SetPriceAlertViewModel {
     }
 
     var alertDirectionTitle: String {
-        switch state.type {
-        case .price:
-            switch alertDirection {
-            case .up: Localized.PriceAlerts.SetAlert.priceOver
-            case .down: Localized.PriceAlerts.SetAlert.priceUnder
-            case .none: Localized.PriceAlerts.SetAlert.setTargetPrice
-            }
-        case .percentage:
-            switch state.selectedDirection {
-            case .up: Localized.PriceAlerts.SetAlert.priceIncreasesBy
-            case .down: Localized.PriceAlerts.SetAlert.priceDecreasesBy
-            }
-        }
+        session.viewState().prompt.title
     }
 
     var isEnabledConfirmButton: Bool {

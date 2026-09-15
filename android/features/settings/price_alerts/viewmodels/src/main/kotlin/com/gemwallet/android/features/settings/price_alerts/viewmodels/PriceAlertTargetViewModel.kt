@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.settings.price_alerts.viewmodels
 
+import uniffi.gemstone.GemPriceAlertPrompt
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.SavedStateHandle
@@ -99,6 +100,9 @@ class PriceAlertTargetViewModel @Inject constructor(
 
     private val viewState: StateFlow<GemPriceAlertViewState> = session.map { it.viewState() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, session.value.viewState())
+
+    val prompt: StateFlow<GemPriceAlertPrompt> = viewState.map { it.prompt }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, viewState.value.prompt)
 
     val resolvedDirection: StateFlow<PriceAlertDirection?> = viewState.map { it.direction?.toPrimitives() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
