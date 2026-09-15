@@ -642,8 +642,16 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         providers.first.map(\.apr).flatMap { $0 > 0 ? $0 : nil } ?? assetApr ?? 0
     }
 
-    public func usesFreeze(chain _: Gemstone.Chain) -> Bool {
-        freezes
+    public func stakeSections(chain _: Gemstone.Chain, hasActions: Bool, hasDelegations: Bool) -> [Gemstone.GemStakeSection] {
+        [hasActions ? .manage : nil, freezes ? .resources : nil, hasDelegations ? .delegations : nil].compactMap { $0 }
+    }
+
+    public func stakeInfoRows(chain _: Gemstone.Chain, stakingApr: Double?) -> [Gemstone.GemStakeInfoRow] {
+        [stakingApr.flatMap { $0 != 0 ? .apr : nil }, lockTime > 0 ? .lockTime : nil, minStake != 0 ? .minimumAmount : nil].compactMap { $0 }
+    }
+
+    public func delegationRows(delegation: Gemstone.Delegation) -> [Gemstone.GemDelegationRow] {
+        [.provider, delegation.validator.apr != 0 ? .apr : nil, .status, rewardsShown ? .rewards : nil].compactMap { $0 }
     }
 
 

@@ -14,8 +14,8 @@ use crate::models::custom_types::GemBigInt;
 use crate::models::{GemContractCallData, GemEarnType};
 
 pub use model::{
-    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationCompletion, GemDelegationDestination, GemDelegationStatus, GemDelegationTone, GemStakeAction,
-    GemStakeActionItem, GemStakeAmountInput, GemStakeValidatorSelection, GemValidatorRow,
+    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationCompletion, GemDelegationDestination, GemDelegationRow, GemDelegationStatus,
+    GemDelegationTone, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeInfoRow, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
 };
 pub use store::GemStakeStore;
 
@@ -125,12 +125,20 @@ impl GemStakeService {
         rules::can_change_amount_on_unstake(chain)
     }
 
-    pub fn uses_freeze(&self, chain: Chain) -> bool {
-        rules::uses_freeze(chain)
-    }
-
     pub fn stake_actions(&self, wallet_type: WalletType, chain: Chain, has_validators: bool, balance: GemAssetBalance, delegations: Vec<Delegation>) -> Vec<GemStakeActionItem> {
         rules::stake_actions(wallet_type, chain, has_validators, &balance, &delegations)
+    }
+
+    pub fn stake_sections(&self, chain: Chain, has_actions: bool, has_delegations: bool) -> Vec<GemStakeSection> {
+        rules::stake_sections(rules::uses_freeze(chain), has_actions, has_delegations)
+    }
+
+    pub fn stake_info_rows(&self, chain: Chain, staking_apr: Option<f64>) -> Vec<GemStakeInfoRow> {
+        rules::stake_info_rows(chain, staking_apr)
+    }
+
+    pub fn delegation_rows(&self, delegation: Delegation) -> Vec<GemDelegationRow> {
+        rules::delegation_rows(&delegation)
     }
 
     pub fn claim_rewards(&self, chain: Chain, delegations: Vec<Delegation>) -> GemClaimRewards {

@@ -25,7 +25,6 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 
 
 
-- **R21** **M** Stake and delegation — `StakeSceneViewModel`, `DelegationSceneViewModel` and `DelegationViewModel` build nine section and field titles app-side against the Android earn screens.
 
 - **R24** **L** The shared row models in [`PrimitivesComponents`](../ios/Packages/PrimitivesComponents/Sources/ViewModels) are the largest unmigrated group: 29 models, 57 user-facing strings, none holding a Core record — `AssetViewModel`, `AddressListItemViewModel`, `AssetDataViewModel`, `NetworkSelectorViewModel`, `WalletHeaderViewModel`, `MarketValueViewModel`. Android mirrors each in `ui-models` and `gemcore/domains`. Take them one row at a time; `GemAssetRow` is the exemplar and several already have a Core record they do not hold. `GemAssetRow` names the row's shape for a whole screen, so the per-item values still come from `AssetDataViewModel` on iOS and `AssetInfoDataAggregate` on Android; the row model drops that second object once Core carries the values.
 - **R25** **M** Perpetuals — `PerpetualSceneViewModel` alone decides nine section and button titles, with `AutocloseViewModel`, `PerpetualsHeaderViewModel` and `ChartLineViewModel` behind it, against the Android perpetual screens.
