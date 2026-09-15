@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use primitives::{Chain, Latency};
+use primitives::Chain;
 
 use super::model::{GemAddNodeError, GemChainSettingsSection, GemExplorerRow, GemNodeCheck, GemNodeRow, GemNodeSelection, GemNodeStatusState};
 use super::rules;
@@ -91,13 +91,7 @@ impl GemChainSettingsService {
     }
 
     pub async fn node_status(&self, chain: Chain, url: String) -> GemNodeStatusState {
-        match self.gateway.get_node_status(chain, &url).await {
-            Ok(status) if status.latest_block_number > 0 => GemNodeStatusState::Result {
-                latest_block_number: status.latest_block_number,
-                latency: Latency::from_milliseconds(status.latency_ms),
-            },
-            Ok(_) | Err(_) => GemNodeStatusState::Error,
-        }
+        rules::node_status_state(self.gateway.get_node_status(chain, &url).await.ok())
     }
 
     pub fn new_add_node_session(&self, chain: Chain) -> GemAddNodeSession {
@@ -111,5 +105,83 @@ impl GemChainSettingsService {
     pub async fn check_node(&self, chain: Chain, url: String) -> Result<GemNodeCheck, GemAddNodeError> {
         let url = rules::node_url(&url).ok_or(GemAddNodeError::InvalidUrl)?;
         Ok(self.gateway.check_node(chain, &url).await?)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use primitives::node_config::NodeRegion;
+
+    use super::*;
+    use super::super::model::GemNodeSubtitle;
+    use crate::gateway::EmptyPreferences;
+    use crate::services::node::rules;
+    use crate::services::node::testkit::MemoryNodeStore;
+    use crate::services::preferences::GemPreferencesService;
+    use crate::services::preferences::testkit::MemoryPreferencesStore;
+    use crate::testkit::TestAlienProvider;
+
+    fn service() -> GemChainSettingsService {
+        let preferences_store = Arc::new(MemoryPreferencesStore::default());
+        let preferences = Arc::new(GemPreferencesService::new(preferences_store.clone()));
+        GemChainSettingsService::new(
+            Arc::new(GemNodeService::new(Arc::new(MemoryNodeStore::default()), preferences_store.clone())),
+            Arc::new(GemExplorerService::new(preferences)),
+            Arc::new(GemGateway::new(
+                Arc::new(TestAlienProvider::with_status(200)),
+                preferences_store,
+                Arc::new(EmptyPreferences),
+            )),
+        )
+    }
+
+    #[test]
+    fn test_exactly_one_explorer_row_is_selected_and_it_follows_the_stored_name() {
+        let service = service();
+        let rows = service.explorer_rows(Chain::Ethereum);
+        let names: Vec<String> = rows.iter().map(|row| row.name.clone()).collect();
+
+        assert_eq!(names, service.explorers(Chain::Ethereum));
+        assert_eq!(rows.iter().filter(|row| row.is_selected).count(), 1);
+
+        let other = names.last().unwrap().clone();
+        service.set_explorer_name(Chain::Ethereum, other.clone()).unwrap();
+        let selected: Vec<String> = service
+            .explorer_rows(Chain::Ethereum)
+            .into_iter()
+            .filter(|row| row.is_selected)
+            .map(|row| row.name)
+            .collect();
+
+        assert_eq!(selected, vec![other]);
+    }
+
+    #[test]
+    fn test_a_default_node_row_cannot_be_deleted_and_an_added_one_can() {
+        let service = service();
+        let default_url = rules::region_node(Chain::Ethereum, NodeRegion::Us).url;
+        let selections = rules::node_selections(vec![rules::region_node(Chain::Ethereum, NodeRegion::Us)], &default_url);
+        let default_row = service.node_row(Chain::Ethereum, selections[0].clone(), GemNodeStatusState::Loading);
+
+        assert!(!default_row.can_delete);
+        assert_eq!(default_row.subtitle, GemNodeSubtitle::LatestBlock { value: None });
+
+        let added = GemNodeSelection {
+            url: "https://node.example.com".to_string(),
+            host: "node.example.com".to_string(),
+            is_selected: false,
+            gem_node_flag: None,
+        };
+        let added_row = service.node_row(
+            Chain::Ethereum,
+            added,
+            GemNodeStatusState::Result {
+                latest_block_number: 21_000_000,
+                latency: primitives::Latency::from_milliseconds(120),
+            },
+        );
+
+        assert!(added_row.can_delete);
+        assert_eq!(added_row.subtitle, GemNodeSubtitle::LatestBlock { value: Some(21_000_000) });
     }
 }

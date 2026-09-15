@@ -213,7 +213,6 @@ Thirty gemstone files carry `pub fn`s and no `#[cfg(test)]`, but most of them de
 - **T3** **S** `services/swap/mod.rs` `suggest_pair`.
 - **T4** **S** `services/wallet_home/mod.rs` `refresh`.
 - **T5** **M** `services/app_start/mod.rs` `setup_wallets`.
-- **T6** **S** `services/node/settings.rs` — `explorer_rows` (which name is selected), `node_row`, and `node_status` (a zero block number is an error, not a result).
 - **T7** **S** `services/asset_discovery/mod.rs` `discover`.
 - **T8** **M** `services/rewards/mod.rs` — `create_referral`, `use_referral_code`, `redeem`. Money paths with no test.
 - **T9** **S** `services/explorer/mod.rs` `get_transaction_link` (13 lines of explorer selection).

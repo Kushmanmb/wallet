@@ -3,6 +3,8 @@ use crate::service_status::GemLatencyStatus;
 use crate::services::collections::unique_by;
 use primitives::Chain;
 use primitives::node::{Node, NodeState};
+use primitives::node_status::NodeStatus;
+use primitives::Latency;
 use primitives::node_config::{self, NodePriority, NodeRegion};
 use url::Url;
 
@@ -123,6 +125,16 @@ pub fn latency_status(state: &GemNodeStatusState) -> GemLatencyStatus {
         GemNodeStatusState::Loading => GemLatencyStatus::Loading,
         GemNodeStatusState::Error => GemLatencyStatus::Error,
         GemNodeStatusState::Result { latency, .. } => GemLatencyStatus::Result { latency: latency.clone() },
+    }
+}
+
+pub fn node_status_state(status: Option<NodeStatus>) -> GemNodeStatusState {
+    match status {
+        Some(status) if status.latest_block_number > 0 => GemNodeStatusState::Result {
+            latest_block_number: status.latest_block_number,
+            latency: Latency::from_milliseconds(status.latency_ms),
+        },
+        _ => GemNodeStatusState::Error,
     }
 }
 
@@ -286,5 +298,27 @@ mod tests {
             sorted.iter().map(|node| node.url.as_str()).collect::<Vec<_>>(),
             vec![default_url.as_str(), added.url.as_str()]
         );
+    }
+
+    #[test]
+    fn test_a_node_that_reports_no_block_is_an_error_not_a_result() {
+        let reachable = NodeStatus {
+            latest_block_number: 21_000_000,
+            latency_ms: 120,
+        };
+        let stalled = NodeStatus {
+            latest_block_number: 0,
+            latency_ms: 5,
+        };
+
+        assert_eq!(
+            node_status_state(Some(reachable)),
+            GemNodeStatusState::Result {
+                latest_block_number: 21_000_000,
+                latency: Latency::from_milliseconds(120),
+            }
+        );
+        assert_eq!(node_status_state(Some(stalled)), GemNodeStatusState::Error, "a node at block zero has nothing to serve");
+        assert_eq!(node_status_state(None), GemNodeStatusState::Error);
     }
 }
