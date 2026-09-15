@@ -315,7 +315,10 @@ extension SwapSceneViewModel {
     }
 
     func onAssetIdsChange(assetIds: Set<AssetId>) async {
-        await performUpdate(for: Array(assetIds))
+        let assetIds = Array(assetIds)
+        async let balances: () = performUpdate(for: assetIds)
+        async let prices: () = subscribePrices(for: assetIds)
+        _ = await (balances, prices)
     }
 
     func onSelectAssetPay() {
@@ -429,11 +432,6 @@ extension SwapSceneViewModel {
         session = session.onRequestChanged(request: input.request)
         resetToValue()
         loadTrigger = SwapLoadTrigger(input: input, isImmediate: isImmediate)
-
-        Task {
-            let assetIds = [fromAsset?.asset.id, toAsset?.asset.id].compactMap(\.self)
-            try await service.addPrices(assetIds: assetIds)
-        }
     }
 
     private func swap() {
@@ -493,6 +491,14 @@ extension SwapSceneViewModel {
             try await service.updateBalances(assetIds: assetIds)
         } catch {
             debugLog("SwapScene balance update error: \(error)")
+        }
+    }
+
+    private func subscribePrices(for assetIds: [AssetId]) async {
+        do {
+            try await service.addPrices(assetIds: assetIds)
+        } catch {
+            debugLog("SwapScene price subscription error: \(error)")
         }
     }
 
