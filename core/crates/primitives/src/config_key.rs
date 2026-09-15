@@ -313,7 +313,7 @@ impl ConfigKey {
             Self::PriceTimerTopMarketCap => "60s",
             Self::PriceTimerHighMarketCap => "5m",
             Self::PriceTimerLowMarketCap => "15m",
-            Self::PriceTimerFiatRates => "6m",
+            Self::PriceTimerFiatRates => "12h",
             Self::PriceTimerChartsHourly => "60s",
             Self::PriceTimerChartsDaily => "6m",
             Self::PriceTimerMarkets => "1h",

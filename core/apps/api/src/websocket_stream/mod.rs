@@ -24,10 +24,11 @@ pub async fn ws_stream(ws: WebSocket, auth: AuthenticatedDevice, price_client: &
     let retention = config.retention;
     let history_limit = config.history_limit;
     let device_id = auth.device_row.device_id.clone();
+    let version = auth.device_row.version;
 
     ws.channel(move |ws_stream| {
         Box::pin(async move {
-            let mut observer = client::StreamObserverClient::new(device_id, price_client);
+            let mut observer = client::StreamObserverClient::new(device_id, version, price_client);
             stream::new_stream(&redis_url, &cacher_client, retention, history_limit, &mut observer, ws_stream).await;
             Ok::<(), rocket_ws::result::Error>(())
         })

@@ -308,6 +308,10 @@ On-chain swaps use normal transaction tracking; cross-chain providers may also t
 
 <sub>Reviewed 2026-09-02. Source: [active swap providers](../core/crates/swapper/src/swapper.rs). Cetus Aggregator and Orca are inactive.</sub>
 
+## Fiat exchange rates
+
+CoinGecko and CoinMarketCap provide USD-based rates with a provider assigned per currency. BYN, KZT, UZS, EGP, KES, COP, MAD, GHS, and PEN require app 2.114.32+ and remain disabled pending rollout.
+
 ## Fiat providers
 
 All six providers below are active. Order lookup and webhooks provide payment-status updates.

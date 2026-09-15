@@ -118,6 +118,8 @@ pub mod fiat_quote_request;
 pub use self::fiat_quote_request::FiatQuoteRequest;
 pub mod fiat_rate;
 pub use self::fiat_rate::FiatRate;
+pub mod fiat_rate_provider;
+pub use self::fiat_rate_provider::FiatRateProvider;
 pub mod fiat_provider_id;
 pub use self::fiat_provider_id::FiatProviderId;
 pub mod platform;
@@ -398,6 +400,8 @@ pub mod connection_status;
 pub use self::connection_status::ConnectionStatus;
 pub mod metrics;
 pub use self::metrics::{ConsumerStatus, ParserStatus, ReportedError};
+pub mod version;
+pub use self::version::is_version_higher;
 pub mod value_access;
 pub use self::value_access::{JsonDecode, ValueAccess};
 

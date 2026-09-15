@@ -6303,6 +6303,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "coingecko",
+ "coinmarketcap",
  "gem_client",
  "gem_ton",
  "gem_tracing",

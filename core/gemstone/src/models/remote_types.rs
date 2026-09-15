@@ -229,6 +229,15 @@ pub enum Currency {
     MYR,
     AED,
     SEK,
+    BYN,
+    KZT,
+    UZS,
+    EGP,
+    KES,
+    COP,
+    MAD,
+    GHS,
+    PEN,
 }
 
 #[uniffi::remote(Enum)]

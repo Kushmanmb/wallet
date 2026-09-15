@@ -3,11 +3,11 @@ use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
 use crate::DatabaseError;
-use crate::sql_types::{AssetId, Currency, FiatProviderNameRow, FiatTransactionStatusRow, FiatTransactionType};
+use crate::sql_types::{AssetId, Currency, FiatProviderNameRow, FiatRateProviderRow, FiatTransactionStatusRow, FiatTransactionType};
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use primitives::{
-    AssetId as PrimitiveAssetId, FiatAsset, FiatProvider, FiatProviderCountry, FiatProviderName, FiatRate, FiatTransaction, FiatTransactionUpdate, PaymentType,
+    AssetId as PrimitiveAssetId, FiatAsset, FiatProvider, FiatProviderCountry, FiatProviderName, FiatRate, FiatRateProvider, FiatTransaction, FiatTransactionUpdate, PaymentType,
     fiat_assets::FiatAssetLimits,
 };
 use serde::{Deserialize, Serialize};
@@ -19,6 +19,8 @@ pub struct FiatRateRow {
     pub id: Currency,
     pub name: String,
     pub rate: f64,
+    pub provider: FiatRateProviderRow,
+    pub is_enabled: bool,
 }
 
 impl FiatRateRow {
@@ -29,11 +31,13 @@ impl FiatRateRow {
         }
     }
 
-    pub fn from_primitive(rate: FiatRate) -> Self {
+    pub fn from_primitive(rate: FiatRate, provider: FiatRateProvider) -> Self {
         FiatRateRow {
             id: rate.symbol.into(),
             name: "".to_string(),
             rate: rate.rate,
+            provider: provider.into(),
+            is_enabled: false,
         }
     }
 }
