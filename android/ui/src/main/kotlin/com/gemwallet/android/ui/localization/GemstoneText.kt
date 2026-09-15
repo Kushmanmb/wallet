@@ -19,6 +19,7 @@ import com.wallet.core.primitives.TransactionState
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.GemAddNodeFailure
 import uniffi.gemstone.GemApprovalValue
+import uniffi.gemstone.GemAssetMenuAction
 import uniffi.gemstone.GemDelegationStatus
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemLocalizedText
@@ -246,3 +247,11 @@ fun GemVerificationLevel.stringRes(): Int = when (this) {
 
 @StringRes
 fun WalletConnectionVerificationStatus.titleRes(): Int = verificationLevel(this).stringRes()
+
+@StringRes
+fun GemAssetMenuAction.stringRes(): Int = when (this) {
+    is GemAssetMenuAction.Pin -> if (isPinned) R.string.common_unpin else R.string.common_pin
+    GemAssetMenuAction.Hide -> R.string.common_hide
+    GemAssetMenuAction.AddToWallet -> R.string.asset_add_to_wallet
+    is GemAssetMenuAction.CopyAddress -> R.string.wallet_copy_address
+}

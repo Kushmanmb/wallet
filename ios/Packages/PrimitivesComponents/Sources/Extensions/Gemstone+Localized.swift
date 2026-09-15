@@ -4,6 +4,7 @@ import BigInt
 import Formatters
 import enum Gemstone.PerpetualDirection
 import enum Gemstone.FeeOption
+import enum Gemstone.GemAssetMenuAction
 import enum Gemstone.GemApprovalValue
 import enum Gemstone.GemAssetInfoKind
 import enum Gemstone.GemFiatTransactionBadge
@@ -306,6 +307,16 @@ extension FeeUnitType {
         case .satVb: Localized.FeeRate.satvB
         case .gwei: Localized.FeeRate.gwei
         case .native: symbol
+        }
+    }
+}
+
+extension GemAssetMenuAction {
+    public var title: String? {
+        switch self {
+        case .addToWallet: Localized.Asset.addToWallet
+        case .copyAddress: Localized.Wallet.copyAddress
+        case .pin, .hide: nil
         }
     }
 }

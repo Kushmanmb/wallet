@@ -71,7 +71,6 @@ Per-variant labels: a primitives enum both apps map to a string themselves is a 
 - **V16** **S** Price alert kind — 5 cases, `PriceAlertItemViewModel` against `PriceAlertListItem.kt`. Lands with **F12**.
 - **V17** **S** Perpetual position action — 5 cases, `ToastMessage+PrimitivesComponents` against `PerpetualConfirmDetailsComponents.kt`.
 - **V18** **S** Swap button action — 5 cases, `SwapButtonViewModel` against `SwapUiState.kt`.
-- **V19** **S** Asset context menu action — 4 cases, `AssetContextMenu` on both apps.
 - **V20** **S** Collectible row kind — 4 cases, `CollectibleViewModel` against `NftDetailsScene.kt`.
 - **V21** **S** Chart scene section — 4 cases, `ChartScene` against `AssetChartScene.kt`.
 - **V22** **S** `GemFiatAmountCheck` — a Core enum both apps map to text themselves, `FiatSceneViewModel` against `FiatViewModel.kt`. Lands with **F9**'s shape.
