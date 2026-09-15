@@ -20,7 +20,6 @@ A Core enum both apps map is only safe while both maps agree. These were found b
 
 Each of these picks a literal `Localized.`/`R.string.` from a Core variant outside its module's mapper, which is how V40–V42 happened. Verified file by file on 2026-09-15: a `when`/`switch` that calls the mapper (`row.stringRes()`, `row.title`) is the contract working and is not listed.
 
-- **V49** **S** iOS Swap — `Swap/Sources/Errors/Errors.swift`, the counterpart of the Android mapper V56 added.
 - **V50** **M** iOS Transfer — `Transfer/Sources/Errors/Errors.swift`, `ViewModels/ConfirmButtonViewModel.swift`, `ViewModels/RecipientSceneViewModel.swift`, `ViewModels/TransferDataViewModel.swift`.
 - **V51** **S** iOS WalletConnector — `WalletConnector/.../ViewModels/SignMessageSceneViewModel.swift`.
 - **V52** **S** Android buy — `features/buy/viewmodels/FiatViewModel.kt`.
