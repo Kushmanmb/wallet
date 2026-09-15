@@ -12,6 +12,8 @@ These files were checked during the 2026-09-15 mapper sweep and need no change �
 
 ## 2. Lists and screens without a row record
 
+Three were checked on 2026-09-15 and need no record. The amount screen's balance and reserved-fee lines are a localized template around an amount each platform formats with the device locale, and the `shows_asset_balance` and `can_change_value` decisions already come from `GemAmountInput` — moving the text into Core would take the locale out of the number. The autoclose summary was the one real find: Android hand-joined `"$label: $value"` where iOS and Android's own position row both call `trigger_order_text`, so a cleared trigger read differently; Android now calls it too. The scanner error is two platform conditions — no camera, permission denied — with the same two strings on both apps and nothing for Core to decide.
+
 Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](../ios/Packages/PrimitivesComponents/Sources/ViewModels/ListAssetItemViewModel.swift), [Android](../android/gemcore/src/main/kotlin/com/gemwallet/android/domains/asset/aggregates/AssetInfoDataAggregate.kt). Each of these iOS view models composes four or more user-facing strings and holds no Core record; the count in brackets is how many. Land each with its Android mirror.
 
 - **R36** **M** `Transfer/Sources/ViewModels/RecipientSceneViewModel.swift` (9) against the Android `recipient` screens.
@@ -20,9 +22,6 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 - **R41** **M** `Contacts/Sources/ViewModels/ManageContactViewModel.swift` (6) against Android `ManageContactViewModel`.
 - **R42** **M** `Assets/Sources/ViewModels/AddAssetSceneViewModel.swift` (6) against Android `AddAssetViewModel`.
 - **R46** **M** `Onboarding/Sources/ViewModels/ImportWalletSceneViewModel.swift` (5) against Android `ImportViewModel`.
-- **R47** **S** `Transfer/Sources/ViewModels/AmountSceneViewModel.swift` (4) — balance line, reserved-fee line, max and continue.
-- **R48** **S** `Transfer/Sources/ViewModels/AmountPerpetualViewModel.swift` (4).
-- **R50** **S** `QRScanner/Sources/ViewModels/QRScannerErrorViewModel.swift` (4) — check the scanner divergence note in SERVICES.md first; only the non-platform half moves.
 - **R51** **M** `Perpetuals/Sources/ViewModels/PerpetualsSceneViewModel.swift` (4) against Android `PerpetualMarketViewModel`.
 
 ## 5. Screens that may want a session
