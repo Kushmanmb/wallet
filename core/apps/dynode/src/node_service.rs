@@ -33,6 +33,7 @@ pub struct NodeService {
     chain_types: ChainTypesConfig,
     retry_config: RetryConfig,
     proxy: ProxyRequestService,
+    broadcast_providers: Arc<BroadcastProviders>,
     node_monitor: NodeMonitor,
 }
 
@@ -50,8 +51,9 @@ impl NodeService {
     ) -> Self {
         let nodes = chains.values().filter_map(|config| config.urls.first().cloned().map(|url| (config.chain, url))).collect();
 
+        metrics.initialize_transaction_broadcasts(chains.keys().copied());
         let broadcast_providers = Arc::new(BroadcastProviders::from_chains(chains.keys().copied()));
-        let proxy = ProxyRequestService::new(metrics.clone(), cache, client, headers_config, broadcast_webhook, broadcast_providers);
+        let proxy = ProxyRequestService::new(metrics.clone(), cache, client, headers_config, broadcast_webhook, Arc::clone(&broadcast_providers));
         let nodes = Arc::new(RwLock::new(nodes));
         let metrics = Arc::new(metrics);
         let node_monitor = NodeMonitor::new(chains.values().cloned(), Arc::clone(&nodes), Arc::clone(&metrics), monitoring_config);
@@ -63,6 +65,7 @@ impl NodeService {
             chain_types,
             retry_config,
             proxy,
+            broadcast_providers,
             node_monitor,
         }
     }
@@ -75,6 +78,9 @@ impl NodeService {
         let chain = request.chain;
         let _inflight = self.metrics.track_node_inflight(chain);
         let result = self.handle_request_inner(request).await;
+        if request.is_broadcast(&self.broadcast_providers) {
+            self.metrics.record_transaction_broadcast(request, &result, &self.broadcast_providers);
+        }
         let status = result.as_ref().map_or(StatusCode::INTERNAL_SERVER_ERROR.as_u16(), |response| response.status);
         self.metrics.record_node_response(chain, &request.path, status);
         if let Ok(response) = &result {
@@ -409,6 +415,28 @@ mod tests {
             }
         }))
         .unwrap()
+    }
+
+    #[tokio::test]
+    async fn test_broadcast_metrics_count_final_response_without_webhook() {
+        let config = ChainConfig {
+            urls: vec![],
+            ..testkit::chain_config(Chain::Ethereum, "https://ethereum.example.com")
+        };
+        let service = create_service(HashMap::from([(Chain::Ethereum, config)]));
+        let prefix = "dynode_transaction_broadcasts_total{";
+        let before = service.metrics.get_metrics();
+        let initial = before.lines().filter(|line| line.starts_with(prefix)).collect::<Vec<_>>();
+        assert_eq!(initial.len(), 2);
+        assert!(initial.iter().all(|line| line.ends_with(" 0")));
+
+        service.handle_request(&create_jsonrpc_request(Chain::Ethereum, "eth_chainId")).await.unwrap();
+        service.handle_request(&create_jsonrpc_request(Chain::Ethereum, "eth_sendRawTransaction")).await.unwrap();
+        let encoded = service.metrics.get_metrics();
+        assert_eq!(
+            encoded.lines().filter(|line| line.starts_with(prefix) && !line.ends_with(" 0")).collect::<Vec<_>>(),
+            vec!["dynode_transaction_broadcasts_total{source=\"public\",group=\"evm\",service=\"ethereum\",chain=\"ethereum\",outcome=\"failure\"} 1"]
+        );
     }
 
     #[test]

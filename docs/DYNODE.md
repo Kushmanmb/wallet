@@ -43,15 +43,10 @@ curl http://localhost:3000/api/fastnear_transfers/
 
 ## Transaction broadcast metrics
 
-`dynode_transaction_broadcasts_total` counts completed recognized broadcast requests once, after Dynode retries. Labels are `chain`, `source`, `group`, `service`, `outcome` (`success` or `failure`), and a bounded `reason`:
-
-- `accepted`: a 2xx response with a nonempty transaction identifier decoded by the chain's existing broadcast provider. This measures RPC acceptance, not on-chain confirmation.
-- `http_error`: a final non-2xx response, including local rejection, missing nodes, or exhausted retries.
-- `response_error`: a 2xx response rejected by the chain decoder or without a usable identifier. This includes application-level errors and malformed or unsupported responses; it does not prove the transaction was never submitted.
-- `proxy_error`: the request ended in an error without a final proxy response, including transport or JSON-RPC parse errors.
+`dynode_transaction_broadcasts_total` counts completed recognized broadcast requests once, after Dynode retries. Labels are `chain`, `source`, `group`, `service`, and `outcome` (`success` or `failure`). Success requires a 2xx response with a nonempty transaction identifier decoded by the chain's existing broadcast provider; it measures RPC acceptance, not on-chain confirmation. Failure includes HTTP or proxy errors and rejected, malformed, or unsupported responses without a usable identifier. A failure does not prove the transaction was never submitted.
 
 `dynode_transaction_broadcast_latency_milliseconds` is a histogram with the same labels, measuring elapsed request time through completion, including retries. It records successes and failures. Metrics run independently of broadcast webhook configuration and delivery. Transaction identifiers, addresses, bodies, and free-form error messages are never metric labels.
 
 Coverage follows the existing webhook request classifiers: single JSON-RPC calls and recognized HTTP/gRPC broadcast paths for configured chains. JSON-RPC batches, unrecognized requests, requests rejected before reaching the node service, and cancelled requests are excluded. Repeated client submissions count separately; these are request counts, not unique transactions.
 
-The Dynode Grafana dashboard in `../infra` has a Transaction Broadcast section above Cache Performance with per-chain counts, success rate, P50/P95 latency, and failure categories. Source, region, group, and chain filters apply; host, provider, and platform filters do not apply because one final outcome may span multiple upstreams. Range counts use Prometheus `increase`, so they are estimates from scrapes and cannot recover historical broadcasts before instrumentation was deployed.
+The Dynode Grafana dashboard in `../infra` has a Transaction Broadcast section above Cache Performance with per-chain counts, success rate, P50/P95 latency, and failures by chain. Source, region, group, and chain filters apply; host, provider, and platform filters do not apply because one final outcome may span multiple upstreams. Range counts use Prometheus `increase`, so they are estimates from scrapes and cannot recover historical broadcasts before instrumentation was deployed.
