@@ -137,11 +137,11 @@ class FiatViewModel @Inject constructor(
 
 
     val providers = combine(assetInfoUIModel.filterNotNull(), viewState) { asset, state ->
-        state.quoteRows.map { row -> row.toProviderUIModel(asset.asset, currency) }
+        state.quoteRows.map { row -> row.toProviderUIModel(asset.asset) }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val selectedProvider = combine(assetInfoUIModel, viewState) { asset, state ->
-        asset?.let { state.selectedQuoteRow?.toProviderUIModel(it.asset, currency) }
+        asset?.let { state.selectedQuoteRow?.toProviderUIModel(it.asset) }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val ticker = tickerFlow(service.quoteRefreshIntervalMilliseconds().toLong()) {}
