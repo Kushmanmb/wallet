@@ -65,8 +65,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, UIWindowSceneDelegate {
         let token = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
 
         Task {
-            let _ = try SecurePreferences.standard.set(value: token, key: .deviceToken)
-            try await AppResolver.main.services.deviceService.synchronizeIfNeeded()
+            do {
+                _ = try SecurePreferences.standard.set(value: token, key: .deviceToken)
+                try await AppResolver.main.services.deviceService.synchronizeIfNeeded()
+            } catch {
+                debugLog("Push token registration failed")
+            }
         }
     }
 

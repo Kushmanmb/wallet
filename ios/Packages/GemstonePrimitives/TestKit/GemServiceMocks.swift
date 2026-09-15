@@ -850,7 +850,7 @@ public final class GemPerpetualServiceMock: GemPerpetualServiceProtocol, @unchec
             throw AnyError("connection unavailable")
         }
         guard let account = wallet.toPrimitives().hyperliquidAccount else { return nil }
-        return try Gemstone.GemPerpetualConnection(
+        return Gemstone.GemPerpetualConnection(
             address: account.address,
             mode: Primitives.PerpetualAccountMode.standard.toGem(),
         )

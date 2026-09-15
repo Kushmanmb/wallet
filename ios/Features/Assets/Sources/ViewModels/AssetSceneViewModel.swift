@@ -328,7 +328,11 @@ public extension AssetSceneViewModel {
             }
         case .closeBanner:
             Task {
-                try await service.closeBanner(key: action.banner.gemKey)
+                do {
+                    try await service.closeBanner(key: action.banner.gemKey)
+                } catch {
+                    isPresentingToastMessage = .error(Localized.Errors.errorOccurred)
+                }
             }
         }
         onSelect(url: action.url)

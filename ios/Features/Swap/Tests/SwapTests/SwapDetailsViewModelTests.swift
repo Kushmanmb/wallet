@@ -19,7 +19,7 @@ struct SwapDetailsViewModelTests {
     @Test
     func swapEstimationField() throws {
         #expect(
-            try SwapDetailsViewModel
+            SwapDetailsViewModel
                 .mock(selectedQuote: SwapperQuote.mock(etaInSeconds: nil).swapQuote).swapEstimationField == nil,
         )
         #expect(SwapDetailsViewModel.mock(selectedQuote: SwapperQuote.mock(etaInSeconds: 30).swapQuote).swapEstimationField?.value.text == "≈ 30 sec")

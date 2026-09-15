@@ -200,7 +200,11 @@ public extension WalletSceneViewModel {
         case .event: break
         case .closeBanner:
             Task {
-                try await service.close(action.banner)
+                do {
+                    try await service.close(action.banner)
+                } catch {
+                    isPresentingToastMessage = .error(Localized.Errors.errorOccurred)
+                }
             }
         case let .button(bannerButton):
             switch bannerButton {

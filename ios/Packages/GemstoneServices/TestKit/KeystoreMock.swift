@@ -3,7 +3,6 @@
 public import struct Gemstone.GemSignedTransaction
 public import struct Gemstone.GemSignerInput
 public import class Gemstone.MessageSigner
-public import GemstonePrimitives
 import Foundation
 import GemstoneServices
 import Primitives

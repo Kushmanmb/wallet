@@ -12,6 +12,7 @@ import Store
 import Support
 import SwiftUI
 import WalletConnector
+import WalletConnectorService
 
 struct SettingsNavigationView: View {
     @Environment(\.navigationHandler) private var navigationHandler
