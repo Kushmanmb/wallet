@@ -216,7 +216,6 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 
 ## 14. Documentation that has fallen behind
 
-- **G6** **S** ARCHITECTURE.md's implementation index still points at examples that moved during the row migration; re-resolve every link.
 - **G7** **S** [PERFORMANCE.md](PERFORMANCE.md) records budgets for screens whose data path moved to Core sessions; restate each budget against the current path or mark it unmeasured.
 
 ## 15. More platform work

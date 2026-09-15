@@ -77,5 +77,8 @@ localize:
 check-mappers:
     @python3 ./scripts/check-mapper-parity.py
 
+check-docs:
+    @python3 ./scripts/check-docs-links.py
+
 bump TARGET="patch":
     @bash ./scripts/bump.sh {{TARGET}}
