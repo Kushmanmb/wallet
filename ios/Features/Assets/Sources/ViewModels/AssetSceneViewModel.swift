@@ -222,7 +222,7 @@ public final class AssetSceneViewModel: Sendable {
     }
 
     public func priceAlertsImage(_ details: GemAssetDetails) -> Image {
-        Image(systemName: details.state.priceAlertEnabled ? SystemImage.bellFill : SystemImage.bell)
+        details.state.priceAlert.image
     }
 
     public func menuItems(_ details: GemAssetDetails) -> [ActionMenuItemType] {
@@ -367,10 +367,10 @@ public extension AssetSceneViewModel {
 
     func onTogglePriceAlert() {
         Task {
-            let enabled = !details.state.priceAlertEnabled
+            let toggled = details.state.priceAlert.toggled()
             do {
-                try await setPriceAlert(enabled: enabled)
-                isPresentingToastMessage = .priceAlert(for: assetData.asset.name, enabled: enabled)
+                try await setPriceAlert(enabled: toggled == .enabled)
+                isPresentingToastMessage = .priceAlert(for: assetData.asset.name, enabled: toggled == .enabled)
             } catch {
                 isPresentingToastMessage = .error(error.localizedDescription)
             }

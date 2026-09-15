@@ -19,7 +19,7 @@ use crate::perpetual::GemPerpetual;
 use crate::services::balance::GemAssetBalance;
 use crate::services::nft::rules::nft_chains;
 use crate::services::price::rules::has_price;
-use crate::services::price_alert::rules::{displayed_price_alert_ids, price_alert_enabled};
+use crate::services::price_alert::rules::{displayed_price_alert_ids, price_alert_toggle};
 use swapper::AssetList as SwapAssetList;
 
 use crate::models::asset::{wallet_asset_is_enabled, wallet_default_assets};
@@ -376,7 +376,7 @@ pub fn details_state(
         shows_resources: StakeChain::from_str(chain.as_ref()).is_ok_and(|stake_chain| stake_chain.get_uses_freeze()),
         shows_price_alerts: has_price(price) && displayed_alerts > 0,
         price_alerts_count: displayed_alerts,
-        price_alert_enabled: price_alert_enabled(&price_alerts),
+        price_alert: price_alert_toggle(&price_alerts),
         shows_earn: EARN_OFFERED && metadata.is_earn_enabled && !is_view_only && balance.earn == GemBigUint::ZERO,
         empty_transactions_action: if metadata.is_buy_enabled {
             Some(GemAssetEmptyAction::Buy)
@@ -434,6 +434,7 @@ mod tests {
         );
     }
     use super::*;
+    use crate::services::price_alert::rules::GemPriceAlertToggle;
 
     #[test]
     fn test_each_select_flow_decides_its_row_action_and_recent_activity() {
@@ -1009,8 +1010,8 @@ mod tests {
         let state = |alerts: Vec<PriceAlert>| details_state(WalletType::Multicoin, Chain::Ethereum, &plain, &balance, &[], Some(1.0), alerts);
 
         assert_eq!(state(vec![auto.clone(), manual.clone(), notified]).price_alerts_count, 2);
-        assert!(state(vec![auto, manual.clone()]).price_alert_enabled);
-        assert!(!state(vec![manual]).price_alert_enabled);
+        assert_eq!(state(vec![auto, manual.clone()]).price_alert, GemPriceAlertToggle::Enabled);
+        assert_eq!(state(vec![manual]).price_alert, GemPriceAlertToggle::Disabled);
         assert_eq!(state(vec![]).price_alerts_count, 0);
     }
 

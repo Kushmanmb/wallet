@@ -1,6 +1,7 @@
 use primitives::{Asset, AssetId, AssetMetaData, AssetType, BannerEvent, BlockExplorerLink, Chain, PriceAlert, RecentActivityType, VerificationStatus, WalletType};
 
 use crate::services::balance::GemAssetBalance;
+use crate::services::price_alert::rules::GemPriceAlertToggle;
 use crate::services::swap::GemSwapPairSuggestion;
 use strum::IntoEnumIterator;
 use swapper::AssetList as SwapAssetList;
@@ -428,7 +429,7 @@ pub struct GemAssetDetailsState {
     pub shows_resources: bool,
     pub shows_price_alerts: bool,
     pub price_alerts_count: u32,
-    pub price_alert_enabled: bool,
+    pub price_alert: GemPriceAlertToggle,
     pub shows_earn: bool,
     pub empty_transactions_action: Option<GemAssetEmptyAction>,
 }

@@ -8,6 +8,7 @@ import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toGemKey
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.domains.banner.BannerRow
+import uniffi.gemstone.GemPriceAlertToggle
 import uniffi.gemstone.GemAssetDetailsInput
 import uniffi.gemstone.GemAssetDetailsServiceInterface
 import androidx.lifecycle.SavedStateHandle
@@ -180,8 +181,8 @@ class AssetDetailsViewModel @Inject constructor(
     }
 
     fun togglePriceAlert(assetId: AssetId) = viewModelScope.launch(Dispatchers.IO) {
-        val enabled = uiModel.value?.detailsState?.priceAlertEnabled ?: return@launch
-        runCatchingCancellable { assetDetailsService.setPriceAlert(assetId.toIdentifier(), !enabled) }
+        val toggled = uiModel.value?.detailsState?.priceAlert?.toggled() ?: return@launch
+        runCatchingCancellable { assetDetailsService.setPriceAlert(assetId.toIdentifier(), toggled == GemPriceAlertToggle.ENABLED) }
             .onFailure { errorState.value = it.serviceMessage() }
     }
 

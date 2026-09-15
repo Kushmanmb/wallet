@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import enum Gemstone.GemEmptyStateImage
+import enum Gemstone.GemPriceAlertToggle
 import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemTransactionStateTone
@@ -33,6 +34,15 @@ extension GemEmptyStateImage {
         case .walletConnect: Images.EmptyContent.walletConnect
         case .notifications: Images.System.bell
         case .search: Images.EmptyContent.search
+        }
+    }
+}
+
+extension GemPriceAlertToggle {
+    public var image: Image {
+        switch self {
+        case .enabled: Image(systemName: SystemImage.bellFill)
+        case .disabled: Image(systemName: SystemImage.bell)
         }
     }
 }
