@@ -16,11 +16,20 @@ import com.gemwallet.android.ui.components.perpetual.title
 import com.wallet.core.primitives.Asset
 import java.math.BigInteger
 import uniffi.gemstone.GemConfirmButtonKind
+import uniffi.gemstone.GemConfirmDestination
 import uniffi.gemstone.GemConfirmException
 import uniffi.gemstone.GemConfirmErrorDisplay
 import uniffi.gemstone.GemConfirmScreen
 import uniffi.gemstone.GemConfirmTitle
 import uniffi.gemstone.GemValueStyle
+
+internal fun GemConfirmDestination.title(): Int = when (this) {
+    is GemConfirmDestination.Recipient -> R.string.transfer_recipient_title
+    is GemConfirmDestination.Contract -> R.string.asset_contract
+    is GemConfirmDestination.Validator -> R.string.stake_validator
+    is GemConfirmDestination.Resource -> R.string.stake_resource
+    is GemConfirmDestination.Provider -> R.string.common_provider
+}
 
 @Composable
 internal fun GemConfirmTitle.string(): String = when (this) {

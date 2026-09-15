@@ -51,17 +51,20 @@ class BuildConfirmPropertiesImpl(
                 addressType = destination.addressType,
                 imageUrl = destination.imageUrl,
                 explorerLink = explorerLink(chain, destination.address),
+                kind = destination.kind,
             )
             is ConfirmProperty.Destination.Contract -> ConfirmProperty.Destination.Contract(
                 address = destination.address,
                 chain = destination.chain,
                 explorerLink = explorerLink(chain, destination.address),
+                kind = destination.kind,
             )
             is ConfirmProperty.Destination.Stake -> destination.address?.let { address ->
                 ConfirmProperty.Destination.Stake(
                     data = destination.data,
                     address = address,
                     explorerLink = explorerLink(chain, address),
+                    kind = destination.kind,
                 )
             } ?: destination
             else -> destination
