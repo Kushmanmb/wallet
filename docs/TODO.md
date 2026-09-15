@@ -94,11 +94,12 @@ Each of these is an `#[uniffi::export]` the sweep found named in one app and in 
 
 **Read the preamble before starting one.** The sweep measures which *export* each app names, which is not the same as which app *owns* the decision. Eleven were checked on 2026-09-15 and closed with no change, because the app that never calls the export still reads the same Core answer through a different one: Android reads the abbreviation cutoff through `GemValueStyle.abbreviates`, the price-alert kind through the aggregate's `kind.groupsByAsset()`, the dApp name through `GemConfirmDestination.Generic` and `connection_row`, whether to show a memo through the confirm row set, the latest block through the node row's `GemNodeSubtitle.LatestBlock`, the swap minimum through `GemSwapButtonAction.UseMinimumAmount`, and whether to offer rewards through the `GemSettingsRow.REWARDS` the settings service emits from it.
 
-The second pass closed ten more. Three were never exported: `named`, `synchronize` and the avatar service's `set_image` / `remove_image` sit in plain `impl` blocks that the sweep's name match picked up, and the avatar methods reach both apps through `GemWalletService`. Four are the same Core answer asked for differently: Android passes `submit_attempted` straight into the autoclose session constructor instead of calling `on_submit_attempt`, clears the add-asset form with `new_session` instead of `on_chain`, reads the recommended validators out of the stake selection record, takes `swap_quote` through `swapper_quote_summary`, and reads the swap error display off the session rather than through the free function iOS uses to give `SwapperError` a description. The rest are platform plumbing, not decisions: Android shows no error at all for a failed biometric prompt so it has nothing to gate on `is_cancelled`, its image loader caches a support attachment by URL so it never needs `image_file`, and the developer screen simply offers fewer actions than the iOS one. So for each item below, first find what the other app renders for the same thing — only if it computes the answer itself is there work here.
+The second pass closed ten more. Three were never exported: `named`, `synchronize` and the avatar service's `set_image` / `remove_image` sit in plain `impl` blocks that the sweep's name match picked up, and the avatar methods reach both apps through `GemWalletService`. Four are the same Core answer asked for differently: Android passes `submit_attempted` straight into the autoclose session constructor instead of calling `on_submit_attempt`, clears the add-asset form with `new_session` instead of `on_chain`, reads the recommended validators out of the stake selection record, takes `swap_quote` through `swapper_quote_summary`, and reads the swap error display off the session rather than through the free function iOS uses to give `SwapperError` a description. The rest are platform plumbing, not decisions: Android shows no error at all for a failed biometric prompt so it has nothing to gate on `is_cancelled`, its image loader caches a support attachment by URL so it never needs `image_file`, and the developer screen simply offers fewer actions than the iOS one. The second pass also closed twelve on the iOS side. `update_balance` and the five perpetual sync methods are plain `impl` blocks, not exports — only the iOS mock reimplements them by name. `listed_asset_rank` is gone with the rank consolidation above. `decode_url` has one caller in the whole repo, an Android instrumentation test; both apps decode a payment link through `load`, which goes to the same `PaymentURLDecoder`. Android needs `chain_from_caip2` because it routes on the `Chain` enum app-side while iOS hands the CAIP-2 string straight to Core, and it builds a session from `on_auto` where iOS builds the same session from the `Auto` selection. The rest are one app not having the flow at all: iOS inserts no default asset record when a wallet is created, has no invalid-word highlighting in the import field, no NFT receive chain picker, no token-search sync behind its price widget, no timed retry after a failed biometric prompt, and its update check compares versions inside `newest` rather than against a Play archive.
+
+So for each item below, first find what the other app renders for the same thing — only if it computes the answer itself is there work here.
 
 ### Android does not read an iOS-read decision
 
-- **P32** **M** `perpetual/mod.rs` `sync_markets_if_needed`, `sync_markets`, `sync_current_positions`, `clear_markets`, `markets_updated_at` — Android schedules the same five itself.
 - **P40** **M** `wallet/mod.rs` `setup_chains` — Android runs its own chain setup after import.
 - **P42** **M** `message/signer.rs` `sign_with_keystore` — security-critical; confirm what Android signs with before changing anything.
 
@@ -107,19 +108,8 @@ The second pass closed ten more. Three were never exported: `named`, `synchroniz
 - **P45** **M** `wallet_connect/mod.rs` `authentication_accounts`, `authentication_chain_ids`, `authentication_methods` — iOS builds the SIWE authentication payload itself.
 - **P47** **S** `wallet_connect/mod.rs` `is_origin_rejected` and `user_rejected_error`.
 - **P48** **S** `wallet_connect/mod.rs` `message_preview` and `message_address_names`.
-- **P49** **S** `chain/mod.rs` `chain_from_caip2`.
-- **P50** **S** `payment.rs` `decode_url` — iOS decodes payment URLs through a different entry point; confirm they agree.
-- **P51** **S** `assets/config.rs` `default_asset_basic`.
-- **P52** **S** `mnemonic.rs` `find_invalid_words` — iOS surfaces invalid words only through the import error.
-- **P53** **S** `app_update/mod.rs` `is_version_higher` — iOS compares versions inside `newest`; pick one.
-- **P54** **S** `transactions/mod.rs` `listed_asset_rank`.
-- **P55** **S** `security/rules.rs` `retry_delay_milliseconds` — iOS retries biometry prompts on its own schedule. (iOS does read `lock_periods` and `lock_period_from_minutes` through `LockPeriod+Gemstone.swift`.)
 - **P56** **M** `wallet/mod.rs` `migrate_to_shared_password` and `preview_import` — security-critical keystore paths; read [KEYSTORE_V4](KEYSTORE_V4.md) first.
-- **P57** **S** `swap/slippage.rs` `on_auto`.
 - **P58** **S** `swap/session.rs` — the two apps drive the same Core session through different transitions: Android calls `on_quote_invalidated` and `on_refresh_requested`, iOS calls `on_refresh_resumed` and `on_request_changed`. One set should cover both.
-- **P59** **S** `nft/mod.rs` `receive_accounts`.
-- **P60** **S** `assets/mod.rs` `sync_assets`.
-- **P61** **S** `perpetual/mod.rs` `update_balance`.
 
 ## 11. Missing tests
 
