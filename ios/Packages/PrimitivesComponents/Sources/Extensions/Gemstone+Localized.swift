@@ -5,6 +5,7 @@ import Formatters
 import enum Gemstone.PerpetualDirection
 import enum Gemstone.FeeOption
 import enum Gemstone.GemAssetMenuAction
+import enum Gemstone.GemContactAddressField
 import enum Gemstone.PerpetualType
 import enum Gemstone.GemApprovalValue
 import enum Gemstone.GemAssetInfoKind
@@ -495,6 +496,16 @@ extension GemDayLabel {
         case .today: Localized.Date.today
         case .yesterday: Localized.Date.yesterday
         case .date: nil
+        }
+    }
+}
+
+public extension GemContactAddressField {
+    var title: String {
+        switch self {
+        case .network: Localized.Transfer.network
+        case .address: Localized.Common.address
+        case .memo: Localized.Transfer.memo
         }
     }
 }

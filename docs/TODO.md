@@ -24,7 +24,6 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 - **R48** **S** `Transfer/Sources/ViewModels/AmountPerpetualViewModel.swift` (4).
 - **R50** **S** `QRScanner/Sources/ViewModels/QRScannerErrorViewModel.swift` (4) — check the scanner divergence note in SERVICES.md first; only the non-platform half moves.
 - **R51** **M** `Perpetuals/Sources/ViewModels/PerpetualsSceneViewModel.swift` (4) against Android `PerpetualMarketViewModel`.
-- **R53** **S** `Contacts/Sources/ViewModels/ManageContactAddressViewModel.swift` (4).
 
 ## 5. Screens that may want a session
 
