@@ -4,6 +4,7 @@ import struct Gemstone.GemPaymentRecipient
 import enum Gemstone.GemPerpetualPositionAction
 import Support
 import class Gemstone.GemDeveloperService
+import class Gemstone.GemSettingsService
 import class Gemstone.GemDeviceService
 import class Gemstone.GemWalletPreferencesService
 import protocol Gemstone.GemSupportServiceProtocol
@@ -205,7 +206,10 @@ public struct ViewModelFactory: Sendable {
 
     @MainActor
     public func settingsScene() -> SettingsViewModel {
-        SettingsViewModel(service: walletSessionService, observablePreferences: observablePreferences)
+        SettingsViewModel(
+            service: GemSettingsService(preferences: preferencesService, session: walletSessionService),
+            observablePreferences: observablePreferences,
+        )
     }
 
     @MainActor

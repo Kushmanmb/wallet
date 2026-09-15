@@ -42,6 +42,7 @@ pub mod recipient;
 pub mod rewards;
 pub mod scan;
 pub mod search;
+pub mod settings;
 pub mod security;
 pub mod simulation;
 pub mod stake;

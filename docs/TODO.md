@@ -28,7 +28,7 @@ Copy: [`GemAssetRow`](../core/gemstone/src/services/assets/model.rs) → [iOS](.
 
 
 
-- **R17** **L** Settings has no Core service at all. Both apps show the same nine rows in the same order — wallets, security, notifications, preferences, WalletConnect, support, rewards, about, developer — so there is no drift today; the row set, its order, the icons and the visibility conditions are simply written twice — [iOS `SettingsViewModel`](../ios/Features/Settings/Sources/Settings/ViewModels/SettingsViewModel.swift) as `xTitle`/`xImage` pairs, [Android `SettingsScene`](../android/features/settings/settings/presents/src/main/kotlin/com/gemwallet/android/features/settings/settings/presents/views/SettingsScene.kt) inline in the composable. Add a `settings` service with a row record carrying the key, the icon key and the destination, and let each app map the key to its own image and string. `PreferencesViewModel`, `SecurityViewModel` and `AboutUsViewModel` are the same screen family and go with it.
+- **R17** **M** The settings family's sibling screens still name their own rows: [iOS `PreferencesViewModel`](../ios/Features/Settings/Sources/Settings/ViewModels/PreferencesViewModel.swift), `SecurityViewModel` and `AboutUsViewModel` against the Android preferences, security and about screens. The settings screen itself now reads `GemSettingsService.sections`; give each sibling the same shape — a row key per screen that each app maps to its own image and string.
 - **R19** **M** WalletConnect connections — [`ConnectionsViewModel`](../ios/Features/WalletConnector/Sources/WalletConnector/ViewModels/ConnectionsViewModel.swift) and `ConnectionSceneViewModel` hold no Core record and build the row and the detail fields themselves; Android's bridge screens do the same. `GemConnectionRow` already exists and answers part of it.
 - **R20** **M** Chain settings and nodes — `ChainSettingsSceneViewModel`, `ChainNodeViewModel` and `ServiceStatusItemViewModel` on iOS against the Android networks screens. `GemNodeSelection` and `GemServiceEndpoint` cross, but the section titles, the node subtitle and the explorer row are each app's.
 - **R21** **M** Stake and delegation — `StakeSceneViewModel`, `DelegationSceneViewModel` and `DelegationViewModel` build nine section and field titles app-side against the Android earn screens.
@@ -94,7 +94,7 @@ Product or security decisions, one question each:
 
 Ownership, injection and threads:
 
-- **O9** **S** [`SettingsViewModel`](../android/features/settings/settings/viewmodels/src/main/kotlin/com/gemwallet/android/features/settings/settings/viewmodels/SettingsViewModel.kt) holds the currency and wallet-session services beside its own because the settings screen has no Core service to ask; it gets one with **R17** and drops them there. The other three named here now hold one: `TransactionsViewModel` reads `listedAssetRank()` from its transactions service, and the WalletConnect screens sign, preview and name addresses through `GemWalletConnectService`.
+- **O9** **S** `SettingsViewModel` on Android still holds the currency service beside the settings service because the preferences screen shares that view model; it drops it when the preferences rows move to Core with **R17**.
 
 
 

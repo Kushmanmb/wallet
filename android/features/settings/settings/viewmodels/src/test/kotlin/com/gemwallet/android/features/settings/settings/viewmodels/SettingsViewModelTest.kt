@@ -12,7 +12,9 @@ import com.gemwallet.android.model.Session
 import com.gemwallet.android.testkit.mockWallet
 import com.wallet.core.primitives.Wallet
 import com.wallet.core.primitives.WalletType
-import uniffi.gemstone.GemWalletSessionServiceInterface
+import uniffi.gemstone.GemSettingsRow
+import uniffi.gemstone.GemSettingsSection
+import uniffi.gemstone.GemSettingsServiceInterface
 import io.mockk.coVerify
 import io.mockk.coEvery
 import io.mockk.every
@@ -28,6 +30,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.After
@@ -79,23 +82,28 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `rewards follow core's answer for the loaded wallets`() = runTest(testDispatcher) {
-        every { walletSessionService.showsRewards(any()) } returns false
+    fun `the rows follow core's answer for the loaded wallets`() = runTest(testDispatcher) {
+        every { settingsService.sections(any(), any(), any()) } returns listOf(GemSettingsSection(listOf(GemSettingsRow.WALLETS)))
         wallets.value = listOf(mockWallet(type = WalletType.Single))
         viewModel = createViewModel()
         advanceUntilIdle()
 
-        assertFalse(viewModel.isRewardsAvailable.first { !it })
+        assertEquals(listOf(GemSettingsRow.WALLETS), viewModel.sections.first { it.isNotEmpty() }.flatMap { it.rows })
 
-        every { walletSessionService.showsRewards(any()) } returns true
+        every { settingsService.sections(any(), any(), any()) } returns listOf(
+            GemSettingsSection(listOf(GemSettingsRow.WALLETS, GemSettingsRow.REWARDS)),
+        )
         wallets.value = listOf(mockWallet(type = WalletType.Multicoin))
         advanceUntilIdle()
 
-        assertTrue(viewModel.isRewardsAvailable.first { it })
+        assertEquals(
+            listOf(GemSettingsRow.WALLETS, GemSettingsRow.REWARDS),
+            viewModel.sections.first { section -> section.flatMap { it.rows }.contains(GemSettingsRow.REWARDS) }.flatMap { it.rows },
+        )
     }
 
-    private val walletSessionService = mockk<GemWalletSessionServiceInterface>(relaxed = true).also {
-        every { it.showsRewards(any()) } returns true
+    private val settingsService = mockk<GemSettingsServiceInterface>(relaxed = true).also {
+        every { it.sections(any(), any(), any()) } returns listOf(GemSettingsSection(listOf(GemSettingsRow.WALLETS)))
     }
 
     private val currencyService = mockk<GemCurrencyServiceInterface> {
@@ -110,6 +118,6 @@ class SettingsViewModelTest {
         switchPushEnabled = switchPushEnabled,
         getPushEnabled = getPushEnabled,
         notificationsAvailable = true,
-        walletSessionService = walletSessionService,
+        settingsService = settingsService,
     )
 }

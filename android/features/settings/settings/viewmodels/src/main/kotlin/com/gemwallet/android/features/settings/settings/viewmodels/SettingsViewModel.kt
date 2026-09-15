@@ -12,12 +12,13 @@ import com.gemwallet.android.model.NotificationsAvailable
 import com.wallet.core.primitives.Appearance
 import com.wallet.core.primitives.WalletType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import uniffi.gemstone.GemWalletSessionServiceInterface
+import uniffi.gemstone.GemSettingsServiceInterface
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -36,7 +37,7 @@ class SettingsViewModel @Inject constructor(
     private val switchPushEnabled: SwitchPushEnabled,
     private val getPushEnabled: GetPushEnabled,
     val notificationsAvailable: NotificationsAvailable,
-    private val walletSessionService: GemWalletSessionServiceInterface,
+    private val settingsService: GemSettingsServiceInterface,
 ) : ViewModel() {
 
     private val session = getSession()
@@ -44,13 +45,20 @@ class SettingsViewModel @Inject constructor(
     private val state = MutableStateFlow(SettingsViewModelState(currency = currencyService.currencies(null).selected))
     val uiState = state.asStateFlow()
 
-    val isRewardsAvailable = wallets
-        .map { wallets -> walletSessionService.showsRewards(wallets.map { it.toGem() }) }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            true,
+    private val walletConnectAvailable = MutableStateFlow(true)
+
+    val sections = combine(wallets, state, walletConnectAvailable) { wallets, _, walletConnect ->
+        settingsService.sections(
+            wallets = wallets.map { it.toGem() },
+            notificationsAvailable = notificationsAvailable,
+            walletConnectAvailable = walletConnect,
         )
+    }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    fun setWalletConnectAvailable(available: Boolean) {
+        walletConnectAvailable.value = available
+    }
 
     val walletsCount = wallets.map { it.size }
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0)
