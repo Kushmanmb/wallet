@@ -2,6 +2,8 @@ pub mod keys;
 pub mod platform;
 pub mod rules;
 pub mod signer;
+#[cfg(test)]
+pub(crate) mod testkit;
 
 use crate::services::error::GemServiceError;
 use std::sync::Arc;
