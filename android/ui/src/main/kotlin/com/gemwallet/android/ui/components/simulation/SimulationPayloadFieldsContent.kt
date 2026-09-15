@@ -1,5 +1,6 @@
 package com.gemwallet.android.ui.components.simulation
 
+import com.gemwallet.android.ui.localization.stringRes
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
@@ -29,7 +30,7 @@ fun LazyListScope.simulationPayloadFieldsContent(
     itemsIndexed(fields) { index, payload ->
         val listPosition = ListPosition.getPosition(index, totalItems)
         val field = payload.field
-        val titleRes = fieldTitleRes(field)
+        val titleRes = field.kind.stringRes()
         when {
             titleRes != null && field.fieldType == SimulationPayloadFieldType.ADDRESS -> AddressPropertyItem(
                 title = titleRes,
@@ -71,16 +72,6 @@ fun LazyListScope.simulationPayloadDetailsContent(
         item { SubheaderItem(R.string.common_details) }
         simulationPayloadFieldsContent(secondaryFields, addressNames)
     }
-}
-
-private fun fieldTitleRes(field: SimulationPayloadField): Int? = when (field.kind) {
-    SimulationPayloadFieldKind.CONTRACT -> R.string.asset_contract
-    SimulationPayloadFieldKind.METHOD -> R.string.common_method
-    SimulationPayloadFieldKind.TOKEN -> R.string.common_token
-    SimulationPayloadFieldKind.SPENDER -> R.string.transfer_to
-    SimulationPayloadFieldKind.VALUE -> R.string.perpetual_value
-    SimulationPayloadFieldKind.EXPIRATION -> R.string.common_expiration
-    SimulationPayloadFieldKind.CUSTOM -> null
 }
 
 @Composable

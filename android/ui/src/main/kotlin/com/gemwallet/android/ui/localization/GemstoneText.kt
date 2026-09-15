@@ -23,6 +23,7 @@ import uniffi.gemstone.GemTransactionFilter
 import uniffi.gemstone.LinkType
 import uniffi.gemstone.GemTransactionTitle
 import uniffi.gemstone.GemWalletSubtitle
+import uniffi.gemstone.SimulationPayloadFieldKind
 import uniffi.gemstone.SimulationSeverity
 
 @Composable
@@ -179,4 +180,15 @@ fun QRScanType.stringRes(): Int = when (this) {
     QRScanType.TokenContract -> R.string.wallet_import_contract_address_field
     QRScanType.SecretPhrase -> R.string.common_secret_phrase
     QRScanType.PrivateKey -> R.string.common_private_key
+}
+
+@StringRes
+fun SimulationPayloadFieldKind.stringRes(): Int? = when (this) {
+    SimulationPayloadFieldKind.CONTRACT -> R.string.asset_contract
+    SimulationPayloadFieldKind.METHOD -> R.string.common_method
+    SimulationPayloadFieldKind.TOKEN -> R.string.common_token
+    SimulationPayloadFieldKind.SPENDER -> R.string.transfer_to
+    SimulationPayloadFieldKind.VALUE -> R.string.perpetual_value
+    SimulationPayloadFieldKind.EXPIRATION -> R.string.common_expiration
+    SimulationPayloadFieldKind.CUSTOM -> null
 }

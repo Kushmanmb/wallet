@@ -11,6 +11,7 @@ import enum Gemstone.GemPriceAlertLabel
 import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemPriceAlertText
 import enum Gemstone.GemSimulationWarningKind
+import enum Gemstone.SimulationPayloadFieldKind
 import enum Gemstone.GemTransactionTitle
 import enum Gemstone.GemWalletSubtitle
 import GemstonePrimitives
@@ -218,6 +219,20 @@ extension Resource {
         switch self {
         case .bandwidth: Localized.Stake.Resource.bandwidth
         case .energy: Localized.Stake.Resource.energy
+        }
+    }
+}
+
+extension SimulationPayloadFieldKind {
+    public var title: String? {
+        switch self {
+        case .contract: Localized.Asset.contract
+        case .method: Localized.Common.method
+        case .token: Localized.Common.token
+        case .spender: Localized.Transfer.to
+        case .value: Localized.Perpetual.value
+        case .expiration: Localized.Common.expiration
+        case .custom: nil
         }
     }
 }
