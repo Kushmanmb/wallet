@@ -267,9 +267,10 @@ What went wrong in V40 and V41 was not the pair; it was one app's mapper reachin
 
 ### iOS errors thrown away
 
-174 `try?`/empty-catch sites in first-party code. The wallet-critical ones first.
+Re-checked on 2026-09-15. `Store/Migrations.swift` holds 88 of the 174 sites and they are the idempotent-migration idiom — `try? db.alter` for a column that may already exist, `try? db.drop` for a table that may not. Rewriting those against a shipped wallet database is a data-loss risk with no defect behind it, so they stay. `clearChainData` was the one that was wrong: it deleted a removed chain's rows from seven tables with `try?`, so a locked table or a constraint left the rows behind silently. It now asks `tableExists` the way `clearTables` beside it already did and lets a real error through.
 
-- **X67** **M** `ios/Packages/Store/Sources/Migrations.swift` — 88 sites. A migration that silently no-ops leaves a half-migrated database.
+The rest of the sites are one or two per file and each needs reading on its own; these are the ones on a path where a swallowed error is not visible to the user.
+
 - **X68** **S** `ios/Packages/Store/Sources/Migrations/WalletIdMigration.swift` — 6, on the wallet-id rewrite.
 - **X69** **S** `ios/Packages/GemstoneServices/Sources/Keystore/LocalKeystore.swift` — 4, on the keystore.
 - **X70** **S** `ios/Features/Swap/.../SwapSceneViewModel.swift` — 4.
