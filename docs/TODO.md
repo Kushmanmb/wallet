@@ -47,7 +47,6 @@ Decide before building; a read-only screen is a row, not a session.
 
 ## 6. Parity
 
-- **P14** **S** Both apps carry the same deferred feature with the same wording: `ios/Packages/PrimitivesComponents/Sources/Scenes/NetworkFeeScene.swift` and `android/features/confirm/.../components/FeeDetails.kt` both say "present fee items in a separate section when nonempty". Build it once in Core and render it twice, or drop both notes.
 
 ## 7. Platform
 
