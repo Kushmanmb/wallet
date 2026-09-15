@@ -18,6 +18,7 @@ import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemSimulationWarningKind
 import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.GemTransactionFilter
+import uniffi.gemstone.LinkType
 import uniffi.gemstone.GemTransactionTitle
 import uniffi.gemstone.GemWalletSubtitle
 import uniffi.gemstone.SimulationSeverity
@@ -140,4 +141,22 @@ fun ChartPeriod.stringRes(): Int = when (this) {
     ChartPeriod.Month -> R.string.charts_month
     ChartPeriod.Year -> R.string.charts_year
     ChartPeriod.All -> R.string.charts_all
+}
+
+@StringRes
+fun LinkType.stringRes(): Int = when (this) {
+    LinkType.X -> R.string.social_x
+    LinkType.DISCORD -> R.string.social_discord
+    LinkType.REDDIT -> R.string.social_reddit
+    LinkType.TELEGRAM -> R.string.social_telegram
+    LinkType.GIT_HUB -> R.string.social_github
+    LinkType.YOU_TUBE -> R.string.social_youtube
+    LinkType.FACEBOOK -> R.string.social_facebook
+    LinkType.WEBSITE -> R.string.social_website
+    LinkType.COINGECKO -> R.string.social_coingecko
+    LinkType.OPEN_SEA -> R.string.social_opensea
+    LinkType.INSTAGRAM -> R.string.social_instagram
+    LinkType.MAGIC_EDEN -> R.string.social_magiceden
+    LinkType.COIN_MARKET_CAP -> R.string.social_coinmarketcap
+    LinkType.TIK_TOK -> R.string.social_tiktok
 }

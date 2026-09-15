@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import enum Gemstone.GemHeaderButtonKind
+import enum Gemstone.LinkType
 import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemValueTone
 import enum Gemstone.PriceAlertDirection
@@ -43,6 +44,27 @@ extension GemHeaderButtonKind {
         case .deposit: Images.Actions.buy
         case .withdraw: Images.Actions.send
         case .more: Images.Actions.more
+        }
+    }
+}
+
+extension LinkType {
+    public var image: Image {
+        switch self {
+        case .x: Images.Social.x
+        case .discord: Images.Social.discord
+        case .reddit: Images.Social.reddit
+        case .telegram: Images.Social.telegram
+        case .gitHub: Images.Social.github
+        case .youTube: Images.Social.youtube
+        case .facebook: Images.Social.facebook
+        case .website: Images.Social.website
+        case .coingecko: Images.Social.coingecko
+        case .coinMarketCap: Images.Social.coinmarketcap
+        case .openSea: Images.Social.opensea
+        case .instagram: Images.Social.instagram
+        case .magicEden: Images.Social.magiceden
+        case .tikTok: Images.Social.tiktok
         }
     }
 }

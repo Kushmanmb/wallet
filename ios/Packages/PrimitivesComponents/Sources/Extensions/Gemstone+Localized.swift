@@ -4,6 +4,7 @@ import enum Gemstone.PerpetualDirection
 import enum Gemstone.FeeOption
 import enum Gemstone.GemAssetInfoKind
 import enum Gemstone.GemFiatTransactionBadge
+import enum Gemstone.LinkType
 import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemLocalizedText
 import enum Gemstone.GemPriceAlertLabel
@@ -178,6 +179,27 @@ extension ChartPeriod {
         case .month: Localized.Charts.month
         case .year: Localized.Charts.year
         case .all: Localized.Charts.all
+        }
+    }
+}
+
+extension LinkType {
+    public var title: String {
+        switch self {
+        case .x: Localized.Social.x
+        case .discord: Localized.Social.discord
+        case .reddit: Localized.Social.reddit
+        case .telegram: Localized.Social.telegram
+        case .gitHub: Localized.Social.github
+        case .youTube: Localized.Social.youtube
+        case .facebook: Localized.Social.facebook
+        case .website: Localized.Social.website
+        case .coingecko: Localized.Social.coingecko
+        case .coinMarketCap: Localized.Social.coinmarketcap
+        case .openSea: Localized.Social.opensea
+        case .instagram: Localized.Social.instagram
+        case .magicEden: Localized.Social.magiceden
+        case .tikTok: Localized.Social.tiktok
         }
     }
 }
