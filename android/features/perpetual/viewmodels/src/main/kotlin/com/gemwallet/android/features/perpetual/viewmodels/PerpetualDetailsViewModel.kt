@@ -146,7 +146,7 @@ class PerpetualDetailsViewModel @Inject constructor(
                     if (market == null) return@flow
                     perpetualObserver.chartUpdates
                         .collect { update ->
-                            candles = service.applyCandleUpdate(candles.map { it.toGem() }, update.toGem(), market.toGem(), period.toGem())
+                            candles = service.mergedCandles(candles.map { it.toGem() }, update.toGem(), market.toGem(), period.toGem())
                                 ?.map { it.toPrimitives() } ?: return@collect
                             emit(candles.toChartState())
                         }

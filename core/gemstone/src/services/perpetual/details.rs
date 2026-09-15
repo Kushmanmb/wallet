@@ -100,8 +100,8 @@ impl GemPerpetualDetailsService {
         self.perpetuals.get_candlesticks(Chain::HyperCore, rules::symbol(&perpetual), period).await
     }
 
-    pub fn apply_candle_update(&self, candles: Vec<GemChartCandleStick>, update: ChartCandleUpdate, perpetual: Perpetual, period: ChartPeriod) -> Option<Vec<GemChartCandleStick>> {
-        rules::apply_candle_update(candles, update, &perpetual, &period)
+    pub fn merged_candles(&self, candles: Vec<GemChartCandleStick>, update: ChartCandleUpdate, perpetual: Perpetual, period: ChartPeriod) -> Option<Vec<GemChartCandleStick>> {
+        rules::merged_candles(candles, update, &perpetual, &period)
     }
 
     pub async fn sync_positions(&self) -> Result<(), GemServiceError> {

@@ -216,7 +216,7 @@ impl GemStakeService {
             validators.extend(missing.into_iter().map(|validator| (validator.id.clone(), validator)));
         }
 
-        let incoming = rules::apply_validator_state(delegations, &validators);
+        let incoming = rules::delegations_with_state(delegations, &validators);
         let existing_ids = self.store.get_delegation_ids(wallet_id.clone(), asset_id, StakeProviderType::Stake).await?;
         let delete_ids = rules::stale_delegation_ids(existing_ids, &incoming);
         self.store.update_delegations(wallet_id, incoming, delete_ids).await
@@ -286,7 +286,7 @@ mod tests {
     #[test]
     fn test_delegations_on_inactive_validators_become_inactive() {
         let validators: HashMap<_, _> = [("v".to_string(), validator("v", false))].into();
-        let delegations = apply_validator_state(vec![delegation("v", DelegationState::Active), delegation("other", DelegationState::Active)], &validators);
+        let delegations = delegations_with_state(vec![delegation("v", DelegationState::Active), delegation("other", DelegationState::Active)], &validators);
         assert_eq!(delegations[0].state, DelegationState::Inactive);
         assert_eq!(delegations[1].state, DelegationState::Active);
     }

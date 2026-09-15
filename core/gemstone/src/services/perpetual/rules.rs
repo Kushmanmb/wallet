@@ -489,7 +489,7 @@ pub fn symbol(perpetual: &Perpetual) -> String {
     perpetual.name.clone()
 }
 
-pub fn apply_candle_update(candles: Vec<ChartCandleStick>, update: ChartCandleUpdate, perpetual: &Perpetual, period: &ChartPeriod) -> Option<Vec<ChartCandleStick>> {
+pub fn merged_candles(candles: Vec<ChartCandleStick>, update: ChartCandleUpdate, perpetual: &Perpetual, period: &ChartPeriod) -> Option<Vec<ChartCandleStick>> {
     (update.coin == symbol(perpetual) && update.interval == candle_interval(period)).then(|| merge_candle(candles, update.candle))
 }
 
@@ -1373,13 +1373,13 @@ mod tests {
             candle: candle(3000, 110.0),
         };
         let symbol = symbol(&perpetual);
-        assert_eq!(apply_candle_update(candles.clone(), update(&symbol, "30m"), &perpetual, &ChartPeriod::Day), Some(appended));
+        assert_eq!(merged_candles(candles.clone(), update(&symbol, "30m"), &perpetual, &ChartPeriod::Day), Some(appended));
         assert_eq!(
-            apply_candle_update(candles.clone(), update(&symbol, "1m"), &perpetual, &ChartPeriod::Day),
+            merged_candles(candles.clone(), update(&symbol, "1m"), &perpetual, &ChartPeriod::Day),
             None,
             "a candle for another interval is not this chart's"
         );
-        assert_eq!(apply_candle_update(candles, update("OTHER", "30m"), &perpetual, &ChartPeriod::Day), None);
+        assert_eq!(merged_candles(candles, update("OTHER", "30m"), &perpetual, &ChartPeriod::Day), None);
     }
 
     #[test]

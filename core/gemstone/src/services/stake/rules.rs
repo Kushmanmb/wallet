@@ -471,7 +471,7 @@ pub fn missing_validators(
         .collect()
 }
 
-pub fn apply_validator_state(delegations: Vec<DelegationBase>, validators: &HashMap<String, DelegationValidator>) -> Vec<DelegationBase> {
+pub fn delegations_with_state(delegations: Vec<DelegationBase>, validators: &HashMap<String, DelegationValidator>) -> Vec<DelegationBase> {
     delegations
         .into_iter()
         .map(|mut delegation| {
@@ -1117,7 +1117,7 @@ mod tests {
             stale_delegation_ids(vec![delegation("known").id(), "gone".to_string()], &[delegation("known")]),
             vec!["gone"]
         );
-        let applied = apply_validator_state(
+        let applied = delegations_with_state(
             vec![delegation("known"), delegation("anon")],
             &HashMap::from([("anon".to_string(), inactive_validator(Chain::Cosmos, "anon".to_string(), String::new()))]),
         );

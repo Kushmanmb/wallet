@@ -160,7 +160,7 @@ impl GemPerpetualService {
         Ok(self.gateway.get_perpetual_portfolio(chain, address).await?)
     }
 
-    pub async fn apply_socket_message(&self, wallet_id: WalletId, mode: PerpetualAccountMode, data: Vec<u8>) -> Result<GemPerpetualSocketUpdate, GemServiceError> {
+    pub async fn on_socket_message(&self, wallet_id: WalletId, mode: PerpetualAccountMode, data: Vec<u8>) -> Result<GemPerpetualSocketUpdate, GemServiceError> {
         let message = parse_websocket_data(&data, mode).map_err(|error| GemServiceError::Core { msg: error.to_string() })?;
         match message {
             HyperliquidSocketMessage::AccountState { balance, positions } => {
