@@ -123,7 +123,6 @@ Ownership, injection and threads:
 Platform items:
 
 
-- **X19** **S** Dead code, second pass. Removed: the Android `Precision` leftovers, iOS `String.numberOfOccurrencesOf` and nine unread `Locale` identifiers. Kept, with reasons a future sweep must respect — `recoverPubKey` satisfies reown's `CryptoProvider`, `deviceInfo` and `signTransaction` are `GemDevicePlatform` and `GemWalletConnectSigner` foreign-trait callbacks Rust invokes, `AuthenticationPolicy` mirrors Apple's `SecAccessControlCreateFlags` as a whole, and the three `Localized` keys no app reads are translated entries in the shared Fluent source that other clients draw from. What is left is only that last group, which needs the translation workflow's agreement, not a code change.
 
 
 
