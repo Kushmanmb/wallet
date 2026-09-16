@@ -119,13 +119,7 @@ public final class RewardsViewModel: Sendable {
     }
 
     var referralLink: String? {
-        guard let code = rewardsState.referralCode else { return nil }
-        do {
-            return try service.referralLink(code: code).absoluteString
-        } catch {
-            debugLog("RewardsViewModel referral link error: \(error)")
-            return nil
-        }
+        rewardsState.referralLink
     }
 
     var redemptions: [GemRewardsRedemption] {

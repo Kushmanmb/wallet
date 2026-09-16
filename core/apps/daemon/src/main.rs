@@ -13,6 +13,7 @@ mod worker;
 
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
+use std::time::Instant;
 
 use crate::model::{ConsumerOptions, ConsumerService, DaemonService, WorkerOptions, WorkerService};
 use crate::reporters::consumer::ConsumerReporter;
@@ -182,6 +183,8 @@ async fn run_consumer_services(settings: settings::Settings, services: &[Consume
     let reporter: Arc<dyn ConsumerStatusReporter> = Arc::new(ConsumerReporter::new(consumer_metrics));
     let failures = Arc::new(Mutex::new(Vec::new()));
 
+    health_state.set_ready();
+
     let handles: Vec<_> = services
         .iter()
         .map(|service| {
@@ -192,35 +195,44 @@ async fn run_consumer_services(settings: settings::Settings, services: &[Consume
             let shutdown_rx = shutdown_rx.clone();
             let failures = failures.clone();
             let options = options.clone();
+            let health_state = health_state.clone();
             tokio::spawn(async move {
                 let restart_delay = settings.consumer.error.timeout;
+                let max_delay = settings.rabbitmq.retry.timeout;
+                let mut delay = restart_delay;
                 loop {
                     if *shutdown_rx.borrow() {
                         break;
                     }
+                    let started = Instant::now();
                     match run_consumer((*settings.as_ref()).clone(), svc, shutdown_rx.clone(), reporter.clone(), options.clone()).await {
                         Ok(_) => {
                             info_with_fields!("consumer stopped", consumer = svc_name, status = "ok");
                             break;
                         }
                         Err(err) => {
+                            if started.elapsed() >= max_delay {
+                                delay = restart_delay;
+                            }
                             let message = err.to_string();
                             error_with_fields!("consumer failed", &*err, consumer = svc_name);
                             if let Ok(mut list) = failures.lock() {
                                 list.push(format!("{}: {}", svc_name, message));
                             }
-                            if shutdown::sleep_or_shutdown(restart_delay, &shutdown_rx).await {
+                            if delay >= max_delay {
+                                health_state.set_not_ready();
+                            }
+                            if shutdown::sleep_or_shutdown(delay, &shutdown_rx).await {
                                 break;
                             }
-                            info_with_fields!("consumer restarting", consumer = svc_name);
+                            delay = (delay * 2).min(max_delay);
+                            info_with_fields!("consumer restarting", consumer = svc_name, delay_secs = delay.as_secs());
                         }
                     }
                 }
             })
         })
         .collect();
-
-    health_state.set_ready();
 
     signal_handle.await.ok();
     futures::future::join_all(handles).await;

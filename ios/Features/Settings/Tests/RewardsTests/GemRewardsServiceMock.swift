@@ -8,7 +8,7 @@ final class GemRewardsServiceMock: GemRewardsServiceProtocol, @unchecked Sendabl
     var selectedWalletValue: Wallet?
     var walletsValue: [Wallet] = []
     var rewardsResult: Result<Rewards, Error> = .success(.mock())
-    var stateForRewards: (Rewards?) -> GemRewardsState = { rewards in .mock(referralCode: rewards?.code) }
+    var stateForRewards: (Rewards?) -> GemRewardsState = { rewards in .mock(referralCode: rewards?.code, referralLink: rewards?.code.map { "https://gemwallet.com/join?code=\($0)" }) }
     var useReferralCodeError: Error?
     var redeemError: Error?
 
@@ -32,10 +32,6 @@ final class GemRewardsServiceMock: GemRewardsServiceProtocol, @unchecked Sendabl
         redeemedIds.append(redemptionId)
         if let redeemError { throw redeemError }
         return .mock()
-    }
-
-    func referralLink(code: String) -> String {
-        "https://gemwallet.com/referral/\(code)"
     }
 
     func selectedWallet(current: Wallet?, wallets _: [Wallet]) -> Wallet? {

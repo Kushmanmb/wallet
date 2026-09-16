@@ -5,7 +5,6 @@ use primitives::rewards::{RedemptionRequest, RedemptionResult};
 use primitives::{AuthenticatedRequest, ReferralCode, Rewards, Wallet, WalletId};
 
 use crate::api::{GemApiError, GemDeviceApiClient};
-use crate::config::rewards::get_referral_url;
 use crate::services::auth::GemAuthService;
 use crate::services::balance::GemBalanceService;
 use crate::services::error::GemServiceError;
@@ -38,10 +37,6 @@ impl GemRewardsService {
 
     pub fn selected_wallet(&self, current: Option<Wallet>, wallets: Vec<Wallet>) -> Option<Wallet> {
         session_rules::rewards_wallet(current, &self.wallets(wallets))
-    }
-
-    pub fn referral_link(&self, code: String) -> String {
-        get_referral_url(&code)
     }
 
     pub fn state(&self, rewards: Option<Rewards>) -> GemRewardsState {

@@ -61,14 +61,14 @@ struct RewardsViewModelTests {
 
         #expect(service.rewardsCalls == [first.id.id])
         #expect(model.referralCode == "test123")
-        #expect(model.referralLink == "https://gemwallet.com/referral/test123")
+        #expect(model.referralLink == "https://gemwallet.com/join?code=test123")
     }
 
     @Test
     func aFailedLoadFallsBackToTheEmptyState() async throws {
         let service = service {
             $0.rewardsResult = .failure(AnyError("offline"))
-            $0.stateForRewards = { rewards in .mock(referralCode: rewards?.code) }
+            $0.stateForRewards = { rewards in .mock(referralCode: rewards?.code, referralLink: rewards?.code.map { "https://gemwallet.com/join?code=\($0)" }) }
         }
         let model = try #require(viewModel(service))
 
