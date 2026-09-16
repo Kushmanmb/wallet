@@ -31,7 +31,6 @@ data class SwapItemInteraction(
 }
 
 data class SwapUiState(
-    val action: GemSwapSessionAction = GemSwapSessionAction.None,
     @StringRes val actionTitle: Int = R.string.wallet_swap,
     internal val buttonAction: GemSwapButtonAction = GemSwapButtonAction.Swap,
     val buttonState: ButtonState = ButtonState.Disabled,
@@ -54,7 +53,6 @@ data class SwapUiState(
 }
 
 internal fun createSwapUiState(state: GemSwapViewState) = SwapUiState(
-    action = state.action,
     buttonAction = state.buttonAction,
     actionTitle = state.buttonAction.stringRes(),
     buttonState = when (state.buttonState) {
