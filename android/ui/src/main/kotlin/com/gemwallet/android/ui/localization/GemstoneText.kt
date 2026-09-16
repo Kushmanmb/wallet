@@ -11,7 +11,6 @@ import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
 import uniffi.gemstone.GemBalanceResource
-import uniffi.gemstone.GemContactAddressField
 import uniffi.gemstone.GemRecipientSection
 import uniffi.gemstone.GemHeaderButtonKind
 import com.wallet.core.primitives.Asset
@@ -383,13 +382,6 @@ fun GemCandleTooltipRow.stringRes(): Int = when (this) {
     GemCandleTooltipRow.CLOSE -> R.string.charts_price_close
     GemCandleTooltipRow.CHANGE -> R.string.charts_price_change
     GemCandleTooltipRow.VOLUME -> R.string.perpetual_volume
-}
-
-@StringRes
-fun GemContactAddressField.stringRes(): Int = when (this) {
-    GemContactAddressField.NETWORK -> R.string.transfer_network
-    GemContactAddressField.ADDRESS -> R.string.common_address
-    GemContactAddressField.MEMO -> R.string.transfer_memo
 }
 
 @StringRes

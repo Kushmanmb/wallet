@@ -55,8 +55,8 @@ data class ContactAddressInput(
     val isAddressValid: Boolean = false,
     val showAddressError: Boolean = false,
 ) {
-    val fields: List<GemContactAddressField>
-        get() = contactAddressFields(chain.string)
+    val showsMemo: Boolean
+        get() = GemContactAddressField.MEMO in contactAddressFields(chain.string)
 
     val isConfirmEnabled: Boolean
         get() = isAddressValid

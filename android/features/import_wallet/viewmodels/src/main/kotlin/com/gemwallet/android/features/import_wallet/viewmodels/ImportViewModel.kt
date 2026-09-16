@@ -1,5 +1,8 @@
 package com.gemwallet.android.features.import_wallet.viewmodels
 
+import androidx.annotation.StringRes
+import com.gemwallet.android.features.import_wallet.viewmodels.localization.fieldStringRes
+import com.gemwallet.android.features.import_wallet.viewmodels.localization.tabStringRes
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.gemwallet.android.ui.localization.string
@@ -52,11 +55,11 @@ class ImportViewModel @Inject constructor(
     private val nameRecordController = NameRecordController(nameService, viewModelScope)
     val nameResolveState: StateFlow<GemNameRecordState> = nameRecordController.state
 
-    fun importKind(kind: GemWalletImportKind) {
+    fun importKind(type: ImportType) {
         nameRecordController.reset()
         state.update {
             it.copy(
-                importType = it.importType.copy(kind = kind),
+                importType = type,
                 dataError = null
             )
         }
@@ -145,7 +148,8 @@ data class ImportViewModelState(
             error = error,
             defaultWalletName = defaultWalletName,
             chainName = chainName,
-            tabs = tabs,
+            tabs = tabs.map { kind -> ImportTabUIModel(type = importType.copy(kind = kind), title = kind.tabStringRes(), isSelected = kind == importType.kind) },
+            input = importType.kind.inputUiModel(),
             importType = importType,
             dataError = dataError,
             existingWalletResult = existingWalletResult,
@@ -159,8 +163,34 @@ data class ImportUIState(
     val importType: ImportType = ImportType(GemWalletImportKind.PHRASE),
     val defaultWalletName: String? = null,
     val chainName: String = "",
-    val tabs: List<GemWalletImportKind> = emptyList(),
+    val tabs: List<ImportTabUIModel> = emptyList(),
+    val input: ImportInputUIModel = GemWalletImportKind.PHRASE.inputUiModel(),
     val dataError: Throwable? = null,
     val existingWalletResult: WalletImportResult.Existing? = null,
+)
+
+data class ImportTabUIModel(
+    val type: ImportType,
+    @StringRes val title: Int,
+    val isSelected: Boolean,
+)
+
+data class ImportInputUIModel(
+    @StringRes val placeholder: Int,
+    val isPhrase: Boolean,
+    val protectsInput: Boolean,
+    val supportsPhraseSuggestions: Boolean,
+    val showsViewOnlyWarning: Boolean,
+)
+
+internal fun GemWalletImportKind.inputUiModel() = ImportInputUIModel(
+    placeholder = fieldStringRes(),
+    isPhrase = when (this) {
+        GemWalletImportKind.PHRASE -> true
+        GemWalletImportKind.ADDRESS, GemWalletImportKind.PRIVATE_KEY -> false
+    },
+    protectsInput = protectsInput(),
+    supportsPhraseSuggestions = supportsPhraseSuggestions(),
+    showsViewOnlyWarning = showsViewOnlyWarning(),
 )
 
