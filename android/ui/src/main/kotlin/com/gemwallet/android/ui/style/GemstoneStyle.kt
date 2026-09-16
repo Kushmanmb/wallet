@@ -81,6 +81,6 @@ fun GemEmptyStateImage.image(): EmptyStateImage = when (this) {
     GemEmptyStateImage.STAKE -> EmptyStateImage.Drawable(R.drawable.empty_stake)
     GemEmptyStateImage.WALLET_CONNECT -> EmptyStateImage.Drawable(R.drawable.empty_dapps)
     GemEmptyStateImage.NOTIFICATIONS -> EmptyStateImage.Drawable(R.drawable.empty_notifications)
-    GemEmptyStateImage.SEARCH -> EmptyStateImage.Vector(AppIcons.Search)
-    GemEmptyStateImage.WALLET -> EmptyStateImage.Vector(AppIcons.Wallet)
+    GemEmptyStateImage.SEARCH -> EmptyStateImage.Vector(R.drawable.ic_search)
+    GemEmptyStateImage.WALLET -> EmptyStateImage.Vector(R.drawable.ic_wallet)
 }
