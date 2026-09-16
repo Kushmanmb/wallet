@@ -10,7 +10,6 @@ Every open item carries a stable id (V vocabulary and twins, R rows, C compositi
 
 The last places where an app reaches the API, a rule or a table without going through Core. The widget boundary that used to protect them was a missing linker flag, closed on 2026-09-16 (see the ledger), so each is now an ordinary move.
 
-- **X166** **S** `ios/Packages/GemAPI` — the whole package is one protocol, `GemAPIAssetsService`, with one consumer: `GemPriceWidget/Services/WidgetPriceService.swift` calls `getAssets(currency:assetIds:)` on it. The widget links Gemstone now, so it can hold `GemAssetsService` and call `get_assets` like every other screen; then the package, its `Package.swift` and the product reference in `Gem.xcodeproj` go. Android has no equivalent — every Kotlin caller already reaches the API through Core's `GemApiClient`.
 
 ## 2. Decisions still made twice
 
