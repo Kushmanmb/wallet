@@ -13,8 +13,8 @@ use primitives::{
 use super::model::{
     GemAutocloseSummary, GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine,
     GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualInfoRow, GemPerpetualMarketCounts, GemPerpetualMarketRow,
-    GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind,
-    GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
+    GemPerpetualMarketSection, GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetailRow,
+    GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigInt;
@@ -522,6 +522,19 @@ pub fn market_sections(counts: &GemPerpetualMarketCounts, is_searching: bool, is
         shows_markets,
         shows_empty: is_searching && !shows_positions && !shows_pinned && !shows_markets,
     }
+}
+
+pub fn market_section_list(sections: &GemPerpetualMarketSections) -> Vec<GemPerpetualMarketSection> {
+    [
+        (sections.shows_recents, GemPerpetualMarketSection::Recents),
+        (sections.shows_positions, GemPerpetualMarketSection::Positions),
+        (sections.shows_pinned, GemPerpetualMarketSection::Pinned),
+        (sections.shows_markets, GemPerpetualMarketSection::Markets),
+        (sections.shows_empty, GemPerpetualMarketSection::Empty),
+    ]
+    .into_iter()
+    .filter_map(|(shows, section)| shows.then_some(section))
+    .collect()
 }
 
 pub fn candle_tooltip(candle: &ChartCandleStick) -> GemCandleTooltip {
@@ -1390,5 +1403,44 @@ mod tests {
         assert_eq!(candle_interval(&ChartPeriod::Month), "12h");
         assert_eq!(candle_interval(&ChartPeriod::Year), "1w");
         assert_eq!(candle_interval(&ChartPeriod::All), "1M");
+    }
+
+    #[test]
+    fn test_the_market_screen_lists_its_sections_in_order() {
+        let counts = GemPerpetualMarketCounts {
+            positions: 1,
+            pinned: 1,
+            markets: 2,
+            recents: 1,
+        };
+
+        assert_eq!(
+            market_sections(&counts, false, true).list(),
+            vec![GemPerpetualMarketSection::Positions, GemPerpetualMarketSection::Pinned, GemPerpetualMarketSection::Markets]
+        );
+        assert_eq!(
+            market_sections(&counts, true, true).list(),
+            vec![
+                GemPerpetualMarketSection::Recents,
+                GemPerpetualMarketSection::Positions,
+                GemPerpetualMarketSection::Pinned,
+                GemPerpetualMarketSection::Markets
+            ],
+            "an empty search query offers the recents above the rest"
+        );
+        assert_eq!(
+            market_sections(
+                &GemPerpetualMarketCounts {
+                    positions: 0,
+                    pinned: 0,
+                    markets: 0,
+                    recents: 0
+                },
+                true,
+                false
+            )
+            .list(),
+            vec![GemPerpetualMarketSection::Empty]
+        );
     }
 }

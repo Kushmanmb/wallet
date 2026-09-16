@@ -4,6 +4,7 @@ import enum Gemstone.GemCandleTooltipRow
 import enum Gemstone.GemPerpetualButton
 import enum Gemstone.GemPerpetualChartLineKind
 import enum Gemstone.GemPerpetualInfoRow
+import enum Gemstone.GemPerpetualMarketSection
 import enum Gemstone.GemPerpetualPositionDetailRow
 import enum Gemstone.GemPerpetualSection
 import Localization
@@ -84,6 +85,17 @@ extension GemCandleTooltipRow {
         case .close: Localized.Charts.Price.close
         case .change: Localized.Charts.Price.change
         case .volume: Localized.Perpetual.volume
+        }
+    }
+}
+
+extension GemPerpetualMarketSection {
+    var title: String {
+        switch self {
+        case .positions: Localized.Perpetual.positions
+        case .pinned: Localized.Common.pinned
+        case .markets: Localized.Perpetuals.markets
+        case .recents, .empty: .empty
         }
     }
 }

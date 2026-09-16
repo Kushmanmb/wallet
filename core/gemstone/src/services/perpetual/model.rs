@@ -293,6 +293,22 @@ pub struct GemPerpetualMarketSections {
     pub shows_empty: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemPerpetualMarketSection {
+    Positions,
+    Recents,
+    Pinned,
+    Markets,
+    Empty,
+}
+
+#[uniffi::export]
+impl GemPerpetualMarketSections {
+    pub fn list(&self) -> Vec<GemPerpetualMarketSection> {
+        super::rules::market_section_list(self)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
 pub struct GemPerpetualMarketCounts {
     pub positions: u32,
