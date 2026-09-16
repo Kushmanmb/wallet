@@ -18,15 +18,15 @@ import uniffi.gemstone.GemVerificationLevel
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
 
-@Composable
-fun GemHeaderButtonKind.icon(): ImageVector = when (this) {
-    GemHeaderButtonKind.SEND -> AppIcons.Send
-    GemHeaderButtonKind.RECEIVE -> AppIcons.Receive
-    GemHeaderButtonKind.BUY -> AppIcons.Buy
-    GemHeaderButtonKind.SWAP -> AppIcons.SwapVert
-    GemHeaderButtonKind.DEPOSIT -> AppIcons.Deposit
-    GemHeaderButtonKind.WITHDRAW -> AppIcons.Withdraw
-    GemHeaderButtonKind.MORE -> AppIcons.MoreVert
+@DrawableRes
+fun GemHeaderButtonKind.iconRes(): Int = when (this) {
+    GemHeaderButtonKind.SEND -> R.drawable.ic_action_send
+    GemHeaderButtonKind.RECEIVE -> R.drawable.ic_action_receive
+    GemHeaderButtonKind.BUY -> R.drawable.ic_action_buy
+    GemHeaderButtonKind.SWAP -> R.drawable.ic_swap_vert
+    GemHeaderButtonKind.DEPOSIT -> R.drawable.ic_action_deposit
+    GemHeaderButtonKind.WITHDRAW -> R.drawable.ic_action_withdraw
+    GemHeaderButtonKind.MORE -> R.drawable.ic_more_vert
 }
 
 @DrawableRes

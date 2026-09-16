@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.assets.views.components
 
+import com.gemwallet.android.ui.components.list_head.uiModel
 import androidx.compose.runtime.Composable
 import uniffi.gemstone.GemValueTone
 import com.gemwallet.android.domains.wallet.aggregates.WalletSummaryAggregate
@@ -31,11 +32,12 @@ internal fun AssetsHead(
         onSubtitleClick = onPortfolio,
         actions = {
             AssetHeadActions(
-                actions = walletSummary.headerActions,
-                onTransfer = onSendClick,
-                onReceive = onReceiveClick,
-                onBuy = onBuyClick,
-                onSwap = onSwapClick,
+                walletSummary.headerActions.uiModel(
+                    onTransfer = onSendClick,
+                    onReceive = onReceiveClick,
+                    onBuy = onBuyClick,
+                    onSwap = onSwapClick,
+                ),
             )
         }
     )

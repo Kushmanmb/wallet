@@ -1,6 +1,5 @@
 package com.gemwallet.android.ui.components.list_head
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
@@ -81,7 +81,6 @@ import com.gemwallet.android.ui.theme.tinyIconSize
 import com.wallet.core.primitives.Asset
 import uniffi.gemstone.GemHeaderActions
 import uniffi.gemstone.GemHeaderButton
-import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.style.icon
 import uniffi.gemstone.GemHeaderButtonKind
 import kotlin.math.floor
@@ -216,51 +215,16 @@ fun HeaderIcon(
     )
 }
 
-private data class AssetHeadActionItem(
-    @param:StringRes val title: Int,
-    val imageVector: ImageVector,
-    val enabled: Boolean,
-    val onClick: (() -> Unit)?,
-    val testTag: String? = null,
-)
-
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun AssetHeadActions(
-    actions: GemHeaderActions,
-    onTransfer: (() -> Unit)?,
-    onReceive: (() -> Unit)?,
-    onBuy: (() -> Unit)?,
-    onSwap: (() -> Unit)?,
-    onDeposit: (() -> Unit)? = null,
-    onWithdraw: (() -> Unit)? = null,
-    onMore: (() -> Unit)? = null,
-) {
+fun AssetHeadActions(model: HeadActionsUIModel) {
     var actionFontSize by remember { mutableStateOf(16.sp) }
-    val buttons = when (actions) {
-        GemHeaderActions.WatchOnly -> {
+    val items = when (model) {
+        HeadActionsUIModel.WatchOnly -> {
             AssetWatchOnly()
             return
         }
-        is GemHeaderActions.Buttons -> actions.buttons
-    }
-    val items = buttons.map { button ->
-        val action = when (button.kind) {
-            GemHeaderButtonKind.SEND -> onTransfer
-            GemHeaderButtonKind.RECEIVE -> onReceive
-            GemHeaderButtonKind.BUY -> onBuy
-            GemHeaderButtonKind.SWAP -> onSwap
-            GemHeaderButtonKind.DEPOSIT -> onDeposit
-            GemHeaderButtonKind.WITHDRAW -> onWithdraw
-            GemHeaderButtonKind.MORE -> onMore
-        }
-        AssetHeadActionItem(
-            title = button.kind.stringRes(),
-            imageVector = button.kind.icon(),
-            enabled = button.isEnabled,
-            onClick = action,
-            testTag = if (button.kind == GemHeaderButtonKind.BUY) "assetBuy" else null,
-        )
+        is HeadActionsUIModel.Buttons -> model.items
     }
     Row(
         modifier = Modifier.width(IntrinsicSize.Min),
@@ -268,20 +232,19 @@ fun AssetHeadActions(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         items.forEach { action ->
-            val onClick = action.onClick ?: return@forEach
             AmountHeadAction(
                 modifier = Modifier
                     .weight(1f)
                     .then(if (action.testTag != null) Modifier.testTag(action.testTag) else Modifier),
                 title = stringResource(id = action.title),
-                imageVector = action.imageVector,
+                imageVector = ImageVector.vectorResource(action.icon),
                 enabled = action.enabled,
                 contentDescription = stringResource(id = action.title),
                 fontSize = actionFontSize,
                 onNextFontSize = {
                     if (actionFontSize > it) actionFontSize = it
                 },
-                onClick = onClick,
+                onClick = action.onClick,
             )
         }
     }
@@ -506,11 +469,12 @@ private class ActionTextAutoSize(
 fun PreviewAssetHeadActions() {
     WalletTheme {
         AssetHeadActions(
-            actions = GemHeaderActions.Buttons(listOf(GemHeaderButtonKind.SEND, GemHeaderButtonKind.RECEIVE, GemHeaderButtonKind.BUY, GemHeaderButtonKind.SWAP).map { GemHeaderButton(it, isEnabled = true) }),
-            onTransfer = { },
-            onReceive = { },
-            onBuy = {},
-            onSwap = {},
+            GemHeaderActions.Buttons(listOf(GemHeaderButtonKind.SEND, GemHeaderButtonKind.RECEIVE, GemHeaderButtonKind.BUY, GemHeaderButtonKind.SWAP).map { GemHeaderButton(it, isEnabled = true) }).uiModel(
+                onTransfer = { },
+                onReceive = { },
+                onBuy = {},
+                onSwap = {},
+            ),
         )
     }
 }
