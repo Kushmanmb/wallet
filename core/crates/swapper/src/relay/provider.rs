@@ -7,7 +7,7 @@ use async_trait::async_trait;
 use gem_client::Client;
 use gem_tron::address::TronAddress;
 use primitives::{
-    AssetId, Chain,
+    AssetId, Chain, EvmNativeCurrency,
     swap::{ApprovalData, SlippageMode},
 };
 
@@ -193,9 +193,9 @@ where
         let token = match (chain, from_asset_id.token_id.clone()) {
             (RelayChain::Solana | RelayChain::Ton, _) | (RelayChain::Tron, None) => return Ok(None),
             (_, Some(token)) => token,
-            (RelayChain::Evm(chain), None) => match chain.native_asset_contract() {
-                Some(token) => token.to_string(),
-                None => return Ok(None),
+            (RelayChain::Evm(chain), None) => match chain.native_currency() {
+                EvmNativeCurrency::Token(token) => token.to_string(),
+                EvmNativeCurrency::Wrapped(_) | EvmNativeCurrency::Mirrored { .. } | EvmNativeCurrency::None => return Ok(None),
             },
         };
 
@@ -264,7 +264,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_check_evm_approval_native_asset_contract() -> Result<(), SwapperError> {
+    async fn test_check_evm_approval_tokenized_native_currency() -> Result<(), SwapperError> {
         let relay = mock_relay_with_allowance(ZERO_ALLOWANCE);
         let approval = relay
             .check_approval(&mock_quote(Chain::Celo), &mock_quote_response(), &AssetId::from_chain(Chain::Celo))
