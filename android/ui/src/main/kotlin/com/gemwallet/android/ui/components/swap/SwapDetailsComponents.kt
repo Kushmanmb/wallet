@@ -1,10 +1,10 @@
 package com.gemwallet.android.ui.components.swap
 
 import com.gemwallet.android.domains.duration.formatEstimatedConfirmation
+import com.gemwallet.android.ui.models.swap.SwapDetailRowUIModel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,12 +41,9 @@ import com.gemwallet.android.ui.models.swap.SwapDetailsUIModel
 import com.gemwallet.android.ui.models.swap.SwapPriceImpactUIModel
 import com.gemwallet.android.ui.models.swap.SwapProviderUIModel
 import uniffi.gemstone.SwapPriceImpactType
-import com.gemwallet.android.ui.theme.Spacer8
 import com.gemwallet.android.ui.theme.pendingColor
 import com.gemwallet.android.ui.theme.listItemIconSize
 import uniffi.gemstone.SwapProvider
-import uniffi.gemstone.GemSwapDetailRow
-import com.gemwallet.android.ui.localization.stringRes
 
 @Composable
 fun SwapDetailsSummaryItem(
@@ -114,7 +111,7 @@ fun SwapDetailsBottomSheet(
             val providers = model.inlineProviders(onProviderSelect != null)
             val providerSectionTitle = when {
                 onProviderSelect != null -> R.string.buy_providers_title
-                showProviderSectionHeader -> GemSwapDetailRow.PROVIDER.stringRes()
+                showProviderSectionHeader -> R.string.common_provider
                 else -> null
             }
 
@@ -142,24 +139,18 @@ fun SwapDetailsBottomSheet(
                     )
                 }
             }
-            val rows = model.rows.filterNot { it == GemSwapDetailRow.PROVIDER }
-            itemsIndexed(rows) { index, row ->
-                val listPosition = ListPosition.getPosition(index, rows.size)
+            itemsIndexed(model.rows) { index, row ->
+                val listPosition = ListPosition.getPosition(index, model.rows.size)
                 when (row) {
-                    GemSwapDetailRow.PROVIDER -> Unit
-                    GemSwapDetailRow.RATE -> AssetRatePropertyItem(model.rate, listPosition)
-                    GemSwapDetailRow.ESTIMATED_TIME -> model.etaInSeconds?.let(::formatEstimatedConfirmation)?.takeIf { it.isNotEmpty() }?.let {
-                        PropertyItem(title = row.stringRes(), data = it, listPosition = listPosition)
+                    is SwapDetailRowUIModel.Rate -> AssetRatePropertyItem(row.rate, listPosition)
+                    is SwapDetailRowUIModel.EstimatedTime -> formatEstimatedConfirmation(row.seconds).takeIf { it.isNotEmpty() }?.let {
+                        PropertyItem(title = R.string.swap_estimated_time_title, data = it, listPosition = listPosition)
                     }
-                    GemSwapDetailRow.PRICE_IMPACT -> model.priceImpact?.let { PriceImpactPropertyItem(it, listPosition) }
-                    GemSwapDetailRow.MINIMUM_RECEIVE -> PropertyItem(
-                        title = row.stringRes(),
-                        data = model.minimumReceive,
-                        listPosition = listPosition,
-                    )
-                    GemSwapDetailRow.SLIPPAGE -> PropertyItem(
-                        title = row.stringRes(),
-                        data = if (model.selectedSlippage == null) stringResource(R.string.swap_slippage_auto) else model.slippageText,
+                    is SwapDetailRowUIModel.PriceImpact -> PriceImpactPropertyItem(row.model, listPosition)
+                    is SwapDetailRowUIModel.MinimumReceive -> PropertyItem(title = R.string.swap_min_receive, data = row.text, listPosition = listPosition)
+                    is SwapDetailRowUIModel.Slippage -> PropertyItem(
+                        title = R.string.swap_slippage,
+                        data = row.text ?: stringResource(R.string.swap_slippage_auto),
                         info = InfoSheetEntity.Slippage,
                         listPosition = listPosition,
                     )

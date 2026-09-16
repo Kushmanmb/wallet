@@ -13,7 +13,6 @@ import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.domains.swap.AssetRatePair
 import com.gemwallet.android.domains.swap.SwapItemType
 import com.gemwallet.android.ext.toIdentifier
-import uniffi.gemstone.GemSwapDetailRow
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.model.AssetBalance
 import uniffi.gemstone.GemTransferData
@@ -591,7 +590,7 @@ class SwapViewModelTest {
     @Test
     fun `onPrimaryAction shows price impact warning before swap`() = runTest(testDispatcher) {
         every { SwapDetailsUIModelFactory.create(any()) } returns SwapDetailsUIModel(
-            rows = listOf(GemSwapDetailRow.PROVIDER, GemSwapDetailRow.RATE, GemSwapDetailRow.PRICE_IMPACT),
+            rows = emptyList(),
             provider = SwapProviderUIModel(
                 id = SwapProvider.UNISWAP_V3,
                 title = "Uniswap v3",
