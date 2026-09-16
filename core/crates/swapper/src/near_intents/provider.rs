@@ -83,11 +83,11 @@ where
 }
 
 impl NearIntents<RpcClient> {
-    pub fn new(rpc_provider: Arc<dyn RpcProvider>) -> Self {
+    pub fn new(rpc_provider: Arc<dyn RpcProvider>) -> Option<Self> {
         let client = NearIntentsClient::new(RpcClient::new(base_url(), rpc_provider.clone()), None);
         let explorer = NearIntentsExplorer::new(RpcClient::new(explorer_url(), rpc_provider.clone()));
-        let sui_client = create_sui_client(rpc_provider.clone()).expect("failed to create Sui gRPC client");
-        Self::with_client(client, explorer, sui_client)
+        let sui_client = create_sui_client(rpc_provider.clone()).ok()?;
+        Some(Self::with_client(client, explorer, sui_client))
     }
 }
 

@@ -67,30 +67,37 @@ impl GemSwapper {
 }
 
 impl GemSwapper {
+    fn boxed<T: Swapper + 'static>(swapper: T) -> Box<dyn Swapper> {
+        Box::new(swapper)
+    }
+
     pub fn new(rpc_provider: Arc<dyn RpcProvider>) -> Self {
-        let swappers: Vec<Box<dyn Swapper>> = vec![
-            uniswap::default::boxed_uniswap_v3(rpc_provider.clone()),
-            uniswap::default::boxed_uniswap_v4(rpc_provider.clone()),
-            uniswap::default::boxed_pancakeswap(rpc_provider.clone()),
-            Box::new(thorchain::ThorChain::new(rpc_provider.clone())),
-            Box::new(thorchain::ThorChain::new_mayachain(rpc_provider.clone())),
-            Box::new(jupiter::Jupiter::new(rpc_provider.clone())),
-            Box::new(okx::OkxProvider::new(rpc_provider.clone())),
-            Box::new(across::Across::new(rpc_provider.clone())),
-            Box::new(hyperliquid::Hyperliquid::new(rpc_provider.clone())),
-            uniswap::default::boxed_oku(rpc_provider.clone()),
-            uniswap::default::boxed_wagmi(rpc_provider.clone()),
-            Box::new(stonfi::Stonfi::new(rpc_provider.clone())),
-            Box::new(mayan::Mayan::new(rpc_provider.clone())),
-            Box::new(panora::Panora::new(rpc_provider.clone())),
-            Box::new(near_intents::NearIntents::new(rpc_provider.clone())),
-            Box::new(chainflip::ChainflipProvider::new(rpc_provider.clone())),
-            Box::new(cetus_clmm::CetusClmm::new(rpc_provider.clone())),
-            Box::new(relay::Relay::new(rpc_provider.clone())),
-            Box::new(squid::Squid::new(rpc_provider.clone())),
-            Box::new(swaps_xyz::SwapsXyz::new(rpc_provider.clone())),
-            uniswap::default::boxed_aerodrome(rpc_provider.clone()),
-        ];
+        let swappers: Vec<Box<dyn Swapper>> = [
+            Some(uniswap::default::boxed_uniswap_v3(rpc_provider.clone())),
+            Some(uniswap::default::boxed_uniswap_v4(rpc_provider.clone())),
+            Some(uniswap::default::boxed_pancakeswap(rpc_provider.clone())),
+            thorchain::ThorChain::new(rpc_provider.clone()).map(Self::boxed),
+            thorchain::ThorChain::new_mayachain(rpc_provider.clone()).map(Self::boxed),
+            jupiter::Jupiter::new(rpc_provider.clone()).map(Self::boxed),
+            Some(Box::new(okx::OkxProvider::new(rpc_provider.clone()))),
+            Some(Box::new(across::Across::new(rpc_provider.clone()))),
+            Some(Box::new(hyperliquid::Hyperliquid::new(rpc_provider.clone()))),
+            Some(uniswap::default::boxed_oku(rpc_provider.clone())),
+            Some(uniswap::default::boxed_wagmi(rpc_provider.clone())),
+            stonfi::Stonfi::new(rpc_provider.clone()).map(Self::boxed),
+            Some(Box::new(mayan::Mayan::new(rpc_provider.clone()))),
+            Some(Box::new(panora::Panora::new(rpc_provider.clone()))),
+            near_intents::NearIntents::new(rpc_provider.clone()).map(Self::boxed),
+            Some(Box::new(chainflip::ChainflipProvider::new(rpc_provider.clone()))),
+            cetus_clmm::CetusClmm::new(rpc_provider.clone()).map(Self::boxed),
+            Some(Box::new(relay::Relay::new(rpc_provider.clone()))),
+            Some(Box::new(squid::Squid::new(rpc_provider.clone()))),
+            swaps_xyz::SwapsXyz::new(rpc_provider.clone()).map(Self::boxed),
+            Some(uniswap::default::boxed_aerodrome(rpc_provider.clone())),
+        ]
+        .into_iter()
+        .flatten()
+        .collect();
 
         Self { rpc_provider, swappers }
     }
@@ -314,9 +321,9 @@ mod tests {
         let swappers: Vec<Box<dyn Swapper>> = vec![
             Box::new(new_uniswap_v3(provider.clone())),
             Box::new(new_pancakeswap(provider.clone())),
-            Box::new(thorchain::ThorChain::new(provider.clone())),
-            Box::new(thorchain::ThorChain::new_mayachain(provider.clone())),
-            Box::new(jupiter::Jupiter::new(provider)),
+            Box::new(thorchain::ThorChain::new(provider.clone()).unwrap()),
+            Box::new(thorchain::ThorChain::new_mayachain(provider.clone()).unwrap()),
+            Box::new(jupiter::Jupiter::new(provider).unwrap()),
         ];
 
         let from_chain = Chain::Ethereum;

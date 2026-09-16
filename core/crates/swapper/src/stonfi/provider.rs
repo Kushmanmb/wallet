@@ -30,9 +30,9 @@ where
 }
 
 impl Stonfi<RpcClient> {
-    pub fn new(rpc_provider: Arc<dyn RpcProvider>) -> Self {
-        let endpoint = rpc_provider.get_endpoint(Chain::Ton).expect("failed to get TON endpoint for STON.fi");
-        Self::new_with_client(TonClient::new(RpcClient::new(endpoint, rpc_provider)))
+    pub fn new(rpc_provider: Arc<dyn RpcProvider>) -> Option<Self> {
+        let endpoint = rpc_provider.get_endpoint(Chain::Ton).ok()?;
+        Some(Self::new_with_client(TonClient::new(RpcClient::new(endpoint, rpc_provider))))
     }
 }
 
