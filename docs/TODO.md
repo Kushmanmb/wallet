@@ -205,7 +205,6 @@ C11 and C13 landed with C10. The per-asset alert list asked `type != .auto` whil
 
 C10 landed on 2026-09-16. The network-assets screen split pinned from unpinned with its own `filter { $0.metadata.isPinned }` while the select-asset screen next to it already went through `AssetsSections.from`, which calls Core's `asset_sections`. It uses the same path now. Worth noting for the rest of this section: the Core rule is keyed by asset id, so it dedupes — the one test that broke was building three assets with the same id, which is not a list the screen can ever receive.
 
-- **C18** **S** `android/data/coordinators/.../stake/StakeReadsImpl.kt` — delegation filtering beside a Core stake service.
 
 ## 21. Time decided on a client
 
@@ -327,16 +326,15 @@ The one real copy was `create_eth_client`, identical in `swapper` and `yielder` 
 
 [SERVICES.md](SERVICES.md) says a screen service only one app holds is the next consolidation. These are the rows where the table itself shows one side empty or asymmetric.
 
+Five were confirmations rather than decisions and are closed. **P78**: both compositions forward identically to `self.banners.banner_content(event, asset)`, so the banner rules have not drifted. **P76**: all three screens ask `getChains(query:)` — the same question. **P77**: iOS's third `GemRecentActivityService` holder does not hold it; `SelectAssetViewModel` takes it in `init` and passes it straight to a child model, the conduit shape O31 and O32 describe. **P80**: the iOS delegation filter was closed with § 19. **P81** was already finished as § 35 — the trace is done and the answer is two.
+
+**P76 turned up something the sweep did not name.** `ImportWalletTypeViewModel` reaches `GemChainService.shared` at file scope while its sibling `ChainListSettingsViewModel` takes the same service in its initializer, and thirteen more iOS sites do the same with `GemAddressService`, `GemAssetConfigService`, `GemApplicationMetadataService` and `GemConnectionService`. SERVICES.md forbids a file-scope `Gem*Service` so a test can substitute it, but every one of these is a stateless rule object with no constructor arguments, so injecting it into fourteen initializers buys no substitutability. That is one decision — does a stateless Core rule object count as a service under § 7, or as a free function — and it should be settled once rather than fourteen times.
+
 - **P72** **M** `GemAppUpdateService` — iOS `AboutUsViewModel` holds it; Android uses Play in-app update instead, so the update decision is made by two different owners. `AppUpdateCoordinator` already maps `upgradeRequired` itself (see F29).
 - **P73** **M** `GemAvatarService` — Android has no avatar surface at all, so wallet avatars are an iOS-only feature rather than a Core one.
 - **P74** **S** `GemNotificationsService` — iOS `NotificationsViewModel` holds it; Android's `SettingsViewModel` uses push cases instead.
 - **P75** **S** `GemTransactionDetailsService` — iOS holds the service, Android reaches the same answer through `GetTransactionDetailsImpl` as an observed read, so the links are built in two places.
-- **P76** **S** `GemChainService` — iOS holds it in the chain picker, Android in two unrelated models (`ContactChainSelectViewModel`, `SelectImportTypeViewModel`); confirm the three screens ask the same question.
-- **P77** **S** `GemRecentActivityService` — three iOS holders against two Android; the extra iOS holder is `SelectAssetViewModel`, which Android answers inside `BaseAssetSelectViewModel`.
-- **P78** **S** `GemBannerService` — held by no screen on either app, composed inside two services; confirm the banner rules have not drifted between those two compositions.
 - **P79** **S** `GemWalletSessionService` — iOS spreads it over `RootSceneViewModel` and `NavigationHandler`; Android keeps it in `SessionCoordinator`. The iOS split is what produced O35.
-- **P80** **S** `GemStakeService` — three screens each side, but iOS `EarnSceneViewModel` filters delegations itself (S21) where Android does not.
-- **P81** **S** About 67 exported records and enums are named by neither app. SERVICES.md says review before deleting; do the review and record the ones that are reached through a nested field so the list stops being re-swept.
 
 ## 30. App ports that Core could own
 
