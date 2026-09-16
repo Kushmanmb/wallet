@@ -83,4 +83,25 @@ class BaseSelectSearchTest {
 
         verify(exactly = 1) { searchService.search("", true, NO_QUERY_LIMIT, setOf(AssetFilter.Buyable)) }
     }
+
+    @Test
+    fun `the chain chips and the balance toggle reach the query as filters`() = runTest {
+        val searchService = mockk<AssetsSearchService> {
+            every { search(any(), any(), any(), any()) } returns flowOf(results)
+        }
+        val search = BaseSelectSearch(searchService)
+        val filters = MutableStateFlow(
+            SelectAssetFilters(
+                session = null,
+                query = "",
+                chainFilter = listOf(Chain.Ethereum),
+                hasBalance = true,
+                filters = listOf(GemAssetFilter.Buyable),
+            )
+        )
+        search.items(filters).first()
+        verify(exactly = 1) {
+            searchService.search("", false, NO_QUERY_LIMIT, setOf(AssetFilter.Buyable, AssetFilter.Chains(listOf(Chain.Ethereum)), AssetFilter.HasBalance))
+        }
+    }
 }
