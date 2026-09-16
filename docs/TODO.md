@@ -96,8 +96,11 @@ Re-checked on 2026-09-15 the way the Android dp items were: most of the 31 hits 
 - **X90** **M** `core/gemstone/src/models/remote_types.rs` — 1929 lines.
 - **X91** **M** `core/crates/primitives/src/chain_config.rs` — 1388.
 - **X92** **M** `core/gemstone/src/message/signer.rs` — 771.
-- **X94** **M** `ios/Packages/PrimitivesComponents/Sources/Extensions/Gemstone+Localized.swift` — 499 lines; the shared mapper is becoming the place every module's leftovers land.
 - **X95** **M** `android/ui/.../components/list_head/AmountListHead.kt` (516) and `chart/GemCandlestickChart.kt` (470).
+
+### The shared localized mapper
+
+**X94** closed on 2026-09-16 with no change. `PrimitivesComponents/Extensions/Gemstone+Localized.swift` is 35 extensions that each give one Core enum its localized label, and the length is the number of Core enums the apps draw, not a mix of concerns — the style half already lives beside it in `Gemstone+Style.swift`. One shared mapper per app is the rule ([ARCHITECTURE.md](ARCHITECTURE.md)); splitting it into several files is what that rule exists to prevent, and a module that wants its own copy is the mistake the rule catches. It grows when Core names a new outcome, which is the contract working.
 
 ### The two Android migration files
 
