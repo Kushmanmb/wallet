@@ -336,7 +336,6 @@ pub(crate) fn unfreeze_available(resource: &primitives::Resource, balance: &GemA
     }
 }
 
-#[uniffi::export]
 impl GemConfirmDestination {
     pub fn with_address_name(&self, address_name: Option<AddressName>) -> GemConfirmDestination {
         match (self, address_name) {

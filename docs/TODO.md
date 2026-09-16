@@ -14,7 +14,6 @@ Ordered by the lines it removes; work these before the sections below. The dupli
 - **U7** **M** `android/gemcore/.../domains/price/ValueDirection.kt` is a hand-written twin of `GemValueTone` with 125 readers, mapped from a `Double` and from `PriceAlertDirection`; [no hand-written twins](ARCHITECTURE.md): the readers take the Core tone and a style mapper decides the colour, the way `LatencyTone` does for the latency badge.
 - **U8** **M** `android/gemcore/.../model/Precision.kt` is a twin of `GemPrecision` (`GemPrecision.toPrecision()`) used by the four formatters; the formatters read `GemPrecision` directly.
 - **U5** **S** iOS members with no reader: `PerpetualPositionViewModel.nameText`, `ValueFormatter.full_US`, `SupportMessageSender.isAgent`, `Constants.apiURL` (confirm the last against the widget and tests before deleting).
-- **U3** **S** `GemConfirmDestination::with_address_name` is still `#[uniffi::export]`ed but has no app caller since R81 moved the merge into `row_contents`; keep it a Rust function.
 
 ## 1. Surfaces still outside Gemstone
 
