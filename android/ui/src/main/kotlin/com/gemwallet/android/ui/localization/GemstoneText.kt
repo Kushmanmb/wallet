@@ -10,6 +10,7 @@ import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
+import uniffi.gemstone.GemBalanceResource
 import uniffi.gemstone.GemContactAddressField
 import uniffi.gemstone.GemRecipientSection
 import uniffi.gemstone.GemHeaderButtonKind
@@ -399,4 +400,9 @@ fun GemRecipientSection.stringRes(): Int = when (this) {
     is GemRecipientSection.Contacts -> R.string.contacts_title
     is GemRecipientSection.Wallets -> R.string.transfer_recipient_my_wallets
     is GemRecipientSection.ViewWallets -> R.string.transfer_recipient_view_wallets
+}
+
+fun GemBalanceResource.titleRes(): Int = when (this) {
+    GemBalanceResource.ENERGY -> R.string.stake_resource_energy
+    GemBalanceResource.BANDWIDTH -> R.string.stake_resource_bandwidth
 }
