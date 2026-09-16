@@ -73,6 +73,13 @@
 		D83819562E256A5B0076CDB3 /* GemPriceWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D83819492E256A5A0076CDB3 /* GemPriceWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D83BDCB72E3E878A00E41807 /* PerpetualPositionNavigationStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83BDCB52E3E878A00E41807 /* PerpetualPositionNavigationStack.swift */; };
 		D83BDCB92E3E8AA400E41807 /* ViewModelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83BDCB82E3E8AA400E41807 /* ViewModelFactory.swift */; };
+		D8A200060000000000E41807 /* ViewModelFactory+Wallets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A100060000000000E41807 /* ViewModelFactory+Wallets.swift */; };
+		D8A200050000000000E41807 /* ViewModelFactory+Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A100050000000000E41807 /* ViewModelFactory+Wallet.swift */; };
+		D8A200040000000000E41807 /* ViewModelFactory+Transfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A100040000000000E41807 /* ViewModelFactory+Transfer.swift */; };
+		D8A200030000000000E41807 /* ViewModelFactory+Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A100030000000000E41807 /* ViewModelFactory+Settings.swift */; };
+		D8A200020000000000E41807 /* ViewModelFactory+Perpetuals.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A100020000000000E41807 /* ViewModelFactory+Perpetuals.swift */; };
+		D8A200010000000000E41807 /* ViewModelFactory+Collectibles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A100010000000000E41807 /* ViewModelFactory+Collectibles.swift */; };
+		D8A200000000000000E41807 /* ViewModelFactory+Activity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A100000000000000E41807 /* ViewModelFactory+Activity.swift */; };
 		D852CAFD2C9C9837004121D3 /* AddAssetPriceAlertNavigationStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = D852CAFC2C9C9837004121D3 /* AddAssetPriceAlertNavigationStack.swift */; };
 		D852CB012C9CC315004121D3 /* PriceAlertsNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D852CB002C9CC315004121D3 /* PriceAlertsNavigationView.swift */; };
 		D85AD2A62CD7017E0010DEF8 /* NativeProviderService in Frameworks */ = {isa = PBXBuildFile; productRef = D85AD2A52CD7017E0010DEF8 /* NativeProviderService */; };
@@ -229,6 +236,13 @@
 		D83819492E256A5A0076CDB3 /* GemPriceWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = GemPriceWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D83BDCB52E3E878A00E41807 /* PerpetualPositionNavigationStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerpetualPositionNavigationStack.swift; sourceTree = "<group>"; };
 		D83BDCB82E3E8AA400E41807 /* ViewModelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModelFactory.swift; sourceTree = "<group>"; };
+		D8A100060000000000E41807 /* ViewModelFactory+Wallets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewModelFactory+Wallets.swift"; sourceTree = "<group>"; };
+		D8A100050000000000E41807 /* ViewModelFactory+Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewModelFactory+Wallet.swift"; sourceTree = "<group>"; };
+		D8A100040000000000E41807 /* ViewModelFactory+Transfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewModelFactory+Transfer.swift"; sourceTree = "<group>"; };
+		D8A100030000000000E41807 /* ViewModelFactory+Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewModelFactory+Settings.swift"; sourceTree = "<group>"; };
+		D8A100020000000000E41807 /* ViewModelFactory+Perpetuals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewModelFactory+Perpetuals.swift"; sourceTree = "<group>"; };
+		D8A100010000000000E41807 /* ViewModelFactory+Collectibles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewModelFactory+Collectibles.swift"; sourceTree = "<group>"; };
+		D8A100000000000000E41807 /* ViewModelFactory+Activity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewModelFactory+Activity.swift"; sourceTree = "<group>"; };
 		D852CAFC2C9C9837004121D3 /* AddAssetPriceAlertNavigationStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAssetPriceAlertNavigationStack.swift; sourceTree = "<group>"; };
 		D852CB002C9CC315004121D3 /* PriceAlertsNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceAlertsNavigationView.swift; sourceTree = "<group>"; };
 		D87316542E3AF1F000C11634 /* FeatureServices */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FeatureServices; sourceTree = "<group>"; };
@@ -473,6 +487,13 @@
 				83B08BDC2D0B4B1E00CA1B33 /* AppResolver+Services.swift */,
 				833CDFCF2D10622D00DAABEE /* ServicesFactory.swift */,
 				D83BDCB82E3E8AA400E41807 /* ViewModelFactory.swift */,
+				D8A100060000000000E41807 /* ViewModelFactory+Wallets.swift */,
+				D8A100050000000000E41807 /* ViewModelFactory+Wallet.swift */,
+				D8A100040000000000E41807 /* ViewModelFactory+Transfer.swift */,
+				D8A100030000000000E41807 /* ViewModelFactory+Settings.swift */,
+				D8A100020000000000E41807 /* ViewModelFactory+Perpetuals.swift */,
+				D8A100010000000000E41807 /* ViewModelFactory+Collectibles.swift */,
+				D8A100000000000000E41807 /* ViewModelFactory+Activity.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -1016,6 +1037,13 @@
 				D8C4A3A52C9696FE006FABE8 /* AssetNavigationView.swift in Sources */,
 				D890F7A52C7FC0AC00C26819 /* WalletsNavigationStack.swift in Sources */,
 				D83BDCB92E3E8AA400E41807 /* ViewModelFactory.swift in Sources */,
+				D8A200060000000000E41807 /* ViewModelFactory+Wallets.swift in Sources */,
+				D8A200050000000000E41807 /* ViewModelFactory+Wallet.swift in Sources */,
+				D8A200040000000000E41807 /* ViewModelFactory+Transfer.swift in Sources */,
+				D8A200030000000000E41807 /* ViewModelFactory+Settings.swift in Sources */,
+				D8A200020000000000E41807 /* ViewModelFactory+Perpetuals.swift in Sources */,
+				D8A200010000000000E41807 /* ViewModelFactory+Collectibles.swift in Sources */,
+				D8A200000000000000E41807 /* ViewModelFactory+Activity.swift in Sources */,
 				83B08BDD2D0B4B1E00CA1B33 /* AppResolver+Services.swift in Sources */,
 				83E0415A2D0AFCB80031D4BC /* RootSceneViewModel.swift in Sources */,
 				D8B738D42C59643D004EF083 /* MainTabViewModel.swift in Sources */,

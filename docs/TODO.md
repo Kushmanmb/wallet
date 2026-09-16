@@ -29,18 +29,6 @@ Closed on 2026-09-15. Four of the six were the same `try { focusRequester.reques
 - **X42** **S** `core/crates/primitives/src/swap_provider.rs` still carries `CetusAggregator` beside `CetusClmm`. Checked on 2026-09-15: a completed swap stores its provider as a string in `TransactionSwapMetadata.provider`, so dropping the variant does not break a stored row — it breaks reading one back, and an old Cetus swap loses its provider name and its swap-again action. The query that settles it is whether any stored swap metadata still carries `cetus_aggregator`; the note in the code, which blamed client references, is gone.
 
 
-### Files that have outgrown one module
-
-- **X46** **M** `core/gemstone/src/services/confirm/rules.rs` — 1387 lines.
-- **X47** **M** `core/gemstone/src/services/perpetual/rules.rs` — 1373.
-- **X48** **M** `core/gemstone/src/services/transactions/rules.rs` — 1266.
-- **X49** **M** `core/gemstone/src/services/stake/rules.rs` — 1265.
-- **X50** **M** `core/gemstone/src/services/amount/rules.rs` — 1251.
-- **X51** **M** `core/gemstone/src/services/transfer/rules.rs` — 1194.
-- **X52** **M** `core/gemstone/src/services/assets/rules.rs` — 1168.
-- **X53** **M** `ios/Packages/Keychain/Sources/Types/Status.swift` — 1241 lines of status mapping.
-- **X54** **M** `ios/Gem/Services/ViewModelFactory.swift` — 777 lines and every screen's constructor.
-
 ### View models with no test
 
 The logic weight in brackets is methods plus computed properties. 95 of 159 iOS and 45 of 65 Android feature view models have no test file; these are the heaviest.
@@ -182,6 +170,16 @@ All eight closed on 2026-09-15. The orchestration in `wallet_home`, `asset_disco
 
 ### 10. Exports no app calls at all
 Closed on 2026-09-15 with no change. The sweep counted **app** callers, which is the wrong test for a `rules.rs` function: rules are called by the service that owns them, and the app calls the service. Every function listed here has Core callers — `sanitize_number_input` has fifteen, `node_url` twenty-three, `price_alert_toggle` is read by the asset row, `shows_header` by the confirm screen — and the explorer getters are used by nine other services. A Core export with no caller anywhere is still worth finding; counting app callers alone does not find it.
+
+### Files that have outgrown one module
+
+All nine closed by 2026-09-16, two of them by changing the file.
+
+**X46–X52** counted file lines, and in a Rust module the tests live at the bottom of the file they test. The production halves are 622, 596, 556, 518, 489, 465 and 443 lines — the top of a smooth distribution across 44 `rules.rs` files whose median is about 130, not a cliff. Each one is also a single subject: `transactions/rules.rs` is 38 functions that all feed `row`, `detail_rows` and `details`, and `transfer/rules.rs` is one trait and its impl for `TransactionInputType`. Splitting either would move a private helper away from its only caller and add a module layer that removes nothing.
+
+**X53** is real and fixed: `Keychain/Types/Status.swift` was 1240 lines because 820 of them were a hand-copied English table of Apple's own `OSStatus` messages. `SecCopyErrorMessageString` returns the same message from the system, localized, so `description` is now one line and the file is 434 — the enum of status codes and nothing else.
+
+**X54** is real and fixed: `ViewModelFactory.swift` was one struct with 55 stored services, 98 imports and 61 screen constructors. The struct and its properties stay in `ViewModelFactory.swift`; the constructors moved to `ViewModelFactory+Wallet`, `+Settings`, `+Wallets`, `+Transfer`, `+Activity`, `+Perpetuals` and `+Collectibles`, each carrying only the imports its screens need. The largest is 217 lines.
 
 ### Core hardening, second pass
 
