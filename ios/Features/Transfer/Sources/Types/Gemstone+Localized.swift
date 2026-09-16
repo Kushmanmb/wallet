@@ -8,6 +8,7 @@ import enum Gemstone.GemAmountError
 import enum Gemstone.GemAmountTitle
 import enum Gemstone.GemConfirmButtonKind
 import enum Gemstone.GemConfirmDestination
+import enum Gemstone.GemRecipientSection
 import enum Gemstone.GemConfirmError
 import enum Gemstone.GemConfirmErrorDisplay
 import enum Gemstone.GemConfirmTitle
@@ -155,6 +156,17 @@ extension GemConfirmDestination {
         case .validator: Localized.Stake.validator
         case .resource: Localized.Stake.resource
         case .provider: Localized.Common.provider
+        }
+    }
+}
+
+extension GemRecipientSection {
+    var title: String {
+        switch self {
+        case .pinned: Localized.Common.pinned
+        case .contacts: Localized.Contacts.title
+        case .wallets: Localized.Transfer.Recipient.myWallets
+        case .viewWallets: Localized.Transfer.Recipient.viewWallets
         }
     }
 }

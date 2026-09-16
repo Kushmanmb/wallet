@@ -11,6 +11,7 @@ import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
 import uniffi.gemstone.GemContactAddressField
+import uniffi.gemstone.GemRecipientSection
 import uniffi.gemstone.GemHeaderButtonKind
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.ChartPeriod
@@ -390,4 +391,12 @@ fun GemContactAddressField.stringRes(): Int = when (this) {
     GemContactAddressField.NETWORK -> R.string.transfer_network
     GemContactAddressField.ADDRESS -> R.string.common_address
     GemContactAddressField.MEMO -> R.string.transfer_memo
+}
+
+@StringRes
+fun GemRecipientSection.stringRes(): Int = when (this) {
+    is GemRecipientSection.Pinned -> R.string.common_pinned
+    is GemRecipientSection.Contacts -> R.string.contacts_title
+    is GemRecipientSection.Wallets -> R.string.transfer_recipient_my_wallets
+    is GemRecipientSection.ViewWallets -> R.string.transfer_recipient_view_wallets
 }
