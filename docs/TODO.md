@@ -1,6 +1,6 @@
 # Open work
 
-**Refilled on 2026-09-16.** Every id from the 2026-09-15 sweeps is closed — landed, or closed against evidence, with the reasoning kept in the lower half of this file so the same lead is not re-raised. Sections 16 onwards are the new pass, built from screen-shaped lenses rather than the structural ones, which have been dry since 2026-09-12: the row census, a composed-label pass, client-side arithmetic, invented failures, call-site thresholds, collection shaping, client-side time, hand-built URLs and cross-app member-name collisions. No test items: coverage is tracked by the decisions a screen makes, not by file names.
+**Refilled on 2026-09-16.** Every id from the 2026-09-15 sweeps is closed — landed, or closed against evidence, with the reasoning kept in the lower half of this file so the same lead is not re-raised. Sections 16–25 are the app-shaped pass, built from lenses the structural sweeps miss: the row census, a composed-label pass, client-side arithmetic, invented failures, call-site thresholds, collection shaping, client-side time, hand-built URLs and cross-app member-name collisions. Sections 26–30 are the Core-shaped pass over the same corpus: records that cross with a bare number, screens holding no Core service at all, rules duplicated between Core crates, the gaps the screen-service map already names, and app ports Core could own. No test items: coverage is tracked by the decisions a screen makes, not by file names.
 
 Every open item carries a stable id (V vocabulary, R rows, C composition, S sessions, B view boundary, F formatting, P parity, D decisions, O ownership, X platform, G guidance, T tests, L localization, N naming, PERF performance) and a size (**S**/**M**/**L**). Contracts are in [ARCHITECTURE.md](ARCHITECTURE.md) and [SERVICES.md](SERVICES.md). **Delete an item's line in the commit that lands it** — ids are never reused.
 
@@ -292,6 +292,132 @@ The rule is in [ARCHITECTURE.md](ARCHITECTURE.md) §7 and now covers stores as w
 ## 25. The About screen, decided twice
 
 - **L15** **S** `ios/Features/Settings/.../AboutUsScene.swift:36` and `android/features/settings/aboutus/.../AboutUsScreen.kt:46` — the label-map fingerprint pairs these at 0.83 on `community`, `privacypolicy`, `termsofservice`, `version`, `website`. The rows of the About screen, their order and their links are chosen in each app.
+
+## 26. Records that hand the app a bare number
+
+Swept on 2026-09-16 over every `#[uniffi::Record]` in `core/gemstone/src` for `f64`/`i32`/`u32`/`i64`/`u64` fields whose name is a rendered quantity, keeping only the records an app actually names. The contract is [the row carries the finished value](ARCHITECTURE.md): a record that crosses with a raw `f64` makes both apps decide the precision, the sign and the unit. The count is how often the app source names the record.
+
+- **F32** **S** `GemFormattedNumber.value` (`formatted_number.rs`, 19 app mentions) — the record that exists to carry finished text still exposes the raw value beside it; confirm every reader takes the text.
+- **F33** **S** `GemRewardsState.invite_reward_points` (`rewards/model.rs`, 17) — iOS bolds it with `String(_:).boldMarkdown()` inside the invite description.
+- **F34** **S** `GemAutocloseField.price` and `.original_price` (`perpetual/autoclose.rs`, 15) — both apps format these through their own perpetual formatter.
+- **F35** **M** `ChainConfig.account_activation_fee`, `.token_activation_fee`, `.minimum_account_balance` (`chain.rs`, 12) — activation fees are rendered from raw numbers in both apps.
+- **F36** **S** `GemBannerContext.asset_rank_score` (`banner/model.rs`, 6) — a score that decides whether a banner shows, exposed as a number rather than the decision.
+- **F37** **S** `GemPriceUpdate.price`, `.price_usd`, `.price_change_percentage_24h` (`price/model.rs`, 4).
+- **F38** **S** `GemPriceAlertSession.current_price` (`price_alert/session.rs`, 4) — the session already returns suggestions; the price beside them is formatted twice.
+- **F39** **S** `GemPerpetualTransferData.price` and `.leverage` (`perpetual/model.rs`, 4).
+- **F40** **S** `GemPerpetualChartLayout.price_low` / `.price_high` (`perpetual/model.rs`, 4) — the chart axis labels are built from these.
+- **F41** **S** `GemDurationPart.value` (`duration_formatter.rs`, 4) — a duration part that carries a number and leaves the unit to the app.
+- **F42** **S** `GemAssetDetailsState.price_alerts_count` (`assets/model.rs`, 4) — a count the app turns into a badge string.
+- **F43** **S** `GemAssetDetailsInput.price` (`assets/model.rs`, 4).
+- **F44** **S** `GemPerpetualAutoclose.take_profit` / `.stop_loss` (`perpetual/model.rs`, 3).
+- **F45** **S** `GemFiatQuoteRequest.amount` (`fiat/session.rs`, 3).
+- **F46** **S** `GemPerpetualDefaults.leverage`, `.take_profit_percent`, `.stop_loss_percent` (`perpetual/rules.rs`, 2) — defaults that both apps render as text.
+- **F47** **S** `GemBalanceValue.amount` (`balance/model.rs`, 2).
+- **F48** **S** `GemChart.base_value` (`chart/mod.rs`, 1) — the chart baseline.
+
+## 27. Screens with no Core service
+
+156 iOS view models name no `Gem*ServiceProtocol`; Android has 8. The asymmetry is the shape of the gap: Android injects a service into almost every model, iOS keeps a family of small models that decide presentation locally. A child model handed a Core record is allowed — these are the ones heavy enough to be deciding something. The weight in brackets is members plus methods.
+
+- **B11** **M** `PrimitivesComponents/NetworkFeeSceneViewModel.swift` [29] — the heaviest model in the repo with no service, beside a Core fee-rate record Android reads through `FeeDetailsModel`.
+- **B12** **M** `Features/Perpetuals/AutocloseSceneViewModel.swift` [28] — Android's `AutocloseViewModel` drives the same screen from `GemAutocloseSession`.
+- **B13** **M** `PrimitivesComponents/AssetDataViewModel.swift` [26] — the shared asset model behind most rows; see also R55.
+- **B14** **M** `Features/WalletConnector/ConnectionProposalViewModel.swift` [24] — Android's proposal scene holds `GemWalletConnectServiceInterface`.
+- **B15** **M** `PrimitivesComponents/PerpetualDetailsViewModel.swift` [22] — Android holds `GemPerpetualDetailsServiceInterface` for this screen.
+- **B16** **M** `Features/AppLock/LockSceneViewModel.swift` [22] — the lock screen, which is a security surface with no Core service on either app.
+- **B17** **S** `Features/Support/SupportMessageBubbleViewModel.swift` [19] — bubble grouping and status beside `GemSupportService`.
+- **B18** **M** `Features/Swap/SwapDetailsViewModel.swift` [18] — Android builds the same rows in `SwapDetailsUIModelFactory` from `GemSwapQuoteSummary`.
+- **B19** **S** `Features/Perpetuals/PerpetualPositionViewModel.swift` [18].
+- **B20** **S** `Features/Transactions/TransactionsFilterViewModel.swift` [16] — the activity filter; Android's `TransactionsViewModel` holds the Core filter list.
+- **B21** **S** `Features/Perpetuals/CandlestickChartViewModel.swift` [16] — see D25.
+- **B22** **S** `PrimitivesComponents/TransactionViewModel.swift` [15] — see R77.
+- **B23** **S** `PrimitivesComponents/NetworkFeeCustomViewModel.swift` [15] — Android's namesake takes `FeeDetailsModel` and calls `customFee`; iOS does not.
+- **B24** **S** `PrimitivesComponents/BannerViewModel.swift` [14] — `canClose` is declared on Android too, in `BannerItemUIModel.kt`.
+- **B25** **S** `Features/Onboarding/VerifyPhraseViewModel.swift` [14] — phrase verification is a security rule with no Core owner.
+- **B26** **S** `PrimitivesComponents/AddressListItemViewModel.swift` [13] — see R59.
+- **B27** **S** `PrimitivesComponents/InputValidationViewModel.swift` [11] — validation on the iOS side of the `Validators` boundary.
+- **B28** **S** `PrimitivesComponents/BalanceViewModel.swift` [11] — see R58.
+- **B29** **S** `Features/Settings/ChainNodeViewModel.swift` [11] — node rows beside `GemChainSettingsService`.
+- **B30** **S** `Features/QRScanner/QRScannerSceneViewModel.swift` [11] — scan handling with no Core payment service.
+- **B31** **S** `Features/FiatConnect/FiatQuoteViewModel.swift` [11] — quote rows beside `GemFiatQuoteService`.
+- **B32** **S** `Features/Assets/AssetsFilterViewModel.swift` [11] — `chainsFilter` is declared on Android too, in `TransactionsViewModel.kt`.
+- **B33** **S** `PrimitivesComponents/AssetViewModel.swift` [10] — see R62.
+- **B34** **S** `PrimitivesComponents/PriceViewModel.swift` [9] — see D23.
+- **B35** **S** `PrimitivesComponents/EmptyContentTypeViewModel.swift` [9] — `actions` is declared on Android too, in `DelegationViewModel.kt`.
+- **B36** **S** `PrimitivesComponents/TextInputSheet/TextInputViewModel.swift` [9].
+- **B37** **S** `Features/Transfer/TransferDataViewModel.swift` [9].
+- **B38** **S** `PrimitivesComponents/FiatTransactionViewModel.swift` [8] — the fiat transaction row, which SERVICES.md says already reads the same on both apps.
+- **B39** **S** `PrimitivesComponents/CopyTypeViewModel.swift` [8] — see S30.
+- **B40** **S** `PrimitivesComponents/Types/ChartHeaderViewModel.swift` [8] — see R65.
+- **B41** **S** `PrimitivesComponents/Protocols/ValueHeaderViewModel.swift` [8].
+- **B42** **S** `Features/Transfer/TransactionInputViewModel.swift` [8].
+- **B43** **S** `Features/Swap/SwapTokenViewModel.swift` [8].
+- **B44** **S** `Features/Swap/PriceImpactViewModel.swift` [8] — see R66.
+- **B45** **S** `Features/Settings/RewardRedemptionOptionViewModel.swift` [8] — see R63.
+- **B46** **S** `Features/PriceAlerts/PriceAlertItemViewModel.swift` [8].
+- **B47** **S** `Features/Perpetuals/OpenPositionItemViewModel.swift` [8].
+- **B48** **S** `PrimitivesComponents/WalletHeaderViewModel.swift` [7].
+- **B49** **S** `PrimitivesComponents/ChainViewModel.swift` [7].
+- **B50** **S** `GemPriceWidget/CoinPriceRowViewModel.swift` [7] — the widget row, which cannot import Gemstone today.
+- **B51** **S** `Features/Support/SupportMessageInputBarViewModel.swift` [7].
+- **B52** **S** `Features/Settings/ServiceStatusItemViewModel.swift` [7].
+- **B53** **S** `Features/Perpetuals/PerpetualsHeaderViewModel.swift` [7].
+- **B54** **S** `Features/Perpetuals/PerpetualViewModel.swift` [7] — `priceText` is declared on Android too, in `ChartHeaderUIModel.kt`.
+- **B55** **S** `Features/Perpetuals/PerpetualPositionItemViewModel.swift` [7].
+- **B56** **S** `Features/Perpetuals/AutocloseViewModel.swift` [7] — see R69 and D22.
+- **B57** **S** `PrimitivesComponents/SimulationWarningViewModel.swift` [6] — simulation warnings landed in Core (d458faac6e); confirm this model only maps them.
+- **B58** **S** `PrimitivesComponents/PnLViewModel.swift` [6] — position profit landed in Core (6321c9eb20); same check.
+- **B59** **S** `PrimitivesComponents/ListAssetItemViewModel.swift` [6].
+- **B60** **S** `PrimitivesComponents/ChartValuesViewModel.swift` [6].
+- **B61** **S** `Features/WalletTab/PerpetualsPreviewViewModel.swift` [6].
+- **B62** **S** `Features/Transactions/TransactionTypesFilterViewModel.swift` [6].
+- **B63** **S** `Features/Swap/SwapProvidersViewModel.swift` [6] and `SwapButtonViewModel.swift` [6].
+- **B64** **S** `Features/Perpetuals/PerpetualItemViewModel.swift` [6].
+- **B65** **S** `Features/Assets/AssetHeaderViewModel.swift` [6].
+
+## 28. Core duplicated inside Core
+
+The same `pub fn` name in two crates is not always duplication, but these thirteen name a rule rather than a constructor. Each is a chain crate or a provider crate carrying a copy of something a sibling already has.
+
+- **G8** **M** `calculate_transaction_fee` in `gem_cosmos`, `gem_solana` and `gem_ton` — three chain crates computing a fee the same way.
+- **G9** **S** `calculate_fee_rates` in `gem_cosmos` and `gem_solana`.
+- **G10** **S** `calculate_network_apy` in `gem_cosmos` and `gem_solana` — the staking APY formula in two chain crates.
+- **G11** **S** `create_staking_client` in `gem_bsc` and `gem_monad`.
+- **G12** **S** `format_price`, `format_input_price` and `format_size` in `gem_hypercore` and `core/gemstone/src` — perpetual formatting written on both sides of the FFI boundary.
+- **G13** **S** `checksum_address` in `core/gemstone/src` and `swapper`.
+- **G14** **S** `chain_from_id` and `chain_id` in `dexscreener` and `swapper`.
+- **G15** **S** `create_eth_client` in `swapper` and `yielder`.
+- **G16** **S** `deposit_addresses` in `gem_evm` and `swapper`.
+- **G17** **S** `for_chain` in `gem_evm`, `settings_chain` and `swapper` — three per-chain lookups.
+- **G18** **S** `config_session_properties` in `gem_wallet_connect` and `core/gemstone/src`.
+- **G19** **S** `has_price` / `has_size` in `primitives` and `core/gemstone/src`.
+- **G20** **S** `execution_error` in `gem_sui` and `primitives`.
+
+## 29. Gaps the screen-service map already names
+
+[SERVICES.md](SERVICES.md) says a screen service only one app holds is the next consolidation. These are the rows where the table itself shows one side empty or asymmetric.
+
+- **P72** **M** `GemAppUpdateService` — iOS `AboutUsViewModel` holds it; Android uses Play in-app update instead, so the update decision is made by two different owners. `AppUpdateCoordinator` already maps `upgradeRequired` itself (see F29).
+- **P73** **M** `GemAvatarService` — Android has no avatar surface at all, so wallet avatars are an iOS-only feature rather than a Core one.
+- **P74** **S** `GemNotificationsService` — iOS `NotificationsViewModel` holds it; Android's `SettingsViewModel` uses push cases instead.
+- **P75** **S** `GemTransactionDetailsService` — iOS holds the service, Android reaches the same answer through `GetTransactionDetailsImpl` as an observed read, so the links are built in two places.
+- **P76** **S** `GemChainService` — iOS holds it in the chain picker, Android in two unrelated models (`ContactChainSelectViewModel`, `SelectImportTypeViewModel`); confirm the three screens ask the same question.
+- **P77** **S** `GemRecentActivityService` — three iOS holders against two Android; the extra iOS holder is `SelectAssetViewModel`, which Android answers inside `BaseAssetSelectViewModel`.
+- **P78** **S** `GemBannerService` — held by no screen on either app, composed inside two services; confirm the banner rules have not drifted between those two compositions.
+- **P79** **S** `GemWalletSessionService` — iOS spreads it over `RootSceneViewModel` and `NavigationHandler`; Android keeps it in `SessionCoordinator`. The iOS split is what produced O35.
+- **P80** **S** `GemStakeService` — three screens each side, but iOS `EarnSceneViewModel` filters delegations itself (S21) where Android does not.
+- **P81** **S** About 67 exported records and enums are named by neither app. SERVICES.md says review before deleting; do the review and record the ones that are reached through a nested field so the list stops being re-swept.
+
+## 30. App ports that Core could own
+
+- **V65** **S** `ios/Packages/FeatureServices/.../Reconnectable.swift` — `reconnectDelayMilliseconds` and `pingIntervalMilliseconds` are a Swift protocol; Android reads both from Core (`WebSocketConnection.kt:45`). The iOS socket should read the same numbers.
+- **V66** **S** `ios/Packages/.../ConnectionComponentMonitoring.swift` and `ConnectivityMonitor.swift` — two single-method protocols over connection health, beside `GemConnectionService`.
+- **V67** **S** `ios/Packages/.../WebSocketRequestProvider.swift` — one method, building the authenticated socket request that Core's device auth already signs.
+- **V68** **S** `ios/Packages/Store/Sources/BindableQuery.swift` — a one-method protocol behind every observed read on iOS; Android has narrow cases instead. Worth one decision about which shape both apps use.
+- **V69** **M** `ios/Packages/Formatters` and `ios/Packages/Validators` cannot import Gemstone, which is what keeps D15–D17 duplicated. The item is the dependency, not the formatter: decide whether the widget and these two packages get a Gemstone-free Core surface or move under one that can import it.
+- **V70** **S** `android/features/update_app/.../InAppUpdateServiceImpl.kt` — an app-owned update service beside `GemAppUpdateService`, with its own HTTP client and timeouts (S28).
+- **V71** **S** `android/ui/.../UriHandlerExt.kt` — URL opening policy in the UI module (V63).
+- **V72** **S** `ios/Packages/GemstonePrimitives/Sources/Config.swift` — the iOS half of V59; decide whether app URLs are a Core config record or stay per-platform.
 
 ## Closed with no change
 
