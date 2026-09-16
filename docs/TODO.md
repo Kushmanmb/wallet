@@ -208,10 +208,11 @@ C10 landed on 2026-09-16. The network-assets screen split pinned from unpinned w
 
 ## 21. Time decided on a client
 
-Seven closed on 2026-09-16. **P71 and V65 were backwards**: iOS already reads both socket numbers from Core — `GemConnectionService` conforms to `Reconnectable` retroactively, and the protocol exists so `SwiftHTTPClient` can stay Gemstone-free, which is the pattern rather than a gap. **P70** is inside a `@Preview`. **P68/P69** stamp `updatedAt` while writing a row, which is the store adapter's job on both apps. **P63** groups a transcript and an activity list by *local* day through `Calendar.current`, and a local day depends on the device's calendar and time zone — that is platform territory, and Core has no day-bucketing rule to move to. **P66/P67** are a `dateComponents` helper and an epoch default for a missing `updatedAt`.
+**P65 landed.** Both apps computed the support sync cursor the same way — the `createdAt` of the last message whose sender is an agent, in seconds, else zero — iOS as `query.value.last { $0.sender.isAgent }`, Android as `lastOrNull { it.sender is Agent }`. `sync_from_timestamp` owns it.
+
+Seven more closed on 2026-09-16. **P71 and V65 were backwards**: iOS already reads both socket numbers from Core — `GemConnectionService` conforms to `Reconnectable` retroactively, and the protocol exists so `SwiftHTTPClient` can stay Gemstone-free, which is the pattern rather than a gap. **P70** is inside a `@Preview`. **P68/P69** stamp `updatedAt` while writing a row, which is the store adapter's job on both apps. **P63** groups a transcript and an activity list by *local* day through `Calendar.current`, and a local day depends on the device's calendar and time zone — that is platform territory, and Core has no day-bucketing rule to move to. **P66/P67** are a `dateComponents` helper and an epoch default for a missing `updatedAt`.
 
 - **P64** **S** `ios/Features/Stake/.../StakeSceneViewModel.swift:121` — the unlock date is built by adding `service.lockTimeSeconds(chain:)` to now; Core has the seconds and could carry the date.
-- **P65** **S** `ios/Features/Support/.../SupportChatSceneViewModel.swift:51` — the sync cursor is derived from the last agent message's timestamp in the model.
 
 ## 22. URLs built in the app
 
@@ -299,13 +300,10 @@ Five were confirmations rather than decisions and are closed. **P78**: both comp
 
 ## 30. App ports that Core could own
 
-- **V66** **S** `ios/Packages/.../ConnectionComponentMonitoring.swift` and `ConnectivityMonitor.swift` — two single-method protocols over connection health, beside `GemConnectionService`.
-- **V67** **S** `ios/Packages/.../WebSocketRequestProvider.swift` — one method, building the authenticated socket request that Core's device auth already signs.
+V66, V67 and V71 closed on 2026-09-16 as platform ports rather than thin wrappers: `ConnectionComponentMonitoring` has two conformers and `WebSocketRequestProvider` has two, so they carry real polymorphism over platform APIs, and `UriHandler.open` is Chrome Custom Tabs with a fallback, which Core cannot express. V70 and V72 restated decisions already open as P72 and V59 and are folded into them.
+
 - **V68** **S** `ios/Packages/Store/Sources/BindableQuery.swift` — a one-method protocol behind every observed read on iOS; Android has narrow cases instead. Worth one decision about which shape both apps use.
 - **V69** **M** `ios/Packages/Formatters` and `ios/Packages/Validators` cannot import Gemstone, which is what keeps D15–D17 duplicated. The item is the dependency, not the formatter: decide whether the widget and these two packages get a Gemstone-free Core surface or move under one that can import it.
-- **V70** **S** `android/features/update_app/.../InAppUpdateServiceImpl.kt` — an app-owned update service beside `GemAppUpdateService`, with its own HTTP client and timeouts (S28).
-- **V71** **S** `android/ui/.../UriHandlerExt.kt` — URL opening policy in the UI module (V63).
-- **V72** **S** `ios/Packages/GemstonePrimitives/Sources/Config.swift` — the iOS half of V59; decide whether app URLs are a Core config record or stay per-platform.
 
 ## 31. Services with more collaborators than a service should have
 
