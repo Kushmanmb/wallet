@@ -108,7 +108,7 @@ impl ToJsonRpcRequest for SolanaRpc {
                     "encoding": "json",
                     "transactionDetails": "full",
                     "rewards": false,
-                    "maxSupportedTransactionVersion": 0,
+                    "maxSupportedTransactionVersion": 1,
                 }))
             ]),
             Self::GetEpochInfo(config) | Self::GetLatestBlockhash(config) | Self::GetSlot(config) => config.params(),
@@ -142,7 +142,7 @@ impl ToJsonRpcRequest for SolanaRpc {
                 signature,
                 confirmed_config(json!({
                     "encoding": "json",
-                    "maxSupportedTransactionVersion": 0,
+                    "maxSupportedTransactionVersion": 1,
                 }))
             ]),
             Self::GetVoteAccounts { keep_unstaked_delinquents } => json!([confirmed_config(json!({
@@ -199,6 +199,23 @@ mod tests {
         assert_eq!(request.id, 42);
         assert_eq!(request.method, method);
         assert_eq!(request.params, params);
+    }
+
+    #[test]
+    fn builds_block_and_transaction_requests_that_accept_version_one() {
+        assert_request(
+            SolanaRpc::GetBlock(7),
+            method::GET_BLOCK,
+            json!([
+                7,
+                {"commitment": "confirmed", "encoding": "json", "transactionDetails": "full", "rewards": false, "maxSupportedTransactionVersion": 1}
+            ]),
+        );
+        assert_request(
+            SolanaRpc::GetTransaction("signature".into()),
+            method::GET_TRANSACTION,
+            json!(["signature", {"commitment": "confirmed", "encoding": "json", "maxSupportedTransactionVersion": 1}]),
+        );
     }
 
     #[test]
