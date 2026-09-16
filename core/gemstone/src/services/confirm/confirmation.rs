@@ -2,10 +2,13 @@ use std::sync::Arc;
 
 use futures::lock::Mutex;
 use primitives::currency::Currency;
-use primitives::{BlockExplorerLink, Chain, PerpetualModifyConfirmData, SimulationResult, Wallet};
+use primitives::{AddressName, BlockExplorerLink, Chain, PerpetualModifyConfirmData, SimulationResult, Wallet};
 
 use super::rules::preload_simulation;
-use super::{GemAcquireAssetFlow, GemConfirmError, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmScreen, GemConfirmTransferService, GemExecuteResult, GemTransferAmountResult};
+use super::{
+    GemAcquireAssetFlow, GemConfirmError, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemExecuteResult,
+    GemTransferAmountResult,
+};
 use crate::services::perpetual::model::GemAutocloseSummary;
 use crate::services::transfer::GemTransferData;
 use crate::services::wallet::GemKeystoreAuthentication;
@@ -43,6 +46,10 @@ impl GemConfirmation {
 
     pub fn authentication(&self) -> GemKeystoreAuthentication {
         self.service.authentication()
+    }
+
+    pub fn row_contents(&self, address_name: Option<AddressName>) -> Vec<GemConfirmRowContent> {
+        self.service.row_contents(self.transfer.clone(), self.wallet.clone(), address_name)
     }
 
     pub fn address_url(&self, chain: Chain, address: String) -> BlockExplorerLink {

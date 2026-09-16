@@ -7,8 +7,11 @@ use crate::services::balance::GemAssetBalance;
 use crate::services::simulation::GemSimulationWarningRow;
 use crate::services::transactions::GemAmountSign;
 use crate::services::transfer::GemTransferData;
+use crate::services::transfer::model::GemConfirmDestination;
+use crate::services::wallet::model::GemWalletRow;
 use crate::transfer_amount::GemTransferAmount;
 use primitives::AssetPrice;
+use primitives::BlockExplorerLink;
 use primitives::{
     Account, AddressName, Asset, AssetId, Chain, ChainAddress, FeePriority, FeeUnitType, SimulationPayloadField, SimulationPayloadFieldType, SimulationResult, Transaction, Wallet,
 };
@@ -319,4 +322,30 @@ mod tests {
         assert_eq!(custom.selected_priority(), None);
         assert_eq!(custom.custom_gas_price(), Some(7.into()));
     }
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemConfirmRowContent {
+    App {
+        name: String,
+        icon_url: Option<String>,
+    },
+    Sender {
+        wallet: GemWalletRow,
+    },
+    Recipient {
+        destination: GemConfirmDestination,
+        address_name: Option<AddressName>,
+        memo: Option<String>,
+        chain: Chain,
+        link: BlockExplorerLink,
+    },
+    Network {
+        chain: Chain,
+        name: String,
+    },
+    Memo {
+        memo: Option<String>,
+    },
+    Details,
 }

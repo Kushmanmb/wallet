@@ -15,7 +15,6 @@ The last places where an app reaches the API, a rule or a table without going th
 
 Found by pairing every view model on both apps (see Coverage) and reading the ones whose logic did not match. Each is the same product rule written on both sides with a difference.
 
-- **R81** **M** `GemTransferData::confirm_rows` hands each app a list of *keys* — `SENDER`, `RECIPIENT`, `NETWORK`, `MEMO`, `APP` — and both apps then assemble the row's content themselves: Android `data/coordinators/.../confirm/BuildConfirmPropertiesImpl.kt` `when (row)` builds the wallet row, the destination with its explorer link, the network asset and the memo; iOS `ConfirmTransferSceneViewModel.swift:184` does the same in `confirmRows().map { row in ... }`. [The record carries the finished value](ARCHITECTURE.md#the-record-carries-the-finished-value-not-the-ingredients): return `GemConfirmRowContent` rows with the title, the finished value, the image and the link, the way `GemTransactionDetailsService::detail_rows` already does for the transaction screen, and both apps render what they are handed.
 
 ## 3. The view boundary
 
@@ -70,14 +69,14 @@ Two passes on 2026-09-16, and the second is the one that answers "is this everyt
 | Depend on the generated abstraction | 21 iOS + 34 Android consumers | **O38** (the stateless five are **D26**) |
 | Never call Core from the main thread | 9 Android view models | **X167** |
 | One mapper per module | 5 iOS files, 1 Android | **L16** |
-| The record carries the finished value | `confirm_rows` keys assembled on both apps; the wallet PnL sign on one | **R81**, **D27** |
+| The record carries the finished value | 0 | — |
 | Sections are records | 5 view models with three or more `show*` members | reads of Core sections and rules; two compositions noted on **S35** |
 | Navigation values are app types | 4 | the iOS three are navigation *views* holding a Core value, counted in **B67**; Android wraps its one in `ImportType` |
 | At most one Core service per iOS view model | 2 | the O31/O32 conduits, closed in the ledger |
 | A screen's state is one phase enum | 2 | every flag is a computed projection of the session phase |
 | A row model holds the record, does not restate it | 2 | the edit input and pre-formatted texts, which the record cannot carry |
 | Derive the view state, do not store it | 0 | — |
-| An application case is a narrow read | 6 with branches | four are flow plumbing; the other two are **R81** and **D27** |
+| An application case is a narrow read | 4 with branches | flow plumbing |
 
 Each check is a regex over the same file sets (view models by name, views by folder and suffix, composables by annotation, cases by `*Impl.kt` under `data/`) and takes under a minute; rerun them before declaring the migration finished, since a hit count that returns to zero is the definition of done for each row.
 

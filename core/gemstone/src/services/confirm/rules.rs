@@ -1,3 +1,9 @@
+use super::model::GemConfirmRowContent;
+use crate::application::GemApplicationMetadataService;
+use crate::services::assets::rules::asset_text;
+use crate::services::transfer::model::{GemConfirmRow, GemTransferData};
+use crate::services::wallet::model::wallet_row;
+use primitives::{AddressName, BlockExplorerLink};
 use primitives::{
     ApplicationMetadataSource, Asset, AssetId, Chain, ChainType, FeePriority, FeeUnitType, GasPriceType, ScanAddressTarget, ScanTransaction, ScanTransactionPayload,
     SimulationResult, SimulationWarningType, Transaction, TransactionPreloadInput, Wallet,
@@ -463,6 +469,53 @@ impl GemConfirmFeeSelection {
     }
 }
 
+pub fn confirm_row_contents(
+    transfer: &GemTransferData,
+    wallet: Wallet,
+    address_name: Option<AddressName>,
+    address_url: impl Fn(Chain, String) -> BlockExplorerLink,
+) -> Vec<GemConfirmRowContent> {
+    let asset = transfer.input_asset();
+    let chain = asset.chain();
+    transfer
+        .confirm_rows()
+        .into_iter()
+        .filter_map(|row| match row {
+            GemConfirmRow::App => transfer.application_short_name().map(|name| GemConfirmRowContent::App {
+                name,
+                icon_url: match &transfer.input_type {
+                    TransactionInputType::Generic { metadata, .. } => GemApplicationMetadataService::new().icon_url(metadata.clone()),
+                    _ => None,
+                },
+            }),
+            GemConfirmRow::Sender => Some(GemConfirmRowContent::Sender {
+                wallet: wallet_row(wallet.clone()),
+            }),
+            GemConfirmRow::Recipient => transfer.destination().map(|destination| GemConfirmRowContent::Recipient {
+                destination: destination.with_address_name(address_name.clone()),
+                address_name: address_name.clone(),
+                memo: transfer.recipient.memo.clone(),
+                chain,
+                link: address_url(chain, transfer.recipient.address.clone()),
+            }),
+            GemConfirmRow::Network => {
+                let text = asset_text(&asset);
+                Some(GemConfirmRowContent::Network {
+                    chain,
+                    name: match transfer.input_type {
+                        TransactionInputType::Transfer { .. } | TransactionInputType::Deposit { .. } | TransactionInputType::Withdrawal { .. } => text.network_full_name,
+                        _ => text.network_name,
+                    },
+                })
+            }
+            GemConfirmRow::Memo => Some(GemConfirmRowContent::Memo {
+                memo: transfer.recipient.memo.clone(),
+            }),
+            GemConfirmRow::Details => Some(GemConfirmRowContent::Details),
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::super::model::GemConfirmData;
@@ -472,6 +525,7 @@ mod tests {
     use crate::models::custom_types::GemBigUint;
     use crate::models::transaction::{GemFeeOptions, GemTransactionLoadMetadata};
     use crate::services::transfer::GemTransferData;
+    use crate::services::transfer::model::GemRecipient;
     use crate::transfer_amount::GemTransferAmount;
     use num_bigint::BigInt;
     use num_bigint::BigUint;
@@ -1469,5 +1523,48 @@ mod tests {
 
         let resimulated = screen.with_fee(fee, Some(simulation_state(vec![SimulationWarning::validation_error("preload")])));
         assert_eq!(resimulated.simulation.warnings.len(), 1);
+    }
+
+    #[test]
+    fn the_confirm_rows_carry_their_finished_content() {
+        let link = |chain: Chain, address: String| BlockExplorerLink {
+            name: chain.to_string(),
+            link: address,
+        };
+        let contents = confirm_row_contents(&row_transfer(Asset::from_chain(Chain::Ethereum)), Wallet::mock(), None, link);
+        assert!(matches!(&contents[0], GemConfirmRowContent::Sender { .. }));
+        assert!(matches!(&contents[1], GemConfirmRowContent::Recipient { link, chain: Chain::Ethereum, .. } if link.link == "0xrecipient"));
+        assert!(matches!(&contents[2], GemConfirmRowContent::Network { chain: Chain::Ethereum, name } if name == "Ethereum"));
+
+        let usdc = Asset::new(
+            AssetId::from_token(Chain::Ethereum, "0xusdc"),
+            "USDC".into(),
+            "USDC".into(),
+            6,
+            primitives::AssetType::ERC20,
+        );
+        let token = confirm_row_contents(&row_transfer(usdc), Wallet::mock(), None, link);
+        assert!(matches!(&token[2], GemConfirmRowContent::Network { name, .. } if name == "Ethereum (ERC20)"));
+
+        let solana = confirm_row_contents(&row_transfer(Asset::from_chain(Chain::Solana)), Wallet::mock(), None, link);
+        assert!(
+            solana
+                .iter()
+                .any(|content| matches!(content, GemConfirmRowContent::Memo { memo: Some(memo) } if memo == "memo"))
+        );
+    }
+
+    fn row_transfer(asset: Asset) -> GemTransferData {
+        GemTransferData {
+            input_type: TransactionInputType::Transfer { asset },
+            recipient: GemRecipient {
+                address: "0xrecipient".to_string(),
+                name: None,
+                memo: Some("memo".to_string()),
+                references: vec![],
+            },
+            value: GemBigInt::from(1u64),
+            use_max_amount: false,
+        }
     }
 }

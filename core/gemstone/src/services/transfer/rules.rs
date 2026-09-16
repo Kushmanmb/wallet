@@ -52,35 +52,12 @@ impl GemTransferData {
         self.input_type.title()
     }
 
-    pub fn shows_memo(&self) -> bool {
-        self.input_type.shows_memo()
-    }
-
-    pub fn confirm_rows(&self) -> Vec<GemConfirmRow> {
-        let is_generic = matches!(self.input_type, TransactionInputType::Generic { .. });
-        [
-            self.input_type.application_short_name().is_some().then_some(GemConfirmRow::App),
-            Some(GemConfirmRow::Sender),
-            (!is_generic).then_some(GemConfirmRow::Recipient),
-            Some(GemConfirmRow::Network),
-            self.shows_memo().then_some(GemConfirmRow::Memo),
-            (!is_generic).then_some(GemConfirmRow::Details),
-        ]
-        .into_iter()
-        .flatten()
-        .collect()
-    }
-
     pub fn fee_asset(&self) -> Asset {
         self.input_type.fee_asset()
     }
 
     pub fn default_fee_priority(&self) -> FeePriority {
         self.input_type.default_fee_priority()
-    }
-
-    pub fn application_short_name(&self) -> Option<String> {
-        self.input_type.application_short_name()
     }
 }
 
@@ -455,6 +432,29 @@ pub fn earn_transfer_data(asset: Asset, earn_type: EarnType, data: ContractCallD
 }
 
 impl GemTransferData {
+    pub fn shows_memo(&self) -> bool {
+        self.input_type.shows_memo()
+    }
+
+    pub fn confirm_rows(&self) -> Vec<GemConfirmRow> {
+        let is_generic = matches!(self.input_type, TransactionInputType::Generic { .. });
+        [
+            self.input_type.application_short_name().is_some().then_some(GemConfirmRow::App),
+            Some(GemConfirmRow::Sender),
+            (!is_generic).then_some(GemConfirmRow::Recipient),
+            Some(GemConfirmRow::Network),
+            self.shows_memo().then_some(GemConfirmRow::Memo),
+            (!is_generic).then_some(GemConfirmRow::Details),
+        ]
+        .into_iter()
+        .flatten()
+        .collect()
+    }
+
+    pub fn application_short_name(&self) -> Option<String> {
+        self.input_type.application_short_name()
+    }
+
     #[allow(clippy::result_large_err)]
     pub(crate) fn available_value(&self, balance: &GemAssetBalance) -> Result<BigInt, GemAmountError> {
         let asset = self.input_type.get_asset();

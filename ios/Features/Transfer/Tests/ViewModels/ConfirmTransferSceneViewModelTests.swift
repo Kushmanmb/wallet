@@ -6,6 +6,7 @@ import Foundation
 import enum Gemstone.FeePriority
 import class Gemstone.GemAssetConfigService
 import struct Gemstone.GemBalanceRequirement
+import enum Gemstone.GemConfirmRowContent
 import enum Gemstone.GemConfirmError
 import struct Gemstone.GemConfirmFailure
 import struct Gemstone.GemConfirmSimulation
@@ -13,6 +14,7 @@ import struct Gemstone.GemFeeRate
 import struct Gemstone.GemSimulationWarningRow
 import protocol Gemstone.GemNameServiceProtocol
 import struct Gemstone.GemTransferData
+import func Gemstone.walletRow
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
 import GemstoneServices
@@ -70,7 +72,7 @@ struct ConfirmTransferSceneViewModelTests {
     @Test
     func appItemModel() {
         let model = ConfirmTransferSceneViewModel.mock()
-        let appItem = model.itemModel(for: .app) as? ConfirmAppViewModel
+        let appItem = model.itemModel(for: .app) as? ConfirmRowViewModel
 
         if case .empty = appItem?.itemModel {
             // Expected empty for non-generic transfer
@@ -78,10 +80,8 @@ struct ConfirmTransferSceneViewModelTests {
             Issue.record("Expected empty app item model")
         }
 
-        let modelWithWebsite = ConfirmTransferSceneViewModel.mock(
-            data: .mock(type: .generic(asset: .mock(), metadata: .mock(name: "Gem Wallet", url: "https://example.com"), extra: .mock())),
-        )
-        let appItemWithWebsite = modelWithWebsite.itemModel(for: .app) as? ConfirmAppViewModel
+        let modelWithWebsite = ConfirmTransferSceneViewModel.mock(rows: { _ in [.app(name: "Gem Wallet", iconUrl: nil)] })
+        let appItemWithWebsite = modelWithWebsite.itemModel(for: .app) as? ConfirmRowViewModel
 
         if case let .app(listItem) = appItemWithWebsite?.itemModel {
             #expect(listItem.subtitle == "Gem Wallet")
@@ -101,7 +101,7 @@ struct ConfirmTransferSceneViewModelTests {
     @Test
     func senderItemModel() {
         let model = ConfirmTransferSceneViewModel.mock()
-        let senderItem = model.itemModel(for: .sender) as? ConfirmSenderViewModel
+        let senderItem = model.itemModel(for: .sender) as? ConfirmRowViewModel
 
         if case let .sender(listItem) = senderItem?.itemModel {
             #expect(listItem.title == Localized.Wallet.title)
@@ -117,7 +117,7 @@ struct ConfirmTransferSceneViewModelTests {
             type: .transfer(.mock()),
             recipient: .mock(address: address),
         ))
-        let recipientItem = model.itemModel(for: .recipient) as? ConfirmRecipientViewModel
+        let recipientItem = model.itemModel(for: .recipient) as? ConfirmRowViewModel
 
         if case let .recipient(addressViewModel) = recipientItem?.itemModel {
             #expect(addressViewModel.account.address == address)
@@ -138,7 +138,7 @@ struct ConfirmTransferSceneViewModelTests {
             load: .success(.mock(addressName: .mock(chain: .bitcoin, address: address, name: "Bitcoin"))),
         )
         await model.load()
-        let recipientItem = model.itemModel(for: .recipient) as? ConfirmRecipientViewModel
+        let recipientItem = model.itemModel(for: .recipient) as? ConfirmRowViewModel
 
         if case let .recipient(addressViewModel) = recipientItem?.itemModel {
             #expect(addressViewModel.account.address == address)
@@ -159,7 +159,7 @@ struct ConfirmTransferSceneViewModelTests {
             load: .success(.mock(addressName: .mock(chain: .ethereum, address: checksummedAddress, name: "Uniswap"))),
         )
         await model.load()
-        let recipientItem = model.itemModel(for: .recipient) as? ConfirmRecipientViewModel
+        let recipientItem = model.itemModel(for: .recipient) as? ConfirmRowViewModel
 
         if case let .recipient(addressViewModel) = recipientItem?.itemModel {
             #expect(addressViewModel.account.address == checksummedAddress)
@@ -171,40 +171,13 @@ struct ConfirmTransferSceneViewModelTests {
 
     @Test
     func networkItemModel() {
-        let ethModel = ConfirmTransferSceneViewModel.mock(data: .mock(type: .transfer(.mockEthereum())))
-        let ethNetworkItem = ethModel.itemModel(for: .network) as? ConfirmNetworkViewModel
+        let model = ConfirmTransferSceneViewModel.mock(rows: { _ in [.network(chain: Chain.ethereum.rawValue, name: "Ethereum (ERC20)")] })
+        let networkItem = model.itemModel(for: .network) as? ConfirmRowViewModel
 
-        if case let .network(listItem) = ethNetworkItem?.itemModel {
-            #expect(listItem.subtitle == "Ethereum")
-        } else {
-            Issue.record("Expected network item model for ETH")
-        }
-
-        let usdtModel = ConfirmTransferSceneViewModel.mock(data: .mock(type: .transfer(.mockEthereumUSDT())))
-        let usdtNetworkItem = usdtModel.itemModel(for: .network) as? ConfirmNetworkViewModel
-
-        if case let .network(listItem) = usdtNetworkItem?.itemModel {
+        if case let .network(listItem) = networkItem?.itemModel {
             #expect(listItem.subtitle == "Ethereum (ERC20)")
         } else {
-            Issue.record("Expected network item model for USDT")
-        }
-
-        let genericEthModel = ConfirmTransferSceneViewModel.mock(data: .mock(type: .generic(asset: .mockEthereum(), metadata: .mock(), extra: .mock())))
-        let genericEthNetworkItem = genericEthModel.itemModel(for: .network) as? ConfirmNetworkViewModel
-
-        if case let .network(listItem) = genericEthNetworkItem?.itemModel {
-            #expect(listItem.subtitle == "Ethereum")
-        } else {
-            Issue.record("Expected network item model for generic ETH")
-        }
-
-        let genericUsdtModel = ConfirmTransferSceneViewModel.mock(data: .mock(type: .generic(asset: .mockEthereumUSDT(), metadata: .mock(), extra: .mock())))
-        let genericUsdtNetworkItem = genericUsdtModel.itemModel(for: .network) as? ConfirmNetworkViewModel
-
-        if case let .network(listItem) = genericUsdtNetworkItem?.itemModel {
-            #expect(listItem.subtitle == "Ethereum")
-        } else {
-            Issue.record("Expected network item model for generic USDT")
+            Issue.record("Expected network item model")
         }
     }
 
@@ -357,7 +330,7 @@ struct ConfirmTransferSceneViewModelTests {
                 recipient: .mock(memo: "Test memo"),
             ),
         )
-        let memoItem = modelWithMemo.itemModel(for: .memo) as? ConfirmMemoViewModel
+        let memoItem = modelWithMemo.itemModel(for: .memo) as? ConfirmRowViewModel
 
         if case let .memo(listItem) = memoItem?.itemModel {
             #expect(listItem.title == Localized.Transfer.memo)
@@ -369,7 +342,7 @@ struct ConfirmTransferSceneViewModelTests {
         let modelNoMemo = ConfirmTransferSceneViewModel.mock(
             data: .mock(type: .transfer(.mockEthereum())),
         )
-        let noMemoItem = modelNoMemo.itemModel(for: .memo) as? ConfirmMemoViewModel
+        let noMemoItem = modelNoMemo.itemModel(for: .memo) as? ConfirmRowViewModel
 
         if case .empty = noMemoItem?.itemModel {
             // Expected empty for non-memo chain
@@ -474,6 +447,13 @@ struct ConfirmTransferSceneViewModelTests {
                 simulation: GemConfirmSimulation(primaryFields: payload, secondaryFields: [], header: nil, balanceChanges: [], hasCriticalWarning: false),
                 warnings: [GemSimulationWarningRow(kind: .unlimitedApproval, severity: .warning, message: nil)],
             )),
+            rows: { _ in
+                [
+                    .app(name: "Gem Wallet", iconUrl: nil),
+                    .sender(wallet: walletRow(wallet: Wallet.mock().toGem())),
+                    .network(chain: Chain.ethereum.rawValue, name: "Ethereum"),
+                ]
+            },
         )
         await model.load()
         let sections = model.sections
