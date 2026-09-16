@@ -171,10 +171,9 @@ impl ToJsonRpcRequest for SolanaRpc {
 }
 
 fn confirmed_config(mut config: Value) -> Value {
-    config
-        .as_object_mut()
-        .expect("Solana RPC configuration must be a JSON object")
-        .insert("commitment".to_string(), COMMITMENT_CONFIRMED.into());
+    if let Some(object) = config.as_object_mut() {
+        object.insert("commitment".to_string(), COMMITMENT_CONFIRMED.into());
+    }
     config
 }
 

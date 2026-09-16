@@ -151,7 +151,7 @@ impl FiatProviderRow {
             sell_enabled: true,
             priority: None,
             priority_threshold_bps: None,
-            payment_methods: serde_json::to_value(Vec::<PaymentType>::new()).unwrap(),
+            payment_methods: serde_json::Value::Array(Vec::new()),
         }
     }
 
