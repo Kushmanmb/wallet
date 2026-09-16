@@ -1,5 +1,8 @@
 package com.gemwallet.android.ui.style
 
+import androidx.compose.ui.res.stringResource
+import uniffi.gemstone.GemNameRecordState
+import uniffi.gemstone.GemPerpetualChartLineKind
 import uniffi.gemstone.GemEmptyStateImage
 import com.gemwallet.android.ui.components.empty.EmptyStateImage
 import androidx.annotation.DrawableRes
@@ -83,4 +86,25 @@ fun GemEmptyStateImage.image(): EmptyStateImage = when (this) {
     GemEmptyStateImage.NOTIFICATIONS -> EmptyStateImage.Drawable(R.drawable.empty_notifications)
     GemEmptyStateImage.SEARCH -> EmptyStateImage.Vector(R.drawable.ic_search)
     GemEmptyStateImage.WALLET -> EmptyStateImage.Vector(R.drawable.ic_wallet)
+}
+
+@Composable
+fun GemPerpetualChartLineKind.color(): Color = when (this) {
+    GemPerpetualChartLineKind.ENTRY -> MaterialTheme.colorScheme.outline
+    GemPerpetualChartLineKind.LIQUIDATION -> MaterialTheme.colorScheme.error
+    GemPerpetualChartLineKind.STOP_LOSS -> pendingColor
+    GemPerpetualChartLineKind.TAKE_PROFIT -> MaterialTheme.colorScheme.tertiary
+}
+
+sealed interface NameResolveIndicatorStyle {
+    data object Loading : NameResolveIndicatorStyle
+    data class Icon(val vector: ImageVector, val tint: Color, val contentDescription: String?) : NameResolveIndicatorStyle
+}
+
+@Composable
+fun GemNameRecordState.indicator(): NameResolveIndicatorStyle? = when (this) {
+    is GemNameRecordState.Loading -> NameResolveIndicatorStyle.Loading
+    GemNameRecordState.Error -> NameResolveIndicatorStyle.Icon(AppIcons.Error, MaterialTheme.colorScheme.error, stringResource(R.string.errors_error_occurred))
+    is GemNameRecordState.Complete -> NameResolveIndicatorStyle.Icon(AppIcons.CheckCircle, MaterialTheme.colorScheme.tertiary, null)
+    GemNameRecordState.None -> null
 }

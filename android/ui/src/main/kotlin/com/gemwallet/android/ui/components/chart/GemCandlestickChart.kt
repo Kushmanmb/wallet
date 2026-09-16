@@ -1,5 +1,6 @@
 package com.gemwallet.android.ui.components.chart
 
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -34,7 +34,6 @@ import com.gemwallet.android.ui.models.chart.CandlestickChartUIModel
 import com.gemwallet.android.ui.models.chart.ChartAxisTick
 import com.gemwallet.android.ui.models.chart.ChartReferenceLineUIModel
 import com.gemwallet.android.ui.theme.paddingDefault
-import com.gemwallet.android.ui.theme.pendingColor
 import com.gemwallet.android.ui.theme.space1
 import com.gemwallet.android.ui.theme.space2
 import uniffi.gemstone.GemPerpetualChartLineKind
@@ -218,18 +217,8 @@ fun GemCandlestickChart(
 
 @Composable
 private fun referenceColors(): (GemPerpetualChartLineKind) -> Color {
-    val entryColor = MaterialTheme.colorScheme.outline
-    val liquidationColor = MaterialTheme.colorScheme.error
-    val stopLossColor = pendingColor
-    val takeProfitColor = MaterialTheme.colorScheme.tertiary
-    return { role ->
-        when (role) {
-            GemPerpetualChartLineKind.ENTRY -> entryColor
-            GemPerpetualChartLineKind.LIQUIDATION -> liquidationColor
-            GemPerpetualChartLineKind.STOP_LOSS -> stopLossColor
-            GemPerpetualChartLineKind.TAKE_PROFIT -> takeProfitColor
-        }
-    }
+    val colors = GemPerpetualChartLineKind.entries.associateWith { it.color() }
+    return { role -> colors.getValue(role) }
 }
 
 private fun candleColor(candle: CandleUIModel, up: Color, down: Color, flat: Color): Color = when (candle.direction) {
