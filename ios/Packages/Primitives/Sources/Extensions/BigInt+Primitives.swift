@@ -16,7 +16,7 @@ public extension BigInt {
 }
 
 public extension BigInt {
-    static func from(string: String) throws -> BigInt {
+    static func from(string: String) -> BigInt {
         if string.isEmpty {
             .zero
         } else if let value = BigInt(string, radix: 10) {

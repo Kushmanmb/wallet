@@ -195,13 +195,11 @@ A rendered number the app computes is the same class of bug as the fiat multipli
 
 The rule from 2026-09-16: a `try?` or a `runCatching { }.getOrNull()` that turns a real failure into a silent default is the app inventing a failure mode. `Migrations.swift` (80 sites) and the decoder probes in `AnyCodableValue.swift` are already closed as the idempotent-migration and type-probe idioms; these are the rest.
 
+Four closed on 2026-09-16. **F24** was the rule in its purest form: `BigInt.from(string:)` was declared `throws` and had no `throw` in its body — every branch returned a value — so the two `try?` in `SwapMetadataViewModel` were guarding a failure the signature had invented. The signature is total now and the guard is gone. **F25**'s socket discarded why a request could not be built and reconnected reporting `notConnected`; it carries the real error now. **F20** is closed with no change: all four keystore sites are inside `findV3File`, which was already closed as the directory-scan idiom — the item's claim that only one of them was is wrong. **F23** is closed too: both sites are ISO-8601 parse probes where nil is the answer.
+
 - **F19** **S** `ios/Features/Swap/.../SwapSceneViewModel.swift` — four sites; `currentInput` is closed as nil-is-the-answer, the other three are not.
-- **F20** **S** `ios/Packages/GemstoneServices/Sources/Keystore/LocalKeystore.swift` — four sites in a wallet-critical path; `findV3File` is closed, the rest need reading.
 - **F21** **S** `ios/Packages/Primitives/Sources/Generated/ListItem.swift` — four sites inside a generated file, which means the generator emits them.
 - **F22** **S** `ios/Gem/Navigation/NavigationHandler.swift` and `ios/Packages/Components/Sources/NavigationPathState.swift` — three each; the path-decoding ones are closed, the wallet-id ones are not.
-- **F23** **S** `ios/Packages/Formatters/Sources/RelativeDateFormatter.swift` — two sites in date formatting.
-- **F24** **S** `ios/Packages/PrimitivesComponents/.../SwapMetadataViewModel.swift` — two sites reading a stored swap's metadata, which is exactly the shape the Cetus alias fixed in Core.
-- **F25** **S** `ios/Packages/SwiftHTTPClient/WebSocketClient/WebSocketConnection.swift` — two sites on a live socket.
 - **F26** **S** `ios/Features/MarketInsight/.../ChartSceneViewModel.swift`, `ios/Features/NFT/.../CollectibleViewModel.swift`, `ios/Features/Assets/.../SelectAssetViewModel.swift`, `ios/Features/QRScanner/.../QRScannerSceneViewModel.swift`, `ios/Features/Support/.../SupportChatSceneViewModel.swift` — one site each.
 - **F27** **S** `android/gemcore/.../serializer/RoutePayload.kt` — two `runCatching { }.getOrNull()` on route payload decoding.
 - **F28** **S** `android/data/coordinators/.../session/SessionCoordinator.kt` — a swallowed failure in the session path.

@@ -19,7 +19,7 @@ struct BigInt_PrimitivesTests {
 
     @Test
     func fromString() throws {
-        #expect(try BigInt.from(string: "111").description == "111")
-        #expect(try BigInt.from(string: "0.1").description == "0")
+        #expect(BigInt.from(string: "111").description == "111")
+        #expect(BigInt.from(string: "0.1").description == "0")
     }
 }
