@@ -351,7 +351,8 @@ A chain crate that does not implement a trait its siblings do is either a chain 
 
 X124–X132 are closed on 2026-09-16 after reading every arm the sweep found. All of them are fail-closed: the Aptos signer's five arms return `SignerError::InvalidInput`, the Uniswap, Across and Relay deployment tables return `None` for a chain with no deployment, Chainflip returns `SwapperError::NotSupportedChain`, GoPlus returns an `Err` naming the chain, and the five fiat mappers return `FiatTransactionStatus::Unknown`, which is a named outcome rather than a silent default. `EvmStakingClient` is absent from every non-EVM chain because its name states the constraint. The lens counts a defaulting arm; it cannot see that the default *is* the answer, so exclude `None`/`false`/`Err`/`Unknown` arms in provider tables next time and keep only arms that pick a wrong concrete value.
 
-- **X123** **M** `gem_bitcoin`, `gem_cosmos`, `gem_ton` and `gem_hypercore` implement `ChainTraits` but not `ChainProvider`; `gem_bsc`, `gem_monad` and `gem_optimism` implement `ChainProvider` but not `ChainTraits`. Two overlapping abstractions with different membership.
+
+X123 closed on 2026-09-16: there is one abstraction, not two. `ChainProvider` is a *supertrait* of `ChainTraits`, so every one of the sixteen chain crates that implements `ChainTraits` implements it by definition and each carries its own `get_chain`. `gem_bsc`, `gem_monad` and `gem_optimism` implement neither, because they are not chain providers — they are BSC and Monad staking encoders and an Optimism gas oracle, and the provider for those chains is `gem_evm`'s `EthereumProvider`. Check whether one trait is a supertrait of the other before calling two traits overlapping abstractions.
 
 ## 34. Files that are a table and a rule set at once
 
