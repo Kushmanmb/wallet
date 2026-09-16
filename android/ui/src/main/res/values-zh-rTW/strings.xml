@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">全倉</string>
   <string name="perpetual_margin_isolated">逐倉</string>
   <string name="perpetuals_title">永續合約</string>
+  <string name="perpetuals_trade">交易永續合約</string>
   <string name="perpetuals_markets">市場</string>
   <string name="perpetuals_empty_state_no_markets_found">未找到任何市場</string>
   <string name="rewards_title">積分</string>

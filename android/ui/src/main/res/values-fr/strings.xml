@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Cross</string>
   <string name="perpetual_margin_isolated">Isolé</string>
   <string name="perpetuals_title">Perpétuels</string>
+  <string name="perpetuals_trade">Trader les perpétuels</string>
   <string name="perpetuals_markets">Marchés</string>
   <string name="perpetuals_empty_state_no_markets_found">Aucun marché trouvé</string>
   <string name="rewards_title">Récompenses</string>

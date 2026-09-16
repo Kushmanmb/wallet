@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Chéo</string>
   <string name="perpetual_margin_isolated">Bị cô lập</string>
   <string name="perpetuals_title">Perpetual</string>
+  <string name="perpetuals_trade">Giao dịch Perpetual</string>
   <string name="perpetuals_markets">Thị trường</string>
   <string name="perpetuals_empty_state_no_markets_found">Không tìm thấy thị trường</string>
   <string name="rewards_title">Phần thưởng</string>

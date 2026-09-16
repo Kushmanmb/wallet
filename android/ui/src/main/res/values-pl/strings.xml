@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Krzyż</string>
   <string name="perpetual_margin_isolated">Izolowana</string>
   <string name="perpetuals_title">Wieczyste</string>
+  <string name="perpetuals_trade">Handluj wieczystymi</string>
   <string name="perpetuals_markets">Rynki</string>
   <string name="perpetuals_empty_state_no_markets_found">Nie znaleziono rynków</string>
   <string name="rewards_title">Nagrody</string>

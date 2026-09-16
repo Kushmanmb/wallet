@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Cross</string>
   <string name="perpetual_margin_isolated">Terisolasi</string>
   <string name="perpetuals_title">Perpetual</string>
+  <string name="perpetuals_trade">Perdagangkan Perpetual</string>
   <string name="perpetuals_markets">Pasar</string>
   <string name="perpetuals_empty_state_no_markets_found">Tidak ada pasar yang ditemukan</string>
   <string name="rewards_title">Hadiah</string>

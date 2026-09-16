@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">クロス</string>
   <string name="perpetual_margin_isolated">分離マージン</string>
   <string name="perpetuals_title">パーペチュアル</string>
+  <string name="perpetuals_trade">パーペチュアルを取引</string>
   <string name="perpetuals_markets">市場</string>
   <string name="perpetuals_empty_state_no_markets_found">市場が見つかりません</string>
   <string name="rewards_title">ポイント</string>

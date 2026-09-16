@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Ketare</string>
   <string name="perpetual_margin_isolated">Ware</string>
   <string name="perpetuals_title">Perpetuals</string>
+  <string name="perpetuals_trade">Ciniki Perpetuals</string>
   <string name="perpetuals_markets">Kasuwanni</string>
   <string name="perpetuals_empty_state_no_markets_found">Babu kasuwanni da aka samu</string>
   <string name="rewards_title">Lada</string>

@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">ข้าม</string>
   <string name="perpetual_margin_isolated">โดดเดี่ยว</string>
   <string name="perpetuals_title">นิรันดร์</string>
+  <string name="perpetuals_trade">เทรดนิรันดร์</string>
   <string name="perpetuals_markets">ตลาด</string>
   <string name="perpetuals_empty_state_no_markets_found">ไม่พบตลาด</string>
   <string name="rewards_title">รางวัล</string>

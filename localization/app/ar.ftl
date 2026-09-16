@@ -680,7 +680,7 @@ perpetual_margin_isolated = معزول
 
 perpetuals_title = العقود الدائمة
 # Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
-perpetuals_trade = Trade Perpetuals
+perpetuals_trade = تداول العقود الدائمة
 perpetuals_markets = الأسواق
 perpetuals_empty_state_no_markets_found = لم يتم العثور على الأسواق
 

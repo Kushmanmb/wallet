@@ -680,7 +680,7 @@ perpetual_margin_isolated = 逐仓
 
 perpetuals_title = 永续合约
 # Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
-perpetuals_trade = Trade Perpetuals
+perpetuals_trade = 交易永续合约
 perpetuals_markets = 市场
 perpetuals_empty_state_no_markets_found = 未找到任何市场
 

@@ -680,7 +680,7 @@ perpetual_margin_isolated = İzole
 
 perpetuals_title = Sürekliler
 # Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
-perpetuals_trade = Trade Perpetuals
+perpetuals_trade = Süreklileri al-sat
 perpetuals_markets = Piyasalar
 perpetuals_empty_state_no_markets_found = Hiçbir pazar bulunamadı
 

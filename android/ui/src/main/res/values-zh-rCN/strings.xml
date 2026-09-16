@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">全仓</string>
   <string name="perpetual_margin_isolated">逐仓</string>
   <string name="perpetuals_title">永续合约</string>
+  <string name="perpetuals_trade">交易永续合约</string>
   <string name="perpetuals_markets">市场</string>
   <string name="perpetuals_empty_state_no_markets_found">未找到任何市场</string>
   <string name="rewards_title">积分</string>

@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">מוצלב</string>
   <string name="perpetual_margin_isolated">מבודד</string>
   <string name="perpetuals_title">נצחיים</string>
+  <string name="perpetuals_trade">מסחר בנצחיים</string>
   <string name="perpetuals_markets">שווקים</string>
   <string name="perpetuals_empty_state_no_markets_found">לא נמצאו שווקים</string>
   <string name="rewards_title">תגמולים</string>

@@ -680,7 +680,7 @@ perpetual_margin_isolated = מבודד
 
 perpetuals_title = נצחיים
 # Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
-perpetuals_trade = Trade Perpetuals
+perpetuals_trade = מסחר בנצחיים
 perpetuals_markets = שווקים
 perpetuals_empty_state_no_markets_found = לא נמצאו שווקים
 

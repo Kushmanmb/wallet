@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Cross</string>
   <string name="perpetual_margin_isolated">Izolovaný</string>
   <string name="perpetuals_title">Věčné</string>
+  <string name="perpetuals_trade">Obchodovat věčné</string>
   <string name="perpetuals_markets">Trhy</string>
   <string name="perpetuals_empty_state_no_markets_found">Nenalezeny žádné trhy</string>
   <string name="rewards_title">Odměny</string>

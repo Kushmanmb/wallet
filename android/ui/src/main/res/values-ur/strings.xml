@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">کراس</string>
   <string name="perpetual_margin_isolated">الگ تھلگ</string>
   <string name="perpetuals_title">دائمی</string>
+  <string name="perpetuals_trade">دائمی ٹریڈ کریں</string>
   <string name="perpetuals_markets">منڈیاں</string>
   <string name="perpetuals_empty_state_no_markets_found">کوئی بازار نہیں ملا</string>
   <string name="rewards_title">انعامات</string>

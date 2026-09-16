@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">크로스</string>
   <string name="perpetual_margin_isolated">절연</string>
   <string name="perpetuals_title">무기한 선물</string>
+  <string name="perpetuals_trade">무기한 선물 거래</string>
   <string name="perpetuals_markets">시장</string>
   <string name="perpetuals_empty_state_no_markets_found">시장을 찾을 수 없습니다</string>
   <string name="rewards_title">보상</string>

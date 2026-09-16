@@ -680,7 +680,7 @@ perpetual_margin_isolated = 절연
 
 perpetuals_title = 무기한 선물
 # Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
-perpetuals_trade = Trade Perpetuals
+perpetuals_trade = 무기한 선물 거래
 perpetuals_markets = 시장
 perpetuals_empty_state_no_markets_found = 시장을 찾을 수 없습니다
 

@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">کراس</string>
   <string name="perpetual_margin_isolated">جدا شده</string>
   <string name="perpetuals_title">دائمی‌ها</string>
+  <string name="perpetuals_trade">معامله دائمی‌ها</string>
   <string name="perpetuals_markets">بازارها</string>
   <string name="perpetuals_empty_state_no_markets_found">هیچ بازاری یافت نشد</string>
   <string name="rewards_title">پاداش‌ها</string>

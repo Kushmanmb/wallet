@@ -680,7 +680,7 @@ perpetual_margin_isolated = Izolovaný
 
 perpetuals_title = Věčné
 # Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
-perpetuals_trade = Trade Perpetuals
+perpetuals_trade = Obchodovat věčné
 perpetuals_markets = Trhy
 perpetuals_empty_state_no_markets_found = Nenalezeny žádné trhy
 

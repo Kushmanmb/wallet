@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Cruce</string>
   <string name="perpetual_margin_isolated">Izolat</string>
   <string name="perpetuals_title">Perpetue</string>
+  <string name="perpetuals_trade">Tranzacționează perpetue</string>
   <string name="perpetuals_markets">Piețele</string>
   <string name="perpetuals_empty_state_no_markets_found">Nu s-au găsit piețe</string>
   <string name="rewards_title">Recompense</string>

@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Krus</string>
   <string name="perpetual_margin_isolated">Nakahiwalay</string>
   <string name="perpetuals_title">Perpetuals</string>
+  <string name="perpetuals_trade">Mag-trade ng Perpetuals</string>
   <string name="perpetuals_markets">Mga pamilihan</string>
   <string name="perpetuals_empty_state_no_markets_found">Walang nakitang mga merkado</string>
   <string name="rewards_title">Mga Gantimpala</string>

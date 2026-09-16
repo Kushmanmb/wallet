@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">متقاطع</string>
   <string name="perpetual_margin_isolated">معزول</string>
   <string name="perpetuals_title">العقود الدائمة</string>
+  <string name="perpetuals_trade">تداول العقود الدائمة</string>
   <string name="perpetuals_markets">الأسواق</string>
   <string name="perpetuals_empty_state_no_markets_found">لم يتم العثور على الأسواق</string>
   <string name="rewards_title">مكافآت</string>

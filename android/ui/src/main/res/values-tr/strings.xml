@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Çapraz</string>
   <string name="perpetual_margin_isolated">İzole</string>
   <string name="perpetuals_title">Sürekliler</string>
+  <string name="perpetuals_trade">Süreklileri al-sat</string>
   <string name="perpetuals_markets">Piyasalar</string>
   <string name="perpetuals_empty_state_no_markets_found">Hiçbir pazar bulunamadı</string>
   <string name="rewards_title">Ödüller</string>

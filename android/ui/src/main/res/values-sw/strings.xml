@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Msalaba</string>
   <string name="perpetual_margin_isolated">Imetengwa</string>
   <string name="perpetuals_title">Perpetuals</string>
+  <string name="perpetuals_trade">Fanya biashara ya Perpetuals</string>
   <string name="perpetuals_markets">Masoko</string>
   <string name="perpetuals_empty_state_no_markets_found">Hakuna masoko yaliyopatikana</string>
   <string name="rewards_title">Zawadi</string>

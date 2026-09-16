@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Kors</string>
   <string name="perpetual_margin_isolated">Isoleret</string>
   <string name="perpetuals_title">Perpetuals</string>
+  <string name="perpetuals_trade">Handl perpetuals</string>
   <string name="perpetuals_markets">Markeder</string>
   <string name="perpetuals_empty_state_no_markets_found">Ingen markeder fundet</string>
   <string name="rewards_title">Belønninger</string>

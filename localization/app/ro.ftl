@@ -680,7 +680,7 @@ perpetual_margin_isolated = Izolat
 
 perpetuals_title = Perpetue
 # Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
-perpetuals_trade = Trade Perpetuals
+perpetuals_trade = Tranzacționează perpetue
 perpetuals_markets = Piețele
 perpetuals_empty_state_no_markets_found = Nu s-au găsit piețe
 

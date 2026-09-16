@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Крос</string>
   <string name="perpetual_margin_isolated">Ізольовані</string>
   <string name="perpetuals_title">Перпетуали</string>
+  <string name="perpetuals_trade">Торгувати перпетуалами</string>
   <string name="perpetuals_markets">Ринки</string>
   <string name="perpetuals_empty_state_no_markets_found">Ринків не знайдено</string>
   <string name="rewards_title">Нагороди</string>

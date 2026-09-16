@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">ক্রস</string>
   <string name="perpetual_margin_isolated">বিচ্ছিন্ন</string>
   <string name="perpetuals_title">পারপেচুয়াল</string>
+  <string name="perpetuals_trade">পারপেচুয়াল ট্রেড করুন</string>
   <string name="perpetuals_markets">বাজার</string>
   <string name="perpetuals_empty_state_no_markets_found">কোন বাজার খুঁজে পাওয়া যায়নি</string>
   <string name="rewards_title">পুরষ্কার</string>

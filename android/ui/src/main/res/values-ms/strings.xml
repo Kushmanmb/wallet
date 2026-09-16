@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Salib</string>
   <string name="perpetual_margin_isolated">Terpencil</string>
   <string name="perpetuals_title">Kekal</string>
+  <string name="perpetuals_trade">Dagangkan Kekal</string>
   <string name="perpetuals_markets">Pasaran</string>
   <string name="perpetuals_empty_state_no_markets_found">Tiada pasaran ditemui</string>
   <string name="rewards_title">Ganjaran</string>

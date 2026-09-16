@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Croce</string>
   <string name="perpetual_margin_isolated">Isolato</string>
   <string name="perpetuals_title">Perpetui</string>
+  <string name="perpetuals_trade">Fai trading sui perpetui</string>
   <string name="perpetuals_markets">Mercati</string>
   <string name="perpetuals_empty_state_no_markets_found">Nessun mercato trovato</string>
   <string name="rewards_title">Ricompense</string>

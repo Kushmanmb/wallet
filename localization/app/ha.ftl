@@ -680,7 +680,7 @@ perpetual_margin_isolated = Ware
 
 perpetuals_title = Perpetuals
 # Used in the wallet screen row that opens Perpetuals when the wallet holds no positions.
-perpetuals_trade = Trade Perpetuals
+perpetuals_trade = Ciniki Perpetuals
 perpetuals_markets = Kasuwanni
 perpetuals_empty_state_no_markets_found = Babu kasuwanni da aka samu
 

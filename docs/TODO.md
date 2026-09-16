@@ -38,9 +38,8 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 
 ### Hardcoded user-visible strings
 
-Swept on 2026-09-15 over every non-preview, non-test iOS file: 25 hits, of which 20 are the developer screen (a debug screen that is deliberately untranslated) and 4 are inside a `PreviewProvider`. The one real hit was the wallet screen's "Trade Perpetuals" row, now `perpetuals_trade`. The same sweep over Android found none.
+Swept on 2026-09-15 over every non-preview, non-test iOS file: 25 hits, of which 20 are the developer screen (a debug screen that is deliberately untranslated) and 4 are inside a `PreviewProvider`. The one real hit was the wallet screen's "Trade Perpetuals" row, now `perpetuals_trade`. The same sweep over Android found none. All three new keys — `perpetuals_trade`, `widget_empty` and `widget_empty_short` — were translated into the other 30 locales on 2026-09-16, each following the locale's existing `perpetuals_title` and `errors_no_data_available` wording.
 
-- **L14** **S** `perpetuals_trade`, `widget_empty` and `widget_empty_short` carry the English text in the other 30 locales until the next translation pass.
 
 ### iOS view models with no test file
 

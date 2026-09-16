@@ -544,6 +544,7 @@
   <string name="perpetual_margin_cross">Kruis</string>
   <string name="perpetual_margin_isolated">Geïsoleerd</string>
   <string name="perpetuals_title">Perpetuals</string>
+  <string name="perpetuals_trade">Perpetuals verhandelen</string>
   <string name="perpetuals_markets">Markten</string>
   <string name="perpetuals_empty_state_no_markets_found">Geen markten gevonden</string>
   <string name="rewards_title">Beloningen</string>
