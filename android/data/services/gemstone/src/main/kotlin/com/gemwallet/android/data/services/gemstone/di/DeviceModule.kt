@@ -21,6 +21,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import uniffi.gemstone.GemDeviceApiClient
 import uniffi.gemstone.GemDeviceService
+import uniffi.gemstone.GemDeviceServiceInterface
 import uniffi.gemstone.GemNotificationPermissions
 import uniffi.gemstone.GemNotificationsService
 import uniffi.gemstone.GemPreferencesService
@@ -120,4 +121,8 @@ object DeviceModule {
         getWallets = getWallets,
         deviceService = deviceService,
     )
+
+    @Provides
+    @Singleton
+    fun provideDeviceServiceInterface(service: GemDeviceService): GemDeviceServiceInterface = service
 }

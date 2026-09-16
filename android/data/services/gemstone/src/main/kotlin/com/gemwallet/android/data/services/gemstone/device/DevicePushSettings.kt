@@ -28,12 +28,13 @@ import kotlinx.coroutines.flow.onStart
 import uniffi.gemstone.GemDeviceService
 import uniffi.gemstone.GemNotificationsService
 import uniffi.gemstone.GemPreferencesService
+import uniffi.gemstone.GemPreferencesServiceInterface
 
 class DevicePushSettings(
     private val context: Context,
     private val configStore: ConfigStore,
     private val notificationsAvailable: NotificationsAvailable,
-    private val preferencesService: GemPreferencesService,
+    private val preferencesService: GemPreferencesServiceInterface,
     private val deviceService: Lazy<GemDeviceService>,
     private val notificationsService: Lazy<GemNotificationsService>,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,

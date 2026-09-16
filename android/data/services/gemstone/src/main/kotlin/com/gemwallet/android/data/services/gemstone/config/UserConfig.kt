@@ -14,6 +14,7 @@ import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.Wallet
 import com.wallet.core.primitives.WalletId
 import uniffi.gemstone.GemPreferencesService
+import uniffi.gemstone.GemPreferencesServiceInterface
 import uniffi.gemstone.GemSecureStore
 import uniffi.gemstone.lockPeriodFromMinutes
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +29,7 @@ private val Context.dataStore by preferencesDataStore(name = "user_config")
 class UserConfig(
     private val context: Context,
     private val configStore: ConfigStore,
-    private val preferencesService: GemPreferencesService,
+    private val preferencesService: GemPreferencesServiceInterface,
     private val secureStore: GemSecureStore,
 ) {
 
