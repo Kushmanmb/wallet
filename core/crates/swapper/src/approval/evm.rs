@@ -99,7 +99,7 @@ where
     let decoded = HexDecode(result).map_err(|_| SwapperError::TransactionError("failed to decode permit2 allowance result".into()))?;
     let allowance_return = IAllowanceTransfer::allowanceCall::abi_decode_returns(&decoded).map_err(SwapperError::from)?;
 
-    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_secs();
+    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
     let expiration: u64 = allowance_return
         ._1
         .try_into()

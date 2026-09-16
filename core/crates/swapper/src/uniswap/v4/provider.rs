@@ -72,7 +72,10 @@ impl UniswapV4 {
     }
 
     fn is_base_pair(token_in: &Address, token_out: &Address, evm_chain: &EVMChain) -> bool {
-        let base_set: HashSet<Address> = HashSet::from_iter(get_base_pair(evm_chain, evm_chain.native_asset_contract()).unwrap().path_building_array());
+        let Some(base_pair) = get_base_pair(evm_chain, evm_chain.native_asset_contract()) else {
+            return false;
+        };
+        let base_set: HashSet<Address> = HashSet::from_iter(base_pair.path_building_array());
         base_set.contains(token_in) || base_set.contains(token_out)
     }
 
