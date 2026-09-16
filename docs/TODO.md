@@ -10,7 +10,6 @@ Every open item carries a stable id (U duplicated or redundant code, V vocabular
 
 Ordered by the lines it removes; work these before the sections below. The duplication sweeps (same-named similar bodies within an app and across the apps, same-bodied Core functions, shared constants, twins built from a Core type, unread members) were rerun on 2026-09-16 after B68 closed, and this is everything they still find — the larger families landed in earlier passes and are in the ledger. Everything else in this file moves a boundary rather than deleting a copy.
 
-- **U5** **S** iOS members with no reader: `PerpetualPositionViewModel.nameText`, `ValueFormatter.full_US`, `SupportMessageSender.isAgent`, `Constants.apiURL` (confirm the last against the widget and tests before deleting).
 
 ## 1. Surfaces still outside Gemstone
 
