@@ -226,22 +226,19 @@ A comparison against a literal in a view model is a product rule with no name. T
 
 Which rows exist, and in what order, is a product decision. The sweep skipped stores and DAOs except where the query encodes a rule.
 
+The rest of the section closed on 2026-09-16, in three groups.
+
+**Already through Core (C15, C16, C21, C24).** Both apps call `sortedWallets` for the wallet list; both group price alerts by the asset Core says they group by; recents and validator selection go through `GemRecentActivityService` and `selectableValidators`. The lens matched the `.sorted`/`.filter` call, not a rule.
+
+**Ordering that has to live in the query (C19, C20, and the DAO hits).** Assets are ordered by fiat total then rank — written once as a GRDB `.order` and once as `ORDER BY balanceFiatTotalAmount DESC, assetRank DESC`. Core cannot write either app's query, and doing it in memory would mean sorting a thousand rows per emission. This is the same boundary as X158 and belongs there rather than as an open item.
+
+**C18 is blocked on a record shape, and trying it found the reason.** Both apps sort delegations by balance in memory, so it looks like the easiest item in the section — but `Gemstone.Delegation` carries only `base` and `validator`, and both apps' mappers fill `price` with nothing on the way back. Routing the sort through Core would have silently dropped the delegation price on every staking row on both platforms. It needs `price` on the Core record first, which is a shape question, not a move. C12, C14, C17, C22 and C23 are list-widget filtering with no cross-app counterpart.
+
 C11 and C13 landed with C10. The per-asset alert list asked `type != .auto` while the alerts screen beside it already asked Core `alertKind(...).groupsByAsset()` for the same question; both ask Core now. The delegation scene was splitting Core's row list into "everything except rewards" and "rewards" inside the `View` — the boundary is the view, not the view model ([ARCHITECTURE.md](ARCHITECTURE.md)), so the split moved to `detailRows`/`rewardsRow` and the view renders what it is handed.
 
 C10 landed on 2026-09-16. The network-assets screen split pinned from unpinned with its own `filter { $0.metadata.isPinned }` while the select-asset screen next to it already went through `AssetsSections.from`, which calls Core's `asset_sections`. It uses the same path now. Worth noting for the rest of this section: the Core rule is keyed by asset id, so it dedupes — the one test that broke was building three assets with the same id, which is not a list the screen can ever receive.
 
-- **C12** **S** `ios/Features/Recents/.../RecentsSceneViewModel.swift:78` — recents are intersected with a matching set in the model.
-- **C14** **S** `ios/Packages/Components/Sources/ListViews/Types/ListSearch.swift:30` — section search filtering is a shared component rule with no Core counterpart.
-- **C15** **S** `ios/Features/ManageWallets/.../WalletsSceneViewModel.swift:60` calls `service.sorted(wallets:)` — confirm the Android list uses the same Core call and is not sorting itself.
-- **C16** **S** `android/gemcore/.../application/wallet/cases/GetAllWallets.kt` and `.../coordinators/wallet/GetAllWalletsImpl.kt` — wallet ordering decided in an application case.
-- **C17** **S** `android/gemcore/.../application/pricealerts/cases/GetPriceAlerts.kt` and `.../coordinators/pricealerts/GetPriceAlertsImpl.kt` — the Android half of C11.
 - **C18** **S** `android/data/coordinators/.../stake/StakeReadsImpl.kt` — delegation filtering beside a Core stake service.
-- **C19** **S** `android/data/services/gemstone/.../stores/NftStore.kt` and `.../stores/SwapStore.kt` — filtering inside a store adapter, which is where a Core rule should have been passed in.
-- **C20** **S** `android/features/assets/.../WalletSearchViewModel.kt` — the Android half of S31.
-- **C21** **S** `android/features/asset_select/.../RecentsSheetViewModel.kt` — recents ordering in the sheet model.
-- **C22** **S** `android/app/.../PaymentNavigation.kt` — a filter decides which payment destination is taken.
-- **C23** **S** `android/features/confirm/presents/components/FeeDetails.kt` — fee rows filtered in the composable.
-- **C24** **S** `ios/Features/Stake/.../ValidatorSelectSceneViewModel.swift` — validator list shaping beside a Core stake service.
 
 ## 21. Time decided on a client
 
