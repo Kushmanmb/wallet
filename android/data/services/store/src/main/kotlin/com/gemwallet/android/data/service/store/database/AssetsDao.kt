@@ -255,6 +255,7 @@ interface AssetsDao {
             AND assetRank >= 0
             AND (symbol LIKE '%' || :query || '%'
             OR name LIKE '%' || :query || '%' COLLATE NOCASE
+            OR asset_info.id LIKE '%' || :query || '%'
             OR (type = 'NATIVE' AND chain LIKE '%' || :query || '%' COLLATE NOCASE))
             AND (NOT :buyable OR isBuyEnabled = 1)
             AND (NOT :sellable OR isSellEnabled = 1)
