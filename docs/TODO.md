@@ -1,6 +1,6 @@
 # Open work
 
-**Refilled on 2026-09-16.** Every id from the 2026-09-15 sweeps is closed — landed, or closed against evidence, with the reasoning kept in the lower half of this file so the same lead is not re-raised. Sections 16–25 are the app-shaped pass, built from lenses the structural sweeps miss: the row census, a composed-label pass, client-side arithmetic, invented failures, call-site thresholds, collection shaping, client-side time, hand-built URLs and cross-app member-name collisions. Sections 26–30 are the Core-shaped pass over the same corpus: records that cross with a bare number, screens holding no Core service at all, rules duplicated between Core crates, the gaps the screen-service map already names, and app ports Core could own. No test items: coverage is tracked by the decisions a screen makes, not by file names.
+**Refilled on 2026-09-16.** Every id from the 2026-09-15 sweeps is closed — landed, or closed against evidence, with the reasoning kept in the lower half of this file so the same lead is not re-raised. Sections 16–25 are the app-shaped pass, built from lenses the structural sweeps miss: the row census, a composed-label pass, client-side arithmetic, invented failures, call-site thresholds, collection shaping, client-side time, hand-built URLs and cross-app member-name collisions. Sections 26–30 are the Core-shaped pass over the same corpus: records that cross with a bare number, screens holding no Core service at all, rules duplicated between Core crates, the gaps the screen-service map already names, and app ports Core could own. Sections 31–37 are the structural pass — service composition depth, screens that change state with no session, chain coverage the docs do not state, the FFI surface neither app names, the boundaries that block whole families above, and the performance budgets nothing measures. Those are **L** and **M** by nature: each needs a decision before it needs a commit. No test items: coverage is tracked by the decisions a screen makes, not by file names.
 
 Every open item carries a stable id (V vocabulary, R rows, C composition, S sessions, B view boundary, F formatting, P parity, D decisions, O ownership, X platform, G guidance, T tests, L localization, N naming, PERF performance) and a size (**S**/**M**/**L**). Contracts are in [ARCHITECTURE.md](ARCHITECTURE.md) and [SERVICES.md](SERVICES.md). **Delete an item's line in the commit that lands it** — ids are never reused.
 
@@ -418,6 +418,146 @@ The same `pub fn` name in two crates is not always duplication, but these thirte
 - **V70** **S** `android/features/update_app/.../InAppUpdateServiceImpl.kt` — an app-owned update service beside `GemAppUpdateService`, with its own HTTP client and timeouts (S28).
 - **V71** **S** `android/ui/.../UriHandlerExt.kt` — URL opening policy in the UI module (V63).
 - **V72** **S** `ios/Packages/GemstonePrimitives/Sources/Config.swift` — the iOS half of V59; decide whether app URLs are a Core config record or stay per-platform.
+
+## 31. Services with more collaborators than a service should have
+
+29 `uniffi::Object` services hold four or more `Arc` collaborators. Composition is the sanctioned answer to "a screen needs several owners" ([ARCHITECTURE.md](ARCHITECTURE.md) § 7), so depth alone is not a defect — but a service that composes a dozen others is the place a cycle appears, and it is the hardest thing in Core to change without touching every screen. Each item is one service to read for a responsibility that belongs to a collaborator.
+
+- **X107** **L** `GemStreamService` — 13 collaborators (`GemBalanceService`, `GemDeviceService`, `GemFiatService`, `GemNftService`, `GemNotificationStore`, `GemPerpetualService` and seven more). The socket fan-out is the widest object in Core, and every screen's freshness depends on it.
+- **X108** **L** `GemWalletService` — 10, spanning the keystore, the avatar, the explorer and the file store. Wallet creation, naming, avatars and secret export are one object.
+- **X109** **L** `GemAssetDetailsService` — 10; the asset screen composes banners, deeplinks, price alerts and balances into one answer.
+- **X110** **M** `GemPerpetualService` — 9, including the gateway and two stores.
+- **X111** **M** `GemTransactionsService` — 8, including the device API client and the status service.
+- **X112** **M** `GemConfirmTransferService` — 8; the confirm flow reaches the keystore password, the name service and the asset config.
+- **X113** **M** `GemConfirmService` — 8, including simulation and scanning. Confirm is split across two eight-collaborator services; decide whether that split is the right seam.
+- **X114** **M** `GemAssetSelectionService` — 8; asset selection composes perpetuals, price alerts and recent activity.
+- **X115** **M** `GemStakeService` — 7.
+- **X116** **M** `GemDeveloperService` — 7 after the 2026-09-16 migration; the developer screen is now the widest debug surface in Core.
+- **X117** **M** `GemAppStartService` — 7; launch orchestration.
+- **X118** **M** `GemWalletHomeService` — 6.
+- **X119** **M** `GemWalletConnectService` — 6, including its own signer and simulation.
+- **X120** **M** `GemTransactionStateService` — 6.
+- **X121** **M** `GemBalanceService` and `GemAssetsService` — 6 each, and they compose each other's neighbours; the balance/assets pair is worth reading as one seam.
+- **X122** **M** `GemAssetDiscoveryService` — 6.
+
+## 32. A screen that changes state with no session
+
+[ARCHITECTURE.md](ARCHITECTURE.md) says a screen whose state changes is a session. 83 iOS view models declare six or more `var`s and name no `Gem*Session`; Android has two. The count in brackets is mutable members. These are hard because a session is a Core object with a lifetime, not a record — each one is a flow to model, and the screen's state has to move in one move.
+
+- **S34** **L** `Features/Settings/RewardsViewModel.swift` [40] — the widest stateful screen with no session: wallet selection, sheets, alerts, toasts and the rewards state.
+- **S35** **L** `Features/WalletTab/WalletSearchSceneViewModel.swift` [32].
+- **S36** **L** `Features/Assets/AssetSceneViewModel.swift` [30].
+- **S37** **L** `Features/Assets/SelectAssetViewModel.swift` [26].
+- **S38** **L** `Features/Transfer/ConfirmTransferSceneViewModel.swift` [25] — confirm has `GemConfirmation`, which SERVICES.md explicitly calls not a session; this is the item that decides whether that is still right.
+- **S39** **M** `PrimitivesComponents/AssetDataViewModel.swift` [24].
+- **S40** **M** `Features/Transfer/AmountSceneViewModel.swift` [24].
+- **S41** **M** `Features/WalletConnector/SignMessageSceneViewModel.swift` [22] — a signing surface holding its own state.
+- **S42** **M** `PrimitivesComponents/PerpetualDetailsViewModel.swift` [20].
+- **S43** **M** `PrimitivesComponents/NetworkFeeSceneViewModel.swift` [20].
+- **S44** **M** `Features/WalletTab/WalletSceneViewModel.swift` [20].
+- **S45** **M** `Features/Stake/DelegationViewModel.swift` [20].
+- **S46** **M** `Features/Stake/StakeSceneViewModel.swift` [19].
+- **S47** **M** `Features/Onboarding/ImportWalletSceneViewModel.swift` [19] — wallet import state, a recovery-critical flow.
+- **S48** **M** `Features/Contacts/ManageContactViewModel.swift` [19].
+- **S49** **M** `Features/WalletConnector/ConnectionProposalViewModel.swift` [18].
+- **S50** **M** `Features/Settings/PreferencesViewModel.swift` [17].
+- **S51** **M** `Features/Perpetuals/PerpetualSceneViewModel.swift` [17].
+- **S52** **M** `Features/WalletTab/NetworkAssetsSceneViewModel.swift` [16].
+- **S53** **M** `Features/Perpetuals/PerpetualsSceneViewModel.swift` [16] and `PerpetualPositionViewModel.swift` [16].
+- **S54** **M** `Features/Transfer/ReceiveViewModel.swift` [15].
+- **S55** **M** `Features/Swap/SwapDetailsViewModel.swift` [15].
+- **S56** **M** `Features/Support/SupportMessageBubbleViewModel.swift` [15].
+- **S57** **M** `Features/NFT/CollectibleViewModel.swift` [15].
+- **S58** **M** `Features/Stake/EarnSceneViewModel.swift` [14].
+- **S59** **M** `Features/Settings/SecurityViewModel.swift` [14] — a security surface whose lock-period state produced a crash on 2026-09-15.
+- **S60** **M** `Features/AppLock/LockSceneViewModel.swift` [14] — the lock screen state machine.
+- **S61** **S** `PrimitivesComponents/BannerViewModel.swift` [13].
+- **S62** **S** `Features/WalletTab/AssetsResultsSceneViewModel.swift` [13].
+- **S63** **S** `Features/Transfer/RecipientSceneViewModel.swift` [13].
+- **S64** **S** `Features/Settings/AboutUsViewModel.swift` [13] — see L15 and P72.
+- **S65** **S** `Features/WalletConnector/ConnectionsViewModel.swift` [11].
+- **S66** **S** `Features/Stake/DelegationSceneViewModel.swift` [11].
+- **S67** **S** `Features/ManageWallets/WalletIDetailViewModel.swift` [11] — also the one iOS file whose name carries a typo (`WalletIDetail`).
+- **S68** **S** `Features/Settings/ChainNodeViewModel.swift` [10] and `Features/FiatConnect/FiatQuoteViewModel.swift` [10].
+- **S69** **S** `Features/Onboarding/VerifyPhraseViewModel.swift` [9] and `Features/Contacts/ManageContactAddressViewModel.swift` [9].
+- **S70** **M** `android/features/perpetual/.../PerpetualDetailsViewModel.kt` and `android/features/confirm/.../ConfirmViewModel.kt` — the only two Android screens in this shape; both have a Core service but keep six `MutableStateFlow`s of their own.
+
+## 33. Chain coverage the matrix does not state
+
+A chain crate that does not implement a trait its siblings do is either a chain that cannot do that thing or a gap nobody wrote down. `docs/FEATURES.md` states capabilities per chain; these are where the code disagrees with a sibling and the doc is silent.
+
+- **X123** **M** `gem_bitcoin`, `gem_cosmos`, `gem_ton` and `gem_hypercore` implement `ChainTraits` but not `ChainProvider`; `gem_bsc`, `gem_monad` and `gem_optimism` implement `ChainProvider` but not `ChainTraits`. Two overlapping abstractions with different membership.
+- **X124** **S** `EvmStakingClient` is implemented by 6+ crates and absent from every non-EVM chain, which is correct — confirm it and state it in `FEATURES.md` so the sweep stops flagging it.
+- **X125** **M** `core/crates/gem_aptos/src/signer/chain_signer.rs` — 5 defaulting `_ =>` arms in a signer. A signing path that silently defaults is the class of bug [Defensive Programming](../core/skills/defensive-programming.md) exists to prevent.
+- **X126** **M** `core/crates/gem_evm/src/uniswap/deployment/v3.rs` and `v4.rs` — 7 defaulting arms between them; an unknown chain gets no deployment rather than an error.
+- **X127** **M** `core/crates/swapper/src/chainflip/provider.rs` and `relay/asset.rs` — 8 defaulting arms in cross-chain asset mapping, where a wrong default sends funds to the wrong chain.
+- **X128** **M** The four fiat provider mappers (`banxa`, `transak`, `flashnet`, `mercuryo`, `paybis`) each carry 2–3 defaulting arms over provider status codes; an unrecognised status reads as a known one.
+- **X129** **S** `core/crates/security_provider/src/providers/goplus/mapper.rs` — defaulting arms in a security verdict mapper.
+- **X130** **S** `core/gemstone/src/config/chain.rs` — 3 defaulting arms in the config every screen reads.
+- **X131** **S** `core/crates/swapper/src/models.rs` — 3 defaulting arms in provider classification, which is what made the Cetus variant removal need care.
+- **X132** **S** `core/crates/gem_evm/src/across/deployment.rs` — defaulting arms in a bridge deployment table.
+
+## 34. Files that are a table and a rule set at once
+
+The 2026-09-16 pass closed the "outgrown one module" items by measuring what each length was made of. These are the ones where the length is a table *and* rules, so splitting is real work rather than bookkeeping.
+
+- **X133** **L** `core/gemstone/src/services/confirm/rules.rs` (1474 lines) — the confirm rules, the widest rule file in Core and the one two eight-collaborator services share.
+- **X134** **L** `core/gemstone/src/services/perpetual/rules.rs` (1447).
+- **X135** **L** `core/crates/primitives/src/chain_config.rs` (1389) — 102 `ChainConfig` literals plus the config types; the table half is generated-shaped and could be data.
+- **X136** **L** `core/gemstone/src/services/transactions/rules.rs` (1313).
+- **X137** **L** `core/gemstone/src/services/stake/rules.rs` (1272).
+- **X138** **L** `core/gemstone/src/services/amount/rules.rs` (1251).
+- **X139** **L** `core/gemstone/src/services/transfer/rules.rs` (1191).
+- **X140** **L** `core/gemstone/src/services/assets/rules.rs` (1173).
+- **X141** **M** `core/crates/gem_rewards/src/risk_scoring/scoring.rs` (1113) — a scoring model with no app reader; confirm it is server-side only.
+- **X142** **M** `core/crates/storage/src/schema.rs` (1111) — generated by Diesel; confirm and record so it stops being swept.
+- **X143** **M** `core/crates/swapper/src/stonfi/provider.rs` (1011), `across/provider.rs` (915), `chainflip/provider.rs` (906) — three swap providers over 900 lines each; compare their shapes before splitting any one.
+- **X144** **M** `core/crates/gem_tron/src/signer/chain_signer.rs` (976) — the widest chain signer.
+- **X145** **M** `core/crates/gem_hypercore/src/provider/perpetual_mapper.rs` (925).
+- **X146** **S** `core/gemstone/src/models/remote_types.rs` (1940) — generated by `just generate-models`; already closed as X90 and kept here only so the count is explained.
+
+## 35. The FFI surface neither app names
+
+62 exported `uniffi::Record`/`uniffi::Enum` types are named by no app source. SERVICES.md says review before deleting, because a nested field or a test may reach one. That review is the item, and it is hard because each one needs its Rust callers traced before it can be un-exported.
+
+- **X147** **M** The amount family: `GemAmountEarnType`, `GemAmountMaxEntry`, `GemAmountPerpetualPosition`, `GemAmountStakeType` — four records behind a service both apps hold.
+- **X148** **M** The EIP-712 family: `GemEIP712Message`, `GemEIP712Section`, `GemEIP712Value`, `GemEIP712ValueType` — a whole typed-signing surface no app names. Either the apps render typed data from something else, or this is unfinished.
+- **X149** **S** The asset-refresh family: `GemAssetRefreshFailure`, `GemAssetRefreshStep`, `GemAssetSectionIds`.
+- **X150** **S** The view states: `GemAddAssetViewState`, `GemAutocloseViewState`, `GemChartViewState` — three screen state records nothing reads, beside three screens that keep their own state (S34–S69).
+- **X151** **S** The balance family: `GemBalanceUpdate`, `GemBalanceUpdateType`.
+- **X152** **S** The app-start family: `GemAppStartStep`, `GemDiscoveryStep`.
+- **X153** **S** The contact family: `GemContactRow`, `GemContactScannedAddress` — `scannedAddress` is exported on the service, so confirm the record is reached through it.
+- **X154** **S** The fee family: `GemFeeOptions`, `GemFeeRate` — beside `NetworkFeeSceneViewModel` (B11), which has no Core service.
+- **X155** **S** The fiat family: `GemFiatOperation`, `GemFiatTransactionStatus`.
+- **X156** **S** `GemChartCurrent`, `GemCollectibleAttribute`, `GemConfirmInput`, `GemDeviceStreamRequest` — four singles.
+- **X157** **M** The remaining 34 of the 62; the item is to finish the trace and record the reachable ones so the list stops being re-swept every pass.
+
+## 36. Boundaries that block the rest
+
+Each of these is one decision that unblocks a family of items above. They are listed last because none is a code change until the decision is made.
+
+- **X158** **L** `ios/Packages/Formatters` and `ios/Packages/Validators` cannot depend on Gemstone, which is what keeps D15–D17 duplicated and what left `GemPriceWidget` (B50) without Core. Decide whether these packages move under a target that can import Gemstone, or Core grows a dependency-free surface for them.
+- **X159** **M** `GemPriceWidget` is a separate target with its own `SharedPreferences` and `WidgetPriceService`; the Android widget has its own too (S29, S32). A widget that cannot call Core is a second implementation of the price screen on each platform.
+- **X160** **M** iOS keeps a family of small row view models (156 with no service, § 27) where Android injects a service into almost every model. That is a platform-shaped difference in where presentation is decided; pick one shape and write it in ARCHITECTURE.md before migrating the individual models.
+- **X161** **M** `BindableQuery`/`ObservableQuery` on iOS against Android's narrow application cases (V68) — two answers to "how does a screen watch the database", and every observed read on both apps sits on one of them.
+- **X162** **M** The `GemTests` target cannot link package products because Xcode rebuilds `Store` as a dynamic product that does not resolve `BigInt` — recorded when T28 closed. Until that is fixed the app target has no unit tests, which is what keeps `RootSceneViewModel` (O33, S34-adjacent) untestable.
+- **X163** **M** iOS pins the `Gemstone` package to Swift 5 language mode; re-tested on 2026-09-16 against uniffi 0.32.1 and the two `uniffiTraitInterfaceCallAsync` sites still fail. Until uniffi changes that function, the generated bindings cannot be Swift 6 clean, and neither can anything downstream that would otherwise adopt strict concurrency.
+- **X164** **M** `core/apps/api` and `core/apps/daemon` share `primitives` and `storage` with the mobile FFI, so a `primitives` change is a server change. Issue #1202 holds the measured baseline and the phased plan; the item is to decide whether the mobile surface gets its own crate boundary.
+- **X165** **M** Two services own confirm (`GemConfirmService`, `GemConfirmTransferService`, X112/X113) and two own assets (`GemAssetsService`, `GemAssetDetailsService`, X109/X121). Both pairs predate the screen-service rule; decide the seam before the § 31 items are started.
+
+## 37. Performance budgets nothing measures yet
+
+[PERFORMANCE.md](PERFORMANCE.md) sets p95 ≤ 100 ms to first feedback, ≤ 200 ms to useful content from local data, and ≤ 100 ms from a received update to the frame. The budgets exist; these screens have no measurement against them.
+
+- **PERF20** **M** The wallet screen against the warm-data budget, on both apps, with 1000 assets seeded.
+- **PERF21** **M** The asset screen (S36, 30 mutable members, 10-collaborator service).
+- **PERF22** **M** The confirm screen, whose rules file is the widest in Core (X133).
+- **PERF23** **M** The swap screen's quote refresh against the update-to-frame budget.
+- **PERF24** **M** The activity list with its filters applied (B20, C10).
+- **PERF25** **M** The perpetuals screen, which holds a live socket and a chart (X107).
+- **PERF26** **S** Launch to the wallet screen on both apps, which is what `GemAppStartService` (X117) orchestrates.
+- **PERF27** **S** The select-asset sheet, which composes six services (X114) and filters in the view model (S25).
+- **PERF28** **S** The iOS `RootSceneViewModel.currentWallet` database read on every `body` pass (O35) — measure it before deciding whether it matters.
 
 ## Closed with no change
 
