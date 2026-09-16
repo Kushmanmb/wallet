@@ -66,6 +66,17 @@ Swept on 2026-09-15 over every non-preview, non-test iOS file: 25 hits, of which
 - **T38** **S** `app` — `MainViewModel`, `AppViewModel`, `MainScreenViewModel`, `SetupWalletViewModel`.
 - **T39** **S** `features/settings/security/viewmodels` `SecurityViewModel.kt` — authentication toggles with no test.
 
+## 14. Decisions still made on a client
+
+The standing goal, restated on 2026-09-16: **any business logic moves to Gemstone, and nothing is decided twice on the clients.** The sweep that finds this work compares the two apps rather than reading one: the same computation on both sides, or one app calling Core where the other does the arithmetic itself, is a divergence waiting to happen — not a style difference. Four landed on 2026-09-16:
+
+- Rejecting a WalletConnect proposal. iOS mapped the error to a CAIP-25 reason and deleted the stored session; Android sent the string `"Reject Session"` for every rejection and kept the session. `session_rejection` now returns the reason, the code, the message the dApp sees and whether the session is deleted.
+- The slippage percent. Android asked Core; iOS wrote `Double(bps) / 100` in two places, and Android wrote it a third time in `SwapDetailsUIModelFactory`. All three read `slippage_percent` now, and `GemSwapQuoteSummary` carries it for the screens that hold the summary but no service.
+- Margin usage on the portfolio screen. Both apps computed `account_value * usage` and `usage * 100` and composed the same `"value (percent)"`. `PortfolioMarginUsage` carries `used_value` and `usage_percent`.
+- Crypto to fiat. iOS converted through `CryptoFiatConverter`; Android multiplied two doubles in `BalanceInfoUIModel`, `DelegationInfo` and `AssetPriceValue`, which loses Core's precision rules. All of them go through Core now, and `GemSwapValue::fiat_value` is exported for the swap screens.
+
+Checked and clean: the price-impact model, the swap rate text and Android's `EquivalentValue` all read a Core value and map only the label, the colour or the locale format.
+
 ## 15. More platform work
 
 ### iOS errors thrown away
