@@ -207,7 +207,6 @@ pub fn assets_in_wallet(supported: AssetList, wallet: &Wallet) -> AssetList {
     }
 }
 
-#[uniffi::export]
 impl GemSwapButtonInput {
     pub fn action(&self) -> GemSwapButtonAction {
         if let Some(minimum) = minimum_amount(self.quote_error.as_ref()) {

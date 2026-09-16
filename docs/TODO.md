@@ -498,19 +498,12 @@ The 2026-09-16 pass closed the "outgrown one module" items by measuring what eac
 
 ## 35. The FFI surface neither app names
 
-62 exported `uniffi::Record`/`uniffi::Enum` types are named by no app source. SERVICES.md says review before deleting, because a nested field or a test may reach one. That review is the item, and it is hard because each one needs its Rust callers traced before it can be un-exported.
+Closed on 2026-09-16 by finishing the trace instead of re-listing it. Of 413 exported records and enums, 351 are named by an app and 275 appear in an exported signature; seeding reachability from *both* sets and walking field types leaves 411 reachable. "Named by neither app" was never the right question — a record crosses because something that crosses carries it.
 
-- **X147** **M** The amount family: `GemAmountEarnType`, `GemAmountMaxEntry`, `GemAmountPerpetualPosition`, `GemAmountStakeType` — four records behind a service both apps hold.
-- **X148** **M** The EIP-712 family: `GemEIP712Message`, `GemEIP712Section`, `GemEIP712Value`, `GemEIP712ValueType` — a whole typed-signing surface no app names. Either the apps render typed data from something else, or this is unfinished.
-- **X149** **S** The asset-refresh family: `GemAssetRefreshFailure`, `GemAssetRefreshStep`, `GemAssetSectionIds`.
-- **X150** **S** The view states: `GemAddAssetViewState`, `GemAutocloseViewState`, `GemChartViewState` — three screen state records nothing reads, beside three screens that keep their own state (S34–S69).
-- **X151** **S** The balance family: `GemBalanceUpdate`, `GemBalanceUpdateType`.
-- **X152** **S** The app-start family: `GemAppStartStep`, `GemDiscoveryStep`.
-- **X153** **S** The contact family: `GemContactRow`, `GemContactScannedAddress` — `scannedAddress` is exported on the service, so confirm the record is reached through it.
-- **X154** **S** The fee family: `GemFeeOptions`, `GemFeeRate` — beside `NetworkFeeSceneViewModel` (B11), which has no Core service.
-- **X155** **S** The fiat family: `GemFiatOperation`, `GemFiatTransactionStatus`.
-- **X156** **S** `GemChartCurrent`, `GemCollectibleAttribute`, `GemConfirmInput`, `GemDeviceStreamRequest` — four singles.
-- **X157** **M** The remaining 34 of the 62; the item is to finish the trace and record the reachable ones so the list stops being re-swept every pass.
+Exactly two were unreachable and are now un-exported: `GemSwapButtonInput` was built and consumed inside `GemSwapSession::button_action`, with only `GemSwapButtonAction` crossing, so its `#[uniffi::export] impl` generated bindings nothing could call; `GemTransferOutput` is an internal trait return. Both keep their Rust callers and no longer appear in `Gemstone.swift` or `gemstone.kt`.
+
+The trace to keep: seed from app-named **and** signature-named types, then walk field types transitively. Seeding from app-named alone reports 12 false orphans.
+
 
 ## 36. Boundaries that block the rest
 
