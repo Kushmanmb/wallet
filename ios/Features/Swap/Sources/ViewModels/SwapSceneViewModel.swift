@@ -360,8 +360,8 @@ extension SwapSceneViewModel {
             side: side,
             assetId: asset.id.identifier,
         )
-        pairSelectorModel.fromAssetId = selection.payAssetId.flatMap { try? AssetId(id: $0) }
-        pairSelectorModel.toAssetId = selection.receiveAssetId.flatMap { try? AssetId(id: $0) }
+        pairSelectorModel.fromAssetId = selection.payAssetId.map { AssetId(core: $0) }
+        pairSelectorModel.toAssetId = selection.receiveAssetId.map { AssetId(core: $0) }
         isPresentingInfoSheet = nil
     }
 }
