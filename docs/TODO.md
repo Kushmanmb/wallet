@@ -223,7 +223,8 @@ V60 closed on 2026-09-16: its five URLs are native app schemes — `tg://resolve
 
 V61–V64 closed on 2026-09-16. Of the five iOS sites said to build the asset image URL, four are `#Preview` literals and test fixtures; the only production one is `WidgetPriceService`, which builds it by hand because the widget cannot import Gemstone — that is X159, not a separate item. V62's five "hand-built URLs" are three `UIApplication.openSettingsURLString` calls and a `URL(string:)` around a URL Core already supplied. V63 and V64 are a URI opener and two composables opening a link.
 
-- **V59** **M** `ios/Packages/GemstonePrimitives/Sources/Config.swift` (4 URLs) against `android/gemcore/.../AppUrl.kt` and `android/gemcore/.../ext/UpdateUrl.kt` — the app's own URLs are listed twice, once per platform.
+
+V59 closed on 2026-09-16. The two lists are not two lists of URLs: `AppUrl` on both platforms is the same three-function façade over Core's `DocsUrl`, `PublicUrl` and `RewardsUrl` enums, each appending its own `utm_source`. The only URL either app writes is Android's universal-APK host, which exists because that flavour distributes outside Play and has no iOS counterpart. What was real is that Android also kept twenty-two `by lazy` names mirroring Core's `DocsUrl` variants by hand; nineteen had a single call site, so they are gone and those sites now name the variant the way iOS already did. The three with several callers stay.
 
 ## 23. Ownership: a view model holding more than its service
 
