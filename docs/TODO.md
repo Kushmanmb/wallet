@@ -226,7 +226,8 @@ A comparison against a literal in a view model is a product rule with no name. T
 
 Which rows exist, and in what order, is a product decision. The sweep skipped stores and DAOs except where the query encodes a rule.
 
-- **C10** **S** `ios/Features/WalletTab/.../NetworkAssetsSceneViewModel.swift:65,77` — `filter { $0.asset.type != .native }` twice to split active from hidden.
+C10 landed on 2026-09-16. The network-assets screen split pinned from unpinned with its own `filter { $0.metadata.isPinned }` while the select-asset screen next to it already went through `AssetsSections.from`, which calls Core's `asset_sections`. It uses the same path now. Worth noting for the rest of this section: the Core rule is keyed by asset id, so it dedupes — the one test that broke was building three assets with the same id, which is not a list the screen can ever receive.
+
 - **C11** **S** `ios/Features/PriceAlerts/.../AssetPriceAlertsViewModel.swift:67` — `filter { $0.priceAlert.type != .auto }` decides which alerts are listed.
 - **C12** **S** `ios/Features/Recents/.../RecentsSceneViewModel.swift:78` — recents are intersected with a matching set in the model.
 - **C13** **S** `ios/Features/Stake/Sources/Scenes/DelegationScene.swift:30` — `model.rows.filter { $0 != .rewards }` filters a Core row list inside the view.
