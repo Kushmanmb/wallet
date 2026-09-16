@@ -48,6 +48,16 @@ let package = Package(
             path: "Sources",
         ),
         .testTarget(
+            name: "ChainSettingsTests",
+            dependencies: [
+                "Settings",
+                "Primitives",
+                "Gemstone",
+                "GemstonePrimitives",
+                .product(name: "GemstonePrimitivesTestKit", package: "GemstonePrimitives"),
+            ],
+        ),
+        .testTarget(
             name: "CurrencyTests",
             dependencies: [
                 "Settings",

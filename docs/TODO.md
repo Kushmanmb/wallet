@@ -53,7 +53,6 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 - **X55** **M** iOS `Settings/.../RewardsViewModel.swift` (53).
 - **X56** **M** iOS `Perpetuals/.../PerpetualSceneViewModel.swift` (45).
 - **X57** **S** iOS `Transfer/.../ReceiveViewModel.swift` (26).
-- **X58** **S** iOS `Settings/.../ChainSettingsSceneViewModel.swift` (23) and `AddNodeSceneViewModel.swift` (17).
 - **X59** **S** iOS `WalletTab/.../NetworkAssetsSceneViewModel.swift` (22) and `AssetsResultsSceneViewModel.swift` (20).
 - **X60** **S** iOS `WalletConnector/.../ConnectionsViewModel.swift` (21) — its old test was deleted when the sections moved to Core; the wiring still has none.
 - **X61** **S** iOS `ManageWallets/.../WalletIDetailViewModel.swift` (21).
