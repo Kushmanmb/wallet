@@ -177,7 +177,6 @@ Rebuilt on 2026-09-16 from the row census and a composed-label pass: a `*ViewMod
 
 A rendered number the app computes is the same class of bug as the fiat multiplication fixed on 2026-09-16: the app reaches a `Double` and loses Core's precision rules. These are the remaining sites the arithmetic sweep found outside `Formatters`.
 
-- **D12** **S** `ios/Packages/Primitives/Sources/Extensions/BigInt+Primitives.swift:29` — `self * BigInt(percent) / 100` is a percentage-of-amount rule written in the app; Core owns bps and percent conversion.
 - **D13** **S** `ios/Packages/Primitives/Sources/ChartValues.swift:42` — the x-axis is padded by `timeIntervalSince(first) * 0.02`; Core already owns candlestick geometry (08f9789016).
 - **D14** **S** `ios/Packages/Components/Sources/Interval.swift:13` — `Interval(value) * 60` converts minutes in the app.
 - **D15** **S** `ios/Packages/Primitives/Sources/Extensions/Double+Primitives.swift` `rounded` and `android/gemcore/.../ValueFormatter.kt` `rounded` — the same rounding helper on both apps.

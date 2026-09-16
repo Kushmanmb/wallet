@@ -10,25 +10,6 @@ public extension BigInt {
         Int(self)
     }
 
-    func increase(byPercent percent: Int) -> BigInt {
-        let multiplier = 100 + percent
-        return self * BigInt(multiplier) / 100
-    }
-
-    func decrease(byPercent percent: Int) -> BigInt {
-        let multiplier = 100 - percent
-        return self * BigInt(multiplier) / 100
-    }
-
-    func decrease(byBasisPoints basisPoints: Int) -> BigInt {
-        let multiplier = 10000 - basisPoints
-        return self * BigInt(multiplier) / 10000
-    }
-
-    func multiply(byPercent percent: Int) -> BigInt {
-        self * BigInt(percent) / 100
-    }
-
     func isBetween(_ lowerBound: BigInt, and upperBound: BigInt) -> Bool {
         self >= lowerBound && self <= upperBound
     }

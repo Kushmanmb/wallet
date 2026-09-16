@@ -407,7 +407,7 @@ extension SwapSceneViewModel {
 
     private func setFromValue(percent: Int, assetData: AssetData) {
         amountInputModel.text = formatter.format(
-            value: assetData.balance.available.multiply(byPercent: percent),
+            value: service.amountForPercent(available: assetData.balance.available, percent: UInt32(percent)),
             decimals: assetData.asset.decimals.asInt,
         )
     }
