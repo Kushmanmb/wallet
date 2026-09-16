@@ -3,7 +3,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Instant;
 
-use gem_tracing::info_with_fields;
+use gem_tracing::{DurationMs, info_with_fields};
 use primitives::{Chain, ValueAccess};
 use reqwest::Client;
 use reqwest::StatusCode;
@@ -153,7 +153,7 @@ impl ProxyRequestService {
             method = request.method.as_str(),
             uri = request.path.as_str(),
             status = status,
-            latency_ms = request.elapsed().as_millis(),
+            latency = DurationMs(request.elapsed()),
         );
 
         if let (Some(ttl), Some(key)) = (cache_ttl, cache_key)
@@ -179,7 +179,7 @@ impl ProxyRequestService {
                     path = &path,
                     ttl_ms = ttl.as_millis(),
                     size_bytes = size,
-                    latency_ms = elapsed.as_millis(),
+                    latency = DurationMs(elapsed),
                 );
             });
         }

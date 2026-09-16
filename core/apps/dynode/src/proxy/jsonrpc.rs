@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::time::{Duration, Instant};
 
-use gem_tracing::info_with_fields;
+use gem_tracing::{DurationMs, info_with_fields};
 use reqwest::Client;
 use reqwest::StatusCode;
 use reqwest::header::HeaderMap;
@@ -101,7 +101,7 @@ impl JsonRpcHandler {
                     uri = request.path.as_str(),
                     rpc_method = call.method.as_str(),
                     status = response_status,
-                    latency_ms = request.elapsed().as_millis(),
+                    latency = DurationMs(request.elapsed()),
                 );
             }
             JsonRpcResult::Error(error_response) => {
@@ -114,7 +114,7 @@ impl JsonRpcHandler {
                     uri = request.path.as_str(),
                     rpc_method = call.method.as_str(),
                     status = response_status,
-                    latency_ms = request.elapsed().as_millis(),
+                    latency = DurationMs(request.elapsed()),
                     error_code = error_response.error.code,
                     error = error_response.error.message.as_str(),
                 );
@@ -227,7 +227,7 @@ impl JsonRpcHandler {
             uri = request.path.as_str(),
             rpc_method = &rpc_methods,
             status = response_status,
-            latency_ms = request.elapsed().as_millis(),
+            latency = DurationMs(request.elapsed()),
         );
 
         Ok(ProxyResponse::with_content_type(response_status, response_body, JSON_CONTENT_TYPE).with_proxy_headers(request.id.as_str(), request.elapsed(), cache_status))

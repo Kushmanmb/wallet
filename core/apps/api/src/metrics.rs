@@ -31,7 +31,7 @@ pub struct Metrics {
 
 impl Metrics {
     pub fn new(providers: &TransactionScanProviders) -> Self {
-        let scan_latency = Family::<ScanLabels, Histogram>::new_with_constructor(|| Histogram::new(exponential_buckets(0.01, 2.0, 12)));
+        let scan_latency = Family::<ScanLabels, Histogram>::new_with_constructor(|| Histogram::new(exponential_buckets(10.0, 2.0, 12)));
         for (provider, kind) in providers
             .addresses
             .iter()
@@ -50,7 +50,7 @@ impl Metrics {
         let mut registry = MetricsRegistry::with_prefix("api");
         registry
             .registry_mut()
-            .register("security_scan_latency_seconds", "Security provider request latency", scan_latency.clone());
+            .register("security_scan_latency_milliseconds", "Security provider request latency", scan_latency.clone());
         Self { registry, scan_latency }
     }
 
@@ -66,7 +66,7 @@ impl Metrics {
                 kind,
                 outcome,
             })
-            .observe(latency.as_secs_f64());
+            .observe(latency.as_secs_f64() * 1000.0);
     }
 }
 
@@ -99,20 +99,20 @@ mod tests {
         let body = response.into_string().unwrap();
         let mut samples: Vec<_> = body
             .lines()
-            .filter(|line| line.starts_with("api_security_scan_latency_seconds_count{") || line.starts_with("api_security_scan_latency_seconds_sum{"))
+            .filter(|line| line.starts_with("api_security_scan_latency_milliseconds_count{") || line.starts_with("api_security_scan_latency_milliseconds_sum{"))
             .collect();
         samples.sort_unstable();
         assert_eq!(
             samples,
             vec![
-                "api_security_scan_latency_seconds_count{provider=\"goplus\",kind=\"address\",outcome=\"clean\"} 1",
-                "api_security_scan_latency_seconds_count{provider=\"hashdit\",kind=\"address\",outcome=\"clean\"} 1",
-                "api_security_scan_latency_seconds_count{provider=\"hashdit\",kind=\"address\",outcome=\"malicious\"} 1",
-                "api_security_scan_latency_seconds_count{provider=\"hashdit\",kind=\"website\",outcome=\"error\"} 1",
-                "api_security_scan_latency_seconds_sum{provider=\"goplus\",kind=\"address\",outcome=\"clean\"} 0.005",
-                "api_security_scan_latency_seconds_sum{provider=\"hashdit\",kind=\"address\",outcome=\"clean\"} 0.125",
-                "api_security_scan_latency_seconds_sum{provider=\"hashdit\",kind=\"address\",outcome=\"malicious\"} 2.0",
-                "api_security_scan_latency_seconds_sum{provider=\"hashdit\",kind=\"website\",outcome=\"error\"} 62.5",
+                "api_security_scan_latency_milliseconds_count{provider=\"goplus\",kind=\"address\",outcome=\"clean\"} 1",
+                "api_security_scan_latency_milliseconds_count{provider=\"hashdit\",kind=\"address\",outcome=\"clean\"} 1",
+                "api_security_scan_latency_milliseconds_count{provider=\"hashdit\",kind=\"address\",outcome=\"malicious\"} 1",
+                "api_security_scan_latency_milliseconds_count{provider=\"hashdit\",kind=\"website\",outcome=\"error\"} 1",
+                "api_security_scan_latency_milliseconds_sum{provider=\"goplus\",kind=\"address\",outcome=\"clean\"} 5.0",
+                "api_security_scan_latency_milliseconds_sum{provider=\"hashdit\",kind=\"address\",outcome=\"clean\"} 125.0",
+                "api_security_scan_latency_milliseconds_sum{provider=\"hashdit\",kind=\"address\",outcome=\"malicious\"} 2000.0",
+                "api_security_scan_latency_milliseconds_sum{provider=\"hashdit\",kind=\"website\",outcome=\"error\"} 62500.0",
             ]
         );
     }

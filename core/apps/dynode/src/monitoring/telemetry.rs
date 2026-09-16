@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use gem_tracing::{error_fields, error_fields_impl, info_with_fields, info_with_fields_impl};
+use gem_tracing::{DurationMs, error_fields, error_fields_impl, info_with_fields, info_with_fields_impl};
 use primitives::{Chain, NodeStatusState};
 
 use crate::config::Url;
@@ -29,7 +29,7 @@ impl NodeTelemetry {
     pub(super) fn log_node_switch(chain: Chain, previous: &Url, switch: &NodeSwitchResult<'_>) {
         let chain = chain.as_ref();
         let observation = &switch.observation;
-        let latency = observation.latency.as_millis();
+        let latency = DurationMs(observation.latency);
         let (latest, current) = match &observation.state {
             NodeStatusState::Healthy(status) => (status.latest_block_number, if status.in_sync { None } else { status.current_block_number }),
             NodeStatusState::Error { .. } => (None, None),
@@ -60,7 +60,7 @@ impl NodeTelemetry {
 }
 
 fn log_observation(message: &'static str, chain: &str, observation: &NodeStatusObservation, sink: impl Fn(&'static str, &[(&str, &dyn Display)])) {
-    let latency = observation.latency.as_millis();
+    let latency = DurationMs(observation.latency);
     match &observation.state {
         NodeStatusState::Healthy(status) => {
             let mut fields = vec![("host", observation.url.host())];
@@ -81,8 +81,15 @@ fn log_observation(message: &'static str, chain: &str, observation: &NodeStatusO
     }
 }
 
-fn emit_event<I>(message: &'static str, chain: &str, fields: I, latency: &u128, latest: Option<u64>, current: Option<u64>, sink: impl Fn(&'static str, &[(&str, &dyn Display)]))
-where
+fn emit_event<I>(
+    message: &'static str,
+    chain: &str,
+    fields: I,
+    latency: &DurationMs,
+    latest: Option<u64>,
+    current: Option<u64>,
+    sink: impl Fn(&'static str, &[(&str, &dyn Display)]),
+) where
     I: IntoIterator<Item = (&'static str, String)>,
 {
     let mut values = Vec::new();
@@ -96,7 +103,7 @@ where
 
     let mut display: Vec<(&str, &dyn Display)> = Vec::with_capacity(values.len() + 2);
     display.push(("chain", &chain));
-    display.push(("latency_ms", latency));
+    display.push(("latency", latency));
     for (key, value) in &values {
         display.push((*key, value));
     }

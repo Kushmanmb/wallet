@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use gem_tracing::info_with_fields;
+use gem_tracing::{DurationMs, info_with_fields};
 use reqwest::StatusCode;
 use serde_json::Value;
 
@@ -40,7 +40,7 @@ pub(super) async fn set_result(call: &JsonRpcCall, result: &Value, ttl: Duration
         method = call.method.as_str(),
         ttl_ms = ttl.as_millis(),
         size_bytes = size,
-        latency_ms = request.elapsed().as_millis(),
+        latency = DurationMs(request.elapsed()),
     );
     Ok(())
 }

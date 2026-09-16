@@ -5,7 +5,7 @@ use std::time::{Duration, Instant};
 
 use cacher::{AccessTokenCacherClient, CacherClient};
 use gem_client::ReqwestClient;
-use gem_tracing::info_with_fields;
+use gem_tracing::{DurationMs, info_with_fields};
 use primitives::{AssetId, ChainAddress, ConfigKey, ConfigParamKey, ScanProvider, ScanSource, ScanTransaction, ScanTransactionPayload, TransactionType, asset_score::AssetRank};
 use reqwest::Url;
 use rocket::futures::future;
@@ -42,7 +42,7 @@ pub struct TransactionScanConfig {
 
 #[derive(Serialize)]
 struct ScanCheck {
-    latency_ms: u128,
+    latency: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     malicious: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -58,7 +58,7 @@ impl ScanCheck {
             Err(error) => (None, None, Some(error.to_string())),
         };
         Self {
-            latency_ms: duration.as_millis(),
+            latency: DurationMs(duration).to_string(),
             malicious,
             reason,
             error,
