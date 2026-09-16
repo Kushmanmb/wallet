@@ -1,5 +1,6 @@
 package com.gemwallet.android.data.services.gemstone.di
 
+import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import android.content.Context
 import com.gemwallet.android.application.device.cases.GetPushEnabled
 import com.gemwallet.android.application.device.cases.GetPushToken
@@ -68,6 +69,7 @@ object DeviceModule {
         preferencesService: GemPreferencesService,
         deviceService: Lazy<GemDeviceService>,
         notificationsService: Lazy<GemNotificationsService>,
+        userConfig: UserConfig,
     ): DevicePushSettings = DevicePushSettings(
         context = context,
         configStore = ConfigStore(context.getSharedPreferences("device-info", Context.MODE_PRIVATE)),
@@ -75,6 +77,7 @@ object DeviceModule {
         preferencesService = preferencesService,
         deviceService = deviceService,
         notificationsService = notificationsService,
+        userConfig = userConfig,
     )
 
     @Provides

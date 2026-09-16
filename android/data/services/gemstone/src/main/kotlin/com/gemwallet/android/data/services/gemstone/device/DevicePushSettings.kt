@@ -1,5 +1,6 @@
 package com.gemwallet.android.data.services.gemstone.device
 
+import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import android.content.Context
 import android.util.Log
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -37,6 +38,7 @@ class DevicePushSettings(
     private val preferencesService: GemPreferencesServiceInterface,
     private val deviceService: Lazy<GemDeviceService>,
     private val notificationsService: Lazy<GemNotificationsService>,
+    private val userConfig: UserConfig,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + ioDispatcher),
 ) : SwitchPushEnabled, GetPushEnabled, GetPushToken, SetPushToken {
@@ -46,6 +48,7 @@ class DevicePushSettings(
     private val pushEnabledState = MutableStateFlow(false)
 
     override suspend fun switchPushEnabled(enabled: Boolean) = withContext(ioDispatcher) {
+        userConfig.stopAskNotifications()
         pushEnabledState.value = runCatchingCancellable {
             notificationsService.get().setEnabled(enabled)
         }.getOrElse {
