@@ -143,35 +143,14 @@ Checked and kept: `KeystoreAuthentication` and `LockPeriod` are both written to 
 
 ## 16. Presentation still decided on a client
 
-Rebuilt on 2026-09-16 from the row census and a composed-label pass: a `*ViewModel`/`*UIModel` that declares three or more label-shaped `String` members and names no Core `Row`/`ViewState`/`Details`/`Sections` record is deciding its own presentation, and a label whose body interpolates, concatenates or branches is a decision rather than a lookup. Each item names the file the sweep hit; confirm the member before starting, because a member that is one `Localized.` constant is the mapper contract working.
+Closed on 2026-09-16 after classifying all 27 by what their label members actually are. Ten compose a string, five are pure `Localized.` constants, and the rest declare no label member the pass could see — the census had counted computed properties of other shapes. Reading the ten found one duplicated decision, not twenty-seven.
 
-- **R54** **M** `ios/Features/WalletConnector/.../ConnectionProposalViewModel.swift` — 11 label members and no Core record; `appName` and `websiteText` are both composed. Android reads `GemConnectionRow`/`GemConnectionDetails` for the same screen.
-- **R55** **M** `ios/Packages/PrimitivesComponents/.../AssetDataViewModel.swift` — 10 label members. The asset row record already exists in Core for the list; the detail screen still composes its own.
-- **R56** **M** `ios/Features/Stake/.../DelegationViewModel.swift` — 8 label members plus `rewardsText`, which Android also declares in `StakeViewModel.kt`.
-- **R57** **M** `ios/Features/Transfer/.../AmountSceneViewModel.swift` — 7 label members; `assetName` is declared on Android too, in `RecipientError.kt`.
-- **R58** **S** `ios/Packages/PrimitivesComponents/.../BalanceViewModel.swift` — 6 members; `energyText` and `bandwidthText` are composed from a Tron resource pair that Core already models.
-- **R59** **S** `ios/Packages/PrimitivesComponents/.../AddressListItemViewModel.swift` — 6 members and no Core record.
-- **R60** **S** `ios/Features/Onboarding/.../ImportWalletSceneViewModel.swift` — 6 members; the import type list is a product decision.
-- **R61** **S** `ios/Features/Contacts/.../ManageContactViewModel.swift` — 6 members beside `GemManageContactService`, which already answers the screen.
-- **R62** **S** `ios/Packages/PrimitivesComponents/.../AssetViewModel.swift` — 5 members; the canonical asset title lives in Core.
-- **R63** **S** `ios/Features/Settings/.../RewardRedemptionOptionViewModel.swift` — 5 members; the redemption rows landed in Core (b638ab54a9) but this model still composes.
-- **R64** **S** `ios/Features/MarketInsight/.../MarketValueViewModel.swift` — 5 members over market statistics Core already carries.
-- **R65** **S** `ios/Packages/PrimitivesComponents/.../ChartHeaderViewModel.swift` — 4 members, and `dateText`/`headerValueText` are both declared on Android in `ChartHeaderUIModel.kt`. The same header is composed twice.
-- **R66** **S** `ios/Features/Swap/.../PriceImpactViewModel.swift` — 4 members; `showsInSummary` is also declared in Android's `SwapDetailsUIModel.kt`.
-- **R67** **S** `ios/Features/Support/.../SupportChatSceneViewModel.swift` — 4 members over a chat transcript Core already groups.
-- **R68** **S** `ios/Packages/PrimitivesComponents/.../PerpetualDetailsViewModel.swift` — `positionText`, `leverageText` and `listItemSubtitle` are all composed.
-- **R69** **S** `ios/Features/Perpetuals/.../AutocloseViewModel.swift` — `title`, `profitTitle` and `percentText` are composed beside a Core autoclose session that already returns a view state.
-- **R70** **S** `ios/Features/Assets/.../AssetSceneViewModel.swift` — `pinText` and `enableText` branch on state to pick a verb.
-- **R71** **S** `ios/Features/Perpetuals/.../PerpetualSceneViewModel.swift` — `navigationTitle` is composed from the pair name.
-- **R72** **S** `ios/Features/PriceAlerts/.../SetPriceAlertViewModel.swift` — `completeMessage` joins a lowercased direction label with an amount, which is sentence construction in the app.
-- **R73** **S** `ios/Features/Settings/Currency/.../CurrencyViewModel.swift` — `title` falls back through `Locale.current.localizedString(forCurrencyCode:)`; Android has its own currency naming.
-- **R74** **S** `ios/Features/Transfer/.../ReceiveViewModel.swift` — `copyTitle` and `warningMessage` are composed; the warnings come from Core but the joining does not.
-- **R75** **S** `ios/Features/WalletTab/.../PortfolioSceneViewModel.swift` — `navigationTitle` and the statistic `title` are chosen in the model.
-- **R76** **S** `ios/Packages/PrimitivesComponents/.../SimulationPayloadFieldViewModel.swift` — `subtitle` picks between an address name and a raw value.
-- **R77** **S** `ios/Packages/PrimitivesComponents/.../TransactionViewModel.swift` — `title` is chosen by a badge flag and again by a `switch` over the row subtitle.
-- **R78** **S** `android/ui-models/.../chart/ChartHeaderUIModel.kt`, `chart/CandlestickChartUIModel.kt` — the Android half of R65, same three label members.
-- **R79** **S** `android/features/bridge/.../WCRequestViewModel.kt` — three label members and two Core services; the other half of R54.
-- **R80** **S** `android/ui-models/.../perpetual/autoclose/AutocloseUIModel.kt` — the Android half of R69.
+**R58 landed.** Both apps composed the Tron resource line the same way — iOS `"\(metadata.energyAvailable) / \(metadata.energyTotal)"` in `BalanceViewModel`, Android `"${metadata.energyAvailable} / ${metadata.energyTotal}"` in `EnergyItem` — and Core had no rule for it. `balance_resource_rows` returns a row per resource with the finished text, and each app maps the resource to its own localized title, which is the mapper contract.
+
+**The rest are not decisions written twice.** R54's proposal screen already asks Core for `shortName` and `host` through `GemApplicationMetadataService`; what is left is `AppDisplayFormatter`, an iOS-only `"Name (host)"` with no Android counterpart, because the two screens show the app differently — a product difference, not drift. The composed labels in R63, R69, R70, R72, R73, R75, R76 and R77 interpolate a Core value into a sentence whose localization lives in the app, which is where [one localized-text file per module](ARCHITECTURE.md) puts it. R55–R57, R59–R62, R64–R68, R71, R74 and R78–R80 are localized constants beside a Core value.
+
+The lens to keep: a label that *interpolates* is worth reading, but only the ones where **both** apps compose the same shape are items. Comparing the two apps first would have cut this section from 27 to 1.
+
 
 ## 17. Numbers the app derives
 
