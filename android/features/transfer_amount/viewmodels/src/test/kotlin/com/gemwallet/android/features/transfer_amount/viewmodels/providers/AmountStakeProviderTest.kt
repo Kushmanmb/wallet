@@ -5,7 +5,6 @@ import com.gemwallet.android.application.stake.cases.GetDelegation
 import com.gemwallet.android.application.stake.cases.GetDelegations
 import com.gemwallet.android.application.stake.cases.GetStakeValidator
 import com.gemwallet.android.application.stake.cases.GetValidators
-import com.gemwallet.android.features.transfer_amount.models.AmountError
 import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.domains.confirm.stakeType
 import com.gemwallet.android.ext.toGem
@@ -108,14 +107,14 @@ class AmountStakeProviderTest {
     }
 
     @Test
-    fun `delegate without validator throws NoValidatorSelected`() = runBlocking {
+    fun `delegate without validator fails fast`() = runBlocking {
         coEvery { getStakeValidator(any(), any()) } returns null
         every { getDelegation(any(), any(), any()) } returns flowOf(null)
         every { getValidators(any()) } returns flowOf(emptyList())
         every { service.stakeValidatorSelection(any(), any()) } returns GemStakeValidatorSelection(recommended = emptyList(), options = emptyList(), validator = null, canSelect = true)
         val provider = makeProvider(AmountParams.Stake.Delegate(asset.id, validatorId = null))
         provider.assetInfo.filterNotNull().first()
-        assertThrows(AmountError.NoValidatorSelected::class.java) {
+        assertThrows(IllegalStateException::class.java) {
             runBlocking { provider.stakeType() }
         }
         Unit

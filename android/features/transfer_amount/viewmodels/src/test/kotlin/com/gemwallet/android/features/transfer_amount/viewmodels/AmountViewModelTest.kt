@@ -1,11 +1,11 @@
 package com.gemwallet.android.features.transfer_amount.viewmodels
 
 import com.gemwallet.android.ext.toGem
+import uniffi.gemstone.GemAmountException
 import uniffi.gemstone.GemRecipient
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.gemwallet.android.features.transfer_amount.models.AmountError
 import com.gemwallet.android.features.transfer_amount.viewmodels.providers.AmountDataProvider
 import com.gemwallet.android.features.transfer_amount.viewmodels.providers.AmountProviderFactory
 import com.gemwallet.android.model.AmountParams
@@ -85,7 +85,7 @@ class AmountViewModelTest {
         viewModel.setAmount("1")
 
         assertEquals(ButtonState.Enabled, viewModel.buttonState.value)
-        assertTrue(viewModel.amountError.value is AmountError.None)
+        assertNull(viewModel.amountError.value)
     }
 
     @Test
@@ -99,7 +99,7 @@ class AmountViewModelTest {
         balanceFlow.value = transferBalance(OneAtom)
         viewModel.setAmount("5")
         assertEquals(ButtonState.Disabled, viewModel.buttonState.value)
-        assertTrue(viewModel.amountError.value is AmountError.InsufficientBalance)
+        assertTrue(viewModel.amountError.value is GemAmountException.InsufficientBalance)
     }
 
     @Test
@@ -108,7 +108,7 @@ class AmountViewModelTest {
 
         assertEquals(confirmInput, viewModel.confirm())
         assertEquals(BigInteger("1500000"), builtAmounts.last().atomicValue)
-        assertTrue(viewModel.amountError.value is AmountError.None)
+        assertNull(viewModel.amountError.value)
     }
 
     @Test
@@ -129,7 +129,7 @@ class AmountViewModelTest {
 
         assertNull(viewModel.confirm())
         assertTrue(builtAmounts.isEmpty())
-        assertTrue(viewModel.amountError.value is AmountError.InsufficientBalance)
+        assertTrue(viewModel.amountError.value is GemAmountException.InsufficientBalance)
     }
 
     @Test

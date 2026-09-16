@@ -33,7 +33,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 [No hand-written twins](ARCHITECTURE.md): a type that only crosses the FFI is used as the uniffi type, and a twin exists only for a type an app persists. Android keeps four twins of exported Core enums, none persisted, and two of them let the app invent outcomes Core never produced.
 
-- **F51** **M** `android/features/transfer_amount/.../models/AmountError.kt` — a twin of `GemAmountErrorDisplay` that is *wider* than Core: `AmountErrorMapper` maps Core's four cases onto it, then `AmountViewModel.onNext` adds `Required` when the text is empty, `Unknown(err.message)` around any build failure, and `AmountStakeProvider`/`AmountEarnProvider` throw `NoValidatorSelected`/`NoDelegationSelected`. iOS reads `entry.error` and `allows_confirm` straight off `GemAmountEntry` and treats `Zero` as silent. Delete the twin and read `GemAmountErrorDisplay` directly; `Required` is Core's `Zero` and `allows_confirm`, `Unknown` is a real failure that belongs in `errorText()` rather than in the amount field, and a missing stake selection is either unreachable from a screen that requires one or a variant Core should name. Copy: [`AmountSceneViewModel.entryError`](../ios/Features/Transfer/Sources/ViewModels/AmountSceneViewModel.swift).
 
 ## 5. Forwarders and façades
 
