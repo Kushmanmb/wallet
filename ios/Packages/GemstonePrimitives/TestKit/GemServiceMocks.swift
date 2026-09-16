@@ -1136,3 +1136,37 @@ public final class GemPerpetualDetailsServiceMock: GemPerpetualDetailsServicePro
         if let syncTransactionsError { throw syncTransactionsError }
     }
 }
+
+public final class GemReceiveServiceMock: GemReceiveServiceProtocol, @unchecked Sendable {
+    public var networkAssetIdsValue: [Gemstone.AssetId] = []
+    public var warningsValue: [GemReceiveWarning] = []
+    public var assetResult: Result<Gemstone.Asset, Error> = .success(Primitives.Asset.mock().toGem())
+    public var enableAssetError: Error?
+
+    public private(set) var enabledAssetIds: [Gemstone.AssetId] = []
+    public private(set) var syncedAssetIds: [[Gemstone.AssetId]] = []
+    public private(set) var requestedAssetIds: [Gemstone.AssetId] = []
+
+    public init() {}
+
+    public func asset(assetId: Gemstone.AssetId) async throws -> Gemstone.Asset {
+        requestedAssetIds.append(assetId)
+        return try assetResult.get()
+    }
+
+    public func enableAsset(walletId _: Gemstone.WalletId, assetId: Gemstone.AssetId) async throws {
+        enabledAssetIds.append(assetId)
+        if let enableAssetError { throw enableAssetError }
+    }
+
+    public func networkAssetIds(assetId: Gemstone.AssetId, associations _: [Gemstone.AssetId], wallet _: Gemstone.Wallet) -> [Gemstone.AssetId] {
+        networkAssetIdsValue.isEmpty ? [assetId] : networkAssetIdsValue
+    }
+
+    public func syncMissingAssets(assetIds: [Gemstone.AssetId]) async throws -> [Gemstone.AssetId] {
+        syncedAssetIds.append(assetIds)
+        return assetIds
+    }
+
+    public func warnings(chain _: Gemstone.Chain) -> [GemReceiveWarning] { warningsValue }
+}

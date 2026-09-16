@@ -33,7 +33,6 @@ Closed on 2026-09-15. Four of the six were the same `try { focusRequester.reques
 
 The logic weight in brackets is methods plus computed properties. 95 of 159 iOS and 45 of 65 Android feature view models have no test file; these are the heaviest.
 
-- **X57** **S** iOS `Transfer/.../ReceiveViewModel.swift` (26).
 - **X59** **S** iOS `WalletTab/.../NetworkAssetsSceneViewModel.swift` (22) and `AssetsResultsSceneViewModel.swift` (20).
 - **X60** **S** iOS `WalletConnector/.../ConnectionsViewModel.swift` (21) — its old test was deleted when the sections moved to Core; the wiring still has none.
 - **X61** **S** iOS `ManageWallets/.../WalletIDetailViewModel.swift` (21).
