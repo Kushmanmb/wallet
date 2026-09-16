@@ -55,9 +55,7 @@ class UserConfig(
     fun showPerpetuals(wallet: Wallet): Boolean = preferencesService.showPerpetuals(wallet.type.toGem(), wallet.chainIds)
 
 
-    fun chartPeriod(): ChartPeriod = preferencesService.getChartPeriod().toPrimitives()
 
-    fun setChartPeriod(period: ChartPeriod) = preferencesService.setChartPeriod(period.toGem())
 
     private val hideBalancesState = MutableStateFlow(preferencesService.isHideBalanceEnabled())
     private val perpetualEnabledState = MutableStateFlow(preferencesService.isPerpetualEnabled())
