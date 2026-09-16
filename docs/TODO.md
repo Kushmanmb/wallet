@@ -286,17 +286,22 @@ The one real copy was `create_eth_client`, identical in `swapper` and `yielder` 
 
 ## 29. Gaps the screen-service map already names
 
-[SERVICES.md](SERVICES.md) says a screen service only one app holds is the next consolidation. These are the rows where the table itself shows one side empty or asymmetric.
+[SERVICES.md](SERVICES.md) says a screen service only one app holds is the next consolidation. These were the rows where the table showed one side empty or asymmetric.
+
+**The last five closed on 2026-09-16, and four of them closed by reading the code the table describes.** Three of the dashes were simply wrong, and the map is now corrected:
+
+- `GemAppUpdateService` (P72) is held by `AppUpdateCoordinator`, which calls `check` and `skip` on it. What Android adds is a delivery channel — Play or the universal APK — which is a distribution fact iOS does not have.
+- `GemAvatarService` (P73) is held by Android's own `WalletImageViewModel` through `WalletAvatarService`, with `setEmoji`, `setNftImage` and `reset`. The avatar surface exists on both apps.
+- `GemNotificationsService` (P74) is held by `DevicePushSettings`, which *is* the push cases `SettingsViewModel` calls.
+- `GemTransactionDetailsService` (P75) is held by `GetTransactionDetailsImpl`, which calls `detail_rows`. The rows and links come from Core on both apps; Android wraps the call in an observed read because its screens observe flows, which is a shape difference, not a second decision.
+- `GemWalletSessionService` (P79) is the same finding as **O35** stated from the table's side, and closes with it.
+
+A dash in the map means "not recorded", never "the other app decides this itself". Re-read the code before listing a row as a gap: a coordinator or an application case holding the service is the Android shape of holding it, and four of these five had a Kotlin file calling the same export all along.
 
 Five were confirmations rather than decisions and are closed. **P78**: both compositions forward identically to `self.banners.banner_content(event, asset)`, so the banner rules have not drifted. **P76**: all three screens ask `getChains(query:)` — the same question. **P77**: iOS's third `GemRecentActivityService` holder does not hold it; `SelectAssetViewModel` takes it in `init` and passes it straight to a child model, the conduit shape O31 and O32 describe. **P80**: the iOS delegation filter was closed with § 19. **P81** was already finished as § 35 — the trace is done and the answer is two.
 
 **P76 turned up something the sweep did not name.** `ImportWalletTypeViewModel` reaches `GemChainService.shared` at file scope while its sibling `ChainListSettingsViewModel` takes the same service in its initializer, and thirteen more iOS sites do the same with `GemAddressService`, `GemAssetConfigService`, `GemApplicationMetadataService` and `GemConnectionService`. SERVICES.md forbids a file-scope `Gem*Service` so a test can substitute it, but every one of these is a stateless rule object with no constructor arguments, so injecting it into fourteen initializers buys no substitutability. That is one decision — does a stateless Core rule object count as a service under § 7, or as a free function — and it should be settled once rather than fourteen times.
 
-- **P72** **M** `GemAppUpdateService` — iOS `AboutUsViewModel` holds it; Android uses Play in-app update instead, so the update decision is made by two different owners. `AppUpdateCoordinator` already maps `upgradeRequired` itself (see F29).
-- **P73** **M** `GemAvatarService` — Android has no avatar surface at all, so wallet avatars are an iOS-only feature rather than a Core one.
-- **P74** **S** `GemNotificationsService` — iOS `NotificationsViewModel` holds it; Android's `SettingsViewModel` uses push cases instead.
-- **P75** **S** `GemTransactionDetailsService` — iOS holds the service, Android reaches the same answer through `GetTransactionDetailsImpl` as an observed read, so the links are built in two places.
-- **P79** **S** `GemWalletSessionService` — iOS spreads it over `RootSceneViewModel` and `NavigationHandler`; Android keeps it in `SessionCoordinator`. The iOS split is what produced O35.
 
 ## 30. App ports that Core could own
 
