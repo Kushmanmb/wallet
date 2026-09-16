@@ -227,12 +227,15 @@ V61–V64 closed on 2026-09-16. Of the five iOS sites said to build the asset im
 
 ## 23. Ownership: a view model holding more than its service
 
-The rule is in [ARCHITECTURE.md](ARCHITECTURE.md) §7 and now covers stores as well as services. The store sweep is clean on both apps; these are the remaining multi-service holders.
+The rule is in [ARCHITECTURE.md](ARCHITECTURE.md) §7 and now covers stores as well as services. The store sweep is clean on both apps.
 
-- **O31** **S** `ios/Features/Contacts/.../ManageContactViewModel.swift` — `GemManageContactServiceProtocol` plus `GemNameServiceProtocol`, held only to pass to `ManageContactAddressViewModel`'s `AddressInputViewModel`. Decide whether a shared component's service is a port or a second service.
-- **O32** **S** `ios/Features/Onboarding/.../ImportWalletViewModel.swift` — `GemWalletServiceProtocol` plus `GemNameServiceProtocol`, the same conduit shape as O31.
-- **O33** **M** `ios/Gem/ViewModels/RootSceneViewModel.swift` — four Core services plus `ViewModelFactory`; the app root, and the one rule inside it (a required update offers only the update action) is unreachable from a test.
-- **O34** **S** `android/features/bridge/.../WCRequestViewModel.kt` — `GemWalletConnectServiceInterface` plus `GemSignMessageServiceInterface`.
+**Four closed on 2026-09-16 by asking whether the second service is ever called.** The rule is one service whose decisions the screen makes; the sweep counted held references instead.
+
+- `ManageContactViewModel` (O31), `ImportWalletViewModel` (O32) and `WCRequestViewModel` (O34) never call their second service. In each, it is a constructor argument forwarded to the child that owns it — `AddressInputViewModel` makes every name decision through `recipient` and `validate_recipient`, and `WCRequest.SignMessage` makes every signing one. `RecipientSceneViewModel` already shows the finished shape: it takes `nameService` as a parameter, hands it to the component and holds one service of its own. The three holders keep the field only because the child is built on demand, which is a lazy-construction detail rather than a second owner.
+- `RootSceneViewModel` (O33) is the composition root, not a screen; wiring every service is what it is for. Its one rule — `release.upgradeRequired` choosing whether an update alert offers Skip — is not a decision the app invents: `upgrade_required` is a field on Core's `Release`, and Android reads the same field into `AppUpdateCoordinator.isRequired` and covers it in `AppUpdateCoordinatorTest`. Each app then renders it with its own store's mechanism, which is the only part Core cannot see. That it is unreachable from an iOS test is **X162**, not an ownership problem.
+
+Count a holder by the services it calls. A reference passed straight through to the object that decides with it is a constructor argument, and the screen that never calls it holds nothing.
+
 - **O35** **S** `ios/Gem/ViewModels/RootSceneViewModel.swift:41` — `currentWallet` reads `viewModelFactory.stores.walletStore.getWallet(id:)` with `try?` on every `body` pass. The session service has the async answer; making it sync would flash onboarding, so this needs a decision, not a rewrite.
 
 ## 24. Chain-specific branches in app code
