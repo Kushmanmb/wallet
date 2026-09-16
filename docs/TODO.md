@@ -345,17 +345,6 @@ X124–X132 are closed on 2026-09-16 after reading every arm the sweep found. Al
 
 The 2026-09-16 pass closed the "outgrown one module" items by measuring what each length was made of. These are the ones where the length is a table *and* rules, so splitting is real work rather than bookkeeping.
 
-- **X133** **L** `core/gemstone/src/services/confirm/rules.rs` (1474 lines) — the confirm rules, the widest rule file in Core and the one two eight-collaborator services share.
-- **X134** **L** `core/gemstone/src/services/perpetual/rules.rs` (1447).
-- **X135** **L** `core/crates/primitives/src/chain_config.rs` (1389) — 102 `ChainConfig` literals plus the config types; the table half is generated-shaped and could be data.
-- **X136** **L** `core/gemstone/src/services/transactions/rules.rs` (1313).
-- **X137** **L** `core/gemstone/src/services/stake/rules.rs` (1272).
-- **X138** **L** `core/gemstone/src/services/amount/rules.rs` (1251).
-- **X139** **L** `core/gemstone/src/services/transfer/rules.rs` (1191).
-- **X140** **L** `core/gemstone/src/services/assets/rules.rs` (1173).
-- **X143** **M** `core/crates/swapper/src/stonfi/provider.rs` (1011), `across/provider.rs` (915), `chainflip/provider.rs` (906) — three swap providers over 900 lines each; compare their shapes before splitting any one.
-- **X144** **M** `core/crates/gem_tron/src/signer/chain_signer.rs` (976) — the widest chain signer.
-- **X145** **M** `core/crates/gem_hypercore/src/provider/perpetual_mapper.rs` (925).
 
 ## 35. The FFI surface neither app names
 
