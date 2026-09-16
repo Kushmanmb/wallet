@@ -58,7 +58,6 @@ T26 closed on 2026-09-16 with one file. `SwapTokenViewModel` decides what the pa
 
 49 of them; X65 already names three.
 
-- **T30** **M** `features/bridge/viewmodels` — the remaining three (`ProposalSceneViewModel`, `ConnectionViewModel`, `ConnectionsViewModel`).
 - **T31** **M** `features/asset_select/viewmodels` — all five.
 - **T33** **S** `features/perpetual/viewmodels` — `PerpetualDetailsViewModel`, `AutocloseViewModel`, `PerpetualsPreviewViewModel`.
 - **T34** **S** `features/wallet-details/viewmodels` — all three.
