@@ -20,6 +20,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GemChainSettingsServiceInterface
+import com.gemwallet.android.features.settings.networks.viewmodels.models.NetworkSectionUIModel
 import uniffi.gemstone.GemChainSettingsSection
 import uniffi.gemstone.GemNodeListSession
 import uniffi.gemstone.GemNodeRow
@@ -109,6 +110,6 @@ class NetworksViewModelTest {
 
     private fun sessionUrls(viewModel: NetworksViewModel): List<String> {
         val rows = viewModel.uiState.value
-        return rows.nodeRows.map { it.node.url }
+        return rows.sections.filterIsInstance<NetworkSectionUIModel.Nodes>().flatMap { it.rows }.map { it.url }
     }
 }

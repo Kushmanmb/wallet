@@ -1,5 +1,7 @@
 package com.gemwallet.android.features.settings.networks.viewmodels
 
+import com.gemwallet.android.features.settings.networks.viewmodels.models.NetworkSectionUIModel
+import com.gemwallet.android.features.settings.networks.viewmodels.models.uiModel
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.gemwallet.android.ui.localization.text
@@ -12,7 +14,6 @@ import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import uniffi.gemstone.GemChainSettingsServiceInterface
 import uniffi.gemstone.GemChainSettingsSection
 import uniffi.gemstone.GemExplorerRow
-import uniffi.gemstone.GemNodeRow
 import uniffi.gemstone.GemNodeListSession
 import uniffi.gemstone.GemNodeStatusState
 import com.gemwallet.android.features.settings.networks.viewmodels.models.NetworksUIState
@@ -164,10 +165,13 @@ class NetworksViewModel @Inject constructor(
         chain = chain,
         chains = availableChains,
         selectChain = selectChain,
-        sections = sections,
-        blockExplorers = explorers,
+        sections = sections.map { section ->
+            when (section) {
+                GemChainSettingsSection.NODES -> NetworkSectionUIModel.Nodes(session?.let { service.nodeRows(it.chain, it.nodes, it.statuses) }.orEmpty().map { it.uiModel(context) })
+                GemChainSettingsSection.EXPLORER -> NetworkSectionUIModel.Explorers(explorers.map { it.uiModel() })
+            }
+        },
         availableAddNode = availableAddNode,
-        nodeRows = session?.let { service.nodeRows(it.chain, it.nodes, it.statuses) }.orEmpty(),
         errorText = errorText,
     )
 }

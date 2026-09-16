@@ -86,14 +86,12 @@ fun GemWalletSubtitle.string(): String = when (this) {
     is GemWalletSubtitle.Address -> value
 }
 
-@Composable
-fun GemAddNodeFailure.string(): String = stringResource(
-    when (this) {
-        GemAddNodeFailure.INVALID_URL -> R.string.errors_invalid_url
-        GemAddNodeFailure.INVALID_NETWORK_ID -> R.string.errors_invalid_network_id
-        GemAddNodeFailure.UNAVAILABLE -> R.string.errors_error_occurred
-    }
-)
+@StringRes
+fun GemAddNodeFailure.stringRes(): Int = when (this) {
+    GemAddNodeFailure.INVALID_URL -> R.string.errors_invalid_url
+    GemAddNodeFailure.INVALID_NETWORK_ID -> R.string.errors_invalid_network_id
+    GemAddNodeFailure.UNAVAILABLE -> R.string.errors_error_occurred
+}
 
 @Composable
 fun GemDelegationStatus.stateText(): String = stringResource(
