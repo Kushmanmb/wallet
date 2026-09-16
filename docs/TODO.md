@@ -33,7 +33,6 @@ Closed on 2026-09-15. Four of the six were the same `try { focusRequester.reques
 
 The logic weight in brackets is methods plus computed properties. 95 of 159 iOS and 45 of 65 Android feature view models have no test file; these are the heaviest.
 
-- **X64** **S** iOS `Support/.../SupportChatSceneViewModel.swift` (16) and `SupportMessageBubbleViewModel.swift` (19).
 
 ## 11. Missing tests
 
