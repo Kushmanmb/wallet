@@ -288,24 +288,16 @@ N10 closed on 2026-09-16, and the sweep was right that the rule was written twic
 
 ## 26. Records that hand the app a bare number
 
-Swept on 2026-09-16 over every `#[uniffi::Record]` in `core/gemstone/src` for `f64`/`i32`/`u32`/`i64`/`u64` fields whose name is a rendered quantity, keeping only the records an app actually names. The contract is [the row carries the finished value](ARCHITECTURE.md): a record that crosses with a raw `f64` makes both apps decide the precision, the sign and the unit. The count is how often the app source names the record.
+Closed on 2026-09-16 after reading every one. The lens asked the wrong question: it matched on the *field* being a number, when the violation is the app *deciding* something from it. Three classes came back, none of them a decision written twice.
 
-- **F32** **S** `GemFormattedNumber.value` (`formatted_number.rs`, 19 app mentions) — the record that exists to carry finished text still exposes the raw value beside it; confirm every reader takes the text.
-- **F33** **S** `GemRewardsState.invite_reward_points` (`rewards/model.rs`, 17) — iOS bolds it with `String(_:).boldMarkdown()` inside the invite description.
-- **F34** **S** `GemAutocloseField.price` and `.original_price` (`perpetual/autoclose.rs`, 15) — both apps format these through their own perpetual formatter.
-- **F35** **M** `ChainConfig.account_activation_fee`, `.token_activation_fee`, `.minimum_account_balance` (`chain.rs`, 12) — activation fees are rendered from raw numbers in both apps.
-- **F36** **S** `GemBannerContext.asset_rank_score` (`banner/model.rs`, 6) — a score that decides whether a banner shows, exposed as a number rather than the decision.
-- **F37** **S** `GemPriceUpdate.price`, `.price_usd`, `.price_change_percentage_24h` (`price/model.rs`, 4).
-- **F38** **S** `GemPriceAlertSession.current_price` (`price_alert/session.rs`, 4) — the session already returns suggestions; the price beside them is formatted twice.
-- **F39** **S** `GemPerpetualTransferData.price` and `.leverage` (`perpetual/model.rs`, 4).
-- **F40** **S** `GemPerpetualChartLayout.price_low` / `.price_high` (`perpetual/model.rs`, 4) — the chart axis labels are built from these.
-- **F42** **S** `GemAssetDetailsState.price_alerts_count` (`assets/model.rs`, 4) — a count the app turns into a badge string.
-- **F43** **S** `GemAssetDetailsInput.price` (`assets/model.rs`, 4).
-- **F44** **S** `GemPerpetualAutoclose.take_profit` / `.stop_loss` (`perpetual/model.rs`, 3).
-- **F45** **S** `GemFiatQuoteRequest.amount` (`fiat/session.rs`, 3).
-- **F46** **S** `GemPerpetualDefaults.leverage`, `.take_profit_percent`, `.stop_loss_percent` (`perpetual/rules.rs`, 2) — defaults that both apps render as text.
-- **F47** **S** `GemBalanceValue.amount` (`balance/model.rs`, 2).
-- **F48** **S** `GemChart.base_value` (`chart/mod.rs`, 1) — the chart baseline.
+**Inputs, not outputs.** `GemAssetDetailsInput.price`, `GemFiatQuoteRequest.amount`, `GemPerpetualTransferData.price`/`leverage`, `GemAutocloseField.price`/`original_price`, `GemPriceAlertSession.current_price` and `GemBannerContext.asset_rank_score` are all built *by* the app and handed *to* Core. A number going in is the app telling Core what the user did.
+
+**Values the app must render with its own locale.** `GemFormattedNumber.value` is carried beside the finished text on purpose — both apps format it through their own number formatter, which is the divergence X158 names. `GemDurationPart.value` is the same shape and symmetric on both apps. `GemRewardsState.invite_reward_points` is interpolated into a sentence whose localization lives in the app, not in Core's `localizer`.
+
+**Values nothing renders.** `GemBalanceValue.amount` is written to the database by a store adapter, `GemPriceUpdate` is a store write, and `ChainConfig`'s activation fees and `GemChart.base_value` are named by no app source at all.
+
+The one real hit was `GemPerpetualChartLayout`, and not for its numbers: `price_low`/`price_high` are axis bounds Core is right to carry, but both apps derived the candle's direction from `close - open` themselves. That is D19/D25 and it landed — see § 17.
+
 
 ## 27. Screens with no Core service
 
