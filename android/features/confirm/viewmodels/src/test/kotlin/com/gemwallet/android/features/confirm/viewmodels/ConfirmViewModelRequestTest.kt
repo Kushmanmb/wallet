@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.confirm.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.session.cases.GetSession
@@ -112,5 +113,6 @@ class ConfirmViewModelRequestTest {
         buildConfirmProperties = mockk(relaxed = true),
         confirmService = confirmService,
         savedStateHandle = handle,
+        context = mockk<Context> { every { getString(any()) } returns "Error"; every { getString(any(), *anyVararg()) } returns "Error" },
     )
 }

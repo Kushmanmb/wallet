@@ -1,5 +1,9 @@
 package com.gemwallet.android.features.confirm.viewmodels
 
+import com.gemwallet.android.ui.components.InfoSheetEntity
+import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetRequest
+import uniffi.gemstone.GemAcquireAssetFlow
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.domains.confirm.pack
@@ -73,10 +77,26 @@ class ConfirmViewModelNetworkFeeSheetTest {
         assertTrue(viewModel.isNetworkFeeSheetVisible.first { it })
     }
 
+    @Test
+    fun loadErrorCarriesItsTextAndInfoSheet() = runTest(testDispatcher) {
+        val viewModel = viewModel()
+        runCurrent()
+
+        val error = requireNotNull(viewModel.loadError.first { it != null })
+        assertEquals("Error", error.text)
+        assertTrue(error.info is InfoSheetEntity.NetworkFeeRequiredInfo)
+
+        viewModel.acquire(asset, 10)
+        assertEquals(AcquireAssetRequest(asset = asset, buyAmount = 10, offersOptions = false), viewModel.acquireRequest.value)
+        viewModel.dismissAcquire()
+        assertEquals(null, viewModel.acquireRequest.value)
+    }
+
     private fun viewModel(): ConfirmViewModel {
         val transfer = mockGemTransferData(asset = asset, value = BigInteger.TEN)
         every { confirmation.getCurrency() } returns Currency.USD.toGem()
         every { confirmation.insufficientNetworkFeeBuyAmount() } returns 10
+        every { confirmation.acquireAssetFlow(any()) } returns GemAcquireAssetFlow.FIAT
         every { confirmService.confirmation(any(), transfer, any()) } returns confirmation
         every { confirmation.screen() } returns mockGemConfirmScreen()
         coEvery { confirmation.state() } returns mockGemConfirmLoad(asset)
@@ -92,6 +112,7 @@ class ConfirmViewModelNetworkFeeSheetTest {
             buildConfirmProperties = mockk(relaxed = true),
             confirmService = confirmService,
             savedStateHandle = SavedStateHandle(mapOf(RouteArgument.Params.key to requireNotNull(transfer.pack()))),
+            context = mockk<Context> { every { getString(any()) } returns "Error"; every { getString(any(), *anyVararg()) } returns "Error" },
         )
     }
 }

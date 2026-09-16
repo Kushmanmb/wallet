@@ -99,9 +99,10 @@ fun ConfirmScreen(
     val amountModel by viewModel.amountUIModel.collectAsStateWithLifecycle()
     val transactionProperties by viewModel.transactionProperties.collectAsStateWithLifecycle()
     val feeModel by viewModel.feeUIModel.collectAsStateWithLifecycle()
+    val loadError by viewModel.loadError.collectAsStateWithLifecycle()
+    val acquireRequest by viewModel.acquireRequest.collectAsStateWithLifecycle()
     val feeValue by viewModel.feeValue.collectAsStateWithLifecycle()
     val screen by viewModel.screen.collectAsStateWithLifecycle()
-    val networkFeeBuyAmount by viewModel.networkFeeBuyAmount.collectAsStateWithLifecycle()
     val feeAssets by viewModel.feeAssets.collectAsStateWithLifecycle()
     val feeAsset by viewModel.feeAsset.collectAsStateWithLifecycle()
     val feeSelection by viewModel.feeSelection.collectAsStateWithLifecycle()
@@ -109,7 +110,6 @@ fun ConfirmScreen(
     val detailElements by viewModel.detailElements.collectAsStateWithLifecycle()
     val payloadAddressNames by viewModel.payloadAddressNames.collectAsStateWithLifecycle()
     val button by viewModel.button.collectAsStateWithLifecycle()
-    val assetPrice by viewModel.assetPrice.collectAsStateWithLifecycle()
     val title by viewModel.title.collectAsStateWithLifecycle()
     val isExternalRequest by viewModel.isExternalRequest.collectAsStateWithLifecycle()
     val isPayment by viewModel.isPaymentRequest.collectAsStateWithLifecycle()
@@ -267,13 +267,11 @@ fun ConfirmScreen(
             }
             item {
                 ConfirmErrorInfo(
-                    failure = screen.failure,
-                    fee = feeModel as? FeeUIModel.FeeInfo,
+                    error = loadError,
+                    acquireRequest = acquireRequest,
                     isShowBottomSheetInfo = isShowBottomSheetInfo,
                     onDismissBottomSheetInfo = viewModel::dismissNetworkFeeSheet,
-                    assetPrice = assetPrice,
-                    acquireFlow = viewModel::acquireFlow,
-                    networkFeeBuyAmount = networkFeeBuyAmount,
+                    onDismissAcquire = viewModel::dismissAcquire,
                     onAcquireAsset = onAcquireAsset,
                 )
             }
