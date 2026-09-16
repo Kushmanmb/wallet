@@ -242,15 +242,10 @@ C10 landed on 2026-09-16. The network-assets screen split pinned from unpinned w
 
 ## 21. Time decided on a client
 
-- **P63** **S** `ios/Features/Support/Sources/Types/SupportChatDayBuilder.swift:17` and `ios/Packages/PrimitivesComponents/Sources/Types/DateSectionBuilder.swift:25` — two separate `Calendar.current.startOfDay` groupings on iOS; Android groups the same transcript and the same activity list its own way.
+Seven closed on 2026-09-16. **P71 and V65 were backwards**: iOS already reads both socket numbers from Core — `GemConnectionService` conforms to `Reconnectable` retroactively, and the protocol exists so `SwiftHTTPClient` can stay Gemstone-free, which is the pattern rather than a gap. **P70** is inside a `@Preview`. **P68/P69** stamp `updatedAt` while writing a row, which is the store adapter's job on both apps. **P63** groups a transcript and an activity list by *local* day through `Calendar.current`, and a local day depends on the device's calendar and time zone — that is platform territory, and Core has no day-bucketing rule to move to. **P66/P67** are a `dateComponents` helper and an epoch default for a missing `updatedAt`.
+
 - **P64** **S** `ios/Features/Stake/.../StakeSceneViewModel.swift:121` — the unlock date is built by adding `service.lockTimeSeconds(chain:)` to now; Core has the seconds and could carry the date.
 - **P65** **S** `ios/Features/Support/.../SupportChatSceneViewModel.swift:51` — the sync cursor is derived from the last agent message's timestamp in the model.
-- **P66** **S** `ios/Packages/GemstonePrimitives/Sources/Extensions/Date+GemstonePrimitives.swift:9` — a `dateComponents` helper the app owns.
-- **P67** **S** `ios/Packages/Store/Sources/Models/PriceRecord.swift:120` — a missing `updatedAt` becomes the epoch, which is a decision about staleness.
-- **P68** **S** `android/data/services/gemstone/.../assets/RecentAssetsService.kt:39`, `.../stores/BalanceStore.kt:34`, `.../entities/DbTransaction.kt:68`, `.../entities/DbPerpetualPosition.kt:120` — four separate `System.currentTimeMillis()` stamps written while saving, where Core decides freshness elsewhere.
-- **P69** **S** `android/data/services/store/.../TransactionsDao.kt:164,189` — `updatedAt` defaulted at the DAO.
-- **P70** **S** `android/ui/.../list_item/transaction/TransactionItem.kt:185,217` — `createdAt` stamped inside a UI item.
-- **P71** **S** `android/data/services/gemstone/.../stream/WebSocketConnection.kt:45` reads `pingIntervalMilliseconds()` from Core — confirm the iOS socket does the same rather than using its own interval.
 
 ## 22. URLs built in the app
 
@@ -380,7 +375,6 @@ The one real copy was `create_eth_client`, identical in `swapper` and `yielder` 
 
 ## 30. App ports that Core could own
 
-- **V65** **S** `ios/Packages/FeatureServices/.../Reconnectable.swift` — `reconnectDelayMilliseconds` and `pingIntervalMilliseconds` are a Swift protocol; Android reads both from Core (`WebSocketConnection.kt:45`). The iOS socket should read the same numbers.
 - **V66** **S** `ios/Packages/.../ConnectionComponentMonitoring.swift` and `ConnectivityMonitor.swift` — two single-method protocols over connection health, beside `GemConnectionService`.
 - **V67** **S** `ios/Packages/.../WebSocketRequestProvider.swift` — one method, building the authenticated socket request that Core's device auth already signs.
 - **V68** **S** `ios/Packages/Store/Sources/BindableQuery.swift` — a one-method protocol behind every observed read on iOS; Android has narrow cases instead. Worth one decision about which shape both apps use.
