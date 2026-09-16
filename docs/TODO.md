@@ -216,12 +216,10 @@ Seven closed on 2026-09-16. **P71 and V65 were backwards**: iOS already reads bo
 
 ## 22. URLs built in the app
 
+V61–V64 closed on 2026-09-16. Of the five iOS sites said to build the asset image URL, four are `#Preview` literals and test fixtures; the only production one is `WidgetPriceService`, which builds it by hand because the widget cannot import Gemstone — that is X159, not a separate item. V62's five "hand-built URLs" are three `UIApplication.openSettingsURLString` calls and a `URL(string:)` around a URL Core already supplied. V63 and V64 are a URI opener and two composables opening a link.
+
 - **V59** **M** `ios/Packages/GemstonePrimitives/Sources/Config.swift` (4 URLs) against `android/gemcore/.../AppUrl.kt` and `android/gemcore/.../ext/UpdateUrl.kt` — the app's own URLs are listed twice, once per platform.
 - **V60** **S** `ios/Packages/PrimitivesComponents/.../DeepLinkViewModel.swift` (5 URLs) — deep link targets built in a view model while Core owns `Deeplink::to_gem_url`.
-- **V61** **S** `ios/GemPriceWidget/Services/WidgetPriceService.swift:82`, `ios/Packages/Components/Sources/AssetImageView.swift`, `.../Grid/GridPosterView.swift`, `.../Lists/ListAssetItemView.swift`, `ios/Packages/GemstonePrimitives/.../GemImage+GemstonePrimitives.swift` — the asset image URL is assembled from `assets.gemwallet.com/blockchains/<chain>/assets/<tokenId>` in five places on iOS.
-- **V62** **S** `ios/Features/NFT/.../CollectibleViewModel.swift`, `ios/Features/Transfer/.../TransferDataViewModel.swift`, `ios/Features/WalletConnector/.../ConnectionView.swift`, `ios/Features/Settings/.../PreferencesScene.swift`, `ios/Features/QRScanner/.../QRScannerScene.swift` — one hand-built URL each.
-- **V63** **S** `android/ui/.../UriHandlerExt.kt` and `android/ui/.../Markdown.kt` — URL handling helpers with no Core counterpart.
-- **V64** **S** `android/features/settings/networks/.../NodeItem.kt` and `android/features/update_app/.../InAppUpdateBanner.kt` — URLs built in composables.
 
 ## 23. Ownership: a view model holding more than its service
 
@@ -235,15 +233,15 @@ The rule is in [ARCHITECTURE.md](ARCHITECTURE.md) §7 and now covers stores as w
 
 ## 24. Chain-specific branches in app code
 
+N11, N12 and N13 closed on 2026-09-16 as the mapper contract working. `ChainImage`'s 14 cases and the swap provider's `hyperliquid` case are icon maps, which is the style half both apps are supposed to own. N11 is not a chain branch at all — the lens matched the word: `case .bitcoin` there is a variant of Core's `GemBannerIcon`, mapped to an image like every other variant beside it.
+
 N10 closed on 2026-09-16, and the sweep was right that the rule was written twice with a divergence — iOS refused a multicoin wallet with no Ethereum account, Android fell back to the first account, so a malformed account list would have produced a different id on each platform. Neither is on the live path: Core's `GemWalletService` creates wallets now, iOS's `WalletId.from(type:accounts:)` had only test callers and is deleted, and Android's `WalletIdGenerator` is reached only by `Migration_63_64`, whose behaviour must stay frozen because it has already run on installed databases. A migration is the one place a rule does not get consolidated.
 
-- **N11** **S** `ios/Packages/PrimitivesComponents/.../BannerViewModel.swift:41` — a `case .bitcoin` branch decides banner behaviour.
-- **N12** **S** `ios/Packages/PrimitivesComponents/Sources/Types/ChainImage.swift` — 14 chain cases; confirm against Android's chain icon map, which the mapper contract allows, and close if it matches.
-- **N13** **S** `ios/Packages/PrimitivesComponents/.../SwapProviderType+Gemstone.swift:25` — a lone `case .hyperliquid` beside the provider icon map.
 
 ## 25. The About screen, decided twice
 
-- **L15** **S** `ios/Features/Settings/.../AboutUsScene.swift:36` and `android/features/settings/aboutus/.../AboutUsScreen.kt:46` — the label-map fingerprint pairs these at 0.83 on `community`, `privacypolicy`, `termsofservice`, `version`, `website`. The rows of the About screen, their order and their links are chosen in each app.
+Closed on 2026-09-16. Both apps already `switch` over Core's `GemAboutRow` and Android reads `aboutSections()` — which is exactly why the label-map fingerprint paired them at 0.83. Matching variant sets is what the mapper contract *looks like*; the fingerprint cannot tell a shared Core enum from a decision made twice, so a pair is only an item when neither side names a Core type.
+
 
 ## 26. Records that hand the app a bare number
 
