@@ -277,13 +277,7 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
     }
 
     public func validatorRow(validator: Gemstone.DelegationValidator) -> Gemstone.GemValidatorRow {
-        Gemstone.GemValidatorRow(
-            validator: validator,
-            name: validator.name,
-            imageUrl: "https://assets.gemwallet.com/validator.png",
-            placeholder: String(validator.name.prefix(1)),
-            provider: .none,
-        )
+        .mock(validator: validator)
     }
 
     public func validatorRows(validators: [Gemstone.DelegationValidator]) -> [Gemstone.GemValidatorRow] {

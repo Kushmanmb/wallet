@@ -44,16 +44,7 @@ pub fn coins(ids: &[AssetId], assets: Vec<AssetBasic>, currency: &str, size: Gem
 mod tests {
     use super::*;
     use crate::formatted_number::{GemNumberDisplay, GemValueTone};
-    use primitives::{Asset, AssetProperties, AssetScore, Price, PriceProvider};
-
-    fn asset(chain: Chain, price: Option<f64>) -> AssetBasic {
-        AssetBasic {
-            asset: Asset::from_chain(chain),
-            properties: AssetProperties::default(AssetId::from_chain(chain)),
-            score: AssetScore::default(),
-            price: price.map(|value| Price::new(value, -3.5, chrono::Utc::now(), PriceProvider::Coingecko)),
-        }
-    }
+    use primitives::Asset;
 
     #[test]
     fn the_small_widget_shows_one_coin_and_the_large_five() {
@@ -65,7 +56,11 @@ mod tests {
     #[test]
     fn coins_keep_the_widget_order_and_skip_an_asset_without_a_price() {
         let ids = coin_ids(GemWidgetSize::Medium);
-        let assets = vec![asset(Chain::Solana, Some(150.0)), asset(Chain::Ethereum, None), asset(Chain::Bitcoin, Some(69_000.0))];
+        let assets = vec![
+            AssetBasic::mock_with_price(Chain::Solana, 150.0, -3.5),
+            Asset::from_chain(Chain::Ethereum).as_basic_primitive(),
+            AssetBasic::mock_with_price(Chain::Bitcoin, 69_000.0, -3.5),
+        ];
         let coins = coins(&ids, assets, "USD", GemWidgetSize::Medium);
         assert_eq!(coins.iter().map(|coin| coin.symbol.as_str()).collect::<Vec<_>>(), vec!["BTC", "SOL"]);
         assert_eq!(coins[0].change.tone, GemValueTone::Negative);
@@ -75,7 +70,7 @@ mod tests {
     #[test]
     fn the_small_widget_abbreviates_its_price() {
         let ids = coin_ids(GemWidgetSize::Small);
-        let coins = coins(&ids, vec![asset(Chain::Bitcoin, Some(690_000.0))], "USD", GemWidgetSize::Small);
+        let coins = coins(&ids, vec![AssetBasic::mock_with_price(Chain::Bitcoin, 690_000.0, -3.5)], "USD", GemWidgetSize::Small);
         assert!(matches!(coins[0].price.display, GemNumberDisplay::Abbreviated));
     }
 }

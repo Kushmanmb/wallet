@@ -43,7 +43,7 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
     }
 
     public func screen() -> GemConfirmScreen {
-        GemConfirmScreen(phase: .loading, hasCriticalWarning: false, failure: nil)
+        .mock()
     }
 
     public func state() async throws -> GemConfirmLoad {

@@ -1,6 +1,8 @@
 package com.gemwallet.android.features.settings.networks.viewmodels
 
 import android.content.Context
+import com.gemwallet.android.testkit.mockGemNodeSelection
+import com.gemwallet.android.testkit.mockGemNodeStatusState
 import com.wallet.core.primitives.Chain
 import io.mockk.coEvery
 import io.mockk.every
@@ -27,8 +29,6 @@ import uniffi.gemstone.GemNodeRow
 import uniffi.gemstone.GemNodeRowTitle
 import uniffi.gemstone.GemNodeSelection
 import uniffi.gemstone.GemNodeStatusState
-import uniffi.gemstone.Latency
-import uniffi.gemstone.LatencyType
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NetworksViewModelTest {
@@ -45,10 +45,6 @@ class NetworksViewModelTest {
         models.clear()
         Dispatchers.resetMain()
     }
-
-    private fun node(url: String) = GemNodeSelection(url = url, host = url, isSelected = false, gemNodeFlag = null)
-
-    private fun reachable(block: ULong) = GemNodeStatusState.Result(block, Latency(LatencyType.FAST, 10.0))
 
     private fun service(
         nodesByCall: List<List<GemNodeSelection>>,
@@ -80,8 +76,8 @@ class NetworksViewModelTest {
     @Test
     fun `selecting a chain loads its nodes and a status for each`() = runTest(dispatcher) {
         val service = service(
-            nodesByCall = listOf(listOf(node("a"), node("b"))),
-            statuses = mapOf("a" to reachable(10UL), "b" to reachable(11UL)),
+            nodesByCall = listOf(listOf(mockGemNodeSelection("a"), mockGemNodeSelection("b"))),
+            statuses = mapOf("a" to mockGemNodeStatusState(10UL), "b" to mockGemNodeStatusState(11UL)),
         )
         val viewModel = NetworksViewModel(service, dispatcher, mockk<Context> { every { getString(any()) } returns "Error"; every { getString(any(), *anyVararg()) } returns "Error" }).also { models.add(it) }
 
@@ -95,8 +91,8 @@ class NetworksViewModelTest {
     @Test
     fun `deleting a node drops the status it had`() = runTest(dispatcher) {
         val service = service(
-            nodesByCall = listOf(listOf(node("a"), node("b")), listOf(node("a"))),
-            statuses = mapOf("a" to reachable(10UL), "b" to reachable(11UL)),
+            nodesByCall = listOf(listOf(mockGemNodeSelection("a"), mockGemNodeSelection("b")), listOf(mockGemNodeSelection("a"))),
+            statuses = mapOf("a" to mockGemNodeStatusState(10UL), "b" to mockGemNodeStatusState(11UL)),
         )
         val viewModel = NetworksViewModel(service, dispatcher, mockk<Context> { every { getString(any()) } returns "Error"; every { getString(any(), *anyVararg()) } returns "Error" }).also { models.add(it) }
         viewModel.onSelectedChain(Chain.Ethereum)

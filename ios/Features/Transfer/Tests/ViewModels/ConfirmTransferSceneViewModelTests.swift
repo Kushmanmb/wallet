@@ -9,7 +9,6 @@ import struct Gemstone.GemBalanceRequirement
 import enum Gemstone.GemConfirmRowContent
 import enum Gemstone.GemConfirmError
 import struct Gemstone.GemConfirmFailure
-import struct Gemstone.GemConfirmSimulation
 import struct Gemstone.GemFeeRate
 import struct Gemstone.GemSimulationWarningRow
 import protocol Gemstone.GemNameServiceProtocol
@@ -27,10 +26,8 @@ import PrimitivesTestKit
 import Store
 import Testing
 @testable import Transfer
-import TransferTestKit
+@testable import TransferTestKit
 import struct Gemstone.SimulationPayloadField
-import struct Gemstone.SimulationWarning
-import struct Gemstone.SimulationWarningApproval
 
 @MainActor
 struct ConfirmTransferSceneViewModelTests {
@@ -239,7 +236,7 @@ struct ConfirmTransferSceneViewModelTests {
         await model.load()
         #expect(model.state.preload?.confirmData.feeRates.map(\.priority) == priorities)
 
-        model.state.simulation = .mock(warnings: [GemSimulationWarningRow(kind: .externallyOwnedSpender, severity: .warning, message: nil)])
+        model.state.simulation = .mock(warnings: [.mock(kind: .externallyOwnedSpender)])
         model.feeSelection = .priority(priority: .fast)
         await model.load()
 
@@ -249,8 +246,6 @@ struct ConfirmTransferSceneViewModelTests {
 
     @Test
     func reloadKeepsTheLoadedFeeRowUntilTheConfirmationAnswers() async {
-        let data = GemTransferData.mock()
-        let wallet = Wallet.mock(accounts: [.mock(chain: data.chain)])
         let confirmationMock = GemConfirmationMock(
             state: .mock(preload: nil),
             load: .success(.mock(preload: .mock(confirmData: .mock(feeRates: [
@@ -258,12 +253,7 @@ struct ConfirmTransferSceneViewModelTests {
                 GemFeeRate(priority: .fast, gasPriceType: .regular(gasPrice: 30)),
             ])))),
         )
-        let model = ConfirmTransferSceneViewModel(
-            request: ConfirmTransferRequest(data: data, simulation: nil),
-            wallet: wallet,
-            confirmation: confirmationMock,
-            onComplete: nil,
-        )
+        let model = ConfirmTransferSceneViewModel.mock(confirmation: confirmationMock)
         await model.load()
 
         await confirmation { reloading in
@@ -284,18 +274,11 @@ struct ConfirmTransferSceneViewModelTests {
 
     @Test
     func firstLoadShowsTheScreenBeforeThePreloadArrives() async {
-        let data = GemTransferData.mock()
-        let wallet = Wallet.mock(accounts: [.mock(chain: data.chain)])
         let confirmationMock = GemConfirmationMock(
             state: .mock(addressName: .mock(name: "vitalik.eth"), preload: nil),
             load: .success(.mock(addressName: .mock(name: "vitalik.eth"))),
         )
-        let model = ConfirmTransferSceneViewModel(
-            request: ConfirmTransferRequest(data: data, simulation: nil),
-            wallet: wallet,
-            confirmation: confirmationMock,
-            onComplete: nil,
-        )
+        let model = ConfirmTransferSceneViewModel.mock(confirmation: confirmationMock)
 
         await confirmation { preloading in
             confirmationMock.onLoad = {
@@ -436,16 +419,12 @@ struct ConfirmTransferSceneViewModelTests {
         let model = ConfirmTransferSceneViewModel.mock(
             data: .mock(type: .generic(asset: .mockEthereum(), metadata: .mock(), extra: .mock(to: "0x1111111111111111111111111111111111111111"))),
             simulation: .mock(
-                warnings: [SimulationWarning(
-                    severity: .warning,
-                    warning: .tokenApproval(SimulationWarningApproval(assetId: AssetId(chain: .ethereum, tokenId: "0x1111111111111111111111111111111111111111").identifier, value: nil)),
-                    message: nil,
-                )],
+                warnings: [.mock(warning: .tokenApproval(.mock(assetId: AssetId(chain: .ethereum, tokenId: "0x1111111111111111111111111111111111111111"))))],
                 payload: payload,
             ),
             load: .success(.mock(
-                simulation: GemConfirmSimulation(primaryFields: payload, secondaryFields: [], header: nil, balanceChanges: [], hasCriticalWarning: false),
-                warnings: [GemSimulationWarningRow(kind: .unlimitedApproval, severity: .warning, message: nil)],
+                simulation: .mock(primaryFields: payload),
+                warnings: [.mock()],
             )),
             rows: { _ in
                 [
@@ -474,9 +453,9 @@ struct ConfirmTransferSceneViewModelTests {
     @Test
     func buttonDisabledWithCriticalWarnings() async {
         let model = ConfirmTransferSceneViewModel.mock(
-            simulation: .mock(warnings: [SimulationWarning(severity: .critical, warning: .suspiciousSpender, message: nil)]),
+            simulation: .mock(warnings: [.mock(severity: .critical, warning: .suspiciousSpender)]),
             load: .success(.mock(
-                simulation: GemConfirmSimulation(primaryFields: [], secondaryFields: [], header: nil, balanceChanges: [], hasCriticalWarning: true),
+                simulation: .mock(hasCriticalWarning: true),
             )),
         )
         await model.load()
@@ -493,16 +472,8 @@ struct ConfirmTransferSceneViewModelTests {
     func simulationWarningsHideBoundedApprovalsAndKeepExternallyOwnedSpenderWarnings() {
         let model = ConfirmTransferSceneViewModel.mock(
             simulation: .mock(warnings: [
-                SimulationWarning(
-                    severity: .warning,
-                    warning: .permitApproval(SimulationWarningApproval(assetId: AssetId(chain: .ethereum, tokenId: "0x123").identifier, value: 1000)),
-                    message: nil,
-                ),
-                SimulationWarning(
-                    severity: .warning,
-                    warning: .externallyOwnedSpender,
-                    message: nil,
-                ),
+                .mock(warning: .permitApproval(.mock(value: 1000))),
+                .mock(warning: .externallyOwnedSpender),
             ]),
         )
 
@@ -514,16 +485,8 @@ struct ConfirmTransferSceneViewModelTests {
     func simulationWarningsPassThroughValidationWarnings() {
         let model = ConfirmTransferSceneViewModel.mock(
             simulation: .mock(warnings: [
-                SimulationWarning(
-                    severity: .warning,
-                    warning: .permitApproval(SimulationWarningApproval(assetId: AssetId(chain: .ethereum, tokenId: "0x123").identifier, value: 1000)),
-                    message: nil,
-                ),
-                SimulationWarning(
-                    severity: .critical,
-                    warning: .validationError,
-                    message: "Unable to verify spender is a contract",
-                ),
+                .mock(warning: .permitApproval(.mock(value: 1000))),
+                .mock(severity: .critical, warning: .validationError, message: "Unable to verify spender is a contract"),
             ]),
         )
 
@@ -673,7 +636,7 @@ struct ConfirmTransferSceneViewModelTests {
 
         let withPrice = InfoSheetModelFactory.create(from: .insufficientNetworkFee(
             asset, image: image, requirement: BalanceRequirement(required: required, available: .zero, shortfall: required),
-            price: Price(price: 2000, priceChangePercentage24h: 0, updatedAt: Date()),
+            price: .mock(price: 2000),
             currency: "USD", button: .action(title: "", action: {}),
         ))
         let withoutPrice = InfoSheetModelFactory.create(from: .insufficientNetworkFee(

@@ -6,14 +6,14 @@ import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
 import com.gemwallet.android.features.asset_select.viewmodels.models.SelectAssetFilters
 import com.gemwallet.android.features.asset_select.viewmodels.models.SelectSearch
 import com.gemwallet.android.model.AssetInfo
-import com.gemwallet.android.model.Session
 import com.gemwallet.android.testkit.mockAccount
 import com.gemwallet.android.testkit.mockAsset
+import com.gemwallet.android.testkit.mockAssetEthereum
+import com.gemwallet.android.testkit.mockSession
 import com.gemwallet.android.testkit.mockAssetInfo
 import com.gemwallet.android.testkit.mockWallet
 import com.gemwallet.android.ui.models.AssetToast
 import com.wallet.core.primitives.Chain
-import com.wallet.core.primitives.Currency
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -65,8 +65,8 @@ class BaseAssetSelectViewModelTest {
         accounts = listOf(mockAccount(chain = Chain.Ethereum, address = "0xabc"), mockAccount(chain = Chain.Bitcoin, address = "bc1q")),
     )
 
-    private val ethereum = mockAsset(chain = Chain.Ethereum, name = "Ethereum", symbol = "ETH")
-    private val bitcoin = mockAsset(chain = Chain.Bitcoin, name = "Bitcoin", symbol = "BTC")
+    private val ethereum = mockAssetEthereum()
+    private val bitcoin = mockAsset()
 
     private fun sendFlow(): GemSelectAssetFlow = mockk(relaxed = true) {
         every { action } returns GemAssetAction.SEND
@@ -90,7 +90,7 @@ class BaseAssetSelectViewModelTest {
         },
     ): BaseAssetSelectViewModel {
         val session: GetSession = mockk {
-            every { this@mockk.invoke() } returns MutableStateFlow(Session(wallet = wallet, currency = Currency.USD))
+            every { this@mockk.invoke() } returns MutableStateFlow(mockSession(wallet = wallet))
         }
         val search = object : SelectSearch {
             override fun items(filters: Flow<SelectAssetFilters?>): Flow<List<AssetInfo>> = filters.map { current ->
