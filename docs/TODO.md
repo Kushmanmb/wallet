@@ -199,11 +199,8 @@ Four closed on 2026-09-16. **F24** was the rule in its purest form: `BigInt.from
 
 Four more closed on the same day. **F19**: the swap screen re-parsed `selection.payAssetId` with `try? AssetId(id:)`, silently dropping a selection Core had just validated; `AssetId(core:)` exists for exactly that and asserts instead. Its other two sites are the already-closed `suggestPair` and `currentInput`. **F26** found one real site among five: the chart period write was `try?` on iOS and uncaught on Android, so the same storage failure was silently ignored on one app and a crash on the other — both report it now. The other four are "this wallet has no account on that chain" and two photo loads, where nil is the answer. **F21** is the decoder-probe idiom inside generated code, and **F22**'s wallet lookups answer "the deeplink names a wallet that is gone".
 
-- **F27** **S** `android/gemcore/.../serializer/RoutePayload.kt` — two `runCatching { }.getOrNull()` on route payload decoding.
-- **F28** **S** `android/data/coordinators/.../session/SessionCoordinator.kt` — a swallowed failure in the session path.
-- **F29** **S** `android/data/coordinators/.../update/AppUpdateCoordinator.kt` — `runCatching { appUpdateService.check(...) }.getOrNull()` hides an update check failure as "no update".
-- **F30** **S** `android/data/coordinators/.../wallet_connect/WalletConnectCoordinator.kt` and `.../perpetual/HyperliquidObserverService.kt` — one each on live connections.
-- **F31** **S** `android/features/recipient/.../RecipientViewModel.kt`, `.../referral/ReferralViewModel.kt`, `.../settings/currency/CurrenciesViewModel.kt`, `.../receive/presents/components/QRCode.kt` — one each.
+The Android half (F27–F31) closes with no change: every site either logs before returning null (`WalletConnectCoordinator.activeSessions`, `HyperliquidObserverService.connection`) or is a genuine probe whose null is the answer — a locale with no currency, a route argument that is absent rather than malformed. The unpack side is guarded by `checkNotNull` with a message, so a malformed payload fails fast rather than silently.
+
 
 ## 19. Thresholds and limits written at a call site
 
