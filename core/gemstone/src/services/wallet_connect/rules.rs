@@ -15,7 +15,9 @@ use primitives::{
 
 use crate::services::error::GemServiceError;
 use crate::services::transfer::{GemRecipient, GemTransferData};
-use crate::services::wallet_connect::model::{GemWalletConnectAuthAccount, GemWalletConnectRpcError, GemWalletConnectTransactionAction};
+use crate::services::wallet_connect::model::{
+    GemWalletConnectAuthAccount, GemWalletConnectRejection, GemWalletConnectRejectionReason, GemWalletConnectRpcError, GemWalletConnectTransactionAction,
+};
 use crate::wallet_connect::{EvmTransactionKind, WalletConnect, WalletConnectTransaction, wallet_connect_chain, wallet_connect_namespace};
 use num_bigint::BigInt;
 use primitives::GasPriceType;
@@ -23,6 +25,10 @@ use primitives::TransactionInputType;
 use primitives::{Asset, TransactionType, TransferDataExtra, TransferDataOutputAction, TransferDataOutputType};
 
 pub const USER_REJECTED_ERROR_CODE: i32 = 4001;
+const UNSUPPORTED_CHAINS_ERROR_CODE: i32 = 5100;
+const UNSUPPORTED_METHODS_ERROR_CODE: i32 = 5101;
+const UNSUPPORTED_ACCOUNTS_ERROR_CODE: i32 = 5103;
+const UNSUPPORTED_EVENTS_ERROR_CODE: i32 = 5102;
 const SESSION_REQUEST_EXPIRED_ERROR_CODE: i32 = 8000;
 const METHOD_NOT_FOUND_ERROR_CODE: i32 = -32601;
 
@@ -183,6 +189,22 @@ pub fn session(topic: String, chains: Vec<Chain>, expire_at: DateTime<Utc>, meta
         created_at: Utc::now(),
         expire_at,
         metadata,
+    }
+}
+
+pub fn session_rejection(reason: GemWalletConnectRejectionReason) -> GemWalletConnectRejection {
+    let (code, message) = match reason {
+        GemWalletConnectRejectionReason::UserRejected => (USER_REJECTED_ERROR_CODE, "User rejected the session"),
+        GemWalletConnectRejectionReason::UnsupportedChains => (UNSUPPORTED_CHAINS_ERROR_CODE, "Unsupported chains"),
+        GemWalletConnectRejectionReason::UnsupportedMethods => (UNSUPPORTED_METHODS_ERROR_CODE, "Unsupported methods"),
+        GemWalletConnectRejectionReason::UnsupportedAccounts => (UNSUPPORTED_ACCOUNTS_ERROR_CODE, "Unsupported accounts"),
+        GemWalletConnectRejectionReason::UnsupportedEvents => (UNSUPPORTED_EVENTS_ERROR_CODE, "Unsupported events"),
+    };
+    GemWalletConnectRejection {
+        reason,
+        code,
+        message: message.to_string(),
+        deletes_session: true,
     }
 }
 
@@ -377,6 +399,21 @@ fn hex_to_bytes(value: &str) -> Result<Vec<u8>, GemServiceError> {
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn test_session_rejection_names_the_wire_values() {
+        let rejection = session_rejection(GemWalletConnectRejectionReason::UnsupportedChains);
+        assert_eq!(rejection.reason, GemWalletConnectRejectionReason::UnsupportedChains);
+        assert_eq!(rejection.code, 5100);
+        assert_eq!(rejection.message, "Unsupported chains");
+        assert!(rejection.deletes_session);
+
+        assert_eq!(session_rejection(GemWalletConnectRejectionReason::UserRejected).code, USER_REJECTED_ERROR_CODE);
+        assert_eq!(session_rejection(GemWalletConnectRejectionReason::UnsupportedMethods).code, 5101);
+        assert_eq!(session_rejection(GemWalletConnectRejectionReason::UnsupportedEvents).code, 5102);
+        assert_eq!(session_rejection(GemWalletConnectRejectionReason::UnsupportedAccounts).code, 5103);
+    }
+
     use super::*;
     use primitives::Account;
 

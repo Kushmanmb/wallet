@@ -136,6 +136,10 @@ public final class GemWalletConnectServiceMock: GemWalletConnectServiceProtocol,
         )
     }
 
+    public func sessionRejection(reason: GemWalletConnectRejectionReason) -> GemWalletConnectRejection {
+        GemWalletConnectRejection(reason: reason, code: 4001, message: "Rejected", deletesSession: true)
+    }
+
     public func sessionApproval(wallet _: Gemstone.Wallet) -> GemSessionApproval {
         GemSessionApproval(chains: [], accounts: [], methods: [], events: [])
     }

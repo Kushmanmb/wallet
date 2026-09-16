@@ -277,6 +277,25 @@ iOS draws the sync state as an emoji in the value column and Android as a tinted
 
 Two things still map per platform, and only two: the localized label for each case, and the glyph or colour for each named outcome. Anything else in a row model — a formatter, a placeholder, a ternary over a flag — is a decision that belongs in the record.
 
+The same holds for a value an SDK sends on the wire. Rejecting a WalletConnect proposal used to be decided twice: iOS mapped the error to a CAIP-25 reason and deleted the stored session, Android sent the string `"Reject Session"` for every rejection and kept the session. `session_rejection` now returns the finished rejection — the named reason, the CAIP-25 code, the message the dApp receives and whether the session is deleted — and each app maps only its own SDK's error type onto the named reason, which is the one thing Core cannot see.
+
+```swift
+let rejection = service.sessionRejection(reason: GemWalletConnectRejectionReason(from: error))
+try await WalletKit.instance.rejectSession(proposalId: proposal.id, reason: RejectionReason(rejection.reason))
+if rejection.deletesSession {
+    try await service.deleteSession(sessionId: proposal.pairingTopic)
+}
+```
+
+```kotlin
+val rejection = walletConnectService.sessionRejection(reason)
+walletConnectClient.rejectSession(proposal, rejection) {
+    if (rejection.deletesSession) {
+        scope.launch { walletConnectService.deleteSession(proposal.pairingTopic) }
+    }
+}
+```
+
 ### A row that a screen only ever draws one way keeps its shape app-side
 
 `GemAssetRow` carries the layout because the same asset row is drawn four ways: the wallet list prices it, select-asset names its network, manage-tokens toggles it, receive copies it. The choice varies, so Core makes it once and both apps switch on `subtitle` and `trailing`.

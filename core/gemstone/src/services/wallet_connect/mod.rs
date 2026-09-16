@@ -27,8 +27,8 @@ use crate::wallet_connect::{WalletConnect, WalletConnectAction, WalletConnectCha
 pub use error::GemWalletConnectError;
 pub use model::{
     GemConnection, GemConnectionDetailRow, GemConnectionDetails, GemConnectionSection, GemSessionApproval, GemSessionProposal, GemWalletConnectAuthAccount,
-    GemWalletConnectFailure, GemWalletConnectMessageRequest, GemWalletConnectOutcome, GemWalletConnectResponse, GemWalletConnectRpcError, GemWalletConnectSessionRequest,
-    GemWalletConnectTransactionAction, GemWalletConnectTransactionRequest,
+    GemWalletConnectFailure, GemWalletConnectMessageRequest, GemWalletConnectOutcome, GemWalletConnectRejection, GemWalletConnectRejectionReason, GemWalletConnectResponse,
+    GemWalletConnectRpcError, GemWalletConnectSessionRequest, GemWalletConnectTransactionAction, GemWalletConnectTransactionRequest,
 };
 pub use sign_message::{GemSignMessagePreview, GemSignMessageService};
 pub use signer::GemWalletConnectSigner;
@@ -198,6 +198,10 @@ impl GemWalletConnectService {
             msg: format!("invalid session expiry {expire_at}"),
         })?;
         Ok(rules::session(topic, chains, expire_at, metadata))
+    }
+
+    pub fn session_rejection(&self, reason: GemWalletConnectRejectionReason) -> GemWalletConnectRejection {
+        rules::session_rejection(reason)
     }
 
     pub fn user_rejected_error(&self) -> GemWalletConnectRpcError {

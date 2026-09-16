@@ -31,6 +31,23 @@ pub struct GemWalletConnectRpcError {
     pub message: String,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemWalletConnectRejectionReason {
+    UserRejected,
+    UnsupportedChains,
+    UnsupportedMethods,
+    UnsupportedAccounts,
+    UnsupportedEvents,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemWalletConnectRejection {
+    pub reason: GemWalletConnectRejectionReason,
+    pub code: i32,
+    pub message: String,
+    pub deletes_session: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemWalletConnectResponse {
     Response { value: WalletConnectResponseType },
