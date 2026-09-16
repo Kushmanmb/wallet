@@ -1045,3 +1045,94 @@ private extension Primitives.Wallet {
         accounts.first { $0.chain == .hyperCore }
     }
 }
+
+public final class GemPerpetualDetailsServiceMock: GemPerpetualDetailsServiceProtocol, @unchecked Sendable {
+    public var buttonsValue: [GemPerpetualButton] = []
+    public var modifyButtonsValue: [GemPerpetualButton] = []
+    public var sectionsValue: [GemPerpetualSection] = []
+    public var infoRowsValue: [GemPerpetualInfoRow] = []
+    public var positionDetailRowsValue: [GemPerpetualPositionDetailRow] = []
+    public var currencyValue: Gemstone.Currency = Primitives.Currency.usd.toGem()
+    public var chartPeriodValue: Gemstone.ChartPeriod = Primitives.ChartPeriod.day.toGem()
+    public var candlesticksValue: [Gemstone.ChartCandleStick] = []
+    public var mergedCandlesValue: [Gemstone.ChartCandleStick]?
+    public var closeTransferResult: Result<Gemstone.GemTransferData, Error> = .success(.mock())
+    public var positionActionResult: Result<GemPerpetualPositionAction, Error> = .success(.open(data: .mock()))
+    public var syncPositionsError: Error?
+    public var syncTransactionsError: Error?
+
+    public private(set) var syncPositionsCount = 0
+    public private(set) var syncedTransactionAssetIds: [Gemstone.AssetId] = []
+    public private(set) var positionKinds: [GemPerpetualPositionKind] = []
+    public private(set) var setChartPeriods: [Gemstone.ChartPeriod] = []
+
+    public init() {}
+
+    public func buttons(hasPosition: Bool) -> [GemPerpetualButton] {
+        hasPosition ? modifyButtonsValue : buttonsValue
+    }
+
+    public func candleSubscription(perpetual: Gemstone.Perpetual, period: Gemstone.ChartPeriod) -> GemPerpetualSubscription {
+        .candle(symbol: perpetual.name, interval: period.toPrimitives().rawValue)
+    }
+
+    public func candlesticks(perpetual _: Gemstone.Perpetual, period _: Gemstone.ChartPeriod) async throws -> [Gemstone.ChartCandleStick] {
+        candlesticksValue
+    }
+
+    public func chartPeriod() -> Gemstone.ChartPeriod { chartPeriodValue }
+
+    public func closeTransfer(perpetual _: Gemstone.Perpetual, asset _: Gemstone.Asset, position _: Gemstone.PerpetualPosition?) throws -> Gemstone.GemTransferData {
+        try closeTransferResult.get()
+    }
+
+    public func getCurrency() -> Gemstone.Currency { currencyValue }
+
+    public func infoRows() -> [GemPerpetualInfoRow] { infoRowsValue }
+
+    public func marketSubscription(perpetual: Gemstone.Perpetual) -> GemPerpetualSubscription {
+        .marketData(symbol: perpetual.name)
+    }
+
+    public func mergedCandles(
+        candles _: [Gemstone.ChartCandleStick],
+        update _: Gemstone.ChartCandleUpdate,
+        perpetual _: Gemstone.Perpetual,
+        period _: Gemstone.ChartPeriod,
+    ) -> [Gemstone.ChartCandleStick]? {
+        mergedCandlesValue
+    }
+
+    public func modifyButtons() -> [GemPerpetualButton] { modifyButtonsValue }
+
+    public func positionAction(
+        perpetual _: Gemstone.Perpetual,
+        asset _: Gemstone.Asset,
+        position _: Gemstone.PerpetualPosition?,
+        kind: GemPerpetualPositionKind,
+    ) throws -> GemPerpetualPositionAction {
+        positionKinds.append(kind)
+        return try positionActionResult.get()
+    }
+
+    public func positionDetailRows(position _: Gemstone.PerpetualPosition) -> [GemPerpetualPositionDetailRow] {
+        positionDetailRowsValue
+    }
+
+    public func sections(hasPosition _: Bool) -> [GemPerpetualSection] { sectionsValue }
+
+    public func setChartPeriod(period: Gemstone.ChartPeriod) throws {
+        setChartPeriods.append(period)
+        chartPeriodValue = period
+    }
+
+    public func syncPositions() async throws {
+        syncPositionsCount += 1
+        if let syncPositionsError { throw syncPositionsError }
+    }
+
+    public func syncTransactions(assetId: Gemstone.AssetId) async throws {
+        syncedTransactionAssetIds.append(assetId)
+        if let syncTransactionsError { throw syncTransactionsError }
+    }
+}
