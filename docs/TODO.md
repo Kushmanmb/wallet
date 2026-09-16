@@ -307,8 +307,8 @@ Five were confirmations rather than decisions and are closed. **P78**: both comp
 
 V66, V67 and V71 closed on 2026-09-16 as platform ports rather than thin wrappers: `ConnectionComponentMonitoring` has two conformers and `WebSocketRequestProvider` has two, so they carry real polymorphism over platform APIs, and `UriHandler.open` is Chrome Custom Tabs with a fallback, which Core cannot express. V70 and V72 restated decisions already open as P72 and V59 and are folded into them.
 
-- **V68** **S** `ios/Packages/Store/Sources/BindableQuery.swift` — a one-method protocol behind every observed read on iOS; Android has narrow cases instead. Worth one decision about which shape both apps use.
-- **V69** **M** `ios/Packages/Formatters` and `ios/Packages/Validators` cannot import Gemstone, which is what keeps D15–D17 duplicated. The item is the dependency, not the formatter: decide whether the widget and these two packages get a Gemstone-free Core surface or move under one that can import it.
+
+V68 and V69 closed on 2026-09-16 as duplicates. V68 is **X161** — `BindableQuery`/`ObservableQuery` against Android's narrow cases — which already cites it. V69 is **X158**, the `Formatters`/`Validators` dependency that keeps D15–D17 duplicated. Both are boundary decisions, and § 36 is where they belong; a port item and a boundary item that name the same two files are one item.
 
 ## 31. Services with more collaborators than a service should have
 
