@@ -13,7 +13,6 @@ mod worker;
 
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use std::time::Instant;
 
 use crate::model::{ConsumerOptions, ConsumerService, DaemonService, WorkerOptions, WorkerService};
 use crate::reporters::consumer::ConsumerReporter;
@@ -198,35 +197,26 @@ async fn run_consumer_services(settings: settings::Settings, services: &[Consume
             let health_state = health_state.clone();
             tokio::spawn(async move {
                 let restart_delay = settings.consumer.error.timeout;
-                let max_delay = settings.rabbitmq.retry.timeout;
-                let mut delay = restart_delay;
                 loop {
                     if *shutdown_rx.borrow() {
                         break;
                     }
-                    let started = Instant::now();
                     match run_consumer((*settings.as_ref()).clone(), svc, shutdown_rx.clone(), reporter.clone(), options.clone()).await {
                         Ok(_) => {
                             info_with_fields!("consumer stopped", consumer = svc_name, status = "ok");
                             break;
                         }
                         Err(err) => {
-                            if started.elapsed() >= max_delay {
-                                delay = restart_delay;
-                            }
                             let message = err.to_string();
                             error_with_fields!("consumer failed", &*err, consumer = svc_name);
                             if let Ok(mut list) = failures.lock() {
                                 list.push(format!("{}: {}", svc_name, message));
                             }
-                            if delay >= max_delay {
-                                health_state.set_not_ready();
-                            }
-                            if shutdown::sleep_or_shutdown(delay, &shutdown_rx).await {
+                            health_state.set_not_ready();
+                            if shutdown::sleep_or_shutdown(restart_delay, &shutdown_rx).await {
                                 break;
                             }
-                            delay = (delay * 2).min(max_delay);
-                            info_with_fields!("consumer restarting", consumer = svc_name, delay_secs = delay.as_secs());
+                            info_with_fields!("consumer restarting", consumer = svc_name);
                         }
                     }
                 }
