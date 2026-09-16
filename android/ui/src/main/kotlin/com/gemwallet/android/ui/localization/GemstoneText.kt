@@ -1,5 +1,8 @@
 package com.gemwallet.android.ui.localization
 
+import com.wallet.core.primitives.Currency
+import com.gemwallet.android.model.CurrencyFormatter
+import com.gemwallet.android.ui.localization.stringRes
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
@@ -49,26 +52,25 @@ import uniffi.gemstone.GemWalletSubtitle
 import uniffi.gemstone.SimulationPayloadFieldKind
 import uniffi.gemstone.SimulationSeverity
 
-@Composable
-fun GemTransactionTitle.string(): String = when (this) {
-    GemTransactionTitle.Received -> stringResource(R.string.transaction_title_received)
-    GemTransactionTitle.Sent -> stringResource(R.string.transaction_title_sent)
-    GemTransactionTitle.Transfer -> stringResource(R.string.transfer_title)
-    GemTransactionTitle.SmartContract -> stringResource(R.string.transfer_smart_contract_title)
-    GemTransactionTitle.Swap -> stringResource(R.string.wallet_swap)
-    GemTransactionTitle.Approve -> stringResource(R.string.transfer_approve_title)
-    GemTransactionTitle.Stake -> stringResource(R.string.transfer_stake_title)
-    GemTransactionTitle.Unstake -> stringResource(R.string.transfer_unstake_title)
-    GemTransactionTitle.Redelegate -> stringResource(R.string.transfer_redelegate_title)
-    GemTransactionTitle.Rewards -> stringResource(R.string.transfer_rewards_title)
-    GemTransactionTitle.Withdraw -> stringResource(R.string.transfer_withdraw_title)
-    GemTransactionTitle.ActivateAsset -> stringResource(R.string.transfer_activate_asset_title)
-    GemTransactionTitle.Freeze -> stringResource(R.string.transfer_freeze_title)
-    GemTransactionTitle.Unfreeze -> stringResource(R.string.transfer_unfreeze_title)
-    GemTransactionTitle.Earn -> stringResource(R.string.common_earn)
-    is GemTransactionTitle.PerpetualOpen -> perpetualTitle(direction, R.string.perpetual_open_direction, R.string.perpetual_position)
-    is GemTransactionTitle.PerpetualClose -> perpetualTitle(direction, R.string.perpetual_close_direction, R.string.perpetual_close_position)
-    GemTransactionTitle.PerpetualModify -> stringResource(R.string.perpetual_modify)
+fun GemTransactionTitle.string(context: Context): String = when (this) {
+    GemTransactionTitle.Received -> context.getString(R.string.transaction_title_received)
+    GemTransactionTitle.Sent -> context.getString(R.string.transaction_title_sent)
+    GemTransactionTitle.Transfer -> context.getString(R.string.transfer_title)
+    GemTransactionTitle.SmartContract -> context.getString(R.string.transfer_smart_contract_title)
+    GemTransactionTitle.Swap -> context.getString(R.string.wallet_swap)
+    GemTransactionTitle.Approve -> context.getString(R.string.transfer_approve_title)
+    GemTransactionTitle.Stake -> context.getString(R.string.transfer_stake_title)
+    GemTransactionTitle.Unstake -> context.getString(R.string.transfer_unstake_title)
+    GemTransactionTitle.Redelegate -> context.getString(R.string.transfer_redelegate_title)
+    GemTransactionTitle.Rewards -> context.getString(R.string.transfer_rewards_title)
+    GemTransactionTitle.Withdraw -> context.getString(R.string.transfer_withdraw_title)
+    GemTransactionTitle.ActivateAsset -> context.getString(R.string.transfer_activate_asset_title)
+    GemTransactionTitle.Freeze -> context.getString(R.string.transfer_freeze_title)
+    GemTransactionTitle.Unfreeze -> context.getString(R.string.transfer_unfreeze_title)
+    GemTransactionTitle.Earn -> context.getString(R.string.common_earn)
+    is GemTransactionTitle.PerpetualOpen -> perpetualTitle(context, direction, R.string.perpetual_open_direction, R.string.perpetual_position)
+    is GemTransactionTitle.PerpetualClose -> perpetualTitle(context, direction, R.string.perpetual_close_direction, R.string.perpetual_close_position)
+    GemTransactionTitle.PerpetualModify -> context.getString(R.string.perpetual_modify)
 }
 
 @Composable
@@ -140,13 +142,12 @@ fun GemSimulationWarningRow.descriptionText(): String? = when (kind) {
     GemSimulationWarningKind.SUSPICIOUS_SPENDER -> message ?: descriptionRes()?.let { stringResource(it) }
 }
 
-@Composable
-private fun perpetualTitle(direction: uniffi.gemstone.PerpetualDirection?, @StringRes directionTitle: Int, @StringRes fallback: Int): String {
+private fun perpetualTitle(context: Context, direction: uniffi.gemstone.PerpetualDirection?, @StringRes directionTitle: Int, @StringRes fallback: Int): String {
     val side = when (val side = direction?.toPrimitives()) {
-        null -> return stringResource(fallback)
-        else -> stringResource(side.stringRes())
+        null -> return context.getString(fallback)
+        else -> context.getString(side.stringRes())
     }
-    return stringResource(directionTitle, side)
+    return context.getString(directionTitle, side)
 }
 
 fun GemLocalizedText.string(context: Context): String = when (this) {
@@ -394,3 +395,17 @@ fun GemBalanceResource.titleRes(): Int = when (this) {
     GemBalanceResource.ENERGY -> R.string.stake_resource_energy
     GemBalanceResource.BANDWIDTH -> R.string.stake_resource_bandwidth
 }
+
+private val usdFiatFormatter = CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = Currency.USD)
+
+fun GemTransactionRowSubtitle.text(context: Context): String? = when (this) {
+    is GemTransactionRowSubtitle.ToAddress -> prefixed(context, prefixRes(), participant)
+    is GemTransactionRowSubtitle.FromAddress -> prefixed(context, prefixRes(), participant)
+    is GemTransactionRowSubtitle.ToResource -> prefixed(context, prefixRes(), context.getString(resource.toPrimitives().stringRes()))
+    is GemTransactionRowSubtitle.FromResource -> prefixed(context, prefixRes(), context.getString(resource.toPrimitives().stringRes()))
+    is GemTransactionRowSubtitle.Price -> prefixRes()?.let { "${context.getString(it)}: ${usdFiatFormatter.string(value)}" }
+    GemTransactionRowSubtitle.None -> null
+}
+
+private fun prefixed(context: Context, @StringRes prefix: Int?, value: String): String? =
+    prefix?.let { res -> value.takeIf { it.isNotEmpty() }?.let { "${context.getString(res)} $it" } }
