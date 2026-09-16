@@ -45,7 +45,6 @@ Swept on 2026-09-15 over every non-preview, non-test iOS file: 25 hits, of which
 
 130 across `Features`, `Packages`, `Gem` and the widget — the wider count that X55–X64's preamble narrows to feature modules. Grouped by module so each item is one test target's worth of work; X55–X64 already name the heaviest. The count is by file name, so a module whose view models are tested from a differently named file still shows up: `Features/Transactions` already had seven test files when T21 was written, and closing it meant covering the two that decide something — the activity list and its filter — not all sixteen.
 
-- **T23** **S** `Features/Perpetuals` — 6.
 - **T24** **S** `Features/Onboarding` — 9.
 - **T25** **S** `Features/NFT` — 4, and `Features/Contacts` — 1.
 - **T26** **S** `Features/Swap` — 3 (`SwapProvidersViewModel`, `SwapTokenViewModel`, `SwapPairSelectorViewModel`).
