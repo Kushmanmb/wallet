@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use gem_tracing::{DurationMs, error_fields, info_with_fields};
+use gem_tracing::{error_fields, info_with_fields};
 use reqwest::Method;
 use rocket::http::Status;
 
@@ -62,7 +62,7 @@ impl<'a> AccessLog<'a> {
             method = self.method.as_str(),
             uri = self.uri,
             status = status,
-            latency = DurationMs(self.start.elapsed()),
+            latency_ms = self.start.elapsed().as_millis(),
         );
     }
 
@@ -78,7 +78,7 @@ impl<'a> AccessLog<'a> {
             uri = self.uri,
             status = Status::BadGateway.code,
             reason = reason,
-            latency = DurationMs(self.start.elapsed()),
+            latency_ms = self.start.elapsed().as_millis(),
         );
     }
 
@@ -93,7 +93,7 @@ impl<'a> AccessLog<'a> {
             uri = self.uri,
             status = status,
             reason = reason,
-            latency = DurationMs(self.start.elapsed()),
+            latency_ms = self.start.elapsed().as_millis(),
         );
     }
 
@@ -108,7 +108,7 @@ impl<'a> AccessLog<'a> {
             method = self.method.as_str(),
             uri = self.uri,
             status = status,
-            latency = DurationMs(self.start.elapsed()),
+            latency_ms = self.start.elapsed().as_millis(),
         );
     }
 }

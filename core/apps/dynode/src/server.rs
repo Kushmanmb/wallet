@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::net::IpAddr;
 use std::str::FromStr;
 
-use gem_tracing::{DurationMs, error_with_fields, info_with_fields};
+use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::Chain;
 use reqwest::Method;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
@@ -193,7 +193,7 @@ async fn forward_request(request: &Request<'_>, data: Data<'_>, target: Target<'
                     method = proxy_request.method.as_str(),
                     uri = proxy_request.path.as_str(),
                     user_agent = proxy_request.user_agent.as_str(),
-                    latency = DurationMs(proxy_request.elapsed()),
+                    latency_ms = proxy_request.elapsed().as_millis(),
                 );
                 ProxyError::new(Status::InternalServerError, "Proxy request failed")
             })

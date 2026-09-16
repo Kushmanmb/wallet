@@ -5,7 +5,7 @@ use std::time::{Duration, Instant};
 
 use cacher::{AccessTokenCacherClient, CacherClient};
 use gem_client::ReqwestClient;
-use gem_tracing::{DurationMs, info_with_fields};
+use gem_tracing::info_with_fields;
 use primitives::{AssetId, ChainAddress, ConfigKey, ConfigParamKey, ScanProvider, ScanSource, ScanTransaction, ScanTransactionPayload, TransactionType, asset_score::AssetRank};
 use reqwest::Url;
 use rocket::futures::future;
@@ -17,6 +17,8 @@ use serde::Serialize;
 use serde_json::json;
 use settings::Settings;
 use storage::{AssetsRepository, ConfigRepository, Database, ScanAddressesRepository};
+
+use crate::metrics::Metrics;
 
 pub fn scan_providers(settings: &Settings, cacher: CacherClient, timeout: Duration) -> Result<TransactionScanProviders, Box<dyn Error + Send + Sync>> {
     let config = AddressScanProviderConfig {
@@ -40,7 +42,7 @@ pub struct TransactionScanConfig {
 
 #[derive(Serialize)]
 struct ScanCheck {
-    latency: String,
+    latency_ms: u128,
     #[serde(skip_serializing_if = "Option::is_none")]
     malicious: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -56,7 +58,7 @@ impl ScanCheck {
             Err(error) => (None, None, Some(error.to_string())),
         };
         Self {
-            latency: DurationMs(duration).to_string(),
+            latency_ms: duration.as_millis(),
             malicious,
             reason,
             error,
@@ -68,11 +70,12 @@ impl ScanCheck {
 pub struct ScanClient {
     database: Database,
     config: TransactionScanConfig,
+    metrics: Arc<Metrics>,
 }
 
 impl ScanClient {
-    pub fn new(database: Database, config: TransactionScanConfig) -> Self {
-        Self { database, config }
+    pub fn new(database: Database, config: TransactionScanConfig, metrics: Arc<Metrics>) -> Self {
+        Self { database, config, metrics }
     }
 
     pub async fn get_scan_transaction(&self, payload: ScanTransactionPayload) -> Result<ScanTransaction, Box<dyn Error + Send + Sync>> {
@@ -101,9 +104,9 @@ impl ScanClient {
         };
         let providers = self.config.providers.filter_enabled(&enabled);
         let (address_scans, poisoning_scans, website_scans) = future::join3(
-            Self::scan_address_providers(&providers, address_target.clone()),
-            Self::scan_address_poisoning_providers(&providers, poisoning_target),
-            Self::scan_website_providers(&providers, website_target.clone()),
+            self.scan_address_providers(&providers, address_target.clone()),
+            self.scan_address_poisoning_providers(&providers, poisoning_target),
+            self.scan_website_providers(&providers, website_target.clone()),
         )
         .await;
 
@@ -273,16 +276,19 @@ impl ScanClient {
         targets
     }
 
-    async fn scan_address_providers(providers: &TransactionScanProviders, target: AddressTarget) -> Vec<(ScanProvider, ScanCheck)> {
+    async fn scan_address_providers(&self, providers: &TransactionScanProviders, target: AddressTarget) -> Vec<(ScanProvider, ScanCheck)> {
         future::join_all(providers.addresses.iter().filter(|provider| provider.supports_chain(target.chain)).map(|provider| async {
             let start = Instant::now();
             let result = provider.scan_address(&target).await;
-            (provider.provider(), ScanCheck::new(result, start.elapsed()))
+            let latency = start.elapsed();
+            self.metrics
+                .record_scan(provider.provider(), "address", result.as_ref().ok().map(|scan| scan.is_malicious), latency);
+            (provider.provider(), ScanCheck::new(result, latency))
         }))
         .await
     }
 
-    async fn scan_address_poisoning_providers(providers: &TransactionScanProviders, target: Option<AddressPoisoningTarget>) -> Vec<(ScanProvider, ScanCheck)> {
+    async fn scan_address_poisoning_providers(&self, providers: &TransactionScanProviders, target: Option<AddressPoisoningTarget>) -> Vec<(ScanProvider, ScanCheck)> {
         let Some(target) = target else {
             return Vec::new();
         };
@@ -294,20 +300,26 @@ impl ScanClient {
                 .map(|provider| async {
                     let start = Instant::now();
                     let result = provider.scan_address_poisoning(&target).await;
-                    (provider.provider(), ScanCheck::new(result, start.elapsed()))
+                    let latency = start.elapsed();
+                    self.metrics
+                        .record_scan(provider.provider(), "address_poisoning", result.as_ref().ok().map(|scan| scan.is_malicious), latency);
+                    (provider.provider(), ScanCheck::new(result, latency))
                 }),
         )
         .await
     }
 
-    async fn scan_website_providers(providers: &TransactionScanProviders, target: Option<WebsiteTarget>) -> Vec<(ScanProvider, ScanCheck)> {
+    async fn scan_website_providers(&self, providers: &TransactionScanProviders, target: Option<WebsiteTarget>) -> Vec<(ScanProvider, ScanCheck)> {
         let Some(target) = target else {
             return Vec::new();
         };
         future::join_all(providers.websites.iter().map(|provider| async {
             let start = Instant::now();
             let result = provider.scan_website(&target).await;
-            (provider.provider(), ScanCheck::new(result, start.elapsed()))
+            let latency = start.elapsed();
+            self.metrics
+                .record_scan(provider.provider(), "website", result.as_ref().ok().map(|scan| scan.is_malicious), latency);
+            (provider.provider(), ScanCheck::new(result, latency))
         }))
         .await
     }

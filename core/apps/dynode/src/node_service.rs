@@ -4,7 +4,7 @@ use std::{
     sync::Arc,
 };
 
-use gem_tracing::{DurationMs, info_with_fields};
+use gem_tracing::info_with_fields;
 use primitives::{Chain, ResponseError, ResponseResult, response::ErrorDetail};
 use reqwest::StatusCode;
 use serde_json::Value;
@@ -158,7 +158,7 @@ impl NodeService {
 
                     let request_id = request.id.as_str();
                     let chain = request.chain.as_ref();
-                    let latency = DurationMs(request.elapsed());
+                    let latency_ms = request.elapsed().as_millis();
                     let retry_reason = FailureReason::from_error(e.as_ref()).to_string();
                     info_with_fields!(
                         "Upstream error",
@@ -166,7 +166,7 @@ impl NodeService {
                         chain = chain,
                         remote_host = remote_host.as_str(),
                         error = retry_reason.as_str(),
-                        latency = latency,
+                        latency_ms = latency_ms,
                     );
                     if index + 1 < max_attempts {
                         self.metrics.add_proxy_retry(request.chain.as_ref(), remote_host.as_str(), &retry_reason);
@@ -185,7 +185,7 @@ impl NodeService {
                 method = request.method.as_str(),
                 uri = request.path.as_str(),
                 error = error,
-                latency = DurationMs(request.elapsed()),
+                latency_ms = request.elapsed().as_millis(),
             );
         }
         self.log_and_create_error_response(request, None, NodeServiceError::UpstreamsFailed, last_error_data)
@@ -311,7 +311,7 @@ impl NodeService {
         let uri = request.path.as_str();
         let method = request.method.as_str();
         let remote_host = host.unwrap_or("none");
-        let latency = DurationMs(request.elapsed());
+        let latency_ms = request.elapsed().as_millis();
         let status = error.status().as_u16();
         info_with_fields!(
             "Proxy response",
@@ -322,7 +322,7 @@ impl NodeService {
             uri = uri,
             status = status,
             error = error_message.as_str(),
-            latency = latency,
+            latency_ms = latency_ms,
         );
 
         let response_latency = request.elapsed();

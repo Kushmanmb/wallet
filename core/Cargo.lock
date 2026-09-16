@@ -492,6 +492,7 @@ dependencies = [
  "gem_tracing",
  "in_app_notifications",
  "localizer",
+ "metrics",
  "name_resolver",
  "nft",
  "num-bigint 0.5.1",

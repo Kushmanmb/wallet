@@ -100,7 +100,7 @@ impl PendingTransactionsUpdater {
                     chain = chain.as_ref(),
                     identifier = identifier,
                     elapsed = elapsed,
-                    latency = DurationMs(start.elapsed())
+                    latency_ms = start.elapsed().as_millis()
                 );
                 self.stream_producer
                     .publish_transactions(TransactionsPayload::new_with_notify(chain, vec![], vec![transaction]))
@@ -113,7 +113,7 @@ impl PendingTransactionsUpdater {
                     chain = chain.as_ref(),
                     identifier = identifier,
                     elapsed = elapsed,
-                    latency = DurationMs(start.elapsed())
+                    latency_ms = start.elapsed().as_millis()
                 );
                 Ok(false)
             }
@@ -124,7 +124,7 @@ impl PendingTransactionsUpdater {
                     chain = chain.as_ref(),
                     identifier = identifier,
                     elapsed = elapsed,
-                    latency = DurationMs(start.elapsed())
+                    latency_ms = start.elapsed().as_millis()
                 );
                 Ok(pending_transaction_error_expired(elapsed_duration, self.config.error_max_age(chain)))
             }
