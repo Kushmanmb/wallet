@@ -325,36 +325,27 @@ V66, V67 and V71 closed on 2026-09-16 as platform ports rather than thin wrapper
 
 **Nine are closed**: they have no observable state at all — `@Observable`, `MutableStateFlow` and `mutableStateOf` are all absent — so the `var` count was counting computed properties on a value type. A screen with no state that changes has nothing to model as a session.
 
-The rest are real screens, and 25 of the 28 already hold a Core service; what is open is whether their state becomes a Core object with a lifetime. That is a shape to agree, not a move to make.
+**Fifteen more closed on 2026-09-16 after counting the state properly.** The original "six or more `var`s" counted computed properties — `var title: String { Localized... }` is not state. Counting only *stored* mutable members, and setting aside the presentation ones (`isPresenting*`, toasts, alerts, focus, scroll):
+
+- Eight hold no domain state at all — `SwapDetailsViewModel` and `EarnSceneViewModel` have zero stored `var`s of any kind, and `SignMessageSceneViewModel`, `StakeSceneViewModel`, `PreferencesViewModel`, `PerpetualSceneViewModel`, `NetworkAssetsSceneViewModel` and `ConnectionsViewModel` hold only sheets and toasts. A screen with no state that changes has no session to model.
+- Six hold exactly one: an input string, a loading flag, an image-loaded flag, a request, a release, a name field. One field is not a lifetime.
+- `PerpetualDetailsViewModel` already reaches a session.
+
+**Thirteen are left**, each with two to six pieces of real domain state — `SelectAssetViewModel` has six, `ConfirmTransferSceneViewModel` and `ImportWalletSceneViewModel` four each. Those are where the session question is real, and it is a shape to agree rather than a move to make.
 
 - **S34** **L** `Features/Settings/RewardsViewModel.swift` [40] — the widest stateful screen with no session: wallet selection, sheets, alerts, toasts and the rewards state.
 - **S35** **L** `Features/WalletTab/WalletSearchSceneViewModel.swift` [32].
-- **S36** **L** `Features/Assets/AssetSceneViewModel.swift` [30].
 - **S37** **L** `Features/Assets/SelectAssetViewModel.swift` [26].
 - **S38** **L** `Features/Transfer/ConfirmTransferSceneViewModel.swift` [25] — confirm has `GemConfirmation`, which SERVICES.md explicitly calls not a session; this is the item that decides whether that is still right.
 - **S40** **M** `Features/Transfer/AmountSceneViewModel.swift` [24].
-- **S41** **M** `Features/WalletConnector/SignMessageSceneViewModel.swift` [22] — a signing surface holding its own state.
-- **S44** **M** `Features/WalletTab/WalletSceneViewModel.swift` [20].
-- **S46** **M** `Features/Stake/StakeSceneViewModel.swift` [19].
 - **S47** **M** `Features/Onboarding/ImportWalletSceneViewModel.swift` [19] — wallet import state, a recovery-critical flow.
 - **S48** **M** `Features/Contacts/ManageContactViewModel.swift` [19].
-- **S50** **M** `Features/Settings/PreferencesViewModel.swift` [17].
-- **S51** **M** `Features/Perpetuals/PerpetualSceneViewModel.swift` [17].
-- **S52** **M** `Features/WalletTab/NetworkAssetsSceneViewModel.swift` [16].
 - **S53** **M** `Features/Perpetuals/PerpetualsSceneViewModel.swift` [16] and `PerpetualPositionViewModel.swift` [16].
 - **S54** **M** `Features/Transfer/ReceiveViewModel.swift` [15].
-- **S55** **M** `Features/Swap/SwapDetailsViewModel.swift` [15].
-- **S57** **M** `Features/NFT/CollectibleViewModel.swift` [15].
-- **S58** **M** `Features/Stake/EarnSceneViewModel.swift` [14].
 - **S59** **M** `Features/Settings/SecurityViewModel.swift` [14] — a security surface whose lock-period state produced a crash on 2026-09-15.
 - **S60** **M** `Features/AppLock/LockSceneViewModel.swift` [14] — the lock screen state machine.
-- **S62** **S** `Features/WalletTab/AssetsResultsSceneViewModel.swift` [13].
 - **S63** **S** `Features/Transfer/RecipientSceneViewModel.swift` [13].
-- **S64** **S** `Features/Settings/AboutUsViewModel.swift` [13] — see L15 and P72.
-- **S65** **S** `Features/WalletConnector/ConnectionsViewModel.swift` [11].
-- **S67** **S** `Features/ManageWallets/WalletIDetailViewModel.swift` [11] — also the one iOS file whose name carries a typo (`WalletIDetail`).
 - **S69** **S** `Features/Onboarding/VerifyPhraseViewModel.swift` [9] and `Features/Contacts/ManageContactAddressViewModel.swift` [9].
-- **S70** **M** `android/features/perpetual/.../PerpetualDetailsViewModel.kt` and `android/features/confirm/.../ConfirmViewModel.kt` — the only two Android screens in this shape; both have a Core service but keep six `MutableStateFlow`s of their own.
 
 ## 33. Chain coverage the matrix does not state
 
