@@ -63,7 +63,7 @@ object SwapDetailsUIModelFactory {
     fun create(input: SwapDetailsUIModelInput): SwapDetailsUIModel? {
         val rate = input.summary.rate?.let(rateFormatter::format) ?: return null
 
-        val slippagePercent = input.slippageBps.toDouble() / 100.0
+        val slippagePercent = input.summary.slippagePercent()
         val priceImpact = input.priceImpact?.let {
             SwapPriceImpactUIModel(
                 type = it.impactType,
