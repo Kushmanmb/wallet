@@ -62,7 +62,6 @@ T31 closed on 2026-09-16. Four of the five — `BuySelectViewModel`, `SendSelect
 
 49 of them; X65 already names three.
 
-- **T36** **S** `features/receive/viewmodels` — both.
 - **T37** **S** `features/confirm/viewmodels` `ConfirmViewModel.kt` (412 lines) and `presents/components/NetworkFeeCustomViewModel.kt`.
 - **T38** **S** `app` — `MainViewModel`, `AppViewModel`, `MainScreenViewModel`, `SetupWalletViewModel`.
 
