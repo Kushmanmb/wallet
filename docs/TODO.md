@@ -10,8 +10,6 @@ Every open item carries a stable id (U duplicated or redundant code, V vocabular
 
 Ordered by the lines it removes; work these before the sections below. The duplication sweeps (same-named similar bodies within an app and across the apps, same-bodied Core functions, shared constants, twins built from a Core type, unread members) were rerun on 2026-09-16 after B68 closed, and this is everything they still find — the larger families landed in earlier passes and are in the ledger. Everything else in this file moves a boundary rather than deleting a copy.
 
-- **U4** **S** Five iOS members written twice with the same body: `navigationDestination(for:)` in `EarnSceneViewModel` and `StakeSceneViewModel`, `delete` in `WalletIDetailViewModel` and `WalletsSceneViewModel`, `display(for:)` in `NetworkFeeCustomViewModel` and `NetworkFeeSceneViewModel`, `alertView` in `AssetPriceAlertsScene` and `PriceAlertsScene`, `setupWalletModel` in `CreateWalletModel` and `ImportWalletViewModel`. Each pair keeps one owner (a mapper on the Core destination, a service extension, a shared row view) and the other calls it.
-- **U7** **M** `android/gemcore/.../domains/price/ValueDirection.kt` is a hand-written twin of `GemValueTone` with 125 readers, mapped from a `Double` and from `PriceAlertDirection`; [no hand-written twins](ARCHITECTURE.md): the readers take the Core tone and a style mapper decides the colour, the way `LatencyTone` does for the latency badge.
 - **U5** **S** iOS members with no reader: `PerpetualPositionViewModel.nameText`, `ValueFormatter.full_US`, `SupportMessageSender.isAgent`, `Constants.apiURL` (confirm the last against the widget and tests before deleting).
 
 ## 1. Surfaces still outside Gemstone
@@ -108,6 +106,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 ## Ledger of closed sections
 
 What each section of the 2026-09-15 and 2026-09-16 sweeps measured, what landed, and why the rest closed — kept so the same lead is not re-raised with the same answer. Commits carry the detail.
+
+**U4 (2026-09-16).** Four of the five pairs collapsed to one owner: `GemDelegationDestination.navigationValue(delegation:)` for the two stake screens, `ObservablePreferences.reload(after:)` for the two wallet deletions, the custom fee model takes the scene model's `display` instead of rebuilding it, and `PriceAlertItemView` for the two alert lists. `setupWalletModel` stays written twice on purpose: two parent models vending the same child is the shape B69 asks for.
 
 **B68, import and contacts (2026-09-16).** `ImportUIState` carries `tabs: List<ImportTabUIModel>` (navigation `ImportType`, title id, `isSelected`) and `input: ImportInputUIModel` — the placeholder id and the four per-kind booleans the composables used to derive by switching on `GemWalletImportKind`; `ContactAddressInput.fields` became `showsMemo`, since Core's field order is fixed. Closed with all ten classes translated; the field-level `GemNameRecordState` hand-offs are the shared components' contract, B67.
 
