@@ -96,7 +96,6 @@ Re-checked on 2026-09-15 the way the Android dp items were: most of the 31 hits 
 - **X90** **M** `core/gemstone/src/models/remote_types.rs` — 1929 lines.
 - **X91** **M** `core/crates/primitives/src/chain_config.rs` — 1388.
 - **X92** **M** `core/gemstone/src/message/signer.rs` — 771.
-- **X93** **M** `ios/Packages/GemstonePrimitives/TestKit/GemServiceMocks.swift` — 1047 lines of mocks in one file.
 - **X94** **M** `ios/Packages/PrimitivesComponents/Sources/Extensions/Gemstone+Localized.swift` — 499 lines; the shared mapper is becoming the place every module's leftovers land.
 - **X95** **M** `android/ui/.../components/list_head/AmountListHead.kt` (516) and `chart/GemCandlestickChart.kt` (470).
 - **X96** **S** `android/data/services/store/.../database/di/Migration_71_72.kt` (546) and `Migration_41_42.kt` (406) — confirm both are still reachable from the oldest supported schema.
