@@ -1,5 +1,8 @@
 package com.gemwallet.android.features.import_wallet.viewmodels
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ext.toPrimitives
 import uniffi.gemstone.GemWalletDefaultName
 import androidx.lifecycle.ViewModel
@@ -9,7 +12,6 @@ import kotlinx.coroutines.CancellationException
 import uniffi.gemstone.GemNameServiceInterface
 import com.gemwallet.android.ext.words
 import uniffi.gemstone.GemMnemonicInterface
-import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemWalletServiceInterface
 import uniffi.gemstone.GemWalletImportResult
 import com.gemwallet.android.ext.toGem
@@ -36,6 +38,7 @@ class ImportViewModel @Inject constructor(
     private val service: GemWalletServiceInterface,
     nameService: GemNameServiceInterface,
     private val mnemonic: GemMnemonicInterface,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     fun invalidPhraseWords(text: String): Set<String> = mnemonic.findInvalidWords(text.words()).toSet()
@@ -77,7 +80,7 @@ class ImportViewModel @Inject constructor(
         state.update {
             it.copy(
                 importType = importType,
-                defaultWalletName = defaultName.text,
+                defaultWalletName = defaultName.text.string(context),
                 chainName = chainName,
                 tabs = tabs,
             )
@@ -129,7 +132,7 @@ data class ImportViewModelState(
     val loading: Boolean = false,
     val error: String = "",
     val importType: ImportType = ImportType(GemWalletImportKind.PHRASE),
-    val defaultWalletName: GemLocalizedText? = null,
+    val defaultWalletName: String? = null,
     val chainName: String = "",
     val tabs: List<GemWalletImportKind> = emptyList(),
     val data: String = "",
@@ -154,7 +157,7 @@ data class ImportUIState(
     val loading: Boolean = false,
     val error: String = "",
     val importType: ImportType = ImportType(GemWalletImportKind.PHRASE),
-    val defaultWalletName: GemLocalizedText? = null,
+    val defaultWalletName: String? = null,
     val chainName: String = "",
     val tabs: List<GemWalletImportKind> = emptyList(),
     val dataError: Throwable? = null,

@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.settings.networks.viewmodels
 
+import android.content.Context
 import com.wallet.core.primitives.Chain
 import io.mockk.coEvery
 import io.mockk.every
@@ -81,7 +82,7 @@ class NetworksViewModelTest {
             nodesByCall = listOf(listOf(node("a"), node("b"))),
             statuses = mapOf("a" to reachable(10UL), "b" to reachable(11UL)),
         )
-        val viewModel = NetworksViewModel(service, dispatcher).also { models.add(it) }
+        val viewModel = NetworksViewModel(service, dispatcher, mockk<Context> { every { getString(any()) } returns "Error"; every { getString(any(), *anyVararg()) } returns "Error" }).also { models.add(it) }
 
         viewModel.onSelectedChain(Chain.Ethereum)
         advanceUntilIdle()
@@ -96,7 +97,7 @@ class NetworksViewModelTest {
             nodesByCall = listOf(listOf(node("a"), node("b")), listOf(node("a"))),
             statuses = mapOf("a" to reachable(10UL), "b" to reachable(11UL)),
         )
-        val viewModel = NetworksViewModel(service, dispatcher).also { models.add(it) }
+        val viewModel = NetworksViewModel(service, dispatcher, mockk<Context> { every { getString(any()) } returns "Error"; every { getString(any(), *anyVararg()) } returns "Error" }).also { models.add(it) }
         viewModel.onSelectedChain(Chain.Ethereum)
         advanceUntilIdle()
 

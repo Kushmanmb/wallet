@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.import_wallet.viewmodels
 
+import android.content.Context
 import com.gemwallet.android.ext.toGem
 import uniffi.gemstone.GemMnemonic
 import io.mockk.coEvery
@@ -71,6 +72,11 @@ class ImportViewModelTest {
         service = mockk(relaxed = true),
         nameService = nameService,
         mnemonic = GemMnemonic(),
+        context = mockk<Context> {
+            every { getString(any()) } returns "Wallet"
+            every { getString(any(), *anyVararg()) } returns "Wallet"
+        },
+
     )
 
     @Before
