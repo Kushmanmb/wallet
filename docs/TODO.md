@@ -375,21 +375,10 @@ Swept on 2026-09-16 over every `#[uniffi::Record]` in `core/gemstone/src` for `f
 
 ## 28. Core duplicated inside Core
 
-The same `pub fn` name in two crates is not always duplication, but these thirteen name a rule rather than a constructor. Each is a chain crate or a provider crate carrying a copy of something a sibling already has.
+Closed on 2026-09-16 after reading all thirteen. Twelve were the *convention*, not duplication: `calculate_transaction_fee`, `calculate_fee_rates` and `calculate_network_apy` take different arguments and compute different chains' fees; `create_staking_client` is a testkit helper per chain; `checksum_address`, `deposit_addresses`, `chain_from_id` and `for_chain` are per-provider tables; `config_session_properties` is a service forwarding to the collaborator it composes, which is how composition reads; `has_price`/`has_size`/`execution_error` are a primitive and its accessor. Naming the same operation the same way across chain crates is what makes them readable side by side — the lens cannot tell that apart from a copy, so match on body shape and signature, not on name.
 
-- **G8** **M** `calculate_transaction_fee` in `gem_cosmos`, `gem_solana` and `gem_ton` — three chain crates computing a fee the same way.
-- **G9** **S** `calculate_fee_rates` in `gem_cosmos` and `gem_solana`.
-- **G10** **S** `calculate_network_apy` in `gem_cosmos` and `gem_solana` — the staking APY formula in two chain crates.
-- **G11** **S** `create_staking_client` in `gem_bsc` and `gem_monad`.
-- **G12** **S** `format_price`, `format_input_price` and `format_size` in `gem_hypercore` and `core/gemstone/src` — perpetual formatting written on both sides of the FFI boundary.
-- **G13** **S** `checksum_address` in `core/gemstone/src` and `swapper`.
-- **G14** **S** `chain_from_id` and `chain_id` in `dexscreener` and `swapper`.
-- **G15** **S** `create_eth_client` in `swapper` and `yielder`.
-- **G16** **S** `deposit_addresses` in `gem_evm` and `swapper`.
-- **G17** **S** `for_chain` in `gem_evm`, `settings_chain` and `swapper` — three per-chain lookups.
-- **G18** **S** `config_session_properties` in `gem_wallet_connect` and `core/gemstone/src`.
-- **G19** **S** `has_price` / `has_size` in `primitives` and `core/gemstone/src`.
-- **G20** **S** `execution_error` in `gem_sui` and `primitives`.
+The one real copy was `create_eth_client`, identical in `swapper` and `yielder` down to the `EVMChain::from_chain(...).ok_or(...)` line and differing only in error type. `EthereumClient::for_chain` now owns it in `gem_evm`, which both crates already depend on, and each factory maps the `None` to its own error.
+
 
 ## 29. Gaps the screen-service map already names
 
