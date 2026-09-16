@@ -24,6 +24,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import com.gemwallet.android.model.AssetFilter
+import com.gemwallet.android.model.chains
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -90,7 +93,11 @@ class BaseAssetSelectViewModelTest {
             every { this@mockk.invoke() } returns MutableStateFlow(Session(wallet = wallet, currency = Currency.USD))
         }
         val search = object : SelectSearch {
-            override fun items(filters: Flow<SelectAssetFilters?>): Flow<List<AssetInfo>> = flowOf(items)
+            override fun items(filters: Flow<SelectAssetFilters?>): Flow<List<AssetInfo>> = filters.map { current ->
+                val query = current?.queryFilters().orEmpty()
+                val chains = query.chains()
+                items.filter { (chains.isEmpty() || it.asset.id.chain in chains) && (AssetFilter.HasBalance !in query || it.balance.totalAmount > 0.0) }
+            }
         }
         return BaseAssetSelectViewModel(session, recents, service, search, GemSelectAssetType.Send)
             .also { models.add(it) }
