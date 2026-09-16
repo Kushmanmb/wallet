@@ -20,7 +20,7 @@ public struct DelegationViewModel: Sendable {
     private let asset: Asset
     private let formatter: ValueFormatter
     private let service: any GemStakeServiceProtocol
-    private let priceFormatter: CurrencyFormatter
+    private let priceViewModel: PriceViewModel
     public let validatorModel: ValidatorViewModel
     public let destination: GemDelegationDestination
 
@@ -37,7 +37,7 @@ public struct DelegationViewModel: Sendable {
         self.asset = asset
         self.formatter = formatter
         self.service = service
-        priceFormatter = CurrencyFormatter(type: .currency, currencyCode: currency.rawValue)
+        priceViewModel = PriceViewModel(price: delegation.price, currencyCode: currency.rawValue)
         validatorModel = ValidatorViewModel(row: service.validatorRow(validator: delegation.validator.toGem()))
         self.destination = destination
     }
@@ -67,11 +67,7 @@ public struct DelegationViewModel: Sendable {
     }
 
     public var fiatValueText: String? {
-        guard
-            let price = delegation.price,
-            let balance = try? formatter.double(from: delegation.base.balance, decimals: asset.decimals.asInt)
-        else { return nil }
-        return priceFormatter.string(price.price * balance)
+        priceViewModel.fiatValueText(value: delegation.base.balance, decimals: asset.decimals.asInt)
     }
 
     private var showsRewards: Bool {
@@ -84,12 +80,8 @@ public struct DelegationViewModel: Sendable {
     }
 
     public var rewardsFiatValueText: String? {
-        guard
-            showsRewards,
-            let price = delegation.price,
-            let rewards = try? formatter.double(from: delegation.base.rewards, decimals: asset.decimals.asInt)
-        else { return nil }
-        return priceFormatter.string(price.price * rewards)
+        guard showsRewards else { return nil }
+        return priceViewModel.fiatValueText(value: delegation.base.rewards, decimals: asset.decimals.asInt)
     }
 
     public var validatorText: String {

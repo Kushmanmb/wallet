@@ -114,23 +114,8 @@ public struct AssetDataViewModel: Sendable {
     }
 
     public var fiatBalanceText: String {
-        guard
-            let price = priceViewModel.price,
-            balanceViewModel.balanceAmount > 0
-        else {
-            return .empty
-        }
-        guard let value = try? CryptoFiatConverter().toFiat(
-            value: balanceViewModel.total,
-            decimals: UInt32(asset.decimals),
-            price: price.price,
-        ) else {
-            return .empty
-        }
-        return CurrencyFormatter(
-            type: .currency,
-            currencyCode: currency.rawValue,
-        ).string(Double(value) ?? .zero)
+        guard balanceViewModel.balanceAmount > 0 else { return .empty }
+        return priceViewModel.fiatValueText(value: balanceViewModel.total, decimals: asset.decimals.asInt) ?? .empty
     }
 
     public var isEnabled: Bool {

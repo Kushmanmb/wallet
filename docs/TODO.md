@@ -72,6 +72,8 @@ The standing goal, restated on 2026-09-16: **any business logic moves to Gemston
 - Margin usage on the portfolio screen. Both apps computed `account_value * usage` and `usage * 100` and composed the same `"value (percent)"`. `PortfolioMarginUsage` carries `used_value` and `usage_percent`.
 - Crypto to fiat. iOS converted through `CryptoFiatConverter`; Android multiplied two doubles in `BalanceInfoUIModel`, `DelegationInfo` and `AssetPriceValue`, which loses Core's precision rules. All of them go through Core now, and `GemSwapValue::fiat_value` is exported for the swap screens.
 
+Crypto to fiat came back on 2026-09-16: four iOS sites still read the atomic value into a `Double` and multiplied it by the price — the asset balance, the swap pay row, the swap provider row and both delegation rows — which is the precision loss Android had already been fixed for. `CryptoFiatConverter.to_fiat` no longer throws (a price that is not a number is not a price, and a `BigInt` always stringifies), and `PriceViewModel.fiatValueText(value:decimals:)` is the one iOS path into it.
+
 Checked and clean: the price-impact model, the swap rate text and Android's `EquivalentValue` all read a Core value and map only the label, the colour or the locale format.
 
 A fifth landed the same day: the developer screen. iOS held five stores beside its service and built an eleven-row table of sample transactions by hand; Android held the service alone and could offer none of the actions. `GemDeveloperStore` names the seven database operations, `sample_transactions` owns the table, and both screens now reach the database only through `GemDeveloperService`.
