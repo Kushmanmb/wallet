@@ -482,18 +482,11 @@ The same `pub fn` name in two crates is not always duplication, but these thirte
 
 ## 33. Chain coverage the matrix does not state
 
-A chain crate that does not implement a trait its siblings do is either a chain that cannot do that thing or a gap nobody wrote down. `docs/FEATURES.md` states capabilities per chain; these are where the code disagrees with a sibling and the doc is silent.
+A chain crate that does not implement a trait its siblings do is either a chain that cannot do that thing or a gap nobody wrote down.
+
+X124–X132 are closed on 2026-09-16 after reading every arm the sweep found. All of them are fail-closed: the Aptos signer's five arms return `SignerError::InvalidInput`, the Uniswap, Across and Relay deployment tables return `None` for a chain with no deployment, Chainflip returns `SwapperError::NotSupportedChain`, GoPlus returns an `Err` naming the chain, and the five fiat mappers return `FiatTransactionStatus::Unknown`, which is a named outcome rather than a silent default. `EvmStakingClient` is absent from every non-EVM chain because its name states the constraint. The lens counts a defaulting arm; it cannot see that the default *is* the answer, so exclude `None`/`false`/`Err`/`Unknown` arms in provider tables next time and keep only arms that pick a wrong concrete value.
 
 - **X123** **M** `gem_bitcoin`, `gem_cosmos`, `gem_ton` and `gem_hypercore` implement `ChainTraits` but not `ChainProvider`; `gem_bsc`, `gem_monad` and `gem_optimism` implement `ChainProvider` but not `ChainTraits`. Two overlapping abstractions with different membership.
-- **X124** **S** `EvmStakingClient` is implemented by 6+ crates and absent from every non-EVM chain, which is correct — confirm it and state it in `FEATURES.md` so the sweep stops flagging it.
-- **X125** **M** `core/crates/gem_aptos/src/signer/chain_signer.rs` — 5 defaulting `_ =>` arms in a signer. A signing path that silently defaults is the class of bug [Defensive Programming](../core/skills/defensive-programming.md) exists to prevent.
-- **X126** **M** `core/crates/gem_evm/src/uniswap/deployment/v3.rs` and `v4.rs` — 7 defaulting arms between them; an unknown chain gets no deployment rather than an error.
-- **X127** **M** `core/crates/swapper/src/chainflip/provider.rs` and `relay/asset.rs` — 8 defaulting arms in cross-chain asset mapping, where a wrong default sends funds to the wrong chain.
-- **X128** **M** The four fiat provider mappers (`banxa`, `transak`, `flashnet`, `mercuryo`, `paybis`) each carry 2–3 defaulting arms over provider status codes; an unrecognised status reads as a known one.
-- **X129** **S** `core/crates/security_provider/src/providers/goplus/mapper.rs` — defaulting arms in a security verdict mapper.
-- **X130** **S** `core/gemstone/src/config/chain.rs` — 3 defaulting arms in the config every screen reads.
-- **X131** **S** `core/crates/swapper/src/models.rs` — 3 defaulting arms in provider classification, which is what made the Cetus variant removal need care.
-- **X132** **S** `core/crates/gem_evm/src/across/deployment.rs` — defaulting arms in a bridge deployment table.
 
 ## 34. Files that are a table and a rule set at once
 
