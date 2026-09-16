@@ -98,7 +98,10 @@ Re-checked on 2026-09-15 the way the Android dp items were: most of the 31 hits 
 - **X92** **M** `core/gemstone/src/message/signer.rs` — 771.
 - **X94** **M** `ios/Packages/PrimitivesComponents/Sources/Extensions/Gemstone+Localized.swift` — 499 lines; the shared mapper is becoming the place every module's leftovers land.
 - **X95** **M** `android/ui/.../components/list_head/AmountListHead.kt` (516) and `chart/GemCandlestickChart.kt` (470).
-- **X96** **S** `android/data/services/store/.../database/di/Migration_71_72.kt` (546) and `Migration_41_42.kt` (406) — confirm both are still reachable from the oldest supported schema.
+
+### The two Android migration files
+
+**X96** closed on 2026-09-16. Both are reachable: `provideRoom` registers every step from 41 to 71 by hand and then `gemDatabaseMigrations` from 71 to the current 94, so the chain from the oldest schema is unbroken and neither can be deleted without breaking an upgrade from an old install. `Migration_71_72.kt` stays as one file — it is one schema step whose nine ordered helpers have to run in one transaction, and the comment at the top says why the order matters. `Migration_41_42.kt` was the real find: it held three migrations (41→42, 42→43, 43→44) under one migration's name, which is why it measured long. Each now has its own file, the way every migration from 44 on already did.
 
 ### The services factory
 
