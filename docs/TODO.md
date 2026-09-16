@@ -59,7 +59,6 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 - **X62** **S** iOS `PriceAlerts/.../SetPriceAlertViewModel.swift` (20).
 - **X63** **S** iOS `Settings/.../PreferencesViewModel.swift` (18), `AboutUsViewModel.swift` (18), `SecurityViewModel.swift` (17) — all three moved to Core rows with no app test.
 - **X64** **S** iOS `Support/.../SupportChatSceneViewModel.swift` (16) and `SupportMessageBubbleViewModel.swift` (19).
-- **X66** **S** Android `bridge/viewmodels` — `WCRequestViewModel.kt`, `WCAuthViewModel.kt`.
 
 ## 11. Missing tests
 
@@ -85,7 +84,7 @@ Swept on 2026-09-15 over every non-preview, non-test iOS file: 25 hits, of which
 
 ### Android view models with no test
 
-49 of them; X65 and X66 already name five.
+49 of them; X65 already names three.
 
 - **T30** **M** `features/bridge/viewmodels` — the remaining three (`ProposalSceneViewModel`, `ConnectionViewModel`, `ConnectionsViewModel`).
 - **T31** **M** `features/asset_select/viewmodels` — all five.
