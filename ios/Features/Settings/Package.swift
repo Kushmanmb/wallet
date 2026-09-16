@@ -58,6 +58,22 @@ let package = Package(
             ],
         ),
         .testTarget(
+            name: "SettingsTests",
+            dependencies: [
+                "Settings",
+                "Primitives",
+                "PrimitivesComponents",
+                "Gemstone",
+                "GemstonePrimitives",
+                "Components",
+                "Localization",
+                .product(name: "GemstoneServices", package: "GemstoneServices"),
+                .product(name: "GemstoneServicesTestKit", package: "GemstoneServices"),
+                .product(name: "PrimitivesTestKit", package: "Primitives"),
+                .product(name: "GemstonePrimitivesTestKit", package: "GemstonePrimitives"),
+            ],
+        ),
+        .testTarget(
             name: "RewardsTests",
             dependencies: [
                 "Settings",

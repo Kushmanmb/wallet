@@ -1280,3 +1280,70 @@ public final class GemWalletConnectServiceMock: GemWalletConnectServiceProtocol,
         GemWalletConnectRpcError(code: 4001, message: "User rejected")
     }
 }
+
+public final class GemSettingsServiceMock: GemSettingsServiceProtocol, @unchecked Sendable {
+    public var sectionsValue: [GemSettingsSection] = []
+    public var securitySectionsValue: [GemSecuritySection] = []
+    public var perpetualDefaults = GemPerpetualDefaults(leverage: 3, takeProfitPercent: 25, stopLossPercent: 10)
+    public var preferencesSections: [GemPreferencesSection] = []
+    public var setDefaultsError: Error?
+
+    public private(set) var storedDefaults: [GemPerpetualDefaults] = []
+    public private(set) var securitySectionsCalls: [Bool] = []
+    public private(set) var perpetualsEnabledCalls: [Bool] = []
+
+    public init() {}
+
+    public func preferences(currency: Gemstone.Currency, perpetualsEnabled: Bool) -> GemPreferencesState {
+        perpetualsEnabledCalls.append(perpetualsEnabled)
+        return GemPreferencesState(
+            currency: GemCurrencyRow(currency: currency, flag: "🇺🇸"),
+            sections: preferencesSections,
+            perpetualDefaults: perpetualDefaults,
+        )
+    }
+
+    public func sections(wallets _: [Gemstone.Wallet], notificationsAvailable _: Bool, walletConnectAvailable _: Bool) -> [GemSettingsSection] {
+        sectionsValue
+    }
+
+    public func securitySections(authenticationEnabled: Bool) -> [GemSecuritySection] {
+        securitySectionsCalls.append(authenticationEnabled)
+        return securitySectionsValue
+    }
+
+    public func setPerpetualDefaults(defaults: GemPerpetualDefaults) throws {
+        if let setDefaultsError { throw setDefaultsError }
+        storedDefaults.append(defaults)
+        perpetualDefaults = defaults
+    }
+}
+
+public final class GemAppUpdateServiceMock: GemAppUpdateServiceProtocol, @unchecked Sendable {
+    public var newestValue: Gemstone.Release?
+    public var newestError: Error?
+
+    public private(set) var skippedVersions: [String] = []
+
+    public init(newest: Gemstone.Release? = nil) {
+        newestValue = newest
+    }
+
+    public func check(store _: Gemstone.PlatformStore, currentVersion _: String) async throws -> Gemstone.Release? {
+        if let newestError { throw newestError }
+        return newestValue
+    }
+
+    public func isVersionHigher(new: String, current: String) -> Bool {
+        new.compare(current, options: .numeric) == .orderedDescending
+    }
+
+    public func newest(store _: Gemstone.PlatformStore, currentVersion _: String) async throws -> Gemstone.Release? {
+        if let newestError { throw newestError }
+        return newestValue
+    }
+
+    public func skip(version: String) throws {
+        skippedVersions.append(version)
+    }
+}

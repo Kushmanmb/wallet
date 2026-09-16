@@ -19,6 +19,7 @@ public final class SecurityViewModel {
 
     var isPresentingAlertMessage: AlertMessage?
     var isEnabled: Bool
+    private var storedLockPeriod: LockPeriod
     var isPrivacyLockEnabled: Bool
     var isHideBalanceEnabled: Bool {
         get {
@@ -30,7 +31,8 @@ public final class SecurityViewModel {
     }
 
     var lockPeriod: LockPeriod {
-        didSet { updateLockPeriod() }
+        get { storedLockPeriod }
+        set { updateLockPeriod(to: newValue) }
     }
 
     var allLockPeriods: [LockPeriod] {
@@ -46,7 +48,7 @@ public final class SecurityViewModel {
         self.settings = settings
         self.preferences = preferences
 
-        lockPeriod = service.lockPeriod
+        storedLockPeriod = service.lockPeriod
         isEnabled = service.requiresAuthentication
         isPrivacyLockEnabled = service.isPrivacyLockEnabled
     }
@@ -92,7 +94,7 @@ extension SecurityViewModel {
         do {
             try await service.enableAuthentication(isEnabled, reason: SecurityViewModel.reason)
             isPrivacyLockEnabled = service.isPrivacyLockEnabled
-            lockPeriod = service.lockPeriod
+            storedLockPeriod = service.lockPeriod
         } catch let error as BiometryAuthenticationError {
             if !error.isAuthenticationCancelled {
                 isPresentingAlertMessage = AlertMessage(message: error.localizedDescription)
@@ -114,12 +116,15 @@ extension SecurityViewModel {
         }
     }
 
-    func updateLockPeriod() {
+    func updateLockPeriod(to period: LockPeriod) {
+        guard period != storedLockPeriod else { return }
+        let previous = storedLockPeriod
+        storedLockPeriod = period
         do {
-            try service.update(period: lockPeriod)
+            try service.update(period: period)
         } catch {
             isPresentingAlertMessage = AlertMessage(message: error.localizedDescription)
-            lockPeriod = service.lockPeriod
+            storedLockPeriod = previous
         }
     }
 }

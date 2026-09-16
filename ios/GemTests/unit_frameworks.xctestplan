@@ -199,6 +199,13 @@
     {
       "target": {
         "containerPath": "container:Features/Settings",
+        "identifier": "SettingsTests",
+        "name": "SettingsTests"
+      }
+    },
+    {
+      "target": {
+        "containerPath": "container:Features/Settings",
         "identifier": "CurrencyTests",
         "name": "CurrencyTests"
       }
