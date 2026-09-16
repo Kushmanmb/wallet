@@ -52,7 +52,7 @@ class AddNodeViewModelTest {
 
     @Test
     fun `an untouched form is idle`() = runTest(dispatcher) {
-        val viewModel = AddNodeViewModel(service { check })
+        val viewModel = AddNodeViewModel(service { check }, dispatcher)
 
         viewModel.init(Chain.Ethereum)
         advanceUntilIdle()
@@ -63,7 +63,7 @@ class AddNodeViewModelTest {
 
     @Test
     fun `a node that answers is ready to import`() = runTest(dispatcher) {
-        val viewModel = AddNodeViewModel(service { check })
+        val viewModel = AddNodeViewModel(service { check }, dispatcher)
         viewModel.init(Chain.Ethereum)
 
         viewModel.url.value = "https://node"
@@ -76,7 +76,7 @@ class AddNodeViewModelTest {
 
     @Test
     fun `a rejected network id is reported and cannot be imported`() = runTest(dispatcher) {
-        val viewModel = AddNodeViewModel(service { throw GemAddNodeException.InvalidNetworkId() })
+        val viewModel = AddNodeViewModel(service { throw GemAddNodeException.InvalidNetworkId() }, dispatcher)
         viewModel.init(Chain.Ethereum)
 
         viewModel.url.value = "https://node"
@@ -89,7 +89,7 @@ class AddNodeViewModelTest {
 
     @Test
     fun `clearing the field stops asking`() = runTest(dispatcher) {
-        val viewModel = AddNodeViewModel(service { check })
+        val viewModel = AddNodeViewModel(service { check }, dispatcher)
         viewModel.init(Chain.Ethereum)
 
         viewModel.url.value = ""

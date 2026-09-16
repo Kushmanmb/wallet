@@ -388,6 +388,7 @@ class FiatViewModelTest {
             getAssetPriceUsd = getAssetPriceUsd,
             service = service,
             context = context,
+            ioDispatcher = testDispatcher,
             savedStateHandle = SavedStateHandle(arguments),
         )
     }
