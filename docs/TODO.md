@@ -403,17 +403,12 @@ Each of these is one decision that unblocks a family of items above. They are li
 
 ## 37. Performance budgets nothing measures yet
 
-[PERFORMANCE.md](PERFORMANCE.md) sets p95 ≤ 100 ms to first feedback, ≤ 200 ms to useful content from local data, and ≤ 100 ms from a received update to the frame. The budgets exist; these screens have no measurement against them.
+[PERFORMANCE.md](PERFORMANCE.md) sets p95 ≤ 100 ms to first feedback, ≤ 200 ms to useful content from local data, and ≤ 100 ms from a received update to the frame.
 
-- **PERF20** **M** The wallet screen against the warm-data budget, on both apps, with 1000 assets seeded.
-- **PERF21** **M** The asset screen (S36, 30 mutable members, 10-collaborator service).
-- **PERF22** **M** The confirm screen, whose rules file is the widest in Core (X133).
-- **PERF23** **M** The swap screen's quote refresh against the update-to-frame budget.
-- **PERF24** **M** The activity list with its filters applied (B20, C10).
-- **PERF25** **M** The perpetuals screen, which holds a live socket and a chart (X107).
-- **PERF26** **S** Launch to the wallet screen on both apps, which is what `GemAppStartService` (X117) orchestrates.
-- **PERF27** **S** The select-asset sheet, which composes six services (X114) and filters in the view model (S25).
-- **PERF28** **S** The iOS `RootSceneViewModel.currentWallet` database read on every `body` pass (O35) — measure it before deciding whether it matters.
+Attempted on 2026-09-16 and the attempt is the finding. `am start -W` over eight cold launches of the debug build on the API 17 emulator gives a median `TotalTime` of 4.7 s (range 3.7–8.2 s), and `dumpsys gfxinfo` right after launch reports 5 frames, 100% janky — statistically empty. Neither number is evidence: the debug build has no R8, and PERFORMANCE.md § How to test says measurement needs release-like builds on physical devices, with 5 warmups and 30 measured runs.
+
+The prerequisite is that **no harness exists**: there is no Macrobenchmark module in `android/settings.gradle.kts` and no XCTest metric target on iOS, and the doc's own escape hatch — "until a benchmark harness exists for a journey, record the manual profiler setup and steps" — is what these nine items were. Adding a benchmark module and wiring it into CI is scaffolding to agree before any of the nine can produce a number worth comparing. The eight launch samples above are recorded so the harness has something to sanity-check against.
+
 
 ## Closed with no change
 
