@@ -1388,3 +1388,23 @@ public final class GemSupportServiceMock: GemSupportServiceProtocol, @unchecked 
         if let syncError { throw syncError }
     }
 }
+
+public final class GemTransactionsServiceMock: GemTransactionsServiceProtocol, @unchecked Sendable {
+    public var filterChainsValue: [Gemstone.Chain] = []
+    public var syncError: Error?
+
+    public private(set) var syncedAssetIds: [Gemstone.AssetId?] = []
+
+    public init(filterChains: [Gemstone.Chain] = []) {
+        filterChainsValue = filterChains
+    }
+
+    public func filterChains(wallet _: Gemstone.Wallet) -> [Gemstone.Chain] { filterChainsValue }
+
+    public func getCurrency() -> Gemstone.Currency { Primitives.Currency.usd.toGem() }
+
+    public func sync(assetId: Gemstone.AssetId?) async throws {
+        syncedAssetIds.append(assetId)
+        if let syncError { throw syncError }
+    }
+}
