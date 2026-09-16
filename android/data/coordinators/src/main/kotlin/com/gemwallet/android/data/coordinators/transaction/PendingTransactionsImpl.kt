@@ -5,7 +5,6 @@ import com.gemwallet.android.application.transactions.cases.TransactionsRequestF
 import com.gemwallet.android.application.session.cases.GetCurrentWalletId
 import com.gemwallet.android.data.services.gemstone.stores.GemstoneTransactionStore
 import com.wallet.core.primitives.TransactionState
-import com.gemwallet.android.domains.asset.assetConfig
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -22,7 +21,7 @@ class GetPendingTransactionsCountImpl(
         .flatMapLatest { walletId ->
             transactionStore.observeTransactionsCount(
                 walletId,
-                TransactionsRequestFilter.activityDefaults(assetConfig.defaultTokenRank()) + TransactionsRequestFilter.States(pendingTransactionStates),
+                TransactionsRequestFilter.activityDefaults() + TransactionsRequestFilter.States(pendingTransactionStates),
             )
         }
 }

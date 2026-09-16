@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.transactions.cases.GetTransactions
 import com.gemwallet.android.application.transactions.cases.TransactionsRequestFilter
-import com.gemwallet.android.domains.asset.assetConfig
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.ext.toPrimitives
 import uniffi.gemstone.GemTransactionFilter
@@ -66,12 +65,7 @@ class TransactionsViewModel @Inject constructor(
         chainsFilter,
         typeFilter,
     ) { chains, types ->
-        buildList {
-            addAll(TransactionsRequestFilter.activityDefaults(assetConfig.defaultTokenRank()))
-            if (chains.isNotEmpty()) add(TransactionsRequestFilter.Chains(chains))
-            val allowedTypes = types.flatMap { filter -> filter.transactionTypes().map { type -> type.toPrimitives() } }
-            if (allowedTypes.isNotEmpty()) add(TransactionsRequestFilter.Types(allowedTypes))
-        }
+        TransactionsRequestFilter.activity(chains, types)
     }
     .flatMapLatest { filters -> getTransactions.getTransactions(filters) }
     .stateIn(
