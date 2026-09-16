@@ -276,7 +276,8 @@ The rule is in [ARCHITECTURE.md](ARCHITECTURE.md) §7 and now covers stores as w
 
 ## 24. Chain-specific branches in app code
 
-- **N10** **S** `ios/Packages/Primitives/Sources/WalletId.swift:98` and `android/gemcore/.../wallet/cases/WalletIdGenerator.kt:22` — both apps pick the Ethereum account to seed a wallet id. The same rule, written twice, in the identity path.
+N10 closed on 2026-09-16, and the sweep was right that the rule was written twice with a divergence — iOS refused a multicoin wallet with no Ethereum account, Android fell back to the first account, so a malformed account list would have produced a different id on each platform. Neither is on the live path: Core's `GemWalletService` creates wallets now, iOS's `WalletId.from(type:accounts:)` had only test callers and is deleted, and Android's `WalletIdGenerator` is reached only by `Migration_63_64`, whose behaviour must stay frozen because it has already run on installed databases. A migration is the one place a rule does not get consolidated.
+
 - **N11** **S** `ios/Packages/PrimitivesComponents/.../BannerViewModel.swift:41` — a `case .bitcoin` branch decides banner behaviour.
 - **N12** **S** `ios/Packages/PrimitivesComponents/Sources/Types/ChainImage.swift` — 14 chain cases; confirm against Android's chain icon map, which the mapper contract allows, and close if it matches.
 - **N13** **S** `ios/Packages/PrimitivesComponents/.../SwapProviderType+Gemstone.swift:25` — a lone `case .hyperliquid` beside the provider icon map.
