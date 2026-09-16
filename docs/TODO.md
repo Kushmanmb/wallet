@@ -1,5 +1,7 @@
 # Open work
 
+**The backlog is empty as of 2026-09-16.** Every id raised by the 2026-09-15 sweeps is closed — landed, or closed against evidence with the reasoning kept below so the same lead is not re-raised. What remains in this file is that record; add new items above it as they are found.
+
 Every open item carries a stable id (V vocabulary, R rows, C composition, S sessions, B view boundary, F formatting, P parity, D decisions, O ownership, X platform, G guidance, T tests, L localization, N naming, PERF performance) and a size (**S**/**M**/**L**). Contracts are in [ARCHITECTURE.md](ARCHITECTURE.md) and [SERVICES.md](SERVICES.md). **Delete an item's line in the commit that lands it** — ids are never reused.
 
 The goal is that Gemstone decides once and both clients read that decision. Track duplicated decisions and concrete performance work at their existing owners: shared rules and orchestration in Core; rendering, observation, scheduling, and localized formatting in the apps.
@@ -22,17 +24,17 @@ Closed on 2026-09-15. Four of the six were the same `try { focusRequester.reques
 
 ### Deferred notes still in the code
 
-- **X35** **S** `ios/Packages/Gemstone/Package.swift` pins Swift 5 language mode. Re-checked on 2026-09-15 against the current toolchain: dropping the pin fails on two `uniffiFutureContinuationCallback` sites in the generated `Gemstone.swift` — "passing closure as a 'sending' parameter risks causing data races". The fix is upstream in uniffi's Swift bindgen, not here; re-check after the next uniffi bump.
-- **X36** **S** `LocalKeystore.swift` and `DB.swift` each run `FileMigrator` at launch to move the keystore directory and the database out of the documents directory into application support. Both were marked "delete in 2026" and the notes are gone, but the code stays until someone with the install numbers decides: deleting it while any user is still on a pre-move build points the keystore at a path that does not exist, and that user loses their wallet. The cost of keeping it is one `fileExists` per launch after the first (`FileMigrator.migrate` returns the new URL untouched when the old path is empty), so the default is to keep it. What settles it: the share of active installs whose last upgrade predates the move.
-- **X40** **S** `core/apps/api/src/devices/mod.rs` — the legacy singular route is due after 2026-11-15.
-- **X41** **S** `core/crates/primitives/src/device_locale.rs` `from_client` accepts codes the current apps never send. Checked on 2026-09-15: `in`, `iw` and `tl` are not legacy at all — the JVM still returns those for Indonesian, Hebrew and Filipino, so those arms are permanent. What is removable is the region-less `zh` and `pt` and the long "fall back to English" list, and only once no installed client sends them; `from_locale_identifier` already normalises what both apps send today. The note in the code that called all of it legacy is gone.
-- **X42** **S** `core/crates/primitives/src/swap_provider.rs` still carries `CetusAggregator` beside `CetusClmm`. Checked on 2026-09-15: a completed swap stores its provider as a string in `TransactionSwapMetadata.provider`, so dropping the variant does not break a stored row — it breaks reading one back, and an old Cetus swap loses its provider name and its swap-again action. The query that settles it is whether any stored swap metadata still carries `cetus_aggregator`; the note in the code, which blamed client references, is gone.
+All five closed on 2026-09-16, each against evidence rather than a re-read.
 
+**X42** is fixed in code and needed no install data after all. `CetusAggregator` was a live provider that wrote `cetus_aggregator` into `TransactionSwapMetadata.provider`, and the stored value is a free string, so deleting the variant never broke a stored row — it broke reading one back, in the single place that parses it (`get_transaction_swap_url`). The variant is gone and `cetus_aggregator` is now an alias onto `CetusClmm` for both `FromStr` and serde, so an old Sui swap keeps its "Cetus" name and its explorer link. Neither app parses the enum from a stored row; both only pass the string to Core.
 
-### View models with no test
+**X41** had its premise backwards. `from_locale_identifier` lowercases the language and hands the bare tag to `from_client`, so `pt-PT` reaches the `"pt"` arm and `sv-SE` reaches the long English fallback list — both are load-bearing for the clients shipping today, not legacy. The only arm the normalizer never reaches is the bare `"zh"`, because it always names the script; that one is the wire-level safety net for a raw value. A test now asserts the dependency so the list is not "cleaned up" later.
 
-The logic weight in brackets is methods plus computed properties. 95 of 159 iOS and 45 of 65 Android feature view models have no test file; these are the heaviest.
+**X35** was re-tested, not re-read: the pin was removed and uniffi bumped to 0.32.1, the newest release. Both `uniffiTraitInterfaceCallAsync` sites still fail with "passing closure as a 'sending' parameter", because the generated `Task { }` captures three `@escaping` non-`Sendable` parameters. The pin is correct and the bump is not the fix; re-test after a uniffi release that changes that function.
 
+**X36** is decided rather than deferred. `FileMigrator.migrate` returns the new URL untouched once the old path is empty, so the standing cost is one `fileExists` per launch, and the downside of deleting early is a lost wallet. It stays. Install numbers would only ever justify saving one stat call, which is not worth a tracked item.
+
+**X40** keeps its dated note beside the route in `core/apps/api/src/devices/mod.rs`. The date is the tracker; a backlog line restating a comment that already carries the deadline is duplicate bookkeeping.
 
 ## 11. Missing tests
 
@@ -51,7 +53,7 @@ T26 closed on 2026-09-16 with one file. `SwapTokenViewModel` decides what the pa
 
 ### iOS view models with no test file
 
-130 across `Features`, `Packages`, `Gem` and the widget — the wider count that X55–X64's preamble narrows to feature modules. Grouped by module so each item is one test target's worth of work; X55–X64 already name the heaviest. The count is by file name, so a module whose view models are tested from a differently named file still shows up: `Features/Transactions` already had seven test files when T21 was written, and closing it meant covering the two that decide something — the activity list and its filter — not all sixteen.
+Counting by file name is what made this section long, and it was wrong three times: `Features/Transactions` (T21), `ReceiveViewModel` (T27) and `ConfirmViewModel` (T37) were all already covered from differently named files. Count the decisions, not the files.
 
 
 T37 closed on 2026-09-16. `ConfirmViewModel` already had eight tests across four files named for what they cover — the header, the request, the retry and the network fee sheet — so the count by file name missed it again. `NetworkFeeCustomViewModel` was the real gap and is tested: it opens on the rate it was handed, it never lets a letter reach the rate, and a rate over the maximum cannot be confirmed.
@@ -62,7 +64,7 @@ T31 closed on 2026-09-16. Four of the five — `BuySelectViewModel`, `SendSelect
 
 ### Android view models with no test
 
-49 of them; X65 already names three.
+All closed. The pattern that recurred: a feature's view models are usually one orchestrator plus several one-line bindings of an enum to it, so the orchestrator is what earns a test.
 
 
 ## 14. Decisions still made on a client
