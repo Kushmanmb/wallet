@@ -4,6 +4,8 @@ import uniffi.gemstone.GemAddNodeException
 import uniffi.gemstone.GemAddNodeFailure
 import uniffi.gemstone.GemAddNodeSession
 import uniffi.gemstone.GemChainSettingsServiceInterface
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -55,7 +57,7 @@ class AddNodeViewModel @Inject constructor(
         val current = session.value ?: return
         val status = current.viewState().canImport.takeIf { it }?.let { (current.check) } ?: return
         viewModelScope.launch {
-            if (runCatching { service.addNode(current.chain, status.url) }.isFailure) {
+            if (runCatching { withContext(Dispatchers.IO) { service.addNode(current.chain, status.url) } }.isFailure) {
                 session.value = current.onFailed(GemAddNodeFailure.UNAVAILABLE)
                 return@launch
             }
@@ -68,7 +70,7 @@ class AddNodeViewModel @Inject constructor(
     private suspend fun checkUrl(current: GemAddNodeSession) {
         session.value = current.onChecking()
         session.value = try {
-            current.onChecked(service.checkNode(current.chain, current.url))
+            current.onChecked(withContext(Dispatchers.IO) { service.checkNode(current.chain, current.url) })
         } catch (error: GemAddNodeException.InvalidUrl) {
             current.onFailed(GemAddNodeFailure.INVALID_URL)
         } catch (error: GemAddNodeException.InvalidNetworkId) {
