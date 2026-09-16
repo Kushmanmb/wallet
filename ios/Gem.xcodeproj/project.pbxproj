@@ -854,6 +854,7 @@
 				D8CFDEAD2E37FCA800D27283 /* Formatters */,
 				D8CFDEAF2E37FCB000D27283 /* Components */,
 				D8WIDGETGEMSTONE00000001 /* Gemstone */,
+				D8WIDGETGEMPRIMS00000001 /* GemstonePrimitives */,
 				D8WIDGET12345678901234 /* WidgetLocalization */,
 			);
 			productName = GemPriceWidgetExtension;
@@ -1871,6 +1872,10 @@
 		D9F015752F10654000000002 /* InAppNotifications */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = InAppNotifications;
+		};
+		D8WIDGETGEMPRIMS00000001 /* GemstonePrimitives */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GemstonePrimitives;
 		};
 		DF8421ED2C1526ED003F558C /* GemstonePrimitives */ = {
 			isa = XCSwiftPackageProductDependency;

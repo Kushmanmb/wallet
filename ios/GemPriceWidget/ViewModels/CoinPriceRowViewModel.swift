@@ -2,6 +2,7 @@
 
 import Components
 import Formatters
+import GemstonePrimitives
 import Style
 import SwiftUI
 
@@ -9,12 +10,12 @@ import SwiftUI
 @MainActor
 final class CoinPriceRowViewModel {
     private let coin: CoinPrice
-    private let currencyFormatter: PriceWidgetFormatter
+    private let currencyFormatter: CurrencyFormatter
     private let percentFormatter: PercentFormatter
 
     init(
         coin: CoinPrice,
-        currencyFormatter: PriceWidgetFormatter,
+        currencyFormatter: CurrencyFormatter,
         percentFormatter: PercentFormatter,
     ) {
         self.coin = coin
