@@ -216,10 +216,11 @@ Seven more closed on 2026-09-16. **P71 and V65 were backwards**: iOS already rea
 
 ## 22. URLs built in the app
 
+V60 closed on 2026-09-16: its five URLs are native app schemes — `tg://resolve?domain=`, `twitter://user?screen_name=`, `youtube://` — which have no Android counterpart because Android opens the same apps through intents. Core's `config/social.rs` already owns the web URLs; the scheme mapping is platform territory. 
+
 V61–V64 closed on 2026-09-16. Of the five iOS sites said to build the asset image URL, four are `#Preview` literals and test fixtures; the only production one is `WidgetPriceService`, which builds it by hand because the widget cannot import Gemstone — that is X159, not a separate item. V62's five "hand-built URLs" are three `UIApplication.openSettingsURLString` calls and a `URL(string:)` around a URL Core already supplied. V63 and V64 are a URI opener and two composables opening a link.
 
 - **V59** **M** `ios/Packages/GemstonePrimitives/Sources/Config.swift` (4 URLs) against `android/gemcore/.../AppUrl.kt` and `android/gemcore/.../ext/UpdateUrl.kt` — the app's own URLs are listed twice, once per platform.
-- **V60** **S** `ios/Packages/PrimitivesComponents/.../DeepLinkViewModel.swift` (5 URLs) — deep link targets built in a view model while Core owns `Deeplink::to_gem_url`.
 
 ## 23. Ownership: a view model holding more than its service
 
