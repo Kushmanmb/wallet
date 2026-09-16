@@ -129,6 +129,7 @@ struct ServicesFactory {
         )
         let nftService = Gemstone.GemNftService(api: deviceApiClient, store: GemstoneNftStore(store: stores.nftStore), session: walletSessionService)
         let transactionStateStore = GemstoneTransactionStateStore(store: stores.transactionStore, walletStore: stores.walletStore)
+        let gemstoneTransactionStore = GemstoneTransactionStore(store: stores.transactionStore)
         let transactionStateService = gatewayService.transactionStateService(
             store: transactionStateStore,
             assets: assetsService,
@@ -139,7 +140,7 @@ struct ServicesFactory {
         let transactionsService = Gemstone.GemTransactionsService(
             api: deviceApiClient,
             assets: assetsService,
-            store: GemstoneTransactionStore(store: stores.transactionStore),
+            store: gemstoneTransactionStore,
             addressStore: gemstoneAddressStore,
             walletPreferences: walletPreferencesService,
             preferences: preferencesService,
@@ -415,8 +416,16 @@ struct ServicesFactory {
                 platform: devicePlatform,
                 preferences: preferencesService,
                 walletPreferences: walletPreferencesService,
-                transactions: transactionStateStore,
+                transactionState: transactionStateStore,
+                transactions: gemstoneTransactionStore,
                 perpetual: perpetualService,
+                store: GemstoneDeveloperStore(
+                    transactionStore: stores.transactionStore,
+                    assetStore: stores.assetStore,
+                    stakeStore: stores.stakeStore,
+                    bannerStore: stores.bannerStore,
+                    priceStore: stores.priceStore,
+                ),
             ),
             deviceService: deviceService,
             notificationPermissions: notificationPermissions,

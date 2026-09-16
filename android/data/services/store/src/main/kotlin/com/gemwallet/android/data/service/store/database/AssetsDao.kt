@@ -19,6 +19,7 @@ import com.gemwallet.android.model.AssetFilter
 import com.gemwallet.android.model.chainsOrAssetIds
 import com.gemwallet.android.model.NO_QUERY_LIMIT
 import com.wallet.core.primitives.RecentActivityType
+import com.wallet.core.primitives.AssetType
 import com.wallet.core.primitives.Chain
 import kotlinx.coroutines.flow.Flow
 
@@ -416,4 +417,7 @@ interface AssetsDao {
             AND type IN (:types)
     """)
     suspend fun clearRecentAssets(walletId: String, types: List<RecentActivityType>)
+
+    @Query("DELETE FROM asset WHERE type != :nativeType")
+    suspend fun deleteTokens(nativeType: AssetType)
 }

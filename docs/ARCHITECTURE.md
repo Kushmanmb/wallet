@@ -970,6 +970,19 @@ An iOS view model holds **at most one** Core service, named `service`, and it is
 
 This limit does not count explicit platform ports such as a signer, keystore, observation source or navigation builder. Those remain narrow injected dependencies; they do not decide shared product behavior.
 
+A store is not one of those ports. A store is the database side of a Core service, and a view model that holds one has reached past the service into what the service owns — the same coupling a second service would be, by a shorter path. The developer screen was the last of these on iOS: it held `TransactionStore`, `AssetStore`, `StakeStore`, `BannerStore` and `PriceStore` beside `GemDeveloperServiceProtocol`, so the nine clear actions and the sample transaction table existed only on that platform. The operations moved onto `GemDeveloperStore` and the service exports them, which is what let Android offer the same actions from the service it already held:
+
+```swift
+DeveloperViewModel(walletId: walletId, service: developerService)
+```
+
+```kotlin
+class DevelopViewModel @Inject constructor(
+    private val service: GemDeveloperServiceInterface,
+    val notificationsAvailable: NotificationsAvailable,
+) : ViewModel()
+```
+
 A second service is never the way to reach a value the screen renders. When a view model needs an answer its own service does not hold, the fix is one of three, in order: the answer is a pure projection and becomes a function of the value it projects ([a row is projected from its value](#a-row-is-projected-from-its-value-never-fetched-from-a-service)); the screen's own service or session already receives the input and returns the answer alongside the rest of its view state; or the screen was drawn around the wrong service. Widening the constructor is not on the list, and neither is having the composition root call the other service and pass the result in — a factory line that reads `walletService.walletRow(...)` next to an unrelated service is the same coupling with a longer path.
 
 When a real screen-level service is needed, name it for the screen it backs, not for the layer: `GemManageContactService` backs the add-and-edit screen. No `Scene` or `Facade` in the name. A `GemContactsService` that only forwarded calls to `GemContactService` was wrapper debt, not the pattern, and is deleted: the list screen holds the owning `GemContactService`. When a screen needs a cohesive answer from several Core owners, Core composes them:

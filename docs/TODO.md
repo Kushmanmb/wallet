@@ -75,9 +75,8 @@ The standing goal, restated on 2026-09-16: **any business logic moves to Gemston
 
 Checked and clean: the price-impact model, the swap rate text and Android's `EquivalentValue` all read a Core value and map only the label, the colour or the locale format.
 
-Open:
+A fifth landed the same day: the developer screen. iOS held five stores beside its service and built an eleven-row table of sample transactions by hand; Android held the service alone and could offer none of the actions. `GemDeveloperStore` names the seven database operations, `sample_transactions` owns the table, and both screens now reach the database only through `GemDeveloperService`.
 
-- **O30** **M** A view model talks to one service. iOS `Settings/DeveloperViewModel` holds `GemDeveloperServiceProtocol` and five stores (`TransactionStore`, `AssetStore`, `StakeStore`, `BannerStore`, `PriceStore`), reaching past the service into the database the service already owns; Android's `DevelopViewModel` holds the service alone and cannot offer the same actions. The clear operations belong on the store traits Core already has, and the mock transaction table the iOS screen builds by hand belongs beside them.
 
 
 

@@ -102,15 +102,7 @@ extension ViewModelFactory {
 
     @MainActor
     public func developerScene(walletId: WalletId) -> DeveloperViewModel {
-        DeveloperViewModel(
-            walletId: walletId,
-            service: developerService,
-            transactionStore: stores.transactionStore,
-            assetStore: stores.assetStore,
-            stakeStore: stores.stakeStore,
-            bannerStore: stores.bannerStore,
-            priceStore: stores.priceStore,
-        )
+        DeveloperViewModel(walletId: walletId, service: developerService)
     }
 
     @MainActor
