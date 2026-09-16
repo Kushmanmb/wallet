@@ -254,7 +254,7 @@ mod tests {
             amount_in,
             U256::from(250_000_000_000u64),
             &path,
-            Some(permit2_data.into()),
+            Some(permit2_data.try_into().unwrap()),
             false,
             deployment.universal_router_abi,
         )
@@ -310,7 +310,7 @@ mod tests {
             amount_in,
             U256::from(6507936),
             &path,
-            Some(permit2_data.into()),
+            Some(permit2_data.try_into().unwrap()),
             false,
             UniversalRouterAbi::V2,
         )
@@ -428,7 +428,7 @@ mod tests {
             amount_in,
             U256::from(3997001989341576u64),
             &path,
-            Some(permit2_data.into()),
+            Some(permit2_data.try_into().unwrap()),
             false,
             UniversalRouterAbi::V2,
         )
