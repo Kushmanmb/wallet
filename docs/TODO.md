@@ -2,9 +2,21 @@
 
 The goal is that Gemstone decides once and both clients read that decision. Shared rules and orchestration live in Core; rendering, observation, scheduling and locale formatting live in the apps. Contracts are in [ARCHITECTURE.md](ARCHITECTURE.md) and [SERVICES.md](SERVICES.md).
 
-Every open item carries a stable id (V vocabulary and twins, R rows, C composition, S sessions, B view boundary, F formatting and errors, P parity, D decisions, O ownership, X platform, G guidance, PERF performance) and a size (**S**/**M**/**L**). Ids are never reused. **Delete an item's line in the commit that lands it**; an item that turns out to be correct as written is closed the same way, with the reason moved to the ledger at the bottom.
+Every open item carries a stable id (U duplicated or redundant code, V vocabulary and twins, R rows, C composition, S sessions, B view boundary, F formatting and errors, P parity, D decisions, O ownership, X platform, G guidance, PERF performance) and a size (**S**/**M**/**L**). Ids are never reused. **Delete an item's line in the commit that lands it**; an item that turns out to be correct as written is closed the same way, with the reason moved to the ledger at the bottom.
 
 **Rebuilt on 2026-09-16 from verified surfaces, not lens hits, then checked against every view model, scene and composable on both apps, one contract at a time** (see Coverage). Every item below was confirmed by reading both sides before it was written down; the lenses that produced the previous 318 items are recorded in the ledger with what each one actually found, and most of them are dry. Keep each item independently reviewable: shared decisions land in Core and both apps, platform-only work stays on that platform, and a commit removes the path it replaces without bundling an unrelated change. Regenerate bindings only when a shared interface changes, and run the applicable [Quality Checks](../skills/quality-checks.md).
+
+## 0. Duplicated code to delete first
+
+Ordered by the lines it removes; work these before the sections below. The duplication sweeps (same-named similar bodies within an app and across the apps, same-bodied Core functions, shared constants, twins built from a Core type, unread members) were rerun on 2026-09-16 after B68 closed, and this is everything they still find — the larger families landed in earlier passes and are in the ledger. Everything else in this file moves a boundary rather than deleting a copy.
+
+- **U4** **S** Five iOS members written twice with the same body: `navigationDestination(for:)` in `EarnSceneViewModel` and `StakeSceneViewModel`, `delete` in `WalletIDetailViewModel` and `WalletsSceneViewModel`, `display(for:)` in `NetworkFeeCustomViewModel` and `NetworkFeeSceneViewModel`, `alertView` in `AssetPriceAlertsScene` and `PriceAlertsScene`, `setupWalletModel` in `CreateWalletModel` and `ImportWalletViewModel`. Each pair keeps one owner (a mapper on the Core destination, a service extension, a shared row view) and the other calls it.
+- **U7** **M** `android/gemcore/.../domains/price/ValueDirection.kt` is a hand-written twin of `GemValueTone` with 125 readers, mapped from a `Double` and from `PriceAlertDirection`; [no hand-written twins](ARCHITECTURE.md): the readers take the Core tone and a style mapper decides the colour, the way `LatencyTone` does for the latency badge.
+- **U8** **M** `android/gemcore/.../model/Precision.kt` is a twin of `GemPrecision` (`GemPrecision.toPrecision()`) used by the four formatters; the formatters read `GemPrecision` directly.
+- **U5** **S** iOS members with no reader: `PerpetualPositionViewModel.nameText`, `ValueFormatter.full_US`, `SupportMessageSender.isAgent`, `Constants.apiURL` (confirm the last against the widget and tests before deleting).
+- **U2** **S** `payment_memo_required` (`core/gemstone/src/payment.rs`) restates the `is_memo_supported` chain table (`config/chain.rs`) with one difference, Solana; a second copy of a chain list is the drift the migration exists to remove. Express it as the exception.
+- **U6** **S** Android `AppViewModel.onNotificationsEnable` and `SettingsViewModel.enableNotifications` are the same two calls (`stopAskNotifications`, `switchPushEnabled(true)`); one application case owns the pair.
+- **U3** **S** `GemConfirmDestination::with_address_name` is still `#[uniffi::export]`ed but has no app caller since R81 moved the merge into `row_contents`; keep it a Rust function.
 
 ## 1. Surfaces still outside Gemstone
 
