@@ -853,6 +853,7 @@
 				D8CFDEA92E37FC8C00D27283 /* GemAPI */,
 				D8CFDEAD2E37FCA800D27283 /* Formatters */,
 				D8CFDEAF2E37FCB000D27283 /* Components */,
+				D8WIDGETGEMSTONE00000001 /* Gemstone */,
 				D8WIDGET12345678901234 /* WidgetLocalization */,
 			);
 			productName = GemPriceWidgetExtension;
@@ -1515,6 +1516,14 @@
 				DEVELOPMENT_TEAM = U2D6XV88CZ;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../core/target/aarch64-apple-ios/debug/libgemstone.a",
+				);
+				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../core/target/aarch64-apple-ios-sim/debug/libgemstone.a",
+				);
 				INFOPLIST_FILE = GemPriceWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GemPriceWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1550,6 +1559,14 @@
 				DEVELOPMENT_TEAM = U2D6XV88CZ;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../core/target/aarch64-apple-ios/release/libgemstone.a",
+				);
+				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../core/target/aarch64-apple-ios-sim/release/libgemstone.a",
+				);
 				INFOPLIST_FILE = GemPriceWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GemPriceWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1858,6 +1875,10 @@
 		DF8421ED2C1526ED003F558C /* GemstonePrimitives */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = GemstonePrimitives;
+		};
+		D8WIDGETGEMSTONE00000001 /* Gemstone */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Gemstone;
 		};
 		DF93C4ED2C969F4F00204ABD /* Gemstone */ = {
 			isa = XCSwiftPackageProductDependency;
