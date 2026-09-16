@@ -185,21 +185,16 @@ The Android half (F27–F31) closes with no change: every site either logs befor
 
 A comparison against a literal in a view model is a product rule with no name. The sweep excluded layout numbers, `AuthenticationPolicy` bit flags and SQL.
 
-- **S19** **S** `ios/Features/Assets/Sources/Types/AddAssetInput.swift:12` `chains.count > 1`, `ios/Features/Onboarding/.../ImportWalletSceneViewModel.swift:87` `importTypes.count > 1`, `ios/Features/Settings/.../RewardsViewModel.swift:107` `wallets.count > 1` — "more than one, so offer a picker" written three times on iOS.
-- **S20** **S** `ios/Packages/PrimitivesComponents/.../AssetDataViewModel.swift:101,117` — "has a balance" as `> 0` in two places; `ios/Features/Perpetuals/.../PerpetualsHeaderViewModel.swift:59` and `ios/Features/Assets/.../AssetSceneViewModel.swift:201` repeat it.
-- **S21** **S** `ios/Features/Stake/.../EarnSceneViewModel.swift:92` — `.filter { BigInt($0.base.balance) > 0 }` decides which delegations show.
-- **S22** **S** `ios/Features/NFT/.../CollectionsViewModel.swift:40` and `android/features/nft/.../NftListScene.kt:116` — the unverified-collections row appears when the count is above zero, decided on both apps.
-- **S23** **S** `ios/Features/Swap/Sources/Types/SwapValueFormatter.swift:17` — a zero guard in front of swap value text.
-- **S24** **S** `android/data/services/store/.../entities/DbAssetInfo.kt:124,146` — resource metadata and price presence decided by `> 0` while mapping a row out of the database.
-- **S25** **S** `android/features/asset_select/.../BaseAssetSelectViewModel.kt:126` — the balance filter is `it.balance.totalAmount > 0.0` in the view model.
-- **S26** **S** `android/ui-models/.../chart/CandlestickChartUIModel.kt:57` — `if (tickCount < 2) return emptyList()`.
+Nine closed on 2026-09-16, because most of the hits are not rules. `count > 1`, `balance > 0`, `unverifiedCount > 0` and `tickCount < 2` all say "is there more than nothing here" — S22 is the clearest case: both apps ask Core `unverifiedCollections(...)` and both then check the size, so the only thing Core could add is the `> 0`, and [a lookup wrapper over uniffi is not an export](ARCHITECTURE.md). S21, S24 and S25 are the collection filtering closed in § 20, and S33 is a SQL predicate.
+
+What is left below is the part that *is* a decision: a number someone chose, that the two apps chose differently.
+
 - **S27** **S** `android/app/.../di/ClientsModule.kt:29-31` — connect timeout, read timeout and the idle connection pool are literals; iOS sets its own in `URLSessionConfiguration`, so the network budget is decided twice.
 - **S28** **S** `android/features/update_app/.../InAppUpdateServiceImpl.kt:42-43` — a second, different pair of HTTP timeouts inside the same app.
 - **S29** **S** `ios/GemPriceWidget/Widget/PriceWidgetProvider.swift:33` one minute vs `android/app/.../widgets/WidgetPriceSyncWorker.kt:34` `REFRESH_INTERVAL_MINUTES` — the widget refresh cadence is a product decision made twice.
 - **S30** **S** `ios/Packages/PrimitivesComponents/.../CopyTypeViewModel.swift:63` — the pasteboard expiry interval is set in the app; Android's clipboard path has its own.
 - **S31** **S** `ios/Features/WalletTab/.../WalletSearchSceneViewModel.swift:173,181` — the section caps come from Core's `limits` but the `prefix` is applied app-side on iOS only.
 - **S32** **S** `ios/GemPriceWidget/.../PriceWidgetViewModel.swift:23,25` — one coin for the small family, three for the medium; the Android widget picks its own counts.
-- **S33** **S** `android/data/services/store/.../PerpetualDao.kt:34` — `WHERE volume24h > 0` decides which markets exist, in SQL.
 
 ## 20. Ordering, filtering and grouping in app code
 
