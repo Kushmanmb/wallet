@@ -177,19 +177,19 @@ Rebuilt on 2026-09-16 from the row census and a composed-label pass: a `*ViewMod
 
 A rendered number the app computes is the same class of bug as the fiat multiplication fixed on 2026-09-16: the app reaches a `Double` and loses Core's precision rules. These are the remaining sites the arithmetic sweep found outside `Formatters`.
 
+D19 and D25 landed on 2026-09-16. `GemValueTone::of` was the rule both apps were rewriting — Android as `Double?.toValueDirection()` and again inline in `candleUIModel`, iOS as `PriceChangeColor.color(for: candle.close - candle.open)` — so `value_tone` is exported and all three ask Core which way a number points. The app still owns the colour and the glyph, which is the style half of the mapper contract. `PriceChangeColor` itself stays as that mapper: it lives in `Components`, which the widget depends on, and the widget cannot import Gemstone (X159).
+
 - **D13** **S** `ios/Packages/Primitives/Sources/ChartValues.swift:42` — the x-axis is padded by `timeIntervalSince(first) * 0.02`; Core already owns candlestick geometry (08f9789016).
 - **D14** **S** `ios/Packages/Components/Sources/Interval.swift:13` — `Interval(value) * 60` converts minutes in the app.
 - **D15** **S** `ios/Packages/Primitives/Sources/Extensions/Double+Primitives.swift` `rounded` and `android/gemcore/.../ValueFormatter.kt` `rounded` — the same rounding helper on both apps.
 - **D16** **S** `ios/Packages/Formatters/.../BigNumberFormatter.swift` `decimal` and `android/gemcore/.../NumericFormatter.kt` `decimal` — the same decimal parse on both apps.
 - **D17** **S** `ios/Packages/Formatters/.../ValueFormatter.swift` and `android/gemcore/.../ValueFormatter.kt` both declare `formattedDustThreshold`; the dust *predicate* is Core's `is_value_dust`, the *threshold text* is written twice.
 - **D18** **S** `ios/Packages/PrimitivesComponents/Sources/Types/AmountDisplay.swift:131` — the sign prefix is picked from `value > 0` / `value < 0`; Android does the same in `AutocloseUIModelFactory.kt:70` and `GetWalletSummaryImpl.kt:125`.
-- **D19** **S** `android/gemcore/.../domains/price/ValueDirection.kt:13` — up/down/flat from a raw comparison; Core names the direction on the row it already returns.
 - **D20** **S** `android/ui/.../list_item/transaction/TransactionDataAggregateExt.kt:57` and `android/app/.../widgets/PricesWidget.kt:163` — profit colour chosen from `pnl > 0` in two places, with the widget hardcoding hex colours.
 - **D21** **S** `android/ui/.../chart/GemLineChart.kt:341,366` — chart point averaging and x-position are computed in the composable.
 - **D22** **S** `ios/Features/Perpetuals/.../AutocloseViewModel.swift:44,59` — `isProfit` and the sign are derived beside a Core estimator that already answers both; `android/ui-models/.../AutocloseUIModelFactory.kt:55,70` is the same rule.
 - **D23** **S** `ios/Packages/PrimitivesComponents/.../PriceViewModel.swift:60` — the price-change background colour branches on `priceChange > 0`.
 - **D24** **S** `ios/Features/WalletTab/.../PortfolioSceneViewModel.swift` and `android/.../PortfolioChartViewModel.kt` both declare `availablePeriods`; Core's `PortfolioData` already carries them.
-- **D25** **S** `ios/Features/Perpetuals/.../CandlestickChartViewModel.swift:95` — nearest-candle selection by absolute time distance is written in the app.
 
 ## 18. Errors the app invents
 
@@ -299,7 +299,6 @@ Swept on 2026-09-16 over every `#[uniffi::Record]` in `core/gemstone/src` for `f
 - **F38** **S** `GemPriceAlertSession.current_price` (`price_alert/session.rs`, 4) — the session already returns suggestions; the price beside them is formatted twice.
 - **F39** **S** `GemPerpetualTransferData.price` and `.leverage` (`perpetual/model.rs`, 4).
 - **F40** **S** `GemPerpetualChartLayout.price_low` / `.price_high` (`perpetual/model.rs`, 4) — the chart axis labels are built from these.
-- **F41** **S** `GemDurationPart.value` (`duration_formatter.rs`, 4) — a duration part that carries a number and leaves the unit to the app.
 - **F42** **S** `GemAssetDetailsState.price_alerts_count` (`assets/model.rs`, 4) — a count the app turns into a badge string.
 - **F43** **S** `GemAssetDetailsInput.price` (`assets/model.rs`, 4).
 - **F44** **S** `GemPerpetualAutoclose.take_profit` / `.stop_loss` (`perpetual/model.rs`, 3).
