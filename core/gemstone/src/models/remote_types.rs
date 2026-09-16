@@ -1564,6 +1564,8 @@ pub struct PortfolioData {
 pub struct PortfolioMarginUsage {
     pub account_value: f64,
     pub usage: f64,
+    pub used_value: f64,
+    pub usage_percent: f64,
 }
 
 #[uniffi::remote(Record)]
