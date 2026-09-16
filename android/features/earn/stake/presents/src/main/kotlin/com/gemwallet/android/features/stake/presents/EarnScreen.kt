@@ -2,6 +2,7 @@
 
 package com.gemwallet.android.features.stake.presents
 
+import com.gemwallet.android.ui.components.list_item.uiModel
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -102,7 +103,7 @@ fun EarnScreen(
                         DelegationItem(
                             assetInfo = earnAssetInfo,
                             delegation = item,
-                            validator = validatorRows[item.validator.id] ?: return@itemsIndexed,
+                            validator = validatorRows[item.validator.id] ?: return@itemsIndexed.uiModel(),
                             listPosition = ListPosition.getPosition(index, positions.size),
                             onClick = { onDelegation(item.validator.id, item.base.delegationId) },
                         )

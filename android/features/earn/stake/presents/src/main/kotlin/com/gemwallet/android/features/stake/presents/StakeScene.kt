@@ -2,6 +2,7 @@
 
 package com.gemwallet.android.features.stake.presents
 
+import com.gemwallet.android.ui.components.list_item.uiModel
 import com.gemwallet.android.ui.components.image.iconModel
 import android.icu.util.Measure
 import android.icu.util.MeasureUnit
@@ -117,7 +118,7 @@ internal fun StakeScene(
                             DelegationItem(
                                 assetInfo = assetInfo,
                                 delegation = item,
-                                validator = validatorRows[item.validator.id] ?: return@itemsIndexed,
+                                validator = validatorRows[item.validator.id] ?: return@itemsIndexed.uiModel(),
                                 listPosition = ListPosition.getPosition(index, delegations.size),
                                 onClick = { onAction(StakeSceneAction.OpenDelegation(item)) }
                             )

@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.transfer_amount.presents
 
+import com.gemwallet.android.ui.components.list_item.uiModel
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,7 +78,7 @@ private fun StakeValidatorSection(provider: AmountStakeProvider, onPickValidator
     validator?.let { current ->
         SubheaderItem(R.string.stake_validator)
         PropertyValidatorItem(
-            validator = current,
+            validator = current.uiModel(),
             listPosition = ListPosition.Single,
             onClick = if (canSelectValidator) onPickValidator else null,
         )
