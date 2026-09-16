@@ -63,7 +63,6 @@ Swept on 2026-09-15 over every non-preview, non-test iOS file: 25 hits, of which
 - **T36** **S** `features/receive/viewmodels` — both.
 - **T37** **S** `features/confirm/viewmodels` `ConfirmViewModel.kt` (412 lines) and `presents/components/NetworkFeeCustomViewModel.kt`.
 - **T38** **S** `app` — `MainViewModel`, `AppViewModel`, `MainScreenViewModel`, `SetupWalletViewModel`.
-- **T39** **S** `features/settings/security/viewmodels` `SecurityViewModel.kt` — authentication toggles with no test.
 
 ## 14. Decisions still made on a client
 
