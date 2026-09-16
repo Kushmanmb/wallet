@@ -7,13 +7,10 @@ import com.gemwallet.android.data.coordinators.stake.GetDelegationImpl
 import com.gemwallet.android.data.coordinators.stake.GetDelegationsImpl
 import com.gemwallet.android.data.coordinators.stake.GetStakeValidatorImpl
 import com.gemwallet.android.application.stake.cases.GetValidators
-import com.gemwallet.android.application.stake.cases.SyncStakeDelegations
 import com.gemwallet.android.data.coordinators.stake.GetValidatorsImpl
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import com.gemwallet.android.data.coordinators.stake.SyncStakeDelegationsImpl
 import com.gemwallet.android.data.services.gemstone.stores.GemstoneStakeStore
-import uniffi.gemstone.GemStakeService
 import uniffi.gemstone.GemStakeServiceInterface
 import dagger.Module
 import dagger.Provides
@@ -45,7 +42,4 @@ object StakeModule {
     @Singleton
     fun provideGetStakeValidator(stakeStore: GemstoneStakeStore): GetStakeValidator = GetStakeValidatorImpl(stakeStore)
 
-    @Provides
-    @Singleton
-    fun provideSyncStakeDelegations(stakeService: GemStakeService): SyncStakeDelegations = SyncStakeDelegationsImpl(stakeService)
 }
