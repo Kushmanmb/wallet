@@ -2,6 +2,8 @@
 
 package com.gemwallet.android.features.bridge.views
 
+import com.gemwallet.android.ui.components.list_item.uiModel
+import androidx.compose.ui.platform.LocalContext
 import com.gemwallet.android.ui.components.screen.SheetExpansion
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
@@ -117,7 +119,7 @@ internal fun WalletSelectionSheet(
             item { SubheaderItem(R.string.wallets_title) }
             itemsIndexed(walletRows) { index, row ->
                 WalletItem(
-                    row = row,
+                    model = row.uiModel(LocalContext.current),
                     isCurrent = row.id == selectedWalletId?.id,
                     listPosition = ListPosition.getPosition(index, walletRows.size),
                     modifier = Modifier.clickable {

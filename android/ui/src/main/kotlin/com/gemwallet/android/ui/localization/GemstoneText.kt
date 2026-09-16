@@ -79,9 +79,8 @@ fun GemFiatTransactionBadge.string(): String = stringResource(
     }
 )
 
-@Composable
-fun GemWalletSubtitle.string(): String = when (this) {
-    GemWalletSubtitle.Multicoin -> stringResource(R.string.wallet_multicoin)
+fun GemWalletSubtitle.string(context: Context): String = when (this) {
+    GemWalletSubtitle.Multicoin -> context.getString(R.string.wallet_multicoin)
     is GemWalletSubtitle.Address -> value
 }
 
