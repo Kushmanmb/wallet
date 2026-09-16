@@ -6,6 +6,7 @@ import com.gemwallet.android.features.setup_wallet.viewmodels.SetupWalletViewMod
 import com.gemwallet.android.testkit.mockWallet
 import com.wallet.core.primitives.WalletId
 import io.mockk.coEvery
+import kotlinx.coroutines.CompletableDeferred
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -61,14 +62,17 @@ class SetupWalletViewModelTest {
 
     @Test
     fun `renaming shows the new name and writes it through`() = runTest(dispatcher) {
-        val service: GemWalletServiceInterface = mockk(relaxed = true)
+        val renamed = CompletableDeferred<Pair<String, String>>()
+        val service: GemWalletServiceInterface = mockk(relaxed = true) {
+            coEvery { rename(any(), any()) } answers { renamed.complete(firstArg<String>() to secondArg<String>()) }
+        }
         val model = viewModel(service)
         model.uiState.first { it.row != null }
 
         model.onNameChange("Savings")
 
         assertEquals("Savings", model.uiState.first { it.walletName == "Savings" }.walletName)
-        coVerify { service.rename(wallet.id.id, "Savings") }
+        assertEquals(wallet.id.id to "Savings", renamed.await())
     }
 
     @Test
