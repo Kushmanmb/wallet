@@ -258,6 +258,7 @@ One Core service per screen, held by the screen's view model on both apps. The s
 | `GemWalletHomeService` | — | `WalletSceneViewModel`, `NetworkAssetsSceneViewModel` | `AssetsViewModel`, `NetworkAssetsViewModel` |
 | `GemWalletService` | — | onboarding and manage-wallet view models (`WalletsSceneViewModel` gates on `can_add_wallet`, `WalletDetailViewModel` exports the secret through `export_secret`) | `CreateWalletViewModel`, `ImportViewModel`, `WalletsViewModel` (`can_add_wallet`), `WalletViewModel` / `SetupWalletViewModel` (`rename`), `WalletSecretDataViewModel` (`export_secret`), wallet cases |
 | `GemWalletSessionService` | — | `RootSceneViewModel`, `NavigationHandler` | `SessionCoordinator` (+ the services it composes) |
+| `GemWidgetService` | — | `WidgetPriceService` (the price widget) | `PricesWidget` and `WidgetPriceSyncWorker` through `WidgetEntryPoint` |
 
 ### Services no screen holds
 

@@ -855,6 +855,7 @@
 				D8CFDEAF2E37FCB000D27283 /* Components */,
 				D8WIDGETGEMSTONE00000001 /* Gemstone */,
 				D8WIDGETGEMPRIMS00000001 /* GemstonePrimitives */,
+				D8WIDGETNATIVEPROV000001 /* NativeProviderService */,
 				D8WIDGET12345678901234 /* WidgetLocalization */,
 			);
 			productName = GemPriceWidgetExtension;
@@ -1800,6 +1801,10 @@
 		D829BF442CBDD9F700DEB2E8 /* FiatConnect */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FiatConnect;
+		};
+		D8WIDGETNATIVEPROV000001 /* NativeProviderService */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NativeProviderService;
 		};
 		D85AD2A52CD7017E0010DEF8 /* NativeProviderService */ = {
 			isa = XCSwiftPackageProductDependency;

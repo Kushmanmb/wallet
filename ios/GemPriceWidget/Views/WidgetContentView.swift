@@ -23,27 +23,13 @@ struct WidgetContentView: View {
             case .systemSmall:
                 if let bitcoin = viewModel.prices.first {
                     SmallCoinView(
-                        model: CoinPriceRowViewModel(
-                            coin: bitcoin,
-                            currencyFormatter: CurrencyFormatter(
-                                type: .abbreviated,
-                                currencyCode: viewModel.entry.currency,
-                            ),
-                            percentFormatter: PercentFormatter(),
-                        ),
+                        model: CoinPriceRowViewModel(coin: bitcoin),
                     )
                 }
             default:
                 ForEach(viewModel.prices) { coin in
                     CoinPriceRow(
-                        model: CoinPriceRowViewModel(
-                            coin: coin,
-                            currencyFormatter: CurrencyFormatter(
-                                type: .fiat,
-                                currencyCode: viewModel.entry.currency,
-                            ),
-                            percentFormatter: PercentFormatter(),
-                        ),
+                        model: CoinPriceRowViewModel(coin: coin),
                     )
                 }
             }
