@@ -103,7 +103,7 @@ fun EarnScreen(
                         DelegationItem(
                             assetInfo = earnAssetInfo,
                             delegation = item,
-                            validator = validatorRows[item.validator.id] ?: return@itemsIndexed.uiModel(),
+                            validator = (validatorRows[item.validator.id] ?: return@itemsIndexed).uiModel(),
                             listPosition = ListPosition.getPosition(index, positions.size),
                             onClick = { onDelegation(item.validator.id, item.base.delegationId) },
                         )

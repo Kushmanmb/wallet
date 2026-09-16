@@ -118,7 +118,7 @@ internal fun StakeScene(
                             DelegationItem(
                                 assetInfo = assetInfo,
                                 delegation = item,
-                                validator = validatorRows[item.validator.id] ?: return@itemsIndexed.uiModel(),
+                                validator = (validatorRows[item.validator.id] ?: return@itemsIndexed).uiModel(),
                                 listPosition = ListPosition.getPosition(index, delegations.size),
                                 onClick = { onAction(StakeSceneAction.OpenDelegation(item)) }
                             )
