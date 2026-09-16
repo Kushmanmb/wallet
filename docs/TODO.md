@@ -214,7 +214,8 @@ C10 landed on 2026-09-16. The network-assets screen split pinned from unpinned w
 
 Seven more closed on 2026-09-16. **P71 and V65 were backwards**: iOS already reads both socket numbers from Core — `GemConnectionService` conforms to `Reconnectable` retroactively, and the protocol exists so `SwiftHTTPClient` can stay Gemstone-free, which is the pattern rather than a gap. **P70** is inside a `@Preview`. **P68/P69** stamp `updatedAt` while writing a row, which is the store adapter's job on both apps. **P63** groups a transcript and an activity list by *local* day through `Calendar.current`, and a local day depends on the device's calendar and time zone — that is platform territory, and Core has no day-bucketing rule to move to. **P66/P67** are a `dateComponents` helper and an epoch default for a missing `updatedAt`.
 
-- **P64** **S** `ios/Features/Stake/.../StakeSceneViewModel.swift:121` — the unlock date is built by adding `service.lockTimeSeconds(chain:)` to now; Core has the seconds and could carry the date.
+
+The unlock text (P64) closed on 2026-09-16: `lock_time_seconds` is already the Core rule and already crosses, and what was left app-side is a `DateComponentsFormatter` turning a fixed number of seconds into "21 days" in the OS locale — the same class as a currency symbol, which no Core rule can print. The two `Date.now` reads went with it, since a fixed duration needs no clock.
 
 ## 22. URLs built in the app
 

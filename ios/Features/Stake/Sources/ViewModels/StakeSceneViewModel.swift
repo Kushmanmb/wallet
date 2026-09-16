@@ -117,9 +117,7 @@ public final class StakeSceneViewModel {
     }
 
     private var lockTimeValue: String {
-        let now = Date.now
-        let date = now.addingTimeInterval(TimeInterval(service.lockTimeSeconds(chain: chain.chain.rawValue)))
-        return Self.lockTimeFormatter.string(from: now, to: date) ?? .empty
+        Self.lockTimeFormatter.string(from: TimeInterval(service.lockTimeSeconds(chain: chain.chain.rawValue))) ?? .empty
     }
 
     var lockTimeInfoSheet: InfoSheetType {
