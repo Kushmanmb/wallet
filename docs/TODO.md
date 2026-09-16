@@ -257,63 +257,24 @@ The one real hit was `GemPerpetualChartLayout`, and not for its numbers: `price_
 
 ## 27. Screens with no Core service
 
-156 iOS view models name no `Gem*ServiceProtocol`; Android has 8. The asymmetry is the shape of the gap: Android injects a service into almost every model, iOS keeps a family of small models that decide presentation locally. A child model handed a Core record is allowed — these are the ones heavy enough to be deciding something. The weight in brackets is members plus methods.
+156 iOS view models name no `Gem*ServiceProtocol`; Android has 8. The asymmetry looked like the shape of the gap — until the section's own test was applied to all 55 on 2026-09-16.
 
-- **B11** **M** `PrimitivesComponents/NetworkFeeSceneViewModel.swift` [29] — the heaviest model in the repo with no service, beside a Core fee-rate record Android reads through `FeeDetailsModel`.
+**43 of them are the allowed shape and are closed.** Each is a `struct` with no observable state, no query and no async work, whose initializer takes Core records and projects them. `NetworkFeeSceneViewModel` was called the heaviest model in the repo with no service; it is a value type handed `GemConfirmFeeSelection`, `GemFeeRateRows` and `GemFeeOptionItem` plus two callbacks. A value type projecting Core records does not need a service, and the member count says nothing about whether it decides anything. The weight column was measuring size, not ownership.
+
+**Twelve are left**, and they are the ones that actually drive a screen — each holds `@Observable` state, a query or async work with no Core service behind it. Those are where X160's question bites.
+
 - **B12** **M** `Features/Perpetuals/AutocloseSceneViewModel.swift` [28] — Android's `AutocloseViewModel` drives the same screen from `GemAutocloseSession`.
-- **B13** **M** `PrimitivesComponents/AssetDataViewModel.swift` [26] — the shared asset model behind most rows; see also R55.
-- **B14** **M** `Features/WalletConnector/ConnectionProposalViewModel.swift` [24] — Android's proposal scene holds `GemWalletConnectServiceInterface`.
-- **B15** **M** `PrimitivesComponents/PerpetualDetailsViewModel.swift` [22] — Android holds `GemPerpetualDetailsServiceInterface` for this screen.
 - **B16** **M** `Features/AppLock/LockSceneViewModel.swift` [22] — the lock screen, which is a security surface with no Core service on either app.
-- **B17** **S** `Features/Support/SupportMessageBubbleViewModel.swift` [19] — bubble grouping and status beside `GemSupportService`.
 - **B18** **M** `Features/Swap/SwapDetailsViewModel.swift` [18] — Android builds the same rows in `SwapDetailsUIModelFactory` from `GemSwapQuoteSummary`.
-- **B19** **S** `Features/Perpetuals/PerpetualPositionViewModel.swift` [18].
 - **B20** **S** `Features/Transactions/TransactionsFilterViewModel.swift` [16] — the activity filter; Android's `TransactionsViewModel` holds the Core filter list.
-- **B21** **S** `Features/Perpetuals/CandlestickChartViewModel.swift` [16] — see D25.
-- **B22** **S** `PrimitivesComponents/TransactionViewModel.swift` [15] — see R77.
 - **B23** **S** `PrimitivesComponents/NetworkFeeCustomViewModel.swift` [15] — Android's namesake takes `FeeDetailsModel` and calls `customFee`; iOS does not.
-- **B24** **S** `PrimitivesComponents/BannerViewModel.swift` [14] — `canClose` is declared on Android too, in `BannerItemUIModel.kt`.
 - **B25** **S** `Features/Onboarding/VerifyPhraseViewModel.swift` [14] — phrase verification is a security rule with no Core owner.
-- **B26** **S** `PrimitivesComponents/AddressListItemViewModel.swift` [13] — see R59.
 - **B27** **S** `PrimitivesComponents/InputValidationViewModel.swift` [11] — validation on the iOS side of the `Validators` boundary.
-- **B28** **S** `PrimitivesComponents/BalanceViewModel.swift` [11] — see R58.
-- **B29** **S** `Features/Settings/ChainNodeViewModel.swift` [11] — node rows beside `GemChainSettingsService`.
 - **B30** **S** `Features/QRScanner/QRScannerSceneViewModel.swift` [11] — scan handling with no Core payment service.
-- **B31** **S** `Features/FiatConnect/FiatQuoteViewModel.swift` [11] — quote rows beside `GemFiatQuoteService`.
-- **B32** **S** `Features/Assets/AssetsFilterViewModel.swift` [11] — `chainsFilter` is declared on Android too, in `TransactionsViewModel.kt`.
-- **B33** **S** `PrimitivesComponents/AssetViewModel.swift` [10] — see R62.
-- **B34** **S** `PrimitivesComponents/PriceViewModel.swift` [9] — see D23.
-- **B35** **S** `PrimitivesComponents/EmptyContentTypeViewModel.swift` [9] — `actions` is declared on Android too, in `DelegationViewModel.kt`.
 - **B36** **S** `PrimitivesComponents/TextInputSheet/TextInputViewModel.swift` [9].
-- **B37** **S** `Features/Transfer/TransferDataViewModel.swift` [9].
-- **B38** **S** `PrimitivesComponents/FiatTransactionViewModel.swift` [8] — the fiat transaction row, which SERVICES.md says already reads the same on both apps.
-- **B39** **S** `PrimitivesComponents/CopyTypeViewModel.swift` [8] — see S30.
-- **B40** **S** `PrimitivesComponents/Types/ChartHeaderViewModel.swift` [8] — see R65.
-- **B41** **S** `PrimitivesComponents/Protocols/ValueHeaderViewModel.swift` [8].
-- **B42** **S** `Features/Transfer/TransactionInputViewModel.swift` [8].
-- **B43** **S** `Features/Swap/SwapTokenViewModel.swift` [8].
-- **B44** **S** `Features/Swap/PriceImpactViewModel.swift` [8] — see R66.
-- **B45** **S** `Features/Settings/RewardRedemptionOptionViewModel.swift` [8] — see R63.
-- **B46** **S** `Features/PriceAlerts/PriceAlertItemViewModel.swift` [8].
-- **B47** **S** `Features/Perpetuals/OpenPositionItemViewModel.swift` [8].
-- **B48** **S** `PrimitivesComponents/WalletHeaderViewModel.swift` [7].
-- **B49** **S** `PrimitivesComponents/ChainViewModel.swift` [7].
 - **B50** **S** `GemPriceWidget/CoinPriceRowViewModel.swift` [7] — the widget row, which cannot import Gemstone today.
 - **B51** **S** `Features/Support/SupportMessageInputBarViewModel.swift` [7].
-- **B52** **S** `Features/Settings/ServiceStatusItemViewModel.swift` [7].
-- **B53** **S** `Features/Perpetuals/PerpetualsHeaderViewModel.swift` [7].
-- **B54** **S** `Features/Perpetuals/PerpetualViewModel.swift` [7] — `priceText` is declared on Android too, in `ChartHeaderUIModel.kt`.
-- **B55** **S** `Features/Perpetuals/PerpetualPositionItemViewModel.swift` [7].
-- **B56** **S** `Features/Perpetuals/AutocloseViewModel.swift` [7] — see R69 and D22.
-- **B57** **S** `PrimitivesComponents/SimulationWarningViewModel.swift` [6] — simulation warnings landed in Core (d458faac6e); confirm this model only maps them.
-- **B58** **S** `PrimitivesComponents/PnLViewModel.swift` [6] — position profit landed in Core (6321c9eb20); same check.
-- **B59** **S** `PrimitivesComponents/ListAssetItemViewModel.swift` [6].
-- **B60** **S** `PrimitivesComponents/ChartValuesViewModel.swift` [6].
 - **B61** **S** `Features/WalletTab/PerpetualsPreviewViewModel.swift` [6].
-- **B62** **S** `Features/Transactions/TransactionTypesFilterViewModel.swift` [6].
-- **B63** **S** `Features/Swap/SwapProvidersViewModel.swift` [6] and `SwapButtonViewModel.swift` [6].
-- **B64** **S** `Features/Perpetuals/PerpetualItemViewModel.swift` [6].
-- **B65** **S** `Features/Assets/AssetHeaderViewModel.swift` [6].
 
 ## 28. Core duplicated inside Core
 
@@ -369,43 +330,38 @@ Five were confirmations rather than decisions and are closed. **P78**: both comp
 
 ## 32. A screen that changes state with no session
 
-[ARCHITECTURE.md](ARCHITECTURE.md) says a screen whose state changes is a session. 83 iOS view models declare six or more `var`s and name no `Gem*Session`; Android has two. The count in brackets is mutable members. These are hard because a session is a Core object with a lifetime, not a record — each one is a flow to model, and the screen's state has to move in one move.
+[ARCHITECTURE.md](ARCHITECTURE.md) says a screen whose state changes is a session. 83 iOS view models declare six or more `var`s and name no `Gem*Session`; Android has two.
+
+**Nine are closed**: they have no observable state at all — `@Observable`, `MutableStateFlow` and `mutableStateOf` are all absent — so the `var` count was counting computed properties on a value type. A screen with no state that changes has nothing to model as a session.
+
+The rest are real screens, and 25 of the 28 already hold a Core service; what is open is whether their state becomes a Core object with a lifetime. That is a shape to agree, not a move to make.
 
 - **S34** **L** `Features/Settings/RewardsViewModel.swift` [40] — the widest stateful screen with no session: wallet selection, sheets, alerts, toasts and the rewards state.
 - **S35** **L** `Features/WalletTab/WalletSearchSceneViewModel.swift` [32].
 - **S36** **L** `Features/Assets/AssetSceneViewModel.swift` [30].
 - **S37** **L** `Features/Assets/SelectAssetViewModel.swift` [26].
 - **S38** **L** `Features/Transfer/ConfirmTransferSceneViewModel.swift` [25] — confirm has `GemConfirmation`, which SERVICES.md explicitly calls not a session; this is the item that decides whether that is still right.
-- **S39** **M** `PrimitivesComponents/AssetDataViewModel.swift` [24].
 - **S40** **M** `Features/Transfer/AmountSceneViewModel.swift` [24].
 - **S41** **M** `Features/WalletConnector/SignMessageSceneViewModel.swift` [22] — a signing surface holding its own state.
-- **S42** **M** `PrimitivesComponents/PerpetualDetailsViewModel.swift` [20].
-- **S43** **M** `PrimitivesComponents/NetworkFeeSceneViewModel.swift` [20].
 - **S44** **M** `Features/WalletTab/WalletSceneViewModel.swift` [20].
-- **S45** **M** `Features/Stake/DelegationViewModel.swift` [20].
 - **S46** **M** `Features/Stake/StakeSceneViewModel.swift` [19].
 - **S47** **M** `Features/Onboarding/ImportWalletSceneViewModel.swift` [19] — wallet import state, a recovery-critical flow.
 - **S48** **M** `Features/Contacts/ManageContactViewModel.swift` [19].
-- **S49** **M** `Features/WalletConnector/ConnectionProposalViewModel.swift` [18].
 - **S50** **M** `Features/Settings/PreferencesViewModel.swift` [17].
 - **S51** **M** `Features/Perpetuals/PerpetualSceneViewModel.swift` [17].
 - **S52** **M** `Features/WalletTab/NetworkAssetsSceneViewModel.swift` [16].
 - **S53** **M** `Features/Perpetuals/PerpetualsSceneViewModel.swift` [16] and `PerpetualPositionViewModel.swift` [16].
 - **S54** **M** `Features/Transfer/ReceiveViewModel.swift` [15].
 - **S55** **M** `Features/Swap/SwapDetailsViewModel.swift` [15].
-- **S56** **M** `Features/Support/SupportMessageBubbleViewModel.swift` [15].
 - **S57** **M** `Features/NFT/CollectibleViewModel.swift` [15].
 - **S58** **M** `Features/Stake/EarnSceneViewModel.swift` [14].
 - **S59** **M** `Features/Settings/SecurityViewModel.swift` [14] — a security surface whose lock-period state produced a crash on 2026-09-15.
 - **S60** **M** `Features/AppLock/LockSceneViewModel.swift` [14] — the lock screen state machine.
-- **S61** **S** `PrimitivesComponents/BannerViewModel.swift` [13].
 - **S62** **S** `Features/WalletTab/AssetsResultsSceneViewModel.swift` [13].
 - **S63** **S** `Features/Transfer/RecipientSceneViewModel.swift` [13].
 - **S64** **S** `Features/Settings/AboutUsViewModel.swift` [13] — see L15 and P72.
 - **S65** **S** `Features/WalletConnector/ConnectionsViewModel.swift` [11].
-- **S66** **S** `Features/Stake/DelegationSceneViewModel.swift` [11].
 - **S67** **S** `Features/ManageWallets/WalletIDetailViewModel.swift` [11] — also the one iOS file whose name carries a typo (`WalletIDetail`).
-- **S68** **S** `Features/Settings/ChainNodeViewModel.swift` [10] and `Features/FiatConnect/FiatQuoteViewModel.swift` [10].
 - **S69** **S** `Features/Onboarding/VerifyPhraseViewModel.swift` [9] and `Features/Contacts/ManageContactAddressViewModel.swift` [9].
 - **S70** **M** `android/features/perpetual/.../PerpetualDetailsViewModel.kt` and `android/features/confirm/.../ConfirmViewModel.kt` — the only two Android screens in this shape; both have a Core service but keep six `MutableStateFlow`s of their own.
 
