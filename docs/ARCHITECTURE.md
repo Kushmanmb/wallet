@@ -127,7 +127,9 @@ impl GemConfirmService {
 
 The method is thin: gather inputs, call the rule, return. Product or domain-decision branching belongs in `rules.rs`; I/O sequencing, error propagation and empty-work short circuits may remain in the service.
 
-**Point reads should be synchronous.** `GemWalletStore.get_wallet` is a sync trait method, so `GemWalletSessionService` answers a session lookup without `await`. Do the same for any single-row read — an `async` point read pushes the caller back to the store, which is how the confirm screen ended up reading `AssetStore` directly for two years.
+**Point reads should be synchronous where the platform allows it.** `GemWalletSessionStore.get_current_wallet_id` is a sync trait method, so `GemWalletSessionService` answers the current-wallet id without `await`. An `async` point read pushes the caller back to the store, which is how the confirm screen ended up reading `AssetStore` directly for two years.
+
+It is not free in both directions. `GemWalletStore.get_wallet` is still `async` because the two platforms disagree about what a blocking row read costs: iOS reads GRDB synchronously, while Room forbids a blocking query on the main thread, so the same signature would make Android either open a non-suspend DAO with a threading rule nothing enforces or block inside `runBlocking`. Make a point read sync when the row is already in memory or the store is the app's own preferences; when it is a database row that one platform can only read off its main thread, keep it `async` and let the caller hold the value rather than re-reading it per render.
 
 ### No trivial exports
 
