@@ -48,6 +48,10 @@ pub enum GemSwapDetailRow {
 
 #[uniffi::export]
 impl GemSwapQuoteSummary {
+    pub fn slippage_percent(&self) -> f64 {
+        rules::slippage_percent(self.quote.slippage_bps)
+    }
+
     pub fn rows(&self, shows_price_impact: bool) -> Vec<GemSwapDetailRow> {
         [
             Some(GemSwapDetailRow::Provider),

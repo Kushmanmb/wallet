@@ -129,7 +129,7 @@ public final class SwapSceneViewModel {
             fromAssetPrice: fromAssetPrice,
             toAssetPrice: toAssetPrice,
             summary: summary,
-            slippage: selectedSlippage,
+            slippagePercent: selectedSlippage.bps.map { service.slippagePercent(bps: $0) },
             currency: service.currency.rawValue,
             isProviderSelectionEnabled: isQuoteInteractionEnabled,
             swapPriceImpact: fromAssetPrice.swapValue(selectedQuote.fromValue)

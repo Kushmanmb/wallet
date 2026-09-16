@@ -52,7 +52,7 @@ extension SwapDetailsViewModel {
             fromAssetPrice: AssetPriceValue(asset: .mockEthereum(), price: .mock()),
             toAssetPrice: AssetPriceValue(asset: .mockEthereumUSDT(), price: .mock()),
             summary: summary,
-            slippage: .auto,
+            slippagePercent: nil,
             currency: Currency.usd.rawValue,
             swapPriceImpact: nil,
             swapProviderSelectAction: nil,
