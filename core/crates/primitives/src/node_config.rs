@@ -1,7 +1,6 @@
 use super::chain::Chain;
 use crate::{GEM_NODES_ASIA_HOST, GEM_NODES_EUROPE_HOST, GEM_NODES_HOST};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use strum::{AsRefStr, EnumString};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, AsRefStr, EnumString)]
@@ -75,10 +74,6 @@ impl Node {
     pub fn new(url: &str, priority: NodePriority) -> Self {
         Node { url: url.to_string(), priority }
     }
-}
-
-pub fn get_nodes() -> HashMap<String, Vec<Node>> {
-    Chain::all().into_iter().map(|chain| (chain.to_string(), get_nodes_for_chain(chain))).collect()
 }
 
 pub fn get_nodes_for_chain(chain: Chain) -> Vec<Node> {

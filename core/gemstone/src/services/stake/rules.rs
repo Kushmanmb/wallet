@@ -110,7 +110,7 @@ pub fn can_claim_rewards(wallet_type: WalletType, delegation: &Delegation) -> bo
     wallet_type != WalletType::View && config.can_claim_rewards && shows_rewards(&delegation.base)
 }
 
-pub fn validator_display_name(validator: &DelegationValidator) -> String {
+fn validator_display_name(validator: &DelegationValidator) -> String {
     if validator.name.is_empty() {
         return AddressFormatter::format(&validator.id, Some(validator.chain), AddressFormatStyle::Short);
     }
@@ -237,7 +237,7 @@ pub fn min_stake_amount(chain: Chain) -> BigInt {
     stake_config(chain).map(|config| BigInt::from(config.min_amount)).unwrap_or_default()
 }
 
-pub fn can_change_amount_on_unstake(chain: Chain) -> bool {
+fn can_change_amount_on_unstake(chain: Chain) -> bool {
     stake_config(chain).is_some_and(|config| config.change_amount_on_unstake)
 }
 
@@ -350,7 +350,7 @@ fn recommended_validator_ids(chain: Chain) -> Vec<String> {
     get_validators().remove(chain.as_ref()).unwrap_or_default()
 }
 
-pub fn recommended_validators(chain: Chain, validators: &[DelegationValidator]) -> Vec<DelegationValidator> {
+fn recommended_validators(chain: Chain, validators: &[DelegationValidator]) -> Vec<DelegationValidator> {
     let recommended = recommended_validator_ids(chain);
     validators.iter().filter(|validator| recommended.contains(&validator.id)).cloned().collect()
 }
