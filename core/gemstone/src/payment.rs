@@ -3,6 +3,7 @@ use std::sync::Arc;
 use crate::GemstoneError;
 use crate::address::{checksum_address, validate_address};
 use crate::alien::{AlienProvider, AlienProviderWrapper};
+use crate::config::chain::is_memo_supported;
 use crate::models::custom_types::GemBigUint;
 use crate::models::payment::{GemPayment, GemPaymentAmount, GemPaymentLink, GemPaymentRequest, GemPaymentTransaction};
 use crate::services::transfer::model::{GemRecipient, GemTransferData};
@@ -256,19 +257,7 @@ fn requires_memo(chain: Chain, request: &GemPaymentRequest) -> bool {
 }
 
 fn payment_memo_required(chain: Chain) -> bool {
-    match chain.chain_type() {
-        ChainType::Cosmos | ChainType::Ton | ChainType::Xrp | ChainType::Stellar | ChainType::Algorand => true,
-        ChainType::Solana
-        | ChainType::Ethereum
-        | ChainType::Bitcoin
-        | ChainType::Near
-        | ChainType::Tron
-        | ChainType::Aptos
-        | ChainType::Sui
-        | ChainType::Polkadot
-        | ChainType::Cardano
-        | ChainType::HyperCore => false,
-    }
+    is_memo_supported(chain) && chain.chain_type() != ChainType::Solana
 }
 
 fn transfer_value(request: &GemPaymentRequest, decimals: i32) -> Option<BigUint> {
