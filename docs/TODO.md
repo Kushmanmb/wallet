@@ -12,7 +12,6 @@ Ordered by the lines it removes; work these before the sections below. The dupli
 
 - **U4** **S** Five iOS members written twice with the same body: `navigationDestination(for:)` in `EarnSceneViewModel` and `StakeSceneViewModel`, `delete` in `WalletIDetailViewModel` and `WalletsSceneViewModel`, `display(for:)` in `NetworkFeeCustomViewModel` and `NetworkFeeSceneViewModel`, `alertView` in `AssetPriceAlertsScene` and `PriceAlertsScene`, `setupWalletModel` in `CreateWalletModel` and `ImportWalletViewModel`. Each pair keeps one owner (a mapper on the Core destination, a service extension, a shared row view) and the other calls it.
 - **U7** **M** `android/gemcore/.../domains/price/ValueDirection.kt` is a hand-written twin of `GemValueTone` with 125 readers, mapped from a `Double` and from `PriceAlertDirection`; [no hand-written twins](ARCHITECTURE.md): the readers take the Core tone and a style mapper decides the colour, the way `LatencyTone` does for the latency badge.
-- **U8** **M** `android/gemcore/.../model/Precision.kt` is a twin of `GemPrecision` (`GemPrecision.toPrecision()`) used by the four formatters; the formatters read `GemPrecision` directly.
 - **U5** **S** iOS members with no reader: `PerpetualPositionViewModel.nameText`, `ValueFormatter.full_US`, `SupportMessageSender.isAgent`, `Constants.apiURL` (confirm the last against the widget and tests before deleting).
 
 ## 1. Surfaces still outside Gemstone
