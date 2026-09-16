@@ -99,7 +99,10 @@ Re-checked on 2026-09-15 the way the Android dp items were: most of the 31 hits 
 - **X94** **M** `ios/Packages/PrimitivesComponents/Sources/Extensions/Gemstone+Localized.swift` — 499 lines; the shared mapper is becoming the place every module's leftovers land.
 - **X95** **M** `android/ui/.../components/list_head/AmountListHead.kt` (516) and `chart/GemCandlestickChart.kt` (470).
 - **X96** **S** `android/data/services/store/.../database/di/Migration_71_72.kt` (546) and `Migration_41_42.kt` (406) — confirm both are still reachable from the oldest supported schema.
-- **X97** **M** `ios/Gem/Services/ServicesFactory.swift` (469) alongside X54's `ViewModelFactory.swift`.
+
+### The services factory
+
+**X97** closed on 2026-09-16 with no change. `ServicesFactory.makeServices` is one function because it is one dependency graph: 91 local bindings in construction order, each feeding the next, ending in a single `AppResolver.Services`. `ViewModelFactory` split cleanly (X54) because every screen constructor is independent of the others; here a split into `makeCoreServices`, `makeWalletServices` and so on would have to thread twenty-odd intermediate values between the halves, which is more moving parts than the straight line it replaces. The length tracks the number of services the app has, not a mix of concerns.
 
 ### App-side twins of Core types
 
