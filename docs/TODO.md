@@ -59,7 +59,6 @@ The logic weight in brackets is methods plus computed properties. 95 of 159 iOS 
 - **X62** **S** iOS `PriceAlerts/.../SetPriceAlertViewModel.swift` (20).
 - **X63** **S** iOS `Settings/.../PreferencesViewModel.swift` (18), `AboutUsViewModel.swift` (18), `SecurityViewModel.swift` (17) — all three moved to Core rows with no app test.
 - **X64** **S** iOS `Support/.../SupportChatSceneViewModel.swift` (16) and `SupportMessageBubbleViewModel.swift` (19).
-- **X65** **S** Android `settings/networks/viewmodels` — `NetworksViewModel.kt`, `AddNodeViewModel.kt`, `ServiceStatusViewModel.kt`.
 - **X66** **S** Android `bridge/viewmodels` — `WCRequestViewModel.kt`, `WCAuthViewModel.kt`.
 
 ## 11. Missing tests
