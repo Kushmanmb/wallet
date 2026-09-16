@@ -57,7 +57,6 @@ Swept on 2026-09-15 over every non-preview, non-test iOS file: 25 hits, of which
 
 - **T30** **M** `features/bridge/viewmodels` — the remaining three (`ProposalSceneViewModel`, `ConnectionViewModel`, `ConnectionsViewModel`).
 - **T31** **M** `features/asset_select/viewmodels` — all five.
-- **T32** **S** `features/settings/contacts/viewmodels` — all three.
 - **T33** **S** `features/perpetual/viewmodels` — `PerpetualDetailsViewModel`, `AutocloseViewModel`, `PerpetualsPreviewViewModel`.
 - **T34** **S** `features/wallet-details/viewmodels` — all three.
 - **T35** **S** `features/activities/viewmodels` — `TransactionsViewModel`, `TransactionDetailsViewModel`.
