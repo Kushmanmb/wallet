@@ -36,11 +36,14 @@ class GetValidatorsImpl(
 
 class GetDelegationsImpl(
     private val stakeStore: GemstoneStakeStore,
+    private val stakeService: GemStakeServiceInterface,
+    private val ioDispatcher: CoroutineDispatcher,
 ) : GetDelegations {
 
     override fun invoke(walletId: WalletId, assetId: AssetId, providerType: StakeProviderType): Flow<List<Delegation>> =
         stakeStore.observeDelegations(walletId, assetId, providerType)
-            .map { delegations -> delegations.sortedByDescending { it.base.balance } }
+            .map { delegations -> stakeService.sortedDelegations(delegations.map { it.toGem() }).map { it.toPrimitives() } }
+            .flowOn(ioDispatcher)
 }
 
 class GetDelegationImpl(

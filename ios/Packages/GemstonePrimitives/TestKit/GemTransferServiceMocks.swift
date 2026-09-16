@@ -218,6 +218,10 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         self.wholeAmounts = wholeAmounts
     }
 
+    public func sortedDelegations(delegations: [Gemstone.Delegation]) -> [Gemstone.Delegation] {
+        delegations
+    }
+
     public func lockTimeSeconds(chain _: Gemstone.Chain) -> UInt64 {
         lockTime
     }

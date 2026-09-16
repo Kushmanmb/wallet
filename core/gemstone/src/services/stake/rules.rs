@@ -229,6 +229,11 @@ pub fn delegation_rows(delegation: &Delegation) -> Vec<GemDelegationRow> {
     .collect()
 }
 
+pub fn sorted_delegations(mut delegations: Vec<Delegation>) -> Vec<Delegation> {
+    delegations.sort_by(|a, b| b.base.balance.cmp(&a.base.balance));
+    delegations
+}
+
 pub fn lock_time_seconds(chain: Chain) -> u64 {
     stake_config(chain).map(|config| config.time_lock).unwrap_or_default()
 }
@@ -683,6 +688,7 @@ mod tests {
                 provider_type: provider,
                 ..validator
             },
+            price: None,
         }
     }
 
@@ -1038,6 +1044,7 @@ mod tests {
                 ..DelegationBase::mock()
             },
             validator,
+            price: None,
         }
     }
 
@@ -1374,5 +1381,14 @@ mod tests {
         let _: fn(GemAssetBalance) -> (GemBigUint, GemBigUint, GemBigUint, GemBigUint, GemBigUint) =
             |balance| (balance.frozen, balance.locked, balance.staked, balance.pending, balance.rewards);
         assert_eq!(stake_balance(0, 0, 100, 20, 5).staked_value(Chain::Cosmos), GemBigUint::from(125u32));
+    }
+
+    #[test]
+    fn delegations_sort_by_balance_descending() {
+        let mut small = Delegation::mock();
+        small.base.balance = BigUint::from(10u64);
+        let mut large = Delegation::mock();
+        large.base.balance = BigUint::from(300u64);
+        assert_eq!(sorted_delegations(vec![small.clone(), large.clone()]), vec![large, small]);
     }
 }

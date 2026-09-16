@@ -745,6 +745,7 @@ mod tests {
                 apr: 0.0,
                 provider_type: StakeProviderType::Stake,
             },
+            price: None,
         }
     }
 
@@ -1165,6 +1166,7 @@ mod tests {
                 id: "other".into(),
                 ..delegation.validator.clone()
             },
+            price: None,
         };
         let validators = vec![delegation.validator.clone(), other.validator.clone()];
 

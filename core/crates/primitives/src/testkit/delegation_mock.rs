@@ -6,6 +6,7 @@ impl Delegation {
         Delegation {
             base: DelegationBase::mock(),
             validator: DelegationValidator::mock(),
+            price: None,
         }
     }
 
@@ -13,6 +14,7 @@ impl Delegation {
         Delegation {
             base,
             validator: DelegationValidator::mock(),
+            price: None,
         }
     }
 
@@ -30,6 +32,7 @@ impl Delegation {
                 validator_id: validator_id.clone(),
             },
             validator: DelegationValidator::stake(Chain::Tron, validator_id.clone(), validator_id, true, 0.0, 0.0),
+            price: None,
         }
     }
 
@@ -46,6 +49,7 @@ impl Delegation {
                 validator_id: validator_id.to_string(),
             },
             validator: DelegationValidator::mock_osmosis(validator_id),
+            price: None,
         }
     }
 

@@ -36,7 +36,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 ## 6. Core shapes that block an app move
 
-- **C25** **M** `core/crates/primitives/src/delegation.rs` `Delegation` — carries `base` and `validator` and no price, so both apps keep a persisted `Delegation` twin that joins the price, and every rule that needs the row has to stay app-side: the delegation sort by balance is written in both apps (this was C18, which was tried and reverted because routing it through Core silently dropped the price on every staking row). Add the price to the delegation row Core returns — a `GemDelegationRow` carrying the twin's fields, or `price: Option<Price>` on the record — then land the sort through Core and drop the `StakeType` twin, which SERVICES.md says moves the day the delegation store reads the Core record.
 
 ## 7. Decisions to make
 

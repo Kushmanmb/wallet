@@ -28,7 +28,11 @@ object StakeModule {
 
     @Provides
     @Singleton
-    fun provideGetDelegations(stakeStore: GemstoneStakeStore): GetDelegations = GetDelegationsImpl(stakeStore)
+    fun provideGetDelegations(
+        stakeStore: GemstoneStakeStore,
+        stakeService: GemStakeServiceInterface,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher,
+    ): GetDelegations = GetDelegationsImpl(stakeStore, stakeService, ioDispatcher)
 
     @Provides
     @Singleton

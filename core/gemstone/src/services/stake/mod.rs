@@ -123,6 +123,10 @@ impl GemStakeService {
         rules::shows_rewards(&delegation)
     }
 
+    pub fn sorted_delegations(&self, delegations: Vec<Delegation>) -> Vec<Delegation> {
+        rules::sorted_delegations(delegations)
+    }
+
     pub fn lock_time_seconds(&self, chain: Chain) -> u64 {
         rules::lock_time_seconds(chain)
     }
