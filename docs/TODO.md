@@ -90,13 +90,14 @@ Re-checked on 2026-09-15 by separating what actually ships: 116 of the 122 iOS s
 
 Re-checked on 2026-09-15 the way the Android dp items were: most of the 31 hits are inside a `#Preview` or are a named configuration field (`QRScannerDisplayConfiguration.default`), which is the pattern. What was real: a segmented picker width repeated in three scenes and a chart height repeated in two now read `Sizing.picker.segmentedWidth` and `Sizing.chart.height` (Android has named the chart height all along), and the `spacing: 0` / `cornerRadius: 10` / `spacing: 24` call sites read from `Spacing`. X84–X88 are closed.
 
-### Files that have outgrown one module (second pass)
 
-- **X89** **M** `android/gemcore/.../ext/RemoteTypeMappers.kt` — 2278 lines of hand-written remote mappers. Check how many the generator could emit.
-- **X90** **M** `core/gemstone/src/models/remote_types.rs` — 1929 lines.
-- **X91** **M** `core/crates/primitives/src/chain_config.rs` — 1388.
-- **X92** **M** `core/gemstone/src/message/signer.rs` — 771.
-- **X95** **M** `android/ui/.../components/list_head/AmountListHead.kt` (516) and `chart/GemCandlestickChart.kt` (470).
+### Files that have outgrown one module, second pass
+
+All five closed on 2026-09-16 after measuring what each length is made of.
+
+**X89** and **X90** are the same file in two languages and both say so on line one: `RemoteTypeMappers.kt` and `models/remote_types.rs` are emitted by `just generate-models` from `core/bin/generate/remote_types.yml`. The answer to "how many the generator could emit" is all of them; the length is the number of types that cross the FFI.
+
+**X91** `chain_config.rs` is a table — the config types, then one `ChainConfig { .. }` literal per chain, 102 of them. **X92** `message/signer.rs` measured 771 file lines and 231 production lines; the rest is its test module, the same miscount as X46–X52. **X95**'s `GemCandlestickChart.kt` is one chart and its private drawing helpers, and `AmountListHead.kt` is one component family — five composables sharing a private item type and private layout state — so splitting it means widening those to `internal` and trading file length for a wider surface.
 
 ### The shared localized mapper
 
