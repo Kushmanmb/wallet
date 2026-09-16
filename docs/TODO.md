@@ -317,21 +317,21 @@ Closed on 2026-09-16, because the premise was testable and it is false. The sect
 - Six hold exactly one: an input string, a loading flag, an image-loaded flag, a request, a release, a name field. One field is not a lifetime.
 - `PerpetualDetailsViewModel` already reaches a session.
 
-**Thirteen are left**, each with two to six pieces of real domain state — `SelectAssetViewModel` has six, `ConfirmTransferSceneViewModel` and `ImportWalletSceneViewModel` four each. Those are where the session question is real, and it is a shape to agree rather than a move to make.
+**Eight more closed on 2026-09-16 by applying the contract's own test instead of a `var` count.** [ARCHITECTURE.md](ARCHITECTURE.md#a-screen-whose-state-changes-is-a-session) does not say "six or more `var`s"; it says a session is *pure* — no store, no clock, no network — holding state the user drives through events, with one derived view state. Read that way:
+
+- `PerpetualsSceneViewModel` and `PerpetualPositionViewModel` hold no domain state at all: three search and presentation flags between them, and the position model has zero stored `var`s. The same measurement error as the nine above, missed because the count included the base class.
+- `SecurityViewModel`'s three members are mirrors of `service.lockPeriod`, `service.requiresAuthentication` and `service.isPrivacyLockEnabled`, written back through the service and rolled back when the write fails. That is an optimistic write of stored settings, and a session may not hold a store.
+- `LockSceneViewModel` keys its state machine on a `ContinuousClock.Instant` and the app lifecycle. A session may not hold a clock, so this one cannot become one by the rule as written.
+- `ReceiveViewModel` keeps `assetModel`, `address` and `networkAssetIds`, which are one selection — the network — projected three ways, and the address comes from a wallet account read.
+- `ImportWalletSceneViewModel`, `ManageContactViewModel`, `RecipientSceneViewModel` and `ManageContactAddressViewModel` are forms. Their state is unsent input, and every rule on it already crosses: `import_request`, `can_save`, `recipient`, `scanned_address`, `format_address`. A form whose every decision is already Core's has nothing left to move.
+
+**Five are left**, the screens that genuinely derive a view state from state the user drives. Each is a shape to agree rather than a move to make.
 
 - **S34** **L** `Features/Settings/RewardsViewModel.swift` [40] — the widest stateful screen with no session: wallet selection, sheets, alerts, toasts and the rewards state.
 - **S35** **L** `Features/WalletTab/WalletSearchSceneViewModel.swift` [32].
 - **S37** **L** `Features/Assets/SelectAssetViewModel.swift` [26].
 - **S38** **L** `Features/Transfer/ConfirmTransferSceneViewModel.swift` [25] — confirm has `GemConfirmation`, which SERVICES.md explicitly calls not a session; this is the item that decides whether that is still right.
 - **S40** **M** `Features/Transfer/AmountSceneViewModel.swift` [24].
-- **S47** **M** `Features/Onboarding/ImportWalletSceneViewModel.swift` [19] — wallet import state, a recovery-critical flow.
-- **S48** **M** `Features/Contacts/ManageContactViewModel.swift` [19].
-- **S53** **M** `Features/Perpetuals/PerpetualsSceneViewModel.swift` [16] and `PerpetualPositionViewModel.swift` [16].
-- **S54** **M** `Features/Transfer/ReceiveViewModel.swift` [15].
-- **S59** **M** `Features/Settings/SecurityViewModel.swift` [14] — a security surface whose lock-period state produced a crash on 2026-09-15.
-- **S60** **M** `Features/AppLock/LockSceneViewModel.swift` [14] — the lock screen state machine.
-- **S63** **S** `Features/Transfer/RecipientSceneViewModel.swift` [13].
-- **S69** **S** `Features/Onboarding/VerifyPhraseViewModel.swift` [9] and `Features/Contacts/ManageContactAddressViewModel.swift` [9].
 
 ## 33. Chain coverage the matrix does not state
 
