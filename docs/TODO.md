@@ -134,10 +134,6 @@ Re-checked on 2026-09-15 the way the Android dp items were: most of the 31 hits 
 
 Checked and kept: `KeystoreAuthentication` and `LockPeriod` are both written to the keychain by raw value, which the rule allows; `AmountType` carries a recipient its Core namesake does not; `SelectAssetType` and `PaymentDestination` are navigation types carrying app payloads and already map to Core through `flowType`.
 
-### Core hardening (second pass)
-
-- **X106** **S** `core/gemstone/src/gateway/chain_factory.rs` (3), `device.rs` (2), `signer/chain.rs` (1), `block_explorer/explorer.rs` (1).
-
 ## Closed with no change
 
 Each of these was a section of the 2026-09-15 sweeps. The work was to check them; the answer was that the sweep measured the wrong thing. They are kept so the same sweep is not run again with the same conclusion.
@@ -186,6 +182,10 @@ All eight closed on 2026-09-15. The orchestration in `wallet_home`, `asset_disco
 
 ### 10. Exports no app calls at all
 Closed on 2026-09-15 with no change. The sweep counted **app** callers, which is the wrong test for a `rules.rs` function: rules are called by the service that owns them, and the app calls the service. Every function listed here has Core callers — `sanitize_number_input` has fifteen, `node_url` twenty-three, `price_alert_toggle` is read by the asset row, `shows_header` by the confirm screen — and the explorer getters are used by nine other services. A Core export with no caller anywhere is still worth finding; counting app callers alone does not find it.
+
+### Core hardening, second pass
+
+**X106** closed on 2026-09-16. `block_explorer/explorer.rs` is gone: `Explorer::new(&str)` was dead outside its own tests, and the service builds `Explorer { chain }` from a real `Chain`. The four `X::from_chain(chain).unwrap()` sites in `gateway/chain_factory.rs` and `signer/chain.rs` sit inside a matching `chain_type()` arm, and that invariant is now a test — `every_chain_type_resolves_to_its_sub_chain` walks every chain and asserts the Bitcoin, EVM and Cosmos conversions exist for the type the config claims — so a new chain added with the wrong type fails in CI instead of in the app. `device.rs` keeps both: a device key must not be built from a failed OS RNG or a seed the signer rejected, and there is no safe value to fall back to.
 
 ### Core `unwrap` and `expect`
 
