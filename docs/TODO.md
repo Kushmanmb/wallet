@@ -262,20 +262,12 @@ The one real hit was `GemPerpetualChartLayout`, and not for its numbers: `price_
 
 **43 of them are the allowed shape and are closed.** Each is a `struct` with no observable state, no query and no async work, whose initializer takes Core records and projects them. `NetworkFeeSceneViewModel` was called the heaviest model in the repo with no service; it is a value type handed `GemConfirmFeeSelection`, `GemFeeRateRows` and `GemFeeOptionItem` plus two callbacks. A value type projecting Core records does not need a service, and the member count says nothing about whether it decides anything. The weight column was measuring size, not ownership.
 
-**Twelve are left**, and they are the ones that actually drive a screen — each holds `@Observable` state, a query or async work with no Core service behind it. Those are where X160's question bites.
+**The last twelve closed on 2026-09-16 too, and one of them was worth the whole section.**
 
-- **B12** **M** `Features/Perpetuals/AutocloseSceneViewModel.swift` [28] — Android's `AutocloseViewModel` drives the same screen from `GemAutocloseSession`.
-- **B16** **M** `Features/AppLock/LockSceneViewModel.swift` [22] — the lock screen, which is a security surface with no Core service on either app.
-- **B18** **M** `Features/Swap/SwapDetailsViewModel.swift` [18] — Android builds the same rows in `SwapDetailsUIModelFactory` from `GemSwapQuoteSummary`.
-- **B20** **S** `Features/Transactions/TransactionsFilterViewModel.swift` [16] — the activity filter; Android's `TransactionsViewModel` holds the Core filter list.
-- **B23** **S** `PrimitivesComponents/NetworkFeeCustomViewModel.swift` [15] — Android's namesake takes `FeeDetailsModel` and calls `customFee`; iOS does not.
-- **B25** **S** `Features/Onboarding/VerifyPhraseViewModel.swift` [14] — phrase verification is a security rule with no Core owner.
-- **B27** **S** `PrimitivesComponents/InputValidationViewModel.swift` [11] — validation on the iOS side of the `Validators` boundary.
-- **B30** **S** `Features/QRScanner/QRScannerSceneViewModel.swift` [11] — scan handling with no Core payment service.
-- **B36** **S** `PrimitivesComponents/TextInputSheet/TextInputViewModel.swift` [9].
-- **B50** **S** `GemPriceWidget/CoinPriceRowViewModel.swift` [7] — the widget row, which cannot import Gemstone today.
-- **B51** **S** `Features/Support/SupportMessageInputBarViewModel.swift` [7].
-- **B61** **S** `Features/WalletTab/PerpetualsPreviewViewModel.swift` [6].
+**B25 landed.** Both apps shuffle the recovery phrase *within groups of four* so the user re-picks the words in order — iOS as `words.shuffleInGroups(groupSize: 4)`, Android as its own chunk-and-shuffle loop with a private `wordsPerGroup = 4`. The same rule, written twice, on the wallet-recovery surface, where the two implementations drifting means one platform verifying a phrase the other would not. `phrase_verification_words` owns it now, and both screens take the shuffled list from the service that creates the wallet.
+
+Five of the rest already read Core and map it: `AutocloseSceneViewModel`, `LockSceneViewModel`, `SwapDetailsViewModel`, `TransactionsFilterViewModel` and `NetworkFeeCustomViewModel` — B23 in particular looked like a gap because Android has a `CustomFee` domain class iOS lacks, but both call `GemCustomFee.estimate` and read `isOverMax`, `isBelowMinimum`, `isValid`, `feeValue`, `maxRate` and `minimumRate` from it; only the rate *text* is formatted per app, which is X158. `CoinPriceRowViewModel` is the widget (X159) and `InputValidationViewModel` sits behind the `Validators` boundary (X158). `QRScannerSceneViewModel`, `TextInputViewModel` and `SupportMessageInputBarViewModel` are camera, keyboard and attachment plumbing, and `PerpetualsPreviewViewModel` is two query passthroughs.
+
 
 ## 28. Core duplicated inside Core
 
