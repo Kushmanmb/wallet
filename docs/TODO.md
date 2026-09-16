@@ -180,14 +180,16 @@ A comparison against a literal in a view model is a product rule with no name. T
 
 Nine closed on 2026-09-16, because most of the hits are not rules. `count > 1`, `balance > 0`, `unverifiedCount > 0` and `tickCount < 2` all say "is there more than nothing here" — S22 is the clearest case: both apps ask Core `unverifiedCollections(...)` and both then check the size, so the only thing Core could add is the `> 0`, and [a lookup wrapper over uniffi is not an export](ARCHITECTURE.md). S21, S24 and S25 are the collection filtering closed in § 20, and S33 is a SQL predicate.
 
-What is left below is the part that *is* a decision: a number someone chose, that the two apps chose differently.
+**The remaining six closed on 2026-09-16**, because "chosen differently" was asserted rather than checked. Each one is a single platform's transport or API detail:
 
-- **S27** **S** `android/app/.../di/ClientsModule.kt:29-31` — connect timeout, read timeout and the idle connection pool are literals; iOS sets its own in `URLSessionConfiguration`, so the network budget is decided twice.
-- **S28** **S** `android/features/update_app/.../InAppUpdateServiceImpl.kt:42-43` — a second, different pair of HTTP timeouts inside the same app.
-- **S29** **S** `ios/GemPriceWidget/Widget/PriceWidgetProvider.swift:33` one minute vs `android/app/.../widgets/WidgetPriceSyncWorker.kt:34` `REFRESH_INTERVAL_MINUTES` — the widget refresh cadence is a product decision made twice.
-- **S30** **S** `ios/Packages/PrimitivesComponents/.../CopyTypeViewModel.swift:63` — the pasteboard expiry interval is set in the app; Android's clipboard path has its own.
-- **S31** **S** `ios/Features/WalletTab/.../WalletSearchSceneViewModel.swift:173,181` — the section caps come from Core's `limits` but the `prefix` is applied app-side on iOS only.
-- **S32** **S** `ios/GemPriceWidget/.../PriceWidgetViewModel.swift:23,25` — one coin for the small family, three for the medium; the Android widget picks its own counts.
+- The Android HTTP timeouts (S27) are already named constants, not literals, and iOS makes no competing choice — `SwiftHTTPClient` uses `URLSession.shared` and sets no `timeoutInterval` at all. The rest of the block configures an OkHttp `ConnectionPool` and `Cache`, which have no `URLSession` counterpart to disagree with.
+- The update client's pair (S28) is the APK download path, which reads a file rather than an API response; a longer read budget for a longer read is not the app contradicting itself.
+- The pasteboard expiry (S30) is two platform APIs for one intent. Android marks the clip `EXTRA_IS_SENSITIVE` and lets the OS hide and expire it; iOS has no such flag and must pass `.expirationDate` with `.localOnly`. Neither API can take the other's argument.
+- The search caps (S31) already come from Core: `wallet_search_limits` decides how many and `has_more_*` decides whether to offer the rest. What is left app-side is `prefix` on a list the app loaded from its own database — sending every asset, perpetual and NFT across the FFI so Core can slice it would be a large reverse crossing for no decision.
+- The widget cadence and coin counts (S29, S32) are gated on the widget being able to link Core at all, which is **X159**. A number Core owns that only one of the two widgets can read hides the divergence rather than removing it, so these move behind that boundary instead of standing alone.
+
+Rank a threshold by whether both apps *decide* with it, not by whether both apps *contain* one; a constant that configures one platform's client object has no second site to disagree with.
+
 
 ## 20. Ordering, filtering and grouping in app code
 
