@@ -300,24 +300,10 @@ V66, V67 and V71 closed on 2026-09-16 as platform ports rather than thin wrapper
 
 ## 31. Services with more collaborators than a service should have
 
-29 `uniffi::Object` services hold four or more `Arc` collaborators. Composition is the sanctioned answer to "a screen needs several owners" ([ARCHITECTURE.md](ARCHITECTURE.md) § 7), so depth alone is not a defect — but a service that composes a dozen others is the place a cycle appears, and it is the hardest thing in Core to change without touching every screen. Each item is one service to read for a responsibility that belongs to a collaborator.
+Closed on 2026-09-16, because the premise was testable and it is false. The section said a deeply composed service "is the place a cycle appears" — so the composition graph was built from every `#[derive(uniffi::Object)]` struct's `Arc` fields and walked: **68 services, zero cycles.** `GemStreamService` has 13 collaborators and sits in an acyclic graph, as does `GemWalletService` with 10 and `GemAssetDetailsService` with 10.
 
-- **X107** **L** `GemStreamService` — 13 collaborators (`GemBalanceService`, `GemDeviceService`, `GemFiatService`, `GemNftService`, `GemNotificationStore`, `GemPerpetualService` and seven more). The socket fan-out is the widest object in Core, and every screen's freshness depends on it.
-- **X108** **L** `GemWalletService` — 10, spanning the keystore, the avatar, the explorer and the file store. Wallet creation, naming, avatars and secret export are one object.
-- **X109** **L** `GemAssetDetailsService` — 10; the asset screen composes banners, deeplinks, price alerts and balances into one answer.
-- **X110** **M** `GemPerpetualService` — 9, including the gateway and two stores.
-- **X111** **M** `GemTransactionsService` — 8, including the device API client and the status service.
-- **X112** **M** `GemConfirmTransferService` — 8; the confirm flow reaches the keystore password, the name service and the asset config.
-- **X113** **M** `GemConfirmService` — 8, including simulation and scanning. Confirm is split across two eight-collaborator services; decide whether that split is the right seam.
-- **X114** **M** `GemAssetSelectionService` — 8; asset selection composes perpetuals, price alerts and recent activity.
-- **X115** **M** `GemStakeService` — 7.
-- **X116** **M** `GemDeveloperService` — 7 after the 2026-09-16 migration; the developer screen is now the widest debug surface in Core.
-- **X117** **M** `GemAppStartService` — 7; launch orchestration.
-- **X118** **M** `GemWalletHomeService` — 6.
-- **X119** **M** `GemWalletConnectService` — 6, including its own signer and simulation.
-- **X120** **M** `GemTransactionStateService` — 6.
-- **X121** **M** `GemBalanceService` and `GemAssetsService` — 6 each, and they compose each other's neighbours; the balance/assets pair is worth reading as one seam.
-- **X122** **M** `GemAssetDiscoveryService` — 6.
+[ARCHITECTURE.md § 7](ARCHITECTURE.md) already prescribes this shape — "when a screen needs a cohesive answer from several Core owners, Core composes them" — so a collaborator count is not evidence of a defect, only of how many owners that screen's answer spans. What *would* be an item is a named responsibility sitting on the wrong service, and X165 below is the one such claim the sweep actually made. Counting `Arc` fields finds depth, not misplacement; drop this lens.
+
 
 ## 32. A screen that changes state with no session
 
