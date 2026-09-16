@@ -5,6 +5,7 @@ import Foundation
 import protocol Gemstone.GemChainSettingsServiceProtocol
 import enum Gemstone.GemChainSettingsSection
 import struct Gemstone.GemExplorerRow
+import struct Gemstone.GemNodeListSession
 import struct Gemstone.GemNodeSelection
 import enum Gemstone.GemNodeStatusState
 import GemstonePrimitives
@@ -22,13 +23,13 @@ public final class ChainSettingsSceneViewModel {
     var isPresentingImportNode: Bool = false
     var isPresentingAlertMessage: AlertMessage?
 
-    private var nodes: [GemNodeSelection] = []
-    private var statusStateByNodeUrl: [String: GemNodeStatusState] = [:]
+    private var session: GemNodeListSession
 
     public init(chain: Chain, service: any GemChainSettingsServiceProtocol) {
         self.chain = chain
         self.service = service
         explorers = service.explorerRows(chain: chain.rawValue)
+        session = service.newNodeListSession(chain: chain.rawValue)
     }
 
     var title: String {
@@ -40,7 +41,7 @@ public final class ChainSettingsSceneViewModel {
     }
 
     var nodesModels: [ChainNodeViewModel] {
-        service.nodeRows(chain: chain.rawValue, nodes: nodes, statuses: statusStateByNodeUrl)
+        service.nodeRows(chain: chain.rawValue, nodes: session.nodes, statuses: session.statuses)
             .map { ChainNodeViewModel(row: $0) }
     }
 
@@ -62,7 +63,6 @@ public final class ChainSettingsSceneViewModel {
 extension ChainSettingsSceneViewModel {
     func load() async {
         do {
-            clear()
             try await loadNodes()
             await loadNodesStates()
         } catch {
@@ -120,23 +120,20 @@ extension ChainSettingsSceneViewModel {
 
 extension ChainSettingsSceneViewModel {
     private func loadNodes() async throws {
-        nodes = try await service.nodes(chain: chain.rawValue)
-    }
-
-    private func clear() {
-        statusStateByNodeUrl = [:]
+        session = session.onNodes(nodes: try await service.nodes(chain: chain.rawValue))
     }
 
     private func loadNodesStates() async {
+        session = session.onChecking()
         await withTaskGroup(of: (String, GemNodeStatusState).self) { group in
-            for url in nodes.map(\.url) {
+            for url in session.nodeUrls() {
                 group.addTask {
                     await (url, self.service.nodeStatus(chain: self.chain.rawValue, url: url))
                 }
             }
 
             for await (url, state) in group {
-                statusStateByNodeUrl[url] = state
+                session = session.onStatus(url: url, state: state)
             }
         }
     }

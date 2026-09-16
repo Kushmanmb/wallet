@@ -5,7 +5,7 @@ use primitives::Chain;
 
 use super::model::{GemAddNodeError, GemChainSettingsSection, GemExplorerRow, GemNodeCheck, GemNodeRow, GemNodeSelection, GemNodeStatusState};
 use super::rules;
-use super::session::GemAddNodeSession;
+use super::session::{GemAddNodeSession, GemNodeListSession};
 use crate::gateway::GemGateway;
 use crate::services::chain::rules as chain_rules;
 use crate::services::error::GemServiceError;
@@ -103,6 +103,10 @@ impl GemChainSettingsService {
 
     pub async fn node_status(&self, chain: Chain, url: String) -> GemNodeStatusState {
         rules::node_status_state(self.gateway.get_node_status(chain, &url).await.ok())
+    }
+
+    pub fn new_node_list_session(&self, chain: Chain) -> GemNodeListSession {
+        GemNodeListSession::new(chain)
     }
 
     pub fn new_add_node_session(&self, chain: Chain) -> GemAddNodeSession {

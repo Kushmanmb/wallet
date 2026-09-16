@@ -10,7 +10,7 @@ import uniffi.gemstone.GemChainSettingsServiceInterface
 import uniffi.gemstone.GemChainSettingsSection
 import uniffi.gemstone.GemExplorerRow
 import uniffi.gemstone.GemNodeRow
-import uniffi.gemstone.GemNodeSelection
+import uniffi.gemstone.GemNodeListSession
 import uniffi.gemstone.GemNodeStatusState
 import com.gemwallet.android.features.settings.networks.viewmodels.models.NetworksUIState
 import com.wallet.core.primitives.Chain
@@ -63,9 +63,7 @@ class NetworksViewModel @Inject constructor(
                 selectChain = false,
                 explorers = service.explorerRows(chain.string),
                 availableAddNode = true,
-                nodes = emptyList(),
-                nodeStates = emptyMap(),
-                refreshNonce = System.nanoTime(),
+                session = service.newNodeListSession(chain.string),
             )
         }
         observeNodes(chain)
@@ -73,7 +71,7 @@ class NetworksViewModel @Inject constructor(
 
     fun refresh() {
         val chain = state.value.chain ?: return
-        refreshNodeStatuses(chain, System.nanoTime())
+        refreshNodeStatuses(chain)
     }
 
     fun onSelectNode(url: String) {
@@ -111,78 +109,35 @@ class NetworksViewModel @Inject constructor(
         observeNodesJob?.cancel()
         observeNodesJob = viewModelScope.launch {
             loadNodes(chain)
-            refreshNodeStatuses(chain, System.nanoTime())
+            refreshNodeStatuses(chain)
         }
     }
 
     private suspend fun loadNodes(chain: Chain) {
         val nodes = service.nodes(chain.string)
 
-        updateState {
-            it.copy(
-                nodes = nodes,
-                nodeStates = visibleNodeStates(nodes, it.nodeStates),
-            )
-        }
+        updateState { it.copy(session = it.session?.onNodes(nodes)) }
     }
 
-    private fun refreshNodeStatuses(chain: Chain, refreshNonce: Long) {
+    private fun refreshNodeStatuses(chain: Chain) {
         refreshJob?.cancel()
         refreshJob = viewModelScope.launch {
-            val nodes = state.value.nodes
-            if (nodes.isEmpty()) {
-                updateState { current ->
-                    if (current.chain == chain && current.refreshNonce <= refreshNonce) {
-                        current.copy(
-                            refreshNonce = refreshNonce,
-                        )
-                    } else {
-                        current
-                    }
-                }
+            val urls = state.value.session?.nodeUrls().orEmpty()
+            if (urls.isEmpty()) {
                 return@launch
             }
-
-            val loadingStates = nodes.associate { it.url to GemNodeStatusState.Loading }
-            updateState { current ->
-                if (current.chain != chain) {
-                    current
-                } else {
-                    current.copy(
-                        refreshNonce = refreshNonce,
-                        nodeStates = loadingStates,
-                    )
-                }
-            }
+            updateState { current -> if (current.chain == chain) current.copy(session = current.session?.onChecking()) else current }
 
             supervisorScope {
-                nodes.forEach { node ->
+                urls.forEach { url ->
                     launch {
-                        val nodeState = withContext(Dispatchers.IO) {
-                            service.nodeStatus(chain.string, node.url)
-                        }
-                        updateNodesIfCurrent(chain, refreshNonce) { current ->
-                            if (current.nodes.none { it.url == node.url }) {
-                                current
-                            } else {
-                                current.copy(
-                                    nodeStates = visibleNodeStates(
-                                        current.nodes,
-                                        current.nodeStates + (node.url to nodeState),
-                                    ),
-                                )
-                            }
+                        val nodeState = withContext(Dispatchers.IO) { service.nodeStatus(chain.string, url) }
+                        updateState { current ->
+                            if (current.chain != chain) current else current.copy(session = current.session?.onStatus(url, nodeState))
                         }
                     }
                 }
             }
-        }
-    }
-
-    private fun updateNodesIfCurrent(chain: Chain, refreshNonce: Long, transform: (State) -> State) {
-        updateState { current ->
-            if (current.chain != chain || current.refreshNonce != refreshNonce) current
-            else transform(current)
         }
     }
 
@@ -193,12 +148,10 @@ class NetworksViewModel @Inject constructor(
     private data class State(
         val chain: Chain? = null,
         val explorers: List<GemExplorerRow> = emptyList(),
-        val nodeStates: Map<String, GemNodeStatusState> = emptyMap(),
-        val nodes: List<GemNodeSelection> = emptyList(),
+        val session: GemNodeListSession? = null,
         val availableChains: List<Chain> = emptyList(),
         val selectChain: Boolean = true,
         val availableAddNode: Boolean = true,
-        val refreshNonce: Long = 0,
         val error: GemErrorText? = null,
     )
 
@@ -209,15 +162,7 @@ class NetworksViewModel @Inject constructor(
         sections = sections,
         blockExplorers = explorers,
         availableAddNode = availableAddNode,
-        nodeRows = chain?.let { service.nodeRows(it.string, nodes, nodeStates) }.orEmpty(),
+        nodeRows = session?.let { service.nodeRows(it.chain, it.nodes, it.statuses) }.orEmpty(),
         error = error,
     )
-}
-
-internal fun visibleNodeStates(
-    nodes: List<GemNodeSelection>,
-    nodeStates: Map<String, GemNodeStatusState>,
-): Map<String, GemNodeStatusState> {
-    val nodeUrls = nodes.mapTo(hashSetOf()) { it.url }
-    return nodeStates.filterKeys(nodeUrls::contains)
 }

@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 use super::model::{GemNodeSelection, GemNodeStatusState};
 use crate::service_status::GemLatencyStatus;
 use crate::services::collections::unique_by;
@@ -153,6 +155,15 @@ pub fn block_number_text(value: Option<u64>) -> String {
             .map(|value| ValueFormatter::format(ValueStyle::Full, &value.to_string(), 0).unwrap_or_else(|_| value.to_string()))
             .as_deref(),
     )
+}
+
+pub fn visible_statuses(nodes: &[GemNodeSelection], statuses: &HashMap<String, GemNodeStatusState>) -> HashMap<String, GemNodeStatusState> {
+    let urls: HashSet<&str> = nodes.iter().map(|node| node.url.as_str()).collect();
+    statuses
+        .iter()
+        .filter(|(url, _)| urls.contains(url.as_str()))
+        .map(|(url, state)| (url.clone(), state.clone()))
+        .collect()
 }
 
 #[cfg(test)]

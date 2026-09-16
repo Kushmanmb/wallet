@@ -14,7 +14,6 @@ These files were checked during the 2026-09-15 mapper sweep and need no change â
 
 Decide before building; a read-only screen is a row, not a session.
 
-- **S17** **M** `Settings/Sources/ChainSettings/ViewModels/ChainSettingsSceneViewModel.swift` holds five mutable fields and loads node status concurrently after the node list. Android's `NetworksViewModel` carries the same state plus a refresh nonce it invented to order the two loads.
 - **S18** **S** `Transactions/Sources/ViewModels/TransactionsFilterViewModel.swift` against the Android filter sheet.
 
 ## 7. Platform
