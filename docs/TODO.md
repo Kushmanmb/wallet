@@ -22,7 +22,6 @@ Closed on 2026-09-15. Four of the six were the same `try { focusRequester.reques
 
 ### Deferred notes still in the code
 
-- **X33** **S** `ios/Packages/Components/Sources/TextFields/CurrencyTextField.swift` pins the field height to work around <https://developer.apple.com/forums/thread/806828>. Remove the `.frame(height:)` and check the amount field on the oldest supported iOS and the newest; if the text no longer jumps, the pin goes.
 - **X35** **S** `ios/Packages/Gemstone/Package.swift` pins Swift 5 language mode. Re-checked on 2026-09-15 against the current toolchain: dropping the pin fails on two `uniffiFutureContinuationCallback` sites in the generated `Gemstone.swift` — "passing closure as a 'sending' parameter risks causing data races". The fix is upstream in uniffi's Swift bindgen, not here; re-check after the next uniffi bump.
 - **X36** **S** `LocalKeystore.swift` and `DB.swift` each run `FileMigrator` at launch to move the keystore directory and the database out of the documents directory into application support. Both were marked "delete in 2026" and the notes are gone, but the code stays until someone with the install numbers decides: deleting it while any user is still on a pre-move build points the keystore at a path that does not exist, and that user loses their wallet. The cost of keeping it is one `fileExists` per launch after the first (`FileMigrator.migrate` returns the new URL untouched when the old path is empty), so the default is to keep it. What settles it: the share of active installs whose last upgrade predates the move.
 - **X39** **M** `core/crates/nft/src/providers/ton/verified.rs` hardcodes the verified-collection allowlist. Backend gap; track it where the backend work lives or close the note.
@@ -191,6 +190,10 @@ All eight closed on 2026-09-15. The orchestration in `wallet_home`, `asset_disco
 
 ### 10. Exports no app calls at all
 Closed on 2026-09-15 with no change. The sweep counted **app** callers, which is the wrong test for a `rules.rs` function: rules are called by the service that owns them, and the app calls the service. Every function listed here has Core callers — `sanitize_number_input` has fifteen, `node_url` twenty-three, `price_alert_toggle` is read by the asset row, `shows_header` by the confirm screen — and the explorer getters are used by nine other services. A Core export with no caller anywhere is still worth finding; counting app callers alone does not find it.
+
+### The currency field's height pin
+
+**X33** closed on 2026-09-16 with no change. Measured on iOS 26.5, the newest runtime: unpinned, the field is 53.0 pt while it is empty and 54.7 pt as soon as it holds a digit, so the amount jumps on the first keystroke and the pin is still doing its job. `CurrencyTextFieldTests` now measures the height across four amounts, so the check is already written for whoever revisits this once the SwiftUI fix lands.
 
 ### 12. Localization hygiene
 
