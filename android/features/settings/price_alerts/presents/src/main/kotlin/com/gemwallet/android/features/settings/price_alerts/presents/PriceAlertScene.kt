@@ -5,9 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -17,8 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.gemwallet.android.ui.components.empty.EmptyContentType
-import com.gemwallet.android.ui.components.empty.EmptyContentView
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,9 +33,11 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.gemwallet.android.domains.asset.aggregates.AssetInfoDataAggregate
 import com.gemwallet.android.domains.pricealerts.aggregates.PriceAlertDataAggregate
-import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.empty.EmptyContentType
+import com.gemwallet.android.ui.components.empty.EmptyContentView
 import com.gemwallet.android.ui.components.list_item.ActionIcon
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.SwipeableItemWithActions
@@ -56,7 +56,7 @@ import com.wallet.core.primitives.AssetId
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PriceAlertScene(
-    assetInfo: AssetInfo? = null,
+    asset: AssetInfoDataAggregate? = null,
     data: Map<AssetId?, List<PriceAlertDataAggregate>>,
     enabled: Boolean,
     syncState: Boolean,
@@ -68,7 +68,7 @@ internal fun PriceAlertScene(
     Scene(
         title = stringResource(R.string.settings_price_alerts_title),
         actions = @Composable {
-            val assetId = assetInfo?.id()
+            val assetId = asset?.id
             IconButton(onClick = if (assetId == null) {
                 { onAction(PriceAlertAction.Add) }
             } else {
@@ -87,7 +87,7 @@ internal fun PriceAlertScene(
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 if (isAssetView) {
-                    autoAlertToggle(assetInfo, data) { onAction(PriceAlertAction.ToggleAutoAlert(it)) }
+                    autoAlertToggle(asset, data) { onAction(PriceAlertAction.ToggleAutoAlert(it)) }
                     val manualData = data.filterKeys { it != null }
                     emptyAlertingAssets(data.values.flatten().isEmpty())
                     assets(
@@ -126,17 +126,17 @@ internal fun PriceAlertScene(
 }
 
 private fun LazyListScope.autoAlertToggle(
-    assetInfo: AssetInfo?,
+    asset: AssetInfoDataAggregate?,
     data: Map<AssetId?, List<PriceAlertDataAggregate>>,
     onToggleAutoAlert: (Boolean) -> Unit,
 ) {
     item {
         val autoAlerts = data[null] ?: emptyList()
         val isAutoAlertEnabled = autoAlerts.isNotEmpty()
-        val currentAssetInfo = assetInfo ?: return@item
+        val currentAsset = asset ?: return@item
 
         PriceAlertAutoAssetItem(
-            assetInfo = currentAssetInfo,
+            asset = currentAsset,
             enabled = isAutoAlertEnabled,
             onCheckedChange = onToggleAutoAlert,
         )
