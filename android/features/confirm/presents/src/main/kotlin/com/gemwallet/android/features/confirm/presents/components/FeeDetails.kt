@@ -1,5 +1,12 @@
 package com.gemwallet.android.features.confirm.presents.components
 
+import com.gemwallet.android.ui.theme.listItemIconSize
+import com.gemwallet.android.ui.components.list_item.ListItemSupportText
+import com.gemwallet.android.ui.components.image.IconWithBadge
+import androidx.compose.ui.unit.Dp
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
@@ -41,7 +48,6 @@ import com.gemwallet.android.ui.components.SuffixTextField
 import com.gemwallet.android.ui.components.list_item.AssetListItem
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemDefaults
-import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemTitleText
 import com.gemwallet.android.ui.components.list_item.SelectionCheckmark
@@ -372,22 +378,44 @@ private fun FeeRow(
     onClick: () -> Unit,
 ) {
     ListItem(
-        model = ListItemModel(
-            title = title,
-            subtitle = rate?.takeIf { it.isNotEmpty() },
-            subtitleExtra = fiat?.takeIf { it.isNotEmpty() },
-            image = ListItemImage.Emoji(emoji),
-        ),
-        listPosition = position,
         modifier = Modifier.clickable { onClick() },
-        minHeight = ListItemDefaults.defaultMinHeight,
-        accessory = {
-            if (isSelected) {
-                SelectionCheckmark()
-            }
-            DataBadgeChevron()
+        leading = {
+            EmojiCircle(emoji, listItemIconSize, isSelected)
         },
+        title = {
+            ListItemTitleText(title)
+        },
+        trailing = {
+            DataBadgeChevron(isShowChevron = true) {
+                Column(horizontalAlignment = Alignment.End) {
+                    rate?.takeIf { it.isNotEmpty() }?.let { ListItemTitleText(it) }
+                    fiat?.takeIf { it.isNotEmpty() }?.let { ListItemSupportText(it) }
+                }
+            }
+        },
+        listPosition = position,
+        minHeight = ListItemDefaults.defaultMinHeight,
     )
+}
+
+@Composable
+private fun EmojiCircle(emoji: String, size: Dp, isSelected: Boolean = false) {
+    IconWithBadge(
+        size = size,
+        badge = if (isSelected) {{ SelectionCheckmark() }} else null,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(size)
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = alpha10), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = emoji,
+                style = MaterialTheme.typography.headlineSmall,
+            )
+        }
+    }
 }
 
 @Composable
