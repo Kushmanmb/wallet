@@ -48,7 +48,8 @@ fun PriceAlertsNavScreen(
     var selectingAsset by remember { mutableStateOf(false) }
     val requestNotificationPermission = rememberNotificationPermissionGate()
 
-    val data by viewModel.data.collectAsStateWithLifecycle()
+    val sections by viewModel.sections.collectAsStateWithLifecycle()
+    val isAutoAlertEnabled by viewModel.isAutoAlertEnabled.collectAsStateWithLifecycle()
     val asset by viewModel.asset.collectAsStateWithLifecycle()
     val priceAlertEnabled by viewModel.priceAlertEnabled.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
@@ -71,7 +72,8 @@ fun PriceAlertsNavScreen(
             )
             false -> PriceAlertScene(
                 asset = asset,
-                data = data,
+                sections = sections,
+                isAutoAlertEnabled = isAutoAlertEnabled,
                 enabled = priceAlertEnabled == true,
                 syncState = isRefreshing,
                 isAssetView = viewModel.isAssetManage(),

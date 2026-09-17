@@ -2,8 +2,10 @@ package com.gemwallet.android.ui.components.image
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -37,7 +39,7 @@ fun ListItemImageView(
         is ListItemImage.Drawable -> Image(
             painter = painterResource(image.id),
             contentDescription = null,
-            modifier = modifier.size(iconSize),
+            modifier = if (image.isRounded) modifier.size(size).clip(CircleShape) else modifier.size(iconSize),
         )
     }
 }

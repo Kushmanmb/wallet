@@ -18,9 +18,13 @@ import com.gemwallet.android.ui.components.image.ListItemImageView
 import com.gemwallet.android.ui.components.list_item.property.PropertyDataText
 import com.gemwallet.android.ui.components.list_item.property.PropertyItem
 import com.gemwallet.android.ui.components.list_item.property.PropertyTitleText
+import com.gemwallet.android.ui.components.progress.CircularProgressIndicator14
 import com.gemwallet.android.ui.models.ListPosition
+import com.gemwallet.android.ui.theme.Spacer6
 import com.gemwallet.android.ui.theme.alpha10
 import com.gemwallet.android.ui.theme.listItemIconSize
+import com.gemwallet.android.ui.theme.paddingHalfSmall
+import com.gemwallet.android.ui.theme.pendingColor
 import com.gemwallet.android.ui.theme.space2
 import com.gemwallet.android.ui.theme.space6
 import com.wallet.core.primitives.AssetId
@@ -30,7 +34,9 @@ data class ListItemModel(
     val titleStyle: ListItemTextStyle = ListItemTextStyle.Body,
     val titleTag: String? = null,
     val titleTagStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
+    val titleTagType: ListItemTagType = ListItemTagType.None,
     val titleExtra: String? = null,
+    val titleExtraStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
     val subtitle: String? = null,
     val subtitleStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
     val subtitleExtra: String? = null,
@@ -43,7 +49,13 @@ enum class ListItemTextStyle {
     Secondary,
     Positive,
     Negative,
+    Warning,
     Primary,
+}
+
+enum class ListItemTagType {
+    None,
+    Progress,
 }
 
 sealed interface ListItemImage {
@@ -52,7 +64,7 @@ sealed interface ListItemImage {
     data class Stored(val name: String, val placeholder: String? = null) : ListItemImage
     data class Emoji(val glyph: String, val backgroundColor: Int? = null) : ListItemImage
     data class Initials(val text: String) : ListItemImage
-    data class Drawable(@DrawableRes val id: Int) : ListItemImage
+    data class Drawable(@DrawableRes val id: Int, val isRounded: Boolean = false) : ListItemImage
 }
 
 @Composable
@@ -61,6 +73,7 @@ fun ListItemTextStyle.color(): Color = when (this) {
     ListItemTextStyle.Secondary -> MaterialTheme.colorScheme.secondary
     ListItemTextStyle.Positive -> MaterialTheme.colorScheme.tertiary
     ListItemTextStyle.Negative -> MaterialTheme.colorScheme.error
+    ListItemTextStyle.Warning -> pendingColor
     ListItemTextStyle.Primary -> MaterialTheme.colorScheme.primary
 }
 
@@ -90,8 +103,8 @@ fun ListItem(
         listPosition = listPosition,
         minHeight = minHeight,
         leading = model.image?.let { image -> { ListItemImageView(image = image, size = listItemIconSize) } },
-        title = { ListItemTitleText(text = model.title, color = model.titleStyle.color(), titleBadge = model.titleTag?.let { { TitleTag(it, model.titleTagStyle) } }) },
-        subtitle = model.titleExtra?.let { { ListItemSupportText(it) } },
+        title = { ListItemTitleText(text = model.title, color = model.titleStyle.color(), titleBadge = model.titleTag?.let { { TitleTag(it, model.titleTagStyle, model.titleTagType) } }) },
+        subtitle = model.titleExtra?.let { { ListItemSupportText(text = it, color = model.titleExtraStyle.color()) } },
         trailing = if (model.subtitle == null && model.subtitleExtra == null && accessory == null) {
             null
         } else {
@@ -116,22 +129,32 @@ fun ListItem(
 }
 
 @Composable
-private fun TitleTag(text: String, style: ListItemTextStyle) {
+private fun TitleTag(text: String, style: ListItemTextStyle, type: ListItemTagType) {
+    when (type) {
+        ListItemTagType.Progress -> {
+            Spacer6()
+            CircularProgressIndicator14()
+            return
+        }
+        ListItemTagType.None -> Unit
+    }
     when (style) {
-        ListItemTextStyle.Primary -> Text(
+        ListItemTextStyle.Primary,
+        ListItemTextStyle.Positive,
+        ListItemTextStyle.Negative,
+        ListItemTextStyle.Warning -> Text(
             modifier = Modifier
+                .padding(start = paddingHalfSmall)
                 .background(
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = alpha10),
+                    color = style.color().copy(alpha = alpha10),
                     shape = RoundedCornerShape(space6),
                 )
                 .padding(horizontal = space6, vertical = space2),
             text = text,
-            color = MaterialTheme.colorScheme.primary,
+            color = style.color(),
             style = MaterialTheme.typography.bodyMedium,
         )
         ListItemTextStyle.Body,
-        ListItemTextStyle.Secondary,
-        ListItemTextStyle.Positive,
-        ListItemTextStyle.Negative -> Badge(text)
+        ListItemTextStyle.Secondary -> Badge(text)
     }
 }

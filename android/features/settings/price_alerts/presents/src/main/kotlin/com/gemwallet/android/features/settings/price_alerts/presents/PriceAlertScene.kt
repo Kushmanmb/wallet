@@ -39,13 +39,13 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.empty.EmptyContentType
 import com.gemwallet.android.ui.components.empty.EmptyContentView
 import com.gemwallet.android.ui.components.list_item.ActionIcon
-import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.SwipeableItemWithActions
 import com.gemwallet.android.ui.components.list_item.SwitchProperty
-import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
+import com.gemwallet.android.ui.components.list_item.listSections
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.icons.AppIcons
+import com.gemwallet.android.ui.models.ListSection
 import com.gemwallet.android.ui.theme.headerIconSize
 import com.gemwallet.android.ui.theme.paddingHalfSmall
 import com.gemwallet.android.ui.theme.paddingLarge
@@ -57,7 +57,8 @@ import com.wallet.core.primitives.AssetId
 @Composable
 internal fun PriceAlertScene(
     asset: AssetInfoDataAggregate? = null,
-    data: Map<AssetId?, List<PriceAlertDataAggregate>>,
+    sections: List<ListSection<PriceAlertDataAggregate>>,
+    isAutoAlertEnabled: Boolean,
     enabled: Boolean,
     syncState: Boolean,
     isAssetView: Boolean,
@@ -87,14 +88,12 @@ internal fun PriceAlertScene(
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 if (isAssetView) {
-                    autoAlertToggle(asset, data) { onAction(PriceAlertAction.ToggleAutoAlert(it)) }
-                    val manualData = data.filterKeys { it != null }
-                    emptyAlertingAssets(data.values.flatten().isEmpty())
+                    autoAlertToggle(asset, isAutoAlertEnabled) { onAction(PriceAlertAction.ToggleAutoAlert(it)) }
+                    emptyAlertingAssets(sections.isEmpty() && !isAutoAlertEnabled)
                     assets(
                         revealable = revealable,
-                        data = manualData,
-                        isAssetView = isAssetView,
-                        onChart = { onAction(PriceAlertAction.OpenChart(it)) },
+                        sections = sections,
+                        onChart = null,
                         onExclude = { onAction(PriceAlertAction.Exclude(it)) },
                     )
                 } else {
@@ -111,11 +110,10 @@ internal fun PriceAlertScene(
                             color = MaterialTheme.colorScheme.secondary,
                         )
                     }
-                    emptyAlertingAssets(data.values.flatten().isEmpty())
+                    emptyAlertingAssets(sections.isEmpty() && !isAutoAlertEnabled)
                     assets(
                         revealable = revealable,
-                        data = data,
-                        isAssetView = isAssetView,
+                        sections = sections,
                         onChart = { onAction(PriceAlertAction.OpenChart(it)) },
                         onExclude = { onAction(PriceAlertAction.Exclude(it)) },
                     )
@@ -127,12 +125,10 @@ internal fun PriceAlertScene(
 
 private fun LazyListScope.autoAlertToggle(
     asset: AssetInfoDataAggregate?,
-    data: Map<AssetId?, List<PriceAlertDataAggregate>>,
+    isAutoAlertEnabled: Boolean,
     onToggleAutoAlert: (Boolean) -> Unit,
 ) {
     item {
-        val autoAlerts = data[null] ?: emptyList()
-        val isAutoAlertEnabled = autoAlerts.isNotEmpty()
         val currentAsset = asset ?: return@item
 
         PriceAlertAutoAssetItem(
@@ -163,28 +159,11 @@ private fun LazyListScope.emptyAlertingAssets(empty: Boolean) {
 
 private fun LazyListScope.assets(
     revealable: MutableState<String?>,
-    data: Map<AssetId?, List<PriceAlertDataAggregate>>,
-    isAssetView: Boolean,
-    onChart: (AssetId) -> Unit,
-    onExclude: (String) -> Unit,
-) {
-    data.entries.forEach { item ->
-        if (item.value.isEmpty()) return@forEach
-
-        item.key?.let {
-            item { SubheaderItem(if (isAssetView) stringResource(R.string.stake_active) else item.value.firstOrNull()?.title ?: "") }
-        }
-        assets(revealable, item.value, onChart.takeIf { !isAssetView }, onExclude)
-    }
-}
-
-private fun LazyListScope.assets(
-    revealable: MutableState<String?>,
-    data: List<PriceAlertDataAggregate>,
+    sections: List<ListSection<PriceAlertDataAggregate>>,
     onChart: ((AssetId) -> Unit)?,
     onExclude: (String) -> Unit,
 ) {
-    itemsPositioned(data/*, key = { _, item -> item.id}*/) { position, item ->
+    listSections(sections) { position, item ->
         var minActionWidth by remember { mutableStateOf(space0) }
         val density = LocalDensity.current
 
