@@ -116,6 +116,7 @@ struct WalletNavigationView: View {
                         }
                     },
                     onAddContact: { model.isPresentingSheet = .addContact($0) },
+                    onSelectAddress: { model.isPresentingSheet = .addressDetails($0) },
                 ),
             )
         }
@@ -218,6 +219,8 @@ struct WalletNavigationView: View {
                     PortfolioScene(model: viewModelFactory.portfolioScene(wallet: model.wallet, defaultType: defaultType))
                 case let .addContact(action):
                     AddContactNavigationView(action: action)
+                case let .addressDetails(chainAddress):
+                    AddressDetailsNavigationStack(model: viewModelFactory.addressDetailsScene(chainAddress: chainAddress))
                 case .swap:
                     SwapNavigationStack(wallet: model.wallet, onComplete: model.onTransferComplete)
                 }

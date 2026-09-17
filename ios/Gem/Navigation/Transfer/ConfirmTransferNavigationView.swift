@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Assets
 import Components
 import FiatConnect
 import GemstonePrimitives
@@ -67,6 +68,8 @@ struct ConfirmTransferNavigationView: View {
                         PerpetualDetailsView(model: model)
                     }
                     .sheetPresentation(.forCurrentDeviceSize(expandable: true))
+                case let .addressDetails(chainAddress):
+                    AddressDetailsNavigationStack(model: viewModelFactory.addressDetailsScene(chainAddress: chainAddress))
                 }
             }
     }

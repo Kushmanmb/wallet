@@ -96,11 +96,11 @@ public final class AssetSceneViewModel: Sendable {
 
     func balanceListItem(for row: GemBalanceRow) -> ListItemModel {
         switch row {
-        case let .available(value): ListItemModel(title: row.title(stakeProvider: .stake), subtitle: balanceText(value))
-        case let .staked(value): ListItemModel(title: row.title(stakeProvider: .stake), subtitle: stakeBalanceText(value))
-        case let .earn(value): ListItemModel(title: row.title(stakeProvider: .earn), subtitle: balanceText(value))
-        case let .pendingUnconfirmed(value): ListItemModel(title: row.title(stakeProvider: .stake), subtitle: balanceText(value), infoAction: onSelectPendingUnconfirmedInfo)
-        case let .reserved(value, _): ListItemModel(title: row.title(stakeProvider: .stake), subtitle: balanceText(value))
+        case let .available(value): ListItemModel(title: row.title().text, subtitle: balanceText(value))
+        case let .staked(value): ListItemModel(title: row.title().text, subtitle: stakeBalanceText(value))
+        case let .earn(value): ListItemModel(title: row.title().text, subtitle: balanceText(value))
+        case let .pendingUnconfirmed(value): ListItemModel(title: row.title().text, subtitle: balanceText(value), infoAction: onSelectPendingUnconfirmedInfo)
+        case let .reserved(value, _): ListItemModel(title: row.title().text, subtitle: balanceText(value))
         }
     }
 

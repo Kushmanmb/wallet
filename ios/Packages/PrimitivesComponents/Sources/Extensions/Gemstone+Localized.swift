@@ -9,6 +9,8 @@ import enum Gemstone.PerpetualDirection
 import enum Gemstone.FeeOption
 import enum Gemstone.GemAssetMenuAction
 import enum Gemstone.GemContactAddressField
+import enum Gemstone.GemListRowTitle
+import enum Gemstone.GemListSectionTitle
 import enum Gemstone.PerpetualType
 import enum Gemstone.GemApprovalValue
 import enum Gemstone.GemAssetInfoKind
@@ -549,6 +551,31 @@ extension GemSimulationWarningTitle {
         case .error: Localized.Errors.errorOccurred
         case .unlimitedApproval: Localized.Simulation.Warning.UnlimitedTokenApproval.title
         case .nftCollectionApproval: Localized.Simulation.Warning.NftCollectionApproval.title
+        }
+    }
+}
+
+public extension GemListSectionTitle {
+    var text: String? {
+        switch self {
+        case .none: nil
+        case .balances: Localized.Asset.balances
+        }
+    }
+}
+
+public extension GemListRowTitle {
+    var text: String {
+        switch self {
+        case .name: Localized.Asset.name
+        case .network: Localized.Transfer.network
+        case .address: Localized.Common.address
+        case .available: Localized.Asset.Balances.available
+        case .stake: Localized.Wallet.stake
+        case .earn: Localized.Common.earn
+        case .pendingUnconfirmed: Localized.Stake.pending
+        case .reserved: Localized.Asset.Balances.reserved
+        case .error: Localized.Errors.errorOccurred
         }
     }
 }
