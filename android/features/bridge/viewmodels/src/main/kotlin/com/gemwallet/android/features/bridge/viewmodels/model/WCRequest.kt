@@ -12,7 +12,6 @@ import com.gemwallet.android.ui.models.withExplorerLinks
 import com.wallet.core.primitives.Account
 import com.wallet.core.primitives.ApplicationMetadata
 import com.wallet.core.primitives.Chain
-import com.wallet.core.primitives.TransferDataOutputAction
 import com.wallet.core.primitives.Wallet
 import uniffi.gemstone.GemConnectionRow
 import uniffi.gemstone.GemSignMessagePreview
@@ -92,9 +91,6 @@ sealed class WCRequest(
         row: GemConnectionRow,
     ) : WCRequest(request, row) {
         val isSendable: Boolean get() = request.isSendable
-
-        val outputAction: TransferDataOutputAction
-            get() = if (isSendable) TransferDataOutputAction.Send else TransferDataOutputAction.Sign
 
         val input: ConfirmTransferInput
             get() = ConfirmTransferInput(request.transfer)

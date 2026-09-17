@@ -90,11 +90,6 @@ public struct NetworkFeeSceneViewModel {
         rows.map { feeRateViewModel(priority: $0.priority.toPrimitives(), displayValue: $0.displayValue, fee: $0.fee) }
     }
 
-    public var selectedFeeRateViewModel: FeeRateViewModel? {
-        guard let priority = selection.selectedPriority()?.toPrimitives() else { return nil }
-        return feeRatesViewModels.first(where: { $0.priority == priority })
-    }
-
     public func isSelected(_ rate: FeeRateViewModel) -> Bool {
         selection.selectedPriority()?.toPrimitives() == rate.priority
     }

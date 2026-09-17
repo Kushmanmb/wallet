@@ -323,10 +323,3 @@ extension WalletSearchSceneViewModel {
     }
 
 }
-
-extension SearchContentState {
-    var isResults: Bool {
-        if case .results = self { return true }
-        return false
-    }
-}
