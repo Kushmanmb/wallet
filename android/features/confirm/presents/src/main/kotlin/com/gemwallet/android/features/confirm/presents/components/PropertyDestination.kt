@@ -11,7 +11,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.wallet.core.primitives.Chain
 
 @Composable
-internal fun AddressRow(row: ConfirmRowUIModel.Address, listPosition: ListPosition) {
+internal fun AddressRow(row: ConfirmRowUIModel.Address, listPosition: ListPosition, onClick: () -> Unit) {
     AddressPropertyItem(
         title = row.title,
         displayText = destinationText(row.name, row.address, row.chain, row.avatar is ListItemImage.Stored),
@@ -19,6 +19,7 @@ internal fun AddressRow(row: ConfirmRowUIModel.Address, listPosition: ListPositi
         image = row.avatar,
         explorerLink = row.explorerLink,
         listPosition = listPosition,
+        onClick = onClick,
     )
 }
 

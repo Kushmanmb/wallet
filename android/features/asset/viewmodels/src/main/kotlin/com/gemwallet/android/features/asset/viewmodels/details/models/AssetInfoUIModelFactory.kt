@@ -20,6 +20,7 @@ import com.gemwallet.android.ui.components.banner.uiModel
 import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.localization.titleRes
 import com.gemwallet.android.ui.components.list_item.ListItemSymbol
 import com.wallet.core.primitives.Currency
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -86,19 +87,21 @@ class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private va
         val text = { value: BigInteger -> formatter.string(value, asset) }
         return assetInfo.balance.toGem().detailRows(asset.chain.string, assetInfo.metadata.isStakeEnabled).mapNotNull { row ->
             when (row) {
-                is GemBalanceRow.Available -> balance(AssetInfoUIModel.BalanceViewType.Available, text(row.value))
+                is GemBalanceRow.Available -> balance(row, row.viewType(), text(row.value))
                 is GemBalanceRow.Staked -> balance(
-                    AssetInfoUIModel.BalanceViewType.Stake,
+                    row,
+                    row.viewType(),
                     if (row.value == BigInteger.ZERO) {
                         "APR ${(assetInfo.metadata.stakingApr ?: 0.0).formatAsPercentage(style = GemPercentageStyle.UNSIGNED)}"
                     } else {
                         text(row.value)
                     },
                 )
-                is GemBalanceRow.PendingUnconfirmed -> balance(AssetInfoUIModel.BalanceViewType.PendingUnconfirmed, text(row.value), info = InfoSheetEntity.PendingUnconfirmedBalanceInfo)
-                is GemBalanceRow.Reserved -> balance(AssetInfoUIModel.BalanceViewType.Reserved, text(row.value), url = row.url)
+                is GemBalanceRow.PendingUnconfirmed -> balance(row, row.viewType(), text(row.value), info = InfoSheetEntity.PendingUnconfirmedBalanceInfo)
+                is GemBalanceRow.Reserved -> balance(row, row.viewType(), text(row.value), url = row.url)
                 is GemBalanceRow.Earn -> balance(
-                    AssetInfoUIModel.BalanceViewType.Earn,
+                    row,
+                    row.viewType(),
                     if (row.value == BigInteger.ZERO) {
                         "APR ${(assetInfo.metadata.earnApr ?: 0.0).formatAsPercentage(style = GemPercentageStyle.UNSIGNED)}"
                     } else {
@@ -109,9 +112,9 @@ class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private va
         }
     }
 
-    private fun balance(type: AssetInfoUIModel.BalanceViewType, value: String, url: String? = null, info: InfoSheetEntity? = null) = AssetInfoUIModel.BalanceUIModel(
+    private fun balance(row: GemBalanceRow, type: AssetInfoUIModel.BalanceViewType, value: String, url: String? = null, info: InfoSheetEntity? = null) = AssetInfoUIModel.BalanceUIModel(
         type = type,
         url = url,
-        model = ListItemModel(title = context.getString(type.label), subtitle = value, info = info),
+        model = ListItemModel(title = context.getString(row.title().titleRes()), subtitle = value, info = info),
     )
 }

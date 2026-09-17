@@ -10,6 +10,8 @@ import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.ValueFormatter
+import uniffi.gemstone.GemListRowTitle
+import uniffi.gemstone.GemListSectionTitle
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.localization.stringRes
 import com.wallet.core.primitives.Asset
@@ -450,4 +452,23 @@ private fun bannerAmount(amount: GemBannerAmount): String = ValueFormatter(style
     .string(amount.value, decimals = amount.decimals, currency = amount.symbol)
 fun GemRecipientErrorDisplay.string(context: Context): String = when (this) {
     is GemRecipientErrorDisplay.InvalidAddress -> context.getString(R.string.errors_invalid_asset_address, network)
+}
+
+@StringRes
+fun GemListSectionTitle.titleRes(): Int? = when (this) {
+    GemListSectionTitle.NONE -> null
+    GemListSectionTitle.BALANCES -> R.string.asset_balances
+}
+
+@StringRes
+fun GemListRowTitle.titleRes(): Int = when (this) {
+    GemListRowTitle.NAME -> R.string.asset_name
+    GemListRowTitle.NETWORK -> R.string.transfer_network
+    GemListRowTitle.ADDRESS -> R.string.common_address
+    GemListRowTitle.AVAILABLE -> R.string.asset_balances_available
+    GemListRowTitle.STAKE -> R.string.wallet_stake
+    GemListRowTitle.EARN -> R.string.common_earn
+    GemListRowTitle.PENDING_UNCONFIRMED -> R.string.stake_pending
+    GemListRowTitle.RESERVED -> R.string.asset_balances_reserved
+    GemListRowTitle.ERROR -> R.string.errors_error_occurred
 }

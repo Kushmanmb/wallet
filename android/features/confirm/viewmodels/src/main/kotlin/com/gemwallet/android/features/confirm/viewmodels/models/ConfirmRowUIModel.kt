@@ -31,6 +31,7 @@ sealed interface ConfirmRowUIModel {
         val title: String,
         val name: String,
         val address: String,
+        val chain: Chain,
         val explorerLink: BlockExplorerLink,
     ) : ConfirmRowUIModel
     data class Network(val chain: Chain, val name: String) : ConfirmRowUIModel
@@ -45,7 +46,7 @@ internal fun ConfirmProperty.uiModel(context: Context): ConfirmRowUIModel = when
         val address = address
         val explorerLink = explorerLink
         if (address != null && explorerLink != null) {
-            ConfirmRowUIModel.Validator(title = context.getString(titleRes()), name = data, address = address, explorerLink = explorerLink)
+            ConfirmRowUIModel.Validator(title = context.getString(titleRes()), name = data, address = address, chain = chain, explorerLink = explorerLink)
         } else {
             ConfirmRowUIModel.Item(ListItemModel(title = context.getString(titleRes()), subtitle = data))
         }

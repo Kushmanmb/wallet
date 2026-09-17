@@ -36,6 +36,7 @@ import com.gemwallet.android.ui.models.ListSection
 import com.gemwallet.android.ui.open
 import com.gemwallet.android.ui.theme.padding16
 import com.gemwallet.android.ui.theme.paddingSmall
+import com.wallet.core.primitives.ChainAddress
 
 @Composable
 internal fun TransactionDetailsScene(
@@ -70,6 +71,7 @@ internal fun TransactionDetailsScene(
                         copyValue = row.address,
                         explorerLink = row.explorerLink,
                         listPosition = position,
+                        onClick = row.chain?.let { chain -> { onAction(TransactionDetailsAction.OpenAddress(ChainAddress(chain, row.address))) } },
                     )
                     is TransactionDetailsRowUIModel.Fee -> ListItem(
                         model = row.model,

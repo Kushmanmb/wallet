@@ -32,6 +32,7 @@ fun AddressPropertyItem(
     image: ListItemImage? = null,
     explorerLink: BlockExplorerLink? = null,
     listPosition: ListPosition = ListPosition.Middle,
+    onClick: (() -> Unit)? = null,
 ) {
     AddressPropertyItem(
         title = stringResource(title),
@@ -40,6 +41,7 @@ fun AddressPropertyItem(
         image = image,
         explorerLink = explorerLink,
         listPosition = listPosition,
+        onClick = onClick,
     )
 }
 
@@ -51,6 +53,7 @@ fun AddressPropertyItem(
     image: ListItemImage? = null,
     explorerLink: BlockExplorerLink? = null,
     listPosition: ListPosition = ListPosition.Middle,
+    onClick: (() -> Unit)? = null,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val clipboardManager = LocalContext.current.clipboardManager()
@@ -61,7 +64,7 @@ fun AddressPropertyItem(
         isExpanded = isExpanded,
         onDismiss = { isExpanded = false },
         onLongClick = { isExpanded = true },
-        onClick = { explorerLink?.let { uriHandler.open(context, it.link) } },
+        onClick = onClick ?: { explorerLink?.let { link -> uriHandler.open(context, link.link) } ?: Unit },
         content = { modifier ->
             PropertyItem(
                 modifier = modifier,
@@ -71,9 +74,9 @@ fun AddressPropertyItem(
                         text = displayText,
                         badge = when {
                             image != null -> {
-                                { DataBadgeChevron(explorerLink != null) { ListItemImageView(image = image, size = smallIconSize) } }
+                                { DataBadgeChevron(onClick != null || explorerLink != null) { ListItemImageView(image = image, size = smallIconSize) } }
                             }
-                            explorerLink != null -> {
+                            onClick != null || explorerLink != null -> {
                                 { DataBadgeChevron() }
                             }
                             else -> null

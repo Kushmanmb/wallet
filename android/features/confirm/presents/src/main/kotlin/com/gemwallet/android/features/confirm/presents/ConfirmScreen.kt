@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.domains.confirm.ConfirmTransferInput
 import com.gemwallet.android.domains.confirm.FeeUIModel
 import com.gemwallet.android.ext.asset
+import com.gemwallet.android.features.asset.presents.address.AddressDetailsSheet
 import com.gemwallet.android.features.confirm.models.ConfirmDetailElement
 import com.gemwallet.android.features.confirm.presents.components.AddressRow
 import com.gemwallet.android.features.confirm.presents.components.ConfirmErrorInfo
@@ -69,6 +70,7 @@ import com.gemwallet.android.ui.models.actions.FinishConfirmAction
 import com.gemwallet.android.ui.requestAuth
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.AssetId
+import com.wallet.core.primitives.ChainAddress
 import uniffi.gemstone.SimulationResult
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -108,6 +110,7 @@ fun ConfirmScreen(
     var showSelectTxSpeed by remember { mutableStateOf(false) }
     var showSimulationDetails by remember { mutableStateOf(false) }
     var selectedDetailElement by remember(input) { mutableStateOf<ConfirmDetailElement?>(null) }
+    var selectedAddress by remember(input) { mutableStateOf<ChainAddress?>(null) }
     var isShowedBroadcastError by remember(executeErrorText) { mutableStateOf(executeErrorText != null) }
     val isShowBottomSheetInfo by viewModel.isNetworkFeeSheetVisible.collectAsStateWithLifecycle()
 
@@ -179,13 +182,18 @@ fun ConfirmScreen(
                             { DataBadgeChevron(isShowChevron = false) { ListItemImageView(image = image, size = smallIconSize) } }
                         },
                     )
-                    is ConfirmRowUIModel.Address -> AddressRow(row = row, listPosition = listPosition)
+                    is ConfirmRowUIModel.Address -> AddressRow(
+                        row = row,
+                        listPosition = listPosition,
+                        onClick = { selectedAddress = ChainAddress(row.chain, row.address) },
+                    )
                     is ConfirmRowUIModel.Validator -> AddressPropertyItem(
                         title = row.title,
                         displayText = row.name,
                         copyValue = row.address,
                         explorerLink = row.explorerLink,
                         listPosition = listPosition,
+                        onClick = { selectedAddress = ChainAddress(row.chain, row.address) },
                     )
                     is ConfirmRowUIModel.Network -> PropertyNetworkItem(chain = row.chain, value = row.name, listPosition = listPosition)
                 }
@@ -268,6 +276,11 @@ fun ConfirmScreen(
         ConfirmDetailElementBottomSheet(
             item = selectedDetailElement,
             onDismiss = { selectedDetailElement = null },
+        )
+
+        AddressDetailsSheet(
+            chainAddress = selectedAddress,
+            onDismiss = { selectedAddress = null },
         )
     }
 
