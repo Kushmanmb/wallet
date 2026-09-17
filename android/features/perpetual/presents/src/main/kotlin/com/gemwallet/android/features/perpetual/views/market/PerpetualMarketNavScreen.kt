@@ -9,18 +9,17 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.ext.HypercoreUSDC
+import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.features.asset_select.presents.views.RecentsSheetHost
 import com.gemwallet.android.features.asset_select.viewmodels.RecentsSheetViewModel
 import com.gemwallet.android.features.perpetual.viewmodels.PerpetualMarketViewModel
 import com.gemwallet.android.model.AmountParams
-import com.wallet.core.primitives.RecentActivityType
-import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.components.RefreshOnTimer
+import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.AssetIdAction
-import uniffi.gemstone.GemRefreshKind
+import com.wallet.core.primitives.RecentActivityType
 import uniffi.gemstone.GemPerpetual
 import uniffi.gemstone.PerpetualProvider
-import com.gemwallet.android.ext.toAssetId
 
 @Composable
 fun PerpetualMarketNavScreen(
@@ -47,7 +46,8 @@ fun PerpetualMarketNavScreen(
         viewModel.fetch()
     }
 
-    RefreshOnTimer(GemRefreshKind.MARKET, viewModel::fetch)
+    val refreshIntervalMillis by viewModel.refreshIntervalMillis.collectAsStateWithLifecycle()
+    RefreshOnTimer(refreshIntervalMillis, viewModel::fetch)
 
     DisposableEffect(Unit) {
         viewModel.subscribeMarketPrices()

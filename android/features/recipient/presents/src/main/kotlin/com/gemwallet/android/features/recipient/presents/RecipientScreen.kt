@@ -29,6 +29,7 @@ import com.gemwallet.android.features.recipient.viewmodel.models.RecipientState
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.QrCodeScannerModal
 import com.gemwallet.android.ui.components.buttons.MainActionButton
+import com.gemwallet.android.ui.components.fields.NameResolveIndicatorUIModel
 import com.gemwallet.android.ui.components.isKeyboardVisible
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.listSections
@@ -43,7 +44,6 @@ import com.gemwallet.android.ui.theme.SceneSizing
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.QRScanType
-import uniffi.gemstone.GemNameRecordState
 import uniffi.gemstone.GemRecipientType
 
 @Composable
@@ -60,7 +60,7 @@ fun RecipientScreen(
     val address by viewModel.address.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
     val memo by viewModel.memo.collectAsStateWithLifecycle()
-    val nameResolveState by viewModel.nameResolveState.collectAsStateWithLifecycle()
+    val nameResolveIndicator by viewModel.nameResolveIndicator.collectAsStateWithLifecycle()
 
     var scan by remember { mutableStateOf(QrScanField.None) }
 
@@ -74,7 +74,7 @@ fun RecipientScreen(
                 address = address,
                 memo = memo,
                 addressError = addressError,
-                nameResolveState = nameResolveState,
+                nameResolveIndicator = nameResolveIndicator,
                 sections = sections,
                 buttonState = buttonState,
                 onAction = { action ->
@@ -114,7 +114,7 @@ internal fun RecipientScreen(
     address: String,
     memo: String,
     addressError: Boolean,
-    nameResolveState: GemNameRecordState,
+    nameResolveIndicator: NameResolveIndicatorUIModel?,
     sections: List<ListSection<RecipientRowUIModel>>,
     buttonState: ButtonState,
     onAction: (RecipientAction) -> Unit,
@@ -157,7 +157,7 @@ internal fun RecipientScreen(
                 assetName = asset.name,
                 address = address,
                 addressError = addressError,
-                nameResolveState = nameResolveState,
+                nameResolveIndicator = nameResolveIndicator,
                 memo = memo,
                 onAddress = { onAction(RecipientAction.SetAddress(it)) },
                 onMemo = { onAction(RecipientAction.SetMemo(it)) },

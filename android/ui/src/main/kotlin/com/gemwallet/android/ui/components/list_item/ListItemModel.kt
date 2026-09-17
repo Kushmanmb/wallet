@@ -69,6 +69,8 @@ enum class ListItemSymbol {
     Receive,
     Add,
     Article,
+    Error,
+    CheckCircle,
 }
 
 enum class ListItemTagType {

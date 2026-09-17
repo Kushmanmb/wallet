@@ -5,17 +5,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.empty.EmptyStateImage
+import com.gemwallet.android.ui.components.fields.AmountSymbolPlacement
+import com.gemwallet.android.ui.components.fields.AmountSymbolUIModel
+import com.gemwallet.android.ui.components.fields.NameResolveIndicatorUIModel
+import com.gemwallet.android.ui.components.list_item.ListItemSymbol
 import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.theme.pendingColor
+import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PerpetualDirection
 import com.wallet.core.primitives.VerificationStatus
 import uniffi.gemstone.ChainAddress
 import uniffi.gemstone.GemAddressFormatStyle
 import uniffi.gemstone.GemAddressServiceInterface
+import uniffi.gemstone.GemAmountInputType
 import uniffi.gemstone.GemDelegationTone
 import uniffi.gemstone.GemEmptyStateImage
 import uniffi.gemstone.GemFiatTransactionBadge
@@ -154,19 +159,18 @@ fun GemPerpetualChartLineKind.color(): Color = when (this) {
     GemPerpetualChartLineKind.TAKE_PROFIT -> MaterialTheme.colorScheme.tertiary
 }
 
-sealed interface NameResolveIndicatorStyle {
-    data object Loading : NameResolveIndicatorStyle
-    data class Icon(val vector: ImageVector, val tint: Color, val contentDescription: String?) : NameResolveIndicatorStyle
-}
-
-@Composable
-fun GemNameRecordState.indicator(): NameResolveIndicatorStyle? = when (this) {
-    is GemNameRecordState.Loading -> NameResolveIndicatorStyle.Loading
-    GemNameRecordState.Error -> NameResolveIndicatorStyle.Icon(AppIcons.Error, MaterialTheme.colorScheme.error, stringResource(R.string.errors_error_occurred))
-    is GemNameRecordState.Complete -> NameResolveIndicatorStyle.Icon(AppIcons.CheckCircle, MaterialTheme.colorScheme.tertiary, null)
+fun GemNameRecordState.indicator(): NameResolveIndicatorUIModel? = when (this) {
+    is GemNameRecordState.Loading -> NameResolveIndicatorUIModel.Loading
+    GemNameRecordState.Error -> NameResolveIndicatorUIModel.Icon(ListItemSymbol.Error, ListItemTextStyle.Negative, R.string.errors_error_occurred)
+    is GemNameRecordState.Complete -> NameResolveIndicatorUIModel.Icon(ListItemSymbol.CheckCircle, ListItemTextStyle.Positive, null)
     GemNameRecordState.None -> null
 }
 
 fun GemAddressServiceInterface.formatShort(address: String, chain: String?): String = format(address, chain, GemAddressFormatStyle.Short)
 
 fun GemAddressServiceInterface.formatShort(addresses: List<ChainAddress>): List<String> = formatAll(addresses, GemAddressFormatStyle.Short)
+
+fun GemAmountInputType.amountSymbol(assetSymbol: String, currency: Currency): AmountSymbolUIModel = when (this) {
+    GemAmountInputType.ASSET -> AmountSymbolUIModel(assetSymbol, AmountSymbolPlacement.Trailing)
+    GemAmountInputType.FIAT -> AmountSymbolUIModel(android.icu.util.Currency.getInstance(currency.string).symbol, AmountSymbolPlacement.Leading)
+}

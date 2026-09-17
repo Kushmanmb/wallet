@@ -9,6 +9,8 @@ import com.gemwallet.android.application.perpetual.cases.GetPerpetualPositions
 import com.gemwallet.android.application.perpetual.cases.GetPerpetuals
 import com.gemwallet.android.application.perpetual.cases.PerpetualObserver
 import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
+import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusObserver
+import com.gemwallet.android.domains.connection.refreshInterval
 import com.gemwallet.android.domains.perpetual.values.PerpetualBalance
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
@@ -39,6 +41,7 @@ import uniffi.gemstone.GemAssetAction
 import uniffi.gemstone.GemMarketsRefreshTrigger
 import uniffi.gemstone.GemPerpetualServiceInterface
 import uniffi.gemstone.GemPerpetualSubscription
+import uniffi.gemstone.GemRefreshKind
 
 @HiltViewModel
 class PerpetualMarketViewModel @Inject constructor(
@@ -49,7 +52,13 @@ class PerpetualMarketViewModel @Inject constructor(
     private val service: GemPerpetualServiceInterface,
     private val perpetualObserver: PerpetualObserver,
     @param:ApplicationContext private val context: Context,
+    private val connectionStatusObserver: ConnectionStatusObserver,
 ) : ViewModel() {
+
+    val refreshIntervalMillis: StateFlow<Long> = connectionStatusObserver.status
+        .map { it.refreshInterval(GemRefreshKind.MARKET).toMillis() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, 0L)
+
 
     val query = MutableStateFlow<String?>(null)
 

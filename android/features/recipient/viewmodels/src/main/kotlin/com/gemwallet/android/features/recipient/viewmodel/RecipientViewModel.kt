@@ -19,6 +19,7 @@ import com.gemwallet.android.features.recipient.viewmodel.models.RecipientRowUIM
 import com.gemwallet.android.features.recipient.viewmodel.models.RecipientState
 import com.gemwallet.android.features.recipient.viewmodel.models.uiSection
 import com.gemwallet.android.model.AmountParams
+import com.gemwallet.android.ui.components.fields.NameResolveIndicatorUIModel
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.ListSection
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
@@ -29,6 +30,7 @@ import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.gemwallet.android.ui.models.navigation.optionalNftAssetId
 import com.gemwallet.android.ui.models.navigation.optionalPaymentRecipient
 import com.gemwallet.android.ui.models.navigation.requireAssetId
+import com.gemwallet.android.ui.style.indicator
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.NFTAsset
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -82,7 +84,8 @@ class RecipientViewModel @Inject constructor(
     private val addressInput = AddressInputModel(nameService, viewModelScope)
 
     val address: StateFlow<String> = addressInput.text
-    val nameResolveState: StateFlow<GemNameRecordState> = addressInput.nameResolveState
+    val nameResolveIndicator: StateFlow<NameResolveIndicatorUIModel?> = addressInput.nameResolveState.map { it.indicator() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val addressError: StateFlow<Boolean> = addressInput.showError
 
     private val _memo = MutableStateFlow("")
