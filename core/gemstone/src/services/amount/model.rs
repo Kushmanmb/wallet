@@ -214,6 +214,10 @@ impl GemNumberFormat {
         super::rules::input_text(&self.decimal_separator, &value, decimals)
     }
 
+    pub fn value_text(&self, value: f64) -> String {
+        super::rules::value_text(&self.decimal_separator, value)
+    }
+
     pub fn plain(&self, input: String) -> String {
         super::rules::plain_number(&self.decimal_separator, &input)
     }

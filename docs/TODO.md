@@ -16,9 +16,6 @@ Ordered by the lines it removes; work these before the sections below. The dupli
 
 The last places where an app reaches the API, a rule or a table without going through Core. The widget boundary that used to protect them was a missing linker flag, closed on 2026-09-16 (see the ledger), so each is now an ordinary move.
 
-- **N5** **S** `android/gemcore/.../model/CurrencyFormatter.kt:38` and `ValueFormatter.kt:52` hard-code `maximumFractionDigits = 2`; iOS reads `GemCurrencyStyle::precision` — Android reads Core.
-- **N1** **S** `ios/Features/WalletTab/.../PortfolioSceneViewModel.swift:128` formats a statistic with `.precision(.fractionLength(2))` — a precision rule app-side; take it from `GemValueStyle`.
-- **N3** **S** `android/features/settings/price_alerts/.../PriceAlertTargetViewModel.kt:119` echoes the typed price through `BigDecimal.stripTrailingZeros().toPlainString()` — reading a typed number is `GemNumberFormat`'s rule on both apps.
 - **O42** **S** `ios/Gem/Navigation/NavigationHandler.swift` holds the concrete `GemDeeplinkService` and `GemPaymentService` — take the generated protocols.
 - **O43** **S** `AuthenticatedRequestProvider`, `DevicePlatform` (`GemDeviceKeyService`), `BiometryAuthenticationService` (`GemSecurityService`) and `WidgetPriceService` (`GemWidgetService`, `GemApiClient`) hold concrete Core classes — the protocols, so the test kits substitute them.
 - **O44** **S** `ios/Packages/GemstoneServices/Sources/GemNodeService+WebSocket.swift` extends the concrete `GemNodeService` — the socket wiring belongs on the service that owns the stream, reached through its protocol.

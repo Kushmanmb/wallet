@@ -15,6 +15,7 @@ import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
+import com.gemwallet.android.math.numberFormat
 import com.gemwallet.android.features.settings.price_alerts.viewmodels.localization.stringRes
 import com.gemwallet.android.features.settings.price_alerts.viewmodels.models.PriceAlertConfirmResult
 import com.gemwallet.android.model.CurrencyFormatter
@@ -116,7 +117,7 @@ class PriceAlertTargetViewModel @Inject constructor(
     val priceSuggestions: StateFlow<List<Pair<String, String>>> = viewState.map { state ->
         val fmt = CurrencyFormatter(currency = currency)
         state.priceSuggestions.map { value ->
-            fmt.string(BigDecimal.valueOf(value)) to value.toBigDecimal().stripTrailingZeros().toPlainString()
+            fmt.string(BigDecimal.valueOf(value)) to numberFormat().valueText(value)
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
