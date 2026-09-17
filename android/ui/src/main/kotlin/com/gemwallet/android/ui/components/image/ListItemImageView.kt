@@ -92,4 +92,7 @@ fun ListItemSymbol.vector(): ImageVector = when (this) {
     ListItemSymbol.CheckCircle -> AppIcons.CheckCircle
     ListItemSymbol.Notifications -> AppIcons.Notifications
     ListItemSymbol.NotificationsOutlined -> AppIcons.NotificationsOutlined
+    ListItemSymbol.Warning -> AppIcons.Warning
+    ListItemSymbol.CurrencyBitcoin -> AppIcons.CurrencyBitcoin
+    ListItemSymbol.Close -> AppIcons.Close
 }

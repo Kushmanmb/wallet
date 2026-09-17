@@ -77,6 +77,7 @@ internal fun TransactionDetailsScene(
                         modifier = Modifier.clickable { onAction(TransactionDetailsAction.ShowFeeDetails) },
                         accessory = { DataBadgeChevron() },
                     )
+                    is TransactionDetailsRowUIModel.SwapProgress -> SwapProgressItem(row.model)
                     is TransactionDetailsRowUIModel.Value -> when (val item = row.value) {
                         is TransactionDetailsValue.Amount.NFT -> NftHead(
                             metadata = item.metadata,
@@ -100,6 +101,7 @@ internal fun TransactionDetailsScene(
                         )
                         is TransactionDetailsValue.Network -> PropertyNetworkItem(item.data.chain, listPosition = position)
                         is TransactionDetailsValue.Destination,
+                        is TransactionDetailsValue.SwapProgress,
                         is TransactionDetailsValue.Fee,
                         is TransactionDetailsValue.Status,
                         is TransactionDetailsValue.Date,
@@ -110,7 +112,6 @@ internal fun TransactionDetailsScene(
                         is TransactionDetailsValue.Price,
                         is TransactionDetailsValue.EstimatedConfirmation -> Unit
                         is TransactionDetailsValue.Rate -> AssetRatePropertyItem(item.rate, position)
-                        is TransactionDetailsValue.SwapProgress -> SwapProgressItem(item)
                         is TransactionDetailsValue.SwapAgain -> MainActionButton(
                             title = stringResource(R.string.transaction_swap_again),
                             modifier = Modifier.padding(horizontal = padding16, vertical = paddingSmall),

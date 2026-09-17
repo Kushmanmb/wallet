@@ -9,7 +9,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.ext.HypercoreUSDC
-import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.features.asset_select.presents.views.RecentsSheetHost
 import com.gemwallet.android.features.asset_select.viewmodels.RecentsSheetViewModel
 import com.gemwallet.android.features.perpetual.viewmodels.PerpetualMarketViewModel
@@ -18,8 +17,6 @@ import com.gemwallet.android.ui.components.RefreshOnTimer
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.AssetIdAction
 import com.wallet.core.primitives.RecentActivityType
-import uniffi.gemstone.GemPerpetual
-import uniffi.gemstone.PerpetualProvider
 
 @Composable
 fun PerpetualMarketNavScreen(
@@ -36,6 +33,8 @@ fun PerpetualMarketNavScreen(
     val positions by viewModel.positionRows.collectAsStateWithLifecycle()
     val balance by viewModel.balance.collectAsStateWithLifecycle()
     val recent by viewModel.recent.collectAsStateWithLifecycle()
+    val sections by viewModel.sections.collectAsStateWithLifecycle()
+    val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
     val query = rememberTextFieldState()
 
     LaunchedEffect(query) {
@@ -62,12 +61,15 @@ fun PerpetualMarketNavScreen(
         positions = positions,
         recent = recent,
         query = query,
+        sections = sections,
+        isSearching = isSearching,
         onAction = { action ->
             when (action) {
                 PerpetualMarketAction.Refresh -> viewModel.onRefresh()
+                is PerpetualMarketAction.SetSearching -> viewModel.setSearching(action.isSearching)
                 PerpetualMarketAction.Close -> onCancel()
                 PerpetualMarketAction.Withdraw -> amountAction(AmountParams.Withdraw(HypercoreUSDC.id))
-                PerpetualMarketAction.Deposit -> amountAction(AmountParams.Deposit(GemPerpetual(PerpetualProvider.HYPERCORE).use { it.depositAsset() }.id.toAssetId()!!))
+                PerpetualMarketAction.Deposit -> amountAction(AmountParams.Deposit(viewModel.depositAssetId))
                 PerpetualMarketAction.OpenPortfolio -> onOpenPortfolio()
                 is PerpetualMarketAction.TogglePin -> viewModel.onTogglePin(action.perpetualId)
                 is PerpetualMarketAction.OpenPerpetual -> {

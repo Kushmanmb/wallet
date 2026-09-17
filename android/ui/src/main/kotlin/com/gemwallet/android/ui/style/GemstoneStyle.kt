@@ -27,6 +27,7 @@ import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemHeaderButtonKind
 import uniffi.gemstone.GemNameRecordState
 import uniffi.gemstone.GemPerpetualChartLineKind
+import uniffi.gemstone.GemSwapProgressStep
 import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemValueTone
 import uniffi.gemstone.GemVerificationLevel
@@ -105,6 +106,15 @@ fun VerificationStatus.textStyle(): ListItemTextStyle = when (this) {
 fun GemFiatTransactionBadge.textStyle(): ListItemTextStyle = when (this) {
     GemFiatTransactionBadge.PENDING -> ListItemTextStyle.Warning
     GemFiatTransactionBadge.FAILED -> ListItemTextStyle.Negative
+}
+
+fun GemSwapProgressStep.textStyle(): ListItemTextStyle = when (this) {
+    GemSwapProgressStep.COMPLETED -> ListItemTextStyle.Positive
+    GemSwapProgressStep.PENDING -> ListItemTextStyle.Primary
+    GemSwapProgressStep.WAITING -> ListItemTextStyle.Faded
+    GemSwapProgressStep.FAILED,
+    GemSwapProgressStep.REVERTED -> ListItemTextStyle.Negative
+    GemSwapProgressStep.REFUNDED -> ListItemTextStyle.Warning
 }
 
 fun GemDelegationTone.textStyle(): ListItemTextStyle = when (this) {

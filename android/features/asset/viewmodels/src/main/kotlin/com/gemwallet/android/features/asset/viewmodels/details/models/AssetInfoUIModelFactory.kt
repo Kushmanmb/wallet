@@ -17,6 +17,7 @@ import com.gemwallet.android.model.getTotalAmount
 import com.gemwallet.android.model.toGem
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.InfoSheetEntity
+import com.gemwallet.android.ui.components.banner.uiModel
 import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
@@ -74,7 +75,7 @@ class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private va
                     value = BigInteger.ZERO,
                 )
             },
-            banners = banners,
+            banners = banners.map { it.uiModel(context) },
             pinListItem = ListItemModel(
                 title = context.getString(if (assetInfo.metadata.isPinned) R.string.common_unpin else R.string.common_pin),
                 image = ListItemImage.Symbol(ListItemSymbol.Pin),

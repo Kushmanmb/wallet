@@ -1,9 +1,9 @@
 package com.gemwallet.android.features.asset.viewmodels.details.models
 
 import androidx.annotation.StringRes
-import com.gemwallet.android.domains.banner.BannerRow
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.banner.BannerRowUIModel
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
@@ -39,7 +39,7 @@ class AssetInfoUIModel(
     val priceAlertMenu: PriceAlertMenuUIModel = GemPriceAlertToggle.DISABLED.menu(),
     val emptyTransactions: EmptyTransactionsUIModel = EmptyTransactionsUIModel(showsBuy = false, showsSwap = false),
     val activateTransferData: GemTransferData? = null,
-    val banners: List<BannerRow>,
+    val banners: List<BannerRowUIModel>,
     val pinListItem: ListItemModel = ListItemModel(title = ""),
     val addListItem: ListItemModel = ListItemModel(title = ""),
     val priceListItem: ListItemModel = ListItemModel(title = ""),
