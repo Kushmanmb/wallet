@@ -287,6 +287,8 @@ open class BaseAssetSelectViewModel(
         }
     }
 
+    fun openRecent(asset: Asset) = updateRecent(asset, GemAssetAction.OPEN)
+
     fun updateRecent(asset: Asset, action: GemAssetAction) = viewModelScope.launch(Dispatchers.IO) {
         runCatchingCancellable { service.addRecent(action, asset.toGem()) }
             .onFailure { Log.e(TAG, "recording recent ${asset.id.toIdentifier()} failed", it) }

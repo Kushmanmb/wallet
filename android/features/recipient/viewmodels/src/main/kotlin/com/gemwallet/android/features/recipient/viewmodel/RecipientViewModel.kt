@@ -225,11 +225,11 @@ class RecipientViewModel @Inject constructor(
         _memo.value = input
     }
 
-    fun setQrData(type: GemRecipientType, field: QrScanField, data: String, confirmAction: ConfirmTransactionAction) {
+    fun setQrData(state: RecipientState.Ready, field: QrScanField, data: String, confirmAction: ConfirmTransactionAction) {
         when (field) {
             QrScanField.None -> Unit
             QrScanField.Memo -> _memo.value = data
-            QrScanField.Address -> onAddressScan(type, data, confirmAction)
+            QrScanField.Address -> onAddressScan(state.type, data, confirmAction)
         }
     }
 

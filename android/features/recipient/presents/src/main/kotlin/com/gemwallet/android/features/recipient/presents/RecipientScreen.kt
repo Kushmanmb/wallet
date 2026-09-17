@@ -24,6 +24,7 @@ import com.gemwallet.android.features.recipient.presents.components.RecipientHea
 import com.gemwallet.android.features.recipient.presents.components.destinationView
 import com.gemwallet.android.features.recipient.viewmodel.RecipientViewModel
 import com.gemwallet.android.features.recipient.viewmodel.models.QrScanField
+import com.gemwallet.android.features.recipient.viewmodel.models.RecipientHeadUIModel
 import com.gemwallet.android.features.recipient.viewmodel.models.RecipientRowUIModel
 import com.gemwallet.android.features.recipient.viewmodel.models.RecipientState
 import com.gemwallet.android.ui.R
@@ -44,7 +45,6 @@ import com.gemwallet.android.ui.theme.SceneSizing
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.QRScanType
-import uniffi.gemstone.GemRecipientType
 
 @Composable
 fun RecipientScreen(
@@ -69,7 +69,7 @@ fun RecipientScreen(
         is RecipientState.Ready -> {
             RecipientScreen(
                 asset = currentState.asset,
-                type = currentState.type,
+                head = currentState.head,
                 hasMemo = hasMemo,
                 address = address,
                 memo = memo,
@@ -98,7 +98,7 @@ fun RecipientScreen(
                 },
                 onDismissRequest = { scan = QrScanField.None },
                 onResult = {
-                    viewModel.setQrData(currentState.type, scan, it, confirmAction)
+                    viewModel.setQrData(currentState, scan, it, confirmAction)
                     scan = QrScanField.None
                 },
             )
@@ -109,7 +109,7 @@ fun RecipientScreen(
 @Composable
 internal fun RecipientScreen(
     asset: Asset,
-    type: GemRecipientType,
+    head: RecipientHeadUIModel,
     hasMemo: Boolean,
     address: String,
     memo: String,
@@ -151,7 +151,7 @@ internal fun RecipientScreen(
             contentPadding = PaddingValues(bottom = paddingDefault),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            item { RecipientHead(asset, type) }
+            item { RecipientHead(asset, head) }
             destinationView(
                 hasMemo = hasMemo,
                 assetName = asset.name,
