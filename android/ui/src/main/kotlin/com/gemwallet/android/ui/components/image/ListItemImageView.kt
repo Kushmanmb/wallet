@@ -1,0 +1,43 @@
+package com.gemwallet.android.ui.components.image
+
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
+import com.gemwallet.android.ui.components.list_item.ListItemImage
+import com.gemwallet.android.ui.icons.AppIcons
+
+@Composable
+fun ListItemImageView(
+    image: ListItemImage,
+    size: Dp,
+    modifier: Modifier = Modifier,
+) {
+    when (image) {
+        is ListItemImage.Asset -> AsyncImage(model = image.assetId.iconModel(), modifier = modifier, size = size)
+        is ListItemImage.Url -> AsyncImage(model = image.url, modifier = modifier, size = size, placeholderText = image.placeholder)
+        is ListItemImage.Stored -> AsyncImage(
+            model = walletImageModel(LocalContext.current, image.name),
+            modifier = modifier,
+            size = size,
+            placeholderText = image.placeholder,
+        )
+        is ListItemImage.Emoji -> EmojiView(
+            emoji = image.glyph,
+            modifier = modifier.size(size),
+            background = Color(image.backgroundColor),
+            scale = AvatarScale.EMOJI,
+        )
+        is ListItemImage.Initials -> InitialsAvatar(text = image.text, size = size, modifier = modifier, placeholder = AppIcons.Person)
+        is ListItemImage.Drawable -> Icon(
+            painter = painterResource(image.id),
+            contentDescription = null,
+            modifier = modifier.size(size),
+            tint = Color.Unspecified,
+        )
+    }
+}
