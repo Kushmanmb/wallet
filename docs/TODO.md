@@ -10,15 +10,75 @@ Every open item carries a stable id (U duplicated or redundant code, V vocabular
 
 Ordered by the lines it removes; work these before the sections below. The duplication sweeps (same-named similar bodies within an app and across the apps, same-bodied Core functions, shared constants, twins built from a Core type, unread members) were rerun on 2026-09-16 after B68 closed, and this is everything they still find — the larger families landed in earlier passes and are in the ledger. Everything else in this file moves a boundary rather than deleting a copy.
 
+- **G1** **S** `core/crates/gem_hypercore` and `core/gemstone` both define `format_price`, `format_size` and `format_input_price` — one owner; gemstone calls the crate's.
+- **G2** **M** `calculate_fee_rates`, `calculate_network_apy` and `calculate_transaction_fee` are written in `gem_cosmos` and `gem_solana` (`calculate_transaction_fee` in `gem_ton` too) — lift the shared arithmetic into one crate; chain families keep their inputs.
+- **G3** **S** `sign`, `sign_transfer`, `sign_token_transfer`, `sign_nft_transfer`, `sign_swap` (`gem_ton`) and `sign_message` (`gem_aptos`) reappear in `core/gemstone/src/signer` — check which layer only forwards and delete it.
+- **G4** **S** `validate_origin` in `gem_wallet_connect` and in `core/gemstone/src/services/wallet_connect` — one owner.
+- **G5** **S** `chain_from_id` and `chain_id` in `dexscreener` and `swapper` — one mapping crate-side.
+- **G6** **S** `create_client`/`create_eth_client` in `gem_jsonrpc`, `yielder` and `swapper` — one constructor.
+- **U1** **S** Unread iOS members (repo-wide word count equals the declaration): `LockSceneViewModel.isUnlocking`, `PerpetualPositionViewModel.pnlPercent`, `TransactionInputViewModel.networkFeeText`/`networkFeeFiatText`/`isReady`, `WalletSearchSceneViewModel.isResults`, `AprViewModel.showApr`, `NetworkFeeSceneViewModel.selectedFeeRateViewModel`, `SimulationPayloadModel.addressRequests`/`fieldViewModel` — delete; leave `DefaultCryptoProvider.recoverPubKey` unless the connector SDK protocol no longer requires it.
+- **U2** **S** Unread Android members: `WCRequest.Transaction.outputAction`, `LockTimer.setPausedAt`, `PendingNavigationCoordinator.setIntent`, `SqlQueryBuilder.equalTo`, `FormattedAddresses.rememberFormattedAddresses`, `Snackbar.withDismissAction` — delete after a targeted grep; the Room `TypeConverters` and framework overrides the sweep also lists stay.
+- **P3** **S** Receive warnings are joined with a space on both apps — iOS `ReceiveViewModel.warningMessage`, Android `ReceiveViewModel.warningText` — `GemReceiveService` returns one `warning_text`.
+- **P2** **S** The chart reference-line label `"<kind> | <price>"` is a template on both apps — iOS `ChartLineViewModel.label`, Android `CandlestickChartUIModel.from` — `GemPerpetualChartLine` carries `text`; the app supplies only the kind label.
+- **P14** **S** The currency row title `"<flag> <code> - <name>"` is composed on both apps — iOS `CurrencyViewModel.title`, Android `CurrencyRowUIModel` — one template on `GemCurrencyRow`, the localized name the only app input.
+- **P13** **S** The reward redemption confirmation message is composed on both apps — iOS `RewardRedemptionOptionViewModel.confirmationMessage`, Android `RewardsRowUIModel.confirmationMessage` — `GemRewardsRedemption::confirmation_text` with the app's label key.
+- **N2** **S** Slippage percent formatting is a rule twice — iOS `SwapSlippageViewModel.format` (`fractionLength(0...2)`), Android `SwapSlippage.format` (strip trailing zeros) — Core `slippage_percent_text`.
+
 
 ## 1. Surfaces still outside Gemstone
 
 The last places where an app reaches the API, a rule or a table without going through Core. The widget boundary that used to protect them was a missing linker flag, closed on 2026-09-16 (see the ledger), so each is now an ordinary move.
 
+- **N5** **S** `android/gemcore/.../model/CurrencyFormatter.kt:38` and `ValueFormatter.kt:52` hard-code `maximumFractionDigits = 2`; iOS reads `GemCurrencyStyle::precision` — Android reads Core.
+- **N1** **S** `ios/Features/WalletTab/.../PortfolioSceneViewModel.swift:128` formats a statistic with `.precision(.fractionLength(2))` — a precision rule app-side; take it from `GemValueStyle`.
+- **N3** **S** `android/features/settings/price_alerts/.../PriceAlertTargetViewModel.kt:119` echoes the typed price through `BigDecimal.stripTrailingZeros().toPlainString()` — reading a typed number is `GemNumberFormat`'s rule on both apps.
+- **O42** **S** `ios/Gem/Navigation/NavigationHandler.swift` holds the concrete `GemDeeplinkService` and `GemPaymentService` — take the generated protocols.
+- **O43** **S** `AuthenticatedRequestProvider`, `DevicePlatform` (`GemDeviceKeyService`), `BiometryAuthenticationService` (`GemSecurityService`) and `WidgetPriceService` (`GemWidgetService`, `GemApiClient`) hold concrete Core classes — the protocols, so the test kits substitute them.
+- **O44** **S** `ios/Packages/GemstoneServices/Sources/GemNodeService+WebSocket.swift` extends the concrete `GemNodeService` — the socket wiring belongs on the service that owns the stream, reached through its protocol.
+- **O45** **S** `HyperliquidObserverService` imports the concrete `GemPerpetualService` — the protocol.
+- **R19** **M** `ios/Features/Support/.../SupportMessageBubbleViewModel.swift` parses links out of the message text app-side (`displayContent.links`, `hasLinks`, `hasImages`) — a rule with no test that flips; `GemSupportService` returns the message display (text, links, images, status).
+- **K10** **S** Fiat provider status mappers end in `_ => None` (`banxa/mapper.rs:45,144`, `mercuryo/mapper.rs:54,88`, `moonpay/mapper.rs:55`, `paybis/mapper.rs:109,159`, `transak/mapper.rs:56,58,183`, `flashnet/mapper.rs:29`) — an unknown provider status becomes no state and the transaction shows nothing; enumerate the wire values and map the rest to an explicit `Unknown`.
+- **K11** **S** `opensea/mapper.rs:65`, `gem_solana/staking_mapper.rs:62`, `gem_sui/staking_mapper.rs:27` and `swapper/chainflip/chain.rs:23` return `None` from `_ =>` on chain or status — enumerate.
+
 
 ## 2. Decisions still made twice
 
 Found by pairing every view model on both apps (see Coverage) and reading the ones whose logic did not match. Each is the same product rule written on both sides with a difference.
+
+- **P1** **S** Profit or loss is decided from the sign of the PnL on both apps — iOS `AutocloseViewModel.profitTitle` (`pnl >= 0`), Android `AutocloseUIModelFactory.isProfit` (`pnl >= 0.0`), each with the same take-profit fallback — `GemAutocloseField` carries `is_profit`.
+- **P4** **S** The custom fee bounds text is a rule twice — iOS `NetworkFeeCustomViewModel.errorText` (`isBelowMinimum`/`isOverMax` + `Localized.Common.minimumValue/maximumValue`), Android `confirm/presents/.../NetworkFeeCustomViewModel.kt` — `GemFeeEstimate::check` returns a check enum the way `GemSlippageCheck` does, each app maps the key.
+- **P5** **S** The perpetual position text `"<direction> <leverage>x"` and `leverageText` are templates on iOS `PerpetualDetailsViewModel` and Android `PerpetualConfirmDetailsUIModel` — `GemPerpetualTransferData` carries `position_text`; `GemPerpetual::margin_text` is the shape.
+- **P6** **S** The simulation warning title rule (`kind == validationError && severity != critical`) is written in iOS `SimulationWarningViewModel.title/message` and Android `ui/localization/GemstoneText.kt:128,140` — `GemSimulationWarningRow` carries `title_kind`; the apps map keys only.
+- **P7** **S** Withdraw is enabled by `balance.available > 0` in iOS `PerpetualsHeaderViewModel.isWithdrawEnabled`; Android does not gate it — `GemPerpetualBalance.can_withdraw`, read by both.
+- **P8** **S** iOS `EarnSceneViewModel.positionModels` filters delegations with `balance > 0` app-side; Android reads `GemStakeService.sortedDelegations` — iOS reads the same answer.
+- **P9** **S** Android `StakeViewModel.lockTimeDays` turns `lockTimeSeconds` into days (`> 0 → secondsToDays`); iOS formats the same seconds its own way — `GemStakeService.lock_time_parts` (`GemDurationPart`).
+- **P10** **S** iOS `DelegationViewModel` computes the completion countdown from `completionDate` and formats it; the Android row takes `completionDateText` from the record — `GemDelegationRow` carries the countdown for both.
+- **P11** **S** The unverified-collections count is turned into a row on both apps — iOS `CollectionsViewModel` (`unverifiedCount > 0 ? String : nil`), Android `NftListViewModels.kt:67` — `GemNftService.list_items` already builds the list; it carries the unverified row with its count text.
+- **P12** **S** The pending-referral countdown is formatted on both apps — iOS `RewardsViewModel.pendingReferralDescription` (date formatter to `pendingVerificationAfter`), Android `ReferralUIModel.verifyAfter: Long?` — `GemRewardsState` carries the countdown parts and `can_activate` decides the text key.
+- **P15** **S** The chart header value and date texts are computed on both apps — iOS `ChartHeaderViewModel.headerValueText`, Android `ChartHeaderUIModel.headerValueText` — `candlestick_header` and `chart_header` return the finished header; read them.
+- **P16** **S** Android `TransactionRowUIModel.valueTone` derives the tone of a closed perpetual from the PnL sign; the row's `valueSign` already comes from Core — `GemTransactionRow` carries `value_tone` and iOS reads the same.
+- **P17** **S** iOS `PriceViewModel` picks the price-change colour from the sign (`== 0` gray, `> 0` green, else red); Android renders `GemValueTone` — iOS reads the tone.
+- **P18** **S** iOS `AssetDataViewModel.fiatBalanceText` and `PriceViewModel.fiatValueText` decide when a fiat value is shown (`balance > 0`, `price != 0`, `value > 0`); Android decides in `AssetInfoUIModelFactory` — `GemAssetRow` carries the fiat value with its style, empty when Core says so.
+- **P20** **S** iOS `PerpetualSceneViewModel.navigationTitle` falls back from an empty name to the symbol — `GemPerpetualDetails.title`, read by Android's aggregate too.
+- **P21** **S** iOS `ChainNodeViewModel.title` composes `gemWalletNode + " " + flag` from `GemNodeRowTitle`; Android maps the same enum in its mapper — the row carries the finished title.
+- **P22** **S** iOS `AprViewModel` shows the APR only when `apr > 0` and composes `Localized.Stake.apr(text)`; Android's stake rows take the APR text from the record — `GemApr::text` for both.
+- **P23** **S** The fiat quick-amount button `"<symbol><amount>"` is composed in iOS `FiatSceneViewModel.buttonTitle` and Android `FiatViewModel` — `GemFiatViewState.suggested_amount_texts`.
+- **P24** **S** The slippage check text is chosen outside the mapper on both apps — iOS `SwapSlippageViewModel.validate` throws `Localized.Common.minimumValue/maximumValue`, Android `ui/components/swap/SlippageStateUIModel.kt` maps `GemSlippageCheck` to `R.string` — one mapper entry per app.
+- **P25** **S** The set-price-alert success message is composed in iOS `SetPriceAlertViewModel:131` (`"<direction> <amount>"`, percentage as `"\(value)%"`); Android composes its own toast — `GemPriceAlertSession.added_text` with the app's label key.
+- **P26** **S** iOS `ConnectionProposalViewModel` decides `websiteText` (empty host → nil) and formats `appText`; Android reads `GemConnectionRow` — iOS reads the row.
+- **P29** **S** iOS `EarnSceneViewModel.positionsSectionTitle` is `hasPositions ? title : ""` — sections are records; `GemEarnSections` decides which sections exist.
+- **P30** **S** iOS `PortfolioSceneViewModel` decides `showSegmentedControl` and maps `PortfolioType` to a title in the model — the portfolio state record carries the segment rows.
+- **P19** **S** iOS `AssetSceneViewModel` computes `hasStakeBalance`, `hasAvailableBalance` and `isWalletEmpty` and passes them into `GemAssetDetailsInput`; Android computes the same — see **K1**.
+- **E1** **M** Rewards errors reach the user as `error.localizedDescription` — iOS `RewardsViewModel:268,279,314`, `CreateRewardsCodeViewModel:56`, `RedeemRewardsCodeViewModel:54`, `RewardsScene:104` — a Core error crosses as a display (§ 9); `GemRewardsService` answers `GemRewardsErrorDisplay` and the app maps its key.
+- **E2** **S** Security errors — iOS `SecurityViewModel:111,115,125,137` — same shape as **E1**.
+- **E3** **S** Wallet errors — iOS `WalletIDetailViewModel:118,141`, `ImportWalletSceneViewModel:194` — same shape; the import error family already exists in Core (`GemWalletImportError`).
+- **E4** **S** Asset and price-alert errors — iOS `AssetSceneViewModel:383`, `AssetPriceAlertsViewModel:92,100` — same shape.
+- **E5** **S** Connector errors — iOS `ConnectionsViewModel:120,132`; Android `WCAuthViewModel:120,133,190` (`AuthSceneState.Error(err.message)`) and `WCRequestViewModel:144` (`err.message.orEmpty()`) — `GemWalletConnectFailure` already crosses; the remaining raw messages need a display too.
+- **E6** **S** `ios/Features/Settings/.../Scenes/AddNodeScene.swift:140` formats an error inside the scene — the model owns it, and `GemAddNodeFailure` already has the display.
+- **E7** **S** `ConfirmTransferSceneViewModel:339` shows a Localized title with a raw `error.localizedDescription` body — `GemConfirmErrorDisplay` is the shape the load path already uses.
+- **E8** **S** `SwapSceneViewModel:451,478` and `ChartSceneViewModel:131` wrap `error.localizedDescription` into a Core error variant (`ComputeQuoteError(String)`, `.Core(msg:)`) — a string is not an error; the session takes the typed failure.
+- **E9** **S** `FiatSceneViewModel:337` and `SwapSlippageViewModel:74` show `localizedDescription` of validation errors the model itself threw — the check enum, mapped once (see **P24**).
+- **E10** **S** Android `ProposalSceneViewModel:130` logs `error.message`; `FiatViewModel:183` and `SwapViewModel:361` cast unknown throwables into Core error variants — same shape as **E8**.
 
 
 
@@ -26,19 +86,94 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 [ARCHITECTURE.md § 5](ARCHITECTURE.md#a-view-never-names-a-core-type): what must not appear inside a SwiftUI `body` or a `@Composable` is the generated type itself; a `switch` over a Core enum inside the view and a Core record handed to a child view's initializer both move into the model unchanged. The 2026-09-15 sweep closed this family (B9/B10) as "the contract working" — that closure was wrong against the rule as written two days earlier, and it is reopened here with the count measured against the 644 generated type names rather than the `Gem` prefix, which the app's own `GemTextField`/`GemLineChart` components share.
 
+- **V1** **S** `android/features/confirm/presents/.../FeeDetails.kt:200` shows the fee options only when `feeRateModels.size > 1`; iOS `NetworkFeeSceneViewModel` keeps three `show*` members for the same choice — `GemFeeRateRows` carries `shows_options`.
+- **V2** **S** `android/features/receive/presents/.../ReceiveScreen.kt:97` offers the network selector when `networkAssetIds.size > 1`; iOS `ReceiveViewModel.presentation` decides the same — `GemReceiveService` answers `shows_network_selector`.
+- **V3** **S** `android/ui/.../swap/SwapDetailsComponents.kt:114` lists providers only when `providers.size > 1`; iOS `SwapDetailsViewModel.allowSelectProvider` — `GemSwapDetails.allows_provider_selection` for both.
+- **V4** **S** `android/features/asset/presents/.../EmptyTransactionsItem.kt:20` returns when `size > 0` — the transactions section record decides emptiness.
+- **V5** **S** `ios/Features/Settings/.../SecurityScene.swift:23` attaches the footer to `index == 0` — the section record carries its footer.
+- **R1** **M** Settings rows are assembled from the key on both apps — iOS `SettingsViewModel.listItem(for:)` (wallet count subtitle), Android `SettingsRowUIModel.uiModel(context, walletsCount)` — `GemSettingsSection` carries `GemSettingsRowRecord { key, value }`.
+- **R2** **M** Preferences rows — iOS `PreferencesViewModel.listItem(for:)` (12 arms: currency text, language, appearance, leverage, take profit, stop loss), Android `PreferencesRowUIModel.uiModel` (7 arms) — the row record carries `value`; the language name stays the one locale-data input.
+- **R3** **S** Security rows — iOS `SecurityViewModel` (4 arms), Android `SecurityRowUIModel` (lock-period subtitle from `lockPeriodFromMinutes`) — the record carries the lock-period text key.
+- **R4** **S** About rows — iOS `AboutUsViewModel.listItem(for:)` (version subtitle, three URLs), Android `AboutRowUIModel.uiModel` — `GemAboutRow` record with `url` and `value`.
+- **R5** **M** Delegation detail rows — iOS `DelegationSceneViewModel.listItem(for:)` (6 arms, five value sources), Android `DelegationProperties.kt` (5 arms) — `GemDelegationRow` becomes a record with value and style.
+- **R6** **M** Stake sections, rows and actions — iOS `StakeSceneViewModel` switches over `GemStakeSection` (6), `GemStakeInfoRow` (6) and `GemStakeAction` (4); Android `StakeRowUIModel` (4) — records with finished values.
+- **R7** **M** Perpetual position detail rows — iOS `PerpetualPositionViewModel:75` (6 arms), Android `PerpetualPositionScene` reads the aggregate — `GemPerpetualDetailRow` record.
+- **R8** **M** Perpetual info rows — iOS `PerpetualSceneViewModel:131` (6 arms) and Android `PerpetualDetailsSectionUIModel` — `GemPerpetualInfoRow` record.
+- **R9** **S** Import wallet types — iOS `ImportWalletSceneViewModel:46,53` switches `GemWalletImportType` to a title (`multicoin` or the network name); Android `ImportTabUIModel` — the type carries the title key and the chain.
+- **R11** **S** iOS `AutocloseSceneViewModel:84` assembles the entry-price row (`Localized.Perpetual.entryPrice`, formatted price) — `GemAutocloseViewState` carries it.
+- **R12** **S** iOS `SimulationPayloadFieldViewModel.subtitle` decides address-versus-name for a field — `GemSimulationPayloadField` carries the outcome.
+- **R13** **S** iOS `ChainNodeViewModel.title/titleExtra` switch over `GemNodeRowTitle`/subtitle — with **P21**, the row carries the text.
+- **R14** **S** iOS `LatencyStatusViewModel` maps `GemLatencyStatus` (`.result → LatencyViewModel.title`, `.error → Localized`) — `GemLatencyStatus` becomes a row with text and tone, as Android's mapper already treats it.
+- **R15** **M** iOS `ConnectionProposalViewModel` holds no service and builds seven strings (app, website, wallet, verification) itself — `GemWalletConnectService.proposal_row` answers the screen.
+- **R17** **S** iOS `AssetViewModel` and `AddressListItemViewModel` restate five title-shaped strings each from primitives — read `GemAssetRow` / the address row record the other screens use.
+- **R18** **S** iOS `MarketValueViewModel` builds market rows from five strings; Android `AssetMarketUIModelFactory` switches `GemChartSection` (4 arms) — `GemAssetMarketRow` records.
+- **R20** **S** Android `WCRequestViewModel` assembles three request strings; iOS `SignMessageSceneViewModel` reads `GemSignMessagePreview` — Android reads the same preview for the request screen.
+- **M1** **S** `ios/Features/Settings/Sources/ChainSettings/ViewModels/GemAddNodeFailure+Settings.swift` maps a Core failure to `Localized` outside `Gemstone+Localized.swift`.
+- **M2** **S** `FiatSceneViewModel.emptyTitle` switches `GemFiatQuotePhase` to `Localized` in the model — the mapper.
+- **M3** **S** `WalletConnectorService.swift:281` maps a failure to `Localized.WalletConnect.requestExpired` in a service — the mapper.
+- **M5** **S** `PortfolioSceneViewModel.typeTitle` switches the type to `Localized` — the mapper.
+- **M6** **S** `android/features/asset/viewmodels/.../AssetDetailsMenuUIModel.kt:20` chooses `R.string` per `GemPriceAlertToggle` — the module's `GemstoneText.kt`.
+- **M7** **S** `android/features/settings/security/viewmodels/.../SecurityRowUIModel.kt:25` chooses `R.string` per `GemSecurityRow` — the module's `GemstoneText.kt`.
+- **M9** **S** `ios/Packages/PrimitivesComponents/.../CopyTypeViewModel.swift:20` composes copied messages with `String(format:)` — a template; `GemCopyType::text` with the app's label key.
+
 
 ## 4. App-side twins and outcomes the app invents
 
 [No hand-written twins](ARCHITECTURE.md): a type that only crosses the FFI is used as the uniffi type, and a twin exists only for a type an app persists. Android keeps four twins of exported Core enums, none persisted, and two of them let the app invent outcomes Core never produced.
+
+- **T2** **S** iOS `SignMessagePayload` restates `GemWalletConnectMessageRequest` (chain, session, wallet, message, simulation, assets) — use the record.
+- **T3** **S** iOS `WalletConnectSessionApproval` and Android `WalletConnectSessionNamespace` both twin `GemSessionApproval` (chains, accounts, methods, events) — use the record on both.
+- **T4** **S** iOS `ManageContactAddressViewModel.Input` twins `GemContactAddressInput` (address, chain, memo, replacingId) — use the record.
+- **T5** **S** Android `ManageContactState` twins `GemContactInput` (name, description, avatar, addresses) — with **S43**, the session holds the input.
+- **T6** **M** `android/features/asset_select/viewmodels/models/AssetSelectFlowUIModel.kt` translates `GemAssetRow` into two app enums the screen switches on (`AssetRowSubtitleStyle`, `AssetRowTrailingStyle`) — a twin of a Core enum; the row's subtitle and trailing become finished values (text, image) and the switch goes.
+- **T7** **S** `android/features/referral/viewmodels/models/ReferralUIModel.kt` restates twelve same-named fields of `GemRewardsState` — expose only what the scene reads (`canInvite`, `disableReason` text, the countdown) and keep the record private.
+- **T1** **S** iOS `WalletSearchSections` twins `GemWalletSearchCounts` — folds into **S35**.
+- **Q1** **S** `wallet.account(for: chain)` is read under `try?` in `SelectAssetViewModel:273`, `CollectibleViewModel:179` and `AmountSceneViewModel:278`, where a missing account becomes an empty sender address — Core answers the account on the row; an empty address never reaches a transfer.
+- **Q2** **S** `SwapSceneViewModel:255,386` swallow `suggestPair` and `SwapQuoteInput.create` failures with `try?` — Core returns an optional pair; the input builds from the session.
+- **Q3** **S** `WalletSceneViewModel:258` reads `(try? service.showsInitialLoading()) ?? false` — a rule that cannot fail is declared throwing; fix the signature.
+- **Q4** **S** `ChartValuesViewModel:25`, `FeeUnitViewModel:44` and `NetworkFeeCustomViewModel:102` parse numbers under `try?` — `GemNumberFormat` answers a value or a check.
+- **Q5** **S** `DeveloperViewModel:39,40` turn failed reads into `.empty` with `try?` — show the failure.
+- **Q6** **S** `CoinPriceRowViewModel:35` drops a widget coin on `try? AssetId(id:)` — `GemWidgetCoin` carries a typed asset id.
+- **O51** **S** iOS `WalletIDetailViewModel.isPresentingExportWallet: GemWalletSecret` is presentation state holding a Core record — the app's `WalletSecretInput`, the shape Android uses.
+- **O52** **S** iOS `ChainSettingsSceneViewModel.nodeDelete: GemNodeSelection` — presentation state holding a Core record; an app value.
+- **O53** **S** iOS `NameRecordViewModel.state: GemNameRecordState` is stored — derive it from the address session.
+- **O54** **S** iOS `AmountStakeViewModel.action: GemStakeAmountInput` and `ImportWalletSceneViewModel.importType: GemWalletImportKind` are stored and switched on in the model — the session holds them (**S41**).
 
 
 ## 5. Forwarders and façades
 
 [ARCHITECTURE.md § 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android): a case that only forwards a Core call is migration debt — delete it and call the service. iOS has none left; Android has one class and one case, plus two sites that show a raw exception where every other screen shows Core's text.
 
+- **F1** **S** `android/data/coordinators/.../asset/GetWalletSummaryImpl.kt:103` decides `showsPnl` in an application case — `GemWalletSummary.shows_pnl`.
+- **F2** **S** `android/data/coordinators/.../transaction/GetTransactionsImpl.kt:112,121` keep private mappers over `GemTransactionRowSubtitle` and `GemTransactionRowValue` in a case — the row record carries the finished text.
+- **F3** **S** `android/data/coordinators/.../stake/StakeReadsImpl.kt` only maps through `selectableValidators` and `sortedDelegations` — a forwarder; the view model calls the service.
+- **F4** **S** `android/features/bridge/viewmodels/.../WCRequestViewModel.kt` injects three Core services (wallet connect, sign message, metadata) — the narrow-cases rule; the request screen record comes from one service.
+- **F5** **S** `android/features/confirm/presents/.../components/NetworkFeeCustomViewModel.kt` is a view model in a presents module — move it to `viewmodels` with **P4**.
+
 
 
 ## 6. Core shapes that block an app move
+
+- **K1** **M** `GemAssetDetailsInput` takes booleans the apps compute from balances (`hasStakeBalance`, `hasAvailableBalance`, `isWalletEmpty`) — take the balances, decide in Core, delete the arithmetic on both apps (**P19**).
+- **K2** **S** ETA seconds cross bare on `GemTransactionStateUpdate.confirmation_eta_seconds`, `GemTransactionDetailRows.estimated_confirmation_seconds` and `GemSwapProgress.eta_seconds`, and each app formats them (`formatEstimatedConfirmation` on Android, the iOS duration formatter) — Core returns `GemDurationPart`s or text.
+- **K3** **S** `GemRewardsState.invite_reward_points` crosses as `i32` and both apps compose the invite description with it (iOS `RewardsViewModel:91`, Android `ReferralScene:149`) — the record carries `invite_reward_points_text`.
+- **K4** **S** `GemAssetDetailsState.price_alerts_count` crosses bare; iOS `AssetSceneViewModel:94` and Android `AssetInfoUIModelFactory` turn it into the alerts row subtitle — the record carries the subtitle value.
+- **K5** **S** `GemNftRow.count` crosses bare and is rendered on both apps — value and style.
+- **K6** **S** `GemPerpetualTransferData.price` and `leverage` cross bare and are rendered on the confirm screen — with **P5**.
+- **K9** **S** `GemChart.base_value` and `GemChartData.base` cross bare and the apps do the chart arithmetic (`ChartValues.from` on iOS) — a `GemChartLayout` like the candlestick layout.
+- **K8** **M** `GemStreamService` holds 13 `Arc`s, `GemAssetDetailsService` and `GemWalletService` 10, `GemPerpetualService` 9 — for each, the dependencies reached only to forward one call move behind the composition service (§ 7).
+- **S41** **M** iOS `ImportWalletSceneViewModel` drives input, word suggestions, import kind and button state itself — `GemWalletImportSession` on both apps (Android `ImportUIState` carries the same).
+- **S42** **S** iOS `VerifyPhraseViewModel` is a pure rule machine (`wordsVerified`, `wordsIndex`, `selectedIndexes`, `buttonState`) with no test that flips — `GemVerifyPhraseSession` in Core with the rule tests; Android's verify screen reads it.
+- **S43** **M** iOS `ManageContactViewModel` (name input, description, avatar, addresses, saving) and Android `ManageContactState` — `GemContactSession` over the `GemContactInput` both already hold.
+- **S44** **S** iOS `LockSceneViewModel` (`state`, `backgroundedAt`) and Android `LockTimer` each time the lock — one `GemLockSession` rule with a flipping test.
+- **S45** **S** iOS `RecipientSceneViewModel` (address input, memo, `recipientData`) drives the recipient screen app-side; Android's does too — `GemRecipientSession` over `GemRecipientService.next`.
+- **S46** **S** iOS `PerpetualsSceneViewModel` (`isSearchPresented`, `searchQuery`, `isSearching`) and Android `PerpetualMarketViewModel` (`isSearching`, `query`) both drive the market search — `GemPerpetualMarketSession`, which already has `GemPerpetualMarketCounts.sections` as its derived half.
+- **S47** **S** iOS `AssetsFilterViewModel` (chains filter, `hasBalance`) and Android `BaseAssetSelectViewModel` filters — `GemAssetFilterSession`.
+- **S48** **S** iOS `SecurityViewModel` toggles (`isEnabled`, `lockPeriod`, `isPrivacyLockEnabled`, `isHideBalanceEnabled`) and Android `SecurityViewModel` — a `GemSecuritySession` whose sections the screen already reads.
+- **S49** **S** iOS `ReceiveViewModel` (`networkAssetIds`, `presentation`) — `GemReceiveSession` (with **V2**).
+- **O46** **S** iOS `AssetsResultsSceneViewModel` and `NetworkAssetsSceneViewModel` keep four `show*` members each — sections are records (`GemNetworkAssetCounts`, the search counts); read them.
+- **O48** **S** iOS `NetworkFeeSceneViewModel` keeps three `show*` members — with **V1**.
+- **O49** **S** Android `MainViewModel` keeps three `show*` members for the launch state — `GemAppStartService` answers the launch phase.
 
 
 ## 7. Decisions to make
