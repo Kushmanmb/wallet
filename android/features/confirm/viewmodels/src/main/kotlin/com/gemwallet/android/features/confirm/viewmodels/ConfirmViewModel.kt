@@ -335,7 +335,9 @@ class ConfirmViewModel @Inject constructor(
         isNetworkFeeSheetVisible.value = error is GemConfirmException.InsufficientNetworkFee
     }
 
-    val feeListItem: StateFlow<ListItemModel?> = combine(feeUIModel, feeAsset) { fee, asset -> fee?.listItem(context, asset?.asset) }
+    val feeListItem: StateFlow<ListItemModel?> = combine(feeUIModel, feeAsset, feeAssets) { fee, asset, assets ->
+        fee?.listItem(context, asset?.asset, showsFeeAssetSymbol = assets.any { it.asset.id != asset?.asset?.id })
+    }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val feeItems: StateFlow<List<ListItemModel>> = feeUIModel.map { (it as? FeeUIModel.FeeInfo)?.feeItems(context).orEmpty() }

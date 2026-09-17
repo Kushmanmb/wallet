@@ -1,5 +1,7 @@
 package com.gemwallet.android.features.confirm.presents
 
+import com.gemwallet.android.ui.theme.smallIconSize
+import com.gemwallet.android.ui.components.image.ListItemImageView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -170,7 +172,13 @@ fun ConfirmScreen(
             itemsIndexed(transactionRows) { index, row ->
                 val listPosition = ListPosition.getPosition(index, sectionSize)
                 when (row) {
-                    is ConfirmRowUIModel.Item -> ListItem(model = row.model, listPosition = listPosition)
+                    is ConfirmRowUIModel.Item -> ListItem(
+                        model = row.model,
+                        listPosition = listPosition,
+                        accessory = row.trailingImage?.let { image ->
+                            { DataBadgeChevron(isShowChevron = false) { ListItemImageView(image = image, size = smallIconSize) } }
+                        },
+                    )
                     is ConfirmRowUIModel.Address -> AddressRow(row = row, listPosition = listPosition)
                     is ConfirmRowUIModel.Validator -> AddressPropertyItem(
                         title = row.title,

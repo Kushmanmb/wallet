@@ -18,7 +18,7 @@ import com.wallet.core.primitives.BlockExplorerLink
 import com.wallet.core.primitives.Chain
 
 sealed interface ConfirmRowUIModel {
-    data class Item(val model: ListItemModel) : ConfirmRowUIModel
+    data class Item(val model: ListItemModel, val trailingImage: ListItemImage? = null) : ConfirmRowUIModel
     data class Address(
         val title: String,
         val name: String?,
@@ -67,7 +67,8 @@ internal fun ConfirmProperty.uiModel(context: Context): ConfirmRowUIModel = when
         avatar = null,
     )
     is ConfirmProperty.Source -> ConfirmRowUIModel.Item(
-        ListItemModel(title = context.getString(R.string.common_wallet), subtitle = walletRow.name, image = walletRow.listItemImage()),
+        ListItemModel(title = context.getString(R.string.common_wallet), subtitle = walletRow.name),
+        trailingImage = walletRow.listItemImage(),
     )
     is ConfirmProperty.Network -> ConfirmRowUIModel.Network(chain = chain, name = name)
 }
@@ -78,13 +79,18 @@ private fun ConfirmProperty.Destination.Transfer.avatar(): ListItemImage? {
     return imageUrl?.takeIf { it.isNotEmpty() }?.let { ListItemImage.Stored(it, initials) } ?: initials?.let { ListItemImage.Initials(it) }
 }
 
-fun FeeUIModel.listItem(context: Context, feeAsset: Asset?): ListItemModel {
+fun FeeUIModel.listItem(context: Context, feeAsset: Asset?, showsFeeAssetSymbol: Boolean = false): ListItemModel {
     val title = context.getString(R.string.transfer_network_fee)
     val info = InfoSheetEntity.NetworkFeeInfo(feeAsset?.name.orEmpty(), feeAsset?.symbol.orEmpty())
     return when (this) {
         FeeUIModel.Calculating -> ListItemModel(title = title, subtitleTagType = ListItemTagType.Progress, info = info)
         FeeUIModel.Error -> ListItemModel(title = title, subtitle = "~", info = info)
-        is FeeUIModel.FeeInfo -> ListItemModel(title = title, subtitle = cryptoAmount, subtitleExtra = fiatAmount.takeIf { it.isNotEmpty() }, info = info)
+        is FeeUIModel.FeeInfo -> ListItemModel(
+            title = title,
+            subtitle = fiatAmount.ifEmpty { cryptoAmount },
+            subtitleExtra = feeAsset?.symbol?.takeIf { showsFeeAssetSymbol && fiatAmount.isNotEmpty() },
+            info = info,
+        )
     }
 }
 

@@ -58,15 +58,18 @@ fun SwapDetailsSummaryItem(
         modifier = Modifier.clickable(onClick = onClick),
         accessory = {
             if (badgeText != null) {
-                Text(
-                    text = badgeText,
-                    color = model.priceImpact.getColor(),
-                    maxLines = 1,
-                    overflow = TextOverflow.Clip,
-                    softWrap = false,
-                )
+                DataBadgeChevron {
+                    Text(
+                        text = badgeText,
+                        color = model.priceImpact.getColor(),
+                        maxLines = 1,
+                        overflow = TextOverflow.Clip,
+                        softWrap = false,
+                    )
+                }
+            } else {
+                DataBadgeChevron()
             }
-            DataBadgeChevron()
         },
     )
 }

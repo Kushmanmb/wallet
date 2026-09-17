@@ -130,7 +130,14 @@ fun ListItem(
         listPosition = listPosition,
         minHeight = minHeight,
         leading = model.image?.let { image -> { ListItemImageView(image = image, size = listItemIconSize) } },
-        title = { ListItemTitleText(text = model.title, color = model.titleStyle.color(), titleBadge = model.titleTag?.let { { TitleTag(it, model.titleTagStyle, model.titleTagType) } }) },
+        title = {
+            ListItemTitleText(
+                text = model.title,
+                color = model.titleStyle.color(),
+                style = MaterialTheme.typography.bodyLarge,
+                titleBadge = model.titleTag?.let { { TitleTag(it, model.titleTagStyle, model.titleTagType) } },
+            )
+        },
         subtitle = model.titleExtra?.let { { ListItemSupportText(text = it, color = model.titleExtraStyle.color()) } },
         trailing = if (model.subtitle == null && model.subtitleExtra == null && accessory == null) {
             null
