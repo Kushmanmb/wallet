@@ -1,23 +1,23 @@
 package com.gemwallet.android.features.settings.settings.viewmodels
 
-import com.gemwallet.android.ext.toGem
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.device.cases.GetPushEnabled
 import com.gemwallet.android.application.device.cases.SwitchPushEnabled
-import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.application.wallet.cases.GetWallets
+import com.gemwallet.android.data.services.gemstone.config.UserConfig
+import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.features.settings.settings.viewmodels.models.uiModel
 import com.gemwallet.android.model.NotificationsAvailable
 import dagger.hilt.android.lifecycle.HiltViewModel
-import uniffi.gemstone.GemSettingsServiceInterface
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import uniffi.gemstone.GemSettingsServiceInterface
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -33,7 +33,7 @@ class SettingsViewModel @Inject constructor(
     private val developerEnabled = MutableStateFlow(userConfig.developEnabled())
     private val walletConnectAvailable = MutableStateFlow(true)
 
-    val sections = combine(wallets, developerEnabled, walletConnectAvailable) { wallets, _, walletConnect ->
+    private val sections = combine(wallets, developerEnabled, walletConnectAvailable) { wallets, _, walletConnect ->
         settingsService.sections(
             wallets = wallets.map { it.toGem() },
             notificationsAvailable = notificationsAvailable,
@@ -46,8 +46,10 @@ class SettingsViewModel @Inject constructor(
         walletConnectAvailable.value = available
     }
 
-    val walletsCount = wallets.map { it.size }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, 0)
+    val rows = combine(sections, wallets) { sections, wallets ->
+        sections.map { section -> section.rows.map { it.uiModel(wallets.size) } }
+    }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val pushEnabled = getPushEnabled.getPushEnabled()
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
