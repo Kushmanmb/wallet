@@ -1,5 +1,7 @@
 package com.gemwallet.android.ui.components.list_item
 
+import com.gemwallet.android.domains.percentage.formatAsPercentage
+import uniffi.gemstone.GemPercentageStyle
 import uniffi.gemstone.GemValidatorRow
 
 data class ValidatorRowUIModel(
@@ -17,3 +19,5 @@ fun GemValidatorRow.uiModel() = ValidatorRowUIModel(
     placeholder = placeholder,
     aprText = validator.apr.formatApr(),
 )
+
+fun Double.formatApr(): String = formatAsPercentage(style = GemPercentageStyle.UNSIGNED)

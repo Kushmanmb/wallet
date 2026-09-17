@@ -4,22 +4,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.domains.asset.aggregates.AssetInfoDataAggregate
 import com.gemwallet.android.domains.price.tone
 import com.gemwallet.android.domains.pricealerts.aggregates.PriceAlertDataAggregate
 import com.gemwallet.android.features.settings.price_alerts.presents.localization.string
-import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.AssetListItem
 import com.gemwallet.android.ui.components.list_item.PriceInfo
 import com.gemwallet.android.ui.components.list_item.assetPriceSupport
 import com.gemwallet.android.ui.models.ListPosition
+import com.gemwallet.android.ui.style.textStyle
 
 internal fun priceAlertSupport(item: PriceAlertDataAggregate): (@Composable () -> Unit)? = {
     PriceInfo(
         price = item.prefix.string(),
         changes = item.suffix.string(),
-        state = item.priceDirection.tone(),
+        changeStyle = item.priceDirection.tone().textStyle(),
         style = MaterialTheme.typography.bodyMedium,
     )
 }

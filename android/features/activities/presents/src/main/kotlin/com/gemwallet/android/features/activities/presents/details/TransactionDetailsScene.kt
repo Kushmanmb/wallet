@@ -91,10 +91,11 @@ internal fun TransactionDetailsScene(
                         )
                         is TransactionDetailsValue.Amount.Swap -> SwapListHead(
                             fromAsset = item.fromAsset,
-                            fromValue = item.fromValue,
+                            fromValueText = item.fromValueText,
                             toAsset = item.toAsset,
-                            toValue = item.toValue,
-                            currency = item.currency,
+                            toValueText = item.toValueText,
+                            fromEquivalentText = item.fromEquivalentText,
+                            toEquivalentText = item.toEquivalentText,
                             onSwapClick = data.headerAction?.let { action -> { onAction(action.navigation()) } },
                             onAssetClick = { onAction(TransactionDetailsAction.OpenAsset(it)) },
                         )

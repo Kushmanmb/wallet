@@ -180,7 +180,7 @@ class ConfirmViewModel @Inject constructor(
     .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val simulation = content
-        .map { it?.load?.simulation?.toSimulation(it.session) ?: Simulation() }
+        .map { it?.load?.simulation?.toSimulation(it.session, context) ?: Simulation() }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.Eagerly, Simulation())
 

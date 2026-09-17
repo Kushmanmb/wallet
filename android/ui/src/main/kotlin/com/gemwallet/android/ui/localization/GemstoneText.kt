@@ -244,10 +244,9 @@ fun FeePriority.stringRes(): Int = when (this) {
     FeePriority.Fast -> R.string.fee_rates_fast
 }
 
-@Composable
-fun GemApprovalValue.string(symbol: String, formatter: ValueFormatter, asset: Asset): String = when (this) {
+fun GemApprovalValue.text(context: Context, symbol: String, formatter: ValueFormatter, asset: Asset): String = when (this) {
     is GemApprovalValue.Exact -> formatter.string(value, asset)
-    GemApprovalValue.Unlimited -> stringResource(R.string.simulation_header_unlimited_asset, symbol)
+    GemApprovalValue.Unlimited -> context.getString(R.string.simulation_header_unlimited_asset, symbol)
 }
 
 @StringRes

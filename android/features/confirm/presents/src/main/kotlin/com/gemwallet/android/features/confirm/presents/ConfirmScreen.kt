@@ -164,10 +164,11 @@ fun ConfirmScreen(
                         val model = requireNotNull(amountModel)
                         SwapListHead(
                             fromAsset = model.fromAsset,
-                            fromValue = model.fromAmount,
+                            fromValueText = model.fromAmountText,
                             toAsset = requireNotNull(model.toAsset),
-                            toValue = requireNotNull(model.toAmount),
-                            currency = model.currency,
+                            toValueText = requireNotNull(model.toAmountText),
+                            fromEquivalentText = model.fromAmountEquivalentText,
+                            toEquivalentText = model.toAmountEquivalentText,
                         )
                     }
 

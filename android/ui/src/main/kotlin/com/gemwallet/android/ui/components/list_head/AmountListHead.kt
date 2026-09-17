@@ -51,18 +51,20 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import uniffi.gemstone.GemValueTone
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.DisplayText
 import com.gemwallet.android.ui.components.HideToggle
 import com.gemwallet.android.ui.components.InfoBottomSheet
 import com.gemwallet.android.ui.components.InfoSheetEntity
-import com.gemwallet.android.ui.components.isHidden
-import com.gemwallet.android.ui.components.mask
 import com.gemwallet.android.ui.components.image.AssetIcon
 import com.gemwallet.android.ui.components.image.IconWithBadge
-import com.gemwallet.android.ui.style.color
+import com.gemwallet.android.ui.components.isHidden
+import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
+import com.gemwallet.android.ui.components.list_item.color
+import com.gemwallet.android.ui.components.mask
 import com.gemwallet.android.ui.icons.AppIcons
+import com.gemwallet.android.ui.style.color
+import com.gemwallet.android.ui.style.icon
 import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.Spacer8
 import com.gemwallet.android.ui.theme.WalletTheme
@@ -79,11 +81,10 @@ import com.gemwallet.android.ui.theme.space10
 import com.gemwallet.android.ui.theme.space2
 import com.gemwallet.android.ui.theme.tinyIconSize
 import com.wallet.core.primitives.Asset
+import kotlin.math.floor
 import uniffi.gemstone.GemHeaderActions
 import uniffi.gemstone.GemHeaderButton
-import com.gemwallet.android.ui.style.icon
 import uniffi.gemstone.GemHeaderButtonKind
-import kotlin.math.floor
 
 private val headerChangeTextHeight = 24.dp
 
@@ -96,7 +97,7 @@ fun AmountListHead(
     iconPlaceholder: String? = null,
     changedValue: String? = null,
     changedPercentages: String? = null,
-    changeState: GemValueTone = GemValueTone.NEUTRAL,
+    changeStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
     onClick: (() -> Unit)? = null,
     onSubtitleClick: (() -> Unit)? = null,
     actions: (@Composable () -> Unit)? = null,
@@ -145,7 +146,7 @@ fun AmountListHead(
                     )
                 }
                 changedValue?.let { value ->
-                    val highlightColor = changeState.color()
+                    val highlightColor = changeStyle.color()
                     val changeTextStyle = MaterialTheme.typography.titleMedium.copy(
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Medium,

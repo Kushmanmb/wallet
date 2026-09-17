@@ -13,6 +13,9 @@ import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.theme.pendingColor
 import com.wallet.core.primitives.PerpetualDirection
 import com.wallet.core.primitives.VerificationStatus
+import uniffi.gemstone.ChainAddress
+import uniffi.gemstone.GemAddressFormatStyle
+import uniffi.gemstone.GemAddressServiceInterface
 import uniffi.gemstone.GemDelegationTone
 import uniffi.gemstone.GemEmptyStateImage
 import uniffi.gemstone.GemFiatTransactionBadge
@@ -163,3 +166,7 @@ fun GemNameRecordState.indicator(): NameResolveIndicatorStyle? = when (this) {
     is GemNameRecordState.Complete -> NameResolveIndicatorStyle.Icon(AppIcons.CheckCircle, MaterialTheme.colorScheme.tertiary, null)
     GemNameRecordState.None -> null
 }
+
+fun GemAddressServiceInterface.formatShort(address: String, chain: String?): String = format(address, chain, GemAddressFormatStyle.Short)
+
+fun GemAddressServiceInterface.formatShort(addresses: List<ChainAddress>): List<String> = formatAll(addresses, GemAddressFormatStyle.Short)

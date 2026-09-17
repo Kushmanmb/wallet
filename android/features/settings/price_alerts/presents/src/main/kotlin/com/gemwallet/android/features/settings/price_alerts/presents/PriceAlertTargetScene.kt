@@ -43,6 +43,7 @@ import com.gemwallet.android.ui.components.fields.requestFocusIfAttached
 import com.gemwallet.android.ui.components.image.AssetIcon
 import com.gemwallet.android.ui.components.list_item.Badge
 import com.gemwallet.android.ui.components.list_item.ListItem
+import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import com.gemwallet.android.ui.components.list_item.ListItemTitleText
 import com.gemwallet.android.ui.components.list_item.PriceInfo
 import com.gemwallet.android.ui.components.parseMarkdownToAnnotatedString
@@ -58,7 +59,6 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PriceAlertDirection
 import com.wallet.core.primitives.PriceAlertNotificationType
-import uniffi.gemstone.GemValueTone
 
 private val tabs = listOf(
     PriceAlertNotificationType.Price,
@@ -79,7 +79,7 @@ fun PriceAlertTargetScene(
     asset: Asset? = null,
     assetPriceFormatted: String = "",
     assetPriceChangeFormatted: String = "",
-    assetValueDirection: GemValueTone = GemValueTone.NEUTRAL,
+    assetValueStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
     buttonState: ButtonState,
     snackbar: SnackbarHostState? = null,
     onType: (PriceAlertNotificationType) -> Unit,
@@ -238,7 +238,7 @@ fun PriceAlertTargetScene(
                             PriceInfo(
                                 price = assetPriceFormatted,
                                 changes = assetPriceChangeFormatted,
-                                state = assetValueDirection,
+                                changeStyle = assetValueStyle,
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         },

@@ -10,8 +10,10 @@ import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemTagType
+import com.gemwallet.android.ui.localization.infoDescriptionRes
 import com.gemwallet.android.ui.localization.statusLabelRes
 import com.gemwallet.android.ui.localization.stringRes
+import com.gemwallet.android.ui.style.badgeIconRes
 import com.gemwallet.android.ui.style.textStyle
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.BlockExplorerLink
@@ -58,7 +60,7 @@ internal fun TransactionDetailsValue.uiModel(context: Context, asset: Asset): Tr
             subtitle = context.getString(data.statusLabelRes()),
             subtitleStyle = status.tone.textStyle(),
             subtitleTagType = if (status.showsProgress) ListItemTagType.Progress else ListItemTagType.None,
-            info = InfoSheetEntity.TransactionInfo(icon = asset.iconModel(), state = data, tone = status.tone),
+            info = InfoSheetEntity.TransactionInfo(icon = asset.iconModel(), state = data, badgeIcon = status.tone.badgeIconRes(), description = status.tone.infoDescriptionRes()),
         ),
     )
     is TransactionDetailsValue.Fee -> TransactionDetailsRowUIModel.Fee(

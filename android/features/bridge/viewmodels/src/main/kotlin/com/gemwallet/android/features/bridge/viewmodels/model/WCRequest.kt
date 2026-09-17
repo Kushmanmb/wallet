@@ -1,8 +1,10 @@
 package com.gemwallet.android.features.bridge.viewmodels.model
 
+import android.content.Context
 import com.gemwallet.android.application.wallet_connect.WalletConnectPendingRequest
 import com.gemwallet.android.ext.toPrimitives
-import com.gemwallet.android.serializer.toJson
+import com.gemwallet.android.ui.components.list_head.SimulationHeaderUIModel
+import com.gemwallet.android.ui.components.list_head.headerUIModel
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.PayloadField
 import com.gemwallet.android.ui.models.withExplorerLinks
@@ -14,7 +16,6 @@ import com.wallet.core.primitives.Wallet
 import uniffi.gemstone.GemConnectionRow
 import uniffi.gemstone.GemSignMessagePreview
 import uniffi.gemstone.GemSignMessageServiceInterface
-import uniffi.gemstone.GemSimulationValue
 import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.GemTransferData
 import uniffi.gemstone.MessageType
@@ -46,6 +47,7 @@ sealed class WCRequest(
         private val row: GemConnectionRow,
         private val service: GemSignMessageServiceInterface,
         private val texts: ReviewTexts,
+        private val context: Context,
         override val addressNames: Map<String, String> = emptyMap(),
     ) : WCRequest(request, row), WalletConnectReviewModel {
         val signMessage: GemSignMessage get() = request.message
@@ -67,8 +69,8 @@ sealed class WCRequest(
         override val hasCriticalWarning: Boolean
             get() = preview.hasCriticalWarning
 
-        override val header: GemSimulationValue?
-            get() = preview.header
+        override val header: SimulationHeaderUIModel?
+            get() = preview.header?.headerUIModel(context)
 
         override val primaryPayloadFields: List<PayloadField> by lazy { preview.primaryFields.fields() }
 
@@ -79,7 +81,7 @@ sealed class WCRequest(
             .filter { it.name.isNotEmpty() && !it.name.equals(it.address, ignoreCase = true) }
             .associate { it.address.lowercase() to it.name }
 
-        fun withAddressNames(addressNames: Map<String, String>): SignMessage = SignMessage(request, row, service, texts, addressNames)
+        fun withAddressNames(addressNames: Map<String, String>): SignMessage = SignMessage(request, row, service, texts, context, addressNames)
 
         private fun List<uniffi.gemstone.SimulationPayloadField>.fields(): List<PayloadField> =
             withExplorerLinks(chain) { chain, address -> service.addressUrl(chain.string, address) }

@@ -173,7 +173,7 @@ class WCRequestViewModel @Inject constructor(
     private fun toRequest(pending: WalletConnectPendingRequest): WCRequest {
         val row = service.connectionRow(pending.appMetadata.toGem())
         return when (pending) {
-            is WalletConnectPendingRequest.SignMessage -> WCRequest.SignMessage(pending, row, signMessageService, ReviewTexts(context))
+            is WalletConnectPendingRequest.SignMessage -> WCRequest.SignMessage(pending, row, signMessageService, ReviewTexts(context), context)
             is WalletConnectPendingRequest.Transaction -> WCRequest.Transaction(pending, row)
         }
     }
