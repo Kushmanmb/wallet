@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.asset.viewmodels.localization
 
+import uniffi.gemstone.GemPriceAlertToggle
 import androidx.annotation.StringRes
 import com.gemwallet.android.ui.R
 import uniffi.gemstone.GemAssetMarketRow
@@ -27,4 +28,10 @@ internal fun PortfolioStatistic.stringRes(): Int = when (this) {
     is PortfolioStatistic.MarginUsage -> R.string.perpetual_margin_usage
     is PortfolioStatistic.AllTimePnl -> R.string.perpetual_all_time_pnl
     is PortfolioStatistic.Volume -> R.string.perpetual_volume
+}
+
+@StringRes
+fun GemPriceAlertToggle.toastRes(): Int = when (this) {
+    GemPriceAlertToggle.ENABLED -> R.string.price_alerts_disabled_for
+    GemPriceAlertToggle.DISABLED -> R.string.price_alerts_enabled_for
 }

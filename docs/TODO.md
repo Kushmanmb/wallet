@@ -112,12 +112,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **R17** **S** iOS `AssetViewModel` and `AddressListItemViewModel` restate five title-shaped strings each from primitives — read `GemAssetRow` / the address row record the other screens use.
 - **R18** **S** iOS `MarketValueViewModel` builds market rows from five strings; Android `AssetMarketUIModelFactory` switches `GemChartSection` (4 arms) — `GemAssetMarketRow` records.
 - **R20** **S** Android `WCRequestViewModel` assembles three request strings; iOS `SignMessageSceneViewModel` reads `GemSignMessagePreview` — Android reads the same preview for the request screen.
-- **M1** **S** `ios/Features/Settings/Sources/ChainSettings/ViewModels/GemAddNodeFailure+Settings.swift` maps a Core failure to `Localized` outside `Gemstone+Localized.swift`.
-- **M2** **S** `FiatSceneViewModel.emptyTitle` switches `GemFiatQuotePhase` to `Localized` in the model — the mapper.
-- **M3** **S** `WalletConnectorService.swift:281` maps a failure to `Localized.WalletConnect.requestExpired` in a service — the mapper.
-- **M5** **S** `PortfolioSceneViewModel.typeTitle` switches the type to `Localized` — the mapper.
-- **M6** **S** `android/features/asset/viewmodels/.../AssetDetailsMenuUIModel.kt:20` chooses `R.string` per `GemPriceAlertToggle` — the module's `GemstoneText.kt`.
-- **M7** **S** `android/features/settings/security/viewmodels/.../SecurityRowUIModel.kt:25` chooses `R.string` per `GemSecurityRow` — the module's `GemstoneText.kt`.
 - **M9** **S** `ios/Packages/PrimitivesComponents/.../CopyTypeViewModel.swift:20` composes copied messages with `String(format:)` — a template; `GemCopyType::text` with the app's label key.
 
 

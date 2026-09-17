@@ -3,7 +3,6 @@ package com.gemwallet.android.features.settings.security.viewmodels.models
 import android.content.Context
 import androidx.annotation.StringRes
 import com.gemwallet.android.features.settings.security.viewmodels.localization.stringRes
-import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import uniffi.gemstone.GemSecurityRow
 import uniffi.gemstone.lockPeriodFromMinutes
@@ -23,14 +22,14 @@ internal fun GemSecurityRow.uiModel(
     hideBalances: Boolean,
     lockPeriods: List<LockPeriodOption>,
 ): SecurityRowUIModel? = when (this) {
-    GemSecurityRow.AUTHENTICATION -> SecurityRowUIModel.Authentication(ListItemModel(title = context.getString(R.string.settings_enable_passcode)), authRequired)
+    GemSecurityRow.AUTHENTICATION -> SecurityRowUIModel.Authentication(ListItemModel(title = context.getString(stringRes())), authRequired)
     GemSecurityRow.LOCK_PERIOD -> SecurityRowUIModel.LockPeriod(
         model = ListItemModel(
-            title = context.getString(R.string.lock_require_authentication),
+            title = context.getString(stringRes()),
             subtitle = context.getString(lockPeriodFromMinutes(lockInterval.toUInt()).stringRes()),
         ),
         options = lockPeriods.map { it.copy(isSelected = it.minutes == lockInterval) },
     )
     GemSecurityRow.PRIVACY_LOCK -> null
-    GemSecurityRow.HIDE_BALANCE -> SecurityRowUIModel.HideBalance(ListItemModel(title = context.getString(R.string.settings_hide_balance)), hideBalances)
+    GemSecurityRow.HIDE_BALANCE -> SecurityRowUIModel.HideBalance(ListItemModel(title = context.getString(stringRes())), hideBalances)
 }

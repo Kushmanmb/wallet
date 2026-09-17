@@ -163,13 +163,7 @@ public final class FiatSceneViewModel {
     }
 
     func emptyTitle(_ viewState: GemFiatViewState) -> String {
-        switch viewState.phase {
-        case .noInput, .invalidInput:
-            switch type {
-            case .buy, .sell: Localized.Input.enterAmountTo(type.action)
-            }
-        case .invalid, .loading, .ready, .noQuotes, .failed: Localized.Buy.noResults
-        }
+        viewState.phase.emptyTitle(action: type.action)
     }
 
     var assetTitle: String {

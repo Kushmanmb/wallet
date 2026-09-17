@@ -111,10 +111,7 @@ extension PortfolioSceneViewModel {
     }
 
     func chartTypeTitle(for type: PortfolioChartType) -> String {
-        switch type {
-        case .value: Localized.Perpetual.value
-        case .pnl: Localized.Perpetual.pnl
-        }
+        type.title
     }
 
     func statisticModel(_ statistic: PortfolioStatistic) -> ListItemModel {

@@ -29,6 +29,13 @@ extension GemFiatAmountCheck {
 }
 
 extension GemFiatQuotePhase {
+    func emptyTitle(action: String) -> String {
+        switch self {
+        case .noInput, .invalidInput: Localized.Input.enterAmountTo(action)
+        case .invalid, .loading, .ready, .noQuotes, .failed: Localized.Buy.noResults
+        }
+    }
+
     var inputErrorText: String? {
         switch self {
         case .invalidInput: Localized.Errors.invalidAmount
