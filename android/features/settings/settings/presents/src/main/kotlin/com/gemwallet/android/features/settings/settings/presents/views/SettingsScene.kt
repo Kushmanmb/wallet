@@ -2,6 +2,7 @@
 
 package com.gemwallet.android.features.settings.settings.presents.views
 
+import com.gemwallet.android.ui.models.actions.SettingsSceneAction
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box

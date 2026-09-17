@@ -1,12 +1,8 @@
 package com.gemwallet.android.features.settings.settings.presents.style
 
 import androidx.annotation.DrawableRes
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import com.gemwallet.android.features.settings.settings.presents.views.SettingsSceneAction
+import com.gemwallet.android.ui.models.actions.SettingsSceneAction
 import com.gemwallet.android.ui.R
-import uniffi.gemstone.GemPreferencesRow
 import uniffi.gemstone.GemSettingsRow
 
 @DrawableRes
@@ -34,18 +30,3 @@ internal fun GemSettingsRow.action(): SettingsSceneAction = when (this) {
     GemSettingsRow.DEVELOPER -> SettingsSceneAction.Develop
 }
 
-@DrawableRes
-internal fun GemPreferencesRow.icon(): Int? = when (this) {
-    GemPreferencesRow.CURRENCY -> R.drawable.settings_currency
-    GemPreferencesRow.LANGUAGE -> R.drawable.settings_language
-    GemPreferencesRow.APPEARANCE -> R.drawable.settings_appearance
-    GemPreferencesRow.NETWORKS -> R.drawable.settings_networks
-    GemPreferencesRow.CONTACTS -> R.drawable.settings_contacts
-    GemPreferencesRow.PERPETUALS -> R.drawable.settings_pricealert
-    GemPreferencesRow.PERPETUAL_LEVERAGE,
-    GemPreferencesRow.PERPETUAL_TAKE_PROFIT,
-    GemPreferencesRow.PERPETUAL_STOP_LOSS -> null
-}
-
-@Composable
-internal fun GemPreferencesRow.painter(): Painter? = icon()?.let { painterResource(it) }

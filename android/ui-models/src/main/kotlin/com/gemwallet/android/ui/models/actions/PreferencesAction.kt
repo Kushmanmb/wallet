@@ -1,4 +1,4 @@
-package com.gemwallet.android.features.settings.settings.presents.views
+package com.gemwallet.android.ui.models.actions
 
 sealed interface PreferencesAction {
     data object Currencies : PreferencesAction
