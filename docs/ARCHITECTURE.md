@@ -299,6 +299,98 @@ walletConnectClient.rejectSession(proposal, rejection) {
 }
 ```
 
+### A plain list is Core sections of one shared row, rendered by one builder per app
+
+A row that shows a title with a value, an amount, a link, an icon, an address to copy, a loading placeholder or an error is the same row on every screen. It crosses once, as [`models/list.rs`](../core/gemstone/src/models/list.rs):
+
+```rust
+pub enum GemListRow {
+    Text { title: GemListRowTitle, value: String },
+    Amount { title: GemListRowTitle, amount: GemFormattedNumber },
+    Icon { chain: Chain },
+    Address { address: String, copy: GemCopy },
+    Explorer { name: String, url: String },
+    Loading,
+    Error { error: GemServiceError },
+}
+
+pub struct GemListSection {
+    pub title: GemListSectionTitle,
+    pub rows: Vec<GemListRow>,
+}
+```
+
+Four things make this work, and all four are load-bearing:
+
+1. **A screen's record returns `Vec<GemListSection>`** and declares no section or row type of its own. `GemAddressDetails::sections()` is the reference; a screen with no section header uses `GemListSectionTitle::None`.
+2. **The row carries the finished value.** `Text` carries printed text, `Amount` carries a `GemFormattedNumber` each app renders through its existing formatter, and `Address` carries the [copy model](#one-copy-model-for-every-address-phrase-and-key) with the shortened display already computed. A row that owns its title answers it in Core (`GemBalanceRow::title()`).
+3. **Titles are two shared enums**, `GemListRowTitle` and `GemListSectionTitle`, resolved in the one shared localization file per app — iOS `PrimitivesComponents/Extensions/Gemstone+Localized.swift`, Android `ui/localization/GemstoneText.kt`. A new title is a case there, never a per-feature mapper. A title that interpolates a value stays app-side (`Explorer` carries the explorer's name and the app composes "View on …").
+4. **One builder renders it, so a screen adds no rendering.** iOS `GemListRowView(row:)` in `PrimitivesComponents` and Android `GemListRowView(row:, listPosition:)` plus `LazyListScope.gemListSections(sections:)` in `:ui` take the Core row and own everything it needs — the list-row container, the copy and its toast, opening the link, the loading spinner. A screen is then:
+
+```swift
+ListSectionView(provider: model) { row in
+    GemListRowView(row: row)
+}
+```
+
+```kotlin
+LazyColumn { gemListSections(sections) }
+```
+
+Rich rows stay outside: the transaction header, swap progress, asset, wallet and validator rows have their own layout on both apps and keep their own records ([a row that a screen only ever draws one way](#a-row-that-a-screen-only-ever-draws-one-way-keeps-its-shape-app-side)). The test is whether the row is a title with a value — if it is, it is a `GemListRow`. Adding a per-screen row enum, a per-feature title mapper or a second `switch` over the row in a scene is the regression this replaces.
+
+### A screen's load state is one Core state, and a failed refresh keeps what is shown
+
+The apps already agree on what a screen in flight looks like: `StateViewType` on iOS and `StateViewType` in `ui-models` on Android both read `noData | loading | data | error`. What they did **not** agree on is when each case applies — whether a pull-to-refresh that fails wipes the rows the user is reading or leaves them. That is a product decision, so it crosses as Core state.
+
+[`models/state.rs`](../core/gemstone/src/models/state.rs) holds the shared pair. `GemLoadState` is the one enum every screen uses, with the same four cases as the apps' own:
+
+```rust
+pub enum GemLoadState {
+    NoData,
+    Loading,
+    Data,
+    Error { error: GemServiceError },
+}
+```
+
+UniFFI has no generics, so the state cannot carry the payload across the FFI the way `StateViewType<T>` does; the record holds the state beside the value it loaded. `GemLoad<T>` is the Rust-side generic that keeps the two together and owns the transition, so no feature writes that rule again:
+
+```rust
+pub struct GemLoad<T> {
+    pub state: GemLoadState,
+    pub value: T,
+}
+
+impl<T: Clone + Default> GemLoad<T> {
+    pub fn loading() -> Self
+    pub fn data(&self, value: Result<T, GemServiceError>) -> Self
+}
+```
+
+`data` is the decision: a fetch that succeeds replaces the value, a fetch that fails keeps a value already on screen, and only a screen with nothing to keep shows the error. A screen therefore hands its record back for the next load — `refresh(details)`, not `refresh(chain, address)` — so Core decides what survives a failure. Never re-derive the previous value from the sections the app is rendering: that is the same decision read backwards out of the UI.
+
+### One copy model for every address, phrase and key
+
+Copying is the same three-part answer everywhere: the value that reaches the clipboard, the shortened value the toast shows, and what kind of secret it is. Each app had its own version — iOS `CopyType`, Android a raw `setPlainText` with an `isSensitive` flag it set per call site — so a screen could copy a private key without marking it sensitive.
+
+```rust
+// models/copy.rs
+pub enum GemCopyKind {
+    Address { chain: Chain },
+    SecretPhrase,
+    PrivateKey,
+}
+
+pub struct GemCopy {
+    pub kind: GemCopyKind,
+    pub value: String,
+    pub display: String,
+}
+```
+
+Core shortens the address (`format_address`), so the toast text is not formatted twice. Each app maps `GemCopy` once — `GemCopy.copyModel` on iOS, `ClipboardManager.setCopy` on Android — and a row that offers copying carries the model rather than the pieces.
+
 ### A row that a screen only ever draws one way keeps its shape app-side
 
 `GemAssetRow` carries the layout because the same asset row is drawn four ways: the wallet list prices it, select-asset names its network, manage-tokens toggles it, receive copies it. The choice varies, so Core makes it once and both apps switch on `subtitle` and `trailing`.
