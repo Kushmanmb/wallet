@@ -1,8 +1,5 @@
 package com.gemwallet.android.ui.localization
 
-import com.wallet.core.primitives.Currency
-import com.gemwallet.android.model.CurrencyFormatter
-import com.gemwallet.android.ui.localization.stringRes
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
@@ -11,13 +8,13 @@ import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toPrimitives
+import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
-import uniffi.gemstone.GemBalanceResource
-import uniffi.gemstone.GemRecipientSection
-import uniffi.gemstone.GemHeaderButtonKind
+import com.gemwallet.android.ui.localization.stringRes
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.ChartPeriod
+import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.FeePriority
 import com.wallet.core.primitives.PerpetualDirection
 import com.wallet.core.primitives.QRScanType
@@ -29,27 +26,30 @@ import uniffi.gemstone.DelegationState
 import uniffi.gemstone.GemAddNodeFailure
 import uniffi.gemstone.GemApprovalValue
 import uniffi.gemstone.GemAssetMenuAction
+import uniffi.gemstone.GemBalanceResource
+import uniffi.gemstone.GemCandleTooltipRow
 import uniffi.gemstone.GemDelegationStatus
 import uniffi.gemstone.GemEmptyStateAction
-import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemEmptyStateText
+import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemFiatTransactionBadge
+import uniffi.gemstone.GemHeaderButtonKind
 import uniffi.gemstone.GemLocalizedText
+import uniffi.gemstone.GemRecipientSection
 import uniffi.gemstone.GemSimulationWarningKind
 import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.GemTransactionFilter
-import uniffi.gemstone.LinkType
 import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStateTone
-import uniffi.gemstone.GemVerificationLevel
-import uniffi.gemstone.GemCandleTooltipRow
-import uniffi.gemstone.GemWalletSecretKind
-import uniffi.gemstone.WalletConnectionVerificationStatus
-import uniffi.gemstone.verificationLevel
 import uniffi.gemstone.GemTransactionTitle
+import uniffi.gemstone.GemVerificationLevel
+import uniffi.gemstone.GemWalletSecretKind
 import uniffi.gemstone.GemWalletSubtitle
+import uniffi.gemstone.LinkType
 import uniffi.gemstone.SimulationPayloadFieldKind
 import uniffi.gemstone.SimulationSeverity
+import uniffi.gemstone.WalletConnectionVerificationStatus
+import uniffi.gemstone.verificationLevel
 
 fun GemTransactionTitle.string(context: Context): String = when (this) {
     GemTransactionTitle.Received -> context.getString(R.string.transaction_title_received)
@@ -92,16 +92,19 @@ fun GemAddNodeFailure.stringRes(): Int = when (this) {
     GemAddNodeFailure.UNAVAILABLE -> R.string.errors_error_occurred
 }
 
+@StringRes
+fun GemDelegationStatus.stateRes(): Int = when (state) {
+    DelegationState.ACTIVE -> R.string.stake_active
+    DelegationState.PENDING -> R.string.stake_pending
+    DelegationState.INACTIVE -> R.string.stake_inactive
+    DelegationState.ACTIVATING -> R.string.stake_activating
+    DelegationState.DEACTIVATING -> R.string.stake_deactivating
+    DelegationState.AWAITING_WITHDRAWAL -> R.string.stake_awaiting_withdrawal
+}
+
 @Composable
 fun GemDelegationStatus.stateText(): String = stringResource(
-    when (state) {
-        DelegationState.ACTIVE -> R.string.stake_active
-        DelegationState.PENDING -> R.string.stake_pending
-        DelegationState.INACTIVE -> R.string.stake_inactive
-        DelegationState.ACTIVATING -> R.string.stake_activating
-        DelegationState.DEACTIVATING -> R.string.stake_deactivating
-        DelegationState.AWAITING_WITHDRAWAL -> R.string.stake_awaiting_withdrawal
-    }
+    stateRes()
 )
 
 @StringRes

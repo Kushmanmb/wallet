@@ -1,4 +1,4 @@
-package com.gemwallet.android.features.earn.delegation.presents.localization
+package com.gemwallet.android.features.earn.delegation.viewmodels.localization
 
 import androidx.annotation.StringRes
 import com.gemwallet.android.ui.R

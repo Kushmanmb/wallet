@@ -64,6 +64,12 @@ fun GemValueTone.color(): Color = when (this) {
     GemValueTone.NEGATIVE -> MaterialTheme.colorScheme.error
 }
 
+fun GemDelegationTone.textStyle(): ListItemTextStyle = when (this) {
+    GemDelegationTone.POSITIVE -> ListItemTextStyle.Positive
+    GemDelegationTone.PENDING -> ListItemTextStyle.Warning
+    GemDelegationTone.NEGATIVE -> ListItemTextStyle.Negative
+}
+
 @Composable
 fun GemDelegationTone.color(): Color = when (this) {
     GemDelegationTone.POSITIVE -> MaterialTheme.colorScheme.tertiary
