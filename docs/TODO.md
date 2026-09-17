@@ -20,7 +20,6 @@ The last places where an app reaches the API, a rule or a table without going th
 
 Found by pairing every view model on both apps (see Coverage) and reading the ones whose logic did not match. Each is the same product rule written on both sides with a difference.
 
-- **C47** **S** `android/features/swap/viewmodels/…/SwapViewModel.kt` sends `on_quote_invalidated` itself on asset select, switch and slippage change, although each of those also changes `quoteRequestParams` and so reaches `on_request_changed`, which Core composes from `on_refresh_requested` and `on_quote_invalidated`; iOS sends only the request change. Delete the three calls once the swap suites run on a machine whose native tests load. The add-asset and autoclose sessions differ only in drive shape — Android derives the session from its flows on every change, iOS holds one and sends `on_chain`/`on_submit_attempt` — and both are contract shapes, so those events stay.
 
 
 ## 3. The view boundary
@@ -37,7 +36,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 [ARCHITECTURE.md § 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android): a case that only forwards a Core call is migration debt — delete it and call the service. iOS has none left; Android has one class and one case, plus two sites that show a raw exception where every other screen shows Core's text.
 
-- **C46** **S** `GemWalletConnectService.connection_row` forwards to `GemApplicationMetadataService.connection_row`; Android reads the forwarder in three bridge view models, iOS reads the owner through `.shared` (**D26**), and the metadata object is otherwise iOS-only. Settle with D26: one owner on the service the bridge view models already hold, and the metadata object stops being exported.
 
 
 ## 6. Core shapes that block an app move
@@ -47,7 +45,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 None of these is a code change until someone chooses; each is written so the choice is the only remaining step.
 
-- **D26** **M** File-scope Core services on iOS. 23 sites reach a stateless rule object through `.shared` — `GemAddressService` at 12, `GemAssetConfigService` 4, `GemChainService` 3, `GemApplicationMetadataService` 3, `GemConnectionService` 1 — across `ReceiveViewModel`, `ImportWalletTypeViewModel`, `CopyTypeViewModel`, `AddressListItemViewModel`, `AssetsSection` and the `GemstonePrimitives` extensions. SERVICES.md forbids a file-scope `Gem*Service` so a test can substitute it, but none of these takes a constructor argument, so injecting them buys nothing to substitute. Decide once: either a stateless rule object counts as a free function and `.shared` is written into SERVICES.md as the shape, or § 7 applies and the 23 sites take it in their initializer.
 - **O35** **S** `ios/Gem/ViewModels/RootSceneViewModel.swift:41` — `currentWallet` reads `viewModelFactory.stores.walletStore.getWallet(id:)` with `try?` on every `body` pass. `GemWalletSessionService.get_current_wallet` is the answer but it is `async`, and making the point read sync is not free: Room forbids a blocking query on the main thread, so the same signature would cost Android a threading rule nothing enforces (ARCHITECTURE.md § 2). Decide whether the root holds the wallet it was launched with and updates it from the session events, or the session service grows a sync read that Android answers from memory.
 - **S34** **L** `Features/Settings/RewardsViewModel.swift` — wallet selection, the loaded rewards state, sheets, alerts and toasts. The widest screen that derives a view state from state the user drives and has no session; a shape to agree.
 - **S35** **L** `Features/WalletTab/WalletSearchSceneViewModel.swift` — a search model driving three capped sections. Two of its section decisions are still app-side compositions of Core answers (`searchableQuery.isEmpty && recentModel.hasAssets`, `sections.pinnedAssets.isNotEmpty || showPinnedPerpetuals`) where [sections are records](ARCHITECTURE.md#sections-actions-and-destinations-are-records-too); a session would carry them.
@@ -73,7 +70,7 @@ Two passes on 2026-09-16, and the second is the one that answers "is this everyt
 | A view never names a Core type | 0 | closed 2026-09-17 (**B67**); the census in the ledger entry is the rerun |
 | A UI state class holds no Core type | 0 | the two `nameResolveState` hand-offs became `NameResolveIndicatorUIModel` on the shared field |
 | The parent vends the child model | 4 screen models (118 row projections excluded) | **B69** |
-| Depend on the generated abstraction | 29 iOS + 4 Android | landed as O38 (230eb8ba0f); what remains is the `.shared` stateless services under **D26** and the Hilt providers that construct the concrete objects |
+| Depend on the generated abstraction | 29 iOS + 4 Android | landed as O38 (230eb8ba0f); what remains is the dependency-free rule objects SERVICES.md exempts (held as `.shared` on iOS, Hilt singletons on Android) and the Hilt providers that construct the concrete objects |
 | Never call Core from the main thread | 9 Android view models | **X167** |
 | One mapper per module | 5 iOS files, 1 Android | **L16** |
 | The record carries the finished value | 0 | — |
@@ -108,6 +105,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 ## Ledger of closed sections
 
 What each section of the 2026-09-15 and 2026-09-16 sweeps measured, what landed, and why the rest closed — kept so the same lead is not re-raised with the same answer. Commits carry the detail.
+
+**D26 and C46 (2026-09-17).** SERVICES.md already exempted the dependency-free adapters (`GemSimulationFormatter`, `PriceAlertFormatter`, `GemChainService`); the 23 `.shared` sites reach five objects of exactly that shape — no constructor argument, no state, no I/O — so the exception now names them and the iOS sites stay. With `GemApplicationMetadataService` the owner on both apps, `GemWalletConnectService.connection_row` stopped forwarding: Android's three bridge view models read the metadata service the rules module now provides. C47 closed by reading: `quoteRequestParams.distinctUntilChangedBy { it?.key }.onEach(::onQuoteRequestParamsChanged)` runs before the debounced fetch, and `on_request_changed` composes the invalidation, so the three explicit `on_quote_invalidated` calls Android made on asset select, switch and slippage change were redundant and are gone.
 
 **Consistency review (2026-09-17).** Three sweeps over the exported surface after B67: exported methods called by one app only (54), Core service objects abstracted on one app only (11 concrete on iOS, 5 on Android — all providers and `.shared` sites), and Core enums mapped by one app's mapper files only (20). Read on both apps they reduce to the nine C4x items in §§ 2 and 5. Dismissed as platform-owned: the app-update rule (Play in-app update vs App Store release check), the keystore flows (`setup_chains` vs `migrate_to_shared_password`), CAIP-2 (both through Core by different entry points), the sign-message preview (both `GemSignMessagePreview`; `payload_preview` is the Android one-click-auth flow), WalletConnect authentication, the support-chat image rule, which Android does not render at all, and the auth prompt outcome read by halves (iOS's Local Authentication prompt is modal and only needs `is_cancelled`; Android's BiometricPrompt is cancelled by the activity lifecycle and only needs `retry_delay_milliseconds`; both halves are Core rules). The 20 one-sided enum mappings are all icon or enum-to-enum translations inside model files, not label choices; `just check-mappers` stays the label check.
 

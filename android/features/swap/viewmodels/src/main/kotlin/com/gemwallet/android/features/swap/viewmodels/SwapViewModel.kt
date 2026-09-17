@@ -256,7 +256,6 @@ class SwapViewModel @Inject constructor(
     }
 
     fun onSelect(type: SwapItemType, assetId: AssetId) {
-        session.update { it.onQuoteInvalidated() }
         val selection = swapQuoteService.selectPairAsset(
             GemSwapPairSelection(
                 payAssetId = payAsset.value?.id()?.toIdentifier(),
@@ -274,7 +273,6 @@ class SwapViewModel @Inject constructor(
     }
 
     fun switchSwap() = viewModelScope.launch {
-        session.update { it.onQuoteInvalidated() }
         val payAssetId = payAsset.value?.id()?.toIdentifier()
         val receiveAssetId = receiveAsset.value?.id()?.toIdentifier()
         savedStateHandle[RouteArgument.FromAssetId.key] = receiveAssetId
@@ -290,7 +288,6 @@ class SwapViewModel @Inject constructor(
         if (slippageBps == selectedSlippageBps.value) {
             return
         }
-        session.update { it.onQuoteInvalidated() }
         selectedSlippageBps.update { slippageBps }
         viewModelScope.launch(Dispatchers.IO) {
             swapQuoteService.setSlippageBps(slippageBps)
