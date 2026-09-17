@@ -3,7 +3,6 @@ package com.gemwallet.android.ui.components.list_item
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -19,8 +18,10 @@ import com.gemwallet.android.ui.components.list_item.property.PropertyDataText
 import com.gemwallet.android.ui.components.list_item.property.PropertyItem
 import com.gemwallet.android.ui.components.list_item.property.PropertyTitleText
 import com.gemwallet.android.ui.components.progress.CircularProgressIndicator14
+import com.gemwallet.android.ui.components.progress.CircularProgressIndicator16
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.Spacer6
+import com.gemwallet.android.ui.theme.Spacer8
 import com.gemwallet.android.ui.theme.alpha10
 import com.gemwallet.android.ui.theme.listItemIconSize
 import com.gemwallet.android.ui.theme.paddingHalfSmall
@@ -42,6 +43,7 @@ data class ListItemModel(
     val subtitleStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
     val subtitleExtra: String? = null,
     val subtitleExtraStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
+    val subtitleTagType: ListItemTagType = ListItemTagType.None,
     val image: ListItemImage? = null,
     val info: InfoSheetEntity? = null,
 )
@@ -62,6 +64,9 @@ enum class ListItemSymbol {
     QrScanner,
     Pin,
     AddCircle,
+    Buy,
+    Swap,
+    Receive,
 }
 
 enum class ListItemTagType {
@@ -75,7 +80,7 @@ sealed interface ListItemImage {
     data class Stored(val name: String, val placeholder: String? = null) : ListItemImage
     data class Emoji(val glyph: String, val backgroundColor: Int? = null) : ListItemImage
     data class Initials(val text: String) : ListItemImage
-    data class Symbol(val symbol: ListItemSymbol) : ListItemImage
+    data class Symbol(val symbol: ListItemSymbol, val isFilled: Boolean = false) : ListItemImage
     data class Drawable(@DrawableRes val id: Int, val isRounded: Boolean = false) : ListItemImage
 }
 
@@ -102,10 +107,10 @@ fun ListItem(
         PropertyItem(
             modifier = modifier,
             title = { PropertyTitleText(text = model.title, color = model.titleStyle.color(), info = model.info) },
-            data = if (model.subtitle == null && accessory == null) {
+            data = if (model.subtitle == null && accessory == null && model.subtitleTagType == ListItemTagType.None) {
                 null
             } else {
-                { PropertyDataText(text = model.subtitle ?: "", color = model.subtitleStyle.color(), badge = accessory) }
+                { PropertyDataText(text = model.subtitle ?: "", color = model.subtitleStyle.color(), badge = subtitleBadge(model, accessory)) }
             },
             listPosition = listPosition,
         )
@@ -135,10 +140,32 @@ fun ListItem(
                         model.subtitleExtra?.let { ListItemSupportText(text = it, color = model.subtitleExtraStyle.color()) }
                     }
                 }
+                SubtitleTag(model)
                 accessory?.invoke()
             }
         },
     )
+}
+
+private fun subtitleBadge(model: ListItemModel, accessory: (@Composable () -> Unit)?): (@Composable () -> Unit)? = when (model.subtitleTagType) {
+    ListItemTagType.None -> accessory
+    ListItemTagType.Progress -> {
+        {
+            SubtitleTag(model)
+            accessory?.invoke()
+        }
+    }
+}
+
+@Composable
+private fun SubtitleTag(model: ListItemModel) {
+    when (model.subtitleTagType) {
+        ListItemTagType.Progress -> {
+            Spacer8()
+            CircularProgressIndicator16(color = model.subtitleStyle.color())
+        }
+        ListItemTagType.None -> Unit
+    }
 }
 
 @Composable

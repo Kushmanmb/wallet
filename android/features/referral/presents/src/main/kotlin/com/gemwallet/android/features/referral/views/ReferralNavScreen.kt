@@ -54,6 +54,8 @@ fun ReferralNavScreen(
     val inSync by viewModel.inSync.collectAsStateWithLifecycle()
     val referralCode by viewModel.referralCode.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val infoRows by viewModel.infoRows.collectAsStateWithLifecycle()
+    val redemptions by viewModel.redemptions.collectAsStateWithLifecycle()
 
     ReferralScene(
         inSync = inSync,
@@ -61,6 +63,8 @@ fun ReferralNavScreen(
         referralCode = referralCode,
         referralLink = referralLink,
         uiState = uiState,
+        infoRows = infoRows,
+        redemptions = redemptions,
         currentWallet = currentWallet,
         onUsername = viewModel::createReferral,
         onCode = viewModel::useCode,

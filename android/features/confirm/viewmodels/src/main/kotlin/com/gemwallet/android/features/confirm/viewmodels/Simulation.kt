@@ -1,17 +1,21 @@
 package com.gemwallet.android.features.confirm.viewmodels
 
-import uniffi.gemstone.GemAmountSign
-import uniffi.gemstone.GemSimulationBalanceChange
-import uniffi.gemstone.GemValueTone
-import uniffi.gemstone.GemSimulationValue
+import com.gemwallet.android.ext.requireChain
+import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.ValueFormatter
+import com.gemwallet.android.ui.components.list_item.ListItemImage
+import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.PayloadField
 import com.gemwallet.android.ui.models.withExplorerLinks
+import com.gemwallet.android.ui.style.textStyle
+import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.GemConfirmSimulationState
 import uniffi.gemstone.GemConfirmationInterface
-import com.gemwallet.android.ext.requireChain
+import uniffi.gemstone.GemSimulationBalanceChange
+import uniffi.gemstone.GemSimulationValue
 import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.GemValueStyle
+import uniffi.gemstone.GemValueTone
 
 data class Simulation(
     val warnings: List<GemSimulationWarningRow> = emptyList(),
@@ -49,3 +53,10 @@ fun GemSimulationBalanceChange.tone(): GemValueTone = when (sign) {
     GemAmountSign.OUTGOING -> GemValueTone.NEGATIVE
     GemAmountSign.NONE -> GemValueTone.NEUTRAL
 }
+
+fun GemSimulationBalanceChange.listItem(): ListItemModel = ListItemModel(
+    title = asset.name,
+    subtitle = formattedValue(),
+    subtitleStyle = tone().textStyle(),
+    image = ListItemImage.Asset(asset.toPrimitives().id),
+)

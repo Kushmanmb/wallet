@@ -70,6 +70,13 @@ fun PerpetualDirection.textStyle(): ListItemTextStyle = when (this) {
     PerpetualDirection.Long -> ListItemTextStyle.Positive
 }
 
+fun GemTransactionStateTone.textStyle(): ListItemTextStyle = when (this) {
+    GemTransactionStateTone.PENDING,
+    GemTransactionStateTone.REFUNDED -> ListItemTextStyle.Warning
+    GemTransactionStateTone.SUCCESS -> ListItemTextStyle.Positive
+    GemTransactionStateTone.ERROR -> ListItemTextStyle.Negative
+}
+
 fun GemDelegationTone.textStyle(): ListItemTextStyle = when (this) {
     GemDelegationTone.POSITIVE -> ListItemTextStyle.Positive
     GemDelegationTone.PENDING -> ListItemTextStyle.Warning

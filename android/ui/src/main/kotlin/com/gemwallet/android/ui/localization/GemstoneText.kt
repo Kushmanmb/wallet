@@ -23,6 +23,7 @@ import com.wallet.core.primitives.ScanReceiveMode
 import com.wallet.core.primitives.TpslType
 import com.wallet.core.primitives.TransactionState
 import uniffi.gemstone.DelegationState
+import uniffi.gemstone.FeeOption
 import uniffi.gemstone.GemAddNodeFailure
 import uniffi.gemstone.GemApprovalValue
 import uniffi.gemstone.GemAssetMenuAction
@@ -401,3 +402,8 @@ fun GemTransactionRowSubtitle.text(context: Context): String? = when (this) {
 
 private fun prefixed(context: Context, @StringRes prefix: Int?, value: String): String? =
     prefix?.let { res -> value.takeIf { it.isNotEmpty() }?.let { "${context.getString(res)} $it" } }
+
+@StringRes
+fun FeeOption.stringRes(): Int = when (this) {
+    FeeOption.TOKEN_ACCOUNT_CREATION -> R.string.banner_account_activation_title
+}

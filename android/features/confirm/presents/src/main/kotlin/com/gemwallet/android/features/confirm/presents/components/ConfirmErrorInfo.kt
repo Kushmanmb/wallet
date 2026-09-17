@@ -8,8 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import com.gemwallet.android.features.confirm.presents.AcquireAssetAction
+import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetAction
 import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetRequest
+import com.gemwallet.android.features.confirm.viewmodels.models.AcquireOptionUIModel
 import com.gemwallet.android.features.confirm.viewmodels.models.ConfirmErrorUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.InfoBottomSheet
@@ -21,6 +22,7 @@ import com.wallet.core.primitives.AssetId
 internal fun ConfirmErrorInfo(
     error: ConfirmErrorUIModel?,
     acquireRequest: AcquireAssetRequest?,
+    acquireOptions: List<AcquireOptionUIModel>,
     isShowBottomSheetInfo: Boolean,
     onDismissBottomSheetInfo: () -> Unit,
     onDismissAcquire: () -> Unit,
@@ -40,7 +42,7 @@ internal fun ConfirmErrorInfo(
 
     GetAssetBottomSheet(
         asset = acquireRequest?.takeIf { it.offersOptions }?.asset,
-        buyAmount = acquireRequest?.buyAmount,
+        options = acquireOptions,
         onDismiss = onDismissAcquire,
         onAction = { action ->
             onDismissAcquire()

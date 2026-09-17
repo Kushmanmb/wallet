@@ -11,10 +11,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.features.perpetual.views.components.PerpetualPositionItem
 import com.gemwallet.android.ui.R
-import com.gemwallet.android.ui.components.isKeyboardVisible
 import com.gemwallet.android.ui.components.PercentSuggestionsBar
 import com.gemwallet.android.ui.components.buttons.MainActionButton
-import com.gemwallet.android.ui.components.list_item.property.PropertyItem
+import com.gemwallet.android.ui.components.isKeyboardVisible
+import com.gemwallet.android.ui.components.list_item.ListItem
+import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.perpetual.AutocloseInputSection
 import com.gemwallet.android.ui.components.screen.MainActionWidth
 import com.gemwallet.android.ui.components.screen.Scene
@@ -29,6 +30,7 @@ import com.wallet.core.primitives.TpslType
 @Composable
 internal fun AutocloseScene(
     model: AutocloseUIModel,
+    priceRows: List<ListItemModel>,
     takeProfitText: String,
     stopLossText: String,
     onAction: (AutocloseAction) -> Unit,
@@ -81,16 +83,9 @@ internal fun AutocloseScene(
                 Spacer16()
             }
             item {
-                PropertyItem(
-                    title = stringResource(R.string.perpetual_entry_price),
-                    data = model.entryPriceText,
-                    listPosition = ListPosition.First,
-                )
-                PropertyItem(
-                    title = stringResource(R.string.perpetual_market_price),
-                    data = model.marketPriceText,
-                    listPosition = ListPosition.Last,
-                )
+                priceRows.forEachIndexed { index, row ->
+                    ListItem(model = row, listPosition = ListPosition.getPosition(index, priceRows.size))
+                }
                 Spacer16()
             }
             item {

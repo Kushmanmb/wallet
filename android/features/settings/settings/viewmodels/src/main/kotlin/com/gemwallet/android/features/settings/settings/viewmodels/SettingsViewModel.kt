@@ -10,6 +10,9 @@ import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.settings.settings.viewmodels.models.uiModel
 import com.gemwallet.android.model.NotificationsAvailable
+import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.list_item.ListItemImage
+import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.ListSection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -56,6 +59,13 @@ class SettingsViewModel @Inject constructor(
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val notificationsListItem = ListItemModel(title = context.getString(R.string.settings_notifications_title))
+
+    val priceAlertsListItem = ListItemModel(
+        title = context.getString(R.string.settings_price_alerts_title),
+        image = ListItemImage.Drawable(R.drawable.settings_pricealert),
+    )
 
     val pushEnabled = getPushEnabled.getPushEnabled()
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)

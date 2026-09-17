@@ -27,13 +27,16 @@ import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.confirm.models.ConfirmDetailElement
 import com.gemwallet.android.features.confirm.models.PerpetualModifyAutocloseFactory
 import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetRequest
+import com.gemwallet.android.features.confirm.viewmodels.models.AcquireOptionUIModel
 import com.gemwallet.android.features.confirm.viewmodels.models.ConfirmRowUIModel
+import com.gemwallet.android.features.confirm.viewmodels.models.acquireOptions
+import com.gemwallet.android.features.confirm.viewmodels.models.feeItems
+import com.gemwallet.android.features.confirm.viewmodels.models.listItem
 import com.gemwallet.android.features.confirm.viewmodels.models.uiModel
 import com.gemwallet.android.model.AssetPriceValue
 import com.gemwallet.android.model.Crypto
 import com.gemwallet.android.model.FeeAssetSelection
-import com.gemwallet.android.serializer.toJson
-import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.actions.FinishConfirmAction
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.gemwallet.android.ui.models.perpetual.PerpetualConfirmDetailsUIModelFactory
@@ -46,7 +49,6 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.FeePriority
-import com.wallet.core.primitives.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -320,6 +322,18 @@ class ConfirmViewModel @Inject constructor(
         screen.update { it.onLoadFailed(error.toConfirmError()) }
         isNetworkFeeSheetVisible.value = error is GemConfirmException.InsufficientNetworkFee
     }
+
+    val feeListItem: StateFlow<ListItemModel?> = combine(feeUIModel, feeAsset) { fee, asset -> fee?.listItem(context, asset?.asset) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val feeItems: StateFlow<List<ListItemModel>> = feeUIModel.map { (it as? FeeUIModel.FeeInfo)?.feeItems(context).orEmpty() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val balanceChangeRows: StateFlow<List<ListItemModel>> = simulation.map { it.balanceChanges.map { change -> change.listItem() } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val acquireOptions: StateFlow<List<AcquireOptionUIModel>> = acquireRequest.map { request -> request?.let { acquireOptions(context, it.buyAmount) }.orEmpty() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun feeDetailsModel(currentFee: FeeUIModel.FeeInfo, feeAsset: FeeAssetUIModel, selection: GemConfirmFeeSelection): FeeDetailsModel? {
         val confirmData = content.value?.confirmData ?: return null

@@ -1,4 +1,4 @@
-package com.gemwallet.android.features.confirm.presents
+package com.gemwallet.android.features.confirm.viewmodels.models
 
 sealed interface AcquireAssetAction {
     data class Buy(val amount: Int? = null) : AcquireAssetAction

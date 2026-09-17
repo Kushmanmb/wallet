@@ -14,9 +14,7 @@ import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.domains.transaction.aggregates.TransactionDetailsAggregate
 import com.gemwallet.android.domains.transaction.values.TransactionDetailsValue
-import com.gemwallet.android.features.activities.presents.details.components.DestinationPropertyItem
 import com.gemwallet.android.features.activities.presents.details.components.SwapProgressItem
-import com.gemwallet.android.features.activities.presents.details.components.TransactionStatusProperty
 import com.gemwallet.android.features.activities.viewmodels.models.TransactionDetailsRowUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.buttons.MainActionButton
@@ -25,11 +23,12 @@ import com.gemwallet.android.ui.components.list_head.NftHead
 import com.gemwallet.android.ui.components.list_head.SwapListHead
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.listSections
+import com.gemwallet.android.ui.components.list_item.property.AddressPropertyItem
 import com.gemwallet.android.ui.components.list_item.property.AssetRatePropertyItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
-import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkFee
 import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
 import com.gemwallet.android.ui.components.screen.Scene
+import com.gemwallet.android.ui.format.rememberFormattedAddress
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.models.ListSection
@@ -66,6 +65,19 @@ internal fun TransactionDetailsScene(
                         modifier = row.url?.let { url -> Modifier.clickable { uriHandler.open(context, url) } } ?: Modifier,
                         accessory = row.url?.let { { DataBadgeChevron() } },
                     )
+                    is TransactionDetailsRowUIModel.Address -> AddressPropertyItem(
+                        title = row.title,
+                        displayText = row.name ?: rememberFormattedAddress(row.address, row.chain),
+                        copyValue = row.address,
+                        explorerLink = row.explorerLink,
+                        listPosition = position,
+                    )
+                    is TransactionDetailsRowUIModel.Fee -> ListItem(
+                        model = row.model,
+                        listPosition = position,
+                        modifier = Modifier.clickable { onAction(TransactionDetailsAction.ShowFeeDetails) },
+                        accessory = { DataBadgeChevron() },
+                    )
                     is TransactionDetailsRowUIModel.Value -> when (val item = row.value) {
                         is TransactionDetailsValue.Amount.NFT -> NftHead(
                             metadata = item.metadata,
@@ -86,17 +98,10 @@ internal fun TransactionDetailsScene(
                             onSwapClick = data.headerAction?.let { action -> { onAction(action.navigation()) } },
                             onAssetClick = { onAction(TransactionDetailsAction.OpenAsset(it)) },
                         )
-                        is TransactionDetailsValue.Destination -> DestinationPropertyItem(item, position)
-                        is TransactionDetailsValue.Fee -> PropertyNetworkFee(
-                            networkTitle = item.asset.name,
-                            networkSymbol = item.asset.symbol,
-                            feeCrypto = item.value,
-                            feeFiat = item.equivalent,
-                            variantsAvailable = true,
-                            onClick = { onAction(TransactionDetailsAction.ShowFeeDetails) },
-                        )
                         is TransactionDetailsValue.Network -> PropertyNetworkItem(item.data.chain, listPosition = position)
-                        is TransactionDetailsValue.Status -> TransactionStatusProperty(data.asset, item, position)
+                        is TransactionDetailsValue.Destination,
+                        is TransactionDetailsValue.Fee,
+                        is TransactionDetailsValue.Status,
                         is TransactionDetailsValue.Date,
                         is TransactionDetailsValue.Explorer,
                         is TransactionDetailsValue.Memo,

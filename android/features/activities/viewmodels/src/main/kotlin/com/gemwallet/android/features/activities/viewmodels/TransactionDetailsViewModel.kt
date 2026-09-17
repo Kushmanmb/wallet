@@ -35,7 +35,7 @@ class TransactionDetailsViewModel @Inject constructor(
 
     val sections: StateFlow<List<ListSection<TransactionDetailsRowUIModel>>> = data.map { details ->
         details?.sections.orEmpty().mapIndexed { index, section ->
-            ListSection(id = index.toString(), items = section.rows.map { row -> details!!.value(row).uiModel(context, details.asset.chain) })
+            ListSection(id = index.toString(), items = section.rows.map { row -> details!!.value(row).uiModel(context, details.asset) })
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())

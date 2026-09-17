@@ -15,7 +15,7 @@ import com.gemwallet.android.features.bridge.viewmodels.RequestSceneState
 import com.gemwallet.android.features.bridge.viewmodels.WCRequestViewModel
 import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
 import com.gemwallet.android.features.bridge.viewmodels.model.WCRequest
-import com.gemwallet.android.features.confirm.presents.AcquireAssetAction
+import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetAction
 import com.gemwallet.android.features.confirm.presents.ConfirmScreen
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItem

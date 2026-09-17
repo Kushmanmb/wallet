@@ -58,6 +58,7 @@ class AutocloseViewModelTest {
             byAsset,
             session,
             SavedStateHandle(mapOf(RouteArgument.AssetId.key to asset.id.toIdentifier())),
+            mockk(relaxed = true),
         ).also { models.add(it) }
     }
 

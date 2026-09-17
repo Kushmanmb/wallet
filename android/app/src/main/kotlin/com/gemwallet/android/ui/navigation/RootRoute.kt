@@ -14,7 +14,7 @@ import com.gemwallet.android.domains.search.WalletSearchTag
 import com.gemwallet.android.domains.swap.SwapItemType
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.features.asset_select.presents.navigation.AssetsManageRoute
-import com.gemwallet.android.features.confirm.presents.AcquireAssetAction
+import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetAction
 import com.gemwallet.android.features.create_wallet.navigation.CreateWalletAlertRoute
 import com.gemwallet.android.features.create_wallet.navigation.CreateWalletRoute
 import com.gemwallet.android.features.import_wallet.navigation.ImportChainWalletRoute

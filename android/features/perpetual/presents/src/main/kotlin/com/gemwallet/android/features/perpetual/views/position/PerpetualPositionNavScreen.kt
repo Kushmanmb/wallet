@@ -19,7 +19,7 @@ import com.gemwallet.android.ui.models.actions.FinishConfirmAction
 import com.wallet.core.primitives.TransactionId
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState
-import com.gemwallet.android.features.confirm.presents.AcquireAssetAction
+import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetAction
 import com.wallet.core.primitives.AssetId
 import com.gemwallet.android.ui.localization.text
 
