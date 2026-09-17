@@ -8,9 +8,8 @@ import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.InfoSheetEntity
-import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.gemwallet.android.ui.components.list_item.property.toSocialLinks
+import com.gemwallet.android.ui.components.list_item.property.linkRows
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Currency
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -37,12 +36,7 @@ class AssetMarketUIModelFactory @Inject constructor(@ApplicationContext private 
                     is GemChartSection.Market -> ChartSectionUIModel.Market(section.rows.map(mapper::row))
                     is GemChartSection.Links -> ChartSectionUIModel.Links(
                         title = context.getString(R.string.social_links),
-                        links = socialLinks(section.links).toSocialLinks().map { link ->
-                            LinkRowUIModel(
-                                url = link.url,
-                                model = ListItemModel(title = context.getString(link.label), subtitle = link.host, image = ListItemImage.Drawable(link.icon)),
-                            )
-                        },
+                        links = socialLinks(section.links).linkRows(context),
                     )
                 }
             },

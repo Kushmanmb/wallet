@@ -5,7 +5,8 @@ import com.gemwallet.android.AppUrl
 import com.gemwallet.android.features.settings.aboutus.presents.localization.stringRes
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.gemwallet.android.ui.components.list_item.property.toSocialLinks
+import com.gemwallet.android.ui.components.list_item.property.icon
+import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.models.ListSection
 import uniffi.gemstone.GemAboutRow
 import uniffi.gemstone.PublicUrl
@@ -23,8 +24,8 @@ internal fun aboutSections(context: Context, version: String): List<ListSection<
             ListSection(
                 id = index.toString(),
                 title = context.getString(GemAboutRow.COMMUNITY.stringRes()),
-                items = communityLinks().toSocialLinks().map { link ->
-                    AboutRowUIModel(url = link.url, model = ListItemModel(title = context.getString(link.label), image = ListItemImage.Drawable(link.icon)))
+                items = communityLinks().map { link ->
+                    AboutRowUIModel(url = link.url, model = ListItemModel(title = context.getString(link.linkType.stringRes()), image = ListItemImage.Drawable(link.linkType.icon)))
                 },
             )
         } else {

@@ -1,7 +1,7 @@
 package com.gemwallet.android.features.asset.viewmodels.chart.models
 
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.gemwallet.android.ui.components.list_item.property.SocialLinkUIModel
+import com.gemwallet.android.ui.components.list_item.property.LinkRowUIModel
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.Currency
 
@@ -17,5 +17,3 @@ sealed interface ChartSectionUIModel {
     data class Market(val rows: List<MarketRowUIModel>) : ChartSectionUIModel
     data class Links(val title: String, val links: List<LinkRowUIModel>) : ChartSectionUIModel
 }
-
-data class LinkRowUIModel(val url: String, val model: ListItemModel)

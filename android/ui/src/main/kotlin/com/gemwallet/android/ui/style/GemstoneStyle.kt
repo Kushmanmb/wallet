@@ -11,6 +11,7 @@ import com.gemwallet.android.ui.components.empty.EmptyStateImage
 import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.theme.pendingColor
+import com.wallet.core.primitives.PerpetualDirection
 import uniffi.gemstone.GemDelegationTone
 import uniffi.gemstone.GemEmptyStateImage
 import uniffi.gemstone.GemHeaderButtonKind
@@ -62,6 +63,11 @@ fun GemValueTone.color(): Color = when (this) {
     GemValueTone.NEUTRAL -> MaterialTheme.colorScheme.secondary
     GemValueTone.POSITIVE -> MaterialTheme.colorScheme.tertiary
     GemValueTone.NEGATIVE -> MaterialTheme.colorScheme.error
+}
+
+fun PerpetualDirection.textStyle(): ListItemTextStyle = when (this) {
+    PerpetualDirection.Short -> ListItemTextStyle.Negative
+    PerpetualDirection.Long -> ListItemTextStyle.Positive
 }
 
 fun GemDelegationTone.textStyle(): ListItemTextStyle = when (this) {
