@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.swap.viewmodels
 
+import com.gemwallet.android.ui.models.swap.SwapSlippage
 import android.content.Context
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
@@ -108,11 +109,11 @@ class SwapViewModel @Inject constructor(
     fun slippageState(bps: UInt?, isAuto: Boolean): SlippageStateUIModel =
         swapQuoteService.newSlippageSession(if (isAuto) GemSlippageSelection.Auto else GemSlippageSelection.Manual(bps ?: 0u))
             .viewState()
-            .uiModel(context, ::slippagePercent)
+            .uiModel(context, ::slippageText)
 
     fun slippageBps(percent: Double): UInt? = swapQuoteService.slippageBpsFromPercent(percent)
 
-    fun slippagePercent(bps: UInt): Double = swapQuoteService.slippagePercent(bps)
+    fun slippageText(bps: UInt): String = swapQuoteService.slippagePercentText(bps, SwapSlippage.numberFormat())
 
     private val refreshRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     private val refreshEnabled = MutableStateFlow(false)

@@ -10,11 +10,6 @@ Every open item carries a stable id (U duplicated or redundant code, V vocabular
 
 Ordered by the lines it removes; work these before the sections below. The duplication sweeps (same-named similar bodies within an app and across the apps, same-bodied Core functions, shared constants, twins built from a Core type, unread members) were rerun on 2026-09-16 after B68 closed, and this is everything they still find — the larger families landed in earlier passes and are in the ledger. Everything else in this file moves a boundary rather than deleting a copy.
 
-- **P3** **S** Receive warnings are joined with a space on both apps — iOS `ReceiveViewModel.warningMessage`, Android `ReceiveViewModel.warningText` — `GemReceiveService` returns one `warning_text`.
-- **P2** **S** The chart reference-line label `"<kind> | <price>"` is a template on both apps — iOS `ChartLineViewModel.label`, Android `CandlestickChartUIModel.from` — `GemPerpetualChartLine` carries `text`; the app supplies only the kind label.
-- **P14** **S** The currency row title `"<flag> <code> - <name>"` is composed on both apps — iOS `CurrencyViewModel.title`, Android `CurrencyRowUIModel` — one template on `GemCurrencyRow`, the localized name the only app input.
-- **P13** **S** The reward redemption confirmation message is composed on both apps — iOS `RewardRedemptionOptionViewModel.confirmationMessage`, Android `RewardsRowUIModel.confirmationMessage` — `GemRewardsRedemption::confirmation_text` with the app's label key.
-- **N2** **S** Slippage percent formatting is a rule twice — iOS `SwapSlippageViewModel.format` (`fractionLength(0...2)`), Android `SwapSlippage.format` (strip trailing zeros) — Core `slippage_percent_text`.
 
 
 ## 1. Surfaces still outside Gemstone

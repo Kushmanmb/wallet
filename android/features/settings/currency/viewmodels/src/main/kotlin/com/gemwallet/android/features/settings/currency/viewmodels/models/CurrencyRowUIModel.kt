@@ -25,6 +25,6 @@ private fun GemCurrencyRow.uiModel(selected: GemCurrencyRow): CurrencyRowUIModel
     return CurrencyRowUIModel(
         currency = currency.toPrimitives(),
         isSelected = currency == selected.currency,
-        model = ListItemModel(title = "$flag  $code - ${android.icu.util.Currency.getInstance(code).displayName}"),
+        model = ListItemModel(title = title(android.icu.util.Currency.getInstance(code).displayName)),
     )
 }

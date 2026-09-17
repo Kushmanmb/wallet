@@ -19,15 +19,15 @@ data class SlippageStateUIModel(
     val maximumIntegerDigits: UInt,
 )
 
-fun GemSlippageViewState.uiModel(context: Context, slippagePercent: (UInt) -> Double): SlippageStateUIModel = SlippageStateUIModel(
+fun GemSlippageViewState.uiModel(context: Context, slippageText: (UInt) -> String): SlippageStateUIModel = SlippageStateUIModel(
     allowsConfirm = allowsConfirm,
     footerText = if (isAuto) null else when (check) {
-        GemSlippageCheck.ABOVE_MAXIMUM -> context.getString(R.string.common_maximum_value, SwapSlippage.percentLabel(maximumBps, slippagePercent))
-        GemSlippageCheck.BELOW_MINIMUM -> context.getString(R.string.common_minimum_value, SwapSlippage.percentLabel(minimumBps, slippagePercent))
+        GemSlippageCheck.ABOVE_MAXIMUM -> context.getString(R.string.common_maximum_value, SwapSlippage.percentLabel(maximumBps, slippageText))
+        GemSlippageCheck.BELOW_MINIMUM -> context.getString(R.string.common_minimum_value, SwapSlippage.percentLabel(minimumBps, slippageText))
         GemSlippageCheck.HIGH -> context.getString(R.string.swap_slippage_warning)
         GemSlippageCheck.VALID -> null
     },
-    suggestions = suggestionsBps.map { SlippageSuggestionUIModel(it, SwapSlippage.percentLabel(it, slippagePercent)) },
+    suggestions = suggestionsBps.map { SlippageSuggestionUIModel(it, SwapSlippage.percentLabel(it, slippageText)) },
     maximumFractionDigits = maximumFractionDigits,
     maximumIntegerDigits = maximumIntegerDigits,
 )
