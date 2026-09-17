@@ -1,13 +1,15 @@
 package com.gemwallet.android.features.settings.currency.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
 import com.gemwallet.android.application.session.cases.SetCurrentCurrency
 import com.gemwallet.android.ext.toGem
-import com.gemwallet.android.features.settings.currency.viewmodels.models.uiModel
+import com.gemwallet.android.features.settings.currency.viewmodels.models.sections
 import com.wallet.core.primitives.Currency
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,6 +24,7 @@ class CurrenciesViewModel @Inject constructor(
     private val service: GemCurrencyServiceInterface,
     getCurrentCurrency: GetCurrentCurrency,
     private val setCurrentCurrency: SetCurrentCurrency,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
     private val localeCurrency: Currency? = runCatching { java.util.Currency.getInstance(Locale.getDefault()).currencyCode }
         .getOrNull()
@@ -29,8 +32,8 @@ class CurrenciesViewModel @Inject constructor(
 
     private val currency = getCurrentCurrency.getCurrency()
 
-    val currencies = currency.mapLatest { service.currencies(localeCurrency?.toGem()).uiModel() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val sections = currency.mapLatest { service.currencies(localeCurrency?.toGem()).sections(context) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun setCurrency(currency: Currency) {
         if (this.currency.value == currency) {
