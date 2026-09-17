@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.settings.in_app_notifications.presents.components
 
-import com.gemwallet.android.ui.components.image.iconModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -21,6 +20,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import com.gemwallet.android.features.settings.in_app_notifications.viewmodels.models.NotificationIconUIModel
+import com.gemwallet.android.features.settings.in_app_notifications.viewmodels.models.NotificationRowUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.image.AsyncImage
 import com.gemwallet.android.ui.components.list_item.ListItem
@@ -31,19 +32,13 @@ import com.gemwallet.android.ui.theme.listItemIconSize
 import com.gemwallet.android.ui.theme.space2
 import com.gemwallet.android.ui.theme.space6
 import com.gemwallet.android.ui.theme.space8
-import com.gemwallet.android.ext.toAssetId
-import com.gemwallet.android.ext.toGem
-import com.wallet.core.primitives.InAppNotification
-import uniffi.gemstone.GemNotificationIcon
-import uniffi.gemstone.notificationRow
 
 @Composable
 fun NotificationItem(
-    notification: InAppNotification,
+    row: NotificationRowUIModel,
     listPosition: ListPosition,
     onOpenUrl: (String) -> Unit,
 ) {
-    val row = notificationRow(notification.toGem())
     val icon = row.icon
     val url = row.url
     val subtitle = row.subtitle
@@ -128,9 +123,9 @@ private fun NewBadge() {
 }
 
 @Composable
-private fun NotificationIcon(icon: GemNotificationIcon) {
+private fun NotificationIcon(icon: NotificationIconUIModel) {
     when (icon) {
-        is GemNotificationIcon.Emoji -> Box(
+        is NotificationIconUIModel.Emoji -> Box(
             modifier = Modifier.size(listItemIconSize),
             contentAlignment = Alignment.Center,
         ) {
@@ -142,8 +137,7 @@ private fun NotificationIcon(icon: GemNotificationIcon) {
                 textAlign = TextAlign.Center,
             )
         }
-        is GemNotificationIcon.Image -> AsyncImage(model = icon.url, size = listItemIconSize)
-        is GemNotificationIcon.Asset -> AsyncImage(model = icon.assetId.toAssetId()?.iconModel(), size = listItemIconSize)
+        is NotificationIconUIModel.Image -> AsyncImage(model = icon.model, size = listItemIconSize)
     }
 }
 

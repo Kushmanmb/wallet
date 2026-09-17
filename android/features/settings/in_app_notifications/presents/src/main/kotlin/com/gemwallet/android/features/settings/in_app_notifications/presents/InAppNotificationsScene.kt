@@ -38,10 +38,10 @@ fun InAppNotificationsScene(
             LazyColumn {
                 dateSectionedList(
                     sections = sections,
-                    key = { _, notification -> notification.item.id },
+                    key = { _, notification -> notification.id },
                 ) { listPosition, notification ->
                     NotificationItem(
-                        notification = notification,
+                        row = notification,
                         listPosition = listPosition,
                         onOpenUrl = { onAction(InAppNotificationsAction.OpenUrl(it)) },
                     )
