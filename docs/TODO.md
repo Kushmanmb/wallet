@@ -25,7 +25,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 [ARCHITECTURE.md § 5](ARCHITECTURE.md#a-view-never-names-a-core-type): what must not appear inside a SwiftUI `body` or a `@Composable` is the generated type itself; a `switch` over a Core enum inside the view and a Core record handed to a child view's initializer both move into the model unchanged. The 2026-09-15 sweep closed this family (B9/B10) as "the contract working" — that closure was wrong against the rule as written two days earlier, and it is reopened here with the count measured against the 644 generated type names rather than the `Gem` prefix, which the app's own `GemTextField`/`GemLineChart` components share.
 
-- **B67** **L** 26 views name a generated Core type — 26 iOS scenes and views, 0 Android composables. Android closed on 2026-09-17: the perpetual chart and tooltip models, the slippage state, the widget coins, the deeplink composition local, the `ConfirmTransferInput` and `WalletSecretInput` navigation values and the navigator in its own file — copy `PerpetualChartUIModel`, `CandlestickTooltipUIModel`, `SlippageStateUIModel`, `WidgetCoinUIModel` and `LocalDeeplinkService`. iOS Settings 6 (`GemAboutRow`, `GemSettingsRow`, `GemPreferencesRow`, `GemSecurityRow`, `GemChainSettingsSection`, `GemRewardsRedemption`), Stake 3, WalletConnector 2, `Gem/Navigation` 2 (the navigation stacks holding `GemTransferData`, `GemPerpetualPositionAction`, `GemWalletSecret`), `PrimitivesComponents` 3 and one or two in Perpetuals, WalletTab, Contacts, Swap, Transactions, ManageWallets, FiatConnect and Assets. Three shapes account for nearly all of it: a composable or view whose parameter is a Core record, a `switch`/`when` over a Core row key choosing which child to render, and a Core enum mapped to a label in the view. The file list is reproduced by collecting every `pub struct|enum|trait Gem*` name under `core/gemstone/src` plus the `public` types in `Gemstone.swift`, then listing each file under `ios/**/Scenes`, `ios/**/Views`, `*Scene.swift`, `*View.swift` and each Android file containing `@Composable` — test, generated and the four mapper files excluded — that names one of them; land it a feature at a time. Copy: [`AssetListItemViewModel`](../ios/Features/WalletTab/Sources/ViewModels/AssetListItemViewModel.swift) for a model that holds the record and exposes platform values.
 
 ## 4. App-side twins and outcomes the app invents
 
@@ -67,15 +66,15 @@ Two passes on 2026-09-16, and the second is the one that answers "is this everyt
 
 | Contract | Hits | Outcome |
 | --- | --- | --- |
-| A view never names a Core type | 136 files | **B67**, with **B68** for the Android UI states that feed them |
-| A UI state class holds no Core type | 0 | the two `nameResolveState` hand-offs ride on the shared `AddressChainField`/`NameResolveIndicator` components, counted in **B67** |
+| A view never names a Core type | 0 | closed 2026-09-17 (**B67**); the census in the ledger entry is the rerun |
+| A UI state class holds no Core type | 0 | the two `nameResolveState` hand-offs became `NameResolveIndicatorUIModel` on the shared field |
 | The parent vends the child model | 4 screen models (118 row projections excluded) | **B69** |
 | Depend on the generated abstraction | 21 iOS + 34 Android consumers | **O38** (the stateless five are **D26**) |
 | Never call Core from the main thread | 9 Android view models | **X167** |
 | One mapper per module | 5 iOS files, 1 Android | **L16** |
 | The record carries the finished value | 0 | — |
 | Sections are records | 5 view models with three or more `show*` members | reads of Core sections and rules; two compositions noted on **S35** |
-| Navigation values are app types | 4 | the iOS three are navigation *views* holding a Core value, counted in **B67**; Android wraps its one in `ImportType` |
+| Navigation values are app types | 0 | iOS pushes `ConfirmTransferInput` and app values; Android wraps its inputs in `ImportType`, `ConfirmTransferInput` and `WalletSecretInput` |
 | At most one Core service per iOS view model | 2 | the O31/O32 conduits, closed in the ledger |
 | A screen's state is one phase enum | 2 | every flag is a computed projection of the session phase |
 | A row model holds the record, does not restate it | 2 | the edit input and pre-formatted texts, which the record cannot carry |
@@ -105,6 +104,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 ## Ledger of closed sections
 
 What each section of the 2026-09-15 and 2026-09-16 sweeps measured, what landed, and why the rest closed — kept so the same lead is not re-raised with the same answer. Commits carry the detail.
+
+**B67 (2026-09-17).** 136 files (28 iOS, 108 Android) to 0 on both apps, in nine commits. Android: the shared composables took row models first (`android/ui`), then every feature — the confirm header and fee selection, transaction header target, asset menu, referral state, validator lists, perpetual market sections, autoclose field, accept-terms rows, asset-select flow, banners, swap progress, the perpetual chart and tooltip, slippage state, widget coins — and the app root: `LocalDeeplinkService` replaces the service threaded through `MainContent`/`WalletApp`, `WalletNavigator` moved out of the composable file, and the navigation payloads became `ConfirmTransferInput` and `WalletSecretInput`. iOS: a `switch` over a Core row key became a row view model with an app kind or destination (`AboutRowViewModel`, `SettingsRowDestination`, `PreferencesRowKind`, `SecurityRow`, `ChainSettingsSectionViewModel`, `DelegationRowViewModel`, `StakeActionViewModel`, `SwapDetailRow`, `PerpetualButtonViewModel`, `PerpetualMarketSectionViewModel`, `ContactAddressField`); a pass-through Core record became a model the view model vends (`ListAssetItemsViewModel.item`, `BannerViewModel`, `ConnectionViewModel`, `ValidatorViewModel`, `AssetValueHeaderViewModel`, `FiatProviderViewModel`, the swap progress `Step` styling); the two navigation views take the header-action closure typed by the scene model. `ListSection<T>` no longer requires `Sendable` (conditional conformance) so row models holding `ListItemModel` fit it. Census: collect `pub struct|enum|trait Gem*` under `core/gemstone/src` plus the public types in `Gemstone.swift`, list `ios/**/Scenes`, `ios/**/Views`, `*Scene.swift`, `*View.swift` and every Android file containing `@Composable` (tests, generated, the four mapper files and previews excluded) that names one — 0 and 0.
 
 **U4 (2026-09-16).** Four of the five pairs collapsed to one owner: `GemDelegationDestination.navigationValue(delegation:)` for the two stake screens, `ObservablePreferences.reload(after:)` for the two wallet deletions, the custom fee model takes the scene model's `display` instead of rebuilding it, and `PriceAlertItemView` for the two alert lists. `setupWalletModel` stays written twice on purpose: two parent models vending the same child is the shape B69 asks for.
 
