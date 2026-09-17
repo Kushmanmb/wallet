@@ -58,6 +58,7 @@ import uniffi.gemstone.SimulationPayloadFieldKind
 import uniffi.gemstone.SimulationSeverity
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
+import uniffi.gemstone.GemSimulationWarningTitle
 
 fun GemTransactionTitle.string(context: Context): String = when (this) {
     GemTransactionTitle.Received -> context.getString(R.string.transaction_title_received)
@@ -124,12 +125,11 @@ fun GemTransactionFilter.getLabel() = when (this) {
 }
 
 @StringRes
-fun GemSimulationWarningRow.titleRes(): Int = when (kind) {
-    GemSimulationWarningKind.VALIDATION_ERROR -> if (severity != SimulationSeverity.CRITICAL) R.string.common_warning else R.string.errors_error_occurred
-    GemSimulationWarningKind.NFT_COLLECTION_APPROVAL -> R.string.simulation_warning_nft_collection_approval_title
-    GemSimulationWarningKind.UNLIMITED_APPROVAL -> R.string.simulation_warning_unlimited_token_approval_title
-    GemSimulationWarningKind.EXTERNALLY_OWNED_SPENDER -> R.string.common_warning
-    GemSimulationWarningKind.SUSPICIOUS_SPENDER -> R.string.errors_error_occurred
+fun GemSimulationWarningRow.titleRes(): Int = when (title) {
+    GemSimulationWarningTitle.WARNING -> R.string.common_warning
+    GemSimulationWarningTitle.ERROR -> R.string.errors_error_occurred
+    GemSimulationWarningTitle.NFT_COLLECTION_APPROVAL -> R.string.simulation_warning_nft_collection_approval_title
+    GemSimulationWarningTitle.UNLIMITED_APPROVAL -> R.string.simulation_warning_unlimited_token_approval_title
 }
 
 @StringRes

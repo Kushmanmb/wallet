@@ -22,12 +22,6 @@ The last places where an app reaches the API, a rule or a table without going th
 
 Found by pairing every view model on both apps (see Coverage) and reading the ones whose logic did not match. Each is the same product rule written on both sides with a difference.
 
-- **P1** **S** Profit or loss is decided from the sign of the PnL on both apps — iOS `AutocloseViewModel.profitTitle` (`pnl >= 0`), Android `AutocloseUIModelFactory.isProfit` (`pnl >= 0.0`), each with the same take-profit fallback — `GemAutocloseField` carries `is_profit`.
-- **P4** **S** The custom fee bounds text is a rule twice — iOS `NetworkFeeCustomViewModel.errorText` (`isBelowMinimum`/`isOverMax` + `Localized.Common.minimumValue/maximumValue`), Android `confirm/presents/.../NetworkFeeCustomViewModel.kt` — `GemFeeEstimate::check` returns a check enum the way `GemSlippageCheck` does, each app maps the key.
-- **P5** **S** The perpetual position text `"<direction> <leverage>x"` and `leverageText` are templates on iOS `PerpetualDetailsViewModel` and Android `PerpetualConfirmDetailsUIModel` — `GemPerpetualTransferData` carries `position_text`; `GemPerpetual::margin_text` is the shape.
-- **P6** **S** The simulation warning title rule (`kind == validationError && severity != critical`) is written in iOS `SimulationWarningViewModel.title/message` and Android `ui/localization/GemstoneText.kt:128,140` — `GemSimulationWarningRow` carries `title_kind`; the apps map keys only.
-- **P7** **S** Withdraw is enabled by `balance.available > 0` in iOS `PerpetualsHeaderViewModel.isWithdrawEnabled`; Android does not gate it — `GemPerpetualBalance.can_withdraw`, read by both.
-- **P8** **S** iOS `EarnSceneViewModel.positionModels` filters delegations with `balance > 0` app-side; Android reads `GemStakeService.sortedDelegations` — iOS reads the same answer.
 - **P9** **S** Android `StakeViewModel.lockTimeDays` turns `lockTimeSeconds` into days (`> 0 → secondsToDays`); iOS formats the same seconds its own way — `GemStakeService.lock_time_parts` (`GemDurationPart`).
 - **P10** **S** iOS `DelegationViewModel` computes the completion countdown from `completionDate` and formats it; the Android row takes `completionDateText` from the record — `GemDelegationRow` carries the countdown for both.
 - **P11** **S** The unverified-collections count is turned into a row on both apps — iOS `CollectionsViewModel` (`unverifiedCount > 0 ? String : nil`), Android `NftListViewModels.kt:67` — `GemNftService.list_items` already builds the list; it carries the unverified row with its count text.

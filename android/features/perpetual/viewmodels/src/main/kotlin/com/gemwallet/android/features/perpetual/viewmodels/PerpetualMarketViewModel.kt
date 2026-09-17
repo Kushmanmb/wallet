@@ -103,6 +103,9 @@ class PerpetualMarketViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val balance = getBalance.getDisplayBalance()
         .stateIn(viewModelScope, SharingStarted.Eagerly, EmptyPerpetualBalance)
+    val canWithdraw: StateFlow<Boolean> = getBalance.getBalance()
+        .map { balance -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.canWithdraw(balance?.available ?: 0.0) } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val recent: StateFlow<List<Asset>> =
         recentAssetsService.getRecentAssets(RecentAssetsRequest(types = listOf(RecentActivityType.Perpetual)))
             .map { items -> items.map { it.asset } }

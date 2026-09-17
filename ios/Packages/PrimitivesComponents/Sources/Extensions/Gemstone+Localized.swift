@@ -26,6 +26,7 @@ import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemPriceAlertText
 import enum Gemstone.GemRecipientErrorDisplay
 import enum Gemstone.GemSimulationWarningKind
+import enum Gemstone.GemSimulationWarningTitle
 import enum Gemstone.SimulationPayloadFieldKind
 import enum Gemstone.GemTransactionRowSubtitle
 import enum Gemstone.GemTransactionStateTone
@@ -135,15 +136,6 @@ extension GemWalletSubtitle {
 }
 
 extension GemSimulationWarningKind {
-    var warningTitle: String {
-        switch self {
-        case .unlimitedApproval: Localized.Simulation.Warning.UnlimitedTokenApproval.title
-        case .nftCollectionApproval: Localized.Simulation.Warning.NftCollectionApproval.title
-        case .externallyOwnedSpender: Localized.Common.warning
-        case .suspiciousSpender, .validationError: Localized.Errors.errorOccurred
-        }
-    }
-
     var defaultMessage: String? {
         switch self {
         case .unlimitedApproval: Localized.Simulation.Warning.UnlimitedTokenApproval.description
@@ -546,6 +538,17 @@ extension GemRecipientErrorDisplay: @retroactive LocalizedError {
     public var errorDescription: String? {
         switch self {
         case let .invalidAddress(network): Localized.Errors.invalidAssetAddress(network.boldMarkdown())
+        }
+    }
+}
+
+extension GemSimulationWarningTitle {
+    var text: String {
+        switch self {
+        case .warning: Localized.Common.warning
+        case .error: Localized.Errors.errorOccurred
+        case .unlimitedApproval: Localized.Simulation.Warning.UnlimitedTokenApproval.title
+        case .nftCollectionApproval: Localized.Simulation.Warning.NftCollectionApproval.title
         }
     }
 }

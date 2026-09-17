@@ -74,15 +74,15 @@ public final class NetworkFeeCustomViewModel {
     }
 
     public var errorText: String? {
-        if estimate.isBelowMinimum(), let minimumRate = estimate.minimumRate() {
-            let minText = FeeUnitViewModel(unit: FeeUnit(type: unitType, value: minimumRate), decimals: decimals, symbol: feeAsset.symbol).value
-            return Localized.Common.minimumValue(minText)
+        switch estimate.check() {
+        case .belowMinimum: estimate.minimumRate().map { Localized.Common.minimumValue(rateText($0)) }
+        case .overMaximum: Localized.Common.maximumValue(rateText(estimate.maxRate()))
+        case .valid: nil
         }
-        if estimate.isOverMax() {
-            let maxText = FeeUnitViewModel(unit: FeeUnit(type: unitType, value: estimate.maxRate()), decimals: decimals, symbol: feeAsset.symbol).value
-            return Localized.Common.maximumValue(maxText)
-        }
-        return nil
+    }
+
+    private func rateText(_ rate: BigInt) -> String {
+        FeeUnitViewModel(unit: FeeUnit(type: unitType, value: rate), decimals: decimals, symbol: feeAsset.symbol).value
     }
 
     public var isConfirmEnabled: Bool {

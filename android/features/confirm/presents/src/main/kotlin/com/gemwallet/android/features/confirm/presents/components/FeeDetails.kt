@@ -70,6 +70,7 @@ import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.FeePriority
 import com.wallet.core.primitives.FeeUnitType
 import java.math.BigInteger
+import uniffi.gemstone.GemCustomFeeCheck
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -314,10 +315,10 @@ private fun ColumnScope.CustomFeeInput(
     }
     Text(
         modifier = Modifier.padding(horizontal = paddingLarge, vertical = paddingHalfSmall),
-        text = when {
-            model.isOverMax -> stringResource(R.string.common_maximum_value, "${model.maxRateText} $unitSymbol")
-            model.isBelowMinimum -> stringResource(R.string.common_minimum_value, "${model.minRateText} $unitSymbol")
-            else -> ""
+        text = when (model.check) {
+            GemCustomFeeCheck.BELOW_MINIMUM -> stringResource(R.string.common_minimum_value, "${model.minRateText} $unitSymbol")
+            GemCustomFeeCheck.OVER_MAXIMUM -> stringResource(R.string.common_maximum_value, "${model.maxRateText} $unitSymbol")
+            GemCustomFeeCheck.VALID -> ""
         },
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.error,

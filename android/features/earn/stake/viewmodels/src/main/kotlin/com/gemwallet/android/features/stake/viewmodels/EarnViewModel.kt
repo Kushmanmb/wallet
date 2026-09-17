@@ -24,7 +24,6 @@ import com.wallet.core.primitives.StakeProviderType
 import com.wallet.core.primitives.WalletType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.math.BigInteger
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +43,7 @@ import kotlinx.coroutines.flow.update
 import uniffi.gemstone.GemPercentageStyle
 import uniffi.gemstone.GemStakeServiceInterface
 import uniffi.gemstone.GemValidatorRow
+import com.gemwallet.android.ext.toPrimitives
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -74,7 +74,7 @@ class EarnViewModel @Inject constructor(
 
     val positions = session.filterNotNull()
         .flatMapLatest { current -> getDelegations(current.wallet.id, assetId, StakeProviderType.Earn) }
-        .map { delegations -> delegations.filter { it.base.balance > BigInteger.ZERO } }
+        .map { delegations -> stakeService.positions(delegations.map { it.toGem() }).map { it.toPrimitives() } }
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 

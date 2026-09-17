@@ -69,6 +69,7 @@ import com.wallet.core.primitives.PerpetualProvider
 internal fun PerpetualMarketScene(
     sceneState: PerpetualMarketSceneState,
     balance: PerpetualBalance,
+    canWithdraw: Boolean,
     positions: List<PerpetualPositionRowUIModel>,
     unpinnedPerpetuals: List<PerpetualDataAggregate>,
     pinnedPerpetuals: List<PerpetualDataAggregate>,
@@ -125,6 +126,7 @@ internal fun PerpetualMarketScene(
                             onClick = { onAction(PerpetualMarketAction.OpenPortfolio) },
                         ) {
                             MarketHeadActions(
+                                canWithdraw = canWithdraw,
                                 onWithdraw = { onAction(PerpetualMarketAction.Withdraw) },
                                 onDeposit = { onAction(PerpetualMarketAction.Deposit) },
                             )
@@ -236,6 +238,7 @@ fun PreviewPerpetualMarketScene() {
             query = androidx.compose.foundation.text.input.TextFieldState(),
             sections = emptyList(),
             isSearching = false,
+            canWithdraw = true,
             balance = object : PerpetualBalance {
                 override val deposit: String = "$50,000.00"
                 override val available: String = "$45,000.00"

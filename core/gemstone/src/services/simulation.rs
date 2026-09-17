@@ -246,9 +246,33 @@ pub enum GemSimulationWarningKind {
     ValidationError,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemSimulationWarningTitle {
+    Warning,
+    Error,
+    UnlimitedApproval,
+    NftCollectionApproval,
+}
+
+impl GemSimulationWarningTitle {
+    fn of(kind: GemSimulationWarningKind, severity: SimulationSeverity) -> Self {
+        match kind {
+            GemSimulationWarningKind::UnlimitedApproval => Self::UnlimitedApproval,
+            GemSimulationWarningKind::NftCollectionApproval => Self::NftCollectionApproval,
+            GemSimulationWarningKind::ExternallyOwnedSpender => Self::Warning,
+            GemSimulationWarningKind::SuspiciousSpender => Self::Error,
+            GemSimulationWarningKind::ValidationError => match severity {
+                SimulationSeverity::Critical => Self::Error,
+                SimulationSeverity::Low | SimulationSeverity::Warning => Self::Warning,
+            },
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemSimulationWarningRow {
     pub kind: GemSimulationWarningKind,
+    pub title: GemSimulationWarningTitle,
     pub severity: SimulationSeverity,
     pub message: Option<String>,
 }
@@ -274,6 +298,7 @@ pub fn warning_rows(warnings: &[SimulationWarning]) -> Vec<GemSimulationWarningR
             }?;
             Some(GemSimulationWarningRow {
                 kind,
+                title: GemSimulationWarningTitle::of(kind, warning.severity),
                 severity: warning.severity,
                 message: warning.message.clone(),
             })
@@ -324,6 +349,23 @@ mod tests {
         );
         let error = rows.last().unwrap();
         assert_eq!((error.severity, error.message.as_deref()), (SimulationSeverity::Critical, Some("Chain ID mismatch")));
+        let titles: Vec<GemSimulationWarningTitle> = rows.iter().map(|row| row.title).collect();
+        assert_eq!(
+            titles,
+            vec![
+                GemSimulationWarningTitle::UnlimitedApproval,
+                GemSimulationWarningTitle::UnlimitedApproval,
+                GemSimulationWarningTitle::UnlimitedApproval,
+                GemSimulationWarningTitle::NftCollectionApproval,
+                GemSimulationWarningTitle::Warning,
+                GemSimulationWarningTitle::Error,
+                GemSimulationWarningTitle::Error,
+            ]
+        );
+        assert_eq!(
+            GemSimulationWarningTitle::of(GemSimulationWarningKind::ValidationError, SimulationSeverity::Warning),
+            GemSimulationWarningTitle::Warning
+        );
     }
 
     #[test]
