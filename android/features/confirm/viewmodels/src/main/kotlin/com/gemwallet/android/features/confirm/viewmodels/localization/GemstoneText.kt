@@ -1,7 +1,9 @@
 package com.gemwallet.android.features.confirm.viewmodels.localization
 
 import android.content.Context
+import androidx.annotation.StringRes
 import com.gemwallet.android.domains.asset.title
+import com.gemwallet.android.domains.confirm.ConfirmProperty
 import com.gemwallet.android.ext.boldMarkdown
 import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.ext.toPrimitives
@@ -12,6 +14,7 @@ import com.gemwallet.android.ui.localization.text
 import com.wallet.core.primitives.Asset
 import java.math.BigInteger
 import uniffi.gemstone.GemAcquireAssetFlow
+import uniffi.gemstone.GemConfirmDestination
 import uniffi.gemstone.GemConfirmErrorDisplay
 import uniffi.gemstone.GemValueStyle
 
@@ -70,3 +73,15 @@ internal fun GemAcquireAssetFlow.actionLabel(context: Context, symbol: String): 
 )
 
 private fun amount(value: BigInteger, asset: Asset): String = ValueFormatter(style = GemValueStyle.FULL).string(value, asset)
+
+@StringRes
+fun GemConfirmDestination.title(): Int = when (this) {
+    is GemConfirmDestination.Recipient -> R.string.transfer_recipient_title
+    is GemConfirmDestination.Contract -> R.string.asset_contract
+    is GemConfirmDestination.Validator -> R.string.stake_validator
+    is GemConfirmDestination.Resource -> R.string.stake_resource
+    is GemConfirmDestination.Provider -> R.string.common_provider
+}
+
+@StringRes
+fun ConfirmProperty.Destination.titleRes(): Int = kind?.title() ?: R.string.wallet_connect_app

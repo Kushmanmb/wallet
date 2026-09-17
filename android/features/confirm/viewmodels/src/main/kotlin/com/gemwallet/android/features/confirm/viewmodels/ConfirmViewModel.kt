@@ -1,86 +1,66 @@
 package com.gemwallet.android.features.confirm.viewmodels
 
-import kotlinx.coroutines.flow.asStateFlow
-import uniffi.gemstone.GemConfirmStage
-import com.gemwallet.android.features.confirm.viewmodels.models.uiModel
-import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetRequest
-import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
-import com.gemwallet.android.ui.R
-import uniffi.gemstone.GemTransferAmountResult
-import uniffi.gemstone.GemConfirmException
-import uniffi.gemstone.GemTransferData
-import uniffi.gemstone.PerpetualType
-import com.gemwallet.android.serializer.toJson
-import com.gemwallet.android.domains.confirm.asset
-import com.gemwallet.android.domains.confirm.nftAsset
-import com.gemwallet.android.domains.confirm.pack
-import com.gemwallet.android.domains.confirm.perpetualType
-import com.gemwallet.android.domains.confirm.swapData
-import com.gemwallet.android.domains.confirm.toAsset
-import com.gemwallet.android.domains.confirm.applicationMetadata
-import com.wallet.core.primitives.ApplicationMetadataSource
-import com.gemwallet.android.domains.confirm.confirmLoadOptions
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.confirm.cases.BuildConfirmProperties
 import com.gemwallet.android.application.session.cases.GetSession
-import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.domains.asset.chain
+import com.gemwallet.android.domains.confirm.AmountUIModel
+import com.gemwallet.android.domains.confirm.FeeAssetUIModel
+import com.gemwallet.android.domains.confirm.FeeDetailsModel
+import com.gemwallet.android.domains.confirm.FeeUIModel
+import com.gemwallet.android.domains.confirm.applicationMetadata
+import com.gemwallet.android.domains.confirm.asset
+import com.gemwallet.android.domains.confirm.confirmLoadOptions
+import com.gemwallet.android.domains.confirm.nftAsset
+import com.gemwallet.android.domains.confirm.pack
+import com.gemwallet.android.domains.confirm.perpetualType
+import com.gemwallet.android.domains.confirm.swapData
+import com.gemwallet.android.domains.confirm.toAsset
+import com.gemwallet.android.domains.confirm.toFeeAssetUIModel
+import com.gemwallet.android.domains.confirm.unpackTransferData
 import com.gemwallet.android.ext.toAssetPriceValue
+import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
+import com.gemwallet.android.features.confirm.models.ConfirmDetailElement
+import com.gemwallet.android.features.confirm.models.PerpetualModifyAutocloseFactory
+import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetRequest
+import com.gemwallet.android.features.confirm.viewmodels.models.ConfirmRowUIModel
+import com.gemwallet.android.features.confirm.viewmodels.models.uiModel
 import com.gemwallet.android.model.AssetPriceValue
-import uniffi.gemstone.GemConfirmButton
-import uniffi.gemstone.GemConfirmAction
-import uniffi.gemstone.GemConfirmData
-import uniffi.gemstone.GemConfirmButtonKind
-import uniffi.gemstone.GemConfirmButtonState
-import uniffi.gemstone.GemConfirmFeeRow
-import uniffi.gemstone.GemConfirmLoad
-import uniffi.gemstone.GemConfirmPhase
-import uniffi.gemstone.GemConfirmScreen
-import uniffi.gemstone.GemConfirmation
-import uniffi.gemstone.GemAcquireAssetFlow
-import uniffi.gemstone.GemConfirmTransferServiceInterface
-import uniffi.gemstone.GemExecuteResult
-import uniffi.gemstone.perpetualDetails
-import uniffi.gemstone.swapQuoteSummary
 import com.gemwallet.android.model.Crypto
-import uniffi.gemstone.GemConfirmFeeSelection
-import uniffi.gemstone.GemPerpetual
-import uniffi.gemstone.PerpetualProvider
-import uniffi.gemstone.TransactionInputType
 import com.gemwallet.android.model.FeeAssetSelection
+import com.gemwallet.android.serializer.toJson
+import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.models.actions.FinishConfirmAction
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.gemwallet.android.ui.models.perpetual.PerpetualConfirmDetailsUIModelFactory
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelFactory
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelInput
 import com.gemwallet.android.ui.models.swap.SwapProviderUIModelFactory
-import com.gemwallet.android.ui.models.actions.FinishConfirmAction
-import com.gemwallet.android.domains.confirm.AmountUIModel
-import com.gemwallet.android.domains.confirm.FeeAssetUIModel
-import com.gemwallet.android.domains.confirm.toFeeAssetUIModel
-import com.gemwallet.android.features.confirm.models.ConfirmDetailElement
-import com.gemwallet.android.features.confirm.models.PerpetualModifyAutocloseFactory
-import com.gemwallet.android.domains.confirm.FeeDetailsModel
-import com.gemwallet.android.domains.confirm.FeeUIModel
 import com.wallet.core.primitives.AddressName
+import com.wallet.core.primitives.ApplicationMetadataSource
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.FeePriority
 import com.wallet.core.primitives.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -88,9 +68,31 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemAcquireAssetFlow
+import uniffi.gemstone.GemConfirmAction
+import uniffi.gemstone.GemConfirmButton
+import uniffi.gemstone.GemConfirmButtonKind
+import uniffi.gemstone.GemConfirmButtonState
+import uniffi.gemstone.GemConfirmData
+import uniffi.gemstone.GemConfirmException
+import uniffi.gemstone.GemConfirmFeeRow
+import uniffi.gemstone.GemConfirmFeeSelection
+import uniffi.gemstone.GemConfirmLoad
+import uniffi.gemstone.GemConfirmPhase
+import uniffi.gemstone.GemConfirmScreen
+import uniffi.gemstone.GemConfirmStage
+import uniffi.gemstone.GemConfirmTransferServiceInterface
+import uniffi.gemstone.GemConfirmation
+import uniffi.gemstone.GemExecuteResult
+import uniffi.gemstone.GemPerpetual
+import uniffi.gemstone.GemTransferAmountResult
+import uniffi.gemstone.GemTransferData
+import uniffi.gemstone.PerpetualProvider
+import uniffi.gemstone.PerpetualType
 import uniffi.gemstone.SimulationResult
-import javax.inject.Inject
-import com.gemwallet.android.domains.confirm.unpackTransferData
+import uniffi.gemstone.TransactionInputType
+import uniffi.gemstone.perpetualDetails
+import uniffi.gemstone.swapQuoteSummary
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -248,6 +250,9 @@ class ConfirmViewModel @Inject constructor(
         buildConfirmProperties(request, session.wallet, content?.addressName)
     }
     .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val transactionRows: StateFlow<List<ConfirmRowUIModel>> = transactionProperties.map { properties -> properties.map { it.uiModel(context) } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val feeUIModel = combine(content, screen) { content, screen ->
         val confirmData = content?.confirmData

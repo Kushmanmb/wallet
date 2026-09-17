@@ -1,11 +1,9 @@
 package com.gemwallet.android.features.confirm.presents
 
-import com.gemwallet.android.ui.localization.string
-import com.gemwallet.android.ui.components.screen.SheetExpansion
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,59 +27,63 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gemwallet.android.domains.confirm.ConfirmProperty
+import com.gemwallet.android.domains.confirm.FeeUIModel
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.features.confirm.models.ConfirmDetailElement
-import com.gemwallet.android.ui.models.ButtonState
+import com.gemwallet.android.features.confirm.presents.components.ConfirmErrorInfo
+import com.gemwallet.android.features.confirm.presents.components.FeeDetails
+import com.gemwallet.android.features.confirm.presents.components.PropertyDestination
+import com.gemwallet.android.features.confirm.presents.components.confirmBalanceChangesContent
 import com.gemwallet.android.features.confirm.presents.localization.buttonLabel
 import com.gemwallet.android.features.confirm.presents.localization.string
 import com.gemwallet.android.features.confirm.presents.localization.toBroadcastLabel
-import uniffi.gemstone.GemConfirmButtonKind
-import uniffi.gemstone.GemConfirmButtonState
-import uniffi.gemstone.GemConfirmPhase
-import uniffi.gemstone.GemConfirmStage
-import uniffi.gemstone.GemConfirmScreen
-import com.gemwallet.android.domains.confirm.ConfirmProperty
-import com.gemwallet.android.domains.confirm.FeeUIModel
-import com.gemwallet.android.features.confirm.presents.components.ConfirmErrorInfo
-import com.gemwallet.android.ui.components.InfoSheetEntity
-import com.gemwallet.android.features.confirm.presents.components.FeeDetails
-import com.gemwallet.android.features.confirm.presents.components.PropertyDestination
 import com.gemwallet.android.features.confirm.viewmodels.ConfirmViewModel
+import com.gemwallet.android.features.confirm.viewmodels.models.ConfirmRowUIModel
 import com.gemwallet.android.model.AuthRequest
-import uniffi.gemstone.GemTransferData
-import uniffi.gemstone.GemTransactionHeaderKind
 import com.gemwallet.android.ui.R
-import com.gemwallet.android.ui.components.perpetual.AutocloseSummaryRow
-import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsBottomSheet
-import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsSummaryItem
-import com.wallet.core.primitives.AssetId
+import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.image.walletImageModel
 import com.gemwallet.android.ui.components.list_head.AmountListHead
 import com.gemwallet.android.ui.components.list_head.AssetValueListHead
 import com.gemwallet.android.ui.components.list_head.NftHead
 import com.gemwallet.android.ui.components.list_head.SwapListHead
+import com.gemwallet.android.ui.components.list_item.ListItem
+import com.gemwallet.android.ui.components.list_item.iconModel
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.PropertyDataText
 import com.gemwallet.android.ui.components.list_item.property.PropertyItem
 import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkFee
 import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
 import com.gemwallet.android.ui.components.list_item.property.PropertyTitleText
-import com.gemwallet.android.ui.components.list_item.iconModel
+import com.gemwallet.android.ui.components.perpetual.AutocloseSummaryRow
+import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsBottomSheet
+import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsSummaryItem
 import com.gemwallet.android.ui.components.progress.CircularProgressIndicator14
 import com.gemwallet.android.ui.components.screen.ModalBottomSheet
 import com.gemwallet.android.ui.components.screen.Scene
+import com.gemwallet.android.ui.components.screen.SheetExpansion
 import com.gemwallet.android.ui.components.simulation.simulationPayloadDetailsContent
 import com.gemwallet.android.ui.components.simulation.simulationPayloadFieldsContent
 import com.gemwallet.android.ui.components.simulation.simulationWarningsContent
 import com.gemwallet.android.ui.components.swap.SwapDetailsBottomSheet
 import com.gemwallet.android.ui.components.swap.SwapDetailsSummaryItem
+import com.gemwallet.android.ui.localization.string
+import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.actions.CancelAction
 import com.gemwallet.android.ui.models.actions.FinishConfirmAction
 import com.gemwallet.android.ui.requestAuth
 import com.gemwallet.android.ui.theme.paddingDefault
-import com.gemwallet.android.features.confirm.presents.components.confirmBalanceChangesContent
+import com.wallet.core.primitives.AssetId
+import uniffi.gemstone.GemConfirmButtonKind
+import uniffi.gemstone.GemConfirmButtonState
+import uniffi.gemstone.GemConfirmPhase
+import uniffi.gemstone.GemConfirmScreen
+import uniffi.gemstone.GemConfirmStage
+import uniffi.gemstone.GemTransactionHeaderKind
+import uniffi.gemstone.GemTransferData
 import uniffi.gemstone.SimulationResult
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,7 +99,7 @@ fun ConfirmScreen(
 ) {
     val context = LocalContext.current
     val amountModel by viewModel.amountUIModel.collectAsStateWithLifecycle()
-    val transactionProperties by viewModel.transactionProperties.collectAsStateWithLifecycle()
+    val transactionRows by viewModel.transactionRows.collectAsStateWithLifecycle()
     val feeModel by viewModel.feeUIModel.collectAsStateWithLifecycle()
     val loadError by viewModel.loadError.collectAsStateWithLifecycle()
     val acquireRequest by viewModel.acquireRequest.collectAsStateWithLifecycle()
@@ -114,7 +116,6 @@ fun ConfirmScreen(
     val isExternalRequest by viewModel.isExternalRequest.collectAsStateWithLifecycle()
     val isPayment by viewModel.isPaymentRequest.collectAsStateWithLifecycle()
     val headerAsset by viewModel.headerAsset.collectAsStateWithLifecycle()
-    val displayTransactionProperties = transactionProperties
 
     var showSelectTxSpeed by remember { mutableStateOf(false) }
     var showSimulationDetails by remember { mutableStateOf(false) }
@@ -194,15 +195,17 @@ fun ConfirmScreen(
                     )
                 }
             }
-            val sectionSize = displayTransactionProperties.size + detailElements.size
-            itemsIndexed(displayTransactionProperties) { index, item ->
+            val sectionSize = transactionRows.size + detailElements.size
+            itemsIndexed(transactionRows) { index, row ->
                 val listPosition = ListPosition.getPosition(index, sectionSize)
-                when (item) {
+                when (row) {
+                    is ConfirmRowUIModel.Item -> ListItem(model = row.model, listPosition = listPosition)
+                    is ConfirmRowUIModel.Property -> when (val item = row.property) {
                     is ConfirmProperty.Destination -> PropertyDestination(
                         model = item,
                         listPosition = listPosition,
                     )
-                    is ConfirmProperty.Memo -> PropertyItem(R.string.transfer_memo, item.data, listPosition = listPosition)
+                    is ConfirmProperty.Memo -> Unit
                     is ConfirmProperty.Network -> PropertyNetworkItem(chain = item.chain, value = item.name, listPosition = listPosition)
                     is ConfirmProperty.Source -> PropertyItem(
                         title = { PropertyTitleText(R.string.common_wallet) },
@@ -216,10 +219,11 @@ fun ConfirmScreen(
                         },
                         listPosition = listPosition,
                     )
+                    }
                 }
             }
             itemsIndexed(detailElements) { index, item ->
-                val listPosition = ListPosition.getPosition(displayTransactionProperties.size + index, sectionSize)
+                val listPosition = ListPosition.getPosition(transactionRows.size + index, sectionSize)
                 ConfirmDetailElementRow(
                     item = item,
                     listPosition = listPosition,

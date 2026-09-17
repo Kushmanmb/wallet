@@ -17,13 +17,6 @@ import uniffi.gemstone.GemConfirmException
 import uniffi.gemstone.GemConfirmScreen
 import uniffi.gemstone.GemConfirmTitle
 
-internal fun GemConfirmDestination.title(): Int = when (this) {
-    is GemConfirmDestination.Recipient -> R.string.transfer_recipient_title
-    is GemConfirmDestination.Contract -> R.string.asset_contract
-    is GemConfirmDestination.Validator -> R.string.stake_validator
-    is GemConfirmDestination.Resource -> R.string.stake_resource
-    is GemConfirmDestination.Provider -> R.string.common_provider
-}
 
 @Composable
 internal fun GemConfirmTitle.string(): String = when (this) {

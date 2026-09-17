@@ -1,28 +1,28 @@
 package com.gemwallet.android.features.confirm.presents.components
 
-import com.gemwallet.android.ui.LocalAddressService
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
-import com.gemwallet.android.ui.format.rememberFormattedAddress
-import com.gemwallet.android.ui.R
 import androidx.compose.ui.res.stringResource
+import com.gemwallet.android.domains.confirm.ConfirmProperty
+import com.gemwallet.android.features.confirm.viewmodels.localization.titleRes
+import com.gemwallet.android.ui.LocalAddressService
+import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.image.walletImageModel
-import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.components.list_item.property.AddressPropertyItem
 import com.gemwallet.android.ui.components.list_item.property.PropertyDataText
 import com.gemwallet.android.ui.components.list_item.property.PropertyItem
 import com.gemwallet.android.ui.components.list_item.property.PropertyTitleText
+import com.gemwallet.android.ui.format.rememberFormattedAddress
+import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.models.ListPosition
-import com.gemwallet.android.domains.confirm.ConfirmProperty
-import com.gemwallet.android.features.confirm.presents.localization.title
 import com.wallet.core.primitives.AddressType
-import uniffi.gemstone.contactInitials
-import uniffi.gemstone.GemAddressDisplay
 import com.wallet.core.primitives.Chain
+import uniffi.gemstone.GemAddressDisplay
+import uniffi.gemstone.contactInitials
 
 @Composable
 fun PropertyDestination(
@@ -94,8 +94,6 @@ fun PropertyDestination(
         }
     }
 }
-
-internal fun ConfirmProperty.Destination.titleRes(): Int = kind?.title() ?: R.string.wallet_connect_app
 
 internal fun ConfirmProperty.Destination.displayData(): String = when (this) {
     is ConfirmProperty.Destination.Provider,
