@@ -1,6 +1,8 @@
 package com.gemwallet.android.features.settings.security.viewmodels
 
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
+import com.gemwallet.android.features.settings.security.viewmodels.models.SecurityRowUIModel
+import com.gemwallet.android.ui.R
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -15,9 +17,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemSecurityRow
 import uniffi.gemstone.GemSecuritySection
 import uniffi.gemstone.GemSettingsServiceInterface
 
@@ -39,17 +41,19 @@ class SecurityViewModelTest {
             every { this@mockk.authRequired() } returns authRequired
         }
 
-    private fun settings(sections: List<GemSecuritySection> = emptyList()) =
-        mockk<GemSettingsServiceInterface>(relaxed = true) {
-            every { securitySections(any()) } returns sections
+    private fun settings() = mockk<GemSettingsServiceInterface>(relaxed = true) {
+        every { securitySections(any()) } answers {
+            listOf(
+                GemSecuritySection(listOfNotNull(GemSecurityRow.AUTHENTICATION, GemSecurityRow.LOCK_PERIOD.takeIf { firstArg() })),
+                GemSecuritySection(listOf(GemSecurityRow.HIDE_BALANCE)),
+            )
         }
+    }
 
     @Test
-    fun `the sections come from core with the authentication flag`() {
+    fun `the rows come from core with the authentication flag`() {
         val settings = settings()
-        val model = SecurityViewModel(userConfig(), settings)
-
-        model.sections(authenticationEnabled = true)
+        SecurityViewModel(userConfig(authRequired = true), settings)
 
         verify { settings.securitySections(true) }
     }
@@ -59,9 +63,11 @@ class SecurityViewModelTest {
         val model = SecurityViewModel(userConfig(authRequired = true, lockMinutes = 5, hideBalances = true), settings())
         advanceUntilIdle()
 
-        assertTrue(model.authRequired())
-        assertEquals(5, model.lockInterval.value)
-        assertTrue(model.isHideBalances.value)
+        val rows = model.rows.value.flatten()
+        assertEquals(SecurityRowUIModel.Authentication(true), rows[0])
+        assertEquals(R.string.lock_five_minutes, (rows[1] as SecurityRowUIModel.LockPeriod).current)
+        assertEquals(listOf(5), (rows[1] as SecurityRowUIModel.LockPeriod).options.filter { it.isSelected }.map { it.minutes })
+        assertEquals(SecurityRowUIModel.HideBalance(true), rows[2])
     }
 
     @Test
