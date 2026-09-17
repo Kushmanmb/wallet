@@ -3502,6 +3502,7 @@ version = "2.114.33"
 dependencies = [
  "async-trait",
  "hex",
+ "primitives",
  "reqwest 0.13.4",
  "serde",
  "serde_json",
