@@ -266,7 +266,7 @@ extension WalletSceneViewModel {
         try await service.setAssetsEnabled(assetIds: assetIds, enabled: enabled)
     }
     var assetItems: ListAssetItemsViewModel {
-        ListAssetItemsViewModel(currency: observablePreferences.currency, row: service.assetRow())
+        ListAssetItemsViewModel(currency: observablePreferences.currency, rowStyle: service.assetRowStyle())
     }
 
 }

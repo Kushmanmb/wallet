@@ -339,6 +339,29 @@ LazyColumn { gemListSections(sections) }
 
 Rich rows stay outside: the transaction header, swap progress, asset, wallet and validator rows have their own layout on both apps and keep their own records ([a row that a screen only ever draws one way](#a-row-that-a-screen-only-ever-draws-one-way-keeps-its-shape-app-side)). The test is whether the row is a title with a value — if it is, it is a `GemListRow`. Adding a per-screen row enum, a per-feature title mapper or a second `switch` over the row in a scene is the regression this replaces.
 
+### Three row families, and which one a list belongs to
+
+Rows divide into three families. Getting the family right is most of the design work for a list.
+
+**1. Plain rows — one shared `GemListRow`.** A title from a fixed vocabulary plus a value, an amount, a link, an icon, an address, a loading placeholder or an error. One type, one renderer per app, no per-screen code. This is the default; reach for it first.
+
+**2. Shared rich rows — one record per family, reused by every list that draws that family.** An asset row and a transaction row are heavy (an icon with a badge, a title that may be the asset or its network, a subtitle that may be a price, a network name or a counterparty, a two-line trailing value) and they appear on many screens, so each is one record that all of those screens read:
+
+| Family | Record | Lists that read it |
+|---|---|---|
+| Transaction | [`GemTransactionRow`](../core/gemstone/src/services/transactions/model.rs) | activity, asset details, perpetual position |
+| Wallet | [`GemWalletRow`](../core/gemstone/src/services/wallet/model.rs) | wallets list, wallet detail, confirm sender |
+| Validator | [`GemValidatorRow`](../core/gemstone/src/services/stake/model.rs) | stake, earn, delegation |
+| Balance | [`GemBalanceRow`](../core/gemstone/src/services/balance/model.rs) | asset details, address details |
+
+A shared rich row lives with the service that owns its domain, not in `models/list.rs`, because its payload is that domain's type (`Asset`, `TransactionId`). It does **not** nest a `GemListRow`: a plain row's title is a case of `GemListRowTitle`, while an asset or transaction row's title is data the row carries, so the two do not compose. What a rich row does reuse is the smaller shared pieces — `GemFormattedNumber` for an amount, `GemCopy` for a copyable value, `GemListRowTitle` for a labelled sub-field, `GemLoadState` for its list's state.
+
+A `Gem…Row` record carries **one row's data**. Which fields a shared row shows on a given screen is a different decision and a different type, named `…Style` and never `Row`: [`GemAssetRowStyle`](../core/gemstone/src/services/assets/model.rs) says whether the asset row titles itself with the asset, its canonical name or its network, whether it repeats the symbol, and what its subtitle and trailing hold, while the asset row's data stays app-side (`AssetDataViewModel` on iOS, `AssetInfoDataAggregate` on Android) because it is assembled from the local asset store, not fetched. A screen reads the style from the flow it is in (`GemSelectAssetFlow.row_style`, `GemWalletHome.asset_row_style()`) and passes it to the one row view; it never re-declares the style enums app-side.
+
+**3. Per-screen rich rows — one screen, one layout.** The transaction header, swap progress and the confirm recipient row are drawn one way on one screen, so the record stays with that screen ([a row that a screen only ever draws one way](#a-row-that-a-screen-only-ever-draws-one-way-keeps-its-shape-app-side)). If a second screen starts drawing it, it has become family 2 and moves.
+
+The questions, in order: is the row a title with a value (family 1)? Does more than one list draw this shape (family 2)? Only then does it stay with its screen (family 3). A per-screen enum for a family-1 row, or a second copy of a family-2 record, is the regression to watch for.
+
 ### A screen's load state is one Core state, and a failed refresh keeps what is shown
 
 The apps already agree on what a screen in flight looks like: `StateViewType` on iOS and `StateViewType` in `ui-models` on Android both read `noData | loading | data | error`. What they did **not** agree on is when each case applies — whether a pull-to-refresh that fails wipes the rows the user is reading or leaves them. That is a product decision, so it crosses as Core state.

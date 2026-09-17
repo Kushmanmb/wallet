@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uniffi.gemstone.GemAssetRowTitle
+import uniffi.gemstone.GemAssetTitleStyle
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemPriceAlertServiceInterface
 
@@ -67,7 +67,7 @@ class PriceAlertViewModel @Inject constructor(
     val asset = assetId.flatMapLatest { id ->
         if (id != null) getAssetTokenInfo(id) else flowOf(null)
     }
-        .mapLatest { it?.toAssetInfoDataAggregate(GemAssetRowTitle.CANONICAL_ASSET) }
+        .mapLatest { it?.toAssetInfoDataAggregate(GemAssetTitleStyle.CANONICAL_ASSET) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val alerts = assetId.flatMapLatest { getPriceAlerts(it) }

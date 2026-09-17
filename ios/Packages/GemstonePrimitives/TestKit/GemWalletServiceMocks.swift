@@ -259,8 +259,8 @@ public final class GemWalletHomeServiceMock: GemWalletHomeServiceProtocol, @unch
         Primitives.Currency.usd.toGem()
     }
 
-    public func assetRow() -> Gemstone.GemAssetRow {
-        Gemstone.GemAssetRow(title: .asset, showsSymbol: false, subtitle: .price, trailing: .balance)
+    public func assetRowStyle() -> Gemstone.GemAssetRowStyle {
+        Gemstone.GemAssetRowStyle(title: .asset, showsSymbol: false, subtitle: .price, trailing: .balance)
     }
 
     public func viewState(wallet: Gemstone.Wallet, balances: [Gemstone.AssetFiatValue], perpetual: Gemstone.PerpetualBalance?, banners: [Gemstone.Banner], isWalletEmpty: Bool) -> GemWalletHomeViewState {

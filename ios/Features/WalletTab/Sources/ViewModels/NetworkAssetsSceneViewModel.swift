@@ -138,7 +138,7 @@ extension NetworkAssetsSceneViewModel {
         try await service.setAssetsEnabled(assetIds: assetIds, enabled: enabled)
     }
     var assetItems: ListAssetItemsViewModel {
-        ListAssetItemsViewModel(currency: currency, row: service.assetRow())
+        ListAssetItemsViewModel(currency: currency, rowStyle: service.assetRowStyle())
     }
 
 }

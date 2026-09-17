@@ -174,7 +174,7 @@ fun WalletSearchScreen(
                 autoFocus = true,
             )
         },
-        titleBadge = { item -> getAssetBadge(item, viewModel.flow.row.showsSymbol) },
+        titleBadge = { item -> getAssetBadge(item, viewModel.flow.rowStyle.showsSymbol) },
         support = { assetPriceSupport(it.price) },
         query = viewModel.queryState,
         pinned = pinned,

@@ -142,7 +142,7 @@ public final class SelectAssetViewModel {
     }
 
     var assetItems: ListAssetItemsViewModel {
-        ListAssetItemsViewModel(currency: currency, row: flow.row)
+        ListAssetItemsViewModel(currency: currency, rowStyle: flow.rowStyle)
     }
 
     var currency: Currency {

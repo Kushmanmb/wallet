@@ -319,7 +319,7 @@ extension WalletSearchSceneViewModel {
         try await service.setPerpetualPinned(perpetualId: perpetualId.identifier, pinned: pinned)
     }
     var assetItems: ListAssetItemsViewModel {
-        ListAssetItemsViewModel(currency: currency, row: service.flow(selectType: .walletSearch).row)
+        ListAssetItemsViewModel(currency: currency, rowStyle: service.flow(selectType: .walletSearch).rowStyle)
     }
 
 }

@@ -15,7 +15,7 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.domains.asset.aggregates.AssetInfoDataAggregate
 import com.gemwallet.android.model.AssetInfo
 import kotlinx.coroutines.CoroutineDispatcher
-import uniffi.gemstone.GemAssetRow
+import uniffi.gemstone.GemAssetRowStyle
 import uniffi.gemstone.GemNetworkAssetCounts
 import uniffi.gemstone.GemNetworkAssetSections
 import com.gemwallet.android.domains.asset.aggregates.toAssetInfoDataAggregates
@@ -53,7 +53,7 @@ class NetworkAssetsViewModel @Inject constructor(
 
     val title: String = context.getString(R.string.assets_title)
 
-    val row: GemAssetRow = service.assetRow()
+    val rowStyle: GemAssetRowStyle = service.assetRowStyle()
 
     private val assetGroups: StateFlow<NetworkAssetGroups> = getCurrentWalletId()
         .flatMapLatest { walletId ->
@@ -98,9 +98,9 @@ class NetworkAssetsViewModel @Inject constructor(
         )
         val byId = tokens.associateBy { it.asset.id.toIdentifier() }
         return NetworkAssetGroups(
-            pinned = sections.pinned.mapNotNull(byId::get).toAssetInfoDataAggregates(row.title),
-            unpinned = sections.assets.mapNotNull(byId::get).toAssetInfoDataAggregates(row.title),
-            hidden = hidden.tokens().toAssetInfoDataAggregates(row.title),
+            pinned = sections.pinned.mapNotNull(byId::get).toAssetInfoDataAggregates(rowStyle.title),
+            unpinned = sections.assets.mapNotNull(byId::get).toAssetInfoDataAggregates(rowStyle.title),
+            hidden = hidden.tokens().toAssetInfoDataAggregates(rowStyle.title),
             isLoaded = true,
         )
     }
