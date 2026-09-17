@@ -68,7 +68,7 @@ fun ManageContactScene(
                     contentAlignment = Alignment.Center,
                 ) {
                     ContactAvatar(
-                        name = state.name,
+                        initials = state.initials,
                         avatar = state.avatar,
                         size = extraLargeIconSize,
                         modifier = Modifier.clickable { onAction(ManageContactAction.SelectAvatar) },

@@ -16,17 +16,15 @@ import com.gemwallet.android.ui.components.image.RemoveBadge
 import com.gemwallet.android.ui.components.image.walletImageModel
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.theme.listItemIconSize
-import uniffi.gemstone.contactInitials
 
 @Composable
 internal fun ContactAvatar(
-    name: String,
+    initials: String,
     avatar: ContactAvatarState,
     modifier: Modifier = Modifier,
     size: Dp = listItemIconSize,
     onRemove: (() -> Unit)? = null,
 ) {
-    val initials = contactInitials(name)
     Box(modifier = modifier) {
         when (avatar) {
             ContactAvatarState.Empty -> InitialsAvatar(

@@ -16,6 +16,7 @@ enum class ManageContactPage {
 data class ManageContactUIState(
     val isEdit: Boolean = false,
     val name: String = "",
+    val initials: String = "",
     val description: String = "",
     val avatar: ContactAvatarState = ContactAvatarState.Empty,
     val addresses: List<ContactAddress> = emptyList(),

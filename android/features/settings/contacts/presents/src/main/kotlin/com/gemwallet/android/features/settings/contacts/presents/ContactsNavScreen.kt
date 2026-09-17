@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.features.settings.contacts.viewmodels.ContactsViewModel
-import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactAvatarState
+import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactRowUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.empty.EmptyContentType
 import com.gemwallet.android.ui.components.empty.EmptyContentView
@@ -29,12 +29,9 @@ import com.gemwallet.android.ui.components.list_item.SwipeableItemWithActions
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.Scene
+import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.ListPosition
-import com.gemwallet.android.ext.toGem
-import com.wallet.core.primitives.Contact
-import uniffi.gemstone.contactRow
-import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 
 @Composable
 fun ContactsNavScreen(
@@ -63,9 +60,9 @@ fun ContactsNavScreen(
             )
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                itemsPositioned(contacts, key = { _, item -> item.contact.id }) { position, item ->
+                itemsPositioned(contacts, key = { _, item -> item.id }) { position, item ->
                     SwipeableItemWithActions(
-                        isRevealed = revealed.value == item.contact.id,
+                        isRevealed = revealed.value == item.id,
                         actions = {
                             ActionIcon(
                                 onClick = {
@@ -76,14 +73,14 @@ fun ContactsNavScreen(
                                 icon = AppIcons.Delete,
                             )
                         },
-                        onExpanded = { revealed.value = item.contact.id },
+                        onExpanded = { revealed.value = item.id },
                         onCollapsed = { revealed.value = null },
                         listPosition = position,
                     ) { itemPosition ->
                         ContactListItem(
-                            contact = item.contact,
+                            row = item,
                             listPosition = itemPosition,
-                            onClick = { onAction(ContactsAction.OpenContact(item.contact.id)) },
+                            onClick = { onAction(ContactsAction.OpenContact(item.id)) },
                         )
                     }
                 }
@@ -94,16 +91,15 @@ fun ContactsNavScreen(
 
 @Composable
 private fun ContactListItem(
-    contact: Contact,
+    row: ContactRowUIModel,
     listPosition: ListPosition,
     onClick: () -> Unit,
 ) {
-    val row = contactRow(contact.toGem())
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
         listPosition = listPosition,
         minHeight = ListItemDefaults.defaultMinHeight,
-        leading = { ContactAvatar(name = row.title, avatar = ContactAvatarState.from(contact.imageUrl)) },
+        leading = { ContactAvatar(initials = row.initials, avatar = row.avatar) },
         title = { ListItemTitleText(text = row.title) },
         subtitle = row.subtitle?.let { description ->
             {
