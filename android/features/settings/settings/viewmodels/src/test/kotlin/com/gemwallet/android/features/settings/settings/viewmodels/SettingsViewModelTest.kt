@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.settings.settings.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.device.cases.GetPushEnabled
 import com.gemwallet.android.application.device.cases.SwitchPushEnabled
@@ -74,8 +75,8 @@ class SettingsViewModelTest {
         viewModel = createViewModel()
         advanceUntilIdle()
 
-        assertEquals(listOf(SettingsSceneAction.Wallets), viewModel.rows.first { it.isNotEmpty() }.flatten().map { it.action })
-        assertEquals("1", viewModel.rows.value.flatten().single().trailing)
+        assertEquals(listOf(SettingsSceneAction.Wallets), viewModel.rows.first { it.isNotEmpty() }.flatMap { it.items }.map { it.action })
+        assertEquals("1", viewModel.rows.value.flatMap { it.items }.single().model.subtitle)
 
         every { settingsService.sections(any(), any(), any()) } returns listOf(
             GemSettingsSection(listOf(GemSettingsRow.WALLETS, GemSettingsRow.REWARDS)),
@@ -85,7 +86,7 @@ class SettingsViewModelTest {
 
         assertEquals(
             listOf(SettingsSceneAction.Wallets, SettingsSceneAction.Referral),
-            viewModel.rows.first { rows -> rows.flatten().any { it.action == SettingsSceneAction.Referral } }.flatten().map { it.action },
+            viewModel.rows.first { rows -> rows.flatMap { it.items }.any { it.action == SettingsSceneAction.Referral } }.flatMap { it.items }.map { it.action },
         )
     }
 
@@ -100,5 +101,6 @@ class SettingsViewModelTest {
         getPushEnabled = getPushEnabled,
         notificationsAvailable = true,
         settingsService = settingsService,
+        context = mockk<Context> { every { getString(any()) } returns "" },
     )
 }

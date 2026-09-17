@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.settings.settings.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.device.cases.GetPushEnabled
@@ -9,7 +10,9 @@ import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.settings.settings.viewmodels.models.uiModel
 import com.gemwallet.android.model.NotificationsAvailable
+import com.gemwallet.android.ui.models.ListSection
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +30,7 @@ class SettingsViewModel @Inject constructor(
     private val getPushEnabled: GetPushEnabled,
     val notificationsAvailable: NotificationsAvailable,
     private val settingsService: GemSettingsServiceInterface,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val wallets = getWallets()
@@ -47,7 +51,9 @@ class SettingsViewModel @Inject constructor(
     }
 
     val rows = combine(sections, wallets) { sections, wallets ->
-        sections.map { section -> section.rows.map { it.uiModel(wallets.size) } }
+        sections.mapIndexed { index, section ->
+            ListSection(id = index.toString(), items = section.rows.map { it.uiModel(context, wallets.size) })
+        }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 

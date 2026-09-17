@@ -4,6 +4,7 @@ package com.gemwallet.android.features.settings.settings.presents.views
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,9 +33,9 @@ import com.gemwallet.android.features.settings.settings.viewmodels.SettingsViewM
 import com.gemwallet.android.ui.BuildConfig
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.PushRequest
-import com.gemwallet.android.ui.components.list_item.LinkItem
+import com.gemwallet.android.ui.components.list_item.ListItem
+import com.gemwallet.android.ui.components.list_item.ListItemDefaults
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
-import com.gemwallet.android.ui.components.list_item.property.PropertyDataText
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.actions.SettingsSceneAction
@@ -77,23 +78,18 @@ fun SettingsScene(
                 .verticalScroll(scrollState)
         ) {
             rows.forEach { section ->
-                section.forEachIndexed { index, row ->
-                    val listPosition = ListPosition.getPosition(index, section.size)
+                section.items.forEachIndexed { index, row ->
+                    val listPosition = ListPosition.getPosition(index, section.items.size)
                     Box(modifier = Modifier.fillMaxWidth()) {
-                        LinkItem(
-                            title = stringResource(row.title),
-                            icon = row.icon,
+                        ListItem(
+                            model = row.model,
                             listPosition = listPosition,
-                            trailingContent = row.trailing?.let { trailing ->
-                                @Composable {
-                                    PropertyDataText(
-                                        text = trailing,
-                                        badge = { DataBadgeChevron() },
-                                    )
-                                }
-                            },
-                            onLongClick = { isShowDevelopEnable = true }.takeIf { row.opensDeveloperMenu },
-                            onClick = { onRowAction(row.action) },
+                            modifier = Modifier.combinedClickable(
+                                onClick = { onRowAction(row.action) },
+                                onLongClick = { isShowDevelopEnable = true }.takeIf { row.opensDeveloperMenu },
+                            ),
+                            minHeight = ListItemDefaults.plainMinHeight,
+                            accessory = { DataBadgeChevron() },
                         )
                         if (row.opensDeveloperMenu) {
                             DropdownMenu(

@@ -1,28 +1,33 @@
 package com.gemwallet.android.features.settings.settings.viewmodels.models
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
+import android.content.Context
 import com.gemwallet.android.features.settings.settings.viewmodels.localization.stringRes
 import com.gemwallet.android.features.settings.settings.viewmodels.style.icon
+import com.gemwallet.android.ui.components.list_item.ListItemImage
+import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.actions.SettingsSceneAction
 import uniffi.gemstone.GemSettingsRow
 
 data class SettingsRowUIModel(
-    @StringRes val title: Int,
-    @DrawableRes val icon: Int,
     val action: SettingsSceneAction,
-    val trailing: String? = null,
+    val model: ListItemModel,
     val opensDeveloperMenu: Boolean = false,
 )
 
-internal fun GemSettingsRow.uiModel(walletsCount: Int): SettingsRowUIModel = when (this) {
-    GemSettingsRow.WALLETS -> SettingsRowUIModel(stringRes(), icon(), SettingsSceneAction.Wallets, trailing = walletsCount.toString())
-    GemSettingsRow.SECURITY -> SettingsRowUIModel(stringRes(), icon(), SettingsSceneAction.Security)
-    GemSettingsRow.NOTIFICATIONS -> SettingsRowUIModel(stringRes(), icon(), SettingsSceneAction.Notifications)
-    GemSettingsRow.PREFERENCES -> SettingsRowUIModel(stringRes(), icon(), SettingsSceneAction.Preferences)
-    GemSettingsRow.WALLET_CONNECT -> SettingsRowUIModel(stringRes(), icon(), SettingsSceneAction.Bridges)
-    GemSettingsRow.SUPPORT -> SettingsRowUIModel(stringRes(), icon(), SettingsSceneAction.Support)
-    GemSettingsRow.REWARDS -> SettingsRowUIModel(stringRes(), icon(), SettingsSceneAction.Referral)
-    GemSettingsRow.ABOUT_US -> SettingsRowUIModel(stringRes(), icon(), SettingsSceneAction.AboutUs, opensDeveloperMenu = true)
-    GemSettingsRow.DEVELOPER -> SettingsRowUIModel(stringRes(), icon(), SettingsSceneAction.Develop)
+internal fun GemSettingsRow.uiModel(context: Context, walletsCount: Int): SettingsRowUIModel = when (this) {
+    GemSettingsRow.WALLETS -> SettingsRowUIModel(SettingsSceneAction.Wallets, listItem(context, subtitle = walletsCount.toString()))
+    GemSettingsRow.SECURITY -> SettingsRowUIModel(SettingsSceneAction.Security, listItem(context))
+    GemSettingsRow.NOTIFICATIONS -> SettingsRowUIModel(SettingsSceneAction.Notifications, listItem(context))
+    GemSettingsRow.PREFERENCES -> SettingsRowUIModel(SettingsSceneAction.Preferences, listItem(context))
+    GemSettingsRow.WALLET_CONNECT -> SettingsRowUIModel(SettingsSceneAction.Bridges, listItem(context))
+    GemSettingsRow.SUPPORT -> SettingsRowUIModel(SettingsSceneAction.Support, listItem(context))
+    GemSettingsRow.REWARDS -> SettingsRowUIModel(SettingsSceneAction.Referral, listItem(context))
+    GemSettingsRow.ABOUT_US -> SettingsRowUIModel(SettingsSceneAction.AboutUs, listItem(context), opensDeveloperMenu = true)
+    GemSettingsRow.DEVELOPER -> SettingsRowUIModel(SettingsSceneAction.Develop, listItem(context))
 }
+
+private fun GemSettingsRow.listItem(context: Context, subtitle: String? = null): ListItemModel = ListItemModel(
+    title = context.getString(stringRes()),
+    subtitle = subtitle,
+    image = ListItemImage.Drawable(icon()),
+)
