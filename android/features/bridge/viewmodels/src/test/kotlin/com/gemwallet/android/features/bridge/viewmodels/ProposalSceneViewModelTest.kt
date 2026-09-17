@@ -81,6 +81,7 @@ class ProposalSceneViewModelTest {
         activeRequest = ActiveWalletConnectRequest(events = emptyFlow()),
         walletConnectService = service,
         ioDispatcher = dispatcher,
+        context = mockk(relaxed = true),
     ).also { models.add(it) }
 
     @Test

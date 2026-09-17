@@ -111,6 +111,7 @@ class WCAuthViewModelTest {
         prepareSessionProposal = prepare,
         activeRequest = ActiveWalletConnectRequest(events = emptyFlow()),
         walletConnectService = service,
+        context = mockk(relaxed = true),
     ).also { models.add(it) }
 
     private suspend fun WCAuthViewModel.awaitSettled(): AuthSceneState = state.first { it !is AuthSceneState.Loading }

@@ -9,10 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import com.gemwallet.android.ui.components.list_item.ListItemImage
+import com.gemwallet.android.ui.components.list_item.ListItemSymbol
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.theme.iconSize
 
@@ -38,8 +40,8 @@ fun ListItemImageView(
             scale = AvatarScale.EMOJI,
         )
         is ListItemImage.Initials -> InitialsAvatar(text = image.text, size = size, modifier = modifier, placeholder = AppIcons.Person)
-        is ListItemImage.Icon -> Icon(
-            imageVector = image.vector,
+        is ListItemImage.Symbol -> Icon(
+            imageVector = image.symbol.vector(),
             contentDescription = null,
             modifier = modifier.size(size),
             tint = MaterialTheme.colorScheme.onSurface,
@@ -50,4 +52,13 @@ fun ListItemImageView(
             modifier = if (image.isRounded) modifier.size(size).clip(CircleShape) else modifier.size(iconSize),
         )
     }
+}
+
+@Composable
+private fun ListItemSymbol.vector(): ImageVector = when (this) {
+    ListItemSymbol.Check -> AppIcons.Check
+    ListItemSymbol.Paste -> AppIcons.ContentPaste
+    ListItemSymbol.QrScanner -> AppIcons.QrCodeScanner
+    ListItemSymbol.Pin -> AppIcons.PushPin
+    ListItemSymbol.AddCircle -> AppIcons.AddCircleOutlined
 }

@@ -20,7 +20,7 @@ import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.gemwallet.android.ui.icons.AppIcons
+import com.gemwallet.android.ui.components.list_item.ListItemSymbol
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetType
 import com.wallet.core.primitives.Currency
@@ -66,9 +66,9 @@ class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private va
             banners = banners,
             pinListItem = ListItemModel(
                 title = context.getString(if (assetInfo.metadata.isPinned) R.string.common_unpin else R.string.common_pin),
-                image = ListItemImage.Icon(AppIcons.PushPin),
+                image = ListItemImage.Symbol(ListItemSymbol.Pin),
             ),
-            addListItem = ListItemModel(title = context.getString(R.string.asset_add_to_wallet), image = ListItemImage.Icon(AppIcons.AddCircleOutlined)),
+            addListItem = ListItemModel(title = context.getString(R.string.asset_add_to_wallet), image = ListItemImage.Symbol(ListItemSymbol.AddCircle)),
             priceListItem = ListItemModel(title = context.getString(R.string.asset_price), subtitle = if (price == 0.0) "" else currencyFormatter.string(price)),
             priceAlertsListItem = ListItemModel(title = context.getString(R.string.settings_price_alerts_title), subtitle = details.state.priceAlertsCount.toString()),
             accountInfoUIModel = AssetInfoUIModel.AccountInfoUIModel(

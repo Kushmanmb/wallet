@@ -94,6 +94,7 @@ class WCRequestViewModelTest {
         respondWalletConnectRequest = respond,
         pendingRequests = requests,
         activeRequest = ActiveWalletConnectRequest(events = emptyFlow()),
+        context = mockk(relaxed = true),
     ).also { models.add(it) }
 
     private fun TestScope.pending(requests: WalletConnectPendingRequests, signature: CompletableDeferred<String>? = null): Job =

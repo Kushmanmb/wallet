@@ -77,6 +77,12 @@ fun WalletConnectionVerificationStatus.icon(): ImageVector = when (verificationL
     GemVerificationLevel.UNVERIFIED, GemVerificationLevel.SUSPICIOUS -> AppIcons.Warning
 }
 
+fun WalletConnectionVerificationStatus.textStyle(): ListItemTextStyle = when (verificationLevel(this)) {
+    GemVerificationLevel.VERIFIED -> ListItemTextStyle.Positive
+    GemVerificationLevel.UNVERIFIED -> ListItemTextStyle.Warning
+    GemVerificationLevel.SUSPICIOUS -> ListItemTextStyle.Negative
+}
+
 @Composable
 fun WalletConnectionVerificationStatus.color(): Color = when (verificationLevel(this)) {
     GemVerificationLevel.VERIFIED -> MaterialTheme.colorScheme.tertiary

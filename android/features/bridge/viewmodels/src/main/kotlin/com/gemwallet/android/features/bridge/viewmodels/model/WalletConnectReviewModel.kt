@@ -1,12 +1,16 @@
 package com.gemwallet.android.features.bridge.viewmodels.model
 
-import uniffi.gemstone.GemSimulationValue
+import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.PayloadField
 import com.wallet.core.primitives.Chain
+import uniffi.gemstone.GemSimulationValue
 import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.MessageType
 
 interface WalletConnectReviewModel {
+    val appListItem: ListItemModel
+    val walletListItem: ListItemModel
+    val viewFullMessageListItem: ListItemModel
     val icon: String?
     val name: String
     val uri: String
