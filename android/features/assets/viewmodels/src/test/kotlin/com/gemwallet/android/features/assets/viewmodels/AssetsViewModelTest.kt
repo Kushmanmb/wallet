@@ -123,5 +123,6 @@ class AssetsViewModelTest {
         getWalletSummary = getWalletSummary,
         getSession = getSession,
         userConfig = mockk(relaxed = true),
+        context = mockk(relaxed = true),
     )
 }

@@ -32,7 +32,7 @@ import com.gemwallet.android.ui.components.list_item.getBalanceInfo
 import com.gemwallet.android.ui.components.list_item.listItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
-import com.gemwallet.android.ui.components.screen.AssetToastEffect
+import com.gemwallet.android.ui.components.screen.ToastEffect
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.space0
 import com.wallet.core.primitives.AssetType
@@ -61,7 +61,7 @@ fun WalletSearchScreen(
 
     val longPressedPerpetual = remember { mutableStateOf<PerpetualId?>(null) }
     val snackbar = remember { SnackbarHostState() }
-    AssetToastEffect(viewModel.toastEvents, snackbar)
+    ToastEffect(viewModel.toastEvents, snackbar)
 
     val handleAction: (WalletSearchAction) -> Unit = { action ->
         when (action) {
