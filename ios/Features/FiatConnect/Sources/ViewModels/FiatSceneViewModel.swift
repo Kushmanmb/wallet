@@ -142,6 +142,10 @@ public final class FiatSceneViewModel {
         Localized.Common.provider
     }
 
+    var rateListItem: ListItemModel {
+        ListItemModel(title: rateTitle, subtitle: rateValue)
+    }
+
     var rateTitle: String {
         Localized.Buy.rate
     }

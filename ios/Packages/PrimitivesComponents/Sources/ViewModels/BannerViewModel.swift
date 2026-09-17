@@ -29,6 +29,10 @@ struct BannerViewModel {
         content.icon?.image
     }
 
+    var listItem: ListItemModel {
+        ListItemModel(title: title, titleExtra: description, imageStyle: imageStyle)
+    }
+
     var title: String? {
         content.title?.text
     }
