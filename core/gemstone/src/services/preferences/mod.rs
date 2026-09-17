@@ -227,13 +227,13 @@ impl GemPreferencesService {
     pub fn set_perpetual_chart_period(&self, period: ChartPeriod) -> Result<(), GemServiceError> {
         self.store.set(PERPETUAL_CHART_PERIOD.to_string(), period.as_ref().to_string())
     }
-    pub fn is_push_notifications_declined(&self) -> bool {
+    fn is_push_notifications_declined(&self) -> bool {
         self.store.get(PUSH_NOTIFICATIONS_DECLINED.to_string()).as_deref() == Some("true")
     }
     pub fn set_push_notifications_declined(&self, declined: bool) -> Result<(), GemServiceError> {
         self.store.set(PUSH_NOTIFICATIONS_DECLINED.to_string(), declined.to_string())
     }
-    pub fn get_launches_count(&self) -> u32 {
+    fn get_launches_count(&self) -> u32 {
         self.store.get(LAUNCHES_COUNT.to_string()).and_then(|value| value.parse().ok()).unwrap_or(0)
     }
     pub fn is_price_alerts_enabled(&self) -> bool {

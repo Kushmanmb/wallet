@@ -199,7 +199,7 @@ fn collections(data: Vec<NFTData>, verified: bool) -> Vec<NFTData> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use primitives::{AssetLink, LinkType, NFTAsset, NFTCollection, NFTData, Wallet};
+    use primitives::{AssetLink, LinkType, NFTAsset, NFTCollection, NFTData};
 
     #[test]
     fn test_a_collection_row_counts_its_assets_and_an_asset_row_does_not() {

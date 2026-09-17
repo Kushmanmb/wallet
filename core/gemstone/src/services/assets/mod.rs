@@ -98,18 +98,6 @@ impl GemAssetsService {
         self.price.update_prices(prices, currency).await
     }
 
-    pub async fn sync_missing_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, GemServiceError> {
-        let existing = self.store.get_asset_ids(asset_ids.clone()).await?;
-        let missing = rules::missing_asset_ids(asset_ids, existing);
-        if missing.is_empty() {
-            return Ok(vec![]);
-        }
-        let assets = self.get_assets(missing, None).await?;
-        let asset_ids = assets.iter().map(|asset| asset.asset.id.clone()).collect();
-        self.store.save_assets(assets).await?;
-        Ok(asset_ids)
-    }
-
     pub async fn open_asset(&self, asset_id: AssetId) -> Result<Option<Asset>, GemServiceError> {
         let wallet = self.session.current_wallet().await?;
         self.open_wallet_asset(wallet, asset_id).await
@@ -130,7 +118,7 @@ impl GemAssetsService {
 }
 
 impl GemAssetsService {
-    pub async fn sync_asset(&self, asset_id: AssetId) -> Result<AssetFull, GemServiceError> {
+    async fn sync_asset(&self, asset_id: AssetId) -> Result<AssetFull, GemServiceError> {
         let currency = self.preferences.get_currency();
         let asset = self.get_asset(asset_id.clone()).await?;
         self.store.save_asset(asset.clone()).await?;
@@ -152,6 +140,18 @@ impl GemAssetsService {
             self.sync_missing_assets(associations.clone()).await?;
         }
         Ok(associations)
+    }
+
+    pub async fn sync_missing_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, GemServiceError> {
+        let existing = self.store.get_asset_ids(asset_ids.clone()).await?;
+        let missing = rules::missing_asset_ids(asset_ids, existing);
+        if missing.is_empty() {
+            return Ok(vec![]);
+        }
+        let assets = self.get_assets(missing, None).await?;
+        let asset_ids = assets.iter().map(|asset| asset.asset.id.clone()).collect();
+        self.store.save_assets(assets).await?;
+        Ok(asset_ids)
     }
 
     pub(crate) async fn ensure_simulation_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<Asset>, GemServiceError> {

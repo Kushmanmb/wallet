@@ -4020,7 +4020,6 @@ dependencies = [
 name = "gemstone"
 version = "2.114.33"
 dependencies = [
- "alloy-primitives",
  "async-trait",
  "base64 0.23.0",
  "bs58",

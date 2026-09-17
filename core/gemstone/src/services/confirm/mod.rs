@@ -82,10 +82,6 @@ impl GemConfirmService {
         }
     }
 
-    pub async fn sync_missing_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, crate::services::error::GemServiceError> {
-        self.assets.sync_missing_assets(asset_ids).await
-    }
-
     pub async fn load(&self, input: GemConfirmInput, options: GemConfirmLoadOptions) -> Result<GemConfirmData, GemConfirmError> {
         let transfer = &input.transfer;
         let asset = transfer.input_type.get_asset();
