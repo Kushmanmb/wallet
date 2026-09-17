@@ -1,7 +1,7 @@
 package com.gemwallet.android.ui.components.image
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -10,6 +10,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.icons.AppIcons
+import com.gemwallet.android.ui.theme.iconSize
 
 @Composable
 fun ListItemImageView(
@@ -29,15 +30,14 @@ fun ListItemImageView(
         is ListItemImage.Emoji -> EmojiView(
             emoji = image.glyph,
             modifier = modifier.size(size),
-            background = Color(image.backgroundColor),
+            background = image.backgroundColor?.let { Color(it) } ?: Color.Transparent,
             scale = AvatarScale.EMOJI,
         )
         is ListItemImage.Initials -> InitialsAvatar(text = image.text, size = size, modifier = modifier, placeholder = AppIcons.Person)
-        is ListItemImage.Drawable -> Icon(
+        is ListItemImage.Drawable -> Image(
             painter = painterResource(image.id),
             contentDescription = null,
-            modifier = modifier.size(size),
-            tint = Color.Unspecified,
+            modifier = modifier.size(iconSize),
         )
     }
 }

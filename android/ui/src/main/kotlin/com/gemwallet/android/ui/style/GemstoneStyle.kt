@@ -1,20 +1,21 @@
 package com.gemwallet.android.ui.style
 
-import androidx.compose.ui.res.stringResource
-import uniffi.gemstone.GemNameRecordState
-import uniffi.gemstone.GemPerpetualChartLineKind
-import uniffi.gemstone.GemEmptyStateImage
-import com.gemwallet.android.ui.components.empty.EmptyStateImage
 import androidx.annotation.DrawableRes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.empty.EmptyStateImage
+import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.theme.pendingColor
 import uniffi.gemstone.GemDelegationTone
+import uniffi.gemstone.GemEmptyStateImage
 import uniffi.gemstone.GemHeaderButtonKind
+import uniffi.gemstone.GemNameRecordState
+import uniffi.gemstone.GemPerpetualChartLineKind
 import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemValueTone
 import uniffi.gemstone.GemVerificationLevel
@@ -46,6 +47,13 @@ fun GemTransactionStateTone.color(): Color = when (this) {
     GemTransactionStateTone.REFUNDED -> pendingColor
     GemTransactionStateTone.SUCCESS -> MaterialTheme.colorScheme.tertiary
     GemTransactionStateTone.ERROR -> MaterialTheme.colorScheme.error
+}
+
+fun GemValueTone.textStyle(): ListItemTextStyle = when (this) {
+    GemValueTone.PLAIN -> ListItemTextStyle.Body
+    GemValueTone.NEUTRAL -> ListItemTextStyle.Secondary
+    GemValueTone.POSITIVE -> ListItemTextStyle.Positive
+    GemValueTone.NEGATIVE -> ListItemTextStyle.Negative
 }
 
 @Composable

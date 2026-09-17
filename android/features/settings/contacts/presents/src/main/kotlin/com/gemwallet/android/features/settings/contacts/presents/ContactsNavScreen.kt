@@ -78,7 +78,7 @@ fun ContactsNavScreen(
                             listPosition = itemPosition,
                             modifier = Modifier.clickable { onAction(ContactsAction.OpenContact(item.contact.id)) },
                             minHeight = ListItemDefaults.defaultMinHeight,
-                            trailing = { DataBadgeChevron() },
+                            accessory = { DataBadgeChevron() },
                         )
                     }
                 }
