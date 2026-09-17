@@ -20,6 +20,7 @@ public extension [GemListSection] {
                 values: section.rows.enumerated().map { row in
                     GemListSectionRow(id: "\(index)-\(row.offset)", row: row.element)
                 },
+                footer: section.footer.text,
             )
         }
     }

@@ -8,7 +8,7 @@ use super::model::GemAddressDetails;
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::copy::{GemCopy, GemCopyKind};
-use crate::models::list::{GemListRow, GemListRowTitle, GemListSection, GemListSectionTitle};
+use crate::models::list::{GemListRow, GemListRowTitle, GemListSection, GemListSectionFooter, GemListSectionTitle};
 use crate::models::state::{GemLoad, GemLoadState};
 use crate::precision::GemValueStyle;
 use crate::services::assets::rules::asset_text;
@@ -37,10 +37,12 @@ pub(super) fn sections(details: &GemAddressDetails) -> Vec<GemListSection> {
     vec![
         GemListSection {
             title: GemListSectionTitle::None,
+            footer: GemListSectionFooter::None,
             rows: vec![GemListRow::Icon { chain }],
         },
         GemListSection {
             title: GemListSectionTitle::None,
+            footer: GemListSectionFooter::None,
             rows: vec![GemListRow::Address {
                 address: details.address.clone(),
                 copy: details.copy.clone(),
@@ -48,6 +50,7 @@ pub(super) fn sections(details: &GemAddressDetails) -> Vec<GemListSection> {
         },
         GemListSection {
             title: GemListSectionTitle::None,
+            footer: GemListSectionFooter::None,
             rows: details
                 .name
                 .iter()
@@ -63,10 +66,12 @@ pub(super) fn sections(details: &GemAddressDetails) -> Vec<GemListSection> {
         },
         GemListSection {
             title: GemListSectionTitle::Balances,
+            footer: GemListSectionFooter::None,
             rows: balance_section(details, &asset),
         },
         GemListSection {
             title: GemListSectionTitle::None,
+            footer: GemListSectionFooter::None,
             rows: vec![GemListRow::Explorer {
                 name: details.link.name.clone(),
                 url: details.link.link.clone(),

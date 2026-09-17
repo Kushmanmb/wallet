@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +23,7 @@ import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.localization.titleRes
 import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSection
 
 fun LazyListScope.gemListSections(sections: List<GemListSection>) {
@@ -38,6 +40,9 @@ fun GemListRowView(
     row: GemListRow,
     listPosition: ListPosition,
     modifier: Modifier = Modifier,
+    onToggle: ((GemListRowTitle, Boolean) -> Unit)? = null,
+    onSelect: ((GemListRowTitle) -> Unit)? = null,
+    accessory: (@Composable () -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -64,6 +69,23 @@ fun GemListRowView(
             HeaderIcon(row.asset)
         }
         is GemListRowUIModel.Address -> AddressCard(row = row) { clipboardManager.setCopy(context, row.copy) }
+        is GemListRowUIModel.Toggle -> ListItem(
+            model = row.model,
+            listPosition = listPosition,
+            modifier = modifier,
+            minHeight = ListItemDefaults.plainMinHeight,
+            accessory = { Switch(checked = row.isOn, onCheckedChange = { onToggle?.invoke(row.title, it) }) },
+        )
+        is GemListRowUIModel.Picker -> ListItem(
+            model = row.model,
+            listPosition = listPosition,
+            modifier = modifier.clickable { onSelect?.invoke(row.title) },
+            minHeight = ListItemDefaults.plainMinHeight,
+            accessory = {
+                DataBadgeChevron()
+                accessory?.invoke()
+            },
+        )
         is GemListRowUIModel.Social -> Column {
             row.links.forEachIndexed { index, link ->
                 ListItem(

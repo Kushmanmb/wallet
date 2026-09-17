@@ -2,6 +2,7 @@
 
 import Components
 import enum Gemstone.GemListRow
+import enum Gemstone.GemListRowTitle
 import Primitives
 import Style
 import SwiftUI
@@ -12,9 +13,17 @@ public struct GemListRowView: View {
     @State private var isPresentingCopyToast = false
 
     private let row: GemListRow
+    private let onToggle: ((GemListRowTitle, Bool) -> Void)?
+    private let onSelect: ((GemListRowTitle) -> Void)?
 
-    public init(row: GemListRow) {
+    public init(
+        row: GemListRow,
+        onToggle: ((GemListRowTitle, Bool) -> Void)? = nil,
+        onSelect: ((GemListRowTitle) -> Void)? = nil,
+    ) {
         self.row = row
+        self.onToggle = onToggle
+        self.onSelect = onSelect
     }
 
     public var body: some View {
@@ -26,6 +35,11 @@ public struct GemListRowView: View {
         switch row.item {
         case let .listItem(model):
             ListItemView(model: model)
+        case let .picker(model, title):
+            NavigationCustomLink(with: ListItemView(model: model)) { onSelect?(title) }
+        case let .toggle(label, title, isOn):
+            Toggle(label, isOn: Binding(get: { isOn }, set: { onToggle?(title, $0) }))
+                .toggleStyle(AppToggleStyle())
         case let .page(model, url):
             SafariNavigationLink(url: url) {
                 ListItemView(model: model)

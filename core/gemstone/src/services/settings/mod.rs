@@ -12,7 +12,7 @@ use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_session;
 
-pub use rules::{GemPerpetualDefaults, GemPreferencesRow, GemPreferencesSection, GemPreferencesState, GemSecurityRow, GemSecuritySection};
+pub use rules::{GemPerpetualDefaults, GemPreferencesRow, GemPreferencesSection, GemPreferencesState, GemSecurityInput};
 
 #[derive(uniffi::Object)]
 pub struct GemSettingsService {
@@ -44,8 +44,8 @@ impl GemSettingsService {
         self.preferences.set_perpetual_stop_loss_percent(defaults.stop_loss_percent)
     }
 
-    pub fn security_sections(&self, authentication_enabled: bool) -> Vec<GemSecuritySection> {
-        rules::security_sections(authentication_enabled)
+    pub fn security_sections(&self, input: GemSecurityInput) -> Vec<GemListSection> {
+        rules::security_sections(input)
     }
 
     pub fn sections(&self, wallets: Vec<Wallet>, notifications_available: bool, wallet_connect_available: bool) -> Vec<GemListSection> {

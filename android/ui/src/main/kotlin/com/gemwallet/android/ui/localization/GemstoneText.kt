@@ -486,4 +486,8 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.REWARDS -> R.string.rewards_title
     GemListRowTitle.ABOUT_US -> R.string.settings_aboutus
     GemListRowTitle.DEVELOPER -> R.string.settings_developer
+    GemListRowTitle.AUTHENTICATION -> R.string.settings_enable_passcode
+    GemListRowTitle.LOCK_PERIOD -> R.string.lock_require_authentication
+    GemListRowTitle.PRIVACY_LOCK -> R.string.lock_privacy_lock
+    GemListRowTitle.HIDE_BALANCE -> R.string.settings_hide_balance
 }

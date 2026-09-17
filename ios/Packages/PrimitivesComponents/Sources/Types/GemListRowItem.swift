@@ -18,6 +18,8 @@ struct AddressCardModel {
 
 enum GemListRowItem {
     case listItem(ListItemModel)
+    case picker(ListItemModel, title: GemListRowTitle)
+    case toggle(label: String, title: GemListRowTitle, isOn: Bool)
     case page(ListItemModel, url: URL)
     case external(ListItemModel, url: URL)
     case icon(AssetImage)
@@ -35,6 +37,10 @@ extension GemListRow {
             .listItem(ListItemModel(title: title.text, subtitle: amount.text()))
         case let .link(title, value, icon):
             .listItem(listItem(title: title, value: value, icon: icon))
+        case let .picker(title, value, icon):
+            .picker(listItem(title: title, value: value, icon: icon), title: title)
+        case let .toggle(title, value, _, isOn):
+            .toggle(label: toggleLabel(title: title, value: value), title: title, isOn: isOn)
         case let .url(title, value, icon, url, target):
             urlItem(title: title, value: value, icon: icon, url: url, target: target)
         case let .social(links):
@@ -49,6 +55,13 @@ extension GemListRow {
             .address(AddressCardModel(address: address, copyModel: copy.copyModel))
         case .loading:
             .loading
+        }
+    }
+
+    private func toggleLabel(title: GemListRowTitle, value: String?) -> String {
+        switch title {
+        case .authentication: value.map { Localized.Settings.enableValue($0) } ?? title.text
+        default: title.text
         }
     }
 

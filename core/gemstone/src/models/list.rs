@@ -37,6 +37,16 @@ pub enum GemListRowTitle {
     Rewards,
     AboutUs,
     Developer,
+    Authentication,
+    LockPeriod,
+    PrivacyLock,
+    HideBalance,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemListSectionFooter {
+    None,
+    Authentication,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -82,6 +92,17 @@ pub enum GemListRow {
         url: String,
         target: GemUrlTarget,
     },
+    Toggle {
+        title: GemListRowTitle,
+        value: Option<String>,
+        icon: GemListRowIcon,
+        is_on: bool,
+    },
+    Picker {
+        title: GemListRowTitle,
+        value: String,
+        icon: GemListRowIcon,
+    },
     Social {
         links: Vec<GemSocialLink>,
     },
@@ -105,5 +126,6 @@ pub enum GemListRow {
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemListSection {
     pub title: GemListSectionTitle,
+    pub footer: GemListSectionFooter,
     pub rows: Vec<GemListRow>,
 }

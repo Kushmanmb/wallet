@@ -10,6 +10,7 @@ import enum Gemstone.FeeOption
 import enum Gemstone.GemAssetMenuAction
 import enum Gemstone.GemContactAddressField
 import enum Gemstone.GemListRowTitle
+import enum Gemstone.GemListSectionFooter
 import enum Gemstone.GemListSectionTitle
 import enum Gemstone.PerpetualType
 import enum Gemstone.GemApprovalValue
@@ -565,6 +566,15 @@ public extension GemListSectionTitle {
     }
 }
 
+public extension GemListSectionFooter {
+    var text: String? {
+        switch self {
+        case .none: nil
+        case .authentication: Localized.Lock.footer
+        }
+    }
+}
+
 public extension GemListRowTitle {
     var text: String {
         switch self {
@@ -591,6 +601,10 @@ public extension GemListRowTitle {
         case .rewards: Localized.Rewards.title
         case .aboutUs: Localized.Settings.aboutus
         case .developer: Localized.Settings.developer
+        case .authentication: Localized.Settings.enablePasscode
+        case .lockPeriod: Localized.Lock.requireAuthentication
+        case .privacyLock: Localized.Lock.privacyLock
+        case .hideBalance: Localized.Settings.hideBalance
         }
     }
 }

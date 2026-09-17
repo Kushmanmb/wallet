@@ -20,6 +20,8 @@ internal sealed interface GemListRowUIModel {
     data class Icon(val asset: Asset) : GemListRowUIModel
     data class Address(val address: String, val copy: GemCopy) : GemListRowUIModel
     data class Social(val links: List<GemSocialLink>) : GemListRowUIModel
+    data class Toggle(val model: ListItemModel, val title: GemListRowTitle, val isOn: Boolean) : GemListRowUIModel
+    data class Picker(val model: ListItemModel, val title: GemListRowTitle) : GemListRowUIModel
     data object Loading : GemListRowUIModel
 }
 
@@ -34,6 +36,8 @@ internal fun GemListRow.uiModel(context: Context): GemListRowUIModel = when (thi
     )
     is GemListRow.Icon -> GemListRowUIModel.Icon(asset = chain.requireChain().asset())
     is GemListRow.Address -> GemListRowUIModel.Address(address = address, copy = copy)
+    is GemListRow.Toggle -> GemListRowUIModel.Toggle(listItemModel(context, title, null, icon), title, isOn)
+    is GemListRow.Picker -> GemListRowUIModel.Picker(listItemModel(context, title, value, icon), title)
     is GemListRow.Social -> GemListRowUIModel.Social(links)
     GemListRow.Loading -> GemListRowUIModel.Loading
 }

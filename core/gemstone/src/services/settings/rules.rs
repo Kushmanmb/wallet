@@ -2,7 +2,7 @@ use primitives::{PlatformStore, Release};
 
 use crate::config::public::PublicUrl;
 use crate::config::social::community_links;
-use crate::models::list::{GemListRow, GemListRowIcon, GemListRowTitle, GemListSection, GemListSectionTitle, GemUrlTarget};
+use crate::models::list::{GemListRow, GemListRowIcon, GemListRowTitle, GemListSection, GemListSectionFooter, GemListSectionTitle, GemUrlTarget};
 use crate::services::currency::GemCurrencyRow;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -37,17 +37,14 @@ pub struct GemPerpetualDefaults {
     pub stop_loss_percent: u8,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemSecurityRow {
-    Authentication,
-    LockPeriod,
-    PrivacyLock,
-    HideBalance,
-}
-
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
-pub struct GemSecuritySection {
-    pub rows: Vec<GemSecurityRow>,
+pub struct GemSecurityInput {
+    pub authentication_enabled: bool,
+    pub authentication_name: Option<String>,
+    pub lock_period: String,
+    pub privacy_lock_enabled: bool,
+    pub privacy_lock_supported: bool,
+    pub hide_balance_enabled: bool,
 }
 
 pub fn preferences_sections(perpetuals_enabled: bool) -> Vec<GemPreferencesSection> {
@@ -74,21 +71,41 @@ pub fn preferences_sections(perpetuals_enabled: bool) -> Vec<GemPreferencesSecti
     .collect()
 }
 
-pub fn security_sections(authentication_enabled: bool) -> Vec<GemSecuritySection> {
-    [
-        [
-            Some(GemSecurityRow::Authentication),
-            authentication_enabled.then_some(GemSecurityRow::LockPeriod),
-            authentication_enabled.then_some(GemSecurityRow::PrivacyLock),
-        ]
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>(),
-        vec![GemSecurityRow::HideBalance],
+pub fn security_sections(input: GemSecurityInput) -> Vec<GemListSection> {
+    let toggle = |title: GemListRowTitle, is_on: bool| GemListRow::Toggle {
+        title,
+        value: None,
+        icon: GemListRowIcon::None,
+        is_on,
+    };
+    vec![
+        GemListSection {
+            title: GemListSectionTitle::None,
+            footer: GemListSectionFooter::Authentication,
+            rows: [
+                Some(GemListRow::Toggle {
+                    title: GemListRowTitle::Authentication,
+                    value: input.authentication_name,
+                    icon: GemListRowIcon::None,
+                    is_on: input.authentication_enabled,
+                }),
+                input.authentication_enabled.then_some(GemListRow::Picker {
+                    title: GemListRowTitle::LockPeriod,
+                    value: input.lock_period,
+                    icon: GemListRowIcon::None,
+                }),
+                (input.authentication_enabled && input.privacy_lock_supported).then(|| toggle(GemListRowTitle::PrivacyLock, input.privacy_lock_enabled)),
+            ]
+            .into_iter()
+            .flatten()
+            .collect(),
+        },
+        GemListSection {
+            title: GemListSectionTitle::None,
+            footer: GemListSectionFooter::None,
+            rows: vec![toggle(GemListRowTitle::HideBalance, input.hide_balance_enabled)],
+        },
     ]
-    .into_iter()
-    .map(|rows| GemSecuritySection { rows })
-    .collect()
 }
 
 pub fn about_sections(version: String, update: Option<Release>) -> Vec<GemListSection> {
@@ -102,6 +119,7 @@ pub fn about_sections(version: String, update: Option<Release>) -> Vec<GemListSe
     vec![
         GemListSection {
             title: GemListSectionTitle::None,
+            footer: GemListSectionFooter::None,
             rows: vec![
                 page(GemListRowTitle::TermsOfService, PublicUrl::TermsOfService),
                 page(GemListRowTitle::PrivacyPolicy, PublicUrl::PrivacyPolicy),
@@ -110,10 +128,12 @@ pub fn about_sections(version: String, update: Option<Release>) -> Vec<GemListSe
         },
         GemListSection {
             title: GemListSectionTitle::Community,
+            footer: GemListSectionFooter::None,
             rows: vec![GemListRow::Social { links: community_links() }],
         },
         GemListSection {
             title: GemListSectionTitle::None,
+            footer: GemListSectionFooter::None,
             rows: [
                 Some(GemListRow::Text {
                     title: GemListRowTitle::Version,
@@ -166,9 +186,10 @@ pub fn sections(wallets_count: usize, notifications_available: bool, wallet_conn
         .into_iter()
         .flatten()
         .collect(),
-        wallet_connect_available
-            .then(|| vec![link(GemListRowTitle::WalletConnect, GemListRowIcon::WalletConnect)])
-            .unwrap_or_default(),
+        match wallet_connect_available {
+            true => vec![link(GemListRowTitle::WalletConnect, GemListRowIcon::WalletConnect)],
+            false => vec![],
+        },
         [
             Some(link(GemListRowTitle::Support, GemListRowIcon::Support)),
             shows_rewards.then(|| link(GemListRowTitle::Rewards, GemListRowIcon::Rewards)),
@@ -183,6 +204,7 @@ pub fn sections(wallets_count: usize, notifications_available: bool, wallet_conn
     .filter(|rows: &Vec<GemListRow>| !rows.is_empty())
     .map(|rows| GemListSection {
         title: GemListSectionTitle::None,
+        footer: GemListSectionFooter::None,
         rows,
     })
     .collect()
@@ -203,17 +225,44 @@ mod tests {
 
     #[test]
     fn test_the_lock_rows_show_only_once_authentication_is_on() {
+        let input = |authentication_enabled: bool| GemSecurityInput {
+            authentication_enabled,
+            authentication_name: Some("Face ID".to_string()),
+            lock_period: "Immediately".to_string(),
+            privacy_lock_enabled: true,
+            privacy_lock_supported: true,
+            hide_balance_enabled: false,
+        };
+
         assert_eq!(
-            security_sections(false).first().map(|section| section.rows.clone()),
-            Some(vec![GemSecurityRow::Authentication])
+            security_sections(input(false)).first().map(|section| section.rows.len()),
+            Some(1),
+            "a device without authentication offers only the switch that turns it on"
         );
         assert_eq!(
-            security_sections(true).first().map(|section| section.rows.clone()),
-            Some(vec![GemSecurityRow::Authentication, GemSecurityRow::LockPeriod, GemSecurityRow::PrivacyLock])
+            security_sections(input(true))
+                .first()
+                .map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
+            Some(vec![GemListRowTitle::Authentication, GemListRowTitle::LockPeriod, GemListRowTitle::PrivacyLock])
         );
         assert_eq!(
-            security_sections(true).last().map(|section| section.rows.clone()),
-            Some(vec![GemSecurityRow::HideBalance]),
+            security_sections(GemSecurityInput {
+                privacy_lock_supported: false,
+                ..input(true)
+            })
+            .first()
+            .map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
+            Some(vec![GemListRowTitle::Authentication, GemListRowTitle::LockPeriod]),
+            "a platform without a privacy lock drops that row"
+        );
+        assert_eq!(
+            security_sections(input(true)).last().map(|section| section.rows.clone()),
+            Some(vec![GemListRow::Toggle {
+                title: GemListRowTitle::HideBalance,
+                value: None,
+                icon: GemListRowIcon::None,
+                is_on: false
+            }]),
             "hiding the balance is its own choice, not part of the lock"
         );
     }
@@ -285,7 +334,12 @@ mod tests {
 
     fn row_title(row: &GemListRow) -> Option<GemListRowTitle> {
         match row {
-            GemListRow::Link { title, .. } | GemListRow::Text { title, .. } | GemListRow::Amount { title, .. } | GemListRow::Url { title, .. } => Some(*title),
+            GemListRow::Link { title, .. }
+            | GemListRow::Text { title, .. }
+            | GemListRow::Amount { title, .. }
+            | GemListRow::Url { title, .. }
+            | GemListRow::Toggle { title, .. }
+            | GemListRow::Picker { title, .. } => Some(*title),
             GemListRow::Social { .. } | GemListRow::Icon { .. } | GemListRow::Address { .. } | GemListRow::Explorer { .. } | GemListRow::Loading | GemListRow::Error { .. } => None,
         }
     }

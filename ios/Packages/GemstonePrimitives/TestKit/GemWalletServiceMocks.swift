@@ -372,13 +372,13 @@ public final class GemSearchServiceMock: GemSearchServiceProtocol, @unchecked Se
 
 public final class GemSettingsServiceMock: GemSettingsServiceProtocol, @unchecked Sendable {
     public var sectionsValue: [GemListSection] = []
-    public var securitySectionsValue: [GemSecuritySection] = []
+    public var securitySectionsValue: [GemListSection] = []
     public var perpetualDefaults = GemPerpetualDefaults(leverage: 3, takeProfitPercent: 25, stopLossPercent: 10)
     public var preferencesSections: [GemPreferencesSection] = []
     public var setDefaultsError: Error?
 
     public private(set) var storedDefaults: [GemPerpetualDefaults] = []
-    public private(set) var securitySectionsCalls: [Bool] = []
+    public private(set) var securitySectionsCalls: [GemSecurityInput] = []
     public private(set) var perpetualsEnabledCalls: [Bool] = []
 
     public init() {}
@@ -396,8 +396,8 @@ public final class GemSettingsServiceMock: GemSettingsServiceProtocol, @unchecke
         sectionsValue
     }
 
-    public func securitySections(authenticationEnabled: Bool) -> [GemSecuritySection] {
-        securitySectionsCalls.append(authenticationEnabled)
+    public func securitySections(input: GemSecurityInput) -> [GemListSection] {
+        securitySectionsCalls.append(input)
         return securitySectionsValue
     }
 
