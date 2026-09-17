@@ -25,6 +25,7 @@ import com.gemwallet.android.ui.theme.alpha10
 import com.gemwallet.android.ui.theme.listItemIconSize
 import com.gemwallet.android.ui.theme.paddingHalfSmall
 import com.gemwallet.android.ui.theme.pendingColor
+import com.gemwallet.android.ui.theme.secondaryFaded
 import com.gemwallet.android.ui.theme.space2
 import com.gemwallet.android.ui.theme.space6
 import com.wallet.core.primitives.AssetId
@@ -52,6 +53,7 @@ enum class ListItemTextStyle {
     Negative,
     Warning,
     Primary,
+    Faded,
 }
 
 enum class ListItemSymbol {
@@ -85,6 +87,7 @@ fun ListItemTextStyle.color(): Color = when (this) {
     ListItemTextStyle.Negative -> MaterialTheme.colorScheme.error
     ListItemTextStyle.Warning -> pendingColor
     ListItemTextStyle.Primary -> MaterialTheme.colorScheme.primary
+    ListItemTextStyle.Faded -> MaterialTheme.colorScheme.secondaryFaded
 }
 
 @Composable
@@ -165,6 +168,7 @@ private fun TitleTag(text: String, style: ListItemTextStyle, type: ListItemTagTy
             style = MaterialTheme.typography.bodyMedium,
         )
         ListItemTextStyle.Body,
-        ListItemTextStyle.Secondary -> Badge(text)
+        ListItemTextStyle.Secondary,
+        ListItemTextStyle.Faded -> Badge(text)
     }
 }
