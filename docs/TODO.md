@@ -16,13 +16,6 @@ Ordered by the lines it removes; work these before the sections below. The dupli
 
 The last places where an app reaches the API, a rule or a table without going through Core. The widget boundary that used to protect them was a missing linker flag, closed on 2026-09-16 (see the ledger), so each is now an ordinary move.
 
-- **O42** **S** `ios/Gem/Navigation/NavigationHandler.swift` holds the concrete `GemDeeplinkService` and `GemPaymentService` — take the generated protocols.
-- **O43** **S** `AuthenticatedRequestProvider`, `DevicePlatform` (`GemDeviceKeyService`), `BiometryAuthenticationService` (`GemSecurityService`) and `WidgetPriceService` (`GemWidgetService`, `GemApiClient`) hold concrete Core classes — the protocols, so the test kits substitute them.
-- **O44** **S** `ios/Packages/GemstoneServices/Sources/GemNodeService+WebSocket.swift` extends the concrete `GemNodeService` — the socket wiring belongs on the service that owns the stream, reached through its protocol.
-- **O45** **S** `HyperliquidObserverService` imports the concrete `GemPerpetualService` — the protocol.
-- **R19** **M** `ios/Features/Support/.../SupportMessageBubbleViewModel.swift` parses links out of the message text app-side (`displayContent.links`, `hasLinks`, `hasImages`) — a rule with no test that flips; `GemSupportService` returns the message display (text, links, images, status).
-- **K10** **S** Fiat provider status mappers end in `_ => None` (`banxa/mapper.rs:45,144`, `mercuryo/mapper.rs:54,88`, `moonpay/mapper.rs:55`, `paybis/mapper.rs:109,159`, `transak/mapper.rs:56,58,183`, `flashnet/mapper.rs:29`) — an unknown provider status becomes no state and the transaction shows nothing; enumerate the wire values and map the rest to an explicit `Unknown`.
-- **K11** **S** `opensea/mapper.rs:65`, `gem_solana/staking_mapper.rs:62`, `gem_sui/staking_mapper.rs:27` and `swapper/chainflip/chain.rs:23` return `None` from `_ =>` on chain or status — enumerate.
 
 
 ## 2. Decisions still made twice
