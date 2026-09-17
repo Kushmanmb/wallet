@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -34,6 +35,8 @@ import com.gemwallet.android.features.settings.settings.viewmodels.PreferencesVi
 import com.gemwallet.android.features.settings.settings.viewmodels.models.PreferencesRowUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.LinkItem
+import com.gemwallet.android.ui.components.list_item.ListItem
+import com.gemwallet.android.ui.components.list_item.ListItemDefaults
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.PropertyDataText
 import com.gemwallet.android.ui.components.screen.Scene
@@ -63,44 +66,32 @@ fun PreferencesScene(
                 itemsIndexed(section) { index, row ->
                     val listPosition = ListPosition.getPosition(index, section.size)
                     when (row) {
-                        is PreferencesRowUIModel.Link -> LinkItem(
-                            title = stringResource(row.title),
-                            painter = row.icon?.let { painterResource(it) },
+                        is PreferencesRowUIModel.Link -> ListItem(
+                            model = row.model,
                             listPosition = listPosition,
-                            trailingContent = row.trailing?.let { trailing ->
-                                @Composable {
-                                    PropertyDataText(
-                                        text = trailing,
-                                        badge = { DataBadgeChevron() },
-                                    )
-                                }
-                            },
-                            onClick = { onAction(row.action) },
+                            modifier = Modifier.clickable { onAction(row.action) },
+                            minHeight = ListItemDefaults.plainMinHeight,
+                            accessory = { DataBadgeChevron() },
                         )
                         is PreferencesRowUIModel.Language -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             val language = configuration.locales
                                 .get(0).displayLanguage.replaceFirstChar {
                                     if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
                                 }
-                            LinkItem(
-                                title = stringResource(row.title),
-                                painter = row.icon?.let { painterResource(it) },
+                            ListItem(
+                                model = row.model.copy(subtitle = language),
                                 listPosition = listPosition,
-                                trailingContent = {
-                                    PropertyDataText(
-                                        text = language,
-                                        badge = { DataBadgeChevron() },
-                                    )
-                                },
-                                onClick = {
+                                modifier = Modifier.clickable {
                                     val intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS)
                                     intent.data = Uri.fromParts("package", context.packageName, null)
                                     context.startActivity(intent)
-                                }
+                                },
+                                minHeight = ListItemDefaults.plainMinHeight,
+                                accessory = { DataBadgeChevron() },
                             )
                         }
                         is PreferencesRowUIModel.AppearancePicker -> OptionPickerLinkItem(
-                            title = stringResource(row.title),
+                            title = row.title,
                             current = row.current,
                             options = Appearance.entries,
                             listPosition = listPosition,
@@ -109,20 +100,20 @@ fun PreferencesScene(
                             label = { stringResource(it.stringRes()) },
                             onSelect = { viewModel.setAppearance(it) },
                         )
-                        is PreferencesRowUIModel.PerpetualsSwitch -> LinkItem(
-                            title = stringResource(row.title),
-                            painter = row.icon?.let { painterResource(it) },
+                        is PreferencesRowUIModel.PerpetualsSwitch -> ListItem(
+                            model = row.model,
                             listPosition = listPosition,
-                            trailingContent = {
+                            modifier = Modifier.clickable { viewModel.setPerpetualEnabled(!row.isEnabled) },
+                            minHeight = ListItemDefaults.plainMinHeight,
+                            accessory = {
                                 Switch(
                                     checked = row.isEnabled,
                                     onCheckedChange = viewModel::setPerpetualEnabled,
                                 )
                             },
-                            onClick = { viewModel.setPerpetualEnabled(!row.isEnabled) },
                         )
                         is PreferencesRowUIModel.Picker -> OptionPickerLinkItem(
-                            title = stringResource(row.title),
+                            title = row.title,
                             current = row.current,
                             options = row.options.map { it.value },
                             listPosition = listPosition,

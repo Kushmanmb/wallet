@@ -87,7 +87,7 @@ class PreferencesViewModel @Inject constructor(
     }
 
     val rows = combine(state, appearance, perpetualValues) { state, appearance, perpetual ->
-        state.sections.map { section -> section.rows.map { it.uiModel(state, appearance, perpetual, perpetualOptions) } }
+        state.sections.map { section -> section.rows.map { it.uiModel(context, state, appearance, perpetual, perpetualOptions) } }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun setPerpetualOption(setting: PerpetualSetting, value: Int) = when (setting) {

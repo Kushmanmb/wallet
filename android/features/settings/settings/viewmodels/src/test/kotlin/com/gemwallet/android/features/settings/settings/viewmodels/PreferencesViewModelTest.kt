@@ -75,12 +75,12 @@ class PreferencesViewModelTest {
 
     @Test
     fun `the rows follow the selected currency`() = runTest(testDispatcher) {
-        assertEquals("🏳 USD", currencyRow(viewModel.rows.first { it.isNotEmpty() }).trailing)
+        assertEquals("🏳 USD", currencyRow(viewModel.rows.first { it.isNotEmpty() }).model.subtitle)
 
         currency.value = Currency.GBP
         advanceUntilIdle()
 
-        assertEquals("🏳 GBP", currencyRow(viewModel.rows.first { currencyRow(it).trailing != "🏳 USD" }).trailing)
+        assertEquals("🏳 GBP", currencyRow(viewModel.rows.first { currencyRow(it).model.subtitle != "🏳 USD" }).model.subtitle)
     }
 
     private fun currencyRow(rows: List<List<PreferencesRowUIModel>>) = rows.first().first() as PreferencesRowUIModel.Link
