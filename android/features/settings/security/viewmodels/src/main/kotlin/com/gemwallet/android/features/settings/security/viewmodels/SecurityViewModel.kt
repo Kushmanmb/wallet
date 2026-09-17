@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.settings.security.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
@@ -8,6 +9,7 @@ import com.gemwallet.android.features.settings.security.viewmodels.models.LockPe
 import com.gemwallet.android.features.settings.security.viewmodels.models.SecurityRowUIModel
 import com.gemwallet.android.features.settings.security.viewmodels.models.uiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +25,7 @@ import uniffi.gemstone.lockPeriods
 class SecurityViewModel @Inject constructor(
     private val userConfig: UserConfig,
     private val settingsService: GemSettingsServiceInterface,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val authRequired = MutableStateFlow(userConfig.authRequired())
@@ -35,7 +38,7 @@ class SecurityViewModel @Inject constructor(
 
     private fun rows(authRequired: Boolean, lockInterval: Int, hideBalances: Boolean): List<List<SecurityRowUIModel>> =
         settingsService.securitySections(authRequired).map { section ->
-            section.rows.mapNotNull { it.uiModel(authRequired, lockInterval, hideBalances, lockPeriods) }
+            section.rows.mapNotNull { it.uiModel(context, authRequired, lockInterval, hideBalances, lockPeriods) }
         }
 
     fun setAuthRequired(required: Boolean) {

@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.settings.security.viewmodels
 
+import android.content.Context
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.features.settings.security.viewmodels.models.SecurityRowUIModel
 import com.gemwallet.android.ui.R
@@ -53,27 +54,27 @@ class SecurityViewModelTest {
     @Test
     fun `the rows come from core with the authentication flag`() {
         val settings = settings()
-        SecurityViewModel(userConfig(authRequired = true), settings)
+        SecurityViewModel(userConfig(authRequired = true), settings, context())
 
         verify { settings.securitySections(true) }
     }
 
     @Test
     fun `the stored preferences are what the scene starts from`() = runTest(dispatcher) {
-        val model = SecurityViewModel(userConfig(authRequired = true, lockMinutes = 5, hideBalances = true), settings())
+        val model = SecurityViewModel(userConfig(authRequired = true, lockMinutes = 5, hideBalances = true), settings(), context())
         advanceUntilIdle()
 
         val rows = model.rows.value.flatten()
-        assertEquals(SecurityRowUIModel.Authentication(true), rows[0])
-        assertEquals(R.string.lock_five_minutes, (rows[1] as SecurityRowUIModel.LockPeriod).current)
+        assertEquals(true, (rows[0] as SecurityRowUIModel.Authentication).isEnabled)
+        assertEquals(R.string.lock_five_minutes.toString(), (rows[1] as SecurityRowUIModel.LockPeriod).model.subtitle)
         assertEquals(listOf(5), (rows[1] as SecurityRowUIModel.LockPeriod).options.filter { it.isSelected }.map { it.minutes })
-        assertEquals(SecurityRowUIModel.HideBalance(true), rows[2])
+        assertEquals(true, (rows[2] as SecurityRowUIModel.HideBalance).isEnabled)
     }
 
     @Test
     fun `changing the lock interval and the balance privacy writes through`() = runTest(dispatcher) {
         val config = userConfig()
-        val model = SecurityViewModel(config, settings())
+        val model = SecurityViewModel(config, settings(), context())
 
         model.setAuthRequired(true)
         model.setLockInterval(15)
@@ -86,4 +87,7 @@ class SecurityViewModelTest {
         coVerify { config.setLockInterval(15) }
         coVerify { config.hideBalances() }
     }
+
+    private fun context(): Context = mockk { every { getString(any()) } answers { firstArg<Int>().toString() } }
+
 }

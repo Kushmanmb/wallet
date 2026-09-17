@@ -24,6 +24,8 @@ import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualPositi
 import com.gemwallet.android.features.perpetual.viewmodels.model.infoListItem
 import com.gemwallet.android.features.perpetual.viewmodels.model.positionRow
 import com.gemwallet.android.features.perpetual.viewmodels.model.uiModel
+import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.components.perpetual.listItem
 import com.gemwallet.android.ui.models.StateViewType
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.ConfirmTransactionAction
@@ -48,7 +50,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -115,6 +116,9 @@ class PerpetualDetailsViewModel @Inject constructor(
             perpetual?.let { getPerpetualPosition.getPositionByPerpetual(walletId, it.id) } ?: flowOf(null)
         }
         .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val positionListItem: StateFlow<ListItemModel?> = position.map { it?.listItem(context) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val sections: StateFlow<List<PerpetualDetailsSectionUIModel>> = combine(perpetual, position) { perpetual, position ->

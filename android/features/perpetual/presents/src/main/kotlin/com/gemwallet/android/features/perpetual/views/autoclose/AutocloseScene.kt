@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import com.gemwallet.android.features.perpetual.views.components.PerpetualPositionItem
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.PercentSuggestionsBar
 import com.gemwallet.android.ui.components.buttons.MainActionButton
@@ -31,6 +30,7 @@ import com.wallet.core.primitives.TpslType
 internal fun AutocloseScene(
     model: AutocloseUIModel,
     priceRows: List<ListItemModel>,
+    positionListItem: ListItemModel?,
     takeProfitText: String,
     stopLossText: String,
     onAction: (AutocloseAction) -> Unit,
@@ -76,10 +76,7 @@ internal fun AutocloseScene(
     ) {
         LazyColumn {
             item {
-                PerpetualPositionItem(
-                    data = model.position,
-                    listPosition = ListPosition.Single,
-                )
+                positionListItem?.let { ListItem(model = it, listPosition = ListPosition.Single) }
                 Spacer16()
             }
             item {

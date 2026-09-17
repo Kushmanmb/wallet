@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,19 +25,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gemwallet.android.features.settings.settings.presents.localization.stringRes
 import com.gemwallet.android.features.settings.settings.viewmodels.PreferencesViewModel
+import com.gemwallet.android.features.settings.settings.viewmodels.localization.stringRes
 import com.gemwallet.android.features.settings.settings.viewmodels.models.PreferencesRowUIModel
 import com.gemwallet.android.ui.R
-import com.gemwallet.android.ui.components.list_item.LinkItem
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemDefaults
+import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
-import com.gemwallet.android.ui.components.list_item.property.PropertyDataText
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.ListPosition
@@ -91,12 +88,10 @@ fun PreferencesScene(
                             )
                         }
                         is PreferencesRowUIModel.AppearancePicker -> OptionPickerLinkItem(
-                            title = row.title,
+                            model = row.model,
                             current = row.current,
                             options = Appearance.entries,
                             listPosition = listPosition,
-                            icon = row.icon,
-                            indented = false,
                             label = { stringResource(it.stringRes()) },
                             onSelect = { viewModel.setAppearance(it) },
                         )
@@ -113,7 +108,7 @@ fun PreferencesScene(
                             },
                         )
                         is PreferencesRowUIModel.Picker -> OptionPickerLinkItem(
-                            title = row.title,
+                            model = row.model,
                             current = row.current,
                             options = row.options.map { it.value },
                             listPosition = listPosition,
@@ -128,23 +123,20 @@ fun PreferencesScene(
 }
 @Composable
 private fun <T> OptionPickerLinkItem(
-    title: String,
+    model: ListItemModel,
     current: T,
     options: List<T>,
     listPosition: ListPosition,
     label: @Composable (T) -> String,
     onSelect: (T) -> Unit,
-    @DrawableRes icon: Int? = null,
-    indented: Boolean = true,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    LinkItem(
-        title = title,
-        painter = icon?.let { painterResource(id = it) },
+    ListItem(
+        model = model,
         listPosition = listPosition,
-        indented = indented,
-        trailingContent = {
-            PropertyDataText(text = label(current), badge = { DataBadgeChevron() })
+        modifier = Modifier.clickable { expanded = true },
+        accessory = {
+            DataBadgeChevron()
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
@@ -171,6 +163,5 @@ private fun <T> OptionPickerLinkItem(
                 }
             }
         },
-        onClick = { expanded = true },
     )
 }

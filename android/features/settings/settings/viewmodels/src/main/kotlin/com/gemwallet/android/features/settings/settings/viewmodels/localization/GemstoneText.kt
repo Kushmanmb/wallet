@@ -2,6 +2,7 @@ package com.gemwallet.android.features.settings.settings.viewmodels.localization
 
 import androidx.annotation.StringRes
 import com.gemwallet.android.ui.R
+import com.wallet.core.primitives.Appearance
 import uniffi.gemstone.GemPreferencesRow
 import uniffi.gemstone.GemSettingsRow
 
@@ -29,4 +30,11 @@ internal fun GemSettingsRow.stringRes(): Int = when (this) {
     GemSettingsRow.REWARDS -> R.string.rewards_title
     GemSettingsRow.ABOUT_US -> R.string.settings_aboutus
     GemSettingsRow.DEVELOPER -> R.string.settings_developer
+}
+
+@StringRes
+fun Appearance.stringRes(): Int = when (this) {
+    Appearance.System -> R.string.settings_appearance_system
+    Appearance.Light -> R.string.settings_appearance_light
+    Appearance.Dark -> R.string.settings_appearance_dark
 }

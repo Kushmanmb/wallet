@@ -16,6 +16,8 @@ import com.gemwallet.android.features.settings.contacts.viewmodels.models.Contac
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.ManageContactPage
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.ManageContactState
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.ManageContactUIState
+import com.gemwallet.android.features.settings.contacts.viewmodels.models.addAddressListItem
+import com.gemwallet.android.features.settings.contacts.viewmodels.models.rows
 import com.gemwallet.android.ui.components.image.EmojiAvatarRenderer
 import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.models.name.AddressInputModel
@@ -35,10 +37,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemAddressService
 import uniffi.gemstone.GemContactAddressInput
 import uniffi.gemstone.GemContactAvatar
 import uniffi.gemstone.GemContactInput
-import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemManageContactServiceInterface
 import uniffi.gemstone.GemNameServiceInterface
 import uniffi.gemstone.contactInitials
@@ -50,6 +52,7 @@ class ManageContactViewModel @Inject constructor(
     private val service: GemManageContactServiceInterface,
     nameService: GemNameServiceInterface,
     savedStateHandle: SavedStateHandle,
+    private val addressService: GemAddressService,
 ) : ViewModel() {
 
     private sealed interface Mode {
@@ -81,6 +84,8 @@ class ManageContactViewModel @Inject constructor(
             description = current.description,
             avatar = current.avatar,
             addresses = current.addresses,
+            addressRows = current.addresses.rows(addressService),
+            addAddressListItem = addAddressListItem(context),
             page = current.page,
             isSaving = current.isSaving,
             saved = current.saved,

@@ -12,14 +12,17 @@ import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.theme.pendingColor
 import com.wallet.core.primitives.PerpetualDirection
+import com.wallet.core.primitives.VerificationStatus
 import uniffi.gemstone.GemDelegationTone
 import uniffi.gemstone.GemEmptyStateImage
+import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemHeaderButtonKind
 import uniffi.gemstone.GemNameRecordState
 import uniffi.gemstone.GemPerpetualChartLineKind
 import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemValueTone
 import uniffi.gemstone.GemVerificationLevel
+import uniffi.gemstone.SwapPriceImpactType
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
 
@@ -75,6 +78,25 @@ fun GemTransactionStateTone.textStyle(): ListItemTextStyle = when (this) {
     GemTransactionStateTone.REFUNDED -> ListItemTextStyle.Warning
     GemTransactionStateTone.SUCCESS -> ListItemTextStyle.Positive
     GemTransactionStateTone.ERROR -> ListItemTextStyle.Negative
+}
+
+fun SwapPriceImpactType?.textStyle(): ListItemTextStyle = when (this) {
+    SwapPriceImpactType.POSITIVE -> ListItemTextStyle.Positive
+    SwapPriceImpactType.MEDIUM -> ListItemTextStyle.Warning
+    SwapPriceImpactType.HIGH -> ListItemTextStyle.Negative
+    SwapPriceImpactType.LOW,
+    null -> ListItemTextStyle.Secondary
+}
+
+fun VerificationStatus.textStyle(): ListItemTextStyle = when (this) {
+    VerificationStatus.Suspicious -> ListItemTextStyle.Negative
+    VerificationStatus.Unverified,
+    VerificationStatus.Verified -> ListItemTextStyle.Warning
+}
+
+fun GemFiatTransactionBadge.textStyle(): ListItemTextStyle = when (this) {
+    GemFiatTransactionBadge.PENDING -> ListItemTextStyle.Warning
+    GemFiatTransactionBadge.FAILED -> ListItemTextStyle.Negative
 }
 
 fun GemDelegationTone.textStyle(): ListItemTextStyle = when (this) {

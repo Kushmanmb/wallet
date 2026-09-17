@@ -86,4 +86,6 @@ private fun ListItemSymbol.vector(): ImageVector = when (this) {
     ListItemSymbol.Buy -> AppIcons.Buy
     ListItemSymbol.Swap -> AppIcons.SwapVert
     ListItemSymbol.Receive -> AppIcons.Receive
+    ListItemSymbol.Add -> AppIcons.Add
+    ListItemSymbol.Article -> AppIcons.Article
 }

@@ -12,6 +12,7 @@ import com.gemwallet.android.math.numberFormat
 import com.gemwallet.android.model.NumericFormatter
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.components.perpetual.listItem
 import com.gemwallet.android.ui.models.navigation.requireAssetId
 import com.gemwallet.android.ui.models.perpetual.autoclose.AutocloseUIModel
 import com.gemwallet.android.ui.models.perpetual.autoclose.AutocloseUIModelFactory
@@ -85,6 +86,9 @@ class AutocloseViewModel @Inject constructor(
     ) { position, takeProfit, stopLoss, attempted ->
         position?.let { buildUiModel(it, takeProfit, stopLoss, attempted) }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val positionListItem: StateFlow<ListItemModel?> = uiModel.map { it?.position?.listItem(context) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val priceRows: StateFlow<List<ListItemModel>> = uiModel.map { model ->
         listOfNotNull(

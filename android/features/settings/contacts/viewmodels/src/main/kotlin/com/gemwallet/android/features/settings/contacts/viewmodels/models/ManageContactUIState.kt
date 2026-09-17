@@ -1,10 +1,11 @@
 package com.gemwallet.android.features.settings.contacts.viewmodels.models
 
-import uniffi.gemstone.GemContactAddressField
-import uniffi.gemstone.contactAddressFields
-import uniffi.gemstone.GemNameRecordState
+import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.ContactAddress
+import uniffi.gemstone.GemContactAddressField
+import uniffi.gemstone.GemNameRecordState
+import uniffi.gemstone.contactAddressFields
 
 enum class ManageContactPage {
     Form,
@@ -20,6 +21,8 @@ data class ManageContactUIState(
     val description: String = "",
     val avatar: ContactAvatarState = ContactAvatarState.Empty,
     val addresses: List<ContactAddress> = emptyList(),
+    val addressRows: List<ContactAddressRowUIModel> = emptyList(),
+    val addAddressListItem: ListItemModel? = null,
     val page: ManageContactPage = ManageContactPage.Form,
     val addressInput: ContactAddressInput? = null,
     val isSaving: Boolean = false,

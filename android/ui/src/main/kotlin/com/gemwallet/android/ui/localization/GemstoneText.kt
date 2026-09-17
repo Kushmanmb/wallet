@@ -73,13 +73,11 @@ fun GemTransactionTitle.string(context: Context): String = when (this) {
     GemTransactionTitle.PerpetualModify -> context.getString(R.string.perpetual_modify)
 }
 
-@Composable
-fun GemFiatTransactionBadge.string(): String = stringResource(
-    when (this) {
-        GemFiatTransactionBadge.PENDING -> R.string.transaction_status_pending
-        GemFiatTransactionBadge.FAILED -> R.string.transaction_status_failed
-    }
-)
+@StringRes
+fun GemFiatTransactionBadge.stringRes(): Int = when (this) {
+    GemFiatTransactionBadge.PENDING -> R.string.transaction_status_pending
+    GemFiatTransactionBadge.FAILED -> R.string.transaction_status_failed
+}
 
 fun GemWalletSubtitle.string(context: Context): String = when (this) {
     GemWalletSubtitle.Multicoin -> context.getString(R.string.wallet_multicoin)

@@ -67,6 +67,8 @@ enum class ListItemSymbol {
     Buy,
     Swap,
     Receive,
+    Add,
+    Article,
 }
 
 enum class ListItemTagType {

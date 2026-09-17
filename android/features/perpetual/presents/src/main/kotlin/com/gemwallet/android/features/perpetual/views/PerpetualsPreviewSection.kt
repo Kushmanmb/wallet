@@ -8,7 +8,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.features.perpetual.viewmodels.PerpetualsPreviewViewModel
-import com.gemwallet.android.features.perpetual.views.components.PerpetualPositionItem
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.clickable
 import com.gemwallet.android.ui.components.list_item.ListItem
@@ -38,8 +37,8 @@ fun PerpetualsPreviewSection(
             )
         } else {
             positions.forEachIndexed { index, position ->
-                PerpetualPositionItem(
-                    data = position,
+                ListItem(
+                    model = position.model,
                     listPosition = ListPosition.getPosition(index, positions.size),
                     modifier = Modifier.clickable { onOpenPerpetualDetails(position.asset.id) },
                 )

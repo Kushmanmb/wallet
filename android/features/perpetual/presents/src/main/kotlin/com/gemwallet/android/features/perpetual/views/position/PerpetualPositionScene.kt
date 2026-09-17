@@ -49,13 +49,13 @@ import com.wallet.core.primitives.PerpetualOrderType
 import com.wallet.core.primitives.PerpetualPosition
 import com.wallet.core.primitives.PerpetualProvider
 import com.wallet.core.primitives.PerpetualTriggerOrder
-import com.wallet.core.primitives.TransactionId
 import uniffi.gemstone.GemValueTone
 
 @Composable
 internal fun PerpetualPositionScene(
     perpetual: PerpetualDetailsDataAggregate?,
     position: PerpetualPositionDetailsDataAggregate?,
+    positionListItem: ListItemModel?,
     transactions: List<TransactionDataAggregate>,
     chart: StateViewType<List<ChartCandleStick>>,
     period: ChartPeriod,
@@ -103,7 +103,7 @@ internal fun PerpetualPositionScene(
                         is PerpetualDetailsSectionUIModel.Position -> {
                             item { SubheaderItem(section.title) }
                             positionProperties(
-                                position = position,
+                                position = positionListItem,
                                 rows = section.rows,
                                 onAutocloseClick = { onAction(PerpetualDetailsAction.Autoclose) },
                             )
@@ -227,6 +227,7 @@ private fun PerpetualPositionScenePreview() {
         PerpetualPositionScene(
             perpetual = samplePerpetual,
             position = samplePosition,
+            positionListItem = null,
             transactions = emptyList(),
             chart = StateViewType.Data(chartData),
             period = ChartPeriod.Day,

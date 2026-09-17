@@ -1,7 +1,6 @@
 package com.gemwallet.android.features.settings.settings.viewmodels.models
 
 import android.content.Context
-import androidx.annotation.DrawableRes
 import com.gemwallet.android.features.settings.settings.viewmodels.localization.stringRes
 import com.gemwallet.android.features.settings.settings.viewmodels.style.icon
 import com.gemwallet.android.ui.components.list_item.ListItemImage
@@ -14,9 +13,9 @@ import uniffi.gemstone.GemPreferencesState
 sealed interface PreferencesRowUIModel {
     data class Link(val model: ListItemModel, val action: PreferencesAction) : PreferencesRowUIModel
     data class Language(val model: ListItemModel) : PreferencesRowUIModel
-    data class AppearancePicker(val title: String, @DrawableRes val icon: Int?, val current: Appearance) : PreferencesRowUIModel
+    data class AppearancePicker(val model: ListItemModel, val current: Appearance) : PreferencesRowUIModel
     data class PerpetualsSwitch(val model: ListItemModel, val isEnabled: Boolean) : PreferencesRowUIModel
-    data class Picker(val title: String, val setting: PerpetualSetting, val current: Int, val options: List<PickerOption>) : PreferencesRowUIModel
+    data class Picker(val model: ListItemModel, val setting: PerpetualSetting, val current: Int, val options: List<PickerOption>) : PreferencesRowUIModel
 }
 
 enum class PerpetualSetting { Leverage, TakeProfit, StopLoss }
@@ -40,13 +39,13 @@ internal fun GemPreferencesRow.uiModel(
 ): PreferencesRowUIModel = when (this) {
     GemPreferencesRow.CURRENCY -> PreferencesRowUIModel.Link(listItem(context, subtitle = state.currency.text()), PreferencesAction.Currencies)
     GemPreferencesRow.LANGUAGE -> PreferencesRowUIModel.Language(listItem(context))
-    GemPreferencesRow.APPEARANCE -> PreferencesRowUIModel.AppearancePicker(context.getString(stringRes()), icon(), appearance)
+    GemPreferencesRow.APPEARANCE -> PreferencesRowUIModel.AppearancePicker(listItem(context, subtitle = context.getString(appearance.stringRes())), appearance)
     GemPreferencesRow.NETWORKS -> PreferencesRowUIModel.Link(listItem(context), PreferencesAction.Networks)
     GemPreferencesRow.CONTACTS -> PreferencesRowUIModel.Link(listItem(context), PreferencesAction.Contacts)
     GemPreferencesRow.PERPETUALS -> PreferencesRowUIModel.PerpetualsSwitch(listItem(context), perpetual.isEnabled)
-    GemPreferencesRow.PERPETUAL_LEVERAGE -> PreferencesRowUIModel.Picker(context.getString(stringRes()), PerpetualSetting.Leverage, perpetual.leverage, options.leverage)
-    GemPreferencesRow.PERPETUAL_TAKE_PROFIT -> PreferencesRowUIModel.Picker(context.getString(stringRes()), PerpetualSetting.TakeProfit, perpetual.takeProfit, options.takeProfit)
-    GemPreferencesRow.PERPETUAL_STOP_LOSS -> PreferencesRowUIModel.Picker(context.getString(stringRes()), PerpetualSetting.StopLoss, perpetual.stopLoss, options.stopLoss)
+    GemPreferencesRow.PERPETUAL_LEVERAGE -> PreferencesRowUIModel.Picker(listItem(context, subtitle = options.leverage.label(perpetual.leverage)), PerpetualSetting.Leverage, perpetual.leverage, options.leverage)
+    GemPreferencesRow.PERPETUAL_TAKE_PROFIT -> PreferencesRowUIModel.Picker(listItem(context, subtitle = options.takeProfit.label(perpetual.takeProfit)), PerpetualSetting.TakeProfit, perpetual.takeProfit, options.takeProfit)
+    GemPreferencesRow.PERPETUAL_STOP_LOSS -> PreferencesRowUIModel.Picker(listItem(context, subtitle = options.stopLoss.label(perpetual.stopLoss)), PerpetualSetting.StopLoss, perpetual.stopLoss, options.stopLoss)
 }
 
 private fun GemPreferencesRow.listItem(context: Context, subtitle: String? = null): ListItemModel = ListItemModel(
@@ -54,3 +53,5 @@ private fun GemPreferencesRow.listItem(context: Context, subtitle: String? = nul
     subtitle = subtitle,
     image = icon()?.let { ListItemImage.Drawable(it) },
 )
+
+private fun List<PickerOption>.label(value: Int): String? = firstOrNull { it.value == value }?.label

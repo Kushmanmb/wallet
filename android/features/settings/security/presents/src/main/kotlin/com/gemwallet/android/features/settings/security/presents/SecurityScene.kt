@@ -27,9 +27,8 @@ import com.gemwallet.android.features.settings.security.viewmodels.SecurityViewM
 import com.gemwallet.android.features.settings.security.viewmodels.models.SecurityRowUIModel
 import com.gemwallet.android.model.AuthRequest
 import com.gemwallet.android.ui.R
-import com.gemwallet.android.ui.components.list_item.property.PropertyDataText
-import com.gemwallet.android.ui.components.list_item.property.PropertyItem
-import com.gemwallet.android.ui.components.list_item.property.PropertyTitleText
+import com.gemwallet.android.ui.components.list_item.ListItem
+import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.ListPosition
@@ -53,9 +52,9 @@ fun SecurityScene(
                 itemsIndexed(section) { index, row ->
                     val listPosition = ListPosition.getPosition(index, section.size)
                     when (row) {
-                        is SecurityRowUIModel.Authentication -> EnablePasscode(row.isEnabled, listPosition, viewModel::setAuthRequired)
+                        is SecurityRowUIModel.Authentication -> EnablePasscode(row, listPosition, viewModel::setAuthRequired)
                         is SecurityRowUIModel.LockPeriod -> RequiredAuthDelay(row, listPosition, viewModel::setLockInterval)
-                        is SecurityRowUIModel.HideBalance -> HideBalanceItem(row.isEnabled, listPosition, viewModel::setHideBalances)
+                        is SecurityRowUIModel.HideBalance -> HideBalanceItem(row, listPosition, viewModel::setHideBalances)
                     }
                 }
             }
@@ -65,16 +64,17 @@ fun SecurityScene(
 
 @Composable
 private fun EnablePasscode(
-    authRequired: Boolean,
+    row: SecurityRowUIModel.Authentication,
     listPosition: ListPosition,
     onAuthRequired: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
-    PropertyItem(
-        title = { PropertyTitleText(R.string.settings_enable_passcode) },
-        data = {
+    ListItem(
+        model = row.model,
+        listPosition = listPosition,
+        accessory = {
             Switch(
-                authRequired,
+                row.isEnabled,
                 onCheckedChange = {
                     context.requestAuth(AuthRequest.Default) {
                         onAuthRequired(it)
@@ -82,7 +82,6 @@ private fun EnablePasscode(
                 }
             )
         },
-        listPosition = listPosition,
     )
 }
 
@@ -93,11 +92,12 @@ private fun RequiredAuthDelay(
     onSelect: (Int) -> Unit,
 ) {
     var isShowLockDelays by remember { mutableStateOf(false) }
-    PropertyItem(
+    ListItem(
+        model = row.model,
+        listPosition = listPosition,
         modifier = Modifier.clickable(onClick = { isShowLockDelays = true }),
-        title = { PropertyTitleText(R.string.lock_require_authentication) },
-        data = {
-            PropertyDataText(text = stringResource(row.current))
+        accessory = {
+            DataBadgeChevron()
             DropdownMenu(
                 expanded = isShowLockDelays,
                 onDismissRequest = { isShowLockDelays = false },
@@ -124,24 +124,23 @@ private fun RequiredAuthDelay(
                 }
             }
         },
-        listPosition = listPosition,
     )
 }
 
 @Composable
 private fun HideBalanceItem(
-    hideBalances: Boolean,
+    row: SecurityRowUIModel.HideBalance,
     listPosition: ListPosition,
     onHide: () -> Unit,
 ) {
-    PropertyItem(
-        title = { PropertyTitleText(R.string.settings_hide_balance) },
-        data = {
+    ListItem(
+        model = row.model,
+        listPosition = listPosition,
+        accessory = {
             Switch(
-                checked = hideBalances,
+                checked = row.isEnabled,
                 onCheckedChange = { onHide() }
             )
         },
-        listPosition = listPosition,
     )
 }
