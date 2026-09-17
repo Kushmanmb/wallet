@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.image.ListItemImageView
@@ -40,6 +41,7 @@ data class ListItemModel(
     val subtitle: String? = null,
     val subtitleStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
     val subtitleExtra: String? = null,
+    val subtitleExtraStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
     val image: ListItemImage? = null,
     val info: InfoSheetEntity? = null,
 )
@@ -64,6 +66,7 @@ sealed interface ListItemImage {
     data class Stored(val name: String, val placeholder: String? = null) : ListItemImage
     data class Emoji(val glyph: String, val backgroundColor: Int? = null) : ListItemImage
     data class Initials(val text: String) : ListItemImage
+    data class Icon(val vector: ImageVector) : ListItemImage
     data class Drawable(@DrawableRes val id: Int, val isRounded: Boolean = false) : ListItemImage
 }
 
@@ -119,7 +122,7 @@ fun ListItem(
                                 maxLines = 1,
                             )
                         }
-                        model.subtitleExtra?.let { ListItemSupportText(it) }
+                        model.subtitleExtra?.let { ListItemSupportText(text = it, color = model.subtitleExtraStyle.color()) }
                     }
                 }
                 accessory?.invoke()

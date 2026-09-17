@@ -33,6 +33,27 @@ fun AddressPropertyItem(
     explorerLink: BlockExplorerLink? = null,
     listPosition: ListPosition = ListPosition.Middle,
 ) {
+    AddressPropertyItem(
+        title = stringResource(title),
+        displayText = displayText,
+        copyValue = copyValue,
+        icon = icon,
+        placeholderText = placeholderText,
+        explorerLink = explorerLink,
+        listPosition = listPosition,
+    )
+}
+
+@Composable
+fun AddressPropertyItem(
+    title: String,
+    displayText: String,
+    copyValue: String,
+    icon: Any? = null,
+    placeholderText: String? = null,
+    explorerLink: BlockExplorerLink? = null,
+    listPosition: ListPosition = ListPosition.Middle,
+) {
     var isExpanded by remember { mutableStateOf(false) }
     val clipboardManager = LocalContext.current.clipboardManager()
     val context = LocalContext.current
@@ -46,7 +67,7 @@ fun AddressPropertyItem(
         content = { modifier ->
             PropertyItem(
                 modifier = modifier,
-                title = { PropertyTitleText(title) },
+                title = { PropertyTitleText(text = title) },
                 data = {
                     PropertyDataText(
                         text = displayText,

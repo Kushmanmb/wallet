@@ -3,6 +3,8 @@ package com.gemwallet.android.ui.components.image
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +38,12 @@ fun ListItemImageView(
             scale = AvatarScale.EMOJI,
         )
         is ListItemImage.Initials -> InitialsAvatar(text = image.text, size = size, modifier = modifier, placeholder = AppIcons.Person)
+        is ListItemImage.Icon -> Icon(
+            imageVector = image.vector,
+            contentDescription = null,
+            modifier = modifier.size(size),
+            tint = MaterialTheme.colorScheme.onSurface,
+        )
         is ListItemImage.Drawable -> Image(
             painter = painterResource(image.id),
             contentDescription = null,
