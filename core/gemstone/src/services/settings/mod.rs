@@ -4,17 +4,15 @@ pub(crate) mod testkit;
 
 use std::sync::Arc;
 
-use primitives::{Currency, Wallet};
+use primitives::{Currency, Release, Wallet};
 
+use crate::models::list::GemListSection;
 use crate::services::currency;
 use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_session;
 
-pub use rules::{
-    GemAboutRow, GemAboutSection, GemPerpetualDefaults, GemPreferencesRow, GemPreferencesSection, GemPreferencesState, GemSecurityRow, GemSecuritySection, GemSettingsRow,
-    GemSettingsSection,
-};
+pub use rules::{GemPerpetualDefaults, GemPreferencesRow, GemPreferencesSection, GemPreferencesState, GemSecurityRow, GemSecuritySection, GemSettingsRow, GemSettingsSection};
 
 #[derive(uniffi::Object)]
 pub struct GemSettingsService {
@@ -61,8 +59,8 @@ impl GemSettingsService {
 }
 
 #[uniffi::export]
-pub fn about_sections() -> Vec<GemAboutSection> {
-    rules::about_sections()
+pub fn about_sections(version: String, update: Option<Release>) -> Vec<GemListSection> {
+    rules::about_sections(version, update)
 }
 
 #[cfg(test)]

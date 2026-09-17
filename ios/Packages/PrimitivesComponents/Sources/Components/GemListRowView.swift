@@ -7,6 +7,8 @@ import Style
 import SwiftUI
 
 public struct GemListRowView: View {
+    @Environment(\.openURL) private var openURL
+
     @State private var isPresentingCopyToast = false
 
     private let row: GemListRow
@@ -24,10 +26,16 @@ public struct GemListRowView: View {
         switch row.item {
         case let .listItem(model):
             ListItemView(model: model)
-        case let .link(model, url):
+        case let .page(model, url):
             SafariNavigationLink(url: url) {
                 ListItemView(model: model)
             }
+        case let .external(model, url):
+            NavigationCustomLink(with: ListItemView(model: model)) {
+                openURL(url)
+            }
+        case let .social(links):
+            SocialLinksView(model: SocialLinksViewModel(links: links))
         case let .icon(assetImage):
             AssetImageView(assetImage: assetImage, size: .image.semiLarge)
                 .frame(maxWidth: .infinity)

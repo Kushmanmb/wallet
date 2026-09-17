@@ -58,6 +58,16 @@ fun GemListRowView(
             HeaderIcon(row.asset)
         }
         is GemListRowUIModel.Address -> AddressCard(row = row) { clipboardManager.setCopy(context, row.copy) }
+        is GemListRowUIModel.Social -> Column {
+            row.links.forEachIndexed { index, link ->
+                ListItem(
+                    model = link.uiModel(context).model,
+                    listPosition = ListPosition.getPosition(index, row.links.size),
+                    modifier = Modifier.clickable { uriHandler.open(context, link.url) },
+                    accessory = { DataBadgeChevron() },
+                )
+            }
+        }
         GemListRowUIModel.Loading -> Column(
             modifier = Modifier
                 .fillMaxWidth()

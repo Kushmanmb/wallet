@@ -560,6 +560,7 @@ public extension GemListSectionTitle {
         switch self {
         case .none: nil
         case .balances: Localized.Asset.balances
+        case .community: Localized.Settings.community
         }
     }
 }
@@ -576,6 +577,11 @@ public extension GemListRowTitle {
         case .pendingUnconfirmed: Localized.Stake.pending
         case .reserved: Localized.Asset.Balances.reserved
         case .error: Localized.Errors.errorOccurred
+        case .termsOfService: Localized.Settings.termsOfServices
+        case .privacyPolicy: Localized.Settings.privacyPolicy
+        case .website: Localized.Settings.website
+        case .version: Localized.Settings.version
+        case .updateApp: Localized.UpdateApp.title
         }
     }
 }

@@ -5,6 +5,7 @@ import enum Gemstone.GemEmptyStateImage
 import enum Gemstone.GemPriceAlertToggle
 import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.GemHeaderButtonKind
+import enum Gemstone.GemListRowIcon
 import enum Gemstone.GemTransactionStateTone
 import enum Gemstone.LinkType
 import struct Gemstone.GemPriceAlertRow
@@ -167,6 +168,15 @@ public extension GemBannerIcon {
         case .suspicious: AssetImage.image(Images.TokenStatus.risk)
         case .bitcoin: AssetImage.image(Images.System.bitcoin)
         case .perpetuals: AssetImage.image(Images.Perpetuals.perpetuals)
+        }
+    }
+}
+
+public extension GemListRowIcon {
+    var assetImage: AssetImage? {
+        switch self {
+        case .none: nil
+        case .appLogo: AssetImage.image(Images.Settings.gem)
         }
     }
 }

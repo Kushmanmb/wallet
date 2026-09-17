@@ -1,3 +1,8 @@
+use primitives::{PlatformStore, Release};
+
+use crate::config::public::PublicUrl;
+use crate::config::social::community_links;
+use crate::models::list::{GemListRow, GemListRowIcon, GemListRowTitle, GemListSection, GemListSectionTitle, GemUrlTarget};
 use crate::services::currency::GemCurrencyRow;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -63,20 +68,6 @@ pub struct GemSecuritySection {
     pub rows: Vec<GemSecurityRow>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemAboutRow {
-    TermsOfService,
-    PrivacyPolicy,
-    Website,
-    Community,
-    Version,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
-pub struct GemAboutSection {
-    pub rows: Vec<GemAboutRow>,
-}
-
 pub fn preferences_sections(perpetuals_enabled: bool) -> Vec<GemPreferencesSection> {
     [
         vec![
@@ -118,15 +109,61 @@ pub fn security_sections(authentication_enabled: bool) -> Vec<GemSecuritySection
     .collect()
 }
 
-pub fn about_sections() -> Vec<GemAboutSection> {
-    [
-        vec![GemAboutRow::TermsOfService, GemAboutRow::PrivacyPolicy, GemAboutRow::Website],
-        vec![GemAboutRow::Community],
-        vec![GemAboutRow::Version],
+pub fn about_sections(version: String, update: Option<Release>) -> Vec<GemListSection> {
+    let page = |title: GemListRowTitle, url: PublicUrl| GemListRow::Url {
+        title,
+        value: None,
+        icon: GemListRowIcon::None,
+        url: url.url(),
+        target: GemUrlTarget::InApp,
+    };
+    vec![
+        GemListSection {
+            title: GemListSectionTitle::None,
+            rows: vec![
+                page(GemListRowTitle::TermsOfService, PublicUrl::TermsOfService),
+                page(GemListRowTitle::PrivacyPolicy, PublicUrl::PrivacyPolicy),
+                page(GemListRowTitle::Website, PublicUrl::Website),
+            ],
+        },
+        GemListSection {
+            title: GemListSectionTitle::Community,
+            rows: vec![GemListRow::Social { links: community_links() }],
+        },
+        GemListSection {
+            title: GemListSectionTitle::None,
+            rows: [
+                Some(GemListRow::Text {
+                    title: GemListRowTitle::Version,
+                    value: version,
+                }),
+                update.map(|release| GemListRow::Url {
+                    title: GemListRowTitle::UpdateApp,
+                    value: Some(release.version),
+                    icon: GemListRowIcon::AppLogo,
+                    url: store_url(release.store).url(),
+                    target: GemUrlTarget::External,
+                }),
+            ]
+            .into_iter()
+            .flatten()
+            .collect(),
+        },
     ]
-    .into_iter()
-    .map(|rows| GemAboutSection { rows })
-    .collect()
+}
+
+fn store_url(store: PlatformStore) -> PublicUrl {
+    match store {
+        PlatformStore::AppStore => PublicUrl::AppStore,
+        PlatformStore::GooglePlay => PublicUrl::PlayStore,
+        PlatformStore::Fdroid
+        | PlatformStore::Huawei
+        | PlatformStore::SolanaStore
+        | PlatformStore::SamsungStore
+        | PlatformStore::ApkUniversal
+        | PlatformStore::Emerald
+        | PlatformStore::Local => PublicUrl::APK,
+    }
 }
 
 pub fn sections(notifications_available: bool, wallet_connect_available: bool, shows_rewards: bool, developer_enabled: bool) -> Vec<GemSettingsSection> {
@@ -180,6 +217,31 @@ mod tests {
             security_sections(true).last().map(|section| section.rows.clone()),
             Some(vec![GemSecurityRow::HideBalance]),
             "hiding the balance is its own choice, not part of the lock"
+        );
+    }
+
+    #[test]
+    fn test_the_about_screen_offers_the_update_only_when_a_release_is_newer() {
+        let plain = about_sections("1.2.3".to_string(), None);
+        assert_eq!(
+            plain.last().map(|section| section.rows.clone()),
+            Some(vec![GemListRow::Text {
+                title: GemListRowTitle::Version,
+                value: "1.2.3".to_string()
+            }])
+        );
+
+        let update = about_sections("1.2.3".to_string(), Some(Release::new(PlatformStore::AppStore, "1.3.0".to_string(), false)));
+        assert_eq!(
+            update.last().and_then(|section| section.rows.last().cloned()),
+            Some(GemListRow::Url {
+                title: GemListRowTitle::UpdateApp,
+                value: Some("1.3.0".to_string()),
+                icon: GemListRowIcon::AppLogo,
+                url: PublicUrl::AppStore.url(),
+                target: GemUrlTarget::External,
+            }),
+            "the row points at the store the release came from, and a store page opens outside the app"
         );
     }
 

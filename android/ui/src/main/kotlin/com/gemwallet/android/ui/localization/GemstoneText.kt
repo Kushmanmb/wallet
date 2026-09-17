@@ -458,6 +458,7 @@ fun GemRecipientErrorDisplay.string(context: Context): String = when (this) {
 fun GemListSectionTitle.titleRes(): Int? = when (this) {
     GemListSectionTitle.NONE -> null
     GemListSectionTitle.BALANCES -> R.string.asset_balances
+    GemListSectionTitle.COMMUNITY -> R.string.settings_community
 }
 
 @StringRes
@@ -471,4 +472,9 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.PENDING_UNCONFIRMED -> R.string.stake_pending
     GemListRowTitle.RESERVED -> R.string.asset_balances_reserved
     GemListRowTitle.ERROR -> R.string.errors_error_occurred
+    GemListRowTitle.TERMS_OF_SERVICE -> R.string.settings_terms_of_services
+    GemListRowTitle.PRIVACY_POLICY -> R.string.settings_privacy_policy
+    GemListRowTitle.WEBSITE -> R.string.settings_website
+    GemListRowTitle.VERSION -> R.string.settings_version
+    GemListRowTitle.UPDATE_APP -> R.string.update_app_title
 }

@@ -7,7 +7,7 @@ import struct Gemstone.GemListSection
 
 public struct GemListSectionRow: Identifiable, Sendable {
     public let id: String
-    let row: GemListRow
+    public let row: GemListRow
 }
 
 public extension [GemListSection] {

@@ -2,7 +2,6 @@
 
 import enum Gemstone.GemAddNodeFailure
 import enum Gemstone.GemServiceEndpointType
-import enum Gemstone.GemAboutRow
 import enum Gemstone.GemPreferencesRow
 import enum Gemstone.GemSettingsRow
 import enum Gemstone.GemChainSettingsSection
@@ -59,18 +58,6 @@ extension GemPreferencesRow {
         case .perpetualLeverage: Localized.Settings.Preferences.Perpetual.defaultLeverage
         case .perpetualTakeProfit: Localized.Settings.Preferences.Perpetual.defaultTakeProfit
         case .perpetualStopLoss: Localized.Settings.Preferences.Perpetual.defaultStopLoss
-        }
-    }
-}
-
-extension GemAboutRow {
-    var title: String {
-        switch self {
-        case .termsOfService: Localized.Settings.termsOfServices
-        case .privacyPolicy: Localized.Settings.privacyPolicy
-        case .website: Localized.Settings.website
-        case .community: Localized.Settings.community
-        case .version: Localized.Settings.version
         }
     }
 }
