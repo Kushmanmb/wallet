@@ -97,7 +97,7 @@ class TransactionsViewModel @Inject constructor(
     .stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = null,
+        initialValue = getTransactions.stored(TransactionsRequestFilter.activityDefaults()).takeIf { it.isNotEmpty() },
     )
 
     init {

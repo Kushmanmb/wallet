@@ -156,7 +156,7 @@ class PerpetualDetailsViewModel @Inject constructor(
         transactionSync,
     ) { transactions, _ -> transactions }
         .flowOn(ioDispatcher)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, getTransactions.stored(transactionFilters))
 
     val period = MutableStateFlow(service.chartPeriod().toPrimitives())
 

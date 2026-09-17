@@ -102,10 +102,12 @@ class AssetDetailsViewModel @Inject constructor(
         return ChainAssetInfo(assetInfo, feeInfo)
     }
 
-    val transactions = getTransactions.getTransactions(listOf(TransactionsRequestFilter.Asset(assetId)))
+    private val transactionFilters = listOf(TransactionsRequestFilter.Asset(assetId))
+
+    val transactions = getTransactions.getTransactions(transactionFilters)
         .map { it.toImmutableList() }
         .flowOn(ioDispatcher)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, getTransactions.stored(transactionFilters).toImmutableList())
 
     private val banners = chainAssetInfo.filterNotNull()
         .map { it.assetInfo.asset }

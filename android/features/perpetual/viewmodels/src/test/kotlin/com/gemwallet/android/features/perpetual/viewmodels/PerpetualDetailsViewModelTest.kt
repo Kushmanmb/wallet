@@ -72,6 +72,7 @@ class PerpetualDetailsViewModelTest {
         val positions: GetPerpetualPosition = mockk(relaxed = true)
         val transactions: GetTransactions = mockk {
             every { getTransactions(any()) } returns emptyFlow()
+            every { stored(any()) } returns emptyList()
         }
         val observer: PerpetualObserver = mockk(relaxed = true) {
             every { chartUpdates } returns emptyFlow()

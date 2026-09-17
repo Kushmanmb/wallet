@@ -75,6 +75,7 @@ class AssetDetailsViewModelTest {
         every { getChainAssetInfo(asset.id) } returns chainAssetInfoFlow
         every { getSession() } returns sessionFlow
         every { getTransactions.getTransactions(any()) } returns MutableStateFlow(emptyList())
+        every { getTransactions.stored(any()) } returns emptyList()
         every { getActiveBanners(any()) } returns banners
         every { getPriceAlerts.assetPriceAlerts(asset.id) } returns priceAlerts
         every { service.details(any()) } answers {
