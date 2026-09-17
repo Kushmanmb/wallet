@@ -54,7 +54,7 @@ fun AmountScreen(
     ) { showingPicker ->
         if (showingPicker && provider is AmountStakeProvider) {
             val validator by provider.validatorState.collectAsStateWithLifecycle()
-            val selection by provider.validatorSelection.collectAsStateWithLifecycle()
+            val selection by provider.validatorRows.collectAsStateWithLifecycle()
             selection?.let { resolved ->
                 ValidatorsScreen(
                     selection = resolved,

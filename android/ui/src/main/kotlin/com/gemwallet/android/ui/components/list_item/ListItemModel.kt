@@ -71,6 +71,8 @@ enum class ListItemSymbol {
     Article,
     Error,
     CheckCircle,
+    Notifications,
+    NotificationsOutlined,
 }
 
 enum class ListItemTagType {

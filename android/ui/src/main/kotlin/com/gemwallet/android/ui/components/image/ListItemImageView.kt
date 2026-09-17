@@ -77,7 +77,7 @@ fun ListItemImageView(
 }
 
 @Composable
-internal fun ListItemSymbol.vector(): ImageVector = when (this) {
+fun ListItemSymbol.vector(): ImageVector = when (this) {
     ListItemSymbol.Check -> AppIcons.Check
     ListItemSymbol.Paste -> AppIcons.ContentPaste
     ListItemSymbol.QrScanner -> AppIcons.QrCodeScanner
@@ -90,4 +90,6 @@ internal fun ListItemSymbol.vector(): ImageVector = when (this) {
     ListItemSymbol.Article -> AppIcons.Article
     ListItemSymbol.Error -> AppIcons.Error
     ListItemSymbol.CheckCircle -> AppIcons.CheckCircle
+    ListItemSymbol.Notifications -> AppIcons.Notifications
+    ListItemSymbol.NotificationsOutlined -> AppIcons.NotificationsOutlined
 }

@@ -12,6 +12,8 @@ import com.wallet.core.primitives.BalanceMetadata
 import com.wallet.core.primitives.VerificationStatus
 import uniffi.gemstone.GemAssetDetailsState
 import uniffi.gemstone.GemAssetNetworkDestination
+import uniffi.gemstone.GemPriceAlertToggle
+import uniffi.gemstone.GemTransferData
 import uniffi.gemstone.GemValueTone
 
 class AssetInfoUIModel(
@@ -34,6 +36,9 @@ class AssetInfoUIModel(
     val networkDestination: GemAssetNetworkDestination? = null,
     val shareUrl: String = "",
     val detailsState: GemAssetDetailsState,
+    val priceAlertMenu: PriceAlertMenuUIModel = GemPriceAlertToggle.DISABLED.menu(),
+    val emptyTransactions: EmptyTransactionsUIModel = EmptyTransactionsUIModel(showsBuy = false, showsSwap = false),
+    val activateTransferData: GemTransferData? = null,
     val banners: List<BannerRow>,
     val pinListItem: ListItemModel = ListItemModel(title = ""),
     val addListItem: ListItemModel = ListItemModel(title = ""),

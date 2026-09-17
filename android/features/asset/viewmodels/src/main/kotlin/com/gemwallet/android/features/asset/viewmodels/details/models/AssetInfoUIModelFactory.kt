@@ -3,11 +3,11 @@ package com.gemwallet.android.features.asset.viewmodels.details.models
 import android.content.Context
 import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.domains.banner.BannerRow
+import com.gemwallet.android.domains.confirm.account
 import com.gemwallet.android.domains.percentage.formatAsPercentage
 import com.gemwallet.android.domains.price.tone
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.ext.toAssetId
-import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.ChainAssetInfo
@@ -21,8 +21,7 @@ import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemSymbol
-import com.wallet.core.primitives.Asset
-import com.wallet.core.primitives.AssetType
+import com.wallet.core.primitives.AccountDataType
 import com.wallet.core.primitives.Currency
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.math.BigInteger
@@ -30,7 +29,10 @@ import javax.inject.Inject
 import uniffi.gemstone.GemAssetDetails
 import uniffi.gemstone.GemBalanceRow
 import uniffi.gemstone.GemPercentageStyle
+import uniffi.gemstone.GemRecipient
+import uniffi.gemstone.GemTransferData
 import uniffi.gemstone.GemValueStyle
+import uniffi.gemstone.TransactionInputType
 
 class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private val context: Context) {
 
@@ -63,6 +65,15 @@ class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private va
             networkDestination = details.networkDestination,
             shareUrl = details.shareUrl,
             detailsState = details.state,
+            priceAlertMenu = details.state.priceAlert.menu(),
+            emptyTransactions = details.state.emptyTransactionsAction.emptyTransactions(),
+            activateTransferData = assetInfo.owner?.let { owner ->
+                GemTransferData(
+                    inputType = TransactionInputType.account(assetInfo.asset, AccountDataType.Activate),
+                    recipient = GemRecipient(owner.address),
+                    value = BigInteger.ZERO,
+                )
+            },
             banners = banners,
             pinListItem = ListItemModel(
                 title = context.getString(if (assetInfo.metadata.isPinned) R.string.common_unpin else R.string.common_pin),
