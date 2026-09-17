@@ -26,7 +26,6 @@ import uniffi.gemstone.GemEmptyStateImage
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemHeaderButtonKind
 import uniffi.gemstone.GemNameRecordState
-import uniffi.gemstone.GemPerpetualChartLineKind
 import uniffi.gemstone.GemSwapProgressStep
 import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemValueTone
@@ -159,14 +158,6 @@ fun GemEmptyStateImage.image(): EmptyStateImage = when (this) {
     GemEmptyStateImage.NOTIFICATIONS -> EmptyStateImage.Drawable(R.drawable.empty_notifications)
     GemEmptyStateImage.SEARCH -> EmptyStateImage.Vector(R.drawable.ic_search)
     GemEmptyStateImage.WALLET -> EmptyStateImage.Vector(R.drawable.ic_wallet)
-}
-
-@Composable
-fun GemPerpetualChartLineKind.color(): Color = when (this) {
-    GemPerpetualChartLineKind.ENTRY -> MaterialTheme.colorScheme.outline
-    GemPerpetualChartLineKind.LIQUIDATION -> MaterialTheme.colorScheme.error
-    GemPerpetualChartLineKind.STOP_LOSS -> pendingColor
-    GemPerpetualChartLineKind.TAKE_PROFIT -> MaterialTheme.colorScheme.tertiary
 }
 
 fun GemNameRecordState.indicator(): NameResolveIndicatorUIModel? = when (this) {
