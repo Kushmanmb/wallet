@@ -7782,6 +7782,7 @@ dependencies = [
  "gem_client",
  "serde",
  "serde_serializers",
+ "url",
 ]
 
 [[package]]
