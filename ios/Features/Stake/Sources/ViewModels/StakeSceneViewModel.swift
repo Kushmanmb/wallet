@@ -175,6 +175,13 @@ public final class StakeSceneViewModel {
         }
     }
 
+    func actionListItem(_ item: GemStakeActionItem) -> ListItemModel {
+        if let infoAction = frozenBalanceInfoAction(for: item) {
+            return ListItemModel(title: item.action.title, titleStyle: .bodySecondary, infoAction: infoAction)
+        }
+        return ListItemModel(title: item.action.title, subtitle: subtitle(for: item.action))
+    }
+
     func subtitle(for action: GemStakeAction) -> String? {
         action == .claimRewards ? claimRewardsText : .none
     }
