@@ -20,6 +20,15 @@ The last places where an app reaches the API, a rule or a table without going th
 
 Found by pairing every view model on both apps (see Coverage) and reading the ones whose logic did not match. Each is the same product rule written on both sides with a difference.
 
+- **C41** **S** `android/gemcore/src/main/kotlin/com/gemwallet/android/domains/stake/DelegationAmountExt.kt` — `Delegation.hasRewards()` is `rewards > 0`; Core's `GemStakeService.shows_rewards` is `state == Active && rewards > 0`, which iOS reads in `DelegationViewModel`. Android's `AmountStakeProvider` offers the rewards flow for an inactive delegation. The provider asks the service; the extension goes.
+- **C42** **S** Chain query matching is exported twice: `GemChainService.get_matching_chains` (iOS `NetworkSelectorViewModel`) and `GemAddAssetService.matching_chains` (Android `AddAssetViewModel`), both `rules::matching_chains`. Android reads the chain service; the add-asset export goes.
+- **C43** **S** Perpetual defaults reach Core through two surfaces: Android `UserConfig.perpetualLeverage`/`perpetualTakeProfit`/`perpetualStopLoss` and their setters call six `GemPreferencesService` exports only Android reads; iOS reads `GemSettingsService.preferences(…).perpetualDefaults` and writes `set_perpetual_defaults`. Android's `PreferencesViewModel` already holds the same `GemPreferencesState`. Android writes the record and re-reads the state; the three `UserConfig` pairs go and the six per-field functions leave the exported block.
+- **C44** **S** The auth prompt outcome is read by halves: iOS `BiometryAuthenticationError` reads `is_cancelled` only, Android `SystemAuthPolicy` reads `retry_delay_milliseconds` only, so each app applies half of `security/rules.rs`. Decide the one shape — both apps read both, or Core answers one `GemAuthPromptDecision` — and drive both prompts from it.
+- **C45** **S** Notification navigation syncs the asset by two Core methods: Android `NotificationNavigation` calls `sync_missing_assets` then opens, iOS `NavigationHandler` calls `ensure_asset`, which syncs internally and returns the asset. Android calls `ensure_asset`; `sync_missing_assets` keeps its search caller.
+- **C47** **M** Three sessions are driven with different event sets. Swap: Android sends `on_quote_invalidated` (asset select, switch, slippage change) and `on_refresh_requested`, iOS relies on `on_request_changed` and never sends either. Add asset: iOS sends `on_chain`, Android builds `newSession(chain).onAddress(address)` on every change. Autoclose: iOS sends `on_submit_attempt`, Android rebuilds `GemAutocloseSession(modify, policy, true)` at submit. One event set per session on both apps; the events neither drives stop being exported.
+- **C48** **S** `GemSlippageSession.on_auto` is Android-only: Android builds the session from a bps value then calls `onAuto(isAuto)`, iOS builds it from `GemSlippageSelection`. Android passes the selection; `on_auto` goes.
+- **C49** **S** The Android developer screen lacks the five Core developer actions iOS offers: `add_sample_transactions`, `clear_preferences`, `deeplink_url`, `delete_wallet_preferences`, `reset_transactions_timestamp`. The service is already injected into `DevelopViewModel`; add the rows.
+
 
 ## 3. The view boundary
 
@@ -34,6 +43,8 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 ## 5. Forwarders and façades
 
 [ARCHITECTURE.md § 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android): a case that only forwards a Core call is migration debt — delete it and call the service. iOS has none left; Android has one class and one case, plus two sites that show a raw exception where every other screen shows Core's text.
+
+- **C46** **S** `GemWalletConnectService.connection_row` forwards to `GemApplicationMetadataService.connection_row`; Android reads the forwarder in three bridge view models, iOS reads the owner through `.shared` (**D26**), and the metadata object is otherwise iOS-only. Settle with D26: one owner on the service the bridge view models already hold, and the metadata object stops being exported.
 
 
 ## 6. Core shapes that block an app move
@@ -69,7 +80,7 @@ Two passes on 2026-09-16, and the second is the one that answers "is this everyt
 | A view never names a Core type | 0 | closed 2026-09-17 (**B67**); the census in the ledger entry is the rerun |
 | A UI state class holds no Core type | 0 | the two `nameResolveState` hand-offs became `NameResolveIndicatorUIModel` on the shared field |
 | The parent vends the child model | 4 screen models (118 row projections excluded) | **B69** |
-| Depend on the generated abstraction | 21 iOS + 34 Android consumers | **O38** (the stateless five are **D26**) |
+| Depend on the generated abstraction | 29 iOS + 4 Android | landed as O38 (230eb8ba0f); what remains is the `.shared` stateless services under **D26** and the Hilt providers that construct the concrete objects |
 | Never call Core from the main thread | 9 Android view models | **X167** |
 | One mapper per module | 5 iOS files, 1 Android | **L16** |
 | The record carries the finished value | 0 | — |
@@ -104,6 +115,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 ## Ledger of closed sections
 
 What each section of the 2026-09-15 and 2026-09-16 sweeps measured, what landed, and why the rest closed — kept so the same lead is not re-raised with the same answer. Commits carry the detail.
+
+**Consistency review (2026-09-17).** Three sweeps over the exported surface after B67: exported methods called by one app only (54), Core service objects abstracted on one app only (11 concrete on iOS, 5 on Android — all providers and `.shared` sites), and Core enums mapped by one app's mapper files only (20). Read on both apps they reduce to the nine C4x items in §§ 2 and 5. Dismissed as platform-owned: the app-update rule (Play in-app update vs App Store release check), the keystore flows (`setup_chains` vs `migrate_to_shared_password`), CAIP-2 (both through Core by different entry points), the sign-message preview (both `GemSignMessagePreview`; `payload_preview` is the Android one-click-auth flow), WalletConnect authentication, and the support-chat image rule, which Android does not render at all. The 20 one-sided enum mappings are all icon or enum-to-enum translations inside model files, not label choices; `just check-mappers` stays the label check.
 
 **B67 (2026-09-17).** 136 files (28 iOS, 108 Android) to 0 on both apps, in nine commits. Android: the shared composables took row models first (`android/ui`), then every feature — the confirm header and fee selection, transaction header target, asset menu, referral state, validator lists, perpetual market sections, autoclose field, accept-terms rows, asset-select flow, banners, swap progress, the perpetual chart and tooltip, slippage state, widget coins — and the app root: `LocalDeeplinkService` replaces the service threaded through `MainContent`/`WalletApp`, `WalletNavigator` moved out of the composable file, and the navigation payloads became `ConfirmTransferInput` and `WalletSecretInput`. iOS: a `switch` over a Core row key became a row view model with an app kind or destination (`AboutRowViewModel`, `SettingsRowDestination`, `PreferencesRowKind`, `SecurityRow`, `ChainSettingsSectionViewModel`, `DelegationRowViewModel`, `StakeActionViewModel`, `SwapDetailRow`, `PerpetualButtonViewModel`, `PerpetualMarketSectionViewModel`, `ContactAddressField`); a pass-through Core record became a model the view model vends (`ListAssetItemsViewModel.item`, `BannerViewModel`, `ConnectionViewModel`, `ValidatorViewModel`, `AssetValueHeaderViewModel`, `FiatProviderViewModel`, the swap progress `Step` styling); the two navigation views take the header-action closure typed by the scene model. `ListSection<T>` no longer requires `Sendable` (conditional conformance) so row models holding `ListItemModel` fit it. Census: collect `pub struct|enum|trait Gem*` under `core/gemstone/src` plus the public types in `Gemstone.swift`, list `ios/**/Scenes`, `ios/**/Views`, `*Scene.swift`, `*View.swift` and every Android file containing `@Composable` (tests, generated, the four mapper files and previews excluded) that names one — 0 and 0.
 
