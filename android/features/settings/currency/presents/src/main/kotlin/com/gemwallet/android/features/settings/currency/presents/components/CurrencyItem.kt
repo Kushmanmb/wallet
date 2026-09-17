@@ -3,32 +3,26 @@ package com.gemwallet.android.features.settings.currency.presents.components
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.gemwallet.android.ext.toPrimitives
+import com.gemwallet.android.features.settings.currency.viewmodels.models.CurrencyRowUIModel
 import com.gemwallet.android.ui.components.list_item.ListItem
-import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.components.list_item.ListItemDefaults
-import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.components.list_item.ListItemTitleText
 import com.gemwallet.android.ui.components.list_item.SelectionCheckmark
 import com.gemwallet.android.ui.models.ListPosition
-import uniffi.gemstone.GemCurrencyRow
+import com.wallet.core.primitives.Currency
 
 @Composable
 fun CurrencyItem(
-    row: GemCurrencyRow,
-    isSelected: Boolean,
+    row: CurrencyRowUIModel,
     listPosition: ListPosition,
-    onSelect: (GemCurrencyRow) -> Unit,
+    onSelect: (Currency) -> Unit,
 ) {
-    val code = row.currency.toPrimitives().string
-    val title = android.icu.util.Currency.getInstance(code).displayName
-
     ListItem(
-        modifier = Modifier.clickable { onSelect(row) },
+        modifier = Modifier.clickable { onSelect(row.currency) },
         minHeight = ListItemDefaults.plainMinHeight,
-        title = { ListItemTitleText("${row.flag}  $code - $title") },
+        title = { ListItemTitleText(row.title) },
         listPosition = listPosition,
-        trailing = if (isSelected) {
+        trailing = if (row.isSelected) {
             @Composable { SelectionCheckmark() }
         } else {
             null
