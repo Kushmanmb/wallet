@@ -371,7 +371,7 @@ public final class GemSearchServiceMock: GemSearchServiceProtocol, @unchecked Se
 }
 
 public final class GemSettingsServiceMock: GemSettingsServiceProtocol, @unchecked Sendable {
-    public var sectionsValue: [GemSettingsSection] = []
+    public var sectionsValue: [GemListSection] = []
     public var securitySectionsValue: [GemSecuritySection] = []
     public var perpetualDefaults = GemPerpetualDefaults(leverage: 3, takeProfitPercent: 25, stopLossPercent: 10)
     public var preferencesSections: [GemPreferencesSection] = []
@@ -392,7 +392,7 @@ public final class GemSettingsServiceMock: GemSettingsServiceProtocol, @unchecke
         )
     }
 
-    public func sections(wallets _: [Gemstone.Wallet], notificationsAvailable _: Bool, walletConnectAvailable _: Bool) -> [GemSettingsSection] {
+    public func sections(wallets _: [Gemstone.Wallet], notificationsAvailable _: Bool, walletConnectAvailable _: Bool) -> [GemListSection] {
         sectionsValue
     }
 

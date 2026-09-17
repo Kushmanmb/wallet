@@ -3,7 +3,6 @@ package com.gemwallet.android.features.settings.settings.viewmodels.style
 import androidx.annotation.DrawableRes
 import com.gemwallet.android.ui.R
 import uniffi.gemstone.GemPreferencesRow
-import uniffi.gemstone.GemSettingsRow
 
 @DrawableRes
 internal fun GemPreferencesRow.icon(): Int? = when (this) {
@@ -18,15 +17,3 @@ internal fun GemPreferencesRow.icon(): Int? = when (this) {
     GemPreferencesRow.PERPETUAL_STOP_LOSS -> null
 }
 
-@DrawableRes
-internal fun GemSettingsRow.icon(): Int = when (this) {
-    GemSettingsRow.WALLETS -> R.drawable.settings_wallets
-    GemSettingsRow.SECURITY -> R.drawable.settings_security
-    GemSettingsRow.NOTIFICATIONS -> R.drawable.settings_notifications
-    GemSettingsRow.PREFERENCES -> R.drawable.settings_preferences
-    GemSettingsRow.WALLET_CONNECT -> R.drawable.settings_wc
-    GemSettingsRow.SUPPORT -> R.drawable.settings_support
-    GemSettingsRow.REWARDS -> R.drawable.settings_wallets
-    GemSettingsRow.ABOUT_US -> R.drawable.settings_about_us
-    GemSettingsRow.DEVELOPER -> R.drawable.settings_developer
-}

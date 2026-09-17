@@ -3,7 +3,6 @@
 import enum Gemstone.GemAddNodeFailure
 import enum Gemstone.GemServiceEndpointType
 import enum Gemstone.GemPreferencesRow
-import enum Gemstone.GemSettingsRow
 import enum Gemstone.GemChainSettingsSection
 import enum Gemstone.GemNodeCheckRow
 import enum Gemstone.GemNodeSubtitle
@@ -26,22 +25,6 @@ extension GemServiceEndpointType {
         switch self {
         case .api: "API"
         case .gemNode: Localized.Nodes.gemWalletNode
-        }
-    }
-}
-
-extension GemSettingsRow {
-    var title: String {
-        switch self {
-        case .wallets: Localized.Wallets.title
-        case .security: Localized.Settings.security
-        case .notifications: Localized.Settings.Notifications.title
-        case .preferences: Localized.Settings.Preferences.title
-        case .walletConnect: Localized.WalletConnect.title
-        case .support: Localized.Settings.support
-        case .rewards: Localized.Rewards.title
-        case .aboutUs: Localized.Settings.aboutus
-        case .developer: Localized.Settings.developer
         }
     }
 }

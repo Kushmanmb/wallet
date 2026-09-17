@@ -582,6 +582,15 @@ public extension GemListRowTitle {
         case .website: Localized.Settings.website
         case .version: Localized.Settings.version
         case .updateApp: Localized.UpdateApp.title
+        case .wallets: Localized.Wallets.title
+        case .security: Localized.Settings.security
+        case .notifications: Localized.Settings.Notifications.title
+        case .preferences: Localized.Settings.Preferences.title
+        case .walletConnect: Localized.WalletConnect.title
+        case .support: Localized.Settings.support
+        case .rewards: Localized.Rewards.title
+        case .aboutUs: Localized.Settings.aboutus
+        case .developer: Localized.Settings.developer
         }
     }
 }

@@ -12,7 +12,7 @@ use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_session;
 
-pub use rules::{GemPerpetualDefaults, GemPreferencesRow, GemPreferencesSection, GemPreferencesState, GemSecurityRow, GemSecuritySection, GemSettingsRow, GemSettingsSection};
+pub use rules::{GemPerpetualDefaults, GemPreferencesRow, GemPreferencesSection, GemPreferencesState, GemSecurityRow, GemSecuritySection};
 
 #[derive(uniffi::Object)]
 pub struct GemSettingsService {
@@ -48,8 +48,9 @@ impl GemSettingsService {
         rules::security_sections(authentication_enabled)
     }
 
-    pub fn sections(&self, wallets: Vec<Wallet>, notifications_available: bool, wallet_connect_available: bool) -> Vec<GemSettingsSection> {
+    pub fn sections(&self, wallets: Vec<Wallet>, notifications_available: bool, wallet_connect_available: bool) -> Vec<GemListSection> {
         rules::sections(
+            wallets.len(),
             notifications_available,
             wallet_connect_available,
             wallet_session::rules::shows_rewards(&wallets),

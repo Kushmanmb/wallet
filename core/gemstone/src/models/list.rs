@@ -28,6 +28,15 @@ pub enum GemListRowTitle {
     Website,
     Version,
     UpdateApp,
+    Wallets,
+    Security,
+    Notifications,
+    Preferences,
+    WalletConnect,
+    Support,
+    Rewards,
+    AboutUs,
+    Developer,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -40,6 +49,15 @@ pub enum GemUrlTarget {
 pub enum GemListRowIcon {
     None,
     AppLogo,
+    Wallets,
+    Security,
+    Notifications,
+    Preferences,
+    WalletConnect,
+    Support,
+    Rewards,
+    AboutUs,
+    Developer,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]

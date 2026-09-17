@@ -16,7 +16,7 @@ import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemSocialLink
 
 internal sealed interface GemListRowUIModel {
-    data class Item(val model: ListItemModel, val url: String? = null) : GemListRowUIModel
+    data class Item(val model: ListItemModel, val url: String? = null, val opensAnotherScreen: Boolean = false) : GemListRowUIModel
     data class Icon(val asset: Asset) : GemListRowUIModel
     data class Address(val address: String, val copy: GemCopy) : GemListRowUIModel
     data class Social(val links: List<GemSocialLink>) : GemListRowUIModel
@@ -26,7 +26,7 @@ internal sealed interface GemListRowUIModel {
 internal fun GemListRow.uiModel(context: Context): GemListRowUIModel = when (this) {
     is GemListRow.Text -> GemListRowUIModel.Item(ListItemModel(title = context.getString(title.titleRes()), subtitle = value))
     is GemListRow.Amount -> GemListRowUIModel.Item(ListItemModel(title = context.getString(title.titleRes()), subtitle = amount.text()))
-    is GemListRow.Link -> GemListRowUIModel.Item(listItemModel(context, title, value, icon))
+    is GemListRow.Link -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), opensAnotherScreen = true)
     is GemListRow.Url -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), url = url)
     is GemListRow.Explorer -> GemListRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)
     is GemListRow.Error -> GemListRowUIModel.Item(
@@ -52,4 +52,13 @@ private fun listItemModel(context: Context, title: GemListRowTitle, value: Strin
 private fun GemListRowIcon.image(): ListItemImage? = when (this) {
     GemListRowIcon.NONE -> null
     GemListRowIcon.APP_LOGO -> ListItemImage.Drawable(R.drawable.ic_gem_foreground)
+    GemListRowIcon.WALLETS -> ListItemImage.Drawable(R.drawable.settings_wallets)
+    GemListRowIcon.SECURITY -> ListItemImage.Drawable(R.drawable.settings_security)
+    GemListRowIcon.NOTIFICATIONS -> ListItemImage.Drawable(R.drawable.settings_notifications)
+    GemListRowIcon.PREFERENCES -> ListItemImage.Drawable(R.drawable.settings_preferences)
+    GemListRowIcon.WALLET_CONNECT -> ListItemImage.Drawable(R.drawable.settings_wc)
+    GemListRowIcon.SUPPORT -> ListItemImage.Drawable(R.drawable.settings_support)
+    GemListRowIcon.REWARDS -> ListItemImage.Drawable(R.drawable.settings_wallets)
+    GemListRowIcon.ABOUT_US -> ListItemImage.Drawable(R.drawable.settings_about_us)
+    GemListRowIcon.DEVELOPER -> ListItemImage.Drawable(R.drawable.settings_developer)
 }

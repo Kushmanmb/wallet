@@ -477,4 +477,13 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.WEBSITE -> R.string.settings_website
     GemListRowTitle.VERSION -> R.string.settings_version
     GemListRowTitle.UPDATE_APP -> R.string.update_app_title
+    GemListRowTitle.WALLETS -> R.string.wallets_title
+    GemListRowTitle.SECURITY -> R.string.settings_security
+    GemListRowTitle.NOTIFICATIONS -> R.string.settings_notifications_title
+    GemListRowTitle.PREFERENCES -> R.string.settings_preferences_title
+    GemListRowTitle.WALLET_CONNECT -> R.string.wallet_connect_title
+    GemListRowTitle.SUPPORT -> R.string.settings_support
+    GemListRowTitle.REWARDS -> R.string.rewards_title
+    GemListRowTitle.ABOUT_US -> R.string.settings_aboutus
+    GemListRowTitle.DEVELOPER -> R.string.settings_developer
 }

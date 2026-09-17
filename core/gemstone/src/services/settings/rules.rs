@@ -6,24 +6,6 @@ use crate::models::list::{GemListRow, GemListRowIcon, GemListRowTitle, GemListSe
 use crate::services::currency::GemCurrencyRow;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemSettingsRow {
-    Wallets,
-    Security,
-    Notifications,
-    Preferences,
-    WalletConnect,
-    Support,
-    Rewards,
-    AboutUs,
-    Developer,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
-pub struct GemSettingsSection {
-    pub rows: Vec<GemSettingsRow>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemPreferencesRow {
     Currency,
     Language,
@@ -166,27 +148,43 @@ fn store_url(store: PlatformStore) -> PublicUrl {
     }
 }
 
-pub fn sections(notifications_available: bool, wallet_connect_available: bool, shows_rewards: bool, developer_enabled: bool) -> Vec<GemSettingsSection> {
+pub fn sections(wallets_count: usize, notifications_available: bool, wallet_connect_available: bool, shows_rewards: bool, developer_enabled: bool) -> Vec<GemListSection> {
+    let link = |title: GemListRowTitle, icon: GemListRowIcon| GemListRow::Link { title, value: None, icon };
     [
-        vec![GemSettingsRow::Wallets, GemSettingsRow::Security],
-        [notifications_available.then_some(GemSettingsRow::Notifications), Some(GemSettingsRow::Preferences)]
-            .into_iter()
-            .flatten()
-            .collect(),
-        wallet_connect_available.then_some(vec![GemSettingsRow::WalletConnect]).unwrap_or_default(),
+        vec![
+            GemListRow::Link {
+                title: GemListRowTitle::Wallets,
+                value: Some(wallets_count.to_string()),
+                icon: GemListRowIcon::Wallets,
+            },
+            link(GemListRowTitle::Security, GemListRowIcon::Security),
+        ],
         [
-            Some(GemSettingsRow::Support),
-            shows_rewards.then_some(GemSettingsRow::Rewards),
-            Some(GemSettingsRow::AboutUs),
-            developer_enabled.then_some(GemSettingsRow::Developer),
+            notifications_available.then(|| link(GemListRowTitle::Notifications, GemListRowIcon::Notifications)),
+            Some(link(GemListRowTitle::Preferences, GemListRowIcon::Preferences)),
+        ]
+        .into_iter()
+        .flatten()
+        .collect(),
+        wallet_connect_available
+            .then(|| vec![link(GemListRowTitle::WalletConnect, GemListRowIcon::WalletConnect)])
+            .unwrap_or_default(),
+        [
+            Some(link(GemListRowTitle::Support, GemListRowIcon::Support)),
+            shows_rewards.then(|| link(GemListRowTitle::Rewards, GemListRowIcon::Rewards)),
+            Some(link(GemListRowTitle::AboutUs, GemListRowIcon::AboutUs)),
+            developer_enabled.then(|| link(GemListRowTitle::Developer, GemListRowIcon::Developer)),
         ]
         .into_iter()
         .flatten()
         .collect(),
     ]
     .into_iter()
-    .filter(|rows: &Vec<GemSettingsRow>| !rows.is_empty())
-    .map(|rows| GemSettingsSection { rows })
+    .filter(|rows: &Vec<GemListRow>| !rows.is_empty())
+    .map(|rows| GemListSection {
+        title: GemListSectionTitle::None,
+        rows,
+    })
     .collect()
 }
 
@@ -247,26 +245,48 @@ mod tests {
 
     #[test]
     fn test_the_settings_rows_follow_what_the_device_and_wallet_offer() {
-        let full = sections(true, true, true, true);
+        let titles = |sections: Vec<GemListSection>| {
+            sections
+                .iter()
+                .map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>())
+                .collect::<Vec<_>>()
+        };
+
         assert_eq!(
-            full.iter().map(|section| section.rows.clone()).collect::<Vec<_>>(),
+            titles(sections(3, true, true, true, true)),
             vec![
-                vec![GemSettingsRow::Wallets, GemSettingsRow::Security],
-                vec![GemSettingsRow::Notifications, GemSettingsRow::Preferences],
-                vec![GemSettingsRow::WalletConnect],
-                vec![GemSettingsRow::Support, GemSettingsRow::Rewards, GemSettingsRow::AboutUs, GemSettingsRow::Developer],
+                vec![GemListRowTitle::Wallets, GemListRowTitle::Security],
+                vec![GemListRowTitle::Notifications, GemListRowTitle::Preferences],
+                vec![GemListRowTitle::WalletConnect],
+                vec![GemListRowTitle::Support, GemListRowTitle::Rewards, GemListRowTitle::AboutUs, GemListRowTitle::Developer],
             ]
         );
 
-        let plain = sections(false, false, false, false);
         assert_eq!(
-            plain.iter().map(|section| section.rows.clone()).collect::<Vec<_>>(),
+            titles(sections(1, false, false, false, false)),
             vec![
-                vec![GemSettingsRow::Wallets, GemSettingsRow::Security],
-                vec![GemSettingsRow::Preferences],
-                vec![GemSettingsRow::Support, GemSettingsRow::AboutUs],
+                vec![GemListRowTitle::Wallets, GemListRowTitle::Security],
+                vec![GemListRowTitle::Preferences],
+                vec![GemListRowTitle::Support, GemListRowTitle::AboutUs],
             ],
             "a device without notifications or WalletConnect drops those rows and their empty section"
         );
+
+        assert_eq!(
+            sections(3, false, false, false, false).first().and_then(|section| section.rows.first().cloned()),
+            Some(GemListRow::Link {
+                title: GemListRowTitle::Wallets,
+                value: Some("3".to_string()),
+                icon: GemListRowIcon::Wallets,
+            }),
+            "the wallets row counts the wallets the screen was given"
+        );
+    }
+
+    fn row_title(row: &GemListRow) -> Option<GemListRowTitle> {
+        match row {
+            GemListRow::Link { title, .. } | GemListRow::Text { title, .. } | GemListRow::Amount { title, .. } | GemListRow::Url { title, .. } => Some(*title),
+            GemListRow::Social { .. } | GemListRow::Icon { .. } | GemListRow::Address { .. } | GemListRow::Explorer { .. } | GemListRow::Loading | GemListRow::Error { .. } => None,
+        }
     }
 }

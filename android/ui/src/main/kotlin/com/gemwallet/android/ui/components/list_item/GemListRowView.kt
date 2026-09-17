@@ -37,6 +37,7 @@ fun LazyListScope.gemListSections(sections: List<GemListSection>) {
 fun GemListRowView(
     row: GemListRow,
     listPosition: ListPosition,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -46,8 +47,13 @@ fun GemListRowView(
         is GemListRowUIModel.Item -> ListItem(
             model = row.model,
             listPosition = listPosition,
-            modifier = row.url?.let { url -> Modifier.clickable { uriHandler.open(context, url) } } ?: Modifier,
-            accessory = row.url?.let { { DataBadgeChevron() } },
+            modifier = modifier.then(row.url?.let { url -> Modifier.clickable { uriHandler.open(context, url) } } ?: Modifier),
+            minHeight = ListItemDefaults.plainMinHeight,
+            accessory = if (row.url != null || row.opensAnotherScreen) {
+                { DataBadgeChevron() }
+            } else {
+                null
+            },
         )
         is GemListRowUIModel.Icon -> Column(
             modifier = Modifier
@@ -64,6 +70,7 @@ fun GemListRowView(
                     model = link.uiModel(context).model,
                     listPosition = ListPosition.getPosition(index, row.links.size),
                     modifier = Modifier.clickable { uriHandler.open(context, link.url) },
+                    minHeight = ListItemDefaults.plainMinHeight,
                     accessory = { DataBadgeChevron() },
                 )
             }
