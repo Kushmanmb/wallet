@@ -1,8 +1,12 @@
 package com.gemwallet.android.features.settings.in_app_notifications.viewmodels.models
 
+import android.content.Context
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toGem
-import com.gemwallet.android.ui.components.image.iconModel
+import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.list_item.ListItemImage
+import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import com.wallet.core.primitives.InAppNotification
 import uniffi.gemstone.GemNotificationIcon
 import uniffi.gemstone.notificationRow
@@ -10,37 +14,31 @@ import uniffi.gemstone.notificationRow
 data class NotificationRowUIModel(
     val id: String,
     val createdAt: Long,
-    val title: String,
-    val subtitle: String?,
-    val value: String?,
-    val subvalue: String?,
     val url: String?,
-    val isUnread: Boolean,
-    val icon: NotificationIconUIModel?,
+    val model: ListItemModel,
 )
 
-sealed interface NotificationIconUIModel {
-    data class Emoji(val glyph: String) : NotificationIconUIModel
-    data class Image(val model: Any?) : NotificationIconUIModel
-}
-
-internal fun InAppNotification.uiModel(): NotificationRowUIModel {
+internal fun InAppNotification.uiModel(context: Context): NotificationRowUIModel {
     val row = notificationRow(toGem())
     return NotificationRowUIModel(
         id = item.id,
         createdAt = createdAt,
-        title = row.title,
-        subtitle = row.subtitle,
-        value = row.value,
-        subvalue = row.subvalue,
         url = row.url,
-        isUnread = row.isUnread,
-        icon = row.icon?.uiModel(),
+        model = ListItemModel(
+            title = row.title,
+            titleTag = if (row.isUnread) context.getString(R.string.assets_tags_new) else null,
+            titleTagStyle = ListItemTextStyle.Primary,
+            titleExtra = row.subtitle,
+            subtitle = row.value,
+            subtitleStyle = ListItemTextStyle.Body,
+            subtitleExtra = row.subvalue,
+            image = row.icon?.image(),
+        ),
     )
 }
 
-private fun GemNotificationIcon.uiModel(): NotificationIconUIModel = when (this) {
-    is GemNotificationIcon.Emoji -> NotificationIconUIModel.Emoji(glyph)
-    is GemNotificationIcon.Image -> NotificationIconUIModel.Image(url)
-    is GemNotificationIcon.Asset -> NotificationIconUIModel.Image(assetId.toAssetId()?.iconModel())
+private fun GemNotificationIcon.image(): ListItemImage? = when (this) {
+    is GemNotificationIcon.Emoji -> ListItemImage.Emoji(glyph)
+    is GemNotificationIcon.Image -> ListItemImage.Url(url)
+    is GemNotificationIcon.Asset -> assetId.toAssetId()?.let { ListItemImage.Asset(it) }
 }
