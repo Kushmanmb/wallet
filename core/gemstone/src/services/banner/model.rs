@@ -197,7 +197,10 @@ mod tests {
             rank_score: 42,
             ..AssetMetaData::mock()
         };
-        let empty = GemAssetBalance { is_active: false, ..GemAssetBalance::mock() };
+        let empty = GemAssetBalance {
+            is_active: false,
+            ..GemAssetBalance::mock()
+        };
         let funded = GemAssetBalance {
             staked: GemBigUint::from(5u32),
             is_active: true,

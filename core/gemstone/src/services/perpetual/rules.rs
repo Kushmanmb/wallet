@@ -12,13 +12,13 @@ use primitives::{
 
 use super::model::{
     GemAutocloseSummary, GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine,
-    GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketRow,
-    GemPerpetualMarketSection, GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetailRow,
-    GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
+    GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSection,
+    GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind,
+    GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::GemFormattedNumber;
-use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
 use crate::models::custom_types::GemBigInt;
+use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
 use crate::perpetual::GemPerpetual;
 use crate::services::error::GemServiceError;
 use crate::services::transfer::GemTransferData;
@@ -977,15 +977,7 @@ mod tests {
 
     #[test]
     fn test_a_market_row_annualizes_the_hourly_funding_as_a_signed_percent() {
-        let row = |funding: f64| {
-            market_row(
-                &Perpetual {
-                    funding,
-                    ..Perpetual::mock()
-                },
-                &Asset::from_chain(Chain::HyperCore),
-            )
-        };
+        let row = |funding: f64| market_row(&Perpetual { funding, ..Perpetual::mock() }, &Asset::from_chain(Chain::HyperCore));
 
         assert_eq!(row(0.0013).funding_apr, GemFormattedNumber::percentage(funding_apr(0.0013), GemPercentageStyle::Signed));
         assert_eq!(row(0.0013).funding_apr.notation, crate::formatted_number::GemNumberNotation::Signed);

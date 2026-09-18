@@ -225,9 +225,15 @@ mod tests {
 
     #[test]
     fn test_an_amount_never_rounds_above_what_is_held() {
-        assert_eq!(GemFormattedNumber::amount(5.205516, Some("ATOM".to_string()), GemValueStyle::Auto).rounding, GemNumberRounding::TowardZero);
+        assert_eq!(
+            GemFormattedNumber::amount(5.205516, Some("ATOM".to_string()), GemValueStyle::Auto).rounding,
+            GemNumberRounding::TowardZero
+        );
         assert_eq!(GemFormattedNumber::usd(5.205516).rounding, GemNumberRounding::ToNearest);
-        assert_eq!(GemFormattedNumber::percentage(5.205516, GemPercentageStyle::Unsigned).rounding, GemNumberRounding::ToNearest);
+        assert_eq!(
+            GemFormattedNumber::percentage(5.205516, GemPercentageStyle::Unsigned).rounding,
+            GemNumberRounding::ToNearest
+        );
     }
 
     #[test]
@@ -278,7 +284,12 @@ mod tests {
         let leverage = GemFormattedNumber::leverage(2.5);
 
         assert_eq!(leverage.unit, GemNumberUnit::Multiplier);
-        assert_eq!(leverage.display, GemNumberDisplay::Number { precision: number_formatter::Precision::TWO_PLACES.into() });
+        assert_eq!(
+            leverage.display,
+            GemNumberDisplay::Number {
+                precision: number_formatter::Precision::TWO_PLACES.into()
+            }
+        );
         assert_eq!(leverage.notation, GemNumberNotation::Plain);
     }
 

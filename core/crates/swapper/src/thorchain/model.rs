@@ -514,10 +514,7 @@ mod tests {
             Some(TRON_USDT_ASSET_ID.clone())
         );
         assert_eq!(coin("THOR.TCY").asset_id(THORChainNetwork::Thorchain), Some(THORCHAIN_TCY_ASSET_ID.clone()));
-        assert_eq!(
-            coin("ETH.UNKNOWN-0x1234567890abcdef1234567890abcdef12345678").asset_id(THORChainNetwork::Thorchain),
-            None
-        );
+        assert_eq!(coin("ETH.UNKNOWN-0x1234567890abcdef1234567890abcdef12345678").asset_id(THORChainNetwork::Thorchain), None);
         assert_eq!(coin("INVALID").asset_id(THORChainNetwork::Thorchain), None);
     }
 

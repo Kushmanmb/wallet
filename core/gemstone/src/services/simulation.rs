@@ -14,8 +14,8 @@ use gem_wallet_connect::{
     SignDigestType as WcSignDigestType, WCEthereumTransactionData as WcEthereumTransactionData, WalletConnectTransactionType as WcWalletConnectTransactionType,
 };
 use primitives::{
-    AddressName, AssetId, Chain, ChainAddress, EVMChain, SimulationInput, SimulationPayloadField, SimulationPayloadFieldKind, SimulationPayloadFieldType, SimulationResult, SimulationSeverity,
-    SimulationWarning, SimulationWarningType,
+    AddressName, AssetId, Chain, ChainAddress, EVMChain, SimulationInput, SimulationPayloadField, SimulationPayloadFieldKind, SimulationPayloadFieldType, SimulationResult,
+    SimulationSeverity, SimulationWarning, SimulationWarningType,
 };
 
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
@@ -547,9 +547,24 @@ mod tests {
     fn test_payload_rows_title_by_kind_and_carry_the_short_address_or_the_parsed_timestamp() {
         let address = "0xBA4D1d35bCe0e8F28E5a3403e7a0b996c5d50AC4";
         let fields = vec![
-            SimulationPayloadField::standard(SimulationPayloadFieldKind::Spender, address, SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Primary),
-            SimulationPayloadField::standard(SimulationPayloadFieldKind::Expiration, "1662714817", SimulationPayloadFieldType::Timestamp, SimulationPayloadFieldDisplay::Primary),
-            SimulationPayloadField::custom("issuedAt", "2024-01-02T03:04:05.123Z", SimulationPayloadFieldType::Timestamp, SimulationPayloadFieldDisplay::Secondary),
+            SimulationPayloadField::standard(
+                SimulationPayloadFieldKind::Spender,
+                address,
+                SimulationPayloadFieldType::Address,
+                SimulationPayloadFieldDisplay::Primary,
+            ),
+            SimulationPayloadField::standard(
+                SimulationPayloadFieldKind::Expiration,
+                "1662714817",
+                SimulationPayloadFieldType::Timestamp,
+                SimulationPayloadFieldDisplay::Primary,
+            ),
+            SimulationPayloadField::custom(
+                "issuedAt",
+                "2024-01-02T03:04:05.123Z",
+                SimulationPayloadFieldType::Timestamp,
+                SimulationPayloadFieldDisplay::Secondary,
+            ),
             SimulationPayloadField::custom("statement", "Sign in", SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary),
         ];
         let short = format_address(address, Some(Chain::Ethereum), GemAddressFormatStyle::Short);
@@ -588,8 +603,18 @@ mod tests {
         let other = "0x0000000000000000000000000000000000000001";
         let rows = payload_rows(
             &[
-                SimulationPayloadField::standard(SimulationPayloadFieldKind::Spender, address, SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Primary),
-                SimulationPayloadField::standard(SimulationPayloadFieldKind::Contract, other, SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Primary),
+                SimulationPayloadField::standard(
+                    SimulationPayloadFieldKind::Spender,
+                    address,
+                    SimulationPayloadFieldType::Address,
+                    SimulationPayloadFieldDisplay::Primary,
+                ),
+                SimulationPayloadField::standard(
+                    SimulationPayloadFieldKind::Contract,
+                    other,
+                    SimulationPayloadFieldType::Address,
+                    SimulationPayloadFieldDisplay::Primary,
+                ),
             ],
             Some(Chain::Ethereum),
             &[],
@@ -620,7 +645,13 @@ mod tests {
                 address: other.to_string()
             }
         );
-        assert_eq!(address_requests(&named, Chain::Ethereum), vec![ChainAddress::new(Chain::Ethereum, address.to_string()), ChainAddress::new(Chain::Ethereum, other.to_string())]);
+        assert_eq!(
+            address_requests(&named, Chain::Ethereum),
+            vec![
+                ChainAddress::new(Chain::Ethereum, address.to_string()),
+                ChainAddress::new(Chain::Ethereum, other.to_string())
+            ]
+        );
     }
 
     #[test]

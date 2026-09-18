@@ -29,8 +29,8 @@ use crate::services::assets::GemAssetsService;
 use crate::services::balance::GemBalanceService;
 use crate::services::clock::sleep;
 use crate::services::confirm::rules::ConfirmInput;
-use crate::services::simulation::payload_rows;
 use crate::services::price::GemPriceService;
+use crate::services::simulation::payload_rows;
 use crate::services::simulation::{GemSimulationFormatter, GemSimulationService};
 use crate::services::transaction_state::{GemTransactionStateService, GemTransactionStatusService};
 use crate::services::transfer::rules::TransferInput;
@@ -180,9 +180,7 @@ impl GemConfirmService {
                 })
             })
             .collect();
-        let (primary_fields, secondary_fields): (Vec<_>, Vec<_>) = payload_fields
-            .into_iter()
-            .partition(|field| field.display == SimulationPayloadFieldDisplay::Primary);
+        let (primary_fields, secondary_fields): (Vec<_>, Vec<_>) = payload_fields.into_iter().partition(|field| field.display == SimulationPayloadFieldDisplay::Primary);
         Ok(GemConfirmSimulation {
             has_critical_warning,
             primary_fields: payload_rows(&primary_fields, Some(chain), &[]),

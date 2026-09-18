@@ -1,22 +1,20 @@
 use super::error::GemConfirmError;
 use super::rules::approval_value_from;
 use crate::models::custom_types::{GemBigInt, GemBigUint};
-use crate::services::localization::GemLocalizedText;
 use crate::models::gateway::GemFeeRate;
 use crate::models::transaction::{GemFeeOptionItem, GemTransactionLoadFee, GemTransactionLoadMetadata};
 use crate::services::balance::GemAssetBalance;
+use crate::services::localization::GemLocalizedText;
 use crate::services::simulation::GemSimulationWarningRow;
+use crate::services::simulation::{GemSimulationPayloadRow, address_requests, named_payload_rows};
 use crate::services::transactions::GemAmountSign;
 use crate::services::transfer::GemTransferData;
-use crate::services::simulation::{GemSimulationPayloadRow, address_requests, named_payload_rows};
 use crate::services::transfer::model::GemConfirmDestination;
 use crate::services::wallet::model::GemWalletRow;
 use crate::transfer_amount::GemTransferAmount;
 use primitives::AssetPrice;
 use primitives::BlockExplorerLink;
-use primitives::{
-    Account, AddressName, Asset, AssetId, Chain, ChainAddress, FeePriority, FeeUnitType, SimulationResult, Transaction, Wallet,
-};
+use primitives::{Account, AddressName, Asset, AssetId, Chain, ChainAddress, FeePriority, FeeUnitType, SimulationResult, Transaction, Wallet};
 
 pub type GemAccount = Account;
 

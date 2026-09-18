@@ -42,7 +42,9 @@ impl GemCustomFee {
     #[uniffi::constructor]
     pub fn estimate(chain: Chain, input: String, format: GemNumberFormat, rows: GemFeeRateRows, loaded_fee: BigInt) -> Self {
         let config = get_fee_config(chain);
-        let rate = value_from_input(&format.decimal_separator, &input, rows.unit_decimals).ok().filter(|rate| rate > &BigInt::ZERO);
+        let rate = value_from_input(&format.decimal_separator, &input, rows.unit_decimals)
+            .ok()
+            .filter(|rate| rate > &BigInt::ZERO);
         let base_total = rows.selected_total.clone().unwrap_or_default();
         let normal_total = rows.normal_total.unwrap_or_else(|| base_total.clone());
         Self {
@@ -126,8 +128,19 @@ mod tests {
         assert_eq!(estimate(Chain::Bitcoin, "0").rate(), None, "a zero rate is no rate");
         assert!(!estimate(Chain::Bitcoin, "").is_valid());
         assert_eq!(estimate(Chain::Bitcoin, "").check(), GemCustomFeeCheck::Valid, "an empty field shows no error");
-        assert_eq!(estimate(Chain::Bitcoin, "").placeholder(), Some(GemFormattedNumber::amount(10.0, None, GemValueStyle::Auto)));
-        let unloaded = GemCustomFee::estimate(Chain::Bitcoin, "20".to_string(), GemNumberFormat { decimal_separator: ".".to_string() }, rows(None), BigInt::from(1_000));
+        assert_eq!(
+            estimate(Chain::Bitcoin, "").placeholder(),
+            Some(GemFormattedNumber::amount(10.0, None, GemValueStyle::Auto))
+        );
+        let unloaded = GemCustomFee::estimate(
+            Chain::Bitcoin,
+            "20".to_string(),
+            GemNumberFormat {
+                decimal_separator: ".".to_string(),
+            },
+            rows(None),
+            BigInt::from(1_000),
+        );
         assert_eq!(unloaded.placeholder(), None, "no loaded rate, no placeholder");
     }
 

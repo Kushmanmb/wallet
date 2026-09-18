@@ -1,7 +1,7 @@
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigInt;
-use crate::precision::GemCurrencyStyle;
 use crate::perpetual::GemPerpetual;
+use crate::precision::GemCurrencyStyle;
 use crate::services::transfer::GemTransferData;
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
 use primitives::perpetual::{CancelOrderData, PerpetualModifyConfirmData, PerpetualModifyPositionType, TPSLOrderData};
@@ -187,13 +187,22 @@ mod tests {
             GemAutocloseField::mock(Some(110.0), Some(100.0), true, None),
             GemAutocloseField::mock(None, None, true, None),
         );
-        let prices = GemAutoclosePrices { entry: Some(100.0), market: 110.0 };
+        let prices = GemAutoclosePrices {
+            entry: Some(100.0),
+            market: 110.0,
+        };
         let ios = GemAutocloseSession::new(changed.clone(), GemAutocloseConfirmPolicy::WhenBuildable, prices.clone());
         let android = GemAutocloseSession::new(changed, GemAutocloseConfirmPolicy::UntilSubmitted, prices);
 
         assert_eq!(ios.view_state().confirm_enabled, ios.modify.can_build());
-        assert_eq!(ios.view_state().entry_price, Some(GemFormattedNumber::currency(100.0, Currency::USD, GemCurrencyStyle::Currency)));
-        assert_eq!(ios.view_state().market_price, GemFormattedNumber::currency(110.0, Currency::USD, GemCurrencyStyle::Currency));
+        assert_eq!(
+            ios.view_state().entry_price,
+            Some(GemFormattedNumber::currency(100.0, Currency::USD, GemCurrencyStyle::Currency))
+        );
+        assert_eq!(
+            ios.view_state().market_price,
+            GemFormattedNumber::currency(110.0, Currency::USD, GemCurrencyStyle::Currency)
+        );
         assert!(android.view_state().confirm_enabled, "a pending change is enough before a submit");
         assert_eq!(android.on_submit_attempt().view_state().confirm_enabled, android.modify.can_build());
     }

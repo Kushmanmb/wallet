@@ -10,8 +10,8 @@ use serde::Serialize;
 use serde::de::DeserializeOwned;
 
 use crate::models::{
-    Account, Block, DelegationPoolStake, GasFee, Ledger, Resource, SimulateTransactionQuery, StakingConfig, Transaction, TransactionPayload, TransactionResponse,
-    SponsoredSimulationSignature, TransactionSimulation, ValidatorSet, ViewRequest,
+    Account, Block, DelegationPoolStake, GasFee, Ledger, Resource, SimulateTransactionQuery, SponsoredSimulationSignature, StakingConfig, Transaction, TransactionPayload,
+    TransactionResponse, TransactionSimulation, ValidatorSet, ViewRequest,
 };
 use crate::provider::payload_builder::{
     build_stake_transaction_payload, build_swap_transaction_payload, build_token_transfer_transaction_payload, build_transfer_transaction_payload,
@@ -273,9 +273,8 @@ mod tests {
 
         assert_eq!(client.simulate_transaction("0x1", 0, payload.clone(), "100").await.unwrap(), 5075);
 
-        let client = AptosClient::new(MockClient::new().with_post(|_, _| {
-            Ok(br#"[{"success":false,"vm_status":"MAX_GAS_UNITS_BELOW_MIN_TRANSACTION_GAS_UNITS","gas_used":"0"}]"#.to_vec())
-        }));
+        let client =
+            AptosClient::new(MockClient::new().with_post(|_, _| Ok(br#"[{"success":false,"vm_status":"MAX_GAS_UNITS_BELOW_MIN_TRANSACTION_GAS_UNITS","gas_used":"0"}]"#.to_vec())));
         assert_eq!(
             client.simulate_transaction("0x1", 0, payload, "100").await.unwrap_err().to_string(),
             "MAX_GAS_UNITS_BELOW_MIN_TRANSACTION_GAS_UNITS",

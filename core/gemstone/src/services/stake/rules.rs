@@ -12,23 +12,24 @@ use rand::seq::IndexedRandom;
 use std::str::FromStr;
 
 use super::model::{
-    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationStatus, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
+    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationStatus, GemStakeAction, GemStakeActionItem,
+    GemStakeAmountInput, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
 };
 use crate::config::image::GemImage;
+use crate::config::stake::EARN_OFFERED;
+use crate::duration_formatter::{GemDurationPart, countdown_parts, day_parts};
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
+use crate::models::custom_types::GemBigUint;
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowIcon, GemListRowTitle, GemUrlTarget};
-use crate::services::localization::GemLocalizedText;
-use primitives::BlockExplorerLink;
 use crate::percentage::GemPercentageStyle;
 use crate::precision::GemValueStyle;
-use number_formatter::BigNumberFormatter;
-use crate::duration_formatter::{GemDurationPart, countdown_parts, day_parts};
-use chrono::{DateTime, Utc};
-use crate::config::stake::EARN_OFFERED;
-use crate::models::custom_types::GemBigUint;
 use crate::services::balance::{GemAssetBalance, GemBalanceRow};
 use crate::services::error::GemServiceError;
+use crate::services::localization::GemLocalizedText;
 use crate::services::transfer::rules as transfer_rules;
+use chrono::{DateTime, Utc};
+use number_formatter::BigNumberFormatter;
+use primitives::BlockExplorerLink;
 
 use crate::config::chain::account_activation_fee_url;
 use crate::config::stake::{StakeChainConfig, get_stake_config};
@@ -664,10 +665,10 @@ pub fn earn_validators(providers: Vec<DelegationValidator>, apr: f64) -> Vec<Del
 
 #[cfg(test)]
 mod tests {
-    use crate::duration_formatter::GemDurationUnit;
-    use chrono::Duration;
     use super::*;
+    use crate::duration_formatter::GemDurationUnit;
     use crate::services::transfer::GemTransferData;
+    use chrono::Duration;
     use primitives::Resource;
 
     #[test]
@@ -915,8 +916,17 @@ mod tests {
 
         let earn = Delegation::mock_with(Chain::Ethereum, StakeProviderType::Earn, DelegationState::Pending, 0);
         let rows = delegation_rows(&earn, None, now);
-        assert!(matches!(rows.first(), Some(GemListRow::Text { title: GemListRowTitle::Provider, .. })));
-        assert!(!rows.iter().any(|row| matches!(row, GemListRow::Duration { .. })), "earn positions have no completion countdown");
+        assert!(matches!(
+            rows.first(),
+            Some(GemListRow::Text {
+                title: GemListRowTitle::Provider,
+                ..
+            })
+        ));
+        assert!(
+            !rows.iter().any(|row| matches!(row, GemListRow::Duration { .. })),
+            "earn positions have no completion countdown"
+        );
     }
 
     #[test]
@@ -936,7 +946,10 @@ mod tests {
         let mut pending = Delegation::mock_with(Chain::Cosmos, StakeProviderType::Stake, DelegationState::Deactivating, 0);
         pending.base.completion_date = Some(now + Duration::days(2));
 
-        assert_eq!(completion_countdown_parts(&pending, now).first().map(|part| (part.value, part.unit)), Some((2, GemDurationUnit::Day)));
+        assert_eq!(
+            completion_countdown_parts(&pending, now).first().map(|part| (part.value, part.unit)),
+            Some((2, GemDurationUnit::Day))
+        );
         pending.base.completion_date = Some(now - Duration::hours(1));
         assert!(completion_countdown_parts(&pending, now).is_empty());
     }
@@ -960,7 +973,10 @@ mod tests {
             assert_eq!(completion(state, StakeProviderType::Stake), Some(GemListRowTitle::AvailableIn));
         }
         assert_eq!(status(DelegationState::AwaitingWithdrawal, StakeProviderType::Stake).tone, GemValueTone::Negative);
-        assert_eq!(completion(DelegationState::AwaitingWithdrawal, StakeProviderType::Stake), Some(GemListRowTitle::AvailableIn));
+        assert_eq!(
+            completion(DelegationState::AwaitingWithdrawal, StakeProviderType::Stake),
+            Some(GemListRowTitle::AvailableIn)
+        );
         assert_eq!(completion(DelegationState::Pending, StakeProviderType::Earn), None);
 
         let mut on_inactive_validator = Delegation::mock_with(Chain::Cosmos, StakeProviderType::Stake, DelegationState::Active, 100);

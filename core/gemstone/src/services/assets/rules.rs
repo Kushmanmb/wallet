@@ -3,22 +3,23 @@ use std::str::FromStr;
 
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
 use primitives::{
-    Asset, AssetBasic, AssetId, AssetMetaData, AssetPrice, BalanceMetadata, AssetProperties, AssetScore, BannerEvent, Chain, ChainAsset, ConfigVersions, PerpetualProvider, PriceAlert, StakeChain,
-    VerificationStatus, Wallet, WalletType,
+    Asset, AssetBasic, AssetId, AssetMetaData, AssetPrice, AssetProperties, AssetScore, BalanceMetadata, BannerEvent, Chain, ChainAsset, ConfigVersions, PerpetualProvider,
+    PriceAlert, StakeChain, VerificationStatus, Wallet, WalletType,
 };
 
 use super::model::{
-    AssetList, GemAssetAction, GemAssetDetailRow, GemAssetDetailSection, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput, GemAssetNetworkDestination, GemAssetRowStyle,
-    GemAssetSectionIds, GemAssetSubtitleStyle, GemAssetText, GemAssetTitleStyle, GemAssetTrailingStyle, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow,
-    GemSelectAssetScope, GemSelectAssetSection, GemSelectAssetTitle, GemSelectAssetType, GemSelectRowAction, GemWalletSearchCounts, GemWalletSearchLimits, GemWalletSearchPhase,
+    AssetList, GemAssetAction, GemAssetDetailRow, GemAssetDetailSection, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput,
+    GemAssetNetworkDestination, GemAssetRowStyle, GemAssetSectionIds, GemAssetSubtitleStyle, GemAssetText, GemAssetTitleStyle, GemAssetTrailingStyle, GemHeaderActions,
+    GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow, GemSelectAssetScope, GemSelectAssetSection, GemSelectAssetTitle, GemSelectAssetType, GemSelectRowAction,
+    GemWalletSearchCounts, GemWalletSearchLimits, GemWalletSearchPhase,
 };
 use crate::config::search_config::{ASSETS_INITIAL_LIMIT, ASSETS_SEARCH_LIMIT, NFTS_PREVIEW_LIMIT, PERPETUALS_PREVIEW_LIMIT, RESULTS_LIMIT};
 use crate::config::stake::EARN_OFFERED;
-use crate::models::custom_types::GemBigUint;
-use crate::perpetual::GemPerpetual;
 use crate::formatted_number::GemFormattedNumber;
-use crate::percentage::GemPercentageStyle;
+use crate::models::custom_types::GemBigUint;
 use crate::models::list::{GemListRow, GemListRowIcon, GemListRowTitle, GemListSectionTitle};
+use crate::percentage::GemPercentageStyle;
+use crate::perpetual::GemPerpetual;
 use crate::services::balance::rules::{balance_amount, balance_resource_rows};
 use crate::services::balance::{GemAssetBalance, GemAssetBalanceRow, GemBalanceResource, GemBalanceRow, GemBalanceRowValue};
 use crate::services::nft::rules::nft_chains;
@@ -415,11 +416,13 @@ pub fn balance_rows(asset: &Asset, metadata: &AssetMetaData, balance: &GemAssetB
             let value = match &row {
                 GemBalanceRow::Staked { value } if *value == GemBigUint::ZERO => GemBalanceRowValue::Apr { apr: apr(metadata.staking_apr) },
                 GemBalanceRow::Earn { value } if *value == GemBigUint::ZERO => GemBalanceRowValue::Apr { apr: apr(metadata.earn_apr) },
-                GemBalanceRow::Available { .. } | GemBalanceRow::Staked { .. } | GemBalanceRow::Earn { .. } | GemBalanceRow::PendingUnconfirmed { .. } | GemBalanceRow::Reserved { .. } => {
-                    GemBalanceRowValue::Amount {
-                        amount: balance_amount(&row.value(), asset),
-                    }
-                }
+                GemBalanceRow::Available { .. }
+                | GemBalanceRow::Staked { .. }
+                | GemBalanceRow::Earn { .. }
+                | GemBalanceRow::PendingUnconfirmed { .. }
+                | GemBalanceRow::Reserved { .. } => GemBalanceRowValue::Amount {
+                    amount: balance_amount(&row.value(), asset),
+                },
             };
             GemAssetBalanceRow { row, value }
         })
@@ -1109,10 +1112,7 @@ mod tests {
             ..balance.clone()
         };
         assert_eq!(
-            balance_rows(&asset, &metadata, &staked)
-                .into_iter()
-                .map(|item| item.value)
-                .collect::<Vec<_>>(),
+            balance_rows(&asset, &metadata, &staked).into_iter().map(|item| item.value).collect::<Vec<_>>(),
             vec![
                 GemBalanceRowValue::Amount {
                     amount: GemFormattedNumber::amount(1.5, Some("ATOM".to_string()), GemValueStyle::Auto)
@@ -1210,7 +1210,10 @@ mod tests {
 
         assert_eq!(
             manage(&unmanaged),
-            vec![vec![link(GemListRowTitle::Pin, GemListRowIcon::Pin), link(GemListRowTitle::AddToWallet, GemListRowIcon::AddToWallet)]]
+            vec![vec![
+                link(GemListRowTitle::Pin, GemListRowIcon::Pin),
+                link(GemListRowTitle::AddToWallet, GemListRowIcon::AddToWallet)
+            ]]
         );
         assert_eq!(
             manage(&AssetMetaData { is_pinned: true, ..unmanaged })[0][0],
@@ -1300,11 +1303,12 @@ mod tests {
         let alerts_row = |price: Option<f64>, alerts: Vec<PriceAlert>| {
             sections(&asset, &metadata, &balance, price, &alerts)[0].rows.iter().find_map(|row| match row {
                 GemAssetDetailRow::Row {
-                    row: GemListRow::Link {
-                        title: GemListRowTitle::PriceAlerts,
-                        value,
-                        ..
-                    },
+                    row:
+                        GemListRow::Link {
+                            title: GemListRowTitle::PriceAlerts,
+                            value,
+                            ..
+                        },
                 } => value.clone(),
                 _ => None,
             })
@@ -1426,14 +1430,8 @@ mod tests {
             is_buy_enabled: true,
             ..swappable.clone()
         };
-        assert_eq!(
-            state(WalletType::Multicoin, &tradable, &[]).empty_transactions_action,
-            Some(GemAssetEmptyAction::Buy)
-        );
-        assert_eq!(
-            state(WalletType::Multicoin, &swappable, &[]).empty_transactions_action,
-            Some(GemAssetEmptyAction::Swap)
-        );
+        assert_eq!(state(WalletType::Multicoin, &tradable, &[]).empty_transactions_action, Some(GemAssetEmptyAction::Buy));
+        assert_eq!(state(WalletType::Multicoin, &swappable, &[]).empty_transactions_action, Some(GemAssetEmptyAction::Swap));
         assert_eq!(state(WalletType::Multicoin, &AssetMetaData::mock(), &[]).empty_transactions_action, None);
     }
 }

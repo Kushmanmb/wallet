@@ -168,9 +168,7 @@ mod tests {
         let arbitrum = validation(Chain::Arbitrum, "0xinvalid", &GemNameRecordState::None);
         assert_eq!(
             arbitrum.error,
-            Some(GemRecipientErrorDisplay::InvalidAddress {
-                network: "Arbitrum".to_string()
-            }),
+            Some(GemRecipientErrorDisplay::InvalidAddress { network: "Arbitrum".to_string() }),
             "the error names the network, not the chain's asset name"
         );
     }

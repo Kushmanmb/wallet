@@ -11,7 +11,8 @@ use futures::future::join_all;
 use primitives::{Asset, AssetBalance, AssetId, Wallet, WalletId};
 
 pub use model::{
-    GemAssetBalance, GemAssetBalanceRow, GemBalanceRecord, GemBalanceResource, GemBalanceRequirement, GemBalanceRow, GemBalanceRowValue, GemBalanceUpdate, GemBalanceUpdateType, GemBalanceValue,
+    GemAssetBalance, GemAssetBalanceRow, GemBalanceRecord, GemBalanceRequirement, GemBalanceResource, GemBalanceRow, GemBalanceRowValue, GemBalanceUpdate, GemBalanceUpdateType,
+    GemBalanceValue,
 };
 pub use store::GemBalanceStore;
 

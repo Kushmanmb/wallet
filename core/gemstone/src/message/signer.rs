@@ -235,12 +235,12 @@ mod tests {
         eip712::{GemEIP712Section, GemEIP712Value, GemEIP712ValueType},
         sign_type::{MessageType, SignDigestType},
     };
+    use crate::services::simulation::GemSimulationPayloadTitle;
     use crate::signer::ChainTransactionSigner;
     use gem_evm::EIP712Domain;
     use primitives::Address;
     use primitives::testkit::signer_mock::TEST_PRIVATE_KEY;
     use signer::Ed25519KeyPair;
-    use crate::services::simulation::GemSimulationPayloadTitle;
 
     #[test]
     fn test_eip712_chain_signer_matches_message_signer() {

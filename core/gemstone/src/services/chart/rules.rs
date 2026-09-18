@@ -411,7 +411,10 @@ mod tests {
         assert!((flat.y_min - 4.95).abs() < 1e-9 && (flat.y_max - 5.05).abs() < 1e-9, "a flat line pads by one percent");
 
         let zero = chart_bounds(&points(&[0.0, 0.0]));
-        assert!((zero.y_min + 0.01).abs() < 1e-9 && (zero.y_max - 0.01).abs() < 1e-9, "a flat line at zero keeps a minimum range");
+        assert!(
+            (zero.y_min + 0.01).abs() < 1e-9 && (zero.y_max - 0.01).abs() < 1e-9,
+            "a flat line at zero keeps a minimum range"
+        );
 
         let negative = chart_bounds(&points(&[-2.0, -2.0]));
         assert!((negative.y_min + 2.01).abs() < 1e-9 && (negative.y_max + 1.99).abs() < 1e-9);
@@ -442,9 +445,15 @@ mod tests {
                 },
                 GemChartSection::Market {
                     rows: vec![
-                        GemAssetMarketRow::CirculatingSupply { value: supply(50.0, &token.symbol) },
-                        GemAssetMarketRow::TotalSupply { value: supply(60.0, &token.symbol) },
-                        GemAssetMarketRow::MaxSupply { value: supply(21.0, &token.symbol) },
+                        GemAssetMarketRow::CirculatingSupply {
+                            value: supply(50.0, &token.symbol)
+                        },
+                        GemAssetMarketRow::TotalSupply {
+                            value: supply(60.0, &token.symbol)
+                        },
+                        GemAssetMarketRow::MaxSupply {
+                            value: supply(21.0, &token.symbol)
+                        },
                     ]
                 },
                 GemChartSection::Market {
@@ -473,7 +482,14 @@ mod tests {
                     rows: vec![GemAssetMarketRow::FullyDilutedValuation { value: usd(120.0) }]
                 },
                 GemChartSection::Market {
-                    rows: vec![GemAssetMarketRow::CirculatingSupply { value: supply(50.0, &Asset::mock().symbol) }, GemAssetMarketRow::MaxSupply { value: supply(21.0, &Asset::mock().symbol) }]
+                    rows: vec![
+                        GemAssetMarketRow::CirculatingSupply {
+                            value: supply(50.0, &Asset::mock().symbol)
+                        },
+                        GemAssetMarketRow::MaxSupply {
+                            value: supply(21.0, &Asset::mock().symbol)
+                        }
+                    ]
                 },
                 GemChartSection::Market {
                     rows: vec![GemAssetMarketRow::AllTimeHigh {
@@ -491,7 +507,13 @@ mod tests {
             section => panic!("expected market rows, got {section:?}"),
         };
 
-        assert_eq!(rank(MARKET_CAP_RANK_BADGE_LIMIT), GemAssetMarketRow::MarketCap { value: usd(100.0), rank: Some(1000) });
+        assert_eq!(
+            rank(MARKET_CAP_RANK_BADGE_LIMIT),
+            GemAssetMarketRow::MarketCap {
+                value: usd(100.0),
+                rank: Some(1000)
+            }
+        );
         assert_eq!(rank(MARKET_CAP_RANK_BADGE_LIMIT + 1), GemAssetMarketRow::MarketCap { value: usd(100.0), rank: None });
         assert_eq!(rank(0), GemAssetMarketRow::MarketCap { value: usd(100.0), rank: None });
     }

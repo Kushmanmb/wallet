@@ -282,7 +282,12 @@ mod tests {
             preferences_sections(preferences_input(false, None))
                 .first()
                 .map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
-            Some(vec![GemListRowTitle::Currency, GemListRowTitle::Appearance, GemListRowTitle::Networks, GemListRowTitle::Contacts])
+            Some(vec![
+                GemListRowTitle::Currency,
+                GemListRowTitle::Appearance,
+                GemListRowTitle::Networks,
+                GemListRowTitle::Contacts
+            ])
         );
     }
 

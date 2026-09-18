@@ -667,7 +667,11 @@ mod tests {
         let normal = GemConfirmFeeSelection::Priority { priority: FeePriority::Normal };
 
         let gwei = fee_rate_rows(Chain::Ethereum, &Asset::from_chain(Chain::Ethereum), &rates, &normal, &GemTransactionLoadFee::mock(1_000));
-        assert_eq!(gwei.rows[1].value, fee_rate_text(FeeUnitType::Gwei, &BigInt::from(25), 9, "ETH"), "a gwei row shows the rate the user picks");
+        assert_eq!(
+            gwei.rows[1].value,
+            fee_rate_text(FeeUnitType::Gwei, &BigInt::from(25), 9, "ETH"),
+            "a gwei row shows the rate the user picks"
+        );
 
         let native = fee_rate_rows(Chain::Solana, &Asset::from_chain(Chain::Solana), &rates, &normal, &GemTransactionLoadFee::mock(1_000));
         assert_eq!(
@@ -688,7 +692,11 @@ mod tests {
             fee_rate_text(FeeUnitType::Native, &BigInt::from(25), 9, "SOL"),
             "with no fee to scale, the rate stands in"
         );
-        assert_eq!(unscaled.custom_rate, Some(fee_rate_text(FeeUnitType::Native, &BigInt::ZERO, 9, "SOL")), "a custom selection reads back its rate");
+        assert_eq!(
+            unscaled.custom_rate,
+            Some(fee_rate_text(FeeUnitType::Native, &BigInt::ZERO, 9, "SOL")),
+            "a custom selection reads back its rate"
+        );
         assert_eq!(native.custom_rate, None);
     }
 

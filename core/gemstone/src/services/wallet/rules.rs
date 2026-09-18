@@ -2,7 +2,10 @@ use gem_keystore::Mnemonic;
 use primitives::{Account, AddressName, AddressType, Chain, ChainAddress, NameRecord, VerificationStatus, Wallet, WalletId, WalletSource, WalletType};
 
 use super::error::GemWalletImportError;
-use super::model::{GemSecretPhraseRow, GemWalletDetails, GemWalletImportKind, GemWalletImportScreen, GemWalletImportType, GemWalletPlaceholder, GemWalletRow, GemWalletSecretKind, GemWalletSubtitle};
+use super::model::{
+    GemSecretPhraseRow, GemWalletDetails, GemWalletImportKind, GemWalletImportScreen, GemWalletImportType, GemWalletPlaceholder, GemWalletRow, GemWalletSecretKind,
+    GemWalletSubtitle,
+};
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::services::localization::GemLocalizedText;
 
@@ -298,7 +301,10 @@ mod tests {
         assert_eq!(multicoin.kinds, vec![GemWalletImportKind::Phrase]);
         assert!(!multicoin.shows_kinds);
         assert_eq!(ethereum.title, GemLocalizedText::ChainNetworkName { chain: Chain::Ethereum });
-        assert_eq!(ethereum.kinds, vec![GemWalletImportKind::Phrase, GemWalletImportKind::PrivateKey, GemWalletImportKind::Address]);
+        assert_eq!(
+            ethereum.kinds,
+            vec![GemWalletImportKind::Phrase, GemWalletImportKind::PrivateKey, GemWalletImportKind::Address]
+        );
         assert!(ethereum.shows_kinds);
     }
 

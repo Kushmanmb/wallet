@@ -18,11 +18,11 @@ use super::model::{
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::config::image::GemImage;
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
-use crate::precision::GemValueStyle;
 use crate::models::asset::wallet_default_assets;
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
-use crate::services::localization::GemLocalizedText;
+use crate::precision::GemValueStyle;
 use crate::services::collections::unique;
+use crate::services::localization::GemLocalizedText;
 use crate::services::swap::model::GemSwapRate;
 use crate::services::swap::rules as swap_rules;
 use swapper::{ProviderType as SwapperProviderType, SwapperProvider, SwapperProviderMode};
@@ -268,9 +268,16 @@ fn participant_name(extended: &TransactionExtended, address: &str) -> String {
 
 fn value_tone(value: &GemTransactionRowValue) -> GemValueTone {
     match value {
-        GemTransactionRowValue::Number { sign: GemAmountSign::Incoming, .. } => GemValueTone::Positive,
-        GemTransactionRowValue::Number { sign: GemAmountSign::Outgoing, .. } => GemValueTone::Plain,
-        GemTransactionRowValue::Number { number, sign: GemAmountSign::None } => match number.tone {
+        GemTransactionRowValue::Number {
+            sign: GemAmountSign::Incoming, ..
+        } => GemValueTone::Positive,
+        GemTransactionRowValue::Number {
+            sign: GemAmountSign::Outgoing, ..
+        } => GemValueTone::Plain,
+        GemTransactionRowValue::Number {
+            number,
+            sign: GemAmountSign::None,
+        } => match number.tone {
             GemValueTone::Positive => GemValueTone::Positive,
             GemValueTone::Negative => GemValueTone::Negative,
             GemValueTone::Neutral | GemValueTone::Plain | GemValueTone::Warning => GemValueTone::Plain,
@@ -701,7 +708,10 @@ mod tests {
             number: GemFormattedNumber::amount(1.0, Some("ETH".to_string()), GemValueStyle::Short),
             sign,
         };
-        let usd = |number| GemTransactionRowValue::Number { number, sign: GemAmountSign::None };
+        let usd = |number| GemTransactionRowValue::Number {
+            number,
+            sign: GemAmountSign::None,
+        };
 
         assert_eq!(value_tone(&amount(GemAmountSign::Incoming)), GemValueTone::Positive);
         assert_eq!(value_tone(&amount(GemAmountSign::Outgoing)), GemValueTone::Plain);
@@ -1355,7 +1365,9 @@ mod tests {
             GemTransactionDetailRow::Row {
                 row: GemListRow::Label {
                     title: GemListRowTitle::Status,
-                    text: GemLocalizedText::TransactionState { state: TransactionState::Confirmed },
+                    text: GemLocalizedText::TransactionState {
+                        state: TransactionState::Confirmed
+                    },
                     tone: GemValueTone::Positive,
                     info: Some(GemInfoTopic::TransactionStatus {
                         state: TransactionState::Confirmed,
