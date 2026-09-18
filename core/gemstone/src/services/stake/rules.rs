@@ -410,7 +410,6 @@ pub fn claim_rewards(chain: Chain, delegations: Vec<Delegation>) -> GemClaimRewa
     GemClaimRewards { destination }
 }
 
-#[uniffi::export]
 impl GemAssetBalance {
     pub fn detail_rows(&self, chain: Chain, is_stake_enabled: bool) -> Vec<GemBalanceRow> {
         let positive = |value: &GemBigUint| (*value > GemBigUint::ZERO).then(|| value.clone());

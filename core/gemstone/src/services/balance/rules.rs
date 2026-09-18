@@ -5,6 +5,15 @@ use crate::services::collections::{missing, unique};
 use primitives::{Account, Asset, AssetBalance, AssetFiatValue, AssetId, BalanceCalculator, BalanceMetadata, Chain, TotalFiatValue};
 
 use super::model::{GemAssetBalance, GemBalanceRecord, GemBalanceResource, GemBalanceResourceRow, GemBalanceUpdate, GemBalanceUpdateType};
+use crate::formatted_number::GemFormattedNumber;
+use crate::precision::GemValueStyle;
+use num_bigint::BigUint;
+use number_formatter::BigNumberFormatter;
+
+pub fn balance_amount(value: &BigUint, asset: &Asset) -> GemFormattedNumber {
+    let value = BigNumberFormatter::value_as_f64(&value.to_string(), asset.decimals.unsigned_abs()).unwrap_or_default();
+    GemFormattedNumber::amount(value, Some(asset.symbol.clone()), GemValueStyle::Auto)
+}
 
 #[uniffi::export]
 pub fn balance_resource_rows(metadata: Option<BalanceMetadata>) -> Vec<GemBalanceResourceRow> {

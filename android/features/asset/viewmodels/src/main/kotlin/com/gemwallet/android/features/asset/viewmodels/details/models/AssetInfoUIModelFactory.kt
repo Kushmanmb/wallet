@@ -8,27 +8,25 @@ import com.gemwallet.android.domains.price.tone
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toPrimitives
-import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.ChainAssetInfo
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.model.getTotalAmount
-import com.gemwallet.android.model.toGem
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.banner.uiModel
 import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.localization.titleRes
 import com.gemwallet.android.ui.components.list_item.ListItemSymbol
 import com.wallet.core.primitives.Currency
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.math.BigInteger
 import javax.inject.Inject
+import uniffi.gemstone.GemAssetBalanceRow
 import uniffi.gemstone.GemAssetDetails
 import uniffi.gemstone.GemBalanceRow
-import uniffi.gemstone.GemPercentageStyle
 import uniffi.gemstone.GemValueStyle
 
 class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private val context: Context) {
@@ -76,45 +74,22 @@ class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private va
                 totalBalance = valueFormatter.string(balances.balance.getTotalAmount(), balances.asset),
                 totalFiat = fiatTotal,
                 owner = assetInfo.owner?.address ?: "",
-                balances = balanceRows(assetInfo, valueFormatter),
+                balances = details.balanceRows.map { balance(it) },
                 balanceMetadata = feeAssetInfo.balance.metadata,
             ),
         )
     }
 
-    private fun balanceRows(assetInfo: AssetInfo, formatter: ValueFormatter): List<AssetInfoUIModel.BalanceUIModel> {
-        val asset = assetInfo.asset
-        val text = { value: BigInteger -> formatter.string(value, asset) }
-        return assetInfo.balance.toGem().detailRows(asset.chain.string, assetInfo.metadata.isStakeEnabled).mapNotNull { row ->
-            when (row) {
-                is GemBalanceRow.Available -> balance(row, row.viewType(), text(row.value))
-                is GemBalanceRow.Staked -> balance(
-                    row,
-                    row.viewType(),
-                    if (row.value == BigInteger.ZERO) {
-                        "APR ${(assetInfo.metadata.stakingApr ?: 0.0).formatAsPercentage(style = GemPercentageStyle.UNSIGNED)}"
-                    } else {
-                        text(row.value)
-                    },
-                )
-                is GemBalanceRow.PendingUnconfirmed -> balance(row, row.viewType(), text(row.value), info = InfoSheetEntity.PendingUnconfirmedBalanceInfo)
-                is GemBalanceRow.Reserved -> balance(row, row.viewType(), text(row.value), url = row.url)
-                is GemBalanceRow.Earn -> balance(
-                    row,
-                    row.viewType(),
-                    if (row.value == BigInteger.ZERO) {
-                        "APR ${(assetInfo.metadata.earnApr ?: 0.0).formatAsPercentage(style = GemPercentageStyle.UNSIGNED)}"
-                    } else {
-                        text(row.value)
-                    },
-                )
-            }
-        }
+    private fun balance(item: GemAssetBalanceRow): AssetInfoUIModel.BalanceUIModel {
+        val row = item.row
+        return AssetInfoUIModel.BalanceUIModel(
+            type = row.viewType(),
+            url = (row as? GemBalanceRow.Reserved)?.url,
+            model = ListItemModel(
+                title = context.getString(row.title().titleRes()),
+                subtitle = item.value.text(context),
+                info = InfoSheetEntity.PendingUnconfirmedBalanceInfo.takeIf { row is GemBalanceRow.PendingUnconfirmed },
+            ),
+        )
     }
-
-    private fun balance(row: GemBalanceRow, type: AssetInfoUIModel.BalanceViewType, value: String, url: String? = null, info: InfoSheetEntity? = null) = AssetInfoUIModel.BalanceUIModel(
-        type = type,
-        url = url,
-        model = ListItemModel(title = context.getString(row.title().titleRes()), subtitle = value, info = info),
-    )
 }

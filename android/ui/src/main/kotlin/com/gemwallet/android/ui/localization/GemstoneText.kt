@@ -42,6 +42,8 @@ import uniffi.gemstone.GemEmptyStateText
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemHeaderButtonKind
+import com.gemwallet.android.model.text
+import uniffi.gemstone.GemBalanceRowValue
 import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemRecipientSection
 import uniffi.gemstone.GemSimulationWarningKind
@@ -158,6 +160,11 @@ private fun perpetualTitle(context: Context, direction: uniffi.gemstone.Perpetua
         else -> context.getString(side.stringRes())
     }
     return context.getString(directionTitle, side)
+}
+
+fun GemBalanceRowValue.text(context: Context): String = when (this) {
+    is GemBalanceRowValue.Amount -> amount.text()
+    is GemBalanceRowValue.Apr -> context.getString(R.string.stake_apr, apr?.text().orEmpty())
 }
 
 fun GemLocalizedText.string(context: Context): String = when (this) {

@@ -1,16 +1,14 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import enum Gemstone.GemHeaderButtonKind
-import BigInt
 import Components
 import struct Gemstone.GemAssetBalance
 import protocol Gemstone.GemAssetDetailsServiceProtocol
 import struct Gemstone.GemAssetDetails
 import struct Gemstone.GemAssetDetailsInput
-import enum Gemstone.GemBalanceRow
+import struct Gemstone.GemAssetBalanceRow
 import struct Gemstone.GemBannerContext
 import func Gemstone.assetBannerContext
-import typealias Gemstone.GemBigUint
 import GemstonePrimitives
 import GemstoneServices
 import Localization
@@ -96,13 +94,10 @@ public final class AssetSceneViewModel: Sendable {
         ListItemModel(title: Localized.Settings.PriceAlerts.title, subtitle: details.state.priceAlertsCountText)
     }
 
-    func balanceListItem(for row: GemBalanceRow) -> ListItemModel {
-        switch row {
-        case let .available(value): ListItemModel(title: row.title().text, subtitle: balanceText(value))
-        case let .staked(value): ListItemModel(title: row.title().text, subtitle: stakeBalanceText(value))
-        case let .earn(value): ListItemModel(title: row.title().text, subtitle: balanceText(value))
-        case let .pendingUnconfirmed(value): ListItemModel(title: row.title().text, subtitle: balanceText(value), infoAction: onSelectPendingUnconfirmedInfo)
-        case let .reserved(value, _): ListItemModel(title: row.title().text, subtitle: balanceText(value))
+    func balanceListItem(for item: GemAssetBalanceRow) -> ListItemModel {
+        switch item.row {
+        case .available, .staked, .earn, .reserved: ListItemModel(title: item.row.title().text, subtitle: item.value.text)
+        case .pendingUnconfirmed: ListItemModel(title: item.row.title().text, subtitle: item.value.text, infoAction: onSelectPendingUnconfirmedInfo)
         }
     }
 
@@ -129,10 +124,6 @@ public final class AssetSceneViewModel: Sendable {
 
     var bandwidthField: ListItemField {
         ListItemField(title: Resource.bandwidth.title, value: feeAssetDataModel.bandwidthText)
-    }
-
-    var balanceRows: [GemBalanceRow] {
-        stakeBalance.detailRows(chain: asset.chain.rawValue, isStakeEnabled: assetData.metadata.isStakeEnabled)
     }
 
     public var details: GemAssetDetails {
@@ -256,14 +247,6 @@ public final class AssetSceneViewModel: Sendable {
     var swapAssetType: SelectedAssetType {
         guard details.swapPair.receiveAssetId != nil else { return .swap(assetData.asset, nil) }
         return .swap(assetData.asset.chain.asset, assetData.asset)
-    }
-
-    func balanceText(_ value: GemBigUint) -> String {
-        assetDataModel.balanceTextWithSymbol(BigInt(value))
-    }
-
-    func stakeBalanceText(_ value: GemBigUint) -> String {
-        value == GemBigUint(BigInt.zero.description) ? aprModel(for: .stake).text : balanceText(value)
     }
 
     func aprModel(for type: StakeProviderType) -> AprViewModel {

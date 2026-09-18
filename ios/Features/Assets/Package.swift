@@ -81,6 +81,7 @@ let package = Package(
                 .product(name: "BigInt", package: "BigInt"),
                 "Gemstone",
                 "GemstonePrimitives",
+                "Localization",
                 "Primitives",
             ],
         ),

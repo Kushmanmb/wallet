@@ -90,31 +90,31 @@ public struct AssetScene: View {
                 }
             }
 
-            if model.balanceRows.isNotEmpty {
+            if details.balanceRows.isNotEmpty {
                 Section(model.balancesTitle) {
-                    ForEach(model.balanceRows, id: \.self) { row in
-                        switch row {
+                    ForEach(details.balanceRows, id: \.self) { item in
+                        switch item.row {
                         case .available, .pendingUnconfirmed:
-                            ListItemView(model: model.balanceListItem(for: row))
+                            ListItemView(model: model.balanceListItem(for: item))
                         case .staked:
                             NavigationCustomLink(
-                                with: ListItemView(model: model.balanceListItem(for: row)),
+                                with: ListItemView(model: model.balanceListItem(for: item)),
                                 action: { model.onSelectStake() },
                             )
                             .accessibilityIdentifier("stake")
                         case .earn:
                             NavigationCustomLink(
-                                with: ListItemView(model: model.balanceListItem(for: row)),
+                                with: ListItemView(model: model.balanceListItem(for: item)),
                                 action: { model.onSelectEarn() },
                             )
                             .accessibilityIdentifier("earn")
                         case let .reserved(_, url):
                             if let url = url.flatMap(URL.init) {
                                 SafariNavigationLink(url: url) {
-                                    ListItemView(model: model.balanceListItem(for: row))
+                                    ListItemView(model: model.balanceListItem(for: item))
                                 }
                             } else {
-                                ListItemView(model: model.balanceListItem(for: row))
+                                ListItemView(model: model.balanceListItem(for: item))
                             }
                         }
                     }

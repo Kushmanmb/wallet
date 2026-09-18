@@ -10,6 +10,7 @@ import enum Gemstone.FeeOption
 import enum Gemstone.GemAssetMenuAction
 import enum Gemstone.GemContactAddressField
 import enum Gemstone.DelegationState
+import enum Gemstone.GemBalanceRowValue
 import enum Gemstone.GemListRowTitle
 import enum Gemstone.GemListSectionFooter
 import enum Gemstone.GemListSectionTitle
@@ -66,6 +67,15 @@ extension GemLocalizedText {
             Chain(core: chain).networkName
         case let .delegationState(state):
             state.title
+        }
+    }
+}
+
+public extension GemBalanceRowValue {
+    var text: String {
+        switch self {
+        case let .amount(amount): amount.text()
+        case let .apr(apr): Localized.Stake.apr(apr?.text() ?? "")
         }
     }
 }

@@ -1,3 +1,4 @@
+use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::{GemBigInt, GemBigUint};
 use crate::models::list::GemListRowTitle;
 use number_formatter::BigNumberFormatter;
@@ -145,6 +146,18 @@ impl GemAssetBalance {
         }
         balance
     }
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemBalanceRowValue {
+    Amount { amount: GemFormattedNumber },
+    Apr { apr: Option<GemFormattedNumber> },
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAssetBalanceRow {
+    pub row: GemBalanceRow,
+    pub value: GemBalanceRowValue,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]

@@ -1,17 +1,13 @@
 use std::iter::once;
 
-use num_bigint::BigUint;
-use number_formatter::BigNumberFormatter;
 use primitives::{AddressName, Asset, AssetBalance, AssetId, Chain, block_explorer::BlockExplorerLink};
 
 use super::model::GemAddressDetails;
-use crate::formatted_number::GemFormattedNumber;
 use crate::models::copy::address_copy;
 use crate::models::list::{GemListRow, GemListRowTitle, GemListSection, GemListSectionFooter, GemListSectionTitle};
 use crate::models::state::{GemLoad, GemLoadState};
-use crate::precision::GemValueStyle;
 use crate::services::assets::rules::asset_text;
-use crate::services::balance::rules::{balance_updates, chain_balances};
+use crate::services::balance::rules::{balance_amount, balance_updates, chain_balances};
 use crate::services::balance::{GemAssetBalance, GemBalanceRow};
 
 pub(super) fn details(chain: Chain, address: String, name: Option<String>, link: BlockExplorerLink, balances: GemLoad<Vec<GemBalanceRow>>) -> GemAddressDetails {
@@ -98,17 +94,12 @@ fn balance_section(details: &GemAddressDetails, asset: &Asset) -> Vec<GemListRow
             .iter()
             .map(|row| GemListRow::Amount {
                 title: row.title(),
-                amount: amount(&row.value(), asset),
+                amount: balance_amount(&row.value(), asset),
                 info: None,
             })
             .collect(),
         GemLoadState::Error { error } => vec![GemListRow::Error { error: error.clone() }],
     }
-}
-
-fn amount(value: &BigUint, asset: &Asset) -> GemFormattedNumber {
-    let value = BigNumberFormatter::value_as_f64(&value.to_string(), asset.decimals.unsigned_abs()).unwrap_or_default();
-    GemFormattedNumber::amount(value, Some(asset.symbol.clone()), GemValueStyle::Auto)
 }
 
 #[cfg(test)]
@@ -117,6 +108,7 @@ mod tests {
     use primitives::{AddressType, VerificationStatus};
 
     use super::*;
+    use crate::formatted_number::GemFormattedNumber;
     use crate::precision::GemValueStyle;
 
     #[test]

@@ -151,6 +151,7 @@ impl GemAssetDetailsService {
         let has_balance = balance.available > GemBigUint::ZERO;
         GemAssetDetails {
             title: rules::asset_title(&asset),
+            balance_rows: rules::balance_rows(&asset, &metadata, &balance),
             state: rules::details_state(wallet_type, chain, &metadata, &balance, &banner_events, price, price_alerts),
             explorer_name: self.explorer.get_explorer_name(chain),
             address_link: owner_address.map(|address| self.explorer.get_address_url(chain, address)),

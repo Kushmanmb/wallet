@@ -16,7 +16,10 @@ use crate::config::search_config::{ASSETS_INITIAL_LIMIT, ASSETS_SEARCH_LIMIT, NF
 use crate::config::stake::EARN_OFFERED;
 use crate::models::custom_types::GemBigUint;
 use crate::perpetual::GemPerpetual;
-use crate::services::balance::GemAssetBalance;
+use crate::formatted_number::GemFormattedNumber;
+use crate::percentage::GemPercentageStyle;
+use crate::services::balance::rules::balance_amount;
+use crate::services::balance::{GemAssetBalance, GemAssetBalanceRow, GemBalanceRow, GemBalanceRowValue};
 use crate::services::nft::rules::nft_chains;
 use crate::services::price::rules::has_price;
 use crate::services::price_alert::rules::{displayed_price_alert_ids, price_alert_toggle};
@@ -397,6 +400,26 @@ pub fn asset_title(asset: &Asset) -> String {
         true => Asset::from_chain(asset.chain()).name,
         false => asset.name.clone(),
     }
+}
+
+pub fn balance_rows(asset: &Asset, metadata: &AssetMetaData, balance: &GemAssetBalance) -> Vec<GemAssetBalanceRow> {
+    let apr = |apr: Option<f64>| apr.filter(|apr| *apr > 0.0).map(|apr| GemFormattedNumber::percentage(apr, GemPercentageStyle::Unsigned));
+    balance
+        .detail_rows(asset.chain(), metadata.is_stake_enabled)
+        .into_iter()
+        .map(|row| {
+            let value = match &row {
+                GemBalanceRow::Staked { value } if *value == GemBigUint::ZERO => GemBalanceRowValue::Apr { apr: apr(metadata.staking_apr) },
+                GemBalanceRow::Earn { value } if *value == GemBigUint::ZERO => GemBalanceRowValue::Apr { apr: apr(metadata.earn_apr) },
+                GemBalanceRow::Available { .. } | GemBalanceRow::Staked { .. } | GemBalanceRow::Earn { .. } | GemBalanceRow::PendingUnconfirmed { .. } | GemBalanceRow::Reserved { .. } => {
+                    GemBalanceRowValue::Amount {
+                        amount: balance_amount(&row.value(), asset),
+                    }
+                }
+            };
+            GemAssetBalanceRow { row, value }
+        })
+        .collect()
 }
 
 pub fn details_state(
@@ -961,6 +984,56 @@ mod tests {
 
     fn kinds(state: &GemAssetDetailsState) -> Vec<GemHeaderButtonKind> {
         buttons(state).into_iter().map(|button| button.kind).collect()
+    }
+
+    #[test]
+    fn test_an_empty_stake_balance_shows_the_rate_it_would_earn() {
+        use crate::precision::GemValueStyle;
+        use num_bigint::BigUint;
+        let asset = Asset::from_chain(Chain::Cosmos);
+        let metadata = AssetMetaData {
+            is_stake_enabled: true,
+            staking_apr: Some(15.81),
+            ..AssetMetaData::mock()
+        };
+        let balance = GemAssetBalance {
+            available: BigUint::from(1_500_000u32),
+            ..GemAssetBalance::mock()
+        };
+
+        assert_eq!(
+            balance_rows(&asset, &metadata, &balance),
+            vec![GemAssetBalanceRow {
+                row: GemBalanceRow::Staked { value: BigUint::ZERO },
+                value: GemBalanceRowValue::Apr {
+                    apr: Some(GemFormattedNumber::percentage(15.81, GemPercentageStyle::Unsigned))
+                },
+            }]
+        );
+
+        let staked = GemAssetBalance {
+            staked: BigUint::from(2_000_000u32),
+            ..balance.clone()
+        };
+        assert_eq!(
+            balance_rows(&asset, &metadata, &staked)
+                .into_iter()
+                .map(|item| item.value)
+                .collect::<Vec<_>>(),
+            vec![
+                GemBalanceRowValue::Amount {
+                    amount: GemFormattedNumber::amount(1.5, Some("ATOM".to_string()), GemValueStyle::Auto)
+                },
+                GemBalanceRowValue::Amount {
+                    amount: GemFormattedNumber::amount(2.0, Some("ATOM".to_string()), GemValueStyle::Auto)
+                },
+            ]
+        );
+        assert_eq!(
+            balance_rows(&asset, &AssetMetaData { staking_apr: None, ..metadata }, &balance)[0].value,
+            GemBalanceRowValue::Apr { apr: None },
+            "an unknown rate leaves the label without a number"
+        );
     }
 
     #[test]

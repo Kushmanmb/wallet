@@ -58,6 +58,7 @@ public final class GemAssetDetailsServiceMock: GemAssetDetailsServiceProtocol, @
                 showsEarn: false,
                 emptyTransactionsAction: nil,
             ),
+            balanceRows: [],
             title: input.asset.name,
             explorerName: "Explorer",
             addressLink: input.ownerAddress.map { Gemstone.BlockExplorerLink(name: "Explorer", link: "https://gemwallet.com/\($0)") },

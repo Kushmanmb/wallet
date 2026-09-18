@@ -11,6 +11,7 @@ fun mockGemAssetDetails(
     state: GemAssetDetailsState = mockGemAssetDetailsState(),
 ) = GemAssetDetails(
     state = state,
+    balanceRows = emptyList(),
     title = asset.name,
     explorerName = "Explorer",
     addressLink = null,

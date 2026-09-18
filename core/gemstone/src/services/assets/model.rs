@@ -1,6 +1,6 @@
 use primitives::{Asset, AssetId, AssetMetaData, AssetType, BannerEvent, BlockExplorerLink, Chain, PriceAlert, RecentActivityType, VerificationStatus, WalletType};
 
-use crate::services::balance::GemAssetBalance;
+use crate::services::balance::{GemAssetBalance, GemAssetBalanceRow};
 use crate::services::price_alert::rules::GemPriceAlertToggle;
 use crate::services::swap::GemSwapPairSuggestion;
 use strum::IntoEnumIterator;
@@ -490,6 +490,7 @@ pub struct GemAssetDetailsInput {
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct GemAssetDetails {
     pub state: GemAssetDetailsState,
+    pub balance_rows: Vec<GemAssetBalanceRow>,
     pub title: String,
     pub explorer_name: String,
     pub address_link: Option<BlockExplorerLink>,
