@@ -6,6 +6,7 @@ import Formatters
 import Foundation
 import class Gemstone.Config
 import enum Gemstone.GemSwapButtonAction
+import struct Gemstone.GemSwapQuoteInput
 import struct Gemstone.GemSwapQuotesResult
 import struct Gemstone.GemSwapSession
 import struct Gemstone.GemSwapViewState
@@ -51,7 +52,7 @@ public final class SwapSceneViewModel {
     var pairSelectorModel: SwapPairSelectorViewModel
 
     var viewState: GemSwapViewState {
-        let value = currentInput?.value ?? .zero
+        let value = currentInput.map { BigInt($0.request.value) } ?? .zero
         let availableBalance = fromAsset?.balance.available ?? .zero
         if let cache = viewStateCache, cache.session == session, cache.value == value, cache.availableBalance == availableBalance {
             return cache.state
@@ -82,7 +83,6 @@ public final class SwapSceneViewModel {
         TimeInterval(service.refreshIntervalMilliseconds()) / 1000
     }
 
-    private let formatter = SwapValueFormatter(valueFormatter: .full)
     private let toValueFormatter = SwapValueFormatter(valueFormatter: ValueFormatter(style: .auto))
 
     public init(
@@ -252,7 +252,7 @@ extension SwapSceneViewModel {
     func suggestPair() async {
         guard
             pairSelectorModel.toAssetId == nil,
-            let pair = try? await service.suggestPair(payAssetId: pairSelectorModel.fromAssetId?.identifier)?.map()
+            let pair = await service.suggestPair(payAssetId: pairSelectorModel.fromAssetId?.identifier)?.map()
         else { return }
         pairSelectorModel = pair
     }
@@ -277,7 +277,8 @@ extension SwapSceneViewModel {
     }
 
     func onChangeFromValue(_: String, _: String) {
-        if let input = loadTrigger?.input, input == currentInput {
+        updateSessionInput()
+        if loadTrigger?.input == currentInput {
             return
         }
         setLoadTrigger(isImmediate: false)
@@ -287,6 +288,7 @@ extension SwapSceneViewModel {
         guard old?.asset.id != new?.asset.id else { return }
 
         resetValues()
+        updateSessionInput(amount: "")
         setLoadTrigger(isImmediate: true)
     }
 
@@ -294,6 +296,7 @@ extension SwapSceneViewModel {
         guard old?.asset.id != new?.asset.id else { return }
 
         resetToValue()
+        updateSessionInput()
         setLoadTrigger(isImmediate: true)
     }
 
@@ -304,6 +307,7 @@ extension SwapSceneViewModel {
     func onSelectPercent(_ percent: Int) {
         guard let fromAsset else { return }
         setFromValue(percent: percent, assetData: fromAsset)
+        updateSessionInput()
         setLoadTrigger(isImmediate: true)
     }
 
@@ -343,6 +347,7 @@ extension SwapSceneViewModel {
         } catch {
             debugLog("set swap slippage error: \(error)")
         }
+        updateSessionInput()
         setLoadTrigger(isImmediate: true)
     }
 
@@ -382,13 +387,32 @@ extension SwapSceneViewModel {
         return .noData
     }
 
-    private var currentInput: SwapQuoteInput? {
-        try? SwapQuoteInput.create(
-            fromAsset: fromAsset,
-            toAsset: toAsset,
-            fromValue: amountInputModel.text,
-            slippage: selectedSlippage,
-            formatter: formatter,
+    private var currentInput: GemSwapQuoteInput? {
+        guard let fromAsset, let toAsset else { return nil }
+        return session.currentInput(
+            payAsset: fromAsset.asset.toGem(),
+            receiveAsset: toAsset.asset.toGem(),
+            availableValue: fromAsset.balance.available,
+            slippageBps: selectedSlippageBps,
+            format: NumberInput.format(),
+        )
+    }
+
+    private var selectedSlippageBps: UInt32? {
+        switch selectedSlippage {
+        case .auto: nil
+        case let .manual(bps): bps
+        }
+    }
+
+    private func updateSessionInput(amount: String? = nil) {
+        session = session.onInputChanged(
+            amount: amount ?? amountInputModel.text,
+            payAsset: fromAsset?.asset.toGem(),
+            receiveAsset: toAsset?.asset.toGem(),
+            availableValue: fromAsset?.balance.available ?? .zero,
+            slippageBps: selectedSlippageBps,
+            format: NumberInput.format(),
         )
     }
 
@@ -414,18 +438,17 @@ extension SwapSceneViewModel {
     private func setFromValue(minimum value: BigInt) {
         guard let fromAsset, let text = NumberInput.format().inputText(value: value.description, decimals: UInt32(fromAsset.asset.decimals)) else { return }
         amountInputModel.text = text
+        updateSessionInput()
         setLoadTrigger(isImmediate: true)
     }
 
     private func setLoadTrigger(isImmediate: Bool) {
         guard let input = currentInput else {
             resetToValue()
-            session = session.onRequestChanged(request: nil)
             loadTrigger = nil
             return
         }
         guard !isTransferDataLoading else { return }
-        session = session.onRequestChanged(request: input.request)
         resetToValue()
         loadTrigger = SwapLoadTrigger(input: input, isImmediate: isImmediate)
     }
@@ -456,23 +479,23 @@ extension SwapSceneViewModel {
         }
     }
 
-    private func performFetch(input: SwapQuoteInput) async {
-        guard !isTransferDataLoading else { return }
+    private func performFetch(input: GemSwapQuoteInput) async {
+        guard !isTransferDataLoading, let fromAsset, let toAsset else { return }
         session = session.onFetchStarted(request: input.request)
         resetToValue()
         do {
             let swapQuotes = try await service.getQuotes(
-                fromAsset: input.fromAsset,
-                toAsset: input.toAsset,
-                amount: input.value,
+                fromAsset: fromAsset.asset,
+                toAsset: toAsset.asset,
+                amount: BigInt(input.request.value),
                 useMaxAmount: input.useMaxAmount,
-                slippage: input.slippage,
+                slippage: selectedSlippage,
             )
 
             guard currentInput == input else { return }
             session = session.onQuoteResults(results: GemSwapQuotesResult(request: input.request, quotes: swapQuotes, error: nil))
-            if let selectedSwapQuote, let asset = toAsset?.asset {
-                setToValue(quote: selectedSwapQuote, asset: asset)
+            if let selectedSwapQuote {
+                setToValue(quote: selectedSwapQuote, asset: toAsset.asset)
             }
         } catch let error as SwapperError {
             guard !Task.isCancelled, currentInput == input else { return }
@@ -501,7 +524,11 @@ extension SwapSceneViewModel {
 
     private func onSelectActionButton() {
         switch viewState.buttonAction {
-        case .retryQuote: setLoadTrigger(isImmediate: true)
+        case .retryQuote:
+            if let input = currentInput {
+                session = session.onRefreshRequested(request: input.request)
+            }
+            setLoadTrigger(isImmediate: true)
         case .retryTransfer: swap()
         case .insufficientBalance: break
         case let .useMinimumAmount(value): setFromValue(minimum: value)

@@ -102,8 +102,9 @@ impl GemSwapQuoteService {
         self.swap.get_quotes(wallet, from_asset, to_asset, value, use_max_amount, slippage_bps).await
     }
 
-    pub async fn suggest_pair(&self, pay_asset_id: Option<AssetId>) -> Result<Option<GemSwapPairSuggestion>, GemServiceError> {
-        self.swap.suggest_pair(self.session.current_wallet().await?, pay_asset_id).await
+    pub async fn suggest_pair(&self, pay_asset_id: Option<AssetId>) -> Option<GemSwapPairSuggestion> {
+        let Ok(wallet) = self.session.current_wallet().await else { return None };
+        self.swap.suggest_pair(wallet, pay_asset_id).await.ok().flatten()
     }
 
     pub async fn get_transfer(&self, quote: Quote) -> Result<GemSwapTransfer, SwapperError> {

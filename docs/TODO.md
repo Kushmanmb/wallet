@@ -42,7 +42,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 [No hand-written twins](ARCHITECTURE.md): a type that only crosses the FFI is used as the uniffi type, and a twin exists only for a type an app persists. Android keeps four twins of exported Core enums, none persisted, and two of them let the app invent outcomes Core never produced.
 
 - **T5** **S** Android `ManageContactState` twins `GemContactInput` (name, description, avatar, addresses) — with **S43**, the session holds the input.
-- **Q2** **S** `SwapSceneViewModel:255,386` swallow `suggestPair` and `SwapQuoteInput.create` failures with `try?` — Core returns an optional pair; the input builds from the session.
 - **O53** **S** iOS `NameRecordViewModel.state: GemNameRecordState` is stored — derive it from the address session.
 - **O54** **S** iOS `AmountStakeViewModel.action: GemStakeAmountInput` and `ImportWalletSceneViewModel.importType: GemWalletImportKind` are stored and switched on in the model — the session holds them (**S41**).
 

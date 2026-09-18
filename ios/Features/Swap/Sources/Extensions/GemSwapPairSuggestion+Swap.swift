@@ -4,10 +4,10 @@ import struct Gemstone.GemSwapPairSuggestion
 import Primitives
 
 extension Gemstone.GemSwapPairSuggestion {
-    func map() throws -> SwapPairSelectorViewModel {
-        try SwapPairSelectorViewModel(
-            fromAssetId: AssetId(id: payAssetId),
-            toAssetId: receiveAssetId.map { try AssetId(id: $0) },
+    func map() -> SwapPairSelectorViewModel {
+        SwapPairSelectorViewModel(
+            fromAssetId: AssetId(core: payAssetId),
+            toAssetId: receiveAssetId.map { AssetId(core: $0) },
         )
     }
 }

@@ -9,9 +9,12 @@ use swapper::{AssetList, Options, Permit2ApprovalData, Quote, QuoteRequest, Swap
 
 use crate::config::swap_config::{SwapConfig, get_default_slippage};
 use crate::models::swap::GemSlippageCheck;
+use crate::services::amount::model::GemNumberFormat;
+use crate::services::amount::rules::value_from_input;
 use crate::services::swap::model::{
     GemAssetRate, GemSwapButtonAction, GemSwapButtonInput, GemSwapPair, GemSwapPairSelection, GemSwapPairSuggestion, GemSwapRate, GemSwapSide, GemSwapTransfer,
 };
+use crate::services::swap::session::{GemSwapQuoteInput, GemSwapRequest};
 use std::collections::HashMap;
 
 pub fn quote_request(wallet: &Wallet, from_asset: &Asset, to_asset: &Asset, value: BigUint, use_max_amount: bool, slippage_bps: Option<u32>) -> Result<QuoteRequest, SwapperError> {
@@ -26,6 +29,27 @@ pub fn quote_request(wallet: &Wallet, from_asset: &Asset, to_asset: &Asset, valu
         options: Options {
             slippage: slippage(from_asset, slippage_bps),
             use_max_amount,
+        },
+    })
+}
+
+pub fn quote_input(
+    pay_asset: &Asset,
+    receive_asset: &Asset,
+    value: &str,
+    available_value: &BigInt,
+    slippage_bps: Option<u32>,
+    format: &GemNumberFormat,
+) -> Option<GemSwapQuoteInput> {
+    let value = value_from_input(&format.decimal_separator, value, pay_asset.decimals as u32).ok()?;
+    let atomic = value.to_biguint().filter(|value| *value > BigUint::ZERO)?;
+    Some(GemSwapQuoteInput {
+        use_max_amount: value == *available_value,
+        request: GemSwapRequest {
+            pay_asset_id: pay_asset.id.clone(),
+            receive_asset_id: receive_asset.id.clone(),
+            value: atomic,
+            slippage_bps,
         },
     })
 }
@@ -299,6 +323,31 @@ pub fn pair_for_asset(asset_id: AssetId, has_balance: bool) -> GemSwapPairSugges
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn test_quote_input_parses_the_typed_value_and_flags_a_full_spend() {
+        let pay = Asset::from_chain(Chain::Ethereum);
+        let receive = Asset::from_chain(Chain::Bitcoin);
+        let format = GemNumberFormat {
+            decimal_separator: ".".to_string(),
+        };
+        let available = BigInt::from(2_000_000_000_000_000_000u128);
+
+        let input = quote_input(&pay, &receive, "1", &available, None, &format).unwrap();
+        assert_eq!(input.request.pay_asset_id, pay.id);
+        assert_eq!(input.request.receive_asset_id, receive.id);
+        assert_eq!(input.request.value, BigUint::from(1_000_000_000_000_000_000u128));
+        assert_eq!(input.request.slippage_bps, None);
+        assert!(!input.use_max_amount);
+
+        let full = quote_input(&pay, &receive, "2", &available, Some(50), &format).unwrap();
+        assert!(full.use_max_amount);
+        assert_eq!(full.request.slippage_bps, Some(50));
+
+        assert!(quote_input(&pay, &receive, "0", &available, None, &format).is_none(), "a zero amount is no input");
+        assert!(quote_input(&pay, &receive, "abc", &available, None, &format).is_none(), "a malformed amount is no input");
+        assert!(quote_input(&pay, &receive, "-1", &available, None, &format).is_none(), "a negative amount is no input");
+    }
+
     #[test]
     fn test_selected_quote_prefers_the_chosen_provider_then_the_best() {
         let quotes = vec![

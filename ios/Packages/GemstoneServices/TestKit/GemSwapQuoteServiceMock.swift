@@ -152,7 +152,7 @@ public final class GemSwapQuoteServiceMock: GemSwapQuoteServiceProtocol, @unchec
         )
     }
 
-    public func suggestPair(payAssetId _: AssetId?) async throws -> GemSwapPairSuggestion? {
+    public func suggestPair(payAssetId _: AssetId?) async -> GemSwapPairSuggestion? {
         pairSuggestion
     }
 }

@@ -4,7 +4,6 @@ import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.application.swap.cases.RequestSwapQuotes
 import com.gemwallet.android.application.swap.cases.SwapQuoteRequestParams
 import com.gemwallet.android.application.swap.cases.SwapQuotesResult
-import com.gemwallet.android.model.Crypto
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -65,13 +64,12 @@ class RequestSwapQuotesImpl(
     }
 
     private suspend fun requestQuotes(params: SwapQuoteRequestParams): SwapQuotesResult = try {
-        val amount = Crypto(params.value, params.pay.asset.decimals).atomicValue
         val quotes = swapService.getQuotes(
             fromAsset = params.pay.asset.toGem(),
             toAsset = params.receive.asset.toGem(),
-            value = amount,
-            useMaxAmount = params.pay.balance.balance.available == amount,
-            slippageBps = params.slippageBps,
+            value = params.input.request.value,
+            useMaxAmount = params.input.useMaxAmount,
+            slippageBps = params.input.request.slippageBps,
         )
         currentCoroutineContext().ensureActive()
         SwapQuotesResult(quotes, params.key, params.pay, params.receive)

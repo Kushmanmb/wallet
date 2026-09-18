@@ -406,6 +406,7 @@ struct SwapSceneViewModelTests {
         #expect(model.selectedSwapQuote?.data.provider.id == .thorchain)
 
         model.amountInputModel.text = "4"
+        model.onChangeFromValue("1", "4")
         await model.load()
 
         #expect(model.selectedSwapQuote?.data.provider.id == .uniswapV3)
@@ -434,7 +435,8 @@ struct SwapSceneViewModelTests {
         let model = SwapSceneViewModel.mock(service: service)
 
         model.onFinishSwapProviderSelection(.mock(toValue: 249000000000, provider: .thorchain))
-        model.onChangeToAsset(old: .mock(asset: .mockEthereum()), new: .mock(asset: .mockEthereumUSDT()))
+        model.toAssetQuery.value = .mock(asset: .mockSolana())
+        model.onChangeToAsset(old: .mock(asset: .mockEthereumUSDT()), new: .mock(asset: .mockSolana()))
         await model.load()
 
         #expect(model.selectedSwapQuote?.data.provider.id == .uniswapV3)
@@ -468,11 +470,13 @@ struct SwapSceneViewModelTests {
         let model = SwapSceneViewModel.mock()
 
         model.amountInputModel.text = "2"
+        model.onChangeFromValue("1", "2")
 
-        #expect(model.viewState.isInputEmpty)
+        #expect(model.viewState.isQuoteLoading)
         #expect(model.buttonViewModel.buttonAction == .insufficientBalance)
 
         model.amountInputModel.text = "1"
+        model.onChangeFromValue("2", "1")
 
         #expect(model.buttonViewModel.buttonAction == .swap)
     }

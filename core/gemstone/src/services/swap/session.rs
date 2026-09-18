@@ -4,6 +4,7 @@ use swapper::{Quote as SwapperQuote, SwapperError, SwapperProvider};
 use super::model::{GemSwapButtonAction, GemSwapButtonInput};
 use super::rules;
 use crate::models::custom_types::{GemBigInt, GemBigUint};
+use crate::services::amount::model::GemNumberFormat;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemSwapRequest {
@@ -18,6 +19,12 @@ pub struct GemSwapQuotesResult {
     pub request: GemSwapRequest,
     pub quotes: Vec<SwapperQuote>,
     pub error: Option<SwapperError>,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemSwapQuoteInput {
+    pub request: GemSwapRequest,
+    pub use_max_amount: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Default, uniffi::Enum)]
@@ -132,21 +139,42 @@ pub struct GemSwapSession {
     pub transfer_phase: GemSwapTransferPhase,
     #[uniffi(default = false)]
     pub refresh_paused_until_restart: bool,
+    #[uniffi(default = "")]
+    pub amount: String,
 }
 
 #[uniffi::export]
 impl GemSwapSession {
-    pub fn on_request_changed(&self, request: Option<GemSwapRequest>) -> GemSwapSession {
-        let Some(request) = request else {
-            return GemSwapSession::default();
+    pub fn current_input(
+        &self,
+        pay_asset: Asset,
+        receive_asset: Asset,
+        available_value: GemBigInt,
+        slippage_bps: Option<u32>,
+        format: GemNumberFormat,
+    ) -> Option<GemSwapQuoteInput> {
+        rules::quote_input(&pay_asset, &receive_asset, &self.amount, &available_value, slippage_bps, &format)
+    }
+
+    pub fn on_input_changed(
+        &self,
+        amount: String,
+        pay_asset: Option<Asset>,
+        receive_asset: Option<Asset>,
+        available_value: GemBigInt,
+        slippage_bps: Option<u32>,
+        format: GemNumberFormat,
+    ) -> GemSwapSession {
+        let request = match (pay_asset, receive_asset) {
+            (Some(pay), Some(receive)) => rules::quote_input(&pay, &receive, &amount, &available_value, slippage_bps, &format).map(|input| input.request),
+            _ => None,
         };
-        let same_pair = self
-            .current_request()
-            .is_some_and(|current| current.pay_asset_id == request.pay_asset_id && current.receive_asset_id == request.receive_asset_id);
+        if request.as_ref() == self.current_request() {
+            return GemSwapSession { amount, ..self.clone() };
+        }
         GemSwapSession {
-            quotes: None,
-            selected_provider: self.selected_provider.filter(|_| same_pair),
-            ..self.on_refresh_requested(request)
+            amount,
+            ..self.on_request_changed(request)
         }
     }
 
@@ -338,6 +366,20 @@ impl GemSwapSession {
 }
 
 impl GemSwapSession {
+    pub(crate) fn on_request_changed(&self, request: Option<GemSwapRequest>) -> GemSwapSession {
+        let Some(request) = request else {
+            return GemSwapSession::default();
+        };
+        let same_pair = self
+            .current_request()
+            .is_some_and(|current| current.pay_asset_id == request.pay_asset_id && current.receive_asset_id == request.receive_asset_id);
+        GemSwapSession {
+            quotes: None,
+            selected_provider: self.selected_provider.filter(|_| same_pair),
+            ..self.on_refresh_requested(request)
+        }
+    }
+
     fn on_quote_invalidated(&self) -> GemSwapSession {
         GemSwapSession {
             transfer_phase: GemSwapTransferPhase::Idle,
@@ -561,6 +603,44 @@ mod tests {
         let failed = started.on_transfer_failed(started.transfer_phase.clone(), SwapperError::TransactionError("boom".into()));
         assert_eq!(failed.button_action(GemBigInt::from(1), GemBigInt::from(2)), GemSwapButtonAction::RetryTransfer);
         assert_eq!(failed.button_state(GemSwapButtonAction::RetryTransfer), GemSwapButtonState::Enabled);
+    }
+
+    #[test]
+    fn test_input_changes_drive_the_request_and_dedupe() {
+        let pay = Asset::from_chain(Chain::Ethereum);
+        let receive = Asset::from_chain(Chain::Bitcoin);
+        let format = GemNumberFormat {
+            decimal_separator: ".".to_string(),
+        };
+        let available = GemBigInt::from(2_000_000_000_000_000_000u128);
+
+        let session = GemSwapSession::default();
+        assert!(
+            session.current_input(pay.clone(), receive.clone(), available.clone(), None, format.clone()).is_none(),
+            "no amount, no input"
+        );
+
+        let typed = session.on_input_changed("1".to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone());
+        assert_eq!(typed.amount, "1");
+        assert!(matches!(typed.quote_phase, GemSwapQuotePhase::Loading { .. }), "a valid input starts loading");
+        let input = typed.current_input(pay.clone(), receive.clone(), available.clone(), None, format.clone()).unwrap();
+        assert_eq!(input.request.value, GemBigUint::from(1_000_000_000_000_000_000u128));
+        assert!(!input.use_max_amount);
+
+        let same = typed.on_input_changed("1".to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone());
+        assert_eq!(same, typed, "re-deriving the same request changes nothing");
+
+        let maxed = typed.on_input_changed("2".to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone());
+        assert!(
+            maxed
+                .current_input(pay.clone(), receive.clone(), available.clone(), None, format.clone())
+                .unwrap()
+                .use_max_amount
+        );
+
+        let cleared = typed.on_input_changed("".to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone());
+        assert!(cleared.is_input_empty());
+        assert_eq!(cleared.amount, "");
     }
 
     #[test]

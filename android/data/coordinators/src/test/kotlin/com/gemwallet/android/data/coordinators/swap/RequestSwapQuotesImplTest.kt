@@ -106,7 +106,7 @@ class RequestSwapQuotesImplTest {
         val params = mockSwapQuoteRequestParams(BigDecimal("1"))
         val quotesState = mockSwapQuotesResult(params)
 
-        assertTrue(quotesState.matches(params.copy(value = BigDecimal("1.0"))))
+        assertTrue(quotesState.matches(mockSwapQuoteRequestParams(BigDecimal("1.0"))))
     }
 
     @Test

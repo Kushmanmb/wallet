@@ -24,7 +24,7 @@ public extension GemSwapSession {
     }
 
     static func mockLoading() -> GemSwapSession {
-        mock().onRequestChanged(request: .mock)
+        GemSwapSession(quotePhase: .loading(request: .mock), transferPhase: .idle, amount: "1")
     }
 
     static func mockReady(quotes: [SwapperQuote] = [.mock()]) -> GemSwapSession {
