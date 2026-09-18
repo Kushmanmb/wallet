@@ -146,7 +146,7 @@ fun ReferralScene(
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 referralHead(
-                    joinPointsCost = uiState.inviteRewardPoints,
+                    joinPointsCost = uiState.inviteRewardPointsText,
                     canInvite = uiState.canInvite,
                     hasCode = uiState.hasReferralCode,
                     onGetStarted = { getStartedDialogShow = true },

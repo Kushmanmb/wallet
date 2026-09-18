@@ -27,7 +27,7 @@ internal fun previewRewardsState(
     isUnverified = isUnverified,
     hasPendingReferral = hasPendingReferral,
     canActivatePendingReferral = canActivatePendingReferral,
-    inviteRewardPoints = 100,
+    inviteRewardPointsText = "100",
     referralCode = referralCode,
     referralLink = null,
     usedReferralCode = usedReferralCode,

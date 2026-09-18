@@ -74,9 +74,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 - **K1** **M** `GemAssetDetailsInput` takes booleans the apps compute from balances (`hasStakeBalance`, `hasAvailableBalance`, `isWalletEmpty`) — take the balances, decide in Core, delete the arithmetic on both apps (**P19**).
 - **K2** **S** ETA seconds cross bare on `GemTransactionStateUpdate.confirmation_eta_seconds`, `GemTransactionDetailRows.estimated_confirmation_seconds` and `GemSwapProgress.eta_seconds`, and each app formats them (`formatEstimatedConfirmation` on Android, the iOS duration formatter) — Core returns `GemDurationPart`s or text.
-- **K3** **S** `GemRewardsState.invite_reward_points` crosses as `i32` and both apps compose the invite description with it (iOS `RewardsViewModel:91`, Android `ReferralScene:149`) — the record carries `invite_reward_points_text`.
-- **K4** **S** `GemAssetDetailsState.price_alerts_count` crosses bare; iOS `AssetSceneViewModel:94` and Android `AssetInfoUIModelFactory` turn it into the alerts row subtitle — the record carries the subtitle value.
-- **K5** **S** `GemNftRow.count` crosses bare and is rendered on both apps — value and style.
 - **K9** **S** The chart min/max and padding arithmetic is still app-side (iOS `ChartValues.from`, Android `GemLineChart`); neither app reads `GemChart.base_value`/`GemChartData.base` — a `GemChartLayout` from Core.
 - **K8** **M** `GemStreamService` holds 13 `Arc`s, `GemAssetDetailsService` and `GemWalletService` 10, `GemPerpetualService` 9 — for each, the dependencies reached only to forward one call move behind the composition service (§ 7).
 - **S41** **M** iOS `ImportWalletSceneViewModel` drives input, word suggestions, import kind and button state itself — `GemWalletImportSession` on both apps (Android `ImportUIState` carries the same).
