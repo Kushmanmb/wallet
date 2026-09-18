@@ -94,19 +94,7 @@ public struct AddressListItemViewModel {
     // MARK: - Private methods
 
     private func auto(for style: GemAddressFormatStyle) -> String {
-        let display = GemAddressService.shared.display(
-            name: account.name,
-            address: address(for: .short),
-            hasImage: account.assetImage != nil,
-        )
-        switch display {
-        case .address:
-            return address(for: style)
-        case let .name(name):
-            return name
-        case let .nameWithAddress(name):
-            return "\(name) (\(address(for: .short)))"
-        }
+        GemAddressService.shared.nameText(name: account.name, address: address(for: .short), hasImage: account.assetImage != nil) ?? address(for: style)
     }
 
     private func address(for style: GemAddressFormatStyle) -> String {
