@@ -73,11 +73,8 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 [ARCHITECTURE.md § 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android): a case that only forwards a Core call is migration debt — delete it and call the service. iOS has none left; Android has one class and one case, plus two sites that show a raw exception where every other screen shows Core's text.
 
-- **F1** **S** `android/data/coordinators/.../asset/GetWalletSummaryImpl.kt:103` decides `showsPnl` in an application case — `GemWalletSummary.shows_pnl`.
 - **F2** **S** `android/data/coordinators/.../transaction/GetTransactionsImpl.kt:112,121` keep private mappers over `GemTransactionRowSubtitle` and `GemTransactionRowValue` in a case — the row record carries the finished text.
-- **F3** **S** `android/data/coordinators/.../stake/StakeReadsImpl.kt` only maps through `selectableValidators` and `sortedDelegations` — a forwarder; the view model calls the service.
 - **F4** **S** `android/features/bridge/viewmodels/.../WCRequestViewModel.kt` injects three Core services (wallet connect, sign message, metadata) — the narrow-cases rule; the request screen record comes from one service.
-- **F5** **S** `android/features/confirm/presents/.../components/NetworkFeeCustomViewModel.kt` is a view model in a presents module — move it to `viewmodels` with **P4**.
 
 
 
