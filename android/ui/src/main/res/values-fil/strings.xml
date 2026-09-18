@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">Privacy Lock</string>
   <string name="lock_footer">Protektahan ang access sa app na ito sa iyong device</string>
   <string name="verify_phrase_title">Kumpirmahin</string>
-  <string name="warnings_multi_signature_blocked">Huwag maglipat ng mga pondo sa %1$s Multi-Signature wallet na ito maliban kung sigurado kang kontrolado mo ang mga pribadong key. Ang pagkabigong gawin ito ay maaaring maglantad sa iyo sa mga scam, at maaari mong permanenteng mawala ang iyong mga asset.</string>
+  <string name="warnings_externally_controlled_account">Maaaring kontrolado ng ibang tao ang %1$s account na ito. Huwag magpadala ng pondo rito maliban kung sigurado kang ikaw ang may kontrol dito, o maaari mong permanenteng mawala ang iyong mga asset.</string>
   <string name="sell_title">Ibenta %1$s</string>
   <string name="info_network_fee_title">Bayad sa Network</string>
   <string name="info_watch_wallet_title">Wallet na Binabantayan</string>

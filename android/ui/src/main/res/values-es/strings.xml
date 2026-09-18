@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">Bloqueo de privacidad</string>
   <string name="lock_footer">Proteger el acceso a esta aplicación en su dispositivo</string>
   <string name="verify_phrase_title">Confirmar</string>
-  <string name="warnings_multi_signature_blocked">No transfiera fondos a esta billetera multifirma %1$s a menos que esté seguro de que controla las claves privadas. Si no lo hace, podría exponerse a estafas y perder sus activos de forma permanente.</string>
+  <string name="warnings_externally_controlled_account">Esta cuenta de %1$s puede estar controlada por otra persona. No envíe fondos a ella a menos que esté seguro de que la controla, o podría perder sus activos de forma permanente.</string>
   <string name="sell_title">Vender %1$s</string>
   <string name="info_network_fee_title">Tarifa de red</string>
   <string name="info_watch_wallet_title">Billetera de observación</string>

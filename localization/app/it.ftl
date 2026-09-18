@@ -529,7 +529,7 @@ verify_phrase_title = Confermare
 
 # Warnings
 
-warnings_multi_signature_blocked = Non trasferire fondi a questo portafoglio multi-firma %@ a meno che tu non sia certo di controllare le chiavi private. In caso contrario, potresti esporti a truffe e potresti perdere definitivamente i tuoi beni.
+warnings_externally_controlled_account = Questo account %@ può essere controllato da qualcun altro. Non inviarvi fondi a meno che tu non sia certo di controllarlo, altrimenti potresti perdere definitivamente i tuoi beni.
 
 # Sell
 

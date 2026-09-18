@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">隱私鎖</string>
   <string name="lock_footer">保護此裝置上的 App 存取安全</string>
   <string name="verify_phrase_title">確認</string>
-  <string name="warnings_multi_signature_blocked">除非確定自己持有對應的私鑰，否則請勿將資金轉入此 %1$s 多重簽章錢包，以免遭到詐騙或永久失去資產。</string>
+  <string name="warnings_externally_controlled_account">此 %1$s 帳戶可能由他人控制。除非確定該帳戶由您掌控，請勿將資金轉入，以免永久失去資產。</string>
   <string name="sell_title">出售%1$s</string>
   <string name="info_network_fee_title">網路手續費</string>
   <string name="info_watch_wallet_title">觀察錢包</string>

@@ -529,7 +529,7 @@ verify_phrase_title = Xác nhận
 
 # Warnings
 
-warnings_multi_signature_blocked = Không chuyển tiền vào ví Đa chữ ký %@ này trừ khi bạn chắc chắn mình kiểm soát được khóa riêng. Nếu không làm như vậy, bạn có thể bị lừa đảo và có thể mất vĩnh viễn tài sản của mình.
+warnings_externally_controlled_account = Tài khoản %@ này có thể do người khác kiểm soát. Không gửi tiền vào tài khoản này trừ khi bạn chắc chắn mình kiểm soát nó, nếu không bạn có thể mất vĩnh viễn tài sản của mình.
 
 # Sell
 

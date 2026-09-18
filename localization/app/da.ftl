@@ -529,7 +529,7 @@ verify_phrase_title = Bekræft
 
 # Warnings
 
-warnings_multi_signature_blocked = Overfør ikke penge til denne %@ Multi-Signatur-tegnebog, medmindre du er sikker på, at du kontrollerer de private nøgler. Undladelse af at gøre det kan udsætte dig for svindel, og du kan permanent miste dine aktiver.
+warnings_externally_controlled_account = Denne %@-konto kan være kontrolleret af en anden. Overfør ikke penge til den, medmindre du er sikker på, at du kontrollerer den, ellers kan du permanent miste dine aktiver.
 
 # Sell
 

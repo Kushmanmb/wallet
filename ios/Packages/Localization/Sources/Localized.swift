@@ -1718,9 +1718,9 @@ public enum Localized {
     public static let watch = Localized.tr("Localizable", "wallets.watch", fallback: "Watch")
   }
   public enum Warnings {
-    /// Do not transfer funds to this %@ Multi-Signature wallet unless you are certain you control the private keys. Failure to do so could expose you to scams, and you may permanently lose your assets.
-    public static func multiSignatureBlocked(_ p1: Any) -> String {
-      return Localized.tr("Localizable", "warnings.multi_signature_blocked", String(describing: p1), fallback: "Do not transfer funds to this %@ Multi-Signature wallet unless you are certain you control the private keys. Failure to do so could expose you to scams, and you may permanently lose your assets.")
+    /// This %@ account can be controlled by someone else. Do not send funds to it unless you are certain you control it, or you may permanently lose your assets.
+    public static func externallyControlledAccount(_ p1: Any) -> String {
+      return Localized.tr("Localizable", "warnings.externally_controlled_account", String(describing: p1), fallback: "This %@ account can be controlled by someone else. Do not send funds to it unless you are certain you control it, or you may permanently lose your assets.")
     }
   }
   public enum Welcome {

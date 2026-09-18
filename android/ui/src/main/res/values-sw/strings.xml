@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">Kufuli ya Faragha</string>
   <string name="lock_footer">Linda ufikiaji wa programu hii kwenye kifaa chako</string>
   <string name="verify_phrase_title">Thibitisha</string>
-  <string name="warnings_multi_signature_blocked">Usihamishe pesa kwa %1$s pochi hii ya Sahihi nyingi isipokuwa una uhakika kuwa unadhibiti funguo za faragha. Kukosa kufanya hivyo kunaweza kukuweka kwenye ulaghai, na unaweza kupoteza mali yako kabisa.</string>
+  <string name="warnings_externally_controlled_account">Akaunti hii ya %1$s inaweza kudhibitiwa na mtu mwingine. Usitume pesa kwake isipokuwa una uhakika kuwa unaidhibiti, la sivyo unaweza kupoteza mali yako kabisa.</string>
   <string name="sell_title">Uza %1$s</string>
   <string name="info_network_fee_title">Ada ya Mtandao</string>
   <string name="info_watch_wallet_title">Tazama Wallet</string>

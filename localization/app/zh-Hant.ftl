@@ -529,7 +529,7 @@ verify_phrase_title = 確認
 
 # Warnings
 
-warnings_multi_signature_blocked = 除非確定自己持有對應的私鑰，否則請勿將資金轉入此 %@ 多重簽章錢包，以免遭到詐騙或永久失去資產。
+warnings_externally_controlled_account = 此 %@ 帳戶可能由他人控制。除非確定該帳戶由您掌控，請勿將資金轉入，以免永久失去資產。
 
 # Sell
 

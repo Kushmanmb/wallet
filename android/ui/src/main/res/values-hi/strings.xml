@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">गोपनीयता लॉक</string>
   <string name="lock_footer">अपने डिवाइस पर इस ऐप तक पहुंच सुरक्षित रखें</string>
   <string name="verify_phrase_title">पुष्टि करना</string>
-  <string name="warnings_multi_signature_blocked">जब तक आप सुनिश्चित न हों कि आप निजी कुंजियों को नियंत्रित करते हैं, तब तक इस %1$s मल्टी-सिग्नेचर वॉलेट में धनराशि स्थानांतरित न करें। ऐसा न करने पर आप धोखाधड़ी के शिकार हो सकते हैं, और आप अपनी संपत्ति हमेशा के लिए खो सकते हैं।</string>
+  <string name="warnings_externally_controlled_account">इस %1$s खाते को कोई और नियंत्रित कर सकता है। जब तक आप सुनिश्चित न हों कि इसका नियंत्रण आपके पास है, इसमें धनराशि न भेजें, वरना आप अपनी संपत्ति हमेशा के लिए खो सकते हैं।</string>
   <string name="sell_title">बेचें %1$s</string>
   <string name="info_network_fee_title">नेटवर्क शुल्क</string>
   <string name="info_watch_wallet_title">वॉलेट देखें</string>

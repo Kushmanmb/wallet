@@ -529,7 +529,7 @@ verify_phrase_title = Bevestig
 
 # Warnings
 
-warnings_multi_signature_blocked = Maak geen geld over naar deze %@ Multi-Signature portemonnee, tenzij u zeker weet dat u de privésleutels beheert. Als u dit niet doet, kunt u worden blootgesteld aan oplichting en kunt u uw bezittingen permanent kwijtraken.
+warnings_externally_controlled_account = Dit %@-account kan door iemand anders worden beheerd. Stuur er geen geld naartoe, tenzij u zeker weet dat u het zelf beheert, anders kunt u uw bezittingen permanent kwijtraken.
 
 # Sell
 

@@ -529,7 +529,7 @@ verify_phrase_title = 확인하다
 
 # Warnings
 
-warnings_multi_signature_blocked = 개인 키를 제어하고 있다는 확신이 없다면 이 %@ 다중 서명 지갑으로 자금을 이체하지 마십시오. 그렇지 않으면 사기에 노출될 수 있으며 자산을 영구적으로 잃을 수 있습니다.
+warnings_externally_controlled_account = 이 %@ 계정은 다른 사람이 제어할 수 있습니다. 본인이 제어하고 있다는 확신이 없다면 이 계정으로 자금을 보내지 마십시오. 그렇지 않으면 자산을 영구적으로 잃을 수 있습니다.
 
 # Sell
 

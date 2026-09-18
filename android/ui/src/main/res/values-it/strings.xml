@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">Blocco privacy</string>
   <string name="lock_footer">Proteggi l\'accesso a questa app sul tuo dispositivo</string>
   <string name="verify_phrase_title">Confermare</string>
-  <string name="warnings_multi_signature_blocked">Non trasferire fondi a questo portafoglio multi-firma %1$s a meno che tu non sia certo di controllare le chiavi private. In caso contrario, potresti esporti a truffe e potresti perdere definitivamente i tuoi beni.</string>
+  <string name="warnings_externally_controlled_account">Questo account %1$s può essere controllato da qualcun altro. Non inviarvi fondi a meno che tu non sia certo di controllarlo, altrimenti potresti perdere definitivamente i tuoi beni.</string>
   <string name="sell_title">Vendi %1$s</string>
   <string name="info_network_fee_title">Commissione di rete</string>
   <string name="info_watch_wallet_title">Guarda Portafoglio</string>

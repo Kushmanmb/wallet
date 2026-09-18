@@ -529,7 +529,7 @@ verify_phrase_title = Thibitisha
 
 # Warnings
 
-warnings_multi_signature_blocked = Usihamishe pesa kwa %@ pochi hii ya Sahihi nyingi isipokuwa una uhakika kuwa unadhibiti funguo za faragha. Kukosa kufanya hivyo kunaweza kukuweka kwenye ulaghai, na unaweza kupoteza mali yako kabisa.
+warnings_externally_controlled_account = Akaunti hii ya %@ inaweza kudhibitiwa na mtu mwingine. Usitume pesa kwake isipokuwa una uhakika kuwa unaidhibiti, la sivyo unaweza kupoteza mali yako kabisa.
 
 # Sell
 

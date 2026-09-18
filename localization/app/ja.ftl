@@ -529,7 +529,7 @@ verify_phrase_title = 確認する
 
 # Warnings
 
-warnings_multi_signature_blocked = 秘密鍵を確実に管理していない限り、この%@マルチ署名ウォレットに資金を送金しないでください。そうしないと、詐欺に遭う可能性があり、資産を永久に失う可能性があります。
+warnings_externally_controlled_account = この%@アカウントは他の人が管理している可能性があります。自分が管理していると確信できない限り、資金を送らないでください。資産を永久に失う可能性があります。
 
 # Sell
 

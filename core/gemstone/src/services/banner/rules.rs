@@ -99,7 +99,7 @@ fn banner_destination(event: BannerEvent, asset: Option<&Asset>) -> Option<GemBa
             url: account_activation_fee_url(asset?.id.chain)?,
         }),
         BannerEvent::AccountBlockedMultiSignature => url(GemBannerLink::Docs {
-            item: DocsUrl::TronMultiSignature,
+            item: DocsUrl::ExternallyControlledAccount,
         }),
         BannerEvent::SuspiciousAsset => url(GemBannerLink::Docs { item: DocsUrl::TokenVerification }),
         BannerEvent::Onboarding => None,
@@ -145,7 +145,7 @@ fn banner_description(event: BannerEvent, asset: Option<&Asset>) -> Option<GemBa
                 },
             })
         }
-        BannerEvent::AccountBlockedMultiSignature => Some(GemBannerDescription::MultiSignatureBlocked {
+        BannerEvent::AccountBlockedMultiSignature => Some(GemBannerDescription::ExternallyControlledAccount {
             network_name: network_name(asset?.id.chain),
         }),
         BannerEvent::ActivateAsset => {
@@ -466,7 +466,7 @@ mod tests {
         assert_eq!(arbitrum.name, "Arbitrum ETH");
         assert_eq!(
             banner_content(BannerEvent::AccountBlockedMultiSignature, Some(&arbitrum)).description,
-            Some(GemBannerDescription::MultiSignatureBlocked {
+            Some(GemBannerDescription::ExternallyControlledAccount {
                 network_name: "Arbitrum".to_string()
             })
         );

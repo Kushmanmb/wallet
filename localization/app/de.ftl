@@ -529,7 +529,7 @@ verify_phrase_title = Bestätigen
 
 # Warnings
 
-warnings_multi_signature_blocked = Überweisen Sie kein Geld auf dieses %@ Multi-Signature-Wallet, es sei denn, Sie sind sicher, dass Sie die privaten Schlüssel kontrollieren. Andernfalls könnten Sie Opfer von Betrug werden und Ihr Vermögen dauerhaft verlieren.
+warnings_externally_controlled_account = Dieses %@-Konto kann von jemand anderem kontrolliert werden. Senden Sie kein Geld darauf, es sei denn, Sie sind sicher, dass Sie es kontrollieren, sonst könnten Sie Ihr Vermögen dauerhaft verlieren.
 
 # Sell
 

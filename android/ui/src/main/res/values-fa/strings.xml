@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">قفل حریم خصوصی</string>
   <string name="lock_footer">دسترسی به این برنامه را در دستگاه خود محافظت کنید</string>
   <string name="verify_phrase_title">تایید کنید</string>
-  <string name="warnings_multi_signature_blocked">وجه را به این کیف پول چند امضایی %1$s منتقل نکنید، مگر اینکه مطمئن باشید کلیدهای خصوصی را کنترل می کنید. عدم انجام این کار می تواند شما را در معرض کلاهبرداری قرار دهد و ممکن است برای همیشه دارایی های خود را از دست بدهید.</string>
+  <string name="warnings_externally_controlled_account">ممکن است شخص دیگری این حساب %1$s را کنترل کند. تا زمانی که مطمئن نیستید کنترل آن در دست شماست، وجهی به آن ارسال نکنید، وگرنه ممکن است دارایی‌های خود را برای همیشه از دست بدهید.</string>
   <string name="sell_title">فروش %1$s</string>
   <string name="info_network_fee_title">کارمزد شبکه</string>
   <string name="info_watch_wallet_title">کیف پول مشاهده‌ای</string>

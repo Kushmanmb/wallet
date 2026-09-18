@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">গোপনীয়তা লক</string>
   <string name="lock_footer">আপনার ডিভাইসে এই অ্যাপের অ্যাক্সেস সুরক্ষিত করুন</string>
   <string name="verify_phrase_title">নিশ্চিত করুন</string>
-  <string name="warnings_multi_signature_blocked">এই %1$s মাল্টি-সিগনেচার ওয়ালেটে তহবিল স্থানান্তর করবেন না যদি না আপনি নিশ্চিত হন যে আপনি ব্যক্তিগত কীগুলি নিয়ন্ত্রণ করছেন৷ এটি করতে ব্যর্থ হলে আপনি কেলেঙ্কারীতে প্রকাশ করতে পারেন এবং আপনি স্থায়ীভাবে আপনার সম্পদ হারাতে পারেন।</string>
+  <string name="warnings_externally_controlled_account">এই %1$s অ্যাকাউন্টটি অন্য কেউ নিয়ন্ত্রণ করতে পারে। এটি আপনার নিয়ন্ত্রণে আছে বলে নিশ্চিত না হলে এতে তহবিল পাঠাবেন না, নইলে আপনি স্থায়ীভাবে আপনার সম্পদ হারাতে পারেন।</string>
   <string name="sell_title">%1$s বিক্রি করুন</string>
   <string name="info_network_fee_title">নেটওয়ার্ক ফি</string>
   <string name="info_watch_wallet_title">ওয়ালেট দেখুন</string>

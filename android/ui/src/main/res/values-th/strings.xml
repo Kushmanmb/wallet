@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">ล็อคความเป็นส่วนตัว</string>
   <string name="lock_footer">ป้องกันการเข้าถึงแอปนี้บนอุปกรณ์ของคุณ</string>
   <string name="verify_phrase_title">ยืนยัน</string>
-  <string name="warnings_multi_signature_blocked">อย่าโอนเงินไปยังกระเป๋าเงินหลายลายเซ็น %1$s นี้ เว้นแต่คุณจะแน่ใจว่าคุณควบคุมคีย์ส่วนตัวได้ การไม่ทำเช่นนั้นอาจทำให้คุณตกเป็นเหยื่อของการหลอกลวง และคุณอาจสูญเสียทรัพย์สินของคุณไปอย่างถาวร</string>
+  <string name="warnings_externally_controlled_account">บัญชี %1$s นี้อาจถูกควบคุมโดยผู้อื่น อย่าส่งเงินไปยังบัญชีนี้ เว้นแต่คุณจะแน่ใจว่าคุณเป็นผู้ควบคุม มิฉะนั้นคุณอาจสูญเสียทรัพย์สินของคุณไปอย่างถาวร</string>
   <string name="sell_title">ขาย %1$s</string>
   <string name="info_network_fee_title">ค่าธรรมเนียมเครือข่าย</string>
   <string name="info_watch_wallet_title">ดูกระเป๋าเงิน</string>

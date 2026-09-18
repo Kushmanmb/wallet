@@ -577,7 +577,7 @@ public extension GemBannerDescription {
         switch self {
         case let .stake(assetSymbol): Localized.Banner.Stake.description(assetSymbol)
         case let .accountActivation(networkName, fee): Localized.Banner.AccountActivation.description(networkName, amount(fee))
-        case let .multiSignatureBlocked(networkName): Localized.Warnings.multiSignatureBlocked(networkName)
+        case let .externallyControlledAccount(networkName): Localized.Warnings.externallyControlledAccount(networkName)
         case let .activateAsset(assetSymbol, networkName): Localized.Banner.ActivateAsset.description(assetSymbol, networkName)
         case .suspiciousAsset: Localized.Banner.AssetStatus.description
         case .onboarding: Localized.Banner.Onboarding.description

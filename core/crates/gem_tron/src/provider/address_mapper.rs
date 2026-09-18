@@ -7,24 +7,24 @@ pub fn map_address_status(account: &TronAccount) -> Vec<AddressStatus> {
 
     if let Some(owner_permission) = &account.owner_permission {
         if owner_permission.permission_name != "owner" || owner_permission.threshold.unwrap_or(1) > 1 {
-            return vec![AddressStatus::MultiSignature];
+            return vec![AddressStatus::ExternallyControlled];
         }
         if let Some(keys) = &owner_permission.keys
             && (keys.len() != 1 || keys.iter().any(|k| k.address != address))
         {
-            return vec![AddressStatus::MultiSignature];
+            return vec![AddressStatus::ExternallyControlled];
         }
     }
 
     if let Some(active_permissions) = &account.active_permission {
         if active_permissions.len() > 1 || active_permissions.iter().any(|p| p.threshold > 1) {
-            return vec![AddressStatus::MultiSignature];
+            return vec![AddressStatus::ExternallyControlled];
         }
         for permission in active_permissions {
             if let Some(keys) = &permission.keys
                 && (keys.len() != 1 || keys.iter().any(|k| k.address != address))
             {
-                return vec![AddressStatus::MultiSignature];
+                return vec![AddressStatus::ExternallyControlled];
             }
         }
     }
@@ -66,7 +66,7 @@ mod tests {
                 keys: None,
             },
         ]);
-        assert_eq!(map_address_status(&account), vec![AddressStatus::MultiSignature]);
+        assert_eq!(map_address_status(&account), vec![AddressStatus::ExternallyControlled]);
     }
 
     #[test]
@@ -77,7 +77,7 @@ mod tests {
             threshold: 2,
             keys: None,
         }]);
-        assert_eq!(map_address_status(&account), vec![AddressStatus::MultiSignature]);
+        assert_eq!(map_address_status(&account), vec![AddressStatus::ExternallyControlled]);
     }
 
     #[test]
@@ -88,7 +88,7 @@ mod tests {
             threshold: Some(1),
             keys: None,
         });
-        assert_eq!(map_address_status(&account), vec![AddressStatus::MultiSignature]);
+        assert_eq!(map_address_status(&account), vec![AddressStatus::ExternallyControlled]);
     }
 
     #[test]
@@ -102,7 +102,7 @@ mod tests {
                 weight: 1,
             }]),
         });
-        assert_eq!(map_address_status(&account), vec![AddressStatus::MultiSignature]);
+        assert_eq!(map_address_status(&account), vec![AddressStatus::ExternallyControlled]);
     }
 
     #[test]
@@ -116,7 +116,7 @@ mod tests {
                 weight: 1,
             }]),
         }]);
-        assert_eq!(map_address_status(&account), vec![AddressStatus::MultiSignature]);
+        assert_eq!(map_address_status(&account), vec![AddressStatus::ExternallyControlled]);
     }
 
     #[test]
@@ -136,7 +136,7 @@ mod tests {
                 },
             ]),
         });
-        assert_eq!(map_address_status(&account), vec![AddressStatus::MultiSignature]);
+        assert_eq!(map_address_status(&account), vec![AddressStatus::ExternallyControlled]);
     }
 
     #[test]
@@ -147,7 +147,7 @@ mod tests {
             threshold: Some(2),
             keys: None,
         });
-        assert_eq!(map_address_status(&account), vec![AddressStatus::MultiSignature]);
+        assert_eq!(map_address_status(&account), vec![AddressStatus::ExternallyControlled]);
     }
 
     #[test]

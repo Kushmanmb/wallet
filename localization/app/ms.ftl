@@ -529,7 +529,7 @@ verify_phrase_title = Sahkan
 
 # Warnings
 
-warnings_multi_signature_blocked = Jangan pindahkan dana ke %@ dompet Berbilang Tandatangan ini melainkan anda pasti anda mengawal kunci peribadi. Kegagalan berbuat demikian boleh mendedahkan anda kepada penipuan dan anda mungkin kehilangan aset anda secara kekal.
+warnings_externally_controlled_account = Akaun %@ ini mungkin dikawal oleh orang lain. Jangan hantar dana ke akaun ini melainkan anda pasti anda yang mengawalnya, atau anda mungkin kehilangan aset anda secara kekal.
 
 # Sell
 

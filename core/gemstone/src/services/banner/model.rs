@@ -100,7 +100,7 @@ impl GemBannerItem {
     }
 }
 
-#[derive(Debug, Clone, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemBannerKey {
     pub wallet_id: Option<WalletId>,
     pub asset_id: Option<AssetId>,
@@ -154,7 +154,7 @@ pub enum GemBannerTitle {
 pub enum GemBannerDescription {
     Stake { asset_symbol: String },
     AccountActivation { network_name: String, fee: GemBannerAmount },
-    MultiSignatureBlocked { network_name: String },
+    ExternallyControlledAccount { network_name: String },
     ActivateAsset { asset_symbol: String, network_name: String },
     SuspiciousAsset,
     Onboarding,

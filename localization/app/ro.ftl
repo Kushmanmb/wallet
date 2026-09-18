@@ -529,7 +529,7 @@ verify_phrase_title = Confirmați
 
 # Warnings
 
-warnings_multi_signature_blocked = Nu transferați fonduri în acest portofel %@ cu semnături multiple decât dacă sunteți sigur că controlați cheile private. Nerespectarea acestui lucru vă poate expune la escrocherii și vă puteți pierde definitiv bunurile.
+warnings_externally_controlled_account = Acest cont %@ poate fi controlat de altcineva. Nu trimiteți fonduri în el decât dacă sunteți sigur că îl controlați, altfel vă puteți pierde definitiv bunurile.
 
 # Sell
 

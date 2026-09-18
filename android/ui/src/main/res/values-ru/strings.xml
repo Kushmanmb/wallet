@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">Блокировка конфиденциальности</string>
   <string name="lock_footer">Защитите доступ к этому приложению на вашем устройстве</string>
   <string name="verify_phrase_title">Подтвердите</string>
-  <string name="warnings_multi_signature_blocked">Не переводите средства на этот %1$s кошелек Multi-Signature, если вы не уверены, что контролируете закрытые ключи. Невыполнение этого требования может подвергнуть вас мошенничеству, и вы можете навсегда потерять свои активы.</string>
+  <string name="warnings_externally_controlled_account">Этот аккаунт %1$s может контролировать кто-то другой. Не отправляйте на него средства, если вы не уверены, что контролируете его, иначе вы можете навсегда потерять свои активы.</string>
   <string name="sell_title">Продать %1$s</string>
   <string name="info_network_fee_title">Сетевая плата</string>
   <string name="info_watch_wallet_title">Смотреть кошелек</string>

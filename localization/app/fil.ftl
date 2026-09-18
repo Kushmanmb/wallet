@@ -529,7 +529,7 @@ verify_phrase_title = Kumpirmahin
 
 # Warnings
 
-warnings_multi_signature_blocked = Huwag maglipat ng mga pondo sa %@ Multi-Signature wallet na ito maliban kung sigurado kang kontrolado mo ang mga pribadong key. Ang pagkabigong gawin ito ay maaaring maglantad sa iyo sa mga scam, at maaari mong permanenteng mawala ang iyong mga asset.
+warnings_externally_controlled_account = Maaaring kontrolado ng ibang tao ang %@ account na ito. Huwag magpadala ng pondo rito maliban kung sigurado kang ikaw ang may kontrol dito, o maaari mong permanenteng mawala ang iyong mga asset.
 
 # Sell
 

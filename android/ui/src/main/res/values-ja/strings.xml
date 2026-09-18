@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">プライバシーロック</string>
   <string name="lock_footer">デバイス上のこのアプリへのアクセスを保護する</string>
   <string name="verify_phrase_title">確認する</string>
-  <string name="warnings_multi_signature_blocked">秘密鍵を確実に管理していない限り、この%1$sマルチ署名ウォレットに資金を送金しないでください。そうしないと、詐欺に遭う可能性があり、資産を永久に失う可能性があります。</string>
+  <string name="warnings_externally_controlled_account">この%1$sアカウントは他の人が管理している可能性があります。自分が管理していると確信できない限り、資金を送らないでください。資産を永久に失う可能性があります。</string>
   <string name="sell_title">%1$sを売る</string>
   <string name="info_network_fee_title">ネットワーク手数料</string>
   <string name="info_watch_wallet_title">ウォッチウォレット</string>

@@ -529,7 +529,7 @@ verify_phrase_title = Potwierdź
 
 # Warnings
 
-warnings_multi_signature_blocked = Nie przelewaj środków do tego portfela Multi-Signature %@ chyba że masz pewność, że kontrolujesz klucze prywatne. Niedopełnienie tego obowiązku może narazić Cię na oszustwa i możesz trwale utracić swoje aktywa.
+warnings_externally_controlled_account = To konto %@ może być kontrolowane przez kogoś innego. Nie wysyłaj na nie środków, chyba że masz pewność, że to Ty je kontrolujesz, w przeciwnym razie możesz trwale utracić swoje aktywa.
 
 # Sell
 

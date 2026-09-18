@@ -529,7 +529,7 @@ verify_phrase_title = Confirmer
 
 # Warnings
 
-warnings_multi_signature_blocked = Ne transférez pas de fonds vers ce portefeuille multisignature %@ à moins d'être certain de contrôler les clés privées. Le non-respect de cette règle pourrait vous exposer à des escroqueries et vous pourriez perdre définitivement vos actifs.
+warnings_externally_controlled_account = Ce compte %@ peut être contrôlé par quelqu'un d'autre. N'y envoyez pas de fonds à moins d'être certain de le contrôler, sinon vous pourriez perdre définitivement vos actifs.
 
 # Sell
 

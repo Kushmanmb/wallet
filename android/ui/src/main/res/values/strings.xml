@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">Privacy Lock</string>
   <string name="lock_footer">Protect access to this app on your device</string>
   <string name="verify_phrase_title">Confirm</string>
-  <string name="warnings_multi_signature_blocked">Do not transfer funds to this %1$s Multi-Signature wallet unless you are certain you control the private keys. Failure to do so could expose you to scams, and you may permanently lose your assets.</string>
+  <string name="warnings_externally_controlled_account">This %1$s account can be controlled by someone else. Do not send funds to it unless you are certain you control it, or you may permanently lose your assets.</string>
   <string name="sell_title">Sell %1$s</string>
   <string name="info_network_fee_title">Network Fee</string>
   <string name="info_watch_wallet_title">Watch Wallet</string>

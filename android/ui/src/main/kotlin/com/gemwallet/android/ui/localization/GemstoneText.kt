@@ -453,7 +453,7 @@ fun bannerDescription(context: Context, description: GemBannerDescription): Stri
         description.networkName,
         bannerAmount(description.fee),
     )
-    is GemBannerDescription.MultiSignatureBlocked -> context.getString(R.string.warnings_multi_signature_blocked, description.networkName)
+    is GemBannerDescription.ExternallyControlledAccount -> context.getString(R.string.warnings_externally_controlled_account, description.networkName)
     is GemBannerDescription.ActivateAsset -> context.getString(
         R.string.banner_activate_asset_description,
         description.assetSymbol,

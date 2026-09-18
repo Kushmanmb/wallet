@@ -529,7 +529,7 @@ verify_phrase_title = Mengonfirmasi
 
 # Warnings
 
-warnings_multi_signature_blocked = Jangan mentransfer dana ke dompet Multi-Signature %@ ini kecuali Anda yakin bahwa Anda memegang kunci pribadi. Kegagalan untuk melakukannya dapat membuat Anda rentan terhadap penipuan, dan Anda dapat kehilangan aset Anda secara permanen.
+warnings_externally_controlled_account = Akun %@ ini dapat dikendalikan oleh orang lain. Jangan kirim dana ke akun ini kecuali Anda yakin bahwa Anda yang mengendalikannya, atau Anda dapat kehilangan aset Anda secara permanen.
 
 # Sell
 

@@ -529,7 +529,7 @@ verify_phrase_title = Confirmar
 
 # Warnings
 
-warnings_multi_signature_blocked = Não transfira fundos para esta carteira %@ Multi-Signature a menos que tenha certeza de que controla as chaves privadas. Não fazer isso pode expô-lo a golpes e você pode perder seus ativos permanentemente.
+warnings_externally_controlled_account = Esta conta %@ pode ser controlada por outra pessoa. Não envie fundos para ela a menos que tenha certeza de que você a controla, ou poderá perder seus ativos permanentemente.
 
 # Sell
 

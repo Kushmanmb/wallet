@@ -529,7 +529,7 @@ verify_phrase_title = Tabbatar
 
 # Warnings
 
-warnings_multi_signature_blocked = Kar a tura kuɗi zuwa wannan %@ Wallet ɗin Sa hannu da yawa sai dai idan kun tabbata kuna sarrafa maɓallan sirri. Rashin yin hakan na iya fallasa ku ga zamba, kuma kuna iya rasa kadarorin ku na dindindin.
+warnings_externally_controlled_account = Wani na iya sarrafa wannan asusun %@. Kada ku tura kuɗi zuwa gare shi sai dai idan kun tabbata kuna sarrafa shi, in ba haka ba kuna iya rasa kadarorin ku na dindindin.
 
 # Sell
 

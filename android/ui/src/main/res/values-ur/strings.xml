@@ -430,7 +430,7 @@
   <string name="lock_privacy_lock">پرائیویسی لاک</string>
   <string name="lock_footer">اپنے آلے پر اس ایپ تک رسائی کی حفاظت کریں۔</string>
   <string name="verify_phrase_title">تصدیق کریں۔</string>
-  <string name="warnings_multi_signature_blocked">اس %1$s کثیر دستخط والے والیٹ میں رقوم منتقل نہ کریں جب تک کہ آپ کو یقین نہ ہو کہ آپ نجی کلیدوں کو کنٹرول کرتے ہیں۔ ایسا کرنے میں ناکامی آپ کو گھوٹالوں کے سامنے آ سکتی ہے، اور آپ اپنے اثاثوں کو مستقل طور پر کھو سکتے ہیں۔</string>
+  <string name="warnings_externally_controlled_account">اس %1$s اکاؤنٹ کو کوئی اور کنٹرول کر سکتا ہے۔ جب تک آپ کو یقین نہ ہو کہ اس کا کنٹرول آپ کے پاس ہے، اس میں رقوم نہ بھیجیں، ورنہ آپ اپنے اثاثے مستقل طور پر کھو سکتے ہیں۔</string>
   <string name="sell_title">فروخت کریں %1$s</string>
   <string name="info_network_fee_title">نیٹ ورک فیس</string>
   <string name="info_watch_wallet_title">والیٹ دیکھیں</string>

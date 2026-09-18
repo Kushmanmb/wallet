@@ -970,8 +970,8 @@ verify_phrase_title = Confirm
 
 # Warnings
 
-# Used in warning cards and confirmations for the multi signature blocked label. Contains 1 string placeholder.
-warnings_multi_signature_blocked = Do not transfer funds to this %@ Multi-Signature wallet unless you are certain you control the private keys. Failure to do so could expose you to scams, and you may permanently lose your assets.
+# Banner on an account whose on-chain control belongs to another key or program, such as a TRON multi-signature account or a Solana account assigned to a program. Contains 1 string placeholder: the network name.
+warnings_externally_controlled_account = This %@ account can be controlled by someone else. Do not send funds to it unless you are certain you control it, or you may permanently lose your assets.
 
 # Sell
 

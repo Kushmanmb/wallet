@@ -529,7 +529,7 @@ verify_phrase_title = Potvrdit
 
 # Warnings
 
-warnings_multi_signature_blocked = Nepřevádějte prostředky do této %@ peněženky s více podpisy, pokud si nejste jisti, že ovládáte soukromé klíče. Pokud tak neučiníte, můžete se vystavit podvodům a můžete trvale ztratit svá aktiva.
+warnings_externally_controlled_account = Tento účet %@ může ovládat někdo jiný. Neposílejte na něj prostředky, pokud si nejste jisti, že ho ovládáte vy, jinak můžete o svá aktiva trvale přijít.
 
 # Sell
 

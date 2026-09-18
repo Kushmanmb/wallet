@@ -529,7 +529,7 @@ verify_phrase_title = Confirmar
 
 # Warnings
 
-warnings_multi_signature_blocked = No transfiera fondos a esta billetera multifirma %@ a menos que esté seguro de que controla las claves privadas. Si no lo hace, podría exponerse a estafas y perder sus activos de forma permanente.
+warnings_externally_controlled_account = Esta cuenta de %@ puede estar controlada por otra persona. No envíe fondos a ella a menos que esté seguro de que la controla, o podría perder sus activos de forma permanente.
 
 # Sell
 
