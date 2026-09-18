@@ -100,14 +100,6 @@ public struct DelegationViewModel: Sendable {
     public var validatorImage: AssetImage {
         validatorModel.validatorImage
     }
-
-    public var validatorUrl: URL? {
-        service.validatorUrl(validator: delegation.validator.toGem()).map { $0.toPrimitives() }?.url
-    }
-
-    public var completionDateText: String? {
-        CountdownFormatter().string(parts: service.completionCountdownParts(delegation: delegation.toGem()))
-    }
 }
 
 extension DelegationViewModel: Identifiable {

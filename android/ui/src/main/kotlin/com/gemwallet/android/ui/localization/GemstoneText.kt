@@ -102,7 +102,7 @@ fun GemAddNodeFailure.stringRes(): Int = when (this) {
 }
 
 @StringRes
-fun GemDelegationStatus.stateRes(): Int = when (state) {
+fun DelegationState.stateRes(): Int = when (this) {
     DelegationState.ACTIVE -> R.string.stake_active
     DelegationState.PENDING -> R.string.stake_pending
     DelegationState.INACTIVE -> R.string.stake_inactive
@@ -113,7 +113,7 @@ fun GemDelegationStatus.stateRes(): Int = when (state) {
 
 @Composable
 fun GemDelegationStatus.stateText(): String = stringResource(
-    stateRes()
+    state.stateRes()
 )
 
 @StringRes
@@ -166,6 +166,7 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
         context.getString(R.string.wallet_default_name_chain, chain.requireChain().asset().name, index)
     GemLocalizedText.WalletMulticoin -> context.getString(R.string.wallet_multicoin)
     is GemLocalizedText.ChainNetworkName -> chain.requireChain().networkName()
+    is GemLocalizedText.DelegationState -> context.getString(state.stateRes())
 }
 
 @StringRes
@@ -500,6 +501,11 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.STAKE_APR -> R.string.stake_apr
     GemListRowTitle.LOCK_TIME -> R.string.stake_lock_time
     GemListRowTitle.MINIMUM_AMOUNT -> R.string.stake_minimum_amount
+    GemListRowTitle.VALIDATOR -> R.string.stake_validator
+    GemListRowTitle.PROVIDER -> R.string.common_provider
+    GemListRowTitle.STATUS -> R.string.transaction_status
+    GemListRowTitle.ACTIVE_IN -> R.string.stake_active_in
+    GemListRowTitle.AVAILABLE_IN -> R.string.stake_available_in
 }
 
 fun GemSlippageCheck.footerText(context: Context, minimumText: String, maximumText: String): String? = when (this) {

@@ -12,12 +12,12 @@ import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.earn.delegation.models.DelegationProperties
+import com.gemwallet.android.features.earn.delegation.models.DelegationRowUIModel
 import com.gemwallet.android.features.earn.delegation.models.HeadDelegationInfo
 import com.gemwallet.android.features.earn.delegation.models.uiModel
 import com.gemwallet.android.model.Crypto
 import com.gemwallet.android.model.toAmountParams
 import com.gemwallet.android.serializer.toJson
-import com.gemwallet.android.domains.duration.formatDuration
 import com.gemwallet.android.ui.models.RewardsInfoUIModel
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.ConfirmTransactionAction
@@ -40,7 +40,6 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemDelegationAction
 import uniffi.gemstone.GemDelegationDestination
 import uniffi.gemstone.GemStakeServiceInterface
-import uniffi.gemstone.delegationStatus
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -78,12 +77,9 @@ class DelegationViewModel @Inject constructor(
         if (delegation == null || assetInfo == null) {
             return@combine null
         }
-        val validatorName = stakeService.validatorRow(delegation.validator.toGem()).name
-        val validatorUrl = stakeService.validatorUrl(delegation.validator.toGem())?.link
-        val status = delegationStatus(delegation.toGem())
-        val availableIn = stakeService.completionCountdownParts(delegation.toGem()).formatDuration()
         DelegationProperties(
-            rows = stakeService.delegationRows(delegation.toGem()).mapNotNull { it.uiModel(context, delegation.validator, validatorName, validatorUrl, status, availableIn) },
+            rows = stakeService.delegationRows(delegation.toGem()).map { DelegationRowUIModel.Row(it) } +
+                listOfNotNull(DelegationRowUIModel.Rewards.takeIf { stakeService.showsRewards(delegation.base.toGem()) }),
             rewards = RewardsInfoUIModel(assetInfo, delegation.base.rewards),
         )
     }

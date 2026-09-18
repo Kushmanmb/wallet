@@ -401,6 +401,7 @@ mod tests {
             | GemListRow::Text { title, .. }
             | GemListRow::Amount { title, .. }
             | GemListRow::Duration { title, .. }
+            | GemListRow::Label { title, .. }
             | GemListRow::Url { title, .. }
             | GemListRow::Toggle { title, .. }
             | GemListRow::Picker { title, .. } => Some(*title),

@@ -301,12 +301,14 @@ walletConnectClient.rejectSession(proposal, rejection) {
 
 ### A plain list is Core sections of one shared row, rendered by one builder per app
 
-A row that shows a title with a value, an amount, a link, an icon, an address to copy, a loading placeholder or an error is the same row on every screen. It crosses once, as [`models/list.rs`](../core/gemstone/src/models/list.rs):
+A row that shows a title with a value, an amount, a duration, a toned label, a link, an icon, an address to copy, a loading placeholder or an error is the same row on every screen. It crosses once, as [`models/list.rs`](../core/gemstone/src/models/list.rs):
 
 ```rust
 pub enum GemListRow {
     Text { title: GemListRowTitle, value: String },
     Amount { title: GemListRowTitle, amount: GemFormattedNumber, info: Option<GemInfoTopic> },
+    Duration { title: GemListRowTitle, parts: Vec<GemDurationPart>, info: Option<GemInfoTopic> },
+    Label { title: GemListRowTitle, text: GemLocalizedText, tone: GemValueTone },
     Icon { chain: Chain },
     Address { address: String, copy: GemCopy },
     Explorer { name: String, url: String },

@@ -9,6 +9,7 @@ import enum Gemstone.PerpetualDirection
 import enum Gemstone.FeeOption
 import enum Gemstone.GemAssetMenuAction
 import enum Gemstone.GemContactAddressField
+import enum Gemstone.DelegationState
 import enum Gemstone.GemListRowTitle
 import enum Gemstone.GemListSectionFooter
 import enum Gemstone.GemListSectionTitle
@@ -63,6 +64,21 @@ extension GemLocalizedText {
             Localized.Wallet.multicoin
         case let .chainNetworkName(chain):
             Chain(core: chain).networkName
+        case let .delegationState(state):
+            state.title
+        }
+    }
+}
+
+public extension Gemstone.DelegationState {
+    var title: String {
+        switch self {
+        case .active: Localized.Stake.active
+        case .pending: Localized.Stake.pending
+        case .inactive: Localized.Stake.inactive
+        case .activating: Localized.Stake.activating
+        case .deactivating: Localized.Stake.deactivating
+        case .awaitingWithdrawal: Localized.Stake.awaitingWithdrawal
         }
     }
 }
@@ -625,6 +641,11 @@ public extension GemListRowTitle {
         case .stakeApr: Localized.Stake.apr("")
         case .lockTime: Localized.Stake.lockTime
         case .minimumAmount: Localized.Stake.minimumAmount
+        case .validator: Localized.Stake.validator
+        case .provider: Localized.Common.provider
+        case .status: Localized.Transaction.status
+        case .activeIn: Localized.Stake.activeIn
+        case .availableIn: Localized.Stake.availableIn
         }
     }
 }

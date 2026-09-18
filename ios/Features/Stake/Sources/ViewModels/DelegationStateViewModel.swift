@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import struct Gemstone.GemDelegationStatus
+import PrimitivesComponents
 import Style
 import SwiftUI
 

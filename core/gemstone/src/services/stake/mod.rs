@@ -3,7 +3,6 @@ pub mod rules;
 pub mod store;
 
 use crate::models::list::GemListRow;
-use crate::duration_formatter::GemDurationPart;
 use chrono::Utc;
 use crate::services::error::GemServiceError;
 use std::collections::HashMap;
@@ -17,8 +16,7 @@ use crate::models::custom_types::GemBigInt;
 use crate::models::{GemContractCallData, GemEarnType};
 
 pub use model::{
-    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationCompletion, GemDelegationDestination, GemDelegationRow,
-    GemDelegationStatus, GemDelegationTone, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
+    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationStatus, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
 };
 pub use store::GemStakeStore;
 
@@ -134,10 +132,6 @@ impl GemStakeService {
         rules::positions(delegations)
     }
 
-    pub fn completion_countdown_parts(&self, delegation: Delegation) -> Vec<GemDurationPart> {
-        rules::completion_countdown_parts(&delegation, Utc::now())
-    }
-
     pub fn stake_actions(&self, wallet_type: WalletType, chain: Chain, has_validators: bool, balance: GemAssetBalance, delegations: Vec<Delegation>) -> Vec<GemStakeActionItem> {
         rules::stake_actions(wallet_type, chain, has_validators, &balance, &delegations)
     }
@@ -150,8 +144,9 @@ impl GemStakeService {
         rules::stake_info_rows(&asset, staking_apr)
     }
 
-    pub fn delegation_rows(&self, delegation: Delegation) -> Vec<GemDelegationRow> {
-        rules::delegation_rows(&delegation)
+    pub fn delegation_rows(&self, delegation: Delegation) -> Vec<GemListRow> {
+        let validator_url = self.validator_url(delegation.validator.clone());
+        rules::delegation_rows(&delegation, validator_url, Utc::now())
     }
 
     pub fn claim_rewards(&self, chain: Chain, delegations: Vec<Delegation>) -> GemClaimRewards {

@@ -2,6 +2,7 @@
 
 import GemstonePrimitivesTestKit
 import Foundation
+import Localization
 import Primitives
 import PrimitivesTestKit
 @testable import Stake
@@ -16,5 +17,15 @@ struct DelegationSceneViewModelTests {
 
         #expect(claimable.canClaimRewards == true)
         #expect(notClaimable.canClaimRewards == false)
+    }
+
+    @Test
+    func rewardsRowOnlyWhenCoreShowsRewards() {
+        let shown = DelegationSceneViewModel.mock(rewards: 500_000, stakeService: GemStakeServiceMock(rewardsShown: true))
+        let hidden = DelegationSceneViewModel.mock(rewards: 500_000, stakeService: GemStakeServiceMock(rewardsShown: false))
+
+        #expect(shown.rewardsItem?.title == Localized.Stake.rewards)
+        #expect(shown.rewardsItem?.subtitle == "0.5 ATOM")
+        #expect(hidden.rewardsItem == nil)
     }
 }

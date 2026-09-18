@@ -226,11 +226,6 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         delegations.filter { BigInt($0.base.balance) > 0 }
     }
 
-    public func completionCountdownParts(delegation: Gemstone.Delegation) -> [GemDurationPart] {
-        guard delegation.base.state != .active, let completionDate = delegation.base.completionDate else { return [] }
-        return DurationFormatter().countdownParts(seconds: Int64(Date.now.distance(to: completionDate)))
-    }
-
     public func earnApr(providers: [Gemstone.DelegationValidator], assetApr: Double?) -> Double {
         providers.first.map(\.apr).flatMap { $0 > 0 ? $0 : nil } ?? assetApr ?? 0
     }
@@ -243,8 +238,8 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         infoRows
     }
 
-    public func delegationRows(delegation: Gemstone.Delegation) -> [Gemstone.GemDelegationRow] {
-        [.provider, delegation.validator.apr != 0 ? .apr : nil, .status, rewardsShown ? .rewards : nil].compactMap { $0 }
+    public func delegationRows(delegation _: Gemstone.Delegation) -> [GemListRow] {
+        []
     }
 
 

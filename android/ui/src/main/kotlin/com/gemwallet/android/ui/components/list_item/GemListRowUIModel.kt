@@ -7,13 +7,13 @@ import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.property.icon
+import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.localization.titleRes
 import com.gemwallet.android.ui.style.textStyle
 import com.wallet.core.primitives.Asset
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import uniffi.gemstone.GemCopy
-import uniffi.gemstone.GemFormattedNumber
 import uniffi.gemstone.GemInfoTopic
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowIcon
@@ -34,9 +34,10 @@ internal sealed interface GemListRowUIModel {
 internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemListRowUIModel = when (this) {
     is GemListRow.Text -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = value))
     is GemListRow.Amount -> GemListRowUIModel.Item(
-        ListItemModel(title = title.text(context), subtitle = amount.text(), subtitleStyle = amount.subtitleStyle(), info = info?.infoSheet(infoIcon)),
+        ListItemModel(title = title.text(context), subtitle = amount.text(), subtitleStyle = amount.tone.subtitleStyle(), info = info?.infoSheet(infoIcon)),
     )
     is GemListRow.Duration -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = parts.formatDuration(), info = info?.infoSheet(infoIcon)))
+    is GemListRow.Label -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = text.string(context), subtitleStyle = tone.subtitleStyle()))
     is GemListRow.Link -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), opensAnotherScreen = true)
     is GemListRow.Url -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), url = url)
     is GemListRow.Explorer -> GemListRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)
@@ -67,9 +68,9 @@ private fun GemListRowTitle.text(context: Context): String = when (this) {
     else -> context.getString(titleRes())
 }
 
-private fun GemFormattedNumber.subtitleStyle(): ListItemTextStyle = when (tone) {
+private fun GemValueTone.subtitleStyle(): ListItemTextStyle = when (this) {
     GemValueTone.PLAIN -> ListItemTextStyle.Secondary
-    GemValueTone.NEUTRAL, GemValueTone.POSITIVE, GemValueTone.WARNING, GemValueTone.NEGATIVE -> tone.textStyle()
+    GemValueTone.NEUTRAL, GemValueTone.POSITIVE, GemValueTone.WARNING, GemValueTone.NEGATIVE -> textStyle()
 }
 
 private fun GemListRowIcon.image(): ListItemImage? = when (this) {

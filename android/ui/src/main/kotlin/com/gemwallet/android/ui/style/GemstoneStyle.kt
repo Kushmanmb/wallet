@@ -26,7 +26,6 @@ import uniffi.gemstone.ChainAddress
 import uniffi.gemstone.GemAddressFormatStyle
 import uniffi.gemstone.GemAddressServiceInterface
 import uniffi.gemstone.GemAmountInputType
-import uniffi.gemstone.GemDelegationTone
 import uniffi.gemstone.GemEmptyStateImage
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemHeaderButtonKind
@@ -121,19 +120,6 @@ fun GemSwapProgressStep.textStyle(): ListItemTextStyle = when (this) {
     GemSwapProgressStep.FAILED,
     GemSwapProgressStep.REVERTED -> ListItemTextStyle.Negative
     GemSwapProgressStep.REFUNDED -> ListItemTextStyle.Warning
-}
-
-fun GemDelegationTone.textStyle(): ListItemTextStyle = when (this) {
-    GemDelegationTone.POSITIVE -> ListItemTextStyle.Positive
-    GemDelegationTone.PENDING -> ListItemTextStyle.Warning
-    GemDelegationTone.NEGATIVE -> ListItemTextStyle.Negative
-}
-
-@Composable
-fun GemDelegationTone.color(): Color = when (this) {
-    GemDelegationTone.POSITIVE -> MaterialTheme.colorScheme.tertiary
-    GemDelegationTone.PENDING -> pendingColor
-    GemDelegationTone.NEGATIVE -> MaterialTheme.colorScheme.error
 }
 
 @Composable

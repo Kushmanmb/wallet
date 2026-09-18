@@ -1,4 +1,5 @@
 use super::rules;
+use crate::formatted_number::GemValueTone;
 use crate::models::custom_types::GemBigInt;
 use crate::services::amount::model::GemAmountType;
 use crate::services::amount::rules as amount_rules;
@@ -7,39 +8,16 @@ use crate::services::transfer::GemTransferData;
 use primitives::{Asset, Delegation, DelegationState, DelegationValidator, EarnType, Resource, StakeType, YieldProvider};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemDelegationTone {
-    Positive,
-    Pending,
-    Negative,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemStakeSection {
     Manage,
     Resources,
     Delegations,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemDelegationRow {
-    Provider,
-    Apr,
-    Status,
-    CompletionDate,
-    Rewards,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemDelegationCompletion {
-    ActiveIn,
-    AvailableIn,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, uniffi::Record)]
 pub struct GemDelegationStatus {
     pub state: DelegationState,
-    pub tone: GemDelegationTone,
-    pub completion: Option<GemDelegationCompletion>,
+    pub tone: GemValueTone,
 }
 
 #[uniffi::export]

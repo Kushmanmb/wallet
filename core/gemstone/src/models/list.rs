@@ -2,9 +2,10 @@ use primitives::Chain;
 
 use crate::config::social::GemSocialLink;
 use crate::duration_formatter::GemDurationPart;
-use crate::formatted_number::GemFormattedNumber;
+use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::copy::GemCopy;
 use crate::services::error::GemServiceError;
+use crate::services::localization::GemLocalizedText;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemListSectionTitle {
@@ -57,6 +58,11 @@ pub enum GemListRowTitle {
     StakeApr,
     LockTime,
     MinimumAmount,
+    Validator,
+    Provider,
+    Status,
+    ActiveIn,
+    AvailableIn,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -115,6 +121,11 @@ pub enum GemListRow {
         title: GemListRowTitle,
         parts: Vec<GemDurationPart>,
         info: Option<GemInfoTopic>,
+    },
+    Label {
+        title: GemListRowTitle,
+        text: GemLocalizedText,
+        tone: GemValueTone,
     },
     Link {
         title: GemListRowTitle,

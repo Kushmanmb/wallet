@@ -2,12 +2,12 @@
 
 import Components
 import Foundation
-import struct Gemstone.GemFormattedNumber
 import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemListRow
 import enum Gemstone.GemListRowIcon
 import enum Gemstone.GemListRowTitle
 import enum Gemstone.GemUrlTarget
+import enum Gemstone.GemValueTone
 import struct Gemstone.GemSocialLink
 import GemstonePrimitives
 import Localization
@@ -37,9 +37,11 @@ extension GemListRow {
         case let .text(title, value):
             .listItem(ListItemModel(title: title.text, subtitle: value))
         case let .amount(title, amount, info):
-            .listItem(ListItemModel(title: title.text, subtitle: amount.text(), subtitleStyle: subtitleStyle(amount), infoAction: infoAction(info, onInfo: onInfo)))
+            .listItem(ListItemModel(title: title.text, subtitle: amount.text(), subtitleStyle: subtitleStyle(amount.tone), infoAction: infoAction(info, onInfo: onInfo)))
         case let .duration(title, parts, info):
             .listItem(ListItemModel(title: title.text, subtitle: CountdownFormatter().string(parts: parts), infoAction: infoAction(info, onInfo: onInfo)))
+        case let .label(title, text, tone):
+            .listItem(ListItemModel(title: title.text, subtitle: text.text, subtitleStyle: subtitleStyle(tone)))
         case let .link(title, value, icon):
             .listItem(listItem(title: title, value: value, icon: icon))
         case let .picker(title, value, icon):
@@ -63,10 +65,10 @@ extension GemListRow {
         }
     }
 
-    private func subtitleStyle(_ amount: GemFormattedNumber) -> TextStyle {
-        switch amount.tone {
+    private func subtitleStyle(_ tone: GemValueTone) -> TextStyle {
+        switch tone {
         case .plain: ListItemModel.StyleDefaults.subtitleStyle
-        case .neutral, .positive, .warning, .negative: TextStyle(font: .callout, color: amount.tone.color)
+        case .neutral, .positive, .warning, .negative: TextStyle(font: .callout, color: tone.color)
         }
     }
 
