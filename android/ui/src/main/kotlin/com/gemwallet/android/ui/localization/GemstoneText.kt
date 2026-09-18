@@ -502,6 +502,9 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.PERPETUAL_LEVERAGE -> R.string.settings_preferences_perpetual_default_leverage
     GemListRowTitle.PERPETUAL_TAKE_PROFIT -> R.string.settings_preferences_perpetual_default_take_profit
     GemListRowTitle.PERPETUAL_STOP_LOSS -> R.string.settings_preferences_perpetual_default_stop_loss
+    GemListRowTitle.DAILY_VOLUME -> R.string.markets_daily_volume
+    GemListRowTitle.OPEN_INTEREST -> R.string.info_perpetual_open_interest_title
+    GemListRowTitle.FUNDING_APR -> R.string.info_perpetual_funding_apr_title
 }
 
 fun GemSlippageCheck.footerText(context: Context, minimumText: String, maximumText: String): String? = when (this) {

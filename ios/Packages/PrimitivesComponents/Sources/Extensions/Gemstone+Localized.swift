@@ -619,6 +619,9 @@ public extension GemListRowTitle {
         case .perpetualLeverage: Localized.Settings.Preferences.Perpetual.defaultLeverage
         case .perpetualTakeProfit: Localized.Settings.Preferences.Perpetual.defaultTakeProfit
         case .perpetualStopLoss: Localized.Settings.Preferences.Perpetual.defaultStopLoss
+        case .dailyVolume: Localized.Markets.dailyVolume
+        case .openInterest: Localized.Info.Perpetual.OpenInterest.title
+        case .fundingApr: Localized.Info.Perpetual.FundingApr.title
         }
     }
 }

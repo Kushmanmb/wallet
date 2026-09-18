@@ -3,7 +3,6 @@ package com.gemwallet.android.data.coordinators.perpetuals
 import com.gemwallet.android.application.perpetual.cases.GetPerpetual
 import com.gemwallet.android.data.services.gemstone.stores.GemstonePerpetualStore
 import com.gemwallet.android.domains.perpetual.aggregates.PerpetualDetailsDataAggregate
-import com.gemwallet.android.model.text
 import com.gemwallet.android.ext.toGem
 import uniffi.gemstone.perpetualMarketRow
 import com.wallet.core.primitives.Asset
@@ -47,12 +46,6 @@ class PerpetualDetailsDataAggregateImpl(
     override val asset: Asset = data.asset
 
     override val name: String = row.title
-
-    override val dayVolume: String = row.volume24h.text()
-
-    override val openInterest: String = row.openInterest.text()
-
-    override val funding: String = row.fundingApr.text()
 
     override val maxLeverage: Int = data.perpetual.maxLeverage.toInt()
 

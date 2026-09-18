@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 @testable import Perpetuals
+import GemstonePrimitives
 import PerpetualsTestKit
 import Primitives
 import PrimitivesTestKit
@@ -14,17 +15,17 @@ struct PerpetualViewModelTests {
 
     @Test
     func volumeField() {
-        #expect(PerpetualViewModel(perpetual: .mock(volume24h: 1_500_000), asset: .mock()).infoField(for: .dailyVolume).value.text == "$1.5M")
+        #expect(PerpetualViewModel(perpetual: .mock(volume24h: 1_500_000), asset: .mock()).row.volume24h.text() == "$1.5M")
     }
 
     @Test
     func openInterestField() {
-        #expect(PerpetualViewModel(perpetual: .mock(openInterest: 5_250_000), asset: .mock()).infoField(for: .openInterest).value.text == "$5.25M")
+        #expect(PerpetualViewModel(perpetual: .mock(openInterest: 5_250_000), asset: .mock()).row.openInterest.text() == "$5.25M")
     }
 
     @Test
     func fundingRateField() {
-        #expect(PerpetualViewModel(perpetual: .mock(funding: 0.0013), asset: .mock()).infoField(for: .fundingRate).value.text == "+11.39%")
+        #expect(PerpetualViewModel(perpetual: .mock(funding: 0.0013), asset: .mock()).row.fundingApr.text() == "+11.39%")
     }
 
     @Test

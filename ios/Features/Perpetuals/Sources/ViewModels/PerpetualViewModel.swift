@@ -5,7 +5,6 @@ import Formatters
 import Foundation
 import GemstonePrimitives
 import struct Gemstone.GemPerpetualMarketRow
-import enum Gemstone.GemPerpetualInfoRow
 import func Gemstone.perpetualMarketRow
 import Localization
 import Primitives
@@ -36,15 +35,6 @@ public struct PerpetualViewModel {
 
     public var assetImage: AssetImage {
         AssetIdViewModel(assetId: perpetual.assetId).assetImage
-    }
-
-    public func infoField(for infoRow: GemPerpetualInfoRow) -> ListItemField {
-        let value = switch infoRow {
-        case .dailyVolume: row.volume24h.text()
-        case .openInterest: row.openInterest.text()
-        case .fundingRate: row.fundingApr.text()
-        }
-        return ListItemField(title: infoRow.title, value: value)
     }
 
     public var priceText: String {

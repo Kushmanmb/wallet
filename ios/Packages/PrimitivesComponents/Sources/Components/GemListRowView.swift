@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemListRow
 import enum Gemstone.GemListRowTitle
 import Primitives
@@ -15,15 +16,18 @@ public struct GemListRowView: View {
     private let row: GemListRow
     private let onToggle: ((GemListRowTitle, Bool) -> Void)?
     private let onSelect: ((GemListRowTitle) -> Void)?
+    private let onInfo: ((GemInfoTopic) -> Void)?
 
     public init(
         row: GemListRow,
         onToggle: ((GemListRowTitle, Bool) -> Void)? = nil,
         onSelect: ((GemListRowTitle) -> Void)? = nil,
+        onInfo: ((GemInfoTopic) -> Void)? = nil,
     ) {
         self.row = row
         self.onToggle = onToggle
         self.onSelect = onSelect
+        self.onInfo = onInfo
     }
 
     public var body: some View {
@@ -32,7 +36,7 @@ public struct GemListRowView: View {
 
     @ViewBuilder
     private var content: some View {
-        switch row.item {
+        switch row.item(onInfo: onInfo) {
         case let .listItem(model):
             ListItemView(model: model)
         case let .picker(model, title):

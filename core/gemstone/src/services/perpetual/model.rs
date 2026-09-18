@@ -219,13 +219,6 @@ pub enum GemPerpetualPositionDetailRow {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemPerpetualInfoRow {
-    DailyVolume,
-    OpenInterest,
-    FundingRate,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemPerpetualButton {
     Long,
     Short,

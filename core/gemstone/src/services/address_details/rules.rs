@@ -99,6 +99,7 @@ fn balance_section(details: &GemAddressDetails, asset: &Asset) -> Vec<GemListRow
             .map(|row| GemListRow::Amount {
                 title: row.title(),
                 amount: amount(&row.value(), asset),
+                info: None,
             })
             .collect(),
         GemLoadState::Error { error } => vec![GemListRow::Error { error: error.clone() }],
@@ -168,6 +169,7 @@ mod tests {
             vec![GemListRow::Amount {
                 title: GemListRowTitle::Available,
                 amount: GemFormattedNumber::amount(1.5, Some("ETH".to_string()), GemValueStyle::Auto),
+                info: None,
             }]
         );
     }

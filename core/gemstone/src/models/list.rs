@@ -50,6 +50,15 @@ pub enum GemListRowTitle {
     PerpetualLeverage,
     PerpetualTakeProfit,
     PerpetualStopLoss,
+    DailyVolume,
+    OpenInterest,
+    FundingApr,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemInfoTopic {
+    OpenInterest,
+    FundingApr,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -94,6 +103,7 @@ pub enum GemListRow {
     Amount {
         title: GemListRowTitle,
         amount: GemFormattedNumber,
+        info: Option<GemInfoTopic>,
     },
     Link {
         title: GemListRowTitle,

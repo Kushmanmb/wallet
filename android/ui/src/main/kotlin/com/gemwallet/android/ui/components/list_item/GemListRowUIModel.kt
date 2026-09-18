@@ -9,7 +9,9 @@ import com.gemwallet.android.ui.components.list_item.property.icon
 import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.localization.titleRes
 import com.wallet.core.primitives.Asset
+import com.gemwallet.android.ui.components.InfoSheetEntity
 import uniffi.gemstone.GemCopy
+import uniffi.gemstone.GemInfoTopic
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowIcon
 import uniffi.gemstone.GemListRowTitle
@@ -27,7 +29,7 @@ internal sealed interface GemListRowUIModel {
 
 internal fun GemListRow.uiModel(context: Context): GemListRowUIModel = when (this) {
     is GemListRow.Text -> GemListRowUIModel.Item(ListItemModel(title = context.getString(title.titleRes()), subtitle = value))
-    is GemListRow.Amount -> GemListRowUIModel.Item(ListItemModel(title = context.getString(title.titleRes()), subtitle = amount.text()))
+    is GemListRow.Amount -> GemListRowUIModel.Item(ListItemModel(title = context.getString(title.titleRes()), subtitle = amount.text(), info = info?.infoSheet()))
     is GemListRow.Link -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), opensAnotherScreen = true)
     is GemListRow.Url -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), url = url)
     is GemListRow.Explorer -> GemListRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)
@@ -71,4 +73,9 @@ private fun GemListRowIcon.image(): ListItemImage? = when (this) {
     GemListRowIcon.NETWORKS -> ListItemImage.Drawable(R.drawable.settings_networks)
     GemListRowIcon.CONTACTS -> ListItemImage.Drawable(R.drawable.settings_contacts)
     GemListRowIcon.PERPETUALS -> ListItemImage.Drawable(R.drawable.settings_pricealert)
+}
+
+private fun GemInfoTopic.infoSheet(): InfoSheetEntity = when (this) {
+    GemInfoTopic.OPEN_INTEREST -> InfoSheetEntity.OpenInterestInfo
+    GemInfoTopic.FUNDING_APR -> InfoSheetEntity.FundingAprInfo
 }

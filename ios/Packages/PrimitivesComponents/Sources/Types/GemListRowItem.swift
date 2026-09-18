@@ -2,6 +2,7 @@
 
 import Components
 import Foundation
+import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemListRow
 import enum Gemstone.GemListRowIcon
 import enum Gemstone.GemListRowTitle
@@ -29,12 +30,12 @@ enum GemListRowItem {
 }
 
 extension GemListRow {
-    var item: GemListRowItem {
+    func item(onInfo: ((GemInfoTopic) -> Void)?) -> GemListRowItem {
         switch self {
         case let .text(title, value):
             .listItem(ListItemModel(title: title.text, subtitle: value))
-        case let .amount(title, amount):
-            .listItem(ListItemModel(title: title.text, subtitle: amount.text()))
+        case let .amount(title, amount, info):
+            .listItem(ListItemModel(title: title.text, subtitle: amount.text(), infoAction: info.flatMap { topic in onInfo.map { onInfo in { onInfo(topic) } } }))
         case let .link(title, value, icon):
             .listItem(listItem(title: title, value: value, icon: icon))
         case let .picker(title, value, icon):

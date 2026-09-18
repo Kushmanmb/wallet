@@ -12,11 +12,12 @@ use primitives::{
 
 use super::model::{
     GemAutocloseSummary, GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine,
-    GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualInfoRow, GemPerpetualMarketCounts, GemPerpetualMarketRow,
+    GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketRow,
     GemPerpetualMarketSection, GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetailRow,
     GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::GemFormattedNumber;
+use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
 use crate::models::custom_types::GemBigInt;
 use crate::perpetual::GemPerpetual;
 use crate::services::error::GemServiceError;
@@ -609,8 +610,24 @@ pub fn position_detail_rows(position: &PerpetualPosition) -> Vec<GemPerpetualPos
     .collect()
 }
 
-pub fn info_rows() -> Vec<GemPerpetualInfoRow> {
-    vec![GemPerpetualInfoRow::DailyVolume, GemPerpetualInfoRow::OpenInterest, GemPerpetualInfoRow::FundingRate]
+pub fn info_rows(row: GemPerpetualMarketRow) -> Vec<GemListRow> {
+    vec![
+        GemListRow::Amount {
+            title: GemListRowTitle::DailyVolume,
+            amount: row.volume_24h,
+            info: None,
+        },
+        GemListRow::Amount {
+            title: GemListRowTitle::OpenInterest,
+            amount: row.open_interest,
+            info: Some(GemInfoTopic::OpenInterest),
+        },
+        GemListRow::Amount {
+            title: GemListRowTitle::FundingApr,
+            amount: row.funding_apr,
+            info: Some(GemInfoTopic::FundingApr),
+        },
+    ]
 }
 
 pub fn perpetual_buttons(has_position: bool) -> Vec<GemPerpetualButton> {
@@ -895,6 +912,34 @@ mod tests {
         assert!(market_row(&priced, &asset).shows_price);
         assert!(!market_row(&unpriced, &asset).shows_price);
         assert_eq!(market_row(&priced, &asset).title, "BTC");
+    }
+
+    #[test]
+    fn test_info_rows_carry_the_market_values_and_explain_open_interest_and_funding() {
+        let row = market_row(&Perpetual::mock(), &Asset::from_chain(Chain::HyperCore));
+
+        let rows = info_rows(row.clone());
+
+        assert_eq!(
+            rows,
+            vec![
+                GemListRow::Amount {
+                    title: GemListRowTitle::DailyVolume,
+                    amount: row.volume_24h,
+                    info: None,
+                },
+                GemListRow::Amount {
+                    title: GemListRowTitle::OpenInterest,
+                    amount: row.open_interest,
+                    info: Some(GemInfoTopic::OpenInterest),
+                },
+                GemListRow::Amount {
+                    title: GemListRowTitle::FundingApr,
+                    amount: row.funding_apr,
+                    info: Some(GemInfoTopic::FundingApr),
+                },
+            ]
+        );
     }
 
     #[test]
