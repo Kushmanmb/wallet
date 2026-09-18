@@ -16,6 +16,11 @@ pub enum GemNftItem {
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemNftUnverifiedRow {
+    pub count_text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemNftRow {
     pub id: String,
     pub title: String,

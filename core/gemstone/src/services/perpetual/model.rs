@@ -113,8 +113,8 @@ pub struct GemPerpetualMarketRow {
 }
 
 #[uniffi::export]
-pub fn perpetual_market_row(perpetual: Perpetual) -> GemPerpetualMarketRow {
-    rules::market_row(&perpetual)
+pub fn perpetual_market_row(perpetual: Perpetual, asset: Asset) -> GemPerpetualMarketRow {
+    rules::market_row(&perpetual, &asset)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

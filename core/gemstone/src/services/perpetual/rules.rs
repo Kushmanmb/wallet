@@ -559,9 +559,12 @@ fn tooltip_cell(row: GemCandleTooltipRow, value: GemFormattedNumber) -> GemCandl
     GemCandleTooltipCell { row, value }
 }
 
-pub fn market_row(perpetual: &Perpetual) -> GemPerpetualMarketRow {
+pub fn market_row(perpetual: &Perpetual, asset: &Asset) -> GemPerpetualMarketRow {
     GemPerpetualMarketRow {
-        title: perpetual.name.clone(),
+        title: match perpetual.name.is_empty() {
+            true => asset.symbol.clone(),
+            false => perpetual.name.clone(),
+        },
         shows_price: perpetual.price != 0.0,
         volume_24h: GemFormattedNumber::usd_abbreviated(perpetual.volume_24h),
         open_interest: GemFormattedNumber::usd_abbreviated(perpetual.open_interest),
@@ -886,18 +889,37 @@ mod tests {
         let priced = Perpetual::mock();
         let unpriced = Perpetual { price: 0.0, ..priced.clone() };
 
-        assert!(market_row(&priced).shows_price);
-        assert!(!market_row(&unpriced).shows_price);
-        assert_eq!(market_row(&priced).title, "BTC");
+        let asset = Asset::from_chain(Chain::HyperCore);
+
+        assert!(market_row(&priced, &asset).shows_price);
+        assert!(!market_row(&unpriced, &asset).shows_price);
+        assert_eq!(market_row(&priced, &asset).title, "BTC");
+    }
+
+    #[test]
+    fn test_a_market_row_titles_an_unnamed_market_with_its_asset_symbol() {
+        let unnamed = Perpetual {
+            name: String::new(),
+            ..Perpetual::mock()
+        };
+        let asset = Asset {
+            symbol: "HYPE".to_string(),
+            ..Asset::from_chain(Chain::HyperCore)
+        };
+
+        assert_eq!(market_row(&unnamed, &asset).title, "HYPE");
     }
 
     #[test]
     fn test_a_market_row_abbreviates_its_volume_and_open_interest_in_usd() {
-        let row = market_row(&Perpetual {
-            volume_24h: 1_500_000.0,
-            open_interest: 5_250_000.0,
-            ..Perpetual::mock()
-        });
+        let row = market_row(
+            &Perpetual {
+                volume_24h: 1_500_000.0,
+                open_interest: 5_250_000.0,
+                ..Perpetual::mock()
+            },
+            &Asset::from_chain(Chain::HyperCore),
+        );
 
         for number in [&row.volume_24h, &row.open_interest] {
             assert_eq!(number.unit, crate::formatted_number::GemNumberUnit::Currency { code: "USD".to_string() });

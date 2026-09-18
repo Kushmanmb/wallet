@@ -83,8 +83,7 @@ public final class PerpetualSceneViewModel {
     }
 
     public var navigationTitle: String {
-        let name = perpetualViewModel.name
-        return name.isEmpty ? asset.symbol : name
+        perpetualViewModel.name
     }
 
     public var currency: Currency {
@@ -173,7 +172,7 @@ public final class PerpetualSceneViewModel {
     }
 
     public var perpetualViewModel: PerpetualViewModel {
-        PerpetualViewModel(perpetual: perpetual)
+        PerpetualViewModel(perpetual: perpetual, asset: asset)
     }
 
     public var positionViewModels: [PerpetualPositionViewModel] {

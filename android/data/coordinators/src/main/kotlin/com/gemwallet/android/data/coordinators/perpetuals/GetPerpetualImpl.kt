@@ -38,7 +38,7 @@ class GetPerpetualImpl @Inject constructor(
 class PerpetualDetailsDataAggregateImpl(
     private val data: PerpetualData,
 ) : PerpetualDetailsDataAggregate {
-    private val row = perpetualMarketRow(data.perpetual.toGem())
+    private val row = perpetualMarketRow(data.perpetual.toGem(), data.asset.toGem())
 
     override val perpetual: Perpetual = data.perpetual
 

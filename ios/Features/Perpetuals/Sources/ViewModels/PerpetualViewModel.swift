@@ -23,11 +23,12 @@ public struct PerpetualViewModel {
 
     public init(
         perpetual: Perpetual,
+        asset: Asset,
         priceFormatter: CurrencyFormatter = .usd,
     ) {
         self.perpetual = perpetual
         self.priceFormatter = priceFormatter
-        row = perpetualMarketRow(perpetual: perpetual.toGem())
+        row = perpetualMarketRow(perpetual: perpetual.toGem(), asset: asset.toGem())
     }
 
     public var name: String {

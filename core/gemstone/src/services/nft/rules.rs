@@ -3,7 +3,7 @@ use primitives::{AddressFormatStyle, BlockExplorerLink, Chain, NFTAssetData, NFT
 
 use super::model::{
     GemCollectibleAttribute, GemCollectibleAttributeValue, GemCollectibleDetails, GemCollectibleIdentifier, GemCollectibleRow, GemCollectibleSection, GemNftItem, GemNftList,
-    GemNftRow,
+    GemNftRow, GemNftUnverifiedRow,
 };
 use crate::address_formatter::format_address;
 use crate::config::chain::supports_nft_transfer;
@@ -12,6 +12,16 @@ const TOKEN_ID_ADDRESS_LENGTH: usize = 16;
 
 pub fn unverified_collections(data: Vec<NFTData>) -> Vec<NFTData> {
     collections(data, false)
+}
+
+pub fn unverified_row(data: Vec<NFTData>, list: GemNftList) -> Option<GemNftUnverifiedRow> {
+    match list {
+        GemNftList::Collections => {
+            let count = unverified_collections(data).len();
+            (count > 0).then(|| GemNftUnverifiedRow { count_text: count.to_string() })
+        }
+        GemNftList::Unverified | GemNftList::Collection => None,
+    }
 }
 
 pub fn list_items(data: Vec<NFTData>, list: GemNftList) -> Vec<GemNftItem> {
