@@ -29,7 +29,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **R43** **M** Stake, earn and delegation — `GemStakeInfoRow`, `GemDelegationRow` and `GemStakeSection` map their own titles in each app; they are title-value rows and sections, so fold them into `GemListRow`/`GemListSection` with the missing titles added to `GemListRowTitle`; the APR value, which iOS formats from `validator.apr` and `stakingApr` in `AprViewModel` and Android in its stake rows, rides along as the row's value.
 - **R48** **S** Price alerts, contacts and NFT details — each has a small plain-row list (alert targets, contact fields, collectible attributes) with its own row model; adopt `GemListRow` so the three feature mappers go away.
 - **D40** **M** Only the address screen takes its load state from Core (`GemLoadState` plus `GemLoad::data`, see [the load-state contract](ARCHITECTURE.md#a-screens-load-state-is-one-core-state-and-a-failed-refresh-keeps-what-is-shown)); the iOS stake screen still resets to `.loading` on every pull and replaces shown rows with the error. Adopt the same state there first; the asset and transactions screens only log a failed refresh today.
-- **P19** **S** iOS `AssetSceneViewModel` computes `hasStakeBalance`, `hasAvailableBalance` and `isWalletEmpty` and passes them into `GemAssetDetailsInput`; Android computes the same — see **K1**.
 
 
 
@@ -71,7 +70,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 ## 6. Core shapes that block an app move
 
-- **K1** **M** `GemAssetDetailsInput` takes booleans the apps compute from balances (`hasStakeBalance`, `hasAvailableBalance`, `isWalletEmpty`) — take the balances, decide in Core, delete the arithmetic on both apps (**P19**).
 - **K9** **S** The chart min/max and padding arithmetic is still app-side (iOS `ChartValues.from`, Android `GemLineChart`); neither app reads `GemChart.base_value`/`GemChartData.base` — a `GemChartLayout` from Core.
 - **K8** **M** `GemStreamService` holds 13 `Arc`s, `GemAssetDetailsService` and `GemWalletService` 10, `GemPerpetualService` 9 — for each, the dependencies reached only to forward one call move behind the composition service (§ 7).
 - **S41** **M** iOS `ImportWalletSceneViewModel` drives input, word suggestions, import kind and button state itself — `GemWalletImportSession` on both apps (Android `ImportUIState` carries the same).

@@ -9,6 +9,7 @@ import struct Gemstone.GemAssetDetails
 import struct Gemstone.GemAssetDetailsInput
 import enum Gemstone.GemBalanceRow
 import struct Gemstone.GemBannerContext
+import func Gemstone.assetBannerContext
 import typealias Gemstone.GemBigUint
 import GemstonePrimitives
 import GemstoneServices
@@ -214,16 +215,7 @@ public final class AssetSceneViewModel: Sendable {
     }
 
     private var bannerContext: GemBannerContext {
-        GemBannerContext(
-            wallet: wallet.toGem(),
-            asset: asset.toGem(),
-            isStakeable: assetData.metadata.isStakeEnabled,
-            hasStakeBalance: stakedValue > .zero,
-            hasAvailableBalance: assetData.balance.available > 0,
-            isAssetActivated: assetData.metadata.isActive,
-            assetRankScore: assetData.metadata.rankScore,
-            isWalletEmpty: false,
-        )
+        assetBannerContext(wallet: wallet.toGem(), asset: asset.toGem(), metadata: assetData.metadata.toGem(), balance: stakeBalance)
     }
 
     func assetHeaderModel(_ details: GemAssetDetails) -> AssetHeaderViewModel {
@@ -427,10 +419,6 @@ public extension AssetSceneViewModel {
 extension AssetSceneViewModel {
     private var stakeBalance: GemAssetBalance {
         GemAssetBalance(assetData.balance, assetId: asset.id, isActive: assetData.metadata.isActive)
-    }
-
-    private var stakedValue: BigInt {
-        BigInt(stakeBalance.stakedValue(chain: asset.chain.rawValue))
     }
 
     private var feeAssetDataModel: AssetDataViewModel {
