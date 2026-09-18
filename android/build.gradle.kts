@@ -37,7 +37,6 @@ subprojects {
     }
     tasks.withType<Test>().configureEach {
         systemProperty("jna.library.path", File(rootDir, "../core/target/debug").absolutePath)
-        systemProperty("kotlinx.coroutines.test.default_timeout", "10s")
     }
     listOf("com.android.library", "com.android.application").forEach { pluginId ->
         plugins.withId(pluginId) {
