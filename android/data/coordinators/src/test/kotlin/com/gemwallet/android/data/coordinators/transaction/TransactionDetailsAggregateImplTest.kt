@@ -17,9 +17,6 @@ import com.wallet.core.primitives.AddressName
 import com.wallet.core.primitives.AddressType
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.Currency
-import com.wallet.core.primitives.Resource
-import com.wallet.core.primitives.TransactionState
-import com.wallet.core.primitives.TransactionType
 import com.wallet.core.primitives.VerificationStatus
 import org.junit.Assert
 import org.junit.Test
@@ -33,14 +30,13 @@ import uniffi.gemstone.GemSwapProgressStep
 import uniffi.gemstone.GemAssetRate
 import uniffi.gemstone.formattedAdaptive
 import uniffi.gemstone.GemSwapRate
+import uniffi.gemstone.GemTransactionDetailRow
 import uniffi.gemstone.GemTransactionDetailRows
 import uniffi.gemstone.GemTransactionHeader
 import uniffi.gemstone.GemTransactionHeaderAction
 import uniffi.gemstone.GemTransactionParticipant
 import uniffi.gemstone.GemTransactionParticipantRole
 import java.math.BigInteger
-import java.text.DateFormat
-import java.util.Date
 
 class TransactionDetailsAggregateImplTest {
 
@@ -154,23 +150,6 @@ class TransactionDetailsAggregateImplTest {
     }
 
     @Test
-    fun testDate() {
-        val data = mockTransactionExtended(transaction)
-        val date = createAggregate(rows = mockGemTransactionDetailRows(transaction = data)).date
-
-        Assert.assertTrue(date.data.contains("January 6, 2026"))
-        Assert.assertTrue(date.data.contains(DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(data.transaction.createdAt))))
-    }
-
-    @Test
-    fun testStatusAndNetwork() {
-        val aggregate = createAggregate(rows = mockGemTransactionDetailRows(transaction = mockTransactionExtended(transaction.copy(state = TransactionState.Pending))))
-
-        Assert.assertEquals(TransactionState.Pending, aggregate.status.data)
-        Assert.assertEquals(btcAsset, aggregate.network.data)
-    }
-
-    @Test
     fun testRate_formatsBothDirectionsFromTheCoreRate() {
         val rate = GemSwapRate(
             direct = GemAssetRate(baseSymbol = "ETH", quoteSymbol = "USDT", value = formattedAdaptive(3000.0, null)),
@@ -181,18 +160,6 @@ class TransactionDetailsAggregateImplTest {
         Assert.assertTrue(formatted!!.rate.forward.startsWith("1 ETH"))
         Assert.assertTrue(formatted.rate.reverse.startsWith("1 USDT"))
         Assert.assertNull(createAggregate().rate)
-    }
-
-    @Test
-    fun testMemoAndResource_comeFromCore() {
-        val aggregate = createAggregate(rows = mockGemTransactionDetailRows(memo = "Test memo", resource = uniffi.gemstone.Resource.ENERGY))
-
-        Assert.assertEquals("Test memo", aggregate.memo?.data)
-        Assert.assertEquals(Resource.Energy, aggregate.resourceType?.data)
-
-        val empty = createAggregate()
-        Assert.assertNull(empty.memo)
-        Assert.assertNull(empty.resourceType)
     }
 
     @Test
@@ -219,16 +186,6 @@ class TransactionDetailsAggregateImplTest {
         Assert.assertNull(validator?.name)
 
         Assert.assertNull(createAggregate().participant)
-    }
-
-    @Test
-    fun testProvider_namesTheCoreProvider() {
-        val aggregate = createAggregate(
-            rows = mockGemTransactionDetailRows(transaction = mockTransactionExtended(transaction.copy(type = TransactionType.Swap)), providerName = "unswap"),
-        )
-
-        Assert.assertEquals("unswap", aggregate.provider?.data)
-        Assert.assertNull(createAggregate().provider)
     }
 
     @Test
@@ -265,21 +222,16 @@ class TransactionDetailsAggregateImplTest {
     fun testValue_answersEveryRowCoreLists() {
         val aggregate = createAggregate(currency = Currency.EUR)
         Assert.assertEquals(Currency.EUR, aggregate.currency)
+        val values = aggregate.sections.flatMap { section -> section.rows.map(aggregate::value) }
+        Assert.assertEquals(aggregate.amount, values.first())
+        Assert.assertTrue(aggregate.fee in values)
         Assert.assertEquals(
-            listOf(aggregate.amount, aggregate.date, aggregate.status, aggregate.network, aggregate.fee, aggregate.explorer),
-            aggregate.sections.flatMap { section -> section.rows.map(aggregate::value) },
+            aggregate.sections.flatMap { section -> section.rows.filterIsInstance<GemTransactionDetailRow.Row>().map { it.row } },
+            values.filterIsInstance<TransactionDetailsValue.Row>().map { it.row },
         )
 
         Assert.assertEquals(720u, createAggregate(rows = mockGemTransactionDetailRows(estimatedConfirmationSeconds = 720u)).estimatedConfirmation?.seconds)
         Assert.assertNull(aggregate.estimatedConfirmation)
     }
 
-    @Test
-    fun testPnlAndPrice_formatInUsd() {
-        val aggregate = createAggregate(rows = mockGemTransactionDetailRows(pnl = -12.5, price = 3000.0))
-
-        Assert.assertEquals("-\$12.50", aggregate.pnl?.value)
-        Assert.assertEquals("\$3,000.00", aggregate.price?.data)
-        Assert.assertEquals("+\$12.50", createAggregate(rows = mockGemTransactionDetailRows(pnl = 12.5)).pnl?.value)
-    }
 }

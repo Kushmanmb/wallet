@@ -25,6 +25,7 @@ enum GemListRowItem {
     case toggle(label: String, title: GemListRowTitle, isOn: Bool, imageStyle: ListItemImageStyle?)
     case page(ListItemModel, url: URL)
     case external(ListItemModel, url: URL)
+    case network(title: String, subtitle: String, image: AssetImage)
     case icon(AssetImage)
     case address(AddressCardModel)
     case social([GemSocialLink])
@@ -40,8 +41,24 @@ extension GemListRow {
             .listItem(ListItemModel(title: title.text, subtitle: amount.text(), subtitleStyle: subtitleStyle(amount.tone), infoAction: infoAction(info, onInfo: onInfo)))
         case let .duration(title, parts, info):
             .listItem(ListItemModel(title: title.text, subtitle: CountdownFormatter().string(parts: parts), infoAction: infoAction(info, onInfo: onInfo)))
-        case let .label(title, text, tone):
-            .listItem(ListItemModel(title: title.text, subtitle: text.text, subtitleStyle: subtitleStyle(tone)))
+        case let .label(title, text, tone, info, progress):
+            .listItem(
+                ListItemModel(
+                    title: title.text,
+                    subtitle: text.text,
+                    subtitleStyle: subtitleStyle(tone),
+                    subtitleTagType: progress ? .progressView() : .none,
+                    infoAction: infoAction(info, onInfo: onInfo),
+                ),
+            )
+        case let .date(title, date):
+            .listItem(ListItemModel(title: title.text, subtitle: TransactionDateFormatter(date: date).row))
+        case let .network(title, chain):
+            .network(
+                title: title.text,
+                subtitle: Chain(core: chain).networkName,
+                image: AssetIdViewModel(assetId: Chain(core: chain).assetId).networkAssetImage,
+            )
         case let .link(title, value, icon):
             .listItem(listItem(title: title, value: value, icon: icon))
         case let .picker(title, value, icon):

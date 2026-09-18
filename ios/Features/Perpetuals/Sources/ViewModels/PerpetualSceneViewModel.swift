@@ -208,7 +208,7 @@ public extension PerpetualSceneViewModel {
     }
 
     func onInfo(_ topic: GemInfoTopic) {
-        isPresentingInfoSheet = InfoSheetType(topic: topic, placeholder: nil)
+        isPresentingInfoSheet = InfoSheetType(topic: topic, assetImage: nil)
     }
 
     func onSelectFundingPaymentsInfo() {

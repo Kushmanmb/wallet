@@ -3,6 +3,7 @@
 import BigInt
 import Components
 import protocol Gemstone.GemTransactionDetailsServiceProtocol
+import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemTransactionDetailRow
 import enum Gemstone.GemTransactionHeaderAction
 import struct Gemstone.GemTransactionDetailRows
@@ -54,7 +55,7 @@ public final class TransactionSceneViewModel {
     }
 
     var explorerURL: URL {
-        explorerViewModel.url
+        rows.explorer.toPrimitives().url
     }
 
     var onTransactionHeaderTap: TransactionHeaderActionHandler? {
@@ -75,8 +76,6 @@ extension TransactionSceneViewModel: ListSectionProvideable {
         case .header: TransactionHeaderViewModel(header: rows.header, currency: service.getCurrency().toPrimitives())
         case .swapProgress: TransactionSwapProgressViewModel(progress: rows.swapProgress)
         case .swapAgain: TransactionSwapButtonViewModel(swapAgain: rows.swapAgain)
-        case .date: TransactionDateViewModel(date: transactionExtended.transaction.createdAt)
-        case .status: TransactionStatusViewModel(status: rows.status, state: transactionExtended.transaction.state, onInfoAction: onSelectStatusInfo)
         case .estimatedConfirmation: TransactionEstimatedConfirmationViewModel(seconds: rows.estimatedConfirmationSeconds, onInfoAction: onSelectEstimatedConfirmationInfo)
         case .participant: TransactionParticipantViewModel(
                 participant: rows.participant,
@@ -85,15 +84,9 @@ extension TransactionSceneViewModel: ListSectionProvideable {
                 onAddContact: onAddContact,
                 onSelectAddress: onSelectAddress,
             )
-        case .memo: TransactionMemoViewModel(transaction: transactionExtended.transaction)
-        case .resource: TransactionResourceViewModel(resource: rows.resource)
         case .rate: TransactionRateViewModel(rate: rows.rate, isInverse: isRateInverse)
-        case .network: TransactionNetworkViewModel(chain: transactionExtended.asset.chain)
-        case .pnl: TransactionPnlViewModel(pnl: rows.pnl)
-        case .price: TransactionPriceViewModel(price: rows.price)
-        case .provider: TransactionProviderViewModel(name: rows.providerName)
         case .fee: TransactionNetworkFeeViewModel(feeDisplay: rows.fee.display(currency: service.getCurrency().toPrimitives(), formatter: .auto), onInfoAction: onSelectFee)
-        case .explorer: explorerViewModel
+        case let .row(row): TransactionItemModel.row(row)
         }
     }
 }
@@ -134,13 +127,8 @@ extension TransactionSceneViewModel {
         isPresentingTransactionSheet = .info(.networkFee(transactionExtended.feeAsset))
     }
 
-    private func onSelectStatusInfo() {
-        let assetImage = TransactionViewModel(transaction: transactionExtended).assetImage
-        isPresentingTransactionSheet = .info(.transactionState(
-            imageURL: assetImage.imageURL,
-            placeholder: assetImage.placeholder,
-            model: TransactionStateViewModel(state: transactionExtended.transaction.state, tone: rows.status.tone),
-        ))
+    func onInfo(_ topic: GemInfoTopic) {
+        isPresentingTransactionSheet = .info(InfoSheetType(topic: topic, assetImage: TransactionViewModel(transaction: transactionExtended).assetImage))
     }
 
     private func onSelectEstimatedConfirmationInfo() {
@@ -153,10 +141,6 @@ extension TransactionSceneViewModel {
 extension TransactionSceneViewModel {
     private var rows: GemTransactionDetailRows {
         service.detailRows(transaction: transactionExtended.toGem(), walletType: wallet.type.toGem())
-    }
-
-    private var explorerViewModel: TransactionExplorerViewModel {
-        TransactionExplorerViewModel(transactionLink: rows.explorer.toPrimitives())
     }
 
     var feeDetailsViewModel: NetworkFeeSceneViewModel {

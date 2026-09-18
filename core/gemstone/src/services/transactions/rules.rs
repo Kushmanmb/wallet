@@ -20,6 +20,8 @@ use crate::config::image::GemImage;
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::precision::GemValueStyle;
 use crate::models::asset::wallet_default_assets;
+use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
+use crate::services::localization::GemLocalizedText;
 use crate::services::collections::unique;
 use crate::services::swap::model::GemSwapRate;
 use crate::services::swap::rules as swap_rules;
@@ -145,18 +147,55 @@ pub fn detail_rows(
 
 pub fn detail_sections(rows: &GemTransactionDetailRows) -> Vec<GemTransactionDetailSection> {
     use GemTransactionDetailRow::*;
+    let list = |row: GemListRow| Row { row };
     let details = [
-        Some(Date),
-        Some(Status),
+        Some(list(GemListRow::Date {
+            title: GemListRowTitle::Date,
+            date: rows.created_at,
+        })),
+        Some(list(status_row(rows))),
         rows.estimated_confirmation_seconds.is_some().then_some(EstimatedConfirmation),
         rows.participant.is_some().then_some(Participant),
-        rows.memo.is_some().then_some(Memo),
-        rows.resource.is_some().then_some(Resource),
+        rows.memo.clone().filter(|memo| !memo.is_empty()).map(|memo| {
+            list(GemListRow::Text {
+                title: GemListRowTitle::Memo,
+                value: memo,
+            })
+        }),
+        rows.resource.map(|resource| {
+            list(GemListRow::Label {
+                title: GemListRowTitle::Resource,
+                text: GemLocalizedText::Resource { resource },
+                tone: GemValueTone::Plain,
+                info: None,
+                progress: false,
+            })
+        }),
         rows.rate.is_some().then_some(Rate),
-        Some(Network),
-        rows.provider_name.is_some().then_some(Provider),
-        rows.pnl.is_some().then_some(Pnl),
-        rows.price.is_some().then_some(Price),
+        Some(list(GemListRow::Network {
+            title: GemListRowTitle::Network,
+            chain: rows.asset.chain(),
+        })),
+        rows.provider_name.clone().map(|name| {
+            list(GemListRow::Text {
+                title: GemListRowTitle::Provider,
+                value: name,
+            })
+        }),
+        rows.pnl.clone().map(|pnl| {
+            list(GemListRow::Amount {
+                title: GemListRowTitle::Pnl,
+                amount: pnl,
+                info: None,
+            })
+        }),
+        rows.price.clone().map(|price| {
+            list(GemListRow::Amount {
+                title: GemListRowTitle::Price,
+                amount: price,
+                info: None,
+            })
+        }),
     ];
     [
         vec![Header],
@@ -164,12 +203,32 @@ pub fn detail_sections(rows: &GemTransactionDetailRows) -> Vec<GemTransactionDet
         rows.swap_again.is_some().then_some(SwapAgain).into_iter().collect(),
         details.into_iter().flatten().collect(),
         vec![Fee],
-        vec![Explorer],
+        vec![list(GemListRow::Explorer {
+            name: rows.explorer.name.clone(),
+            url: rows.explorer.link.clone(),
+        })],
     ]
     .into_iter()
     .filter(|rows| !rows.is_empty())
     .map(|rows| GemTransactionDetailSection { rows })
     .collect()
+}
+
+fn status_row(rows: &GemTransactionDetailRows) -> GemListRow {
+    GemListRow::Label {
+        title: GemListRowTitle::Status,
+        text: GemLocalizedText::TransactionState { state: rows.state },
+        tone: match rows.status.tone {
+            GemTransactionStateTone::Pending | GemTransactionStateTone::Refunded => GemValueTone::Warning,
+            GemTransactionStateTone::Success => GemValueTone::Positive,
+            GemTransactionStateTone::Error => GemValueTone::Negative,
+        },
+        info: Some(GemInfoTopic::TransactionStatus {
+            state: rows.state,
+            tone: rows.status.tone,
+        }),
+        progress: rows.status.shows_progress,
+    }
 }
 
 fn row_subtitle(extended: &TransactionExtended) -> GemTransactionRowSubtitle {
@@ -1182,9 +1241,25 @@ mod tests {
 
     #[test]
     fn test_detail_sections_list_only_the_rows_the_transaction_has_in_one_order() {
-        use GemTransactionDetailRow::*;
         let explorer = BlockExplorerLink::mock_with_address("tx");
-        let rows_of = |sections: Vec<GemTransactionDetailSection>| sections.into_iter().map(|section| section.rows).collect::<Vec<_>>();
+        let kind = |row: GemTransactionDetailRow| match row {
+            GemTransactionDetailRow::Row { row: GemListRow::Explorer { .. } } => "Explorer".to_string(),
+            GemTransactionDetailRow::Row {
+                row:
+                    GemListRow::Date { title, .. }
+                    | GemListRow::Label { title, .. }
+                    | GemListRow::Text { title, .. }
+                    | GemListRow::Network { title, .. }
+                    | GemListRow::Amount { title, .. },
+            } => format!("{title:?}"),
+            other => format!("{other:?}"),
+        };
+        let rows_of = |sections: Vec<GemTransactionDetailSection>| {
+            sections
+                .into_iter()
+                .map(|section| section.rows.into_iter().map(kind).collect::<Vec<_>>())
+                .collect::<Vec<_>>()
+        };
 
         let mut transfer = TransactionExtended::mock_transaction(Transaction::mock_with_state(
             TransactionType::Transfer,
@@ -1199,7 +1274,7 @@ mod tests {
                 participant(&transfer, BlockExplorerLink::mock_with_address),
                 explorer.clone()
             ))),
-            vec![vec![Header], vec![Date, Status, Participant, Memo, Network], vec![Fee], vec![Explorer]],
+            vec![vec!["Header"], vec!["Date", "Status", "Participant", "Memo", "Network"], vec!["Fee"], vec!["Explorer"]],
             "a transfer has no swap sections and shows its memo beside the recipient"
         );
 
@@ -1214,7 +1289,13 @@ mod tests {
                 participant(&pending, BlockExplorerLink::mock_with_address),
                 explorer.clone()
             ))),
-            vec![vec![Header], vec![SwapProgress], vec![Date, Status, Rate, Network, Provider], vec![Fee], vec![Explorer]],
+            vec![
+                vec!["Header"],
+                vec!["SwapProgress"],
+                vec!["Date", "Status", "Rate", "Network", "Provider"],
+                vec!["Fee"],
+                vec!["Explorer"]
+            ],
             "a swap in flight shows its progress instead of a confirmation estimate, and its provider instead of a participant"
         );
 
@@ -1229,7 +1310,7 @@ mod tests {
                 participant(&confirmed, BlockExplorerLink::mock_with_address),
                 explorer.clone()
             )))[1],
-            vec![SwapAgain],
+            vec!["SwapAgain"],
             "a confirmed swap offers to swap again"
         );
         assert_eq!(
@@ -1239,7 +1320,7 @@ mod tests {
                 participant(&confirmed, BlockExplorerLink::mock_with_address),
                 explorer.clone()
             )))[1],
-            vec![Date, Status, Rate, Network, Provider],
+            vec!["Date", "Status", "Rate", "Network", "Provider"],
             "a watch-only wallet cannot sign, so the confirmed swap offers no swap again"
         );
 
@@ -1264,8 +1345,26 @@ mod tests {
                 participant(&open, BlockExplorerLink::mock_with_address),
                 explorer
             )))[1],
-            vec![Date, Status, Network, Pnl, Price],
+            vec!["Date", "Status", "Network", "Pnl", "Price"],
             "a perpetual has no participant and shows its pnl and price after the network"
+        );
+
+        let status = detail_sections(&detail_rows(&transfer, WalletType::Multicoin, None, BlockExplorerLink::mock_with_address("tx")))[1].rows[1].clone();
+        assert_eq!(
+            status,
+            GemTransactionDetailRow::Row {
+                row: GemListRow::Label {
+                    title: GemListRowTitle::Status,
+                    text: GemLocalizedText::TransactionState { state: TransactionState::Confirmed },
+                    tone: GemValueTone::Positive,
+                    info: Some(GemInfoTopic::TransactionStatus {
+                        state: TransactionState::Confirmed,
+                        tone: GemTransactionStateTone::Success,
+                    }),
+                    progress: false,
+                },
+            },
+            "the status reads the state in its tone and explains it"
         );
     }
 

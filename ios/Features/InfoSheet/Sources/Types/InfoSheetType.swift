@@ -92,12 +92,18 @@ public enum InfoSheetType: Identifiable, Sendable, Equatable {
 }
 
 public extension InfoSheetType {
-    init(topic: GemInfoTopic, placeholder: Image?) {
+    init(topic: GemInfoTopic, assetImage: AssetImage?) {
         self = switch topic {
         case .openInterest: .openInterest
         case .fundingApr: .fundingApr
-        case .stakeApr: .stakeApr(placeholder)
-        case .stakeLockTime: .stakeLockTime(placeholder)
+        case .stakeApr: .stakeApr(assetImage?.placeholder)
+        case .stakeLockTime: .stakeLockTime(assetImage?.placeholder)
+        case let .transactionStatus(state, tone):
+            .transactionState(
+                imageURL: assetImage?.imageURL,
+                placeholder: assetImage?.placeholder,
+                model: TransactionStateViewModel(state: state.toPrimitives(), tone: tone),
+            )
         }
     }
 }

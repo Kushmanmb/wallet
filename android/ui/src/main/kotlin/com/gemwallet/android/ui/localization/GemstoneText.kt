@@ -174,6 +174,8 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     GemLocalizedText.WalletMulticoin -> context.getString(R.string.wallet_multicoin)
     is GemLocalizedText.ChainNetworkName -> chain.requireChain().networkName()
     is GemLocalizedText.DelegationState -> context.getString(state.stateRes())
+    is GemLocalizedText.TransactionState -> context.getString(state.toPrimitives().statusLabelRes())
+    is GemLocalizedText.Resource -> context.getString(resource.toPrimitives().stringRes())
 }
 
 @StringRes
@@ -513,6 +515,11 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.STATUS -> R.string.transaction_status
     GemListRowTitle.ACTIVE_IN -> R.string.stake_active_in
     GemListRowTitle.AVAILABLE_IN -> R.string.stake_available_in
+    GemListRowTitle.DATE -> R.string.transaction_date
+    GemListRowTitle.MEMO -> R.string.transfer_memo
+    GemListRowTitle.RESOURCE -> R.string.stake_resource
+    GemListRowTitle.PRICE -> R.string.asset_price
+    GemListRowTitle.PNL -> R.string.perpetual_pnl
 }
 
 fun GemSlippageCheck.footerText(context: Context, minimumText: String, maximumText: String): String? = when (this) {

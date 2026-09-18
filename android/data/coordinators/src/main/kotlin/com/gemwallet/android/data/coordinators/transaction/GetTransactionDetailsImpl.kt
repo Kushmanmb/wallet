@@ -4,14 +4,11 @@ import androidx.compose.runtime.Stable
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.transactions.cases.GetTransaction
 import com.gemwallet.android.application.transactions.cases.GetTransactionDetails
-import com.gemwallet.android.domains.price.tone
-import com.gemwallet.android.model.text
 import com.gemwallet.android.domains.swap.AssetRateFormatter
 import com.gemwallet.android.domains.transaction.aggregates.TransactionDetailsAggregate
 import com.gemwallet.android.domains.transaction.values.TransactionDetailsValue
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
-import com.gemwallet.android.math.getRelativeDate
 import com.gemwallet.android.model.AssetPriceInfo
 import com.gemwallet.android.model.AssetPriceValue
 import com.gemwallet.android.model.Crypto
@@ -109,28 +106,10 @@ class TransactionDetailsAggregateImpl(
         TransactionDetailsValue.Fee(asset, valueFormatter.string(fee.value, asset), fee.fiat(asset).orEmpty())
     }
 
-    val date: TransactionDetailsValue.Date = TransactionDetailsValue.Date(getRelativeDate(rows.createdAt))
-
-    val status: TransactionDetailsValue.Status = TransactionDetailsValue.Status(state, rows.status)
-
     val estimatedConfirmation: TransactionDetailsValue.EstimatedConfirmation? = rows.estimatedConfirmationSeconds
         ?.let { TransactionDetailsValue.EstimatedConfirmation(it) }
 
-    val memo: TransactionDetailsValue.Memo? = rows.memo?.let { TransactionDetailsValue.Memo(it) }
-
-    val resourceType: TransactionDetailsValue.ResourceType? = rows.resource
-        ?.let { TransactionDetailsValue.ResourceType(it.toPrimitives()) }
-
-    val network: TransactionDetailsValue.Network = TransactionDetailsValue.Network(asset)
-
-    val pnl: TransactionDetailsValue.Pnl? = rows.pnl
-        ?.let { TransactionDetailsValue.Pnl(value = it.text(), direction = it.value.tone()) }
-
-    val price: TransactionDetailsValue.Price? = rows.price?.let { TransactionDetailsValue.Price(it.text()) }
-
     val participant: TransactionDetailsValue.Destination? = rows.participant?.destination()
-
-    val provider: TransactionDetailsValue.Destination.Provider? = rows.providerName?.let { TransactionDetailsValue.Destination.Provider(it) }
 
     override val explorer: TransactionDetailsValue.Explorer = TransactionDetailsValue.Explorer(rows.explorer.link, rows.explorer.name)
 
@@ -153,22 +132,14 @@ class TransactionDetailsAggregateImpl(
     override val sections: List<GemTransactionDetailSection> = transactionDetailSections(rows)
 
     override fun value(row: GemTransactionDetailRow): TransactionDetailsValue = when (row) {
-        GemTransactionDetailRow.HEADER -> amount
-        GemTransactionDetailRow.SWAP_PROGRESS -> requireNotNull(swapProgress)
-        GemTransactionDetailRow.SWAP_AGAIN -> requireNotNull(swapAgain)
-        GemTransactionDetailRow.DATE -> date
-        GemTransactionDetailRow.STATUS -> status
-        GemTransactionDetailRow.ESTIMATED_CONFIRMATION -> requireNotNull(estimatedConfirmation)
-        GemTransactionDetailRow.PARTICIPANT -> requireNotNull(participant)
-        GemTransactionDetailRow.MEMO -> requireNotNull(memo)
-        GemTransactionDetailRow.RESOURCE -> requireNotNull(resourceType)
-        GemTransactionDetailRow.RATE -> requireNotNull(rate)
-        GemTransactionDetailRow.NETWORK -> network
-        GemTransactionDetailRow.PROVIDER -> requireNotNull(provider)
-        GemTransactionDetailRow.PNL -> requireNotNull(pnl)
-        GemTransactionDetailRow.PRICE -> requireNotNull(price)
-        GemTransactionDetailRow.FEE -> fee
-        GemTransactionDetailRow.EXPLORER -> explorer
+        GemTransactionDetailRow.Header -> amount
+        GemTransactionDetailRow.SwapProgress -> requireNotNull(swapProgress)
+        GemTransactionDetailRow.SwapAgain -> requireNotNull(swapAgain)
+        GemTransactionDetailRow.EstimatedConfirmation -> requireNotNull(estimatedConfirmation)
+        GemTransactionDetailRow.Participant -> requireNotNull(participant)
+        GemTransactionDetailRow.Rate -> requireNotNull(rate)
+        GemTransactionDetailRow.Fee -> fee
+        is GemTransactionDetailRow.Row -> TransactionDetailsValue.Row(row.row)
     }
 
     private fun GemTransactionAmount.plain(showsFiat: Boolean): TransactionDetailsValue.Amount.Plain {

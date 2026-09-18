@@ -273,6 +273,8 @@ pub fn delegation_rows(delegation: &Delegation, validator_url: Option<BlockExplo
             title: GemListRowTitle::Status,
             text: GemLocalizedText::DelegationState { state: status.state },
             tone: status.tone,
+            info: None,
+            progress: false,
         }),
         completion_title(delegation).map(|title| GemListRow::Duration {
             title,
@@ -881,6 +883,8 @@ mod tests {
                     title: GemListRowTitle::Status,
                     text: GemLocalizedText::DelegationState { state: DelegationState::Active },
                     tone: GemValueTone::Positive,
+                    info: None,
+                    progress: false,
                 },
             ]
         );

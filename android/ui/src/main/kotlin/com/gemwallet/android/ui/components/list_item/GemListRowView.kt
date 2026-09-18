@@ -15,6 +15,7 @@ import com.gemwallet.android.ui.components.clipboard.clipboardManager
 import com.gemwallet.android.ui.components.clipboard.setCopy
 import com.gemwallet.android.ui.components.list_head.HeaderIcon
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
+import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.progress.CircularProgressIndicator16
 import com.gemwallet.android.ui.models.ListPosition
@@ -72,6 +73,7 @@ fun GemListRowView(
         ) {
             HeaderIcon(row.asset)
         }
+        is GemListRowUIModel.Network -> PropertyNetworkItem(row.chain, listPosition = listPosition)
         is GemListRowUIModel.Address -> AddressCard(row = row) { clipboardManager.setCopy(context, row.copy) }
         is GemListRowUIModel.Toggle -> ListItem(
             model = row.model,

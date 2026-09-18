@@ -402,6 +402,8 @@ mod tests {
             | GemListRow::Amount { title, .. }
             | GemListRow::Duration { title, .. }
             | GemListRow::Label { title, .. }
+            | GemListRow::Date { title, .. }
+            | GemListRow::Network { title, .. }
             | GemListRow::Url { title, .. }
             | GemListRow::Toggle { title, .. }
             | GemListRow::Picker { title, .. } => Some(*title),

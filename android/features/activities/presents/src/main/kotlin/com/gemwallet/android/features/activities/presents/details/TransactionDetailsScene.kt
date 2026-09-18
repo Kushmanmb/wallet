@@ -27,7 +27,7 @@ import com.gemwallet.android.ui.components.list_item.listSections
 import com.gemwallet.android.ui.components.list_item.property.AddressPropertyItem
 import com.gemwallet.android.ui.components.list_item.property.AssetRatePropertyItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
-import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.format.rememberFormattedAddress
 import com.gemwallet.android.ui.icons.AppIcons
@@ -80,6 +80,7 @@ internal fun TransactionDetailsScene(
                         accessory = { DataBadgeChevron() },
                     )
                     is TransactionDetailsRowUIModel.SwapProgress -> SwapProgressItem(row.model)
+                    is TransactionDetailsRowUIModel.Row -> GemListRowView(row = row.row, listPosition = position, infoIcon = row.infoIcon)
                     is TransactionDetailsRowUIModel.Value -> when (val item = row.value) {
                         is TransactionDetailsValue.Amount.NFT -> NftHead(
                             metadata = item.metadata,
@@ -101,17 +102,11 @@ internal fun TransactionDetailsScene(
                             onSwapClick = headerTarget?.let { target -> { onAction(target.navigation()) } },
                             onAssetClick = { onAction(TransactionDetailsAction.OpenAsset(it)) },
                         )
-                        is TransactionDetailsValue.Network -> PropertyNetworkItem(item.data.chain, listPosition = position)
                         is TransactionDetailsValue.Destination,
                         is TransactionDetailsValue.SwapProgress,
                         is TransactionDetailsValue.Fee,
-                        is TransactionDetailsValue.Status,
-                        is TransactionDetailsValue.Date,
                         is TransactionDetailsValue.Explorer,
-                        is TransactionDetailsValue.Memo,
-                        is TransactionDetailsValue.ResourceType,
-                        is TransactionDetailsValue.Pnl,
-                        is TransactionDetailsValue.Price,
+                        is TransactionDetailsValue.Row,
                         is TransactionDetailsValue.EstimatedConfirmation -> Unit
                         is TransactionDetailsValue.Rate -> AssetRatePropertyItem(item.rate, position)
                         is TransactionDetailsValue.SwapAgain -> MainActionButton(

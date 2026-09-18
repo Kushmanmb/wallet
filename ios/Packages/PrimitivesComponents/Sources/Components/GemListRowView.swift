@@ -56,6 +56,8 @@ public struct GemListRowView: View {
             NavigationCustomLink(with: ListItemView(model: model)) {
                 openURL(url)
             }
+        case let .network(title, subtitle, image):
+            ListItemImageView(title: title, subtitle: subtitle, assetImage: image)
         case let .social(links):
             SocialLinksView(model: SocialLinksViewModel(links: links))
         case let .icon(assetImage):

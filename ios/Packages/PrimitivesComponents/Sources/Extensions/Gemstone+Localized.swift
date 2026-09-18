@@ -67,6 +67,10 @@ extension GemLocalizedText {
             Chain(core: chain).networkName
         case let .delegationState(state):
             state.title
+        case let .transactionState(state):
+            state.toPrimitives().statusTitle
+        case let .resource(resource):
+            resource.toPrimitives().title
         }
     }
 }
@@ -656,6 +660,11 @@ public extension GemListRowTitle {
         case .status: Localized.Transaction.status
         case .activeIn: Localized.Stake.activeIn
         case .availableIn: Localized.Stake.availableIn
+        case .date: Localized.Transaction.date
+        case .memo: Localized.Transfer.memo
+        case .resource: Localized.Stake.resource
+        case .price: Localized.Asset.price
+        case .pnl: Localized.Perpetual.pnl
         }
     }
 }

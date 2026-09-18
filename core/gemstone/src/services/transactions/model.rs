@@ -1,5 +1,6 @@
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::custom_types::GemBigUint;
+use crate::models::list::GemListRow;
 use crate::services::swap::model::GemSwapRate;
 use chrono::{DateTime, Utc};
 use primitives::{
@@ -148,7 +149,7 @@ pub enum GemTransactionRowValue {
     Number { number: GemFormattedNumber, sign: GemAmountSign },
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemTransactionStateTone {
     Pending,
     Success,
@@ -226,24 +227,16 @@ pub enum GemTransactionHeaderAction {
     Perpetual { asset_id: AssetId },
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemTransactionDetailRow {
     Header,
     SwapProgress,
     SwapAgain,
-    Date,
-    Status,
     EstimatedConfirmation,
     Participant,
-    Memo,
-    Resource,
     Rate,
-    Network,
-    Provider,
-    Pnl,
-    Price,
     Fee,
-    Explorer,
+    Row { row: GemListRow },
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]

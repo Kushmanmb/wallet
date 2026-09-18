@@ -3,15 +3,20 @@ package com.gemwallet.android.ui.components.list_item
 import android.content.Context
 import com.gemwallet.android.domains.duration.formatDuration
 import com.gemwallet.android.ext.asset
+import com.gemwallet.android.ext.toPrimitives
+import com.gemwallet.android.math.getRelativeDate
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.property.icon
 import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.localization.stringRes
+import com.gemwallet.android.ui.localization.infoDescriptionRes
 import com.gemwallet.android.ui.localization.titleRes
+import com.gemwallet.android.ui.style.badgeIconRes
 import com.gemwallet.android.ui.style.textStyle
 import com.wallet.core.primitives.Asset
+import com.wallet.core.primitives.Chain
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import uniffi.gemstone.GemCopy
 import uniffi.gemstone.GemInfoTopic
@@ -24,6 +29,7 @@ import uniffi.gemstone.GemValueTone
 internal sealed interface GemListRowUIModel {
     data class Item(val model: ListItemModel, val url: String? = null, val opensAnotherScreen: Boolean = false) : GemListRowUIModel
     data class Icon(val asset: Asset) : GemListRowUIModel
+    data class Network(val chain: Chain) : GemListRowUIModel
     data class Address(val address: String, val copy: GemCopy) : GemListRowUIModel
     data class Social(val links: List<GemSocialLink>) : GemListRowUIModel
     data class Toggle(val model: ListItemModel, val title: GemListRowTitle, val isOn: Boolean) : GemListRowUIModel
@@ -37,7 +43,17 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
         ListItemModel(title = title.text(context), subtitle = amount.text(), subtitleStyle = amount.tone.subtitleStyle(), info = info?.infoSheet(infoIcon)),
     )
     is GemListRow.Duration -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = parts.formatDuration(), info = info?.infoSheet(infoIcon)))
-    is GemListRow.Label -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = text.string(context), subtitleStyle = tone.subtitleStyle()))
+    is GemListRow.Label -> GemListRowUIModel.Item(
+        ListItemModel(
+            title = title.text(context),
+            subtitle = text.string(context),
+            subtitleStyle = tone.subtitleStyle(),
+            subtitleTagType = if (progress) ListItemTagType.Progress else ListItemTagType.None,
+            info = info?.infoSheet(infoIcon),
+        ),
+    )
+    is GemListRow.Date -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = getRelativeDate(date)))
+    is GemListRow.Network -> GemListRowUIModel.Network(chain.requireChain())
     is GemListRow.Link -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), opensAnotherScreen = true)
     is GemListRow.Url -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), url = url)
     is GemListRow.Explorer -> GemListRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)
@@ -94,8 +110,14 @@ private fun GemListRowIcon.image(): ListItemImage? = when (this) {
 }
 
 private fun GemInfoTopic.infoSheet(icon: Any?): InfoSheetEntity = when (this) {
-    GemInfoTopic.OPEN_INTEREST -> InfoSheetEntity.OpenInterestInfo
-    GemInfoTopic.FUNDING_APR -> InfoSheetEntity.FundingAprInfo
-    GemInfoTopic.STAKE_APR -> InfoSheetEntity.StakeAprInfo(icon)
-    GemInfoTopic.STAKE_LOCK_TIME -> InfoSheetEntity.StakeLockTimeInfo(icon)
+    GemInfoTopic.OpenInterest -> InfoSheetEntity.OpenInterestInfo
+    GemInfoTopic.FundingApr -> InfoSheetEntity.FundingAprInfo
+    GemInfoTopic.StakeApr -> InfoSheetEntity.StakeAprInfo(icon)
+    GemInfoTopic.StakeLockTime -> InfoSheetEntity.StakeLockTimeInfo(icon)
+    is GemInfoTopic.TransactionStatus -> InfoSheetEntity.TransactionInfo(
+        icon = icon,
+        state = state.toPrimitives(),
+        badgeIcon = tone.badgeIconRes(),
+        description = tone.infoDescriptionRes(),
+    )
 }

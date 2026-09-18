@@ -1,4 +1,5 @@
-use primitives::Chain;
+use chrono::{DateTime, Utc};
+use primitives::{Chain, TransactionState};
 
 use crate::config::social::GemSocialLink;
 use crate::duration_formatter::GemDurationPart;
@@ -6,6 +7,7 @@ use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::copy::GemCopy;
 use crate::services::error::GemServiceError;
 use crate::services::localization::GemLocalizedText;
+use crate::services::transactions::GemTransactionStateTone;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemListSectionTitle {
@@ -63,6 +65,11 @@ pub enum GemListRowTitle {
     Status,
     ActiveIn,
     AvailableIn,
+    Date,
+    Memo,
+    Resource,
+    Price,
+    Pnl,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -71,6 +78,7 @@ pub enum GemInfoTopic {
     FundingApr,
     StakeApr,
     StakeLockTime,
+    TransactionStatus { state: TransactionState, tone: GemTransactionStateTone },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -126,6 +134,16 @@ pub enum GemListRow {
         title: GemListRowTitle,
         text: GemLocalizedText,
         tone: GemValueTone,
+        info: Option<GemInfoTopic>,
+        progress: bool,
+    },
+    Date {
+        title: GemListRowTitle,
+        date: DateTime<Utc>,
+    },
+    Network {
+        title: GemListRowTitle,
+        chain: Chain,
     },
     Link {
         title: GemListRowTitle,

@@ -181,7 +181,7 @@ extension StakeSceneViewModel {
     }
 
     func onInfo(_ topic: GemInfoTopic) {
-        isPresentingInfoSheet = InfoSheetType(topic: topic, placeholder: assetModel.assetImage.placeholder)
+        isPresentingInfoSheet = InfoSheetType(topic: topic, assetImage: assetModel.assetImage)
     }
 
     func onStakeFrozenInfo() {

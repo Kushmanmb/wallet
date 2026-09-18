@@ -11,14 +11,11 @@ import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.BlockExplorerLink
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.Currency
-import com.wallet.core.primitives.Resource
 import com.wallet.core.primitives.TransactionNFTTransferMetadata
-import com.wallet.core.primitives.TransactionState
 import java.math.BigInteger
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemSwapProgressState
-import uniffi.gemstone.GemTransactionStatus
 import uniffi.gemstone.GemValueStyle
-import uniffi.gemstone.GemValueTone
 
 sealed interface TransactionDetailsValue {
 
@@ -50,8 +47,6 @@ sealed interface TransactionDetailsValue {
         val value: String,
         val equivalent: String,
     ) : TransactionDetailsValue
-
-    class Date(val data: String) : TransactionDetailsValue
 
     sealed class Destination(
         val data: String,
@@ -92,10 +87,7 @@ sealed interface TransactionDetailsValue {
             name: String? = null,
             explorerLink: BlockExplorerLink? = null,
         ) : Destination(data, chain = chain, name = name, explorerLink = explorerLink)
-        class Provider(name: String) : Destination(name)
     }
-
-    class Status(val data: TransactionState, val status: GemTransactionStatus) : TransactionDetailsValue
 
     class EstimatedConfirmation(val seconds: UInt) : TransactionDetailsValue
 
@@ -115,15 +107,7 @@ sealed interface TransactionDetailsValue {
         val toAssetId: AssetId,
     ) : TransactionDetailsValue
 
-    class Memo(val data: String) : TransactionDetailsValue
-
-    class ResourceType(val data: Resource) : TransactionDetailsValue
-
-    class Network(val data: Asset) : TransactionDetailsValue
-
-    class Pnl(val value: String, val direction: GemValueTone) : TransactionDetailsValue
-
-    class Price(val data: String) : TransactionDetailsValue
-
     class Explorer(val url: String, val name: String) : TransactionDetailsValue
+
+    class Row(val row: GemListRow) : TransactionDetailsValue
 }
