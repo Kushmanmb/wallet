@@ -60,7 +60,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **T3** **S** iOS `WalletConnectSessionApproval` and Android `WalletConnectSessionNamespace` both twin `GemSessionApproval` (chains, accounts, methods, events) — use the record on both.
 - **T5** **S** Android `ManageContactState` twins `GemContactInput` (name, description, avatar, addresses) — with **S43**, the session holds the input.
 - **T6** **M** `android/features/asset_select/viewmodels/models/AssetSelectFlowUIModel.kt` translates `GemAssetRow` into two app enums the screen switches on (`AssetRowSubtitleStyle`, `AssetRowTrailingStyle`) — a twin of a Core enum; the row's subtitle and trailing become finished values (text, image) and the switch goes.
-- **T7** **S** `android/features/referral/viewmodels/models/ReferralUIModel.kt` restates twelve same-named fields of `GemRewardsState` — expose only what the scene reads (`canInvite`, `disableReason` text, the countdown) and keep the record private.
 - **T1** **S** iOS `WalletSearchSections` twins `GemWalletSearchCounts` — folds into **S35**.
 - **Q1** **S** `wallet.account(for: chain)` is read under `try?` in `SelectAssetViewModel:273`, `CollectibleViewModel:179` and `AmountSceneViewModel:278`, where a missing account becomes an empty sender address — Core answers the account on the row; an empty address never reaches a transfer.
 - **Q2** **S** `SwapSceneViewModel:255,386` swallow `suggestPair` and `SwapQuoteInput.create` failures with `try?` — Core returns an optional pair; the input builds from the session.
