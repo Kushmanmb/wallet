@@ -25,6 +25,7 @@ import com.gemwallet.android.ui.theme.Spacer6
 import com.gemwallet.android.ui.theme.Spacer8
 import com.gemwallet.android.ui.theme.alpha10
 import com.gemwallet.android.ui.theme.listItemIconSize
+import com.gemwallet.android.ui.theme.smallIconSize
 import com.gemwallet.android.ui.theme.paddingHalfSmall
 import com.gemwallet.android.ui.theme.pendingColor
 import com.gemwallet.android.ui.theme.secondaryFaded
@@ -110,6 +111,16 @@ fun ListItemTextStyle.color(): Color = when (this) {
     ListItemTextStyle.Faded -> MaterialTheme.colorScheme.secondaryFaded
 }
 
+private fun ListItemImage.leadingSize(): Dp = when (this) {
+    is ListItemImage.Symbol -> if (isFilled) listItemIconSize else smallIconSize
+    is ListItemImage.Asset,
+    is ListItemImage.Url,
+    is ListItemImage.Stored,
+    is ListItemImage.Emoji,
+    is ListItemImage.Initials,
+    is ListItemImage.Drawable -> listItemIconSize
+}
+
 @Composable
 fun ListItem(
     model: ListItemModel,
@@ -135,7 +146,7 @@ fun ListItem(
         modifier = modifier,
         listPosition = listPosition,
         minHeight = minHeight,
-        leading = model.image?.let { image -> { ListItemImageView(image = image, size = listItemIconSize) } },
+        leading = model.image?.let { image -> { ListItemImageView(image = image, size = image.leadingSize()) } },
         title = {
             ListItemTitleText(
                 text = model.title,
