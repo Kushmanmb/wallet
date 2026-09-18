@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.gemwallet.android.ui.theme.listItemIconSize
 import com.gemwallet.android.ui.theme.space2
+import com.gemwallet.android.domains.asset.icon
 import com.wallet.core.primitives.Asset
 
 @Composable
@@ -25,7 +26,7 @@ fun AssetIcon(
 ) {
     IconWithBadge(
         icon = asset.iconModel(),
-        placeholder = asset.symbol,
+        placeholder = asset.id.icon().placeholder,
         supportIcon = asset.supportIconModel(),
         size = size,
         badgeBackgroundColor = badgeBackgroundColor,

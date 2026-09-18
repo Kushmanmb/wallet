@@ -98,24 +98,6 @@ fun AsyncImage(
 }
 
 @Composable
-fun AsyncImage(
-    model: Asset,
-    modifier: Modifier = Modifier,
-    size: Dp = iconSize,
-    placeholderText: String? = model.symbol,
-    errorImageVector: ImageVector? = null,
-) {
-    AsyncImage(
-        model = model.iconModel(),
-        size = size,
-        contentDescription = "asset_icon",
-        modifier = modifier,
-        placeholderText = placeholderText,
-        errorImageVector = errorImageVector
-    )
-}
-
-@Composable
 private fun BundledImage(
     resource: Int,
     contentDescription: String?,

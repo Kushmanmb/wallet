@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.gemwallet.android.domains.asset.icon
 import com.gemwallet.android.domains.transaction.aggregates.TransactionDataAggregate
 import com.gemwallet.android.ui.components.image.AssetIcon
 import com.gemwallet.android.ui.components.image.iconModel
@@ -113,7 +114,7 @@ private fun DirectionBadgedIcon(data: TransactionDataAggregate) {
     }
     IconWithBadge(
         icon = data.nftImageUrl ?: data.asset.iconModel(),
-        placeholder = if (data.nftImageUrl != null) "NFT" else data.asset.symbol,
+        placeholder = if (data.nftImageUrl != null) "NFT" else data.asset.id.icon().placeholder,
         size = size,
     ) {
         BadgeCircle(size = size, color = color) {

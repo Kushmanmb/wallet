@@ -8,6 +8,7 @@ use crate::config::image::GemImage;
 pub struct GemAssetIcon {
     pub image: GemAssetIconImage,
     pub badge: Option<Chain>,
+    pub placeholder: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -41,7 +42,11 @@ pub fn asset_icon(asset_id: &AssetId) -> GemAssetIcon {
         true => badge_chain(asset_id.chain),
         false => Some(icon_chain(asset_id.chain)),
     };
-    GemAssetIcon { image, badge }
+    GemAssetIcon {
+        image,
+        badge,
+        placeholder: asset_id.chain.default_asset_type().map(|asset_type| asset_type.as_ref().to_string()),
+    }
 }
 
 fn icon_asset_id(asset_id: &AssetId) -> AssetId {
@@ -85,35 +90,40 @@ mod tests {
             asset_icon(&AssetId::from_chain(Chain::Ethereum)),
             GemAssetIcon {
                 image: GemAssetIconImage::Local { chain: Chain::Ethereum },
-                badge: None
+                badge: None,
+                placeholder: Some("ERC20".to_string())
             }
         );
         assert_eq!(
             asset_icon(&AssetId::from_chain(Chain::Base)),
             GemAssetIcon {
                 image: GemAssetIconImage::Local { chain: Chain::Ethereum },
-                badge: Some(Chain::Base)
+                badge: Some(Chain::Base),
+                placeholder: Some("ERC20".to_string())
             }
         );
         assert_eq!(
             asset_icon(&AssetId::from_chain(Chain::Robinhood)),
             GemAssetIcon {
                 image: GemAssetIconImage::Local { chain: Chain::Ethereum },
-                badge: Some(Chain::Robinhood)
+                badge: Some(Chain::Robinhood),
+                placeholder: Some("ERC20".to_string())
             }
         );
         assert_eq!(
             asset_icon(&AssetId::from_chain(Chain::SeiEvm)),
             GemAssetIcon {
                 image: GemAssetIconImage::Local { chain: Chain::Sei },
-                badge: None
+                badge: None,
+                placeholder: Some("ERC20".to_string())
             }
         );
         assert_eq!(
             asset_icon(&AssetId::from_chain(Chain::OpBNB)),
             GemAssetIcon {
                 image: GemAssetIconImage::Local { chain: Chain::OpBNB },
-                badge: None
+                badge: None,
+                placeholder: Some("BEP20".to_string())
             }
         );
     }
@@ -125,7 +135,8 @@ mod tests {
                 asset_icon(&AssetId::from_chain(chain)),
                 GemAssetIcon {
                     image: GemAssetIconImage::Local { chain },
-                    badge: None
+                    badge: None,
+                    placeholder: Some("ERC20".to_string())
                 }
             );
         }
@@ -144,7 +155,8 @@ mod tests {
                     icon,
                     GemAssetIcon {
                         image: GemAssetIconImage::Local { chain: Chain::Ethereum },
-                        badge: Some(chain)
+                        badge: Some(chain),
+                        placeholder: chain.default_asset_type().map(|asset_type| asset_type.as_ref().to_string())
                     },
                     "{chain}"
                 ),
@@ -152,7 +164,8 @@ mod tests {
                     icon,
                     GemAssetIcon {
                         image: GemAssetIconImage::Local { chain },
-                        badge: None
+                        badge: None,
+                        placeholder: chain.default_asset_type().map(|asset_type| asset_type.as_ref().to_string())
                     },
                     "{chain}"
                 ),
@@ -173,21 +186,24 @@ mod tests {
             asset_icon(&ETHEREUM_USDT.id),
             GemAssetIcon {
                 image: GemAssetIconImage::LocalToken { token: GemLocalTokenIcon::Usdt },
-                badge: Some(Chain::Ethereum)
+                badge: Some(Chain::Ethereum),
+                placeholder: Some("ERC20".to_string())
             }
         );
         assert_eq!(
             asset_icon(&TRON_USDT.id),
             GemAssetIcon {
                 image: GemAssetIconImage::LocalToken { token: GemLocalTokenIcon::Usdt },
-                badge: Some(Chain::Tron)
+                badge: Some(Chain::Tron),
+                placeholder: Some("TRC20".to_string())
             }
         );
         assert_eq!(
             asset_icon(&SOLANA_USDC.id),
             GemAssetIcon {
                 image: GemAssetIconImage::LocalToken { token: GemLocalTokenIcon::Usdc },
-                badge: Some(Chain::Solana)
+                badge: Some(Chain::Solana),
+                placeholder: Some("SPL".to_string())
             }
         );
         assert_eq!(
@@ -203,6 +219,17 @@ mod tests {
     }
 
     #[test]
+    fn test_the_placeholder_names_the_chain_token_standard_not_the_symbol() {
+        let placeholder = |asset_id: AssetId| asset_icon(&asset_id).placeholder;
+
+        assert_eq!(placeholder(AssetId::from_token(Chain::Ethereum, "0x6982508145454Ce325dDbE47a25d4ec3d2311933")), Some("ERC20".to_string()));
+        assert_eq!(placeholder(AssetId::from_token(Chain::SmartChain, "0x55d398326f99059fF775485246999027B3197955")), Some("BEP20".to_string()));
+        assert_eq!(placeholder(AssetId::from_token(Chain::Tron, "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t")), Some("TRC20".to_string()));
+        assert_eq!(placeholder(AssetId::from_token(Chain::Solana, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")), Some("SPL".to_string()));
+        assert_eq!(placeholder(AssetId::from_chain(Chain::Bitcoin)), None, "a chain without tokens has no placeholder text");
+    }
+
+    #[test]
     fn test_tokens_draw_their_remote_image_badged_with_their_own_chain() {
         let base_usdc = AssetId::from(Chain::Base, Some("0x833589fcd6edb6e08f4c7c32d4f71b54bda02913".to_string()));
         let ethereum_wbtc = AssetId::from_token(Chain::Ethereum, "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599");
@@ -212,21 +239,24 @@ mod tests {
             asset_icon(&base_usdc),
             GemAssetIcon {
                 image: GemAssetIconImage::mock_remote(&base_usdc),
-                badge: Some(Chain::Base)
+                badge: Some(Chain::Base),
+                placeholder: Some("ERC20".to_string())
             }
         );
         assert_eq!(
             asset_icon(&ethereum_wbtc),
             GemAssetIcon {
                 image: GemAssetIconImage::mock_remote(&ethereum_wbtc),
-                badge: Some(Chain::Ethereum)
+                badge: Some(Chain::Ethereum),
+                placeholder: Some("ERC20".to_string())
             }
         );
         assert_eq!(
             asset_icon(&sei_token),
             GemAssetIcon {
                 image: GemAssetIconImage::mock_remote(&sei_token),
-                badge: Some(Chain::Sei)
+                badge: Some(Chain::Sei),
+                placeholder: Some("ERC20".to_string())
             }
         );
     }
@@ -237,14 +267,16 @@ mod tests {
             asset_icon(&perpetual_asset_id("BTC")),
             GemAssetIcon {
                 image: GemAssetIconImage::Local { chain: Chain::Bitcoin },
-                badge: Some(Chain::HyperCore)
+                badge: Some(Chain::HyperCore),
+                placeholder: Some("TOKEN".to_string())
             }
         );
         assert_eq!(
             asset_icon(&perpetual_asset_id("ETH")),
             GemAssetIcon {
                 image: GemAssetIconImage::Local { chain: Chain::Ethereum },
-                badge: Some(Chain::HyperCore)
+                badge: Some(Chain::HyperCore),
+                placeholder: Some("TOKEN".to_string())
             }
         );
         let unknown = perpetual_asset_id("PUMP");
@@ -252,7 +284,8 @@ mod tests {
             asset_icon(&unknown),
             GemAssetIcon {
                 image: GemAssetIconImage::mock_remote(&unknown),
-                badge: Some(Chain::HyperCore)
+                badge: Some(Chain::HyperCore),
+                placeholder: Some("TOKEN".to_string())
             }
         );
     }
