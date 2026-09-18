@@ -9,7 +9,6 @@ import enum GemstoneServices.KeystoreAuthentication
 import GemstonePrimitives
 import Localization
 import Primitives
-import Style
 
 public extension Appearance {
     var title: String {
@@ -68,7 +67,7 @@ extension GemNodeSubtitle {
 
     var text: String {
         switch self {
-        case let .latestBlock(value): "\(title): \(value?.text() ?? Placeholder.empty)"
+        case let .latestBlock(value): text(latestBlockLabel: title, latestBlockValue: value?.text())
         }
     }
 }

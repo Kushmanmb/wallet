@@ -8,7 +8,6 @@ import android.content.Context
 import androidx.annotation.StringRes
 import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
-import com.gemwallet.android.ui.theme.Placeholder
 import uniffi.gemstone.GemNodeCheckRow
 
 @StringRes
@@ -29,7 +28,7 @@ internal fun GemNodeCheckRow.text(context: Context): String = when (this) {
 internal fun GemNodeRowTitle.string(context: Context): String = text(context.getString(R.string.nodes_gem_wallet_node))
 
 internal fun GemNodeSubtitle.text(context: Context): String = when (this) {
-    is GemNodeSubtitle.LatestBlock -> "${context.getString(R.string.nodes_import_node_latest_block)}: ${value?.text() ?: Placeholder.empty}"
+    is GemNodeSubtitle.LatestBlock -> text(context.getString(R.string.nodes_import_node_latest_block), value?.text())
 }
 
 internal fun GemServiceEndpointType.string(context: Context): String = when (this) {

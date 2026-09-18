@@ -6,9 +6,9 @@ use number_formatter::BigNumberFormatter;
 use primitives::{CoreEmoji, RewardRedemptionOption, RewardStatus, Rewards};
 
 use super::model::{GemRewardsRedemption, GemRewardsState};
+use crate::config::rewards::get_referral_url;
 use crate::models::list::{GemListRow, GemListRowTitle, GemNoticeKind};
 use crate::services::localization::GemLocalizedText;
-use crate::config::rewards::get_referral_url;
 
 pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
     let Some(rewards) = rewards else {
@@ -298,9 +298,7 @@ mod tests {
             state.status_notice,
             Some(GemListRow::Notice {
                 title: GemListRowTitle::RewardsPending,
-                message: Some(GemLocalizedText::RewardsPending {
-                    countdown: countdown_parts(3600)
-                }),
+                message: Some(GemLocalizedText::RewardsPending { countdown: countdown_parts(3600) }),
                 kind: GemNoticeKind::Info,
             }),
             "a pending referral replaces the unverified notice"

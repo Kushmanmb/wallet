@@ -119,6 +119,15 @@ pub struct GemNodeSelection {
 }
 
 #[uniffi::export]
+impl GemNodeSubtitle {
+    pub fn text(&self, latest_block_label: String, latest_block_value: Option<String>) -> String {
+        match self {
+            Self::LatestBlock { .. } => format!("{latest_block_label}: {}", rules::text_or_placeholder(latest_block_value.as_deref())),
+        }
+    }
+}
+
+#[uniffi::export]
 impl GemNodeRowTitle {
     pub fn text(&self, gem_node_label: String) -> String {
         match self {
@@ -186,6 +195,14 @@ mod tests {
             GemNodeSubtitle::LatestBlock { value: None },
             "a node that failed still shows the block row, with nothing in it"
         );
+    }
+
+    #[test]
+    fn test_a_node_subtitle_prints_the_label_before_the_block() {
+        let subtitle = GemNodeSubtitle::LatestBlock { value: None };
+
+        assert_eq!(subtitle.text("Latest block".to_string(), Some("21,000,000".to_string())), "Latest block: 21,000,000");
+        assert_eq!(subtitle.text("Latest block".to_string(), None), "Latest block: -");
     }
 
     #[test]
