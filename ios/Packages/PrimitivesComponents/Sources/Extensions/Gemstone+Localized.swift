@@ -59,6 +59,10 @@ extension GemLocalizedText {
             Localized.Wallet.defaultName(Int(index))
         case let .walletDefaultNameChain(chain, index):
             Localized.Wallet.defaultNameChain(Chain(core: chain).networkName, Int(index))
+        case .walletMulticoin:
+            Localized.Wallet.multicoin
+        case let .chainNetworkName(chain):
+            Chain(core: chain).networkName
         }
     }
 }

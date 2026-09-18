@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ext.asset
+import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.CurrencyFormatter
@@ -165,6 +166,8 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     is GemLocalizedText.WalletDefaultName -> context.getString(R.string.wallet_default_name, index)
     is GemLocalizedText.WalletDefaultNameChain ->
         context.getString(R.string.wallet_default_name_chain, chain.requireChain().asset().name, index)
+    GemLocalizedText.WalletMulticoin -> context.getString(R.string.wallet_multicoin)
+    is GemLocalizedText.ChainNetworkName -> chain.requireChain().networkName()
 }
 
 @StringRes

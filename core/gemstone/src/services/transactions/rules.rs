@@ -210,7 +210,7 @@ fn value_tone(value: &GemTransactionRowValue) -> GemValueTone {
         GemTransactionRowValue::Pnl { value } => match GemValueTone::of(*value) {
             GemValueTone::Positive => GemValueTone::Positive,
             GemValueTone::Negative => GemValueTone::Negative,
-            GemValueTone::Neutral | GemValueTone::Plain => GemValueTone::Plain,
+            GemValueTone::Neutral | GemValueTone::Plain | GemValueTone::Warning => GemValueTone::Plain,
         },
         GemTransactionRowValue::None | GemTransactionRowValue::AssetSymbol { .. } | GemTransactionRowValue::Fiat { .. } => GemValueTone::Plain,
     }

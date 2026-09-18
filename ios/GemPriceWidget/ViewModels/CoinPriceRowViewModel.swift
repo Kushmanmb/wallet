@@ -60,6 +60,7 @@ private extension GemValueTone {
         case .plain: Colors.black
         case .neutral: Colors.gray
         case .positive: Colors.green
+        case .warning: Colors.orange
         case .negative: Colors.red
         }
     }

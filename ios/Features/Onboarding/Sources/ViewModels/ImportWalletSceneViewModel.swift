@@ -1,5 +1,6 @@
 import protocol Gemstone.GemNameServiceProtocol
 import enum Gemstone.GemWalletImportKind
+import struct Gemstone.GemWalletImportScreen
 import enum Gemstone.GemWalletImportType
 import protocol Gemstone.GemWalletServiceProtocol
 import Components
@@ -50,10 +51,7 @@ final class ImportWalletSceneViewModel {
     }
 
     var title: String {
-        switch type {
-        case .multicoin: Localized.Wallet.multicoin
-        case let .chain(chain): chain.networkName
-        }
+        importScreen.title.text
     }
 
     var pasteButtonTitle: String {
@@ -84,11 +82,15 @@ final class ImportWalletSceneViewModel {
     }
 
     var showImportTypes: Bool {
-        importTypes.count > 1
+        importScreen.showsKinds
     }
 
     var importTypes: [GemWalletImportKind] {
-        service.importKinds(chain: chain?.toGem())
+        importScreen.kinds
+    }
+
+    private var importScreen: GemWalletImportScreen {
+        service.importScreen(chain: chain?.toGem())
     }
 
     var footerText: String? {

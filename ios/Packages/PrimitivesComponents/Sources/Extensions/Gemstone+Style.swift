@@ -55,6 +55,7 @@ extension GemValueTone {
         case .plain: Colors.black
         case .neutral: Colors.gray
         case .positive: Colors.green
+        case .warning: Colors.orange
         case .negative: Colors.red
         }
     }
@@ -63,6 +64,7 @@ extension GemValueTone {
         switch self {
         case .plain, .neutral: Colors.grayVeryLight
         case .positive: Colors.greenLight
+        case .warning: Colors.orange.opacity(.light)
         case .negative: Colors.redLight
         }
     }
