@@ -1,6 +1,8 @@
 package com.gemwallet.android.features.stake.viewmodels
 
 import android.net.Uri
+import uniffi.gemstone.GemLoadState
+import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemStakeServiceInterface
 import androidx.lifecycle.SavedStateHandle
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
@@ -80,7 +82,8 @@ class StakeViewModelTest {
 
     @Test
     fun `a failed delegations sync stops the spinner instead of taking the screen down`() = runTest(testDispatcher, timeout = 10.seconds) {
-        coEvery { stakeService.sync(asset.id.chain.string) } throws IllegalStateException("Network offline")
+        val offline = GemServiceException.Gateway("Network offline")
+        coEvery { stakeService.refresh(asset.id.chain.string, any()) } returns GemLoadState.Error(offline)
 
         val viewModel = StakeViewModel(
             getAssetInfo = getAssetInfo,
@@ -98,6 +101,7 @@ class StakeViewModelTest {
 
         runCurrent()
         assertEquals(listOf(delegation), viewModel.delegations.value)
+        assertEquals(offline, viewModel.loadError.value)
     }
 
 }

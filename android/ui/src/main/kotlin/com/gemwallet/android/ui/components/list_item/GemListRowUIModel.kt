@@ -3,6 +3,7 @@ package com.gemwallet.android.ui.components.list_item
 import android.content.Context
 import com.gemwallet.android.domains.duration.formatDuration
 import com.gemwallet.android.ext.asset
+import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.math.getRelativeDate
 import com.gemwallet.android.ext.requireChain
@@ -11,6 +12,7 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.property.icon
 import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.localization.stringRes
+import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.localization.infoDescriptionRes
 import com.gemwallet.android.ui.localization.titleRes
 import com.gemwallet.android.ui.style.badgeIconRes
@@ -58,7 +60,7 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
     is GemListRow.Url -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), url = url)
     is GemListRow.Explorer -> GemListRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)
     is GemListRow.Error -> GemListRowUIModel.Item(
-        ListItemModel(title = GemListRowTitle.ERROR.text(context), subtitle = error.message, titleStyle = ListItemTextStyle.Negative),
+        ListItemModel(title = GemListRowTitle.ERROR.text(context), titleStyle = ListItemTextStyle.Negative, titleExtra = error.errorText().text(context)),
     )
     is GemListRow.Icon -> GemListRowUIModel.Icon(asset = chain.requireChain().asset())
     is GemListRow.Address -> GemListRowUIModel.Address(address = address, copy = copy)

@@ -40,6 +40,7 @@ import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.open
 import com.gemwallet.android.ui.theme.paddingLarge
 import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemServiceException
 
 @Composable
 internal fun StakeScene(
@@ -49,6 +50,7 @@ internal fun StakeScene(
     stakeInfoUrl: String?,
     sections: List<StakeSectionUIModel>,
     infoRows: List<GemListRow>,
+    loadError: GemServiceException?,
     amountAction: AmountTransactionAction,
     onAction: (StakeSceneAction) -> Unit,
 ) {
@@ -106,7 +108,10 @@ internal fun StakeScene(
                 if (sections.none { it is StakeSectionUIModel.Delegations }) {
                     item {
                         Spacer(modifier = Modifier.height(paddingLarge))
-                        EmptyContentView(type = EmptyContentType.Stake(symbol = assetInfo.asset.symbol))
+                        when (loadError) {
+                            null -> EmptyContentView(type = EmptyContentType.Stake(symbol = assetInfo.asset.symbol))
+                            else -> GemListRowView(row = GemListRow.Error(loadError), listPosition = ListPosition.Single)
+                        }
                     }
                 }
             }

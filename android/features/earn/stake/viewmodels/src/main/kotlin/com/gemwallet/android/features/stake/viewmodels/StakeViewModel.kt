@@ -15,7 +15,6 @@ import com.gemwallet.android.application.stake.cases.GetDelegations
 import com.gemwallet.android.application.stake.cases.GetValidators
 import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.domains.asset.stakeChain
-import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
@@ -52,6 +51,8 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemClaimRewardsDestination
 import uniffi.gemstone.GemDelegationDestination
 import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemLoadState
+import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemStakeServiceInterface
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -134,6 +135,12 @@ class StakeViewModel @Inject constructor(
 
     private val sync = MutableStateFlow<Boolean>(true)
 
+    private val loadState = MutableStateFlow<GemLoadState>(GemLoadState.Loading)
+
+    val loadError: StateFlow<GemServiceException?> = loadState
+        .map { (it as? GemLoadState.Error)?.error }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     val isSync = sync
         .flatMapLatest { isSync ->
             flow {
@@ -143,8 +150,9 @@ class StakeViewModel @Inject constructor(
                 }
                 val assetInfo = assetInfo.filterNotNull().first()
                 emit(true)
-                runCatchingCancellable { withContext(ioDispatcher) { stakeService.sync(assetInfo.asset.id.chain.string) } }
-                    .onFailure { Log.e(TAG, "stake delegations sync failed", it) }
+                val state = withContext(ioDispatcher) { stakeService.refresh(assetInfo.asset.id.chain.string, delegations.value.map { it.toGem() }) }
+                (state as? GemLoadState.Error)?.let { Log.e(TAG, "stake delegations sync failed", it.error) }
+                loadState.value = state
                 emit(false)
                 sync.update { false }
             }

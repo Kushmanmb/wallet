@@ -26,6 +26,7 @@ fun StakeScreen(
     val stakeInfoUrl by viewModel.stakeInfoUrl.collectAsStateWithLifecycle()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val infoRows by viewModel.infoRows.collectAsStateWithLifecycle()
+    val loadError by viewModel.loadError.collectAsStateWithLifecycle()
 
     val stakeAssetInfo = assetInfo
     if (stakeAssetInfo == null) {
@@ -41,6 +42,7 @@ fun StakeScreen(
             stakeInfoUrl = stakeInfoUrl,
             sections = sections,
             infoRows = infoRows,
+            loadError = loadError,
             amountAction = amountAction,
             onAction = { action ->
                 when (action) {
