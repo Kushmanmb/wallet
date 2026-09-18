@@ -1,3 +1,4 @@
+use crate::duration_formatter::countdown_parts;
 use crate::formatted_number::GemFormattedNumber;
 use crate::precision::GemValueStyle;
 use chrono::{DateTime, Utc};
@@ -31,7 +32,11 @@ pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
         referral_code: referral_code.clone(),
         referral_link: referral_code.as_deref().map(get_referral_url),
         used_referral_code: rewards.used_referral_code.clone().filter(|code| !code.is_empty()),
-        verify_after: rewards.verify_after,
+        pending_countdown: rewards
+            .verify_after
+            .filter(|verify_after| *verify_after > now)
+            .map(|verify_after| countdown_parts((verify_after - now).num_seconds()))
+            .unwrap_or_default(),
         disable_reason: rewards.disable_reason.clone(),
         referral_count_text: rewards.referral_count.to_string(),
         points_text: points_text(rewards.points),

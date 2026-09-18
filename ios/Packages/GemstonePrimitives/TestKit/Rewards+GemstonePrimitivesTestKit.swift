@@ -2,6 +2,7 @@
 
 import BigInt
 import Foundation
+import struct Gemstone.GemDurationPart
 import struct Gemstone.ReferralAllowance
 import struct Gemstone.ReferralQuota
 import enum Gemstone.RedemptionStatus
@@ -86,7 +87,7 @@ public extension GemRewardsState {
         referralCode: String? = "test123",
         referralLink: String? = "https://gemwallet.com/join?code=test123",
         usedReferralCode: String? = nil,
-        verifyAfter: Date? = nil,
+        pendingCountdown: [GemDurationPart] = [],
         disableReason: String? = nil,
         referralCountText: String = "5",
         pointsText: String = "0",
@@ -105,7 +106,7 @@ public extension GemRewardsState {
             referralCode: referralCode,
             referralLink: referralLink,
             usedReferralCode: usedReferralCode,
-            verifyAfter: verifyAfter,
+            pendingCountdown: pendingCountdown,
             disableReason: disableReason,
             referralCountText: referralCountText,
             pointsText: pointsText,

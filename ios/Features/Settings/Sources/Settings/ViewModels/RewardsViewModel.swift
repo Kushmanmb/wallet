@@ -18,14 +18,6 @@ import Style
 @Observable
 @MainActor
 public final class RewardsViewModel: Sendable {
-    private static let dateFormatter: DateComponentsFormatter = {
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.day, .hour, .minute]
-        formatter.zeroFormattingBehavior = .dropLeading
-        formatter.unitsStyle = .full
-        return formatter
-    }()
-
     private let service: any GemRewardsServiceProtocol
     private let activateCode: String?
     private let emptyState: GemRewardsState
@@ -177,21 +169,16 @@ public final class RewardsViewModel: Sendable {
         rewardsState.disableReason
     }
 
-    var pendingVerificationAfter: Date? {
-        rewardsState.verifyAfter
-    }
-
     var pendingReferralTitle: String {
         Localized.Rewards.Pending.title
     }
 
     var pendingReferralDescription: String? {
-        guard let pendingDate = pendingVerificationAfter else { return nil }
+        guard rewardsState.hasPendingReferral else { return nil }
         if rewardsState.canActivatePendingReferral {
             return Localized.Rewards.Pending.descriptionReady
         }
-        guard let timeString = Self.dateFormatter.string(from: .now, to: pendingDate) else { return nil }
-        return Localized.Rewards.Pending.description(timeString)
+        return CountdownFormatter().string(parts: rewardsState.pendingCountdown).map { Localized.Rewards.Pending.description($0) }
     }
 
     var pendingReferralButtonTitle: String {

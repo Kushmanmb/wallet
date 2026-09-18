@@ -230,6 +230,15 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         lockTime
     }
 
+    public func lockTimeParts(chain _: Gemstone.Chain) -> [GemDurationPart] {
+        lockTime > 0 ? [GemDurationPart(value: Int64(lockTime / 86_400), unit: .day)] : []
+    }
+
+    public func completionCountdownParts(delegation: Gemstone.Delegation) -> [GemDurationPart] {
+        guard delegation.base.state != .active, let completionDate = delegation.base.completionDate else { return [] }
+        return DurationFormatter().countdownParts(seconds: Int64(Date.now.distance(to: completionDate)))
+    }
+
     public func minStakeAmount(chain _: Gemstone.Chain) -> Gemstone.GemBigInt {
         minStake
     }

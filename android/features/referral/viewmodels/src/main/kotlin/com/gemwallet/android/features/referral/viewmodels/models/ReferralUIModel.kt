@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.referral.viewmodels.models
 
+import uniffi.gemstone.GemDurationPart
 import uniffi.gemstone.GemRewardsState
 
 data class ReferralUIModel(
@@ -13,7 +14,7 @@ data class ReferralUIModel(
     val canActivatePendingReferral: Boolean,
     val inviteRewardPoints: Int,
     val usedReferralCode: String?,
-    val verifyAfter: Long?,
+    val pendingCountdown: List<GemDurationPart>,
     val disableReason: String?,
 )
 
@@ -28,6 +29,6 @@ internal fun GemRewardsState.uiModel(): ReferralUIModel = ReferralUIModel(
     canActivatePendingReferral = canActivatePendingReferral,
     inviteRewardPoints = inviteRewardPoints,
     usedReferralCode = usedReferralCode,
-    verifyAfter = verifyAfter,
+    pendingCountdown = pendingCountdown,
     disableReason = disableReason,
 )

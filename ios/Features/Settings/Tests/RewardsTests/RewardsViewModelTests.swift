@@ -157,7 +157,7 @@ struct RewardsViewModelTests {
     @Test
     func aReadyPendingReferralReadsAsReady() async throws {
         let service = GemRewardsServiceMock()
-        service.stateForRewards = { _ in .mock(canActivatePendingReferral: true, usedReferralCode: "pending", verifyAfter: Date(timeIntervalSince1970: 0)) }
+        service.stateForRewards = { _ in .mock(hasPendingReferral: true, canActivatePendingReferral: true, usedReferralCode: "pending") }
         let model = try #require(RewardsViewModel.mock(service: service, wallets: [first, second]))
         await model.load()
 
@@ -168,7 +168,7 @@ struct RewardsViewModelTests {
     @Test
     func aPendingReferralWithNoDateHasNoDescription() async throws {
         let service = GemRewardsServiceMock()
-        service.stateForRewards = { _ in .mock(usedReferralCode: "pending", verifyAfter: nil) }
+        service.stateForRewards = { _ in .mock(hasPendingReferral: true, usedReferralCode: "pending") }
         let model = try #require(RewardsViewModel.mock(service: service, wallets: [first, second]))
         await model.load()
 
