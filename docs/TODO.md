@@ -57,7 +57,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 [No hand-written twins](ARCHITECTURE.md): a type that only crosses the FFI is used as the uniffi type, and a twin exists only for a type an app persists. Android keeps four twins of exported Core enums, none persisted, and two of them let the app invent outcomes Core never produced.
 
-- **T2** **S** iOS `SignMessagePayload` restates `GemWalletConnectMessageRequest` (chain, session, wallet, message, simulation, assets) — use the record.
 - **T3** **S** iOS `WalletConnectSessionApproval` and Android `WalletConnectSessionNamespace` both twin `GemSessionApproval` (chains, accounts, methods, events) — use the record on both.
 - **T5** **S** Android `ManageContactState` twins `GemContactInput` (name, description, avatar, addresses) — with **S43**, the session holds the input.
 - **T6** **M** `android/features/asset_select/viewmodels/models/AssetSelectFlowUIModel.kt` translates `GemAssetRow` into two app enums the screen switches on (`AssetRowSubtitleStyle`, `AssetRowTrailingStyle`) — a twin of a Core enum; the row's subtitle and trailing become finished values (text, image) and the switch goes.
