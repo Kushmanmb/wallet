@@ -3,7 +3,6 @@ use std::collections::{HashMap, HashSet};
 use super::model::{GemNodeSelection, GemNodeStatusState};
 use crate::service_status::GemLatencyStatus;
 use crate::services::collections::unique_by;
-use number_formatter::currency::add_thousands_separator;
 use primitives::Chain;
 use primitives::Latency;
 use primitives::node::{Node, NodeState};
@@ -147,10 +146,6 @@ pub fn text_or_placeholder(value: Option<&str>) -> String {
         Some(value) if !value.is_empty() => value.to_string(),
         _ => EMPTY_VALUE.to_string(),
     }
-}
-
-pub fn block_number_text(value: Option<u64>) -> String {
-    text_or_placeholder(value.map(|value| add_thousands_separator(&value.to_string(), ',', '.')).as_deref())
 }
 
 pub fn visible_statuses(nodes: &[GemNodeSelection], statuses: &HashMap<String, GemNodeStatusState>) -> HashMap<String, GemNodeStatusState> {
@@ -332,10 +327,7 @@ mod tests {
     }
 
     #[test]
-    fn test_a_block_number_is_grouped_and_a_missing_one_reads_as_a_dash() {
-        assert_eq!(block_number_text(Some(21_000_000)), "21,000,000");
-        assert_eq!(block_number_text(Some(0)), "0");
-        assert_eq!(block_number_text(None), "-");
+    fn test_a_blank_value_reads_as_a_dash() {
         assert_eq!(text_or_placeholder(Some("  ")), "-");
         assert_eq!(text_or_placeholder(Some(" 1 ")), "1");
     }

@@ -6,8 +6,10 @@ import enum Gemstone.GemChainSettingsSection
 import enum Gemstone.GemNodeCheckRow
 import enum Gemstone.GemNodeSubtitle
 import enum GemstoneServices.KeystoreAuthentication
+import GemstonePrimitives
 import Localization
 import Primitives
+import Style
 
 public extension Appearance {
     var title: String {
@@ -49,7 +51,8 @@ extension GemNodeCheckRow {
 
     var text: String {
         switch self {
-        case let .chainId(value), let .latestBlock(value): value
+        case let .chainId(value): value
+        case let .latestBlock(value): value.text()
         case let .inSync(state): state.symbol
         case let .latency(milliseconds): Localized.Common.latencyInMs(Int(milliseconds))
         }
@@ -60,6 +63,12 @@ extension GemNodeSubtitle {
     var title: String {
         switch self {
         case .latestBlock: Localized.Nodes.ImportNode.latestBlock
+        }
+    }
+
+    var text: String {
+        switch self {
+        case let .latestBlock(value): "\(title): \(value?.text() ?? Placeholder.empty)"
         }
     }
 }

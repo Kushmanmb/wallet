@@ -151,12 +151,13 @@ mod tests {
         let rows = service.node_rows(Chain::Ethereum, nodes, statuses);
 
         assert_eq!(rows.len(), 2);
+        assert_eq!(rows[0].subtitle, GemNodeSubtitle::LatestBlock { value: None }, "a node with no status yet is still loading");
         assert_eq!(
-            rows[0].subtitle,
-            GemNodeSubtitle::LatestBlock { value: "-".to_string() },
-            "a node with no status yet is still loading"
+            rows[1].subtitle,
+            GemNodeSubtitle::LatestBlock {
+                value: Some(crate::formatted_number::GemFormattedNumber::count(21_000_000))
+            }
         );
-        assert_eq!(rows[1].subtitle, GemNodeSubtitle::LatestBlock { value: "21,000,000".to_string() });
         assert!(!rows[0].can_delete);
         assert!(rows[1].can_delete);
     }

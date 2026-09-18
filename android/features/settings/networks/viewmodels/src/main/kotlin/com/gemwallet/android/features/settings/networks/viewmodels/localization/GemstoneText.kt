@@ -6,7 +6,9 @@ import uniffi.gemstone.GemNodeSubtitle
 import uniffi.gemstone.GemServiceEndpointType
 import android.content.Context
 import androidx.annotation.StringRes
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.theme.Placeholder
 import uniffi.gemstone.GemNodeCheckRow
 
 @StringRes
@@ -19,14 +21,16 @@ internal fun GemNodeCheckRow.stringRes(): Int = when (this) {
 
 internal fun GemNodeCheckRow.text(context: Context): String = when (this) {
     is GemNodeCheckRow.ChainId -> value
-    is GemNodeCheckRow.LatestBlock -> value
+    is GemNodeCheckRow.LatestBlock -> value.text()
     is GemNodeCheckRow.Latency -> context.getString(R.string.common_latency_in_ms, milliseconds.toInt())
     is GemNodeCheckRow.InSync -> ""
 }
 
 internal fun GemNodeRowTitle.string(context: Context): String = text(context.getString(R.string.nodes_gem_wallet_node))
 
-internal fun GemNodeSubtitle.text(context: Context): String = text(context.getString(R.string.nodes_import_node_latest_block))
+internal fun GemNodeSubtitle.text(context: Context): String = when (this) {
+    is GemNodeSubtitle.LatestBlock -> "${context.getString(R.string.nodes_import_node_latest_block)}: ${value?.text() ?: Placeholder.empty}"
+}
 
 internal fun GemServiceEndpointType.string(context: Context): String = when (this) {
     GemServiceEndpointType.API -> "API"

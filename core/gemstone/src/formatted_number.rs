@@ -170,6 +170,19 @@ impl GemFormattedNumber {
             },
         }
     }
+
+    pub fn count(value: u64) -> Self {
+        Self {
+            value: value as f64,
+            notation: GemNumberNotation::Plain,
+            tone: GemValueTone::Plain,
+            rounding: GemNumberRounding::ToNearest,
+            unit: GemNumberUnit::Plain,
+            display: GemNumberDisplay::Number {
+                precision: GemPrecision::Fraction { min: 0, max: 0 },
+            },
+        }
+    }
 }
 
 fn unit(symbol: Option<String>) -> GemNumberUnit {
@@ -277,6 +290,20 @@ mod tests {
         );
 
         assert_eq!(GemFormattedNumber::percentage(5.0, GemPercentageStyle::Unsigned).notation, GemNumberNotation::Plain);
+    }
+
+    #[test]
+    fn test_a_count_reads_as_a_plain_integer() {
+        let count = GemFormattedNumber::count(21_000_000);
+        assert_eq!(count.value, 21_000_000.0);
+        assert_eq!(count.unit, GemNumberUnit::Plain);
+        assert_eq!(
+            count.display,
+            GemNumberDisplay::Number {
+                precision: GemPrecision::Fraction { min: 0, max: 0 }
+            }
+        );
+        assert_eq!(count.notation, GemNumberNotation::Plain);
     }
 
     #[test]

@@ -35,7 +35,7 @@ struct ChainNodeViewModel {
     }
 
     var titleExtra: String? {
-        row.subtitle.text(latestBlockLabel: row.subtitle.title)
+        row.subtitle.text
     }
 
     var titleTag: String? {

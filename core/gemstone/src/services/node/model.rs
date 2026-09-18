@@ -1,6 +1,7 @@
 use primitives::Latency;
 
 use super::rules;
+use crate::formatted_number::GemFormattedNumber;
 use crate::gateway::GatewayError;
 use crate::service_status::GemLatencyStatus;
 
@@ -26,7 +27,7 @@ impl GemNodeStatusState {
 
     pub fn subtitle(&self) -> GemNodeSubtitle {
         GemNodeSubtitle::LatestBlock {
-            value: rules::block_number_text(self.latest_block()),
+            value: self.latest_block().map(GemFormattedNumber::count),
         }
     }
 }
@@ -50,7 +51,7 @@ pub enum GemNodeSyncState {
 pub enum GemNodeCheckRow {
     ChainId { value: String },
     InSync { state: GemNodeSyncState },
-    LatestBlock { value: String },
+    LatestBlock { value: GemFormattedNumber },
     Latency { milliseconds: u32 },
 }
 
@@ -68,7 +69,7 @@ impl GemNodeCheck {
                 },
             },
             GemNodeCheckRow::LatestBlock {
-                value: rules::block_number_text(Some(self.latest_block_number)),
+                value: GemFormattedNumber::count(self.latest_block_number),
             },
             GemNodeCheckRow::Latency {
                 milliseconds: self.latency.value as u32,
@@ -89,9 +90,9 @@ pub struct GemExplorerRow {
     pub is_selected: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemNodeSubtitle {
-    LatestBlock { value: String },
+    LatestBlock { value: Option<GemFormattedNumber> },
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -115,15 +116,6 @@ pub struct GemNodeSelection {
     pub host: String,
     pub is_selected: bool,
     pub gem_node_flag: Option<String>,
-}
-
-#[uniffi::export]
-impl GemNodeSubtitle {
-    pub fn text(&self, latest_block_label: String) -> String {
-        match self {
-            Self::LatestBlock { value } => format!("{latest_block_label}: {value}"),
-        }
-    }
 }
 
 #[uniffi::export]
@@ -182,20 +174,18 @@ mod tests {
     fn test_a_node_row_subtitle_names_the_latest_block_and_admits_when_it_has_none() {
         let result = GemNodeStatusState::mock_result(21_000_000);
 
-        assert_eq!(result.subtitle(), GemNodeSubtitle::LatestBlock { value: "21,000,000".to_string() });
-        assert_eq!(GemNodeStatusState::Loading.subtitle(), GemNodeSubtitle::LatestBlock { value: "-".to_string() });
+        assert_eq!(
+            result.subtitle(),
+            GemNodeSubtitle::LatestBlock {
+                value: Some(GemFormattedNumber::count(21_000_000))
+            }
+        );
+        assert_eq!(GemNodeStatusState::Loading.subtitle(), GemNodeSubtitle::LatestBlock { value: None });
         assert_eq!(
             GemNodeStatusState::Error.subtitle(),
-            GemNodeSubtitle::LatestBlock { value: "-".to_string() },
+            GemNodeSubtitle::LatestBlock { value: None },
             "a node that failed still shows the block row, with nothing in it"
         );
-    }
-
-    #[test]
-    fn test_a_node_subtitle_prints_the_label_before_the_block() {
-        let subtitle = GemNodeSubtitle::LatestBlock { value: "21,000,000".to_string() };
-
-        assert_eq!(subtitle.text("Latest block".to_string()), "Latest block: 21,000,000");
     }
 
     #[test]
@@ -215,7 +205,9 @@ mod tests {
                 GemNodeCheckRow::InSync {
                     state: GemNodeSyncState::OutOfSync
                 },
-                GemNodeCheckRow::LatestBlock { value: "21,000,000".to_string() },
+                GemNodeCheckRow::LatestBlock {
+                    value: GemFormattedNumber::count(21_000_000)
+                },
                 GemNodeCheckRow::Latency { milliseconds: 120 },
             ]
         );
@@ -231,7 +223,9 @@ mod tests {
             vec![
                 GemNodeCheckRow::ChainId { value: "1".to_string() },
                 GemNodeCheckRow::InSync { state: GemNodeSyncState::InSync },
-                GemNodeCheckRow::LatestBlock { value: "21,000,000".to_string() },
+                GemNodeCheckRow::LatestBlock {
+                    value: GemFormattedNumber::count(21_000_000)
+                },
                 GemNodeCheckRow::Latency { milliseconds: 120 },
             ]
         );
