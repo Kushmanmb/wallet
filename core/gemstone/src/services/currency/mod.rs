@@ -7,7 +7,6 @@ use primitives::Currency;
 
 pub use model::{GemCurrencies, GemCurrencyRow};
 
-use crate::services::device::GemDeviceService;
 use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::price::GemPriceService;
@@ -16,14 +15,13 @@ use crate::services::price::GemPriceService;
 pub struct GemCurrencyService {
     preferences: Arc<GemPreferencesService>,
     prices: Arc<GemPriceService>,
-    device: Arc<GemDeviceService>,
 }
 
 #[uniffi::export]
 impl GemCurrencyService {
     #[uniffi::constructor]
-    pub fn new(preferences: Arc<GemPreferencesService>, prices: Arc<GemPriceService>, device: Arc<GemDeviceService>) -> Self {
-        Self { preferences, prices, device }
+    pub fn new(preferences: Arc<GemPreferencesService>, prices: Arc<GemPriceService>) -> Self {
+        Self { preferences, prices }
     }
 
     pub fn get_currency(&self) -> Currency {
@@ -39,8 +37,6 @@ impl GemCurrencyService {
             return Ok(());
         }
         self.preferences.set_currency(currency.clone())?;
-        self.prices.change_currency(currency).await?;
-        let _ = self.device.synchronize_if_needed().await;
-        Ok(())
+        self.prices.change_currency(currency).await
     }
 }

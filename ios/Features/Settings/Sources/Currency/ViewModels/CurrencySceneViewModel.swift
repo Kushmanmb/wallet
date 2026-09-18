@@ -3,6 +3,7 @@
 import GemstonePrimitives
 import struct Gemstone.GemCurrencies
 import protocol Gemstone.GemCurrencyServiceProtocol
+import protocol Gemstone.GemDeviceServiceProtocol
 import Components
 import GemstoneServices
 import Foundation
@@ -14,6 +15,7 @@ import Primitives
 public final class CurrencySceneViewModel {
     private var currencyStorage: CurrencyStorable
     private let service: any GemCurrencyServiceProtocol
+    private let deviceService: any GemDeviceServiceProtocol
 
     private(set) var currency: Currency {
         get { currencyStorage.currency }
@@ -23,9 +25,11 @@ public final class CurrencySceneViewModel {
     public init(
         currencyStorage: CurrencyStorable,
         service: any GemCurrencyServiceProtocol,
+        deviceService: any GemDeviceServiceProtocol,
     ) {
         self.currencyStorage = currencyStorage
         self.service = service
+        self.deviceService = deviceService
     }
 
     var title: String {
@@ -52,6 +56,9 @@ public final class CurrencySceneViewModel {
     func setCurrency(_ currency: Currency) async throws {
         try await service.setCurrency(currency: currency.toGem())
         self.currency = currency
+        Task { [deviceService] in
+            try? await deviceService.synchronizeIfNeeded()
+        }
     }
 }
 

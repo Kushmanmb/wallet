@@ -10,6 +10,7 @@ import com.gemwallet.android.data.services.gemstone.device.DeviceObserverService
 import com.gemwallet.android.data.services.gemstone.device.DevicePushSettings
 import com.gemwallet.android.data.services.gemstone.device.GemstoneDevicePlatform
 import com.gemwallet.android.data.services.gemstone.stores.GemstoneWalletStore
+import com.gemwallet.android.application.session.cases.GetCurrentCurrency
 import com.gemwallet.android.application.wallet.cases.GetWallets
 import com.gemwallet.android.data.service.store.ConfigStore
 import com.gemwallet.android.model.BuildInfo
@@ -119,9 +120,11 @@ object DeviceModule {
     @Singleton
     fun provideDeviceObserverService(
         getWallets: GetWallets,
+        getCurrentCurrency: GetCurrentCurrency,
         deviceService: GemDeviceService,
     ): DeviceObserverService = DeviceObserverService(
         getWallets = getWallets,
+        getCurrentCurrency = getCurrentCurrency,
         deviceService = deviceService,
     )
 
