@@ -39,11 +39,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.domains.confirm.FeeAssetUIModel
 import com.gemwallet.android.domains.confirm.FeeDetailsModel
-import com.gemwallet.android.domains.confirm.FeeRateUIModel
 import com.gemwallet.android.domains.confirm.FeeUIModel
 import com.gemwallet.android.features.confirm.presents.localization.suffix
+import com.gemwallet.android.features.confirm.viewmodels.models.FeeRateRowUIModel
 import com.gemwallet.android.features.confirm.viewmodels.models.FeeSelectionUIModel
+import com.gemwallet.android.features.confirm.viewmodels.models.customFeeRowUIModel
 import com.gemwallet.android.features.confirm.viewmodels.models.listItem
+import com.gemwallet.android.features.confirm.viewmodels.models.rowUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.SuffixTextField
 import com.gemwallet.android.ui.components.list_item.AssetListItem
@@ -60,7 +62,6 @@ import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.ModalBottomSheet
 import com.gemwallet.android.ui.components.screen.SheetExpansion
 import com.gemwallet.android.ui.icons.AppIcons
-import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.alpha10
 import com.gemwallet.android.ui.theme.paddingDefault
@@ -91,6 +92,7 @@ fun FeeDetails(
 ) {
     currentFee ?: return
     feeAsset ?: return
+    val context = LocalContext.current
     val model = remember(currentFee, feeAsset, selection) {
         feeDetailsModel(currentFee, feeAsset)
     } ?: return
@@ -141,19 +143,19 @@ fun FeeDetails(
         )
         when (page) {
             FeeDetailsPage.Details -> FeeRates(
-                currentFee = currentFee,
                 feeItems = feeItems,
                 feeListItem = feeListItem,
                 selection = selection,
-                feeRateModels = model.feeRateModels(),
+                feeRateRows = model.feeRateModels().map { it.rowUIModel(context) },
+                customRow = if (model.supportsCustomFee) {
+                    customFeeRowUIModel(context, model.customRate, selectedCustomRate?.let { currentFee.fiatAmount })
+                } else {
+                    null
+                },
                 showsOptions = model.showsOptions,
                 feeAsset = feeAsset,
-                supportsCustomFee = model.supportsCustomFee,
-                customRateText = model.customRate?.string(LocalContext.current),
-                customFiat = selectedCustomRate?.let { currentFee.fiatAmount },
                 showFeeAssets = showFeeAssets,
                 onSelectPriority = { onSelectPriority(it); onCancel() },
-                onSelectCustom = onSelectCustom,
                 onCustom = { page = FeeDetailsPage.CustomFee },
                 onFeeAssets = { page = FeeDetailsPage.FeeAssets },
             )
@@ -175,19 +177,15 @@ fun FeeDetails(
 
 @Composable
 private fun FeeRates(
-    currentFee: FeeUIModel.FeeInfo,
     feeItems: List<ListItemModel>,
     feeListItem: ListItemModel?,
     selection: FeeSelectionUIModel,
-    feeRateModels: List<FeeRateUIModel>,
+    feeRateRows: List<FeeRateRowUIModel>,
+    customRow: FeeRateRowUIModel?,
     showsOptions: Boolean,
     feeAsset: FeeAssetUIModel,
-    supportsCustomFee: Boolean,
-    customRateText: String?,
-    customFiat: String?,
     showFeeAssets: Boolean,
     onSelectPriority: (FeePriority) -> Unit,
-    onSelectCustom: (BigInteger) -> Unit,
     onCustom: () -> Unit,
     onFeeAssets: () -> Unit,
 ) {
@@ -205,27 +203,21 @@ private fun FeeRates(
             }
         }
         if (showsOptions) {
-            val totalCount = feeRateModels.size + if (supportsCustomFee) 1 else 0
-            itemsPositioned(feeRateModels, totalCount = totalCount) { position, feeRate ->
+            val totalCount = feeRateRows.size + if (customRow != null) 1 else 0
+            itemsPositioned(feeRateRows, totalCount = totalCount) { position, row ->
                 FeeRow(
-                    emoji = feeRate.emoji,
-                    title = stringResource(feeRate.priority.stringRes()),
-                    rate = feeRate.row.value.string(LocalContext.current),
-                    fiat = feeRate.fiatValue,
-                    isSelected = selection.selectedPriority == feeRate.priority,
+                    row = row,
+                    isSelected = selection.selectedPriority == row.priority,
                     position = position,
-                    onClick = { onSelectPriority(feeRate.priority) },
+                    onClick = { row.priority?.let { onSelectPriority(it) } },
                 )
             }
-            if (supportsCustomFee) {
+            if (customRow != null) {
                 item {
                     FeeRow(
-                        emoji = "⚙️",
-                        title = stringResource(R.string.fee_rate_custom),
-                        rate = customRateText,
-                        fiat = customFiat,
+                        row = customRow,
                         isSelected = selection.customRate != null,
-                        position = ListPosition.getPosition(feeRateModels.size, totalCount),
+                        position = ListPosition.getPosition(feeRateRows.size, totalCount),
                         onClick = onCustom,
                     )
                 }
@@ -370,10 +362,7 @@ private fun FeeSheetHeader(
 
 @Composable
 private fun FeeRow(
-    emoji: String,
-    title: String,
-    rate: String?,
-    fiat: String?,
+    row: FeeRateRowUIModel,
     isSelected: Boolean,
     position: ListPosition,
     onClick: () -> Unit,
@@ -381,16 +370,16 @@ private fun FeeRow(
     ListItem(
         modifier = Modifier.clickable { onClick() },
         leading = {
-            EmojiCircle(emoji, listItemIconSize, isSelected)
+            EmojiCircle(row.emoji, listItemIconSize, isSelected)
         },
         title = {
-            ListItemTitleText(title)
+            ListItemTitleText(row.model.title)
         },
         trailing = {
             DataBadgeChevron(isShowChevron = true) {
                 Column(horizontalAlignment = Alignment.End) {
-                    rate?.takeIf { it.isNotEmpty() }?.let { ListItemTitleText(it) }
-                    fiat?.takeIf { it.isNotEmpty() }?.let { ListItemSupportText(it) }
+                    row.model.subtitle?.let { ListItemTitleText(it) }
+                    row.model.subtitleExtra?.let { ListItemSupportText(it) }
                 }
             }
         },

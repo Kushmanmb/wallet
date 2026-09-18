@@ -10,9 +10,13 @@ import com.gemwallet.android.domains.referral.values.ReferralError
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
+import com.gemwallet.android.features.referral.viewmodels.models.PendingReferralUIModel
 import com.gemwallet.android.features.referral.viewmodels.models.RewardRedemptionUIModel
+import com.gemwallet.android.features.referral.viewmodels.models.errorRow
+import com.gemwallet.android.features.referral.viewmodels.models.pendingReferralRow
 import com.gemwallet.android.features.referral.viewmodels.models.uiModel
 import com.gemwallet.android.features.referral.viewmodels.models.infoRows
+import com.gemwallet.android.features.referral.viewmodels.models.unverifiedRow
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Wallet
@@ -60,6 +64,15 @@ class ReferralViewModel @Inject constructor(
 
     val infoRows: StateFlow<List<ListItemModel>> = uiState.map { it.infoRows(context) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val errorRow: StateFlow<ListItemModel?> = uiState.map { it.errorRow(context) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val unverifiedRow: StateFlow<ListItemModel?> = uiState.map { it.unverifiedRow(context) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val pendingReferral: StateFlow<PendingReferralUIModel?> = uiState.map { it.pendingReferralRow(context) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val redemptions: StateFlow<List<RewardRedemptionUIModel>> = uiState.map { state -> state.redemptions.mapNotNull { it.uiModel(context) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())

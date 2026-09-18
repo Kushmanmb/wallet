@@ -40,11 +40,8 @@ import com.gemwallet.android.ui.components.TabsBar
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.clickable
 import com.gemwallet.android.ui.components.fields.requestFocusIfAttached
-import com.gemwallet.android.ui.components.image.AssetIcon
-import com.gemwallet.android.ui.components.list_item.Badge
-import com.gemwallet.android.ui.components.list_item.ListItem
+import com.gemwallet.android.ui.components.list_item.AssetListItem
 import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
-import com.gemwallet.android.ui.components.list_item.ListItemTitleText
 import com.gemwallet.android.ui.components.list_item.PriceInfo
 import com.gemwallet.android.ui.components.parseMarkdownToAnnotatedString
 import com.gemwallet.android.ui.components.screen.Scene
@@ -230,11 +227,11 @@ fun PriceAlertTargetScene(
             }
             if (asset != null) {
                 item {
-                    ListItem(
+                    AssetListItem(
+                        asset = asset,
                         listPosition = ListPosition.Single,
-                        leading = { AssetIcon(asset) },
-                        title = { ListItemTitleText(asset.name, titleBadge = { Badge(asset.symbol) }) },
-                        subtitle = {
+                        badge = asset.symbol,
+                        support = {
                             PriceInfo(
                                 price = assetPriceFormatted,
                                 changes = assetPriceChangeFormatted,

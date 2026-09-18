@@ -1,4 +1,4 @@
-package com.gemwallet.android.features.create_wallet.style
+package com.gemwallet.android.features.create_wallet.viewmodels.style
 
 import com.gemwallet.android.ui.theme.Emoji
 import uniffi.gemstone.GemSecurityReminderItem

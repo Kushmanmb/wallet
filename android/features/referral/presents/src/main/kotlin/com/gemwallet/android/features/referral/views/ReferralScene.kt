@@ -33,24 +33,24 @@ import androidx.compose.ui.unit.dp
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.features.referral.viewmodels.SyncType
 import uniffi.gemstone.GemRewardsState
+import com.gemwallet.android.features.referral.viewmodels.models.PendingReferralUIModel
 import com.gemwallet.android.features.referral.viewmodels.models.RewardRedemptionUIModel
-import com.gemwallet.android.features.referral.views.components.referralConfirmCode
-import com.gemwallet.android.features.referral.views.components.referralError
 import com.gemwallet.android.features.referral.views.components.referralHead
 import com.gemwallet.android.features.referral.views.components.referralInfo
-import com.gemwallet.android.features.referral.views.components.referralUnverified
 import com.gemwallet.android.features.referral.views.dialogs.GetStartedDialog
 import com.gemwallet.android.features.referral.views.dialogs.ReferralCodeDialog
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.buttons.mainActionButtonColors
 import com.gemwallet.android.ui.components.clickable
+import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.showSnackbar
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.localization.text
+import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.shareText
 import com.gemwallet.android.ui.theme.Spacer8
 import com.gemwallet.android.ui.theme.WalletTheme
@@ -72,6 +72,9 @@ fun ReferralScene(
     referralLink: String?,
     uiState: GemRewardsState,
     infoRows: List<ListItemModel>,
+    errorRow: ListItemModel?,
+    unverifiedRow: ListItemModel?,
+    pendingReferral: PendingReferralUIModel?,
     redemptions: List<RewardRedemptionUIModel>,
     currentWallet: Wallet?,
     referralCode: String? = null,
@@ -175,19 +178,29 @@ fun ReferralScene(
                         )
                     }
                 }
-                referralError(uiState)
-                referralUnverified(uiState)
-                referralConfirmCode(uiState) {
-                    onCode(it) { error ->
-                        val message = error?.errorText()?.text(context)
-                        scope.launch {
-                            if (message == null) {
-                                snackbar.showSnackbar(successStr, R.drawable.ic_check_circle)
-                            } else {
-                                snackbar.showSnackbar(message, R.drawable.ic_error)
+                errorRow?.let { item { ListItem(model = it, listPosition = ListPosition.Single) } }
+                unverifiedRow?.let { item { ListItem(model = it, listPosition = ListPosition.Single) } }
+                pendingReferral?.let { pending ->
+                    item {
+                        ListItem(model = pending.model, listPosition = ListPosition.Single)
+                        Box(modifier = Modifier.padding(horizontal = sceneContentPadding())) {
+                            MainActionButton(
+                                title = stringResource(R.string.transfer_confirm),
+                                state = pending.buttonState,
+                            ) {
+                                onCode(pending.code) { error ->
+                                    val message = error?.errorText()?.text(context)
+                                    scope.launch {
+                                        if (message == null) {
+                                            snackbar.showSnackbar(successStr, R.drawable.ic_check_circle)
+                                        } else {
+                                            snackbar.showSnackbar(message, R.drawable.ic_error)
+                                        }
+                                    }
+                                    onRefresh()
+                                }
                             }
                         }
-                        onRefresh()
                     }
                 }
                 if (uiState.showsInfo) {
@@ -228,6 +241,9 @@ private fun ReferralScenePreview() {
                 pointsText = "1000 \uD83D\uDC8E",
             ),
             infoRows = emptyList(),
+            errorRow = null,
+            unverifiedRow = null,
+            pendingReferral = null,
             redemptions = emptyList(),
             currentWallet = previewWallet(),
             onUsername = { _, _ -> },
@@ -251,6 +267,9 @@ private fun ReferralSceneNoRewardsPreview() {
             referralLink = null,
             uiState = previewRewardsState(canUseReferralCode = true),
             infoRows = emptyList(),
+            errorRow = null,
+            unverifiedRow = null,
+            pendingReferral = null,
             redemptions = emptyList(),
             currentWallet = previewWallet(),
             onUsername = { _, _ -> },
