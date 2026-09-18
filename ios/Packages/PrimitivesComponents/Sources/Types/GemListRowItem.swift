@@ -93,7 +93,7 @@ extension GemListRow {
         case let .social(links):
             .social(links)
         case let .error(error):
-            .listItem(ListItemModel(title: GemListRowTitle.error.text, subtitle: error.localizedDescription))
+            .notice(title: GemListRowTitle.error.text, message: error.localizedDescription, kind: .error)
         case let .explorer(name, url):
             .page(ListItemModel(title: Localized.Transaction.viewOn(name)), url: URL(string: url) ?? BlockExplorerLink(name: name, link: url).url)
         case let .icon(chain):
