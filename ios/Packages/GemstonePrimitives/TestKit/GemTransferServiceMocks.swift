@@ -195,6 +195,7 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
     private let freezes: Bool
     private let wholeAmounts: Bool
     private let claimRewardsDestination: GemClaimRewardsDestination?
+    private let refreshState: GemLoadState
 
     public init(
         rewardsShown: Bool = false,
@@ -206,6 +207,7 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         freezes: Bool = false,
         wholeAmounts: Bool = false,
         claimRewardsDestination: GemClaimRewardsDestination? = nil,
+        refreshState: GemLoadState = .data,
     ) {
         self.rewardsShown = rewardsShown
         self.claimable = claimable
@@ -216,6 +218,7 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         self.freezes = freezes
         self.wholeAmounts = wholeAmounts
         self.claimRewardsDestination = claimRewardsDestination
+        self.refreshState = refreshState
     }
 
     public func sortedDelegations(delegations: [Gemstone.Delegation]) -> [Gemstone.Delegation] {
@@ -301,6 +304,10 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
     }
 
     public func sync(chain _: Gemstone.Chain) async throws {}
+
+    public func refresh(chain _: Gemstone.Chain, delegations _: [Gemstone.Delegation]) async -> GemLoadState {
+        refreshState
+    }
 
     public func syncEarn(assetId _: Gemstone.AssetId) async throws {}
 }

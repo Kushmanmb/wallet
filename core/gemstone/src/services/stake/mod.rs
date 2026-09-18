@@ -3,6 +3,7 @@ pub mod rules;
 pub mod store;
 
 use crate::models::list::GemListRow;
+use crate::models::state::GemLoadState;
 use chrono::Utc;
 use crate::services::error::GemServiceError;
 use std::collections::HashMap;
@@ -91,6 +92,10 @@ impl GemStakeService {
     pub async fn sync(&self, chain: Chain) -> Result<(), GemServiceError> {
         let (wallet_id, address) = self.current_account(chain).await?;
         self.sync_wallet(wallet_id, chain, address).await
+    }
+
+    pub async fn refresh(&self, chain: Chain, delegations: Vec<Delegation>) -> GemLoadState {
+        rules::delegations_state(self.sync(chain).await, &delegations)
     }
 
     pub async fn sync_earn(&self, asset_id: AssetId) -> Result<(), GemServiceError> {

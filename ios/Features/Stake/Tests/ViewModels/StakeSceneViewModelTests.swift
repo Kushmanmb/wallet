@@ -41,6 +41,18 @@ struct StakeSceneViewModelTests {
     }
 
     @Test
+    func aFailedRefreshWithNothingShownShowsTheError() async {
+        let model = StakeSceneViewModel.mock(chain: .tron, stakeService: GemStakeServiceMock(refreshState: .error(error: .Gateway(msg: "offline"))))
+
+        await model.load()
+
+        guard case .error = model.delegationsViewState else {
+            Issue.record("expected the refresh error")
+            return
+        }
+    }
+
+    @Test
     func stakeStillRequiresValidators() {
         let tron = StakeSceneViewModel.mock(chain: .tron)
         tron.assetQuery.value = .mock(asset: Chain.tron.asset, balance: .mock(frozen: 1))

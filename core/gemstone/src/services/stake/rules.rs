@@ -17,6 +17,7 @@ use super::model::{
 use crate::config::image::GemImage;
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowIcon, GemListRowTitle, GemUrlTarget};
+use crate::models::state::{GemLoad, GemLoadState};
 use crate::services::localization::GemLocalizedText;
 use primitives::BlockExplorerLink;
 use crate::percentage::GemPercentageStyle;
@@ -300,6 +301,17 @@ fn provider_row(validator: &DelegationValidator, validator_url: Option<BlockExpl
         },
         None => GemListRow::Text { title, value: name },
     }
+}
+
+pub fn delegations_state(synced: Result<(), GemServiceError>, delegations: &[Delegation]) -> GemLoadState {
+    let shown = GemLoad {
+        state: match delegations.is_empty() {
+            true => GemLoadState::NoData,
+            false => GemLoadState::Data,
+        },
+        value: (),
+    };
+    shown.data(synced).state
 }
 
 pub fn sorted_delegations(mut delegations: Vec<Delegation>) -> Vec<Delegation> {
@@ -914,6 +926,16 @@ mod tests {
         let rows = delegation_rows(&earn, None, now);
         assert!(matches!(rows.first(), Some(GemListRow::Text { title: GemListRowTitle::Provider, .. })));
         assert!(!rows.iter().any(|row| matches!(row, GemListRow::Duration { .. })), "earn positions have no completion countdown");
+    }
+
+    #[test]
+    fn test_a_failed_sync_keeps_the_delegations_already_shown() {
+        let shown = vec![Delegation::mock_with(Chain::Cosmos, StakeProviderType::Stake, DelegationState::Active, 0)];
+        let failed = || Err(GemServiceError::Gateway { msg: "offline".to_string() });
+
+        assert_eq!(delegations_state(Ok(()), &[]), GemLoadState::Data);
+        assert_eq!(delegations_state(failed(), &shown), GemLoadState::Data);
+        assert!(matches!(delegations_state(failed(), &[]), GemLoadState::Error { .. }));
     }
 
     #[test]

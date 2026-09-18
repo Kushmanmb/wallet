@@ -6,6 +6,7 @@ import Foundation
 import enum Gemstone.GemStakeAction
 import struct Gemstone.GemStakeActionItem
 import enum Gemstone.GemInfoTopic
+import enum Gemstone.GemLoadState
 import enum Gemstone.GemListRow
 import enum Gemstone.GemStakeSection
 import struct Gemstone.GemClaimRewards
@@ -26,7 +27,7 @@ import struct Gemstone.GemTransferData
 public final class StakeSceneViewModel {
     private let service: any GemStakeServiceProtocol
 
-    private var delegationsState: StateViewType<Bool> = .loading
+    private var delegationsState: GemLoadState = .loading
     private let chain: StakeChain
 
     private let formatter = ValueFormatter(style: .auto)
@@ -176,13 +177,7 @@ public final class StakeSceneViewModel {
 extension StakeSceneViewModel {
     func load() async {
         delegationsState = .loading
-        do {
-            try await service.sync(chain: chain.chain.rawValue)
-            delegationsState = .data(true)
-        } catch {
-            debugLog("Stake scene load error: \(error)")
-            delegationsState = .error(error)
-        }
+        delegationsState = await service.refresh(chain: chain.chain.rawValue, delegations: delegations.map { $0.toGem() })
     }
 
     func onInfo(_ topic: GemInfoTopic) {
