@@ -12,6 +12,7 @@ import Primitives
 import PrimitivesComponents
 import Style
 import SwiftUI
+import enum Gemstone.GemServiceError
 
 @Observable
 @MainActor
@@ -192,8 +193,10 @@ extension ImportWalletSceneViewModel {
         preferences.acceptTerms()
         do {
             try service.setCurrentWalletId(walletId: wallet.id.id)
+        } catch let error as GemServiceError {
+            isPresentingAlertMessage = AlertMessage(title: alertTitle, message: error.text().text)
         } catch {
-            isPresentingAlertMessage = AlertMessage(title: alertTitle, message: error.localizedDescription)
+            debugLog("import wallet error: \(error)")
         }
         buttonState = .normal
     }

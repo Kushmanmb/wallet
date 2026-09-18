@@ -27,7 +27,6 @@ import com.gemwallet.android.ui.models.buttonState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +43,8 @@ import uniffi.gemstone.GemSignMessageServiceInterface
 import uniffi.gemstone.GemWalletConnectFailure
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.GemWalletConnectSessionRequest
+import uniffi.gemstone.GemServiceException
+import com.gemwallet.android.ui.localization.text
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -138,12 +139,10 @@ class WCRequestViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             val signature = try {
                 service.signMessage(request.wallet.id.id, request.signMessage)
-            } catch (err: CancellationException) {
-                throw err
-            } catch (err: Throwable) {
+            } catch (err: GemServiceException) {
                 Log.e(TAG, "Sign message failed topic=${request.pending.sessionId}", err)
                 state.update { it.copy(responseState = RequestResponseState.Idle, approved = null) }
-                onError(err.message.orEmpty())
+                onError(err.text().text(context))
                 request.reject()
                 return@launch
             }

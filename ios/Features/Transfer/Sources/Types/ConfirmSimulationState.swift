@@ -46,7 +46,7 @@ struct ConfirmSimulationState {
         )
     }
 
-    init(_ state: GemConfirmSimulationState) throws {
+    init(_ state: GemConfirmSimulationState) {
         let details = state.simulation
         let simulation = state.result
         let payload = SimulationPayloadModel(

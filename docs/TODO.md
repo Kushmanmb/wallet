@@ -35,16 +35,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **D40** **M** Every other screen that loads over a store or the gateway still decides app-side what a failed refresh does to the rows already on screen — the address screen now takes that from Core (`GemLoadState` plus `GemLoad::data`, see [the load-state contract](ARCHITECTURE.md#a-screens-load-state-is-one-core-state-and-a-failed-refresh-keeps-what-is-shown)); adopt the same state on the asset, stake, perpetual and transactions screens, whose `StateViewType` today resets to `loading` on every pull.
 - **P15** **S** The chart header value and date texts are computed on both apps — iOS `ChartHeaderViewModel.headerValueText`, Android `ChartHeaderUIModel.headerValueText` — `candlestick_header` and `chart_header` return the finished header; read them.
 - **P19** **S** iOS `AssetSceneViewModel` computes `hasStakeBalance`, `hasAvailableBalance` and `isWalletEmpty` and passes them into `GemAssetDetailsInput`; Android computes the same — see **K1**.
-- **E1** **M** Rewards errors reach the user as `error.localizedDescription` — iOS `RewardsViewModel:268,279,314`, `CreateRewardsCodeViewModel:56`, `RedeemRewardsCodeViewModel:54`, `RewardsScene:104` — a Core error crosses as a display (§ 9); `GemRewardsService` answers `GemRewardsErrorDisplay` and the app maps its key.
-- **E2** **S** Security errors — iOS `SecurityViewModel:111,115,125,137` — same shape as **E1**.
-- **E3** **S** Wallet errors — iOS `WalletIDetailViewModel:118,141`, `ImportWalletSceneViewModel:194` — same shape; the import error family already exists in Core (`GemWalletImportError`).
-- **E4** **S** Asset and price-alert errors — iOS `AssetSceneViewModel:383`, `AssetPriceAlertsViewModel:92,100` — same shape.
-- **E5** **S** Connector errors — iOS `ConnectionsViewModel:120,132`; Android `WCAuthViewModel:120,133,190` (`AuthSceneState.Error(err.message)`) and `WCRequestViewModel:144` (`err.message.orEmpty()`) — `GemWalletConnectFailure` already crosses; the remaining raw messages need a display too.
-- **E6** **S** `ios/Features/Settings/.../Scenes/AddNodeScene.swift:140` formats an error inside the scene — the model owns it, and `GemAddNodeFailure` already has the display.
-- **E7** **S** `ConfirmTransferSceneViewModel:339` shows a Localized title with a raw `error.localizedDescription` body — `GemConfirmErrorDisplay` is the shape the load path already uses.
-- **E8** **S** `SwapSceneViewModel:451,478` and `ChartSceneViewModel:131` wrap `error.localizedDescription` into a Core error variant (`ComputeQuoteError(String)`, `.Core(msg:)`) — a string is not an error; the session takes the typed failure.
-- **E9** **S** `FiatSceneViewModel:337` shows `localizedDescription` of the quote-URL failure under a localized title — the fiat service answers a display the way the confirm load does (§ 9).
-- **E10** **S** Android `ProposalSceneViewModel:130` logs `error.message`; `FiatViewModel:183` and `SwapViewModel:361` cast unknown throwables into Core error variants — same shape as **E8**.
 
 
 

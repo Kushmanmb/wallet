@@ -286,12 +286,14 @@ extension ConfirmTransferSceneViewModel {
     func load() async {
         state.screen = state.screen.onLoadStarted()
         do {
-            state = try ConfirmTransferState(await confirmation.state(), screen: state.screen)
+            state = ConfirmTransferState(try await confirmation.state(), screen: state.screen)
             let load = try await confirmation.load(options: options(selection: feeSelection, feeAssetSelection: feeAssetSelection))
-            state = try ConfirmTransferState(load, screen: state.screen.onLoaded(load: load))
-        } catch {
+            state = ConfirmTransferState(load, screen: state.screen.onLoaded(load: load))
+        } catch let error as GemConfirmError {
             guard !Task.isCancelled else { return }
-            state.screen = state.screen.onLoadFailed(error: error.confirmError)
+            state.screen = state.screen.onLoadFailed(error: error)
+            debugLog("confirm load error: \(error)")
+        } catch {
             debugLog("confirm load error: \(error)")
         }
     }
@@ -341,9 +343,11 @@ extension ConfirmTransferSceneViewModel {
                 onComplete?()
             } catch GemConfirmError.Cancelled {
                 state.screen = state.screen.onExecuteCancelled()
+            } catch let error as GemConfirmError {
+                state.screen = state.screen.onExecuteFailed(error: error)
+                isPresentingAlertMessage = AlertMessage(title: Localized.Errors.transferError, message: error.display().localizedDescription)
+                debugLog("confirm transaction error: \(error)")
             } catch {
-                state.screen = state.screen.onExecuteFailed(error: error.confirmError)
-                isPresentingAlertMessage = AlertMessage(title: Localized.Errors.transferError, message: error.localizedDescription)
                 debugLog("confirm transaction error: \(error)")
             }
         }

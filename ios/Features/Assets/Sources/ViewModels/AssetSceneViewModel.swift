@@ -19,6 +19,7 @@ import Store
 import Style
 import SwiftUI
 import UIKit
+import enum Gemstone.GemServiceError
 
 @Observable
 @MainActor
@@ -379,8 +380,10 @@ public extension AssetSceneViewModel {
             do {
                 try await setPriceAlert(enabled: toggled == .enabled)
                 isPresentingToastMessage = .priceAlert(for: assetData.asset.name, enabled: toggled == .enabled)
+            } catch let error as GemServiceError {
+                isPresentingToastMessage = .error(error.text().text)
             } catch {
-                isPresentingToastMessage = .error(error.localizedDescription)
+                debugLog("asset scene: price alert error \(error)")
             }
         }
     }

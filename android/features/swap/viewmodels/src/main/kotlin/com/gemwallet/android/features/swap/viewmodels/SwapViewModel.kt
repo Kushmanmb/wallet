@@ -50,7 +50,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.math.BigDecimal
 import java.math.BigInteger
 import javax.inject.Inject
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -359,10 +358,8 @@ class SwapViewModel @Inject constructor(
                 onConfirm(ConfirmTransferInput(params))
             }
             session.update { it.onTransferHandedOff(transfer) }
-        } catch (err: CancellationException) {
-            throw err
-        } catch (err: Throwable) {
-            session.update { it.onTransferFailed(transfer, err as? SwapperException ?: SwapperException.ComputeQuoteException(err.message.orEmpty())) }
+        } catch (err: SwapperException) {
+            session.update { it.onTransferFailed(transfer, err) }
         }
     }
 

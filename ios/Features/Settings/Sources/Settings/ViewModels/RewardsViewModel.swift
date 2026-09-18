@@ -14,6 +14,7 @@ import Localization
 import Primitives
 import PrimitivesComponents
 import Style
+import enum Gemstone.GemServiceError
 
 @Observable
 @MainActor
@@ -251,8 +252,10 @@ public final class RewardsViewModel: Sendable {
             try await service.useReferralCode(wallet: selectedWallet, code: code)
             showActivatedToast()
             await load()
+        } catch let error as GemServiceError {
+            showError(error.text().text)
         } catch {
-            showError(error.localizedDescription)
+            debugLog("rewards error: \(error)")
         }
     }
 
@@ -262,8 +265,10 @@ public final class RewardsViewModel: Sendable {
             try await service.useReferralCode(wallet: selectedWallet, code: code)
             showActivatedToast()
             await load()
+        } catch let error as GemServiceError {
+            showError(error.text().text)
         } catch {
-            showError(error.localizedDescription)
+            debugLog("rewards error: \(error)")
         }
     }
 
@@ -297,8 +302,10 @@ public final class RewardsViewModel: Sendable {
         do {
             _ = try await service.redeem(wallet: selectedWallet, redemptionId: option.id)
             toastMessage = ToastMessage.success(Localized.Common.done)
+        } catch let error as GemServiceError {
+            showError(error.text().text)
         } catch {
-            showError(error.localizedDescription)
+            debugLog("rewards error: \(error)")
         }
     }
 

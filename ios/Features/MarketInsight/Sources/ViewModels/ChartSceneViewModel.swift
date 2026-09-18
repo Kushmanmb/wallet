@@ -127,8 +127,10 @@ public extension ChartSceneViewModel {
                     }
                 }
             }
+        } catch let error as GemServiceError {
+            session = session.onFailed(error: error)
         } catch {
-            session = session.onFailed(error: .Core(msg: error.localizedDescription))
+            debugLog("chart scene: load error \(error)")
         }
     }
 
