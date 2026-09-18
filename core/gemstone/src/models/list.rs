@@ -80,11 +80,15 @@ pub enum GemListRowTitle {
     Bandwidth,
     RewardsUnverified,
     RewardsPending,
+    Warning,
+    UnlimitedApproval,
+    NftCollectionApproval,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemNoticeKind {
     Error,
+    Warning,
     Info,
 }
 

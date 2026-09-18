@@ -7,13 +7,13 @@ import struct Gemstone.GemSimulationValue
 import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
-import struct Gemstone.GemSimulationWarningRow
+import enum Gemstone.GemListRow
 import struct Gemstone.SimulationResult
 import func Gemstone.simulationWarningRows
 
 struct ConfirmSimulationState {
     let result: SimulationResult?
-    let warnings: [GemSimulationWarningRow]
+    let warnings: [GemListRow]
     let hasCriticalWarning: Bool
     let payload: SimulationPayloadModel
     let headerData: GemSimulationValue?
@@ -21,7 +21,7 @@ struct ConfirmSimulationState {
 
     init(
         result: SimulationResult?,
-        warnings: [GemSimulationWarningRow],
+        warnings: [GemListRow],
         hasCriticalWarning: Bool,
         payload: SimulationPayloadModel,
         headerData: GemSimulationValue?,

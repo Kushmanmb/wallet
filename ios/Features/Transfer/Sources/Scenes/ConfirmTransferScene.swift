@@ -76,8 +76,8 @@ extension ConfirmTransferScene {
             } else {
                 ListItemView(model: model)
             }
-        case let .warnings(models):
-            SimulationWarningsContent(models: models)
+        case let .warnings(rows):
+            ForEach(rows, id: \.self) { GemListRowView(row: $0) }
         case let .balanceChange(model):
             ListItemView(model: model.listItem)
         case let .payload(models):

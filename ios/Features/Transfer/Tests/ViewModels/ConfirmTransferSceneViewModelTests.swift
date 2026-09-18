@@ -10,7 +10,7 @@ import enum Gemstone.GemConfirmRowContent
 import enum Gemstone.GemConfirmError
 import struct Gemstone.GemConfirmFailure
 import struct Gemstone.GemFeeRate
-import struct Gemstone.GemSimulationWarningRow
+import enum Gemstone.GemListRow
 import protocol Gemstone.GemNameServiceProtocol
 import struct Gemstone.GemTransferData
 import func Gemstone.addressCopy
@@ -232,7 +232,7 @@ struct ConfirmTransferSceneViewModelTests {
         await model.load()
         #expect(model.state.preload?.confirmData.feeRates.map(\.priority) == priorities)
 
-        model.state.simulation = .mock(warnings: [.mock(kind: .externallyOwnedSpender)])
+        model.state.simulation = .mock(warnings: [.notice(title: .warning, message: .externallyOwnedSpenderWarning, kind: .warning)])
         model.feeSelection = .priority(priority: .fast)
         await model.load()
 
@@ -418,7 +418,7 @@ struct ConfirmTransferSceneViewModelTests {
             ),
             load: .success(.mock(
                 simulation: .mock(primaryFields: rows),
-                warnings: [.mock()],
+                warnings: [.notice(title: .unlimitedApproval, message: .unlimitedApprovalWarning, kind: .warning)],
             )),
             rows: { _ in
                 [
@@ -475,7 +475,7 @@ struct ConfirmTransferSceneViewModelTests {
             ]),
         )
 
-        #expect(model.simulationWarnings.map(\.kind) == [.externallyOwnedSpender])
+        #expect(model.simulationWarnings == [.notice(title: .warning, message: .externallyOwnedSpenderWarning, kind: .warning)])
         #expect(model.button.state != .disabled)
     }
 
@@ -488,7 +488,7 @@ struct ConfirmTransferSceneViewModelTests {
             ]),
         )
 
-        #expect(model.simulationWarnings.map(\.kind) == [.validationError])
+        #expect(model.simulationWarnings == [.notice(title: .error, message: .text(text: "Unable to verify spender is a contract"), kind: .error)])
     }
 
     @Test

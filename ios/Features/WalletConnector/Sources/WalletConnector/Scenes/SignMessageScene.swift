@@ -49,7 +49,7 @@ public struct SignMessageScene: View {
 
             if model.hasWarnings {
                 Section {
-                    SimulationWarningsContent(models: model.simulationWarningModels)
+                    ForEach(model.simulationWarnings, id: \.self) { GemListRowView(row: $0) }
                 }
             }
 

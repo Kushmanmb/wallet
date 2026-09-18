@@ -16,7 +16,7 @@ import uniffi.gemstone.GemConnectionRow
 import uniffi.gemstone.GemSignMessagePreview
 import uniffi.gemstone.GemSimulationPayloadRow
 import uniffi.gemstone.GemSignMessageServiceInterface
-import uniffi.gemstone.GemSimulationWarningRow
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.MessageType
 import uniffi.gemstone.SignMessage as GemSignMessage
 import uniffi.gemstone.SimulationResult
@@ -62,7 +62,7 @@ sealed class WCRequest(
         override val message: String
             get() = preview.text
 
-        override val warnings: List<GemSimulationWarningRow>
+        override val warnings: List<GemListRow>
             get() = simulationWarningRows(simulation.warnings)
 
         override val hasCriticalWarning: Boolean

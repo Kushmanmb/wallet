@@ -6,7 +6,6 @@ use crate::models::list::GemListRow;
 use crate::models::transaction::{GemFeeOptionItem, GemTransactionLoadFee, GemTransactionLoadMetadata};
 use crate::services::balance::GemAssetBalance;
 use crate::services::localization::GemLocalizedText;
-use crate::services::simulation::GemSimulationWarningRow;
 use crate::services::simulation::{GemSimulationPayloadRow, address_requests, named_payload_rows};
 use crate::services::transactions::GemAmountSign;
 use crate::services::transfer::GemTransferData;
@@ -168,7 +167,7 @@ pub struct GemConfirmLoad {
 pub struct GemConfirmSimulationState {
     pub chain: Chain,
     pub result: Option<SimulationResult>,
-    pub warnings: Vec<GemSimulationWarningRow>,
+    pub warnings: Vec<GemListRow>,
     pub simulation: Option<GemConfirmSimulation>,
 }
 

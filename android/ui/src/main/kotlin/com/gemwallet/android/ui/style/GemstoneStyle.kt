@@ -77,12 +77,12 @@ fun GemValueTone.textStyle(): ListItemTextStyle = when (this) {
 @Composable
 fun GemNoticeKind.color(): Color = when (this) {
     GemNoticeKind.ERROR -> MaterialTheme.colorScheme.error
-    GemNoticeKind.INFO -> pendingColor
+    GemNoticeKind.WARNING, GemNoticeKind.INFO -> pendingColor
 }
 
 @Composable
 fun GemNoticeKind.icon(): ImageVector = when (this) {
-    GemNoticeKind.ERROR -> AppIcons.Warning
+    GemNoticeKind.ERROR, GemNoticeKind.WARNING -> AppIcons.Warning
     GemNoticeKind.INFO -> AppIcons.Info
 }
 

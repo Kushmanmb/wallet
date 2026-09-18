@@ -27,7 +27,7 @@ import SwiftUI
 import WalletConnector
 import struct Gemstone.GemSimulationPayloadRow
 import struct Gemstone.SimulationResult
-import struct Gemstone.GemSimulationWarningRow
+import enum Gemstone.GemListRow
 
 @Observable
 @MainActor
@@ -109,12 +109,8 @@ public final class ConfirmTransferSceneViewModel {
         return state.preload != nil
     }
 
-    var simulationWarnings: [GemSimulationWarningRow] {
+    var simulationWarnings: [GemListRow] {
         state.simulation.warnings
-    }
-
-    var simulationWarningModels: [SimulationWarningViewModel] {
-        simulationWarnings.map(SimulationWarningViewModel.init)
     }
 
     public var payloadModel: SimulationPayloadModel { state.simulation.payload }
@@ -179,7 +175,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
         case .header:
             ConfirmHeaderViewModel(request: request, state: state, currency: confirmation.currency)
         case .warnings:
-            ConfirmTransferItemModel.warnings(simulationWarningModels)
+            ConfirmTransferItemModel.warnings(simulationWarnings)
         case let .row(index):
             ConfirmRowViewModel(
                 content: rowContents[index],

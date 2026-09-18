@@ -47,8 +47,6 @@ import uniffi.gemstone.GemBalanceRowValue
 import uniffi.gemstone.FeeUnitType
 import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemRecipientSection
-import uniffi.gemstone.GemSimulationWarningKind
-import uniffi.gemstone.GemSimulationWarningRow
 import uniffi.gemstone.GemTransactionFilter
 import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStateTone
@@ -59,10 +57,8 @@ import uniffi.gemstone.GemWalletSecretKind
 import uniffi.gemstone.GemWalletSubtitle
 import uniffi.gemstone.LinkType
 import uniffi.gemstone.GemSimulationPayloadTitle
-import uniffi.gemstone.SimulationSeverity
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
-import uniffi.gemstone.GemSimulationWarningTitle
 import uniffi.gemstone.GemSlippageCheck
 import com.gemwallet.android.domains.duration.formatDuration
 
@@ -130,32 +126,6 @@ fun GemTransactionFilter.getLabel() = when (this) {
     GemTransactionFilter.OTHERS -> R.string.transfer_other_title
 }
 
-@StringRes
-fun GemSimulationWarningRow.titleRes(): Int = when (title) {
-    GemSimulationWarningTitle.WARNING -> R.string.common_warning
-    GemSimulationWarningTitle.ERROR -> R.string.errors_error_occurred
-    GemSimulationWarningTitle.NFT_COLLECTION_APPROVAL -> R.string.simulation_warning_nft_collection_approval_title
-    GemSimulationWarningTitle.UNLIMITED_APPROVAL -> R.string.simulation_warning_unlimited_token_approval_title
-}
-
-@StringRes
-fun GemSimulationWarningRow.descriptionRes(): Int? = when (kind) {
-    GemSimulationWarningKind.UNLIMITED_APPROVAL -> R.string.simulation_warning_unlimited_token_approval_description
-    GemSimulationWarningKind.EXTERNALLY_OWNED_SPENDER -> R.string.simulation_warning_externally_owned_spender_description
-    GemSimulationWarningKind.SUSPICIOUS_SPENDER -> R.string.common_suspicious_address
-    GemSimulationWarningKind.VALIDATION_ERROR -> if (severity == SimulationSeverity.CRITICAL) R.string.errors_error_occurred else null
-    GemSimulationWarningKind.NFT_COLLECTION_APPROVAL -> null
-}
-
-@Composable
-fun GemSimulationWarningRow.descriptionText(): String? = when (kind) {
-    GemSimulationWarningKind.VALIDATION_ERROR -> if (severity != SimulationSeverity.CRITICAL) message.orEmpty() else message ?: stringResource(R.string.errors_error_occurred)
-    GemSimulationWarningKind.UNLIMITED_APPROVAL,
-    GemSimulationWarningKind.NFT_COLLECTION_APPROVAL,
-    GemSimulationWarningKind.EXTERNALLY_OWNED_SPENDER,
-    GemSimulationWarningKind.SUSPICIOUS_SPENDER -> message ?: descriptionRes()?.let { stringResource(it) }
-}
-
 private fun perpetualTitle(context: Context, direction: uniffi.gemstone.PerpetualDirection?, @StringRes directionTitle: Int, @StringRes fallback: Int): String {
     val side = when (val side = direction?.toPrimitives()) {
         null -> return context.getString(fallback)
@@ -182,6 +152,10 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     GemLocalizedText.RewardsUnverified -> context.getString(R.string.rewards_unverified_description)
     is GemLocalizedText.RewardsPending -> context.getString(R.string.rewards_pending_description, countdown.formatDuration())
     GemLocalizedText.RewardsPendingReady -> context.getString(R.string.rewards_pending_description_ready)
+    GemLocalizedText.ErrorOccurred -> context.getString(R.string.errors_error_occurred)
+    GemLocalizedText.UnlimitedApprovalWarning -> context.getString(R.string.simulation_warning_unlimited_token_approval_description)
+    GemLocalizedText.ExternallyOwnedSpenderWarning -> context.getString(R.string.simulation_warning_externally_owned_spender_description)
+    GemLocalizedText.SuspiciousAddress -> context.getString(R.string.common_suspicious_address)
     is GemLocalizedText.FeeRate -> when (unit) {
         FeeUnitType.SAT_VB -> "${rate.text()} ${context.getString(R.string.fee_rate_satvB)}"
         FeeUnitType.GWEI -> "${rate.text()} ${context.getString(R.string.fee_rate_gwei)}"
@@ -532,6 +506,9 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.RESOURCE -> R.string.stake_resource
     GemListRowTitle.REWARDS_UNVERIFIED -> R.string.rewards_unverified_title
     GemListRowTitle.REWARDS_PENDING -> R.string.rewards_pending_title
+    GemListRowTitle.WARNING -> R.string.common_warning
+    GemListRowTitle.UNLIMITED_APPROVAL -> R.string.simulation_warning_unlimited_token_approval_title
+    GemListRowTitle.NFT_COLLECTION_APPROVAL -> R.string.simulation_warning_nft_collection_approval_title
     GemListRowTitle.PRICE -> R.string.asset_price
     GemListRowTitle.PNL -> R.string.perpetual_pnl
     GemListRowTitle.PIN -> R.string.common_pin

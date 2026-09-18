@@ -15,12 +15,12 @@ import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.GemConfirmSimulationState
 import uniffi.gemstone.GemConfirmationInterface
 import uniffi.gemstone.GemSimulationBalanceChange
-import uniffi.gemstone.GemSimulationWarningRow
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemValueStyle
 import uniffi.gemstone.GemValueTone
 
 data class Simulation(
-    val warnings: List<GemSimulationWarningRow> = emptyList(),
+    val warnings: List<GemListRow> = emptyList(),
     val hasCriticalWarning: Boolean = false,
     val primaryPayloadFields: List<PayloadField> = emptyList(),
     val secondaryPayloadFields: List<PayloadField> = emptyList(),

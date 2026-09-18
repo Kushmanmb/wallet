@@ -6,6 +6,7 @@ import enum Gemstone.GemPriceAlertToggle
 import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemListRowIcon
+import enum Gemstone.GemNoticeKind
 import enum Gemstone.GemTransactionStateTone
 import enum Gemstone.LinkType
 import struct Gemstone.GemPriceAlertRow
@@ -107,6 +108,15 @@ extension LinkType {
         case .instagram: Images.Social.instagram
         case .magicEden: Images.Social.magiceden
         case .tikTok: Images.Social.tiktok
+        }
+    }
+}
+
+extension GemNoticeKind {
+    var color: Color {
+        switch self {
+        case .error: Colors.red
+        case .warning, .info: Colors.orange
         }
     }
 }

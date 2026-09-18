@@ -113,7 +113,7 @@ struct SignMessageSceneViewModelTests {
 
         let viewModel = SignMessageSceneViewModel.mock(request: payload)
 
-        #expect(viewModel.simulationWarnings.map(\.kind) == [.unlimitedApproval])
+        #expect(viewModel.simulationWarnings == [.notice(title: .unlimitedApproval, message: .unlimitedApprovalWarning, kind: .warning)])
     }
 
     @Test
@@ -140,7 +140,7 @@ struct SignMessageSceneViewModelTests {
 
         let viewModel = SignMessageSceneViewModel.mock(request: payload)
 
-        #expect(viewModel.simulationWarnings.map(\.kind) == [.externallyOwnedSpender])
+        #expect(viewModel.simulationWarnings == [.notice(title: .warning, message: .externallyOwnedSpenderWarning, kind: .warning)])
         #expect(!viewModel.isButtonDisabled)
     }
 
@@ -154,8 +154,7 @@ struct SignMessageSceneViewModelTests {
 
         let viewModel = SignMessageSceneViewModel.mock(request: payload)
 
-        #expect(viewModel.simulationWarnings.count == 1)
-        #expect(viewModel.simulationWarnings.first?.kind == .externallyOwnedSpender)
+        #expect(viewModel.simulationWarnings == [.notice(title: .warning, message: .externallyOwnedSpenderWarning, kind: .warning)])
         #expect(!viewModel.isButtonDisabled)
         #expect(viewModel.payloadModel.hasFields)
         #expect(viewModel.payloadModel.primaryFields.contains { row in
@@ -176,7 +175,7 @@ struct SignMessageSceneViewModelTests {
 
         let viewModel = SignMessageSceneViewModel.mock(request: payload)
 
-        #expect(viewModel.simulationWarnings.map(\.kind) == [.validationError])
+        #expect(viewModel.simulationWarnings == [.notice(title: .error, message: .text(text: "Unable to verify spender is a contract"), kind: .error)])
     }
 
     @Test

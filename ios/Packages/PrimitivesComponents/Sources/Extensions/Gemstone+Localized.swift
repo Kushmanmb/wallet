@@ -31,8 +31,6 @@ import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemPriceAlertText
 import enum Gemstone.GemRecipientErrorDisplay
 import enum Gemstone.GemCopyKind
-import enum Gemstone.GemSimulationWarningKind
-import enum Gemstone.GemSimulationWarningTitle
 import enum Gemstone.GemSimulationPayloadTitle
 import enum Gemstone.GemTransactionRowSubtitle
 import enum Gemstone.GemTransactionStateTone
@@ -85,6 +83,14 @@ extension GemLocalizedText {
             CountdownFormatter().string(parts: countdown).map { Localized.Rewards.Pending.description($0) } ?? .empty
         case .rewardsPendingReady:
             Localized.Rewards.Pending.descriptionReady
+        case .errorOccurred:
+            Localized.Errors.errorOccurred
+        case .unlimitedApprovalWarning:
+            Localized.Simulation.Warning.UnlimitedTokenApproval.description
+        case .externallyOwnedSpenderWarning:
+            Localized.Simulation.warningExternallyOwnedSpenderDescription
+        case .suspiciousAddress:
+            Localized.Common.suspiciousAddress
         }
     }
 }
@@ -183,18 +189,6 @@ extension GemWalletSubtitle {
         switch self {
         case .multicoin: Localized.Wallet.multicoin
         case let .address(value): value
-        }
-    }
-}
-
-extension GemSimulationWarningKind {
-    var defaultMessage: String? {
-        switch self {
-        case .unlimitedApproval: Localized.Simulation.Warning.UnlimitedTokenApproval.description
-        case .validationError: Localized.Errors.errorOccurred
-        case .externallyOwnedSpender: Localized.Simulation.warningExternallyOwnedSpenderDescription
-        case .suspiciousSpender: Localized.Common.suspiciousAddress
-        case .nftCollectionApproval: nil
         }
     }
 }
@@ -594,17 +588,6 @@ extension GemRecipientErrorDisplay: @retroactive LocalizedError {
     }
 }
 
-extension GemSimulationWarningTitle {
-    var text: String {
-        switch self {
-        case .warning: Localized.Common.warning
-        case .error: Localized.Errors.errorOccurred
-        case .unlimitedApproval: Localized.Simulation.Warning.UnlimitedTokenApproval.title
-        case .nftCollectionApproval: Localized.Simulation.Warning.NftCollectionApproval.title
-        }
-    }
-}
-
 public extension GemListSectionTitle {
     var text: String? {
         switch self {
@@ -688,6 +671,9 @@ public extension GemListRowTitle {
         case .bandwidth: Localized.Stake.Resource.bandwidth
         case .rewardsUnverified: Localized.Rewards.Unverified.title
         case .rewardsPending: Localized.Rewards.Pending.title
+        case .warning: Localized.Common.warning
+        case .unlimitedApproval: Localized.Simulation.Warning.UnlimitedTokenApproval.title
+        case .nftCollectionApproval: Localized.Simulation.Warning.NftCollectionApproval.title
         }
     }
 }

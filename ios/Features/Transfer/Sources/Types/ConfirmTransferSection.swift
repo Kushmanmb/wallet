@@ -45,7 +45,7 @@ public enum ConfirmTransferItemModel {
     case networkFee(ListItemModel, selectable: Bool)
     case perpetualDetails(PerpetualDetailsViewModel)
     case perpetualModifyPosition(PerpetualModifyViewModel)
-    case warnings([SimulationWarningViewModel])
+    case warnings([GemListRow])
     case payload([SimulationPayloadFieldViewModel])
     case balanceChange(ConfirmBalanceChangeViewModel)
     case error(title: String, error: Error, onInfoAction: VoidAction)

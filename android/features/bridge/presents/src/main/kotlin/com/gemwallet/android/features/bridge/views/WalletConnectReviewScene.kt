@@ -23,11 +23,12 @@ import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.simulation.simulationPayloadFieldsContent
-import com.gemwallet.android.ui.components.simulation.simulationWarningsContent
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.requestAuth
 import com.gemwallet.android.ui.theme.paddingDefault
+import com.gemwallet.android.ui.components.list_item.GemListRowView
+import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 
 @Composable
 internal fun WalletConnectReviewScene(
@@ -80,7 +81,7 @@ internal fun WalletConnectReviewScene(
             item {
                 PropertyNetworkItem(model.chain, listPosition = ListPosition.Last)
             }
-            simulationWarningsContent(model.warnings)
+            itemsPositioned(model.warnings) { position, row -> GemListRowView(row = row, listPosition = position) }
             if (model.hasPayload) {
                 simulationPayloadFieldsContent(
                     fields = model.primaryPayloadFields,

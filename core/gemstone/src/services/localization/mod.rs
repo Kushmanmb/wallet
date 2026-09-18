@@ -17,4 +17,8 @@ pub enum GemLocalizedText {
     RewardsUnverified,
     RewardsPending { countdown: Vec<GemDurationPart> },
     RewardsPendingReady,
+    ErrorOccurred,
+    UnlimitedApprovalWarning,
+    ExternallyOwnedSpenderWarning,
+    SuspiciousAddress,
 }

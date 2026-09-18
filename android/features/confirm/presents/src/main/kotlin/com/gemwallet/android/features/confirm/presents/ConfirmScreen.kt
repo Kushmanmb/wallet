@@ -58,7 +58,6 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.SheetExpansion
 import com.gemwallet.android.ui.components.simulation.simulationPayloadDetailsContent
 import com.gemwallet.android.ui.components.simulation.simulationPayloadFieldsContent
-import com.gemwallet.android.ui.components.simulation.simulationWarningsContent
 import com.gemwallet.android.ui.components.swap.SwapDetailsBottomSheet
 import com.gemwallet.android.ui.components.swap.SwapDetailsSummaryItem
 import com.gemwallet.android.ui.localization.string
@@ -70,6 +69,7 @@ import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.ChainAddress
 import uniffi.gemstone.SimulationResult
+import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -197,7 +197,7 @@ fun ConfirmScreen(
                     onClick = { selectedDetailElement = item },
                 )
             }
-            simulationWarningsContent(simulation.warnings)
+            itemsPositioned(simulation.warnings) { position, row -> GemListRowView(row = row, listPosition = position) }
             simulationPayloadFieldsContent(
                 fields = simulation.primaryPayloadFields,
                 onDetailsClick = simulation.secondaryPayloadFields

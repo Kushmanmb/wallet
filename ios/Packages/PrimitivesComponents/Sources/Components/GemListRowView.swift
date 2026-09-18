@@ -40,7 +40,7 @@ public struct GemListRowView: View {
         switch row.item(onInfo: onInfo) {
         case let .notice(title, message, kind):
             switch kind {
-            case .error: ListItemErrorView(errorTitle: title, error: AnyError(message ?? ""))
+            case .error, .warning: ListItemErrorView(errorTitle: message.map { _ in title }, errorImageColor: kind.color, error: AnyError(message ?? title))
             case .info: ListItemInfoView(title: title, description: message)
             }
         case let .listItem(model):

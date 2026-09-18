@@ -3,7 +3,7 @@
 import struct Gemstone.ApprovalData
 public import struct Gemstone.AssetPrice
 public import struct Gemstone.SimulationResult
-public import struct Gemstone.GemSimulationWarningRow
+public import enum Gemstone.GemListRow
 import struct Gemstone.GemConfirmInput
 public import BigInt
 public import enum Gemstone.FeePriority
@@ -152,7 +152,7 @@ public extension GemConfirmLoad {
         metadata: GemConfirmMetadata = .mock(),
         feeAssets: [GemFeeAsset] = [],
         simulation: GemConfirmSimulation? = nil,
-        warnings: [GemSimulationWarningRow] = [],
+        warnings: [GemListRow] = [],
         addressName: Primitives.AddressName? = nil,
         preload: GemConfirmPreload? = .mock(),
     ) -> GemConfirmLoad {

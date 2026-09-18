@@ -19,6 +19,8 @@ use primitives::{
 };
 
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
+use crate::models::list::{GemListRow, GemListRowTitle, GemNoticeKind};
+use crate::services::localization::GemLocalizedText;
 use crate::models::custom_types::GemBigInt;
 use crate::{
     GemstoneError,
@@ -329,8 +331,8 @@ fn timestamp_unix_ms(value: &str) -> Option<i64> {
     chrono::DateTime::parse_from_rfc3339(value).ok().map(|date| date.timestamp_millis())
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemSimulationWarningKind {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum WarningKind {
     UnlimitedApproval,
     NftCollectionApproval,
     ExternallyOwnedSpender,
@@ -338,61 +340,62 @@ pub enum GemSimulationWarningKind {
     ValidationError,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemSimulationWarningTitle {
-    Warning,
-    Error,
-    UnlimitedApproval,
-    NftCollectionApproval,
-}
+impl WarningKind {
+    fn title(self, severity: SimulationSeverity) -> GemListRowTitle {
+        match self {
+            Self::UnlimitedApproval => GemListRowTitle::UnlimitedApproval,
+            Self::NftCollectionApproval => GemListRowTitle::NftCollectionApproval,
+            Self::ExternallyOwnedSpender => GemListRowTitle::Warning,
+            Self::SuspiciousSpender => GemListRowTitle::Error,
+            Self::ValidationError => match severity {
+                SimulationSeverity::Critical => GemListRowTitle::Error,
+                SimulationSeverity::Low | SimulationSeverity::Warning => GemListRowTitle::Warning,
+            },
+        }
+    }
 
-impl GemSimulationWarningTitle {
-    fn of(kind: GemSimulationWarningKind, severity: SimulationSeverity) -> Self {
-        match kind {
-            GemSimulationWarningKind::UnlimitedApproval => Self::UnlimitedApproval,
-            GemSimulationWarningKind::NftCollectionApproval => Self::NftCollectionApproval,
-            GemSimulationWarningKind::ExternallyOwnedSpender => Self::Warning,
-            GemSimulationWarningKind::SuspiciousSpender => Self::Error,
-            GemSimulationWarningKind::ValidationError => match severity {
-                SimulationSeverity::Critical => Self::Error,
-                SimulationSeverity::Low | SimulationSeverity::Warning => Self::Warning,
+    fn default_message(self, severity: SimulationSeverity) -> Option<GemLocalizedText> {
+        match self {
+            Self::UnlimitedApproval => Some(GemLocalizedText::UnlimitedApprovalWarning),
+            Self::ExternallyOwnedSpender => Some(GemLocalizedText::ExternallyOwnedSpenderWarning),
+            Self::SuspiciousSpender => Some(GemLocalizedText::SuspiciousAddress),
+            Self::NftCollectionApproval => None,
+            Self::ValidationError => match severity {
+                SimulationSeverity::Critical => Some(GemLocalizedText::ErrorOccurred),
+                SimulationSeverity::Low | SimulationSeverity::Warning => None,
             },
         }
     }
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
-pub struct GemSimulationWarningRow {
-    pub kind: GemSimulationWarningKind,
-    pub title: GemSimulationWarningTitle,
-    pub severity: SimulationSeverity,
-    pub message: Option<String>,
-}
-
 #[uniffi::export]
-pub fn simulation_warning_rows(warnings: Vec<SimulationWarning>) -> Vec<GemSimulationWarningRow> {
+pub fn simulation_warning_rows(warnings: Vec<SimulationWarning>) -> Vec<GemListRow> {
     warning_rows(&warnings)
 }
 
-pub fn warning_rows(warnings: &[SimulationWarning]) -> Vec<GemSimulationWarningRow> {
+pub fn warning_rows(warnings: &[SimulationWarning]) -> Vec<GemListRow> {
     warnings
         .iter()
         .filter_map(|warning| {
             let kind = match &warning.warning {
-                SimulationWarningType::TokenApproval(approval) | SimulationWarningType::PermitApproval(approval) => {
-                    approval.value.is_none().then_some(GemSimulationWarningKind::UnlimitedApproval)
-                }
-                SimulationWarningType::PermitBatchApproval(value) => value.is_none().then_some(GemSimulationWarningKind::UnlimitedApproval),
-                SimulationWarningType::NftCollectionApproval(_) => Some(GemSimulationWarningKind::NftCollectionApproval),
-                SimulationWarningType::ExternallyOwnedSpender => Some(GemSimulationWarningKind::ExternallyOwnedSpender),
-                SimulationWarningType::SuspiciousSpender => Some(GemSimulationWarningKind::SuspiciousSpender),
-                SimulationWarningType::ValidationError => Some(GemSimulationWarningKind::ValidationError),
+                SimulationWarningType::TokenApproval(approval) | SimulationWarningType::PermitApproval(approval) => approval.value.is_none().then_some(WarningKind::UnlimitedApproval),
+                SimulationWarningType::PermitBatchApproval(value) => value.is_none().then_some(WarningKind::UnlimitedApproval),
+                SimulationWarningType::NftCollectionApproval(_) => Some(WarningKind::NftCollectionApproval),
+                SimulationWarningType::ExternallyOwnedSpender => Some(WarningKind::ExternallyOwnedSpender),
+                SimulationWarningType::SuspiciousSpender => Some(WarningKind::SuspiciousSpender),
+                SimulationWarningType::ValidationError => Some(WarningKind::ValidationError),
             }?;
-            Some(GemSimulationWarningRow {
-                kind,
-                title: GemSimulationWarningTitle::of(kind, warning.severity),
-                severity: warning.severity,
-                message: warning.message.clone(),
+            Some(GemListRow::Notice {
+                title: kind.title(warning.severity),
+                message: warning
+                    .message
+                    .clone()
+                    .map(|text| GemLocalizedText::Text { text })
+                    .or_else(|| kind.default_message(warning.severity)),
+                kind: match warning.severity {
+                    SimulationSeverity::Critical => GemNoticeKind::Error,
+                    SimulationSeverity::Low | SimulationSeverity::Warning => GemNoticeKind::Warning,
+                },
             })
         })
         .collect()
@@ -426,37 +429,59 @@ mod tests {
             SimulationWarning::mock(SimulationWarningType::SuspiciousSpender),
             SimulationWarning::validation_error("Chain ID mismatch"),
         ]);
-        let kinds: Vec<GemSimulationWarningKind> = rows.iter().map(|row| row.kind).collect();
+        let notice = |title: GemListRowTitle, message: Option<GemLocalizedText>| GemListRow::Notice {
+            title,
+            message,
+            kind: GemNoticeKind::Warning,
+        };
+        let unlimited = notice(GemListRowTitle::UnlimitedApproval, Some(GemLocalizedText::UnlimitedApprovalWarning));
+
         assert_eq!(
-            kinds,
+            rows,
             vec![
-                GemSimulationWarningKind::UnlimitedApproval,
-                GemSimulationWarningKind::UnlimitedApproval,
-                GemSimulationWarningKind::UnlimitedApproval,
-                GemSimulationWarningKind::NftCollectionApproval,
-                GemSimulationWarningKind::ExternallyOwnedSpender,
-                GemSimulationWarningKind::SuspiciousSpender,
-                GemSimulationWarningKind::ValidationError,
+                unlimited.clone(),
+                unlimited.clone(),
+                unlimited,
+                notice(GemListRowTitle::NftCollectionApproval, None),
+                notice(GemListRowTitle::Warning, Some(GemLocalizedText::ExternallyOwnedSpenderWarning)),
+                notice(GemListRowTitle::Error, Some(GemLocalizedText::SuspiciousAddress)),
+                GemListRow::Notice {
+                    title: GemListRowTitle::Error,
+                    message: Some(GemLocalizedText::Text {
+                        text: "Chain ID mismatch".to_string()
+                    }),
+                    kind: GemNoticeKind::Error,
+                },
             ]
         );
-        let error = rows.last().unwrap();
-        assert_eq!((error.severity, error.message.as_deref()), (SimulationSeverity::Critical, Some("Chain ID mismatch")));
-        let titles: Vec<GemSimulationWarningTitle> = rows.iter().map(|row| row.title).collect();
+    }
+
+    #[test]
+    fn test_a_warning_without_its_own_message_reads_the_kind_default() {
+        let critical = SimulationWarning {
+            message: None,
+            ..SimulationWarning::validation_error("")
+        };
         assert_eq!(
-            titles,
-            vec![
-                GemSimulationWarningTitle::UnlimitedApproval,
-                GemSimulationWarningTitle::UnlimitedApproval,
-                GemSimulationWarningTitle::UnlimitedApproval,
-                GemSimulationWarningTitle::NftCollectionApproval,
-                GemSimulationWarningTitle::Warning,
-                GemSimulationWarningTitle::Error,
-                GemSimulationWarningTitle::Error,
-            ]
+            warning_rows(&[critical]),
+            vec![GemListRow::Notice {
+                title: GemListRowTitle::Error,
+                message: Some(GemLocalizedText::ErrorOccurred),
+                kind: GemNoticeKind::Error,
+            }]
         );
+        let low = SimulationWarning {
+            message: None,
+            severity: SimulationSeverity::Warning,
+            ..SimulationWarning::validation_error("")
+        };
         assert_eq!(
-            GemSimulationWarningTitle::of(GemSimulationWarningKind::ValidationError, SimulationSeverity::Warning),
-            GemSimulationWarningTitle::Warning
+            warning_rows(&[low]),
+            vec![GemListRow::Notice {
+                title: GemListRowTitle::Warning,
+                message: None,
+                kind: GemNoticeKind::Warning,
+            }]
         );
     }
 
