@@ -11,13 +11,19 @@ lint:
 test:
     cargo test --lib
 
-export ANDROID_HOME := env("ANDROID_HOME", "~/Library/Android/sdk")
+export ANDROID_HOME := env("ANDROID_HOME", home_directory() / "Library/Android/sdk")
 export CARGO_NDK_VERSION := env("CARGO_NDK_VERSION", "4.1.2")
 
 install-ndk:
     #!/usr/bin/env bash
     SDK_MANAGER=${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager
     NDK="ndk;28.1.13356709"
+
+    if [ ! -x "$SDK_MANAGER" ]; then
+        echo "sdkmanager not found at $SDK_MANAGER"
+        echo "Install the Android SDK Command-line Tools (Android Studio > Settings > Android SDK > SDK Tools) or set ANDROID_HOME to your SDK"
+        exit 1
+    fi
 
     echo "Installing ndk: $NDK"
     $SDK_MANAGER --install $NDK
