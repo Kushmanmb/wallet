@@ -106,7 +106,6 @@ class AssetDetailsViewModelTest {
         priceAlerts.emit(listOf(mockPriceAlert(assetId = asset.id)))
         val uiModel = viewModel.uiModel.first { it != null }!!
 
-        assertEquals("1", uiModel.detailsState.priceAlertsCountText)
         assertEquals(GemPriceAlertToggle.ENABLED, uiModel.detailsState.priceAlert)
     }
 

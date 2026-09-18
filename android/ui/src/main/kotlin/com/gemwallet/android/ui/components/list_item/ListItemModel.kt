@@ -65,6 +65,7 @@ enum class ListItemSymbol {
     Paste,
     QrScanner,
     Pin,
+    Unpin,
     AddCircle,
     Buy,
     Swap,

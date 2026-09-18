@@ -14,6 +14,8 @@ pub enum GemListSectionTitle {
     None,
     Balances,
     Community,
+    Manage,
+    Resources,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -70,6 +72,12 @@ pub enum GemListRowTitle {
     Resource,
     Price,
     Pnl,
+    Pin,
+    Unpin,
+    AddToWallet,
+    PriceAlerts,
+    Energy,
+    Bandwidth,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -112,6 +120,9 @@ pub enum GemListRowIcon {
     Networks,
     Contacts,
     Perpetuals,
+    Pin,
+    Unpin,
+    AddToWallet,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]

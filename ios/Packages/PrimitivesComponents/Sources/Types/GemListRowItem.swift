@@ -64,7 +64,7 @@ extension GemListRow {
         case let .picker(title, value, icon):
             .picker(listItem(title: title, value: value, icon: icon), title: title)
         case let .toggle(title, value, icon, isOn):
-            .toggle(label: toggleLabel(title: title, value: value), title: title, isOn: isOn, imageStyle: .settings(assetImage: icon.assetImage))
+            .toggle(label: toggleLabel(title: title, value: value), title: title, isOn: isOn, imageStyle: icon.imageStyle)
         case let .url(title, value, icon, url, target):
             urlItem(title: title, value: value, icon: icon, url: url, target: target)
         case let .social(links):
@@ -101,7 +101,7 @@ extension GemListRow {
     }
 
     private func listItem(title: GemListRowTitle, value: String?, icon: GemListRowIcon) -> ListItemModel {
-        ListItemModel(title: title.text, subtitle: value, imageStyle: .settings(assetImage: icon.assetImage))
+        ListItemModel(title: title.text, subtitle: value, imageStyle: icon.imageStyle)
     }
 
     private func urlItem(title: GemListRowTitle, value: String?, icon: GemListRowIcon, url: String, target: GemUrlTarget) -> GemListRowItem {

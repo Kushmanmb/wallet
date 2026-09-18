@@ -146,13 +146,22 @@ impl GemAssetDetailsService {
             price,
             banner_events,
             price_alerts,
+            fee_balance_metadata,
         } = input;
         let chain = asset.chain();
         let has_balance = balance.available > GemBigUint::ZERO;
         GemAssetDetails {
             title: rules::asset_title(&asset),
-            balance_rows: rules::balance_rows(&asset, &metadata, &balance),
-            state: rules::details_state(wallet_type, chain, &metadata, &balance, &banner_events, price, price_alerts),
+            state: rules::details_state(wallet_type, &metadata, &banner_events, &price_alerts),
+            sections: rules::details_sections(rules::DetailsSectionsInput {
+                wallet_type,
+                asset: &asset,
+                metadata: &metadata,
+                balance: &balance,
+                price,
+                price_alerts: &price_alerts,
+                fee_balance_metadata,
+            }),
             explorer_name: self.explorer.get_explorer_name(chain),
             address_link: owner_address.map(|address| self.explorer.get_address_url(chain, address)),
             token_link: asset.id.token_id.clone().and_then(|token_id| self.explorer.get_token_url(chain, token_id)),

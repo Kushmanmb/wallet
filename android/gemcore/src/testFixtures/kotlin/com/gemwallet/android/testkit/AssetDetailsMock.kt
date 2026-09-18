@@ -2,7 +2,7 @@ package com.gemwallet.android.testkit
 
 import com.gemwallet.android.ext.toIdentifier
 import com.wallet.core.primitives.Asset
-import uniffi.gemstone.GemAssetBalanceRow
+import uniffi.gemstone.GemAssetDetailSection
 import uniffi.gemstone.GemAssetDetails
 import uniffi.gemstone.GemAssetDetailsState
 import uniffi.gemstone.GemSwapPairSuggestion
@@ -10,10 +10,10 @@ import uniffi.gemstone.GemSwapPairSuggestion
 fun mockGemAssetDetails(
     asset: Asset = mockAsset(),
     state: GemAssetDetailsState = mockGemAssetDetailsState(),
-    balanceRows: List<GemAssetBalanceRow> = emptyList(),
+    sections: List<GemAssetDetailSection> = emptyList(),
 ) = GemAssetDetails(
     state = state,
-    balanceRows = balanceRows,
+    sections = sections,
     title = asset.name,
     explorerName = "Explorer",
     addressLink = null,

@@ -1,15 +1,16 @@
 package com.gemwallet.android.features.asset.viewmodels.details.models
 
+import androidx.annotation.StringRes
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.ui.components.banner.BannerRowUIModel
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.AssetType
-import com.wallet.core.primitives.BalanceMetadata
 import com.wallet.core.primitives.VerificationStatus
 import uniffi.gemstone.GemAssetDetailsState
 import uniffi.gemstone.GemBalanceRow
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemAssetNetworkDestination
 import uniffi.gemstone.GemPriceAlertToggle
 import uniffi.gemstone.GemValueTone
@@ -37,10 +38,8 @@ class AssetInfoUIModel(
     val priceAlertMenu: PriceAlertMenuUIModel = GemPriceAlertToggle.DISABLED.menu(),
     val emptyTransactions: EmptyTransactionsUIModel = EmptyTransactionsUIModel(showsBuy = false, showsSwap = false),
     val banners: List<BannerRowUIModel>,
-    val pinListItem: ListItemModel = ListItemModel(title = ""),
-    val addListItem: ListItemModel = ListItemModel(title = ""),
     val priceListItem: ListItemModel = ListItemModel(title = ""),
-    val priceAlertsListItem: ListItemModel = ListItemModel(title = ""),
+    val sections: List<SectionUIModel> = emptyList(),
 ) {
 
     val asset: Asset get() = assetInfo.asset
@@ -49,15 +48,17 @@ class AssetInfoUIModel(
         val totalBalance: String = "0",
         val totalFiat: String = "",
         val owner: String = "",
-        val balances: List<BalanceUIModel> = emptyList(),
-        val balanceMetadata: BalanceMetadata? = null,
     )
 
-    data class BalanceUIModel(
-        val type: BalanceViewType,
-        val model: ListItemModel,
-        val url: String? = null,
-    )
+    data class SectionUIModel(@StringRes val title: Int?, val rows: List<RowUIModel>)
+
+    sealed interface RowUIModel {
+        data object Price : RowUIModel
+        data class Network(val name: String) : RowUIModel
+        data class Balance(val type: BalanceViewType, val model: ListItemModel, val url: String? = null) : RowUIModel
+        data class Earn(val model: ListItemModel) : RowUIModel
+        data class Row(val row: GemListRow) : RowUIModel
+    }
 
     enum class BalanceViewType {
         Available,

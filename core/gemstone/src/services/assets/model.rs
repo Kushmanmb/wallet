@@ -1,5 +1,9 @@
-use primitives::{Asset, AssetId, AssetMetaData, AssetType, BannerEvent, BlockExplorerLink, Chain, PriceAlert, RecentActivityType, VerificationStatus, WalletType};
+use primitives::{
+    Asset, AssetId, AssetMetaData, AssetType, BalanceMetadata, BannerEvent, BlockExplorerLink, Chain, PriceAlert, RecentActivityType, VerificationStatus, WalletType,
+};
 
+use crate::formatted_number::GemFormattedNumber;
+use crate::models::list::{GemListRow, GemListSectionTitle};
 use crate::services::balance::{GemAssetBalance, GemAssetBalanceRow};
 use crate::services::price_alert::rules::GemPriceAlertToggle;
 use crate::services::swap::GemSwapPairSuggestion;
@@ -466,13 +470,23 @@ pub struct GemAssetDetailsState {
     pub is_view_only: bool,
     pub header_actions: GemHeaderActions,
     pub shows_banners: bool,
-    pub shows_manage: bool,
-    pub shows_resources: bool,
-    pub shows_price_alerts: bool,
-    pub price_alerts_count_text: String,
     pub price_alert: GemPriceAlertToggle,
-    pub shows_earn: bool,
     pub empty_transactions_action: Option<GemAssetEmptyAction>,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemAssetDetailRow {
+    Price,
+    Network { name: String },
+    Balance { row: GemAssetBalanceRow },
+    Earn { apr: Option<GemFormattedNumber> },
+    Row { row: GemListRow },
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAssetDetailSection {
+    pub title: GemListSectionTitle,
+    pub rows: Vec<GemAssetDetailRow>,
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
@@ -485,12 +499,13 @@ pub struct GemAssetDetailsInput {
     pub price: Option<f64>,
     pub banner_events: Vec<BannerEvent>,
     pub price_alerts: Vec<PriceAlert>,
+    pub fee_balance_metadata: Option<BalanceMetadata>,
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct GemAssetDetails {
     pub state: GemAssetDetailsState,
-    pub balance_rows: Vec<GemAssetBalanceRow>,
+    pub sections: Vec<GemAssetDetailSection>,
     pub title: String,
     pub explorer_name: String,
     pub address_link: Option<BlockExplorerLink>,

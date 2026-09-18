@@ -86,6 +86,7 @@ fun ListItemSymbol.vector(): ImageVector = when (this) {
     ListItemSymbol.Paste -> AppIcons.ContentPaste
     ListItemSymbol.QrScanner -> AppIcons.QrCodeScanner
     ListItemSymbol.Pin -> AppIcons.PushPin
+    ListItemSymbol.Unpin -> AppIcons.KeepOff
     ListItemSymbol.AddCircle -> AppIcons.AddCircleOutlined
     ListItemSymbol.Buy -> AppIcons.Buy
     ListItemSymbol.Swap -> AppIcons.SwapVert

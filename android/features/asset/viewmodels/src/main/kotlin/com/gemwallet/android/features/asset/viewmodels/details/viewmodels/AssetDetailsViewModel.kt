@@ -142,6 +142,7 @@ class AssetDetailsViewModel @Inject constructor(
                 price = assetInfo.price?.price?.price,
                 bannerEvents = banners.map { row -> row.banner.event.toGem() },
                 priceAlerts = priceAlerts.map { alert -> alert.toGem() },
+                feeBalanceMetadata = chainInfo.feeAssetInfo.balance.metadata?.toGem(),
             )
         )
         return assetInfoUIModelFactory.create(chainAssetInfo = chainInfo, details = details, banners = banners)

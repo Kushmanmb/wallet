@@ -597,6 +597,8 @@ public extension GemListSectionTitle {
         case .none: nil
         case .balances: Localized.Asset.balances
         case .community: Localized.Settings.community
+        case .manage: Localized.Common.manage
+        case .resources: Localized.Asset.resources
         }
     }
 }
@@ -665,6 +667,12 @@ public extension GemListRowTitle {
         case .resource: Localized.Stake.resource
         case .price: Localized.Asset.price
         case .pnl: Localized.Perpetual.pnl
+        case .pin: Localized.Common.pin
+        case .unpin: Localized.Common.unpin
+        case .addToWallet: Localized.Asset.addToWallet
+        case .priceAlerts: Localized.Settings.PriceAlerts.title
+        case .energy: Localized.Stake.Resource.energy
+        case .bandwidth: Localized.Stake.Resource.bandwidth
         }
     }
 }

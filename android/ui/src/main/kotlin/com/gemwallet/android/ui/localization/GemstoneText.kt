@@ -464,6 +464,8 @@ fun GemListSectionTitle.titleRes(): Int? = when (this) {
     GemListSectionTitle.NONE -> null
     GemListSectionTitle.BALANCES -> R.string.asset_balances
     GemListSectionTitle.COMMUNITY -> R.string.settings_community
+    GemListSectionTitle.MANAGE -> R.string.common_manage
+    GemListSectionTitle.RESOURCES -> R.string.asset_resources
 }
 
 @StringRes
@@ -520,6 +522,12 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.RESOURCE -> R.string.stake_resource
     GemListRowTitle.PRICE -> R.string.asset_price
     GemListRowTitle.PNL -> R.string.perpetual_pnl
+    GemListRowTitle.PIN -> R.string.common_pin
+    GemListRowTitle.UNPIN -> R.string.common_unpin
+    GemListRowTitle.ADD_TO_WALLET -> R.string.asset_add_to_wallet
+    GemListRowTitle.PRICE_ALERTS -> R.string.settings_price_alerts_title
+    GemListRowTitle.ENERGY -> R.string.stake_resource_energy
+    GemListRowTitle.BANDWIDTH -> R.string.stake_resource_bandwidth
 }
 
 fun GemSlippageCheck.footerText(context: Context, minimumText: String, maximumText: String): String? = when (this) {

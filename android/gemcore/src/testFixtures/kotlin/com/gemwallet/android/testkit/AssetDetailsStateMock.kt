@@ -11,11 +11,6 @@ fun mockGemAssetDetailsState(
     isViewOnly = false,
     headerActions = GemHeaderActions.Buttons(emptyList()),
     showsBanners = showsBanners,
-    showsManage = false,
-    showsResources = false,
-    showsPriceAlerts = priceAlertsCount > 0,
-    priceAlertsCountText = priceAlertsCount.toString(),
     priceAlert = if (priceAlertsCount > 0) GemPriceAlertToggle.ENABLED else GemPriceAlertToggle.DISABLED,
-    showsEarn = false,
     emptyTransactionsAction = null,
 )

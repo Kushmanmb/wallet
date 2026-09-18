@@ -18,12 +18,17 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import java.math.BigInteger
 import uniffi.gemstone.GemAssetBalanceRow
+import uniffi.gemstone.GemAssetDetailRow
+import uniffi.gemstone.GemAssetDetailSection
 import uniffi.gemstone.GemBalanceRow
 import uniffi.gemstone.GemBalanceRowValue
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListRowIcon
+import uniffi.gemstone.GemListRowTitle
+import uniffi.gemstone.GemListSectionTitle
 import uniffi.gemstone.GemNumberUnit
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -50,16 +55,24 @@ class AssetInfoUIModelFactoryTest {
     fun `balance rows show the values core formatted`() {
         val staked = mockFormattedNumber(value = 2.0, unit = GemNumberUnit.Symbol(symbol = "ATOM"))
         val apr = mockFormattedNumber(value = 5.0, unit = GemNumberUnit.Percent)
-        val balances = model(
+        val section = model(
             mockAssetInfo(asset = mockAsset(chain = Chain.Cosmos), owner = null),
-            balanceRows = listOf(
-                GemAssetBalanceRow(GemBalanceRow.Staked(BigInteger("2000000")), GemBalanceRowValue.Amount(staked)),
-                GemAssetBalanceRow(GemBalanceRow.Reserved(BigInteger("500000"), "https://reserve"), GemBalanceRowValue.Amount(staked)),
-                GemAssetBalanceRow(GemBalanceRow.Staked(BigInteger.ZERO), GemBalanceRowValue.Apr(apr)),
-                GemAssetBalanceRow(GemBalanceRow.Staked(BigInteger.ZERO), GemBalanceRowValue.Apr(null)),
+            sections = listOf(
+                GemAssetDetailSection(
+                    GemListSectionTitle.BALANCES,
+                    listOf(
+                        GemAssetBalanceRow(GemBalanceRow.Staked(BigInteger("2000000")), GemBalanceRowValue.Amount(staked)),
+                        GemAssetBalanceRow(GemBalanceRow.Reserved(BigInteger("500000"), "https://reserve"), GemBalanceRowValue.Amount(staked)),
+                        GemAssetBalanceRow(GemBalanceRow.Staked(BigInteger.ZERO), GemBalanceRowValue.Apr(apr)),
+                        GemAssetBalanceRow(GemBalanceRow.Staked(BigInteger.ZERO), GemBalanceRowValue.Apr(null)),
+                    ).map { GemAssetDetailRow.Balance(it) },
+                ),
             ),
-        ).accountInfoUIModel.balances
+        ).sections.single()
+        val balances = section.rows.filterIsInstance<AssetInfoUIModel.RowUIModel.Balance>()
 
+        assertEquals(R.string.asset_balances, section.title)
+        assertEquals(4, balances.size)
         assertEquals(
             listOf(
                 AssetInfoUIModel.BalanceViewType.Stake,
@@ -74,7 +87,27 @@ class AssetInfoUIModelFactoryTest {
             balances.map { it.model.subtitle },
         )
         assertEquals("https://reserve", balances[1].url)
-        assertTrue(model(mockAssetInfo(asset = mockAsset(), owner = null)).accountInfoUIModel.balances.isEmpty())
+    }
+
+    @Test
+    fun `sections keep the order and titles core decided`() {
+        val link = GemListRow.Link(GemListRowTitle.PIN, null, GemListRowIcon.PIN)
+        val sections = model(
+            mockAssetInfo(asset = mockAsset(), owner = null),
+            sections = listOf(
+                GemAssetDetailSection(GemListSectionTitle.MANAGE, listOf(GemAssetDetailRow.Row(link))),
+                GemAssetDetailSection(GemListSectionTitle.NONE, listOf(GemAssetDetailRow.Price, GemAssetDetailRow.Network("Ethereum (ERC20)"))),
+            ),
+        ).sections
+
+        assertEquals(listOf(R.string.common_manage, null), sections.map { it.title })
+        assertEquals(
+            listOf(
+                listOf(AssetInfoUIModel.RowUIModel.Row(link)),
+                listOf(AssetInfoUIModel.RowUIModel.Price, AssetInfoUIModel.RowUIModel.Network("Ethereum (ERC20)")),
+            ),
+            sections.map { it.rows },
+        )
     }
 
     private val context = mockk<Context> {
@@ -82,9 +115,9 @@ class AssetInfoUIModelFactoryTest {
         every { getString(any(), *anyVararg()) } answers { "${firstArg<Int>()}${(args[1] as Array<*>).joinToString("")}" }
     }
 
-    private fun model(assetInfo: AssetInfo, balanceRows: List<GemAssetBalanceRow> = emptyList()) = AssetInfoUIModelFactory(context).create(
+    private fun model(assetInfo: AssetInfo, sections: List<GemAssetDetailSection> = emptyList()) = AssetInfoUIModelFactory(context).create(
         mockChainAssetInfo(assetInfo),
-        mockGemAssetDetails(assetInfo.asset, mockGemAssetDetailsState(showsBanners = true), balanceRows),
+        mockGemAssetDetails(assetInfo.asset, mockGemAssetDetailsState(showsBanners = true), sections),
         banners = emptyList(),
     )
 }

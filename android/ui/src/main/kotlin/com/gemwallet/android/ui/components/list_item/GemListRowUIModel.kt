@@ -109,6 +109,9 @@ private fun GemListRowIcon.image(): ListItemImage? = when (this) {
     GemListRowIcon.NETWORKS -> ListItemImage.Drawable(R.drawable.settings_networks)
     GemListRowIcon.CONTACTS -> ListItemImage.Drawable(R.drawable.settings_contacts)
     GemListRowIcon.PERPETUALS -> ListItemImage.Drawable(R.drawable.settings_pricealert)
+    GemListRowIcon.PIN -> ListItemImage.Symbol(ListItemSymbol.Pin)
+    GemListRowIcon.UNPIN -> ListItemImage.Symbol(ListItemSymbol.Unpin)
+    GemListRowIcon.ADD_TO_WALLET -> ListItemImage.Symbol(ListItemSymbol.AddCircle)
 }
 
 private fun GemInfoTopic.infoSheet(icon: Any?): InfoSheetEntity = when (this) {

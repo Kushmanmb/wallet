@@ -202,6 +202,18 @@ public extension GemListRowIcon {
         case .networks: AssetImage.image(Images.Settings.networks)
         case .contacts: AssetImage.image(Images.Settings.contacts)
         case .perpetuals: AssetImage.image(Images.Settings.perpetuals)
+        case .pin: AssetImage(placeholder: Image(systemName: SystemImage.pin))
+        case .unpin: AssetImage(placeholder: Image(systemName: SystemImage.unpin))
+        case .addToWallet: AssetImage(placeholder: Image(systemName: SystemImage.plusCircle))
+        }
+    }
+
+    var imageStyle: ListItemImageStyle? {
+        switch self {
+        case .none, .appLogo, .wallets, .security, .notifications, .preferences, .walletConnect, .support, .rewards, .aboutUs, .developer, .currency, .language, .appearance, .networks, .contacts, .perpetuals:
+            .settings(assetImage: assetImage)
+        case .pin, .unpin, .addToWallet:
+            .list(assetImage: assetImage)
         }
     }
 }
