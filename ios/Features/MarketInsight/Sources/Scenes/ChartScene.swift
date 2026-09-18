@@ -20,7 +20,7 @@ public struct ChartScene: View {
         ChartListView(model: model) {
             ForEach(model.sections, id: \.self) { section in
                 switch section {
-                case let .priceAlerts(count):
+                case .priceAlerts:
                     Section {
                         NavigationLink(
                             value: Scenes.AssetPriceAlert(asset: model.asset),

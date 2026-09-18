@@ -1,6 +1,5 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import Components
 import Foundation
 
 public struct GridPosterViewModel: Sendable {
