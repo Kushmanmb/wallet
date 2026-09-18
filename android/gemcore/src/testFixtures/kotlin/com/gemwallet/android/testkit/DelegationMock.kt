@@ -65,6 +65,5 @@ fun mockDelegation(
 )
 
 fun mockClaimRewards() = GemClaimRewards(
-    value = BigInteger.ZERO,
     destination = GemClaimRewardsDestination.Amount(emptyList()),
 )

@@ -24,7 +24,6 @@ import com.gemwallet.android.features.stake.viewmodels.models.StakeActionUIModel
 import com.gemwallet.android.features.stake.viewmodels.models.StakeSectionUIModel
 import com.gemwallet.android.features.stake.viewmodels.models.uiModel
 import com.gemwallet.android.model.AmountParams
-import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.model.toAmountParams
 import com.gemwallet.android.model.toGem
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
@@ -54,7 +53,6 @@ import uniffi.gemstone.GemClaimRewardsDestination
 import uniffi.gemstone.GemDelegationDestination
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemStakeServiceInterface
-import uniffi.gemstone.GemValueStyle
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -114,10 +112,6 @@ class StakeViewModel @Inject constructor(
         stakeService.claimRewards(assetInfo.asset.chain.string, delegations.map { it.toGem() })
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val rewardsText = combine(claimRewards.filterNotNull(), assetInfo.filterNotNull()) { claimRewards, assetInfo ->
-        ValueFormatter(style = GemValueStyle.AUTO).string(claimRewards.value, assetInfo.asset)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
-
     val actions = combine(
         walletType.filterNotNull(),
         delegations,
@@ -158,8 +152,8 @@ class StakeViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    val actionRows: StateFlow<List<StakeActionUIModel>> = combine(actions, assetInfo.filterNotNull(), rewardsText) { actions, info, rewards ->
-        actions.map { it.uiModel(context, info, rewards) }
+    val actionRows: StateFlow<List<StakeActionUIModel>> = combine(actions, assetInfo.filterNotNull()) { actions, info ->
+        actions.map { it.uiModel(context, info) }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 

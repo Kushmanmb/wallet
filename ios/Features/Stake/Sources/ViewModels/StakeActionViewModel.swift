@@ -1,22 +1,15 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import enum Gemstone.GemStakeSection
 import InfoSheet
 import PrimitivesComponents
 
-enum StakeSection: String, Identifiable {
-    case manage
-    case resources
-    case delegations
-
-    var id: String { rawValue }
-}
-
 struct StakeSectionViewModel: Identifiable {
-    let section: StakeSection
+    let section: GemStakeSection
     let title: String
 
-    var id: String { section.id }
+    var id: String { String(describing: section) }
 }
 
 struct StakeActionViewModel: Identifiable {

@@ -3,6 +3,7 @@ package com.gemwallet.android.features.stake.viewmodels.models
 import android.content.Context
 import com.gemwallet.android.features.stake.viewmodels.localization.stringRes
 import com.gemwallet.android.model.AssetInfo
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.image.iconModel
@@ -20,7 +21,7 @@ data class StakeActionUIModel(
     val model: ListItemModel,
 )
 
-internal fun GemStakeActionItem.uiModel(context: Context, assetInfo: AssetInfo, rewardsText: String): StakeActionUIModel = StakeActionUIModel(
+internal fun GemStakeActionItem.uiModel(context: Context, assetInfo: AssetInfo): StakeActionUIModel = StakeActionUIModel(
     action = when (action) {
         GemStakeAction.STAKE -> StakeAction.Stake
         GemStakeAction.FREEZE -> StakeAction.Freeze
@@ -32,7 +33,7 @@ internal fun GemStakeActionItem.uiModel(context: Context, assetInfo: AssetInfo, 
     model = ListItemModel(
         title = context.getString(action.stringRes()),
         titleStyle = if (requiresFrozenBalance) ListItemTextStyle.Faded else ListItemTextStyle.Body,
-        subtitle = rewardsText.takeIf { action == GemStakeAction.CLAIM_REWARDS },
+        subtitle = value?.text(),
         info = InfoSheetEntity.StakeFrozenRequired(assetInfo.id().iconModel()).takeIf { requiresFrozenBalance },
     ),
 )

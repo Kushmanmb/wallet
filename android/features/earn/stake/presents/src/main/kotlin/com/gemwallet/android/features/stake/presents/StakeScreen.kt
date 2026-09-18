@@ -23,7 +23,6 @@ fun StakeScreen(
     val assetInfo by viewModel.assetInfo.collectAsStateWithLifecycle()
     val delegations by viewModel.delegations.collectAsStateWithLifecycle()
     val actions by viewModel.actionRows.collectAsStateWithLifecycle()
-    val rewardsText by viewModel.rewardsText.collectAsStateWithLifecycle()
     val stakeInfoUrl by viewModel.stakeInfoUrl.collectAsStateWithLifecycle()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val infoRows by viewModel.infoRows.collectAsStateWithLifecycle()
@@ -39,7 +38,6 @@ fun StakeScreen(
             inSync = inSync,
             assetInfo = stakeAssetInfo,
             actions = actions,
-            rewardsText = rewardsText,
             stakeInfoUrl = stakeInfoUrl,
             sections = sections,
             infoRows = infoRows,

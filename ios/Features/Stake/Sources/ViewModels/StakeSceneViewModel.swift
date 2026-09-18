@@ -88,7 +88,7 @@ public final class StakeSceneViewModel {
     }
 
     var sectionModels: [StakeSectionViewModel] {
-        sections.map { StakeSectionViewModel(section: stakeSection($0), title: $0.title) }
+        sections.map { StakeSectionViewModel(section: $0, title: $0.title) }
     }
 
     var showsDelegationsPlaceholder: Bool {
@@ -104,14 +104,6 @@ public final class StakeSceneViewModel {
                 infoAction: frozenBalanceInfoAction(for: item),
                 isEnabled: item.isEnabled,
             )
-        }
-    }
-
-    private func stakeSection(_ section: GemStakeSection) -> StakeSection {
-        switch section {
-        case .manage: .manage
-        case .resources: .resources
-        case .delegations: .delegations
         }
     }
 
@@ -151,10 +143,6 @@ public final class StakeSceneViewModel {
         }
     }
 
-    var claimRewardsText: String {
-        formatter.string(claimRewards.value, decimals: asset.decimals.asInt, currency: asset.symbol)
-    }
-
     var claimRewardsDestination: any Hashable {
         switch claimRewards.destination {
         case let .transfer(transfer): ConfirmTransferInput(data: transfer)
@@ -175,11 +163,7 @@ public final class StakeSceneViewModel {
         if let infoAction = frozenBalanceInfoAction(for: item) {
             return ListItemModel(title: item.action.title, titleStyle: .bodySecondary, infoAction: infoAction)
         }
-        return ListItemModel(title: item.action.title, subtitle: subtitle(for: item.action))
-    }
-
-    func subtitle(for action: GemStakeAction) -> String? {
-        action == .claimRewards ? claimRewardsText : .none
+        return ListItemModel(title: item.action.title, subtitle: item.value?.text())
     }
 
     func frozenBalanceInfoAction(for item: GemStakeActionItem) -> InfoSheetAction? {

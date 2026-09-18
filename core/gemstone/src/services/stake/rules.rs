@@ -360,16 +360,28 @@ pub fn stake_actions(wallet_type: WalletType, chain: Chain, has_validators: bool
         action,
         is_enabled,
         requires_frozen_balance,
+        value: None,
     };
+    let rewards = rewards_value(delegations);
     [
         Some(item(GemStakeAction::Stake, has_validators || requires_frozen_balance, requires_frozen_balance)),
         uses_freeze.then(|| item(GemStakeAction::Freeze, true, false)),
         uses_freeze.then(|| item(GemStakeAction::Unfreeze, true, false)),
-        can_claim_stake_rewards(chain, &rewards_value(delegations)).then(|| item(GemStakeAction::ClaimRewards, true, false)),
+        can_claim_stake_rewards(chain, &rewards).then(|| GemStakeActionItem {
+            value: rewards_amount(chain, &rewards),
+            ..item(GemStakeAction::ClaimRewards, true, false)
+        }),
     ]
     .into_iter()
     .flatten()
     .collect()
+}
+
+fn rewards_amount(chain: Chain, rewards: &BigUint) -> Option<GemFormattedNumber> {
+    let asset = Asset::from_chain(chain);
+    BigNumberFormatter::value_as_f64(&rewards.to_string(), asset.decimals as u32)
+        .ok()
+        .map(|value| GemFormattedNumber::amount(value, Some(asset.symbol), GemValueStyle::Auto))
 }
 
 pub fn claim_rewards(chain: Chain, delegations: Vec<Delegation>) -> GemClaimRewards {
@@ -383,7 +395,7 @@ pub fn claim_rewards(chain: Chain, delegations: Vec<Delegation>) -> GemClaimRewa
     } else {
         GemClaimRewardsDestination::Amount { delegations: with_rewards }
     };
-    GemClaimRewards { value, destination }
+    GemClaimRewards { destination }
 }
 
 #[uniffi::export]
@@ -1165,6 +1177,20 @@ mod tests {
             ),
             vec![(Stake, true, false), (ClaimRewards, true, false)]
         );
+        let claim = stake_actions(
+            WalletType::Multicoin,
+            Chain::Cosmos,
+            true,
+            &GemAssetBalance::mock(),
+            &[Delegation::mock_with(Chain::Cosmos, StakeProviderType::Stake, DelegationState::Active, 1_500_000)],
+        )
+        .into_iter()
+        .find(|item| item.action == ClaimRewards);
+        assert_eq!(
+            claim.and_then(|item| item.value),
+            Some(GemFormattedNumber::amount(1.5, Some("ATOM".to_string()), GemValueStyle::Auto)),
+            "claiming shows the rewards it would claim"
+        );
         assert_eq!(
             actions(Chain::Tron, true, GemAssetBalance::mock(), vec![]),
             vec![(Stake, true, true), (Freeze, true, false), (Unfreeze, true, false)],
@@ -1219,7 +1245,6 @@ mod tests {
                 Delegation::mock_with(Chain::Sui, StakeProviderType::Stake, DelegationState::Active, 7),
             ],
         );
-        assert_eq!(one.value, BigInt::from(7));
         assert!(matches!(one.destination, GemClaimRewardsDestination::Transfer { ref transfer } if transfer.value == BigInt::from(7)));
         let several = claim_rewards(
             Chain::Sui,
@@ -1229,7 +1254,6 @@ mod tests {
                 Delegation::mock_with(Chain::Sui, StakeProviderType::Stake, DelegationState::Active, 0),
             ],
         );
-        assert_eq!(several.value, BigInt::from(7));
         assert!(matches!(several.destination, GemClaimRewardsDestination::Amount { ref delegations } if delegations.len() == 2));
         let cosmos = claim_rewards(
             Chain::Cosmos,

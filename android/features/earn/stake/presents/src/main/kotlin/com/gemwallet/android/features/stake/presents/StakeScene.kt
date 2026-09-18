@@ -46,7 +46,6 @@ internal fun StakeScene(
     inSync: Boolean,
     assetInfo: AssetInfo,
     actions: List<StakeActionUIModel>,
-    rewardsText: String,
     stakeInfoUrl: String?,
     sections: List<StakeSectionUIModel>,
     infoRows: List<GemListRow>,

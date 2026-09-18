@@ -1,6 +1,5 @@
 use super::rules;
-use crate::formatted_number::GemValueTone;
-use crate::models::custom_types::GemBigInt;
+use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::services::amount::model::GemAmountType;
 use crate::services::amount::rules as amount_rules;
 use crate::services::error::GemServiceError;
@@ -42,11 +41,12 @@ pub enum GemStakeAction {
     ClaimRewards,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemStakeActionItem {
     pub action: GemStakeAction,
     pub is_enabled: bool,
     pub requires_frozen_balance: bool,
+    pub value: Option<GemFormattedNumber>,
 }
 
 #[derive(Debug, Clone, uniffi::Enum)]
@@ -66,7 +66,6 @@ pub enum GemDelegationAmountInput {
 
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct GemClaimRewards {
-    pub value: GemBigInt,
     pub destination: GemClaimRewardsDestination,
 }
 
