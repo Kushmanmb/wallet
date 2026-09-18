@@ -35,9 +35,7 @@ struct ChainNodeViewModel {
     }
 
     var titleExtra: String? {
-        switch row.subtitle {
-        case let .latestBlock(value): "\(row.subtitle.title): \(value)"
-        }
+        row.subtitle.text(latestBlockLabel: row.subtitle.title)
     }
 
     var titleTag: String? {

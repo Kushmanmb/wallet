@@ -131,7 +131,7 @@ public final class SwapSceneViewModel {
             summary: summary,
             slippagePercent: selectedSlippage.bps.map { service.slippagePercent(bps: $0) },
             currency: service.currency.rawValue,
-            isProviderSelectionEnabled: isQuoteInteractionEnabled,
+            allowSelectProvider: viewState.allowsProviderSelection,
             swapPriceImpact: fromAssetPrice.swapValue(selectedQuote.fromValue)
                 .priceImpact(receive: toAssetPrice.swapValue(selectedQuote.toValue)),
             swapProviderSelectAction: { [weak self] quote in

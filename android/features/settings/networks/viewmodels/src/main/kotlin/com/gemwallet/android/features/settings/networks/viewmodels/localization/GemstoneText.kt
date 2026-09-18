@@ -26,9 +26,7 @@ internal fun GemNodeCheckRow.text(context: Context): String = when (this) {
 
 internal fun GemNodeRowTitle.string(context: Context): String = text(context.getString(R.string.nodes_gem_wallet_node))
 
-internal fun GemNodeSubtitle.text(context: Context): String = when (this) {
-    is GemNodeSubtitle.LatestBlock -> "${context.getString(R.string.nodes_import_node_latest_block)}: $value"
-}
+internal fun GemNodeSubtitle.text(context: Context): String = text(context.getString(R.string.nodes_import_node_latest_block))
 
 internal fun GemServiceEndpointType.string(context: Context): String = when (this) {
     GemServiceEndpointType.API -> "API"

@@ -197,7 +197,14 @@ class SwapViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    val swapDetails = combine(quote, providers) { quote, providers ->
+    private val viewState = combine(session, payValueFlow, payAsset) { quoteSession, value, pay ->
+            val available = pay?.balance?.balance?.available ?: BigInteger.ZERO
+            val atomic = pay?.let { Crypto(value, it.asset.decimals).atomicValue } ?: BigInteger.ZERO
+            quoteSession.viewState(atomic, available, pay?.asset?.toGem())
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val swapDetails = combine(quote, providers, viewState) { quote, providers, state ->
             if (quote == null) {
                 return@combine null
             }
@@ -221,18 +228,11 @@ class SwapViewModel @Inject constructor(
                     providers = providers,
                     slippageBps = quote.quote.data.slippageBps,
                     selectedSlippage = selectedSlippageBps.value,
-                    isProviderSelectable = providers.size > 1,
+                    isProviderSelectable = state?.allowsProviderSelection ?: false,
                     priceImpact = quote.pay.swapValue(quote.quote.fromValue)
                         .priceImpact(quote.receive.swapValue(quote.quote.toValue)),
                 ),
             )
-        }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-    private val viewState = combine(session, payValueFlow, payAsset) { quoteSession, value, pay ->
-            val available = pay?.balance?.balance?.available ?: BigInteger.ZERO
-            val atomic = pay?.let { Crypto(value, it.asset.decimals).atomicValue } ?: BigInteger.ZERO
-            quoteSession.viewState(atomic, available, pay?.asset?.toGem())
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

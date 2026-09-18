@@ -56,9 +56,7 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **B74** **M** The rich rows the contract keeps outside the model — asset, wallet, chain, NFT, transaction, delegation, validator, swap-provider, and the network, validator and balance composites — each carry a heavier title and their own spacing on Android while their iOS twins are `ListAssetItemView` and friends. The reverse split exists too: iOS draws the recents assets and the delegation row through `ListItemModel` with a semibold title (`RecentsSceneViewModel.listItem`, `DelegationViewModel.listItem`) where Android draws `AssetListItem` and the delegation composite. Decide per composite whether it becomes a `ListItemModel` variant (a leading composite plus the model) or stays, and write the outcome into ARCHITECTURE § 5 by name; today the section names the family, not the files.
 - **B75** **S** The shared Android renderer had two title weights (`titleMedium` behind an image or an extra line, `bodyLarge` otherwise) until 2026-09-18, while iOS's `ListItemModel` title is `.body` on every row — the contract now says the regular weight belongs to every model row; a snapshot test over `ListItem(model)` with and without an image keeps it that way.
 
-- **V1** **S** `android/features/confirm/presents/.../FeeDetails.kt:200` shows the fee options only when `feeRateModels.size > 1`; iOS `NetworkFeeSceneViewModel` keeps three `show*` members for the same choice — `GemFeeRateRows` carries `shows_options`.
 - **V2** **S** `android/features/receive/presents/.../ReceiveScreen.kt:97` offers the network selector when `networkAssetIds.size > 1`; iOS `ReceiveViewModel.presentation` decides the same — `GemReceiveService` answers `shows_network_selector`.
-- **V3** **S** `android/ui/.../swap/SwapDetailsComponents.kt:114` lists providers only when `providers.size > 1`; iOS `SwapDetailsViewModel.allowSelectProvider` — `GemSwapDetails.allows_provider_selection` for both.
 - **R1** **M** Settings rows are assembled from the key on both apps — iOS `SettingsViewModel.listItem(for:)` (wallet count subtitle), Android `SettingsRowUIModel.uiModel(context, walletsCount)` — `GemSettingsSection` carries `GemSettingsRowRecord { key, value }`.
 - **R2** **M** Preferences rows — iOS `PreferencesViewModel.listItem(for:)` (12 arms: currency text, language, appearance, leverage, take profit, stop loss), Android `PreferencesRowUIModel.uiModel` (7 arms) — the row record carries `value`; the language name stays the one locale-data input.
 - **R3** **S** Security rows — iOS `SecurityViewModel` (4 arms), Android `SecurityRowUIModel` (lock-period subtitle from `lockPeriodFromMinutes`) — the record carries the lock-period text key.
@@ -70,7 +68,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **R9** **S** Import wallet types — iOS `ImportWalletSceneViewModel:46,53` switches `GemWalletImportType` to a title (`multicoin` or the network name); Android `ImportTabUIModel` — the type carries the title key and the chain.
 - **R11** **S** iOS `AutocloseSceneViewModel:84` assembles the entry-price row (`Localized.Perpetual.entryPrice`, formatted price) — `GemAutocloseViewState` carries it.
 - **R12** **S** iOS `SimulationPayloadFieldViewModel.subtitle` decides address-versus-name for a field — `GemSimulationPayloadField` carries the outcome.
-- **R13** **S** iOS `ChainNodeViewModel.title/titleExtra` switch over `GemNodeRowTitle`/subtitle — with **P21**, the row carries the text.
 - **R14** **S** iOS `LatencyStatusViewModel` maps `GemLatencyStatus` (`.result → LatencyViewModel.title`, `.error → Localized`) — `GemLatencyStatus` becomes a row with text and tone, as Android's mapper already treats it.
 - **R15** **M** iOS `ConnectionProposalViewModel` holds no service and builds seven strings (app, website, wallet, verification) itself — `GemWalletConnectService.proposal_row` answers the screen.
 - **R17** **S** iOS `AssetViewModel` and `AddressListItemViewModel` restate five title-shaped strings each from primitives — read `GemAssetRow` / the address row record the other screens use.
@@ -134,7 +131,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **S48** **S** iOS `SecurityViewModel` toggles (`isEnabled`, `lockPeriod`, `isPrivacyLockEnabled`, `isHideBalanceEnabled`) and Android `SecurityViewModel` — a `GemSecuritySession` whose sections the screen already reads.
 - **S49** **S** iOS `ReceiveViewModel` (`networkAssetIds`, `presentation`) — `GemReceiveSession` (with **V2**).
 - **O46** **S** iOS `AssetsResultsSceneViewModel` and `NetworkAssetsSceneViewModel` keep four `show*` members each — sections are records (`GemNetworkAssetCounts`, the search counts); read them.
-- **O48** **S** iOS `NetworkFeeSceneViewModel` keeps three `show*` members — with **V1**.
 - **O49** **S** Android `MainViewModel` keeps three `show*` members for the launch state — `GemAppStartService` answers the launch phase.
 
 

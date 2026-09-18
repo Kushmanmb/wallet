@@ -146,6 +146,7 @@ fun FeeDetails(
                 feeListItem = feeListItem,
                 selection = selection,
                 feeRateModels = model.feeRateModels(unitSymbol),
+                showsOptions = model.showsOptions,
                 feeAsset = feeAsset,
                 unitSymbol = unitSymbol,
                 supportsCustomFee = model.supportsCustomFee,
@@ -180,6 +181,7 @@ private fun FeeRates(
     feeListItem: ListItemModel?,
     selection: FeeSelectionUIModel,
     feeRateModels: List<FeeRateUIModel>,
+    showsOptions: Boolean,
     feeAsset: FeeAssetUIModel,
     unitSymbol: String,
     supportsCustomFee: Boolean,
@@ -204,7 +206,7 @@ private fun FeeRates(
                 )
             }
         }
-        if (feeRateModels.size > 1) {
+        if (showsOptions) {
             val totalCount = feeRateModels.size + if (supportsCustomFee) 1 else 0
             itemsPositioned(feeRateModels, totalCount = totalCount) { position, feeRate ->
                 FeeRow(

@@ -123,6 +123,7 @@ pub struct GemFeeRateRow {
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemFeeRateRows {
     pub rows: Vec<GemFeeRateRow>,
+    pub shows_options: bool,
     pub unit_type: FeeUnitType,
     pub unit_decimals: u32,
     pub supports_custom_fee: bool,
