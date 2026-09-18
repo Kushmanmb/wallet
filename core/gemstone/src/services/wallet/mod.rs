@@ -3,6 +3,7 @@ pub mod model;
 pub mod password;
 pub mod rules;
 pub mod store;
+pub mod verify_phrase;
 impl GemWalletService {
     fn migrate_wallet_password(&self, wallet: &Wallet, password: &str, shared: &str) -> Result<bool, GemServiceError> {
         let keystore_id = keystore_id_for_wallet(wallet.id.id());
@@ -49,6 +50,7 @@ pub use error::GemWalletImportError;
 pub use model::{GemWalletDefaultName, GemWalletDeletion, GemWalletImportKind, GemWalletImportResult, GemWalletImportScreen, GemWalletImportType, GemWalletSecret};
 pub use password::{GemKeystoreAuthentication, GemKeystorePassword};
 pub use store::GemWalletStore;
+pub use verify_phrase::GemVerifyPhraseSession;
 
 const SETUP_CHAINS_WALLETS_LIMIT: usize = 25;
 
@@ -128,8 +130,8 @@ impl GemWalletService {
         })
     }
 
-    pub fn phrase_verification_words(&self, words: Vec<String>) -> Vec<String> {
-        rules::phrase_verification_words(words)
+    pub fn verify_phrase_session(&self, words: Vec<String>) -> GemVerifyPhraseSession {
+        GemVerifyPhraseSession::new(words)
     }
 
     pub fn import_screen(&self, chain: Option<Chain>) -> GemWalletImportScreen {

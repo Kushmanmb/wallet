@@ -66,6 +66,7 @@ fun CreateWalletScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val defaultNameText by viewModel.defaultNameText.collectAsStateWithLifecycle()
     val errorText by viewModel.errorText.collectAsStateWithLifecycle()
+    val verificationState by viewModel.verificationState.collectAsStateWithLifecycle()
 
     BackHandler(uiState.isShowSafeMessage) {
         viewModel.handleCreateDismiss()
@@ -79,13 +80,15 @@ fun CreateWalletScreen(
         label = "phrase"
     ) { state ->
         when (state) {
-            true -> CheckPhrase(
-                words = uiState.data,
-                verificationWords = remember(uiState.data) { viewModel.phraseVerificationWords(uiState.data) },
-                loading = uiState.loading,
-                onDone = { viewModel.handleCreate(onCreated) },
-                onCancel = viewModel::handleCreateDismiss,
-            )
+            true -> verificationState?.let { verification ->
+                CheckPhrase(
+                    state = verification,
+                    loading = uiState.loading,
+                    onPick = viewModel::onPickWord,
+                    onDone = { viewModel.handleCreate(onCreated) },
+                    onCancel = viewModel::handleCreateDismiss,
+                )
+            }
             false -> UI(
                 defaultName = defaultNameText,
                 data = uiState.data,

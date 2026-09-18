@@ -11,10 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,7 +29,7 @@ import com.gemwallet.android.ui.theme.WindowDimension
 import com.gemwallet.android.ui.theme.isCompactDimension
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.sceneContentPaddingValues
-import kotlin.math.min
+import uniffi.gemstone.GemVerifyPhraseViewState
 
 private const val wordsPerGroup = 4
 
@@ -42,41 +38,15 @@ private const val verifyGroupCount = 3
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun CheckPhrase(
-    words: List<String>,
-    verificationWords: List<String>,
+    state: GemVerifyPhraseViewState,
     loading: Boolean,
+    onPick: (Int) -> Boolean,
     onDone: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    val random = remember {
-        val byWord = words.withIndex().groupBy({ it.value }, { it.index }).mapValues { it.value.toMutableList() }
-        verificationWords.map { word -> Pair(byWord.getValue(word).removeAt(0), word) }
-    }
-    val render = remember {
-        val state = mutableStateListOf<String>()
-        state.addAll(words.map { "" })
-        state
-    }
-    val result = remember {
-        mutableStateListOf<String>()
-    }
-    val isDone by remember {
-        derivedStateOf {
-            result.joinToString() == words.joinToString()
-        }
-    }
     val isSmallScreen = isCompactDimension(WindowDimension.Height)
-
-    val onWordClick: (String) -> Boolean = { word ->
-        val index = result.size
-        if (words[index] == word) {
-            result.add(word)
-            render[result.size - 1] = word
-            true
-        } else {
-            false
-        }
-    }
+    val progress = state.nextIndex?.toInt() ?: state.verified.size
+    val choices = state.choices.withIndex().toList()
 
     Scene(
         title = stringResource(id = R.string.transfer_confirm),
@@ -85,7 +55,7 @@ internal fun CheckPhrase(
         mainAction = {
             MainActionButton(
                 title = stringResource(id = R.string.common_continue),
-                state = buttonState(enabled = isDone, loading = loading),
+                state = buttonState(enabled = state.isComplete, loading = loading),
             ) {
                 onDone()
             }
@@ -98,11 +68,11 @@ internal fun CheckPhrase(
             CenteredDescriptionText(stringResource(R.string.secret_phrase_confirm_quick_test_title))
             Spacer16()
             PhraseLayout(
-                rows = remember(render.toList()) { phraseRows(render) },
+                rows = phraseRows(state.verified),
                 modifier = Modifier.widthIn(max = SceneSizing.contentMaxWidth),
-                highlightIndex = result.size.takeIf { it < words.size },
+                highlightIndex = state.nextIndex?.toInt(),
             )
-            AnimatedVisibility(visible = !isDone || !isSmallScreen) {
+            AnimatedVisibility(visible = !state.isComplete || !isSmallScreen) {
                 FlowRow(
                     modifier = Modifier
                         .padding(vertical = paddingDefault)
@@ -112,19 +82,14 @@ internal fun CheckPhrase(
                     horizontalArrangement = Arrangement.spacedBy(space8, Alignment.CenterHorizontally),
                     verticalArrangement = Arrangement.spacedBy(space8),
                 ) {
-                    if (isSmallScreen) {
-                        val slice = result.size / wordsPerGroup
-                        if (slice < verifyGroupCount) {
-                            random
-                                .slice(slice * wordsPerGroup..<slice * wordsPerGroup + wordsPerGroup)
-                                .forEach { word ->
-                                    WordChip(word.second, result.getOrNull(word.first) != word.second, onWordClick)
-                                }
-                        }
+                    val visible = if (isSmallScreen) {
+                        val group = progress / wordsPerGroup
+                        if (group < verifyGroupCount) choices.drop(group * wordsPerGroup).take(wordsPerGroup) else emptyList()
                     } else {
-                        random.forEach { word ->
-                            WordChip(word.second, result.getOrNull(word.first) != word.second, onWordClick)
-                        }
+                        choices
+                    }
+                    visible.forEach { (index, choice) ->
+                        WordChip(choice.word, !choice.isPicked) { onPick(index) }
                     }
                 }
             }

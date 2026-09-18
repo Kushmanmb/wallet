@@ -17,8 +17,7 @@ public final class CreateWalletModel {
 
     func verifyPhraseModel(words: [String], onComplete: @escaping ([String]) async throws -> Void) -> VerifyPhraseViewModel {
         VerifyPhraseViewModel(
-            words: words,
-            shuffledWords: service.phraseVerificationWords(words: words),
+            session: service.verifyPhraseSession(words: words),
             onComplete: onComplete,
         )
     }

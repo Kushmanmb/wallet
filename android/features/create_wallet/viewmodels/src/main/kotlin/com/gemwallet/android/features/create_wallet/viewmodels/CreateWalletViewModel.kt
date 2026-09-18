@@ -31,6 +31,8 @@ import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemWalletDefaultName
 import uniffi.gemstone.GemWalletImportKind
 import uniffi.gemstone.GemWalletImportResult
+import uniffi.gemstone.GemVerifyPhraseSession
+import uniffi.gemstone.GemVerifyPhraseViewState
 import uniffi.gemstone.GemWalletServiceInterface
 
 @HiltViewModel
@@ -48,7 +50,17 @@ class CreateWalletViewModel @Inject constructor(
     val errorText: StateFlow<String?> = state.map { it.dataError?.text(context)?.ifBlank { context.getString(R.string.errors_unknown_try_again) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    fun phraseVerificationWords(words: List<String>): List<String> = service.phraseVerificationWords(words)
+    private val verification = MutableStateFlow<GemVerifyPhraseSession?>(null)
+
+    val verificationState: StateFlow<GemVerifyPhraseViewState?> = verification.map { it?.viewState() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    fun onPickWord(choice: Int): Boolean {
+        val current = verification.value ?: return false
+        val next = current.onPick(choice.toUInt())
+        verification.value = next
+        return next != current
+    }
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -66,6 +78,7 @@ class CreateWalletViewModel @Inject constructor(
     }
 
     fun handleReadyToCreate(walletName: String) {
+        verification.value = service.verifyPhraseSession(state.value.data)
         state.update {
             it.copy(
                 name = walletName.ifEmpty { it.name },
