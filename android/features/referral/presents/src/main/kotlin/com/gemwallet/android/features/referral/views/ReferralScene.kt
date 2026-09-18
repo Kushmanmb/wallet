@@ -34,6 +34,7 @@ import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.features.referral.viewmodels.SyncType
 import uniffi.gemstone.GemRewardsState
 import com.gemwallet.android.features.referral.viewmodels.models.PendingReferralUIModel
+import com.gemwallet.android.features.referral.viewmodels.models.RewardsNoticeUIModel
 import com.gemwallet.android.features.referral.viewmodels.models.RewardRedemptionUIModel
 import com.gemwallet.android.features.referral.views.components.referralHead
 import com.gemwallet.android.features.referral.views.components.referralInfo
@@ -43,7 +44,8 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.buttons.mainActionButtonColors
 import com.gemwallet.android.ui.components.clickable
-import com.gemwallet.android.ui.components.list_item.ListItem
+import com.gemwallet.android.ui.components.list_item.WarningItem
+import com.gemwallet.android.ui.components.list_item.listItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
@@ -55,6 +57,7 @@ import com.gemwallet.android.ui.shareText
 import com.gemwallet.android.ui.theme.Spacer8
 import com.gemwallet.android.ui.theme.WalletTheme
 import com.gemwallet.android.ui.theme.paddingDefault
+import com.gemwallet.android.ui.theme.pendingColor
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.sceneContentPadding
 import com.wallet.core.primitives.Wallet
@@ -72,8 +75,8 @@ fun ReferralScene(
     referralLink: String?,
     uiState: GemRewardsState,
     infoRows: List<ListItemModel>,
-    errorRow: ListItemModel?,
-    unverifiedRow: ListItemModel?,
+    errorNotice: RewardsNoticeUIModel?,
+    unverifiedNotice: RewardsNoticeUIModel?,
     pendingReferral: PendingReferralUIModel?,
     redemptions: List<RewardRedemptionUIModel>,
     currentWallet: Wallet?,
@@ -178,12 +181,26 @@ fun ReferralScene(
                         )
                     }
                 }
-                errorRow?.let { item { ListItem(model = it, listPosition = ListPosition.Single) } }
-                unverifiedRow?.let { item { ListItem(model = it, listPosition = ListPosition.Single) } }
+                errorNotice?.let { notice ->
+                    item {
+                        WarningItem(title = notice.title, message = notice.message, color = MaterialTheme.colorScheme.error, position = ListPosition.Single)
+                    }
+                }
+                unverifiedNotice?.let { notice ->
+                    item {
+                        WarningItem(title = notice.title, message = notice.message, color = pendingColor, position = ListPosition.Single, icon = AppIcons.Info)
+                    }
+                }
                 pendingReferral?.let { pending ->
                     item {
-                        ListItem(model = pending.model, listPosition = ListPosition.Single)
-                        Box(modifier = Modifier.padding(horizontal = sceneContentPadding())) {
+                        WarningItem(
+                            title = pending.notice.title,
+                            message = pending.notice.message,
+                            color = pendingColor,
+                            position = ListPosition.First,
+                            icon = AppIcons.Info,
+                        )
+                        Box(modifier = Modifier.listItem(ListPosition.Last).padding(paddingDefault)) {
                             MainActionButton(
                                 title = stringResource(R.string.transfer_confirm),
                                 state = pending.buttonState,
@@ -241,8 +258,8 @@ private fun ReferralScenePreview() {
                 pointsText = "1000 \uD83D\uDC8E",
             ),
             infoRows = emptyList(),
-            errorRow = null,
-            unverifiedRow = null,
+            errorNotice = null,
+            unverifiedNotice = null,
             pendingReferral = null,
             redemptions = emptyList(),
             currentWallet = previewWallet(),
@@ -267,8 +284,8 @@ private fun ReferralSceneNoRewardsPreview() {
             referralLink = null,
             uiState = previewRewardsState(canUseReferralCode = true),
             infoRows = emptyList(),
-            errorRow = null,
-            unverifiedRow = null,
+            errorNotice = null,
+            unverifiedNotice = null,
             pendingReferral = null,
             redemptions = emptyList(),
             currentWallet = previewWallet(),

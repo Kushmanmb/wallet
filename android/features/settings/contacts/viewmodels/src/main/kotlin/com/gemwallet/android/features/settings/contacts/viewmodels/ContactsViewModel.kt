@@ -44,6 +44,7 @@ class ContactsViewModel @Inject constructor(
         return ListItemModel(
             title = row.title,
             titleExtra = row.subtitle,
+            titleExtraLineLimit = 1,
             image = ContactAvatarState.from(contact.contact.imageUrl).image(row.initials),
         )
     }

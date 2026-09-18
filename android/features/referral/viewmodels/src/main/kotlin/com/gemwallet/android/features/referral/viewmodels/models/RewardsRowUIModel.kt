@@ -7,7 +7,6 @@ import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.buttonState
 import uniffi.gemstone.GemRewardsRedemption
@@ -19,38 +18,37 @@ data class RewardRedemptionUIModel(
     val confirmationMessage: String,
 )
 
+data class RewardsNoticeUIModel(
+    val title: String,
+    val message: String,
+)
+
 data class PendingReferralUIModel(
-    val model: ListItemModel,
+    val notice: RewardsNoticeUIModel,
     val code: String,
     val buttonState: ButtonState,
 )
 
-internal fun GemRewardsState.errorRow(context: Context): ListItemModel? = disableReason?.let { reason ->
-    ListItemModel(
-        title = context.getString(R.string.errors_error_occurred),
-        titleStyle = ListItemTextStyle.Negative,
-        titleExtra = reason,
-    )
+internal fun GemRewardsState.errorNotice(context: Context): RewardsNoticeUIModel? = disableReason?.let { reason ->
+    RewardsNoticeUIModel(title = context.getString(R.string.errors_error_occurred), message = reason)
 }
 
-internal fun GemRewardsState.unverifiedRow(context: Context): ListItemModel? = if (!isUnverified) {
+internal fun GemRewardsState.unverifiedNotice(context: Context): RewardsNoticeUIModel? = if (!isUnverified) {
     null
 } else {
-    ListItemModel(
+    RewardsNoticeUIModel(
         title = context.getString(R.string.rewards_unverified_title),
-        titleStyle = ListItemTextStyle.Warning,
-        titleExtra = context.getString(R.string.rewards_unverified_description),
+        message = context.getString(R.string.rewards_unverified_description),
     )
 }
 
-internal fun GemRewardsState.pendingReferralRow(context: Context): PendingReferralUIModel? {
+internal fun GemRewardsState.pendingReferral(context: Context): PendingReferralUIModel? {
     if (!hasPendingReferral) return null
     val code = usedReferralCode ?: return null
     return PendingReferralUIModel(
-        model = ListItemModel(
+        notice = RewardsNoticeUIModel(
             title = context.getString(R.string.rewards_pending_title),
-            titleStyle = ListItemTextStyle.Warning,
-            titleExtra = if (canActivatePendingReferral) {
+            message = if (canActivatePendingReferral) {
                 context.getString(R.string.rewards_pending_description_ready)
             } else {
                 context.getString(R.string.rewards_pending_description, pendingCountdown.formatDuration())

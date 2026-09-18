@@ -23,7 +23,7 @@ final class SecurityReminderViewModel {
 
     var message: String = Localized.Onboarding.Security.CreateWallet.Intro.title
     func listItem(for item: GemSecurityReminderItem) -> ListItemModel {
-        ListItemModel(title: item.title, titleStyle: .headline, titleLineLimit: 2, titleExtra: item.subtitle, titleStyleExtra: .bodySecondary, imageStyle: item.image)
+        ListItemModel(title: item.title, titleLineLimit: 2, titleExtra: item.subtitle, titleStyleExtra: .bodySecondary, imageStyle: item.image)
     }
 
     var items: [GemSecurityReminderItem] = securityReminderItems()

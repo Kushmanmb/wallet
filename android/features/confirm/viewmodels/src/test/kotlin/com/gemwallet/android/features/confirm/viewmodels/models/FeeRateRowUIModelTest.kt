@@ -14,6 +14,7 @@ import java.math.BigInteger
 import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.FeeUnitType
@@ -27,9 +28,16 @@ class FeeRateRowUIModelTest {
         every { getString(any()) } returns "text"
     }
 
+    private val defaultLocale = Locale.getDefault()
+
     @Before
     fun setUp() {
         Locale.setDefault(Locale.US)
+    }
+
+    @After
+    fun tearDown() {
+        Locale.setDefault(defaultLocale)
     }
 
     @Test

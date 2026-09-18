@@ -30,7 +30,7 @@ fun AddAssetScreen(
     val token by viewModel.token.collectAsStateWithLifecycle()
     val assetRows by viewModel.assetRows.collectAsStateWithLifecycle()
     val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
-    val searchFailedRow by viewModel.searchFailedRow.collectAsStateWithLifecycle()
+    val searchFailed by viewModel.searchFailed.collectAsStateWithLifecycle()
     val verificationWarningRow by viewModel.verificationWarningRow.collectAsStateWithLifecycle()
     val explorerLink by viewModel.explorerLink.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
@@ -58,7 +58,7 @@ fun AddAssetScreen(
         } else {
             AddAssetScene(
                 isSearching = isSearching,
-                searchFailedRow = searchFailedRow,
+                searchFailed = searchFailed,
                 addressState = viewModel.addressState,
                 network = network?.asset(),
                 token = token,

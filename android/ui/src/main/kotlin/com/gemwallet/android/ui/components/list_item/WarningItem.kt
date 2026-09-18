@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.gemwallet.android.ui.components.parseMarkdownToAnnotatedString
@@ -29,6 +30,7 @@ fun WarningItem(
     message: String? = null,
     color: Color,
     position: ListPosition,
+    icon: ImageVector = AppIcons.Warning,
     onClick: (() -> Unit)? = null,
 ) {
     Row(
@@ -43,7 +45,7 @@ fun WarningItem(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     modifier = Modifier.size(smallIconSize),
-                    imageVector = AppIcons.Warning,
+                    imageVector = icon,
                     contentDescription = null,
                     tint = color,
                 )

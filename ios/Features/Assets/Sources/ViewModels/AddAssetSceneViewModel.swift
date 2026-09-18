@@ -95,7 +95,6 @@ public final class AddAssetSceneViewModel {
     func warningListItem(infoAction: @escaping () -> Void) -> ListItemModel {
         ListItemModel(
             title: Localized.Asset.Verification.warningTitle,
-            titleStyle: .headline,
             titleExtra: Localized.Asset.Verification.warningMessage,
             titleStyleExtra: .bodySecondary,
             imageStyle: warningImageStyle,

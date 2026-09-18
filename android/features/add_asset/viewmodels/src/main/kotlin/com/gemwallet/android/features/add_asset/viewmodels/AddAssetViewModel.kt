@@ -18,7 +18,6 @@ import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.add_asset.viewmodels.localization.stringRes
 import com.gemwallet.android.features.add_asset.viewmodels.models.AddAssetUIState
-import com.gemwallet.android.features.add_asset.viewmodels.models.searchFailedListItem
 import com.gemwallet.android.features.add_asset.viewmodels.models.verificationWarningListItem
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
@@ -108,8 +107,8 @@ class AddAssetViewModel @Inject constructor(
     val isSearching: StateFlow<Boolean> = searchState.map { it is GemAddAssetPhase.Loading }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val searchFailedRow: StateFlow<ListItemModel?> = searchState.map { if (it is GemAddAssetPhase.Failed) searchFailedListItem(context) else null }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val searchFailed: StateFlow<Boolean> = searchState.map { it is GemAddAssetPhase.Failed }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val token = session.map { it.asset?.toPrimitives() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)

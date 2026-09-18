@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
@@ -24,6 +25,7 @@ import com.gemwallet.android.ui.components.list_item.ChainItem
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
+import com.gemwallet.android.ui.components.list_item.WarningItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.LinkRowUIModel
 import com.gemwallet.android.ui.components.progress.CircularProgressIndicator16
@@ -39,7 +41,7 @@ private val networkItemHeight = 64.dp
 @Composable
 internal fun AddAssetScene(
     isSearching: Boolean,
-    searchFailedRow: ListItemModel?,
+    searchFailed: Boolean,
     addressState: MutableState<String>,
     network: Asset?,
     token: Asset?,
@@ -99,8 +101,13 @@ internal fun AddAssetScene(
                 CircularProgressIndicator16(modifier = Modifier.align(Alignment.Center))
             }
         }
-        if (searchFailedRow != null) {
-            ListItem(model = searchFailedRow, listPosition = ListPosition.Single)
+        if (searchFailed) {
+            WarningItem(
+                title = stringResource(R.string.errors_error_occurred),
+                message = stringResource(R.string.errors_token_invalid_id),
+                color = MaterialTheme.colorScheme.error,
+                position = ListPosition.Single,
+            )
         }
         AssetInfoTable(token, assetRows)
         if (explorerLink != null && token != null) {

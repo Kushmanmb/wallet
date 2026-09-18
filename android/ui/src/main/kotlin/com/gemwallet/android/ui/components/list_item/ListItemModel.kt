@@ -36,11 +36,13 @@ import com.wallet.core.primitives.AssetId
 data class ListItemModel(
     val title: String,
     val titleStyle: ListItemTextStyle = ListItemTextStyle.Body,
+    val titleLineLimit: Int? = 1,
     val titleTag: String? = null,
     val titleTagStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
     val titleTagType: ListItemTagType = ListItemTagType.None,
     val titleExtra: String? = null,
     val titleExtraStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
+    val titleExtraLineLimit: Int? = null,
     val subtitle: String? = null,
     val subtitleStyle: ListItemTextStyle = ListItemTextStyle.Secondary,
     val subtitleExtra: String? = null,
@@ -153,10 +155,13 @@ fun ListItem(
                 text = model.title,
                 color = model.titleStyle.color(),
                 style = MaterialTheme.typography.bodyLarge,
+                maxLines = model.titleLineLimit ?: Int.MAX_VALUE,
                 titleBadge = model.titleTag?.let { { TitleTag(it, model.titleTagStyle, model.titleTagType) } },
             )
         },
-        subtitle = model.titleExtra?.let { { ListItemSupportText(text = it, color = model.titleExtraStyle.color()) } },
+        subtitle = model.titleExtra?.let {
+            { ListItemSupportText(text = it, color = model.titleExtraStyle.color(), maxLines = model.titleExtraLineLimit ?: Int.MAX_VALUE) }
+        },
         trailing = if (model.subtitle == null && model.subtitleExtra == null && accessory == null) {
             null
         } else {
