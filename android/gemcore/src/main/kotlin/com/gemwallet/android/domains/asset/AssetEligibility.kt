@@ -13,5 +13,6 @@ private fun GemAssetFilter.queryFilter(): AssetFilter? = when (this) {
     GemAssetFilter.HasBalance -> AssetFilter.HasBalance
     GemAssetFilter.HasAvailableBalance -> AssetFilter.HasAvailableBalance
     is GemAssetFilter.ChainsOrAssetIds -> AssetFilter.ChainsOrAssetIds(chains.map { it.requireChain() }, assetIds)
+    is GemAssetFilter.Chains -> AssetFilter.Chains(chains.map { it.requireChain() })
     GemAssetFilter.Enabled -> null
 }

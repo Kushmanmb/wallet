@@ -183,6 +183,10 @@ impl GemSelectAssetFlow {
     pub fn shows_chain_filter(&self, is_multicoin: bool, has_chains: bool) -> bool {
         self.chain_filter && is_multicoin && has_chains
     }
+
+    pub fn applied_filters(&self, chains: Vec<Chain>, has_balance: bool) -> Vec<GemAssetFilter> {
+        super::rules::applied_filters(self, chains, has_balance)
+    }
 }
 
 #[uniffi::export]
@@ -201,6 +205,7 @@ pub enum GemAssetFilter {
     HasBalance,
     HasAvailableBalance,
     ChainsOrAssetIds { chains: Vec<Chain>, asset_ids: Vec<AssetId> },
+    Chains { chains: Vec<Chain> },
 }
 
 impl GemAssetFilter {

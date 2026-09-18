@@ -114,11 +114,9 @@ open class BaseAssetSelectViewModel(
         SelectAssetFilters(
             session = session,
             query = query,
-            chainFilter = chainFilter,
-            hasBalance = hasBalance,
             limit = assetsSearchLimit(query),
             scope = flow.scope,
-            filters = flow.filters,
+            filters = flow.appliedFilters(chainFilter.map { it.string }, hasBalance),
         )
     }
     .stateIn(viewModelScope, SharingStarted.Eagerly, null)

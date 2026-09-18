@@ -29,19 +29,7 @@ public struct AssetsFilterViewModel: Sendable, Equatable {
     }
 
     var filters: [AssetsRequestFilter] {
-        guard isAnyFilterSpecified else { return flow.requestFilters }
-
-        var result = flow.requestFilters
-
-        if chainsFilter.isAnySelected {
-            result.append(.chains(chainsFilter.selectedChains.map(\.rawValue)))
-        }
-
-        if hasBalance, showHasBalanceToggle {
-            result.append(.hasBalance)
-        }
-
-        return result.unique()
+        flow.appliedFilters(chains: chainsFilter.selectedChains.map(\.rawValue), hasBalance: hasBalance).map(AssetsRequestFilter.init(core:))
     }
 
     var showHasBalanceToggle: Bool {
