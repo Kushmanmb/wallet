@@ -13,6 +13,7 @@ import Primitives
 import PrimitivesComponents
 import Style
 import SwiftUI
+import func Gemstone.valueTone
 
 public struct PerpetualViewModel {
     public let perpetual: Perpetual
@@ -55,6 +56,6 @@ public struct PerpetualViewModel {
     }
 
     public var priceChangeTextColor: Color {
-        PriceChangeColor.color(for: perpetual.pricePercentChange24h)
+        valueTone(value: perpetual.pricePercentChange24h).color
     }
 }

@@ -31,10 +31,7 @@ struct ChainNodeViewModel {
     }
 
     var title: String {
-        switch row.title {
-        case let .host(host): host
-        case let .gemNode(flag): Localized.Nodes.gemWalletNode + " " + flag
-        }
+        row.title.text(gemNodeLabel: Localized.Nodes.gemWalletNode)
     }
 
     var titleExtra: String? {

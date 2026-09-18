@@ -58,6 +58,14 @@ extension GemValueTone {
         case .negative: Colors.red
         }
     }
+
+    public var backgroundColor: Color {
+        switch self {
+        case .plain, .neutral: Colors.grayVeryLight
+        case .positive: Colors.greenLight
+        case .negative: Colors.redLight
+        }
+    }
 }
 
 extension GemPriceAlertRow {

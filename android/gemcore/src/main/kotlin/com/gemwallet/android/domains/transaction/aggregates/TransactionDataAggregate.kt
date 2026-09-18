@@ -10,6 +10,7 @@ import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStatus
 import uniffi.gemstone.GemTransactionTitle
+import uniffi.gemstone.GemValueTone
 
 @Stable
 interface TransactionDataAggregate {
@@ -22,6 +23,7 @@ interface TransactionDataAggregate {
     val title: GemTransactionTitle
     val subtitle: GemTransactionRowSubtitle
     val valueSign: GemAmountSign
+    val valueTone: GemValueTone
 
     val type: TransactionType
     val direction: TransactionDirection

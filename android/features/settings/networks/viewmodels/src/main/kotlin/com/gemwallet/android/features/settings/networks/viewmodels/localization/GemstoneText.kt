@@ -24,10 +24,7 @@ internal fun GemNodeCheckRow.text(context: Context): String = when (this) {
     is GemNodeCheckRow.InSync -> ""
 }
 
-internal fun GemNodeRowTitle.string(context: Context): String = when (this) {
-    is GemNodeRowTitle.Host -> host
-    is GemNodeRowTitle.GemNode -> "${context.getString(R.string.nodes_gem_wallet_node)} $flag"
-}
+internal fun GemNodeRowTitle.string(context: Context): String = text(context.getString(R.string.nodes_gem_wallet_node))
 
 internal fun GemNodeSubtitle.text(context: Context): String = when (this) {
     is GemNodeSubtitle.LatestBlock -> "${context.getString(R.string.nodes_import_node_latest_block)}: $value"

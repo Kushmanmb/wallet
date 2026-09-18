@@ -118,6 +118,16 @@ pub struct GemNodeSelection {
 }
 
 #[uniffi::export]
+impl GemNodeRowTitle {
+    pub fn text(&self, gem_node_label: String) -> String {
+        match self {
+            Self::Host { host } => host.clone(),
+            Self::GemNode { flag } => format!("{gem_node_label} {flag}"),
+        }
+    }
+}
+
+#[uniffi::export]
 impl GemNodeSelection {
     pub fn title(&self) -> GemNodeRowTitle {
         match &self.gem_node_flag {

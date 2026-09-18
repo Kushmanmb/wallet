@@ -52,6 +52,7 @@ import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemTransactionStatus
 import uniffi.gemstone.GemTransactionTitle
+import uniffi.gemstone.GemValueTone
 
 private val badgeStartPadding = 5.dp
 
@@ -181,6 +182,7 @@ fun PreviewTransactionItem() {
                 override val status = GemTransactionStatus(tone = GemTransactionStateTone.PENDING, showsBadge = true, showsProgress = true)
                 override val subtitle = GemTransactionRowSubtitle.ToAddress("btc12312sdfksdjfks")
                 override val valueSign = GemAmountSign.OUTGOING
+                override val valueTone = GemValueTone.PLAIN
                 override val type = TransactionType.Transfer
                 override val direction = TransactionDirection.Outgoing
                 override val state = TransactionState.Pending
@@ -213,6 +215,7 @@ fun PreviewSwapTransactionItem() {
                 override val title = GemTransactionTitle.Swap
                 override val subtitle = GemTransactionRowSubtitle.None
                 override val valueSign = GemAmountSign.INCOMING
+                override val valueTone = GemValueTone.POSITIVE
                 override val type = TransactionType.Swap
                 override val direction = TransactionDirection.Outgoing
                 override val state = TransactionState.Confirmed

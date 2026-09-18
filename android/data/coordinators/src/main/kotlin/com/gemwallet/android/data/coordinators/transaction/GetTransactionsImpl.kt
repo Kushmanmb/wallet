@@ -40,6 +40,7 @@ import uniffi.gemstone.GemTransactionRow
 import uniffi.gemstone.GemTransactionsServiceInterface
 import uniffi.gemstone.GemValueStyle
 import java.util.concurrent.ConcurrentHashMap
+import uniffi.gemstone.GemValueTone
 
 private val usdFiatFormatter = CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = Currency.USD)
 private val valueFormatter = ValueFormatter(style = GemValueStyle.SHORT)
@@ -118,6 +119,8 @@ class TransactionDataAggregateImpl(
     private val coreValue: GemTransactionRowValue = row.value
 
     override val valueSign: GemAmountSign = (coreValue as? GemTransactionRowValue.Amount)?.amount?.sign ?: GemAmountSign.NONE
+
+    override val valueTone: GemValueTone = row.valueTone
 
     override val value: String = coreValue.format().orEmpty()
 

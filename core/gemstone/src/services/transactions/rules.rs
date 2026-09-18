@@ -17,7 +17,7 @@ use super::model::{
 };
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::config::image::GemImage;
-use crate::formatted_number::GemFormattedNumber;
+use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::asset::wallet_default_assets;
 use crate::services::collections::unique;
 use crate::services::swap::model::GemSwapRate;
@@ -71,6 +71,7 @@ pub fn transaction_asset_ids(transactions: &[Transaction]) -> Vec<AssetId> {
 
 pub fn row(extended: &TransactionExtended) -> GemTransactionRow {
     let transaction = &extended.transaction;
+    let value = row_value(extended, transaction_value(transaction));
     GemTransactionRow {
         id: transaction.id.clone(),
         asset: extended.asset.clone(),
@@ -81,7 +82,8 @@ pub fn row(extended: &TransactionExtended) -> GemTransactionRow {
         status: status(transaction.state),
         title: transaction_title(transaction),
         subtitle: row_subtitle(extended),
-        value: row_value(extended, transaction_value(transaction)),
+        value_tone: value_tone(&value),
+        value,
         equivalent_value: row_value(extended, transaction_equivalent_value(transaction)),
         nft_image_url: transaction.nft_asset_id().map(|asset_id| GemImage::NftAsset { asset_id: asset_id.to_string() }.url()),
     }
@@ -197,6 +199,21 @@ fn participant_name(extended: &TransactionExtended, address: &str) -> String {
     address_name(extended, address)
         .map(|name| name.name)
         .unwrap_or_else(|| format_address(address, Some(extended.transaction.asset_id.chain), GemAddressFormatStyle::Short))
+}
+
+fn value_tone(value: &GemTransactionRowValue) -> GemValueTone {
+    match value {
+        GemTransactionRowValue::Amount { amount } => match amount.sign {
+            GemAmountSign::Incoming => GemValueTone::Positive,
+            GemAmountSign::Outgoing | GemAmountSign::None => GemValueTone::Plain,
+        },
+        GemTransactionRowValue::Pnl { value } => match GemValueTone::of(*value) {
+            GemValueTone::Positive => GemValueTone::Positive,
+            GemValueTone::Negative => GemValueTone::Negative,
+            GemValueTone::Neutral | GemValueTone::Plain => GemValueTone::Plain,
+        },
+        GemTransactionRowValue::None | GemTransactionRowValue::AssetSymbol { .. } | GemTransactionRowValue::Fiat { .. } => GemValueTone::Plain,
+    }
 }
 
 fn row_value(extended: &TransactionExtended, value: GemTransactionValue) -> GemTransactionRowValue {
@@ -596,6 +613,31 @@ pub fn activity_filters(chains: Vec<Chain>, filters: Vec<GemTransactionFilter>) 
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn test_the_value_tone_greens_an_incoming_amount_and_signs_a_pnl() {
+        use super::super::model::{GemAmountSign, GemTransactionAmount, GemTransactionRowValue};
+        use super::value_tone;
+        use crate::formatted_number::GemValueTone;
+        use crate::models::custom_types::GemBigUint;
+        use primitives::{Asset, Chain};
+
+        let amount = |sign| GemTransactionRowValue::Amount {
+            amount: GemTransactionAmount {
+                asset: Asset::from_chain(Chain::Ethereum),
+                value: GemBigUint::from(1u32),
+                sign,
+                price: None,
+            },
+        };
+
+        assert_eq!(value_tone(&amount(GemAmountSign::Incoming)), GemValueTone::Positive);
+        assert_eq!(value_tone(&amount(GemAmountSign::Outgoing)), GemValueTone::Plain);
+        assert_eq!(value_tone(&GemTransactionRowValue::Pnl { value: 12.5 }), GemValueTone::Positive);
+        assert_eq!(value_tone(&GemTransactionRowValue::Pnl { value: -0.5 }), GemValueTone::Negative);
+        assert_eq!(value_tone(&GemTransactionRowValue::Pnl { value: 0.0 }), GemValueTone::Plain);
+        assert_eq!(value_tone(&GemTransactionRowValue::Fiat { value: 10.0 }), GemValueTone::Plain);
+    }
 
     #[test]
     fn test_an_empty_activity_list_reads_as_no_results_only_once_a_filter_is_on() {
