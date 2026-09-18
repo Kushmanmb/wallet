@@ -12,13 +12,11 @@ use primitives::{Chain, Contact};
 use crate::address_formatter::{GemAddressFormatStyle, GemAddressService};
 use crate::models::payment::GemPayment;
 use crate::payment::GemPaymentService;
-use crate::services::file::GemFileStore;
+use crate::services::file::{GemFileStore, IMAGE_EXTENSION};
 use crate::services::name::GemAddressStore;
 
 pub use model::{GemContactAddressInput, GemContactAvatar, GemContactInput, GemContactRow, GemContactScannedAddress, contact_initials, contact_row};
 pub use store::GemContactStore;
-
-const AVATAR_EXTENSION: &str = "png";
 
 #[derive(uniffi::Object)]
 pub struct GemContactService {
@@ -89,7 +87,7 @@ impl GemContactService {
     }
 
     fn save_avatar(&self, image: Vec<u8>) -> Result<String, GemServiceError> {
-        self.files.save_file(image, AVATAR_EXTENSION.to_string())
+        self.files.save_file(image, IMAGE_EXTENSION.to_string())
     }
 
     fn remove_avatar(&self, file_name: String) -> Result<(), GemServiceError> {

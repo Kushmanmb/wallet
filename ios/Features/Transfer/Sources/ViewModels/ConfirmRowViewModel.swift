@@ -5,16 +5,15 @@ import Foundation
 import enum Gemstone.GemConfirmDestination
 import enum Gemstone.GemConfirmRowContent
 import GemstonePrimitives
-import Localization
 import Primitives
 import PrimitivesComponents
 
 struct ConfirmRowViewModel {
-    private let content: GemConfirmRowContent?
+    private let content: GemConfirmRowContent
     private let onSelectAddress: (@MainActor @Sendable (ChainAddress) -> Void)?
 
     init(
-        content: GemConfirmRowContent?,
+        content: GemConfirmRowContent,
         onSelectAddress: (@MainActor @Sendable (ChainAddress) -> Void)? = nil,
     ) {
         self.content = content
@@ -27,22 +26,8 @@ struct ConfirmRowViewModel {
 extension ConfirmRowViewModel: ItemModelProvidable {
     var itemModel: ConfirmTransferItemModel {
         switch content {
-        case let .app(name, iconUrl):
-            .app(
-                ListItemModel(
-                    title: Localized.WalletConnect.app,
-                    subtitle: name,
-                    imageStyle: .list(assetImage: iconUrl.map { AssetImage(imageURL: URL(string: $0)) }),
-                ),
-            )
-        case let .sender(wallet):
-            .sender(
-                ListItemModel(
-                    title: Localized.Common.wallet,
-                    subtitle: wallet.name,
-                    imageStyle: .list(assetImage: wallet.avatarImage),
-                ),
-            )
+        case let .row(row):
+            .row(row)
         case let .recipient(destination, addressName, memo, chain, link):
             .recipient(
                 recipientItem(
@@ -53,17 +38,7 @@ extension ConfirmRowViewModel: ItemModelProvidable {
                     link: link.toPrimitives(),
                 ),
             )
-        case let .network(chain, name):
-            .network(
-                ListItemModel(
-                    title: Localized.Transfer.network,
-                    subtitle: name,
-                    imageStyle: .list(assetImage: AssetIdViewModel(assetId: AssetId(chain: Chain(core: chain), tokenId: nil)).networkAssetImage),
-                ),
-            )
-        case let .memo(memo):
-            .memo(MemoViewModel(memo: memo).listItemModel)
-        case .details, .none:
+        case .details:
             .empty
         }
     }
@@ -121,13 +96,9 @@ extension ConfirmRowViewModel {
 }
 
 extension GemConfirmRowContent {
-    var item: ConfirmTransferItem {
+    func item(at index: Int) -> ConfirmTransferItem {
         switch self {
-        case .app: .app
-        case .sender: .sender
-        case .recipient: .recipient
-        case .network: .network
-        case .memo: .memo
+        case .row, .recipient: .row(index)
         case .details: .details
         }
     }

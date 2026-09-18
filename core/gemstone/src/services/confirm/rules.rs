@@ -1,5 +1,8 @@
 use super::model::GemConfirmRowContent;
 use crate::application::GemApplicationMetadataService;
+use crate::models::copy::address_copy;
+use crate::models::list::{GemListRow, GemListRowTitle};
+use crate::models::placeholder::text_or_placeholder;
 use crate::services::assets::rules::asset_text;
 use crate::services::transfer::model::{GemConfirmRow, GemTransferData};
 use crate::services::wallet::model::wallet_row;
@@ -490,15 +493,25 @@ pub fn confirm_row_contents(
         .confirm_rows()
         .into_iter()
         .filter_map(|row| match row {
-            GemConfirmRow::App => transfer.application_short_name().map(|name| GemConfirmRowContent::App {
-                name,
-                icon_url: match &transfer.input_type {
-                    TransactionInputType::Generic { metadata, .. } => GemApplicationMetadataService::new().icon_url(metadata.clone()),
+            GemConfirmRow::App => transfer.application_short_name().map(|name| {
+                let metadata = match &transfer.input_type {
+                    TransactionInputType::Generic { metadata, .. } => Some(metadata),
                     _ => None,
-                },
+                };
+                GemConfirmRowContent::Row {
+                    row: GemListRow::App {
+                        name,
+                        icon_url: metadata.and_then(|metadata| GemApplicationMetadataService::new().icon_url(metadata.clone())),
+                        website_url: metadata.map(|metadata| metadata.url.clone()).filter(|url| !url.is_empty()),
+                    },
+                }
             }),
-            GemConfirmRow::Sender => Some(GemConfirmRowContent::Sender {
-                wallet: wallet_row(wallet.clone()),
+            GemConfirmRow::Sender => wallet.account(chain).map(|account| GemConfirmRowContent::Row {
+                row: GemListRow::Wallet {
+                    wallet: wallet_row(wallet.clone()),
+                    copy: address_copy(chain, account.address.clone()),
+                    explorer: address_url(chain, account.address.clone()),
+                },
             }),
             GemConfirmRow::Recipient => transfer.destination().map(|destination| GemConfirmRowContent::Recipient {
                 destination: destination.with_address_name(address_name.clone()),
@@ -509,17 +522,26 @@ pub fn confirm_row_contents(
             }),
             GemConfirmRow::Network => {
                 let text = asset_text(&asset);
-                Some(GemConfirmRowContent::Network {
-                    chain,
-                    name: match transfer.input_type {
-                        TransactionInputType::Transfer { .. } | TransactionInputType::Deposit { .. } | TransactionInputType::Withdrawal { .. } => text.network_full_name,
-                        _ => text.network_name,
+                Some(GemConfirmRowContent::Row {
+                    row: GemListRow::Network {
+                        title: GemListRowTitle::Network,
+                        chain,
+                        name: match transfer.input_type {
+                            TransactionInputType::Transfer { .. } | TransactionInputType::Deposit { .. } | TransactionInputType::Withdrawal { .. } => text.network_full_name,
+                            _ => text.network_name,
+                        },
                     },
                 })
             }
-            GemConfirmRow::Memo => Some(GemConfirmRowContent::Memo {
-                memo: transfer.recipient.memo.clone(),
-            }),
+            GemConfirmRow::Memo => {
+                let memo = transfer.recipient.memo.clone().filter(|memo| !memo.trim().is_empty());
+                Some(GemConfirmRowContent::Row {
+                    row: GemListRow::Memo {
+                        value: text_or_placeholder(memo.as_deref()),
+                        copy: memo,
+                    },
+                })
+            }
             GemConfirmRow::Details => Some(GemConfirmRowContent::Details),
         })
         .collect()
@@ -531,7 +553,7 @@ mod tests {
     use crate::models::custom_types::GemBigInt;
     use crate::models::custom_types::GemBigUint;
     use crate::models::transaction::GemFeeOptions;
-    use crate::services::transfer::GemTransferData;
+    use crate::services::transfer::{GemRecipient, GemTransferData};
     use crate::transfer_amount::GemTransferAmount;
     use num_bigint::BigInt;
     use num_bigint::BigUint;
@@ -1545,9 +1567,15 @@ mod tests {
             None,
             link,
         );
-        assert!(matches!(&contents[0], GemConfirmRowContent::Sender { .. }));
+        assert!(matches!(
+            &contents[0],
+            GemConfirmRowContent::Row { row: GemListRow::Wallet { copy, explorer, .. } } if copy.value == "address" && explorer.link == "address"
+        ));
         assert!(matches!(&contents[1], GemConfirmRowContent::Recipient { link, chain: Chain::Ethereum, .. } if link.link == "recipient"));
-        assert!(matches!(&contents[2], GemConfirmRowContent::Network { chain: Chain::Ethereum, name } if name == "Ethereum"));
+        assert!(matches!(
+            &contents[2],
+            GemConfirmRowContent::Row { row: GemListRow::Network { chain: Chain::Ethereum, name, .. } } if name == "Ethereum"
+        ));
 
         let token = confirm_row_contents(
             &GemTransferData::mock(TransactionInputType::Transfer {
@@ -1557,20 +1585,54 @@ mod tests {
             None,
             link,
         );
-        assert!(matches!(&token[2], GemConfirmRowContent::Network { name, .. } if name == "Ethereum (ERC20)"));
+        assert!(matches!(&token[2], GemConfirmRowContent::Row { row: GemListRow::Network { name, .. } } if name == "Ethereum (ERC20)"));
 
-        let solana = confirm_row_contents(
-            &GemTransferData::mock(TransactionInputType::Transfer {
-                asset: Asset::from_chain(Chain::Solana),
+        let solana = GemTransferData::mock(TransactionInputType::Transfer {
+            asset: Asset::from_chain(Chain::Solana),
+        });
+        let without_memo = GemTransferData {
+            recipient: GemRecipient {
+                memo: None,
+                ..solana.recipient.clone()
+            },
+            ..solana.clone()
+        };
+        let memo_row = |transfer: &GemTransferData| {
+            confirm_row_contents(transfer, Wallet::mock(), None, link).into_iter().find_map(|content| match content {
+                GemConfirmRowContent::Row {
+                    row: row @ GemListRow::Memo { .. },
+                } => Some(row),
+                _ => None,
+            })
+        };
+        assert_eq!(
+            memo_row(&solana),
+            Some(GemListRow::Memo {
+                value: "memo".to_string(),
+                copy: Some("memo".to_string()),
+            })
+        );
+        assert_eq!(
+            memo_row(&without_memo),
+            Some(GemListRow::Memo {
+                value: "-".to_string(),
+                copy: None,
+            })
+        );
+
+        let dapp = confirm_row_contents(
+            &GemTransferData::mock(TransactionInputType::Generic {
+                asset: Asset::from_chain(Chain::Ethereum),
+                metadata: ApplicationMetadata::mock(),
+                extra: TransferDataExtra::mock(),
             }),
             Wallet::mock(),
             None,
             link,
         );
-        assert!(
-            solana
-                .iter()
-                .any(|content| matches!(content, GemConfirmRowContent::Memo { memo: Some(memo) } if memo == "memo"))
-        );
+        assert!(dapp.iter().any(|content| matches!(
+            content,
+            GemConfirmRowContent::Row { row: GemListRow::App { website_url: Some(url), .. } } if url == "https://example.com"
+        )));
     }
 }

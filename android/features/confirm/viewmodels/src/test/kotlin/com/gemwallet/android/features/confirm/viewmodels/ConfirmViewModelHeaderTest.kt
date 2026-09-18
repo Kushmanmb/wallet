@@ -97,7 +97,6 @@ class ConfirmViewModelHeaderTest {
                     mockSession(wallet = mockWallet(accounts = listOf(account))),
                 )
             },
-            buildConfirmProperties = mockk(relaxed = true),
             confirmService = confirmService,
             savedStateHandle = SavedStateHandle(mapOf(RouteArgument.Params.key to requireNotNull(transfer.pack()))),
             ioDispatcher = testDispatcher,

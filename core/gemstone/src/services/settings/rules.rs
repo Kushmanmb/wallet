@@ -413,7 +413,15 @@ mod tests {
             | GemListRow::Url { title, .. }
             | GemListRow::Toggle { title, .. }
             | GemListRow::Picker { title, .. } => Some(*title),
-            GemListRow::Social { .. } | GemListRow::Icon { .. } | GemListRow::Address { .. } | GemListRow::Explorer { .. } | GemListRow::Loading | GemListRow::Error { .. } => None,
+            GemListRow::App { .. }
+            | GemListRow::Wallet { .. }
+            | GemListRow::Memo { .. }
+            | GemListRow::Social { .. }
+            | GemListRow::Icon { .. }
+            | GemListRow::Address { .. }
+            | GemListRow::Explorer { .. }
+            | GemListRow::Loading
+            | GemListRow::Error { .. } => None,
         }
     }
 }

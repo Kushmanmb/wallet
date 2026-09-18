@@ -1266,7 +1266,7 @@ mod tests {
         let sections = sections(&token, &AssetMetaData::mock(), &reserving, Some(1.0), &[]);
 
         assert_eq!(
-            sections.iter().map(|section| section.title.clone()).collect::<Vec<_>>(),
+            sections.iter().map(|section| section.title).collect::<Vec<_>>(),
             vec![GemListSectionTitle::None, GemListSectionTitle::Balances]
         );
         assert_eq!(

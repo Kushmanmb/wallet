@@ -49,21 +49,10 @@ extension ConfirmTransferScene {
                 showClearHeader: model.showClearHeader,
             )
             .isVisible(self.model.isHeaderVisible)
-        case let .app(model):
-            ListItemImageView(model: model)
-                .contextMenu(
-                    .url(title: self.model.websiteTitle, onOpen: self.model.onSelectOpenWebsiteURL),
-                )
-        case let .sender(model):
-            ListItemImageView(model: model)
-                .explorerContext(self.model.senderExplorerContext)
+        case let .row(row):
+            GemListRowView(row: row)
         case let .recipient(model):
             AddressListItemView(model: model)
-        case let .network(model):
-            ListItemImageView(model: model)
-        case let .memo(model):
-            ListItemView(model: model)
-                .contextMenu(model.subtitle.map { [.copy(value: $0)] } ?? [])
         case let .swapDetails(model):
             NavigationCustomLink(
                 with: SwapDetailsListView(model: model),

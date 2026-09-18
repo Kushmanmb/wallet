@@ -2,6 +2,7 @@ use super::error::GemConfirmError;
 use super::rules::approval_value_from;
 use crate::models::custom_types::{GemBigInt, GemBigUint};
 use crate::models::gateway::GemFeeRate;
+use crate::models::list::GemListRow;
 use crate::models::transaction::{GemFeeOptionItem, GemTransactionLoadFee, GemTransactionLoadMetadata};
 use crate::services::balance::GemAssetBalance;
 use crate::services::localization::GemLocalizedText;
@@ -10,7 +11,6 @@ use crate::services::simulation::{GemSimulationPayloadRow, address_requests, nam
 use crate::services::transactions::GemAmountSign;
 use crate::services::transfer::GemTransferData;
 use crate::services::transfer::model::GemConfirmDestination;
-use crate::services::wallet::model::GemWalletRow;
 use crate::transfer_amount::GemTransferAmount;
 use primitives::AssetPrice;
 use primitives::BlockExplorerLink;
@@ -324,12 +324,8 @@ mod tests {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemConfirmRowContent {
-    App {
-        name: String,
-        icon_url: Option<String>,
-    },
-    Sender {
-        wallet: GemWalletRow,
+    Row {
+        row: GemListRow,
     },
     Recipient {
         destination: GemConfirmDestination,
@@ -337,13 +333,6 @@ pub enum GemConfirmRowContent {
         memo: Option<String>,
         chain: Chain,
         link: BlockExplorerLink,
-    },
-    Network {
-        chain: Chain,
-        name: String,
-    },
-    Memo {
-        memo: Option<String>,
     },
     Details,
 }

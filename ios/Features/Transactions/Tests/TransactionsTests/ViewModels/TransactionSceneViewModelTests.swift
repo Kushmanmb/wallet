@@ -186,7 +186,7 @@ struct TransactionSceneViewModelTests {
     @Test
     func memoItemModel() {
         let withMemo = listRows(TransactionSceneViewModel.mock(asset: .mock(id: .mock(.cosmos)), memo: "Test memo"))
-        #expect(withMemo.contains(.text(title: .memo, value: "Test memo")))
+        #expect(withMemo.contains(.memo(value: "Test memo", copy: "Test memo")))
 
         #expect(listRows(TransactionSceneViewModel.mock(asset: .mock(id: .mock(.cosmos)), memo: nil)).contains { kind($0) == "memo" } == false)
         #expect(listRows(TransactionSceneViewModel.mock(asset: .mock(id: .mock(.cosmos)), memo: "")).contains { kind($0) == "memo" } == false)
@@ -194,7 +194,7 @@ struct TransactionSceneViewModelTests {
 
     @Test
     func networkItemModel() {
-        #expect(listRows(TransactionSceneViewModel.mock()).contains(.network(title: .network, chain: Chain.bitcoin.rawValue)))
+        #expect(listRows(TransactionSceneViewModel.mock()).contains(.network(title: .network, chain: Chain.bitcoin.rawValue, name: "Bitcoin")))
     }
 
     @Test
@@ -260,7 +260,8 @@ struct TransactionSceneViewModelTests {
 
     private func kind(_ row: GemListRow) -> String {
         switch row {
-        case let .date(title, _), let .network(title, _), let .text(title, _): "\(title)"
+        case let .date(title, _), let .network(title, _, _), let .text(title, _): "\(title)"
+        case .memo: "memo"
         case let .label(title, _, _, _, _): "\(title)"
         case let .amount(title, _, _): "\(title)"
         case .explorer: "explorer"

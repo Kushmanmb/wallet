@@ -6,6 +6,7 @@ import enum Gemstone.GemConfirmRowContent
 import enum Gemstone.GemExecuteResult
 import struct Gemstone.GemTransferData
 import struct Gemstone.SimulationResult
+import func Gemstone.addressCopy
 import func Gemstone.walletRow
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
@@ -27,7 +28,11 @@ public extension ConfirmTransferSceneViewModel {
         let wallet = Wallet.mock(accounts: [.mock(chain: data.chain)])
         let rows = rows ?? { addressName in
             [
-                .sender(wallet: walletRow(wallet: wallet.toGem())),
+                .row(row: .wallet(
+                    wallet: walletRow(wallet: wallet.toGem()),
+                    copy: addressCopy(chain: data.chain.rawValue, address: wallet.accounts[0].address),
+                    explorer: BlockExplorerLink.mock().toGem(),
+                )),
                 .recipient(
                     destination: .recipient(name: addressName?.name, address: data.recipient.address),
                     addressName: addressName,
@@ -35,8 +40,8 @@ public extension ConfirmTransferSceneViewModel {
                     chain: data.chain.rawValue,
                     link: BlockExplorerLink.mock().toGem(),
                 ),
-                .network(chain: data.chain.rawValue, name: data.chain.rawValue),
-                data.recipient.memo.map { GemConfirmRowContent.memo(memo: $0) },
+                .row(row: .network(title: .network, chain: data.chain.rawValue, name: data.chain.rawValue)),
+                data.recipient.memo.map { GemConfirmRowContent.row(row: .memo(value: $0, copy: $0)) },
                 .details,
             ].compactMap(\.self)
         }

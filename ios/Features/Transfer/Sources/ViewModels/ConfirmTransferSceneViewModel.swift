@@ -94,21 +94,6 @@ public final class ConfirmTransferSceneViewModel {
         dataModel.title
     }
 
-    var websiteURL: URL? {
-        dataModel.websiteURL
-    }
-
-    var websiteTitle: String {
-        Localized.Settings.website
-    }
-
-    var senderExplorerContext: ExplorerContextData {
-        ExplorerContextData(
-            copyValue: .address(value: senderAddress, chain: dataModel.chain),
-            explorerLink: explorerLink(chain: dataModel.chain, address: senderAddress),
-        )
-    }
-
     var progressMessage: String {
         Localized.Common.loading
     }
@@ -186,7 +171,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
     }
 
     private var detailItems: [ConfirmTransferItem] {
-        rowContents.map(\.item)
+        rowContents.indices.map { rowContents[$0].item(at: $0) }
     }
 
     public func itemModel(for item: ConfirmTransferItem) -> any ItemModelProvidable<ConfirmTransferItemModel> {
@@ -195,9 +180,9 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
             ConfirmHeaderViewModel(request: request, state: state, currency: confirmation.currency)
         case .warnings:
             ConfirmTransferItemModel.warnings(simulationWarningModels)
-        case .app, .sender, .network, .recipient, .memo:
+        case let .row(index):
             ConfirmRowViewModel(
-                content: rowContents.first { $0.item == item },
+                content: rowContents[index],
                 onSelectAddress: { [weak self] in self?.onSelectAddress($0) },
             )
         case .details:
@@ -251,12 +236,6 @@ extension ConfirmTransferSceneViewModel {
 
     func onSelectPayloadDetails() {
         isPresentingSheet = .payloadDetails
-    }
-
-    func onSelectOpenWebsiteURL() {
-        if let websiteURL {
-            isPresentingSheet = .url(websiteURL)
-        }
     }
 
     func onSelectFeePicker() {

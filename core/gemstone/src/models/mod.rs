@@ -6,6 +6,7 @@ pub mod gateway;
 pub mod list;
 pub mod payment;
 pub mod perpetual;
+pub mod placeholder;
 pub mod remote_types;
 pub mod stake;
 pub mod state;

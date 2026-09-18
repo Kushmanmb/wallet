@@ -7,10 +7,8 @@ use primitives::WalletId;
 
 use crate::alien::AlienProvider;
 use crate::services::error::GemServiceError;
-use crate::services::file::{GemFileStore, download};
+use crate::services::file::{GemFileStore, IMAGE_EXTENSION, download};
 use crate::services::wallet::GemWalletStore;
-
-const IMAGE_EXTENSION: &str = "png";
 
 #[derive(uniffi::Object)]
 pub struct GemAvatarService {

@@ -3,7 +3,6 @@ package com.gemwallet.android.features.confirm.viewmodels.localization
 import android.content.Context
 import androidx.annotation.StringRes
 import com.gemwallet.android.domains.asset.title
-import com.gemwallet.android.domains.confirm.ConfirmProperty
 import com.gemwallet.android.ext.boldMarkdown
 import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.ext.toGemErrorText
@@ -86,9 +85,6 @@ fun GemConfirmDestination.title(): Int = when (this) {
     is GemConfirmDestination.Resource -> R.string.stake_resource
     is GemConfirmDestination.Provider -> R.string.common_provider
 }
-
-@StringRes
-fun ConfirmProperty.Destination.titleRes(): Int = kind?.title() ?: R.string.wallet_connect_app
 
 internal fun GemConfirmScreen.buttonLabel(context: Context, kind: GemConfirmButtonKind): String = when {
     failure?.error is GemConfirmException.AccountMissing -> context.getString(R.string.errors_wallet_account_missing)

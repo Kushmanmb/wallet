@@ -3,7 +3,7 @@
 import Components
 import enum Gemstone.GemConfirmDestination
 import enum Gemstone.GemConfirmRowContent
-import func Gemstone.walletRow
+import enum Gemstone.GemListRow
 import GemstonePrimitives
 import Localization
 import PrimitivesComponents
@@ -15,29 +15,14 @@ import TransferTestKit
 
 struct ConfirmRowViewModelTests {
     @Test
-    func rowsCarryTheirContent() throws {
-        let wallet = Wallet.mock()
-        let app = try #require(ConfirmRowViewModel(content: .app(name: "PancakeSwap", iconUrl: nil)).listItem)
-        #expect(app.title == Localized.WalletConnect.app)
-        #expect(app.subtitle == "PancakeSwap")
-
-        let sender = try #require(ConfirmRowViewModel(content: .sender(wallet: walletRow(wallet: wallet.toGem()))).listItem)
-        #expect(sender.title == Localized.Common.wallet)
-        #expect(sender.subtitle == wallet.name)
-        #expect(sender.imageStyle != nil)
-
-        let network = try #require(ConfirmRowViewModel(content: .network(chain: Chain.ethereum.rawValue, name: "Ethereum (ERC20)")).listItem)
-        #expect(network.title == Localized.Transfer.network)
-        #expect(network.subtitle == "Ethereum (ERC20)")
-        #expect(network.imageStyle != nil)
-
-        let memo = try #require(ConfirmRowViewModel(content: .memo(memo: "test memo")).listItem)
-        #expect(memo.title == Localized.Transfer.memo)
-        #expect(memo.subtitle == "test memo")
-        #expect(try #require(ConfirmRowViewModel(content: .memo(memo: nil)).listItem).subtitle == "-")
-
+    func sharedRowsPassThroughAndDetailsDrawNothing() {
+        let memo = GemListRow.memo(value: "test memo", copy: "test memo")
+        guard case let .row(row) = ConfirmRowViewModel(content: .row(row: memo)).itemModel else {
+            Issue.record("Expected a shared row")
+            return
+        }
+        #expect(row == memo)
         #expect(ConfirmRowViewModel(content: .details).isEmpty)
-        #expect(ConfirmRowViewModel(content: nil).isEmpty)
     }
 
     @Test
@@ -70,13 +55,6 @@ struct ConfirmRowViewModelTests {
 }
 
 private extension ConfirmRowViewModel {
-    var listItem: ListItemModel? {
-        switch itemModel {
-        case let .app(item), let .sender(item), let .network(item), let .memo(item): item
-        case .header, .recipient, .swapDetails, .networkFee, .perpetualDetails, .perpetualModifyPosition, .warnings, .payload, .balanceChange, .error, .empty: nil
-        }
-    }
-
     var recipientItem: AddressListItemViewModel? {
         guard case let .recipient(item) = itemModel else { return nil }
         return item

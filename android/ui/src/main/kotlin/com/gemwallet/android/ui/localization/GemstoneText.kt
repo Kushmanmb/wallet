@@ -529,7 +529,6 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.ACTIVE_IN -> R.string.stake_active_in
     GemListRowTitle.AVAILABLE_IN -> R.string.stake_available_in
     GemListRowTitle.DATE -> R.string.transaction_date
-    GemListRowTitle.MEMO -> R.string.transfer_memo
     GemListRowTitle.RESOURCE -> R.string.stake_resource
     GemListRowTitle.REWARDS_UNVERIFIED -> R.string.rewards_unverified_title
     GemListRowTitle.REWARDS_PENDING -> R.string.rewards_pending_title

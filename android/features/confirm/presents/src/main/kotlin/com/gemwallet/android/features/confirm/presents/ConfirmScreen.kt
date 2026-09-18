@@ -1,7 +1,5 @@
 package com.gemwallet.android.features.confirm.presents
 
-import com.gemwallet.android.ui.theme.smallIconSize
-import com.gemwallet.android.ui.components.image.ListItemImageView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -48,10 +46,10 @@ import com.gemwallet.android.ui.components.list_head.AmountListHead
 import com.gemwallet.android.ui.components.list_head.AssetValueListHead
 import com.gemwallet.android.ui.components.list_head.NftHead
 import com.gemwallet.android.ui.components.list_head.SwapListHead
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.property.AddressPropertyItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
-import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
 import com.gemwallet.android.ui.components.perpetual.AutocloseSummaryRow
 import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsBottomSheet
 import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsSummaryItem
@@ -174,13 +172,8 @@ fun ConfirmScreen(
             itemsIndexed(transactionRows) { index, row ->
                 val listPosition = ListPosition.getPosition(index, sectionSize)
                 when (row) {
-                    is ConfirmRowUIModel.Item -> ListItem(
-                        model = row.model,
-                        listPosition = listPosition,
-                        accessory = row.trailingImage?.let { image ->
-                            { DataBadgeChevron(isShowChevron = false) { ListItemImageView(image = image, size = smallIconSize) } }
-                        },
-                    )
+                    is ConfirmRowUIModel.Row -> GemListRowView(row = row.row, listPosition = listPosition)
+                    is ConfirmRowUIModel.Item -> ListItem(model = row.model, listPosition = listPosition)
                     is ConfirmRowUIModel.Address -> AddressRow(
                         row = row,
                         listPosition = listPosition,
@@ -194,7 +187,6 @@ fun ConfirmScreen(
                         listPosition = listPosition,
                         onClick = { selectedAddress = ChainAddress(row.chain, row.address) },
                     )
-                    is ConfirmRowUIModel.Network -> PropertyNetworkItem(chain = row.chain, value = row.name, listPosition = listPosition)
                 }
             }
             itemsIndexed(detailElements) { index, item ->

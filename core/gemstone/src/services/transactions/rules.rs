@@ -4,7 +4,7 @@ use strum::IntoEnumIterator;
 
 use number_formatter::BigNumberFormatter;
 use primitives::{
-    Asset, AssetId, AssetPrice, AssetType, BlockExplorerLink, Chain, PerpetualDirection, Price, Transaction, TransactionDirection, TransactionExtended,
+    Asset, AssetId, AssetPrice, AssetType, BlockExplorerLink, Chain, ChainAsset, PerpetualDirection, Price, Transaction, TransactionDirection, TransactionExtended,
     TransactionNFTTransferMetadata, TransactionPerpetualMetadata, TransactionResourceTypeMetadata, TransactionState, TransactionSwapMetadata, TransactionType,
     TransactionWalletConnectMetadata, TransferDataOutputAction, WalletType,
 };
@@ -157,9 +157,9 @@ pub fn detail_sections(rows: &GemTransactionDetailRows) -> Vec<GemTransactionDet
         rows.estimated_confirmation_seconds.is_some().then_some(EstimatedConfirmation),
         rows.participant.is_some().then_some(Participant),
         rows.memo.clone().filter(|memo| !memo.is_empty()).map(|memo| {
-            list(GemListRow::Text {
-                title: GemListRowTitle::Memo,
-                value: memo,
+            list(GemListRow::Memo {
+                value: memo.clone(),
+                copy: Some(memo),
             })
         }),
         rows.resource.map(|resource| {
@@ -175,6 +175,7 @@ pub fn detail_sections(rows: &GemTransactionDetailRows) -> Vec<GemTransactionDet
         Some(list(GemListRow::Network {
             title: GemListRowTitle::Network,
             chain: rows.asset.chain(),
+            name: ChainAsset::from_chain(rows.asset.chain()).network_name,
         })),
         rows.provider_name.clone().map(|name| {
             list(GemListRow::Text {
@@ -1254,6 +1255,7 @@ mod tests {
         let explorer = BlockExplorerLink::mock_with_address("tx");
         let kind = |row: GemTransactionDetailRow| match row {
             GemTransactionDetailRow::Row { row: GemListRow::Explorer { .. } } => "Explorer".to_string(),
+            GemTransactionDetailRow::Row { row: GemListRow::Memo { .. } } => "Memo".to_string(),
             GemTransactionDetailRow::Row {
                 row:
                     GemListRow::Date { title, .. }

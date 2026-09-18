@@ -31,14 +31,27 @@ import uniffi.gemstone.GemValueTone
 
 internal sealed interface GemListRowUIModel {
     data class Notice(val title: String, val message: String?, val kind: GemNoticeKind) : GemListRowUIModel
-    data class Item(val model: ListItemModel, val url: String? = null, val opensAnotherScreen: Boolean = false) : GemListRowUIModel
+    data class Item(
+        val model: ListItemModel,
+        val url: String? = null,
+        val opensAnotherScreen: Boolean = false,
+        val trailingImage: ListItemImage? = null,
+        val menu: List<GemListRowMenuItem> = emptyList(),
+    ) : GemListRowUIModel
     data class Icon(val asset: Asset) : GemListRowUIModel
-    data class Network(val chain: Chain) : GemListRowUIModel
+    data class Network(val chain: Chain, val name: String) : GemListRowUIModel
     data class Address(val address: String, val copy: GemCopy) : GemListRowUIModel
     data class Social(val links: List<GemSocialLink>) : GemListRowUIModel
     data class Toggle(val model: ListItemModel, val title: GemListRowTitle, val isOn: Boolean) : GemListRowUIModel
     data class Picker(val model: ListItemModel, val title: GemListRowTitle) : GemListRowUIModel
     data object Loading : GemListRowUIModel
+}
+
+internal sealed interface GemListRowMenuItem {
+    val title: String
+
+    data class Copy(override val title: String, val value: String) : GemListRowMenuItem
+    data class Open(override val title: String, val url: String) : GemListRowMenuItem
 }
 
 internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemListRowUIModel = when (this) {
@@ -58,7 +71,24 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
         ),
     )
     is GemListRow.Date -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = getRelativeDate(date)))
-    is GemListRow.Network -> GemListRowUIModel.Network(chain.requireChain())
+    is GemListRow.Network -> GemListRowUIModel.Network(chain.requireChain(), name)
+    is GemListRow.App -> GemListRowUIModel.Item(
+        ListItemModel(title = context.getString(R.string.wallet_connect_app), subtitle = name),
+        trailingImage = iconUrl?.let { ListItemImage.Url(it) },
+        menu = listOfNotNull(websiteUrl?.let { GemListRowMenuItem.Open(context.getString(R.string.settings_website), it) }),
+    )
+    is GemListRow.Wallet -> GemListRowUIModel.Item(
+        ListItemModel(title = context.getString(R.string.common_wallet), subtitle = wallet.name),
+        trailingImage = wallet.listItemImage(),
+        menu = listOf(
+            GemListRowMenuItem.Copy(context.getString(R.string.wallet_copy_address), copy.value),
+            GemListRowMenuItem.Open(context.getString(R.string.transaction_view_on, explorer.name), explorer.link),
+        ),
+    )
+    is GemListRow.Memo -> GemListRowUIModel.Item(
+        ListItemModel(title = context.getString(R.string.transfer_memo), subtitle = value),
+        menu = listOfNotNull(copy?.let { GemListRowMenuItem.Copy(context.getString(R.string.common_copy), it) }),
+    )
     is GemListRow.Link -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), opensAnotherScreen = true)
     is GemListRow.Url -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), url = url)
     is GemListRow.Explorer -> GemListRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)

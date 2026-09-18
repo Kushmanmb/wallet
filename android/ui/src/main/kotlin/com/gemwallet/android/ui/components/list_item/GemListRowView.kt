@@ -4,8 +4,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -13,15 +20,19 @@ import androidx.compose.ui.platform.LocalUriHandler
 import com.gemwallet.android.ui.components.clickable
 import com.gemwallet.android.ui.components.clipboard.clipboardManager
 import com.gemwallet.android.ui.components.clipboard.setCopy
+import com.gemwallet.android.ui.components.clipboard.setPlainText
+import com.gemwallet.android.ui.components.image.ListItemImageView
 import com.gemwallet.android.ui.components.list_head.HeaderIcon
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.progress.CircularProgressIndicator16
+import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.open
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
+import com.gemwallet.android.ui.theme.smallIconSize
 import com.gemwallet.android.ui.localization.titleRes
 import com.gemwallet.android.ui.style.color
 import com.gemwallet.android.ui.style.icon
@@ -60,20 +71,26 @@ fun GemListRowView(
             position = listPosition,
             icon = row.kind.icon(),
         )
-        is GemListRowUIModel.Item -> ListItem(
-            model = row.model,
-            listPosition = listPosition,
-            modifier = modifier.then(row.url?.let { url -> Modifier.clickable { uriHandler.open(context, url) } } ?: Modifier),
-            minHeight = ListItemDefaults.plainMinHeight,
-            accessory = if (row.url != null || row.opensAnotherScreen) {
-                {
-                    DataBadgeChevron()
-                    accessory?.invoke()
-                }
-            } else {
-                null
-            },
-        )
+        is GemListRowUIModel.Item -> GemListRowMenu(items = row.menu) { menuModifier ->
+            ListItem(
+                model = row.model,
+                listPosition = listPosition,
+                modifier = modifier.then(menuModifier).then(row.url?.let { url -> Modifier.clickable { uriHandler.open(context, url) } } ?: Modifier),
+                minHeight = ListItemDefaults.plainMinHeight,
+                accessory = when {
+                    row.trailingImage != null -> {
+                        { DataBadgeChevron(isShowChevron = false) { ListItemImageView(image = row.trailingImage, size = smallIconSize) } }
+                    }
+                    row.url != null || row.opensAnotherScreen -> {
+                        {
+                            DataBadgeChevron()
+                            accessory?.invoke()
+                        }
+                    }
+                    else -> null
+                },
+            )
+        }
         is GemListRowUIModel.Icon -> Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -82,7 +99,7 @@ fun GemListRowView(
         ) {
             HeaderIcon(row.asset)
         }
-        is GemListRowUIModel.Network -> PropertyNetworkItem(row.chain, listPosition = listPosition)
+        is GemListRowUIModel.Network -> PropertyNetworkItem(row.chain, value = row.name, listPosition = listPosition)
         is GemListRowUIModel.Address -> AddressCard(row = row) { clipboardManager.setCopy(context, row.copy) }
         is GemListRowUIModel.Toggle -> ListItem(
             model = row.model,
@@ -121,4 +138,44 @@ fun GemListRowView(
             CircularProgressIndicator16()
         }
     }
+}
+
+@Composable
+private fun GemListRowMenu(items: List<GemListRowMenuItem>, content: @Composable (Modifier) -> Unit) {
+    if (items.isEmpty()) {
+        content(Modifier)
+        return
+    }
+    val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
+    val clipboardManager = context.clipboardManager()
+    var isExpanded by remember { mutableStateOf(false) }
+
+    DropDownContextItem(
+        isExpanded = isExpanded,
+        onDismiss = { isExpanded = false },
+        onLongClick = { isExpanded = true },
+        onClick = {},
+        content = content,
+        menuItems = {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(text = item.title) },
+                    trailingIcon = {
+                        when (item) {
+                            is GemListRowMenuItem.Copy -> Icon(AppIcons.ContentCopy, contentDescription = null)
+                            is GemListRowMenuItem.Open -> DataBadgeChevron()
+                        }
+                    },
+                    onClick = {
+                        isExpanded = false
+                        when (item) {
+                            is GemListRowMenuItem.Copy -> clipboardManager.setPlainText(context, item.value)
+                            is GemListRowMenuItem.Open -> uriHandler.open(context, item.url)
+                        }
+                    },
+                )
+            }
+        },
+    )
 }

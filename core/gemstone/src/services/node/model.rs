@@ -3,6 +3,7 @@ use primitives::Latency;
 use super::rules;
 use crate::formatted_number::GemFormattedNumber;
 use crate::gateway::GatewayError;
+use crate::models::placeholder::text_or_placeholder;
 use crate::service_status::GemLatencyStatus;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
@@ -60,7 +61,7 @@ impl GemNodeCheck {
     pub fn rows(&self) -> Vec<GemNodeCheckRow> {
         vec![
             GemNodeCheckRow::ChainId {
-                value: rules::text_or_placeholder(self.chain_id.as_deref()),
+                value: text_or_placeholder(self.chain_id.as_deref()),
             },
             GemNodeCheckRow::InSync {
                 state: match self.is_in_sync {
@@ -122,7 +123,7 @@ pub struct GemNodeSelection {
 impl GemNodeSubtitle {
     pub fn text(&self, latest_block_label: String, latest_block_value: Option<String>) -> String {
         match self {
-            Self::LatestBlock { .. } => format!("{latest_block_label}: {}", rules::text_or_placeholder(latest_block_value.as_deref())),
+            Self::LatestBlock { .. } => format!("{latest_block_label}: {}", text_or_placeholder(latest_block_value.as_deref())),
         }
     }
 }

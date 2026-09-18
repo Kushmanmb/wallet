@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gemwallet.android.application.confirm.cases.BuildConfirmProperties
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.domains.asset.chain
@@ -52,7 +51,6 @@ import com.gemwallet.android.ui.models.perpetual.PerpetualConfirmDetailsUIModelF
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelFactory
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelInput
 import com.gemwallet.android.ui.models.swap.SwapProviderUIModelFactory
-import com.wallet.core.primitives.AddressName
 import com.wallet.core.primitives.ApplicationMetadataSource
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
@@ -111,7 +109,6 @@ import uniffi.gemstone.swapQuoteSummary
 @HiltViewModel
 class ConfirmViewModel @Inject constructor(
     private val getSession: GetSession,
-    private val buildConfirmProperties: BuildConfirmProperties,
     private val confirmService: GemConfirmTransferServiceInterface,
     private val savedStateHandle: SavedStateHandle,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
@@ -249,15 +246,13 @@ class ConfirmViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val transactionProperties = combine(request, session, content) { request, session, content ->
+    val transactionRows: StateFlow<List<ConfirmRowUIModel>> = combine(request, session, content) { request, session, content ->
         request ?: return@combine emptyList()
         session ?: return@combine emptyList()
-        buildConfirmProperties(request, session.wallet, content?.addressName)
+        confirmService.rowContents(request, session.wallet.toGem(), content?.load?.addressName).mapNotNull { it.uiModel(context) }
     }
+    .flowOn(ioDispatcher)
     .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    val transactionRows: StateFlow<List<ConfirmRowUIModel>> = transactionProperties.map { properties -> properties.map { it.uiModel(context) } }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val feeUIModel = combine(content, screen) { content, screen ->
         val confirmData = content?.confirmData
@@ -421,8 +416,6 @@ class ConfirmViewModel @Inject constructor(
             FeeAssetUIModel.from(load.feeAsset.toPrimitives(), load.metadata.feeAssetBalance, load.metadata.feePrice(), currency)
 
         val feeAssets: List<FeeAssetUIModel> = load.feeAssets.map { it.toFeeAssetUIModel(currency) }
-
-        val addressName: AddressName? = load.addressName?.toPrimitives()
 
         fun assetPrice(asset: Asset): AssetPriceValue = load.metadata.prices.toAssetPriceValue(asset, currency)
     }

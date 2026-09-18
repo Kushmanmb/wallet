@@ -4,6 +4,7 @@ import Components
 import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemListRow
 import enum Gemstone.GemListRowTitle
+import Localization
 import Primitives
 import Style
 import SwiftUI
@@ -11,7 +12,7 @@ import SwiftUI
 public struct GemListRowView: View {
     @Environment(\.openURL) private var openURL
 
-    @State private var isPresentingCopyToast = false
+    @State private var presentation: GemListRowPresentationType?
 
     private let row: GemListRow
     private let onToggle: ((GemListRowTitle, Bool) -> Void)?
@@ -63,6 +64,16 @@ public struct GemListRowView: View {
             }
         case let .network(title, subtitle, image):
             ListItemImageView(title: title, subtitle: subtitle, assetImage: image)
+        case let .app(model, website):
+            ListItemImageView(model: model)
+                .contextMenu(website.map { url in [.url(title: Localized.Settings.website, onOpen: { presentation = .url(url) })] } ?? [])
+                .safariSheet(url: isPresentingUrl)
+        case let .wallet(model, context):
+            ListItemImageView(model: model)
+                .explorerContext(context)
+        case let .memo(model, copy):
+            ListItemView(model: model)
+                .contextMenu(copy.map { [.copy(value: $0)] } ?? [])
         case let .social(links):
             SocialLinksView(model: SocialLinksViewModel(links: links))
         case let .icon(assetImage):
@@ -71,12 +82,31 @@ public struct GemListRowView: View {
                 .padding(.bottom, .small)
                 .cleanListRow()
         case let .address(model):
-            AddressCardView(model: model, action: { isPresentingCopyToast = true })
+            AddressCardView(model: model, action: { presentation = .copy })
                 .cleanListRow()
-                .copyToast(model: model.copyModel, isPresenting: $isPresentingCopyToast)
+                .copyToast(model: model.copyModel, isPresenting: isPresentingCopyToast)
         case .loading:
             ListItemLoadingView()
         }
+    }
+}
+
+extension GemListRowView {
+    private var isPresentingCopyToast: Binding<Bool> {
+        Binding(
+            get: { presentation == .copy },
+            set: { presentation = $0 ? .copy : nil },
+        )
+    }
+
+    private var isPresentingUrl: Binding<URL?> {
+        Binding(
+            get: {
+                guard case let .url(url) = presentation else { return nil }
+                return url
+            },
+            set: { presentation = $0.map { .url($0) } },
+        )
     }
 }
 

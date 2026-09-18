@@ -228,6 +228,7 @@ pub enum GemTransactionHeaderAction {
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+#[allow(clippy::large_enum_variant)]
 pub enum GemTransactionDetailRow {
     Header,
     SwapProgress,

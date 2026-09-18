@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use primitives::{Chain, TransactionState};
+use primitives::{BlockExplorerLink, Chain, TransactionState};
 
 use crate::config::social::GemSocialLink;
 use crate::duration_formatter::GemDurationPart;
@@ -8,6 +8,7 @@ use crate::models::copy::GemCopy;
 use crate::services::error::GemServiceError;
 use crate::services::localization::GemLocalizedText;
 use crate::services::transactions::GemTransactionStateTone;
+use crate::services::wallet::model::GemWalletRow;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemListSectionTitle {
@@ -68,7 +69,6 @@ pub enum GemListRowTitle {
     ActiveIn,
     AvailableIn,
     Date,
-    Memo,
     Resource,
     Price,
     Pnl,
@@ -168,6 +168,21 @@ pub enum GemListRow {
     Network {
         title: GemListRowTitle,
         chain: Chain,
+        name: String,
+    },
+    App {
+        name: String,
+        icon_url: Option<String>,
+        website_url: Option<String>,
+    },
+    Wallet {
+        wallet: GemWalletRow,
+        copy: GemCopy,
+        explorer: BlockExplorerLink,
+    },
+    Memo {
+        value: String,
+        copy: Option<String>,
     },
     Link {
         title: GemListRowTitle,

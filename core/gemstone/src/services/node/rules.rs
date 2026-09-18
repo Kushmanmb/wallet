@@ -10,7 +10,6 @@ use primitives::node_config::{self, NodePriority, NodeRegion};
 use primitives::node_status::NodeStatus;
 use url::Url;
 
-const EMPTY_VALUE: &str = "-";
 const NODE_URL_SCHEME: &str = "https";
 const NODE_CHECK_DEBOUNCE_MILLISECONDS: u64 = 250;
 
@@ -138,13 +137,6 @@ pub fn node_status_state(status: Option<NodeStatus>) -> GemNodeStatusState {
             latency: Latency::from_milliseconds(status.latency_ms),
         },
         _ => GemNodeStatusState::Error,
-    }
-}
-
-pub fn text_or_placeholder(value: Option<&str>) -> String {
-    match value.map(str::trim) {
-        Some(value) if !value.is_empty() => value.to_string(),
-        _ => EMPTY_VALUE.to_string(),
     }
 }
 
@@ -324,11 +316,5 @@ mod tests {
         );
         assert_eq!(node_status_state(Some(stalled)), GemNodeStatusState::Error, "a node at block zero has nothing to serve");
         assert_eq!(node_status_state(None), GemNodeStatusState::Error);
-    }
-
-    #[test]
-    fn test_a_blank_value_reads_as_a_dash() {
-        assert_eq!(text_or_placeholder(Some("  ")), "-");
-        assert_eq!(text_or_placeholder(Some(" 1 ")), "1");
     }
 }

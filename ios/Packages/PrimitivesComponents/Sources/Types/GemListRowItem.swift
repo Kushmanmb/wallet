@@ -28,6 +28,9 @@ enum GemListRowItem {
     case page(ListItemModel, url: URL)
     case external(ListItemModel, url: URL)
     case network(title: String, subtitle: String, image: AssetImage)
+    case app(ListItemModel, website: URL?)
+    case wallet(ListItemModel, context: ExplorerContextData)
+    case memo(ListItemModel, copy: String?)
     case icon(AssetImage)
     case address(AddressCardModel)
     case social([GemSocialLink])
@@ -57,12 +60,28 @@ extension GemListRow {
             )
         case let .date(title, date):
             .listItem(ListItemModel(title: title.text, subtitle: TransactionDateFormatter(date: date).row))
-        case let .network(title, chain):
+        case let .network(title, chain, name):
             .network(
                 title: title.text,
-                subtitle: Chain(core: chain).networkName,
+                subtitle: name,
                 image: AssetIdViewModel(assetId: Chain(core: chain).assetId).networkAssetImage,
             )
+        case let .app(name, iconUrl, websiteUrl):
+            .app(
+                ListItemModel(
+                    title: Localized.WalletConnect.app,
+                    subtitle: name,
+                    imageStyle: .list(assetImage: iconUrl.map { AssetImage(imageURL: URL(string: $0)) }),
+                ),
+                website: websiteUrl.flatMap { URL(string: $0) },
+            )
+        case let .wallet(wallet, copy, explorer):
+            .wallet(
+                ListItemModel(title: Localized.Common.wallet, subtitle: wallet.name, imageStyle: .list(assetImage: wallet.avatarImage)),
+                context: ExplorerContextData(copyValue: copy.copyValue, explorerLink: explorer.toPrimitives()),
+            )
+        case let .memo(value, copy):
+            .memo(ListItemModel(title: Localized.Transfer.memo, subtitle: value), copy: copy)
         case let .link(title, value, icon):
             .listItem(listItem(title: title, value: value, icon: icon))
         case let .picker(title, value, icon):
