@@ -55,6 +55,7 @@ public final class GemAssetDetailsServiceMock: GemAssetDetailsServiceProtocol, @
             ),
             sections: [],
             title: input.asset.name,
+            fiatValue: .none,
             explorerName: "Explorer",
             addressLink: input.ownerAddress.map { Gemstone.BlockExplorerLink(name: "Explorer", link: "https://gemwallet.com/\($0)") },
             tokenLink: .none,

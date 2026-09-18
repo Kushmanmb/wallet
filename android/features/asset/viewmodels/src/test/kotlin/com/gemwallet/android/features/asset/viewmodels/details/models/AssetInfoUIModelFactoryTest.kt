@@ -22,6 +22,7 @@ import uniffi.gemstone.GemAssetDetailRow
 import uniffi.gemstone.GemAssetDetailSection
 import uniffi.gemstone.GemBalanceRow
 import uniffi.gemstone.GemBalanceRowValue
+import uniffi.gemstone.GemFormattedNumber
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowIcon
 import uniffi.gemstone.GemListRowTitle
@@ -90,6 +91,15 @@ class AssetInfoUIModelFactoryTest {
     }
 
     @Test
+    fun `the header fiat value is the one core formatted and empty without one`() {
+        val fiat = mockFormattedNumber(value = 3.0, unit = GemNumberUnit.Currency(code = "EUR"))
+        val assetInfo = mockAssetInfo(asset = mockAsset(), owner = null)
+
+        assertEquals(fiat.text(), model(assetInfo, fiatValue = fiat).accountInfoUIModel.totalFiat)
+        assertEquals("", model(assetInfo).accountInfoUIModel.totalFiat)
+    }
+
+    @Test
     fun `sections keep the order and titles core decided`() {
         val link = GemListRow.Link(GemListRowTitle.PIN, null, GemListRowIcon.PIN)
         val sections = model(
@@ -115,9 +125,13 @@ class AssetInfoUIModelFactoryTest {
         every { getString(any(), *anyVararg()) } answers { "${firstArg<Int>()}${(args[1] as Array<*>).joinToString("")}" }
     }
 
-    private fun model(assetInfo: AssetInfo, sections: List<GemAssetDetailSection> = emptyList()) = AssetInfoUIModelFactory(context).create(
+    private fun model(
+        assetInfo: AssetInfo,
+        sections: List<GemAssetDetailSection> = emptyList(),
+        fiatValue: GemFormattedNumber? = null,
+    ) = AssetInfoUIModelFactory(context).create(
         mockChainAssetInfo(assetInfo),
-        mockGemAssetDetails(assetInfo.asset, mockGemAssetDetailsState(showsBanners = true), sections),
+        mockGemAssetDetails(assetInfo.asset, mockGemAssetDetailsState(showsBanners = true), sections, fiatValue),
         banners = emptyList(),
     )
 }

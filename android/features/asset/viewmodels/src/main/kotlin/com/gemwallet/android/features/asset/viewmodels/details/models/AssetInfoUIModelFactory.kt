@@ -39,7 +39,6 @@ class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private va
         val currency = assetInfo.price?.currency ?: Currency.USD
         val currencyFormatter = CurrencyFormatter(currency = currency)
         val valueFormatter = ValueFormatter(style = GemValueStyle.AUTO)
-        val fiatTotal = if (balances.fiatTotalAmount == 0.0) "" else currencyFormatter.string(balances.fiatTotalAmount)
         return AssetInfoUIModel(
             assetInfo = assetInfo,
             name = details.title,
@@ -66,7 +65,7 @@ class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private va
             sections = details.sections.map { section -> AssetInfoUIModel.SectionUIModel(section.title.titleRes(), section.rows.map { row(it) }) },
             accountInfoUIModel = AssetInfoUIModel.AccountInfoUIModel(
                 totalBalance = valueFormatter.string(balances.balance.getTotalAmount(), balances.asset),
-                totalFiat = fiatTotal,
+                totalFiat = details.fiatValue?.text().orEmpty(),
                 owner = assetInfo.owner?.address ?: "",
             ),
         )

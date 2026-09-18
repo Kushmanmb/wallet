@@ -144,6 +144,7 @@ impl GemAssetDetailsService {
             metadata,
             balance,
             price,
+            currency,
             banner_events,
             price_alerts,
             fee_balance_metadata,
@@ -152,6 +153,7 @@ impl GemAssetDetailsService {
         let has_balance = balance.available > GemBigUint::ZERO;
         GemAssetDetails {
             title: rules::asset_title(&asset),
+            fiat_value: rules::fiat_value(&asset, &balance, price, currency),
             state: rules::details_state(wallet_type, &metadata, &banner_events, &price_alerts),
             sections: rules::details_sections(rules::DetailsSectionsInput {
                 wallet_type,

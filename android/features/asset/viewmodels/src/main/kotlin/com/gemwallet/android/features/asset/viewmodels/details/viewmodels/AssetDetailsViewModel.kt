@@ -130,7 +130,8 @@ class AssetDetailsViewModel @Inject constructor(
         banners: List<BannerRow>,
         priceAlerts: List<PriceAlert>,
     ): AssetInfoUIModel? {
-        val wallet = session?.wallet ?: return null
+        session ?: return null
+        val wallet = session.wallet
         val assetInfo = chainInfo?.assetInfo ?: return null
         val details = assetDetailsService.details(
             GemAssetDetailsInput(
@@ -140,6 +141,7 @@ class AssetDetailsViewModel @Inject constructor(
                 metadata = assetInfo.metadata.toGem(),
                 balance = assetInfo.balance.toGem(),
                 price = assetInfo.price?.price?.price,
+                currency = session.currency.toGem(),
                 bannerEvents = banners.map { row -> row.banner.event.toGem() },
                 priceAlerts = priceAlerts.map { alert -> alert.toGem() },
                 feeBalanceMetadata = chainInfo.feeAssetInfo.balance.metadata?.toGem(),

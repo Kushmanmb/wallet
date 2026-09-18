@@ -96,6 +96,10 @@ impl GemAssetBalance {
         }
     }
 
+    pub fn total(&self) -> GemBigUint {
+        &self.available + &self.frozen + &self.locked + &self.staked + &self.pending + &self.rewards + &self.earn
+    }
+
     pub fn votes(&self) -> u32 {
         self.metadata.as_ref().map(|metadata| metadata.votes).unwrap_or_default()
     }

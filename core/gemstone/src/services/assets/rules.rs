@@ -3,8 +3,8 @@ use std::str::FromStr;
 
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
 use primitives::{
-    Asset, AssetBasic, AssetId, AssetMetaData, AssetPrice, AssetProperties, AssetScore, BalanceMetadata, BannerEvent, Chain, ChainAsset, ConfigVersions, PerpetualProvider,
-    PriceAlert, StakeChain, VerificationStatus, Wallet, WalletType,
+    Asset, AssetBasic, AssetId, AssetMetaData, AssetPrice, AssetProperties, AssetScore, BalanceMetadata, BannerEvent, Chain, ChainAsset, ConfigVersions, Currency,
+    PerpetualProvider, PriceAlert, StakeChain, VerificationStatus, Wallet, WalletType,
 };
 
 use super::model::{
@@ -20,11 +20,13 @@ use crate::models::custom_types::GemBigUint;
 use crate::models::list::{GemListRow, GemListRowIcon, GemListRowTitle, GemListSectionTitle};
 use crate::percentage::GemPercentageStyle;
 use crate::perpetual::GemPerpetual;
+use crate::precision::GemCurrencyStyle;
 use crate::services::balance::rules::{balance_amount, balance_resource_rows};
 use crate::services::balance::{GemAssetBalance, GemAssetBalanceRow, GemBalanceResource, GemBalanceRow, GemBalanceRowValue};
 use crate::services::nft::rules::nft_chains;
 use crate::services::price::rules::has_price;
 use crate::services::price_alert::rules::{displayed_price_alert_ids, price_alert_toggle};
+use number_formatter::CryptoFiatConverter;
 use swapper::AssetList as SwapAssetList;
 
 use crate::models::asset::{wallet_asset_is_enabled, wallet_default_assets};
@@ -402,6 +404,14 @@ pub fn asset_title(asset: &Asset) -> String {
         true => Asset::from_chain(asset.chain()).name,
         false => asset.name.clone(),
     }
+}
+
+pub fn fiat_value(asset: &Asset, balance: &GemAssetBalance, price: Option<f64>, currency: Currency) -> Option<GemFormattedNumber> {
+    let value: f64 = CryptoFiatConverter::to_fiat(&balance.total().to_string(), asset.decimals as u32, price?)
+        .ok()?
+        .parse()
+        .ok()?;
+    (value > 0.0).then(|| GemFormattedNumber::currency(value, currency, GemCurrencyStyle::Currency))
 }
 
 fn apr(apr: Option<f64>) -> Option<GemFormattedNumber> {
@@ -1279,6 +1289,24 @@ mod tests {
             ]
         );
         assert!(sections[1].rows.iter().all(|row| matches!(row, GemAssetDetailRow::Balance { .. })));
+    }
+
+    #[test]
+    fn test_the_header_fiat_value_counts_the_whole_balance_and_hides_without_value() {
+        let usdc = Asset::mock_ethereum_usdc();
+        let balance = GemAssetBalance {
+            staked: GemBigUint::from(500_000u32),
+            reserved: GemBigUint::from(9_000_000u32),
+            ..GemAssetBalance::mock_with_available(1_000_000)
+        };
+
+        assert_eq!(
+            fiat_value(&usdc, &balance, Some(2.0), Currency::EUR),
+            Some(GemFormattedNumber::currency(3.0, Currency::EUR, GemCurrencyStyle::Currency))
+        );
+        assert_eq!(fiat_value(&usdc, &balance, None, Currency::USD), None);
+        assert_eq!(fiat_value(&usdc, &balance, Some(0.0), Currency::USD), None);
+        assert_eq!(fiat_value(&usdc, &GemAssetBalance::mock(), Some(2.0), Currency::USD), None);
     }
 
     #[test]

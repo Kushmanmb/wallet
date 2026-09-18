@@ -5,16 +5,19 @@ import com.wallet.core.primitives.Asset
 import uniffi.gemstone.GemAssetDetailSection
 import uniffi.gemstone.GemAssetDetails
 import uniffi.gemstone.GemAssetDetailsState
+import uniffi.gemstone.GemFormattedNumber
 import uniffi.gemstone.GemSwapPairSuggestion
 
 fun mockGemAssetDetails(
     asset: Asset = mockAsset(),
     state: GemAssetDetailsState = mockGemAssetDetailsState(),
     sections: List<GemAssetDetailSection> = emptyList(),
+    fiatValue: GemFormattedNumber? = null,
 ) = GemAssetDetails(
     state = state,
     sections = sections,
     title = asset.name,
+    fiatValue = fiatValue,
     explorerName = "Explorer",
     addressLink = null,
     tokenLink = null,

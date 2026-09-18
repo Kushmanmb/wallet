@@ -1,5 +1,5 @@
 use primitives::{
-    Asset, AssetId, AssetMetaData, AssetType, BalanceMetadata, BannerEvent, BlockExplorerLink, Chain, PriceAlert, RecentActivityType, VerificationStatus, WalletType,
+    Asset, AssetId, AssetMetaData, AssetType, BalanceMetadata, BannerEvent, BlockExplorerLink, Chain, Currency, PriceAlert, RecentActivityType, VerificationStatus, WalletType,
 };
 
 use crate::formatted_number::GemFormattedNumber;
@@ -497,6 +497,7 @@ pub struct GemAssetDetailsInput {
     pub metadata: AssetMetaData,
     pub balance: GemAssetBalance,
     pub price: Option<f64>,
+    pub currency: Currency,
     pub banner_events: Vec<BannerEvent>,
     pub price_alerts: Vec<PriceAlert>,
     pub fee_balance_metadata: Option<BalanceMetadata>,
@@ -507,6 +508,7 @@ pub struct GemAssetDetails {
     pub state: GemAssetDetailsState,
     pub sections: Vec<GemAssetDetailSection>,
     pub title: String,
+    pub fiat_value: Option<GemFormattedNumber>,
     pub explorer_name: String,
     pub address_link: Option<BlockExplorerLink>,
     pub token_link: Option<BlockExplorerLink>,
