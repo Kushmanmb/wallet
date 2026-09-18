@@ -17,7 +17,6 @@ import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.text.TextRange
 import com.gemwallet.android.ui.theme.WalletTheme
-import com.wallet.core.primitives.Currency
 import java.text.DecimalFormatSymbols
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -122,8 +121,7 @@ class AmountInputTest {
                     AmountField(
                         modifier = Modifier.testTag("amount"),
                         amount = amount,
-                        assetSymbol = "ETH",
-                        currency = Currency.USD,
+                        symbol = AmountSymbolUIModel("ETH", AmountSymbolPlacement.Trailing),
                         equivalent = "",
                         error = "",
                         onValueChange = { amount = it },
