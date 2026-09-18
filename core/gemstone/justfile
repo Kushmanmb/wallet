@@ -16,17 +16,19 @@ export CARGO_NDK_VERSION := env("CARGO_NDK_VERSION", "4.1.2")
 
 install-ndk:
     #!/usr/bin/env bash
-    SDK_MANAGER=${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager
+    set -eu
+    SDK_MANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
     NDK="ndk;28.1.13356709"
 
     if [ ! -x "$SDK_MANAGER" ]; then
-        echo "sdkmanager not found at $SDK_MANAGER"
-        echo "Install the Android SDK Command-line Tools (Android Studio > Settings > Android SDK > SDK Tools) or set ANDROID_HOME to your SDK"
-        exit 1
+        command -v sdkmanager >/dev/null || brew install --cask android-commandlinetools
+        echo "Installing the SDK command-line tools into $ANDROID_HOME"
+        yes | sdkmanager --sdk_root="$ANDROID_HOME" --licenses >/dev/null
+        sdkmanager --sdk_root="$ANDROID_HOME" --install "cmdline-tools;latest"
     fi
 
     echo "Installing ndk: $NDK"
-    $SDK_MANAGER --install $NDK
+    "$SDK_MANAGER" --install "$NDK"
 
 install-ios-targets:
     #!/usr/bin/env bash
