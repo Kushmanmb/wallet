@@ -13,7 +13,7 @@ import Primitives
 import PrimitivesComponents
 import Style
 import WalletConnectorService
-import struct Gemstone.SimulationPayloadField
+import struct Gemstone.GemSimulationPayloadRow
 import struct Gemstone.GemSimulationWarningRow
 import func Gemstone.simulationWarningRows
 
@@ -23,13 +23,13 @@ public final class SignMessageSceneViewModel {
     private let service: any GemSignMessageServiceProtocol
     private let payload: SignMessagePayload
     private let confirmTransferDelegate: TransferDataCallback.ConfirmTransferDelegate
-    private let preview: GemSignMessagePreview
+    private var preview: GemSignMessagePreview
     private let row: GemWalletRow
 
     public var isPresentingUrl: URL?
     public var isPresentingPayloadDetails: Bool = false
     public var isPresentingAlertMessage: AlertMessage?
-    private var payloadAddressNames: [ChainAddress: AddressName] = [:]
+    private var hasLoadedAddressNames = false
 
     public init(
         service: any GemSignMessageServiceProtocol,
@@ -121,10 +121,8 @@ public final class SignMessageSceneViewModel {
 
     public var payloadModel: SimulationPayloadModel {
         SimulationPayloadModel(
-            chain: payload.chain,
             primaryFields: preview.primaryFields,
             secondaryFields: preview.secondaryFields,
-            addressNames: payloadAddressNames,
         )
     }
 
@@ -166,7 +164,7 @@ public extension SignMessageSceneViewModel {
         }
     }
 
-    func fieldModels(for fields: [SimulationPayloadField]) -> [SimulationPayloadFieldViewModel] {
+    func fieldModels(for fields: [GemSimulationPayloadRow]) -> [SimulationPayloadFieldViewModel] {
         payloadModel.fieldModels(
             for: fields,
             explorerLink: { service.addressUrl(chain: payload.chain.rawValue, address: $0).toPrimitives() },
@@ -181,8 +179,9 @@ public extension SignMessageSceneViewModel {
 
 private extension SignMessageSceneViewModel {
     func loadPayloadAddressNamesIfNeeded() async {
-        guard payloadAddressNames.isEmpty, payloadModel.hasFields else { return }
+        guard !hasLoadedAddressNames, payloadModel.hasFields else { return }
 
-        payloadAddressNames = await service.addressNames(chain: payload.chain, preview: preview)
+        hasLoadedAddressNames = true
+        preview = await service.withAddressNames(chain: payload.chain, preview: preview)
     }
 }

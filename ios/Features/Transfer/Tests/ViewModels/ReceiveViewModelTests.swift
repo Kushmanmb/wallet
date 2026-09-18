@@ -30,10 +30,10 @@ struct ReceiveViewModelTests {
     @Test
     func theNetworksComeFromCore() {
         let service = GemReceiveServiceMock()
-        service.networkAssetIdsValue = [bitcoin.id.identifier, ethereum.id.identifier]
+        service.networksValue = GemReceiveNetworks(assetIds: [bitcoin.id.identifier, ethereum.id.identifier], showsSelector: true)
         let model = ReceiveViewModel.mock(service: service)
 
-        #expect(model.networkAssetIds == [bitcoin.id, ethereum.id])
+        #expect(model.networks.assetIds == [bitcoin.id.identifier, ethereum.id.identifier])
         #expect(model.showNetworkSelector)
     }
 
@@ -64,7 +64,7 @@ struct ReceiveViewModelTests {
     @Test
     func openingTheSceneEnablesTheAssetAndSyncsItsNetworks() async {
         let service = GemReceiveServiceMock()
-        service.syncedNetworkAssetIdsResult = .success([bitcoin.id.identifier, ethereum.id.identifier])
+        service.syncedNetworksResult = .success(GemReceiveNetworks(assetIds: [bitcoin.id.identifier, ethereum.id.identifier], showsSelector: true))
         let model = ReceiveViewModel.mock(service: service)
         #expect(model.showNetworkSelector == false)
 
@@ -73,20 +73,20 @@ struct ReceiveViewModelTests {
 
         #expect(service.enabledAssetIds == [bitcoin.id.identifier])
         #expect(service.syncedAssetIds == [bitcoin.id.identifier])
-        #expect(model.networkAssetIds == [bitcoin.id, ethereum.id])
+        #expect(model.networks.assetIds == [bitcoin.id.identifier, ethereum.id.identifier])
     }
 
     @Test
     func aFailedNetworkSyncKeepsTheStoredNetworks() async {
         let service = GemReceiveServiceMock()
-        service.networkAssetIdsValue = [bitcoin.id.identifier, ethereum.id.identifier]
-        service.syncedNetworkAssetIdsResult = .failure(AnyError("offline"))
+        service.networksValue = GemReceiveNetworks(assetIds: [bitcoin.id.identifier, ethereum.id.identifier], showsSelector: true)
+        service.syncedNetworksResult = .failure(AnyError("offline"))
         let model = ReceiveViewModel.mock(service: service)
 
         model.onTaskOnce()
         await settle(until: { !service.syncedAssetIds.isEmpty })
 
-        #expect(model.networkAssetIds == [bitcoin.id, ethereum.id])
+        #expect(model.networks.assetIds == [bitcoin.id.identifier, ethereum.id.identifier])
         #expect(model.isPresentingAlertMessage == nil)
     }
 

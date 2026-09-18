@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.domains.asset.subtitleSymbol
 import com.gemwallet.android.ext.networkName
@@ -83,7 +84,7 @@ fun ReceiveScreen(
         key = assetId.toIdentifier(),
     ) { it.create(assetId) }
     val assetInfo by viewModel.asset.collectAsStateWithLifecycle()
-    val networkAssetIds by viewModel.networkAssetIds.collectAsStateWithLifecycle()
+    val networks by viewModel.networks.collectAsStateWithLifecycle()
     var isShowingNetworkSelector by remember { mutableStateOf(false) }
     val info = assetInfo
 
@@ -95,7 +96,7 @@ fun ReceiveScreen(
             closeIcon = closeIcon,
             assetInfo = info,
             warning = remember(info.asset.id) { viewModel.warningText(info.asset) },
-            onSelectNetwork = if (networkAssetIds.size > 1) {
+            onSelectNetwork = if (networks.showsSelector) {
                 { isShowingNetworkSelector = true }
             } else {
                 null
@@ -104,7 +105,7 @@ fun ReceiveScreen(
         )
         ReceiveNetworkSelector(
             isVisible = isShowingNetworkSelector,
-            assetIds = networkAssetIds,
+            assetIds = networks.assetIds.map { it.toAssetId()!! },
             onSelect = viewModel::selectAsset,
             onDismiss = { isShowingNetworkSelector = false },
         )

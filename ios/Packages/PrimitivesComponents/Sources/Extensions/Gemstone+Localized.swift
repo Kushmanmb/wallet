@@ -31,7 +31,7 @@ import enum Gemstone.GemRecipientErrorDisplay
 import enum Gemstone.GemCopyKind
 import enum Gemstone.GemSimulationWarningKind
 import enum Gemstone.GemSimulationWarningTitle
-import enum Gemstone.SimulationPayloadFieldKind
+import enum Gemstone.GemSimulationPayloadTitle
 import enum Gemstone.GemTransactionRowSubtitle
 import enum Gemstone.GemTransactionStateTone
 import enum Gemstone.GemTransactionTitle
@@ -241,8 +241,8 @@ extension Resource {
     }
 }
 
-extension SimulationPayloadFieldKind {
-    public var title: String? {
+extension GemSimulationPayloadTitle {
+    public var text: String {
         switch self {
         case .contract: Localized.Asset.contract
         case .method: Localized.Common.method
@@ -250,7 +250,7 @@ extension SimulationPayloadFieldKind {
         case .spender: Localized.Transfer.to
         case .value: Localized.Perpetual.value
         case .expiration: Localized.Common.expiration
-        case .custom: nil
+        case let .custom(label): label
         }
     }
 }

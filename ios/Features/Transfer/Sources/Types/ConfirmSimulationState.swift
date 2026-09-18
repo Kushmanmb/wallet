@@ -35,12 +35,12 @@ struct ConfirmSimulationState {
         self.balanceChanges = balanceChanges
     }
 
-    init(result: SimulationResult?, chain: Primitives.Chain) {
+    init(result: SimulationResult?) {
         self.init(
             result: result,
             warnings: simulationWarningRows(warnings: result?.warnings ?? []),
             hasCriticalWarning: false,
-            payload: SimulationPayloadModel(chain: chain, primaryFields: [], secondaryFields: []),
+            payload: SimulationPayloadModel(primaryFields: [], secondaryFields: []),
             headerData: nil,
             balanceChanges: [],
         )
@@ -49,12 +49,10 @@ struct ConfirmSimulationState {
     init(_ state: GemConfirmSimulationState) throws {
         let details = state.simulation
         let simulation = state.result
-        var payload = SimulationPayloadModel(
-            chain: Primitives.Chain(core: state.chain),
+        let payload = SimulationPayloadModel(
             primaryFields: details?.primaryFields ?? [],
             secondaryFields: details?.secondaryFields ?? [],
         )
-        payload.addressNames = state.names
         self.init(
             result: simulation,
             warnings: state.warnings,

@@ -25,7 +25,7 @@ import Store
 import Swap
 import SwiftUI
 import WalletConnector
-import struct Gemstone.SimulationPayloadField
+import struct Gemstone.GemSimulationPayloadRow
 import struct Gemstone.SimulationResult
 import struct Gemstone.GemSimulationWarningRow
 
@@ -69,7 +69,7 @@ public final class ConfirmTransferSceneViewModel {
         let feeSelection = GemConfirmFeeSelection.priority(priority: request.data.defaultFeePriority())
         let state = ConfirmTransferState(
             transfer: request.data,
-            simulation: ConfirmSimulationState(result: request.simulation, chain: request.data.chain),
+            simulation: ConfirmSimulationState(result: request.simulation),
             screen: confirmation.screen(),
         )
         let screen = state.screen
@@ -241,7 +241,7 @@ extension ConfirmTransferSceneViewModel {
         isPresentingSheet = .info(.networkFee(state.feeAsset))
     }
 
-    public func fieldModels(for fields: [SimulationPayloadField]) -> [SimulationPayloadFieldViewModel] {
+    public func fieldModels(for fields: [GemSimulationPayloadRow]) -> [SimulationPayloadFieldViewModel] {
         payloadModel.fieldModels(
             for: fields,
             explorerLink: { explorerLink(chain: dataModel.chain, address: $0) },

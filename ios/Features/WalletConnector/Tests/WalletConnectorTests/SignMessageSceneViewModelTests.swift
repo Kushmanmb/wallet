@@ -157,7 +157,10 @@ struct SignMessageSceneViewModelTests {
         #expect(viewModel.simulationWarnings.first?.kind == .externallyOwnedSpender)
         #expect(!viewModel.isButtonDisabled)
         #expect(viewModel.payloadModel.hasFields)
-        #expect(viewModel.payloadModel.primaryFields.contains(where: { $0.kind == .spender && $0.value == "0x3333333333333333333333333333333333333333" }))
+        #expect(viewModel.payloadModel.primaryFields.contains { row in
+            guard case let .address(_, address) = row.value else { return false }
+            return row.title == .spender && address == "0x3333333333333333333333333333333333333333"
+        })
     }
 
     @Test
@@ -220,7 +223,7 @@ struct SignMessageSceneViewModelTests {
         let viewModel = SignMessageSceneViewModel.mock(payload: payload)
 
         #expect(viewModel.headerData == GemSimulationValue(asset: asset.toGem(), value: .unlimited))
-        #expect(!(viewModel.payloadModel.primaryFields + viewModel.payloadModel.secondaryFields).contains { $0.kind == .value })
+        #expect(!(viewModel.payloadModel.primaryFields + viewModel.payloadModel.secondaryFields).contains { $0.title == .value })
     }
 
     @Test
@@ -234,6 +237,6 @@ struct SignMessageSceneViewModelTests {
         let viewModel = SignMessageSceneViewModel.mock(payload: payload)
 
         #expect(viewModel.headerData == nil)
-        #expect((viewModel.payloadModel.primaryFields + viewModel.payloadModel.secondaryFields).contains { $0.kind == .value })
+        #expect((viewModel.payloadModel.primaryFields + viewModel.payloadModel.secondaryFields).contains { $0.title == .value })
     }
 }

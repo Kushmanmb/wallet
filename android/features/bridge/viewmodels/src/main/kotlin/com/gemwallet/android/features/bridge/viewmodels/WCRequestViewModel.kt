@@ -65,14 +65,14 @@ class WCRequestViewModel @Inject constructor(
         state.approved ?: pending?.takeIf { it.sessionId == state.sessionRequest?.topic }?.let(::toRequest)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val payloadAddressNames = request
+    private val namedRequest = request
         .map { it as? WCRequest.SignMessage }
         .distinctUntilChanged { old, new -> old?.pending === new?.pending }
-        .mapLatest { request -> request?.addressNames().orEmpty() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+        .mapLatest { request -> request?.withAddressNames() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val sceneState = combine(state, request, payloadAddressNames) { state, request, addressNames ->
-        state.toSceneState((request as? WCRequest.SignMessage)?.withAddressNames(addressNames) ?: request, ReviewTexts(context))
+    val sceneState = combine(state, request, namedRequest) { state, request, named ->
+        state.toSceneState(named?.takeIf { it.pending === request?.pending } ?: request, ReviewTexts(context))
     }.stateIn(viewModelScope, SharingStarted.Eagerly, RequestSceneState.Loading)
 
     val buttonState = sceneState.map { scene ->

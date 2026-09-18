@@ -291,8 +291,8 @@ class WCAuthViewModel @Inject constructor(
             signer.payloadPreview(emptyList())?.let { preview ->
                 AuthPayloadPreview(
                     messageType = preview.messageType,
-                    primaryFields = preview.primary.map { PayloadField(field = it, chain = chain) },
-                    secondaryFields = preview.secondary.map { PayloadField(field = it, chain = chain) },
+                    primaryFields = preview.primary.map { PayloadField(row = it) },
+                    secondaryFields = preview.secondary.map { PayloadField(row = it) },
                 )
             } ?: AuthPayloadPreview()
         } catch (_: Throwable) {

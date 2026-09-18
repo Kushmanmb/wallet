@@ -57,7 +57,7 @@ import uniffi.gemstone.GemVerificationLevel
 import uniffi.gemstone.GemWalletSecretKind
 import uniffi.gemstone.GemWalletSubtitle
 import uniffi.gemstone.LinkType
-import uniffi.gemstone.SimulationPayloadFieldKind
+import uniffi.gemstone.GemSimulationPayloadTitle
 import uniffi.gemstone.SimulationSeverity
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
@@ -216,15 +216,14 @@ fun QRScanType.stringRes(): Int = when (this) {
     QRScanType.PrivateKey -> R.string.common_private_key
 }
 
-@StringRes
-fun SimulationPayloadFieldKind.stringRes(): Int? = when (this) {
-    SimulationPayloadFieldKind.CONTRACT -> R.string.asset_contract
-    SimulationPayloadFieldKind.METHOD -> R.string.common_method
-    SimulationPayloadFieldKind.TOKEN -> R.string.common_token
-    SimulationPayloadFieldKind.SPENDER -> R.string.transfer_to
-    SimulationPayloadFieldKind.VALUE -> R.string.perpetual_value
-    SimulationPayloadFieldKind.EXPIRATION -> R.string.common_expiration
-    SimulationPayloadFieldKind.CUSTOM -> null
+fun GemSimulationPayloadTitle.text(context: Context): String = when (this) {
+    GemSimulationPayloadTitle.Contract -> context.getString(R.string.asset_contract)
+    GemSimulationPayloadTitle.Method -> context.getString(R.string.common_method)
+    GemSimulationPayloadTitle.Token -> context.getString(R.string.common_token)
+    GemSimulationPayloadTitle.Spender -> context.getString(R.string.transfer_to)
+    GemSimulationPayloadTitle.Value -> context.getString(R.string.perpetual_value)
+    GemSimulationPayloadTitle.Expiration -> context.getString(R.string.common_expiration)
+    is GemSimulationPayloadTitle.Custom -> label
 }
 
 @StringRes

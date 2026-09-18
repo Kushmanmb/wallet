@@ -373,11 +373,11 @@ public extension Gemstone.GemFeeAsset {
 }
 
 public final class GemReceiveServiceMock: GemReceiveServiceProtocol, @unchecked Sendable {
-    public var networkAssetIdsValue: [Gemstone.AssetId] = []
+    public var networksValue: GemReceiveNetworks?
     public var warningsValue: [GemReceiveWarning] = []
     public var assetResult: Result<Gemstone.Asset, Error> = .success(Primitives.Asset.mock().toGem())
     public var enableAssetError: Error?
-    public var syncedNetworkAssetIdsResult: Result<[Gemstone.AssetId], Error> = .success([])
+    public var syncedNetworksResult: Result<GemReceiveNetworks, Error> = .success(GemReceiveNetworks(assetIds: [], showsSelector: false))
 
     public private(set) var enabledAssetIds: [Gemstone.AssetId] = []
     public private(set) var syncedAssetIds: [Gemstone.AssetId] = []
@@ -395,13 +395,13 @@ public final class GemReceiveServiceMock: GemReceiveServiceProtocol, @unchecked 
         if let enableAssetError { throw enableAssetError }
     }
 
-    public func networkAssetIds(assetId: Gemstone.AssetId, associations _: [Gemstone.AssetId], wallet _: Gemstone.Wallet) -> [Gemstone.AssetId] {
-        networkAssetIdsValue.isEmpty ? [assetId] : networkAssetIdsValue
+    public func networks(assetId: Gemstone.AssetId, associations _: [Gemstone.AssetId], wallet _: Gemstone.Wallet) -> GemReceiveNetworks {
+        networksValue ?? GemReceiveNetworks(assetIds: [assetId], showsSelector: false)
     }
 
-    public func syncNetworkAssetIds(assetId: Gemstone.AssetId, wallet _: Gemstone.Wallet) async throws -> [Gemstone.AssetId] {
+    public func syncNetworks(assetId: Gemstone.AssetId, wallet _: Gemstone.Wallet) async throws -> GemReceiveNetworks {
         syncedAssetIds.append(assetId)
-        return try syncedNetworkAssetIdsResult.get()
+        return try syncedNetworksResult.get()
     }
 
     public func warnings(chain _: Gemstone.Chain) -> [GemReceiveWarning] { warningsValue }
