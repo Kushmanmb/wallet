@@ -38,10 +38,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **P15** **S** The chart header value and date texts are computed on both apps — iOS `ChartHeaderViewModel.headerValueText`, Android `ChartHeaderUIModel.headerValueText` — `candlestick_header` and `chart_header` return the finished header; read them.
 - **P18** **S** iOS `AssetDataViewModel.fiatBalanceText` and `PriceViewModel.fiatValueText` decide when a fiat value is shown (`balance > 0`, `price != 0`, `value > 0`); Android decides in `AssetInfoUIModelFactory` — `GemAssetRow` carries the fiat value with its style, empty when Core says so.
 - **P20** **S** iOS `PerpetualSceneViewModel.navigationTitle` falls back from an empty name to the symbol — `GemPerpetualDetails.title`, read by Android's aggregate too.
-- **P23** **S** The fiat quick-amount button `"<symbol><amount>"` is composed in iOS `FiatSceneViewModel.buttonTitle` and Android `FiatViewModel` — `GemFiatViewState.suggested_amount_texts`.
-- **P24** **S** The slippage check text is chosen outside the mapper on both apps — iOS `SwapSlippageViewModel.validate` throws `Localized.Common.minimumValue/maximumValue`, Android `ui/components/swap/SlippageStateUIModel.kt` maps `GemSlippageCheck` to `R.string` — one mapper entry per app.
-- **P25** **S** The set-price-alert success message is composed in iOS `SetPriceAlertViewModel:131` (`"<direction> <amount>"`, percentage as `"\(value)%"`); Android composes its own toast — `GemPriceAlertSession.added_text` with the app's label key.
-- **P26** **S** iOS `ConnectionProposalViewModel` decides `websiteText` (empty host → nil) and formats `appText`; Android reads `GemConnectionRow` — iOS reads the row.
 - **P29** **S** iOS `EarnSceneViewModel.positionsSectionTitle` is `hasPositions ? title : ""` — sections are records; `GemEarnSections` decides which sections exist.
 - **P30** **S** iOS `PortfolioSceneViewModel` decides `showSegmentedControl` and maps `PortfolioType` to a title in the model — the portfolio state record carries the segment rows.
 - **P19** **S** iOS `AssetSceneViewModel` computes `hasStakeBalance`, `hasAvailableBalance` and `isWalletEmpty` and passes them into `GemAssetDetailsInput`; Android computes the same — see **K1**.
@@ -53,7 +49,7 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **E6** **S** `ios/Features/Settings/.../Scenes/AddNodeScene.swift:140` formats an error inside the scene — the model owns it, and `GemAddNodeFailure` already has the display.
 - **E7** **S** `ConfirmTransferSceneViewModel:339` shows a Localized title with a raw `error.localizedDescription` body — `GemConfirmErrorDisplay` is the shape the load path already uses.
 - **E8** **S** `SwapSceneViewModel:451,478` and `ChartSceneViewModel:131` wrap `error.localizedDescription` into a Core error variant (`ComputeQuoteError(String)`, `.Core(msg:)`) — a string is not an error; the session takes the typed failure.
-- **E9** **S** `FiatSceneViewModel:337` and `SwapSlippageViewModel:74` show `localizedDescription` of validation errors the model itself threw — the check enum, mapped once (see **P24**).
+- **E9** **S** `FiatSceneViewModel:337` shows `localizedDescription` of the quote-URL failure under a localized title — the fiat service answers a display the way the confirm load does (§ 9).
 - **E10** **S** Android `ProposalSceneViewModel:130` logs `error.message`; `FiatViewModel:183` and `SwapViewModel:361` cast unknown throwables into Core error variants — same shape as **E8**.
 
 

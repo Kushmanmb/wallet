@@ -114,8 +114,8 @@ class FiatViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val suggestedAmounts = type.mapLatest {
-        service.suggestedAmounts().map {
-            FiatSuggestion.SuggestionAmount("$currencySymbol$it", it.toDouble())
+        service.suggestedAmounts(currencySymbol).map {
+            FiatSuggestion.SuggestionAmount(it.text, it.amount.toDouble())
         } + FiatSuggestion.RandomAmount
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 

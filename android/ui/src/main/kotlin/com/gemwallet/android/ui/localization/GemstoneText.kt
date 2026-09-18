@@ -61,6 +61,7 @@ import uniffi.gemstone.SimulationSeverity
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
 import uniffi.gemstone.GemSimulationWarningTitle
+import uniffi.gemstone.GemSlippageCheck
 
 fun GemTransactionTitle.string(context: Context): String = when (this) {
     GemTransactionTitle.Received -> context.getString(R.string.transaction_title_received)
@@ -490,4 +491,11 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.LOCK_PERIOD -> R.string.lock_require_authentication
     GemListRowTitle.PRIVACY_LOCK -> R.string.lock_privacy_lock
     GemListRowTitle.HIDE_BALANCE -> R.string.settings_hide_balance
+}
+
+fun GemSlippageCheck.footerText(context: Context, minimumText: String, maximumText: String): String? = when (this) {
+    GemSlippageCheck.BELOW_MINIMUM -> context.getString(R.string.common_minimum_value, minimumText)
+    GemSlippageCheck.ABOVE_MAXIMUM -> context.getString(R.string.common_maximum_value, maximumText)
+    GemSlippageCheck.HIGH -> context.getString(R.string.swap_slippage_warning)
+    GemSlippageCheck.VALID -> null
 }

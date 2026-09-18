@@ -9,6 +9,7 @@ import enum Gemstone.GemFiatAmountCheck
 import struct Gemstone.GemFiatQuoteRow
 import struct Gemstone.GemFiatQuotesResult
 import struct Gemstone.GemFiatSession
+import struct Gemstone.GemFiatSuggestedAmount
 import struct Gemstone.GemFiatViewState
 import protocol Gemstone.GemFiatQuoteServiceProtocol
 import enum Gemstone.GemServiceError
@@ -182,8 +183,8 @@ public final class FiatSceneViewModel {
         AssetIdViewModel(assetId: asset.id).assetImage
     }
 
-    var suggestedAmounts: [Int] {
-        service.suggestedAmounts().map(Int.init)
+    var suggestedAmounts: [GemFiatSuggestedAmount] {
+        service.suggestedAmounts(currencySymbol: currencyFormatter.symbol)
     }
 
     var showFiatTypePicker: Bool {
@@ -219,10 +220,6 @@ public final class FiatSceneViewModel {
 
     var rateValue: String {
         selectedQuoteViewModel?.rateText ?? ""
-    }
-
-    func buttonTitle(amount: Int) -> String {
-        "\(currencyFormatter.symbol)\(amount)"
     }
 
     func providerAssetImage(_ provider: Gemstone.FiatProviderName) -> AssetImage? {

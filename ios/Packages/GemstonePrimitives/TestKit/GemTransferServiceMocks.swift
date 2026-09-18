@@ -77,8 +77,8 @@ public final class GemFiatQuoteServiceMock: GemFiatQuoteServiceProtocol, @unchec
         Primitives.Currency.usd.toGem()
     }
 
-    public func suggestedAmounts() -> [Int32] {
-        [100, 250]
+    public func suggestedAmounts(currencySymbol: String) -> [GemFiatSuggestedAmount] {
+        [100, 250].map { GemFiatSuggestedAmount(amount: $0, text: "\(currencySymbol)\($0)") }
     }
 
     private func defaultAmount(quoteType: Gemstone.FiatQuoteType) -> UInt32 {
