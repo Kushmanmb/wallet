@@ -288,7 +288,7 @@ public final class GemWalletHomeServiceMock: GemWalletHomeServiceProtocol, @unch
 
     public func updateBalances(assetIds _: [Gemstone.AssetId]) async throws {}
 
-    public func showsInitialLoading() throws -> Bool {
+    public func showsInitialLoading() -> Bool {
         showsLoading
     }
 
