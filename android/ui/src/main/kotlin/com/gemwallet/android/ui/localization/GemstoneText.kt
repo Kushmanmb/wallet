@@ -497,6 +497,9 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.DAILY_VOLUME -> R.string.markets_daily_volume
     GemListRowTitle.OPEN_INTEREST -> R.string.info_perpetual_open_interest_title
     GemListRowTitle.FUNDING_APR -> R.string.info_perpetual_funding_apr_title
+    GemListRowTitle.STAKE_APR -> R.string.stake_apr
+    GemListRowTitle.LOCK_TIME -> R.string.stake_lock_time
+    GemListRowTitle.MINIMUM_AMOUNT -> R.string.stake_minimum_amount
 }
 
 fun GemSlippageCheck.footerText(context: Context, minimumText: String, maximumText: String): String? = when (this) {

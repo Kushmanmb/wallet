@@ -5,7 +5,8 @@ import Formatters
 import Foundation
 import enum Gemstone.GemStakeAction
 import struct Gemstone.GemStakeActionItem
-import enum Gemstone.GemStakeInfoRow
+import enum Gemstone.GemInfoTopic
+import enum Gemstone.GemListRow
 import enum Gemstone.GemStakeSection
 import struct Gemstone.GemClaimRewards
 import struct Gemstone.GemAssetBalance
@@ -78,8 +79,8 @@ public final class StakeSceneViewModel {
         service.stakeSections(chain: chain.chain.rawValue, hasActions: actions.isNotEmpty, hasDelegations: delegations.isNotEmpty)
     }
 
-    var infoRows: [GemStakeInfoRow] {
-        service.stakeInfoRows(chain: chain.chain.rawValue, stakingApr: assetData.metadata.stakingApr)
+    var infoRows: [GemListRow] {
+        service.stakeInfoRows(asset: asset.toGem(), stakingApr: assetData.metadata.stakingApr)
     }
 
     var actions: [GemStakeActionItem] {
@@ -114,45 +115,12 @@ public final class StakeSceneViewModel {
         }
     }
 
-    var stakeAprModel: AprViewModel {
-        AprViewModel(apr: assetData.metadata.stakingApr ?? .zero)
-    }
-
     var energyField: ListItemField {
         ListItemField(title: Resource.energy.title, value: balanceModel.energyText)
     }
 
     var bandwidthField: ListItemField {
         ListItemField(title: Resource.bandwidth.title, value: balanceModel.bandwidthText)
-    }
-
-    func infoField(for row: GemStakeInfoRow) -> ListItemField {
-        switch row {
-        case .apr: ListItemField(title: stakeAprModel.title, value: stakeAprModel.subtitle)
-        case .lockTime: ListItemField(title: row.title, value: lockTimeValue)
-        case .minimumAmount:
-            ListItemField(title: row.title, value: formatter.string(service.minStakeAmount(chain: chain.chain.rawValue), decimals: Int(asset.decimals), currency: asset.symbol))
-        }
-    }
-
-    func infoAction(for row: GemStakeInfoRow) -> InfoSheetAction? {
-        switch row {
-        case .apr: onAprInfo
-        case .lockTime: onLockTimeInfo
-        case .minimumAmount: nil
-        }
-    }
-
-    private var lockTimeValue: String {
-        CountdownFormatter().string(parts: service.lockTimeParts(chain: chain.chain.rawValue)) ?? .empty
-    }
-
-    var lockTimeInfoSheet: InfoSheetType {
-        InfoSheetType.stakeLockTime(assetModel.assetImage.placeholder)
-    }
-
-    var aprInfoSheet: InfoSheetType {
-        InfoSheetType.stakeApr(assetModel.assetImage.placeholder)
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
@@ -233,12 +201,8 @@ extension StakeSceneViewModel {
         }
     }
 
-    func onLockTimeInfo() {
-        isPresentingInfoSheet = lockTimeInfoSheet
-    }
-
-    func onAprInfo() {
-        isPresentingInfoSheet = aprInfoSheet
+    func onInfo(_ topic: GemInfoTopic) {
+        isPresentingInfoSheet = InfoSheetType(topic: topic, placeholder: assetModel.assetImage.placeholder)
     }
 
     func onStakeFrozenInfo() {

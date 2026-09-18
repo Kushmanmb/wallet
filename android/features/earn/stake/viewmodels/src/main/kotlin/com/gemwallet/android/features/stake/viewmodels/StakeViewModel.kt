@@ -22,20 +22,17 @@ import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.stake.viewmodels.models.StakeActionUIModel
 import com.gemwallet.android.features.stake.viewmodels.models.StakeSectionUIModel
-import com.gemwallet.android.features.stake.viewmodels.models.listItem
 import com.gemwallet.android.features.stake.viewmodels.models.uiModel
 import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.model.toAmountParams
 import com.gemwallet.android.model.toGem
-import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.ConfirmTransactionAction
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Delegation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.math.BigInteger
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,6 +52,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemClaimRewardsDestination
 import uniffi.gemstone.GemDelegationDestination
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemStakeServiceInterface
 import uniffi.gemstone.GemValueStyle
 
@@ -86,17 +84,8 @@ class StakeViewModel @Inject constructor(
         .mapLatest { it?.asset?.stakeChain?.let { chain -> AppUrl.staking(chain.string) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val lockTimeParts = assetInfo
-        .mapLatest { it?.asset?.chain?.string?.let { chain -> stakeService.lockTimeParts(chain) }.orEmpty() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    val minStakeAmount = assetInfo
-        .mapLatest { it?.asset?.chain?.string?.let { chain -> stakeService.minStakeAmount(chain) } ?: BigInteger.ZERO }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, BigInteger.ZERO)
-
-    val infoRows: StateFlow<List<ListItemModel>> = combine(assetInfo, lockTimeParts, minStakeAmount) { info, lockTime, minAmount ->
-        info?.let { stakeService.stakeInfoRows(it.asset.chain.string, it.metadata.stakingApr).map { row -> row.listItem(context, it, lockTime, minAmount) } }.orEmpty()
-    }
+    val infoRows: StateFlow<List<GemListRow>> = assetInfo
+        .mapLatest { info -> info?.let { stakeService.stakeInfoRows(it.asset.toGem(), it.metadata.stakingApr) }.orEmpty() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val session = getSession()

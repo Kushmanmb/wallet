@@ -61,7 +61,7 @@ class StakeViewModelTest {
         every { this@mockk() } returns MutableStateFlow(mockSession())
     }
     private val stakeService = mockk<GemStakeServiceInterface>(relaxed = true) {
-        every { minStakeAmount(asset.id.chain.string) } returns BigInteger.ZERO
+        every { stakeInfoRows(any(), any()) } returns emptyList()
         every { claimRewards(asset.id.chain.string, any()) } returns mockClaimRewards()
     }
 

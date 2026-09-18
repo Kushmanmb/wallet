@@ -212,10 +212,7 @@ public extension PerpetualSceneViewModel {
     }
 
     func onInfo(_ topic: GemInfoTopic) {
-        isPresentingInfoSheet = switch topic {
-        case .openInterest: .openInterest
-        case .fundingApr: .fundingApr
-        }
+        isPresentingInfoSheet = InfoSheetType(topic: topic, placeholder: nil)
     }
 
     func onSelectFundingPaymentsInfo() {

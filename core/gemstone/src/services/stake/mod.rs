@@ -2,6 +2,7 @@ pub mod model;
 pub mod rules;
 pub mod store;
 
+use crate::models::list::GemListRow;
 use crate::duration_formatter::GemDurationPart;
 use chrono::Utc;
 use crate::services::error::GemServiceError;
@@ -17,7 +18,7 @@ use crate::models::{GemContractCallData, GemEarnType};
 
 pub use model::{
     GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationCompletion, GemDelegationDestination, GemDelegationRow,
-    GemDelegationStatus, GemDelegationTone, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeInfoRow, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
+    GemDelegationStatus, GemDelegationTone, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
 };
 pub use store::GemStakeStore;
 
@@ -133,16 +134,8 @@ impl GemStakeService {
         rules::positions(delegations)
     }
 
-    pub fn lock_time_parts(&self, chain: Chain) -> Vec<GemDurationPart> {
-        rules::lock_time_parts(chain)
-    }
-
     pub fn completion_countdown_parts(&self, delegation: Delegation) -> Vec<GemDurationPart> {
         rules::completion_countdown_parts(&delegation, Utc::now())
-    }
-
-    pub fn min_stake_amount(&self, chain: Chain) -> GemBigInt {
-        rules::min_stake_amount(chain)
     }
 
     pub fn stake_actions(&self, wallet_type: WalletType, chain: Chain, has_validators: bool, balance: GemAssetBalance, delegations: Vec<Delegation>) -> Vec<GemStakeActionItem> {
@@ -153,8 +146,8 @@ impl GemStakeService {
         rules::stake_sections(rules::uses_freeze(chain), has_actions, has_delegations)
     }
 
-    pub fn stake_info_rows(&self, chain: Chain, staking_apr: Option<f64>) -> Vec<GemStakeInfoRow> {
-        rules::stake_info_rows(chain, staking_apr)
+    pub fn stake_info_rows(&self, asset: Asset, staking_apr: Option<f64>) -> Vec<GemListRow> {
+        rules::stake_info_rows(&asset, staking_apr)
     }
 
     pub fn delegation_rows(&self, delegation: Delegation) -> Vec<GemDelegationRow> {

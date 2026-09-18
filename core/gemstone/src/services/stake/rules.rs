@@ -13,9 +13,14 @@ use std::str::FromStr;
 
 use super::model::{
     GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationCompletion, GemDelegationDestination, GemDelegationRow,
-    GemDelegationStatus, GemDelegationTone, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeInfoRow, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
+    GemDelegationStatus, GemDelegationTone, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
 };
 use crate::config::image::GemImage;
+use crate::formatted_number::GemFormattedNumber;
+use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
+use crate::percentage::GemPercentageStyle;
+use crate::precision::GemValueStyle;
+use number_formatter::BigNumberFormatter;
 use crate::duration_formatter::{GemDurationPart, countdown_parts, day_parts};
 use chrono::{DateTime, Utc};
 use crate::config::stake::EARN_OFFERED;
@@ -207,11 +212,28 @@ pub fn stake_sections(uses_freeze: bool, has_actions: bool, has_delegations: boo
     .collect()
 }
 
-pub fn stake_info_rows(chain: Chain, staking_apr: Option<f64>) -> Vec<GemStakeInfoRow> {
+pub fn stake_info_rows(asset: &Asset, staking_apr: Option<f64>) -> Vec<GemListRow> {
+    let chain = asset.chain();
+    let minimum = min_stake_amount(chain);
     [
-        staking_apr.filter(|apr| *apr != 0.0).map(|_| GemStakeInfoRow::Apr),
-        (lock_time_seconds(chain) > 0).then_some(GemStakeInfoRow::LockTime),
-        (min_stake_amount(chain) > BigInt::ZERO).then_some(GemStakeInfoRow::MinimumAmount),
+        staking_apr.filter(|apr| *apr != 0.0).map(|apr| GemListRow::Amount {
+            title: GemListRowTitle::StakeApr,
+            amount: GemFormattedNumber::percentage(apr, GemPercentageStyle::Unsigned).toned(),
+            info: Some(GemInfoTopic::StakeApr),
+        }),
+        (lock_time_seconds(chain) > 0).then(|| GemListRow::Duration {
+            title: GemListRowTitle::LockTime,
+            parts: lock_time_parts(chain),
+            info: Some(GemInfoTopic::StakeLockTime),
+        }),
+        (minimum > BigInt::ZERO)
+            .then(|| BigNumberFormatter::value_as_f64(&minimum.to_string(), asset.decimals as u32).ok())
+            .flatten()
+            .map(|value| GemListRow::Amount {
+                title: GemListRowTitle::MinimumAmount,
+                amount: GemFormattedNumber::amount(value, Some(asset.symbol.clone()), GemValueStyle::Auto),
+                info: None,
+            }),
     ]
     .into_iter()
     .flatten()
@@ -244,7 +266,7 @@ fn lock_time_seconds(chain: Chain) -> u64 {
     stake_config(chain).map(|config| config.time_lock).unwrap_or_default()
 }
 
-pub fn lock_time_parts(chain: Chain) -> Vec<GemDurationPart> {
+fn lock_time_parts(chain: Chain) -> Vec<GemDurationPart> {
     day_parts(lock_time_seconds(chain) as i64)
 }
 
@@ -262,7 +284,7 @@ pub fn completion_countdown_parts(delegation: &Delegation, now: DateTime<Utc>) -
     countdown_parts(remaining)
 }
 
-pub fn min_stake_amount(chain: Chain) -> BigInt {
+fn min_stake_amount(chain: Chain) -> BigInt {
     stake_config(chain).map(|config| BigInt::from(config.min_amount)).unwrap_or_default()
 }
 
@@ -695,17 +717,57 @@ mod tests {
 
     #[test]
     fn test_the_stake_screen_shows_only_the_info_rows_its_chain_has() {
+        let titles = |asset: &Asset, apr: Option<f64>| {
+            stake_info_rows(asset, apr)
+                .into_iter()
+                .map(|row| match row {
+                    GemListRow::Amount { title, .. } | GemListRow::Duration { title, .. } => title,
+                    other => panic!("unexpected row {other:?}"),
+                })
+                .collect::<Vec<_>>()
+        };
+        let cosmos = Asset::from_chain(Chain::Cosmos);
+        let ethereum = Asset::from_chain(Chain::Ethereum);
+
+        assert_eq!(titles(&cosmos, Some(0.0)), vec![GemListRowTitle::LockTime], "an apr of zero is not an apr row");
+        assert_eq!(titles(&cosmos, None), vec![GemListRowTitle::LockTime]);
+        assert_eq!(titles(&cosmos, Some(12.5)), vec![GemListRowTitle::StakeApr, GemListRowTitle::LockTime]);
         assert_eq!(
-            stake_info_rows(Chain::Cosmos, Some(0.0)),
-            vec![GemStakeInfoRow::LockTime],
-            "an apr of zero is not an apr row"
-        );
-        assert_eq!(stake_info_rows(Chain::Cosmos, None), vec![GemStakeInfoRow::LockTime]);
-        assert_eq!(stake_info_rows(Chain::Cosmos, Some(12.5)), vec![GemStakeInfoRow::Apr, GemStakeInfoRow::LockTime]);
-        assert_eq!(
-            stake_info_rows(Chain::Ethereum, Some(3.0)),
-            vec![GemStakeInfoRow::Apr, GemStakeInfoRow::LockTime, GemStakeInfoRow::MinimumAmount],
+            titles(&ethereum, Some(3.0)),
+            vec![GemListRowTitle::StakeApr, GemListRowTitle::LockTime, GemListRowTitle::MinimumAmount],
             "a chain with a minimum states it"
+        );
+    }
+
+    #[test]
+    fn test_the_stake_info_rows_carry_finished_values_and_their_explanations() {
+        let tron = Asset::from_chain(Chain::Tron);
+
+        let rows = stake_info_rows(&tron, Some(12.5));
+
+        assert_eq!(
+            rows[0],
+            GemListRow::Amount {
+                title: GemListRowTitle::StakeApr,
+                amount: GemFormattedNumber::percentage(12.5, GemPercentageStyle::Unsigned).toned(),
+                info: Some(GemInfoTopic::StakeApr),
+            }
+        );
+        assert_eq!(
+            rows[1],
+            GemListRow::Duration {
+                title: GemListRowTitle::LockTime,
+                parts: lock_time_parts(Chain::Tron),
+                info: Some(GemInfoTopic::StakeLockTime),
+            }
+        );
+        assert_eq!(
+            rows[2],
+            GemListRow::Amount {
+                title: GemListRowTitle::MinimumAmount,
+                amount: GemFormattedNumber::amount(1.0, Some("TRX".to_string()), GemValueStyle::Auto),
+                info: None,
+            }
         );
     }
 

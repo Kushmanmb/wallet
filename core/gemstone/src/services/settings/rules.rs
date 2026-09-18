@@ -400,6 +400,7 @@ mod tests {
             GemListRow::Link { title, .. }
             | GemListRow::Text { title, .. }
             | GemListRow::Amount { title, .. }
+            | GemListRow::Duration { title, .. }
             | GemListRow::Url { title, .. }
             | GemListRow::Toggle { title, .. }
             | GemListRow::Picker { title, .. } => Some(*title),

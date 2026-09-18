@@ -5,7 +5,6 @@ import enum Gemstone.GemDelegationAction
 import enum Gemstone.GemDelegationCompletion
 import enum Gemstone.GemDelegationRow
 import enum Gemstone.GemStakeAction
-import enum Gemstone.GemStakeInfoRow
 import enum Gemstone.GemStakeSection
 import Localization
 import Primitives
@@ -16,16 +15,6 @@ extension GemStakeSection {
         case .manage: Localized.Common.manage
         case .resources: Localized.Asset.resources
         case .delegations: Localized.Stake.delegations
-        }
-    }
-}
-
-extension GemStakeInfoRow {
-    var title: String {
-        switch self {
-        case .apr: Localized.Stake.apr("")
-        case .lockTime: Localized.Stake.lockTime
-        case .minimumAmount: Localized.Stake.minimumAmount
         }
     }
 }

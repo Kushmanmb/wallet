@@ -100,10 +100,7 @@ extension StakeScene {
     private var stakeInfoSection: some View {
         Section {
             ForEach(model.infoRows, id: \.self) { row in
-                ListItemView(
-                    field: model.infoField(for: row),
-                    infoAction: model.infoAction(for: row),
-                )
+                GemListRowView(row: row, onInfo: model.onInfo)
             }
         }
     }

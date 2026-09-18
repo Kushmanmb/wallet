@@ -21,13 +21,6 @@ pub enum GemStakeSection {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemStakeInfoRow {
-    Apr,
-    LockTime,
-    MinimumAmount,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemDelegationRow {
     Provider,
     Apr,

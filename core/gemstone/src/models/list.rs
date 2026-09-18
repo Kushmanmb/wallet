@@ -1,6 +1,7 @@
 use primitives::Chain;
 
 use crate::config::social::GemSocialLink;
+use crate::duration_formatter::GemDurationPart;
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::copy::GemCopy;
 use crate::services::error::GemServiceError;
@@ -53,12 +54,17 @@ pub enum GemListRowTitle {
     DailyVolume,
     OpenInterest,
     FundingApr,
+    StakeApr,
+    LockTime,
+    MinimumAmount,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemInfoTopic {
     OpenInterest,
     FundingApr,
+    StakeApr,
+    StakeLockTime,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -103,6 +109,11 @@ pub enum GemListRow {
     Amount {
         title: GemListRowTitle,
         amount: GemFormattedNumber,
+        info: Option<GemInfoTopic>,
+    },
+    Duration {
+        title: GemListRowTitle,
+        parts: Vec<GemDurationPart>,
         info: Option<GemInfoTopic>,
     },
     Link {

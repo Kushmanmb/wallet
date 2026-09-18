@@ -622,6 +622,9 @@ public extension GemListRowTitle {
         case .dailyVolume: Localized.Markets.dailyVolume
         case .openInterest: Localized.Info.Perpetual.OpenInterest.title
         case .fundingApr: Localized.Info.Perpetual.FundingApr.title
+        case .stakeApr: Localized.Stake.apr("")
+        case .lockTime: Localized.Stake.lockTime
+        case .minimumAmount: Localized.Stake.minimumAmount
         }
     }
 }

@@ -42,13 +42,14 @@ fun GemListRowView(
     modifier: Modifier = Modifier,
     onToggle: ((GemListRowTitle, Boolean) -> Unit)? = null,
     onSelect: ((GemListRowTitle) -> Unit)? = null,
+    infoIcon: Any? = null,
     accessory: (@Composable () -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val clipboardManager = context.clipboardManager()
 
-    when (val row = row.uiModel(context)) {
+    when (val row = row.uiModel(context, infoIcon)) {
         is GemListRowUIModel.Item -> ListItem(
             model = row.model,
             listPosition = listPosition,

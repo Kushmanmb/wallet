@@ -1,6 +1,7 @@
 package com.gemwallet.android.ui.components.list_item
 
 import android.content.Context
+import com.gemwallet.android.domains.duration.formatDuration
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.model.text
@@ -8,14 +9,17 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.property.icon
 import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.localization.titleRes
+import com.gemwallet.android.ui.style.textStyle
 import com.wallet.core.primitives.Asset
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import uniffi.gemstone.GemCopy
+import uniffi.gemstone.GemFormattedNumber
 import uniffi.gemstone.GemInfoTopic
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowIcon
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemSocialLink
+import uniffi.gemstone.GemValueTone
 
 internal sealed interface GemListRowUIModel {
     data class Item(val model: ListItemModel, val url: String? = null, val opensAnotherScreen: Boolean = false) : GemListRowUIModel
@@ -27,14 +31,17 @@ internal sealed interface GemListRowUIModel {
     data object Loading : GemListRowUIModel
 }
 
-internal fun GemListRow.uiModel(context: Context): GemListRowUIModel = when (this) {
-    is GemListRow.Text -> GemListRowUIModel.Item(ListItemModel(title = context.getString(title.titleRes()), subtitle = value))
-    is GemListRow.Amount -> GemListRowUIModel.Item(ListItemModel(title = context.getString(title.titleRes()), subtitle = amount.text(), info = info?.infoSheet()))
+internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemListRowUIModel = when (this) {
+    is GemListRow.Text -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = value))
+    is GemListRow.Amount -> GemListRowUIModel.Item(
+        ListItemModel(title = title.text(context), subtitle = amount.text(), subtitleStyle = amount.subtitleStyle(), info = info?.infoSheet(infoIcon)),
+    )
+    is GemListRow.Duration -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = parts.formatDuration(), info = info?.infoSheet(infoIcon)))
     is GemListRow.Link -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), opensAnotherScreen = true)
     is GemListRow.Url -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), url = url)
     is GemListRow.Explorer -> GemListRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)
     is GemListRow.Error -> GemListRowUIModel.Item(
-        ListItemModel(title = context.getString(GemListRowTitle.ERROR.titleRes()), subtitle = error.message, titleStyle = ListItemTextStyle.Negative),
+        ListItemModel(title = GemListRowTitle.ERROR.text(context), subtitle = error.message, titleStyle = ListItemTextStyle.Negative),
     )
     is GemListRow.Icon -> GemListRowUIModel.Icon(asset = chain.requireChain().asset())
     is GemListRow.Address -> GemListRowUIModel.Address(address = address, copy = copy)
@@ -50,10 +57,20 @@ internal fun GemSocialLink.uiModel(context: Context): GemListRowUIModel.Item = G
 )
 
 private fun listItemModel(context: Context, title: GemListRowTitle, value: String?, icon: GemListRowIcon): ListItemModel = ListItemModel(
-    title = context.getString(title.titleRes()),
+    title = title.text(context),
     subtitle = value,
     image = icon.image(),
 )
+
+private fun GemListRowTitle.text(context: Context): String = when (this) {
+    GemListRowTitle.STAKE_APR -> context.getString(titleRes(), "")
+    else -> context.getString(titleRes())
+}
+
+private fun GemFormattedNumber.subtitleStyle(): ListItemTextStyle = when (tone) {
+    GemValueTone.PLAIN -> ListItemTextStyle.Secondary
+    GemValueTone.NEUTRAL, GemValueTone.POSITIVE, GemValueTone.WARNING, GemValueTone.NEGATIVE -> tone.textStyle()
+}
 
 private fun GemListRowIcon.image(): ListItemImage? = when (this) {
     GemListRowIcon.NONE -> null
@@ -75,7 +92,9 @@ private fun GemListRowIcon.image(): ListItemImage? = when (this) {
     GemListRowIcon.PERPETUALS -> ListItemImage.Drawable(R.drawable.settings_pricealert)
 }
 
-private fun GemInfoTopic.infoSheet(): InfoSheetEntity = when (this) {
+private fun GemInfoTopic.infoSheet(icon: Any?): InfoSheetEntity = when (this) {
     GemInfoTopic.OPEN_INTEREST -> InfoSheetEntity.OpenInterestInfo
     GemInfoTopic.FUNDING_APR -> InfoSheetEntity.FundingAprInfo
+    GemInfoTopic.STAKE_APR -> InfoSheetEntity.StakeAprInfo(icon)
+    GemInfoTopic.STAKE_LOCK_TIME -> InfoSheetEntity.StakeLockTimeInfo(icon)
 }

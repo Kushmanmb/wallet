@@ -26,9 +26,9 @@ import com.gemwallet.android.ui.components.empty.EmptyContentType
 import com.gemwallet.android.ui.components.empty.EmptyContentView
 import com.gemwallet.android.ui.components.list_head.CenteredListHead
 import com.gemwallet.android.ui.components.list_head.HeaderIcon
+import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_item.DelegationItem
-import com.gemwallet.android.ui.components.list_item.ListItem
-import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.energyItem
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
@@ -39,6 +39,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.open
 import com.gemwallet.android.ui.theme.paddingLarge
+import uniffi.gemstone.GemListRow
 
 @Composable
 internal fun StakeScene(
@@ -48,7 +49,7 @@ internal fun StakeScene(
     rewardsText: String,
     stakeInfoUrl: String?,
     sections: List<StakeSectionUIModel>,
-    infoRows: List<ListItemModel>,
+    infoRows: List<GemListRow>,
     amountAction: AmountTransactionAction,
     onAction: (StakeSceneAction) -> Unit,
 ) {
@@ -79,7 +80,7 @@ internal fun StakeScene(
                     )
                 }
 
-                stakeInfoSection(infoRows)
+                stakeInfoSection(infoRows, assetInfo.id().iconModel())
 
                 sections.forEach { section ->
                     item { SubheaderItem(section.title) }
@@ -114,6 +115,6 @@ internal fun StakeScene(
     }
 }
 
-private fun LazyListScope.stakeInfoSection(rows: List<ListItemModel>) {
-    itemsPositioned(rows) { position, row -> ListItem(model = row, listPosition = position) }
+private fun LazyListScope.stakeInfoSection(rows: List<GemListRow>, icon: Any?) {
+    itemsPositioned(rows) { position, row -> GemListRowView(row = row, listPosition = position, infoIcon = icon) }
 }

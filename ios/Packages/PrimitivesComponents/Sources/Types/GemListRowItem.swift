@@ -2,6 +2,7 @@
 
 import Components
 import Foundation
+import struct Gemstone.GemFormattedNumber
 import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemListRow
 import enum Gemstone.GemListRowIcon
@@ -11,6 +12,7 @@ import struct Gemstone.GemSocialLink
 import GemstonePrimitives
 import Localization
 import Primitives
+import Style
 
 struct AddressCardModel {
     let address: String
@@ -35,7 +37,9 @@ extension GemListRow {
         case let .text(title, value):
             .listItem(ListItemModel(title: title.text, subtitle: value))
         case let .amount(title, amount, info):
-            .listItem(ListItemModel(title: title.text, subtitle: amount.text(), infoAction: info.flatMap { topic in onInfo.map { onInfo in { onInfo(topic) } } }))
+            .listItem(ListItemModel(title: title.text, subtitle: amount.text(), subtitleStyle: subtitleStyle(amount), infoAction: infoAction(info, onInfo: onInfo)))
+        case let .duration(title, parts, info):
+            .listItem(ListItemModel(title: title.text, subtitle: CountdownFormatter().string(parts: parts), infoAction: infoAction(info, onInfo: onInfo)))
         case let .link(title, value, icon):
             .listItem(listItem(title: title, value: value, icon: icon))
         case let .picker(title, value, icon):
@@ -57,6 +61,17 @@ extension GemListRow {
         case .loading:
             .loading
         }
+    }
+
+    private func subtitleStyle(_ amount: GemFormattedNumber) -> TextStyle {
+        switch amount.tone {
+        case .plain: ListItemModel.StyleDefaults.subtitleStyle
+        case .neutral, .positive, .warning, .negative: TextStyle(font: .callout, color: amount.tone.color)
+        }
+    }
+
+    private func infoAction(_ topic: GemInfoTopic?, onInfo: ((GemInfoTopic) -> Void)?) -> VoidAction {
+        topic.flatMap { topic in onInfo.map { onInfo in { onInfo(topic) } } }
     }
 
     private func toggleLabel(title: GemListRowTitle, value: String?) -> String {

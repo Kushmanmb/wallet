@@ -4,6 +4,7 @@ import BigInt
 import Components
 import Formatters
 import Foundation
+import enum Gemstone.GemInfoTopic
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -87,5 +88,16 @@ public enum InfoSheetType: Identifiable, Sendable, Equatable {
 
     public static func == (lhs: InfoSheetType, rhs: InfoSheetType) -> Bool {
         lhs.id == rhs.id
+    }
+}
+
+public extension InfoSheetType {
+    init(topic: GemInfoTopic, placeholder: Image?) {
+        self = switch topic {
+        case .openInterest: .openInterest
+        case .fundingApr: .fundingApr
+        case .stakeApr: .stakeApr(placeholder)
+        case .stakeLockTime: .stakeLockTime(placeholder)
+        }
     }
 }

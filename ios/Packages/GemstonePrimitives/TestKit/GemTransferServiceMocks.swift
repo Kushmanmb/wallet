@@ -191,8 +191,7 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
     private let explorerAddress: String?
     private let actions: [Gemstone.GemDelegationAction]
     private let validators: [Gemstone.DelegationValidator]
-    private let lockTime: UInt64
-    private let minStake: Gemstone.GemBigInt
+    private let infoRows: [GemListRow]
     private let freezes: Bool
     private let wholeAmounts: Bool
     private let claimRewardsDestination: GemClaimRewardsDestination?
@@ -203,8 +202,7 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         explorerAddress: String? = nil,
         actions: [Gemstone.GemDelegationAction] = [],
         validators: [Gemstone.DelegationValidator] = [],
-        lockTime: UInt64 = 0,
-        minStake: Gemstone.GemBigInt = 0,
+        infoRows: [GemListRow] = [],
         freezes: Bool = false,
         wholeAmounts: Bool = false,
         claimRewardsDestination: GemClaimRewardsDestination? = nil,
@@ -214,8 +212,7 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         self.explorerAddress = explorerAddress
         self.actions = actions
         self.validators = validators
-        self.lockTime = lockTime
-        self.minStake = minStake
+        self.infoRows = infoRows
         self.freezes = freezes
         self.wholeAmounts = wholeAmounts
         self.claimRewardsDestination = claimRewardsDestination
@@ -229,17 +226,9 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         delegations.filter { BigInt($0.base.balance) > 0 }
     }
 
-    public func lockTimeParts(chain _: Gemstone.Chain) -> [GemDurationPart] {
-        lockTime > 0 ? [GemDurationPart(value: Int64(lockTime / 86_400), unit: .day)] : []
-    }
-
     public func completionCountdownParts(delegation: Gemstone.Delegation) -> [GemDurationPart] {
         guard delegation.base.state != .active, let completionDate = delegation.base.completionDate else { return [] }
         return DurationFormatter().countdownParts(seconds: Int64(Date.now.distance(to: completionDate)))
-    }
-
-    public func minStakeAmount(chain _: Gemstone.Chain) -> Gemstone.GemBigInt {
-        minStake
     }
 
     public func earnApr(providers: [Gemstone.DelegationValidator], assetApr: Double?) -> Double {
@@ -250,8 +239,8 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         [hasActions ? .manage : nil, freezes ? .resources : nil, hasDelegations ? .delegations : nil].compactMap { $0 }
     }
 
-    public func stakeInfoRows(chain _: Gemstone.Chain, stakingApr: Double?) -> [Gemstone.GemStakeInfoRow] {
-        [stakingApr.flatMap { $0 != 0 ? .apr : nil }, lockTime > 0 ? .lockTime : nil, minStake != 0 ? .minimumAmount : nil].compactMap { $0 }
+    public func stakeInfoRows(asset _: Gemstone.Asset, stakingApr _: Double?) -> [GemListRow] {
+        infoRows
     }
 
     public func delegationRows(delegation: Gemstone.Delegation) -> [Gemstone.GemDelegationRow] {
