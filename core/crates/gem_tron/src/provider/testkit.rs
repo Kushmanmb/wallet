@@ -107,6 +107,16 @@ impl TronGridTransaction {
 }
 
 #[cfg(test)]
+impl TronAccountPermissionKey {
+    pub fn mock(address: &str, weight: u64) -> Self {
+        Self {
+            address: address.to_string(),
+            weight,
+        }
+    }
+}
+
+#[cfg(test)]
 impl TronAccount {
     pub fn mock(address: &str) -> Self {
         Self {

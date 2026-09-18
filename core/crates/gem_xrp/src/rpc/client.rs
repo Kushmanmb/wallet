@@ -3,7 +3,7 @@ use std::error::Error;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 
-use chain_traits::{ChainAddressStatus, ChainPerpetual, ChainProvider, ChainSimulation, ChainStaking, ChainTraits};
+use chain_traits::{ChainPerpetual, ChainProvider, ChainSimulation, ChainStaking, ChainTraits};
 use gem_client::Client;
 use gem_jsonrpc::client::JsonRpcClient;
 use gem_jsonrpc::types::{ERROR_CLIENT_ERROR, JsonRpcError};
@@ -127,8 +127,6 @@ fn map_error_result(result: &Value) -> Option<JsonRpcError> {
 impl<C: Client + Clone> ChainStaking for XrpClient<C> {}
 
 impl<C: Client + Clone> ChainPerpetual for XrpClient<C> {}
-
-impl<C: Client + Clone> ChainAddressStatus for XrpClient<C> {}
 
 impl<C: Client + Clone> chain_traits::ChainAccount for XrpClient<C> {}
 

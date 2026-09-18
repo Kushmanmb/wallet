@@ -7,7 +7,7 @@ use primitives::{AddressStatus, Chain, ChainAddress, WalletConfiguration, Wallet
 use settings_chain::ChainProviders;
 use storage::{Database, WalletsRepository};
 
-const ADDRESS_STATUS_CHAINS: [Chain; 2] = [Chain::Tron, Chain::Solana];
+const ADDRESS_STATUS_CHAINS: [Chain; 6] = [Chain::Tron, Chain::Solana, Chain::Xrp, Chain::Stellar, Chain::Algorand, Chain::Aptos];
 
 pub struct WalletConfigurationClient {
     database: Database,
