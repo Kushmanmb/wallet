@@ -155,24 +155,29 @@ struct RewardsViewModelTests {
     }
 
     @Test
-    func aReadyPendingReferralReadsAsReady() async throws {
+    func aReadyPendingReferralCanBeActivated() async throws {
         let service = GemRewardsServiceMock()
-        service.stateForRewards = { _ in .mock(hasPendingReferral: true, canActivatePendingReferral: true, usedReferralCode: "pending") }
+        service.stateForRewards = { _ in .mock(showsPendingActivation: true, canActivatePendingReferral: true, usedReferralCode: "pending") }
         let model = try #require(RewardsViewModel.mock(service: service, wallets: [first, second]))
         await model.load()
 
-        #expect(model.pendingReferralDescription == Localized.Rewards.Pending.descriptionReady)
         #expect(model.activatePendingButtonType == .primary())
     }
 
     @Test
-    func aPendingReferralWithNoDateHasNoDescription() async throws {
+    func aWaitingPendingReferralCannotBeActivated() async throws {
         let service = GemRewardsServiceMock()
-        service.stateForRewards = { _ in .mock(hasPendingReferral: true, usedReferralCode: "pending") }
+        service.stateForRewards = { _ in .mock(showsPendingActivation: true, usedReferralCode: "pending") }
         let model = try #require(RewardsViewModel.mock(service: service, wallets: [first, second]))
         await model.load()
 
-        #expect(model.pendingReferralDescription == nil)
         #expect(model.activatePendingButtonType == .primary(.disabled))
+    }
+
+    @Test
+    func pendingNoticeTextsReadTheLocalizedCopy() {
+        #expect(GemLocalizedText.rewardsPendingReady.text == Localized.Rewards.Pending.descriptionReady)
+        #expect(GemLocalizedText.rewardsUnverified.text == Localized.Rewards.Unverified.description)
+        #expect(GemLocalizedText.text(text: "verification required").text == "verification required")
     }
 }

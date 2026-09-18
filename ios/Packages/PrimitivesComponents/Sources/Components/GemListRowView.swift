@@ -37,6 +37,11 @@ public struct GemListRowView: View {
     @ViewBuilder
     private var content: some View {
         switch row.item(onInfo: onInfo) {
+        case let .notice(title, message, kind):
+            switch kind {
+            case .error: ListItemErrorView(errorTitle: title, error: AnyError(message ?? ""))
+            case .info: ListItemInfoView(title: title, description: message)
+            }
         case let .listItem(model):
             ListItemView(model: model)
         case let .picker(model, title):

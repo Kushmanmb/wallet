@@ -23,8 +23,10 @@ public struct RewardsScene: View {
                 stateErrorView(error: error)
             case .data:
                 inviteFriendsSection
-                if let disableReason = model.disableReason {
-                    disableReasonSection(reason: disableReason)
+                if let notice = model.rewardsState.errorNotice {
+                    Section {
+                        GemListRowView(row: notice)
+                    }
                 }
                 statusSection
                 if model.rewardsState.showsInfo {
@@ -216,42 +218,25 @@ public struct RewardsScene: View {
         }
     }
 
-    private func disableReasonSection(reason: String) -> some View {
-        Section {
-            ListItemErrorView(
-                errorTitle: model.errorTitle,
-                error: AnyError(reason),
-            )
-        }
-    }
-
     @ViewBuilder
     private var statusSection: some View {
-        if model.rewardsState.isUnverified {
+        if let notice = model.rewardsState.statusNotice {
             Section {
-                ListItemInfoView(
-                    title: model.unverifiedTitle,
-                    description: model.unverifiedDescription,
-                )
-            }
-        } else if model.rewardsState.hasPendingReferral {
-            Section {
-                ListItemInfoView(
-                    title: model.pendingReferralTitle,
-                    description: model.pendingReferralDescription,
-                )
+                GemListRowView(row: notice)
 
-                HStack {
-                    Spacer()
-                    StateButton(
-                        text: model.pendingReferralButtonTitle,
-                        type: model.activatePendingButtonType,
-                    ) {
-                        Task { await model.activatePendingReferral() }
+                if model.rewardsState.showsPendingActivation {
+                    HStack {
+                        Spacer()
+                        StateButton(
+                            text: model.pendingReferralButtonTitle,
+                            type: model.activatePendingButtonType,
+                        ) {
+                            Task { await model.activatePendingReferral() }
+                        }
+                        .frame(height: .scene.button.height)
+                        .frame(maxWidth: .scene.button.maxWidth)
+                        Spacer()
                     }
-                    .frame(height: .scene.button.height)
-                    .frame(maxWidth: .scene.button.maxWidth)
-                    Spacer()
                 }
             }
         }

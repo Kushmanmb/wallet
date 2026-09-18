@@ -77,6 +77,14 @@ extension GemLocalizedText {
             case .gwei: "\(rate.text()) \(Localized.FeeRate.gwei)"
             case .native: rate.text()
             }
+        case let .text(text):
+            text
+        case .rewardsUnverified:
+            Localized.Rewards.Unverified.description
+        case let .rewardsPending(countdown):
+            CountdownFormatter().string(parts: countdown).map { Localized.Rewards.Pending.description($0) } ?? .empty
+        case .rewardsPendingReady:
+            Localized.Rewards.Pending.descriptionReady
         }
     }
 }
@@ -679,6 +687,8 @@ public extension GemListRowTitle {
         case .priceAlerts: Localized.Settings.PriceAlerts.title
         case .energy: Localized.Stake.Resource.energy
         case .bandwidth: Localized.Stake.Resource.bandwidth
+        case .rewardsUnverified: Localized.Rewards.Unverified.title
+        case .rewardsPending: Localized.Rewards.Pending.title
         }
     }
 }

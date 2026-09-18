@@ -64,6 +64,7 @@ import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
 import uniffi.gemstone.GemSimulationWarningTitle
 import uniffi.gemstone.GemSlippageCheck
+import com.gemwallet.android.domains.duration.formatDuration
 
 fun GemTransactionTitle.string(context: Context): String = when (this) {
     GemTransactionTitle.Received -> context.getString(R.string.transaction_title_received)
@@ -177,6 +178,10 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     is GemLocalizedText.DelegationState -> context.getString(state.stateRes())
     is GemLocalizedText.TransactionState -> context.getString(state.toPrimitives().statusLabelRes())
     is GemLocalizedText.Resource -> context.getString(resource.toPrimitives().stringRes())
+    is GemLocalizedText.Text -> text
+    GemLocalizedText.RewardsUnverified -> context.getString(R.string.rewards_unverified_description)
+    is GemLocalizedText.RewardsPending -> context.getString(R.string.rewards_pending_description, countdown.formatDuration())
+    GemLocalizedText.RewardsPendingReady -> context.getString(R.string.rewards_pending_description_ready)
     is GemLocalizedText.FeeRate -> when (unit) {
         FeeUnitType.SAT_VB -> "${rate.text()} ${context.getString(R.string.fee_rate_satvB)}"
         FeeUnitType.GWEI -> "${rate.text()} ${context.getString(R.string.fee_rate_gwei)}"
@@ -526,6 +531,8 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.DATE -> R.string.transaction_date
     GemListRowTitle.MEMO -> R.string.transfer_memo
     GemListRowTitle.RESOURCE -> R.string.stake_resource
+    GemListRowTitle.REWARDS_UNVERIFIED -> R.string.rewards_unverified_title
+    GemListRowTitle.REWARDS_PENDING -> R.string.rewards_pending_title
     GemListRowTitle.PRICE -> R.string.asset_price
     GemListRowTitle.PNL -> R.string.perpetual_pnl
     GemListRowTitle.PIN -> R.string.common_pin

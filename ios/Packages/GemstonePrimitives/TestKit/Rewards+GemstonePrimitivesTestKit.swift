@@ -15,6 +15,7 @@ import struct Gemstone.RewardRedemptionOption
 import enum Gemstone.RewardStatus
 import struct Gemstone.Rewards
 import Primitives
+import enum Gemstone.GemListRow
 
 public extension Rewards {
     static func mock(
@@ -80,15 +81,14 @@ public extension GemRewardsState {
         canInvite: Bool = true,
         canUseReferralCode: Bool = true,
         showsInfo: Bool = true,
-        isUnverified: Bool = false,
-        hasPendingReferral: Bool = false,
+        errorNotice: GemListRow? = nil,
+        statusNotice: GemListRow? = nil,
+        showsPendingActivation: Bool = false,
         canActivatePendingReferral: Bool = false,
         inviteRewardPointsText: String = "100",
         referralCode: String? = "test123",
         referralLink: String? = "https://gemwallet.com/join?code=test123",
         usedReferralCode: String? = nil,
-        pendingCountdown: [GemDurationPart] = [],
-        disableReason: String? = nil,
         referralCountText: String = "5",
         pointsText: String = "0",
         redemptions: [GemRewardsRedemption] = [],
@@ -99,15 +99,14 @@ public extension GemRewardsState {
             canInvite: canInvite,
             canUseReferralCode: canUseReferralCode,
             showsInfo: showsInfo,
-            isUnverified: isUnverified,
-            hasPendingReferral: hasPendingReferral,
+            errorNotice: errorNotice,
+            statusNotice: statusNotice,
+            showsPendingActivation: showsPendingActivation,
             canActivatePendingReferral: canActivatePendingReferral,
             inviteRewardPointsText: inviteRewardPointsText,
             referralCode: referralCode,
             referralLink: referralLink,
             usedReferralCode: usedReferralCode,
-            pendingCountdown: pendingCountdown,
-            disableReason: disableReason,
             referralCountText: referralCountText,
             pointsText: pointsText,
             redemptions: redemptions,

@@ -25,10 +25,12 @@ import uniffi.gemstone.GemInfoTopic
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowIcon
 import uniffi.gemstone.GemListRowTitle
+import uniffi.gemstone.GemNoticeKind
 import uniffi.gemstone.GemSocialLink
 import uniffi.gemstone.GemValueTone
 
 internal sealed interface GemListRowUIModel {
+    data class Notice(val title: String, val message: String?, val kind: GemNoticeKind) : GemListRowUIModel
     data class Item(val model: ListItemModel, val url: String? = null, val opensAnotherScreen: Boolean = false) : GemListRowUIModel
     data class Icon(val asset: Asset) : GemListRowUIModel
     data class Network(val chain: Chain) : GemListRowUIModel
@@ -40,6 +42,7 @@ internal sealed interface GemListRowUIModel {
 }
 
 internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemListRowUIModel = when (this) {
+    is GemListRow.Notice -> GemListRowUIModel.Notice(title = title.text(context), message = message?.string(context), kind = kind)
     is GemListRow.Text -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = value))
     is GemListRow.Amount -> GemListRowUIModel.Item(
         ListItemModel(title = title.text(context), subtitle = amount.text(), subtitleStyle = amount.tone.subtitleStyle(), info = info?.infoSheet(infoIcon)),

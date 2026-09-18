@@ -6,6 +6,8 @@ use number_formatter::BigNumberFormatter;
 use primitives::{CoreEmoji, RewardRedemptionOption, RewardStatus, Rewards};
 
 use super::model::{GemRewardsRedemption, GemRewardsState};
+use crate::models::list::{GemListRow, GemListRowTitle, GemNoticeKind};
+use crate::services::localization::GemLocalizedText;
 use crate::config::rewards::get_referral_url;
 
 pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
@@ -18,6 +20,8 @@ pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
     let has_referral_code = has_value(rewards.code.as_deref());
     let has_used_referral_code = has_value(rewards.used_referral_code.as_deref());
     let has_pending_referral = has_used_referral_code && rewards.verify_after.is_some();
+    let can_activate_pending_referral = has_pending_referral && rewards.verify_after.is_some_and(|verify_after| now >= verify_after);
+    let is_unverified = has_referral_code && rewards.status == RewardStatus::Unverified && !has_pending_referral;
     let referral_code = rewards.code.clone().filter(|code| !code.is_empty());
     GemRewardsState {
         has_referral_code,
@@ -25,23 +29,47 @@ pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
         can_invite: has_referral_code && matches!(rewards.status, RewardStatus::Verified | RewardStatus::Trusted | RewardStatus::Attribution),
         can_use_referral_code: !has_referral_code && !has_used_referral_code,
         shows_info: has_referral_code || has_used_referral_code,
-        is_unverified: has_referral_code && rewards.status == RewardStatus::Unverified && !has_pending_referral,
-        has_pending_referral,
-        can_activate_pending_referral: has_pending_referral && rewards.verify_after.is_some_and(|verify_after| now >= verify_after),
+        error_notice: rewards.disable_reason.clone().map(|reason| GemListRow::Notice {
+            title: GemListRowTitle::Error,
+            message: Some(GemLocalizedText::Text { text: reason }),
+            kind: GemNoticeKind::Error,
+        }),
+        status_notice: status_notice(is_unverified, has_pending_referral, can_activate_pending_referral, rewards, now),
+        shows_pending_activation: has_pending_referral && !is_unverified,
+        can_activate_pending_referral,
         invite_reward_points_text: rewards.invite_reward_points.to_string(),
         referral_code: referral_code.clone(),
         referral_link: referral_code.as_deref().map(get_referral_url),
         used_referral_code: rewards.used_referral_code.clone().filter(|code| !code.is_empty()),
-        pending_countdown: rewards
-            .verify_after
-            .filter(|verify_after| *verify_after > now)
-            .map(|verify_after| countdown_parts((verify_after - now).num_seconds()))
-            .unwrap_or_default(),
-        disable_reason: rewards.disable_reason.clone(),
         referral_count_text: rewards.referral_count.to_string(),
         points_text: points_text(rewards.points),
         redemptions: redemptions(rewards),
     }
+}
+
+fn status_notice(is_unverified: bool, has_pending_referral: bool, can_activate: bool, rewards: &Rewards, now: DateTime<Utc>) -> Option<GemListRow> {
+    let notice = |title: GemListRowTitle, message: GemLocalizedText| GemListRow::Notice {
+        title,
+        message: Some(message),
+        kind: GemNoticeKind::Info,
+    };
+    if is_unverified {
+        return Some(notice(GemListRowTitle::RewardsUnverified, GemLocalizedText::RewardsUnverified));
+    }
+    if !has_pending_referral {
+        return None;
+    }
+    let message = match can_activate {
+        true => GemLocalizedText::RewardsPendingReady,
+        false => GemLocalizedText::RewardsPending {
+            countdown: rewards
+                .verify_after
+                .filter(|verify_after| *verify_after > now)
+                .map(|verify_after| countdown_parts((verify_after - now).num_seconds()))
+                .unwrap_or_default(),
+        },
+    };
+    Some(notice(GemListRowTitle::RewardsPending, message))
 }
 
 fn points_text(points: i32) -> String {
@@ -205,7 +233,16 @@ mod tests {
         assert_eq!(state.referral_count_text, "5");
         assert_eq!(state.points_text, "250 \u{1f48e}");
         assert_eq!(state.invite_reward_points_text, "150");
-        assert_eq!(state.disable_reason.as_deref(), Some("verification required"));
+        assert_eq!(
+            state.error_notice,
+            Some(GemListRow::Notice {
+                title: GemListRowTitle::Error,
+                message: Some(GemLocalizedText::Text {
+                    text: "verification required".to_string()
+                }),
+                kind: GemNoticeKind::Error,
+            })
+        );
     }
 
     #[test]
@@ -223,7 +260,7 @@ mod tests {
         assert!(!state.has_referral_code);
         assert!(state.can_use_referral_code);
         assert!(!state.shows_info);
-        assert!(!state.is_unverified);
+        assert_eq!(state.status_notice, None);
         assert!(!state.can_invite);
     }
 
@@ -234,7 +271,7 @@ mod tests {
             assert!(state.can_invite, "{status:?}");
             assert!(state.shows_info);
             assert!(!state.can_use_referral_code);
-            assert!(!state.is_unverified);
+            assert_eq!(state.status_notice, None);
         }
         for status in [RewardStatus::Unverified, RewardStatus::Pending, RewardStatus::Disabled] {
             assert!(!state(Some(&Rewards::mock(Some("gem"), status)), now()).can_invite, "{status:?}");
@@ -243,8 +280,13 @@ mod tests {
 
     #[test]
     fn test_state_flags_an_unverified_code_until_a_referral_is_pending() {
-        assert!(state(Some(&Rewards::mock(Some("gem"), RewardStatus::Unverified)), now()).is_unverified);
-        assert!(!state(Some(&Rewards::mock(None, RewardStatus::Unverified)), now()).is_unverified);
+        let unverified = GemListRow::Notice {
+            title: GemListRowTitle::RewardsUnverified,
+            message: Some(GemLocalizedText::RewardsUnverified),
+            kind: GemNoticeKind::Info,
+        };
+        assert_eq!(state(Some(&Rewards::mock(Some("gem"), RewardStatus::Unverified)), now()).status_notice, Some(unverified));
+        assert_eq!(state(Some(&Rewards::mock(None, RewardStatus::Unverified)), now()).status_notice, None);
 
         let pending = Rewards {
             code: Some("gem".to_string()),
@@ -252,19 +294,37 @@ mod tests {
             ..Rewards::mock_pending(now() + TimeDelta::hours(1))
         };
         let state = state(Some(&pending), now());
-        assert!(!state.is_unverified);
-        assert!(state.has_pending_referral);
+        assert_eq!(
+            state.status_notice,
+            Some(GemListRow::Notice {
+                title: GemListRowTitle::RewardsPending,
+                message: Some(GemLocalizedText::RewardsPending {
+                    countdown: countdown_parts(3600)
+                }),
+                kind: GemNoticeKind::Info,
+            }),
+            "a pending referral replaces the unverified notice"
+        );
+        assert!(state.shows_pending_activation);
     }
 
     #[test]
     fn test_state_activates_a_pending_referral_once_verify_after_is_reached() {
         let waiting = state(Some(&Rewards::mock_pending(now() + TimeDelta::hours(1))), now());
-        assert!(waiting.has_pending_referral);
+        assert!(waiting.shows_pending_activation);
         assert!(!waiting.can_activate_pending_referral);
         assert!(waiting.shows_info);
         assert!(!waiting.can_use_referral_code);
 
-        assert!(state(Some(&Rewards::mock_pending(now())), now()).can_activate_pending_referral);
+        let ready = state(Some(&Rewards::mock_pending(now())), now());
+        assert!(ready.can_activate_pending_referral);
+        assert!(matches!(
+            ready.status_notice,
+            Some(GemListRow::Notice {
+                message: Some(GemLocalizedText::RewardsPendingReady),
+                ..
+            })
+        ));
         assert!(state(Some(&Rewards::mock_pending(now() - TimeDelta::seconds(1))), now()).can_activate_pending_referral);
 
         let without_used_code = Rewards {
@@ -273,7 +333,7 @@ mod tests {
             ..Rewards::mock_pending(now() - TimeDelta::hours(1))
         };
         let state = state(Some(&without_used_code), now());
-        assert!(!state.has_pending_referral);
+        assert!(!state.shows_pending_activation);
         assert!(!state.can_activate_pending_referral);
     }
 
@@ -283,7 +343,7 @@ mod tests {
         let rewards: Rewards = serde_json::from_str(json).unwrap();
 
         let state = state(Some(&rewards), now());
-        assert!(state.has_pending_referral);
+        assert!(state.shows_pending_activation);
         assert!(state.can_activate_pending_referral);
     }
 }

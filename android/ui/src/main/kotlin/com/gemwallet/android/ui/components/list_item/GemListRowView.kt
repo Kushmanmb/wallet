@@ -23,6 +23,8 @@ import com.gemwallet.android.ui.open
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.localization.titleRes
+import com.gemwallet.android.ui.style.color
+import com.gemwallet.android.ui.style.icon
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSection
@@ -51,6 +53,13 @@ fun GemListRowView(
     val clipboardManager = context.clipboardManager()
 
     when (val row = row.uiModel(context, infoIcon)) {
+        is GemListRowUIModel.Notice -> WarningItem(
+            title = row.title,
+            message = row.message,
+            color = row.kind.color(),
+            position = listPosition,
+            icon = row.kind.icon(),
+        )
         is GemListRowUIModel.Item -> ListItem(
             model = row.model,
             listPosition = listPosition,

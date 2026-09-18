@@ -78,6 +78,14 @@ pub enum GemListRowTitle {
     PriceAlerts,
     Energy,
     Bandwidth,
+    RewardsUnverified,
+    RewardsPending,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemNoticeKind {
+    Error,
+    Info,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -127,6 +135,11 @@ pub enum GemListRowIcon {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemListRow {
+    Notice {
+        title: GemListRowTitle,
+        message: Option<GemLocalizedText>,
+        kind: GemNoticeKind,
+    },
     Text {
         title: GemListRowTitle,
         value: String,

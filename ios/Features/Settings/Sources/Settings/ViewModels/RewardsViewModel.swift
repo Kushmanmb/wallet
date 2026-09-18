@@ -158,30 +158,6 @@ public final class RewardsViewModel: Sendable {
         rewardsState.usedReferralCode
     }
 
-    var unverifiedTitle: String {
-        Localized.Rewards.Unverified.title
-    }
-
-    var unverifiedDescription: String {
-        Localized.Rewards.Unverified.description
-    }
-
-    var disableReason: String? {
-        rewardsState.disableReason
-    }
-
-    var pendingReferralTitle: String {
-        Localized.Rewards.Pending.title
-    }
-
-    var pendingReferralDescription: String? {
-        guard rewardsState.hasPendingReferral else { return nil }
-        if rewardsState.canActivatePendingReferral {
-            return Localized.Rewards.Pending.descriptionReady
-        }
-        return CountdownFormatter().string(parts: rewardsState.pendingCountdown).map { Localized.Rewards.Pending.description($0) }
-    }
-
     var pendingReferralButtonTitle: String {
         Localized.Transfer.confirm
     }

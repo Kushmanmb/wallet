@@ -6,6 +6,7 @@ import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemListRow
 import enum Gemstone.GemListRowIcon
 import enum Gemstone.GemListRowTitle
+import enum Gemstone.GemNoticeKind
 import enum Gemstone.GemUrlTarget
 import enum Gemstone.GemValueTone
 import struct Gemstone.GemSocialLink
@@ -20,6 +21,7 @@ struct AddressCardModel {
 }
 
 enum GemListRowItem {
+    case notice(title: String, message: String?, kind: GemNoticeKind)
     case listItem(ListItemModel)
     case picker(ListItemModel, title: GemListRowTitle)
     case toggle(label: String, title: GemListRowTitle, isOn: Bool, imageStyle: ListItemImageStyle?)
@@ -35,6 +37,8 @@ enum GemListRowItem {
 extension GemListRow {
     func item(onInfo: ((GemInfoTopic) -> Void)?) -> GemListRowItem {
         switch self {
+        case let .notice(title, message, kind):
+            .notice(title: title.text, message: message?.text, kind: kind)
         case let .text(title, value):
             .listItem(ListItemModel(title: title.text, subtitle: value))
         case let .amount(title, amount, info):

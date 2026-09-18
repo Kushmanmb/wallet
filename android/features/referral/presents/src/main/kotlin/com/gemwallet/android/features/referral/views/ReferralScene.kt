@@ -33,8 +33,6 @@ import androidx.compose.ui.unit.dp
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.features.referral.viewmodels.SyncType
 import uniffi.gemstone.GemRewardsState
-import com.gemwallet.android.features.referral.viewmodels.models.PendingReferralUIModel
-import com.gemwallet.android.features.referral.viewmodels.models.RewardsNoticeUIModel
 import com.gemwallet.android.features.referral.viewmodels.models.RewardRedemptionUIModel
 import com.gemwallet.android.features.referral.views.components.referralHead
 import com.gemwallet.android.features.referral.views.components.referralInfo
@@ -44,7 +42,7 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.buttons.mainActionButtonColors
 import com.gemwallet.android.ui.components.clickable
-import com.gemwallet.android.ui.components.list_item.WarningItem
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.listItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
@@ -53,11 +51,11 @@ import com.gemwallet.android.ui.components.screen.showSnackbar
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.models.ListPosition
+import com.gemwallet.android.ui.models.buttonState
 import com.gemwallet.android.ui.shareText
 import com.gemwallet.android.ui.theme.Spacer8
 import com.gemwallet.android.ui.theme.WalletTheme
 import com.gemwallet.android.ui.theme.paddingDefault
-import com.gemwallet.android.ui.theme.pendingColor
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.sceneContentPadding
 import com.wallet.core.primitives.Wallet
@@ -75,9 +73,6 @@ fun ReferralScene(
     referralLink: String?,
     uiState: GemRewardsState,
     infoRows: List<ListItemModel>,
-    errorNotice: RewardsNoticeUIModel?,
-    unverifiedNotice: RewardsNoticeUIModel?,
-    pendingReferral: PendingReferralUIModel?,
     redemptions: List<RewardRedemptionUIModel>,
     currentWallet: Wallet?,
     referralCode: String? = null,
@@ -181,40 +176,30 @@ fun ReferralScene(
                         )
                     }
                 }
-                errorNotice?.let { notice ->
-                    item {
-                        WarningItem(title = notice.title, message = notice.message, color = MaterialTheme.colorScheme.error, position = ListPosition.Single)
-                    }
+                uiState.errorNotice?.let { notice ->
+                    item { GemListRowView(row = notice, listPosition = ListPosition.Single) }
                 }
-                unverifiedNotice?.let { notice ->
+                uiState.statusNotice?.let { notice ->
                     item {
-                        WarningItem(title = notice.title, message = notice.message, color = pendingColor, position = ListPosition.Single, icon = AppIcons.Info)
-                    }
-                }
-                pendingReferral?.let { pending ->
-                    item {
-                        WarningItem(
-                            title = pending.notice.title,
-                            message = pending.notice.message,
-                            color = pendingColor,
-                            position = ListPosition.First,
-                            icon = AppIcons.Info,
-                        )
-                        Box(modifier = Modifier.listItem(ListPosition.Last).padding(paddingDefault)) {
-                            MainActionButton(
-                                title = stringResource(R.string.transfer_confirm),
-                                state = pending.buttonState,
-                            ) {
-                                onCode(pending.code) { error ->
-                                    val message = error?.errorText()?.text(context)
-                                    scope.launch {
-                                        if (message == null) {
-                                            snackbar.showSnackbar(successStr, R.drawable.ic_check_circle)
-                                        } else {
-                                            snackbar.showSnackbar(message, R.drawable.ic_error)
+                        val code = uiState.usedReferralCode?.takeIf { uiState.showsPendingActivation }
+                        GemListRowView(row = notice, listPosition = if (code != null) ListPosition.First else ListPosition.Single)
+                        if (code != null) {
+                            Box(modifier = Modifier.listItem(ListPosition.Last).padding(paddingDefault)) {
+                                MainActionButton(
+                                    title = stringResource(R.string.transfer_confirm),
+                                    state = buttonState(enabled = uiState.canActivatePendingReferral),
+                                ) {
+                                    onCode(code) { error ->
+                                        val message = error?.errorText()?.text(context)
+                                        scope.launch {
+                                            if (message == null) {
+                                                snackbar.showSnackbar(successStr, R.drawable.ic_check_circle)
+                                            } else {
+                                                snackbar.showSnackbar(message, R.drawable.ic_error)
+                                            }
                                         }
+                                        onRefresh()
                                     }
-                                    onRefresh()
                                 }
                             }
                         }
@@ -258,9 +243,6 @@ private fun ReferralScenePreview() {
                 pointsText = "1000 \uD83D\uDC8E",
             ),
             infoRows = emptyList(),
-            errorNotice = null,
-            unverifiedNotice = null,
-            pendingReferral = null,
             redemptions = emptyList(),
             currentWallet = previewWallet(),
             onUsername = { _, _ -> },
@@ -284,9 +266,6 @@ private fun ReferralSceneNoRewardsPreview() {
             referralLink = null,
             uiState = previewRewardsState(canUseReferralCode = true),
             infoRows = emptyList(),
-            errorNotice = null,
-            unverifiedNotice = null,
-            pendingReferral = null,
             redemptions = emptyList(),
             currentWallet = previewWallet(),
             onUsername = { _, _ -> },

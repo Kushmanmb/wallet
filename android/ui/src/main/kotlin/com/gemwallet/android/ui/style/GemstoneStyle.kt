@@ -37,6 +37,7 @@ import uniffi.gemstone.GemVerificationLevel
 import uniffi.gemstone.SwapPriceImpactType
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
+import uniffi.gemstone.GemNoticeKind
 
 @DrawableRes
 fun GemHeaderButtonKind.iconRes(): Int = when (this) {
@@ -71,6 +72,18 @@ fun GemValueTone.textStyle(): ListItemTextStyle = when (this) {
     GemValueTone.POSITIVE -> ListItemTextStyle.Positive
     GemValueTone.WARNING -> ListItemTextStyle.Warning
     GemValueTone.NEGATIVE -> ListItemTextStyle.Negative
+}
+
+@Composable
+fun GemNoticeKind.color(): Color = when (this) {
+    GemNoticeKind.ERROR -> MaterialTheme.colorScheme.error
+    GemNoticeKind.INFO -> pendingColor
+}
+
+@Composable
+fun GemNoticeKind.icon(): ImageVector = when (this) {
+    GemNoticeKind.ERROR -> AppIcons.Warning
+    GemNoticeKind.INFO -> AppIcons.Info
 }
 
 @Composable
