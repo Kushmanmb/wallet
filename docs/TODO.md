@@ -59,7 +59,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 - **T2** **S** iOS `SignMessagePayload` restates `GemWalletConnectMessageRequest` (chain, session, wallet, message, simulation, assets) — use the record.
 - **T3** **S** iOS `WalletConnectSessionApproval` and Android `WalletConnectSessionNamespace` both twin `GemSessionApproval` (chains, accounts, methods, events) — use the record on both.
-- **T4** **S** iOS `ManageContactAddressViewModel.Input` twins `GemContactAddressInput` (address, chain, memo, replacingId) — use the record.
 - **T5** **S** Android `ManageContactState` twins `GemContactInput` (name, description, avatar, addresses) — with **S43**, the session holds the input.
 - **T6** **M** `android/features/asset_select/viewmodels/models/AssetSelectFlowUIModel.kt` translates `GemAssetRow` into two app enums the screen switches on (`AssetRowSubtitleStyle`, `AssetRowTrailingStyle`) — a twin of a Core enum; the row's subtitle and trailing become finished values (text, image) and the switch goes.
 - **T7** **S** `android/features/referral/viewmodels/models/ReferralUIModel.kt` restates twelve same-named fields of `GemRewardsState` — expose only what the scene reads (`canInvite`, `disableReason` text, the countdown) and keep the record private.
