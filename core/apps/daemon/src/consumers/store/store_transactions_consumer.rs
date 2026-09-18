@@ -150,14 +150,14 @@ impl MessageConsumer<TransactionsPayload, usize> for StoreTransactionsConsumer {
             .map(|subscription| subscription.wallet_row_id)
             .collect::<HashSet<_>>()
             .into_iter()
-            .filter_map(|wallet_id| {
+            .flat_map(|wallet_id| {
                 let wallet_transactions = subscribed_transactions
                     .iter()
                     .filter(|(subscription, _)| subscription.wallet_row_id == wallet_id)
                     .filter(|(_, transaction)| publishable_transactions.iter().any(|candidate| candidate.id == transaction.id))
                     .map(|(_, transaction)| (transaction.id.clone(), *transaction))
                     .collect::<HashMap<_, _>>();
-                (!wallet_transactions.is_empty()).then(|| WalletStreamPayload {
+                let transactions = (!wallet_transactions.is_empty()).then(|| WalletStreamPayload {
                     wallet_id,
                     event: WalletStreamEvent::Transactions {
                         transaction_ids: wallet_transactions.keys().cloned().collect(),
@@ -168,7 +168,15 @@ impl MessageConsumer<TransactionsPayload, usize> for StoreTransactionsConsumer {
                             .into_iter()
                             .collect(),
                     },
-                })
+                });
+                let nfts = wallet_transactions
+                    .values()
+                    .any(|transaction| transaction.transaction_type == TransactionType::TransferNFT)
+                    .then_some(WalletStreamPayload {
+                        wallet_id,
+                        event: WalletStreamEvent::Nft,
+                    });
+                transactions.into_iter().chain(nfts)
             })
             .collect();
 
