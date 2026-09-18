@@ -6,7 +6,6 @@ import typealias Gemstone.Asset
 import typealias Gemstone.AssetId
 import typealias Gemstone.Chain
 import typealias Gemstone.Currency
-import enum Gemstone.GemSlippageCheck
 import struct Gemstone.GemNumberFormat
 import struct Gemstone.GemSwapPairSelection
 import enum Gemstone.GemSwapSide
@@ -32,7 +31,6 @@ public final class GemSwapQuoteServiceMock: GemSwapQuoteServiceProtocol, @unchec
     private let quotesDelay: Duration?
     private let quotesError: Error?
     private let pairSuggestion: GemSwapPairSuggestion?
-    private let slippageCheckResult: GemSlippageCheck
     public private(set) var storedSlippageBps: UInt32?
     public private(set) var priceSubscriptions: [[AssetId]] = []
 
@@ -43,7 +41,6 @@ public final class GemSwapQuoteServiceMock: GemSwapQuoteServiceProtocol, @unchec
         quotesError: Error? = nil,
         pairSuggestion: GemSwapPairSuggestion? = nil,
         slippageBps: UInt32? = nil,
-        slippageCheck: GemSlippageCheck = .valid,
     ) {
         self.quotes = quotes
         self.quoteData = quoteData
@@ -51,7 +48,6 @@ public final class GemSwapQuoteServiceMock: GemSwapQuoteServiceProtocol, @unchec
         self.quotesError = quotesError
         self.pairSuggestion = pairSuggestion
         storedSlippageBps = slippageBps
-        slippageCheckResult = slippageCheck
     }
 
     public convenience init(
@@ -61,7 +57,6 @@ public final class GemSwapQuoteServiceMock: GemSwapQuoteServiceProtocol, @unchec
         quotesError: Error? = nil,
         pairSuggestion: GemSwapPairSuggestion? = nil,
         slippageBps: UInt32? = nil,
-        slippageCheck: GemSlippageCheck = .valid,
     ) {
         self.init(
             quotes: { _ in quotes },
@@ -70,7 +65,6 @@ public final class GemSwapQuoteServiceMock: GemSwapQuoteServiceProtocol, @unchec
             quotesError: quotesError,
             pairSuggestion: pairSuggestion,
             slippageBps: slippageBps,
-            slippageCheck: slippageCheck,
         )
     }
 
@@ -88,10 +82,6 @@ public final class GemSwapQuoteServiceMock: GemSwapQuoteServiceProtocol, @unchec
 
     public func setSlippageBps(bps: UInt32?) throws {
         storedSlippageBps = bps
-    }
-
-    public func slippageCheck(bps _: UInt32) -> GemSlippageCheck {
-        slippageCheckResult
     }
 
     public func newSlippageSession(selection: GemSlippageSelection) -> GemSlippageSession {

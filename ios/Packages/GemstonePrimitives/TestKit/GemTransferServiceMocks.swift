@@ -226,10 +226,6 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         delegations.filter { BigInt($0.base.balance) > 0 }
     }
 
-    public func lockTimeSeconds(chain _: Gemstone.Chain) -> UInt64 {
-        lockTime
-    }
-
     public func lockTimeParts(chain _: Gemstone.Chain) -> [GemDurationPart] {
         lockTime > 0 ? [GemDurationPart(value: Int64(lockTime / 86_400), unit: .day)] : []
     }

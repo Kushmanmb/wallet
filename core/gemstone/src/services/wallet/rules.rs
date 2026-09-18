@@ -326,8 +326,6 @@ mod tests {
         assert_eq!(shuffled[4..].iter().collect::<std::collections::HashSet<_>>(), words[4..].iter().collect());
     }
 
-    use super::*;
-
     #[test]
     fn test_import_kinds_offer_a_private_key_only_where_the_chain_supports_it() {
         assert_eq!(import_kinds(None), vec![GemWalletImportKind::Phrase]);

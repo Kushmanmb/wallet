@@ -133,10 +133,6 @@ impl GemStakeService {
         rules::positions(delegations)
     }
 
-    pub fn lock_time_seconds(&self, chain: Chain) -> u64 {
-        rules::lock_time_seconds(chain)
-    }
-
     pub fn lock_time_parts(&self, chain: Chain) -> Vec<GemDurationPart> {
         rules::lock_time_parts(chain)
     }

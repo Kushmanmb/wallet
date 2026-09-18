@@ -9,9 +9,8 @@ use super::slippage::{GemSlippageSelection, GemSlippageSession};
 use super::model::{GemSwapPairSelection, GemSwapSide};
 use super::rules;
 use super::{GemSwapPairSuggestion, GemSwapService, GemSwapSession, GemSwapTransfer};
-use crate::config::swap_config::{get_default_slippage, get_swap_config};
+use crate::config::swap_config::get_default_slippage;
 use crate::models::custom_types::{GemBigInt, GemBigUint};
-use crate::models::swap::GemSlippageCheck;
 use crate::services::balance::GemBalanceService;
 use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
@@ -84,10 +83,6 @@ impl GemSwapQuoteService {
 
     pub fn slippage_percent_text(&self, bps: u32, format: GemNumberFormat) -> String {
         rules::slippage_percent_text(bps, &format.decimal_separator)
-    }
-
-    pub fn slippage_check(&self, bps: u32) -> GemSlippageCheck {
-        rules::slippage_check(bps, &get_swap_config())
     }
 
     pub fn default_slippage(&self, chain: Chain) -> SwapperSlippage {

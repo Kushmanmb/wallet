@@ -10,7 +10,7 @@ use crate::config::chain::supports_nft_transfer;
 
 const TOKEN_ID_ADDRESS_LENGTH: usize = 16;
 
-pub fn unverified_collections(data: Vec<NFTData>) -> Vec<NFTData> {
+fn unverified_collections(data: Vec<NFTData>) -> Vec<NFTData> {
     collections(data, false)
 }
 

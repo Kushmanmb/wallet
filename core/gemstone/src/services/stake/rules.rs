@@ -240,7 +240,7 @@ pub fn positions(delegations: Vec<Delegation>) -> Vec<Delegation> {
     delegations.into_iter().filter(|delegation| delegation.base.balance > BigUint::ZERO).collect()
 }
 
-pub fn lock_time_seconds(chain: Chain) -> u64 {
+fn lock_time_seconds(chain: Chain) -> u64 {
     stake_config(chain).map(|config| config.time_lock).unwrap_or_default()
 }
 
@@ -320,11 +320,6 @@ pub fn claim_rewards(chain: Chain, delegations: Vec<Delegation>) -> GemClaimRewa
 
 #[uniffi::export]
 impl GemAssetBalance {
-    pub fn staked_value(&self, chain: Chain) -> GemBigUint {
-        let principal = if uses_freeze(chain) { &self.frozen + &self.locked } else { self.staked.clone() };
-        principal + &self.pending + &self.rewards
-    }
-
     pub fn detail_rows(&self, chain: Chain, is_stake_enabled: bool) -> Vec<GemBalanceRow> {
         let positive = |value: &GemBigUint| (*value > GemBigUint::ZERO).then(|| value.clone());
         let rows: Vec<GemBalanceRow> = [
@@ -361,6 +356,11 @@ impl GemAssetBalance {
 }
 
 impl GemAssetBalance {
+    pub fn staked_value(&self, chain: Chain) -> GemBigUint {
+        let principal = if uses_freeze(chain) { &self.frozen + &self.locked } else { self.staked.clone() };
+        principal + &self.pending + &self.rewards
+    }
+
     fn shows_stake_balance(&self, chain: Chain, is_stake_enabled: bool) -> bool {
         StakeChain::from_chain(chain).is_some() && (is_stake_enabled || self.staked_value(chain) > GemBigUint::ZERO)
     }
