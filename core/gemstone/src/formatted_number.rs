@@ -44,6 +44,12 @@ pub enum GemNumberDisplay {
     BelowThreshold { threshold: f64, places: u32 },
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemNumberRounding {
+    ToNearest,
+    TowardZero,
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemFormattedNumber {
     pub value: f64,
@@ -51,6 +57,7 @@ pub struct GemFormattedNumber {
     pub display: GemNumberDisplay,
     pub notation: GemNumberNotation,
     pub tone: GemValueTone,
+    pub rounding: GemNumberRounding,
 }
 
 impl GemFormattedNumber {
@@ -63,6 +70,7 @@ impl GemFormattedNumber {
             value,
             notation: GemNumberNotation::Plain,
             tone: GemValueTone::Plain,
+            rounding: GemNumberRounding::ToNearest,
             unit: GemNumberUnit::Currency { code },
             display: match style.abbreviates(value) {
                 true => GemNumberDisplay::Abbreviated,
@@ -115,6 +123,7 @@ impl GemFormattedNumber {
             value,
             notation: GemNumberNotation::Plain,
             tone: GemValueTone::Plain,
+            rounding: GemNumberRounding::ToNearest,
             unit: unit(symbol),
             display: GemNumberDisplay::Number {
                 precision: crate::precision::adaptive_precision(value),
@@ -128,6 +137,7 @@ impl GemFormattedNumber {
             value,
             notation: GemNumberNotation::Plain,
             tone: GemValueTone::Plain,
+            rounding: GemNumberRounding::ToNearest,
             unit: GemNumberUnit::Percent,
             display: GemNumberDisplay::Number { precision: format.precision },
         };
@@ -142,6 +152,7 @@ impl GemFormattedNumber {
             value,
             notation: GemNumberNotation::Plain,
             tone: GemValueTone::Plain,
+            rounding: GemNumberRounding::TowardZero,
             unit: unit(symbol),
             display: value_display(value, style),
         }
@@ -152,6 +163,7 @@ impl GemFormattedNumber {
             value,
             notation: GemNumberNotation::Plain,
             tone: GemValueTone::Plain,
+            rounding: GemNumberRounding::ToNearest,
             unit: GemNumberUnit::Multiplier,
             display: GemNumberDisplay::Number {
                 precision: number_formatter::Precision::TWO_PLACES.into(),
@@ -210,6 +222,13 @@ fn value_display(value: f64, style: GemValueStyle) -> GemNumberDisplay {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_an_amount_never_rounds_above_what_is_held() {
+        assert_eq!(GemFormattedNumber::amount(5.205516, Some("ATOM".to_string()), GemValueStyle::Auto).rounding, GemNumberRounding::TowardZero);
+        assert_eq!(GemFormattedNumber::usd(5.205516).rounding, GemNumberRounding::ToNearest);
+        assert_eq!(GemFormattedNumber::percentage(5.205516, GemPercentageStyle::Unsigned).rounding, GemNumberRounding::ToNearest);
+    }
 
     #[test]
     fn test_a_currency_number_carries_its_code_and_its_precision() {

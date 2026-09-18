@@ -60,8 +60,8 @@ private extension CoinPrice {
                 assetId: AssetId(chain: chain, tokenId: nil).identifier,
                 name: name,
                 symbol: symbol,
-                price: GemFormattedNumber(value: price, unit: .currency(code: "USD"), display: .number(precision: .fraction(min: 2, max: 2)), notation: .plain, tone: .plain),
-                change: GemFormattedNumber(value: change, unit: .percent, display: .number(precision: .fraction(min: 2, max: 2)), notation: .signed, tone: change < 0 ? .negative : .positive),
+                price: GemFormattedNumber(value: price, unit: .currency(code: "USD"), display: .number(precision: .fraction(min: 2, max: 2)), notation: .plain, tone: .plain, rounding: .toNearest),
+                change: GemFormattedNumber(value: change, unit: .percent, display: .number(precision: .fraction(min: 2, max: 2)), notation: .signed, tone: change < 0 ? .negative : .positive, rounding: .toNearest),
             ),
             image: Images.name(chain.rawValue),
         )

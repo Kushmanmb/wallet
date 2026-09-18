@@ -5,6 +5,7 @@ import Formatters
 import struct Gemstone.GemFormattedNumber
 import enum Gemstone.GemNumberDisplay
 import enum Gemstone.GemNumberNotation
+import enum Gemstone.GemNumberRounding
 import enum Gemstone.GemNumberUnit
 import enum Gemstone.GemPrecision
 
@@ -59,6 +60,13 @@ private extension GemFormattedNumber {
         }
     }
 
+    var roundingRule: FloatingPointRoundingRule {
+        switch rounding {
+        case .toNearest: .toNearestOrEven
+        case .towardZero: .towardZero
+        }
+    }
+
     var numberSign: NumberFormatStyleConfiguration.SignDisplayStrategy {
         showsSign ? .always(includingZero: true) : .automatic
     }
@@ -73,13 +81,14 @@ private extension GemFormattedNumber {
                 .percent.locale(locale)
                     .precision(precision.formatStyle)
                     .sign(strategy: showsSign ? .always(includingZero: true) : .never)
-                    .scale(1),
+                    .scale(1)
+                    .rounded(rule: roundingRule),
             )
         }
         guard let currencyCode else {
-            return value.formatted(.number.locale(locale).precision(precision.formatStyle).sign(strategy: numberSign))
+            return value.formatted(.number.locale(locale).precision(precision.formatStyle).sign(strategy: numberSign).rounded(rule: roundingRule))
         }
-        return value.formatted(.currency(code: currencyCode).locale(locale).precision(precision.formatStyle).sign(strategy: currencySign))
+        return value.formatted(.currency(code: currencyCode).locale(locale).precision(precision.formatStyle).sign(strategy: currencySign).rounded(rule: roundingRule))
     }
 
     func abbreviatedText(locale: Locale) -> String {

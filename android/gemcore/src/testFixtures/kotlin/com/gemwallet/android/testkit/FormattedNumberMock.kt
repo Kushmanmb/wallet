@@ -3,6 +3,7 @@ package com.gemwallet.android.testkit
 import uniffi.gemstone.GemFormattedNumber
 import uniffi.gemstone.GemNumberDisplay
 import uniffi.gemstone.GemNumberNotation
+import uniffi.gemstone.GemNumberRounding
 import uniffi.gemstone.GemNumberUnit
 import uniffi.gemstone.GemPrecision
 import uniffi.gemstone.GemValueTone
@@ -16,4 +17,5 @@ fun mockFormattedNumber(
     display = GemNumberDisplay.Number(precision = GemPrecision.Fraction(min = 2u, max = 2u)),
     notation = GemNumberNotation.PLAIN,
     tone = GemValueTone.PLAIN,
+    rounding = GemNumberRounding.TO_NEAREST,
 )

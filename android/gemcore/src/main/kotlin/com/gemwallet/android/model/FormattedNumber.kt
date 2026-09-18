@@ -10,6 +10,7 @@ import java.util.Locale
 import uniffi.gemstone.GemFormattedNumber
 import uniffi.gemstone.GemNumberDisplay
 import uniffi.gemstone.GemNumberNotation
+import uniffi.gemstone.GemNumberRounding
 import uniffi.gemstone.GemNumberUnit
 
 fun GemFormattedNumber.text(locale: Locale = Locale.getDefault()): String = when (notation) {
@@ -19,6 +20,12 @@ fun GemFormattedNumber.text(locale: Locale = Locale.getDefault()): String = when
 
 private val GemFormattedNumber.showsSign: Boolean
     get() = notation == GemNumberNotation.SIGNED
+
+private val GemFormattedNumber.numberRounding: RoundingMode
+    get() = when (rounding) {
+        GemNumberRounding.TO_NEAREST -> RoundingMode.HALF_EVEN
+        GemNumberRounding.TOWARD_ZERO -> RoundingMode.DOWN
+    }
 
 private fun GemFormattedNumber.body(locale: Locale): String = when (val display = display) {
     is GemNumberDisplay.Number -> when (unit) {
@@ -60,8 +67,9 @@ private fun GemFormattedNumber.appendSymbol(text: String): String = when (val un
 }
 
 private fun GemFormattedNumber.numberText(value: BigDecimal, precision: GemPrecision, locale: Locale): String {
+    val rounding = numberRounding
     val formatter = (numberFormat(locale) as DecimalFormat).apply {
-        roundingMode = RoundingMode.HALF_EVEN
+        roundingMode = rounding
         if (showsSign) {
             positivePrefix = "+" + positivePrefix
         }
@@ -74,7 +82,10 @@ private fun GemFormattedNumber.abbreviatedText(value: BigDecimal, locale: Locale
         setSignificantDigitsUsed(false)
         minimumFractionDigits = 0
         maximumFractionDigits = 2
-        roundingMode = android.icu.math.BigDecimal.ROUND_HALF_EVEN
+        roundingMode = when (rounding) {
+            GemNumberRounding.TO_NEAREST -> android.icu.math.BigDecimal.ROUND_HALF_EVEN
+            GemNumberRounding.TOWARD_ZERO -> android.icu.math.BigDecimal.ROUND_DOWN
+        }
         currencyCode?.let { currency = android.icu.util.Currency.getInstance(it) }
     }
     return formatter.format(value)
