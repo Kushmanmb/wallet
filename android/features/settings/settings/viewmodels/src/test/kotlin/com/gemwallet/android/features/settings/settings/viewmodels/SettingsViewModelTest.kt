@@ -34,6 +34,7 @@ import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowIcon
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSection
+import uniffi.gemstone.GemListSectionFooter
 import uniffi.gemstone.GemListSectionTitle
 import uniffi.gemstone.GemSettingsServiceInterface
 
@@ -96,6 +97,7 @@ class SettingsViewModelTest {
 
     private fun section(vararg titles: GemListRowTitle) = GemListSection(
         title = GemListSectionTitle.NONE,
+        footer = GemListSectionFooter.NONE,
         rows = titles.map { GemListRow.Link(title = it, value = null, icon = GemListRowIcon.NONE) },
     )
 

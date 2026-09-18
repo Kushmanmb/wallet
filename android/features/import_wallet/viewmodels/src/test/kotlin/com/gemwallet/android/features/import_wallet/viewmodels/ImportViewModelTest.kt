@@ -10,9 +10,11 @@ import uniffi.gemstone.GemNameServiceInterface
 import com.gemwallet.android.model.ImportType
 import uniffi.gemstone.GemNameRecordState
 import com.wallet.core.primitives.Chain
+import uniffi.gemstone.GemWalletDefaultName
 import uniffi.gemstone.GemWalletImportKind
 import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemWalletImportScreen
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
@@ -34,6 +36,7 @@ class ImportViewModelTest {
 
     private fun viewModel(nameService: GemNameServiceInterface, ioDispatcher: CoroutineDispatcher) = ImportViewModel(
         service = mockk(relaxed = true) {
+            coEvery { defaultWalletName(any()) } returns GemWalletDefaultName(text = GemLocalizedText.WalletDefaultName(index = 1), hasExistingWallets = false)
             every { importScreen(any()) } returns GemWalletImportScreen(
                 title = GemLocalizedText.WalletMulticoin,
                 kinds = listOf(GemWalletImportKind.PHRASE, GemWalletImportKind.PRIVATE_KEY, GemWalletImportKind.ADDRESS),
