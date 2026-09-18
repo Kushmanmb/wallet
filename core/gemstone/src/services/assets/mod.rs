@@ -14,7 +14,7 @@ use std::sync::Arc;
 
 use primitives::{Asset, AssetBasic, AssetFull, AssetId, AssetPrice, Chain, ConfigVersions, FiatAssets, FiatQuoteType, SearchResponse, Wallet, WalletId};
 
-pub use add::{GemAddAssetService, GemAssetInfoKind, GemAssetInfoRow};
+pub use add::GemAddAssetService;
 pub use details::GemAssetDetailsService;
 pub use model::{
     AssetList, GemAssetAction, GemAssetDetails, GemAssetDetailsInput, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetNetworkDestination, GemHeaderButton,

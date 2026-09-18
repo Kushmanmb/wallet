@@ -16,7 +16,6 @@ import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
-import com.gemwallet.android.features.add_asset.viewmodels.localization.stringRes
 import com.gemwallet.android.features.add_asset.viewmodels.models.AddAssetUIState
 import com.gemwallet.android.features.add_asset.viewmodels.models.verificationWarningListItem
 import com.gemwallet.android.ui.R
@@ -43,6 +42,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAddAssetPhase
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemAddAssetServiceInterface
 import uniffi.gemstone.GemAddAssetSession
 import uniffi.gemstone.GemErrorText
@@ -107,16 +107,13 @@ class AddAssetViewModel @Inject constructor(
     val isSearching: StateFlow<Boolean> = searchState.map { it is GemAddAssetPhase.Loading }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val searchFailed: StateFlow<Boolean> = searchState.map { it is GemAddAssetPhase.Failed }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
     val token = session.map { it.asset?.toPrimitives() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val verificationWarningRow: StateFlow<ListItemModel?> = token.map { if (it == null) null else verificationWarningListItem(context) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val assetRows: StateFlow<List<ListItemModel>> = session.map { session -> session.assetRows().map { ListItemModel(title = context.getString(it.kind.stringRes()), subtitle = it.value) } }
+    val assetRows: StateFlow<List<GemListRow>> = session.map { it.rows() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val buttonState = combine(session, uiState) { session, uiState ->

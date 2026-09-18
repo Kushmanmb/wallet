@@ -16,7 +16,6 @@ import enum Gemstone.GemListSectionFooter
 import enum Gemstone.GemListSectionTitle
 import enum Gemstone.PerpetualType
 import enum Gemstone.GemApprovalValue
-import enum Gemstone.GemAssetInfoKind
 import enum Gemstone.GemEmptyStateAction
 import enum Gemstone.GemErrorText
 import enum Gemstone.GemSelectAssetSection
@@ -91,6 +90,8 @@ extension GemLocalizedText {
             Localized.Simulation.warningExternallyOwnedSpenderDescription
         case .suspiciousAddress:
             Localized.Common.suspiciousAddress
+        case .invalidTokenId:
+            Localized.Errors.Token.invalidId
         }
     }
 }
@@ -212,17 +213,6 @@ extension GemHeaderButtonKind {
         case .deposit: Localized.Wallet.deposit
         case .withdraw: Localized.Wallet.withdraw
         case .more: Localized.Wallet.more
-        }
-    }
-}
-
-extension GemAssetInfoKind {
-    public var title: String {
-        switch self {
-        case .name: Localized.Asset.name
-        case .symbol: Localized.Asset.symbol
-        case .decimals: Localized.Asset.decimals
-        case .kind: Localized.Common.type
         }
     }
 }
@@ -674,6 +664,9 @@ public extension GemListRowTitle {
         case .warning: Localized.Common.warning
         case .unlimitedApproval: Localized.Simulation.Warning.UnlimitedTokenApproval.title
         case .nftCollectionApproval: Localized.Simulation.Warning.NftCollectionApproval.title
+        case .symbol: Localized.Asset.symbol
+        case .decimals: Localized.Asset.decimals
+        case .type: Localized.Common.type
         }
     }
 }

@@ -96,11 +96,7 @@ extension AddAssetScene {
                 ListItemLoadingView()
                     .id(UUID())
             case let .data(asset):
-                Section {
-                    ForEach(asset.rows, id: \.kind) { row in
-                        ListItemView(model: asset.listItem(for: row))
-                    }
-                }
+                rowsSection
                 if let url = asset.explorerUrl, let item = asset.explorerListItem {
                     Section {
                         SafariNavigationLink(url: url) {
@@ -113,13 +109,15 @@ extension AddAssetScene {
                         isPresentingUrl = model.tokenVerificationUrl
                     })
                 }
-            case let .error(error):
-                ListItemErrorView(
-                    errorTitle: model.errorTitle,
-                    errorSystemNameImage: model.errorSystemImage,
-                    error: error,
-                )
+            case .error:
+                rowsSection
             }
+        }
+    }
+
+    private var rowsSection: some View {
+        Section {
+            ForEach(model.rows, id: \.self) { GemListRowView(row: $0) }
         }
     }
 }

@@ -156,6 +156,7 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     GemLocalizedText.UnlimitedApprovalWarning -> context.getString(R.string.simulation_warning_unlimited_token_approval_description)
     GemLocalizedText.ExternallyOwnedSpenderWarning -> context.getString(R.string.simulation_warning_externally_owned_spender_description)
     GemLocalizedText.SuspiciousAddress -> context.getString(R.string.common_suspicious_address)
+    GemLocalizedText.InvalidTokenId -> context.getString(R.string.errors_token_invalid_id)
     is GemLocalizedText.FeeRate -> when (unit) {
         FeeUnitType.SAT_VB -> "${rate.text()} ${context.getString(R.string.fee_rate_satvB)}"
         FeeUnitType.GWEI -> "${rate.text()} ${context.getString(R.string.fee_rate_gwei)}"
@@ -509,6 +510,9 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.WARNING -> R.string.common_warning
     GemListRowTitle.UNLIMITED_APPROVAL -> R.string.simulation_warning_unlimited_token_approval_title
     GemListRowTitle.NFT_COLLECTION_APPROVAL -> R.string.simulation_warning_nft_collection_approval_title
+    GemListRowTitle.SYMBOL -> R.string.asset_symbol
+    GemListRowTitle.DECIMALS -> R.string.asset_decimals
+    GemListRowTitle.TYPE -> R.string.common_type
     GemListRowTitle.PRICE -> R.string.asset_price
     GemListRowTitle.PNL -> R.string.perpetual_pnl
     GemListRowTitle.PIN -> R.string.common_pin

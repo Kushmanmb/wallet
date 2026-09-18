@@ -21,4 +21,5 @@ pub enum GemLocalizedText {
     UnlimitedApprovalWarning,
     ExternallyOwnedSpenderWarning,
     SuspiciousAddress,
+    InvalidTokenId,
 }

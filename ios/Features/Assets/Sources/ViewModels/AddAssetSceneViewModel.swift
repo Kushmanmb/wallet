@@ -2,6 +2,7 @@
 
 import protocol Gemstone.GemAddAssetServiceProtocol
 import enum Gemstone.GemAddAssetPhase
+import enum Gemstone.GemListRow
 import struct Gemstone.GemAddAssetSession
 import Components
 import Foundation
@@ -40,9 +41,13 @@ public final class AddAssetSceneViewModel {
         case .loading: return .loading
         case let .found(core):
             let asset = core.toPrimitives()
-            return .data(AddAssetViewModel(rows: session.assetRows(), link: service.tokenUrl(chain: asset.chain, tokenId: asset.tokenId ?? "")))
+            return .data(AddAssetViewModel(link: service.tokenUrl(chain: asset.chain, tokenId: asset.tokenId ?? "")))
         case .failed: return .error(AnyError(Localized.Errors.errorOccurred))
         }
+    }
+
+    var rows: [GemListRow] {
+        session.rows()
     }
 
     var title: String {
@@ -55,10 +60,6 @@ public final class AddAssetSceneViewModel {
 
     var networkTitle: String {
         Localized.Transfer.network
-    }
-
-    var errorTitle: String {
-        Localized.Errors.errorOccurred
     }
 
     var actionButtonTitle: String {
@@ -75,10 +76,6 @@ public final class AddAssetSceneViewModel {
 
     var qrImage: Image {
         Images.System.qrCodeViewfinder
-    }
-
-    var errorSystemImage: String {
-        SystemImage.errorOccurred
     }
 
     var addressBinding: Binding<String> {

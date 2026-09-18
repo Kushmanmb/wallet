@@ -3,10 +3,8 @@ package com.gemwallet.android.features.add_asset.views
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
@@ -25,7 +23,7 @@ import com.gemwallet.android.ui.components.list_item.ChainItem
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
-import com.gemwallet.android.ui.components.list_item.WarningItem
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.LinkRowUIModel
 import com.gemwallet.android.ui.components.progress.CircularProgressIndicator16
@@ -34,6 +32,7 @@ import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.open
 import com.wallet.core.primitives.Asset
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.DocsUrl
 
 private val networkItemHeight = 64.dp
@@ -41,11 +40,10 @@ private val networkItemHeight = 64.dp
 @Composable
 internal fun AddAssetScene(
     isSearching: Boolean,
-    searchFailed: Boolean,
     addressState: MutableState<String>,
     network: Asset?,
     token: Asset?,
-    assetRows: List<ListItemModel>,
+    assetRows: List<GemListRow>,
     explorerLink: LinkRowUIModel?,
     verificationWarningRow: ListItemModel?,
     buttonState: ButtonState,
@@ -101,15 +99,9 @@ internal fun AddAssetScene(
                 CircularProgressIndicator16(modifier = Modifier.align(Alignment.Center))
             }
         }
-        if (searchFailed) {
-            WarningItem(
-                title = stringResource(R.string.errors_error_occurred),
-                message = stringResource(R.string.errors_token_invalid_id),
-                color = MaterialTheme.colorScheme.error,
-                position = ListPosition.Single,
-            )
+        assetRows.forEachIndexed { index, row ->
+            GemListRowView(row = row, listPosition = ListPosition.getPosition(index, assetRows.size))
         }
-        AssetInfoTable(token, assetRows)
         if (explorerLink != null && token != null) {
             ListItem(
                 model = explorerLink.model,
@@ -125,15 +117,5 @@ internal fun AddAssetScene(
                 modifier = Modifier.clickable { uriHandler.open(context, AppUrl.tokenVerification) },
             )
         }
-    }
-}
-
-@Composable
-private fun ColumnScope.AssetInfoTable(asset: Asset?, rows: List<ListItemModel>) {
-    if (asset == null) {
-        return
-    }
-    rows.forEachIndexed { index, row ->
-        ListItem(model = row, listPosition = ListPosition.getPosition(index, rows.size))
     }
 }

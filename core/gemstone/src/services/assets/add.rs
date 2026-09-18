@@ -4,10 +4,12 @@ use primitives::{Asset, AssetId, Chain, Wallet};
 
 use super::rules;
 use crate::address::checksum_address;
+use crate::models::list::{GemListRow, GemListRowTitle, GemNoticeKind};
 use crate::services::assets::GemAssetsService;
 use crate::services::balance::GemBalanceService;
 use crate::services::error::GemServiceError;
 use crate::services::explorer::GemExplorerService;
+use crate::services::localization::GemLocalizedText;
 use primitives::BlockExplorerLink;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
@@ -16,20 +18,6 @@ pub enum GemAddAssetPhase {
     Loading,
     Found { asset: Asset },
     Failed,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemAssetInfoKind {
-    Name,
-    Symbol,
-    Decimals,
-    Kind,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
-pub struct GemAssetInfoRow {
-    pub kind: GemAssetInfoKind,
-    pub value: String,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -108,17 +96,22 @@ impl GemAddAssetSession {
         self.chain.is_some() && !self.address.is_empty()
     }
 
-    pub fn asset_rows(&self) -> Vec<GemAssetInfoRow> {
-        let Some(asset) = &self.asset else {
-            return Vec::new();
-        };
-        let row = |kind: GemAssetInfoKind, value: String| GemAssetInfoRow { kind, value };
-        vec![
-            row(GemAssetInfoKind::Name, asset.name.clone()),
-            row(GemAssetInfoKind::Symbol, asset.symbol.clone()),
-            row(GemAssetInfoKind::Decimals, asset.decimals.to_string()),
-            row(GemAssetInfoKind::Kind, asset.asset_type.as_ref().to_string()),
-        ]
+    pub fn rows(&self) -> Vec<GemListRow> {
+        let row = |title: GemListRowTitle, value: String| GemListRow::Text { title, value };
+        match &self.asset {
+            Some(asset) => vec![
+                row(GemListRowTitle::Name, asset.name.clone()),
+                row(GemListRowTitle::Symbol, asset.symbol.clone()),
+                row(GemListRowTitle::Decimals, asset.decimals.to_string()),
+                row(GemListRowTitle::Type, asset.asset_type.as_ref().to_string()),
+            ],
+            None if self.failed => vec![GemListRow::Notice {
+                title: GemListRowTitle::Error,
+                message: Some(GemLocalizedText::InvalidTokenId),
+                kind: GemNoticeKind::Error,
+            }],
+            None => Vec::new(),
+        }
     }
 
     pub fn view_state(&self) -> GemAddAssetViewState {
@@ -228,16 +221,34 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_asset_rows_describe_a_found_asset_and_nothing_before_it() {
+    fn test_rows_describe_a_found_asset_and_nothing_before_it() {
         let session = GemAddAssetSession::new(Some(Chain::Ethereum));
-        assert!(session.asset_rows().is_empty(), "there is nothing to describe until a token is found");
+        assert!(session.rows().is_empty(), "there is nothing to describe until a token is found");
 
-        let rows = session.on_found(Asset::from_chain(Chain::Ethereum)).asset_rows();
+        let text = |title: GemListRowTitle, value: &str| GemListRow::Text { title, value: value.to_string() };
         assert_eq!(
-            rows.iter().map(|row| row.kind).collect::<Vec<_>>(),
-            vec![GemAssetInfoKind::Name, GemAssetInfoKind::Symbol, GemAssetInfoKind::Decimals, GemAssetInfoKind::Kind]
+            session.on_found(Asset::from_chain(Chain::Ethereum)).rows(),
+            vec![
+                text(GemListRowTitle::Name, "Ethereum"),
+                text(GemListRowTitle::Symbol, "ETH"),
+                text(GemListRowTitle::Decimals, "18"),
+                text(GemListRowTitle::Type, "NATIVE"),
+            ]
         );
-        assert_eq!(rows[0].value, "Ethereum");
-        assert_eq!(rows[2].value, "18");
+    }
+
+    #[test]
+    fn test_a_failed_lookup_reads_as_an_invalid_token_id() {
+        let failed = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_failed();
+
+        assert_eq!(
+            failed.rows(),
+            vec![GemListRow::Notice {
+                title: GemListRowTitle::Error,
+                message: Some(GemLocalizedText::InvalidTokenId),
+                kind: GemNoticeKind::Error,
+            }]
+        );
+        assert!(failed.on_address("0xdef".to_string()).rows().is_empty(), "retyping clears the failure");
     }
 }

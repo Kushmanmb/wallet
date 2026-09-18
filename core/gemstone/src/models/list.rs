@@ -83,6 +83,9 @@ pub enum GemListRowTitle {
     Warning,
     UnlimitedApproval,
     NftCollectionApproval,
+    Symbol,
+    Decimals,
+    Type,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
