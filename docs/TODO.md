@@ -45,7 +45,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **R5** **M** Delegation detail rows — iOS `DelegationSceneViewModel.listItem(for:)` (6 arms, five value sources), Android `DelegationProperties.kt` (5 arms) — `GemDelegationRow` becomes a record with value and style.
 - **R6** **M** Stake sections, rows and actions — iOS `StakeSceneViewModel` switches over `GemStakeSection` (3), `GemStakeInfoRow` (3) and `GemStakeAction` (4); Android `StakeRowUIModel` and `StakeSectionUIModel` do the same — records with finished values.
 - **R7** **M** Perpetual position detail rows — `GemPerpetualPositionDetailRow` (7 bare arms) is switched in iOS `PerpetualPositionViewModel.detailField` and Android `PerpetualDetailsUIModel` — a record with finished values.
-- **R8** **M** Perpetual info rows — `GemPerpetualInfoRow` (3 bare arms) is switched in iOS `PerpetualViewModel.infoField` and Android `PerpetualDetailsUIModel` — a record with finished values.
 - **R17** **S** iOS `AddressListItemViewModel` (and Android's address row text in `ui/localization/GemstoneText.kt`) compose `"name (short address)"` from `SimpleAccount` — the address row record the other screens use carries it. The asset half landed (`AssetViewModel` reads `GemAssetText`).
 - **R18** **S** iOS `MarketValueViewModel` builds market rows from five strings; Android `AssetMarketUIModelFactory` switches `GemChartSection` (4 arms) — `GemAssetMarketRow` records.
 
