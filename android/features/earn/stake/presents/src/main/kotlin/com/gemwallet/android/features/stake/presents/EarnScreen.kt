@@ -25,6 +25,7 @@ import com.gemwallet.android.ui.components.empty.EmptyContentView
 import com.gemwallet.android.ui.components.list_head.CenteredListHead
 import com.gemwallet.android.ui.components.list_head.HeaderIcon
 import com.gemwallet.android.ui.components.list_item.DelegationItem
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
@@ -46,7 +47,7 @@ fun EarnScreen(
     val assetInfo by viewModel.assetInfo.collectAsStateWithLifecycle()
     val positions by viewModel.positions.collectAsStateWithLifecycle()
     val validatorRows by viewModel.validatorRows.collectAsStateWithLifecycle()
-    val aprListItem by viewModel.aprListItem.collectAsStateWithLifecycle()
+    val aprRow by viewModel.aprRow.collectAsStateWithLifecycle()
     val depositParams by viewModel.depositParams.collectAsStateWithLifecycle()
     val inSync by viewModel.isSync.collectAsStateWithLifecycle()
 
@@ -73,7 +74,7 @@ fun EarnScreen(
                     )
                 }
 
-                item { ListItem(model = aprListItem, listPosition = ListPosition.Single) }
+                item { GemListRowView(row = aprRow, listPosition = ListPosition.Single) }
 
                 depositParams?.let { params ->
                     item {

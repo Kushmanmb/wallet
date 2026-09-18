@@ -10,7 +10,6 @@ import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.stake.cases.GetDelegations
 import com.gemwallet.android.application.stake.cases.GetValidators
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import com.gemwallet.android.domains.percentage.formatAsPercentage
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toGem
@@ -18,7 +17,6 @@ import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.StakeProviderType
 import com.wallet.core.primitives.WalletType
@@ -40,7 +38,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import uniffi.gemstone.GemPercentageStyle
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemStakeServiceInterface
 import uniffi.gemstone.GemValidatorRow
 import com.gemwallet.android.ext.toPrimitives
@@ -83,14 +82,9 @@ class EarnViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap<String, GemValidatorRow>())
 
-    val apr = combine(providers, assetInfo) { items, current ->
-        stakeService.earnApr(items.map { it.toGem() }, current?.metadata?.earnApr)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
-
-    val aprListItem: StateFlow<ListItemModel> = apr.map {
-        ListItemModel(title = context.getString(R.string.stake_apr, ""), subtitle = it.formatAsPercentage(style = GemPercentageStyle.UNSIGNED), subtitleStyle = ListItemTextStyle.Positive)
-    }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, ListItemModel(title = context.getString(R.string.stake_apr, "")))
+    val aprRow: StateFlow<GemListRow> = combine(providers, assetInfo) { items, current ->
+        stakeService.earnAprRow(items.map { it.toGem() }, current?.metadata?.earnApr)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, GemListRow.Text(GemListRowTitle.STAKE_APR, ""))
 
     val depositListItem = ListItemModel(title = context.getString(R.string.wallet_deposit))
 

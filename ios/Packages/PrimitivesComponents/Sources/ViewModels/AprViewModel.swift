@@ -12,10 +12,6 @@ public struct AprViewModel: Sendable {
         self.apr = apr
     }
 
-    public var title: TextValue {
-        TextValue(text: Localized.Stake.apr(""), style: .body)
-    }
-
     public var subtitle: TextValue {
         let text = apr > .zero ? PercentFormatter.unsigned.string(apr) : .empty
         return TextValue(text: text, style: TextStyle(font: .callout, color: Colors.green))

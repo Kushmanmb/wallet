@@ -27,7 +27,7 @@ public struct EarnScene: View {
                     .id(UUID())
             case .data:
                 Section {
-                    ListItemView(model: model.aprListItem)
+                    GemListRowView(row: model.aprRow)
                 }
             case let .error(error):
                 ListItemErrorView(errorTitle: Localized.Errors.errorOccurred, error: error)

@@ -226,8 +226,8 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         delegations.filter { BigInt($0.base.balance) > 0 }
     }
 
-    public func earnApr(providers: [Gemstone.DelegationValidator], assetApr: Double?) -> Double {
-        providers.first.map(\.apr).flatMap { $0 > 0 ? $0 : nil } ?? assetApr ?? 0
+    public func earnAprRow(providers _: [Gemstone.DelegationValidator], assetApr _: Double?) -> GemListRow {
+        .text(title: .stakeApr, value: "")
     }
 
     public func stakeSections(chain _: Gemstone.Chain, hasActions: Bool, hasDelegations: Bool) -> [Gemstone.GemStakeSection] {

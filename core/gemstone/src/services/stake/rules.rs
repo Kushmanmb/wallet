@@ -107,8 +107,23 @@ pub fn delegation_actions(wallet_type: WalletType, delegation: &Delegation) -> V
     }
 }
 
-pub fn earn_apr(providers: &[DelegationValidator], asset_apr: Option<f64>) -> f64 {
+fn earn_apr(providers: &[DelegationValidator], asset_apr: Option<f64>) -> f64 {
     providers.first().map(|provider| provider.apr).filter(|apr| *apr > 0.0).or(asset_apr).unwrap_or_default()
+}
+
+pub fn earn_apr_row(providers: &[DelegationValidator], asset_apr: Option<f64>) -> GemListRow {
+    let apr = earn_apr(providers, asset_apr);
+    match apr > 0.0 {
+        true => GemListRow::Amount {
+            title: GemListRowTitle::StakeApr,
+            amount: GemFormattedNumber::percentage(apr, GemPercentageStyle::Unsigned).toned(),
+            info: None,
+        },
+        false => GemListRow::Text {
+            title: GemListRowTitle::StakeApr,
+            value: String::new(),
+        },
+    }
 }
 
 pub fn can_claim_rewards(wallet_type: WalletType, delegation: &Delegation) -> bool {
@@ -1258,6 +1273,25 @@ mod tests {
         );
         assert_eq!(earn_apr(&[], Some(2.5)), 2.5);
         assert_eq!(earn_apr(&[], None), 0.0);
+    }
+
+    #[test]
+    fn test_the_earn_rate_row_is_blank_without_a_rate() {
+        assert_eq!(
+            earn_apr_row(&[], Some(2.5)),
+            GemListRow::Amount {
+                title: GemListRowTitle::StakeApr,
+                amount: GemFormattedNumber::percentage(2.5, GemPercentageStyle::Unsigned).toned(),
+                info: None,
+            }
+        );
+        assert_eq!(
+            earn_apr_row(&[], None),
+            GemListRow::Text {
+                title: GemListRowTitle::StakeApr,
+                value: String::new()
+            }
+        );
     }
 
     #[test]

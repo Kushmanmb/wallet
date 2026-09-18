@@ -3,6 +3,7 @@
 import Components
 import GemstoneServices
 import Foundation
+import enum Gemstone.GemListRow
 import protocol Gemstone.GemStakeServiceProtocol
 import GemstonePrimitives
 import Localization
@@ -66,8 +67,8 @@ public final class EarnSceneViewModel {
         AssetViewModel(asset: asset)
     }
 
-    var aprListItem: ListItemModel {
-        ListItemModel(title: aprModel.title.text, titleStyle: aprModel.title.style, subtitle: aprModel.subtitle.text, subtitleStyle: aprModel.subtitle.style)
+    var aprRow: GemListRow {
+        service.earnAprRow(providers: providers.map { $0.toGem() }, assetApr: assetData.metadata.earnApr)
     }
 
     var noDataListItem: ListItemModel {
@@ -76,10 +77,6 @@ public final class EarnSceneViewModel {
 
     var depositListItem: ListItemModel {
         ListItemModel(title: Localized.Wallet.deposit)
-    }
-
-    var aprModel: AprViewModel {
-        AprViewModel(apr: service.earnApr(providers: providers.map { $0.toGem() }, assetApr: assetData.metadata.earnApr))
     }
 
     var showDeposit: Bool {

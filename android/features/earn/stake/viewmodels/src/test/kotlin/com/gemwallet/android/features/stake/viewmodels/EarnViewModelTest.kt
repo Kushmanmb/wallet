@@ -1,5 +1,7 @@
 package com.gemwallet.android.features.stake.viewmodels
 
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListRowTitle
 import androidx.lifecycle.SavedStateHandle
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.session.cases.GetSession
@@ -44,8 +46,9 @@ class EarnViewModelTest {
     private val funded = mockDelegation(assetId = asset.id, balance = BigInteger("500"), validator = provider)
     private val empty = mockDelegation(assetId = asset.id, balance = BigInteger.ZERO, delegationId = "empty", validator = provider)
 
+    private val aprRow = GemListRow.Text(GemListRowTitle.STAKE_APR, "4.00%")
     private val stakeService = mockk<uniffi.gemstone.GemStakeServiceInterface>(relaxed = true) {
-        every { earnApr(any(), any()) } returns 4.0
+        every { earnAprRow(any(), any()) } returns aprRow
     }
     private val getAssetInfo = mockk<GetAssetInfo> {
         every { this@mockk(asset.id) } returns flowOf(mockAssetInfo(asset = asset))
@@ -90,10 +93,10 @@ class EarnViewModelTest {
     }
 
     @Test
-    fun `the rate is the one core answers for the providers`() = runTest(testDispatcher) {
+    fun `the rate row is the one core answers for the providers`() = runTest(testDispatcher) {
         val model = viewModel()
 
-        assertEquals(4.0, model.apr.first { it > 0.0 }, 0.0)
+        assertEquals(aprRow, model.aprRow.first { it == aprRow })
     }
 
     @Test
