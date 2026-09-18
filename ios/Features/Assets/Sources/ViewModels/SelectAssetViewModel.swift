@@ -230,7 +230,7 @@ extension SelectAssetViewModel {
     public func onSelectRecent(_ asset: Asset) {
         switch flow.rowAction {
         case .navigate:
-            assetSelection = SelectAssetInput(type: selectType, assetData: assetData(for: asset))
+            assetSelection = assetData(for: asset).map { SelectAssetInput(type: selectType, assetData: $0) }
         case .select:
             onSelectAssetAction?(asset)
         case .toggle:
@@ -264,12 +264,12 @@ extension SelectAssetViewModel {
         }
     }
 
-    private func assetData(for asset: Asset) -> AssetData {
+    private func assetData(for asset: Asset) -> AssetData? {
         if let assetData = assets.first(where: { $0.asset.id == asset.id }) {
             return assetData
         }
         guard let account = try? wallet.account(for: asset.chain) else {
-            return .with(asset: asset)
+            return nil
         }
         return .with(asset: asset, account: account)
     }

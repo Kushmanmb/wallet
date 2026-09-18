@@ -178,6 +178,12 @@ extension AmountSceneViewModel {
         isPresentingSheet = .infoAction(.stakingReservedFees(image: assetImage))
     }
 
+    func onSelectBuy() {
+        guard let address = try? wallet.account(for: asset.chain).address else { return }
+        let assetAddress = AssetAddress(asset: asset, address: address)
+        isPresentingSheet = .fiatConnect(assetAddress: assetAddress, wallet: wallet)
+    }
+
     func onSelectLeverage() {
         guard case let .perpetual(perpetual) = provider,
               let selection = perpetual.leverageSelection else { return }
@@ -272,12 +278,6 @@ private extension AmountSceneViewModel {
             transferState = .error(error)
             amountInputModel.update(error: error)
         }
-    }
-
-    func onSelectBuy() {
-        let senderAddress = (try? wallet.account(for: asset.chain).address) ?? ""
-        let assetAddress = AssetAddress(asset: asset, address: senderAddress)
-        isPresentingSheet = .fiatConnect(assetAddress: assetAddress, wallet: wallet)
     }
 
     var secondaryText: String {

@@ -12,11 +12,12 @@ import Transfer
 public extension AmountSceneViewModel {
     static func mock(
         type: AmountType = .transfer(recipient: .mock()),
+        wallet: Wallet = .mock(),
         assetData: AssetData = .mock(balance: .mock()),
     ) -> AmountSceneViewModel {
         let model = AmountSceneViewModel(
             input: AmountInput(type: type, asset: assetData.asset),
-            wallet: .mock(),
+            wallet: wallet,
             service: GemAmountServiceMock(builder: GemAmountService.mock()),
             onTransferAction: { _ in },
         )
