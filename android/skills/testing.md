@@ -4,7 +4,7 @@
 
 - Run tests through Gradle or the Android `justfile`
 - Default commands:
-  - `just test` — unit tests for every module (`testGoogleDebugUnitTest` for `:app` plus `testDebugUnitTest` for library modules); builds the host gemstone library first because gemstone-dependent tests load it through JNA
+  - `just test` — unit tests for every module (`testGoogleDebugUnitTest` for `:app` plus `testDebugUnitTest` for library modules) with `--continue`, so every failing module is reported; builds the host gemstone library first because gemstone-dependent tests load it through JNA
   - `just test-integration` — instrumented tests for every module (requires emulator)
   - `./gradlew :app:testGoogleDebugUnitTest` — app module only
   - `./gradlew :<module>:testDebugUnitTest` — one feature or shared module
@@ -24,6 +24,7 @@
 #### Coroutines
 
 - A view-model test sets Main to its own `TestDispatcher` and hands that same dispatcher to the view model, which takes it by injection (see [code-style.md](code-style.md)). `tearDown` cancels `viewModelScope` before `resetMain()`, so nothing survives into the next test
+- Unit tests run with a 10s `runTest` default timeout, so a test stuck on real time or an unavailable native call fails in seconds instead of a minute. A test that needs longer is waiting on something the test scheduler does not control
 - Drive the queued work with `advanceUntilIdle()`, then assert on `.value`. `coVerify(timeout = …)`, `verify(timeout = …)`, `Thread.sleep`, and poll loops never advance the test scheduler — they only hide a race that a slower CI runner loses later (issue #1271)
 
 ### Instrumented Tests (`src/androidTest/kotlin/`)

@@ -54,14 +54,18 @@ Use `./gradlew assembleGoogleDebug` when the change touches app composition, nav
 ## Test Commands
 
 ```bash
-just test
-just test-integration
-./gradlew test
-./gradlew :app:testGoogleDebugUnitTest
-./gradlew assembleGoogleDebugAndroidTest
-./gradlew connectedGoogleDebugAndroidTest
-./gradlew check
+./gradlew :features:asset:viewmodels:testDebugUnitTest # one library module while iterating
+./gradlew :app:testGoogleDebugUnitTest                 # the app module
+just test                                              # every module, before a commit
+./gradlew assembleGoogleDebugAndroidTest               # compile instrumented tests
+just test-integration                                  # instrumented tests on a running emulator
 ```
+
+`just test` builds the host `gemstone` library, then runs every module's unit tests with `--continue`, so one run reports every failing module. A module-scoped Gradle task does not build that library; after a Core change, run `cd ../core && cargo build --package gemstone` before it.
+
+## Core Changes
+
+The Gradle build regenerates the Kotlin bindings and the native libraries on its own whenever Core sources change, so there is no separate generation step for app builds. A local debug build compiles Core for `arm64-v8a` only, which covers the Apple Silicon emulator and current devices; release builds compile `arm64-v8a` and `armeabi-v7a`. Set `GEMSTONE_ANDROID_ABIS` (for example `GEMSTONE_ANDROID_ABIS=arm64-v8a,armeabi-v7a`) to install a debug build on a 32-bit device.
 
 ## Command Rules
 

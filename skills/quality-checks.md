@@ -55,6 +55,8 @@ If any step modifies source files or forces a compile fix, return to the narrow 
 
 If you change shared models or bindings, also run the generation steps and validate both mobile apps.
 
+App checks see a Core change only through what each app links. Run `just generate-stone` before iOS builds and tests; it rebuilds the iOS library and bindings and costs a few seconds when nothing changed. Android app builds regenerate bindings and native libraries on their own, and Android unit tests load the host library that `just android test` builds first.
+
 If a user-facing shared flow changes on only one platform, call out the parity gap explicitly before finishing.
 
 For detailed platform-specific commands, flags, and workflows see:

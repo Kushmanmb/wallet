@@ -78,7 +78,7 @@ build-test:
     @./gradlew assembleGoogleDebugAndroidTest
 
 test: build-gemstone-host
-    @./gradlew testGoogleDebugUnitTest testDebugUnitTest
+    @./gradlew --continue testGoogleDebugUnitTest testDebugUnitTest
 
 build-gemstone-host:
     @cd ../core && cargo build --package gemstone

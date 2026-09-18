@@ -10,11 +10,12 @@ val rustSrcDir = gemstoneRoot.resolve("src")
 val cratesDir = rootProject.projectDir.resolve("../core/crates")
 val jniLibsDir = gemstoneSrc.resolve("main/jniLibs")
 val generatedKotlinDir = gemstoneSrc.resolve("main/java")
-val cargoBuildFlag = if (System.getenv("BUILD_MODE") == "release") "--release" else null
-val defaultCargoNdkAbis = if (System.getenv("UNIT_TESTS") == "true") {
-    "x86_64"
-} else {
-    "arm64-v8a,armeabi-v7a"
+val isRelease = System.getenv("BUILD_MODE") == "release"
+val cargoBuildFlag = if (isRelease) "--release" else null
+val defaultCargoNdkAbis = when {
+    System.getenv("UNIT_TESTS") == "true" -> "x86_64"
+    isRelease -> "arm64-v8a,armeabi-v7a"
+    else -> "arm64-v8a"
 }
 val cargoNdkTargets = (System.getenv("GEMSTONE_ANDROID_ABIS") ?: defaultCargoNdkAbis)
     .split(",")
@@ -78,6 +79,7 @@ val buildCargoNdk = tasks.register<Exec>("buildCargoNdk") {
     inputs.dir(cratesDir)
     inputs.file(gemstoneRoot.resolve("Cargo.toml"))
     inputs.property("cargoBuildFlag", cargoBuildFlag.orEmpty())
+    inputs.property("cargoNdkTargets", cargoNdkTargets)
     outputs.dir(jniLibsDir)
     commandLine("/bin/sh", "-l", "-c", "cargo ndk $cargoNdkTargets -o ${jniLibsDir.absolutePath} build --lib ${cargoBuildFlag.orEmpty()}")
 }

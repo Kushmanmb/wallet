@@ -71,6 +71,8 @@ Note: Mobile builds require UniFFI bindings generation and platform-specific com
 
 > **IMPORTANT**: Regenerate platform bindings when a change affects the mobile API or generated models. Internal implementation changes in `gemstone/`, `swapper/`, `signer/`, or other Core crates do not require regeneration when the exposed interfaces and generated outputs are unchanged.
 
+For the apps, `just generate-stone` from the repo root builds the iOS library and bindings, and the Android Gradle build regenerates its own. The recipes below serve the standalone Gemstone example projects.
+
 ### Swift Bindings (iOS)
 ```sh
 just gemstone bindgen-swift     # Generate Swift bindings only (run in gemstone/)

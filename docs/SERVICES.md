@@ -360,7 +360,7 @@ Open work lives in [TODO.md](TODO.md): the architecture migration to row records
 
 - Core, from `core/`: `just lint` and `cargo test -p gemstone --lib --all-features`. CI also compiles the workspace with `--features unit_tests` and `chain_integration_tests`.
 - Android, from `android/`: `just test`, `./gradlew assembleGoogleDebug`, and `./gradlew assembleGoogleDebugAndroidTest`. DI failures surface at assembly, not compile, and `androidTest` sources are not compiled by the unit-test task.
-- iOS, from `ios/`: `just build && just test`, after `just generate-stone` when a Core FFI signature changed. A raw `xcodebuild` invocation must pass `GEMSTONE_LINKER_FLAGS` or every test bundle fails to link.
+- iOS, from `ios/`: `just generate-stone && just test`. Use the `just` recipes rather than a raw `xcodebuild`; they carry the Gemstone linker flags every test bundle needs and the build settings every recipe shares.
 
 ## Conventions
 
