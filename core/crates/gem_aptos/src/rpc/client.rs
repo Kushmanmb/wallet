@@ -11,14 +11,14 @@ use serde::de::DeserializeOwned;
 
 use crate::models::{
     Account, Block, DelegationPoolStake, GasFee, Ledger, Resource, SimulateTransactionQuery, StakingConfig, Transaction, TransactionPayload, TransactionResponse,
-    TransactionSignature, TransactionSimulation, ValidatorSet, ViewRequest,
+    SponsoredSimulationSignature, TransactionSimulation, ValidatorSet, ViewRequest,
 };
 use crate::provider::payload_builder::{
     build_stake_transaction_payload, build_swap_transaction_payload, build_token_transfer_transaction_payload, build_transfer_transaction_payload,
     build_unstake_transaction_payload, build_withdraw_transaction_payload,
 };
 use crate::rpc::target::AptosTarget;
-use crate::{DEFAULT_MAX_GAS_AMOUNT, DEFAULT_SWAP_MAX_GAS_AMOUNT};
+use crate::{DEFAULT_MAX_GAS_AMOUNT, DEFAULT_SWAP_MAX_GAS_AMOUNT, SIMULATION_MAX_GAS_AMOUNT};
 
 #[derive(Debug)]
 pub struct AptosClient<C: Client> {
@@ -140,24 +140,24 @@ impl<C: Client> AptosClient<C> {
     pub async fn simulate_transaction(&self, sender: &str, sequence: u64, payload: TransactionPayload, gas_price: &str) -> Result<u64, Box<dyn Error + Send + Sync>> {
         let expiration = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs() + 1_000_000;
         let query = SimulateTransactionQuery {
-            estimate_max_gas_amount: true,
+            estimate_max_gas_amount: false,
             estimate_gas_unit_price: false,
             estimate_prioritized_gas_unit_price: false,
         };
         let simulation = TransactionSimulation {
             expiration_timestamp_secs: expiration.to_string(),
             gas_unit_price: gas_price.to_string(),
-            max_gas_amount: DEFAULT_MAX_GAS_AMOUNT.to_string(),
+            max_gas_amount: SIMULATION_MAX_GAS_AMOUNT.to_string(),
             payload,
             sender: sender.to_string(),
             sequence_number: sequence.to_string(),
-            signature: TransactionSignature::no_account(),
+            signature: SponsoredSimulationSignature::unsigned(),
         };
 
         let response: Vec<Transaction> = self.client.post(AptosTarget::SimulateTransaction { query }, &simulation).await?;
         let transaction = response.into_iter().next().ok_or("No simulation result")?;
 
-        transaction.gas_used.ok_or_else(|| "No gas used in simulation".into())
+        simulated_gas(transaction)
     }
 
     pub async fn get_validator_set(&self) -> Result<ValidatorSet, Box<dyn Error + Send + Sync>> {
@@ -217,6 +217,13 @@ mod chain_trait_impls {
     impl<C: Client> ChainAddressStatus for AptosClient<C> {}
 }
 
+fn simulated_gas(transaction: Transaction) -> Result<u64, Box<dyn Error + Send + Sync>> {
+    if !transaction.success {
+        return Err(transaction.vm_status.unwrap_or_else(|| "Aptos simulation failed".to_string()).into());
+    }
+    transaction.gas_used.ok_or_else(|| "No gas used in simulation".into())
+}
+
 #[cfg(test)]
 mod tests {
     use gem_client::testkit::MockClient;
@@ -247,6 +254,33 @@ mod tests {
         let client = AptosClient::new(MockClient::new().with_post(|_, _| Ok(br#"{"message":"Transaction already in mempool","error_code":"mempool"}"#.to_vec())));
         let error = client.submit_transaction(vec![1, 2, 3]).await.unwrap_err();
         assert_eq!(error.to_string(), "Transaction already in mempool");
+    }
+
+    #[tokio::test]
+    async fn test_gas_is_measured_as_a_sponsored_transaction_so_an_unfunded_sender_still_gets_a_fee() {
+        let payload = build_transfer_transaction_payload("0x2", "1");
+        let client = AptosClient::new(MockClient::new().with_post(|path, body| {
+            assert_eq!(
+                path,
+                "/v1/transactions/simulate?estimate_max_gas_amount=false&estimate_gas_unit_price=false&estimate_prioritized_gas_unit_price=false"
+            );
+            let request = serde_json::from_slice::<Value>(body).unwrap();
+            assert_eq!(request["max_gas_amount"], json!(SIMULATION_MAX_GAS_AMOUNT.to_string()));
+            assert_eq!(request["signature"]["type"], json!("fee_payer_signature"));
+            assert_eq!(request["signature"]["fee_payer_address"], json!("0x0"));
+            Ok(br#"[{"success":true,"vm_status":"Executed successfully","gas_used":"5075"}]"#.to_vec())
+        }));
+
+        assert_eq!(client.simulate_transaction("0x1", 0, payload.clone(), "100").await.unwrap(), 5075);
+
+        let client = AptosClient::new(MockClient::new().with_post(|_, _| {
+            Ok(br#"[{"success":false,"vm_status":"MAX_GAS_UNITS_BELOW_MIN_TRANSACTION_GAS_UNITS","gas_used":"0"}]"#.to_vec())
+        }));
+        assert_eq!(
+            client.simulate_transaction("0x1", 0, payload, "100").await.unwrap_err().to_string(),
+            "MAX_GAS_UNITS_BELOW_MIN_TRANSACTION_GAS_UNITS",
+            "a simulation that did not run is an error, not a zero gas limit"
+        );
     }
 
     #[tokio::test]
