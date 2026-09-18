@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use super::model::{GemNodeSelection, GemNodeStatusState};
 use crate::service_status::GemLatencyStatus;
 use crate::services::collections::unique_by;
-use number_formatter::{ValueFormatter, ValueStyle};
+use number_formatter::currency::add_thousands_separator;
 use primitives::Chain;
 use primitives::Latency;
 use primitives::node::{Node, NodeState};
@@ -150,11 +150,7 @@ pub fn text_or_placeholder(value: Option<&str>) -> String {
 }
 
 pub fn block_number_text(value: Option<u64>) -> String {
-    text_or_placeholder(
-        value
-            .map(|value| ValueFormatter::format(ValueStyle::Full, &value.to_string(), 0).unwrap_or_else(|_| value.to_string()))
-            .as_deref(),
-    )
+    text_or_placeholder(value.map(|value| add_thousands_separator(&value.to_string(), ',', '.')).as_deref())
 }
 
 pub fn visible_statuses(nodes: &[GemNodeSelection], statuses: &HashMap<String, GemNodeStatusState>) -> HashMap<String, GemNodeStatusState> {
