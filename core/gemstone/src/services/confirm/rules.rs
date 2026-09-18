@@ -15,6 +15,7 @@ use super::model::{
     GemConfirmSimulationState, GemFeeAsset, GemFeeRateRow, GemFeeRateRows, GemTransferAmountResult, SendInput,
 };
 use crate::config::chain::custom_fee_enabled;
+use crate::fee::fee_rate_text;
 use crate::models::custom_types::GemBigUint;
 use crate::models::gateway::{GemBroadcastOptions, GemFeeRate, GemTransactionPreloadInput};
 use crate::models::transaction::{GemSignedTransaction, GemSignerInput, GemTransactionLoadFee, GemTransactionLoadInput};
@@ -398,6 +399,10 @@ fn fee_rate_rows(chain: Chain, fee_asset: &Asset, rates: &[GemFeeRate], selectio
     let fixed_fee = loaded_fee.options.total();
     let rate_fee = &loaded_fee.fee - &fixed_fee;
     let unit_type = chain.fee_unit_type();
+    let unit_decimals = match unit_type {
+        FeeUnitType::Native => fee_asset.decimals as u32,
+        FeeUnitType::SatVb | FeeUnitType::Gwei => unit_type.decimals(),
+    };
     GemFeeRateRows {
         rows: rates
             .iter()
@@ -412,19 +417,20 @@ fn fee_rate_rows(chain: Chain, fee_asset: &Asset, rates: &[GemFeeRate], selectio
                     priority: rate.priority,
                     fee,
                     unit_value,
-                    display_value,
+                    value: fee_rate_text(unit_type, &display_value, unit_decimals, &fee_asset.symbol),
                 }
             })
             .collect(),
         unit_type,
-        unit_decimals: match unit_type {
-            FeeUnitType::Native => fee_asset.decimals as u32,
-            FeeUnitType::SatVb | FeeUnitType::Gwei => unit_type.decimals(),
-        },
+        unit_decimals,
         shows_options: rates.len() > 1,
         supports_custom_fee: custom_fee_enabled(chain) && rates.len() > 1,
         selected_total,
         normal_total: rate_total(FeePriority::Normal).or_else(|| rates.first().map(unit_value)),
+        custom_rate: match selection {
+            GemConfirmFeeSelection::Custom { gas_price } => Some(fee_rate_text(unit_type, gas_price, unit_decimals, &fee_asset.symbol)),
+            GemConfirmFeeSelection::Priority { .. } => None,
+        },
     }
 }
 
@@ -661,10 +667,14 @@ mod tests {
         let normal = GemConfirmFeeSelection::Priority { priority: FeePriority::Normal };
 
         let gwei = fee_rate_rows(Chain::Ethereum, &Asset::from_chain(Chain::Ethereum), &rates, &normal, &GemTransactionLoadFee::mock(1_000));
-        assert_eq!(gwei.rows[1].display_value, BigInt::from(25), "a gwei row shows the rate the user picks");
+        assert_eq!(gwei.rows[1].value, fee_rate_text(FeeUnitType::Gwei, &BigInt::from(25), 9, "ETH"), "a gwei row shows the rate the user picks");
 
         let native = fee_rate_rows(Chain::Solana, &Asset::from_chain(Chain::Solana), &rates, &normal, &GemTransactionLoadFee::mock(1_000));
-        assert_eq!(native.rows[1].display_value, BigInt::from(2_500), "a native-unit row shows what the transfer costs");
+        assert_eq!(
+            native.rows[1].value,
+            fee_rate_text(FeeUnitType::Native, &BigInt::from(2_500), 9, "SOL"),
+            "a native-unit row shows what the transfer costs"
+        );
 
         let unscaled = fee_rate_rows(
             Chain::Solana,
@@ -673,7 +683,13 @@ mod tests {
             &GemConfirmFeeSelection::Custom { gas_price: BigInt::ZERO },
             &GemTransactionLoadFee::mock(1_000),
         );
-        assert_eq!(unscaled.rows[1].display_value, BigInt::from(25), "with no fee to scale, the rate stands in");
+        assert_eq!(
+            unscaled.rows[1].value,
+            fee_rate_text(FeeUnitType::Native, &BigInt::from(25), 9, "SOL"),
+            "with no fee to scale, the rate stands in"
+        );
+        assert_eq!(unscaled.custom_rate, Some(fee_rate_text(FeeUnitType::Native, &BigInt::ZERO, 9, "SOL")), "a custom selection reads back its rate");
+        assert_eq!(native.custom_rate, None);
     }
 
     #[test]

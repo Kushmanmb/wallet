@@ -36,7 +36,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import com.gemwallet.android.domains.confirm.CustomFee
+import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.domains.confirm.FeeAssetUIModel
 import com.gemwallet.android.domains.confirm.FeeDetailsModel
 import com.gemwallet.android.domains.confirm.FeeRateUIModel
@@ -95,7 +95,6 @@ fun FeeDetails(
         feeDetailsModel(currentFee, feeAsset)
     } ?: return
     val unitSymbol = feeUnitSuffix(model.feeUnitType, feeAsset.asset.symbol)
-    val decimals = model.decimals
 
     val selectedCustomRate = selection.customRate
     val showFeeAssets = feeAssets.any { it.asset.id != currentFee.feeAsset.id }
@@ -146,12 +145,11 @@ fun FeeDetails(
                 feeItems = feeItems,
                 feeListItem = feeListItem,
                 selection = selection,
-                feeRateModels = model.feeRateModels(unitSymbol),
+                feeRateModels = model.feeRateModels(),
                 showsOptions = model.showsOptions,
                 feeAsset = feeAsset,
-                unitSymbol = unitSymbol,
                 supportsCustomFee = model.supportsCustomFee,
-                customRateText = selectedCustomRate?.let { CustomFee.formatRate(it, decimals, unitSymbol) },
+                customRateText = model.customRate?.string(LocalContext.current),
                 customFiat = selectedCustomRate?.let { currentFee.fiatAmount },
                 showFeeAssets = showFeeAssets,
                 onSelectPriority = { onSelectPriority(it); onCancel() },
@@ -184,7 +182,6 @@ private fun FeeRates(
     feeRateModels: List<FeeRateUIModel>,
     showsOptions: Boolean,
     feeAsset: FeeAssetUIModel,
-    unitSymbol: String,
     supportsCustomFee: Boolean,
     customRateText: String?,
     customFiat: String?,
@@ -213,7 +210,7 @@ private fun FeeRates(
                 FeeRow(
                     emoji = feeRate.emoji,
                     title = stringResource(feeRate.priority.stringRes()),
-                    rate = feeRate.price,
+                    rate = feeRate.row.value.string(LocalContext.current),
                     fiat = feeRate.fiatValue,
                     isSelected = selection.selectedPriority == feeRate.priority,
                     position = position,
@@ -318,10 +315,10 @@ private fun ColumnScope.CustomFeeInput(
     }
     Text(
         modifier = Modifier.padding(horizontal = paddingLarge, vertical = paddingHalfSmall),
-        text = when (model.check) {
-            GemCustomFeeCheck.BELOW_MINIMUM -> stringResource(R.string.common_minimum_value, "${model.minRateText} $unitSymbol")
-            GemCustomFeeCheck.OVER_MAXIMUM -> stringResource(R.string.common_maximum_value, "${model.maxRateText} $unitSymbol")
-            GemCustomFeeCheck.VALID -> ""
+        text = when (val check = model.check) {
+            is GemCustomFeeCheck.BelowMinimum -> stringResource(R.string.common_minimum_value, check.rate.string(LocalContext.current))
+            is GemCustomFeeCheck.OverMaximum -> stringResource(R.string.common_maximum_value, check.rate.string(LocalContext.current))
+            GemCustomFeeCheck.Valid -> ""
         },
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.error,

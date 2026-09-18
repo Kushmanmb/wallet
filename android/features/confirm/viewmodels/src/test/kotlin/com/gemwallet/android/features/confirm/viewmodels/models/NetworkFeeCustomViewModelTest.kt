@@ -35,7 +35,7 @@ class NetworkFeeCustomViewModelTest {
 
         viewModel.onInputChange("21")
 
-        assertEquals(GemCustomFeeCheck.OVER_MAXIMUM, viewModel.check)
+        assertTrue(viewModel.check is GemCustomFeeCheck.OverMaximum)
         assertFalse(viewModel.isConfirmEnabled)
     }
 }

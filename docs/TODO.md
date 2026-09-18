@@ -46,7 +46,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 - **T5** **S** Android `ManageContactState` twins `GemContactInput` (name, description, avatar, addresses) — with **S43**, the session holds the input.
 - **Q2** **S** `SwapSceneViewModel:255,386` swallow `suggestPair` and `SwapQuoteInput.create` failures with `try?` — Core returns an optional pair; the input builds from the session.
-- **Q4** **S** `FeeUnitViewModel:44` and `NetworkFeeCustomViewModel:102` parse numbers under `try?` — `GemNumberFormat` answers a value or a check.
 - **O53** **S** iOS `NameRecordViewModel.state: GemNameRecordState` is stored — derive it from the address session.
 - **O54** **S** iOS `AmountStakeViewModel.action: GemStakeAmountInput` and `ImportWalletSceneViewModel.importType: GemWalletImportKind` are stored and switched on in the model — the session holds them (**S41**).
 

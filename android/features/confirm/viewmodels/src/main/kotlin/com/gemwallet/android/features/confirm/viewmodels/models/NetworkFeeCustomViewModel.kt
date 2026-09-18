@@ -7,9 +7,8 @@ import androidx.compose.runtime.setValue
 import com.gemwallet.android.domains.confirm.CustomFee
 import com.gemwallet.android.domains.confirm.FeeDetailsModel
 import com.gemwallet.android.domains.confirm.FeeUIModel
+import com.gemwallet.android.math.numberFormat
 import uniffi.gemstone.GemCustomFeeCheck
-import uniffi.gemstone.GemNumberFormat
-import java.text.DecimalFormatSymbols
 import java.math.BigInteger
 
 class NetworkFeeCustomViewModel(
@@ -18,7 +17,7 @@ class NetworkFeeCustomViewModel(
 ) {
     private val decimals: Int = model.decimals
 
-    var input by mutableStateOf(initialRate?.let { CustomFee.format(it, decimals) } ?: "")
+    var input by mutableStateOf(initialRate?.let { numberFormat().inputText(it.toString(), decimals.toUInt()) } ?: "")
         private set
 
     private val custom by derivedStateOf { model.customFee(input) }
@@ -26,12 +25,10 @@ class NetworkFeeCustomViewModel(
     val placeholder: String get() = custom.placeholder
     val networkFee: FeeUIModel.FeeInfo get() = custom.networkFee
     val check: GemCustomFeeCheck get() = custom.check
-    val maxRateText: String get() = custom.maxRateText
-    val minRateText: String get() = custom.minRateText
     val isConfirmEnabled: Boolean get() = custom.isConfirmEnabled
     val rate: BigInteger? get() = custom.rate
 
     fun onInputChange(value: String) {
-        input = GemNumberFormat(DecimalFormatSymbols.getInstance().decimalSeparator.toString()).sanitize(value, decimals.toUInt(), null)
+        input = numberFormat().sanitize(value, decimals.toUInt(), null)
     }
 }

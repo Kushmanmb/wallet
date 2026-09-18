@@ -1,20 +1,17 @@
 package com.gemwallet.android.domains.confirm
 
 import com.gemwallet.android.domains.asset.chain
-import com.gemwallet.android.math.parseInputValueOrNull
-import com.gemwallet.android.model.ValueFormatter
+import com.gemwallet.android.math.numberFormat
+import com.gemwallet.android.model.text
 import uniffi.gemstone.GemFeeRateRows
 import uniffi.gemstone.GemCustomFee
 import uniffi.gemstone.GemCustomFeeCheck
 import java.math.BigInteger
-import uniffi.gemstone.GemValueStyle
 
 data class CustomFee(
     val rate: BigInteger?,
     val placeholder: String,
     val networkFee: FeeUIModel.FeeInfo,
-    val maxRateText: String,
-    val minRateText: String,
     val check: GemCustomFeeCheck,
     val isConfirmEnabled: Boolean,
 ) {
@@ -23,35 +20,20 @@ data class CustomFee(
             input: String,
             currentFee: FeeUIModel.FeeInfo,
             rows: GemFeeRateRows,
-            decimals: Int,
-        ): CustomFee {
-            val baseTotal = rows.selectedTotal ?: BigInteger.ZERO
-            val normalTotal = rows.normalTotal ?: baseTotal
-            val rate = input.parseInputValueOrNull(decimals)?.takeIf { it > BigInteger.ZERO }
-
-            return GemCustomFee.estimate(
-                chain = currentFee.feeAsset.chain.string,
-                rate = rate,
-                loadedFee = currentFee.amount,
-                baseTotal = baseTotal,
-                normalTotal = normalTotal,
-            ).use { estimate ->
-                CustomFee(
-                    rate = rate,
-                    placeholder = ValueFormatter(style = GemValueStyle.AUTO).string(baseTotal, decimals),
-                    networkFee = FeeUIModel.FeeInfo(estimate.feeValue(), currentFee.feeAsset, currentFee.price, currentFee.currency, currentFee.priority),
-                    maxRateText = format(estimate.maxRate(), decimals),
-                    minRateText = estimate.minimumRate()?.let { format(it, decimals) } ?: "",
-                    check = estimate.check(),
-                    isConfirmEnabled = estimate.isValid(),
-                )
-            }
+        ): CustomFee = GemCustomFee.estimate(
+            chain = currentFee.feeAsset.chain.string,
+            input = input,
+            format = numberFormat(),
+            rows = rows,
+            loadedFee = currentFee.amount,
+        ).use { estimate ->
+            CustomFee(
+                rate = estimate.rate(),
+                placeholder = estimate.placeholder()?.text() ?: "",
+                networkFee = FeeUIModel.FeeInfo(estimate.feeValue(), currentFee.feeAsset, currentFee.price, currentFee.currency, currentFee.priority),
+                check = estimate.check(),
+                isConfirmEnabled = estimate.isValid(),
+            )
         }
-
-        fun format(value: BigInteger, decimals: Int): String =
-            value.toBigDecimal().movePointLeft(decimals).stripTrailingZeros().toPlainString()
-
-        fun formatRate(value: BigInteger, decimals: Int, unitSymbol: String): String =
-            ValueFormatter(style = GemValueStyle.AUTO).string(value, decimals, unitSymbol)
     }
 }

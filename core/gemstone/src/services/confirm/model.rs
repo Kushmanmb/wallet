@@ -1,6 +1,7 @@
 use super::error::GemConfirmError;
 use super::rules::approval_value_from;
 use crate::models::custom_types::{GemBigInt, GemBigUint};
+use crate::services::localization::GemLocalizedText;
 use crate::models::gateway::GemFeeRate;
 use crate::models::transaction::{GemFeeOptionItem, GemTransactionLoadFee, GemTransactionLoadMetadata};
 use crate::services::balance::GemAssetBalance;
@@ -118,7 +119,7 @@ pub struct GemFeeRateRow {
     pub priority: FeePriority,
     pub unit_value: GemBigInt,
     pub fee: Option<GemBigInt>,
-    pub display_value: GemBigInt,
+    pub value: GemLocalizedText,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -130,6 +131,7 @@ pub struct GemFeeRateRows {
     pub supports_custom_fee: bool,
     pub selected_total: Option<GemBigInt>,
     pub normal_total: Option<GemBigInt>,
+    pub custom_rate: Option<GemLocalizedText>,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]

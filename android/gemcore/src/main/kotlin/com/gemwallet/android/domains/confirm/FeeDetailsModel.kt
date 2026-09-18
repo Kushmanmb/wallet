@@ -3,6 +3,7 @@ package com.gemwallet.android.domains.confirm
 import com.gemwallet.android.ext.toPrimitives
 import com.wallet.core.primitives.FeeUnitType
 import uniffi.gemstone.GemFeeRateRows
+import uniffi.gemstone.GemLocalizedText
 
 class FeeDetailsModel(
     private val currentFee: FeeUIModel.FeeInfo,
@@ -13,15 +14,9 @@ class FeeDetailsModel(
     val decimals: Int = rows.unitDecimals.toInt()
     val supportsCustomFee: Boolean = rows.supportsCustomFee
     val showsOptions: Boolean = rows.showsOptions
+    val customRate: GemLocalizedText? = rows.customRate
 
-    fun feeRateModels(unitSymbol: String): List<FeeRateUIModel> = rows.rows.map { row ->
-        FeeRateUIModel(
-            row = row,
-            feeAsset = feeAsset.priceValue,
-            feeRateDecimals = decimals,
-            unitSymbol = unitSymbol,
-        )
-    }
+    fun feeRateModels(): List<FeeRateUIModel> = rows.rows.map { row -> FeeRateUIModel(row = row, feeAsset = feeAsset.priceValue) }
 
-    fun customFee(input: String): CustomFee = CustomFee.from(input, currentFee, rows, decimals)
+    fun customFee(input: String): CustomFee = CustomFee.from(input, currentFee, rows)
 }

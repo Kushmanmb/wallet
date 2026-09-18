@@ -1,6 +1,8 @@
-use primitives::{Chain, DelegationState, Resource, TransactionState};
+use primitives::{Chain, DelegationState, FeeUnitType, Resource, TransactionState};
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+use crate::formatted_number::GemFormattedNumber;
+
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemLocalizedText {
     WalletDefaultName { index: i32 },
     WalletDefaultNameChain { chain: Chain, index: i32 },
@@ -9,4 +11,5 @@ pub enum GemLocalizedText {
     DelegationState { state: DelegationState },
     TransactionState { state: TransactionState },
     Resource { resource: Resource },
+    FeeRate { rate: GemFormattedNumber, unit: FeeUnitType },
 }

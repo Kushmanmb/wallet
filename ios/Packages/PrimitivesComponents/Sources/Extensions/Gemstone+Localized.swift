@@ -71,6 +71,12 @@ extension GemLocalizedText {
             state.toPrimitives().statusTitle
         case let .resource(resource):
             resource.toPrimitives().title
+        case let .feeRate(rate, unit):
+            switch unit {
+            case .satVb: "\(rate.text()) \(Localized.FeeRate.satvB)"
+            case .gwei: "\(rate.text()) \(Localized.FeeRate.gwei)"
+            case .native: rate.text()
+            }
         }
     }
 }

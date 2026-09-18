@@ -44,6 +44,7 @@ import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemHeaderButtonKind
 import com.gemwallet.android.model.text
 import uniffi.gemstone.GemBalanceRowValue
+import uniffi.gemstone.FeeUnitType
 import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemRecipientSection
 import uniffi.gemstone.GemSimulationWarningKind
@@ -176,6 +177,11 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     is GemLocalizedText.DelegationState -> context.getString(state.stateRes())
     is GemLocalizedText.TransactionState -> context.getString(state.toPrimitives().statusLabelRes())
     is GemLocalizedText.Resource -> context.getString(resource.toPrimitives().stringRes())
+    is GemLocalizedText.FeeRate -> when (unit) {
+        FeeUnitType.SAT_VB -> "${rate.text()} ${context.getString(R.string.fee_rate_satvB)}"
+        FeeUnitType.GWEI -> "${rate.text()} ${context.getString(R.string.fee_rate_gwei)}"
+        FeeUnitType.NATIVE -> rate.text()
+    }
 }
 
 @StringRes
