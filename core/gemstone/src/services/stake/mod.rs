@@ -95,7 +95,7 @@ impl GemStakeService {
     }
 
     pub async fn refresh(&self, chain: Chain, delegations: Vec<Delegation>) -> GemLoadState {
-        rules::delegations_state(self.sync(chain).await, &delegations)
+        GemLoadState::refreshed(self.sync(chain).await, !delegations.is_empty())
     }
 
     pub async fn sync_earn(&self, asset_id: AssetId) -> Result<(), GemServiceError> {

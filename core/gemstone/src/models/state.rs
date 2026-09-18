@@ -34,6 +34,19 @@ impl<T: Clone + Default> GemLoad<T> {
     }
 }
 
+impl GemLoadState {
+    pub fn refreshed(synced: Result<(), GemServiceError>, shows_value: bool) -> Self {
+        let shown = GemLoad {
+            state: match shows_value {
+                true => Self::Data,
+                false => Self::NoData,
+            },
+            value: (),
+        };
+        shown.data(synced).state
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -54,9 +67,18 @@ mod tests {
         assert_eq!(
             GemLoad::<Vec<String>>::loading().data(Err(error.clone())),
             GemLoad {
-                state: GemLoadState::Error { error },
+                state: GemLoadState::Error { error: error.clone() },
                 value: Vec::new()
             }
         );
+    }
+
+    #[test]
+    fn test_a_failed_refresh_keeps_the_rows_already_stored() {
+        let failed = || Err(GemServiceError::Gateway { msg: "offline".to_string() });
+
+        assert_eq!(GemLoadState::refreshed(Ok(()), false), GemLoadState::Data);
+        assert_eq!(GemLoadState::refreshed(failed(), true), GemLoadState::Data);
+        assert!(matches!(GemLoadState::refreshed(failed(), false), GemLoadState::Error { .. }));
     }
 }
