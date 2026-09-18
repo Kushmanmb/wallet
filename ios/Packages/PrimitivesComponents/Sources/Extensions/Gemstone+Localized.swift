@@ -28,6 +28,7 @@ import enum Gemstone.GemPriceAlertLabel
 import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemPriceAlertText
 import enum Gemstone.GemRecipientErrorDisplay
+import enum Gemstone.GemCopyKind
 import enum Gemstone.GemSimulationWarningKind
 import enum Gemstone.GemSimulationWarningTitle
 import enum Gemstone.SimulationPayloadFieldKind
@@ -605,6 +606,16 @@ public extension GemListRowTitle {
         case .lockPeriod: Localized.Lock.requireAuthentication
         case .privacyLock: Localized.Lock.privacyLock
         case .hideBalance: Localized.Settings.hideBalance
+        }
+    }
+}
+
+extension GemCopyKind {
+    func copiedMessage(display: String) -> String {
+        switch self {
+        case .secretPhrase: Localized.Common.copied(Localized.Common.secretPhrase)
+        case .privateKey: Localized.Common.copied(Localized.Common.privateKey)
+        case let .address(chain): Localized.Common.copied(String(format: "%@ (%@) ", Chain(core: chain).asset.name, display))
         }
     }
 }

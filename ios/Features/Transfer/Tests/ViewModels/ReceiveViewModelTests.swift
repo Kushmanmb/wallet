@@ -106,7 +106,7 @@ struct ReceiveViewModelTests {
     func pickingTheSameNetworkChangesNothing() async {
         let service = GemReceiveServiceMock()
         let model = ReceiveViewModel.mock(service: service)
-        let address = model.addressShort
+        let address = model.copyModel.content.display
 
         model.onSelectNetwork()
         #expect(model.presentation == .networkSelector)
@@ -115,7 +115,7 @@ struct ReceiveViewModelTests {
         await settle()
 
         #expect(model.presentation == nil)
-        #expect(model.addressShort == address)
+        #expect(model.copyModel.content.display == address)
         #expect(service.requestedAssetIds.isEmpty)
     }
 

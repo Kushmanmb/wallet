@@ -1,12 +1,12 @@
 import Components
 import Foundation
-import class Gemstone.GemAddressService
 import protocol Gemstone.GemReceiveServiceProtocol
 import GemstonePrimitives
 import Localization
 import Primitives
 import PrimitivesComponents
 import SwiftUI
+import func Gemstone.addressCopy
 
 @Observable
 @MainActor
@@ -69,10 +69,6 @@ public final class ReceiveViewModel: Sendable {
         Localized.Receive.title("")
     }
 
-    var addressShort: String {
-        GemAddressService.shared.format(address: address, chain: assetModel.asset.chain)
-    }
-
     var copyTitle: String {
         Localized.Common.copy
     }
@@ -84,10 +80,7 @@ public final class ReceiveViewModel: Sendable {
     }
 
     var copyModel: CopyTypeViewModel {
-        CopyTypeViewModel(
-            type: .address(assetModel.asset, address: addressShort),
-            copyValue: address,
-        )
+        CopyTypeViewModel(content: addressCopy(chain: assetModel.asset.chain.toGem(), address: address))
     }
 
     var showNetworkSelector: Bool {

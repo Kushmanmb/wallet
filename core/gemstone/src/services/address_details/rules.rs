@@ -5,9 +5,8 @@ use number_formatter::BigNumberFormatter;
 use primitives::{AddressName, Asset, AssetBalance, AssetId, Chain, block_explorer::BlockExplorerLink};
 
 use super::model::GemAddressDetails;
-use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::formatted_number::GemFormattedNumber;
-use crate::models::copy::{GemCopy, GemCopyKind};
+use crate::models::copy::address_copy;
 use crate::models::list::{GemListRow, GemListRowTitle, GemListSection, GemListSectionFooter, GemListSectionTitle};
 use crate::models::state::{GemLoad, GemLoadState};
 use crate::precision::GemValueStyle;
@@ -18,11 +17,7 @@ use crate::services::balance::{GemAssetBalance, GemBalanceRow};
 pub(super) fn details(chain: Chain, address: String, name: Option<String>, link: BlockExplorerLink, balances: GemLoad<Vec<GemBalanceRow>>) -> GemAddressDetails {
     GemAddressDetails {
         chain,
-        copy: GemCopy {
-            kind: GemCopyKind::Address { chain },
-            value: address.clone(),
-            display: format_address(&address, Some(chain), GemAddressFormatStyle::Short),
-        },
+        copy: address_copy(chain, address.clone()),
         address,
         name,
         link,
@@ -121,7 +116,6 @@ mod tests {
     use primitives::{AddressType, VerificationStatus};
 
     use super::*;
-    use crate::models::copy::GemCopyKind;
     use crate::precision::GemValueStyle;
 
     #[test]
@@ -232,11 +226,7 @@ mod tests {
             sections(&details)[1].rows,
             vec![GemListRow::Address {
                 address: address.clone(),
-                copy: GemCopy {
-                    kind: GemCopyKind::Address { chain: Chain::Ethereum },
-                    value: address.clone(),
-                    display: format_address(&address, Some(Chain::Ethereum), GemAddressFormatStyle::Short),
-                },
+                copy: address_copy(Chain::Ethereum, address.clone()),
             }]
         );
     }

@@ -47,7 +47,7 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.clickable
 import com.gemwallet.android.ui.components.clipboard.clipboardManager
-import com.gemwallet.android.ui.components.clipboard.setPlainText
+import com.gemwallet.android.ui.components.clipboard.setCopy
 import com.gemwallet.android.ui.components.list_head.CenteredListHead
 import com.gemwallet.android.ui.components.list_head.HeaderIcon
 import com.gemwallet.android.ui.components.list_item.ChainItem
@@ -65,6 +65,7 @@ import com.gemwallet.android.ui.theme.paddingHalfSmall
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.space0
 import com.wallet.core.primitives.AssetId
+import uniffi.gemstone.addressCopy
 
 private val qrCardElevation = 3.dp
 
@@ -133,7 +134,7 @@ private fun ReceiveScene(
     }
 
     val onCopyClick = fun () {
-        clipboardManager.setPlainText(context, assetInfo.owner?.address ?: "")
+        assetInfo.owner?.address?.let { clipboardManager.setCopy(context, addressCopy(assetInfo.asset.id.chain.string, it)) }
     }
 
     Scene(
