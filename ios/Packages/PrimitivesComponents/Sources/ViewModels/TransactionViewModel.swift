@@ -79,12 +79,12 @@ public struct TransactionViewModel: Sendable, Identifiable, Equatable {
         }
     }
 
-    public func listItem(currency: Currency) -> ListItemModel {
+    public var listItem: ListItemModel {
         let title = titleTextValue
         let titleExtra = titleExtraTextValue
         let titleTag = titleTagTextValue
-        let subtitle = subtitleTextValue(currency: currency)
-        let subtitleExtra = subtitleExtraTextValue(currency: currency)
+        let subtitle = subtitleTextValue
+        let subtitleExtra = subtitleExtraTextValue
         return ListItemModel(
             title: title.text,
             titleStyle: title.style,
@@ -150,12 +150,12 @@ public struct TransactionViewModel: Sendable, Identifiable, Equatable {
         }
     }
 
-    public func subtitleTextValue(currency: Currency) -> TextValue? {
-        row.value.textValue(currency: currency, formatter: .short, textStyle: TextStyle(font: .body, color: row.valueTone.color, fontWeight: .medium))
+    public var subtitleTextValue: TextValue? {
+        row.value.textValue(textStyle: TextStyle(font: .body, color: row.valueTone.color, fontWeight: .medium))
     }
 
-    public func subtitleExtraTextValue(currency: Currency) -> TextValue? {
-        row.equivalentValue.textValue(currency: currency, formatter: .short, textStyle: .footnote)
+    public var subtitleExtraTextValue: TextValue? {
+        row.equivalentValue.textValue(textStyle: .footnote)
     }
 
     private var assetId: AssetId {

@@ -32,21 +32,14 @@ public extension GemTransactionAmount {
 }
 
 public extension GemTransactionRowValue {
-    func textValue(currency: Currency, formatter: ValueFormatter, textStyle: TextStyle? = nil) -> TextValue? {
+    func textValue(textStyle: TextStyle) -> TextValue? {
         switch self {
         case .none:
             nil
         case let .assetSymbol(asset):
             AmountDisplay.symbol(asset: asset.toPrimitives()).amount
-        case let .amount(amount):
-            amount.display(currency: currency, formatter: formatter, textStyle: textStyle).amount
-        case let .fiat(value):
-            TextValue(
-                text: CurrencyFormatter(type: .currency, currencyCode: Currency.usd.rawValue).string(value),
-                style: textStyle ?? TextStyle(font: .body, color: Colors.black, fontWeight: .medium),
-            )
-        case let .pnl(value):
-            AmountDisplay.currency(value: value, currencyCode: Currency.usd.rawValue, textStyle: textStyle)
+        case let .number(number, sign):
+            TextValue(text: sign.format(amount: number.text()), style: textStyle)
         }
     }
 }

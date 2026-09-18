@@ -57,7 +57,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 [ARCHITECTURE.md § 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android): a case that only forwards a Core call is migration debt — delete it and call the service. iOS has none left; Android has one class and one case, plus two sites that show a raw exception where every other screen shows Core's text.
 
-- **F2** **S** Android `GetTransactionsImpl.kt` keeps a private formatter over `GemTransactionRowValue` (amount with sign, USD fiat, PnL) and iOS `GemTransactionRowValue.textValue` does the same — the row record carries the value as a `GemFormattedNumber` with its tone.
 - **F4** **S** `android/features/bridge/viewmodels/.../WCRequestViewModel.kt` injects three Core services (wallet connect, sign message, metadata) — the narrow-cases rule; the request screen record comes from one service.
 
 

@@ -145,9 +145,7 @@ pub enum GemTransactionRowSubtitle {
 pub enum GemTransactionRowValue {
     None,
     AssetSymbol { asset: Asset },
-    Amount { amount: GemTransactionAmount },
-    Fiat { value: f64 },
-    Pnl { value: f64 },
+    Number { number: GemFormattedNumber, sign: GemAmountSign },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, uniffi::Enum)]

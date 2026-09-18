@@ -87,10 +87,6 @@ public final class PerpetualSceneViewModel {
         perpetualViewModel.name
     }
 
-    public var currency: Currency {
-        service.getCurrency().toPrimitives()
-    }
-
     public var hasOpenPosition: Bool {
         !positionViewModels.isEmpty
     }

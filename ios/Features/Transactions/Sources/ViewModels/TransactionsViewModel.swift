@@ -51,10 +51,6 @@ public final class TransactionsViewModel {
         wallet.id
     }
 
-    public var currency: Currency {
-        service.getCurrency().toPrimitives()
-    }
-
     public var emptyContentModel: EmptyContentTypeViewModel {
         switch transactionsEmptyState(
             chains: filterModel.chainsFilter.selectedChains.map { $0.rawValue },

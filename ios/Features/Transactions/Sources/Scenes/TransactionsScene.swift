@@ -20,7 +20,7 @@ public struct TransactionsScene: View {
     public var body: some View {
         VStack {
             List {
-                TransactionsList(sections: model.sections, currency: model.currency)
+                TransactionsList(sections: model.sections)
                 .listRowInsets(.assetListRowInsets)
             }
             .listSectionSpacing(.compact)

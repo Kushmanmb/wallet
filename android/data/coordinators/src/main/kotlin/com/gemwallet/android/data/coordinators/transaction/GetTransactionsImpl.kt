@@ -9,11 +9,8 @@ import com.gemwallet.android.data.services.gemstone.stores.GemstoneTransactionSt
 import com.gemwallet.android.domains.transaction.aggregates.TransactionDataAggregate
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
-import com.gemwallet.android.model.CurrencyFormatter
-import com.gemwallet.android.model.PriceChangeFormatter
-import com.gemwallet.android.model.ValueFormatter
+import com.gemwallet.android.model.text
 import com.wallet.core.primitives.Asset
-import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.TransactionDirection
 import com.wallet.core.primitives.TransactionExtended
 import com.wallet.core.primitives.TransactionId
@@ -37,12 +34,9 @@ import uniffi.gemstone.GemTransactionRowValue
 import uniffi.gemstone.GemTransactionTitle
 import uniffi.gemstone.GemTransactionRow
 import uniffi.gemstone.GemTransactionsServiceInterface
-import uniffi.gemstone.GemValueStyle
 import java.util.concurrent.ConcurrentHashMap
 import uniffi.gemstone.GemValueTone
 
-private val usdFiatFormatter = CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = Currency.USD)
-private val valueFormatter = ValueFormatter(style = GemValueStyle.SHORT)
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetTransactionsImpl(
@@ -135,7 +129,5 @@ class TransactionDataAggregateImpl(
 private fun GemTransactionRowValue.format(): String? = when (this) {
     GemTransactionRowValue.None -> null
     is GemTransactionRowValue.AssetSymbol -> asset.symbol
-    is GemTransactionRowValue.Amount -> amount.sign.format(valueFormatter.string(amount.value, amount.asset.toPrimitives()))
-    is GemTransactionRowValue.Fiat -> usdFiatFormatter.string(value)
-    is GemTransactionRowValue.Pnl -> PriceChangeFormatter(usdFiatFormatter).string(value)
+    is GemTransactionRowValue.Number -> sign.format(number.text())
 }
