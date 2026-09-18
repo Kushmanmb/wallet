@@ -18,6 +18,7 @@ public struct SecurityScene: View {
             GemListRowView(row: row, onToggle: model.onToggle, onSelect: model.onSelect)
         }
         .contentMargins(.top, .scene.top, for: .scrollContent)
+        .listSectionSpacing(.compact)
         .confirmationDialog(model.lockPeriodTitle, isPresented: $model.isPresentingLockPeriods) {
             ForEach(model.allLockPeriods) { period in
                 Button(period.title) { model.updateLockPeriod(to: period) }

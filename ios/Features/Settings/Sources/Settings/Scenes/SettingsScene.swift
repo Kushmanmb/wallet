@@ -29,6 +29,8 @@ public struct SettingsScene: View {
             content(for: row)
         }
         .contentMargins(.top, .scene.top, for: .scrollContent)
+        .listStyle(.insetGrouped)
+        .listSectionSpacing(.compact)
         .bindQuery(model.walletsQuery)
         .navigationTitle(model.title)
     }

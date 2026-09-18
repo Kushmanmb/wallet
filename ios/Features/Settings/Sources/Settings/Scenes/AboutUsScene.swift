@@ -18,6 +18,8 @@ public struct AboutUsScene: View {
                 .contextMenu(model.contextMenuItems(for: row))
         }
         .contentMargins(.top, .scene.top, for: .scrollContent)
+        .listStyle(.insetGrouped)
+        .listSectionSpacing(.compact)
         .navigationTitle(model.title)
         .taskOnce { Task { await model.load() } }
     }
