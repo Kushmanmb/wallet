@@ -30,7 +30,10 @@ impl ValueFormatter {
     }
 
     pub fn format_f64_currency(style: ValueStyle, value: f64, symbol: &str) -> String {
-        format!("{}{}", symbol, Self::format_f64(style, value))
+        match Self::format_f64(style, value) {
+            amount if amount.starts_with('-') => format!("-{}{}", symbol, &amount[1..]),
+            amount => format!("{}{}", symbol, amount),
+        }
     }
 
     pub fn format_with_symbol(style: ValueStyle, value: &str, decimals: i32, symbol: &str) -> Result<String, NumberFormatterError> {
@@ -180,7 +183,7 @@ mod tests {
     #[test]
     fn test_format_f64_currency() {
         assert_eq!(ValueFormatter::format_f64_currency(ValueStyle::Auto, 25432.50, "$"), "$25,432.50");
-        assert_eq!(ValueFormatter::format_f64_currency(ValueStyle::Auto, -123.45, "$"), "$-123.45");
+        assert_eq!(ValueFormatter::format_f64_currency(ValueStyle::Auto, -123.45, "$"), "-$123.45");
         assert_eq!(ValueFormatter::format_f64_currency(ValueStyle::Auto, 0.0, "$"), "$0");
     }
 }
