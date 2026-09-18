@@ -19,7 +19,7 @@ struct AddressCardModel {
 enum GemListRowItem {
     case listItem(ListItemModel)
     case picker(ListItemModel, title: GemListRowTitle)
-    case toggle(label: String, title: GemListRowTitle, isOn: Bool)
+    case toggle(label: String, title: GemListRowTitle, isOn: Bool, imageStyle: ListItemImageStyle?)
     case page(ListItemModel, url: URL)
     case external(ListItemModel, url: URL)
     case icon(AssetImage)
@@ -39,8 +39,8 @@ extension GemListRow {
             .listItem(listItem(title: title, value: value, icon: icon))
         case let .picker(title, value, icon):
             .picker(listItem(title: title, value: value, icon: icon), title: title)
-        case let .toggle(title, value, _, isOn):
-            .toggle(label: toggleLabel(title: title, value: value), title: title, isOn: isOn)
+        case let .toggle(title, value, icon, isOn):
+            .toggle(label: toggleLabel(title: title, value: value), title: title, isOn: isOn, imageStyle: .settings(assetImage: icon.assetImage))
         case let .url(title, value, icon, url, target):
             urlItem(title: title, value: value, icon: icon, url: url, target: target)
         case let .social(links):

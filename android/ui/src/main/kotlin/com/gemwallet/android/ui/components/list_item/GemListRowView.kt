@@ -55,7 +55,10 @@ fun GemListRowView(
             modifier = modifier.then(row.url?.let { url -> Modifier.clickable { uriHandler.open(context, url) } } ?: Modifier),
             minHeight = ListItemDefaults.plainMinHeight,
             accessory = if (row.url != null || row.opensAnotherScreen) {
-                { DataBadgeChevron() }
+                {
+                    DataBadgeChevron()
+                    accessory?.invoke()
+                }
             } else {
                 null
             },

@@ -373,23 +373,23 @@ public final class GemSearchServiceMock: GemSearchServiceProtocol, @unchecked Se
 public final class GemSettingsServiceMock: GemSettingsServiceProtocol, @unchecked Sendable {
     public var sectionsValue: [GemListSection] = []
     public var securitySectionsValue: [GemListSection] = []
-    public var perpetualDefaults = GemPerpetualDefaults(leverage: 3, takeProfitPercent: 25, stopLossPercent: 10)
-    public var preferencesSections: [GemPreferencesSection] = []
+    public var perpetualDefaultsValue = GemPerpetualDefaults(leverage: 3, takeProfitPercent: 25, stopLossPercent: 10)
+    public var preferencesSectionsValue: [GemListSection] = []
     public var setDefaultsError: Error?
 
     public private(set) var storedDefaults: [GemPerpetualDefaults] = []
     public private(set) var securitySectionsCalls: [GemSecurityInput] = []
-    public private(set) var perpetualsEnabledCalls: [Bool] = []
+    public private(set) var preferencesInputs: [GemPreferencesInput] = []
 
     public init() {}
 
-    public func preferences(currency: Gemstone.Currency, perpetualsEnabled: Bool) -> GemPreferencesState {
-        perpetualsEnabledCalls.append(perpetualsEnabled)
-        return GemPreferencesState(
-            currency: GemCurrencyRow(currency: currency, flag: "🇺🇸"),
-            sections: preferencesSections,
-            perpetualDefaults: perpetualDefaults,
-        )
+    public func preferencesSections(input: GemPreferencesInput) -> [GemListSection] {
+        preferencesInputs.append(input)
+        return preferencesSectionsValue
+    }
+
+    public func perpetualDefaults() -> GemPerpetualDefaults {
+        perpetualDefaultsValue
     }
 
     public func sections(wallets _: [Gemstone.Wallet], notificationsAvailable _: Bool, walletConnectAvailable _: Bool) -> [GemListSection] {
@@ -404,7 +404,7 @@ public final class GemSettingsServiceMock: GemSettingsServiceProtocol, @unchecke
     public func setPerpetualDefaults(defaults: GemPerpetualDefaults) throws {
         if let setDefaultsError { throw setDefaultsError }
         storedDefaults.append(defaults)
-        perpetualDefaults = defaults
+        perpetualDefaultsValue = defaults
     }
 }
 

@@ -1,40 +1,26 @@
-use primitives::{PlatformStore, Release};
+use primitives::{Currency, PlatformStore, Release};
 
 use crate::config::public::PublicUrl;
 use crate::config::social::community_links;
 use crate::models::list::{GemListRow, GemListRowIcon, GemListRowTitle, GemListSection, GemListSectionFooter, GemListSectionTitle, GemUrlTarget};
-use crate::services::currency::GemCurrencyRow;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemPreferencesRow {
-    Currency,
-    Language,
-    Appearance,
-    Networks,
-    Contacts,
-    Perpetuals,
-    PerpetualLeverage,
-    PerpetualTakeProfit,
-    PerpetualStopLoss,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
-pub struct GemPreferencesSection {
-    pub rows: Vec<GemPreferencesRow>,
-}
-
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
-pub struct GemPreferencesState {
-    pub currency: GemCurrencyRow,
-    pub sections: Vec<GemPreferencesSection>,
-    pub perpetual_defaults: GemPerpetualDefaults,
-}
+use crate::services::currency;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
 pub struct GemPerpetualDefaults {
     pub leverage: u8,
     pub take_profit_percent: u8,
     pub stop_loss_percent: u8,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct GemPreferencesInput {
+    pub currency: Currency,
+    pub language: Option<String>,
+    pub appearance: String,
+    pub perpetuals_enabled: bool,
+    pub perpetual_leverage: String,
+    pub perpetual_take_profit: String,
+    pub perpetual_stop_loss: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
@@ -47,28 +33,48 @@ pub struct GemSecurityInput {
     pub hide_balance_enabled: bool,
 }
 
-pub fn preferences_sections(perpetuals_enabled: bool) -> Vec<GemPreferencesSection> {
-    [
-        vec![
-            GemPreferencesRow::Currency,
-            GemPreferencesRow::Language,
-            GemPreferencesRow::Appearance,
-            GemPreferencesRow::Networks,
-            GemPreferencesRow::Contacts,
-        ],
-        [
-            Some(GemPreferencesRow::Perpetuals),
-            perpetuals_enabled.then_some(GemPreferencesRow::PerpetualLeverage),
-            perpetuals_enabled.then_some(GemPreferencesRow::PerpetualTakeProfit),
-            perpetuals_enabled.then_some(GemPreferencesRow::PerpetualStopLoss),
-        ]
-        .into_iter()
-        .flatten()
-        .collect(),
+pub fn preferences_sections(input: GemPreferencesInput) -> Vec<GemListSection> {
+    let link = |title: GemListRowTitle, value: Option<String>, icon: GemListRowIcon| GemListRow::Link { title, value, icon };
+    let picker = |title: GemListRowTitle, value: String| GemListRow::Picker {
+        title,
+        value,
+        icon: GemListRowIcon::None,
+    };
+    let section = |rows: Vec<GemListRow>| GemListSection {
+        title: GemListSectionTitle::None,
+        footer: GemListSectionFooter::None,
+        rows,
+    };
+    vec![
+        section(
+            [
+                Some(link(GemListRowTitle::Currency, Some(currency::rules::row(input.currency).text()), GemListRowIcon::Currency)),
+                input.language.map(|language| link(GemListRowTitle::Language, Some(language), GemListRowIcon::Language)),
+                Some(link(GemListRowTitle::Appearance, Some(input.appearance), GemListRowIcon::Appearance)),
+                Some(link(GemListRowTitle::Networks, None, GemListRowIcon::Networks)),
+                Some(link(GemListRowTitle::Contacts, None, GemListRowIcon::Contacts)),
+            ]
+            .into_iter()
+            .flatten()
+            .collect(),
+        ),
+        section(
+            [
+                Some(GemListRow::Toggle {
+                    title: GemListRowTitle::Perpetuals,
+                    value: None,
+                    icon: GemListRowIcon::Perpetuals,
+                    is_on: input.perpetuals_enabled,
+                }),
+                input.perpetuals_enabled.then(|| picker(GemListRowTitle::PerpetualLeverage, input.perpetual_leverage)),
+                input.perpetuals_enabled.then(|| picker(GemListRowTitle::PerpetualTakeProfit, input.perpetual_take_profit)),
+                input.perpetuals_enabled.then(|| picker(GemListRowTitle::PerpetualStopLoss, input.perpetual_stop_loss)),
+            ]
+            .into_iter()
+            .flatten()
+            .collect(),
+        ),
     ]
-    .into_iter()
-    .map(|rows| GemPreferencesSection { rows })
-    .collect()
 }
 
 pub fn security_sections(input: GemSecurityInput) -> Vec<GemListSection> {
@@ -214,13 +220,70 @@ pub fn sections(wallets_count: usize, notifications_available: bool, wallet_conn
 mod tests {
     use super::*;
 
+    fn preferences_input(perpetuals_enabled: bool, language: Option<&str>) -> GemPreferencesInput {
+        GemPreferencesInput {
+            currency: Currency::GBP,
+            language: language.map(str::to_string),
+            appearance: "System".to_string(),
+            perpetuals_enabled,
+            perpetual_leverage: "5x".to_string(),
+            perpetual_take_profit: "25%".to_string(),
+            perpetual_stop_loss: "None".to_string(),
+        }
+    }
+
     #[test]
     fn test_the_perpetual_defaults_show_only_once_perpetuals_are_on() {
         assert_eq!(
-            preferences_sections(false).last().map(|section| section.rows.clone()),
-            Some(vec![GemPreferencesRow::Perpetuals])
+            preferences_sections(preferences_input(false, Some("English"))).last().map(|section| section.rows.clone()),
+            Some(vec![GemListRow::Toggle {
+                title: GemListRowTitle::Perpetuals,
+                value: None,
+                icon: GemListRowIcon::Perpetuals,
+                is_on: false,
+            }])
         );
-        assert_eq!(preferences_sections(true).last().map(|section| section.rows.len()), Some(4));
+        assert_eq!(
+            preferences_sections(preferences_input(true, Some("English")))
+                .last()
+                .map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
+            Some(vec![
+                GemListRowTitle::Perpetuals,
+                GemListRowTitle::PerpetualLeverage,
+                GemListRowTitle::PerpetualTakeProfit,
+                GemListRowTitle::PerpetualStopLoss
+            ])
+        );
+    }
+
+    #[test]
+    fn test_the_preference_rows_carry_the_flagged_currency_and_drop_the_language_a_platform_cannot_set() {
+        let sections = preferences_sections(preferences_input(false, Some("English")));
+
+        assert_eq!(
+            sections.first().and_then(|section| section.rows.first()).cloned(),
+            Some(GemListRow::Link {
+                title: GemListRowTitle::Currency,
+                value: Some("\u{1f1ec}\u{1f1e7} GBP".to_string()),
+                icon: GemListRowIcon::Currency,
+            })
+        );
+        assert_eq!(
+            sections.first().map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
+            Some(vec![
+                GemListRowTitle::Currency,
+                GemListRowTitle::Language,
+                GemListRowTitle::Appearance,
+                GemListRowTitle::Networks,
+                GemListRowTitle::Contacts
+            ])
+        );
+        assert_eq!(
+            preferences_sections(preferences_input(false, None))
+                .first()
+                .map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
+            Some(vec![GemListRowTitle::Currency, GemListRowTitle::Appearance, GemListRowTitle::Networks, GemListRowTitle::Contacts])
+        );
     }
 
     #[test]

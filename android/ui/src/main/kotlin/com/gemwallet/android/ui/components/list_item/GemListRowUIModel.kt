@@ -65,4 +65,10 @@ private fun GemListRowIcon.image(): ListItemImage? = when (this) {
     GemListRowIcon.REWARDS -> ListItemImage.Drawable(R.drawable.settings_wallets)
     GemListRowIcon.ABOUT_US -> ListItemImage.Drawable(R.drawable.settings_about_us)
     GemListRowIcon.DEVELOPER -> ListItemImage.Drawable(R.drawable.settings_developer)
+    GemListRowIcon.CURRENCY -> ListItemImage.Drawable(R.drawable.settings_currency)
+    GemListRowIcon.LANGUAGE -> ListItemImage.Drawable(R.drawable.settings_language)
+    GemListRowIcon.APPEARANCE -> ListItemImage.Drawable(R.drawable.settings_appearance)
+    GemListRowIcon.NETWORKS -> ListItemImage.Drawable(R.drawable.settings_networks)
+    GemListRowIcon.CONTACTS -> ListItemImage.Drawable(R.drawable.settings_contacts)
+    GemListRowIcon.PERPETUALS -> ListItemImage.Drawable(R.drawable.settings_pricealert)
 }

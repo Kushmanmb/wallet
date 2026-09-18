@@ -610,6 +610,15 @@ public extension GemListRowTitle {
         case .lockPeriod: Localized.Lock.requireAuthentication
         case .privacyLock: Localized.Lock.privacyLock
         case .hideBalance: Localized.Settings.hideBalance
+        case .currency: Localized.Settings.currency
+        case .language: Localized.Settings.language
+        case .appearance: Localized.Settings.appearanceTitle
+        case .networks: Localized.Settings.Networks.title
+        case .contacts: Localized.Contacts.title
+        case .perpetuals: Localized.Perpetuals.title
+        case .perpetualLeverage: Localized.Settings.Preferences.Perpetual.defaultLeverage
+        case .perpetualTakeProfit: Localized.Settings.Preferences.Perpetual.defaultTakeProfit
+        case .perpetualStopLoss: Localized.Settings.Preferences.Perpetual.defaultStopLoss
         }
     }
 }

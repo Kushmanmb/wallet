@@ -4,15 +4,14 @@ pub(crate) mod testkit;
 
 use std::sync::Arc;
 
-use primitives::{Currency, Release, Wallet};
+use primitives::{Release, Wallet};
 
 use crate::models::list::GemListSection;
-use crate::services::currency;
 use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_session;
 
-pub use rules::{GemPerpetualDefaults, GemPreferencesRow, GemPreferencesSection, GemPreferencesState, GemSecurityInput};
+pub use rules::{GemPerpetualDefaults, GemPreferencesInput, GemSecurityInput};
 
 #[derive(uniffi::Object)]
 pub struct GemSettingsService {
@@ -26,15 +25,15 @@ impl GemSettingsService {
         Self { preferences }
     }
 
-    pub fn preferences(&self, currency: Currency, perpetuals_enabled: bool) -> GemPreferencesState {
-        GemPreferencesState {
-            currency: currency::rules::row(currency),
-            sections: rules::preferences_sections(perpetuals_enabled),
-            perpetual_defaults: GemPerpetualDefaults {
-                leverage: self.preferences.get_perpetual_leverage(),
-                take_profit_percent: self.preferences.get_perpetual_take_profit_percent(),
-                stop_loss_percent: self.preferences.get_perpetual_stop_loss_percent(),
-            },
+    pub fn preferences_sections(&self, input: GemPreferencesInput) -> Vec<GemListSection> {
+        rules::preferences_sections(input)
+    }
+
+    pub fn perpetual_defaults(&self) -> GemPerpetualDefaults {
+        GemPerpetualDefaults {
+            leverage: self.preferences.get_perpetual_leverage(),
+            take_profit_percent: self.preferences.get_perpetual_take_profit_percent(),
+            stop_loss_percent: self.preferences.get_perpetual_stop_loss_percent(),
         }
     }
 
@@ -69,14 +68,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_the_preferences_screen_flags_the_selected_currency_beside_its_rows() {
-        let state = GemSettingsService::mock().preferences(Currency::GBP, false);
-
-        assert_eq!(state.currency.text(), "\u{1f1ec}\u{1f1e7} GBP");
-        assert_eq!(state.sections, rules::preferences_sections(false));
-    }
-
-    #[test]
     fn test_the_perpetual_defaults_the_screen_shows_are_the_ones_it_last_wrote() {
         let service = GemSettingsService::mock();
         let written = GemPerpetualDefaults {
@@ -87,6 +78,6 @@ mod tests {
 
         service.set_perpetual_defaults(written).unwrap();
 
-        assert_eq!(service.preferences(Currency::USD, true).perpetual_defaults, written);
+        assert_eq!(service.perpetual_defaults(), written);
     }
 }

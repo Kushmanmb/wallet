@@ -41,6 +41,15 @@ pub enum GemListRowTitle {
     LockPeriod,
     PrivacyLock,
     HideBalance,
+    Currency,
+    Language,
+    Appearance,
+    Networks,
+    Contacts,
+    Perpetuals,
+    PerpetualLeverage,
+    PerpetualTakeProfit,
+    PerpetualStopLoss,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -68,6 +77,12 @@ pub enum GemListRowIcon {
     Rewards,
     AboutUs,
     Developer,
+    Currency,
+    Language,
+    Appearance,
+    Networks,
+    Contacts,
+    Perpetuals,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]

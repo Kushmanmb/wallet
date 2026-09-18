@@ -493,6 +493,15 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.LOCK_PERIOD -> R.string.lock_require_authentication
     GemListRowTitle.PRIVACY_LOCK -> R.string.lock_privacy_lock
     GemListRowTitle.HIDE_BALANCE -> R.string.settings_hide_balance
+    GemListRowTitle.CURRENCY -> R.string.settings_currency
+    GemListRowTitle.LANGUAGE -> R.string.settings_language
+    GemListRowTitle.APPEARANCE -> R.string.settings_appearance_title
+    GemListRowTitle.NETWORKS -> R.string.settings_networks_title
+    GemListRowTitle.CONTACTS -> R.string.contacts_title
+    GemListRowTitle.PERPETUALS -> R.string.perpetuals_title
+    GemListRowTitle.PERPETUAL_LEVERAGE -> R.string.settings_preferences_perpetual_default_leverage
+    GemListRowTitle.PERPETUAL_TAKE_PROFIT -> R.string.settings_preferences_perpetual_default_take_profit
+    GemListRowTitle.PERPETUAL_STOP_LOSS -> R.string.settings_preferences_perpetual_default_stop_loss
 }
 
 fun GemSlippageCheck.footerText(context: Context, minimumText: String, maximumText: String): String? = when (this) {

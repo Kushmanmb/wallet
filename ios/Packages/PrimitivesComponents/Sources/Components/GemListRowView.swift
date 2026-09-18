@@ -37,9 +37,13 @@ public struct GemListRowView: View {
             ListItemView(model: model)
         case let .picker(model, title):
             NavigationCustomLink(with: ListItemView(model: model)) { onSelect?(title) }
-        case let .toggle(label, title, isOn):
-            Toggle(label, isOn: Binding(get: { isOn }, set: { onToggle?(title, $0) }))
-                .toggleStyle(AppToggleStyle())
+        case let .toggle(label, title, isOn, imageStyle):
+            if let imageStyle {
+                ListItemToggleView(isOn: Binding(get: { isOn }, set: { onToggle?(title, $0) }), title: label, imageStyle: imageStyle)
+            } else {
+                Toggle(label, isOn: Binding(get: { isOn }, set: { onToggle?(title, $0) }))
+                    .toggleStyle(AppToggleStyle())
+            }
         case let .page(model, url):
             SafariNavigationLink(url: url) {
                 ListItemView(model: model)

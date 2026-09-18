@@ -2,7 +2,6 @@
 
 import enum Gemstone.GemAddNodeFailure
 import enum Gemstone.GemServiceEndpointType
-import enum Gemstone.GemPreferencesRow
 import enum Gemstone.GemChainSettingsSection
 import enum Gemstone.GemNodeCheckRow
 import enum Gemstone.GemNodeSubtitle
@@ -25,22 +24,6 @@ extension GemServiceEndpointType {
         switch self {
         case .api: "API"
         case .gemNode: Localized.Nodes.gemWalletNode
-        }
-    }
-}
-
-extension GemPreferencesRow {
-    var title: String {
-        switch self {
-        case .currency: Localized.Settings.currency
-        case .language: Localized.Settings.language
-        case .appearance: Localized.Settings.appearanceTitle
-        case .networks: Localized.Settings.Networks.title
-        case .contacts: Localized.Contacts.title
-        case .perpetuals: Localized.Perpetuals.title
-        case .perpetualLeverage: Localized.Settings.Preferences.Perpetual.defaultLeverage
-        case .perpetualTakeProfit: Localized.Settings.Preferences.Perpetual.defaultTakeProfit
-        case .perpetualStopLoss: Localized.Settings.Preferences.Perpetual.defaultStopLoss
         }
     }
 }
