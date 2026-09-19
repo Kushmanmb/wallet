@@ -81,6 +81,7 @@ class MainActivity : FragmentActivity(), AuthRequester {
         systemAuthenticator.refreshEnrollment()
 
         viewModel.handleIntent(intent)
+        viewModel.maintain()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

@@ -63,7 +63,7 @@ class BaseSelectSearchTest {
 
         search.items(filters).first()
 
-        verify(exactly = 1) { searchService.search("", true, NO_QUERY_LIMIT, setOf(AssetFilter.Buyable)) }
+        verify(exactly = 1) { searchService.search("", true, NO_QUERY_LIMIT, setOf(AssetFilter.Enabled, AssetFilter.Buyable)) }
     }
 
     @Test
