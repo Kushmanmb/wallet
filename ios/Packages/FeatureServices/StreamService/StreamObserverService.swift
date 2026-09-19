@@ -43,11 +43,9 @@ public actor StreamObserverService: Sendable {
         }
     }
 
-    public func disconnect() async {
+    public func disconnect() {
         isActive = false
         observeTask?.cancel()
-        await observeTask?.value
-        observeTask = nil
     }
 
     // MARK: - Private
@@ -56,12 +54,7 @@ public actor StreamObserverService: Sendable {
         guard isActive, observeTask == nil else { return }
         observeTask = Task { [weak self] in
             await self?.observeConnection()
-            await self?.stopObserving()
         }
-    }
-
-    private func stopObserving() {
-        observeTask = nil
     }
 
     private func observeConnection() async {
@@ -81,6 +74,10 @@ public actor StreamObserverService: Sendable {
         }
         await webSocket.disconnect()
         await service.disconnected()
+        observeTask = nil
+        if Task.isCancelled {
+            startObserving()
+        }
     }
 
     private func handle(_ event: WebSocketEvent) async {
