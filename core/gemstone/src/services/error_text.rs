@@ -4,6 +4,7 @@ use crate::gateway::GatewayError;
 use crate::payment::GemPaymentError;
 use crate::services::error::GemServiceError;
 use crate::services::node::model::GemAddNodeError;
+use crate::services::wallet::error::GemWalletImportError;
 use crate::services::wallet_connect::error::GemWalletConnectError;
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
@@ -18,6 +19,11 @@ pub enum GemErrorText {
     UnsupportedChain,
     MaliciousOrigin,
     NoSupportedWallets,
+    InvalidSecretPhrase,
+    InvalidSecretPhraseWords { words: Vec<String> },
+    InvalidPrivateKey,
+    InvalidAddress,
+    Unknown,
     Message { text: String },
 }
 
@@ -34,7 +40,21 @@ impl GemServiceError {
             | Self::NotFound { msg }
             | Self::Unsupported { msg } => GemErrorText::Message { text: msg.clone() },
             Self::Offline => GemErrorText::NetworkOffline,
+            Self::WalletImport { error } => error.text(),
             Self::Cancelled => GemErrorText::Cancelled,
+        }
+    }
+}
+
+#[uniffi::export]
+impl GemWalletImportError {
+    pub fn text(&self) -> GemErrorText {
+        match self {
+            Self::InvalidSecretPhrase => GemErrorText::InvalidSecretPhrase,
+            Self::InvalidSecretPhraseWords { words } => GemErrorText::InvalidSecretPhraseWords { words: words.clone() },
+            Self::InvalidPrivateKey => GemErrorText::InvalidPrivateKey,
+            Self::InvalidAddress => GemErrorText::InvalidAddress,
+            Self::MissingChain => GemErrorText::Unknown,
         }
     }
 }
@@ -125,6 +145,18 @@ mod tests {
             GemErrorText::Message { text: "reverted".into() },
             "a message the gateway already phrased is shown as it is"
         );
+    }
+
+    #[test]
+    fn test_an_import_error_reaches_the_apps_as_its_own_text() {
+        let words = GemWalletImportError::InvalidSecretPhraseWords { words: vec!["abandom".to_string()] };
+
+        assert_eq!(
+            GemServiceError::from(words.clone()).text(),
+            GemErrorText::InvalidSecretPhraseWords { words: vec!["abandom".to_string()] }
+        );
+        assert_eq!(GemServiceError::from(GemWalletImportError::InvalidPrivateKey).text(), GemErrorText::InvalidPrivateKey);
+        assert!(!GemServiceError::from(words).to_string().contains("abandom"), "the log text never repeats a phrase word");
     }
 
     #[test]

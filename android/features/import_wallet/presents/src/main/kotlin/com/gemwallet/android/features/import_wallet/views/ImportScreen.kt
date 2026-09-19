@@ -45,7 +45,6 @@ import com.gemwallet.android.application.wallet_import.values.WalletImportResult
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.features.import_wallet.components.ImportInput
 import com.gemwallet.android.features.import_wallet.components.ImportKindTab
-import com.gemwallet.android.features.import_wallet.localization.string
 import com.gemwallet.android.features.import_wallet.viewmodels.ImportInputUIModel
 import com.gemwallet.android.features.import_wallet.viewmodels.ImportTabUIModel
 import com.gemwallet.android.features.import_wallet.viewmodels.ImportTextUIModel
@@ -73,7 +72,6 @@ import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.sceneContentPadding
 import com.gemwallet.android.ui.theme.space0
 import com.wallet.core.primitives.Chain
-import uniffi.gemstone.GemWalletImportException
 import uniffi.gemstone.GemWalletImportKind
 
 private val loadingDialogSize = 100.dp
@@ -302,14 +300,8 @@ private fun TypeSelection(
 
 @Composable
 private fun ErrorMessage(error: Throwable?) {
-    val text = when (error) {
-        is GemWalletImportException -> error.string()
-        null -> return
-        else -> stringResource(
-            R.string.errors_create_wallet,
-            error.errorText().text().takeIf { it.isNotBlank() } ?: stringResource(R.string.errors_unknown_try_again),
-        )
-    }
+    error ?: return
+    val text = error.errorText().text().takeIf { it.isNotBlank() } ?: stringResource(R.string.errors_unknown_try_again)
     Text(text = text, color = MaterialTheme.colorScheme.error)
 }
 

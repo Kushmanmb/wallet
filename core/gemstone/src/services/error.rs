@@ -2,6 +2,7 @@ use crate::GemstoneError;
 use crate::alien::AlienError;
 use crate::api::GemApiError;
 use crate::gateway::GatewayError;
+use crate::services::wallet::error::GemWalletImportError;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Error)]
 pub enum GemServiceError {
@@ -14,6 +15,7 @@ pub enum GemServiceError {
     NotFound { msg: String },
     Unsupported { msg: String },
     Offline,
+    WalletImport { error: GemWalletImportError },
     Cancelled,
 }
 
@@ -29,6 +31,7 @@ impl std::fmt::Display for GemServiceError {
             | Self::NotFound { msg }
             | Self::Unsupported { msg } => write!(f, "{msg}"),
             Self::Offline => write!(f, "network offline"),
+            Self::WalletImport { error } => write!(f, "{error}"),
             Self::Cancelled => write!(f, "cancelled"),
         }
     }

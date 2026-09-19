@@ -499,6 +499,11 @@ extension GemErrorText {
         case .unsupportedChain: Localized.Errors.Connections.unsupportedChain
         case .maliciousOrigin: Localized.Errors.Connections.maliciousOrigin
         case .noSupportedWallets: Localized.Errors.Connections.noSupportedWallets
+        case .invalidSecretPhrase: Localized.Errors.Import.invalidSecretPhrase
+        case let .invalidSecretPhraseWords(words): Localized.Errors.Import.invalidSecretPhraseWord(words.joined(separator: ", "))
+        case .invalidPrivateKey: Localized.Errors.Import.invalidPrivateKey
+        case .invalidAddress: Localized.Errors.invalidAddressName
+        case .unknown: Localized.Errors.unknown
         case let .message(text): text
         }
     }
