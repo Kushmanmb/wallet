@@ -18,7 +18,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,6 +39,7 @@ import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.list_item.property.verificationStatusItem
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.screen.ModalBottomSheet
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.showSnackbar
@@ -62,7 +62,6 @@ fun NFTDetailsScene(
     val viewModel: NftDetailsViewModel = hiltViewModel()
     val assetData by viewModel.nftAsset.collectAsStateWithLifecycle()
 
-    val uriHandler = LocalUriHandler.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val refresh = stringResource(R.string.common_refresh)
@@ -136,14 +135,7 @@ fun NFTDetailsScene(
                     }
                     is NftSectionUIModel.Links -> {
                         item { SubheaderItem(section.title) }
-                        itemsPositioned(section.links) { position, link ->
-                            ListItem(
-                                model = link.model,
-                                listPosition = position,
-                                modifier = Modifier.clickable { uriHandler.openUri(link.url) },
-                                accessory = { DataBadgeChevron() },
-                            )
-                        }
+                        item { GemListRowView(row = section.row, listPosition = ListPosition.Single) }
                     }
                 }
             }

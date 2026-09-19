@@ -1,13 +1,14 @@
 use super::rules;
+use crate::config::social::GemSocialLink;
 use crate::formatted_number::GemFormattedNumber;
-use primitives::{AssetLink, BlockExplorerLink, ChartDateValue, ChartValuePercentage, Currency};
+use primitives::{BlockExplorerLink, ChartDateValue, ChartValuePercentage, Currency};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemChartSection {
     PriceAlerts { count: u32 },
     SetPriceAlert,
     Market { rows: Vec<GemAssetMarketRow> },
-    Links { links: Vec<AssetLink> },
+    Links { links: Vec<GemSocialLink> },
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]

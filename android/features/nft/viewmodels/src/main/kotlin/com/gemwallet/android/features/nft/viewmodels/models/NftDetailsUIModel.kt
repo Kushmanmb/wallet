@@ -7,8 +7,6 @@ import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.nft.viewmodels.localization.stringRes
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.gemwallet.android.ui.components.list_item.property.LinkRowUIModel
-import com.gemwallet.android.ui.components.list_item.property.linkRows
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.NFTAsset
 import com.wallet.core.primitives.ReportReason
@@ -17,7 +15,7 @@ import uniffi.gemstone.GemCollectibleAttributeValue
 import uniffi.gemstone.GemCollectibleIdentifier
 import uniffi.gemstone.GemCollectibleRow
 import uniffi.gemstone.GemCollectibleSection
-import uniffi.gemstone.socialLinks
+import uniffi.gemstone.GemListRow
 import java.text.DateFormat
 import java.util.Date
 
@@ -32,7 +30,7 @@ sealed interface NftSectionUIModel {
     data class Status(val status: VerificationStatus) : NftSectionUIModel
     data class Info(val rows: List<NftInfoRowUIModel>) : NftSectionUIModel
     data class Attributes(val title: String, val rows: List<ListItemModel>) : NftSectionUIModel
-    data class Links(val title: String, val links: List<LinkRowUIModel>) : NftSectionUIModel
+    data class Links(val title: String, val row: GemListRow) : NftSectionUIModel
 }
 
 sealed interface NftInfoRowUIModel {
@@ -65,9 +63,7 @@ private fun GemCollectibleSection.uiModel(context: Context): NftSectionUIModel? 
         title = context.getString(R.string.nft_properties),
         rows = attributes.map { ListItemModel(title = it.name, subtitle = it.value.text()) },
     )
-    is GemCollectibleSection.Links -> socialLinks(links).linkRows(context)
-        .takeIf { it.isNotEmpty() }
-        ?.let { NftSectionUIModel.Links(title = context.getString(R.string.social_links), links = it) }
+    is GemCollectibleSection.Links -> NftSectionUIModel.Links(title = context.getString(R.string.social_links), row = GemListRow.Social(links))
 }
 
 private fun GemCollectibleRow.uiModel(context: Context): NftInfoRowUIModel = when (this) {

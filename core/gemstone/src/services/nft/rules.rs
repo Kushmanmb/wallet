@@ -7,6 +7,7 @@ use super::model::{
 };
 use crate::address_formatter::format_address;
 use crate::config::chain::supports_nft_transfer;
+use crate::config::social::social_links;
 
 const TOKEN_ID_ADDRESS_LENGTH: usize = 16;
 
@@ -135,9 +136,9 @@ pub fn collectible_details(
     let attributes = (!data.asset.attributes.is_empty()).then(|| GemCollectibleSection::Attributes {
         attributes: data.asset.attributes.iter().map(attribute).collect(),
     });
-    let links = (!data.collection.links.is_empty()).then(|| GemCollectibleSection::Links {
-        links: data.collection.links.clone(),
-    });
+    let links = Some(social_links(data.collection.links.clone()))
+        .filter(|links| !links.is_empty())
+        .map(|links| GemCollectibleSection::Links { links });
     GemCollectibleDetails {
         can_send: can_send(wallet_type, data.asset.chain, is_owned),
         sections: [status, Some(info), attributes, links].into_iter().flatten().collect(),

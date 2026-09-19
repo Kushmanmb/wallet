@@ -5,7 +5,8 @@ import com.gemwallet.android.model.text
 import uniffi.gemstone.GemNumberUnit
 import android.content.Context
 import com.gemwallet.android.ext.toGem
-import com.gemwallet.android.testkit.mockAssetLink
+import com.gemwallet.android.testkit.mockGemSocialLink
+import uniffi.gemstone.GemListRow
 import com.gemwallet.android.testkit.mockAssetSolanaUSDC
 import com.gemwallet.android.ui.R
 import com.wallet.core.primitives.BlockExplorerLink
@@ -36,7 +37,7 @@ class AssetMarketUIModelFactoryTest {
             GemChartSection.Market(listOf(GemAssetMarketRow.Contract(tokenId = tokenId, explorer = explorer.toGem()))),
             GemChartSection.Market(listOf(GemAssetMarketRow.CirculatingSupply(value = mockFormattedNumber(3.0)))),
             GemChartSection.Market(listOf(GemAssetMarketRow.AllTimeHigh(value = allTimeHigh.toGem()))),
-            GemChartSection.Links(listOf(mockAssetLink().toGem())),
+            GemChartSection.Links(listOf(mockGemSocialLink())),
         )
 
         val model = factory.create(asset, Currency.USD, sections)
@@ -64,7 +65,7 @@ class AssetMarketUIModelFactoryTest {
         val high = (model.sections[4] as ChartSectionUIModel.Market).rows.single() as AllTimeUIModel.High
         assertEquals(1.5, high.value, 0.0)
         assertEquals(-5.0, high.percentage, 0.0)
-        assertEquals(1, (model.sections[5] as ChartSectionUIModel.Links).links.size)
+        assertEquals(GemListRow.Social(listOf(mockGemSocialLink())), (model.sections[5] as ChartSectionUIModel.Links).row)
     }
 
     @Test

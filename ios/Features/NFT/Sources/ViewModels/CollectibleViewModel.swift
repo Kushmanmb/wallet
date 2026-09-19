@@ -19,8 +19,6 @@ import PrimitivesComponents
 import Store
 import Style
 import SwiftUI
-import func Gemstone.socialLinks
-import typealias Gemstone.AssetLink
 import enum Gemstone.GemCollectibleRow
 
 @Observable
@@ -152,9 +150,6 @@ public final class CollectibleViewModel {
         }
     }
 
-    func socialLinksModel(_ links: [Gemstone.AssetLink]) -> SocialLinksViewModel {
-        SocialLinksViewModel(links: socialLinks(links: links))
-    }
 
     func attributeListItem(_ attribute: GemCollectibleAttribute) -> ListItemModel {
         ListItemModel(title: attribute.name, subtitle: attributeText(attribute.value))

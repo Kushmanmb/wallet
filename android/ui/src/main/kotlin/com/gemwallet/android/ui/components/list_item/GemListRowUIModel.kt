@@ -102,7 +102,7 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
 }
 
 internal fun GemSocialLink.uiModel(context: Context): GemListRowUIModel.Item = GemListRowUIModel.Item(
-    ListItemModel(title = context.getString(linkType.stringRes()), image = ListItemImage.Drawable(linkType.icon)),
+    ListItemModel(title = context.getString(linkType.stringRes()), subtitle = host, image = ListItemImage.Drawable(linkType.icon)),
     url = url,
 )
 

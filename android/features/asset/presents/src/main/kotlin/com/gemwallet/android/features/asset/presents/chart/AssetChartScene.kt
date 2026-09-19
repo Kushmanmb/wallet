@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.asset.presents.chart
 
-import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -14,9 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -35,12 +31,12 @@ import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.property.AddressPropertyItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 import com.gemwallet.android.ui.format.rememberFormattedAddress
 import com.gemwallet.android.ui.models.ListPosition
-import com.gemwallet.android.ui.open
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Chain
 
@@ -63,8 +59,6 @@ fun AssetChartScene(
         iconRes = R.drawable.ic_notifications,
         onShown = onToastShown,
     )
-    val uriHandler = LocalUriHandler.current
-    val context = LocalContext.current
 
     Scene(
         title = title,
@@ -86,7 +80,7 @@ fun AssetChartScene(
                             is ChartSectionUIModel.PriceAlerts -> item { LinkRow(section.model) { onPriceAlerts(viewModel.assetId) } }
                             is ChartSectionUIModel.SetPriceAlert -> item { LinkRow(section.model) { onAddPriceAlertTarget(viewModel.assetId) } }
                             is ChartSectionUIModel.Market -> marketRows(model.chain, section.rows)
-                            is ChartSectionUIModel.Links -> links(section, uriHandler, context)
+                            is ChartSectionUIModel.Links -> links(section)
                         }
                     }
                 }
@@ -107,17 +101,9 @@ private fun LinkRow(model: ListItemModel, onClick: () -> Unit) {
     )
 }
 
-private fun LazyListScope.links(section: ChartSectionUIModel.Links, uriHandler: UriHandler, context: Context) {
-    if (section.links.isEmpty()) return
+private fun LazyListScope.links(section: ChartSectionUIModel.Links) {
     item { SubheaderItem(section.title) }
-    itemsPositioned(section.links) { position, link ->
-        ListItem(
-            model = link.model,
-            listPosition = position,
-            modifier = Modifier.clickable { uriHandler.open(context, link.url) },
-            accessory = { DataBadgeChevron() },
-        )
-    }
+    item { GemListRowView(row = section.row, listPosition = ListPosition.Single) }
 }
 
 private fun LazyListScope.marketRows(chain: Chain, items: List<MarketRowUIModel>) {

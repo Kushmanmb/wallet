@@ -3,6 +3,7 @@ use primitives::{Asset, AssetLink, AssetMarket, AssetPrice, BlockExplorerLink, C
 
 use super::model::{GemAssetMarketRow, GemChartBounds, GemChartData, GemChartHeader, GemChartSection, GemChartValueType};
 use super::{GemChart, GemChartCurrent};
+use crate::config::social::social_links;
 use crate::formatted_number::GemFormattedNumber;
 use crate::percentage::GemPercentageStyle;
 use crate::precision::{GemCurrencyStyle, GemValueStyle};
@@ -71,7 +72,7 @@ pub fn chart_sections(
     price_alert_section(price, price_alerts)
         .into_iter()
         .chain(market_sections)
-        .chain((!links.is_empty()).then_some(GemChartSection::Links { links }))
+        .chain(Some(social_links(links)).filter(|links| !links.is_empty()).map(|links| GemChartSection::Links { links }))
         .collect()
 }
 
@@ -466,7 +467,7 @@ mod tests {
                         },
                     ]
                 },
-                GemChartSection::Links { links },
+                GemChartSection::Links { links: social_links(links) },
             ]
         );
     }

@@ -39,7 +39,7 @@ public struct ChartScene: View {
                     marketSection(model.marketValues(rows))
                 case let .links(links):
                     Section(section.title ?? "") {
-                        SocialLinksView(model: model.socialLinksModel(links))
+                        SocialLinksView(model: SocialLinksViewModel(links: links))
                     }
                 }
             }

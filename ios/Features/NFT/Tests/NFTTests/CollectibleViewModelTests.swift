@@ -33,7 +33,7 @@ struct CollectibleViewModelTests {
             collection: .mock(
                 contractAddress: "0x47A00fC8590C11bE4c419D9Ae50DEc267B6E24ee",
                 status: .unverified,
-                links: [AssetLink(name: "Website", url: "https://example.com")],
+                links: [AssetLink(name: "website", url: "https://example.com")],
             ),
             asset: .mock(tokenId: "11871", chain: .ethereum, attributes: [NFTAttribute(name: "Color", value: "Blue", percentage: nil)]),
         ))

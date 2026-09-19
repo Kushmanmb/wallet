@@ -38,7 +38,7 @@ public struct CollectibleScene: View {
                     }
                 case let .links(links):
                     Section(Localized.Social.links) {
-                        SocialLinksView(model: model.socialLinksModel(links))
+                        SocialLinksView(model: SocialLinksViewModel(links: links))
                     }
                 }
             }

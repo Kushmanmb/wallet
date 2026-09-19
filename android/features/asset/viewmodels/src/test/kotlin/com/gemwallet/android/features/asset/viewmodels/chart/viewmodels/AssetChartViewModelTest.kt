@@ -17,6 +17,7 @@ import com.gemwallet.android.features.asset.viewmodels.chart.models.AssetMarketU
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.testkit.mockAssetInfo
 import com.gemwallet.android.testkit.mockAssetLink
+import com.gemwallet.android.testkit.mockGemSocialLink
 import com.gemwallet.android.testkit.mockAssetMarket
 import com.gemwallet.android.testkit.mockAssetPriceInfo
 import com.gemwallet.android.testkit.mockAssetSolanaUSDC
@@ -120,7 +121,7 @@ class AssetChartViewModelTest {
         val link = mockAssetLink()
         every { chartService.sections(asset.toGem(), any(), market.toGem(), any(), listOf(link.toGem())) } returns listOf(
             GemChartSection.Market(rows = listOf(GemAssetMarketRow.MarketCap(value = mockFormattedNumber(1234.0), rank = null))),
-            GemChartSection.Links(links = listOf(link.toGem())),
+            GemChartSection.Links(links = listOf(mockGemSocialLink())),
         )
         linksFlow.value = listOf(link)
         marketFlow.value = market

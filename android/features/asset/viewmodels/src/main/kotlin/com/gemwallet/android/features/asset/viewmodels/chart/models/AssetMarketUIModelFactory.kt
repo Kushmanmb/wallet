@@ -8,14 +8,13 @@ import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.gemwallet.android.ui.components.list_item.property.linkRows
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Currency
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import uniffi.gemstone.GemAssetMarketRow
 import uniffi.gemstone.GemChartSection
-import uniffi.gemstone.socialLinks
+import uniffi.gemstone.GemListRow
 
 class AssetMarketUIModelFactory @Inject constructor(@ApplicationContext private val context: Context) {
 
@@ -33,7 +32,7 @@ class AssetMarketUIModelFactory @Inject constructor(@ApplicationContext private 
                     is GemChartSection.Market -> ChartSectionUIModel.Market(section.rows.map(mapper::row))
                     is GemChartSection.Links -> ChartSectionUIModel.Links(
                         title = context.getString(R.string.social_links),
-                        links = socialLinks(section.links).linkRows(context),
+                        row = GemListRow.Social(section.links),
                     )
                 }
             },
