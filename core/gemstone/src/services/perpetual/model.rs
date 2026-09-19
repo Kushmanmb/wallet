@@ -303,10 +303,28 @@ pub struct GemPerpetualMarketCounts {
     pub recents: u32,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Default, uniffi::Record)]
+pub struct GemPerpetualMarketSession {
+    pub query: String,
+    pub is_searching: bool,
+}
+
 #[uniffi::export]
-impl GemPerpetualMarketCounts {
-    pub fn sections(&self, is_searching: bool, is_query_empty: bool) -> GemPerpetualMarketSections {
-        super::rules::market_sections(self, is_searching, is_query_empty)
+impl GemPerpetualMarketSession {
+    pub fn on_query_changed(&self, query: String) -> Self {
+        Self { query, ..self.clone() }
+    }
+
+    pub fn on_searching_changed(&self, is_searching: bool) -> Self {
+        Self { is_searching, ..self.clone() }
+    }
+
+    pub fn search_query(&self) -> String {
+        self.query.trim().to_string()
+    }
+
+    pub fn sections(&self, counts: GemPerpetualMarketCounts) -> GemPerpetualMarketSections {
+        super::rules::market_sections(&counts, self.is_searching, self.search_query().is_empty())
     }
 }
 

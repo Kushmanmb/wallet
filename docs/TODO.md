@@ -62,7 +62,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **S41** **M** iOS `ImportWalletSceneViewModel` drives input, word suggestions, import kind and button state itself — `GemWalletImportSession` on both apps (Android `ImportUIState` carries the same).
 - **S43** **M** iOS `ManageContactViewModel` (name input, description, avatar, addresses, saving) and Android `ManageContactState` — `GemContactSession` over the `GemContactInput` both already hold.
 - **S45** **S** iOS `RecipientSceneViewModel` (address input, memo, `recipientData`) drives the recipient screen app-side; Android's does too — `GemRecipientSession` over `GemRecipientService.next`.
-- **S46** **S** iOS `PerpetualsSceneViewModel` (`isSearchPresented`, `searchQuery`, `isSearching`) and Android `PerpetualMarketViewModel` (`isSearching`, `query`) both drive the market search — `GemPerpetualMarketSession`, which already has `GemPerpetualMarketCounts.sections` as its derived half.
 - **S48** **S** iOS `SecurityViewModel` toggles (`isEnabled`, `lockPeriod`, `isPrivacyLockEnabled`, `isHideBalanceEnabled`) and Android `SecurityViewModel` — a `GemSecuritySession` whose sections the screen already reads.
 
 

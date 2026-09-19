@@ -653,6 +653,7 @@ pub fn modify_buttons() -> Vec<GemPerpetualButton> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::services::perpetual::model::GemPerpetualMarketSession;
     use crate::services::amount::{GemAmountPerpetualPosition, GemAmountType, rules::perpetual_amount_type};
     use num_bigint::BigInt;
     use num_bigint::BigUint;
@@ -707,7 +708,7 @@ mod tests {
         };
 
         assert_eq!(
-            counts.sections(true, true),
+            market_sections(&counts, true, true),
             GemPerpetualMarketSections {
                 shows_positions: false,
                 shows_recents: true,
@@ -716,9 +717,9 @@ mod tests {
                 shows_empty: true
             }
         );
-        assert!(!counts.sections(true, false).shows_recents);
-        assert!(!counts.sections(false, true).shows_recents);
-        assert!(!counts.sections(false, true).shows_empty);
+        assert!(!market_sections(&counts, true, false).shows_recents);
+        assert!(!market_sections(&counts, false, true).shows_recents);
+        assert!(!market_sections(&counts, false, true).shows_empty);
 
         let listed = GemPerpetualMarketCounts {
             positions: 1,
@@ -726,9 +727,26 @@ mod tests {
             markets: 3,
             recents: 0,
         };
-        let sections = listed.sections(true, true);
+        let sections = market_sections(&listed, true, true);
         assert!(sections.shows_positions && sections.shows_pinned && sections.shows_markets);
         assert!(!sections.shows_empty);
+    }
+
+    #[test]
+    fn test_market_session_trims_the_query_and_keeps_recents_until_one_is_typed() {
+        let counts = GemPerpetualMarketCounts {
+            positions: 0,
+            pinned: 0,
+            markets: 0,
+            recents: 2,
+        };
+        let searching = GemPerpetualMarketSession::default().on_searching_changed(true);
+
+        assert!(searching.sections(counts).shows_recents);
+        assert!(searching.on_query_changed("  ".to_string()).sections(counts).shows_recents, "blank input is no query");
+        assert_eq!(searching.on_query_changed(" btc ".to_string()).search_query(), "btc");
+        assert!(!searching.on_query_changed(" btc ".to_string()).sections(counts).shows_recents);
+        assert!(!GemPerpetualMarketSession::default().sections(counts).shows_empty, "nothing is empty before a search");
     }
 
     #[test]

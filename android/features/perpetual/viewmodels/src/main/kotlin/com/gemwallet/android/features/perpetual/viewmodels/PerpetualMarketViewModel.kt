@@ -50,6 +50,8 @@ import uniffi.gemstone.GemPerpetualServiceInterface
 import uniffi.gemstone.GemPerpetualSubscription
 import uniffi.gemstone.GemRefreshKind
 import uniffi.gemstone.PerpetualProvider
+import kotlinx.coroutines.flow.distinctUntilChanged
+import uniffi.gemstone.GemPerpetualMarketSession
 
 @HiltViewModel
 class PerpetualMarketViewModel @Inject constructor(
@@ -64,12 +66,15 @@ class PerpetualMarketViewModel @Inject constructor(
     private val connectionStatusObserver: ConnectionStatusObserver,
 ) : ViewModel() {
 
-    val isSearching = MutableStateFlow(false)
+    private val session = MutableStateFlow(GemPerpetualMarketSession(query = "", isSearching = false))
+
+    val isSearching: StateFlow<Boolean> = session.map { it.isSearching }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val depositAssetId: AssetId = GemPerpetual(PerpetualProvider.HYPERCORE).use { it.depositAsset() }.id.toAssetId()!!
 
     fun setSearching(searching: Boolean) {
-        isSearching.value = searching
+        session.update { it.onSearchingChanged(searching) }
     }
 
     val refreshIntervalMillis: StateFlow<Long> = connectionStatusObserver.status
@@ -77,10 +82,12 @@ class PerpetualMarketViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0L)
 
 
-    val query = MutableStateFlow<String?>(null)
+    private val query: StateFlow<String?> = session.map { it.searchQuery().takeIf(String::isNotEmpty) }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     fun setQuery(value: String) {
-        query.value = value.takeIf { it.isNotEmpty() }
+        session.update { it.onQueryChanged(value) }
     }
     val sceneState = MutableStateFlow<PerpetualMarketSceneState>(PerpetualMarketSceneState.Idle)
     private val perpetuals = getPerpetuals.getPerpetuals(query)
@@ -89,7 +96,7 @@ class PerpetualMarketViewModel @Inject constructor(
     val pinnedPerpetuals = perpetuals.map { items -> items.filter { it.isPinned } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val positions = combine(getPositions.getPerpetualPositions(), query) { items, q ->
-        val needle = q?.trim().orEmpty()
+        val needle = q.orEmpty()
         if (needle.isEmpty()) items else items.filter {
             it.title.contains(needle, ignoreCase = true) ||
                 it.perpetualId.symbol.contains(needle, ignoreCase = true) ||
@@ -111,19 +118,15 @@ class PerpetualMarketViewModel @Inject constructor(
             .map { items -> items.map { it.asset } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val sections: StateFlow<List<PerpetualMarketSectionUIModel>> = combine(positions, pinnedPerpetuals, unpinnedPerpetuals, recent, query, isSearching) { values ->
-        val positions = values[0] as List<*>
-        val pinned = values[1] as List<*>
-        val markets = values[2] as List<*>
-        val recents = values[3] as List<*>
-        val query = values[4] as String?
-        val isSearching = values[5] as Boolean
-        GemPerpetualMarketCounts(
-            positions = positions.size.toUInt(),
-            pinned = pinned.size.toUInt(),
-            markets = markets.size.toUInt(),
-            recents = recents.size.toUInt(),
-        ).sections(isSearching, query.isNullOrEmpty()).list().map { it.uiModel(context) }
+    val sections: StateFlow<List<PerpetualMarketSectionUIModel>> = combine(positions, pinnedPerpetuals, unpinnedPerpetuals, recent, session) { positions, pinned, markets, recents, session ->
+        session.sections(
+            GemPerpetualMarketCounts(
+                positions = positions.size.toUInt(),
+                pinned = pinned.size.toUInt(),
+                markets = markets.size.toUInt(),
+                recents = recents.size.toUInt(),
+            ),
+        ).list().map { it.uiModel(context) }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun onRefresh() {
