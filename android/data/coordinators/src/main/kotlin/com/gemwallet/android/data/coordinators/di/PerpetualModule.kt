@@ -1,13 +1,11 @@
 package com.gemwallet.android.data.coordinators.di
 
-import com.gemwallet.android.application.perpetual.cases.BuildPerpetualParams
 import uniffi.gemstone.GemPerpetualDetailsServiceInterface
 import com.gemwallet.android.application.perpetual.cases.GetPerpetual
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualPosition
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualPositions
 import com.gemwallet.android.application.perpetual.cases.GetPerpetuals
-import com.gemwallet.android.data.coordinators.perpetuals.BuildPerpetualParamsImpl
 import com.gemwallet.android.data.coordinators.perpetuals.PerpetualBalanceCoordinator
 import com.gemwallet.android.data.coordinators.perpetuals.GetPerpetualImpl
 import com.gemwallet.android.data.coordinators.perpetuals.GetPerpetualPositionImpl
@@ -87,17 +85,4 @@ object PerpetualModule {
         )
     }
 
-    @Provides
-    @Singleton
-    fun provideBuildPerpetualParams(
-        perpetualStore: GemstonePerpetualStore,
-        getSession: GetSession,
-        service: GemPerpetualDetailsServiceInterface,
-    ): BuildPerpetualParams {
-        return BuildPerpetualParamsImpl(
-            perpetualStore = perpetualStore,
-            getSession = getSession,
-            service = service,
-        )
-    }
 }

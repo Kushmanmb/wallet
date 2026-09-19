@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gemwallet.android.application.perpetual.cases.BuildPerpetualParams
 import com.gemwallet.android.application.perpetual.cases.GetPerpetual
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualPosition
 import com.gemwallet.android.application.perpetual.cases.PerpetualObserver
@@ -25,6 +24,7 @@ import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualDetail
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualPositionRowUIModel
 import com.gemwallet.android.features.perpetual.viewmodels.model.uiModel
 import com.gemwallet.android.features.perpetual.viewmodels.models.PerpetualChartUIModel
+import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.ui.components.chart.CandlestickTooltipUIModel
 import com.gemwallet.android.ui.components.chart.uiModel
 import com.gemwallet.android.ui.components.list_item.ListItemModel
@@ -75,7 +75,6 @@ class PerpetualDetailsViewModel @Inject constructor(
     private val getPerpetual: GetPerpetual,
     private val getPerpetualPosition: GetPerpetualPosition,
     private val getTransactions: GetTransactions,
-    private val buildPerpetualParams: BuildPerpetualParams,
     private val perpetualObserver: PerpetualObserver,
     private val service: GemPerpetualDetailsServiceInterface,
     private val getSession: GetSession,
@@ -257,21 +256,14 @@ class PerpetualDetailsViewModel @Inject constructor(
     fun reducePosition(amountAction: AmountTransactionAction) = position(GemPerpetualPositionKind.Reduce, amountAction)
 
     private fun position(kind: GemPerpetualPositionKind, amountAction: AmountTransactionAction) {
-        val perpetualId = perpetual.value?.id ?: return
-        viewModelScope.launch {
-            runCatchingCancellable { buildPerpetualParams.position(perpetualId, kind) }
-                .onSuccess { params -> params?.let(amountAction::invoke) }
-                .onFailure { errorState.value = it.errorText() }
-        }
+        val data = perpetual.value ?: return
+        val action = service.positionAction(data.perpetual.toGem(), data.asset.toGem(), position.value?.position?.toGem(), kind)
+        amountAction(AmountParams.Perpetual(assetId = data.asset.id, perpetualId = data.perpetual.id, positionAction = action))
     }
 
     fun closePosition(confirmAction: ConfirmTransactionAction) {
-        val perpetualId = perpetual.value?.id ?: return
-        viewModelScope.launch {
-            runCatchingCancellable { buildPerpetualParams.close(perpetualId) }
-                .onSuccess { transfer -> transfer?.let { confirmAction(ConfirmTransferInput(it)) } }
-                .onFailure { errorState.value = it.errorText() }
-        }
+        val data = perpetual.value ?: return
+        confirmAction(ConfirmTransferInput(service.closeTransfer(data.perpetual.toGem(), data.asset.toGem(), position.value?.position?.toGem())))
     }
 
     fun clearError() = errorState.update { null }
