@@ -87,7 +87,6 @@ pub struct GemPerpetualPositionRow {
     pub title: String,
     pub leverage: String,
     pub direction: PerpetualDirection,
-    pub liquidation_price: Option<GemFormattedNumber>,
 }
 
 #[uniffi::export]

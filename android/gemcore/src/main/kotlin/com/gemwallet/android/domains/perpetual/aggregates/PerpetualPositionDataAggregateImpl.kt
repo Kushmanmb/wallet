@@ -29,6 +29,4 @@ class PerpetualPositionDataAggregateImpl(
     override val marginAmount: String = marginFormatter.string(data.position.marginAmount)
     override val pnlWithPercentage: String = formatPnlWithPercentage(data.position.pnl, data.position.marginAmount)
     override val pnlState: GemValueTone = data.position.pnl.tone()
-
-    val liquidationPrice: String? = row.liquidationPrice?.text()
 }

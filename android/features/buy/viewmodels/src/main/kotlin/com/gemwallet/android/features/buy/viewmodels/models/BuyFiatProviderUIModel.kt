@@ -18,8 +18,6 @@ data class BuyFiatProviderUIModel(
 
     val providerName: String get() = row.providerName
 
-    val providerImageUrl: String? get() = row.providerImageUrl
-
     override val cryptoAmount: Double get() = row.cryptoAmount.value
 
     override val cryptoFormatted: String by lazy { "≈ $cryptoText" }

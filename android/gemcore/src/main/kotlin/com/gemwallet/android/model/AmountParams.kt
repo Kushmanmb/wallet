@@ -5,7 +5,6 @@ import uniffi.gemstone.EarnType
 import uniffi.gemstone.GemDelegationAmountInput
 import uniffi.gemstone.GemRecipient
 import uniffi.gemstone.GemStakeAmountInput
-import com.gemwallet.android.domains.perpetual.data
 import com.gemwallet.android.serializer.decodeJson
 import uniffi.gemstone.GemPerpetualPositionAction
 import com.gemwallet.android.serializer.packRoutePayload

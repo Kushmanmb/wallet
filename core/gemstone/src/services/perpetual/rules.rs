@@ -592,7 +592,6 @@ pub fn position_row(perpetual: &Perpetual, asset: &Asset, position: &PerpetualPo
         },
         leverage: crate::perpetual::leverage_text(position.leverage),
         direction: position.direction.clone(),
-        liquidation_price: position.liquidation_price.filter(|value| *value > 0.0).map(GemFormattedNumber::usd),
     }
 }
 
@@ -1193,28 +1192,6 @@ mod tests {
         assert_eq!(position_row(&market, &symboled, &held).title, symboled.symbol);
         assert_eq!(position_row(&market, &unsymboled, &held).title, "BTC");
         assert_eq!(position_row(&market, &symboled, &held).leverage, "40x");
-    }
-
-    #[test]
-    fn test_a_position_row_drops_a_liquidation_price_that_cannot_happen() {
-        let market = Perpetual::mock();
-        let asset = Asset::from_chain(Chain::HyperCore);
-        let priced = PerpetualPosition {
-            liquidation_price: Some(12.5),
-            ..PerpetualPosition::mock()
-        };
-        let zero = PerpetualPosition {
-            liquidation_price: Some(0.0),
-            ..PerpetualPosition::mock()
-        };
-        let absent = PerpetualPosition {
-            liquidation_price: None,
-            ..PerpetualPosition::mock()
-        };
-
-        assert_eq!(position_row(&market, &asset, &priced).liquidation_price, Some(GemFormattedNumber::usd(12.5)));
-        assert_eq!(position_row(&market, &asset, &zero).liquidation_price, None, "a zero price is no liquidation price");
-        assert_eq!(position_row(&market, &asset, &absent).liquidation_price, None);
     }
 
     #[test]

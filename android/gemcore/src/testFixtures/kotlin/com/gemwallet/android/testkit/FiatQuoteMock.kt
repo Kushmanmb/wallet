@@ -44,7 +44,6 @@ fun mockFiatQuoteRow(
     quoteId = "quote-1",
     provider = FiatProviderName.Mercuryo.toGem(),
     providerName = "Mercuryo",
-    providerImageUrl = null,
     cryptoAmount = formattedAmount(cryptoAmount, "BTC", GemValueStyle.AUTO),
     fiatAmount = formattedCurrency(fiatAmount, "USD", GemCurrencyStyle.FIAT),
     rate = rate,

@@ -74,7 +74,6 @@ pub fn quote_row(quote: &FiatQuote, asset_price: Option<f64>) -> GemFiatQuoteRow
         quote_id: quote.id.clone(),
         provider: quote.provider.id,
         provider_name: quote.provider.name.clone(),
-        provider_image_url: quote.provider.image_url.clone(),
         crypto_amount: GemFormattedNumber::amount(quote.crypto_amount, Some(quote.asset.symbol.clone()), GemValueStyle::Auto),
         fiat_amount: GemFormattedNumber::currency_code(fiat_amount, quote.fiat_currency.clone(), GemCurrencyStyle::Fiat),
         rate: (quote.crypto_amount > 0.0).then(|| GemAssetRate {

@@ -8,6 +8,7 @@ import uniffi.gemstone.GemAmountTitle
 import uniffi.gemstone.GemValueStyle
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.localization.stringRes
 import com.wallet.core.primitives.PerpetualDirection
 
 @Composable
@@ -24,11 +25,6 @@ fun GemAmountTitle.asString(): String = when (this) {
     is GemAmountTitle.PerpetualOpen -> stringResource(direction.toPrimitives().stringRes())
     is GemAmountTitle.PerpetualIncrease -> stringResource(R.string.perpetual_increase_direction, stringResource(direction.toPrimitives().stringRes()))
     is GemAmountTitle.PerpetualReduce -> stringResource(R.string.perpetual_reduce_direction, stringResource(direction.toPrimitives().stringRes()))
-}
-
-private fun PerpetualDirection.stringRes(): Int = when (this) {
-    PerpetualDirection.Short -> R.string.perpetual_short
-    PerpetualDirection.Long -> R.string.perpetual_long
 }
 
 @Composable

@@ -6,7 +6,6 @@ import com.gemwallet.android.application.perpetual.cases.GetPerpetual
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.domains.perpetual.LeverageState
 import com.gemwallet.android.domains.perpetual.aggregates.PerpetualDetailsDataAggregate
-import com.gemwallet.android.domains.perpetual.data
 import com.gemwallet.android.domains.perpetual.formatLeverage
 import com.gemwallet.android.ext.HypercoreUSDC
 import com.gemwallet.android.ext.PerpetualFormatter
@@ -208,7 +207,7 @@ class AmountPerpetualProvider(
         perpetual.filterNotNull(),
         leverageState,
     ) { _, state ->
-        service.perpetualAmountType(params.positionAction, (state?.current ?: params.positionAction.data.leverage.toInt()).toUByte())
+        service.perpetualAmountType(params.positionAction, (state?.current ?: params.positionAction.transferData().leverage.toInt()).toUByte())
     }.stateIn(scope, SharingStarted.Eagerly, null)
 
     override val assetInfo: StateFlow<AssetInfo?> = perpetual.filterNotNull()
@@ -227,7 +226,7 @@ class AmountPerpetualProvider(
             action = params.positionAction,
             value = amount.atomicValue,
             useMaxAmount = isMax,
-            leverage = leverageState.value?.current?.toUByte() ?: params.positionAction.data.leverage,
+            leverage = leverageState.value?.current?.toUByte() ?: params.positionAction.transferData().leverage,
             takeProfit = trigger(takeProfit.value),
             stopLoss = trigger(stopLoss.value),
         )

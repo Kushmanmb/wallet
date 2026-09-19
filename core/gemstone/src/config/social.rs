@@ -9,7 +9,6 @@ pub struct GemSocialLink {
     pub host: Option<String>,
 }
 
-#[uniffi::export]
 pub fn community_links() -> Vec<GemSocialLink> {
     let links = [
         (LinkType::X, "https://x.com/GemWallet"),

@@ -22,7 +22,6 @@ pub struct GemFiatQuoteRow {
     pub quote_id: String,
     pub provider: FiatProviderName,
     pub provider_name: String,
-    pub provider_image_url: Option<String>,
     pub crypto_amount: GemFormattedNumber,
     pub fiat_amount: GemFormattedNumber,
     pub rate: Option<GemAssetRate>,
