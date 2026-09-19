@@ -3,6 +3,7 @@
 import BigInt
 import Foundation
 import enum Gemstone.GemAmountType
+import func Gemstone.validatorRow
 import protocol Gemstone.GemAmountServiceProtocol
 import struct Gemstone.GemValidatorRow
 import enum Gemstone.EarnType
@@ -30,7 +31,7 @@ public final class AmountEarnViewModel: AmountDataProvidable {
     }
 
     var providerRow: GemValidatorRow {
-        service.validatorRow(validator: provider.toGem())
+        validatorRow(validator: provider.toGem())
     }
 
     var providerTitle: String {

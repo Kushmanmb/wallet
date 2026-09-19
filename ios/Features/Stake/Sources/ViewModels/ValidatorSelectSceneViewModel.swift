@@ -2,6 +2,7 @@
 
 import protocol Gemstone.GemStakeServiceProtocol
 import struct Gemstone.GemValidatorRow
+import func Gemstone.validatorRow
 import Components
 import GemstonePrimitives
 import Foundation
@@ -85,6 +86,6 @@ public final class ValidatorSelectSceneViewModel {
     }
 
     public func validatorRow(for validator: DelegationValidator) -> GemValidatorRow {
-        rowsById[validator.id] ?? service.validatorRow(validator: validator.toGem())
+        rowsById[validator.id] ?? Gemstone.validatorRow(validator: validator.toGem())
     }
 }

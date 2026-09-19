@@ -54,6 +54,7 @@ import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemStakeServiceInterface
+import uniffi.gemstone.validatorRow
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -100,7 +101,7 @@ class StakeViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val validatorRows = delegations
-        .map { items -> items.associate { it.validator.id to stakeService.validatorRow(it.validator.toGem()) } }
+        .map { items -> items.associate { it.validator.id to validatorRow(it.validator.toGem()) } }
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 

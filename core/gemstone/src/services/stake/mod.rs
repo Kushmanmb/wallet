@@ -81,10 +81,6 @@ impl GemStakeService {
         rules::earn_apr_row(&providers, asset_apr)
     }
 
-    pub fn validator_row(&self, validator: DelegationValidator) -> GemValidatorRow {
-        rules::validator_row(&validator)
-    }
-
     pub fn validator_rows(&self, validators: Vec<DelegationValidator>) -> Vec<GemValidatorRow> {
         validators.iter().map(rules::validator_row).collect()
     }
@@ -161,6 +157,11 @@ impl GemStakeService {
     pub fn selectable_validators(&self, validators: Vec<DelegationValidator>) -> Vec<DelegationValidator> {
         rules::selectable_validators(validators)
     }
+}
+
+#[uniffi::export]
+pub fn validator_row(validator: DelegationValidator) -> GemValidatorRow {
+    rules::validator_row(&validator)
 }
 
 impl GemStakeService {

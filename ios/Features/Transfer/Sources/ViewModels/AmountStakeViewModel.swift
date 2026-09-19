@@ -3,6 +3,7 @@
 import BigInt
 import Foundation
 import enum Gemstone.GemAmountType
+import func Gemstone.validatorRow
 import enum Gemstone.GemStakeAmountInput
 import struct Gemstone.GemValidatorRow
 import protocol Gemstone.GemStakeServiceProtocol
@@ -63,7 +64,7 @@ public final class AmountStakeViewModel: AmountDataProvidable {
 
     func select(_ validator: DelegationValidator) {
         guard case let .validator(state) = selection else { return }
-        state.selected = service.validatorRow(validator: validator.toGem())
+        state.selected = validatorRow(validator: validator.toGem())
         action = action.withValidator(validator: validator.toGem())
     }
 

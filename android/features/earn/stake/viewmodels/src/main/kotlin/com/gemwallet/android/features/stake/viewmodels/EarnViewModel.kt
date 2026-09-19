@@ -42,6 +42,7 @@ import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemStakeServiceInterface
 import uniffi.gemstone.GemValidatorRow
+import uniffi.gemstone.validatorRow
 import com.gemwallet.android.ext.toPrimitives
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -78,7 +79,7 @@ class EarnViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val validatorRows = positions
-        .map { items -> items.associate { it.validator.id to stakeService.validatorRow(it.validator.toGem()) } }
+        .map { items -> items.associate { it.validator.id to validatorRow(it.validator.toGem()) } }
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap<String, GemValidatorRow>())
 

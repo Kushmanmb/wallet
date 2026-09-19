@@ -41,14 +41,6 @@ public final class GemAmountServiceMock: GemAmountServiceProtocol, @unchecked Se
         builder.earnAmountType(earnType: earnType)
     }
 
-    public func validatorRow(validator: Gemstone.DelegationValidator) -> Gemstone.GemValidatorRow {
-        builder.validatorRow(validator: validator)
-    }
-
-    public func validatorRows(validators: [Gemstone.DelegationValidator]) -> [Gemstone.GemValidatorRow] {
-        validators.map { builder.validatorRow(validator: $0) }
-    }
-
     public func transferData(asset: Gemstone.Asset, transfer: GemAmountTransfer, value: Gemstone.GemBigInt, useMaxAmount: Bool) async throws -> GemTransferData {
         try await builder.transferData(asset: asset, transfer: transfer, value: value, useMaxAmount: useMaxAmount)
     }
@@ -268,12 +260,8 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         Primitives.Currency.usd.toGem()
     }
 
-    public func validatorRow(validator: Gemstone.DelegationValidator) -> Gemstone.GemValidatorRow {
-        .mock(validator: validator)
-    }
-
     public func validatorRows(validators: [Gemstone.DelegationValidator]) -> [Gemstone.GemValidatorRow] {
-        validators.map { validatorRow(validator: $0) }
+        validators.map { Gemstone.validatorRow(validator: $0) }
     }
 
     public func validatorUrl(validator _: Gemstone.DelegationValidator) -> Gemstone.BlockExplorerLink? {

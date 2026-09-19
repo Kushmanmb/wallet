@@ -5,7 +5,7 @@ pub mod rules;
 
 use std::sync::Arc;
 
-use primitives::{Asset, Currency, DelegationValidator, PerpetualDirection};
+use primitives::{Asset, Currency, PerpetualDirection};
 
 pub use model::{
     GemAmountEarnType, GemAmountEntry, GemAmountEquivalent, GemAmountError, GemAmountInput, GemAmountInputType, GemAmountMaxEntry, GemAmountPerpetualPosition, GemAmountStakeType,
@@ -20,8 +20,7 @@ use crate::services::error::GemServiceError;
 use crate::services::perpetual::GemPerpetualPositionAction;
 use crate::services::perpetual::rules as perpetual_rules;
 use crate::services::preferences::GemPreferencesService;
-use crate::services::stake::rules as stake_rules;
-use crate::services::stake::{GemStakeService, GemValidatorRow};
+use crate::services::stake::GemStakeService;
 use crate::services::transfer::rules as transfer_rules;
 use crate::services::transfer::{GemRecipient, GemTransferData};
 use crate::services::wallet_session::GemWalletSessionService;
@@ -72,10 +71,6 @@ impl GemAmountService {
 
     pub fn perpetual_amount_type(&self, action: GemPerpetualPositionAction, leverage: u8) -> GemAmountType {
         rules::perpetual_amount_type(&action, leverage)
-    }
-
-    pub fn validator_row(&self, validator: DelegationValidator) -> GemValidatorRow {
-        stake_rules::validator_row(&validator)
     }
 
     pub fn earn_amount_type(&self, earn_type: GemEarnType) -> GemAmountType {

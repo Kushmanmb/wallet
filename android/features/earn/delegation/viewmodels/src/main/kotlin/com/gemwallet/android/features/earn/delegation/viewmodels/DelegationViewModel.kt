@@ -40,6 +40,7 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemDelegationAction
 import uniffi.gemstone.GemDelegationDestination
 import uniffi.gemstone.GemStakeServiceInterface
+import uniffi.gemstone.validatorRow
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -99,7 +100,7 @@ class DelegationViewModel @Inject constructor(
         if (assetInfo == null || delegation == null) {
             return@combine null
         }
-        HeadDelegationInfo(delegation, assetInfo, stakeService.getCurrency().toPrimitives(), stakeService.validatorRow(delegation.validator.toGem()))
+        HeadDelegationInfo(delegation, assetInfo, stakeService.getCurrency().toPrimitives(), validatorRow(delegation.validator.toGem()))
     }
     .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
