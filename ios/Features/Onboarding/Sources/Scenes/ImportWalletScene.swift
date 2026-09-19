@@ -125,8 +125,6 @@ struct ImportWalletScene: View {
             ScanQRCodeNavigationStack(scanType: scanType, action: model.onHandleScan)
         }
         .onChange(of: model.input, model.onChangeInput)
-        .onChange(of: model.inputCursor, model.onChangeInputCursor)
-        .onChange(of: model.importType, model.onChangeImportType)
         .taskOnce {
             focusedField = .input
         }

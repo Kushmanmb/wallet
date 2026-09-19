@@ -1547,6 +1547,9 @@ mod tests {
             StakeType::Unfreeze(Resource::Bandwidth)
         ));
         assert!(matches!(with_resource(&stake, Resource::Energy), GemStakeAmountInput::Stake { validator: None, .. }));
+        assert_eq!(freeze.resource(), Some(Resource::Bandwidth), "a freeze picks a resource");
+        assert_eq!(unfreeze.resource(), Some(Resource::Energy));
+        assert_eq!(stake.resource(), None, "every other action picks a validator");
     }
 
     #[test]

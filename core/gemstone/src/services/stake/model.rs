@@ -123,6 +123,13 @@ impl GemStakeAmountInput {
     pub fn with_resource(&self, resource: Resource) -> GemStakeAmountInput {
         rules::with_resource(self, resource)
     }
+
+    pub fn resource(&self) -> Option<Resource> {
+        match self {
+            Self::Freeze { resource } | Self::Unfreeze { resource } => Some(*resource),
+            Self::Stake { .. } | Self::Redelegate { .. } | Self::Unstake { .. } | Self::Withdraw { .. } | Self::Rewards { .. } => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]

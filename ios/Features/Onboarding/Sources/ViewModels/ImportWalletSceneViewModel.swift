@@ -1,7 +1,7 @@
-import class Gemstone.GemMnemonic
 import protocol Gemstone.GemNameServiceProtocol
 import enum Gemstone.GemWalletImportKind
 import struct Gemstone.GemWalletImportScreen
+import struct Gemstone.GemWalletImportSession
 import enum Gemstone.GemWalletImportType
 import protocol Gemstone.GemWalletServiceProtocol
 import Components
@@ -20,15 +20,10 @@ import enum Gemstone.GemServiceError
 final class ImportWalletSceneViewModel {
     private let service: any GemWalletServiceProtocol
     private let preferences: ObservablePreferences
-    private let mnemonic = GemMnemonic()
     let type: ImportWalletType
 
-    var input: String = ""
-    var inputCursor: Int?
-    var wordsSuggestion: [String] = []
-    var importType: GemWalletImportKind = .phrase
+    private(set) var session = GemWalletImportSession(kind: .phrase, text: "", cursor: nil, isImporting: false)
     let nameRecordViewModel: NameRecordViewModel?
-    var buttonState = ButtonState.normal
 
     var isPresentingScanner = false
     var isPresentingAlertMessage: AlertMessage?
@@ -55,6 +50,29 @@ final class ImportWalletSceneViewModel {
 
     var title: String {
         importScreen.title.text
+    }
+
+    var input: String {
+        get { session.text }
+        set { session = session.onInputChanged(text: newValue, cursor: session.cursor) }
+    }
+
+    var inputCursor: Int? {
+        get { session.cursor.map { Int($0) } }
+        set { session = session.onInputChanged(text: session.text, cursor: newValue.map { UInt32($0) }) }
+    }
+
+    var importType: GemWalletImportKind {
+        get { session.kind }
+        set { session = session.onKindChanged(kind: newValue) }
+    }
+
+    var wordsSuggestion: [String] {
+        session.suggestions()
+    }
+
+    var buttonState: ButtonState {
+        session.isImporting ? .loading(showProgress: true) : .normal
     }
 
     var pasteButtonTitle: String {
@@ -112,12 +130,7 @@ final class ImportWalletSceneViewModel {
 // MARK: - Business Logic
 
 extension ImportWalletSceneViewModel {
-    func onChangeImportType(_: GemWalletImportKind, _: GemWalletImportKind) {
-        input = ""
-    }
-
     func onChangeInput(_: String, newValue: String) {
-        updateSuggestions()
         if importType.resolvesNames(), let chain {
             nameRecordViewModel?.getNameRecord(name: newValue, chain: chain)
         } else {
@@ -126,12 +139,12 @@ extension ImportWalletSceneViewModel {
     }
 
     func onSelectActionButton() async {
-        buttonState = .loading(showProgress: true)
+        session = session.onImporting(isImporting: true)
 
         do {
             try await importWallet()
         } catch {
-            buttonState = .normal
+            session = session.onImporting(isImporting: false)
             isPresentingAlertMessage = AlertMessage(title: alertTitle, error: error)
         }
     }
@@ -141,25 +154,11 @@ extension ImportWalletSceneViewModel {
     }
 
     func onHandleScan(_ result: String) {
-        input = result
-    }
-
-    func onChangeInputCursor(_: Int?, _: Int?) {
-        updateSuggestions()
+        session = session.onInputChanged(text: result, cursor: nil)
     }
 
     func onSelectWord(_ word: String) {
-        let edit = mnemonic.applyPhraseSuggestion(text: input, cursor: cursor, word: word)
-        input = edit.text
-        inputCursor = Int(edit.cursor)
-    }
-
-    private var cursor: UInt32 {
-        UInt32(min(inputCursor ?? input.utf16.count, input.utf16.count))
-    }
-
-    private func updateSuggestions() {
-        wordsSuggestion = mnemonic.phraseSuggestions(text: input, cursor: cursor)
+        session = session.onSuggestionSelected(word: word)
     }
 
     func onPaste() {
@@ -167,7 +166,7 @@ extension ImportWalletSceneViewModel {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
             return
         }
-        input = string.trim()
+        session = session.onInputChanged(text: string.trim(), cursor: nil)
 
         if shouldProtectInput {
             CopyTypeViewModel.clearClipboard()
@@ -211,6 +210,6 @@ extension ImportWalletSceneViewModel {
         } catch {
             debugLog("import wallet error: \(error)")
         }
-        buttonState = .normal
+        session = session.onImporting(isImporting: false)
     }
 }

@@ -26,32 +26,32 @@ impl GemMnemonic {
         Self
     }
 
-    pub fn phrase_suggestions(&self, text: String, cursor: u32) -> Vec<String> {
-        let word = PhraseWord::at(&text, cursor);
-        let current = text[word.start..word.end].to_lowercase();
-        Mnemonic::suggest_limited(&text[word.start..word.cursor], None)
-            .into_iter()
-            .filter(|suggestion| *suggestion != current)
-            .take(PHRASE_SUGGESTION_LIMIT)
-            .collect()
-    }
-
-    pub fn apply_phrase_suggestion(&self, text: String, cursor: u32, word: String) -> GemPhraseEdit {
-        let at = PhraseWord::at(&text, cursor);
-        let rest = &text[at.end..];
-        let (separator, rest) = match rest.chars().next() {
-            Some(next) if next.is_whitespace() => (&rest[..next.len_utf8()], &rest[next.len_utf8()..]),
-            _ => (" ", rest),
-        };
-        let head = format!("{}{word}{separator}", &text[..at.start]);
-        GemPhraseEdit {
-            cursor: head.encode_utf16().count() as u32,
-            text: head + rest,
-        }
-    }
-
     pub fn find_invalid_words(&self, words: Vec<String>) -> Vec<String> {
         Mnemonic::invalid_words(&words.join(" "))
+    }
+}
+
+pub(crate) fn phrase_suggestions(text: &str, cursor: u32) -> Vec<String> {
+    let word = PhraseWord::at(text, cursor);
+    let current = text[word.start..word.end].to_lowercase();
+    Mnemonic::suggest_limited(&text[word.start..word.cursor], None)
+        .into_iter()
+        .filter(|suggestion| *suggestion != current)
+        .take(PHRASE_SUGGESTION_LIMIT)
+        .collect()
+}
+
+pub(crate) fn apply_phrase_suggestion(text: &str, cursor: u32, word: &str) -> GemPhraseEdit {
+    let at = PhraseWord::at(text, cursor);
+    let rest = &text[at.end..];
+    let (separator, rest) = match rest.chars().next() {
+        Some(next) if next.is_whitespace() => (&rest[..next.len_utf8()], &rest[next.len_utf8()..]),
+        _ => (" ", rest),
+    };
+    let head = format!("{}{word}{separator}", &text[..at.start]);
+    GemPhraseEdit {
+        cursor: head.encode_utf16().count() as u32,
+        text: head + rest,
     }
 }
 
@@ -90,11 +90,11 @@ mod tests {
     use super::*;
 
     fn suggestions(text: &str, cursor: usize) -> Vec<String> {
-        GemMnemonic::new().phrase_suggestions(text.to_string(), cursor as u32)
+        phrase_suggestions(text, cursor as u32)
     }
 
     fn apply(text: &str, cursor: usize, word: &str) -> GemPhraseEdit {
-        GemMnemonic::new().apply_phrase_suggestion(text.to_string(), cursor as u32, word.to_string())
+        apply_phrase_suggestion(text, cursor as u32, word)
     }
 
     #[test]

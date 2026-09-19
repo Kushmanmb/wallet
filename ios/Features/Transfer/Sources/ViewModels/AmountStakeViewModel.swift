@@ -34,12 +34,11 @@ public final class AmountStakeViewModel: AmountDataProvidable {
     init(asset: Asset, type: GemStakeAmountInput, service: any GemAmountServiceProtocol) {
         self.asset = asset
         self.service = service
-        switch type {
-        case let .freeze(resource), let .unfreeze(resource):
+        if let resource = type.resource() {
             selection = .resource(SelectionState(options: [.bandwidth, .energy], selected: resource.toPrimitives(), isEnabled: true, title: Localized.Stake.resource))
             recommendedValidators = []
             action = type
-        case .stake, .unstake, .redelegate, .withdraw, .rewards:
+        } else {
             let validators = service.stakeValidatorSelection(chain: asset.chain.rawValue, input: type)
             guard let selected = validators.validator else {
                 preconditionFailure("Stake action \(type) requires at least one validator")
