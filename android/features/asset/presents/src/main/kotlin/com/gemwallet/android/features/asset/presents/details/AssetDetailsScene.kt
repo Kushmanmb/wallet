@@ -8,7 +8,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -32,7 +31,6 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.showSnackbar
 import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.models.ListPosition
-import kotlinx.coroutines.launch
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 
@@ -47,29 +45,11 @@ internal fun AssetDetailsScene(
     snackBar: SnackbarHostState = remember { SnackbarHostState() },
     onAction: (AssetDetailsAction) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
-    val isPinned = uiState.assetInfo.metadata.isPinned
-    val pinToastMessage = stringResource(
-        if (isPinned) R.string.common_unpinned_asset else R.string.common_pinned_asset,
-        uiState.asset.name,
-    )
-    val addToastMessage = stringResource(R.string.asset_added_to_wallet)
     val detailsState = uiState.detailsState
     val onSelect: (GemListRowTitle) -> Unit = { title ->
         when (title) {
-            GemListRowTitle.PIN, GemListRowTitle.UNPIN -> {
-                onAction(AssetDetailsAction.Pin)
-                scope.launch {
-                    snackBar.showSnackbar(
-                        pinToastMessage,
-                        if (isPinned) R.drawable.keep_off else R.drawable.ic_push_pin,
-                    )
-                }
-            }
-            GemListRowTitle.ADD_TO_WALLET -> {
-                onAction(AssetDetailsAction.Add)
-                scope.launch { snackBar.showSnackbar(addToastMessage, R.drawable.ic_add_circle_outlined) }
-            }
+            GemListRowTitle.PIN, GemListRowTitle.UNPIN -> onAction(AssetDetailsAction.Pin)
+            GemListRowTitle.ADD_TO_WALLET -> onAction(AssetDetailsAction.Add)
             GemListRowTitle.PRICE_ALERTS -> onAction(AssetDetailsAction.OpenPriceAlerts(uiState.asset.id))
             else -> Unit
         }
@@ -98,7 +78,6 @@ internal fun AssetDetailsScene(
             AssetDetailsMenu(
                 uiState = uiState,
                 priceAlert = uiState.priceAlertMenu,
-                snackBar = snackBar,
                 requestNotificationPermission = requestNotificationPermission,
                 onPriceAlert = { onAction(AssetDetailsAction.TogglePriceAlert(it)) },
             )

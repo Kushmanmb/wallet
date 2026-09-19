@@ -57,6 +57,15 @@ import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemPriceAlertToggle
 import uniffi.gemstone.GemRefreshKind
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.gemwallet.android.ui.models.ToastEmitter
+import com.gemwallet.android.ui.models.ToastEmitterImpl
+import com.gemwallet.android.ui.models.ToastMessage
+import com.gemwallet.android.ui.components.screen.assetPinnedToast
+import com.gemwallet.android.ui.components.screen.assetAddedToast
+import com.gemwallet.android.features.asset.viewmodels.localization.toastRes
+import com.gemwallet.android.ui.R
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -73,7 +82,8 @@ class AssetDetailsViewModel @Inject constructor(
     private val userConfig: UserConfig,
     private val connectionStatusObserver: ConnectionStatusObserver,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-) : ViewModel() {
+    @param:ApplicationContext private val context: Context,
+) : ViewModel(), ToastEmitter by ToastEmitterImpl() {
 
     val refreshIntervalMillis: StateFlow<Long> = connectionStatusObserver.refreshIntervalMillis(GemRefreshKind.WALLET)
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0L)
@@ -196,18 +206,22 @@ class AssetDetailsViewModel @Inject constructor(
     fun pin() = viewModelScope.launch(ioDispatcher) {
         val assetInfo = chainAssetInfo.value?.assetInfo ?: return@launch
         runCatchingCancellable { assetDetailsService.setAssetPinned(assetInfo.id().toIdentifier(), !assetInfo.metadata.isPinned) }
+            .onSuccess { emitToast(assetPinnedToast(context, assetInfo.asset.name, !assetInfo.metadata.isPinned)) }
             .onFailure { Log.e(TAG, "pinning ${assetInfo.id().toIdentifier()} failed", it) }
     }
 
     fun add() = viewModelScope.launch(ioDispatcher) {
         val assetInfo = chainAssetInfo.value?.assetInfo ?: return@launch
         runCatchingCancellable { assetDetailsService.setAssetsEnabled(listOf(assetInfo.id().toIdentifier()), true) }
+            .onSuccess { emitToast(assetAddedToast(context)) }
             .onFailure { Log.e(TAG, "enabling ${assetInfo.id().toIdentifier()} failed", it) }
     }
 
     fun togglePriceAlert(assetId: AssetId) = viewModelScope.launch(ioDispatcher) {
-        val toggled = uiModel.value?.detailsState?.priceAlert?.toggled() ?: return@launch
-        runCatchingCancellable { assetDetailsService.setPriceAlert(assetId.toIdentifier(), toggled == GemPriceAlertToggle.ENABLED) }
+        val current = uiModel.value?.detailsState?.priceAlert ?: return@launch
+        val name = chainAssetInfo.value?.assetInfo?.asset?.name.orEmpty()
+        runCatchingCancellable { assetDetailsService.setPriceAlert(assetId.toIdentifier(), current.toggled() == GemPriceAlertToggle.ENABLED) }
+            .onSuccess { emitToast(ToastMessage(context.getString(current.toastRes(), name), R.drawable.ic_notifications)) }
             .onFailure { errorState.value = it.errorText() }
     }
 

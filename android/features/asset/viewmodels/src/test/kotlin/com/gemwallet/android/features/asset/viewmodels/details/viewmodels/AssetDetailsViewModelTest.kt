@@ -139,5 +139,6 @@ class AssetDetailsViewModelTest {
         userConfig = mockk(relaxed = true),
         ioDispatcher = ioDispatcher,
         connectionStatusObserver = mockk(relaxed = true),
+        context = mockk(relaxed = true),
     ).also(viewModels::add)
 }

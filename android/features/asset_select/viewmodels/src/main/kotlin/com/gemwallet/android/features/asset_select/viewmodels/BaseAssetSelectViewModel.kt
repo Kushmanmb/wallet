@@ -234,8 +234,8 @@ open class BaseAssetSelectViewModel(
         val item = assets.value.firstOrNull { it.asset.id == assetId }
         val willPin = item?.pinned != true
         runCatchingCancellable { service.setAssetPinned(assetId.toIdentifier(), willPin) }
+            .onSuccess { item?.let { emitToast(assetPinnedToast(context, it.asset.name, willPin)) } }
             .onFailure { Log.e(TAG, "pinning ${assetId.toIdentifier()} failed", it) }
-        item?.let { emitToast(assetPinnedToast(context, it.asset.name, willPin)) }
     }
 
     private suspend fun setVisibility(assetId: AssetId, visible: Boolean): Result<Unit> = withContext(ioDispatcher) {
@@ -288,11 +288,9 @@ open class BaseAssetSelectViewModel(
         service.searchAssets(query)
     }
 
-    protected suspend fun setPerpetualPinned(perpetualId: PerpetualId, pinned: Boolean) {
-        withContext(ioDispatcher) {
-            runCatchingCancellable { service.setPerpetualPinned(perpetualId.toIdentifier(), pinned) }
-                .onFailure { Log.e(TAG, "pinning perpetual ${perpetualId.toIdentifier()} failed", it) }
-        }
+    protected suspend fun setPerpetualPinned(perpetualId: PerpetualId, pinned: Boolean): Result<Unit> = withContext(ioDispatcher) {
+        runCatchingCancellable { service.setPerpetualPinned(perpetualId.toIdentifier(), pinned) }
+            .onFailure { Log.e(TAG, "pinning perpetual ${perpetualId.toIdentifier()} failed", it) }
     }
 
     fun openRecent(asset: Asset) = updateRecent(asset, GemAssetAction.OPEN)

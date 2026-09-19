@@ -132,8 +132,8 @@ class AssetsViewModel @Inject constructor(
     fun togglePin(assetId: AssetId) = viewModelScope.launch(ioDispatcher) {
         val item = assetGroups.value.let { it.pinned + it.unpinned }.firstOrNull { it.id == assetId } ?: return@launch
         runCatchingCancellable { service.setAssetPinned(assetId.toIdentifier(), !item.pinned) }
+            .onSuccess { emitToast(assetPinnedToast(context, item.asset.name, !item.pinned)) }
             .onFailure { Log.e(TAG, "pinning ${assetId.toIdentifier()} failed", it) }
-        emitToast(assetPinnedToast(context, item.asset.name, !item.pinned))
     }
 
     fun hideBalances() {
