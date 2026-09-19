@@ -92,7 +92,12 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
     is GemListRow.Link -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), opensAnotherScreen = true)
     is GemListRow.Url -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), url = url)
     is GemListRow.Lines -> GemListRowUIModel.Item(
-        ListItemModel(title = title.text(context), subtitle = lines.firstOrNull()?.string(context), subtitleExtra = lines.getOrNull(1)?.string(context)),
+        ListItemModel(
+            title = title.text(context),
+            subtitle = lines.firstOrNull()?.string(context),
+            subtitleExtra = lines.getOrNull(1)?.string(context),
+            info = info?.infoSheet(infoIcon),
+        ),
     )
     is GemListRow.Explorer -> GemListRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)
     is GemListRow.Error -> GemListRowUIModel.Notice(title = GemListRowTitle.ERROR.text(context), message = error.errorText().text(context), kind = GemNoticeKind.ERROR)
@@ -153,6 +158,9 @@ private fun GemInfoTopic.infoSheet(icon: Any?): InfoSheetEntity = when (this) {
     GemInfoTopic.FundingApr -> InfoSheetEntity.FundingAprInfo
     GemInfoTopic.StakeApr -> InfoSheetEntity.StakeAprInfo(icon)
     GemInfoTopic.StakeLockTime -> InfoSheetEntity.StakeLockTimeInfo(icon)
+    GemInfoTopic.AutoClose -> InfoSheetEntity.AutoCloseInfo
+    GemInfoTopic.LiquidationPrice -> InfoSheetEntity.LiquidationPriceInfo
+    GemInfoTopic.FundingPayments -> InfoSheetEntity.FundingPayments
     is GemInfoTopic.TransactionStatus -> InfoSheetEntity.TransactionInfo(
         icon = icon,
         state = state.toPrimitives(),

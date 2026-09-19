@@ -87,7 +87,7 @@ fun GemListRowView(
                             accessory?.invoke()
                         }
                     }
-                    else -> null
+                    else -> accessory
                 },
             )
         }

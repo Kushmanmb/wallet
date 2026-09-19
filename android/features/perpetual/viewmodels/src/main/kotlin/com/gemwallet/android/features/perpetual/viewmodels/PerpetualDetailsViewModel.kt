@@ -23,7 +23,6 @@ import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.perpetual.viewmodels.localization.stringRes
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualDetailsSectionUIModel
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualPositionRowUIModel
-import com.gemwallet.android.features.perpetual.viewmodels.model.positionRow
 import com.gemwallet.android.features.perpetual.viewmodels.model.uiModel
 import com.gemwallet.android.features.perpetual.viewmodels.models.PerpetualChartUIModel
 import com.gemwallet.android.ui.components.chart.CandlestickTooltipUIModel
@@ -65,11 +64,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemErrorText
-import uniffi.gemstone.GemPerpetual
 import uniffi.gemstone.GemPerpetualDetailsServiceInterface
 import uniffi.gemstone.GemPerpetualPositionKind
 import uniffi.gemstone.GemPerpetualSection
-import uniffi.gemstone.PerpetualProvider
 import uniffi.gemstone.candleTooltip
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -144,11 +141,8 @@ class PerpetualDetailsViewModel @Inject constructor(
 
     val modifyButtons = service.modifyButtons().map { it.uiModel(context) }
 
-    private fun positionRows(position: PerpetualPositionDetailsDataAggregate?): List<PerpetualPositionRowUIModel> = position?.let { details ->
-        GemPerpetual(PerpetualProvider.HYPERCORE).use { perpetual ->
-            service.positionDetailRows(details.position.toGem()).map { details.positionRow(context, it, perpetual) }
-        }
-    }.orEmpty()
+    private fun positionRows(position: PerpetualPositionDetailsDataAggregate?): List<PerpetualPositionRowUIModel> =
+        position?.let { service.positionDetails(it.position.toGem()).map { detail -> detail.uiModel() } }.orEmpty()
 
     val transactions = combine(
         getTransactions.getTransactions(transactionFilters),

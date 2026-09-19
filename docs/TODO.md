@@ -33,7 +33,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 [ARCHITECTURE.md § 5](ARCHITECTURE.md#a-view-never-names-a-core-type): what must not appear inside a SwiftUI `body` or a `@Composable` is the generated type itself; a `switch` over a Core enum inside the view and a Core record handed to a child view's initializer both move into the model unchanged. The 2026-09-15 sweep closed this family (B9/B10) as "the contract working" — that closure was wrong against the rule as written two days earlier, and it is reopened here with the count measured against the 644 generated type names rather than the `Gem` prefix, which the app's own `GemTextField`/`GemLineChart` components share.
 
 
-- **R7** **M** Perpetual position detail rows — `GemPerpetualPositionDetailRow` (7 bare arms) is switched in iOS `PerpetualPositionViewModel.detailField` and Android `PerpetualDetailsUIModel` — a record with finished values.
 
 
 ## 4. App-side twins and outcomes the app invents

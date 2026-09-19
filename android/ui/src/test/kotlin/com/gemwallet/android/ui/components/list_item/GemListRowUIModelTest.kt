@@ -3,6 +3,7 @@ package com.gemwallet.android.ui.components.list_item
 import android.content.Context
 import com.gemwallet.android.testkit.mockGemWalletRow
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.InfoSheetEntity
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -10,6 +11,7 @@ import org.junit.Test
 import uniffi.gemstone.BlockExplorerLink
 import uniffi.gemstone.GemCopy
 import uniffi.gemstone.GemCopyKind
+import uniffi.gemstone.GemInfoTopic
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemLocalizedText
@@ -60,12 +62,14 @@ class GemListRowUIModelTest {
         val row = GemListRow.Lines(
             title = GemListRowTitle.AUTO_CLOSE,
             lines = listOf(GemLocalizedText.Text("Take Profit: $65,000"), GemLocalizedText.Text("Stop Loss: $55,000")),
+            info = GemInfoTopic.AutoClose,
         )
 
         val model = (row.uiModel(context) as GemListRowUIModel.Item).model
         assertEquals("Auto Close", model.title)
         assertEquals("Take Profit: $65,000", model.subtitle)
         assertEquals("Stop Loss: $55,000", model.subtitleExtra)
+        assertEquals(InfoSheetEntity.AutoCloseInfo, model.info)
     }
 
     private fun GemListRow.menu(): List<GemListRowMenuItem> = (uiModel(context) as GemListRowUIModel.Item).menu

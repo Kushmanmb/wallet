@@ -63,7 +63,9 @@ import uniffi.gemstone.GemSlippageCheck
 import com.gemwallet.android.domains.duration.formatDuration
 import uniffi.gemstone.GemPerpetual
 import uniffi.gemstone.GemTriggerOrder
+import uniffi.gemstone.PerpetualMarginType
 import uniffi.gemstone.PerpetualProvider
+import uniffi.gemstone.PriceChangeCalculator as GemPriceChangeCalculator
 
 fun GemTransactionTitle.string(context: Context): String = when (this) {
     GemTransactionTitle.Received -> context.getString(R.string.transaction_title_received)
@@ -161,6 +163,8 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     GemLocalizedText.SuspiciousAddress -> context.getString(R.string.common_suspicious_address)
     GemLocalizedText.InvalidTokenId -> context.getString(R.string.errors_token_invalid_id)
     is GemLocalizedText.TriggerOrder -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.triggerOrderText(context.getString(order.stringRes()), price?.text()) }
+    is GemLocalizedText.Pnl -> GemPriceChangeCalculator().use { it.pnlText(amount.text(), percent.text()) }
+    is GemLocalizedText.Margin -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.marginText(amount.text(), context.getString(marginType.stringRes())) }
     is GemLocalizedText.FeeRate -> when (unit) {
         FeeUnitType.SAT_VB -> "${rate.text()} ${context.getString(R.string.fee_rate_satvB)}"
         FeeUnitType.GWEI -> "${rate.text()} ${context.getString(R.string.fee_rate_gwei)}"
@@ -518,6 +522,11 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.DECIMALS -> R.string.asset_decimals
     GemListRowTitle.TYPE -> R.string.common_type
     GemListRowTitle.AUTO_CLOSE -> R.string.perpetual_auto_close
+    GemListRowTitle.SIZE -> R.string.perpetual_size
+    GemListRowTitle.ENTRY_PRICE -> R.string.perpetual_entry_price
+    GemListRowTitle.LIQUIDATION_PRICE -> R.string.info_perpetual_liquidation_price_title
+    GemListRowTitle.MARGIN -> R.string.perpetual_margin
+    GemListRowTitle.FUNDING_PAYMENTS -> R.string.info_perpetual_funding_payments_title
     GemListRowTitle.PRICE -> R.string.asset_price
     GemListRowTitle.PNL -> R.string.perpetual_pnl
     GemListRowTitle.PIN -> R.string.common_pin
@@ -539,4 +548,10 @@ fun GemSlippageCheck.footerText(context: Context, minimumText: String, maximumTe
 fun GemTriggerOrder.stringRes(): Int = when (this) {
     GemTriggerOrder.TAKE_PROFIT -> R.string.perpetual_take_profit
     GemTriggerOrder.STOP_LOSS -> R.string.perpetual_stop_loss
+}
+
+@StringRes
+fun PerpetualMarginType.stringRes(): Int = when (this) {
+    PerpetualMarginType.CROSS -> R.string.perpetual_margin_cross
+    PerpetualMarginType.ISOLATED -> R.string.perpetual_margin_isolated
 }

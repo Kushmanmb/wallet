@@ -29,7 +29,6 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.chart.CandlestickTooltipUIModel
 import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.list_item.rememberDateSections
@@ -52,8 +51,10 @@ import com.wallet.core.primitives.PerpetualOrderType
 import com.wallet.core.primitives.PerpetualPosition
 import com.wallet.core.primitives.PerpetualProvider
 import com.wallet.core.primitives.PerpetualTriggerOrder
+import uniffi.gemstone.GemInfoTopic
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
+import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemValueTone
 
 @Composable
@@ -184,14 +185,6 @@ private fun PerpetualPositionScenePreview() {
         override val marginAmount: String = "$4,771.03"
         override val pnlWithPercentage: String = "+$460.25 (+9.64%)"
         override val pnlState: GemValueTone = GemValueTone.POSITIVE
-        override val size: String = "$47,250.00"
-        override val entryPrice: String = "$94,500.00"
-        override val liquidationPrice: String = "$85,050.00"
-        override val marginType: PerpetualMarginType = PerpetualMarginType.Cross
-        override val fundingPayments: String = "+$12.50"
-        override val fundingPaymentsDirection: GemValueTone = GemValueTone.POSITIVE
-        override val stopLoss: Double = 90050.00
-        override val takeProfit: Double = 95000.00
         override val position: PerpetualPosition = PerpetualPosition(
             id = "position",
             perpetualId = perpetualId,
@@ -201,7 +194,7 @@ private fun PerpetualPositionScenePreview() {
             leverage = 10u,
             entryPrice = 94500.00,
             liquidationPrice = 85050.00,
-            marginType = marginType,
+            marginType = PerpetualMarginType.Cross,
             direction = direction,
             marginAmount = 4771.03,
             takeProfit = PerpetualTriggerOrder(95000.00, PerpetualOrderType.Limit, "tp"),
@@ -240,8 +233,14 @@ private fun PerpetualPositionScenePreview() {
                 PerpetualDetailsSectionUIModel.Position(
                     title = "Position",
                     rows = listOf(
-                        PerpetualPositionRowUIModel.Item(ListItemModel(title = "PnL", subtitle = "+$460.25 (+9.64%)", subtitleStyle = ListItemTextStyle.Positive)),
-                        PerpetualPositionRowUIModel.Autoclose(ListItemModel(title = "Auto close", subtitle = "TP $95,000.00", subtitleExtra = "SL $90,050.00")),
+                        PerpetualPositionRowUIModel.Item(GemListRow.Text(GemListRowTitle.PNL, "+$460.25 (+9.64%)")),
+                        PerpetualPositionRowUIModel.Autoclose(
+                            GemListRow.Lines(
+                                title = GemListRowTitle.AUTO_CLOSE,
+                                lines = listOf(GemLocalizedText.Text("TP $95,000.00"), GemLocalizedText.Text("SL $90,050.00")),
+                                info = GemInfoTopic.AutoClose,
+                            ),
+                        ),
                     ),
                 ),
                 PerpetualDetailsSectionUIModel.Info(
