@@ -7,10 +7,6 @@ let package = Package(
     platforms: [.iOS(.v17), .macOS(.v15)],
     products: [
         .library(
-            name: "SwiftHTTPClient",
-            targets: ["SwiftHTTPClient"],
-        ),
-        .library(
             name: "WebSocketClient",
             targets: ["WebSocketClient"],
         ),
@@ -21,17 +17,6 @@ let package = Package(
     ],
     dependencies: [],
     targets: [
-        .target(
-            name: "SwiftHTTPClient",
-            dependencies: [],
-            path: "SwiftHTTPClient",
-            exclude: ["Tests"],
-        ),
-        .testTarget(
-            name: "SwiftHTTPClientTests",
-            dependencies: ["SwiftHTTPClient"],
-            path: "SwiftHTTPClient/Tests",
-        ),
         .target(
             name: "WebSocketClient",
             dependencies: [],
