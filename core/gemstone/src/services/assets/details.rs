@@ -5,6 +5,7 @@ use primitives::{Asset, AssetId, BannerEvent, Deeplink};
 
 use crate::deeplink::GemDeeplinkService;
 use crate::models::custom_types::GemBigUint;
+use crate::models::state::GemLoadState;
 use crate::services::balance::GemBalanceService;
 use crate::services::banner::{GemBannerContent, GemBannerKey, GemBannerService};
 use crate::services::error::GemServiceError;
@@ -15,7 +16,7 @@ use crate::services::swap::GemSwapService;
 use crate::services::transactions::GemTransactionsService;
 use crate::services::wallet_session::GemWalletSessionService;
 
-use crate::services::failures::{StepFailure, record, record_both};
+use crate::services::failures::{StepFailure, record, record_result};
 
 use super::{GemAssetDetails, GemAssetDetailsInput, GemAssetsService, rules};
 
@@ -31,6 +32,12 @@ pub enum GemAssetRefreshStep {
 pub struct GemAssetRefreshFailure {
     pub step: GemAssetRefreshStep,
     pub message: String,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAssetRefresh {
+    pub transactions: GemLoadState,
+    pub failures: Vec<GemAssetRefreshFailure>,
 }
 
 impl StepFailure for GemAssetRefreshFailure {
@@ -84,11 +91,16 @@ impl GemAssetDetailsService {
         }
     }
 
-    pub async fn refresh(&self, asset_id: AssetId) -> Vec<GemAssetRefreshFailure> {
+    pub async fn refresh(&self, asset_id: AssetId, has_transactions: bool) -> GemAssetRefresh {
         let mut failures = Vec::new();
         let wallet_id = match self.session.current_wallet_id() {
             Ok(wallet_id) => wallet_id,
-            Err(error) => return vec![GemAssetRefreshFailure::new(GemAssetRefreshStep::UpdateBalances, error.to_string())],
+            Err(error) => {
+                return GemAssetRefresh {
+                    transactions: GemLoadState::refreshed(Err(error.clone()), has_transactions),
+                    failures: vec![GemAssetRefreshFailure::new(GemAssetRefreshStep::UpdateBalances, error.to_string())],
+                };
+            }
         };
         record(&mut failures, GemAssetRefreshStep::AddPrices, self.stream.add_prices(vec![asset_id.clone()])).await;
 
@@ -99,13 +111,16 @@ impl GemAssetDetailsService {
         )
         .await;
 
-        record_both(
-            &mut failures,
-            (GemAssetRefreshStep::UpdateBalances, self.balances.update(wallet_id.clone(), vec![asset_id.clone()])),
-            (GemAssetRefreshStep::SyncTransactions, self.transactions.sync_wallet(wallet_id, Some(asset_id))),
-        )
-        .await;
-        failures
+        let (balances, transactions) = futures::join!(
+            self.balances.update(wallet_id.clone(), vec![asset_id.clone()]),
+            self.transactions.sync_wallet(wallet_id, Some(asset_id))
+        );
+        record_result(&mut failures, GemAssetRefreshStep::UpdateBalances, balances);
+        record_result(&mut failures, GemAssetRefreshStep::SyncTransactions, transactions.clone());
+        GemAssetRefresh {
+            transactions: GemLoadState::refreshed(transactions, has_transactions),
+            failures,
+        }
     }
 
     pub async fn sync_transactions(&self, asset_id: Option<AssetId>) -> Result<(), GemServiceError> {
@@ -200,12 +215,19 @@ mod tests {
         block_on(async {
             let testkit = AssetDetailsTestkit::with_status(503);
 
-            let failures = testkit.service.refresh(Chain::Ethereum.as_asset_id()).await;
+            let refresh = testkit.service.refresh(Chain::Ethereum.as_asset_id(), false).await;
+            let failures = refresh.failures;
 
             let steps: Vec<GemAssetRefreshStep> = failures.iter().map(|failure| failure.step).collect();
             assert!(steps.contains(&GemAssetRefreshStep::SyncAsset), "{failures:?}");
             assert!(steps.contains(&GemAssetRefreshStep::UpdateBalances), "{failures:?}");
             assert!(steps.contains(&GemAssetRefreshStep::SyncTransactions), "{failures:?}");
+            assert!(matches!(refresh.transactions, GemLoadState::Error { .. }), "a failed sync with nothing stored shows the error");
+            assert_eq!(
+                testkit.service.refresh(Chain::Ethereum.as_asset_id(), true).await.transactions,
+                GemLoadState::Data,
+                "a failed sync keeps the transactions already shown"
+            );
         })
     }
 
@@ -215,7 +237,7 @@ mod tests {
             let testkit = AssetDetailsTestkit::with_status(503);
             testkit.discovery.session.set_current_wallet_id(None).unwrap();
 
-            let failures = testkit.service.refresh(Chain::Ethereum.as_asset_id()).await;
+            let failures = testkit.service.refresh(Chain::Ethereum.as_asset_id(), true).await.failures;
 
             assert_eq!(failures.len(), 1);
             assert_eq!(failures[0].step, GemAssetRefreshStep::UpdateBalances);
@@ -229,7 +251,7 @@ mod tests {
             let asset = serde_json::to_string(&primitives::AssetFull::mock()).unwrap();
             let testkit = AssetDetailsTestkit::with_bodies(200, &[("assets/", &asset)]);
 
-            let failures = testkit.service.refresh(Chain::Ethereum.as_asset_id()).await;
+            let failures = testkit.service.refresh(Chain::Ethereum.as_asset_id(), true).await.failures;
 
             let steps: Vec<GemAssetRefreshStep> = failures.iter().map(|failure| failure.step).collect();
             assert!(!steps.contains(&GemAssetRefreshStep::SyncAsset), "{failures:?}");

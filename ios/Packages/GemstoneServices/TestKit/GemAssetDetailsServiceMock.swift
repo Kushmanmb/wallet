@@ -9,7 +9,7 @@ import protocol Gemstone.GemAssetDetailsServiceProtocol
 import struct Gemstone.GemAssetDetails
 import struct Gemstone.GemAssetDetailsInput
 import struct Gemstone.GemAssetDetailsState
-import struct Gemstone.GemAssetRefreshFailure
+import struct Gemstone.GemAssetRefresh
 import struct Gemstone.GemBannerContent
 import struct Gemstone.GemBannerKey
 import struct Gemstone.BlockExplorerLink
@@ -24,8 +24,8 @@ public final class GemAssetDetailsServiceMock: GemAssetDetailsServiceProtocol, @
         self.assetPair = assetPair
     }
 
-    public func refresh(assetId _: AssetId) async -> [GemAssetRefreshFailure] {
-        []
+    public func refresh(assetId _: AssetId, hasTransactions _: Bool) async -> GemAssetRefresh {
+        GemAssetRefresh(transactions: .data, failures: [])
     }
 
     public func syncTransactions(assetId _: AssetId?) async throws {}

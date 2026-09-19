@@ -21,6 +21,7 @@ import Style
 import SwiftUI
 import UIKit
 import enum Gemstone.GemServiceError
+import enum Gemstone.GemLoadState
 
 @Observable
 @MainActor
@@ -32,6 +33,8 @@ public final class AssetSceneViewModel: Sendable {
 
     public var isPresentingToastMessage: ToastMessage?
     public var isPresentingAssetSheet: AssetSheetType?
+
+    private var transactionsState: GemLoadState = .loading
 
     public var input: AssetSceneInput
     public let assetQuery: ObservableQuery<ChainAssetRequest>
@@ -114,6 +117,11 @@ public final class AssetSceneViewModel: Sendable {
                 feeBalanceMetadata: chainAssetData.feeAssetData.balance.metadata?.toGem(),
             ),
         )
+    }
+
+    var transactionsError: Error? {
+        guard transactionSections.isEmpty, case let .error(error) = transactionsState else { return nil }
+        return error
     }
 
     var showTransactions: Bool {
@@ -369,8 +377,9 @@ extension AssetSceneViewModel {
     }
 
     private func refresh() async {
-        let failures = await service.refresh(assetId: assetModel.asset.id.identifier)
-        for failure in failures {
+        let refresh = await service.refresh(assetId: assetModel.asset.id.identifier, hasTransactions: showTransactions)
+        transactionsState = refresh.transactions
+        for failure in refresh.failures {
             debugLog("asset scene: refresh \(failure.step) failed: \(failure.message)")
         }
     }

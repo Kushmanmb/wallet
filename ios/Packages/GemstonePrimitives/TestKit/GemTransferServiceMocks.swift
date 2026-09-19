@@ -399,7 +399,7 @@ public final class GemReceiveServiceMock: GemReceiveServiceProtocol, @unchecked 
 
 public final class GemTransactionsServiceMock: GemTransactionsServiceProtocol, @unchecked Sendable {
     public var filterChainsValue: [Gemstone.Chain] = []
-    public var syncError: Error?
+    public var refreshState: GemLoadState = .data
 
     public private(set) var syncedAssetIds: [Gemstone.AssetId?] = []
 
@@ -411,8 +411,8 @@ public final class GemTransactionsServiceMock: GemTransactionsServiceProtocol, @
 
     public func getCurrency() -> Gemstone.Currency { Primitives.Currency.usd.toGem() }
 
-    public func sync(assetId: Gemstone.AssetId?) async throws {
+    public func refresh(assetId: Gemstone.AssetId?, hasTransactions _: Bool) async -> GemLoadState {
         syncedAssetIds.append(assetId)
-        if let syncError { throw syncError }
+        return refreshState
     }
 }

@@ -399,6 +399,8 @@ impl<T: Clone + Default> GemLoad<T> {
 
 `data` is the decision: a fetch that succeeds replaces the value, a fetch that fails keeps a value already on screen, and only a screen with nothing to keep shows the error. A screen therefore hands its record back for the next load — `refresh(details)`, not `refresh(chain, address)` — so Core decides what survives a failure. Never re-derive the previous value from the sections the app is rendering: that is the same decision read backwards out of the UI.
 
+A screen whose rows come from a store query rather than a Core record — the stake delegations, the asset transactions, the activity list — tells its refresh whether it shows any rows (`GemStakeService::refresh`, `GemAssetDetailsService::refresh`, `GemTransactionsService::refresh`), and Core answers with `GemLoadState::refreshed`. An `Error` state takes the place of the empty state and is drawn as the shared error row (`GemListRow::Error` on Android, `ListItemErrorView` on iOS); rows already on screen stay, with no error.
+
 ### One copy model for every address, phrase and key
 
 Copying is the same three-part answer everywhere: the value that reaches the clipboard, the shortened value the toast shows, and what kind of secret it is. Each app had its own version — iOS `CopyType`, Android a raw `setPlainText` with an `isSensitive` flag it set per call site — so a screen could copy a private key without marking it sensitive.

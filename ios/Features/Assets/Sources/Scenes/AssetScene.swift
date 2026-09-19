@@ -67,6 +67,10 @@ public struct AssetScene: View {
             if model.showTransactions {
                 TransactionsList(sections: model.transactionSections)
                 .listRowInsets(.assetListRowInsets)
+            } else if let error = model.transactionsError {
+                Section {
+                    ListItemErrorView(errorTitle: Localized.Errors.errorOccurred, error: error)
+                }
             } else {
                 Section {
                     Spacer()

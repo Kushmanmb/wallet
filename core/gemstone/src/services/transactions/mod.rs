@@ -5,6 +5,7 @@ pub mod store;
 #[cfg(test)]
 pub(crate) mod testkit;
 
+use crate::models::state::GemLoadState;
 use crate::services::error::GemServiceError;
 use std::sync::Arc;
 
@@ -73,12 +74,16 @@ impl GemTransactionsService {
         self.preferences.get_currency()
     }
 
-    pub async fn sync(&self, asset_id: Option<AssetId>) -> Result<(), GemServiceError> {
-        self.sync_wallet(self.session.current_wallet_id()?, asset_id).await
+    pub async fn refresh(&self, asset_id: Option<AssetId>, has_transactions: bool) -> GemLoadState {
+        GemLoadState::refreshed(self.sync(asset_id).await, has_transactions)
     }
 }
 
 impl GemTransactionsService {
+    async fn sync(&self, asset_id: Option<AssetId>) -> Result<(), GemServiceError> {
+        self.sync_wallet(self.session.current_wallet_id()?, asset_id).await
+    }
+
     pub async fn sync_wallet(&self, wallet_id: WalletId, asset_id: Option<AssetId>) -> Result<(), GemServiceError> {
         let from_timestamp = self.wallet_preferences.get_transactions_timestamp(wallet_id.clone(), asset_id.clone());
         let timestamp = Utc::now().timestamp() as u64;

@@ -20,6 +20,11 @@ public struct TransactionsScene: View {
     public var body: some View {
         VStack {
             List {
+                if let error = model.loadError {
+                    Section {
+                        ListItemErrorView(errorTitle: Localized.Errors.errorOccurred, error: error)
+                    }
+                }
                 TransactionsList(sections: model.sections)
                 .listRowInsets(.assetListRowInsets)
             }
@@ -31,7 +36,7 @@ public struct TransactionsScene: View {
         }
         .background { Colors.insetGroupedListStyle.ignoresSafeArea() }
         .overlay {
-            if model.sections.isEmpty {
+            if model.sections.isEmpty, model.loadError == nil {
                 EmptyContentView(model: model.emptyContentModel)
                     .padding(.horizontal, .medium)
             }
