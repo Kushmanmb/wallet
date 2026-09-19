@@ -106,7 +106,7 @@ struct RecipientSceneViewModelTests {
 
         model.onHandleScan("ethereum:0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326", for: .address)
 
-        #expect(model.addressInputModel.inputModel.error as? GemRecipientErrorDisplay == .invalidAddress(network: "Solana"))
+        #expect(model.addressInputModel.inputModel.error?.localizedDescription == GemRecipientErrorDisplay.invalidAddress(network: "Solana").errorDescription)
         #expect(didNavigate == false)
     }
 
@@ -118,7 +118,7 @@ struct RecipientSceneViewModelTests {
         model.onSelectRecipient(.mock(address: "invalid address"))
 
         #expect(model.addressInputModel.text == "invalid address")
-        #expect(model.addressInputModel.inputModel.error as? GemRecipientErrorDisplay == .invalidAddress(network: "Ethereum"))
+        #expect(model.addressInputModel.inputModel.error?.localizedDescription == GemRecipientErrorDisplay.invalidAddress(network: "Ethereum").errorDescription)
         #expect(didNavigate == false)
     }
 
