@@ -44,12 +44,13 @@ class ShowSystemNotificationImpl @Inject constructor(@param:ApplicationContext p
     ) {
         val channelId = channelId ?: "default"
         val title = title ?: "GemWallet"
+        val notificationId = "$type:$rawData".hashCode()
         val intent = Intent(applicationContext, MainActivity::class.java)
             .putNotificationPayload(type = type, rawData = rawData)
             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val pendingIntent = PendingIntent.getActivity(
             applicationContext,
-            0, intent,
+            notificationId, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
         )
         val builder = NotificationCompat.Builder(applicationContext, channelId)
@@ -62,8 +63,8 @@ class ShowSystemNotificationImpl @Inject constructor(@param:ApplicationContext p
         if (ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return
         }
-        val channel = NotificationChannel(channelId, title, NotificationManager.IMPORTANCE_DEFAULT)
+        val channel = NotificationChannel(channelId, applicationContext.getString(R.string.settings_notifications_title), NotificationManager.IMPORTANCE_DEFAULT)
         notificationManager.createNotificationChannel(channel)
-        notificationManager.notify(0, builder.build())
+        notificationManager.notify(notificationId, builder.build())
     }
 }
