@@ -110,6 +110,15 @@ fn write_generated(path: &str, contents: String) {
         fs::create_dir_all(parent).expect("failed to create generated directory");
     }
     fs::write(path, contents).expect("failed to write generated file");
+    if path.extension().is_some_and(|extension| extension == "rs") {
+        format_rust(path);
+    }
+}
+
+/// Generated Rust goes through the workspace formatter so that regenerating never fights `just format`.
+fn format_rust(path: &Path) {
+    let status = Command::new("rustfmt").arg(path).status().expect("failed to run rustfmt");
+    assert!(status.success(), "rustfmt failed on {}", path.display());
 }
 
 fn process_paths(paths: Vec<String>, _folder: &str, generator_type: &GeneratorType, platform_directory_path: &str, ignored_files: &[&str]) {
