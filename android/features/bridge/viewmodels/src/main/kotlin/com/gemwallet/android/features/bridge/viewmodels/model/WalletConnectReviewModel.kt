@@ -8,8 +8,6 @@ import uniffi.gemstone.GemListRow
 import uniffi.gemstone.MessageType
 
 interface WalletConnectReviewModel {
-    val appListItem: ListItemModel
-    val walletListItem: ListItemModel
     val viewFullMessageListItem: ListItemModel
     val icon: String?
     val name: String

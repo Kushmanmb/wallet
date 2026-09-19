@@ -6,7 +6,6 @@ import GemstonePrimitives
 import GemstonePrimitivesTestKit
 import Foundation
 import struct Gemstone.SimulationHeader
-import func Gemstone.walletRow
 import Primitives
 import PrimitivesComponents
 import PrimitivesTestKit
@@ -25,7 +24,11 @@ struct SignMessageSceneViewModelTests {
 
         let viewModel = SignMessageSceneViewModel.mock(request: payload)
 
-        #expect(viewModel.walletText == "My Secure Wallet")
+        guard case let .wallet(row, _, _) = viewModel.rows.first else {
+            Issue.record("expected the wallet row first without a header")
+            return
+        }
+        #expect(row.name == "My Secure Wallet")
     }
 
     @Test
@@ -40,7 +43,7 @@ struct SignMessageSceneViewModelTests {
 
         let viewModel = SignMessageSceneViewModel.mock(request: payload)
 
-        #expect(viewModel.appText == "PancakeSwap")
+        #expect(viewModel.appName == "PancakeSwap")
     }
 
     @Test
@@ -67,18 +70,12 @@ struct SignMessageSceneViewModelTests {
 
         let viewModel = SignMessageSceneViewModel.mock(request: payload)
 
-        #expect(viewModel.networkText == "Ethereum")
-    }
-
-    @Test
-    @MainActor
-    func contextRowsProvideWalletAndNetworkImages() {
-        let payload = GemWalletConnectMessageRequest.mock()
-
-        let viewModel = SignMessageSceneViewModel.mock(request: payload)
-
-        #expect(viewModel.walletAssetImage == walletRow(wallet: payload.wallet).avatarImage)
-        #expect(viewModel.networkAssetImage == AssetIdViewModel(assetId: Chain(core: payload.chain).asset.id).networkAssetImage)
+        guard case let .network(_, chain, name) = viewModel.rows.last else {
+            Issue.record("expected the network row last")
+            return
+        }
+        #expect(chain == Chain.ethereum.rawValue)
+        #expect(name == "Ethereum")
     }
 
     @Test

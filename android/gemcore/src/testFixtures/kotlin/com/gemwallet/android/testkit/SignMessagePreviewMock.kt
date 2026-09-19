@@ -12,4 +12,5 @@ fun mockGemSignMessagePreview(
     secondaryFields = emptyList(),
     hasCriticalWarning = hasCriticalWarning,
     header = null,
+    rows = emptyList(),
 )

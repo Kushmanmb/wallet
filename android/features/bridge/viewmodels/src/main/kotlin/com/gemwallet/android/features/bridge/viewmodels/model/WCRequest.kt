@@ -51,11 +51,11 @@ sealed class WCRequest(
     ) : WCRequest(request, row), WalletConnectReviewModel {
         val signMessage: GemSignMessage get() = request.message
 
-        override val appListItem: ListItemModel get() = ListItemModel(title = texts.app, subtitle = row.title)
-        override val walletListItem: ListItemModel get() = ListItemModel(title = texts.wallet, subtitle = request.wallet.name)
         override val viewFullMessageListItem: ListItemModel get() = ListItemModel(title = texts.viewFullMessage)
 
-        private val preview: GemSignMessagePreview by lazy { namedPreview ?: service.preview(request.message, simulation, request.assets) }
+        private val preview: GemSignMessagePreview by lazy { namedPreview ?: service.preview(request.request) }
+
+        val rows: List<GemListRow> get() = preview.rows
 
         override val messageType: MessageType get() = preview.messageType
 

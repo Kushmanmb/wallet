@@ -333,8 +333,8 @@ sealed interface AuthSceneState {
         val approval: AuthApproval
         val texts: ReviewTexts
 
-        override val appListItem: ListItemModel get() = ListItemModel(title = texts.app, subtitle = peer.title)
-        override val walletListItem: ListItemModel get() = ListItemModel(title = texts.wallet, subtitle = selectedWallet.name)
+        val appListItem: ListItemModel get() = ListItemModel(title = texts.app, subtitle = peer.title)
+        val walletListItem: ListItemModel get() = ListItemModel(title = texts.wallet, subtitle = selectedWallet.name)
         override val viewFullMessageListItem: ListItemModel get() = ListItemModel(title = texts.viewFullMessage)
 
         override val icon: String? get() = peer.iconUrl

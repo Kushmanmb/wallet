@@ -2,8 +2,6 @@
 
 import struct Gemstone.GemSignMessagePreview
 import struct Gemstone.GemWalletConnectMessageRequest
-import struct Gemstone.GemWalletRow
-import func Gemstone.walletRow
 import protocol Gemstone.GemSignMessageServiceProtocol
 import Components
 import Foundation
@@ -25,7 +23,6 @@ public final class SignMessageSceneViewModel {
     private let request: GemWalletConnectMessageRequest
     private let confirmTransferDelegate: TransferDataCallback.ConfirmTransferDelegate
     private var preview: GemSignMessagePreview
-    private let row: GemWalletRow
 
     public var isPresentingUrl: URL?
     public var isPresentingPayloadDetails: Bool = false
@@ -40,12 +37,7 @@ public final class SignMessageSceneViewModel {
         self.service = service
         self.request = request
         self.confirmTransferDelegate = confirmTransferDelegate
-        row = walletRow(wallet: request.wallet)
-        preview = service.preview(message: request.message, simulation: request.simulation, assets: request.assets)
-    }
-
-    private var chain: Chain {
-        Chain(core: request.chain)
+        preview = service.preview(request: request)
     }
 
     private var metadata: ApplicationMetadata {
@@ -60,16 +52,8 @@ public final class SignMessageSceneViewModel {
         ListItemModel(title: Localized.Common.details)
     }
 
-    public var networkText: String {
-        chain.networkName
-    }
-
     public var title: String {
         preview.messageType.title
-    }
-
-    public var walletText: String {
-        request.wallet.name
     }
 
     public var buttonTitle: String {
@@ -84,16 +68,8 @@ public final class SignMessageSceneViewModel {
         AssetImage(imageURL: metadata.iconURL)
     }
 
-    public var walletAssetImage: AssetImage {
-        row.avatarImage
-    }
-
-    public var networkAssetImage: AssetImage {
-        AssetIdViewModel(assetId: chain.asset.id).networkAssetImage
-    }
-
-    public var appText: String {
-        appName
+    var rows: [GemListRow] {
+        preview.rows
     }
 
     public var appPreview: AppPreviewModel {

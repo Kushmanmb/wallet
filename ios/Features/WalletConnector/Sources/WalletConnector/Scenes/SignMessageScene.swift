@@ -28,23 +28,7 @@ public struct SignMessageScene: View {
             }
 
             Section {
-                if model.headerData != nil {
-                    ListItemImageView(
-                        title: Localized.WalletConnect.app,
-                        subtitle: model.appText,
-                        assetImage: model.appAssetImage,
-                    )
-                }
-                ListItemImageView(
-                    title: Localized.Common.wallet,
-                    subtitle: model.walletText,
-                    assetImage: model.walletAssetImage,
-                )
-                ListItemImageView(
-                    title: Localized.Transfer.network,
-                    subtitle: model.networkText,
-                    assetImage: model.networkAssetImage,
-                )
+                ForEach(model.rows, id: \.self) { GemListRowView(row: $0) }
             }
 
             if model.hasWarnings {

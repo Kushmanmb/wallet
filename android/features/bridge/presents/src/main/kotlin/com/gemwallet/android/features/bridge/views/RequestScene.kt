@@ -21,6 +21,8 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.screen.LoadingScene
 import com.wallet.core.primitives.AssetId
+import com.gemwallet.android.ui.components.list_item.GemListRowView
+import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 
 @Composable
 fun RequestScene(
@@ -72,7 +74,7 @@ fun RequestScene(
                 is WCRequest.SignMessage -> WalletConnectReviewScene(
                     model = request,
                     buttonState = buttonState,
-                    walletRow = { position -> ListItem(model = sceneState.walletListItem, listPosition = position) },
+                    details = { itemsPositioned(request.rows) { position, row -> GemListRowView(row = row, listPosition = position) } },
                     onApprove = { viewModel.onSign(reportError) },
                     onReject = viewModel::onReject,
                 )

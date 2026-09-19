@@ -43,7 +43,7 @@ sealed class WalletConnectPendingRequest(
     }
 
     class SignMessage(
-        private val request: GemWalletConnectMessageRequest,
+        val request: GemWalletConnectMessageRequest,
     ) : WalletConnectPendingRequest(request.sessionId, request.chain, request.wallet.toPrimitives(), request.session, request.simulation) {
         val message: GemSignMessage get() = request.message
         val assets: List<Asset> get() = request.assets

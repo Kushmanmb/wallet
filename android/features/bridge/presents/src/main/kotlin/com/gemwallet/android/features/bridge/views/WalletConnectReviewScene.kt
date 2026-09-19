@@ -19,22 +19,20 @@ import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.list_head.AssetValueListHead
 import com.gemwallet.android.ui.components.list_head.CenteredListHead
 import com.gemwallet.android.ui.components.list_head.CenteredListHeadSubtitleLayout
-import com.gemwallet.android.ui.components.list_item.ListItem
-import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.simulation.simulationPayloadFieldsContent
 import com.gemwallet.android.ui.models.ButtonState
-import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.requestAuth
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
+import androidx.compose.foundation.lazy.LazyListScope
 
 @Composable
 internal fun WalletConnectReviewScene(
     model: WalletConnectReviewModel,
     buttonState: ButtonState,
-    walletRow: @Composable (ListPosition) -> Unit,
+    details: LazyListScope.() -> Unit,
     onApprove: () -> Unit,
     onReject: () -> Unit,
 ) {
@@ -72,15 +70,10 @@ internal fun WalletConnectReviewScene(
                         subtitleLayout = CenteredListHeadSubtitleLayout.Vertical,
                     )
                 }
-                item { walletRow(ListPosition.First) }
             } else {
                 item { AssetValueListHead(header) }
-                item { ListItem(model = model.appListItem, listPosition = ListPosition.First) }
-                item { walletRow(ListPosition.Middle) }
             }
-            item {
-                PropertyNetworkItem(model.chain, listPosition = ListPosition.Last)
-            }
+            details()
             itemsPositioned(model.warnings) { position, row -> GemListRowView(row = row, listPosition = position) }
             if (model.hasPayload) {
                 simulationPayloadFieldsContent(

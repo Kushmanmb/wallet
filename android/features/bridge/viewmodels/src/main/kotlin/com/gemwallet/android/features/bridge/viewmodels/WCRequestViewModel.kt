@@ -207,7 +207,7 @@ private data class RequestViewModelState(
 ) {
     fun toSceneState(request: WCRequest?, texts: ReviewTexts): RequestSceneState {
         request ?: return RequestSceneState.Loading
-        val requestState = RequestSceneState.Request(walletName = request.wallet.name, request = request, walletListItem = ListItemModel(title = texts.wallet, subtitle = request.wallet.name))
+        val requestState = RequestSceneState.Request(walletName = request.wallet.name, request = request)
         return when (responseState) {
             RequestResponseState.Idle -> requestState
             RequestResponseState.Responding -> RequestSceneState.Responding(requestState)
@@ -226,20 +226,17 @@ sealed interface RequestSceneState {
     sealed interface Content : RequestSceneState {
         val walletName: String
         val request: WCRequest
-        val walletListItem: ListItemModel
     }
 
     class Request(
         override val walletName: String,
         override val request: WCRequest,
-        override val walletListItem: ListItemModel,
     ) : Content
 
     class Responding(
         private val requestState: Request,
     ) : Content {
         override val walletName: String get() = requestState.walletName
-        override val walletListItem: ListItemModel get() = requestState.walletListItem
         override val request: WCRequest get() = requestState.request
     }
 }

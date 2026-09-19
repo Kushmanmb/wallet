@@ -27,6 +27,7 @@ import com.gemwallet.android.ui.components.screen.LoadingScene
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.localization.text
+import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
 
 @Composable
 fun AuthRequestScene(
@@ -91,21 +92,28 @@ private fun AuthRequestContent(
     WalletConnectReviewScene(
         model = state,
         buttonState = buttonState,
-        walletRow = { position ->
-            ListItem(
-                model = state.walletListItem,
-                listPosition = position,
-                modifier = if (canSelectWallet && state !is AuthSceneState.Approving) {
-                    Modifier.clickable { isShowSelectWallets = true }
-                } else {
-                    Modifier
-                },
-                accessory = if (canSelectWallet) {
-                    { DataBadgeChevron() }
-                } else {
-                    null
-                },
-            )
+        details = {
+            val hasHeader = state.header != null
+            if (hasHeader) {
+                item { ListItem(model = state.appListItem, listPosition = ListPosition.First) }
+            }
+            item {
+                ListItem(
+                    model = state.walletListItem,
+                    listPosition = if (hasHeader) ListPosition.Middle else ListPosition.First,
+                    modifier = if (canSelectWallet && state !is AuthSceneState.Approving) {
+                        Modifier.clickable { isShowSelectWallets = true }
+                    } else {
+                        Modifier
+                    },
+                    accessory = if (canSelectWallet) {
+                        { DataBadgeChevron() }
+                    } else {
+                        null
+                    },
+                )
+            }
+            item { PropertyNetworkItem(state.chain, listPosition = ListPosition.Last) }
         },
         onApprove = onApprove,
         onReject = onReject,
