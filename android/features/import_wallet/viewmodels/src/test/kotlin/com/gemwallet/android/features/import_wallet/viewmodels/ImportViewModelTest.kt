@@ -67,7 +67,7 @@ class ImportViewModelTest {
 
         viewModel.importSelect(ImportType(GemWalletImportKind.PRIVATE_KEY, chain)).join()
         advanceUntilIdle()
-        viewModel.onInput("vitalik.eth")
+        viewModel.onInput("vitalik.eth", 11)
         advanceUntilIdle()
 
         assertEquals(emptyList<Pair<String, Chain>>(), addressInput.requests)
@@ -83,7 +83,7 @@ class ImportViewModelTest {
 
         viewModel.importSelect(ImportType(GemWalletImportKind.ADDRESS, chain)).join()
         advanceUntilIdle()
-        viewModel.onInput("vitalik.eth")
+        viewModel.onInput("vitalik.eth", 11)
         advanceUntilIdle()
 
         assertEquals(listOf("vitalik.eth" to chain), addressInput.requests)

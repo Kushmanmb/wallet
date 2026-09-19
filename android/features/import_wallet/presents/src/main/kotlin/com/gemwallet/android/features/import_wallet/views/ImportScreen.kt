@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,6 +48,7 @@ import com.gemwallet.android.features.import_wallet.components.ImportKindTab
 import com.gemwallet.android.features.import_wallet.localization.string
 import com.gemwallet.android.features.import_wallet.viewmodels.ImportInputUIModel
 import com.gemwallet.android.features.import_wallet.viewmodels.ImportTabUIModel
+import com.gemwallet.android.features.import_wallet.viewmodels.ImportTextUIModel
 import com.gemwallet.android.features.import_wallet.viewmodels.ImportViewModel
 import com.gemwallet.android.model.ImportType
 import com.gemwallet.android.ui.DetectScreenshot
@@ -75,7 +75,6 @@ import com.gemwallet.android.ui.theme.space0
 import com.wallet.core.primitives.Chain
 import uniffi.gemstone.GemWalletImportException
 import uniffi.gemstone.GemWalletImportKind
-import uniffi.gemstone.GemPhraseEdit
 
 private val loadingDialogSize = 100.dp
 
@@ -98,6 +97,7 @@ fun ImportScreen(
     }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val nameResolveIndicator by viewModel.nameResolveIndicator.collectAsStateWithLifecycle()
+    val suggestions by viewModel.suggestions.collectAsStateWithLifecycle()
     val inputState = remember { mutableStateOf(TextFieldValue()) }
 
     ImportScene(
@@ -111,14 +111,14 @@ fun ImportScreen(
         nameResolveIndicator = nameResolveIndicator,
         dataError = uiState.dataError,
         buttonState = buttonState(loading = uiState.loading),
-        onImport = { generatedName, value ->
-            viewModel.import(generatedName, value, onImported)
+        onImport = { generatedName ->
+            viewModel.import(generatedName, onImported)
         },
         onInput = viewModel::onInput,
         onTypeChange = viewModel::importKind,
         invalidWords = viewModel::invalidPhraseWords,
-        phraseSuggestions = viewModel::phraseSuggestions,
-        applyPhraseSuggestion = viewModel::applyPhraseSuggestion,
+        suggestions = suggestions,
+        onSelectSuggestion = viewModel::selectSuggestion,
         onCancel = onCancel,
     )
     if (uiState.loading) {
@@ -151,6 +151,7 @@ fun ImportScreen(
             ),
             onClose = {
                 viewModel.dismissExistingWallet()
+                viewModel.clearInput()
                 inputState.value = TextFieldValue()
             },
         )
@@ -171,12 +172,12 @@ private fun ImportScene(
     nameResolveIndicator: NameResolveIndicatorUIModel?,
     dataError: Throwable?,
     buttonState: ButtonState,
-    onImport: (generatedName: String, value: String) -> Unit,
-    onInput: (String) -> Unit,
+    onImport: (generatedName: String) -> Unit,
+    onInput: (String, Int) -> Unit,
     onTypeChange: (ImportType) -> Unit,
     invalidWords: (String) -> Set<String>,
-    phraseSuggestions: (String, Int) -> List<String>,
-    applyPhraseSuggestion: (String, Int, String) -> GemPhraseEdit,
+    suggestions: List<String>,
+    onSelectSuggestion: (String) -> ImportTextUIModel,
     onCancel: () -> Unit
 ) {
     val generatedName = defaultWalletName.orEmpty()
@@ -190,7 +191,7 @@ private fun ImportScene(
                 title = stringResource(id = R.string.wallet_import_action),
                 state = buttonState,
                 onClick = {
-                    onImport(generatedName, inputState.value.text)
+                    onImport(generatedName)
                 },
             )
         },
@@ -211,7 +212,7 @@ private fun ImportScene(
                         onTypeChange(type)
                         inputState.value = TextFieldValue()
                     }
-                    DataInput(input, inputState, nameResolveIndicator, invalidWords, phraseSuggestions, applyPhraseSuggestion, onInput) {
+                    DataInput(input, inputState, nameResolveIndicator, invalidWords, suggestions, onSelectSuggestion, onInput) {
                         dataErrorState = null
                     }
                     ErrorMessage(dataErrorState)
@@ -240,13 +241,11 @@ private fun DataInput(
     inputState: MutableState<TextFieldValue>,
     nameResolveIndicator: NameResolveIndicatorUIModel?,
     invalidWords: (String) -> Set<String>,
-    phraseSuggestions: (String, Int) -> List<String>,
-    applyPhraseSuggestion: (String, Int, String) -> GemPhraseEdit,
-    onInput: (String) -> Unit,
+    suggestions: List<String>,
+    onSelectSuggestion: (String) -> ImportTextUIModel,
+    onInput: (String, Int) -> Unit,
     onChange: () -> Unit,
 ) {
-    val suggestions = remember(input) { mutableStateListOf<String>() }
-
     ImportInput(
         invalidWords = invalidWords,
         inputState = inputState.value,
@@ -254,16 +253,8 @@ private fun DataInput(
         indicator = nameResolveIndicator,
         onValueChange = { query ->
             inputState.value = query
-            suggestions.clear()
-
             onChange()
-            onInput(query.text)
-
-            if (!input.supportsPhraseSuggestions) {
-                return@ImportInput
-            }
-
-            suggestions.addAll(phraseSuggestions(query.text, query.selection.start))
+            onInput(query.text, query.selection.start)
         },
     )
 
@@ -274,8 +265,8 @@ private fun DataInput(
             items(suggestions) { word ->
                 SuggestionChip(
                     onClick = {
-                        inputState.value = inputState.value.applying(word, applyPhraseSuggestion)
-                        suggestions.clear()
+                        val edit = onSelectSuggestion(word)
+                        inputState.value = TextFieldValue(text = edit.text, selection = TextRange(edit.cursor))
                         onChange()
                     },
                     label = { Text(text = word) }
@@ -322,11 +313,6 @@ private fun ErrorMessage(error: Throwable?) {
     Text(text = text, color = MaterialTheme.colorScheme.error)
 }
 
-private fun TextFieldValue.applying(word: String, apply: (String, Int, String) -> GemPhraseEdit): TextFieldValue {
-    val edit = apply(text, selection.start, word)
-    return TextFieldValue(text = edit.text, selection = TextRange(edit.cursor.toInt()))
-}
-
 @Composable
 @Preview(device = Devices.NEXUS_6)
 @Preview(device = Devices.NEXUS_7)
@@ -356,12 +342,12 @@ fun PreviewImportAddress() {
                 nameResolveIndicator = null,
                 dataError = null,
                 buttonState = ButtonState.Enabled,
-                onImport = {_, _ -> },
-                onInput = {},
+                onImport = {},
+                onInput = { _, _ -> },
                 onTypeChange = {},
                 invalidWords = { emptySet() },
-                phraseSuggestions = { _, _ -> emptyList() },
-                applyPhraseSuggestion = { text, cursor, _ -> GemPhraseEdit(text, cursor.toUInt()) },
+                suggestions = emptyList(),
+                onSelectSuggestion = { ImportTextUIModel("", 0) },
                 onCancel = {},
             )
         }

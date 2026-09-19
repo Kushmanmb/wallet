@@ -26,17 +26,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemMnemonicInterface
 import uniffi.gemstone.GemNameRecordState
-import uniffi.gemstone.GemPhraseEdit
 import uniffi.gemstone.GemNameServiceInterface
 import uniffi.gemstone.GemWalletImportKind
 import uniffi.gemstone.GemWalletImportResult
+import uniffi.gemstone.GemWalletImportSession
 import uniffi.gemstone.GemWalletServiceInterface
 
 @HiltViewModel
@@ -50,13 +52,12 @@ class ImportViewModel @Inject constructor(
 
     fun invalidPhraseWords(text: String): Set<String> = mnemonic.findInvalidWords(text.words()).toSet()
 
-    fun phraseSuggestions(text: String, cursor: Int): List<String> = mnemonic.phraseSuggestions(text, cursor.toUInt())
-
-    fun applyPhraseSuggestion(text: String, cursor: Int, word: String): GemPhraseEdit = mnemonic.applyPhraseSuggestion(text, cursor.toUInt(), word)
-
     private val state = MutableStateFlow(ImportViewModelState())
-    val uiState = state.map { it.toUIState() }
+    private val session = MutableStateFlow(GemWalletImportSession(GemWalletImportKind.PHRASE, "", null, false))
+    val uiState = combine(state, session) { state, session -> state.toUIState(session.isImporting) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, ImportUIState())
+    val suggestions: StateFlow<List<String>> = session.map { it.suggestions() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val nameRecordController = NameRecordController(nameService, viewModelScope)
     val nameResolveState: StateFlow<GemNameRecordState> = nameRecordController.state
@@ -65,6 +66,7 @@ class ImportViewModel @Inject constructor(
 
     fun importKind(type: ImportType) {
         nameRecordController.reset()
+        session.update { it.onKindChanged(type.kind) }
         state.update {
             it.copy(
                 importType = type,
@@ -73,7 +75,8 @@ class ImportViewModel @Inject constructor(
         }
     }
 
-    fun onInput(value: String) {
+    fun onInput(value: String, cursor: Int) {
+        session.update { it.onInputChanged(value, cursor.toUInt()) }
         val importType = state.value.importType
         if (importType.kind.resolvesNames()) {
             nameRecordController.getNameRecord(value, importType.chain)
@@ -82,7 +85,15 @@ class ImportViewModel @Inject constructor(
         }
     }
 
+    fun selectSuggestion(word: String): ImportTextUIModel {
+        val next = session.updateAndGet { it.onSuggestionSelected(word) }
+        return ImportTextUIModel(next.text, next.cursor?.toInt() ?: next.text.length)
+    }
+
+    fun clearInput() = session.update { it.onInputChanged("", null) }
+
     fun importSelect(importType: ImportType) = viewModelScope.launch {
+        session.update { it.onKindChanged(importType.kind) }
         val defaultName = withContext(ioDispatcher) {
             service.defaultWalletName(importType.chain?.string)
         }
@@ -100,14 +111,13 @@ class ImportViewModel @Inject constructor(
 
     fun import(
         generatedName: String,
-        data: String,
         onImported: (WalletImportResult) -> Unit
     ) {
-        if (state.value.loading) {
+        if (session.value.isImporting) {
             return
         }
         val nameRecord = nameRecordController.state.value.record()
-        state.update { it.copy(loading = true) }
+        val data = session.updateAndGet { it.onImporting(true) }.text
 
         viewModelScope.launch(ioDispatcher) {
             try {
@@ -119,17 +129,19 @@ class ImportViewModel @Inject constructor(
                     is GemWalletImportResult.New -> WalletImportResult.New(imported.wallet.toPrimitives())
                 }
                 service.setCurrentWalletId(result.wallet.id.id)
-                state.update { it.copy(dataError = null, loading = false) }
+                state.update { it.copy(dataError = null) }
+                session.update { it.onImporting(false) }
                 withContext(Dispatchers.Main) {
                     when (result) {
                         is WalletImportResult.New -> onImported(result)
-                        is WalletImportResult.Existing -> state.update { it.copy(existingWalletResult = result, loading = false) }
+                        is WalletImportResult.Existing -> state.update { it.copy(existingWalletResult = result) }
                     }
                 }
             } catch (err: CancellationException) {
                 throw err
             } catch (err: Throwable) {
-                state.update { it.copy(dataError = err, loading = false) }
+                state.update { it.copy(dataError = err) }
+                session.update { it.onImporting(false) }
             }
         }
     }
@@ -140,18 +152,16 @@ class ImportViewModel @Inject constructor(
 }
 
 data class ImportViewModelState(
-    val loading: Boolean = false,
     val error: String = "",
     val importType: ImportType = ImportType(GemWalletImportKind.PHRASE),
     val defaultWalletName: String? = null,
     val title: String = "",
     val tabs: List<GemWalletImportKind> = emptyList(),
     val showsTabs: Boolean = false,
-    val data: String = "",
     val dataError: Throwable? = null,
     val existingWalletResult: WalletImportResult.Existing? = null,
 ) {
-    fun toUIState(): ImportUIState {
+    fun toUIState(loading: Boolean): ImportUIState {
         return ImportUIState(
             loading = loading,
             error = error,
@@ -179,6 +189,8 @@ data class ImportUIState(
     val dataError: Throwable? = null,
     val existingWalletResult: WalletImportResult.Existing? = null,
 )
+
+data class ImportTextUIModel(val text: String, val cursor: Int)
 
 data class ImportTabUIModel(
     val type: ImportType,

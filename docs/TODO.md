@@ -36,7 +36,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 [No hand-written twins](ARCHITECTURE.md): a type that only crosses the FFI is used as the uniffi type, and a twin exists only for a type an app persists. Android keeps four twins of exported Core enums, none persisted, and two of them let the app invent outcomes Core never produced.
 
-- **O54** **S** iOS `AmountStakeViewModel.action: GemStakeAmountInput` and `ImportWalletSceneViewModel.importType: GemWalletImportKind` are stored and switched on in the model — the session holds them (**S41**).
 
 
 ## 5. Forwarders and façades
@@ -49,7 +48,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 ## 6. Core shapes that block an app move
 
 - **K8** **M** `GemStreamService` holds 13 `Arc`s, `GemAssetDetailsService` and `GemWalletService` 10, `GemPerpetualService` 9 — for each, the dependencies reached only to forward one call move behind the composition service (§ 7).
-- **S41** **M** iOS `ImportWalletSceneViewModel` drives input, word suggestions, import kind and button state itself — `GemWalletImportSession` on both apps (Android `ImportUIState` carries the same).
 
 
 ## 7. Decisions to make
