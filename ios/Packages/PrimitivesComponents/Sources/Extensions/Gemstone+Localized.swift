@@ -503,6 +503,7 @@ extension GemErrorText {
         case let .invalidSecretPhraseWords(words): Localized.Errors.Import.invalidSecretPhraseWord(words.joined(separator: ", "))
         case .invalidPrivateKey: Localized.Errors.Import.invalidPrivateKey
         case .invalidAddress: Localized.Errors.invalidAddressName
+        case .noAccountForChain: Localized.Errors.walletAccountMissing
         case .unknown: Localized.Errors.unknown
         case let .message(text): text
         }

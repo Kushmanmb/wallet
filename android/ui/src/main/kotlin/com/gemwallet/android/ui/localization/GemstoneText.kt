@@ -364,6 +364,7 @@ fun GemErrorText.text(context: Context): String = when (this) {
     is GemErrorText.InvalidSecretPhraseWords -> context.getString(R.string.errors_import_invalid_secret_phrase_word, words.joinToString())
     GemErrorText.InvalidPrivateKey -> context.getString(R.string.errors_import_invalid_private_key)
     GemErrorText.InvalidAddress -> context.getString(R.string.errors_invalid_address_name)
+    GemErrorText.NoAccountForChain -> context.getString(R.string.errors_wallet_account_missing)
     GemErrorText.Unknown -> context.getString(R.string.errors_unknown)
     is GemErrorText.Message -> text
 }

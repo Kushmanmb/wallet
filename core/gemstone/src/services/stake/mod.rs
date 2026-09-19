@@ -4,7 +4,7 @@ pub mod store;
 
 use crate::models::list::GemListRow;
 use crate::models::state::GemLoadState;
-use crate::services::error::GemServiceError;
+use crate::services::error::{GemServiceError, required_account};
 use chrono::Utc;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -201,9 +201,7 @@ impl GemStakeService {
 
     async fn current_account(&self, chain: Chain) -> Result<(WalletId, String), GemServiceError> {
         let wallet = self.session.current_wallet().await?;
-        let account = wallet.account(chain).ok_or_else(|| GemServiceError::NotFound {
-            msg: format!("wallet {} has no {chain} account", wallet.id.id()),
-        })?;
+        let account = required_account(&wallet, chain)?;
         Ok((wallet.id.clone(), account.address.clone()))
     }
     async fn save_validators(&self, chain: Chain, validators: Vec<DelegationValidator>) -> Result<(), GemServiceError> {

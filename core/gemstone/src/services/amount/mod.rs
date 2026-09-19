@@ -16,7 +16,7 @@ use crate::config::perpetual_config::{leverage_options, select_leverage};
 
 use crate::models::GemEarnType;
 use crate::models::custom_types::GemBigInt;
-use crate::services::error::GemServiceError;
+use crate::services::error::{GemServiceError, required_account};
 use crate::services::perpetual::GemPerpetualPositionAction;
 use crate::services::perpetual::rules as perpetual_rules;
 use crate::services::preferences::GemPreferencesService;
@@ -81,9 +81,7 @@ impl GemAmountService {
         let owner = match transfer {
             GemAmountTransfer::Withdraw => {
                 let wallet = self.session.current_wallet().await?;
-                let account = wallet.account(asset.chain()).ok_or_else(|| GemServiceError::NotFound {
-                    msg: format!("wallet {} has no {} account", wallet.id.id(), asset.chain()),
-                })?;
+                let account = required_account(&wallet, asset.chain())?;
                 Some(GemRecipient::named(account.address.clone(), wallet.name.clone()))
             }
             GemAmountTransfer::Send { .. } | GemAmountTransfer::Deposit => None,
@@ -93,9 +91,7 @@ impl GemAmountService {
 
     pub async fn earn_transfer_data(&self, asset: Asset, earn_type: GemEarnType, value: GemBigInt, use_max_amount: bool) -> Result<GemTransferData, GemServiceError> {
         let wallet = self.session.current_wallet().await?;
-        let account = wallet.account(asset.chain()).ok_or_else(|| GemServiceError::NotFound {
-            msg: format!("wallet {} has no {} account", wallet.id.id(), asset.chain()),
-        })?;
+        let account = required_account(&wallet, asset.chain())?;
         let data = self
             .stake
             .get_earn_data(asset.id.clone(), account.address.clone(), value.to_string(), earn_type.clone())

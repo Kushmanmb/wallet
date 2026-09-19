@@ -3,6 +3,7 @@ use crate::alien::AlienError;
 use crate::api::GemApiError;
 use crate::gateway::GatewayError;
 use crate::services::wallet::error::GemWalletImportError;
+use primitives::{Account, Chain, Wallet};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Error)]
 pub enum GemServiceError {
@@ -14,9 +15,14 @@ pub enum GemServiceError {
     InvalidInput { msg: String },
     NotFound { msg: String },
     Unsupported { msg: String },
+    NoAccountForChain { chain: Chain },
     Offline,
     WalletImport { error: GemWalletImportError },
     Cancelled,
+}
+
+pub fn required_account(wallet: &Wallet, chain: Chain) -> Result<Account, GemServiceError> {
+    wallet.account(chain).cloned().ok_or(GemServiceError::NoAccountForChain { chain })
 }
 
 impl std::fmt::Display for GemServiceError {
@@ -30,6 +36,7 @@ impl std::fmt::Display for GemServiceError {
             | Self::InvalidInput { msg }
             | Self::NotFound { msg }
             | Self::Unsupported { msg } => write!(f, "{msg}"),
+            Self::NoAccountForChain { chain } => write!(f, "wallet has no {chain} account"),
             Self::Offline => write!(f, "network offline"),
             Self::WalletImport { error } => write!(f, "{error}"),
             Self::Cancelled => write!(f, "cancelled"),
