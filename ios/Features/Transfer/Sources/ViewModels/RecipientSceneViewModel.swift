@@ -6,6 +6,7 @@ import enum Gemstone.GemImage
 import protocol Gemstone.GemNameServiceProtocol
 import struct Gemstone.GemPaymentRecipient
 import struct Gemstone.GemRecipient
+import enum Gemstone.GemRecipientError
 import enum Gemstone.GemRecipientNext
 import protocol Gemstone.GemRecipientServiceProtocol
 import struct Gemstone.GemRecipientSession
@@ -139,6 +140,8 @@ extension RecipientSceneViewModel {
         do {
             session = session.onAddressChanged(address: addressInputModel.text)
             try route(session.next(recipientType: type, nameState: addressInputModel.nameResolveState))
+        } catch let error as GemRecipientError {
+            addressInputModel.update(error: error.display(chain: asset.chain.toGem()))
         } catch {
             addressInputModel.update(error: error)
         }
@@ -153,6 +156,8 @@ extension RecipientSceneViewModel {
         case .address:
             do {
                 try handleAddressScan(result)
+            } catch let error as GemRecipientError {
+                addressInputModel.update(error: error.display(chain: asset.chain.toGem()))
             } catch {
                 addressInputModel.update(error: error)
             }
@@ -169,6 +174,9 @@ extension RecipientSceneViewModel {
     func onSelectRecipient(_ recipient: GemRecipient) {
         do {
             try route(service.select(recipientType: type, recipient: recipient))
+        } catch let error as GemRecipientError {
+            addressInputModel.text = recipient.address
+            addressInputModel.update(error: error.display(chain: asset.chain.toGem()))
         } catch {
             addressInputModel.text = recipient.address
             addressInputModel.update(error: error)
