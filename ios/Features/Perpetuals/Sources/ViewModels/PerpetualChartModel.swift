@@ -52,6 +52,7 @@ public extension PerpetualChartModel {
     }
 
     func onPeriodChange(perpetual: Perpetual, from oldPeriod: ChartPeriod, to newPeriod: ChartPeriod) async {
+        state = .loading
         await unsubscribeCandles(candleSubscription(perpetual: perpetual, period: oldPeriod))
         await updateCandlesticks(perpetual: perpetual)
         await subscribeCandles(candleSubscription(perpetual: perpetual, period: newPeriod))
