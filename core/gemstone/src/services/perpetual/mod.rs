@@ -17,7 +17,7 @@ use gem_hypercore::models::websocket::HyperliquidSocketMessage;
 use gem_hypercore::provider::websocket_mapper::{diff_clearinghouse_positions, diff_open_orders_positions, parse_websocket_data};
 use primitives::perpetual::PerpetualBalance;
 use primitives::portfolio::PerpetualPortfolio;
-use primitives::{Asset, AssetId, Chain, ChartPeriod, PerpetualAccountMode, PerpetualModifyConfirmData, PerpetualProvider, Wallet, WalletId};
+use primitives::{Asset, AssetId, Chain, ChartPeriod, PerpetualAccountMode, PerpetualProvider, Wallet, WalletId};
 use std::collections::HashMap;
 
 use crate::config::perpetual_config::PRICES_UPDATE_INTERVAL_SECONDS;
@@ -26,7 +26,7 @@ use crate::services::preferences::GemPreferencesService;
 pub use autoclose::{GemAutocloseField, GemAutocloseModify};
 pub use details::GemPerpetualDetailsService;
 pub use model::{
-    GemAutocloseSummary, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualMarketCounts, GemPerpetualMarketSections, GemPerpetualPositionAction,
+    GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualMarketCounts, GemPerpetualMarketSections, GemPerpetualPositionAction,
     GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualSection, GemPerpetualSocketUpdate, GemPerpetualTransferData,
 };
 pub use store::GemPerpetualStore;
@@ -83,10 +83,6 @@ impl GemPerpetualService {
 
     pub async fn add_recent(&self, action: GemAssetAction, asset: Asset) -> Result<(), GemServiceError> {
         self.recent_activity.add_recent(action, asset).await
-    }
-
-    pub fn autoclose_summary(&self, data: PerpetualModifyConfirmData) -> Option<GemAutocloseSummary> {
-        rules::autoclose_summary(&data)
     }
 
     pub async fn refresh(&self, trigger: GemMarketsRefreshTrigger) -> Vec<GemPerpetualRefreshFailure> {

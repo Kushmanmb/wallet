@@ -86,6 +86,7 @@ pub enum GemListRowTitle {
     Symbol,
     Decimals,
     Type,
+    AutoClose,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -227,6 +228,10 @@ pub enum GemListRow {
     Explorer {
         name: String,
         url: String,
+    },
+    Lines {
+        title: GemListRowTitle,
+        lines: Vec<GemLocalizedText>,
     },
     Loading,
     Error {

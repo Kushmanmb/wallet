@@ -91,6 +91,9 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
     )
     is GemListRow.Link -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), opensAnotherScreen = true)
     is GemListRow.Url -> GemListRowUIModel.Item(listItemModel(context, title, value, icon), url = url)
+    is GemListRow.Lines -> GemListRowUIModel.Item(
+        ListItemModel(title = title.text(context), subtitle = lines.firstOrNull()?.string(context), subtitleExtra = lines.getOrNull(1)?.string(context)),
+    )
     is GemListRow.Explorer -> GemListRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)
     is GemListRow.Error -> GemListRowUIModel.Notice(title = GemListRowTitle.ERROR.text(context), message = error.errorText().text(context), kind = GemNoticeKind.ERROR)
     is GemListRow.Icon -> GemListRowUIModel.Icon(asset = chain.requireChain().asset())

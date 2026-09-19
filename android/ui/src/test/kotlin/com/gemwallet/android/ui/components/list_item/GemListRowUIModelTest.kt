@@ -11,6 +11,8 @@ import uniffi.gemstone.BlockExplorerLink
 import uniffi.gemstone.GemCopy
 import uniffi.gemstone.GemCopyKind
 import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListRowTitle
+import uniffi.gemstone.GemLocalizedText
 
 class GemListRowUIModelTest {
     private val context = mockk<Context>(relaxed = true) {
@@ -50,6 +52,20 @@ class GemListRowUIModelTest {
     fun `a memo row copies only a real memo`() {
         assertEquals(listOf(GemListRowMenuItem.Copy("Copy", "12345")), GemListRow.Memo(value = "12345", copy = "12345").menu())
         assertEquals(emptyList<GemListRowMenuItem>(), GemListRow.Memo(value = "-", copy = null).menu())
+    }
+
+    @Test
+    fun `a lines row reads its first line and the next one below it`() {
+        every { context.getString(R.string.perpetual_auto_close) } returns "Auto Close"
+        val row = GemListRow.Lines(
+            title = GemListRowTitle.AUTO_CLOSE,
+            lines = listOf(GemLocalizedText.Text("Take Profit: $65,000"), GemLocalizedText.Text("Stop Loss: $55,000")),
+        )
+
+        val model = (row.uiModel(context) as GemListRowUIModel.Item).model
+        assertEquals("Auto Close", model.title)
+        assertEquals("Take Profit: $65,000", model.subtitle)
+        assertEquals("Stop Loss: $55,000", model.subtitleExtra)
     }
 
     private fun GemListRow.menu(): List<GemListRowMenuItem> = (uiModel(context) as GemListRowUIModel.Item).menu

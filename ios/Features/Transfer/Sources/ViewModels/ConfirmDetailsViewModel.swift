@@ -53,7 +53,7 @@ extension ConfirmDetailsViewModel: ItemModelProvidable {
             )
         case let .perpetual(_, perpetualType):
             if case let .modify(data) = perpetualType {
-                return .perpetualModifyPosition(PerpetualModifyViewModel(summary: confirmation.autocloseSummary(data: data)))
+                return .perpetualModifyPosition(confirmation.autocloseRow(data: data))
             }
             guard let details = perpetualDetails(perpetualType: perpetualType) else { return .empty }
             return .perpetualDetails(PerpetualDetailsViewModel(details: details))

@@ -2,6 +2,7 @@ package com.gemwallet.android.features.confirm.models
 
 import com.gemwallet.android.ui.models.perpetual.PerpetualConfirmDetailsUIModel
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModel
+import uniffi.gemstone.GemListRow
 
 sealed interface ConfirmDetailElement {
     data class SwapDetails(
@@ -12,8 +13,5 @@ sealed interface ConfirmDetailElement {
         val model: PerpetualConfirmDetailsUIModel,
     ) : ConfirmDetailElement
 
-    data class PerpetualModifyAutoclose(
-        val takeProfitText: String?,
-        val stopLossText: String?,
-    ) : ConfirmDetailElement
+    data class PerpetualModifyAutoclose(val row: GemListRow) : ConfirmDetailElement
 }

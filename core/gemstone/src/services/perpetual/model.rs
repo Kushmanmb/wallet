@@ -63,14 +63,6 @@ pub struct GemPerpetualConnection {
     pub mode: PerpetualAccountMode,
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
-pub struct GemAutocloseSummary {
-    pub take_profit: Option<GemFormattedNumber>,
-    pub stop_loss: Option<GemFormattedNumber>,
-    pub take_profit_cleared: bool,
-    pub stop_loss_cleared: bool,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, uniffi::Enum)]
 pub enum GemPerpetualDetailsAction {
     Open,

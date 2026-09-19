@@ -9,9 +9,9 @@ use super::{
     GemAcquireAssetFlow, GemConfirmError, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemExecuteResult,
     GemTransferAmountResult,
 };
-use crate::services::perpetual::model::GemAutocloseSummary;
 use crate::services::transfer::GemTransferData;
 use crate::services::wallet::GemKeystoreAuthentication;
+use crate::models::list::GemListRow;
 
 #[derive(uniffi::Object)]
 pub struct GemConfirmation {
@@ -64,8 +64,8 @@ impl GemConfirmation {
         self.service.insufficient_network_fee_buy_amount()
     }
 
-    pub fn autoclose_summary(&self, data: PerpetualModifyConfirmData) -> Option<GemAutocloseSummary> {
-        self.service.autoclose_summary(data)
+    pub fn autoclose_row(&self, data: PerpetualModifyConfirmData) -> Option<GemListRow> {
+        self.service.autoclose_row(data)
     }
 
     pub async fn execute(&self) -> Result<GemExecuteResult, GemConfirmError> {

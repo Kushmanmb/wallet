@@ -6,7 +6,6 @@ public import typealias Gemstone.Chain
 public import typealias Gemstone.Currency
 public import enum Gemstone.GemAcquireAssetFlow
 public import class Gemstone.GemAssetConfigService
-public import struct Gemstone.GemAutocloseSummary
 public import struct Gemstone.GemConfirmLoad
 public import struct Gemstone.GemConfirmLoadOptions
 public import enum Gemstone.GemConfirmRowContent
@@ -14,6 +13,7 @@ public import struct Gemstone.GemConfirmScreen
 public import protocol Gemstone.GemConfirmationProtocol
 public import enum Gemstone.GemExecuteResult
 public import enum Gemstone.GemKeystoreAuthentication
+public import enum Gemstone.GemListRow
 public import typealias Gemstone.PerpetualModifyConfirmData
 import GemstonePrimitivesTestKit
 import Primitives
@@ -84,7 +84,7 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
         Self.networkFeeBuyAmount
     }
 
-    public func autocloseSummary(data _: PerpetualModifyConfirmData) -> GemAutocloseSummary? {
+    public func autocloseRow(data _: PerpetualModifyConfirmData) -> GemListRow? {
         nil
     }
 

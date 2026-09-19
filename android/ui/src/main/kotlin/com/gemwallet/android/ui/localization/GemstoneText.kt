@@ -61,6 +61,9 @@ import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
 import uniffi.gemstone.GemSlippageCheck
 import com.gemwallet.android.domains.duration.formatDuration
+import uniffi.gemstone.GemPerpetual
+import uniffi.gemstone.GemTriggerOrder
+import uniffi.gemstone.PerpetualProvider
 
 fun GemTransactionTitle.string(context: Context): String = when (this) {
     GemTransactionTitle.Received -> context.getString(R.string.transaction_title_received)
@@ -157,6 +160,7 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     GemLocalizedText.ExternallyOwnedSpenderWarning -> context.getString(R.string.simulation_warning_externally_owned_spender_description)
     GemLocalizedText.SuspiciousAddress -> context.getString(R.string.common_suspicious_address)
     GemLocalizedText.InvalidTokenId -> context.getString(R.string.errors_token_invalid_id)
+    is GemLocalizedText.TriggerOrder -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.triggerOrderText(context.getString(order.stringRes()), price?.text()) }
     is GemLocalizedText.FeeRate -> when (unit) {
         FeeUnitType.SAT_VB -> "${rate.text()} ${context.getString(R.string.fee_rate_satvB)}"
         FeeUnitType.GWEI -> "${rate.text()} ${context.getString(R.string.fee_rate_gwei)}"
@@ -513,6 +517,7 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.SYMBOL -> R.string.asset_symbol
     GemListRowTitle.DECIMALS -> R.string.asset_decimals
     GemListRowTitle.TYPE -> R.string.common_type
+    GemListRowTitle.AUTO_CLOSE -> R.string.perpetual_auto_close
     GemListRowTitle.PRICE -> R.string.asset_price
     GemListRowTitle.PNL -> R.string.perpetual_pnl
     GemListRowTitle.PIN -> R.string.common_pin
@@ -528,4 +533,10 @@ fun GemSlippageCheck.footerText(context: Context, minimumText: String, maximumTe
     GemSlippageCheck.ABOVE_MAXIMUM -> context.getString(R.string.common_maximum_value, maximumText)
     GemSlippageCheck.HIGH -> context.getString(R.string.swap_slippage_warning)
     GemSlippageCheck.VALID -> null
+}
+
+@StringRes
+fun GemTriggerOrder.stringRes(): Int = when (this) {
+    GemTriggerOrder.TAKE_PROFIT -> R.string.perpetual_take_profit
+    GemTriggerOrder.STOP_LOSS -> R.string.perpetual_stop_loss
 }

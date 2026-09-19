@@ -22,4 +22,11 @@ pub enum GemLocalizedText {
     ExternallyOwnedSpenderWarning,
     SuspiciousAddress,
     InvalidTokenId,
+    TriggerOrder { order: GemTriggerOrder, price: Option<GemFormattedNumber> },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemTriggerOrder {
+    TakeProfit,
+    StopLoss,
 }

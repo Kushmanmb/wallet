@@ -412,7 +412,8 @@ mod tests {
             | GemListRow::Network { title, .. }
             | GemListRow::Url { title, .. }
             | GemListRow::Toggle { title, .. }
-            | GemListRow::Picker { title, .. } => Some(*title),
+            | GemListRow::Picker { title, .. }
+            | GemListRow::Lines { title, .. } => Some(*title),
             GemListRow::App { .. }
             | GemListRow::Wallet { .. }
             | GemListRow::Memo { .. }

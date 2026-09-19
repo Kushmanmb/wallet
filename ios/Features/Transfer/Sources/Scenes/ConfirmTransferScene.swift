@@ -63,9 +63,9 @@ extension ConfirmTransferScene {
                 with: ListItemView(model: model.listItemModel),
                 action: { self.model.onSelectPerpetualDetails(model) },
             )
-        case let .perpetualModifyPosition(model):
-            if let listItemModel = model.listItemModel {
-                ListItemView(model: listItemModel)
+        case let .perpetualModifyPosition(row):
+            if let row {
+                GemListRowView(row: row)
             }
         case let .networkFee(model, selectable):
             if selectable {

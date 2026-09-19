@@ -14,12 +14,12 @@ use crate::services::confirm::{
 };
 use crate::services::explorer::GemExplorerService;
 use crate::services::name::GemNameService;
-use crate::services::perpetual::model::GemAutocloseSummary;
-use crate::services::perpetual::rules::autoclose_summary;
+use crate::services::perpetual::rules::autoclose_row;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::transfer::rules::TransferInput;
 use crate::services::transfer::{GemRecentActivityService, GemTransferData};
 use crate::services::wallet::{GemKeystoreAuthentication, GemKeystorePassword};
+use crate::models::list::GemListRow;
 use primitives::AddressName;
 use primitives::BlockExplorerLink;
 use primitives::TransactionInputType;
@@ -97,8 +97,8 @@ impl GemConfirmTransferService {
     pub(super) fn authentication(&self) -> GemKeystoreAuthentication {
         self.password.authentication().unwrap_or(GemKeystoreAuthentication::None)
     }
-    pub(super) fn autoclose_summary(&self, data: PerpetualModifyConfirmData) -> Option<GemAutocloseSummary> {
-        autoclose_summary(&data)
+    pub(super) fn autoclose_row(&self, data: PerpetualModifyConfirmData) -> Option<GemListRow> {
+        autoclose_row(&data)
     }
     pub(super) fn acquire_asset_flow(&self, chain: Chain) -> GemAcquireAssetFlow {
         self.asset_config.acquire_flow(chain)

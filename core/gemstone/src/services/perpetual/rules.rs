@@ -11,12 +11,13 @@ use primitives::{
 };
 
 use super::model::{
-    GemAutocloseSummary, GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine,
+    GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine,
     GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSection,
     GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind,
     GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::GemFormattedNumber;
+use crate::services::localization::{GemLocalizedText, GemTriggerOrder};
 use crate::models::custom_types::GemBigInt;
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
 use crate::perpetual::GemPerpetual;
@@ -85,7 +86,7 @@ pub fn details(perpetual_type: &PerpetualType) -> Option<GemPerpetualDetails> {
     })
 }
 
-pub fn autoclose_summary(data: &PerpetualModifyConfirmData) -> Option<GemAutocloseSummary> {
+pub fn autoclose_row(data: &PerpetualModifyConfirmData) -> Option<GemListRow> {
     let orders = data.modify_types.iter().find_map(|modify| match modify {
         PerpetualModifyPositionType::Tpsl { order } => Some(order),
         PerpetualModifyPositionType::Cancel { .. } => None,
@@ -106,14 +107,22 @@ pub fn autoclose_summary(data: &PerpetualModifyConfirmData) -> Option<GemAutoclo
     let take_profit_cleared = take_profit.is_none() && data.take_profit_order_id.is_some_and(|id| canceled.contains(&id));
     let stop_loss_cleared = stop_loss.is_none() && data.stop_loss_order_id.is_some_and(|id| canceled.contains(&id));
 
-    if take_profit.is_none() && stop_loss.is_none() && !take_profit_cleared && !stop_loss_cleared {
-        return None;
-    }
-    Some(GemAutocloseSummary {
-        take_profit: take_profit.map(GemFormattedNumber::usd),
-        stop_loss: stop_loss.map(GemFormattedNumber::usd),
-        take_profit_cleared,
-        stop_loss_cleared,
+    let line = |order: GemTriggerOrder, price: Option<f64>, cleared: bool| {
+        (price.is_some() || cleared).then(|| GemLocalizedText::TriggerOrder {
+            order,
+            price: price.map(GemFormattedNumber::usd),
+        })
+    };
+    let lines: Vec<GemLocalizedText> = [
+        line(GemTriggerOrder::TakeProfit, take_profit, take_profit_cleared),
+        line(GemTriggerOrder::StopLoss, stop_loss, stop_loss_cleared),
+    ]
+    .into_iter()
+    .flatten()
+    .collect();
+    (!lines.is_empty()).then_some(GemListRow::Lines {
+        title: GemListRowTitle::AutoClose,
+        lines,
     })
 }
 
@@ -723,42 +732,53 @@ mod tests {
     }
 
     #[test]
-    fn test_autoclose_summary_reads_new_prices_and_cleared_orders() {
-        let both = autoclose_summary(&PerpetualModifyConfirmData::mock(
-            vec![PerpetualModifyPositionType::mock_tpsl(Some("65000"), Some("55000"))],
-            None,
-            None,
-        ))
-        .unwrap();
-        assert_eq!(both.take_profit, Some(GemFormattedNumber::usd(65000.0)));
-        assert_eq!(both.stop_loss, Some(GemFormattedNumber::usd(55000.0)));
-        assert!(!both.take_profit_cleared && !both.stop_loss_cleared);
+    fn test_autoclose_row_reads_new_prices_and_cleared_orders() {
+        let row = |lines: Vec<GemLocalizedText>| GemListRow::Lines {
+            title: GemListRowTitle::AutoClose,
+            lines,
+        };
+        let order = |order: GemTriggerOrder, price: Option<f64>| GemLocalizedText::TriggerOrder {
+            order,
+            price: price.map(GemFormattedNumber::usd),
+        };
 
-        let cleared = autoclose_summary(&PerpetualModifyConfirmData::mock(
-            vec![PerpetualModifyPositionType::mock_cancel(vec![111, 222])],
-            Some(111),
-            Some(222),
-        ))
-        .unwrap();
-        assert_eq!(cleared.take_profit, None);
-        assert_eq!(cleared.stop_loss, None);
-        assert!(cleared.take_profit_cleared && cleared.stop_loss_cleared);
+        assert_eq!(
+            autoclose_row(&PerpetualModifyConfirmData::mock(
+                vec![PerpetualModifyPositionType::mock_tpsl(Some("65000"), Some("55000"))],
+                None,
+                None,
+            )),
+            Some(row(vec![order(GemTriggerOrder::TakeProfit, Some(65000.0)), order(GemTriggerOrder::StopLoss, Some(55000.0))]))
+        );
+        assert_eq!(
+            autoclose_row(&PerpetualModifyConfirmData::mock(
+                vec![PerpetualModifyPositionType::mock_cancel(vec![111, 222])],
+                Some(111),
+                Some(222),
+            )),
+            Some(row(vec![order(GemTriggerOrder::TakeProfit, None), order(GemTriggerOrder::StopLoss, None)])),
+            "a cleared order reads as an empty price"
+        );
+        assert_eq!(
+            autoclose_row(&PerpetualModifyConfirmData::mock(
+                vec![
+                    PerpetualModifyPositionType::mock_tpsl(Some("70000"), None),
+                    PerpetualModifyPositionType::mock_cancel(vec![111]),
+                ],
+                Some(111),
+                None,
+            )),
+            Some(row(vec![order(GemTriggerOrder::TakeProfit, Some(70000.0))])),
+            "a replaced order is not a cleared one"
+        );
+        assert_eq!(
+            autoclose_row(&PerpetualModifyConfirmData::mock(vec![PerpetualModifyPositionType::mock_tpsl(None, Some("50000"))], None, None)),
+            Some(row(vec![order(GemTriggerOrder::StopLoss, Some(50000.0))]))
+        );
 
-        let replaced = autoclose_summary(&PerpetualModifyConfirmData::mock(
-            vec![
-                PerpetualModifyPositionType::mock_tpsl(Some("70000"), None),
-                PerpetualModifyPositionType::mock_cancel(vec![111]),
-            ],
-            Some(111),
-            None,
-        ))
-        .unwrap();
-        assert_eq!(replaced.take_profit, Some(GemFormattedNumber::usd(70000.0)));
-        assert!(!replaced.take_profit_cleared, "a replaced order is not a cleared one");
-
-        assert!(autoclose_summary(&PerpetualModifyConfirmData::mock(vec![], None, None)).is_none());
+        assert!(autoclose_row(&PerpetualModifyConfirmData::mock(vec![], None, None)).is_none());
         assert!(
-            autoclose_summary(&PerpetualModifyConfirmData::mock(
+            autoclose_row(&PerpetualModifyConfirmData::mock(
                 vec![PerpetualModifyPositionType::mock_cancel(vec![999])],
                 Some(111),
                 None

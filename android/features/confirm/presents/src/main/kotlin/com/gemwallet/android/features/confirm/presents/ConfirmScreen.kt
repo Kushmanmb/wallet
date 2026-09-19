@@ -50,7 +50,6 @@ import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.property.AddressPropertyItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
-import com.gemwallet.android.ui.components.perpetual.AutocloseSummaryRow
 import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsBottomSheet
 import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsSummaryItem
 import com.gemwallet.android.ui.components.screen.ModalBottomSheet
@@ -306,11 +305,7 @@ private fun ConfirmDetailElementRow(
             onClick = onClick,
             listPosition = listPosition,
         )
-        is ConfirmDetailElement.PerpetualModifyAutoclose -> AutocloseSummaryRow(
-            takeProfitText = item.takeProfitText,
-            stopLossText = item.stopLossText,
-            listPosition = listPosition,
-        )
+        is ConfirmDetailElement.PerpetualModifyAutoclose -> GemListRowView(row = item.row, listPosition = listPosition)
     }
 }
 

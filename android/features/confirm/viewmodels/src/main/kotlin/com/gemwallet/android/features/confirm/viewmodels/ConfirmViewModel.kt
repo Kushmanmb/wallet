@@ -25,7 +25,6 @@ import com.gemwallet.android.ext.toAssetPriceValue
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.confirm.models.ConfirmDetailElement
-import com.gemwallet.android.features.confirm.models.PerpetualModifyAutocloseFactory
 import com.gemwallet.android.features.confirm.viewmodels.localization.broadcastLabel
 import com.gemwallet.android.features.confirm.viewmodels.localization.buttonLabel
 import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetRequest
@@ -434,7 +433,7 @@ class ConfirmViewModel @Inject constructor(
         perpetualType: PerpetualType?,
     ): ConfirmDetailElement? = when (val type = perpetualType) {
         null -> null
-        is PerpetualType.Modify -> confirmation.value?.let { PerpetualModifyAutocloseFactory.create(type.data, it) }
+        is PerpetualType.Modify -> confirmation.value?.autocloseRow(type.data)?.let { ConfirmDetailElement.PerpetualModifyAutoclose(it) }
         else -> perpetualDetails(type)
             ?.let(PerpetualConfirmDetailsUIModelFactory::create)
             ?.let(ConfirmDetailElement::PerpetualDetails)

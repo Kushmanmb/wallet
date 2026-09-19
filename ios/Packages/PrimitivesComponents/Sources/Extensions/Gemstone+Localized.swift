@@ -41,6 +41,8 @@ import Localization
 import Primitives
 import Style
 import SwiftUI
+import class Gemstone.GemPerpetual
+import enum Gemstone.GemTriggerOrder
 
 
 extension FeeOption {
@@ -92,6 +94,8 @@ extension GemLocalizedText {
             Localized.Common.suspiciousAddress
         case .invalidTokenId:
             Localized.Errors.Token.invalidId
+        case let .triggerOrder(order, price):
+            GemPerpetual(provider: .hypercore).triggerOrderText(label: order.title, formattedPrice: price?.text())
         }
     }
 }
@@ -667,6 +671,7 @@ public extension GemListRowTitle {
         case .symbol: Localized.Asset.symbol
         case .decimals: Localized.Asset.decimals
         case .type: Localized.Common.type
+        case .autoClose: Localized.Perpetual.autoClose
         }
     }
 }
@@ -677,6 +682,15 @@ extension GemCopyKind {
         case .secretPhrase: Localized.Common.copied(Localized.Common.secretPhrase)
         case .privateKey: Localized.Common.copied(Localized.Common.privateKey)
         case let .address(chain): Localized.Common.copied(String(format: "%@ (%@) ", Chain(core: chain).asset.name, display))
+        }
+    }
+}
+
+extension GemTriggerOrder {
+    var title: String {
+        switch self {
+        case .takeProfit: Localized.Perpetual.takeProfit
+        case .stopLoss: Localized.Perpetual.stopLoss
         }
     }
 }

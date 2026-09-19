@@ -59,7 +59,6 @@ public final class GemPriceAlertServiceMock: GemPriceAlertServiceProtocol, @unch
 }
 
 public final class GemPerpetualServiceMock: GemPerpetualServiceProtocol, @unchecked Sendable {
-    public var autocloseSummary: GemAutocloseSummary?
     public var isPerpetualEnabled = true
     public var connects = true
     public private(set) var syncMarketsCount = 0
@@ -74,10 +73,6 @@ public final class GemPerpetualServiceMock: GemPerpetualServiceProtocol, @unchec
 
     public func marketsUpdatedAt() throws -> Int64? {
         updatedAt
-    }
-
-    public func autocloseSummary(data _: Gemstone.PerpetualModifyConfirmData) -> GemAutocloseSummary? {
-        autocloseSummary
     }
 
     public func syncEnablement(wallet: Gemstone.Wallet?, trigger: Gemstone.GemMarketsRefreshTrigger) async throws -> Bool {
