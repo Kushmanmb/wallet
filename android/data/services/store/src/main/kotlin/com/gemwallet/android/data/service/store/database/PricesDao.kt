@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.gemwallet.android.data.service.store.database.entities.DbFiatRate
 import com.gemwallet.android.data.service.store.database.entities.DbPrice
 import com.wallet.core.primitives.Currency
@@ -20,6 +21,12 @@ interface PricesDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun setRates(rates: List<DbFiatRate>)
+
+    @Transaction
+    suspend fun saveRates(rates: List<DbFiatRate>, conversion: DbFiatRate?) {
+        setRates(rates)
+        conversion?.let { updateValues(it.currency, it.rate) }
+    }
 
     @Query("UPDATE prices SET value = usd_value * :rate, currency = :currency")
     suspend fun updateValues(currency: Currency, rate: Double)

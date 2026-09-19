@@ -24,7 +24,10 @@ class GemstonePriceStore(private val pricesDao: PricesDao, private val assetsDao
 
     override suspend fun getRates(): List<uniffi.gemstone.FiatRate> = pricesDao.getRates().toDTO().map { it.toGem() }
 
-    override suspend fun saveRates(rates: List<uniffi.gemstone.FiatRate>) = pricesDao.setRates(rates.map { it.toPrimitives().toRecord() })
+    override suspend fun saveRates(rates: List<uniffi.gemstone.FiatRate>, conversion: uniffi.gemstone.FiatRate?) = pricesDao.saveRates(
+        rates = rates.map { it.toPrimitives().toRecord() },
+        conversion = conversion?.toPrimitives()?.toRecord(),
+    )
 
     override suspend fun savePrices(currency: uniffi.gemstone.Currency, prices: List<GemPriceUpdate>) {
         val currency = currency.toPrimitives()

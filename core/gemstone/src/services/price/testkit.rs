@@ -27,6 +27,7 @@ pub struct MemoryPriceStore {
     pub prices: Mutex<Vec<AssetPrice>>,
     pub saved: Mutex<Vec<(Currency, Vec<GemPriceUpdate>)>>,
     pub converted: Mutex<Vec<(Currency, f64)>>,
+    pub rate_error: Mutex<Option<GemServiceError>>,
 }
 
 impl MemoryPriceStore {
@@ -51,11 +52,17 @@ impl GemPriceStore for MemoryPriceStore {
         *self.rate_reads.lock().unwrap() += 1;
         Ok(self.rates.lock().unwrap().clone())
     }
-    async fn save_rates(&self, rates: Vec<FiatRate>) -> Result<(), GemServiceError> {
+    async fn save_rates(&self, rates: Vec<FiatRate>, conversion: Option<FiatRate>) -> Result<(), GemServiceError> {
+        if let Some(error) = self.rate_error.lock().unwrap().clone() {
+            return Err(error);
+        }
         let mut stored = self.rates.lock().unwrap();
         stored.retain(|stored| rates.iter().all(|rate| rate.symbol != stored.symbol));
         stored.extend(rates.clone());
         self.rate_writes.lock().unwrap().push(rates);
+        if let Some(rate) = conversion {
+            self.converted.lock().unwrap().push((rate.symbol, rate.rate));
+        }
         Ok(())
     }
     async fn save_prices(&self, currency: Currency, prices: Vec<GemPriceUpdate>) -> Result<(), GemServiceError> {

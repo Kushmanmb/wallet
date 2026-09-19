@@ -174,9 +174,8 @@ struct AssetsRequestTests {
         let db = DB.mockAssets()
         let searchStore = SearchStore(db: db)
         let priceStore = PriceStore(db: db)
-        let fiatRateStore = FiatRateStore(db: db)
 
-        try fiatRateStore.add([.mock()])
+        try priceStore.saveRates([.mock()])
 
         let assets = [AssetBasic].mock()
         try priceStore.updatePrices(assets.map {
@@ -213,10 +212,9 @@ struct AssetsRequestTests {
     @Test func order() throws {
         let db = DB.mockAssets()
         let priceStore = PriceStore(db: db)
-        let fiatRateStore = FiatRateStore(db: db)
         let balanceStore = BalanceStore(db: db)
 
-        try fiatRateStore.add([.mock()])
+        try priceStore.saveRates([.mock()])
 
         try priceStore.updatePrices([.mock(assetId: AssetId(chain: .tron), price: 100, priceChangePercentage24h: 100)])
 
