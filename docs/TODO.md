@@ -22,7 +22,6 @@ The last places where an app reaches the API, a rule or a table without going th
 
 Found by pairing every view model on both apps (see Coverage) and reading the ones whose logic did not match. Each is the same product rule written on both sides with a difference.
 
-- **V90** **S** `GemListRow`, `GemListSection`, `GemListSectionTitle` and `GemListRowTitle` ([`models/list.rs`](../core/gemstone/src/models/list.rs)) are the shared list vocabulary, rendered by one builder per app (`GemListRowView`, `gemListSections`); the [contract](ARCHITECTURE.md#a-plain-list-is-core-sections-of-one-shared-row-rendered-by-one-builder-per-app) names what belongs in it. The address screen is the reference. A screen adopts it by returning `Vec<GemListSection>` from its Core record and deleting its row enum, its feature title mapper and its scene's row `switch`; the items below are that work, one per screen.
 - **D40** **M** The address and stake screens take their load state from Core (`GemLoadState` plus `GemLoad::data`, see [the load-state contract](ARCHITECTURE.md#a-screens-load-state-is-one-core-state-and-a-failed-refresh-keeps-what-is-shown); the stake screens through `GemStakeService::refresh`, which keeps the stored delegations on a failed sync and shows the error only in place of the empty state). The asset and transactions screens on both apps only log a failed refresh and never show the error when there is nothing to keep — adopt the same state there with `GemLoadState::refreshed`; the iOS activity list draws its empty state as an `EmptyContentView` overlay, which has no error type yet, so that screen needs the error empty state designed first.
 
 
@@ -119,6 +118,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**V90 (2026-09-19).** Landed: R82 moved the chart market rows onto `GemListRow` (a ranked amount, an all-time row, an identifier row with copy and explorer), and the last two screens that still switched a bare row enum followed — the WalletConnect connection details (`GemConnectionDetailRow`) and the collectible info section (`GemCollectibleRow`, whose token id copies through the new `GemCopyKind::Plain`). The row enums left in Core are not plain rows: named outcomes (`GemNodeCheckRow`, `GemBalanceRow`), per-screen rich rows and composites that wrap a `GemListRow` case (confirm, swap, transaction and asset details), and layout grids (`GemSecretPhraseRow`).
 
 **B74 (2026-09-19).** Decided per composite and written into [ARCHITECTURE § 5](ARCHITECTURE.md#a-view-never-names-a-core-type) by name: every rich row stays a composite on both apps (asset, recent assets, wallet, chain, NFT, transaction, delegation, validator, swap provider, network, balance), paired with its twin. The reverse split is the same weight reached two ways: iOS draws the recents and delegation rows through the row primitive with an explicit semibold title, which is the rich family's iOS form.
 

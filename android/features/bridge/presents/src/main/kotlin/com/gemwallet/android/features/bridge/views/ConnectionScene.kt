@@ -15,6 +15,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.features.bridge.viewmodels.ConnectionViewModel
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.Scene
@@ -43,7 +44,7 @@ fun ConnectionScene(
     ) {
         LazyColumn {
             connectionListItem?.let { item { ListItem(model = it, listPosition = ListPosition.Single) } }
-            itemsPositioned(rows) { position, row -> ListItem(model = row, listPosition = position) }
+            itemsPositioned(rows) { position, row -> GemListRowView(row = row, listPosition = position) }
         }
     }
 }

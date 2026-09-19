@@ -535,6 +535,10 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.MAX_SUPPLY -> R.string.info_max_supply_title
     GemListRowTitle.ALL_TIME_HIGH -> R.string.asset_all_time_high
     GemListRowTitle.ALL_TIME_LOW -> R.string.asset_all_time_low
+    GemListRowTitle.WALLET -> R.string.common_wallet
+    GemListRowTitle.CONTRACT -> R.string.asset_contract
+    GemListRowTitle.TOKEN_ID -> R.string.asset_token_id
+    GemListRowTitle.COLLECTION -> R.string.nft_collection
     GemListRowTitle.PRICE -> R.string.asset_price
     GemListRowTitle.PNL -> R.string.perpetual_pnl
     GemListRowTitle.PIN -> R.string.common_pin

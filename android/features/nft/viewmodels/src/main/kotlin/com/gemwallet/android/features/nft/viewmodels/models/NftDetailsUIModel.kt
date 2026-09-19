@@ -2,18 +2,14 @@ package com.gemwallet.android.features.nft.viewmodels.models
 
 import android.content.Context
 import com.gemwallet.android.domains.nft.NftAssetDetailsData
-import com.gemwallet.android.ext.toChain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.nft.viewmodels.localization.stringRes
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.NFTAsset
 import com.wallet.core.primitives.ReportReason
 import com.wallet.core.primitives.VerificationStatus
 import uniffi.gemstone.GemCollectibleAttributeValue
-import uniffi.gemstone.GemCollectibleIdentifier
-import uniffi.gemstone.GemCollectibleRow
 import uniffi.gemstone.GemCollectibleSection
 import uniffi.gemstone.GemListRow
 import java.text.DateFormat
@@ -28,15 +24,9 @@ data class NftDetailsUIModel(
 
 sealed interface NftSectionUIModel {
     data class Status(val status: VerificationStatus) : NftSectionUIModel
-    data class Info(val rows: List<NftInfoRowUIModel>) : NftSectionUIModel
+    data class Info(val rows: List<GemListRow>) : NftSectionUIModel
     data class Attributes(val title: String, val rows: List<ListItemModel>) : NftSectionUIModel
     data class Links(val title: String, val row: GemListRow) : NftSectionUIModel
-}
-
-sealed interface NftInfoRowUIModel {
-    data class Item(val model: ListItemModel) : NftInfoRowUIModel
-    data class Network(val chain: Chain) : NftInfoRowUIModel
-    data class Identifier(val title: String, val identifier: GemCollectibleIdentifier) : NftInfoRowUIModel
 }
 
 data class ReportReasonUIModel(
@@ -58,19 +48,12 @@ internal fun ReportReason.uiModel(context: Context): ReportReasonUIModel = Repor
 
 private fun GemCollectibleSection.uiModel(context: Context): NftSectionUIModel? = when (this) {
     is GemCollectibleSection.Status -> NftSectionUIModel.Status(status.toPrimitives())
-    is GemCollectibleSection.Info -> NftSectionUIModel.Info(rows.map { it.uiModel(context) })
+    is GemCollectibleSection.Info -> NftSectionUIModel.Info(rows)
     is GemCollectibleSection.Attributes -> NftSectionUIModel.Attributes(
         title = context.getString(R.string.nft_properties),
         rows = attributes.map { ListItemModel(title = it.name, subtitle = it.value.text()) },
     )
     is GemCollectibleSection.Links -> NftSectionUIModel.Links(title = context.getString(R.string.social_links), row = GemListRow.Social(links))
-}
-
-private fun GemCollectibleRow.uiModel(context: Context): NftInfoRowUIModel = when (this) {
-    is GemCollectibleRow.Collection -> NftInfoRowUIModel.Item(ListItemModel(title = context.getString(stringRes()), subtitle = name))
-    is GemCollectibleRow.Network -> NftInfoRowUIModel.Network(chain.toChain())
-    is GemCollectibleRow.Contract -> NftInfoRowUIModel.Identifier(context.getString(stringRes()), identifier)
-    is GemCollectibleRow.TokenId -> NftInfoRowUIModel.Identifier(context.getString(stringRes()), identifier)
 }
 
 private fun GemCollectibleAttributeValue.text(): String = when (this) {

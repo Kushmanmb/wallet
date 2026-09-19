@@ -21,6 +21,7 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Chain
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import uniffi.gemstone.GemCopy
+import uniffi.gemstone.GemCopyKind
 import uniffi.gemstone.GemInfoTopic
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowIcon
@@ -111,11 +112,11 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
             info = info?.infoSheet(infoIcon),
         ),
     )
-    is GemListRow.Contract -> GemListRowUIModel.Item(
-        ListItemModel(title = context.getString(R.string.asset_contract), subtitle = copy.display),
+    is GemListRow.Identifier -> GemListRowUIModel.Item(
+        ListItemModel(title = title.text(context), subtitle = copy.display),
         url = explorer?.link,
         menu = listOfNotNull(
-            GemListRowMenuItem.Copy(context.getString(R.string.wallet_copy_address), copy.value),
+            GemListRowMenuItem.Copy(context.getString(copy.kind.copyTitleRes()), copy.value),
             explorer?.let { GemListRowMenuItem.Open(context.getString(R.string.transaction_view_on, it.name), it.link) },
         ),
     )
@@ -139,6 +140,11 @@ private fun listItemModel(context: Context, title: GemListRowTitle, value: Strin
     subtitle = value,
     image = icon.image(),
 )
+
+private fun GemCopyKind.copyTitleRes(): Int = when (this) {
+    is GemCopyKind.Address -> R.string.wallet_copy_address
+    GemCopyKind.Plain, GemCopyKind.SecretPhrase, GemCopyKind.PrivateKey -> R.string.common_copy
+}
 
 private fun GemListRowTitle.text(context: Context): String = when (this) {
     GemListRowTitle.STAKE_APR -> context.getString(titleRes(), "")

@@ -89,13 +89,13 @@ class GemListRowUIModelTest {
     }
 
     @Test
-    fun `a contract opens the explorer only when core gives a link`() {
+    fun `an identifier opens the explorer only when core gives a link`() {
         every { context.getString(R.string.asset_contract) } returns "Contract"
         val copy = GemCopy(kind = GemCopyKind.Address("ethereum"), value = "0xdAC17F958D2ee523a2206206994597C13D831ec7", display = "0xdAC1...1ec7")
         val explorer = BlockExplorerLink(name = "Etherscan", link = "https://etherscan.io/token/0xdAC17F958D2ee523a2206206994597C13D831ec7")
 
-        val linked = GemListRow.Contract(copy = copy, explorer = explorer).uiModel(context) as GemListRowUIModel.Item
-        val plain = GemListRow.Contract(copy = copy, explorer = null).uiModel(context) as GemListRowUIModel.Item
+        val linked = GemListRow.Identifier(title = GemListRowTitle.CONTRACT, copy = copy, explorer = explorer).uiModel(context) as GemListRowUIModel.Item
+        val plain = GemListRow.Identifier(title = GemListRowTitle.CONTRACT, copy = copy, explorer = null).uiModel(context) as GemListRowUIModel.Item
 
         assertEquals("Contract", linked.model.title)
         assertEquals("0xdAC1...1ec7", linked.model.subtitle)
