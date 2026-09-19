@@ -20,6 +20,7 @@ import uniffi.gemstone.GemConfirmDestination
 import uniffi.gemstone.GemConfirmRowContent
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.contactInitials
+import com.gemwallet.android.ext.networkName
 
 sealed interface ConfirmRowUIModel {
     data class Row(val row: GemListRow) : ConfirmRowUIModel
@@ -86,7 +87,7 @@ private fun AddressName.avatar(name: String?): ListItemImage? {
 
 fun FeeUIModel.listItem(context: Context, feeAsset: Asset?, showsFeeAssetSymbol: Boolean = false): ListItemModel {
     val title = context.getString(R.string.transfer_network_fee)
-    val info = InfoSheetEntity.NetworkFeeInfo(feeAsset?.name.orEmpty(), feeAsset?.symbol.orEmpty())
+    val info = InfoSheetEntity.NetworkFeeInfo(feeAsset?.id?.chain?.networkName().orEmpty(), feeAsset?.symbol.orEmpty())
     return when (this) {
         FeeUIModel.Calculating -> ListItemModel(title = title, subtitleTagType = ListItemTagType.Progress, info = info)
         FeeUIModel.Error -> ListItemModel(title = title, subtitle = "~", info = info)

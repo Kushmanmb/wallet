@@ -39,6 +39,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.Spacer16
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.QRScanType
+import com.gemwallet.android.ext.networkName
 
 @Composable
 fun AddNodeScene(chain: Chain, onCancel: () -> Unit) {
@@ -72,6 +73,7 @@ fun AddNodeScene(chain: Chain, onCancel: () -> Unit) {
         AssetListItem(
             asset = asset,
             listPosition = ListPosition.Single,
+            title = chain.networkName(),
         )
         UrlField(
             value = viewModel.url,

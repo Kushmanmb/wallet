@@ -33,6 +33,7 @@ import com.gemwallet.android.ui.open
 import com.wallet.core.primitives.Asset
 import uniffi.gemstone.GemListSection
 import uniffi.gemstone.DocsUrl
+import com.gemwallet.android.ext.networkName
 
 private val networkItemHeight = 64.dp
 
@@ -70,7 +71,7 @@ internal fun AddAssetScene(
         if (network != null) {
             ChainItem(
                 modifier = Modifier.height(networkItemHeight),
-                title = network.name,
+                title = network.chain.networkName(),
                 icon = network.chain,
                 onClick = if (canSelectChain) {
                     { onAction(AddAssetAction.SelectChain) }

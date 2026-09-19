@@ -67,7 +67,7 @@ public final class ReceiveViewModel: Sendable {
     }
 
     var title: String {
-        Localized.Receive.title("")
+        Localized.Wallet.receive
     }
 
     var copyTitle: String {

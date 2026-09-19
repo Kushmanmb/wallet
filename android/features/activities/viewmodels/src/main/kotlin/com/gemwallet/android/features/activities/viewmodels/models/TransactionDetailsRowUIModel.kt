@@ -13,6 +13,7 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.BlockExplorerLink
 import com.wallet.core.primitives.Chain
 import uniffi.gemstone.GemListRow
+import com.gemwallet.android.ext.networkName
 
 sealed interface TransactionDetailsRowUIModel {
     data class Item(val model: ListItemModel, val url: String? = null) : TransactionDetailsRowUIModel
@@ -49,7 +50,7 @@ internal fun TransactionDetailsValue.uiModel(context: Context, asset: Asset): Tr
             title = context.getString(R.string.transfer_network_fee),
             subtitle = value,
             subtitleExtra = equivalent.takeIf { it.isNotEmpty() },
-            info = InfoSheetEntity.NetworkFeeInfo(this.asset.name, this.asset.symbol),
+            info = InfoSheetEntity.NetworkFeeInfo(this.asset.id.chain.networkName(), this.asset.symbol),
         ),
     )
     is TransactionDetailsValue.SwapProgress -> TransactionDetailsRowUIModel.SwapProgress(uiModel(context))

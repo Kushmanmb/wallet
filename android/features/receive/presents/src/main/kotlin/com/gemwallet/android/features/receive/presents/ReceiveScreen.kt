@@ -139,7 +139,7 @@ private fun ReceiveScene(
     }
 
     Scene(
-        title = stringResource(R.string.receive_title, ""),
+        title = stringResource(R.string.wallet_receive),
         onClose = onCancel,
         closeIcon = closeIcon,
         actions = {
