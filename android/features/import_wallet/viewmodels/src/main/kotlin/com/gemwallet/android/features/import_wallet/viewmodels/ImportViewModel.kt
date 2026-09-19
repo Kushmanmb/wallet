@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemMnemonicInterface
 import uniffi.gemstone.GemNameRecordState
+import uniffi.gemstone.GemPhraseEdit
 import uniffi.gemstone.GemNameServiceInterface
 import uniffi.gemstone.GemWalletImportKind
 import uniffi.gemstone.GemWalletImportResult
@@ -49,7 +50,9 @@ class ImportViewModel @Inject constructor(
 
     fun invalidPhraseWords(text: String): Set<String> = mnemonic.findInvalidWords(text.words()).toSet()
 
-    fun phraseSuggestions(word: String): List<String> = mnemonic.suggestWords(word, null)
+    fun phraseSuggestions(text: String, cursor: Int): List<String> = mnemonic.phraseSuggestions(text, cursor.toUInt())
+
+    fun applyPhraseSuggestion(text: String, cursor: Int, word: String): GemPhraseEdit = mnemonic.applyPhraseSuggestion(text, cursor.toUInt(), word)
 
     private val state = MutableStateFlow(ImportViewModelState())
     val uiState = state.map { it.toUIState() }

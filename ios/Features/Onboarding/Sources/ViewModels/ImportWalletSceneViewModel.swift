@@ -1,3 +1,4 @@
+import class Gemstone.GemMnemonic
 import protocol Gemstone.GemNameServiceProtocol
 import enum Gemstone.GemWalletImportKind
 import struct Gemstone.GemWalletImportScreen
@@ -19,10 +20,11 @@ import enum Gemstone.GemServiceError
 final class ImportWalletSceneViewModel {
     private let service: any GemWalletServiceProtocol
     private let preferences: ObservablePreferences
-    private let wordSuggester = WordSuggester()
+    private let mnemonic = GemMnemonic()
     let type: ImportWalletType
 
     var input: String = ""
+    var inputCursor: Int?
     var wordsSuggestion: [String] = []
     var importType: GemWalletImportKind = .phrase
     let nameRecordViewModel: NameRecordViewModel?
@@ -115,7 +117,7 @@ extension ImportWalletSceneViewModel {
     }
 
     func onChangeInput(_: String, newValue: String) {
-        wordsSuggestion = wordSuggester.wordSuggestionCalculate(value: newValue)
+        updateSuggestions()
         if importType.resolvesNames(), let chain {
             nameRecordViewModel?.getNameRecord(name: newValue, chain: chain)
         } else {
@@ -142,11 +144,22 @@ extension ImportWalletSceneViewModel {
         input = result
     }
 
+    func onChangeInputCursor(_: Int?, _: Int?) {
+        updateSuggestions()
+    }
+
     func onSelectWord(_ word: String) {
-        input = wordSuggester.selectWordCalculate(
-            input: input,
-            word: word,
-        )
+        let edit = mnemonic.applyPhraseSuggestion(text: input, cursor: cursor, word: word)
+        input = edit.text
+        inputCursor = Int(edit.cursor)
+    }
+
+    private var cursor: UInt32 {
+        UInt32(min(inputCursor ?? input.utf16.count, input.utf16.count))
+    }
+
+    private func updateSuggestions() {
+        wordsSuggestion = mnemonic.phraseSuggestions(text: input, cursor: cursor)
     }
 
     func onPaste() {

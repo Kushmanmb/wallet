@@ -75,6 +75,7 @@ import com.gemwallet.android.ui.theme.space0
 import com.wallet.core.primitives.Chain
 import uniffi.gemstone.GemWalletImportException
 import uniffi.gemstone.GemWalletImportKind
+import uniffi.gemstone.GemPhraseEdit
 
 private val loadingDialogSize = 100.dp
 
@@ -117,6 +118,7 @@ fun ImportScreen(
         onTypeChange = viewModel::importKind,
         invalidWords = viewModel::invalidPhraseWords,
         phraseSuggestions = viewModel::phraseSuggestions,
+        applyPhraseSuggestion = viewModel::applyPhraseSuggestion,
         onCancel = onCancel,
     )
     if (uiState.loading) {
@@ -173,7 +175,8 @@ private fun ImportScene(
     onInput: (String) -> Unit,
     onTypeChange: (ImportType) -> Unit,
     invalidWords: (String) -> Set<String>,
-    phraseSuggestions: (String) -> List<String>,
+    phraseSuggestions: (String, Int) -> List<String>,
+    applyPhraseSuggestion: (String, Int, String) -> GemPhraseEdit,
     onCancel: () -> Unit
 ) {
     val generatedName = defaultWalletName.orEmpty()
@@ -208,7 +211,7 @@ private fun ImportScene(
                         onTypeChange(type)
                         inputState.value = TextFieldValue()
                     }
-                    DataInput(input, inputState, nameResolveIndicator, invalidWords, phraseSuggestions, onInput) {
+                    DataInput(input, inputState, nameResolveIndicator, invalidWords, phraseSuggestions, applyPhraseSuggestion, onInput) {
                         dataErrorState = null
                     }
                     ErrorMessage(dataErrorState)
@@ -237,7 +240,8 @@ private fun DataInput(
     inputState: MutableState<TextFieldValue>,
     nameResolveIndicator: NameResolveIndicatorUIModel?,
     invalidWords: (String) -> Set<String>,
-    phraseSuggestions: (String) -> List<String>,
+    phraseSuggestions: (String, Int) -> List<String>,
+    applyPhraseSuggestion: (String, Int, String) -> GemPhraseEdit,
     onInput: (String) -> Unit,
     onChange: () -> Unit,
 ) {
@@ -259,17 +263,7 @@ private fun DataInput(
                 return@ImportInput
             }
 
-            val cursorPosition = query.selection.start
-            if (query.text.isEmpty()) {
-                return@ImportInput
-            }
-            val word = query.text.substring(0..<cursorPosition).split(" ")
-                .lastOrNull()
-            if (word.isNullOrEmpty()) {
-                return@ImportInput
-            }
-            val result = phraseSuggestions(word)
-            suggestions.addAll(result)
+            suggestions.addAll(phraseSuggestions(query.text, query.selection.start))
         },
     )
 
@@ -280,8 +274,7 @@ private fun DataInput(
             items(suggestions) { word ->
                 SuggestionChip(
                     onClick = {
-                        val processed = setSuggestion(inputState.value, word)
-                        inputState.value = processed
+                        inputState.value = inputState.value.applying(word, applyPhraseSuggestion)
                         suggestions.clear()
                         onChange()
                     },
@@ -329,18 +322,9 @@ private fun ErrorMessage(error: Throwable?) {
     Text(text = text, color = MaterialTheme.colorScheme.error)
 }
 
-private fun setSuggestion(inputState: TextFieldValue, word: String): TextFieldValue {
-    val cursorPosition = inputState.selection.start
-    val inputFull = inputState.text
-    val rightInput =
-        inputState.text.substring(0..<cursorPosition)
-    val leftInput = inputState.text.substring(cursorPosition)
-    val lastInput = rightInput.split(" ").lastOrNull() ?: ""
-    val phrase = rightInput.removeSuffix(lastInput)
-    return TextFieldValue(
-        text = inputFull.replaceRange(0, inputFull.length, "$phrase$word $leftInput"),
-        selection = TextRange("$phrase$word ".length)
-    )
+private fun TextFieldValue.applying(word: String, apply: (String, Int, String) -> GemPhraseEdit): TextFieldValue {
+    val edit = apply(text, selection.start, word)
+    return TextFieldValue(text = edit.text, selection = TextRange(edit.cursor.toInt()))
 }
 
 @Composable
@@ -376,7 +360,8 @@ fun PreviewImportAddress() {
                 onInput = {},
                 onTypeChange = {},
                 invalidWords = { emptySet() },
-                phraseSuggestions = { emptyList() },
+                phraseSuggestions = { _, _ -> emptyList() },
+                applyPhraseSuggestion = { text, cursor, _ -> GemPhraseEdit(text, cursor.toUInt()) },
                 onCancel = {},
             )
         }
