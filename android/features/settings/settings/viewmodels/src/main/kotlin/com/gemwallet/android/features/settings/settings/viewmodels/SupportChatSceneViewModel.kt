@@ -70,8 +70,14 @@ class SupportChatSceneViewModel @Inject constructor(
     }
 
     fun sendImage(uri: Uri) = viewModelScope.launch(Dispatchers.IO) {
-        val attachment = imageAttachmentFactory.fromUri(uri) ?: return@launch
-        perform { supportService.sendImage(attachment.data, attachment.fileName, attachment.mimeType) }
+        perform {
+            val attachment = imageAttachmentFactory.fromUri(uri)
+            if (attachment == null) {
+                errorState.value = GemErrorText.NotSupported
+                return@perform
+            }
+            supportService.sendImage(attachment.data, attachment.fileName, attachment.mimeType)
+        }
     }
 
     fun retry(message: SupportMessage) {

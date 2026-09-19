@@ -79,8 +79,10 @@ public final class SupportChatSceneViewModel {
     func sendImages(_ items: [PhotosPickerItem]) {
         Task {
             for item in items {
-                guard let attachment = try? await item.imageAttachment() else { continue }
                 await perform {
+                    guard let attachment = try await item.imageAttachment() else {
+                        throw AnyError(Localized.Errors.notSupported)
+                    }
                     try await service.sendMessage(.image(attachment))
                 }
             }
