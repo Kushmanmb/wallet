@@ -36,7 +36,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 [No hand-written twins](ARCHITECTURE.md): a type that only crosses the FFI is used as the uniffi type, and a twin exists only for a type an app persists. Android keeps four twins of exported Core enums, none persisted, and two of them let the app invent outcomes Core never produced.
 
-- **T5** **S** Android `ManageContactState` twins `GemContactInput` (name, description, avatar, addresses) — with **S43**, the session holds the input.
 - **O54** **S** iOS `AmountStakeViewModel.action: GemStakeAmountInput` and `ImportWalletSceneViewModel.importType: GemWalletImportKind` are stored and switched on in the model — the session holds them (**S41**).
 
 
@@ -51,7 +50,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 - **K8** **M** `GemStreamService` holds 13 `Arc`s, `GemAssetDetailsService` and `GemWalletService` 10, `GemPerpetualService` 9 — for each, the dependencies reached only to forward one call move behind the composition service (§ 7).
 - **S41** **M** iOS `ImportWalletSceneViewModel` drives input, word suggestions, import kind and button state itself — `GemWalletImportSession` on both apps (Android `ImportUIState` carries the same).
-- **S43** **M** iOS `ManageContactViewModel` (name input, description, avatar, addresses, saving) and Android `ManageContactState` — `GemContactSession` over the `GemContactInput` both already hold.
 
 
 ## 7. Decisions to make

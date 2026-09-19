@@ -5,6 +5,7 @@ import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.ContactAddress
 import uniffi.gemstone.GemContactAddressField
+import uniffi.gemstone.GemContactSession
 import uniffi.gemstone.contactAddressFields
 
 enum class ManageContactPage {
@@ -32,14 +33,11 @@ data class ManageContactUIState(
 )
 
 data class ManageContactState(
-    val isEdit: Boolean = false,
-    val name: String = "",
-    val description: String = "",
-    val avatar: ContactAvatarState = ContactAvatarState.Empty,
-    val addresses: List<ContactAddress> = emptyList(),
+    val session: GemContactSession,
+    val isEdit: Boolean,
+    val emojiBackground: Int = 0,
     val page: ManageContactPage = ManageContactPage.Form,
     val form: ContactAddressForm? = null,
-    val isSaving: Boolean = false,
     val saved: Boolean = false,
     val errorText: String? = null,
 )
