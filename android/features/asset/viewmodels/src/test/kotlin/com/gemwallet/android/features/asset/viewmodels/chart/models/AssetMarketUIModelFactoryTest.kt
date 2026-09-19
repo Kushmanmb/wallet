@@ -1,83 +1,34 @@
 package com.gemwallet.android.features.asset.viewmodels.chart.models
 
-import com.gemwallet.android.testkit.mockFormattedNumber
-import com.gemwallet.android.model.text
-import uniffi.gemstone.GemNumberUnit
 import android.content.Context
-import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.testkit.mockFormattedNumber
 import com.gemwallet.android.testkit.mockGemSocialLink
-import uniffi.gemstone.GemListRow
-import com.gemwallet.android.testkit.mockAssetSolanaUSDC
-import com.gemwallet.android.ui.R
-import com.wallet.core.primitives.BlockExplorerLink
-import com.wallet.core.primitives.ChartValuePercentage
-import com.wallet.core.primitives.Currency
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
-import uniffi.gemstone.GemAssetMarketRow
 import uniffi.gemstone.GemChartSection
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListRowTitle
 
 class AssetMarketUIModelFactoryTest {
 
-    private val asset = mockAssetSolanaUSDC()
     private val context = mockk<Context> { every { getString(any()) } answers { firstArg<Int>().toString() } }
     private val factory = AssetMarketUIModelFactory(context)
 
     @Test
-    fun `rows keep their section and the rank badge core gives`() {
-        val tokenId = requireNotNull(asset.id.tokenId)
-        val explorer = BlockExplorerLink(name = "Solscan", link = "https://solscan.io/token/$tokenId")
-        val allTimeHigh = ChartValuePercentage(date = 10L, value = 1.5f, percentage = -5f)
+    fun `sections keep their order and pass the market rows core built`() {
+        val rows = listOf(GemListRow.Ranked(GemListRowTitle.MARKET_CAP, mockFormattedNumber(1.0), 7), GemListRow.Amount(GemListRowTitle.TRADING_VOLUME, mockFormattedNumber(2.0), null))
         val sections = listOf(
             GemChartSection.PriceAlerts(count = 2u),
-            GemChartSection.Market(listOf(GemAssetMarketRow.MarketCap(value = mockFormattedNumber(1.0), rank = 7), GemAssetMarketRow.TradingVolume(value = mockFormattedNumber(2.0)))),
-            GemChartSection.Market(listOf(GemAssetMarketRow.Contract(tokenId = tokenId, explorer = explorer.toGem()))),
-            GemChartSection.Market(listOf(GemAssetMarketRow.CirculatingSupply(value = mockFormattedNumber(3.0)))),
-            GemChartSection.Market(listOf(GemAssetMarketRow.AllTimeHigh(value = allTimeHigh.toGem()))),
+            GemChartSection.Market(rows),
             GemChartSection.Links(listOf(mockGemSocialLink())),
         )
 
-        val model = factory.create(asset, Currency.USD, sections)
+        val model = factory.create(sections)
 
         assertEquals("2", (model.sections[0] as ChartSectionUIModel.PriceAlerts).model.subtitle)
-        val marketRows = (model.sections[1] as ChartSectionUIModel.Market).rows.map { it as MarketInfoUIModel }
-        assertEquals(
-            listOf(R.string.asset_market_cap.toString(), R.string.asset_trading_volume.toString()),
-            marketRows.map { it.model.title },
-        )
-        assertEquals(
-            listOf(MarketInfoUIModel.Layout.Badge, MarketInfoUIModel.Layout.Plain),
-            marketRows.map { it.layout },
-        )
-        assertEquals("#7", marketRows.first().model.titleTag)
-        assertNull(marketRows.last().model.titleTag)
-        val contract = (model.sections[2] as ChartSectionUIModel.Market).rows.single() as MarketInfoUIModel
-        assertEquals(tokenId, contract.model.subtitle)
-        assertEquals(explorer, contract.explorerLink)
-        assertEquals(MarketInfoUIModel.Layout.Address, contract.layout)
-        assertEquals(
-            listOf(R.string.asset_circulating_supply.toString()),
-            (model.sections[3] as ChartSectionUIModel.Market).rows.map { (it as MarketInfoUIModel).model.title },
-        )
-        val high = (model.sections[4] as ChartSectionUIModel.Market).rows.single() as AllTimeUIModel.High
-        assertEquals(1.5, high.value, 0.0)
-        assertEquals(-5.0, high.percentage, 0.0)
-        assertEquals(GemListRow.Social(listOf(mockGemSocialLink())), (model.sections[5] as ChartSectionUIModel.Links).row)
-    }
-
-    @Test
-    fun `values print the number core formatted`() {
-        val supply = mockFormattedNumber(value = 1500.0, unit = GemNumberUnit.Symbol(symbol = asset.symbol))
-        val sections = listOf(GemChartSection.Market(listOf(GemAssetMarketRow.CirculatingSupply(value = supply))))
-
-        val model = factory.create(asset, Currency.USD, sections)
-
-        assertEquals(
-            listOf(supply.text()),
-            (model.sections.single() as ChartSectionUIModel.Market).rows.map { (it as MarketInfoUIModel).model.subtitle },
-        )
+        assertEquals(rows, (model.sections[1] as ChartSectionUIModel.Market).rows)
+        assertEquals(GemListRow.Social(listOf(mockGemSocialLink())), (model.sections[2] as ChartSectionUIModel.Links).row)
     }
 }

@@ -28,6 +28,8 @@ import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemNoticeKind
 import uniffi.gemstone.GemSocialLink
 import uniffi.gemstone.GemValueTone
+import java.text.DateFormat
+import java.util.Date
 
 internal sealed interface GemListRowUIModel {
     data class Notice(val title: String, val message: String?, val kind: GemNoticeKind) : GemListRowUIModel
@@ -59,6 +61,16 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
     is GemListRow.Text -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = value))
     is GemListRow.Amount -> GemListRowUIModel.Item(
         ListItemModel(title = title.text(context), subtitle = amount.text(), subtitleStyle = amount.tone.subtitleStyle(), info = info?.infoSheet(infoIcon)),
+    )
+    is GemListRow.Ranked -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = amount.text(), titleTag = "#$rank"))
+    is GemListRow.AllTime -> GemListRowUIModel.Item(
+        ListItemModel(
+            title = title.text(context),
+            titleExtra = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(date)),
+            subtitle = value.text(),
+            subtitleExtra = change.text(),
+            subtitleExtraStyle = change.tone.textStyle(),
+        ),
     )
     is GemListRow.Duration -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = parts.formatDuration(), info = info?.infoSheet(infoIcon)))
     is GemListRow.Label -> GemListRowUIModel.Item(
@@ -97,6 +109,14 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
             subtitle = lines.firstOrNull()?.string(context),
             subtitleExtra = lines.getOrNull(1)?.string(context),
             info = info?.infoSheet(infoIcon),
+        ),
+    )
+    is GemListRow.Contract -> GemListRowUIModel.Item(
+        ListItemModel(title = context.getString(R.string.asset_contract), subtitle = copy.display),
+        url = explorer?.link,
+        menu = listOfNotNull(
+            GemListRowMenuItem.Copy(context.getString(R.string.wallet_copy_address), copy.value),
+            explorer?.let { GemListRowMenuItem.Open(context.getString(R.string.transaction_view_on, it.name), it.link) },
         ),
     )
     is GemListRow.Explorer -> GemListRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)
@@ -161,6 +181,10 @@ private fun GemInfoTopic.infoSheet(icon: Any?): InfoSheetEntity = when (this) {
     GemInfoTopic.AutoClose -> InfoSheetEntity.AutoCloseInfo
     GemInfoTopic.LiquidationPrice -> InfoSheetEntity.LiquidationPriceInfo
     GemInfoTopic.FundingPayments -> InfoSheetEntity.FundingPayments
+    GemInfoTopic.FullyDilutedValuation -> InfoSheetEntity.FullyDilutedValuation
+    GemInfoTopic.CirculatingSupply -> InfoSheetEntity.CirculatingSupply
+    GemInfoTopic.TotalSupply -> InfoSheetEntity.TotalSupply
+    GemInfoTopic.MaxSupply -> InfoSheetEntity.MaxSupply
     is GemInfoTopic.TransactionStatus -> InfoSheetEntity.TransactionInfo(
         icon = icon,
         state = state.toPrimitives(),

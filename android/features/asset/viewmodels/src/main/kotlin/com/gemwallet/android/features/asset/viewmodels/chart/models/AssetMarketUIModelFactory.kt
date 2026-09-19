@@ -1,35 +1,24 @@
 package com.gemwallet.android.features.asset.viewmodels.chart.models
 
 import android.content.Context
-import com.gemwallet.android.domains.asset.chain
-import com.gemwallet.android.ext.toPrimitives
-import com.gemwallet.android.features.asset.viewmodels.localization.stringRes
-import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
-import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.wallet.core.primitives.Asset
-import com.wallet.core.primitives.Currency
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-import uniffi.gemstone.GemAssetMarketRow
 import uniffi.gemstone.GemChartSection
 import uniffi.gemstone.GemListRow
 
 class AssetMarketUIModelFactory @Inject constructor(@ApplicationContext private val context: Context) {
 
-    fun create(asset: Asset, currency: Currency, sections: List<GemChartSection>): AssetMarketUIModel {
-        val mapper = RowMapper(context, currency)
+    fun create(sections: List<GemChartSection>): AssetMarketUIModel {
         return AssetMarketUIModel(
-            chain = asset.chain,
-            currency = currency,
             sections = sections.map { section ->
                 when (section) {
                     is GemChartSection.PriceAlerts -> ChartSectionUIModel.PriceAlerts(
                         ListItemModel(title = context.getString(R.string.settings_price_alerts_title), subtitle = section.count.toString()),
                     )
                     GemChartSection.SetPriceAlert -> ChartSectionUIModel.SetPriceAlert(ListItemModel(title = context.getString(R.string.price_alerts_set_alert_title)))
-                    is GemChartSection.Market -> ChartSectionUIModel.Market(section.rows.map(mapper::row))
+                    is GemChartSection.Market -> ChartSectionUIModel.Market(section.rows)
                     is GemChartSection.Links -> ChartSectionUIModel.Links(
                         title = context.getString(R.string.social_links),
                         row = GemListRow.Social(section.links),
@@ -37,43 +26,5 @@ class AssetMarketUIModelFactory @Inject constructor(@ApplicationContext private 
                 }
             },
         )
-    }
-
-    private class RowMapper(private val context: Context, private val currency: Currency) {
-
-        fun row(row: GemAssetMarketRow): MarketRowUIModel = when (row) {
-            is GemAssetMarketRow.MarketCap -> MarketInfoUIModel(
-                model = ListItemModel(title = title(row), subtitle = row.value.text(), titleTag = row.rank?.let { "#$it" }),
-                layout = MarketInfoUIModel.Layout.Badge,
-            )
-            is GemAssetMarketRow.FullyDilutedValuation -> MarketInfoUIModel(
-                model = ListItemModel(title = title(row), subtitle = row.value.text(), info = InfoSheetEntity.FullyDilutedValuation),
-            )
-            is GemAssetMarketRow.TradingVolume -> MarketInfoUIModel(
-                model = ListItemModel(title = title(row), subtitle = row.value.text()),
-            )
-            is GemAssetMarketRow.Contract -> MarketInfoUIModel(
-                model = ListItemModel(title = title(row), subtitle = row.tokenId),
-                layout = MarketInfoUIModel.Layout.Address,
-                explorerLink = row.explorer?.toPrimitives(),
-            )
-            is GemAssetMarketRow.CirculatingSupply -> MarketInfoUIModel(
-                model = ListItemModel(title = title(row), subtitle = row.value.text(), info = InfoSheetEntity.CirculatingSupply),
-            )
-            is GemAssetMarketRow.TotalSupply -> MarketInfoUIModel(
-                model = ListItemModel(title = title(row), subtitle = row.value.text(), info = InfoSheetEntity.TotalSupply),
-            )
-            is GemAssetMarketRow.MaxSupply -> MarketInfoUIModel(
-                model = ListItemModel(title = title(row), subtitle = row.value.text(), info = InfoSheetEntity.MaxSupply),
-            )
-            is GemAssetMarketRow.AllTimeHigh -> row.value.toPrimitives().let {
-                AllTimeUIModel.High(it.date, it.value.toDouble(), it.percentage.toDouble(), allTimeListItem(context, currency, true, it.date, it.value.toDouble(), it.percentage.toDouble()))
-            }
-            is GemAssetMarketRow.AllTimeLow -> row.value.toPrimitives().let {
-                AllTimeUIModel.Low(it.date, it.value.toDouble(), it.percentage.toDouble(), allTimeListItem(context, currency, false, it.date, it.value.toDouble(), it.percentage.toDouble()))
-            }
-        }
-
-        private fun title(row: GemAssetMarketRow): String = context.getString(row.stringRes())
     }
 }

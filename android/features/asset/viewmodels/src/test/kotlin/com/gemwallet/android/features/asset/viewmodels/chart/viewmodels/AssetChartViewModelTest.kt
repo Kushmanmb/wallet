@@ -10,10 +10,10 @@ import com.gemwallet.android.application.assets.cases.GetAssetTokenInfo
 import com.gemwallet.android.application.assets.cases.GetWalletAssets
 import com.gemwallet.android.application.pricealerts.cases.GetPriceAlerts
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
-import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.domains.pricealerts.aggregates.PriceAlertDataAggregate
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.asset.viewmodels.chart.models.AssetMarketUIModelFactory
+import com.gemwallet.android.features.asset.viewmodels.chart.models.ChartSectionUIModel
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.testkit.mockAssetInfo
 import com.gemwallet.android.testkit.mockAssetLink
@@ -43,7 +43,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import uniffi.gemstone.GemAssetMarketRow
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemChartSection
 import uniffi.gemstone.GemChartServiceInterface
 
@@ -92,13 +93,12 @@ class AssetChartViewModelTest {
     fun `a stored asset gives the scene its sections and title before any flow emits`() = runTest(testDispatcher) {
         walletAssetsFlow.value = listOf(mockAssetInfo(asset))
         every { chartService.sections(asset.toGem(), any(), null, any(), any()) } returns listOf(
-            GemChartSection.Market(rows = listOf(GemAssetMarketRow.Contract(tokenId = requireNotNull(asset.id.tokenId), explorer = null))),
+            GemChartSection.Market(rows = listOf(GemListRow.Text(GemListRowTitle.TYPE, "SPL"))),
         )
 
         val viewModel = createViewModel()
 
         val uiModel = requireNotNull(viewModel.marketUIModel.value)
-        assertEquals(asset.chain, uiModel.chain)
         assertEquals(1, uiModel.sections.size)
         assertEquals(asset.name, viewModel.title.value)
     }
@@ -120,17 +120,19 @@ class AssetChartViewModelTest {
         val market = mockAssetMarket(marketCap = 1234.0)
         val link = mockAssetLink()
         every { chartService.sections(asset.toGem(), any(), market.toGem(), any(), listOf(link.toGem())) } returns listOf(
-            GemChartSection.Market(rows = listOf(GemAssetMarketRow.MarketCap(value = mockFormattedNumber(1234.0), rank = null))),
+            GemChartSection.Market(rows = listOf(GemListRow.Amount(GemListRowTitle.MARKET_CAP, mockFormattedNumber(1234.0), null))),
             GemChartSection.Links(links = listOf(mockGemSocialLink())),
         )
         linksFlow.value = listOf(link)
         marketFlow.value = market
         currencyFlow.value = Currency.EUR
 
-        val uiModel = viewModel.marketUIModel.first { it?.sections?.size == 2 && it.currency == Currency.EUR }!!
+        val uiModel = viewModel.marketUIModel.first { it?.sections?.size == 2 }!!
 
-        assertEquals(asset.chain, uiModel.chain)
-        assertEquals(Currency.EUR, uiModel.currency)
+        assertEquals(
+            listOf(GemListRow.Amount(GemListRowTitle.MARKET_CAP, mockFormattedNumber(1234.0), null)),
+            (uiModel.sections.first() as ChartSectionUIModel.Market).rows,
+        )
     }
 
     @Test

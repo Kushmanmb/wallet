@@ -17,7 +17,6 @@ import com.gemwallet.android.ui.models.navigation.requireAssetId
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.AssetLink
 import com.wallet.core.primitives.AssetMarket
-import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PriceAlert
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
@@ -59,25 +58,20 @@ class AssetChartViewModel internal constructor(
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, storedAssetInfo?.asset?.name.orEmpty())
 
-    val marketUIModel = combine(assetInfo, links, market, priceAlerts, getCurrentCurrency.getCurrency(), ::marketUIModel)
+    val marketUIModel = combine(assetInfo, links, market, priceAlerts, getCurrentCurrency.getCurrency()) { info, assetLinks, assetMarket, alerts, _ ->
+        marketUIModel(info, assetLinks, assetMarket, alerts)
+    }
         .flowOn(ioDispatcher)
-        .stateIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            marketUIModel(storedAssetInfo, emptyList(), null, emptyList(), getCurrentCurrency.getCurrency().value),
-        )
+        .stateIn(viewModelScope, SharingStarted.Eagerly, marketUIModel(storedAssetInfo, emptyList(), null, emptyList()))
 
     private fun marketUIModel(
         assetInfo: AssetInfo?,
         links: List<AssetLink>,
         market: AssetMarket?,
         priceAlerts: List<PriceAlert>,
-        currency: Currency,
     ): AssetMarketUIModel? = assetInfo?.let {
         marketUIModelFactory.create(
-            asset = it.asset,
-            currency = currency,
-            sections = chartService.sections(
+            chartService.sections(
                 asset = it.asset.toGem(),
                 price = it.price?.price?.price,
                 market = market?.toGem(),

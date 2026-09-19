@@ -527,6 +527,14 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.LIQUIDATION_PRICE -> R.string.info_perpetual_liquidation_price_title
     GemListRowTitle.MARGIN -> R.string.perpetual_margin
     GemListRowTitle.FUNDING_PAYMENTS -> R.string.info_perpetual_funding_payments_title
+    GemListRowTitle.MARKET_CAP -> R.string.asset_market_cap
+    GemListRowTitle.FULLY_DILUTED_VALUATION -> R.string.info_fully_diluted_valuation_title
+    GemListRowTitle.TRADING_VOLUME -> R.string.asset_trading_volume
+    GemListRowTitle.CIRCULATING_SUPPLY -> R.string.asset_circulating_supply
+    GemListRowTitle.TOTAL_SUPPLY -> R.string.asset_total_supply
+    GemListRowTitle.MAX_SUPPLY -> R.string.info_max_supply_title
+    GemListRowTitle.ALL_TIME_HIGH -> R.string.asset_all_time_high
+    GemListRowTitle.ALL_TIME_LOW -> R.string.asset_all_time_low
     GemListRowTitle.PRICE -> R.string.asset_price
     GemListRowTitle.PNL -> R.string.perpetual_pnl
     GemListRowTitle.PIN -> R.string.common_pin
