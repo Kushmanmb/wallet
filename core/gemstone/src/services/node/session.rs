@@ -68,13 +68,23 @@ impl GemAddNodeSession {
         }
     }
 
-    pub fn on_checked(&self, check: GemNodeCheck) -> Self {
+    pub fn on_checked(&self, url: String, check: GemNodeCheck) -> Self {
+        if url != self.url {
+            return self.clone();
+        }
         Self {
             check: Some(check),
             failure: None,
             is_checking: false,
             ..self.clone()
         }
+    }
+
+    pub fn on_check_failed(&self, url: String, failure: GemAddNodeFailure) -> Self {
+        if url != self.url {
+            return self.clone();
+        }
+        self.on_failed(failure)
     }
 
     pub fn on_failed(&self, failure: GemAddNodeFailure) -> Self {
@@ -131,7 +141,7 @@ mod tests {
     fn test_a_new_url_clears_the_previous_answer() {
         let checked = GemAddNodeSession::new(Chain::Ethereum)
             .on_input("https://node".to_string())
-            .on_checked(GemNodeCheck::mock());
+            .on_checked("https://node".to_string(), GemNodeCheck::mock());
         assert!(checked.view_state().can_import);
 
         let retyped = checked.on_input("https://other".to_string());
@@ -140,10 +150,18 @@ mod tests {
     }
 
     #[test]
+    fn test_a_check_for_an_earlier_url_is_ignored() {
+        let session = GemAddNodeSession::new(Chain::Ethereum).on_input("https://other".to_string()).on_checking();
+
+        assert_eq!(session.on_checked("https://node".to_string(), GemNodeCheck::mock()), session);
+        assert_eq!(session.on_check_failed("https://node".to_string(), GemAddNodeFailure::InvalidUrl), session);
+    }
+
+    #[test]
     fn test_a_failure_replaces_the_answer_and_blocks_the_import() {
         let failed = GemAddNodeSession::new(Chain::Ethereum)
             .on_input("https://node".to_string())
-            .on_checked(GemNodeCheck::mock())
+            .on_checked("https://node".to_string(), GemNodeCheck::mock())
             .on_failed(GemAddNodeFailure::InvalidNetworkId);
 
         assert_eq!(
@@ -159,7 +177,7 @@ mod tests {
     fn test_importing_leaves_the_screen_ready_for_the_next_url() {
         let imported = GemAddNodeSession::new(Chain::Ethereum)
             .on_input("https://node".to_string())
-            .on_checked(GemNodeCheck::mock())
+            .on_checked("https://node".to_string(), GemNodeCheck::mock())
             .on_imported();
 
         assert_eq!(imported, GemAddNodeSession::new(Chain::Ethereum));

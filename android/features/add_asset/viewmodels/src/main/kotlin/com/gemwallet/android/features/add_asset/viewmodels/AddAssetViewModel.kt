@@ -167,8 +167,8 @@ class AddAssetViewModel @Inject constructor(
     fun clearError() = state.update { it.copy(error = null) }
 
     private suspend fun searchToken(session: GemAddAssetSession, chain: Chain, address: String): GemAddAssetSession =
-        runCatchingCancellable { session.onFound(service.token(chain.string, address)) }
-            .getOrDefault(session.onFailed())
+        runCatchingCancellable { session.onFound(address, service.token(chain.string, address)) }
+            .getOrDefault(session.onFailed(address))
 
 
     private data class State(

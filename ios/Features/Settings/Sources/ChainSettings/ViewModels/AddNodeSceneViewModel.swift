@@ -118,12 +118,14 @@ extension AddNodeSceneViewModel {
 
     func load() async {
         session = session.onChecking()
+        let url = session.url
         do {
-            session = try await session.onChecked(check: service.checkNode(chain: chain.rawValue, url: session.url))
+            let check = try await service.checkNode(chain: chain.rawValue, url: url)
+            session = session.onChecked(url: url, check: check)
         } catch let error as GemAddNodeError {
-            session = session.onFailed(failure: error.failure)
+            session = session.onCheckFailed(url: url, failure: error.failure)
         } catch {
-            session = session.onFailed(failure: .unavailable)
+            session = session.onCheckFailed(url: url, failure: .unavailable)
         }
     }
 }

@@ -77,15 +77,15 @@ class AddNodeViewModel @Inject constructor(
     private suspend fun checkUrl(current: GemAddNodeSession) {
         session.value = current.onChecking()
         session.value = try {
-            current.onChecked(withContext(ioDispatcher) { service.checkNode(current.chain, current.url) })
+            current.onChecked(current.url, withContext(ioDispatcher) { service.checkNode(current.chain, current.url) })
         } catch (error: GemAddNodeException.InvalidUrl) {
-            current.onFailed(GemAddNodeFailure.INVALID_URL)
+            current.onCheckFailed(current.url, GemAddNodeFailure.INVALID_URL)
         } catch (error: GemAddNodeException.InvalidNetworkId) {
-            current.onFailed(GemAddNodeFailure.INVALID_NETWORK_ID)
+            current.onCheckFailed(current.url, GemAddNodeFailure.INVALID_NETWORK_ID)
         } catch (error: CancellationException) {
             throw error
         } catch (_: Throwable) {
-            current.onFailed(GemAddNodeFailure.UNAVAILABLE)
+            current.onCheckFailed(current.url, GemAddNodeFailure.UNAVAILABLE)
         }
     }
 }

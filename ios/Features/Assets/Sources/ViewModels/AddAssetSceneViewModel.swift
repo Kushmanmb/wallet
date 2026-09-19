@@ -143,9 +143,10 @@ extension AddAssetSceneViewModel {
         guard let trigger = loadTrigger else { return }
         session = session.onLoading()
         do {
-            session = try await session.onFound(asset: service.token(chain: trigger.chain.rawValue, address: trigger.address))
+            let asset = try await service.token(chain: trigger.chain.rawValue, address: trigger.address)
+            session = session.onFound(address: trigger.address, asset: asset)
         } catch {
-            session = session.onFailed()
+            session = session.onFailed(address: trigger.address)
         }
     }
 

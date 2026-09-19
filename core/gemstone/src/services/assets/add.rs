@@ -100,7 +100,10 @@ impl GemAddAssetSession {
         }
     }
 
-    pub fn on_found(&self, asset: Asset) -> Self {
+    pub fn on_found(&self, address: String, asset: Asset) -> Self {
+        if address.trim() != self.address {
+            return self.clone();
+        }
         Self {
             asset: Some(asset),
             is_loading: false,
@@ -109,7 +112,10 @@ impl GemAddAssetSession {
         }
     }
 
-    pub fn on_failed(&self) -> Self {
+    pub fn on_failed(&self, address: String) -> Self {
+        if address.trim() != self.address {
+            return self.clone();
+        }
         Self {
             asset: None,
             is_loading: false,
@@ -201,7 +207,7 @@ mod session_tests {
 
     #[test]
     fn test_a_new_address_drops_the_token_found_for_the_previous_one() {
-        let found = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_found(Asset::mock());
+        let found = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_found("0xabc".to_string(), Asset::mock());
         assert!(found.view_state().can_add);
 
         let retyped = found.on_address("0xdef".to_string());
@@ -211,14 +217,23 @@ mod session_tests {
 
     #[test]
     fn test_switching_chain_starts_over() {
-        let found = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_found(Asset::mock());
+        let found = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_found("0xabc".to_string(), Asset::mock());
 
         assert_eq!(found.on_chain(Some(Chain::SmartChain)).view_state().phase, GemAddAssetPhase::Idle);
     }
 
     #[test]
+    fn test_a_lookup_for_an_earlier_address_is_ignored() {
+        let session = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xdef".to_string()).on_loading();
+
+        assert_eq!(session.on_found("0xabc".to_string(), Asset::mock()), session);
+        assert_eq!(session.on_failed("0xabc".to_string()), session);
+        assert!(session.on_found(" 0xdef ".to_string(), Asset::mock()).view_state().can_add);
+    }
+
+    #[test]
     fn test_a_failed_lookup_is_not_an_empty_screen() {
-        let failed = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_failed();
+        let failed = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_failed("0xabc".to_string());
 
         assert_eq!(failed.view_state().phase, GemAddAssetPhase::Failed);
         assert!(!failed.view_state().can_add);
@@ -248,7 +263,7 @@ mod tests {
             link: "https://etherscan.io/token/0xabc".to_string(),
         };
         assert_eq!(
-            session.on_found(Asset::from_chain(Chain::Ethereum)).sections(Some(link)),
+            session.on_found(String::new(), Asset::from_chain(Chain::Ethereum)).sections(Some(link)),
             vec![
                 section(vec![
                     text(GemListRowTitle::Name, "Ethereum"),
@@ -266,7 +281,7 @@ mod tests {
 
     #[test]
     fn test_a_failed_lookup_reads_as_an_invalid_token_id() {
-        let failed = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_failed();
+        let failed = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_failed("0xabc".to_string());
 
         assert_eq!(
             failed.sections(None),
