@@ -2,7 +2,7 @@
 
 import protocol Gemstone.GemAddAssetServiceProtocol
 import enum Gemstone.GemAddAssetPhase
-import enum Gemstone.GemListRow
+import struct Gemstone.GemListSection
 import struct Gemstone.GemAddAssetSession
 import Components
 import Foundation
@@ -35,19 +35,24 @@ public final class AddAssetSceneViewModel {
         self.input = input
     }
 
-    var state: StateViewType<AddAssetViewModel> {
-        switch session.viewState().phase {
-        case .idle: return .noData
-        case .loading: return .loading
-        case let .found(core):
-            let asset = core.toPrimitives()
-            return .data(AddAssetViewModel(link: service.tokenUrl(chain: asset.chain, tokenId: asset.tokenId ?? "")))
-        case .failed: return .error(AnyError(Localized.Errors.errorOccurred))
-        }
+    var sections: [GemListSection] {
+        service.sections(session: session)
     }
 
-    var rows: [GemListRow] {
-        session.rows()
+    var isLoading: Bool {
+        session.isLoading
+    }
+
+    var showsVerificationWarning: Bool {
+        session.viewState().canAdd
+    }
+
+    var buttonState: ButtonState {
+        switch session.viewState().phase {
+        case .loading: .loading()
+        case .found: .normal
+        case .idle, .failed: .disabled
+        }
     }
 
     var title: String {

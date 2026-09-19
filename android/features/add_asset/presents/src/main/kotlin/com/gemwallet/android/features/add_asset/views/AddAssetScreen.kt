@@ -27,11 +27,9 @@ fun AddAssetScreen(
     val availableChains by viewModel.availableChains.collectAsStateWithLifecycle()
     val chains by viewModel.chains.collectAsStateWithLifecycle()
     val network by viewModel.selectedChain.collectAsStateWithLifecycle()
-    val token by viewModel.token.collectAsStateWithLifecycle()
-    val assetRows by viewModel.assetRows.collectAsStateWithLifecycle()
+    val sections by viewModel.sections.collectAsStateWithLifecycle()
     val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
     val verificationWarningRow by viewModel.verificationWarningRow.collectAsStateWithLifecycle()
-    val explorerLink by viewModel.explorerLink.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
     val snackbar = rememberSnackbarState(message = uiState.error?.text(), iconRes = R.drawable.ic_error, onShown = viewModel::clearError)
 
@@ -59,9 +57,7 @@ fun AddAssetScreen(
                 isSearching = isSearching,
                 addressState = viewModel.addressState,
                 network = network?.asset(),
-                token = token,
-                assetRows = assetRows,
-                explorerLink = explorerLink,
+                sections = sections,
                 verificationWarningRow = verificationWarningRow,
                 buttonState = buttonState,
                 canSelectChain = (availableChains?.size ?: 0) > 1,

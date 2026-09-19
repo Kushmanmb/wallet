@@ -53,7 +53,7 @@ class AddAssetViewModelTest {
         }
         every { chains(any()) } returns listOf(Chain.Ethereum.string)
         every { defaultChain(any()) } returns Chain.Ethereum.string
-        every { tokenUrl(any(), any()) } returns null
+        every { sections(any()) } returns emptyList()
         coEvery { token(Chain.Ethereum.string, "0x1") } returns token.toGem()
         coEvery { add(any(), any()) } returns Unit
     }

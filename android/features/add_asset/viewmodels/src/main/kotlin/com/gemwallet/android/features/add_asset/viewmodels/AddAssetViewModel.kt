@@ -18,9 +18,7 @@ import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.add_asset.viewmodels.models.AddAssetUIState
 import com.gemwallet.android.features.add_asset.viewmodels.models.verificationWarningListItem
-import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.gemwallet.android.ui.components.list_item.property.LinkRowUIModel
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.buttonState
 import com.wallet.core.primitives.Chain
@@ -42,7 +40,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAddAssetPhase
-import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListSection
 import uniffi.gemstone.GemAddAssetServiceInterface
 import uniffi.gemstone.GemAddAssetSession
 import uniffi.gemstone.GemErrorText
@@ -113,20 +111,13 @@ class AddAssetViewModel @Inject constructor(
     val verificationWarningRow: StateFlow<ListItemModel?> = token.map { if (it == null) null else verificationWarningListItem(context) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val assetRows: StateFlow<List<GemListRow>> = session.map { it.rows() }
+    val sections: StateFlow<List<GemListSection>> = session.map { service.sections(it) }
+        .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val buttonState = combine(session, uiState) { session, uiState ->
         buttonState(enabled = session.viewState().canAdd, loading = uiState.isLoading)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Disabled)
-
-    val explorerLink: StateFlow<LinkRowUIModel?> = token.map { token ->
-        val tokenId = token?.id?.tokenId ?: return@map null
-        val link = service.tokenUrl(token.id.chain.string, tokenId)?.toPrimitives() ?: return@map null
-        LinkRowUIModel(url = link.link, model = ListItemModel(title = context.getString(R.string.transaction_view_on, link.name)))
-    }
-    .flowOn(ioDispatcher)
-    .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     fun onQrScan() {
         state.update { it.copy(isQrScan = true) }

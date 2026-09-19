@@ -29,7 +29,7 @@ public struct AddAssetScene: View {
             .safeAreaButton {
                 StateButton(
                     text: model.actionButtonTitle,
-                    type: .primary(model.state),
+                    type: .primary(model.buttonState),
                     action: onSelectImportToken,
                 )
             }
@@ -89,35 +89,22 @@ extension AddAssetScene {
                 .onSubmit(model.onSubmitAddress)
             }
 
-            switch model.state {
-            case .noData:
-                EmptyView()
-            case .loading:
+            if model.isLoading {
                 ListItemLoadingView()
                     .id(UUID())
-            case let .data(asset):
-                rowsSection
-                if let url = asset.explorerUrl, let item = asset.explorerListItem {
-                    Section {
-                        SafariNavigationLink(url: url) {
-                            ListItemView(model: item)
-                        }
-                    }
+            }
+            ForEach(model.sections.listSections) { section in
+                Section {
+                    ForEach(section.values) { GemListRowView(row: $0.row) }
                 }
+            }
+            if model.showsVerificationWarning {
                 Section {
                     ListItemView(model: model.warningListItem {
                         isPresentingUrl = model.tokenVerificationUrl
                     })
                 }
-            case .error:
-                rowsSection
             }
-        }
-    }
-
-    private var rowsSection: some View {
-        Section {
-            ForEach(model.rows, id: \.self) { GemListRowView(row: $0) }
         }
     }
 }

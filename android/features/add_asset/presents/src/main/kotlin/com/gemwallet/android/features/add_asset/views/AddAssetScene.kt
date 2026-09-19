@@ -25,14 +25,13 @@ import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
-import com.gemwallet.android.ui.components.list_item.property.LinkRowUIModel
 import com.gemwallet.android.ui.components.progress.CircularProgressIndicator16
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.open
 import com.wallet.core.primitives.Asset
-import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListSection
 import uniffi.gemstone.DocsUrl
 
 private val networkItemHeight = 64.dp
@@ -42,9 +41,7 @@ internal fun AddAssetScene(
     isSearching: Boolean,
     addressState: MutableState<String>,
     network: Asset?,
-    token: Asset?,
-    assetRows: List<GemListRow>,
-    explorerLink: LinkRowUIModel?,
+    sections: List<GemListSection>,
     verificationWarningRow: ListItemModel?,
     buttonState: ButtonState,
     canSelectChain: Boolean,
@@ -99,18 +96,12 @@ internal fun AddAssetScene(
                 CircularProgressIndicator16(modifier = Modifier.align(Alignment.Center))
             }
         }
-        assetRows.forEachIndexed { index, row ->
-            GemListRowView(row = row, listPosition = ListPosition.getPosition(index, assetRows.size))
+        sections.forEach { section ->
+            section.rows.forEachIndexed { index, row ->
+                GemListRowView(row = row, listPosition = ListPosition.getPosition(index, section.rows.size))
+            }
         }
-        if (explorerLink != null && token != null) {
-            ListItem(
-                model = explorerLink.model,
-                listPosition = ListPosition.Single,
-                modifier = Modifier.clickable { uriHandler.open(context, explorerLink.url) },
-                accessory = { DataBadgeChevron() },
-            )
-        }
-        if (verificationWarningRow != null && token != null) {
+        if (verificationWarningRow != null) {
             ListItem(
                 model = verificationWarningRow,
                 listPosition = ListPosition.Single,

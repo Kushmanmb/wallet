@@ -5,7 +5,7 @@ import typealias Gemstone.Asset
 import typealias Gemstone.AssetId
 import typealias Gemstone.Chain
 import protocol Gemstone.GemAddAssetServiceProtocol
-import struct Gemstone.BlockExplorerLink
+import struct Gemstone.GemListSection
 import struct Gemstone.Wallet
 import GemstonePrimitives
 import Primitives
@@ -27,7 +27,7 @@ public final class GemAddAssetServiceMock: GemAddAssetServiceProtocol, @unchecke
 
     public func chains(wallet _: Wallet) -> [Chain] { chains.map(\.rawValue) }
     public func defaultChain(chains: [Chain]) -> Chain? { chains.first }
-    public func tokenUrl(chain: Chain, tokenId: String) -> Gemstone.BlockExplorerLink? { nil }
+    public func sections(session _: GemAddAssetSession) -> [GemListSection] { [] }
     public func token(chain: Chain, address: String) async throws -> Asset { asset.toGem() }
     public func add(wallet: Wallet, assetId: AssetId) async throws {}
 }
