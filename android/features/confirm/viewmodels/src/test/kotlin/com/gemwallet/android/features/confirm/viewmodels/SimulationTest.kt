@@ -5,6 +5,7 @@ import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.testkit.mockAssetSolana
 import com.gemwallet.android.testkit.mockAssetSolanaUSDC
 import com.gemwallet.android.testkit.mockGemConfirmSimulationState
+import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -17,7 +18,7 @@ import java.math.BigInteger
 
 class SimulationTest {
 
-    private val confirmation = mockk<GemConfirmation>()
+    private val confirmation = mockk<GemConfirmation> { every { rowContents(any()) } returns emptyList() }
 
     @Before
     fun setUp() {

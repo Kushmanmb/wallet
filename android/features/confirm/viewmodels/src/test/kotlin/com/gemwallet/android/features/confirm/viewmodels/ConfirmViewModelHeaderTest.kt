@@ -84,7 +84,7 @@ class ConfirmViewModelHeaderTest {
     }
 
     private fun viewModel(transfer: GemTransferData): ConfirmViewModel {
-        val confirmation = mockk<GemConfirmation>()
+        val confirmation = mockk<GemConfirmation> { every { rowContents(any()) } returns emptyList() }
         every { confirmation.getCurrency() } returns Currency.USD.toGem()
         every { confirmation.insufficientNetworkFeeBuyAmount() } returns 10
         every { confirmation.screen() } returns mockGemConfirmScreen()

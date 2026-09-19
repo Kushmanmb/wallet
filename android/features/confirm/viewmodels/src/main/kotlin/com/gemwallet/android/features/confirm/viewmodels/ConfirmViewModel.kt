@@ -250,10 +250,10 @@ class ConfirmViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val transactionRows: StateFlow<List<ConfirmRowUIModel>> = combine(request, wallet, content) { request, wallet, content ->
+    val transactionRows: StateFlow<List<ConfirmRowUIModel>> = combine(request, content) { request, content ->
         request ?: return@combine emptyList()
-        wallet ?: return@combine emptyList()
-        confirmService.rowContents(request, wallet.toGem(), content?.load?.addressName).mapNotNull { it.uiModel(context) }
+        content ?: return@combine emptyList()
+        content.session.rowContents(content.load.addressName).mapNotNull { it.uiModel(context) }
     }
     .flowOn(ioDispatcher)
     .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())

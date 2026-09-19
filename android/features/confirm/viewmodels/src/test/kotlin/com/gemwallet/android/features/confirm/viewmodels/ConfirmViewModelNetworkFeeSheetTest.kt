@@ -51,7 +51,7 @@ class ConfirmViewModelNetworkFeeSheetTest {
     private val asset = mockAssetSolana()
     private val account = mockAccount(chain = Chain.Solana)
     private val confirmService = mockk<GemConfirmTransferService>(relaxed = true)
-    private val confirmation = mockk<GemConfirmation>()
+    private val confirmation = mockk<GemConfirmation> { every { rowContents(any()) } returns emptyList() }
     private var model: ConfirmViewModel? = null
 
     @Before

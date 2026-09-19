@@ -64,14 +64,6 @@ impl GemConfirmTransferService {
     pub fn confirmation(self: Arc<Self>, wallet: Wallet, transfer: GemTransferData, simulation: Option<SimulationResult>) -> Arc<GemConfirmation> {
         Arc::new(GemConfirmation::new(self, wallet, transfer, simulation))
     }
-
-    pub fn address_url(&self, chain: Chain, address: String) -> BlockExplorerLink {
-        self.explorer.get_address_url(chain, address)
-    }
-
-    pub fn row_contents(&self, transfer: GemTransferData, wallet: Wallet, address_name: Option<AddressName>) -> Vec<GemConfirmRowContent> {
-        confirm_row_contents(&transfer, wallet, address_name, |chain, address| self.address_url(chain, address))
-    }
 }
 
 fn simulation_seed(chain: Chain, simulation: Option<SimulationResult>) -> GemConfirmSimulationState {
@@ -91,6 +83,14 @@ fn is_broadcast(result: &GemExecuteResult) -> bool {
 }
 
 impl GemConfirmTransferService {
+    pub(super) fn address_url(&self, chain: Chain, address: String) -> BlockExplorerLink {
+        self.explorer.get_address_url(chain, address)
+    }
+
+    pub(super) fn row_contents(&self, transfer: GemTransferData, wallet: Wallet, address_name: Option<AddressName>) -> Vec<GemConfirmRowContent> {
+        confirm_row_contents(&transfer, wallet, address_name, |chain, address| self.address_url(chain, address))
+    }
+
     pub(super) fn get_currency(&self) -> Currency {
         self.preferences.get_currency()
     }

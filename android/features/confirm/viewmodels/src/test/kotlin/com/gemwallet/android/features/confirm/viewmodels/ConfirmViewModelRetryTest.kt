@@ -63,7 +63,7 @@ class ConfirmViewModelRetryTest {
     private val asset = mockAssetHyperCoreUBTC()
     private val account = mockAccount(chain = Chain.HyperCore)
     private val confirmService = mockk<GemConfirmTransferService>(relaxed = true)
-    private val confirmation = mockk<GemConfirmation>()
+    private val confirmation = mockk<GemConfirmation> { every { rowContents(any()) } returns emptyList() }
     private var model: ConfirmViewModel? = null
 
     @Before
