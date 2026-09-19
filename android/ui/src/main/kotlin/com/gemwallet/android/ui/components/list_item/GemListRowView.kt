@@ -84,7 +84,7 @@ fun GemListRowView(
                     row.url != null || row.opensAnotherScreen -> {
                         {
                             DataBadgeChevron()
-                            accessory?.invoke()
+                            if (accessory != null) accessory()
                         }
                     }
                     else -> accessory
