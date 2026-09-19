@@ -15,6 +15,7 @@ import com.gemwallet.android.ui.components.list_item.ListItemDefaults
 import com.gemwallet.android.ui.components.list_item.SelectionCheckmark
 import com.gemwallet.android.ui.components.list_item.listSections
 import com.gemwallet.android.ui.components.screen.Scene
+import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 
 @Composable
 fun CurrenciesScene(
@@ -22,9 +23,12 @@ fun CurrenciesScene(
     viewModel: CurrenciesViewModel = hiltViewModel()
 ) {
     val sections by viewModel.sections.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
+    val snackbar = rememberSnackbarState(message = error, iconRes = R.drawable.ic_error, onShown = viewModel::clearError)
 
     Scene(
         title = stringResource(id = R.string.settings_currency),
+        snackbar = snackbar,
         onClose = onCancel,
     ) {
         LazyColumn {
@@ -33,8 +37,7 @@ fun CurrenciesScene(
                     model = row.model,
                     listPosition = position,
                     modifier = Modifier.clickable {
-                        viewModel.setCurrency(row.currency)
-                        onCancel()
+                        viewModel.setCurrency(row.currency, onCancel)
                     },
                     minHeight = ListItemDefaults.plainMinHeight,
                     accessory = if (row.isSelected) {

@@ -33,6 +33,7 @@ public struct CurrencyScene: View {
         }
         .listSectionSpacing(.compact)
         .navigationTitle(model.title)
+        .alertSheet($model.isPresentingAlertMessage)
     }
 }
 
@@ -42,7 +43,13 @@ extension CurrencyScene {
     private func onSelectCurrency(_ currency: Currency) {
         guard currency != model.currency else { return }
 
-        Task { try? await model.setCurrency(currency) }
-        dismiss()
+        Task {
+            do {
+                try await model.setCurrency(currency)
+                dismiss()
+            } catch {
+                model.isPresentingAlertMessage = AlertMessage(error: error)
+            }
+        }
     }
 }

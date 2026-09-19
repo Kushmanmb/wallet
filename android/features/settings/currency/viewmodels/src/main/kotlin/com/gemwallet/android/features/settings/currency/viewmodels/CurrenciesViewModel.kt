@@ -17,6 +17,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import uniffi.gemstone.GemCurrencyServiceInterface
+import com.gemwallet.android.ext.errorText
+import com.gemwallet.android.ext.runCatchingCancellable
+import com.gemwallet.android.ui.localization.text
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -35,11 +43,14 @@ class CurrenciesViewModel @Inject constructor(
     val sections = currency.mapLatest { service.currencies(localeCurrency?.toGem()).sections(context) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    fun setCurrency(currency: Currency) {
-        if (this.currency.value == currency) {
-            return
-        }
+    private val errorState = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = errorState.asStateFlow()
 
-        setCurrentCurrency.setCurrentCurrency(currency)
+    fun setCurrency(currency: Currency, onSelected: () -> Unit) = viewModelScope.launch {
+        runCatchingCancellable { setCurrentCurrency.setCurrentCurrency(currency) }
+            .onSuccess { onSelected() }
+            .onFailure { errorState.value = it.errorText().text(context) }
     }
+
+    fun clearError() = errorState.update { null }
 }

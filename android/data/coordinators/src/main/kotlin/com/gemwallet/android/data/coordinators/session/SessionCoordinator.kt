@@ -74,14 +74,12 @@ class SessionCoordinator(
 
     override fun getCurrency(): StateFlow<Currency> = currencyState
 
-    override fun setCurrentCurrency(currency: Currency) {
-        scope.launch {
-            if (currencyState.value == currency) {
-                return@launch
-            }
-            currencyService.setCurrency(currency.toGem())
-            currencyState.value = currency
+    override suspend fun setCurrentCurrency(currency: Currency) = withContext(Dispatchers.IO) {
+        if (currencyState.value == currency) {
+            return@withContext
         }
+        currencyService.setCurrency(currency.toGem())
+        currencyState.value = currency
     }
 
     override suspend fun setCurrentWallet(walletId: WalletId) = withContext(Dispatchers.IO) {

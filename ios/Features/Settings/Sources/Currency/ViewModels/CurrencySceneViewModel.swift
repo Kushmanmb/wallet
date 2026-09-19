@@ -17,6 +17,8 @@ public final class CurrencySceneViewModel {
     private let service: any GemCurrencyServiceProtocol
     private let deviceService: any GemDeviceServiceProtocol
 
+    var isPresentingAlertMessage: AlertMessage?
+
     private(set) var currency: Currency {
         get { currencyStorage.currency }
         set { currencyStorage.currency = newValue }
