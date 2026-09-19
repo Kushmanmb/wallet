@@ -1,10 +1,11 @@
 use super::rules;
-use crate::formatted_number::GemFormattedNumber;
+use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::custom_types::GemBigInt;
-use crate::models::list::GemListRow;
+use crate::models::list::{GemListRow, GemListSection};
 use crate::services::failures::StepFailure;
+use crate::services::localization::GemLocalizedText;
 use primitives::chart::{ChartCandleStick, ChartCandleUpdate};
-use primitives::{Asset, Perpetual, PerpetualAccountMode, PerpetualConfirmData, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, PerpetualType};
+use primitives::{Asset, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, PerpetualType};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
@@ -62,19 +63,17 @@ pub struct GemPerpetualConnection {
     pub mode: PerpetualAccountMode,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, uniffi::Enum)]
-pub enum GemPerpetualDetailsAction {
-    Open,
-    Close,
-    Increase,
-    Reduce,
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemPerpetualDetailsSummary {
+    pub text: Option<GemLocalizedText>,
+    pub tone: GemValueTone,
 }
 
-#[derive(Debug, Clone, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemPerpetualDetails {
-    pub action: GemPerpetualDetailsAction,
-    pub direction: PerpetualDirection,
-    pub data: PerpetualConfirmData,
+    pub id: String,
+    pub summary: GemPerpetualDetailsSummary,
+    pub sections: Vec<GemListSection>,
 }
 
 #[uniffi::export]

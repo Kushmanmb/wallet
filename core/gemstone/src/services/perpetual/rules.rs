@@ -12,17 +12,17 @@ use primitives::{
 
 use super::model::{
     GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine,
-    GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSection,
+    GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsSummary, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSection,
     GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionDetailRow,
     GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::custom_types::GemBigInt;
-use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
+use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle, GemListSection, GemListSectionFooter, GemListSectionTitle};
 use crate::models::placeholder::EMPTY_VALUE;
-use crate::perpetual::GemPerpetual;
+use crate::perpetual::{GemPerpetual, leverage_text};
 use crate::services::error::GemServiceError;
-use crate::services::localization::{GemLocalizedText, GemTriggerOrder};
+use crate::services::localization::{GemLocalizedText, GemPositionChange, GemTriggerOrder};
 use crate::services::transfer::GemTransferData;
 use num_bigint::BigUint;
 use primitives::{PerpetualConfirmData, PerpetualModifyConfirmData, PerpetualModifyPositionType, PerpetualReduceData, PerpetualType};
@@ -73,18 +73,131 @@ pub fn perpetual_asset_basics(data: &[PerpetualData]) -> Vec<AssetBasic> {
 }
 
 pub fn details(perpetual_type: &PerpetualType) -> Option<GemPerpetualDetails> {
-    let (action, direction, data) = match perpetual_type {
-        PerpetualType::Open { data } => (GemPerpetualDetailsAction::Open, data.direction.clone(), data),
-        PerpetualType::Close { data } => (GemPerpetualDetailsAction::Close, data.direction.clone(), data),
-        PerpetualType::Increase { data } => (GemPerpetualDetailsAction::Increase, data.direction.clone(), data),
-        PerpetualType::Reduce { data } => (GemPerpetualDetailsAction::Reduce, data.position_direction.clone(), &data.data),
+    let (direction, data, summarised_by) = match perpetual_type {
+        PerpetualType::Open { data } => (data.direction.clone(), data, SummarisedBy::Position),
+        PerpetualType::Close { data } => (data.direction.clone(), data, SummarisedBy::Pnl),
+        PerpetualType::Increase { data } => (data.direction.clone(), data, SummarisedBy::Change(GemPositionChange::Increase)),
+        PerpetualType::Reduce { data } => (data.position_direction.clone(), &data.data, SummarisedBy::Change(GemPositionChange::Reduce)),
         PerpetualType::Modify { .. } => return None,
     };
+    let pnl = data.pnl.map(|pnl| pnl_text(pnl, data.margin_amount));
+    let summary = match summarised_by {
+        SummarisedBy::Position => GemPerpetualDetailsSummary {
+            text: Some(position_text(&direction, data.leverage)),
+            tone: direction_tone(&direction),
+        },
+        SummarisedBy::Pnl => GemPerpetualDetailsSummary {
+            text: pnl.as_ref().map(|(text, _)| text.clone()),
+            tone: pnl.as_ref().map_or(GemValueTone::Neutral, |(_, tone)| *tone),
+        },
+        SummarisedBy::Change(change) => GemPerpetualDetailsSummary {
+            text: Some(GemLocalizedText::PositionChange {
+                change,
+                direction: direction.clone(),
+            }),
+            tone: GemValueTone::Neutral,
+        },
+    };
     Some(GemPerpetualDetails {
-        action,
-        direction,
-        data: data.clone(),
+        id: data.base_asset.id.to_string(),
+        summary,
+        sections: details_sections(&direction, data, pnl),
     })
+}
+
+enum SummarisedBy {
+    Position,
+    Pnl,
+    Change(GemPositionChange),
+}
+
+fn details_sections(direction: &PerpetualDirection, data: &PerpetualConfirmData, pnl: Option<(GemLocalizedText, GemValueTone)>) -> Vec<GemListSection> {
+    let label = |title: GemListRowTitle, text: GemLocalizedText, tone: GemValueTone| GemListRow::Label {
+        title,
+        text,
+        tone,
+        info: None,
+        progress: false,
+    };
+    let amount = |title: GemListRowTitle, amount: GemFormattedNumber| GemListRow::Amount { title, amount, info: None };
+
+    let mut position_rows = vec![label(GemListRowTitle::Position, position_text(direction, data.leverage), direction_tone(direction))];
+    if let Some((text, tone)) = pnl {
+        position_rows.push(label(GemListRowTitle::Pnl, text, tone));
+    }
+
+    let mut price_rows = vec![amount(GemListRowTitle::MarketPrice, GemFormattedNumber::usd(data.market_price))];
+    if let Some(entry_price) = data.entry_price {
+        price_rows.push(amount(GemListRowTitle::EntryPrice, GemFormattedNumber::usd(entry_price)));
+    }
+    price_rows.push(amount(
+        GemListRowTitle::Slippage,
+        GemFormattedNumber::percentage(data.slippage, GemPercentageStyle::Unsigned),
+    ));
+
+    [
+        Some(position_rows),
+        Some(vec![
+            amount(GemListRowTitle::Margin, GemFormattedNumber::usd(data.margin_amount)),
+            amount(GemListRowTitle::Size, GemFormattedNumber::usd(data.fiat_value)),
+        ]),
+        trigger_order_lines(data).map(|lines| {
+            vec![GemListRow::Lines {
+                title: GemListRowTitle::AutoClose,
+                lines,
+                info: None,
+            }]
+        }),
+        Some(price_rows),
+    ]
+    .into_iter()
+    .flatten()
+    .map(|rows| GemListSection {
+        title: GemListSectionTitle::None,
+        footer: GemListSectionFooter::None,
+        rows,
+    })
+    .collect()
+}
+
+fn trigger_order_lines(data: &PerpetualConfirmData) -> Option<Vec<GemLocalizedText>> {
+    let line = |order: GemTriggerOrder, price: &Option<String>| {
+        price.as_ref().and_then(|price| price.parse::<f64>().ok()).map(|price| GemLocalizedText::TriggerOrder {
+            order,
+            price: Some(GemFormattedNumber::usd(price)),
+        })
+    };
+    let lines: Vec<GemLocalizedText> = [line(GemTriggerOrder::TakeProfit, &data.take_profit), line(GemTriggerOrder::StopLoss, &data.stop_loss)]
+        .into_iter()
+        .flatten()
+        .collect();
+    (!lines.is_empty()).then_some(lines)
+}
+
+fn position_text(direction: &PerpetualDirection, leverage: u8) -> GemLocalizedText {
+    GemLocalizedText::Position {
+        direction: direction.clone(),
+        leverage: leverage_text(leverage),
+    }
+}
+
+fn direction_tone(direction: &PerpetualDirection) -> GemValueTone {
+    match direction {
+        PerpetualDirection::Long => GemValueTone::Positive,
+        PerpetualDirection::Short => GemValueTone::Negative,
+    }
+}
+
+fn pnl_text(pnl: f64, margin_amount: f64) -> (GemLocalizedText, GemValueTone) {
+    let amount = GemFormattedNumber::signed_usd(pnl);
+    let tone = amount.tone;
+    (
+        GemLocalizedText::Pnl {
+            amount,
+            percent: GemFormattedNumber::percentage(PriceChangeCalculator::pnl_percentage(pnl, margin_amount), GemPercentageStyle::Signed),
+        },
+        tone,
+    )
 }
 
 pub fn autoclose_row(data: &PerpetualModifyConfirmData) -> Option<GemListRow> {
@@ -1512,12 +1625,28 @@ mod tests {
             },
         })
         .unwrap();
-        assert_eq!(reduce.action, GemPerpetualDetailsAction::Reduce);
-        assert_eq!(reduce.direction, PerpetualDirection::Short);
+        assert_eq!(
+            reduce.summary,
+            GemPerpetualDetailsSummary {
+                text: Some(GemLocalizedText::PositionChange {
+                    change: GemPositionChange::Reduce,
+                    direction: PerpetualDirection::Short,
+                }),
+                tone: GemValueTone::Neutral,
+            }
+        );
 
         let open = details(&PerpetualType::Open { data: data.clone() }).unwrap();
-        assert_eq!(open.action, GemPerpetualDetailsAction::Open);
-        assert_eq!(open.direction, PerpetualDirection::Long);
+        assert_eq!(
+            open.summary,
+            GemPerpetualDetailsSummary {
+                text: Some(GemLocalizedText::Position {
+                    direction: PerpetualDirection::Long,
+                    leverage: "5x".to_string(),
+                }),
+                tone: GemValueTone::Positive,
+            }
+        );
 
         assert!(
             details(&PerpetualType::Modify {
@@ -1525,6 +1654,76 @@ mod tests {
             })
             .is_none()
         );
+    }
+
+    #[test]
+    fn test_details_sections_carry_finished_rows_and_the_trigger_prices_the_provider_sent() {
+        let data = PerpetualConfirmData {
+            pnl: Some(5.0),
+            entry_price: Some(100.0),
+            ..PerpetualConfirmData::mock(PerpetualDirection::Long, 0, Some("12.345".to_string()), None)
+        };
+        let sections = details(&PerpetualType::Close { data }).unwrap().sections;
+        let rows = |index: usize| sections[index].rows.clone();
+
+        assert_eq!(
+            rows(0),
+            vec![
+                GemListRow::Label {
+                    title: GemListRowTitle::Position,
+                    text: GemLocalizedText::Position {
+                        direction: PerpetualDirection::Long,
+                        leverage: "5x".to_string(),
+                    },
+                    tone: GemValueTone::Positive,
+                    info: None,
+                    progress: false,
+                },
+                GemListRow::Label {
+                    title: GemListRowTitle::Pnl,
+                    text: GemLocalizedText::Pnl {
+                        amount: GemFormattedNumber::signed_usd(5.0),
+                        percent: GemFormattedNumber::percentage(10.0, GemPercentageStyle::Signed),
+                    },
+                    tone: GemValueTone::Positive,
+                    info: None,
+                    progress: false,
+                },
+            ]
+        );
+        assert_eq!(
+            rows(2),
+            vec![GemListRow::Lines {
+                title: GemListRowTitle::AutoClose,
+                lines: vec![GemLocalizedText::TriggerOrder {
+                    order: GemTriggerOrder::TakeProfit,
+                    price: Some(GemFormattedNumber::usd(12.345)),
+                }],
+                info: None,
+            }],
+            "a machine decimal price is parsed once in Core, never by a locale-aware app parser"
+        );
+        assert_eq!(
+            rows(3).first(),
+            Some(&GemListRow::Amount {
+                title: GemListRowTitle::MarketPrice,
+                amount: GemFormattedNumber::usd(123.45),
+                info: None,
+            })
+        );
+    }
+
+    #[test]
+    fn test_details_leave_out_the_rows_the_data_has_no_value_for() {
+        let sections = details(&PerpetualType::Open {
+            data: PerpetualConfirmData::mock(PerpetualDirection::Short, 0, None, None),
+        })
+        .unwrap()
+        .sections;
+
+        assert_eq!(sections.len(), 3, "no pnl row, and no autoclose section without a trigger order");
+        assert_eq!(sections[0].rows.len(), 1);
+        assert_eq!(sections[2].rows.len(), 2, "no entry price row");
     }
 
     #[test]

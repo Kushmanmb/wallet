@@ -301,7 +301,7 @@ private fun ConfirmDetailElementRow(
             listPosition = listPosition,
         )
         is ConfirmDetailElement.PerpetualDetails -> PerpetualDetailsSummaryItem(
-            model = item.model,
+            details = item.details,
             onClick = onClick,
             listPosition = listPosition,
         )
@@ -323,7 +323,7 @@ private fun ConfirmDetailElementBottomSheet(
     )
     PerpetualDetailsBottomSheet(
         isVisible = item is ConfirmDetailElement.PerpetualDetails,
-        model = (item as? ConfirmDetailElement.PerpetualDetails)?.model,
+        details = (item as? ConfirmDetailElement.PerpetualDetails)?.details,
         onDismiss = onDismiss,
     )
 }

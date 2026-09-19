@@ -46,7 +46,6 @@ import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.actions.FinishConfirmAction
 import com.gemwallet.android.ui.models.navigation.RouteArgument
-import com.gemwallet.android.ui.models.perpetual.PerpetualConfirmDetailsUIModelFactory
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelFactory
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelInput
 import com.gemwallet.android.ui.models.swap.SwapProviderUIModelFactory
@@ -441,7 +440,6 @@ class ConfirmViewModel @Inject constructor(
         null -> null
         is PerpetualType.Modify -> confirmation.value?.autocloseRow(type.data)?.let { ConfirmDetailElement.PerpetualModifyAutoclose(it) }
         else -> perpetualDetails(type)
-            ?.let(PerpetualConfirmDetailsUIModelFactory::create)
             ?.let(ConfirmDetailElement::PerpetualDetails)
     }
 

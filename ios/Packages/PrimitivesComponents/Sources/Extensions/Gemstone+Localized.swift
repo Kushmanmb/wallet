@@ -101,6 +101,13 @@ extension GemLocalizedText {
             PriceChangeCalculator().pnlText(formattedAmount: amount.text(), formattedPercentage: percent.text())
         case let .margin(amount, marginType):
             GemPerpetual(provider: .hypercore).marginText(formattedAmount: amount.text(), marginTypeName: marginType.toPrimitives().title)
+        case let .position(direction, leverage):
+            GemPerpetual(provider: .hypercore).positionText(directionName: direction.toPrimitives().title, formattedLeverage: leverage)
+        case let .positionChange(change, direction):
+            switch change {
+            case .increase: Localized.Perpetual.increaseDirection(direction.toPrimitives().title)
+            case .reduce: Localized.Perpetual.reduceDirection(direction.toPrimitives().title)
+            }
         }
     }
 }
@@ -687,6 +694,10 @@ public extension GemListRowTitle {
         case .entryPrice: Localized.Perpetual.entryPrice
         case .liquidationPrice: Localized.Info.Perpetual.LiquidationPrice.title
         case .margin: Localized.Perpetual.margin
+        case .position: Localized.Perpetual.position
+        case .details: Localized.Common.details
+        case .slippage: Localized.Swap.slippage
+        case .marketPrice: Localized.Perpetual.marketPrice
         case .fundingPayments: Localized.Info.Perpetual.FundingPayments.title
         case .marketCap: Localized.Asset.marketCap
         case .fullyDilutedValuation: Localized.Info.FullyDilutedValuation.title

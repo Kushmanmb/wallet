@@ -1,4 +1,4 @@
-use primitives::{Chain, DelegationState, FeeUnitType, PerpetualMarginType, Resource, TransactionState};
+use primitives::{Chain, DelegationState, FeeUnitType, PerpetualDirection, PerpetualMarginType, Resource, TransactionState};
 
 use crate::duration_formatter::GemDurationPart;
 use crate::formatted_number::GemFormattedNumber;
@@ -25,6 +25,14 @@ pub enum GemLocalizedText {
     TriggerOrder { order: GemTriggerOrder, price: Option<GemFormattedNumber> },
     Pnl { amount: GemFormattedNumber, percent: GemFormattedNumber },
     Margin { amount: GemFormattedNumber, margin_type: PerpetualMarginType },
+    Position { direction: PerpetualDirection, leverage: String },
+    PositionChange { change: GemPositionChange, direction: PerpetualDirection },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemPositionChange {
+    Increase,
+    Reduce,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

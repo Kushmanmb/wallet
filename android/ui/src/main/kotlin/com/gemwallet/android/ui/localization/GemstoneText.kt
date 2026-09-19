@@ -61,6 +61,7 @@ import uniffi.gemstone.verificationLevel
 import uniffi.gemstone.GemSlippageCheck
 import com.gemwallet.android.domains.duration.formatDuration
 import uniffi.gemstone.GemPerpetual
+import uniffi.gemstone.GemPositionChange
 import uniffi.gemstone.GemTriggerOrder
 import uniffi.gemstone.PerpetualMarginType
 import uniffi.gemstone.PerpetualProvider
@@ -157,6 +158,11 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     is GemLocalizedText.TriggerOrder -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.triggerOrderText(context.getString(order.stringRes()), price?.text()) }
     is GemLocalizedText.Pnl -> GemPriceChangeCalculator().use { it.pnlText(amount.text(), percent.text()) }
     is GemLocalizedText.Margin -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.marginText(amount.text(), context.getString(marginType.stringRes())) }
+    is GemLocalizedText.Position -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.positionText(context.getString(direction.toPrimitives().stringRes()), leverage) }
+    is GemLocalizedText.PositionChange -> when (change) {
+        GemPositionChange.INCREASE -> context.getString(R.string.perpetual_increase_direction, context.getString(direction.toPrimitives().stringRes()))
+        GemPositionChange.REDUCE -> context.getString(R.string.perpetual_reduce_direction, context.getString(direction.toPrimitives().stringRes()))
+    }
     is GemLocalizedText.FeeRate -> when (unit) {
         FeeUnitType.SAT_VB -> "${rate.text()} ${context.getString(R.string.fee_rate_satvB)}"
         FeeUnitType.GWEI -> "${rate.text()} ${context.getString(R.string.fee_rate_gwei)}"
@@ -521,6 +527,10 @@ fun GemListRowTitle.titleRes(): Int = when (this) {
     GemListRowTitle.TYPE -> R.string.common_type
     GemListRowTitle.AUTO_CLOSE -> R.string.perpetual_auto_close
     GemListRowTitle.SIZE -> R.string.perpetual_size
+    GemListRowTitle.POSITION -> R.string.perpetual_position
+    GemListRowTitle.DETAILS -> R.string.common_details
+    GemListRowTitle.SLIPPAGE -> R.string.swap_slippage
+    GemListRowTitle.MARKET_PRICE -> R.string.perpetual_market_price
     GemListRowTitle.ENTRY_PRICE -> R.string.perpetual_entry_price
     GemListRowTitle.LIQUIDATION_PRICE -> R.string.info_perpetual_liquidation_price_title
     GemListRowTitle.MARGIN -> R.string.perpetual_margin
