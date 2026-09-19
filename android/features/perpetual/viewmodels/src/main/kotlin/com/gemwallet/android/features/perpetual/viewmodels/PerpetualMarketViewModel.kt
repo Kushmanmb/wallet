@@ -127,7 +127,7 @@ class PerpetualMarketViewModel @Inject constructor(
                 markets = markets.size.toUInt(),
                 recents = recents.size.toUInt(),
             ),
-        ).list().map { it.uiModel(context) }
+        ).map { it.uiModel(context) }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun onRefresh() {

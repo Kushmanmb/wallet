@@ -6,7 +6,6 @@ import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemMarketsRefreshTrigger
 import struct Gemstone.GemPerpetualMarketCounts
 import enum Gemstone.GemPerpetualMarketSection
-import struct Gemstone.GemPerpetualMarketSections
 import struct Gemstone.GemPerpetualMarketSession
 import protocol Gemstone.GemPerpetualServiceProtocol
 import protocol Gemstone.GemRecentActivityServiceProtocol
@@ -102,17 +101,13 @@ public final class PerpetualsSceneViewModel {
         Images.System.search
     }
 
-    var marketSections: GemPerpetualMarketSections {
+    var marketSectionList: [GemPerpetualMarketSection] {
         session.sections(counts: GemPerpetualMarketCounts(
             positions: UInt32(positions.count),
             pinned: UInt32(sections.pinned.count),
             markets: UInt32(sections.markets.count),
             recents: recentModel.hasAssets ? 1 : 0,
         ))
-    }
-
-    var marketSectionList: [GemPerpetualMarketSection] {
-        marketSections.list()
     }
 
     var marketSectionModels: [PerpetualMarketSectionViewModel] {

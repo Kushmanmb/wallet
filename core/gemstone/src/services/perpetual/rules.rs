@@ -11,8 +11,8 @@ use primitives::{
 
 use super::model::{
     GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails,
-    GemPerpetualDetailsSummary, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSection, GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction,
-    GemPerpetualPositionDetail, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
+    GemPerpetualDetailsSummary, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSection, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetail,
+    GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::custom_types::GemBigInt;
@@ -615,26 +615,16 @@ fn merge_candle(candles: Vec<ChartCandleStick>, candle: ChartCandleStick) -> Vec
     merged
 }
 
-pub fn market_sections(counts: &GemPerpetualMarketCounts, is_searching: bool, is_query_empty: bool) -> GemPerpetualMarketSections {
+pub fn market_sections(counts: &GemPerpetualMarketCounts, is_searching: bool, is_query_empty: bool) -> Vec<GemPerpetualMarketSection> {
     let shows_positions = counts.positions > 0;
     let shows_pinned = counts.pinned > 0;
     let shows_markets = counts.markets > 0;
-    GemPerpetualMarketSections {
-        shows_positions,
-        shows_recents: is_searching && is_query_empty && counts.recents > 0,
-        shows_pinned,
-        shows_markets,
-        shows_empty: is_searching && !shows_positions && !shows_pinned && !shows_markets,
-    }
-}
-
-pub fn market_section_list(sections: &GemPerpetualMarketSections) -> Vec<GemPerpetualMarketSection> {
     [
-        (sections.shows_recents, GemPerpetualMarketSection::Recents),
-        (sections.shows_positions, GemPerpetualMarketSection::Positions),
-        (sections.shows_pinned, GemPerpetualMarketSection::Pinned),
-        (sections.shows_markets, GemPerpetualMarketSection::Markets),
-        (sections.shows_empty, GemPerpetualMarketSection::Empty),
+        (is_searching && is_query_empty && counts.recents > 0, GemPerpetualMarketSection::Recents),
+        (shows_positions, GemPerpetualMarketSection::Positions),
+        (shows_pinned, GemPerpetualMarketSection::Pinned),
+        (shows_markets, GemPerpetualMarketSection::Markets),
+        (is_searching && !shows_positions && !shows_pinned && !shows_markets, GemPerpetualMarketSection::Empty),
     ]
     .into_iter()
     .filter_map(|(shows, section)| shows.then_some(section))
@@ -845,19 +835,9 @@ mod tests {
             recents: 2,
         };
 
-        assert_eq!(
-            market_sections(&counts, true, true),
-            GemPerpetualMarketSections {
-                shows_positions: false,
-                shows_recents: true,
-                shows_pinned: false,
-                shows_markets: false,
-                shows_empty: true
-            }
-        );
-        assert!(!market_sections(&counts, true, false).shows_recents);
-        assert!(!market_sections(&counts, false, true).shows_recents);
-        assert!(!market_sections(&counts, false, true).shows_empty);
+        assert_eq!(market_sections(&counts, true, true), vec![GemPerpetualMarketSection::Recents, GemPerpetualMarketSection::Empty]);
+        assert_eq!(market_sections(&counts, true, false), vec![GemPerpetualMarketSection::Empty]);
+        assert_eq!(market_sections(&counts, false, true), vec![]);
 
         let listed = GemPerpetualMarketCounts {
             positions: 1,
@@ -865,9 +845,10 @@ mod tests {
             markets: 3,
             recents: 0,
         };
-        let sections = market_sections(&listed, true, true);
-        assert!(sections.shows_positions && sections.shows_pinned && sections.shows_markets);
-        assert!(!sections.shows_empty);
+        assert_eq!(
+            market_sections(&listed, true, true),
+            vec![GemPerpetualMarketSection::Positions, GemPerpetualMarketSection::Pinned, GemPerpetualMarketSection::Markets]
+        );
     }
 
     #[test]
@@ -880,11 +861,11 @@ mod tests {
         };
         let searching = GemPerpetualMarketSession::default().on_searching_changed(true);
 
-        assert!(searching.sections(counts).shows_recents);
-        assert!(searching.on_query_changed("  ".to_string()).sections(counts).shows_recents, "blank input is no query");
+        assert_eq!(searching.sections(counts), vec![GemPerpetualMarketSection::Recents, GemPerpetualMarketSection::Empty]);
+        assert_eq!(searching.on_query_changed("  ".to_string()).sections(counts), searching.sections(counts));
         assert_eq!(searching.on_query_changed(" btc ".to_string()).search_query(), "btc");
-        assert!(!searching.on_query_changed(" btc ".to_string()).sections(counts).shows_recents);
-        assert!(!GemPerpetualMarketSession::default().sections(counts).shows_empty, "nothing is empty before a search");
+        assert_eq!(searching.on_query_changed(" btc ".to_string()).sections(counts), vec![GemPerpetualMarketSection::Empty]);
+        assert_eq!(GemPerpetualMarketSession::default().sections(counts), vec![]);
     }
 
     #[test]
@@ -1725,11 +1706,11 @@ mod tests {
         };
 
         assert_eq!(
-            market_sections(&counts, false, true).list(),
+            market_sections(&counts, false, true),
             vec![GemPerpetualMarketSection::Positions, GemPerpetualMarketSection::Pinned, GemPerpetualMarketSection::Markets]
         );
         assert_eq!(
-            market_sections(&counts, true, true).list(),
+            market_sections(&counts, true, true),
             vec![GemPerpetualMarketSection::Recents, GemPerpetualMarketSection::Positions, GemPerpetualMarketSection::Pinned, GemPerpetualMarketSection::Markets],
             "an empty search query offers the recents above the rest"
         );
@@ -1743,8 +1724,7 @@ mod tests {
                 },
                 true,
                 false
-            )
-            .list(),
+            ),
             vec![GemPerpetualMarketSection::Empty]
         );
     }

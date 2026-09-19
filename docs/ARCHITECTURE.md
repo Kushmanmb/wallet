@@ -556,7 +556,7 @@ A row is not the only choice a screen makes, and the other three recur often eno
 ```rust
 #[uniffi::export]
 impl GemPerpetualMarketSession {
-    pub fn sections(&self, counts: GemPerpetualMarketCounts) -> GemPerpetualMarketSections { ... }
+    pub fn sections(&self, counts: GemPerpetualMarketCounts) -> Vec<GemPerpetualMarketSection> { ... }
 }
 ```
 

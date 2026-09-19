@@ -269,15 +269,6 @@ impl GemPerpetualPositionAction {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
-pub struct GemPerpetualMarketSections {
-    pub shows_positions: bool,
-    pub shows_recents: bool,
-    pub shows_pinned: bool,
-    pub shows_markets: bool,
-    pub shows_empty: bool,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemPerpetualMarketSection {
     Positions,
@@ -285,13 +276,6 @@ pub enum GemPerpetualMarketSection {
     Pinned,
     Markets,
     Empty,
-}
-
-#[uniffi::export]
-impl GemPerpetualMarketSections {
-    pub fn list(&self) -> Vec<GemPerpetualMarketSection> {
-        super::rules::market_section_list(self)
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
@@ -322,7 +306,7 @@ impl GemPerpetualMarketSession {
         self.query.trim().to_string()
     }
 
-    pub fn sections(&self, counts: GemPerpetualMarketCounts) -> GemPerpetualMarketSections {
+    pub fn sections(&self, counts: GemPerpetualMarketCounts) -> Vec<GemPerpetualMarketSection> {
         super::rules::market_sections(&counts, self.is_searching, self.search_query().is_empty())
     }
 }
