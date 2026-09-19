@@ -69,18 +69,18 @@ class ConfirmViewModelNetworkFeeSheetTest {
         advanceUntilIdle()
 
         assertEquals(GemConfirmPhase.FAILED, viewModel.screen.value.phase)
-        assertTrue(viewModel.isNetworkFeeSheetVisible.value)
+        assertTrue(viewModel.isErrorSheetVisible.value)
 
-        viewModel.dismissNetworkFeeSheet()
+        viewModel.dismissErrorSheet()
         advanceUntilIdle()
 
         assertEquals(GemConfirmPhase.FAILED, viewModel.screen.value.phase)
-        assertFalse(viewModel.isNetworkFeeSheetVisible.value)
+        assertFalse(viewModel.isErrorSheetVisible.value)
 
         viewModel.send(FinishConfirmAction { _ -> })
         advanceUntilIdle()
 
-        assertTrue(viewModel.isNetworkFeeSheetVisible.value)
+        assertTrue(viewModel.isErrorSheetVisible.value)
     }
 
     @Test

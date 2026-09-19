@@ -108,7 +108,7 @@ fun ConfirmScreen(
     var selectedDetailElement by remember(input) { mutableStateOf<ConfirmDetailElement?>(null) }
     var selectedAddress by remember(input) { mutableStateOf<ChainAddress?>(null) }
     var isShowedBroadcastError by remember(executeErrorText) { mutableStateOf(executeErrorText != null) }
-    val isShowBottomSheetInfo by viewModel.isNetworkFeeSheetVisible.collectAsStateWithLifecycle()
+    val isShowBottomSheetInfo by viewModel.isErrorSheetVisible.collectAsStateWithLifecycle()
 
     LaunchedEffect(input, simulationResult) {
         if (input == null) {
@@ -225,7 +225,7 @@ fun ConfirmScreen(
                     acquireRequest = acquireRequest,
                     acquireOptions = acquireOptions,
                     isShowBottomSheetInfo = isShowBottomSheetInfo,
-                    onDismissBottomSheetInfo = viewModel::dismissNetworkFeeSheet,
+                    onDismissBottomSheetInfo = viewModel::dismissErrorSheet,
                     onDismissAcquire = viewModel::dismissAcquire,
                     onAcquireAsset = onAcquireAsset,
                 )

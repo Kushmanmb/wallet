@@ -118,7 +118,7 @@ class ConfirmViewModel @Inject constructor(
     private val restart = MutableStateFlow(false)
     val screen = MutableStateFlow(GemConfirmScreen(phase = GemConfirmPhase.LOADING, hasCriticalWarning = false, failure = null))
 
-    val isNetworkFeeSheetVisible = MutableStateFlow(false)
+    val isErrorSheetVisible = MutableStateFlow(false)
     val feeSelection = MutableStateFlow<GemConfirmFeeSelection>(GemConfirmFeeSelection.Priority(FeePriority.Normal.toGem()))
     private val feeAssetSelection = MutableStateFlow<FeeAssetSelection>(FeeAssetSelection.Automatic)
     private var requestSimulation: SimulationResult? = null
@@ -317,13 +317,13 @@ class ConfirmViewModel @Inject constructor(
         }
     }
 
-    fun dismissNetworkFeeSheet() {
-        isNetworkFeeSheetVisible.value = false
+    fun dismissErrorSheet() {
+        isErrorSheetVisible.value = false
     }
 
     private fun showError(error: Throwable) {
         screen.update { it.onLoadFailed(error.toConfirmError()) }
-        isNetworkFeeSheetVisible.value = error is GemConfirmException.InsufficientNetworkFee
+        isErrorSheetVisible.value = error.toConfirmError().display().hasInfoSheet()
     }
 
     val feeListItem: StateFlow<ListItemModel?> = combine(feeUIModel, feeAsset, feeAssets) { fee, asset, assets ->
