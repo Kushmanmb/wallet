@@ -424,6 +424,8 @@ extension Status: RawRepresentable, CustomStringConvertible {
 }
 
 extension Status: CustomNSError {
+    static var errorDomain: String { NSOSStatusErrorDomain }
+
     var errorCode: Int {
         Int(rawValue)
     }
