@@ -71,7 +71,7 @@ impl HyperCoreSigner {
             && is_spot_swap(from_asset.chain(), to_asset.chain())
         {
             let hl_order = input.metadata.get_hyperliquid_order()?;
-            let agent_key = Zeroizing::new(decode_hex(&hl_order.agent_private_key).map_err(|_| SignerError::InvalidInput("Invalid agent private key".to_string()))?);
+            let agent_key = Zeroizing::new(decode_hex(hl_order.agent_private_key.key()).map_err(|_| SignerError::InvalidInput("Invalid agent private key".to_string()))?);
             let builder = get_builder(BUILDER_ADDRESS, hl_order.builder_fee_bps as i32).ok();
 
             let mut order: PlaceOrder = serde_json::from_str(&swap_data.data.data)?;
@@ -123,7 +123,7 @@ impl HyperCoreSigner {
         let perpetual_type = input.input_type.get_perpetual_type().map_err(SignerError::invalid_input)?;
         let order = input.metadata.get_hyperliquid_order()?;
 
-        let agent_key = Zeroizing::new(decode_hex(&order.agent_private_key).map_err(|_| SignerError::InvalidInput("Invalid agent private key".to_string()))?);
+        let agent_key = Zeroizing::new(decode_hex(order.agent_private_key.key()).map_err(|_| SignerError::InvalidInput("Invalid agent private key".to_string()))?);
         let builder = get_builder(BUILDER_ADDRESS, order.builder_fee_bps as i32).ok();
         let mut timestamp_incrementer = NumberIncrementer::new(Self::timestamp_ms());
 
@@ -401,10 +401,57 @@ mod tests {
     use super::*;
     use crate::core::actions::Grouping;
     use num_bigint::BigUint;
+    use primitives::swap::SwapData;
+    use primitives::testkit::signer_mock::{TEST_PRIVATE_KEY, TEST_PRIVATE_KEY_ETHEREUM_ADDRESS};
+    use primitives::transaction_load_metadata::AgentPrivateKey;
     use primitives::{
         Asset, AssetId, AssetType, Chain, Delegation, DelegationBase, DelegationState, DelegationValidator, HyperliquidOrder, PerpetualConfirmData, PerpetualDirection,
-        SignerInput, StakeType, TransactionFee, TransactionInputType, TransactionLoadInput, asset_constants::HYPERCORE_SPOT_USDC_TOKEN_ID,
+        SignerInput, StakeType, SwapProvider, TransactionFee, TransactionInputType, TransactionLoadInput, TransactionLoadMetadata, asset_constants::HYPERCORE_SPOT_USDC_TOKEN_ID,
     };
+    use std::sync::Arc;
+
+    #[test]
+    fn opaque_agent_key_signs_spot_and_perpetual_orders() {
+        let metadata = TransactionLoadMetadata::Hyperliquid {
+            order: Some(HyperliquidOrder {
+                approve_agent_required: false,
+                approve_referral_required: false,
+                approve_builder_required: false,
+                builder_fee_bps: 10,
+                agent_name: "gemwallet_agent".into(),
+                agent_address: "0x7e5f4552091a69125d5dfcb7b8c2659029395bdf".into(),
+                agent_private_key: Arc::new(AgentPrivateKey::new(format!("{:064x}", 1))),
+            }),
+        };
+        let data = PerpetualConfirmData::mock(PerpetualDirection::Long, 3, None, None);
+        let perpetual = SignerInput::mock_with_input_type(
+            TransactionInputType::Perpetual {
+                asset: Asset::from_chain(Chain::HyperCore),
+                perpetual_type: PerpetualType::Close { data: data.clone() },
+            },
+            TEST_PRIVATE_KEY_ETHEREUM_ADDRESS,
+            "",
+            "0",
+            metadata.clone(),
+        );
+        let swap = SignerInput::mock_with_input_type(
+            TransactionInputType::Swap {
+                from_asset: Asset::from_chain(Chain::HyperCore),
+                to_asset: Asset::from_chain(Chain::HyperCore),
+                swap_data: SwapData::mock_with_provider_data(
+                    SwapProvider::Hyperliquid,
+                    &serde_json::to_string(&HyperCoreSigner::market_order_from_confirm_data(&data, false, None)).unwrap(),
+                    None,
+                ),
+            },
+            TEST_PRIVATE_KEY_ETHEREUM_ADDRESS,
+            "",
+            "0",
+            metadata,
+        );
+        assert_eq!(HyperCoreSigner.sign_perpetual(&perpetual, &TEST_PRIVATE_KEY).unwrap().len(), 1);
+        assert_eq!(HyperCoreSigner.sign_swap(&swap, &TEST_PRIVATE_KEY).unwrap().len(), 1);
+    }
 
     #[test]
     fn market_orders_keep_the_position_direction_and_trade_against_it_when_closing() {
@@ -520,7 +567,7 @@ mod tests {
             builder_fee_bps: 45,
             agent_name: "oldest".to_string(),
             agent_address: "0xbec81216a5edeaed508709d8526078c750e307ad".to_string(),
-            agent_private_key: String::new(),
+            agent_private_key: Arc::new(AgentPrivateKey::new(String::new())),
         };
         let private_key = [1u8; 32];
         let mut timestamp_incrementer = NumberIncrementer::new(1753576844319);

@@ -3,8 +3,10 @@ use chain_traits::{ChainTransactionLoad, TransactionFeeOperation};
 use futures::try_join;
 use num_bigint::BigInt;
 use std::error::Error;
+use std::sync::Arc;
 
 use gem_client::Client;
+use primitives::transaction_load_metadata::AgentPrivateKey;
 use primitives::{
     FeePriority, FeeRate, GasPriceType, HyperliquidOrder, TransactionFee, TransactionInputType, TransactionLoadData, TransactionLoadInput, TransactionLoadMetadata,
     TransactionPreloadInput, asset_constants::HYPERCORE_SPOT_USDC_ASSET_ID, perpetual::PerpetualType,
@@ -34,7 +36,7 @@ impl<C: Client> HyperCoreClient<C> {
                 builder_fee_bps: self.config.max_builder_fee_bps,
                 agent_name: agent.name,
                 agent_address: agent.address,
-                agent_private_key: agent.private_key,
+                agent_private_key: Arc::new(AgentPrivateKey::new(agent.private_key)),
             },
             fee_rates,
         ))

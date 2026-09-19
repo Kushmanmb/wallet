@@ -4,11 +4,13 @@ use crate::models::*;
 use primitives::contract_call_data::ContractCallData;
 use primitives::solana_nft::SolanaNftStandard;
 use primitives::solana_token_program::SolanaTokenProgramId;
+use primitives::transaction_load_metadata::AgentPrivateKey;
 use primitives::{
     AssetId, EarnType, FeeOption, GasPriceType, HyperliquidOrder, SignerInput, TransactionFee, TransactionInputType, TransactionLoadInput, TransactionLoadMetadata,
     TransactionType, TronStakeData,
 };
 use std::collections::HashMap;
+use std::sync::Arc;
 
 pub type GemFeeOption = FeeOption;
 pub type GemTronStakeData = TronStakeData;
@@ -17,6 +19,11 @@ pub type GemTronStakeData = TronStakeData;
 pub enum FeeOption {
     TokenAccountCreation,
 }
+
+pub type GemAgentPrivateKey = AgentPrivateKey;
+
+#[uniffi::remote(Object)]
+pub struct GemAgentPrivateKey;
 
 pub type GemHyperliquidOrder = HyperliquidOrder;
 
@@ -28,7 +35,7 @@ pub struct GemHyperliquidOrder {
     pub builder_fee_bps: u32,
     pub agent_name: String,
     pub agent_address: String,
-    pub agent_private_key: String,
+    pub agent_private_key: Arc<GemAgentPrivateKey>,
 }
 
 pub type GemContractCallData = ContractCallData;
