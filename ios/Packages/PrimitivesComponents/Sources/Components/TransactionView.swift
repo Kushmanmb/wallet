@@ -19,7 +19,6 @@ public struct TransactionView: View {
 
 // MARK: - Previews
 
-
 #Preview {
     let pendingTransactionMock = Transaction(
         id: TransactionId(chain: .smartChain, hash: "0xe5fb66cef0fb71fa75e0245484a40d17952cf46053724c6ac61209bf307d6e56"),

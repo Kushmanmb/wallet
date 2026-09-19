@@ -2,7 +2,9 @@
 
 import Components
 import Foundation
+import func Gemstone.addressCopy
 import protocol Gemstone.GemAssetSelectionServiceProtocol
+import class Gemstone.GemPerpetual
 import protocol Gemstone.GemRecentActivityServiceProtocol
 import struct Gemstone.GemSelectAssetFlow
 import enum Gemstone.GemSelectAssetState
@@ -15,8 +17,6 @@ import Recents
 import Store
 import Style
 import SwiftUI
-import class Gemstone.GemPerpetual
-import func Gemstone.addressCopy
 
 @Observable
 @MainActor
@@ -84,7 +84,6 @@ public final class SelectAssetViewModel {
     var sections: AssetsSections {
         AssetsSections.from(assets, showsPopular: flow.popularSection)
     }
-
 
     var showPopularSection: Bool {
         sections.popular.isNotEmpty

@@ -2,15 +2,15 @@
 
 @testable import Assets
 import AssetsTestKit
-import class Gemstone.GemDeeplinkService
-import protocol Gemstone.GemPriceAlertServiceProtocol
 import struct Gemstone.GemAssetBalanceRow
+import class Gemstone.GemDeeplinkService
 import struct Gemstone.GemFormattedNumber
+import protocol Gemstone.GemPriceAlertServiceProtocol
 import struct Gemstone.GemSwapPairSuggestion
-import Localization
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
 import GemstoneServicesTestKit
+import Localization
 import Primitives
 import PrimitivesTestKit
 import Testing

@@ -146,5 +146,4 @@ public struct AssetStore: Sendable {
             try record.update(db, columns: [AssetRecord.Columns.associations])
         }
     }
-
 }

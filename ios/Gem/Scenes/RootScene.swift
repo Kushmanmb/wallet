@@ -3,9 +3,9 @@
 import Components
 import ConnectionStatusService
 import GemstonePrimitives
+import GemstoneServices
 import Localization
 import Onboarding
-import GemstoneServices
 import Primitives
 import Style
 import SwiftUI
@@ -71,7 +71,7 @@ struct RootScene: View {
             },
         )
         .taskOnce(model.setup)
-        .lockWindow( model.lockWindow)
+        .lockWindow(model.lockWindow)
         .onChange(
             of: model.currentWalletId,
             initial: true,

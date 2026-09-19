@@ -1,14 +1,14 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import protocol Gemstone.GemWalletServiceProtocol
-import GemstoneServices
-import Foundation
-import GemstonePrimitives
-import Primitives
-import SwiftUI
 import Components
+import Foundation
+import protocol Gemstone.GemWalletServiceProtocol
+import GemstonePrimitives
+import GemstoneServices
 import Localization
+import Primitives
 import PrimitivesComponents
+import SwiftUI
 
 @Observable
 @MainActor
@@ -21,6 +21,7 @@ public final class CreateWalletModel {
             onComplete: onComplete,
         )
     }
+
     private let preferences: ObservablePreferences
     let onComplete: VoidAction
 
@@ -79,7 +80,7 @@ extension CreateWalletModel {
         let name = try await service.defaultWalletName(chain: .none)
         let result = try await service.importWallet(
             name: name.text.text,
-            type: try service.importRequest(kind: .phrase, chain: nil, input: words.joined(separator: " "), nameRecord: nil),
+            type: service.importRequest(kind: .phrase, chain: nil, input: words.joined(separator: " "), nameRecord: nil),
             source: .create,
         )
         preferences.acceptTerms()

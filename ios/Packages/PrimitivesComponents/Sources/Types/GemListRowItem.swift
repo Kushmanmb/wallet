@@ -2,15 +2,15 @@
 
 import Components
 import Foundation
+import struct Gemstone.GemCopy
 import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemListRow
 import enum Gemstone.GemListRowIcon
 import enum Gemstone.GemListRowTitle
 import enum Gemstone.GemNoticeKind
+import struct Gemstone.GemSocialLink
 import enum Gemstone.GemUrlTarget
 import enum Gemstone.GemValueTone
-import struct Gemstone.GemCopy
-import struct Gemstone.GemSocialLink
 import GemstonePrimitives
 import Localization
 import Primitives

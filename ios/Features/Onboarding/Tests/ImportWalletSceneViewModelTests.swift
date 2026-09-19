@@ -1,12 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import GemstonePrimitivesTestKit
-import GemstonePrimitives
-import GemstoneServices
-import GemstoneServicesTestKit
 import enum Gemstone.GemWalletImportKind
 import class Gemstone.GemWalletService
 import class Gemstone.GemWalletSessionService
+import GemstonePrimitives
+import GemstonePrimitivesTestKit
+import GemstoneServices
+import GemstoneServicesTestKit
 @testable import Onboarding
 @testable import OnboardingTestKit
 import Primitives

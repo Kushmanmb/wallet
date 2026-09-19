@@ -5,12 +5,12 @@ import enum Gemstone.GemAddNodeError
 import enum Gemstone.GemAddNodePhase
 import struct Gemstone.GemAddNodeSession
 import protocol Gemstone.GemChainSettingsServiceProtocol
+import enum Gemstone.GemServiceError
 import Localization
 import Primitives
 import PrimitivesComponents
 import Style
 import SwiftUI
-import enum Gemstone.GemServiceError
 
 @MainActor
 @Observable

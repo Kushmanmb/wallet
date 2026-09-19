@@ -1,12 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
+import Foundation
 import func Gemstone.contactAddressFields
 import enum Gemstone.GemContactAddressField
 import struct Gemstone.GemContactAddressInput
 import protocol Gemstone.GemManageContactServiceProtocol
 import protocol Gemstone.GemNameServiceProtocol
-import Components
-import Foundation
 import GemstonePrimitives
 import Localization
 import Primitives

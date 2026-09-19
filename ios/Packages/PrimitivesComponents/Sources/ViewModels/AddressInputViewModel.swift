@@ -1,11 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemNameRecordState
-import struct Gemstone.GemRecipient
-import struct Gemstone.GemRecipientValidation
 import Components
 import Foundation
+import enum Gemstone.GemNameRecordState
 import protocol Gemstone.GemNameServiceProtocol
+import struct Gemstone.GemRecipient
+import struct Gemstone.GemRecipientValidation
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -57,7 +57,6 @@ public final class AddressInputViewModel {
         validation.address
     }
 
-
     private var validation: GemRecipientValidation {
         nameService.validateRecipient(chain: chain.rawValue, input: text, state: nameResolveState)
     }
@@ -84,7 +83,6 @@ public final class AddressInputViewModel {
         update(error: validation.error)
         return validation.isValid
     }
-
 }
 
 extension AddressInputViewModel {

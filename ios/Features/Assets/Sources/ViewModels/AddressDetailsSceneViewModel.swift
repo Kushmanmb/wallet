@@ -2,8 +2,8 @@
 
 import Components
 import Foundation
-import protocol Gemstone.GemAddressDetailsServiceProtocol
 import struct Gemstone.GemAddressDetails
+import protocol Gemstone.GemAddressDetailsServiceProtocol
 import enum Gemstone.GemListRow
 import GemstonePrimitives
 import Localization

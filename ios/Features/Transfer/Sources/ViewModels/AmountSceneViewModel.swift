@@ -107,7 +107,9 @@ public final class AmountSceneViewModel {
     }
 
     var actionButtonState: ButtonState {
-        if transferState.isLoading { return .loading() }
+        if transferState.isLoading {
+            return .loading()
+        }
         return entry.allowsConfirm() ? .normal : .disabled
     }
 

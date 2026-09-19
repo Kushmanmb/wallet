@@ -1,17 +1,17 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
+import Foundation
+import struct Gemstone.GemContactAddressInput
 import enum Gemstone.GemContactAvatar
 import enum Gemstone.GemContactAvatarChoice
 import struct Gemstone.GemContactSession
-import struct Gemstone.GemContactAddressInput
 import protocol Gemstone.GemManageContactServiceProtocol
 import protocol Gemstone.GemNameServiceProtocol
-import Components
 import struct Gemstone.GemRecipient
-import GemstoneServices
-import Foundation
 import func Gemstone.walletAvatarEmojis
 import GemstonePrimitives
+import GemstoneServices
 import Localization
 import Primitives
 import PrimitivesComponents
@@ -210,7 +210,7 @@ public final class ManageContactViewModel {
         Task {
             defer { session = session.onSaving(isSaving: false) }
             do {
-                _ = try await service.saveContact(input: session.input(avatar: try avatarInput()))
+                _ = try await service.saveContact(input: session.input(avatar: avatarInput()))
                 dismiss()
             } catch {
                 isPresentingAlertMessage = AlertMessage(error: error)

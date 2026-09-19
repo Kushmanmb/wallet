@@ -6,10 +6,10 @@ import class Gemstone.GemApplicationMetadataService
 import struct Gemstone.GemConnectionRow
 import enum Gemstone.GemVerificationLevel
 import func Gemstone.verificationLevel
-import GemstonePrimitives
-import Localization
 import func Gemstone.walletRow
 import func Gemstone.walletRows
+import GemstonePrimitives
+import Localization
 import Primitives
 import PrimitivesComponents
 import Style

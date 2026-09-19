@@ -1,8 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import struct Gemstone.DelegationValidator
-import struct Gemstone.GemValidatorRow
 import struct Gemstone.GemFormattedNumber
+import struct Gemstone.GemValidatorRow
 import GemstonePrimitives
 import Primitives
 import PrimitivesTestKit

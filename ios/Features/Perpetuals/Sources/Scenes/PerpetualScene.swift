@@ -1,9 +1,9 @@
 import Components
 import Formatters
 import GemstonePrimitives
+import GemstoneServices
 import InfoSheet
 import Localization
-import GemstoneServices
 import Primitives
 import PrimitivesComponents
 import Style
@@ -74,7 +74,7 @@ public struct PerpetualScene: View {
 
             if !model.transactionSections.isEmpty {
                 TransactionsList(sections: model.transactionSections)
-                .listRowInsets(.assetListRowInsets)
+                    .listRowInsets(.assetListRowInsets)
             }
         }
         .navigationTitle(model.navigationTitle)
@@ -109,7 +109,6 @@ public struct PerpetualScene: View {
         .onChange(of: chart.currentPeriod, model.onPeriodChange)
     }
 
-    @ViewBuilder
     private var buttonsSection: some View {
         Section {
             HStack(spacing: Spacing.medium) {

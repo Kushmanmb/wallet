@@ -1,13 +1,13 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
+import protocol Gemstone.GemRewardsServiceProtocol
+import enum Gemstone.GemServiceError
+import struct Gemstone.Rewards
+import GemstonePrimitives
 import Localization
 import Primitives
 import PrimitivesComponents
-import struct Gemstone.Rewards
-import protocol Gemstone.GemRewardsServiceProtocol
-import GemstonePrimitives
-import enum Gemstone.GemServiceError
 
 @Observable
 @MainActor

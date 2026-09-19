@@ -1,14 +1,14 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import struct Gemstone.GemCollectibleAttribute
-import enum Gemstone.GemHeaderButtonKind
 import Components
 import Formatters
 import Foundation
+import struct Gemstone.GemCollectibleAttribute
 import enum Gemstone.GemCollectibleAttributeValue
 import struct Gemstone.GemCollectibleDetails
 import enum Gemstone.GemCollectibleSection
 import protocol Gemstone.GemCollectibleServiceProtocol
+import enum Gemstone.GemHeaderButtonKind
 import GemstonePrimitives
 import GemstoneServices
 import ImageGalleryService

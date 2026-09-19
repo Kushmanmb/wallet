@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import class Gemstone.GemPerpetual
 import Formatters
 import Foundation
+import class Gemstone.GemPerpetual
 import GemstonePrimitives
 import Localization
 import Primitives

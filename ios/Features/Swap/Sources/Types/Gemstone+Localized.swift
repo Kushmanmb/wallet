@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
+import enum Gemstone.GemSlippageCheck
 import enum Gemstone.GemSwapButtonAction
 import enum Gemstone.GemSwapDetailRow
-import enum Gemstone.GemSlippageCheck
 import enum Gemstone.GemSwapErrorDisplay
 import GemstonePrimitives
 import Localization
@@ -41,7 +41,7 @@ extension GemSwapErrorDisplay: @retroactive LocalizedError {
         case .offline: Localized.Errors.networkOffline
         case let .minimumAmount(asset, minAmount):
             Localized.Errors.Swap.minimumAmount(
-                ValueFormatter(style: .auto).string(minAmount, asset: asset.toPrimitives()).boldMarkdown()
+                ValueFormatter(style: .auto).string(minAmount, asset: asset.toPrimitives()).boldMarkdown(),
             )
         case .amountTooSmall: Localized.Errors.Swap.amountTooSmall
         }

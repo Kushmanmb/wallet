@@ -5,11 +5,11 @@ public import struct Gemstone.BlockExplorerLink
 public import typealias Gemstone.Chain
 public import typealias Gemstone.Currency
 public import enum Gemstone.GemAcquireAssetFlow
+public import protocol Gemstone.GemConfirmationProtocol
 public import struct Gemstone.GemConfirmLoad
 public import struct Gemstone.GemConfirmLoadOptions
 public import enum Gemstone.GemConfirmRowContent
 public import struct Gemstone.GemConfirmScreen
-public import protocol Gemstone.GemConfirmationProtocol
 public import enum Gemstone.GemExecuteResult
 public import enum Gemstone.GemKeystoreAuthentication
 public import enum Gemstone.GemListRow

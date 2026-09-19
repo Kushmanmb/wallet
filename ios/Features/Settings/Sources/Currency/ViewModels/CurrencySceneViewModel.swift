@@ -1,12 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import GemstonePrimitives
+import Components
+import Foundation
 import struct Gemstone.GemCurrencies
 import protocol Gemstone.GemCurrencyServiceProtocol
 import protocol Gemstone.GemDeviceServiceProtocol
-import Components
+import GemstonePrimitives
 import GemstoneServices
-import Foundation
 import Localization
 import Primitives
 

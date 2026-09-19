@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemWalletDeletion
 import protocol Gemstone.GemPreferencesServiceProtocol
+import enum Gemstone.GemWalletDeletion
 import GemstonePrimitives
 import Observation
 import Primitives

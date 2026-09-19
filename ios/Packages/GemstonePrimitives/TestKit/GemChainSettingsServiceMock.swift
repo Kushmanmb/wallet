@@ -22,7 +22,9 @@ public final class GemChainSettingsServiceMock: GemChainSettingsServiceProtocol,
         addedNodes.append(url)
     }
 
-    public func chains(query _: String) -> [Chain] { [] }
+    public func chains(query _: String) -> [Chain] {
+        []
+    }
 
     public func checkNode(chain _: Chain, url _: String) async throws -> GemNodeCheck {
         try checkResult.get()
@@ -32,7 +34,9 @@ public final class GemChainSettingsServiceMock: GemChainSettingsServiceProtocol,
         deletedNodes.append(url)
     }
 
-    public func explorerRows(chain _: Chain) -> [GemExplorerRow] { explorerRowsValue }
+    public func explorerRows(chain _: Chain) -> [GemExplorerRow] {
+        explorerRowsValue
+    }
 
     public func newAddNodeSession(chain: Chain) -> GemAddNodeSession {
         GemAddNodeSession(chain: chain, url: "", check: nil, error: nil, isChecking: false)
@@ -42,7 +46,9 @@ public final class GemChainSettingsServiceMock: GemChainSettingsServiceProtocol,
         GemNodeListSession(chain: chain, nodes: [], statuses: [:])
     }
 
-    public func nodeCheckDebounceMilliseconds() -> UInt64 { 0 }
+    public func nodeCheckDebounceMilliseconds() -> UInt64 {
+        0
+    }
 
     public func nodeRows(chain _: Chain, nodes: [GemNodeSelection], statuses: [String: GemNodeStatusState]) -> [GemNodeRow] {
         nodes.map {
@@ -66,7 +72,9 @@ public final class GemChainSettingsServiceMock: GemChainSettingsServiceProtocol,
         return nodesByCall.indices.contains(nodesCalls) ? nodesByCall[nodesCalls] : nodesByCall.last ?? []
     }
 
-    public func sections() -> [GemChainSettingsSection] { [.nodes, .explorer] }
+    public func sections() -> [GemChainSettingsSection] {
+        [.nodes, .explorer]
+    }
 
     public func selectNode(chain _: Chain, url: String) async throws {
         selectedNodes.append(url)

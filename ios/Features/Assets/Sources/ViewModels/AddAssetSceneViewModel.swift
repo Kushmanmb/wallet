@@ -1,11 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import protocol Gemstone.GemAddAssetServiceProtocol
-import enum Gemstone.GemAddAssetPhase
-import struct Gemstone.GemListSection
-import struct Gemstone.GemAddAssetSession
 import Components
 import Foundation
+import enum Gemstone.GemAddAssetPhase
+import protocol Gemstone.GemAddAssetServiceProtocol
+import struct Gemstone.GemAddAssetSession
+import struct Gemstone.GemListSection
 import GemstonePrimitives
 import Localization
 import Primitives

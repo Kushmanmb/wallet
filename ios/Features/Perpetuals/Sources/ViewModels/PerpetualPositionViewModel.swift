@@ -1,13 +1,13 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import class Gemstone.GemPerpetual
-import enum Gemstone.GemCurrencyStyle
 import Components
 import Formatters
 import Foundation
-import GemstonePrimitives
+import enum Gemstone.GemCurrencyStyle
+import class Gemstone.GemPerpetual
 import struct Gemstone.GemPerpetualPositionRow
 import func Gemstone.perpetualPositionRow
+import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
 import SwiftUI
@@ -47,7 +47,6 @@ public struct PerpetualPositionViewModel {
     public var positionTypeText: String {
         perpetual.positionText(directionName: directionText, formattedLeverage: leverageText)
     }
-
 
     public var positionTypeColor: Color {
         PerpetualDirectionViewModel(direction: data.position.direction).color

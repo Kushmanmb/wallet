@@ -1,17 +1,22 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import Primitives
+@testable import AppLock
 import Foundation
 import GemstoneServices
 import GemstoneServicesTestKit
 import LocalAuthentication
-@testable import AppLock
+import Primitives
 
 extension LockSceneViewModel {
     var isUnlocking: Bool {
-        if case .unlocking = state { true } else { false }
+        if case .unlocking = state {
+            true
+        } else {
+            false
+        }
     }
 }
+
 import Testing
 
 @MainActor

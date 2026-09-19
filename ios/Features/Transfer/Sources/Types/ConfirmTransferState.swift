@@ -1,5 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
+import Foundation
 import struct Gemstone.GemConfirmData
 import enum Gemstone.GemConfirmError
 import enum Gemstone.GemConfirmFeeSelection
@@ -11,8 +13,6 @@ import struct Gemstone.GemFeeAsset
 import struct Gemstone.GemFeeRateRows
 import struct Gemstone.GemTransactionLoadFee
 import struct Gemstone.GemTransferData
-import Components
-import Foundation
 import Primitives
 import PrimitivesComponents
 
@@ -64,8 +64,12 @@ extension ConfirmTransferState {
     }
 
     var transactionError: ConfirmTransferError? {
-        if let failure = screen.failure, failure.stage == .load { return ConfirmTransferError(error: failure.error) }
-        if case let .failure(error)? = transferAmount { return ConfirmTransferError(error: error) }
+        if let failure = screen.failure, failure.stage == .load {
+            return ConfirmTransferError(error: failure.error)
+        }
+        if case let .failure(error)? = transferAmount {
+            return ConfirmTransferError(error: error)
+        }
         return nil
     }
 }

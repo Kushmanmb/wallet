@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import Localization
 import enum Gemstone.TransactionInputType
 import GemstonePrimitives
+import Localization
 import Primitives
 import Style
 

@@ -1,10 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import Foundation
 import BigInt
+import Foundation
 import enum Gemstone.GemConfirmError
 import enum Gemstone.GemExecuteResult
 import struct Gemstone.GemSimulationBalanceChange
+import struct Gemstone.GemSimulationPayloadRow
 import struct Gemstone.GemSimulationValue
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
@@ -16,7 +17,6 @@ import PrimitivesTestKit
 import Store
 import StoreTestKit
 import Testing
-import struct Gemstone.GemSimulationPayloadRow
 @testable import Transfer
 import TransferTestKit
 
@@ -112,7 +112,6 @@ struct ConfirmSubmissionTests {
 
         #expect(model.state.simulation.balanceChanges == [GemSimulationBalanceChange(asset: usdt.toGem(), value: "-25", sign: .outgoing)])
     }
-
 }
 
 private final class ReportedValues: @unchecked Sendable {

@@ -4,10 +4,10 @@ import GemstonePrimitivesTestKit
 import GemstoneServices
 import GemstoneServicesTestKit
 import Primitives
-import Testing
 import PrimitivesComponents
 @testable import Settings
 import SettingsTestKit
+import Testing
 
 @MainActor
 struct SecurityViewModelTests {

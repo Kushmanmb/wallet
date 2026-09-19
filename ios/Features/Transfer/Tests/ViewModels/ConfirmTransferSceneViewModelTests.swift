@@ -3,18 +3,20 @@
 import BigInt
 import Components
 import Foundation
+import func Gemstone.addressCopy
 import enum Gemstone.FeePriority
 import class Gemstone.GemAssetConfigService
 import struct Gemstone.GemBalanceRequirement
-import enum Gemstone.GemConfirmRowContent
 import enum Gemstone.GemConfirmError
 import struct Gemstone.GemConfirmFailure
+import enum Gemstone.GemConfirmRowContent
 import struct Gemstone.GemFeeRate
 import enum Gemstone.GemListRow
-import enum Gemstone.TransactionInputType
 import protocol Gemstone.GemNameServiceProtocol
+import struct Gemstone.GemSimulationPayloadRow
 import struct Gemstone.GemTransferData
-import func Gemstone.addressCopy
+import struct Gemstone.SimulationPayloadField
+import enum Gemstone.TransactionInputType
 import func Gemstone.walletRow
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
@@ -29,8 +31,6 @@ import Store
 import Testing
 @testable import Transfer
 @testable import TransferTestKit
-import struct Gemstone.GemSimulationPayloadRow
-import struct Gemstone.SimulationPayloadField
 
 @MainActor
 struct ConfirmTransferSceneViewModelTests {

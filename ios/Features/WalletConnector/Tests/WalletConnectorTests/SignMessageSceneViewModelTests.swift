@@ -1,19 +1,19 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Foundation
 import struct Gemstone.GemSimulationValue
 import struct Gemstone.GemWalletConnectMessageRequest
+import struct Gemstone.SimulationHeader
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
-import Foundation
-import struct Gemstone.SimulationHeader
 import Primitives
 import PrimitivesComponents
 import PrimitivesTestKit
 import Testing
 @testable import WalletConnector
-import WalletConnectorTestKit
 import WalletConnectorService
 import WalletConnectorServiceTestKit
+import WalletConnectorTestKit
 
 struct SignMessageSceneViewModelTests {
     @Test

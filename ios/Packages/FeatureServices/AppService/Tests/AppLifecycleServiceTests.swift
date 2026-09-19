@@ -1,10 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 @testable import AppService
-import GemstonePrimitivesTestKit
 import AppServiceTestKit
-import class Gemstone.GemWalletSessionService
 import Foundation
+import class Gemstone.GemWalletSessionService
+import GemstonePrimitivesTestKit
 import GemstoneServices
 import GemstoneServicesTestKit
 import Primitives
@@ -91,7 +91,7 @@ struct AppLifecycleServiceTests {
     }
 
     @Test
-    func updatePerpetualConnectionUpdatesMarketsWhenEnabled() async throws {
+    func updatePerpetualConnectionUpdatesMarketsWhenEnabled() async {
         let perpetuals = GemPerpetualServiceMock()
         let service = AppLifecycleService.mock(perpetualService: perpetuals)
 

@@ -26,7 +26,7 @@ public struct TransactionsScene: View {
                     }
                 }
                 TransactionsList(sections: model.sections)
-                .listRowInsets(.assetListRowInsets)
+                    .listRowInsets(.assetListRowInsets)
             }
             .listSectionSpacing(.compact)
             .scrollContentBackground(.hidden)

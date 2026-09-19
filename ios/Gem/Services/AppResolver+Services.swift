@@ -1,19 +1,19 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import protocol Gemstone.GemTransactionStateServiceProtocol
-import protocol Gemstone.GemAppUpdateServiceProtocol
-import protocol Gemstone.GemAppStartServiceProtocol
-import GemstoneServices
 import AppService
-import WalletConnectorService
 import ConnectionStatusService
-import protocol Gemstone.GemWalletSessionServiceProtocol
 import Foundation
+import protocol Gemstone.GemAppStartServiceProtocol
+import protocol Gemstone.GemAppUpdateServiceProtocol
 import protocol Gemstone.GemDeviceServiceProtocol
+import protocol Gemstone.GemTransactionStateServiceProtocol
+import protocol Gemstone.GemWalletSessionServiceProtocol
+import GemstoneServices
 import Primitives
 import PrimitivesComponents
 import StreamService
 import WalletConnector
+import WalletConnectorService
 
 extension AppResolver {
     struct Services {

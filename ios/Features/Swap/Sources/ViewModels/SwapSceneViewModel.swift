@@ -6,20 +6,20 @@ import Formatters
 import Foundation
 import class Gemstone.Config
 import enum Gemstone.GemSwapButtonAction
+import enum Gemstone.GemSwapErrorDisplay
+import struct Gemstone.GemSwapPairSelection
 import struct Gemstone.GemSwapQuoteInput
+import protocol Gemstone.GemSwapQuoteServiceProtocol
 import struct Gemstone.GemSwapQuotesResult
 import struct Gemstone.GemSwapSession
+import enum Gemstone.GemSwapSide
 import struct Gemstone.GemSwapViewState
-import protocol Gemstone.GemSwapQuoteServiceProtocol
-import func Gemstone.swapperQuoteSummary
-import enum Gemstone.GemSwapErrorDisplay
 import enum Gemstone.SwapperError
 import struct Gemstone.SwapperQuote
+import func Gemstone.swapperQuoteSummary
 import struct Gemstone.SwapQuote
 import GemstonePrimitives
 import Localization
-import struct Gemstone.GemSwapPairSelection
-import enum Gemstone.GemSwapSide
 import Primitives
 import PrimitivesComponents
 import Store

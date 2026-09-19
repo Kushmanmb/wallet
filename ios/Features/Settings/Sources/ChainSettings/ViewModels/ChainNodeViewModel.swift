@@ -1,18 +1,14 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import GemstonePrimitives
 import struct Gemstone.GemNodeRow
 import struct Gemstone.GemNodeSelection
+import GemstonePrimitives
 import Localization
 import Style
 
 struct ChainNodeViewModel {
     let row: GemNodeRow
-
-    init(row: GemNodeRow) {
-        self.row = row
-    }
 
     var node: GemNodeSelection {
         row.node

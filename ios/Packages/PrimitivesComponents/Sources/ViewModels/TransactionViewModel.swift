@@ -1,10 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.Resource
 import Components
 import Formatters
 import Foundation
 import struct Gemstone.GemTransactionRow
+import enum Gemstone.Resource
 import func Gemstone.transactionRow
 import func Gemstone.transactionRows
 import GemstonePrimitives

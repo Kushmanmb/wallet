@@ -4,10 +4,10 @@ import Components
 import Formatters
 import Foundation
 import Gemstone
-import GemstonePrimitives
+import protocol Gemstone.GemPriceAlertServiceProtocol
 import struct Gemstone.GemPriceAlertSession
 import struct Gemstone.GemPriceAlertViewState
-import protocol Gemstone.GemPriceAlertServiceProtocol
+import GemstonePrimitives
 import GemstoneServices
 import Localization
 import Primitives

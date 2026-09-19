@@ -3,15 +3,15 @@
 import Components
 import Formatters
 import Foundation
-import GemstonePrimitives
 import struct Gemstone.GemPerpetualMarketRow
 import func Gemstone.perpetualMarketRow
+import func Gemstone.valueTone
+import GemstonePrimitives
 import Localization
 import Primitives
 import PrimitivesComponents
 import Style
 import SwiftUI
-import func Gemstone.valueTone
 
 public struct PerpetualViewModel {
     public let perpetual: Perpetual

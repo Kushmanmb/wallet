@@ -2,15 +2,15 @@
 
 import BigInt
 import Components
-import protocol Gemstone.GemTransactionDetailsServiceProtocol
-import enum Gemstone.GemInfoTopic
-import enum Gemstone.GemTransactionDetailRow
-import enum Gemstone.GemTransactionHeaderAction
-import struct Gemstone.GemTransactionDetailRows
-import func Gemstone.transactionDetailSections
-import GemstonePrimitives
 import Formatters
 import Foundation
+import enum Gemstone.GemInfoTopic
+import enum Gemstone.GemTransactionDetailRow
+import struct Gemstone.GemTransactionDetailRows
+import protocol Gemstone.GemTransactionDetailsServiceProtocol
+import enum Gemstone.GemTransactionHeaderAction
+import func Gemstone.transactionDetailSections
+import GemstonePrimitives
 import InfoSheet
 import Localization
 import Primitives

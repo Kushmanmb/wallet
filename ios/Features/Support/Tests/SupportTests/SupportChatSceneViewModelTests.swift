@@ -144,7 +144,9 @@ struct SupportChatSceneViewModelTests {
     private func settle(until condition: () -> Bool) async {
         for _ in 0 ..< 60 {
             await Task.yield()
-            if condition() { return }
+            if condition() {
+                return
+            }
             try? await Task.sleep(for: .milliseconds(5))
         }
     }

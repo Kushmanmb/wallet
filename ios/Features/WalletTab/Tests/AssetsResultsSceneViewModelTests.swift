@@ -1,10 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import PrimitivesComponents
 import GemstonePrimitives
 import GemstoneServicesTestKit
 import Primitives
+import PrimitivesComponents
 import PrimitivesTestKit
 @testable import Store
 import StoreTestKit
@@ -35,7 +35,9 @@ struct AssetsResultsSceneViewModelTests {
 
         await model.refresh()
 
-        if case .empty = model.searchState {} else { Issue.record("expected the empty state, got \(model.searchState)") }
+        if case .empty = model.searchState {} else {
+            Issue.record("expected the empty state, got \(model.searchState)")
+        }
     }
 
     @Test
@@ -44,7 +46,9 @@ struct AssetsResultsSceneViewModelTests {
 
         await model.refresh()
 
-        if case .empty = model.searchState {} else { Issue.record("expected the empty state, got \(model.searchState)") }
+        if case .empty = model.searchState {} else {
+            Issue.record("expected the empty state, got \(model.searchState)")
+        }
     }
 
     @Test
@@ -54,7 +58,9 @@ struct AssetsResultsSceneViewModelTests {
 
         #expect(model.showPinned)
         #expect(model.showAssets)
-        if case .results = model.searchState {} else { Issue.record("expected results, got \(model.searchState)") }
+        if case .results = model.searchState {} else {
+            Issue.record("expected results, got \(model.searchState)")
+        }
     }
 
     @Test
@@ -99,7 +105,7 @@ struct AssetsResultsSceneViewModelTests {
 
         #expect(calls.pinned == [true])
         #expect(calls.enabled == [false])
-        #expect(service.pinnedPerpetuals.map { $0.pinned } == [true])
+        #expect(service.pinnedPerpetuals.map(\.pinned) == [true])
     }
 }
 

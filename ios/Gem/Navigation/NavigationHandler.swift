@@ -6,11 +6,11 @@ import enum Gemstone.Deeplink
 import protocol Gemstone.GemAssetsServiceProtocol
 import protocol Gemstone.GemDeeplinkServiceProtocol
 import protocol Gemstone.GemPaymentServiceProtocol
-import enum Gemstone.Payment
 import enum Gemstone.GemPushNotification
 import protocol Gemstone.GemPushNotificationServiceProtocol
 import protocol Gemstone.GemTransactionStateServiceProtocol
 import protocol Gemstone.GemWalletSessionServiceProtocol
+import enum Gemstone.Payment
 import enum Gemstone.UrlAction
 import enum Gemstone.WalletConnectLink
 import GemstonePrimitives

@@ -3,10 +3,10 @@
 import Components
 import Formatters
 import Foundation
+import func Gemstone.secretPhraseCopy
 import Localization
 import Primitives
 import PrimitivesComponents
-import func Gemstone.secretPhraseCopy
 
 struct ShowSecretPhraseViewModel: SecretPhraseViewableModel {
     private let words: [String]

@@ -7,23 +7,23 @@ import typealias Gemstone.AssetId
 import typealias Gemstone.Chain
 import typealias Gemstone.Currency
 import struct Gemstone.GemNumberFormat
+import enum Gemstone.GemSlippageSelection
+import struct Gemstone.GemSlippageSession
 import struct Gemstone.GemSwapPairSelection
-import enum Gemstone.GemSwapSide
-import struct Gemstone.GemSwapQuoteSummary
-import func Gemstone.swapQuote
-import protocol Gemstone.GemSwapQuoteServiceProtocol
 import struct Gemstone.GemSwapPairSuggestion
+import protocol Gemstone.GemSwapQuoteServiceProtocol
+import struct Gemstone.GemSwapQuoteSummary
 import struct Gemstone.GemSwapSession
+import enum Gemstone.GemSwapSide
 import struct Gemstone.GemSwapTransfer
 import struct Gemstone.SwapperQuote
 import struct Gemstone.SwapperSlippage
+import func Gemstone.swapQuote
 import struct Gemstone.SwapQuoteData
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
 import Primitives
 import PrimitivesTestKit
-import enum Gemstone.GemSlippageSelection
-import struct Gemstone.GemSlippageSession
 
 public final class GemSwapQuoteServiceMock: GemSwapQuoteServiceProtocol, @unchecked Sendable {
     private let quotes: @Sendable (BigInt) -> [SwapperQuote]
@@ -119,7 +119,7 @@ public final class GemSwapQuoteServiceMock: GemSwapQuoteServiceProtocol, @unchec
     }
 
     public func refreshIntervalMilliseconds() -> UInt64 {
-        30_000
+        30000
     }
 
     public func quoteDebounceMilliseconds() -> UInt64 {

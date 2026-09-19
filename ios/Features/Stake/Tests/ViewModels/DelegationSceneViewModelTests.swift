@@ -1,8 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Foundation
 import enum Gemstone.GemDelegationAction
 import GemstonePrimitivesTestKit
-import Foundation
 import Localization
 import Primitives
 import PrimitivesTestKit

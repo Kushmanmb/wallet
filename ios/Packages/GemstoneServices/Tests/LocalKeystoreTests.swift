@@ -6,7 +6,7 @@ import Testing
 
 struct LocalKeystoreTests {
     @Test
-    func testImportWallet() async {
+    func testImportWallet() {
         #expect(throws: Never.self) {
             let keystore = LocalKeystore.mock()
             let wallet = try keystore.importWallet(
@@ -20,7 +20,7 @@ struct LocalKeystoreTests {
     }
 
     @Test
-    func importSolanaWallet() async {
+    func importSolanaWallet() {
         #expect(throws: Never.self) {
             let keystore = LocalKeystore.mock()
             let wallet = try keystore.importWallet(
@@ -35,7 +35,7 @@ struct LocalKeystoreTests {
     }
 
     @Test
-    func importEthereumWallet() async {
+    func importEthereumWallet() {
         #expect(throws: Never.self) {
             let keystore = LocalKeystore.mock()
             let chains: [Chain] = [.ethereum, .smartChain, .blast]
@@ -109,7 +109,7 @@ struct LocalKeystoreTests {
     }
 
     @Test
-    func deriveAddress() async {
+    func deriveAddress() {
         #expect(throws: Never.self) {
             let keystore = LocalKeystore.mock()
             let chains = AssetConfiguration.allChains

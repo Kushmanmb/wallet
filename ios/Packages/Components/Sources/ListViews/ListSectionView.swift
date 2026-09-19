@@ -41,8 +41,6 @@ public struct ListSectionView<Item: Identifiable & Sendable, Content: View>: Vie
                 } footer: {
                     if let footer = section.footer {
                         Text(footer)
-                    } else {
-                        EmptyView()
                     }
                 }
             }

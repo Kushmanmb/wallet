@@ -1,8 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import protocol Gemstone.GemWalletServiceProtocol
 import Components
 import Foundation
+import protocol Gemstone.GemWalletServiceProtocol
 import func Gemstone.walletAvatarEmojis
 import func Gemstone.walletRow
 import Localization

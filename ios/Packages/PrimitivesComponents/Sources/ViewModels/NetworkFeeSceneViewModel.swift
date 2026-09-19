@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemConfirmFeeSelection
-import struct Gemstone.GemFeeOptionItem
 import BigInt
 import Components
+import enum Gemstone.GemConfirmFeeSelection
+import struct Gemstone.GemFeeOptionItem
 import struct Gemstone.GemFeeRateRow
 import struct Gemstone.GemFeeRateRows
 import GemstonePrimitives
@@ -162,5 +162,4 @@ private extension NetworkFeeSceneViewModel {
             formatter: .auto,
         )
     }
-
 }

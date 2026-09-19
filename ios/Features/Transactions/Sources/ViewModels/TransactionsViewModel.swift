@@ -4,13 +4,13 @@ import Components
 import Foundation
 import enum Gemstone.GemLoadState
 import protocol Gemstone.GemTransactionsServiceProtocol
+import func Gemstone.transactionsEmptyState
 import GemstonePrimitives
 import GemstoneServices
 import Localization
 import Primitives
 import PrimitivesComponents
 import Store
-import func Gemstone.transactionsEmptyState
 
 @Observable
 @MainActor
@@ -61,7 +61,7 @@ public final class TransactionsViewModel {
 
     public var emptyContentModel: EmptyContentTypeViewModel {
         switch transactionsEmptyState(
-            chains: filterModel.chainsFilter.selectedChains.map { $0.rawValue },
+            chains: filterModel.chainsFilter.selectedChains.map(\.rawValue),
             filters: filterModel.transactionTypesFilter.selectedTypes,
         ) {
         case .noActivity:

@@ -1,16 +1,16 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import BigInt
-import class Gemstone.CryptoFiatConverter
-import enum Gemstone.GemCurrencyStyle
 import Components
 import Formatters
 import Foundation
+import class Gemstone.CryptoFiatConverter
+import enum Gemstone.GemCurrencyStyle
+import func Gemstone.valueTone
 import GemstonePrimitives
 import Primitives
 import Style
 import SwiftUI
-import func Gemstone.valueTone
 
 public struct PriceViewModel: Sendable {
     public let price: Price?

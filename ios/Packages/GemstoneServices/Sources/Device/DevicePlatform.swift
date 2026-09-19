@@ -2,8 +2,8 @@
 
 import Foundation
 import enum Gemstone.Currency
-import protocol Gemstone.GemDeviceKeyServiceProtocol
 import struct Gemstone.GemDeviceInfo
+import protocol Gemstone.GemDeviceKeyServiceProtocol
 import protocol Gemstone.GemDevicePlatform
 import protocol Gemstone.GemPreferencesServiceProtocol
 import GemstonePrimitives

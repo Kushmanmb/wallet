@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import struct Gemstone.GemAssetBalanceRow
 import enum Gemstone.GemAssetDetailRow
 import enum Gemstone.GemAssetNetworkDestination
-import struct Gemstone.GemAssetBalanceRow
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -66,7 +66,7 @@ public struct AssetScene: View {
 
             if model.showTransactions {
                 TransactionsList(sections: model.transactionSections)
-                .listRowInsets(.assetListRowInsets)
+                    .listRowInsets(.assetListRowInsets)
             } else if let error = model.transactionsError {
                 Section {
                     ListItemErrorView(errorTitle: Localized.Errors.errorOccurred, error: error)

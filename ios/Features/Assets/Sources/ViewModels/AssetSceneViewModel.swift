@@ -1,16 +1,18 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemHeaderButtonKind
 import Components
+import func Gemstone.assetBannerContext
 import struct Gemstone.GemAssetBalance
-import protocol Gemstone.GemAssetDetailsServiceProtocol
+import struct Gemstone.GemAssetBalanceRow
 import struct Gemstone.GemAssetDetails
 import struct Gemstone.GemAssetDetailsInput
-import struct Gemstone.GemAssetBalanceRow
-import struct Gemstone.GemFormattedNumber
-import enum Gemstone.GemListRowTitle
+import protocol Gemstone.GemAssetDetailsServiceProtocol
 import struct Gemstone.GemBannerContext
-import func Gemstone.assetBannerContext
+import struct Gemstone.GemFormattedNumber
+import enum Gemstone.GemHeaderButtonKind
+import enum Gemstone.GemListRowTitle
+import enum Gemstone.GemLoadState
+import enum Gemstone.GemServiceError
 import GemstonePrimitives
 import GemstoneServices
 import Localization
@@ -20,8 +22,6 @@ import Store
 import Style
 import SwiftUI
 import UIKit
-import enum Gemstone.GemServiceError
-import enum Gemstone.GemLoadState
 
 @Observable
 @MainActor

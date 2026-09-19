@@ -3,7 +3,6 @@
 import BigInt
 import Components
 import Formatters
-import GemstonePrimitives
 import Foundation
 import enum Gemstone.GemSwapDetailRow
 import struct Gemstone.GemSwapQuoteSummary
@@ -12,6 +11,7 @@ import struct Gemstone.SwapperQuote
 import struct Gemstone.SwapPriceImpact
 import struct Gemstone.SwapProviderData
 import struct Gemstone.SwapQuote
+import GemstonePrimitives
 import Localization
 import Primitives
 import PrimitivesComponents

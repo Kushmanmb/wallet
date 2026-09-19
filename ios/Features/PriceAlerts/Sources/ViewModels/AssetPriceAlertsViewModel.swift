@@ -1,8 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import class Gemstone.PriceAlertFormatter
 import Components
 import protocol Gemstone.GemPriceAlertServiceProtocol
+import enum Gemstone.GemServiceError
+import class Gemstone.PriceAlertFormatter
 import GemstoneServices
 import Localization
 import Primitives
@@ -10,7 +11,6 @@ import PrimitivesComponents
 import Store
 import Style
 import SwiftUI
-import enum Gemstone.GemServiceError
 
 @Observable
 @MainActor

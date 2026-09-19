@@ -1,12 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import enum Gemstone.GemListRow
-import protocol Gemstone.GemAppUpdateServiceProtocol
 import func Gemstone.aboutSections
+import protocol Gemstone.GemAppUpdateServiceProtocol
+import enum Gemstone.GemListRow
 import GemstonePrimitives
-import Localization
 import GemstoneServices
+import Localization
 import Primitives
 import PrimitivesComponents
 import Style

@@ -1,13 +1,13 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import Primitives
+import class Gemstone.GemSecurityService
 import GemstoneServices
 import LocalAuthentication
 import Localization
 import Observation
+import Primitives
 import Style
 import SwiftUI
-import class Gemstone.GemSecurityService
 
 @MainActor
 @Observable

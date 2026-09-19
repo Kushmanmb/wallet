@@ -8,13 +8,13 @@ import Testing
 
 struct CurrencyViewModelTests {
     @Test
-    func uSTitle() throws {
+    func uSTitle() {
         let viewModel = CurrencyViewModel(row: GemCurrencyRow(currency: Currency.usd.toGem(), flag: "🇺🇸"))
         #expect(viewModel.title == "🇺🇸 USD - US Dollar")
     }
 
     @Test
-    func eUROTitle() throws {
+    func eUROTitle() {
         let viewModel = CurrencyViewModel(row: GemCurrencyRow(currency: Currency.eur.toGem(), flag: "🇪🇺"))
         #expect(viewModel.title == "🇪🇺 EUR - Euro")
     }

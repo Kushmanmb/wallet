@@ -1,13 +1,13 @@
 import Components
 import Foundation
+import func Gemstone.addressCopy
+import struct Gemstone.GemReceiveNetworks
 import protocol Gemstone.GemReceiveServiceProtocol
 import GemstonePrimitives
 import Localization
 import Primitives
 import PrimitivesComponents
 import SwiftUI
-import func Gemstone.addressCopy
-import struct Gemstone.GemReceiveNetworks
 
 @Observable
 @MainActor

@@ -1,11 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
-import enum Gemstone.PerpetualProvider
+import protocol Gemstone.GemPerpetualStore
 import struct Gemstone.PerpetualData
 import struct Gemstone.PerpetualMarketData
 import struct Gemstone.PerpetualPosition
-import protocol Gemstone.GemPerpetualStore
+import enum Gemstone.PerpetualProvider
 import GemstonePrimitives
 import Primitives
 import Store

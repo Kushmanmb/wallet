@@ -3,12 +3,12 @@
 import Components
 import Formatters
 import Foundation
-import enum Gemstone.GemInfoTopic
 import struct Gemstone.GemChart
 import enum Gemstone.GemChartPhase
 import enum Gemstone.GemChartSection
-import struct Gemstone.GemChartSession
 import protocol Gemstone.GemChartServiceProtocol
+import struct Gemstone.GemChartSession
+import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemServiceError
 import GemstonePrimitives
 import GemstoneServices
@@ -91,14 +91,12 @@ public final class ChartSceneViewModel: ChartListViewable {
         self.onSetPriceAlert = onSetPriceAlert
     }
 
-
     func listItem(for section: GemChartSection) -> ListItemModel {
         switch section {
         case let .priceAlerts(count): ListItemModel(title: section.title ?? "", subtitle: "\(count)")
         case .setPriceAlert, .market, .links: ListItemModel(title: section.title ?? "")
         }
     }
-
 }
 
 // MARK: - Business Logic

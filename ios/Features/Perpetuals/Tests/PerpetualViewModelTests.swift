@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-@testable import Perpetuals
 import GemstonePrimitives
+@testable import Perpetuals
 import PerpetualsTestKit
 import Primitives
 import PrimitivesTestKit

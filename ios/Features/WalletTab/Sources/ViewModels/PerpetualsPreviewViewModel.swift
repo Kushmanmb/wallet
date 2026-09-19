@@ -2,8 +2,8 @@
 
 import Formatters
 import Foundation
-import Localization
 import GemstonePrimitives
+import Localization
 import Primitives
 import Store
 

@@ -1,17 +1,17 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import class Gemstone.PriceChangeCalculator
 import Components
 import Formatters
 import Foundation
+import class Gemstone.GemAutocloseEstimator
+import class Gemstone.PriceChangeCalculator
+import func Gemstone.valueTone
 import GemstonePrimitives
 import Localization
 import Primitives
 import PrimitivesComponents
 import Style
 import SwiftUI
-import class Gemstone.GemAutocloseEstimator
-import func Gemstone.valueTone
 
 public struct AutocloseViewModel {
     private let type: TpslType

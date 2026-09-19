@@ -6,8 +6,8 @@ import enum Gemstone.GemConfirmRowContent
 import enum Gemstone.GemListRow
 import GemstonePrimitives
 import Localization
-import PrimitivesComponents
 @testable import Primitives
+import PrimitivesComponents
 import PrimitivesTestKit
 import Testing
 @testable import Transfer
@@ -61,6 +61,10 @@ private extension ConfirmRowViewModel {
     }
 
     var isEmpty: Bool {
-        if case .empty = itemModel { true } else { false }
+        if case .empty = itemModel {
+            true
+        } else {
+            false
+        }
     }
 }

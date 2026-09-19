@@ -2,11 +2,11 @@
 
 import Foundation
 import enum Gemstone.GemPerpetualPositionAction
-import InfoSheet
+import struct Gemstone.GemTransferData
 import GemstonePrimitives
+import InfoSheet
 import Primitives
 import PrimitivesComponents
-import struct Gemstone.GemTransferData
 
 public enum WalletSheetType: Identifiable, Equatable, Sendable {
     case selectAsset(SelectAssetType, chains: [Chain])

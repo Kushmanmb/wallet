@@ -1,5 +1,14 @@
 import Components
+import enum Gemstone.GemServiceError
+import struct Gemstone.GemWalletDetails
+import struct Gemstone.GemWalletRow
+import enum Gemstone.GemWalletSecret
+import enum Gemstone.GemWalletSecretKind
+import protocol Gemstone.GemWalletServiceProtocol
+import func Gemstone.walletDetails
+import func Gemstone.walletRow
 import GemstonePrimitives
+import GemstoneServices
 import Localization
 import Onboarding
 import Primitives
@@ -7,15 +16,6 @@ import PrimitivesComponents
 import Store
 import Style
 import SwiftUI
-import struct Gemstone.GemWalletDetails
-import struct Gemstone.GemWalletRow
-import enum Gemstone.GemWalletSecret
-import enum Gemstone.GemWalletSecretKind
-import func Gemstone.walletDetails
-import func Gemstone.walletRow
-import protocol Gemstone.GemWalletServiceProtocol
-import GemstoneServices
-import enum Gemstone.GemServiceError
 
 @Observable
 @MainActor
@@ -101,7 +101,7 @@ extension WalletDetailViewModel {
     }
 
     func delete() async throws {
-        preferences.reload(after: try await service.delete(wallet))
+        try await preferences.reload(after: service.delete(wallet))
     }
 
     func onSelectImage() {

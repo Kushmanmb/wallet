@@ -1,17 +1,17 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemHeaderButtonKind
-import struct Gemstone.GemPerpetualMarketCounts
-import struct Gemstone.GemPerpetualMarketSession
-import enum Gemstone.GemPerpetualMarketSection
-import struct Gemstone.GemPerpetualMarketSections
-import protocol Gemstone.GemRecentActivityServiceProtocol
-import GemstonePrimitives
-import enum Gemstone.GemMarketsRefreshTrigger
-import protocol Gemstone.GemPerpetualServiceProtocol
-import GemstoneServices
 import Components
 import Foundation
+import enum Gemstone.GemHeaderButtonKind
+import enum Gemstone.GemMarketsRefreshTrigger
+import struct Gemstone.GemPerpetualMarketCounts
+import enum Gemstone.GemPerpetualMarketSection
+import struct Gemstone.GemPerpetualMarketSections
+import struct Gemstone.GemPerpetualMarketSession
+import protocol Gemstone.GemPerpetualServiceProtocol
+import protocol Gemstone.GemRecentActivityServiceProtocol
+import GemstonePrimitives
+import GemstoneServices
 import Localization
 import Primitives
 import PrimitivesComponents
@@ -23,7 +23,6 @@ import SwiftUI
 @Observable
 @MainActor
 public final class PerpetualsSceneViewModel {
-
     private let observerService: any PerpetualObservable
     private let service: any GemPerpetualServiceProtocol
 
@@ -182,7 +181,7 @@ extension PerpetualsSceneViewModel {
         }
     }
 
-    func onSearchQueryChange(_ _: String, _ newValue: String) {
+    func onSearchQueryChange(_ _: String, _: String) {
         let query = session.searchQuery()
         perpetualsQuery.request = PerpetualsRequest(searchQuery: query)
         positionsQuery.request = PerpetualPositionsRequest(walletId: wallet.id, searchQuery: query)

@@ -5,8 +5,8 @@ import Foundation
 import enum Gemstone.GemNotificationIcon
 import struct Gemstone.GemNotificationRow
 import func Gemstone.notificationRow
-import Localization
 import GemstonePrimitives
+import Localization
 import Primitives
 import PrimitivesComponents
 import Style

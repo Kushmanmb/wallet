@@ -1,10 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
+import Foundation
 import enum Gemstone.Deeplink
 import protocol Gemstone.GemDeveloperServiceProtocol
 import enum Gemstone.GemServiceError
-import Components
-import Foundation
 import GemstonePrimitives
 import class GemstoneServices.GemstoneDevicePlatform
 import Localization

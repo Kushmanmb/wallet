@@ -1,11 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import GemstonePrimitives
-import protocol Gemstone.GemPerpetualServiceProtocol
-import protocol Gemstone.GemPerpetualStreamServiceProtocol
 import Foundation
 import struct Gemstone.GemPerpetualConnection
+import protocol Gemstone.GemPerpetualServiceProtocol
+import protocol Gemstone.GemPerpetualStreamServiceProtocol
 import enum Gemstone.GemPerpetualSubscription
+import GemstonePrimitives
 import Primitives
 import WebSocketClient
 
@@ -115,5 +115,4 @@ public actor HyperliquidObserverService: PerpetualObservable {
             debugLog("HyperliquidObserver: handle message failed: \(error)")
         }
     }
-
 }

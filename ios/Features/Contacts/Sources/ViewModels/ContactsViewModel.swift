@@ -1,14 +1,14 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import protocol Gemstone.GemContactServiceProtocol
-import struct Gemstone.GemContactAddressInput
 import Components
-import struct Gemstone.GemRecipient
-import GemstoneServices
 import Foundation
 import func Gemstone.contactRow
-import Localization
+import struct Gemstone.GemContactAddressInput
+import protocol Gemstone.GemContactServiceProtocol
+import struct Gemstone.GemRecipient
 import GemstonePrimitives
+import GemstoneServices
+import Localization
 import Primitives
 import PrimitivesComponents
 import Store

@@ -2,9 +2,9 @@
 
 import Components
 import Foundation
+import func Gemstone.addressCopy
 import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemListRow
-import func Gemstone.addressCopy
 import func Gemstone.walletRow
 import GemstonePrimitives
 import GemstonePrimitivesTestKit

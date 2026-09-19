@@ -1,12 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import protocol Gemstone.GemAmountServiceProtocol
-import protocol Gemstone.GemStakeServiceProtocol
-import enum Gemstone.GemAmountType
 import BigInt
+import protocol Gemstone.GemAmountServiceProtocol
+import enum Gemstone.GemAmountType
+import protocol Gemstone.GemStakeServiceProtocol
+import struct Gemstone.GemTransferData
 import GemstonePrimitives
 import Primitives
-import struct Gemstone.GemTransferData
 
 public enum AmountDataProvider: AmountDataProvidable, @unchecked Sendable {
     case transfer(AmountTransferViewModel)

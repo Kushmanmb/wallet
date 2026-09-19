@@ -2,11 +2,11 @@
 
 import Components
 import Formatters
+import func Gemstone.valueTone
 import GemstonePrimitives
 import Primitives
 import Style
 import SwiftUI
-import func Gemstone.valueTone
 
 public struct TotalValueViewModel {
     private let totalValue: TotalFiatValue

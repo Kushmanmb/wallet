@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import Foundation
 import struct Gemstone.GemVerifyPhraseSession
 import struct Gemstone.GemVerifyPhraseViewState
-import Foundation
 import GemstonePrimitives
 import Localization
 import Primitives

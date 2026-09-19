@@ -65,5 +65,4 @@ extension TransactionParticipantViewModel {
         guard let onSelectAddress else { return nil }
         return { onSelectAddress(chainAddress) }
     }
-
 }

@@ -24,8 +24,8 @@ struct ImageLoaderTests {
     }
 
     @Test
-    func decodeAppliesTheStoredOrientation() {
-        let sideways = UIImage(cgImage: UIImage(data: png(side: 200, height: 100))!.cgImage!, scale: 1, orientation: .right).jpegData(compressionQuality: 1)!
+    func decodeAppliesTheStoredOrientation() throws {
+        let sideways = try #require(UIImage(cgImage: #require(UIImage(data: png(side: 200, height: 100))?.cgImage), scale: 1, orientation: .right).jpegData(compressionQuality: 1))
 
         let full = ImageLoader.decode(sideways, request: ImageRequest(url: url, maxPixelSize: nil, scale: 1))
         let small = ImageLoader.decode(sideways, request: ImageRequest(url: url, maxPixelSize: 50, scale: 1))

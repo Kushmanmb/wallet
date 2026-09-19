@@ -355,9 +355,9 @@ public extension Primitives.CoreListItemBadge {
 public extension Gemstone.CoreListItemIcon {
     func toPrimitives() -> Primitives.CoreListItemIcon {
         switch self {
-        case .emoji(let value): .emoji(value.toPrimitives())
-        case .asset(let value): .asset(Primitives.AssetId(core: value))
-        case .image(let value): .image(value)
+        case let .emoji(value): .emoji(value.toPrimitives())
+        case let .asset(value): .asset(Primitives.AssetId(core: value))
+        case let .image(value): .image(value)
         }
     }
 }
@@ -365,9 +365,9 @@ public extension Gemstone.CoreListItemIcon {
 public extension Primitives.CoreListItemIcon {
     func toGem() -> Gemstone.CoreListItemIcon {
         switch self {
-        case .emoji(let value): .emoji(value.toGem())
-        case .asset(let value): .asset(value.identifier)
-        case .image(let value): .image(value)
+        case let .emoji(value): .emoji(value.toGem())
+        case let .asset(value): .asset(value.identifier)
+        case let .image(value): .image(value)
         }
     }
 }
@@ -1166,7 +1166,7 @@ public extension Gemstone.SupportMessageSender {
     func toPrimitives() -> Primitives.SupportMessageSender {
         switch self {
         case .user: .user
-        case .agent(let value): .agent(value.toPrimitives())
+        case let .agent(value): .agent(value.toPrimitives())
         }
     }
 }
@@ -1175,7 +1175,7 @@ public extension Primitives.SupportMessageSender {
     func toGem() -> Gemstone.SupportMessageSender {
         switch self {
         case .user: .user
-        case .agent(let value): .agent(value.toGem())
+        case let .agent(value): .agent(value.toGem())
         }
     }
 }
@@ -1940,7 +1940,7 @@ public extension Gemstone.Banner {
 public extension Primitives.Banner {
     func toGem() -> Gemstone.Banner {
         Gemstone.Banner(
-            walletId: walletId.map { $0.identifier },
+            walletId: walletId.map(\.identifier),
             asset: asset.map { $0.toGem() },
             event: event.toGem(),
             state: state.toGem(),
@@ -2418,9 +2418,9 @@ public extension Gemstone.MarketsAssets {
 public extension Primitives.MarketsAssets {
     func toGem() -> Gemstone.MarketsAssets {
         Gemstone.MarketsAssets(
-            trending: trending.map { $0.identifier },
-            gainers: gainers.map { $0.identifier },
-            losers: losers.map { $0.identifier },
+            trending: trending.map(\.identifier),
+            gainers: gainers.map(\.identifier),
+            losers: losers.map(\.identifier),
         )
     }
 }
@@ -3387,7 +3387,7 @@ public extension Primitives.WalletConnectionSession {
             id: id,
             sessionId: sessionId,
             state: state.toGem(),
-            chains: chains.map { $0.rawValue },
+            chains: chains.map(\.rawValue),
             createdAt: createdAt,
             expireAt: expireAt,
             metadata: metadata.toGem(),

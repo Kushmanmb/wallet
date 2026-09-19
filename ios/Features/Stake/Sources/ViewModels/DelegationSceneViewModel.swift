@@ -1,17 +1,17 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import protocol Gemstone.GemStakeServiceProtocol
 import Components
 import Foundation
 import enum Gemstone.GemDelegationAction
 import enum Gemstone.GemListRow
+import protocol Gemstone.GemStakeServiceProtocol
+import struct Gemstone.GemTransferData
 import GemstonePrimitives
 import Localization
 import Primitives
 import PrimitivesComponents
 import Style
 import SwiftUI
-import struct Gemstone.GemTransferData
 
 public struct DelegationSceneViewModel {
     public let model: DelegationViewModel
@@ -83,7 +83,6 @@ public struct DelegationSceneViewModel {
     public var canClaimRewards: Bool {
         service.canClaimDelegationRewards(walletType: wallet.type.toGem(), delegation: model.delegation.toGem())
     }
-
 }
 
 // MARK: - Actions
@@ -118,7 +117,6 @@ extension DelegationSceneViewModel {
     private var providerType: StakeProviderType {
         model.delegation.validator.providerType
     }
-
 }
 
 extension GemDelegationAction: @retroactive Identifiable {

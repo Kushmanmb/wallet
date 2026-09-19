@@ -1,11 +1,12 @@
+import Components
+import Foundation
 import protocol Gemstone.GemNameServiceProtocol
+import enum Gemstone.GemServiceError
 import enum Gemstone.GemWalletImportKind
 import struct Gemstone.GemWalletImportScreen
 import struct Gemstone.GemWalletImportSession
 import enum Gemstone.GemWalletImportType
 import protocol Gemstone.GemWalletServiceProtocol
-import Components
-import Foundation
 import GemstonePrimitives
 import GemstoneServices
 import Localization
@@ -13,7 +14,6 @@ import Primitives
 import PrimitivesComponents
 import Style
 import SwiftUI
-import enum Gemstone.GemServiceError
 
 @Observable
 @MainActor
@@ -186,7 +186,7 @@ extension ImportWalletSceneViewModel {
         let defaultName = try await service.defaultWalletName(chain: chain?.toGem()).text.text
         try await importWallet(
             name: service.importName(nameRecord: nameRecord, defaultName: defaultName),
-            type: try service.importRequest(kind: importType, chain: chain?.toGem(), input: input, nameRecord: nameRecord),
+            type: service.importRequest(kind: importType, chain: chain?.toGem(), input: input, nameRecord: nameRecord),
         )
     }
 

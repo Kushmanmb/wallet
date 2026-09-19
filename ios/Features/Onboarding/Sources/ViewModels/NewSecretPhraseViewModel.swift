@@ -1,11 +1,11 @@
 import Components
 import Formatters
 import Foundation
+import func Gemstone.secretPhraseCopy
 import Localization
 import Primitives
 import PrimitivesComponents
 import SwiftUI
-import func Gemstone.secretPhraseCopy
 
 struct NewSecretPhraseViewModel: SecretPhraseViewableModel {
     private let onContinue: VoidAction

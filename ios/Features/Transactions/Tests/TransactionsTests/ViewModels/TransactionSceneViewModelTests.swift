@@ -1,9 +1,9 @@
-import enum Gemstone.GemTransactionHeaderAction
-import GemstonePrimitivesTestKit
 import Components
 import Foundation
 import enum Gemstone.GemListRow
 import enum Gemstone.GemTransactionDetailRow
+import enum Gemstone.GemTransactionHeaderAction
+import GemstonePrimitivesTestKit
 import Localization
 import Primitives
 import PrimitivesComponents

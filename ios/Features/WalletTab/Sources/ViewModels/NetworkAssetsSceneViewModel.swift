@@ -1,12 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import protocol Gemstone.GemWalletHomeServiceProtocol
-import GemstoneServices
 import Components
 import Foundation
-import Localization
 import struct Gemstone.GemNetworkAssetCounts
 import struct Gemstone.GemNetworkAssetSections
+import protocol Gemstone.GemWalletHomeServiceProtocol
+import GemstoneServices
+import Localization
 import Primitives
 import PrimitivesComponents
 import Store
@@ -137,8 +137,8 @@ extension NetworkAssetsSceneViewModel {
     func setAssetsEnabled(_ assetIds: [AssetId], enabled: Bool) async throws {
         try await service.setAssetsEnabled(assetIds: assetIds, enabled: enabled)
     }
+
     var assetItems: ListAssetItemsViewModel {
         ListAssetItemsViewModel(currency: currency, rowStyle: service.assetRowStyle())
     }
-
 }

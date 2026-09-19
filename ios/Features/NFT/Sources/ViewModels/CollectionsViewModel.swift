@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import protocol Gemstone.GemNftServiceProtocol
 import Foundation
-import Localization
+import protocol Gemstone.GemNftServiceProtocol
 import GemstonePrimitives
+import Localization
 import Primitives
 import Store
 import SwiftUI

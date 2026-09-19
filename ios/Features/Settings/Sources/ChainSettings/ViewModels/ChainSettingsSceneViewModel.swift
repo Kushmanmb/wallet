@@ -2,8 +2,8 @@
 
 import Components
 import Foundation
-import protocol Gemstone.GemChainSettingsServiceProtocol
 import enum Gemstone.GemChainSettingsSection
+import protocol Gemstone.GemChainSettingsServiceProtocol
 import struct Gemstone.GemExplorerRow
 import struct Gemstone.GemNodeListSession
 import struct Gemstone.GemNodeSelection
@@ -129,7 +129,7 @@ extension ChainSettingsSceneViewModel {
 
 extension ChainSettingsSceneViewModel {
     private func loadNodes() async throws {
-        session = session.onNodes(nodes: try await service.nodes(chain: chain.rawValue))
+        session = try await session.onNodes(nodes: service.nodes(chain: chain.rawValue))
     }
 
     private func loadNodesStates() async {

@@ -30,8 +30,8 @@ struct SwapButtonViewModelTests {
     }
 
     @Test
-    func retryTransferShowsLoadingWhileTheTransferIsInFlight() {
-        let viewModel = SwapButtonViewModel.mock(session: GemSwapSession.mockReady().startTransfer()!)
+    func retryTransferShowsLoadingWhileTheTransferIsInFlight() throws {
+        let viewModel = try SwapButtonViewModel.mock(session: #require(GemSwapSession.mockReady().startTransfer()))
 
         #expect(viewModel.type == ButtonType.primary(.loading()))
     }

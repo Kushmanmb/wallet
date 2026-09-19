@@ -1,16 +1,16 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
 import Foundation
 import protocol Gemstone.GemSupportServiceProtocol
 import GemstonePrimitives
+import GemstoneServices
 import Localization
 import PhotosUI
 import Primitives
-import Store
-import GemstoneServices
-import SwiftUI
-import Components
 import PrimitivesComponents
+import Store
+import SwiftUI
 
 @Observable
 @MainActor
@@ -101,7 +101,7 @@ public final class SupportChatSceneViewModel {
         guard let url = image.url.asURL else { return }
         Task {
             await perform {
-                previewURL = URL(fileURLWithPath: try await service.imageFile(url: url.absoluteString))
+                previewURL = try await URL(fileURLWithPath: service.imageFile(url: url.absoluteString))
             }
         }
     }

@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.TransactionInputType
 import struct Gemstone.GemTransferData
+import enum Gemstone.TransactionInputType
 import Primitives
 
 public extension GemTransferData {

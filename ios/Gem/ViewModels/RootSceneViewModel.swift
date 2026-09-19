@@ -1,17 +1,17 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import protocol Gemstone.GemAppUpdateServiceProtocol
-import protocol Gemstone.GemTransactionStateServiceProtocol
-import GemstonePrimitives
-import protocol Gemstone.GemAppStartServiceProtocol
-import AppService
-import GemstoneServices
-import Components
-import protocol Gemstone.GemWalletSessionServiceProtocol
-import Foundation
-import protocol Gemstone.GemDeviceServiceProtocol
-import Localization
 import AppLock
+import AppService
+import Components
+import Foundation
+import protocol Gemstone.GemAppStartServiceProtocol
+import protocol Gemstone.GemAppUpdateServiceProtocol
+import protocol Gemstone.GemDeviceServiceProtocol
+import protocol Gemstone.GemTransactionStateServiceProtocol
+import protocol Gemstone.GemWalletSessionServiceProtocol
+import GemstonePrimitives
+import GemstoneServices
+import Localization
 import Onboarding
 import Primitives
 import PrimitivesComponents
@@ -40,6 +40,7 @@ final class RootSceneViewModel {
     var currentWallet: Wallet? {
         walletSessionService.currentWalletId.flatMap { try? viewModelFactory.stores.walletStore.getWallet(id: $0) }
     }
+
     var currentWalletId: WalletId? { walletSessionService.currentWalletId }
     var colorScheme: ColorScheme? { observablePreferences.appearance.colorScheme }
     var updateVersionAlertMessage: AlertMessage?

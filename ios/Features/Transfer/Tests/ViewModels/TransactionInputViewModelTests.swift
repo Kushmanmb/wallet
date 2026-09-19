@@ -1,12 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import struct Gemstone.GemTransferAmount
+import BigInt
 import struct Gemstone.GemBalanceRequirement
 import enum Gemstone.GemConfirmError
 import struct Gemstone.GemConfirmMetadata
-import GemstonePrimitivesTestKit
-import BigInt
+import struct Gemstone.GemTransferAmount
 import GemstonePrimitives
+import GemstonePrimitivesTestKit
 import Primitives
 import PrimitivesTestKit
 import Testing

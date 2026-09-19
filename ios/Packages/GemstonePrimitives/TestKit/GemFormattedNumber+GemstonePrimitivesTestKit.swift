@@ -5,8 +5,8 @@ import enum Gemstone.GemNumberDisplay
 import enum Gemstone.GemNumberNotation
 import enum Gemstone.GemNumberRounding
 import enum Gemstone.GemNumberUnit
-import enum Gemstone.GemValueTone
 import enum Gemstone.GemPrecision
+import enum Gemstone.GemValueTone
 
 public extension GemFormattedNumber {
     static func mock(

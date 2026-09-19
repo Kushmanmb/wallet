@@ -13,7 +13,7 @@ struct PaymentTransferTests {
     let paymentService = GemPaymentService.mock()
 
     @Test
-    func transactionUsesDecodedTransfer() throws {
+    func transactionUsesDecodedTransfer() {
         let asset = Asset.mockSolanaUSDC()
         let recipient = "2kT9W3q7oXg6aPvFTN6DdK3FDZEqUigw6fmNc16YwL5n"
         let transaction = GemPaymentTransaction.mock(
@@ -35,7 +35,7 @@ struct PaymentTransferTests {
     }
 
     @Test
-    func transactionWithoutMemoConfirms() throws {
+    func transactionWithoutMemoConfirms() {
         let asset = Asset.mockSolanaUSDC()
         let recipient = "2kT9W3q7oXg6aPvFTN6DdK3FDZEqUigw6fmNc16YwL5n"
         let transaction = GemPaymentTransaction.mock(request: .mock(address: recipient, amount: .atomicValue(value: "19000000"), assetId: asset.id))
@@ -53,7 +53,7 @@ struct PaymentTransferTests {
     }
 
     @Test
-    func transactionWithMismatchedAssetFallsBack() throws {
+    func transactionWithMismatchedAssetFallsBack() {
         let asset = Asset.mockSolanaUSDC()
         let transaction = GemPaymentTransaction.mock(
             memo: "payment-memo",

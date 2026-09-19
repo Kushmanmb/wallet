@@ -2,14 +2,14 @@
 
 import Assets
 import Components
+import GemstonePrimitives
+import GemstoneServices
 import Localization
 import PriceAlerts
-import GemstonePrimitives
 import Primitives
 import Style
 import SwiftUI
 import Transactions
-import GemstoneServices
 import WalletTab
 
 struct MainTabView: View {

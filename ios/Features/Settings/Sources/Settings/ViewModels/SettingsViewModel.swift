@@ -1,17 +1,17 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import protocol Gemstone.GemSettingsServiceProtocol
 import Foundation
+import enum Gemstone.GemListRow
+import protocol Gemstone.GemSettingsServiceProtocol
 import GemstonePrimitives
+import GemstoneServices
 import Localization
 import Primitives
+import PrimitivesComponents
 import Store
 import Style
-import enum Gemstone.GemListRow
-import PrimitivesComponents
 import SwiftUI
-import GemstoneServices
 
 @Observable
 @MainActor

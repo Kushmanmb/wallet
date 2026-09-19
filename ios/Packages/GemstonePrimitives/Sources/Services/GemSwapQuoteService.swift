@@ -4,9 +4,9 @@ import BigInt
 import Foundation
 import struct Gemstone.GemSwapQuoteInput
 import protocol Gemstone.GemSwapQuoteServiceProtocol
+import struct Gemstone.GemTransferData
 import struct Gemstone.SwapperQuote
 import Primitives
-import struct Gemstone.GemTransferData
 
 public extension GemSwapQuoteServiceProtocol {
     var currency: Primitives.Currency {

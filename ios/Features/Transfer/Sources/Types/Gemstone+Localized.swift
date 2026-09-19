@@ -9,11 +9,11 @@ import enum Gemstone.GemAmountError
 import enum Gemstone.GemAmountTitle
 import enum Gemstone.GemConfirmButtonKind
 import enum Gemstone.GemConfirmDestination
-import enum Gemstone.GemRecipientSectionKind
 import enum Gemstone.GemConfirmError
 import enum Gemstone.GemConfirmErrorDisplay
 import enum Gemstone.GemConfirmTitle
 import enum Gemstone.GemReceiveWarning
+import enum Gemstone.GemRecipientSectionKind
 import GemstonePrimitives
 import Localization
 import Primitives

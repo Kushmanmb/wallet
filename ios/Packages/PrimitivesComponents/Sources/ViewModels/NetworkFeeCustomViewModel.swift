@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import Components
 import BigInt
+import Components
 import Formatters
 import Foundation
 import class Gemstone.GemCustomFee

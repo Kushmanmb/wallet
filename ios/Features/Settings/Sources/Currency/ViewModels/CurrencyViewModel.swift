@@ -8,10 +8,6 @@ import Primitives
 struct CurrencyViewModel {
     let row: GemCurrencyRow
 
-    init(row: GemCurrencyRow) {
-        self.row = row
-    }
-
     var currency: Currency {
         row.currency.toPrimitives()
     }

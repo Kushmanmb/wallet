@@ -140,7 +140,6 @@ extension AssetRecord {
             type: type,
         )
     }
-
 }
 
 extension PriceRecordInfo {

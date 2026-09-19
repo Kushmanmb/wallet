@@ -1,15 +1,15 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import class Gemstone.GemChainService
 import Foundation
+import class Gemstone.GemChainService
+import enum Gemstone.GemWalletConnectError
 import enum Gemstone.GemWalletConnectFailure
 import enum Gemstone.GemWalletConnectRejectionReason
 import enum Gemstone.GemWalletConnectResponse
-import struct Gemstone.GemWalletConnectSessionRequest
-import enum Gemstone.GemWalletConnectError
 import protocol Gemstone.GemWalletConnectServiceProtocol
-import GemstonePrimitives
+import struct Gemstone.GemWalletConnectSessionRequest
 import protocol Gemstone.GemWalletSessionServiceProtocol
+import GemstonePrimitives
 import Primitives
 @preconcurrency import ReownWalletKit
 @preconcurrency import WalletConnectPairing

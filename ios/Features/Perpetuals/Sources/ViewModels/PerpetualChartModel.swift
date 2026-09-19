@@ -1,12 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import GemstonePrimitives
-import protocol Gemstone.GemPerpetualDetailsServiceProtocol
 import Components
 import Foundation
+import protocol Gemstone.GemPerpetualDetailsServiceProtocol
 import enum Gemstone.GemPerpetualSubscription
-import Localization
+import GemstonePrimitives
 import GemstoneServices
+import Localization
 import Primitives
 import Style
 import SwiftUI
@@ -103,7 +103,9 @@ private extension PerpetualChartModel {
 
     func observeCandles(perpetual: Perpetual) async {
         for await update in await observerService.chartService.makeStream() {
-            if Task.isCancelled { break }
+            if Task.isCancelled {
+                break
+            }
             handleChartUpdate(update, perpetual: perpetual)
         }
     }

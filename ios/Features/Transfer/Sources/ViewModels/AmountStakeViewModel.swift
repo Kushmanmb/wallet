@@ -3,16 +3,16 @@
 import BigInt
 import Foundation
 import enum Gemstone.GemAmountType
-import func Gemstone.validatorRow
 import enum Gemstone.GemStakeAmountInput
-import struct Gemstone.GemValidatorRow
 import protocol Gemstone.GemStakeServiceProtocol
+import struct Gemstone.GemTransferData
+import struct Gemstone.GemValidatorRow
+import func Gemstone.validatorRow
 import GemstonePrimitives
 import Localization
 import Primitives
 import PrimitivesComponents
 import Stake
-import struct Gemstone.GemTransferData
 
 public enum AmountStakeSelection {
     case validator(SelectionState<GemValidatorRow>)
@@ -59,7 +59,7 @@ public final class AmountStakeViewModel: AmountDataProvidable {
     }
 
     func makeTransferData(value: BigInt, useMaxAmount: Bool) throws -> GemTransferData {
-        service.stakeTransferData(asset: asset.toGem(), stakeType: try action.stakeType(), value: value, useMaxAmount: useMaxAmount)
+        try service.stakeTransferData(asset: asset.toGem(), stakeType: action.stakeType(), value: value, useMaxAmount: useMaxAmount)
     }
 
     func select(_ validator: DelegationValidator) {

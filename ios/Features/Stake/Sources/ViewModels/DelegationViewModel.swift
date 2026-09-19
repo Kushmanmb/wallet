@@ -1,13 +1,13 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import func Gemstone.delegationStatus
-import func Gemstone.validatorRow
-import struct Gemstone.GemDelegationStatus
-import protocol Gemstone.GemStakeServiceProtocol
-import GemstonePrimitives
 import Formatters
 import Foundation
+import func Gemstone.delegationStatus
+import struct Gemstone.GemDelegationStatus
+import protocol Gemstone.GemStakeServiceProtocol
+import func Gemstone.validatorRow
+import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
 import Style
@@ -55,7 +55,6 @@ public struct DelegationViewModel: Sendable {
             imageStyle: .asset(assetImage: validatorImage),
         )
     }
-
 
     public var titleStyle: TextStyle {
         TextStyle(font: .body, color: .primary, fontWeight: .semibold)

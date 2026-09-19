@@ -1,14 +1,14 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import Foundation
 import enum Gemstone.GemListRowTitle
+import struct Gemstone.GemPerpetualDefaults
 import struct Gemstone.GemPreferencesInput
 import protocol Gemstone.GemSettingsServiceProtocol
-import Foundation
-import struct Gemstone.GemPerpetualDefaults
 import GemstonePrimitives
-import Localization
 import GemstoneServices
+import Localization
 import Primitives
 import PrimitivesComponents
 import Style

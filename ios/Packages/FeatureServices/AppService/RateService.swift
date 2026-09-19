@@ -1,8 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
-import Primitives
 import protocol Gemstone.GemPreferencesServiceProtocol
+import Primitives
 import StoreKit
 
 public struct RateService: Sendable {

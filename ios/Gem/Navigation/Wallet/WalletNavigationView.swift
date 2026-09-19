@@ -2,13 +2,13 @@
 
 import Assets
 import Components
+import GemstonePrimitives
 import InfoSheet
 import Localization
 import MarketInsight
 import NFT
 import Perpetuals
 import PriceAlerts
-import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
 import Store

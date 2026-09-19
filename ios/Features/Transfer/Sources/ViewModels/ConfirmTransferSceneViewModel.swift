@@ -1,20 +1,23 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import struct Gemstone.GemConfirmButton
-import enum Gemstone.GemConfirmFeeRow
-import enum Gemstone.GemConfirmFeeSelection
-import struct Gemstone.GemFeeRateRows
 import Components
 import Foundation
+import protocol Gemstone.GemConfirmationProtocol
+import struct Gemstone.GemConfirmButton
 import enum Gemstone.GemConfirmError
+import enum Gemstone.GemConfirmFeeRow
+import enum Gemstone.GemConfirmFeeSelection
 import struct Gemstone.GemConfirmLoadOptions
 import enum Gemstone.GemConfirmRowContent
-import protocol Gemstone.GemConfirmationProtocol
 import struct Gemstone.GemConfirmSimulationState
 import enum Gemstone.GemExecuteResult
+import struct Gemstone.GemFeeRateRows
+import enum Gemstone.GemListRow
 import protocol Gemstone.GemPreferencesServiceProtocol
+import struct Gemstone.GemSimulationPayloadRow
 import enum Gemstone.GemTransferAmountResult
 import struct Gemstone.GemTransferData
+import struct Gemstone.SimulationResult
 import GemstonePrimitives
 import GemstoneServices
 import InfoSheet
@@ -25,9 +28,6 @@ import Store
 import Swap
 import SwiftUI
 import WalletConnector
-import struct Gemstone.GemSimulationPayloadRow
-import struct Gemstone.SimulationResult
-import enum Gemstone.GemListRow
 
 @Observable
 @MainActor
@@ -35,10 +35,12 @@ public final class ConfirmTransferSceneViewModel {
     var feeSelection: GemConfirmFeeSelection {
         didSet { feeRates = state.feeRateRows(selection: feeSelection) }
     }
+
     var feeAssetSelection: FeeAssetSelection
     var state: ConfirmTransferState {
         didSet { onStateChange(state: state) }
     }
+
     private(set) var button: GemConfirmButton
     private(set) var feeRow: GemConfirmFeeRow
     private(set) var feeRates: GemFeeRateRows?
@@ -47,7 +49,6 @@ public final class ConfirmTransferSceneViewModel {
     public var isPresentingSheet: ConfirmTransferSheetType?
 
     public var isPresentingAlertMessage: AlertMessage?
-
 
     private let request: ConfirmTransferRequest
     private let wallet: Wallet
@@ -261,7 +262,7 @@ extension ConfirmTransferSceneViewModel {
     func load() async {
         state.screen = state.screen.onLoadStarted()
         do {
-            state = ConfirmTransferState(try await confirmation.state(), screen: state.screen)
+            state = try await ConfirmTransferState(confirmation.state(), screen: state.screen)
             let load = try await confirmation.load(options: options(selection: feeSelection, feeAssetSelection: feeAssetSelection))
             state = ConfirmTransferState(load, screen: state.screen.onLoaded(load: load))
         } catch let error as GemConfirmError {

@@ -1,16 +1,16 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemCurrencyStyle
 import BigInt
 import Components
 import Formatters
 import Foundation
+import class Gemstone.CryptoFiatConverter
+import enum Gemstone.GemCurrencyStyle
 import GemstonePrimitives
 import Localization
 import Primitives
 import Style
 import SwiftUI
-import class Gemstone.CryptoFiatConverter
 
 public struct AssetDataViewModel: Sendable {
     private let assetData: AssetData
@@ -137,5 +137,4 @@ public struct AssetDataViewModel: Sendable {
     public var assetAddress: AssetAddress {
         assetData.assetAddress
     }
-
 }

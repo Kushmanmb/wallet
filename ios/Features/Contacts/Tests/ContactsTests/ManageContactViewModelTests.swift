@@ -2,10 +2,10 @@
 
 @testable import Contacts
 import ContactsTestKit
+import GemstonePrimitivesTestKit
 import GemstoneServices
 import GemstoneServicesTestKit
 import Primitives
-import GemstonePrimitivesTestKit
 import PrimitivesTestKit
 import Testing
 

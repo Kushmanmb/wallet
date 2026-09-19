@@ -2,10 +2,10 @@
 
 import Components
 import Foundation
+import GemstonePrimitives
 import Localization
 import Style
 import SwiftUI
-import GemstonePrimitives
 
 public struct ChainsFilterTypeViewModel: FilterTypeRepresentable {
     private let type: ChainsFilterType

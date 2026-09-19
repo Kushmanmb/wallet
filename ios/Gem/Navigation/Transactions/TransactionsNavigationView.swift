@@ -85,4 +85,3 @@ struct TransactionsNavigationView: View {
             }
     }
 }
-

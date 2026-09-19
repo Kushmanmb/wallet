@@ -2,9 +2,9 @@
 
 import Components
 import protocol Gemstone.GemAssetsServiceProtocol
-import enum Gemstone.GemTransactionHeaderAction
 import protocol Gemstone.GemNftServiceProtocol
 import protocol Gemstone.GemRecentActivityServiceProtocol
+import enum Gemstone.GemTransactionHeaderAction
 import GemstonePrimitives
 import GemstoneServices
 import NFT

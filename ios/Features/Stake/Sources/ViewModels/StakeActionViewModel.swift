@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemStakeAction
 import Components
+import enum Gemstone.GemStakeAction
 import enum Gemstone.GemStakeSection
 import InfoSheet
 import PrimitivesComponents

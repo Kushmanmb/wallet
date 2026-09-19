@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import func Gemstone.addressCopy
 import struct Gemstone.AddressName
 import enum Gemstone.GemAcquireAssetFlow
 import struct Gemstone.GemConfirmLoad
@@ -7,7 +8,6 @@ import enum Gemstone.GemConfirmRowContent
 import enum Gemstone.GemExecuteResult
 import struct Gemstone.GemTransferData
 import struct Gemstone.SimulationResult
-import func Gemstone.addressCopy
 import func Gemstone.walletRow
 import GemstonePrimitives
 import GemstonePrimitivesTestKit

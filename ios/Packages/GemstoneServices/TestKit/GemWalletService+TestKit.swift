@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import class Gemstone.GemAvatarService
 import Foundation
+import class Gemstone.GemAvatarService
 import class Gemstone.GemExplorerService
 import class Gemstone.GemNameService
 import class Gemstone.GemPaymentService
@@ -13,8 +13,8 @@ import class Gemstone.GemWalletService
 import class Gemstone.GemWalletSessionService
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
-import NativeProviderService
 import GemstoneServices
+import NativeProviderService
 import Primitives
 import Store
 import StoreTestKit

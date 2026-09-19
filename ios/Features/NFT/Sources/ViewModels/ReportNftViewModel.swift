@@ -1,11 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import GemstonePrimitives
-import protocol Gemstone.GemCollectibleServiceProtocol
 import Components
 import Foundation
-import Localization
+import protocol Gemstone.GemCollectibleServiceProtocol
+import GemstonePrimitives
 import GemstoneServices
+import Localization
 import Primitives
 
 @Observable

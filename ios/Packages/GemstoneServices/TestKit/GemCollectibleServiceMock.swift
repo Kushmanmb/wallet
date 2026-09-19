@@ -17,7 +17,9 @@ public final class GemCollectibleServiceMock: GemCollectibleServiceProtocol, @un
 
     public func report(report: ReportNft) async throws {
         reports.append(report)
-        if let reportError { throw reportError }
+        if let reportError {
+            throw reportError
+        }
     }
 
     public func setWalletAvatar(url _: String) async throws {}

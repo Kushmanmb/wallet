@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+@testable import Perpetuals
 import Primitives
 import PrimitivesComponents
-@testable import Perpetuals
 import Testing
 
 struct PerpetualsHeaderViewModelTests {

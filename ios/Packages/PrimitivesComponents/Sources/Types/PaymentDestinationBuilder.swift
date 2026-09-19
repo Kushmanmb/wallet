@@ -33,7 +33,7 @@ public enum PaymentDestinationBuilder {
         assets: [AssetData],
         paymentService: any GemPaymentServiceProtocol,
     ) throws -> PaymentDestination {
-        switch paymentService.destination(request: payment, assets: assets.map { $0.asset.paymentWalletAsset }) {
+        switch paymentService.destination(request: payment, assets: assets.map(\.asset.paymentWalletAsset)) {
         case let .confirm(transfer):
             guard let assetData = assetData(for: transfer.assetId, in: assets) else {
                 throw AnyError(Localized.Errors.notSupported)

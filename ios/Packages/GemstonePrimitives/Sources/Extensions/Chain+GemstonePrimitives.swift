@@ -2,8 +2,8 @@
 
 import BigInt
 import Foundation
-import class Gemstone.GemAssetConfigService
 import Gemstone
+import class Gemstone.GemAssetConfigService
 import Primitives
 
 private let chainAssets: [Primitives.Chain: Primitives.ChainAsset] = Primitives.Chain.allCases.reduce(into: [:]) { result, chain in
@@ -11,7 +11,6 @@ private let chainAssets: [Primitives.Chain: Primitives.ChainAsset] = Primitives.
 }
 
 public extension Primitives.Chain {
-
     var asset: Primitives.Asset {
         chainAsset.asset
     }

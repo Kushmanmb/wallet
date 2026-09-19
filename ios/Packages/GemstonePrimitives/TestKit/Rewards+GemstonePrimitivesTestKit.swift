@@ -3,19 +3,19 @@
 import BigInt
 import Foundation
 import struct Gemstone.GemDurationPart
-import struct Gemstone.ReferralAllowance
-import struct Gemstone.ReferralQuota
-import enum Gemstone.RedemptionStatus
-import struct Gemstone.RedemptionResult
-import struct Gemstone.RewardRedemption
 import struct Gemstone.GemFormattedNumber
+import enum Gemstone.GemListRow
 import struct Gemstone.GemRewardsRedemption
 import struct Gemstone.GemRewardsState
+import struct Gemstone.RedemptionResult
+import enum Gemstone.RedemptionStatus
+import struct Gemstone.ReferralAllowance
+import struct Gemstone.ReferralQuota
+import struct Gemstone.RewardRedemption
 import struct Gemstone.RewardRedemptionOption
-import enum Gemstone.RewardStatus
 import struct Gemstone.Rewards
+import enum Gemstone.RewardStatus
 import Primitives
-import enum Gemstone.GemListRow
 
 public extension Rewards {
     static func mock(

@@ -2,8 +2,8 @@
 
 import Foundation
 import typealias Gemstone.AssetId
-import typealias Gemstone.Transaction
 import protocol Gemstone.GemTransactionStore
+import typealias Gemstone.Transaction
 import GemstonePrimitives
 import Primitives
 import Store

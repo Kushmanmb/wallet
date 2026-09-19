@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
+import protocol Gemstone.GemRewardsServiceProtocol
 import struct Gemstone.GemRewardsState
 import struct Gemstone.RedemptionResult
-import protocol Gemstone.GemRewardsServiceProtocol
 import struct Gemstone.Rewards
 import Primitives
 

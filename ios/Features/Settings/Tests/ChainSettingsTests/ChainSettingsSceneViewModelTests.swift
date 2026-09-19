@@ -3,8 +3,8 @@
 import Gemstone
 import GemstonePrimitivesTestKit
 @testable import Primitives
-import Testing
 @testable import Settings
+import Testing
 
 @MainActor
 struct ChainSettingsSceneViewModelTests {

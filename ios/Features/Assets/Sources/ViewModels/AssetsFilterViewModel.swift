@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import Localization
 import struct Gemstone.GemSelectAssetFlow
 import GemstonePrimitives
+import Localization
 import Primitives
 import PrimitivesComponents
 import Store
@@ -18,10 +18,6 @@ public struct AssetsFilterViewModel: Sendable, Equatable {
     public init(flow: GemSelectAssetFlow, model: ChainsFilterViewModel) {
         self.flow = flow
         chainsFilter = model
-    }
-
-    public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.flow == rhs.flow && lhs.chainsFilter == rhs.chainsFilter && lhs.hasBalance == rhs.hasBalance
     }
 
     public var isAnyFilterSpecified: Bool {

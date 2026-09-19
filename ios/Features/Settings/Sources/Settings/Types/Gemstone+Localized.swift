@@ -1,11 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemServiceEndpointType
 import enum Gemstone.GemChainSettingsSection
 import enum Gemstone.GemNodeCheckRow
 import enum Gemstone.GemNodeSubtitle
-import enum GemstoneServices.KeystoreAuthentication
+import enum Gemstone.GemServiceEndpointType
 import GemstonePrimitives
+import enum GemstoneServices.KeystoreAuthentication
 import Localization
 import Primitives
 

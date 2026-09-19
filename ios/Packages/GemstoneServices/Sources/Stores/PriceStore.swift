@@ -3,9 +3,9 @@
 import Foundation
 import typealias Gemstone.AssetId
 import struct Gemstone.AssetMarket
+import struct Gemstone.AssetPrice
 import enum Gemstone.Currency
 import struct Gemstone.FiatRate
-import struct Gemstone.AssetPrice
 import protocol Gemstone.GemPriceStore
 import struct Gemstone.GemPriceUpdate
 import GemstonePrimitives

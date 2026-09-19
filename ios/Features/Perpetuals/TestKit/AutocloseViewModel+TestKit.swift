@@ -2,10 +2,10 @@
 
 import Formatters
 import Foundation
-import Perpetuals
-import Primitives
 import class Gemstone.GemAutocloseEstimator
 import GemstonePrimitives
+import Perpetuals
+import Primitives
 import PrimitivesComponents
 
 public extension AutocloseViewModel {

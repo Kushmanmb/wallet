@@ -7,10 +7,6 @@ import Localization
 public struct ConnectionSceneViewModel: Sendable {
     let details: GemConnectionDetails
 
-    init(details: GemConnectionDetails) {
-        self.details = details
-    }
-
     var title: String {
         Localized.WalletConnect.Connection.title
     }

@@ -1,17 +1,17 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
-import GemstonePrimitives
 import struct Gemstone.GemDurationPart
 import enum Gemstone.GemListRow
 import struct Gemstone.GemTransferData
+import GemstonePrimitives
+import GemstonePrimitivesTestKit
+import GemstoneServices
+import GemstoneServicesTestKit
 import Localization
 import Primitives
 import PrimitivesTestKit
 @testable import Stake
-import GemstonePrimitivesTestKit
-import GemstoneServices
-import GemstoneServicesTestKit
 import StakeTestKit
 @testable import Store
 import Testing
@@ -79,5 +79,4 @@ struct StakeSceneViewModelTests {
             return
         }
     }
-
 }

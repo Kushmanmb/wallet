@@ -3,11 +3,11 @@
 import BigInt
 import Foundation
 import Gemstone
+import enum Gemstone.GemNameInputStep
+import struct Gemstone.GemPriceAlertSession
 import GemstonePrimitives
 import Primitives
 import PrimitivesTestKit
-import struct Gemstone.GemPriceAlertSession
-import enum Gemstone.GemNameInputStep
 
 public actor GemDeviceServiceMock: GemDeviceServiceProtocol {
     private let syncError: Error?
@@ -275,7 +275,9 @@ public final class GemCurrencyServiceMock: GemCurrencyServiceProtocol, @unchecke
     }
 
     public func setCurrency(currency: Gemstone.Currency) async throws {
-        if let error { throw error }
+        if let error {
+            throw error
+        }
         setCurrencies.append(currency)
     }
 
@@ -317,7 +319,9 @@ public final class GemSettingsServiceMock: GemSettingsServiceProtocol, @unchecke
     }
 
     public func setPerpetualDefaults(defaults: GemPerpetualDefaults) throws {
-        if let setDefaultsError { throw setDefaultsError }
+        if let setDefaultsError {
+            throw setDefaultsError
+        }
         storedDefaults.append(defaults)
         perpetualDefaultsValue = defaults
     }
@@ -334,7 +338,9 @@ public final class GemAppUpdateServiceMock: GemAppUpdateServiceProtocol, @unchec
     }
 
     public func check(store _: Gemstone.PlatformStore, currentVersion _: String) async throws -> Gemstone.Release? {
-        if let newestError { throw newestError }
+        if let newestError {
+            throw newestError
+        }
         return newestValue
     }
 
@@ -343,7 +349,9 @@ public final class GemAppUpdateServiceMock: GemAppUpdateServiceProtocol, @unchec
     }
 
     public func newest(store _: Gemstone.PlatformStore, currentVersion _: String) async throws -> Gemstone.Release? {
-        if let newestError { throw newestError }
+        if let newestError {
+            throw newestError
+        }
         return newestValue
     }
 

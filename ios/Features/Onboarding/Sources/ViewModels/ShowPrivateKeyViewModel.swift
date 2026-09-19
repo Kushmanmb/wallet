@@ -2,10 +2,10 @@
 
 import Components
 import Foundation
+import func Gemstone.privateKeyCopy
 import Localization
 import Primitives
 import PrimitivesComponents
-import func Gemstone.privateKeyCopy
 
 struct ShowPrivateKeyViewModel: SecretPhraseViewableModel {
     let text: String

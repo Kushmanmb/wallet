@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import GemstoneServices
 import Localization
 import Primitives
 import SwiftUI
-import GemstoneServices
 
 public struct CreateWalletNavigationStack: View {
     @State private var model: CreateWalletModel
@@ -25,8 +25,8 @@ public struct CreateWalletNavigationStack: View {
                 }
                 .navigationDestination(for: Scenes.WalletProfile.self) { scene in
                     SetupWalletScene(model: model.setupWalletModel(wallet: scene.wallet, onComplete: onSetupWalletComplete))
-                    .navigationBarBackButtonHidden()
-                    .interactiveDismissDisabled()
+                        .navigationBarBackButtonHidden()
+                        .interactiveDismissDisabled()
                 }
                 .navigationDestination(for: Scenes.CreateWallet.self) { _ in
                     ShowSecretDataScene(
@@ -42,7 +42,7 @@ public struct CreateWalletNavigationStack: View {
                 .sheet(item: $model.isPresentingSelectImageWallet) { wallet in
                     NavigationStack {
                         WalletImageScene(model: model.walletImageModel(wallet: wallet))
-                        .toolbarDismissItem(type: .close, placement: .topBarLeading)
+                            .toolbarDismissItem(type: .close, placement: .topBarLeading)
                     }
                 }
                 .alertSheet($model.isPresentingAlertMessage)

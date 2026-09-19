@@ -1,13 +1,13 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import Localization
-import Style
 import Components
 import Foundation
 import protocol Gemstone.GemChainServiceProtocol
 import GemstonePrimitives
+import Localization
 import Primitives
 import PrimitivesComponents
+import Style
 
 @Observable
 @MainActor
@@ -32,5 +32,4 @@ public final class ChainListSettingsViewModel {
             imageStyle: .asset(assetImage: AssetImage.image(Images.Logo.logo)),
         )
     }
-
 }

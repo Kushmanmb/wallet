@@ -1,24 +1,24 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
 import enum Gemstone.GemBannerIcon
 import enum Gemstone.GemEmptyStateImage
-import enum Gemstone.GemPriceAlertToggle
 import enum Gemstone.GemFiatTransactionBadge
 import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemListRowIcon
 import enum Gemstone.GemNoticeKind
-import enum Gemstone.GemTransactionStateTone
-import enum Gemstone.LinkType
 import struct Gemstone.GemPriceAlertRow
+import enum Gemstone.GemPriceAlertToggle
+import enum Gemstone.GemTransactionStateTone
 import enum Gemstone.GemValueTone
+import enum Gemstone.LinkType
 import enum Gemstone.PriceAlertDirection
-import Components
 import Primitives
 import Style
 import SwiftUI
 
-extension PriceAlertDirection {
-    public var color: Color {
+public extension PriceAlertDirection {
+    var color: Color {
         switch self {
         case .up: Colors.green
         case .down: Colors.red
@@ -26,8 +26,8 @@ extension PriceAlertDirection {
     }
 }
 
-extension GemEmptyStateImage {
-    public var image: Image {
+public extension GemEmptyStateImage {
+    var image: Image {
         switch self {
         case .nfts: Images.EmptyContent.nft
         case .priceAlerts: Images.EmptyContent.priceAlerts
@@ -41,8 +41,8 @@ extension GemEmptyStateImage {
     }
 }
 
-extension GemPriceAlertToggle {
-    public var image: Image {
+public extension GemPriceAlertToggle {
+    var image: Image {
         switch self {
         case .enabled: Image(systemName: SystemImage.bellFill)
         case .disabled: Image(systemName: SystemImage.bell)
@@ -50,8 +50,8 @@ extension GemPriceAlertToggle {
     }
 }
 
-extension GemValueTone {
-    public var color: Color {
+public extension GemValueTone {
+    var color: Color {
         switch self {
         case .plain: Colors.black
         case .neutral: Colors.gray
@@ -61,7 +61,7 @@ extension GemValueTone {
         }
     }
 
-    public var backgroundColor: Color {
+    var backgroundColor: Color {
         switch self {
         case .plain, .neutral: Colors.grayVeryLight
         case .positive: Colors.greenLight
@@ -71,14 +71,14 @@ extension GemValueTone {
     }
 }
 
-extension GemPriceAlertRow {
-    public var directionColor: Color {
+public extension GemPriceAlertRow {
+    var directionColor: Color {
         direction?.color ?? Colors.gray
     }
 }
 
-extension GemHeaderButtonKind {
-    public var image: Image {
+public extension GemHeaderButtonKind {
+    var image: Image {
         switch self {
         case .send: Images.System.paperplane
         case .receive: Images.System.qrCode
@@ -91,8 +91,8 @@ extension GemHeaderButtonKind {
     }
 }
 
-extension LinkType {
-    public var image: Image {
+public extension LinkType {
+    var image: Image {
         switch self {
         case .x: Images.Social.x
         case .discord: Images.Social.discord
@@ -121,8 +121,8 @@ extension GemNoticeKind {
     }
 }
 
-extension GemTransactionStateTone {
-    public var image: Image {
+public extension GemTransactionStateTone {
+    var image: Image {
         switch self {
         case .pending: Images.Transaction.State.pending
         case .success: Images.Transaction.State.success
@@ -130,7 +130,7 @@ extension GemTransactionStateTone {
         }
     }
 
-    public var color: Color {
+    var color: Color {
         switch self {
         case .success: Colors.green
         case .pending, .refunded: Colors.orange
@@ -139,8 +139,8 @@ extension GemTransactionStateTone {
     }
 }
 
-extension Primitives.PerpetualDirection {
-    public var color: Color {
+public extension Primitives.PerpetualDirection {
+    var color: Color {
         switch self {
         case .long: Colors.green
         case .short: Colors.red
@@ -148,8 +148,8 @@ extension Primitives.PerpetualDirection {
     }
 }
 
-extension VerificationStatus {
-    public var statusStyle: TextStyle {
+public extension VerificationStatus {
+    var statusStyle: TextStyle {
         switch self {
         case .verified: .calloutSecondary
         case .unverified: TextStyle(font: .callout, color: Colors.orange)
@@ -157,7 +157,7 @@ extension VerificationStatus {
         }
     }
 
-    public var statusAssetImage: AssetImage {
+    var statusAssetImage: AssetImage {
         switch self {
         case .verified: AssetImage()
         case .unverified: AssetImage(placeholder: Images.TokenStatus.warning)
@@ -166,15 +166,15 @@ extension VerificationStatus {
     }
 }
 
-extension GemFiatTransactionBadge {
-    public var color: Color {
+public extension GemFiatTransactionBadge {
+    var color: Color {
         switch self {
         case .pending: Colors.orange
         case .failed: Colors.red
         }
     }
 
-    public var textStyle: TextStyle {
+    var textStyle: TextStyle {
         TextStyle(font: Font.system(.footnote, weight: .medium), color: color, background: color.opacity(.light))
     }
 }

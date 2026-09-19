@@ -4,18 +4,18 @@ import Components
 import Formatters
 import Foundation
 import enum Gemstone.GemAutocloseConfirmPolicy
+import class Gemstone.GemAutocloseEstimator
+import struct Gemstone.GemAutocloseField
 import struct Gemstone.GemAutocloseModify
 import struct Gemstone.GemAutoclosePrices
 import struct Gemstone.GemAutocloseSession
 import struct Gemstone.GemAutocloseViewState
-import struct Gemstone.GemAutocloseField
 import GemstonePrimitives
 import Localization
 import Primitives
 import PrimitivesComponents
 import Style
 import SwiftUI
-import class Gemstone.GemAutocloseEstimator
 
 @Observable
 @MainActor

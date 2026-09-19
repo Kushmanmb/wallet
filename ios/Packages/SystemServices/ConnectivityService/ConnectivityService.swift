@@ -5,7 +5,7 @@ import Foundation
 public actor ConnectivityService {
     private let monitor: any ConnectivityMonitoring
     private let offlineDebounce: Duration
-    
+
     private var state: ConnectivityState = .unknown
 
     private var subscribers: [UUID: AsyncStream<ConnectivityState>.Continuation] = [:]
@@ -22,7 +22,7 @@ public actor ConnectivityService {
         offlineTask?.cancel()
         subscribers.values.forEach { $0.finish() }
     }
-    
+
     public var status: ConnectivityState { state }
 
     public func start() {

@@ -1,12 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
-import typealias Gemstone.TransactionId
-import typealias Gemstone.TransactionState
-import protocol Gemstone.GemTransactionStateStore
 import struct Gemstone.GemPendingTransaction
+import protocol Gemstone.GemTransactionStateStore
 import struct Gemstone.GemTransactionStateUpdate
 import typealias Gemstone.Transaction
+import typealias Gemstone.TransactionId
+import typealias Gemstone.TransactionState
 import GemstonePrimitives
 import Primitives
 import Store
@@ -21,8 +21,8 @@ public final class GemstoneTransactionStateStore: GemTransactionStateStore, @unc
     }
 
     public func getPendingTransactions() async throws -> [GemPendingTransaction] {
-        let wallets = Dictionary(uniqueKeysWithValues: try walletStore.getWallets().map { ($0.id, $0) })
-        return try store.getTransactions(states: [.pending, .inTransit]).flatMap { (walletId, transactions) -> [GemPendingTransaction] in
+        let wallets = try Dictionary(uniqueKeysWithValues: walletStore.getWallets().map { ($0.id, $0) })
+        return try store.getTransactions(states: [.pending, .inTransit]).flatMap { walletId, transactions -> [GemPendingTransaction] in
             guard let wallet = wallets[walletId] else { return [] }
             return transactions.map { GemPendingTransaction(wallet: wallet.toGem(), transaction: $0.toGem()) }
         }

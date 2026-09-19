@@ -2,15 +2,15 @@
 
 import BigInt
 import Foundation
-import enum Gemstone.GemAmountType
-import func Gemstone.validatorRow
-import protocol Gemstone.GemAmountServiceProtocol
-import struct Gemstone.GemValidatorRow
 import enum Gemstone.EarnType
+import protocol Gemstone.GemAmountServiceProtocol
+import enum Gemstone.GemAmountType
+import struct Gemstone.GemTransferData
+import struct Gemstone.GemValidatorRow
+import func Gemstone.validatorRow
 import GemstonePrimitives
 import Localization
 import Primitives
-import struct Gemstone.GemTransferData
 
 public final class AmountEarnViewModel: AmountDataProvidable {
     let asset: Asset

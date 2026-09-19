@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemHeaderButtonKind
 import Components
 import Formatters
 import Foundation
+import enum Gemstone.GemHeaderButtonKind
 import protocol Gemstone.GemWalletHomeServiceProtocol
 import func Gemstone.walletRow
 import GemstonePrimitives
@@ -105,7 +105,6 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
     public var manageImage: Image {
         Images.Actions.manage
     }
-
 
     public var walletBarModel: WalletBarViewViewModel {
         let row = walletRow(wallet: wallet.toGem())
@@ -264,8 +263,8 @@ extension WalletSceneViewModel {
     func setAssetsEnabled(_ assetIds: [AssetId], enabled: Bool) async throws {
         try await service.setAssetsEnabled(assetIds: assetIds, enabled: enabled)
     }
+
     var assetItems: ListAssetItemsViewModel {
         ListAssetItemsViewModel(currency: observablePreferences.currency, rowStyle: service.assetRowStyle())
     }
-
 }

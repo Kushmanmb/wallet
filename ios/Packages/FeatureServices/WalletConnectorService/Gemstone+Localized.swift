@@ -1,8 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Foundation
 import enum Gemstone.GemWalletConnectError
 import enum Gemstone.GemWalletConnectFailure
-import Foundation
 import Localization
 import Primitives
 

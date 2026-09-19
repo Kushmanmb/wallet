@@ -7,9 +7,9 @@ import GemstonePrimitivesTestKit
 import Localization
 import Primitives
 import PrimitivesTestKit
-import Testing
 @testable import Settings
 import SettingsTestKit
+import Testing
 
 @MainActor
 struct RewardsViewModelTests {
@@ -70,7 +70,7 @@ struct RewardsViewModelTests {
 
         await model.onTaskOnce()
 
-        #expect(service.usedReferralCodes.map { $0.code } == ["friend"])
+        #expect(service.usedReferralCodes.map(\.code) == ["friend"])
         #expect(model.isPresentingSheet == nil)
     }
 
@@ -112,7 +112,7 @@ struct RewardsViewModelTests {
 
         await model.activatePendingReferral()
 
-        #expect(service.usedReferralCodes.map { $0.code } == ["pending"])
+        #expect(service.usedReferralCodes.map(\.code) == ["pending"])
         #expect(model.toastMessage != nil)
         #expect(model.isPresentingAlert == nil)
     }

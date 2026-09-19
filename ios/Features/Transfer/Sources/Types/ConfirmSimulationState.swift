@@ -2,14 +2,14 @@
 
 import struct Gemstone.GemConfirmSimulation
 import struct Gemstone.GemConfirmSimulationState
+import enum Gemstone.GemListRow
 import struct Gemstone.GemSimulationBalanceChange
 import struct Gemstone.GemSimulationValue
+import struct Gemstone.SimulationResult
+import func Gemstone.simulationWarningRows
 import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
-import enum Gemstone.GemListRow
-import struct Gemstone.SimulationResult
-import func Gemstone.simulationWarningRows
 
 struct ConfirmSimulationState {
     let result: SimulationResult?

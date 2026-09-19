@@ -17,7 +17,6 @@ import PrimitivesComponents
 @MainActor
 @Observable
 public final class SwapSlippageViewModel {
-
     private let service: any GemSwapQuoteServiceProtocol
     private let onSelect: (SwapSlippage) -> Void
 

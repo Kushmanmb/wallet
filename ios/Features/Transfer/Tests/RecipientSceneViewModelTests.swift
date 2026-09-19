@@ -1,10 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
 import struct Gemstone.GemPaymentRecipient
 import struct Gemstone.GemTransferData
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
-import Components
 import Primitives
 import PrimitivesTestKit
 import Testing
@@ -135,7 +135,11 @@ struct RecipientSceneViewModelTests {
     func onHandleScanWithAmountGoesStraightToConfirm() {
         let asset = Asset.mockEthereum()
         var transfer: GemTransferData?
-        let model = RecipientSceneViewModel.mock(asset: asset, type: .asset(asset: asset.toGem()), onNavigate: { if case let .confirm(data) = $0 { transfer = data } })
+        let model = RecipientSceneViewModel.mock(asset: asset, type: .asset(asset: asset.toGem()), onNavigate: {
+            if case let .confirm(data) = $0 {
+                transfer = data
+            }
+        })
 
         model.onHandleScan("ethereum:0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326?amount=1.5", for: .address)
 
@@ -146,7 +150,11 @@ struct RecipientSceneViewModelTests {
     @Test
     func onHandleScanForAnNftOnlyFillsTheRecipient() {
         var transfer: GemTransferData?
-        let model = RecipientSceneViewModel.mock(type: .nft(nftAsset: NFTAsset.mock(chain: .ethereum).toGem()), onNavigate: { if case let .confirm(data) = $0 { transfer = data } })
+        let model = RecipientSceneViewModel.mock(type: .nft(nftAsset: NFTAsset.mock(chain: .ethereum).toGem()), onNavigate: {
+            if case let .confirm(data) = $0 {
+                transfer = data
+            }
+        })
 
         model.onHandleScan("ethereum:0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326?amount=1.5", for: .address)
 
@@ -158,7 +166,11 @@ struct RecipientSceneViewModelTests {
     func onContinueForAnNftConfirmsATransferOfTheAsset() {
         let nftAsset = NFTAsset.mock(chain: .ethereum)
         var transfer: GemTransferData?
-        let model = RecipientSceneViewModel.mock(type: .nft(nftAsset: nftAsset.toGem()), onNavigate: { if case let .confirm(data) = $0 { transfer = data } })
+        let model = RecipientSceneViewModel.mock(type: .nft(nftAsset: nftAsset.toGem()), onNavigate: {
+            if case let .confirm(data) = $0 {
+                transfer = data
+            }
+        })
 
         model.addressInputModel.text = "0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326"
         model.onContinue()

@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import Foundation
 import Formatters
+import Foundation
 import struct Gemstone.GemFormattedNumber
 import enum Gemstone.GemNumberDisplay
 import enum Gemstone.GemNumberNotation
@@ -107,7 +107,9 @@ private extension GemFormattedNumber {
     }
 
     func appendingSymbol(_ text: String) -> String {
-        if case .multiplier = unit { return "\(text)x" }
+        if case .multiplier = unit {
+            return "\(text)x"
+        }
         guard let symbol else { return text }
         return "\(text) \(symbol)"
     }

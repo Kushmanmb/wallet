@@ -1,15 +1,15 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemImage
-import struct Gemstone.GemPaymentRecipient
-import enum Gemstone.GemRecipientNext
-import struct Gemstone.GemRecipientSession
-import struct Gemstone.GemRecipient
-import protocol Gemstone.GemNameServiceProtocol
-import protocol Gemstone.GemRecipientServiceProtocol
-import enum Gemstone.GemRecipientType
 import Components
 import Foundation
+import enum Gemstone.GemImage
+import protocol Gemstone.GemNameServiceProtocol
+import struct Gemstone.GemPaymentRecipient
+import struct Gemstone.GemRecipient
+import enum Gemstone.GemRecipientNext
+import protocol Gemstone.GemRecipientServiceProtocol
+import struct Gemstone.GemRecipientSession
+import enum Gemstone.GemRecipientType
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -138,7 +138,7 @@ extension RecipientSceneViewModel {
 
         do {
             session = session.onAddressChanged(address: addressInputModel.text)
-            route(try session.next(recipientType: type, nameState: addressInputModel.nameResolveState))
+            try route(session.next(recipientType: type, nameState: addressInputModel.nameResolveState))
         } catch {
             addressInputModel.update(error: error)
         }
@@ -168,7 +168,7 @@ extension RecipientSceneViewModel {
 
     func onSelectRecipient(_ recipient: GemRecipient) {
         do {
-            route(try service.select(recipientType: type, recipient: recipient))
+            try route(service.select(recipientType: type, recipient: recipient))
         } catch {
             addressInputModel.text = recipient.address
         }
@@ -183,7 +183,6 @@ extension RecipientSceneViewModel {
             data.addresses.map { GemRecipient(address: $0.address, name: data.contact.name, memo: $0.memo) }
         }
     }
-
 
     private func handleAddressScan(_ string: String) throws {
         switch try service.scan(url: string, recipientType: type) {

@@ -1,11 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import GemstoneServices
 import Foundation
 import enum Gemstone.GemListRow
 import protocol Gemstone.GemStakeServiceProtocol
 import GemstonePrimitives
+import GemstoneServices
 import Localization
 import Primitives
 import PrimitivesComponents

@@ -1,10 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
+import Foundation
 import enum Gemstone.GemAddressFormatStyle
 import class Gemstone.GemAddressService
 import struct Gemstone.GemRecipient
-import Components
-import Foundation
 import GemstonePrimitives
 import Localization
 import Primitives

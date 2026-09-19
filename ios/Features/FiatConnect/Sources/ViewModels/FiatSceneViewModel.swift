@@ -7,11 +7,11 @@ import Foundation
 import enum Gemstone.FiatProviderName
 import enum Gemstone.GemFiatAmountCheck
 import struct Gemstone.GemFiatQuoteRow
+import protocol Gemstone.GemFiatQuoteServiceProtocol
 import struct Gemstone.GemFiatQuotesResult
 import struct Gemstone.GemFiatSession
 import struct Gemstone.GemFiatSuggestedAmount
 import struct Gemstone.GemFiatViewState
-import protocol Gemstone.GemFiatQuoteServiceProtocol
 import enum Gemstone.GemServiceError
 import GemstonePrimitives
 import GemstoneServices
@@ -338,4 +338,3 @@ extension FiatSceneViewModel {
         }
     }
 }
-

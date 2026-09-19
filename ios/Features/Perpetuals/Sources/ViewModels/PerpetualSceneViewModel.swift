@@ -1,20 +1,20 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import protocol Gemstone.GemPerpetualDetailsServiceProtocol
-import enum Gemstone.GemPerpetualPositionAction
-import enum Gemstone.GemPerpetualPositionKind
-import enum Gemstone.GemPerpetualButton
-import enum Gemstone.GemInfoTopic
-import enum Gemstone.GemListRow
-import struct Gemstone.GemPerpetualPositionDetail
-import enum Gemstone.GemPerpetualSection
 import Components
 import Foundation
+import enum Gemstone.GemInfoTopic
+import enum Gemstone.GemListRow
+import enum Gemstone.GemPerpetualButton
+import protocol Gemstone.GemPerpetualDetailsServiceProtocol
+import enum Gemstone.GemPerpetualPositionAction
+import struct Gemstone.GemPerpetualPositionDetail
+import enum Gemstone.GemPerpetualPositionKind
+import enum Gemstone.GemPerpetualSection
 import func Gemstone.transactionsListLimit
 import GemstonePrimitives
+import GemstoneServices
 import InfoSheet
 import Localization
-import GemstoneServices
 import Primitives
 import PrimitivesComponents
 import Store
@@ -30,8 +30,6 @@ public final class PerpetualSceneViewModel {
 
     public let wallet: Wallet
     public let asset: Asset
-
-
 
     public let positionsQuery: ObservableQuery<PerpetualPositionsRequest>
     public let perpetualQuery: ObservableQuery<PerpetualRequest>
@@ -203,7 +201,7 @@ public extension PerpetualSceneViewModel {
 
     func onClosePosition() {
         do {
-            onTransferData?(try service.closeTransfer(perpetual: perpetual.toGem(), asset: asset.toGem(), position: positions.first?.position.toGem()))
+            try onTransferData?(service.closeTransfer(perpetual: perpetual.toGem(), asset: asset.toGem(), position: positions.first?.position.toGem()))
         } catch {
             isPresentingAlertMessage = AlertMessage(error: error)
         }

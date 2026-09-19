@@ -65,7 +65,7 @@ public struct BalanceStore: Sendable {
                     BalanceRecord.Columns.isActive.set(to: balance.isActive),
                 ]
                 if let metadata = balance.metadata {
-                    assignments.append(BalanceRecord.Columns.metadata.set(to: try JSONEncoder().encode(metadata).encodeString()))
+                    try assignments.append(BalanceRecord.Columns.metadata.set(to: JSONEncoder().encode(metadata).encodeString()))
                 }
                 try BalanceRecord
                     .filter(BalanceRecord.Columns.walletId == walletId.id)

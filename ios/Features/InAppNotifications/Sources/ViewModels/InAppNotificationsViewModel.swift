@@ -44,7 +44,6 @@ public final class InAppNotificationsViewModel {
             transform: { InAppNotificationListItemViewModel(notification: $0) },
         ).build()
     }
-
 }
 
 // MARK: - Actions

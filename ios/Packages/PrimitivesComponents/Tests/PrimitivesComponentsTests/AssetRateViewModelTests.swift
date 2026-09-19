@@ -1,10 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
-import GemstonePrimitives
+import func Gemstone.formattedAdaptive
 import struct Gemstone.GemAssetRate
 import struct Gemstone.GemSwapRate
-import func Gemstone.formattedAdaptive
+import GemstonePrimitives
 @testable import PrimitivesComponents
 import Testing
 

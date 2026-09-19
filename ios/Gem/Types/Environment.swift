@@ -1,12 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import GemstoneServices
-import WalletConnectorService
 import Foundation
+import GemstoneServices
 import GRDB
 import Primitives
 import SwiftUI
 import WalletConnector
+import WalletConnectorService
 
 extension EnvironmentValues {
     @Entry var navigationState: NavigationStateManager = AppResolver.main.navigation

@@ -9,7 +9,6 @@ import GemstonePrimitives
 import Primitives
 import SwiftUI
 
-
 private final class AssetIconCache: @unchecked Sendable {
     static let shared = AssetIconCache()
 

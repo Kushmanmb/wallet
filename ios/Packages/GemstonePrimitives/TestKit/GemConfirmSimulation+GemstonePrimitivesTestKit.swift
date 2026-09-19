@@ -2,8 +2,8 @@
 
 import struct Gemstone.GemConfirmSimulation
 import struct Gemstone.GemSimulationBalanceChange
-import struct Gemstone.GemSimulationValue
 import struct Gemstone.GemSimulationPayloadRow
+import struct Gemstone.GemSimulationValue
 
 public extension GemConfirmSimulation {
     static func mock(

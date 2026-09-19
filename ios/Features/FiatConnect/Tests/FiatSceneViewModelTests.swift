@@ -1,14 +1,14 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import GemstonePrimitivesTestKit
-import struct Gemstone.FiatQuote
-import struct Gemstone.GemFiatQuoteRequest
-import GemstoneServicesTestKit
 import BigInt
 @testable import FiatConnect
 import FiatConnectTestKit
 import Formatters
 import Foundation
+import struct Gemstone.FiatQuote
+import struct Gemstone.GemFiatQuoteRequest
+import GemstonePrimitivesTestKit
+import GemstoneServicesTestKit
 import Localization
 import Primitives
 import PrimitivesTestKit

@@ -3,11 +3,11 @@
 import BigInt
 import Foundation
 import Gemstone
+import enum Gemstone.GemNameInputStep
+import struct Gemstone.GemPriceAlertSession
 import GemstonePrimitives
 import Primitives
 import PrimitivesTestKit
-import struct Gemstone.GemPriceAlertSession
-import enum Gemstone.GemNameInputStep
 
 public extension GemContactService {
     static func mock() -> GemContactService {
@@ -71,11 +71,17 @@ public final class GemWalletConnectServiceMock: GemWalletConnectServiceProtocol,
         Gemstone.ApplicationMetadata(name: name, description: description, url: url, icon: icons.first ?? "", source: .walletConnect)
     }
 
-    public func authenticationAccounts(chainIds _: [String], wallet _: Gemstone.Wallet) -> [GemWalletConnectAuthAccount] { [] }
+    public func authenticationAccounts(chainIds _: [String], wallet _: Gemstone.Wallet) -> [GemWalletConnectAuthAccount] {
+        []
+    }
 
-    public func authenticationChainIds(chainIds: [String]) -> [String] { chainIds }
+    public func authenticationChainIds(chainIds: [String]) -> [String] {
+        chainIds
+    }
 
-    public func authenticationMethods() -> [String] { [] }
+    public func authenticationMethods() -> [String] {
+        []
+    }
 
     public func configSessionProperties(properties: [String: String], caip2Chains _: [String], accounts _: [Gemstone.Account]) -> [String: String] {
         properties
@@ -88,15 +94,21 @@ public final class GemWalletConnectServiceMock: GemWalletConnectServiceProtocol,
         )
     }
 
-    public func connectionRow(metadata _: Gemstone.ApplicationMetadata) -> GemConnectionRow { connectionRowValue }
+    public func connectionRow(metadata _: Gemstone.ApplicationMetadata) -> GemConnectionRow {
+        connectionRowValue
+    }
 
-    public func connectionSections(connections _: [Gemstone.WalletConnection]) -> [GemConnectionSection] { connectionSectionsValue }
+    public func connectionSections(connections _: [Gemstone.WalletConnection]) -> [GemConnectionSection] {
+        connectionSectionsValue
+    }
 
     public func deleteSession(sessionId: String) async throws {
         deletedSessionIds.append(sessionId)
     }
 
-    public func hasSessions() async throws -> Bool { hasSessionsValue }
+    public func hasSessions() async throws -> Bool {
+        hasSessionsValue
+    }
 
     public func isOriginRejected(metadataUrl _: String, origin _: String?, validation _: Gemstone.WalletConnectionVerificationStatus) -> Bool {
         originRejected
@@ -174,31 +186,47 @@ public final class GemSupportServiceMock: GemSupportServiceProtocol, @unchecked 
 
     public func imageFile(url: String) async throws -> String {
         requestedImageUrls.append(url)
-        if let imageFileError { throw imageFileError }
+        if let imageFileError {
+            throw imageFileError
+        }
         return imageFilePath
     }
 
     public func retryMessage(message: Gemstone.SupportMessage) async throws {
         retriedMessageIds.append(message.id)
-        if let sendError { throw sendError }
+        if let sendError {
+            throw sendError
+        }
     }
 
     public func sendImage(image _: Data) async throws {
-        if let sendError { throw sendError }
+        if let sendError {
+            throw sendError
+        }
     }
 
     public func sendText(content: String) async throws {
         sentTexts.append(content)
-        if let sendError { throw sendError }
+        if let sendError {
+            throw sendError
+        }
     }
 
     public func syncFromTimestamp(messages: [Gemstone.SupportMessage]) -> UInt64 {
-        messages.last { if case .agent = $0.sender { return true } else { return false } }
-            .map { UInt64(max($0.createdAt.timeIntervalSince1970, 0)) } ?? 0
+        messages.last {
+            if case .agent = $0.sender {
+                true
+            } else {
+                false
+            }
+        }
+        .map { UInt64(max($0.createdAt.timeIntervalSince1970, 0)) } ?? 0
     }
 
     public func syncMessages(fromTimestamp: UInt64) async throws {
         syncedTimestamps.append(fromTimestamp)
-        if let syncError { throw syncError }
+        if let syncError {
+            throw syncError
+        }
     }
 }

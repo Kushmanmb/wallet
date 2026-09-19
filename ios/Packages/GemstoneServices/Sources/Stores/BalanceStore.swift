@@ -1,11 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
-import protocol Gemstone.GemBalanceStore
+import typealias Gemstone.AssetId
 import struct Gemstone.GemAssetBalance
 import struct Gemstone.GemBalanceRecord
+import protocol Gemstone.GemBalanceStore
 import struct Gemstone.GemBalanceValue
-import typealias Gemstone.AssetId
 import GemstonePrimitives
 import Primitives
 import Store

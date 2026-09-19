@@ -3,8 +3,8 @@
 import Foundation
 import class Gemstone.GemAddressService
 import class Gemstone.MessageSigner
-import GemstonePrimitives
 import struct Gemstone.SignMessage
+import GemstonePrimitives
 import Primitives
 import Testing
 
@@ -35,7 +35,7 @@ struct MessageSignerTests {
             .text(text: "thepoc.xyz"),
             .address(
                 display: GemAddressService.shared.format(address: "0xBA4D1d35bCe0e8F28E5a3403e7a0b996c5d50AC4", chain: .ethereum),
-                address: "0xBA4D1d35bCe0e8F28E5a3403e7a0b996c5d50AC4"
+                address: "0xBA4D1d35bCe0e8F28E5a3403e7a0b996c5d50AC4",
             ),
         ])
         #expect(preview?.secondary.count == 5)

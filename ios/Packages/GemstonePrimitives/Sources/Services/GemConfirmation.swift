@@ -14,4 +14,3 @@ public extension GemConfirmationProtocol {
         addressUrl(chain: chain.rawValue, address: address).toPrimitives()
     }
 }
-

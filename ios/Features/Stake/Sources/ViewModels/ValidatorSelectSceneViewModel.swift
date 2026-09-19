@@ -1,11 +1,11 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
+import Foundation
 import protocol Gemstone.GemStakeServiceProtocol
 import struct Gemstone.GemValidatorRow
 import func Gemstone.validatorRow
-import Components
 import GemstonePrimitives
-import Foundation
 import Localization
 import Primitives
 import PrimitivesComponents

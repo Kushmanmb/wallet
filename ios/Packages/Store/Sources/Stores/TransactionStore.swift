@@ -129,7 +129,7 @@ public struct TransactionStore: Sendable {
             let request = TransactionRecord
                 .filter(TransactionRecord.Columns.walletId == walletId.id)
                 .filter(TransactionRecord.Columns.transactionId == transactionId.identifier)
-            let updated = try request.updateAll(db, values.compactMap { $0 })
+            let updated = try request.updateAll(db, values.compactMap(\.self))
             if updated > 0, metadata != nil, let record = try request.fetchOne(db) {
                 try updateAssetAssociations(db, record: record)
             }

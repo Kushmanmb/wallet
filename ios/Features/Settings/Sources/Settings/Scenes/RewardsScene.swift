@@ -201,7 +201,6 @@ public struct RewardsScene: View {
         }
     }
 
-    @ViewBuilder
     private var infoSection: some View {
         Section {
             if let item = model.referralCodeListItem {

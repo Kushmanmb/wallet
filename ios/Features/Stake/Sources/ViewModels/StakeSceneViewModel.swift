@@ -3,24 +3,24 @@
 import Components
 import Formatters
 import Foundation
+import struct Gemstone.GemAssetBalance
+import struct Gemstone.GemClaimRewards
+import enum Gemstone.GemInfoTopic
+import enum Gemstone.GemListRow
+import enum Gemstone.GemLoadState
 import enum Gemstone.GemStakeAction
 import struct Gemstone.GemStakeActionItem
-import enum Gemstone.GemInfoTopic
-import enum Gemstone.GemLoadState
-import enum Gemstone.GemListRow
 import enum Gemstone.GemStakeSection
-import struct Gemstone.GemClaimRewards
-import struct Gemstone.GemAssetBalance
 import protocol Gemstone.GemStakeServiceProtocol
+import struct Gemstone.GemTransferData
 import GemstonePrimitives
+import GemstoneServices
 import InfoSheet
 import Localization
 import Primitives
 import PrimitivesComponents
-import GemstoneServices
 import Store
 import SwiftUI
-import struct Gemstone.GemTransferData
 
 @MainActor
 @Observable

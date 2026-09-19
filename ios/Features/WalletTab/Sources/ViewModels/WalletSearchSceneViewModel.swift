@@ -2,10 +2,13 @@
 
 import Components
 import Foundation
+import func Gemstone.addressCopy
 import protocol Gemstone.GemAssetSelectionServiceProtocol
 import enum Gemstone.GemImage
 import enum Gemstone.GemNftItem
+import struct Gemstone.GemWalletSearchCounts
 import struct Gemstone.GemWalletSearchLimits
+import func Gemstone.walletSearchPhase
 import GemstonePrimitives
 import GemstoneServices
 import Localization
@@ -16,9 +19,6 @@ import Recents
 import Store
 import Style
 import SwiftUI
-import struct Gemstone.GemWalletSearchCounts
-import func Gemstone.walletSearchPhase
-import func Gemstone.addressCopy
 
 @Observable
 @MainActor
@@ -119,11 +119,11 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
     var searchState: SearchContentState {
         switch walletSearchPhase(counts: searchCounts, isLoading: state.isLoading) {
         case .results:
-            return .results
+            .results
         case .loading:
-            return .loading
+            .loading
         case .empty:
-            return .empty(.search(
+            .empty(.search(
                 type: .assets,
                 action: showAddToken ? { [weak self] in self?.onSelectAddCustomToken() } : nil,
             ))
@@ -306,7 +306,7 @@ extension WalletSearchSceneViewModel {
     private func search(query: String) async {
         state = .loading
         do {
-            let _ = try await service.search(query: query, scope: .all)
+            _ = try await service.search(query: query, scope: .all)
             guard query == searchableQuery.trim() else { return }
             state = .data(true)
         } catch {
@@ -329,8 +329,8 @@ extension WalletSearchSceneViewModel {
     func setPerpetualPinned(_ perpetualId: PerpetualId, pinned: Bool) async throws {
         try await service.setPerpetualPinned(perpetualId: perpetualId.identifier, pinned: pinned)
     }
+
     var assetItems: ListAssetItemsViewModel {
         ListAssetItemsViewModel(currency: currency, rowStyle: service.flow(selectType: .walletSearch).rowStyle)
     }
-
 }

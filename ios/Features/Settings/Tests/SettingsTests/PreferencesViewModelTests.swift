@@ -6,9 +6,9 @@ import GemstoneServices
 import GemstoneServicesTestKit
 import Primitives
 import PrimitivesComponents
-import Testing
 @testable import Settings
 import SettingsTestKit
+import Testing
 
 @MainActor
 struct PreferencesViewModelTests {

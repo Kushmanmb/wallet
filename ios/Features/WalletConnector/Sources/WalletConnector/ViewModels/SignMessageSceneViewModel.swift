@@ -1,20 +1,20 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import struct Gemstone.GemSignMessagePreview
-import struct Gemstone.GemWalletConnectMessageRequest
-import protocol Gemstone.GemSignMessageServiceProtocol
 import Components
 import Foundation
+import enum Gemstone.GemListRow
+import struct Gemstone.GemSignMessagePreview
+import protocol Gemstone.GemSignMessageServiceProtocol
+import struct Gemstone.GemSimulationPayloadRow
 import struct Gemstone.GemSimulationValue
+import struct Gemstone.GemWalletConnectMessageRequest
+import func Gemstone.simulationWarningRows
 import GemstonePrimitives
 import Localization
 import Primitives
 import PrimitivesComponents
 import Style
 import WalletConnectorService
-import struct Gemstone.GemSimulationPayloadRow
-import enum Gemstone.GemListRow
-import func Gemstone.simulationWarningRows
 
 @Observable
 @MainActor

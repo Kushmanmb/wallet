@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import func Gemstone.valueTone
-import enum Gemstone.GemValueTone
 import Formatters
+import enum Gemstone.GemValueTone
+import func Gemstone.valueTone
 import GemstonePrimitives
 import Primitives
 import Style

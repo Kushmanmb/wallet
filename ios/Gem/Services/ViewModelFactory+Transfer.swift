@@ -2,6 +2,16 @@
 
 import FiatConnect
 import Foundation
+import class Gemstone.GemConfirmTransferService
+import class Gemstone.GemFiatQuoteService
+import struct Gemstone.GemPaymentRecipient
+import class Gemstone.GemReceiveService
+import class Gemstone.GemRecipientService
+import enum Gemstone.GemRecipientType
+import class Gemstone.GemSwapQuoteService
+import struct Gemstone.GemTransferData
+import struct Gemstone.GemWalletConnectMessageRequest
+import struct Gemstone.SimulationResult
 import GemstonePrimitives
 import GemstoneServices
 import Primitives
@@ -13,20 +23,10 @@ import SwiftUI
 import Transfer
 import WalletConnector
 import WalletConnectorService
-import class Gemstone.GemConfirmTransferService
-import class Gemstone.GemFiatQuoteService
-import class Gemstone.GemReceiveService
-import class Gemstone.GemRecipientService
-import class Gemstone.GemSwapQuoteService
-import enum Gemstone.GemRecipientType
-import struct Gemstone.GemPaymentRecipient
-import struct Gemstone.GemWalletConnectMessageRequest
-import struct Gemstone.GemTransferData
-import struct Gemstone.SimulationResult
 
-extension ViewModelFactory {
+public extension ViewModelFactory {
     @MainActor
-    public func validatorSelectScene(
+    func validatorSelectScene(
         currentValidator: DelegationValidator?,
         recommended: [DelegationValidator],
         validators: [DelegationValidator],
@@ -42,14 +42,14 @@ extension ViewModelFactory {
     }
 
     @MainActor
-    public func confirmTransferScene(
+    func confirmTransferScene(
         wallet: Wallet,
         data: GemTransferData,
         confirmTransferDelegate: TransferDataCallback.ConfirmTransferDelegate? = nil,
         simulation: SimulationResult? = nil,
         onComplete: VoidAction,
     ) -> ConfirmTransferSceneViewModel {
-        return ConfirmTransferSceneViewModel(
+        ConfirmTransferSceneViewModel(
             request: ConfirmTransferRequest(
                 data: data,
                 simulation: simulation,
@@ -78,12 +78,12 @@ extension ViewModelFactory {
     }
 
     @MainActor
-    public func receiveScene(assetData: AssetData, wallet: Wallet) -> ReceiveViewModel {
+    func receiveScene(assetData: AssetData, wallet: Wallet) -> ReceiveViewModel {
         ReceiveViewModel(assetData: assetData, wallet: wallet, service: receiveService())
     }
 
     @MainActor
-    public func receiveScene(assetAddress: AssetAddress, wallet: Wallet) -> ReceiveViewModel {
+    func receiveScene(assetAddress: AssetAddress, wallet: Wallet) -> ReceiveViewModel {
         ReceiveViewModel(assetAddress: assetAddress, wallet: wallet, service: receiveService())
     }
 
@@ -92,7 +92,7 @@ extension ViewModelFactory {
     }
 
     @MainActor
-    public func recipientScene(
+    func recipientScene(
         wallet: Wallet,
         asset: Asset,
         type: GemRecipientType,
@@ -111,7 +111,7 @@ extension ViewModelFactory {
     }
 
     @MainActor
-    public func amountScene(
+    func amountScene(
         input: AmountInput,
         wallet: Wallet,
         onTransferAction: TransferDataAction,
@@ -126,7 +126,7 @@ extension ViewModelFactory {
     }
 
     @MainActor
-    public func fiatScene(
+    func fiatScene(
         assetAddress: AssetAddress,
         wallet: Wallet,
         type: FiatQuoteType = .buy,
@@ -142,7 +142,7 @@ extension ViewModelFactory {
     }
 
     @MainActor
-    public func swapScene(
+    func swapScene(
         input: SwapInput,
         onSwap: @escaping (GemTransferData) -> Void,
     ) -> SwapSceneViewModel {
@@ -160,7 +160,7 @@ extension ViewModelFactory {
     }
 
     @MainActor
-    public func stakeScene(
+    func stakeScene(
         wallet: Wallet,
         chain: Chain,
         onNavigate: StakeRouteAction,
@@ -174,7 +174,7 @@ extension ViewModelFactory {
     }
 
     @MainActor
-    public func earnScene(
+    func earnScene(
         wallet: Wallet,
         asset: Asset,
         onNavigate: StakeRouteAction,
@@ -188,7 +188,7 @@ extension ViewModelFactory {
     }
 
     @MainActor
-    public func delegationScene(
+    func delegationScene(
         wallet: Wallet,
         delegation: Delegation,
         asset: Asset,
@@ -206,7 +206,7 @@ extension ViewModelFactory {
     }
 
     @MainActor
-    public func signMessageScene(
+    func signMessageScene(
         request: GemWalletConnectMessageRequest,
         confirmTransferDelegate: @escaping TransferDataCallback.ConfirmTransferDelegate,
     ) -> SignMessageSceneViewModel {

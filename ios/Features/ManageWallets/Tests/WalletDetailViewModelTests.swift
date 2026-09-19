@@ -103,7 +103,9 @@ struct WalletDetailViewModelTests {
     private func settle(until condition: () -> Bool) async {
         for _ in 0 ..< 200 {
             await Task.yield()
-            if condition() { return }
+            if condition() {
+                return
+            }
             try? await Task.sleep(for: .milliseconds(5))
         }
     }

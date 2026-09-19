@@ -1,10 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import protocol Gemstone.GemStakeServiceProtocol
+import GemstonePrimitivesTestKit
 import Primitives
 import PrimitivesTestKit
 @testable import Stake
-import protocol Gemstone.GemStakeServiceProtocol
-import GemstonePrimitivesTestKit
 
 public extension StakeSceneViewModel {
     static func mock(

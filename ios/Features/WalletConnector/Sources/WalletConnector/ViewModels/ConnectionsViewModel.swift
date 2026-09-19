@@ -1,7 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import WalletConnectorService
 import Foundation
 import struct Gemstone.GemConnection
 import struct Gemstone.GemConnectionSection
@@ -12,6 +11,7 @@ import Primitives
 import PrimitivesComponents
 import Store
 import UIKit
+import WalletConnectorService
 
 @Observable
 @MainActor

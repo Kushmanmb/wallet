@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import GemstonePrimitivesTestKit
 import protocol Gemstone.GemStakeServiceProtocol
+import GemstonePrimitivesTestKit
 import Primitives
 import PrimitivesTestKit
 @testable import Stake

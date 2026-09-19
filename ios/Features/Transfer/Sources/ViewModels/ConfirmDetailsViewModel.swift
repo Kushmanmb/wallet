@@ -1,14 +1,14 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import GemstonePrimitives
-import struct Gemstone.GemConfirmMetadata
+import BigInt
+import Components
 import protocol Gemstone.GemConfirmationProtocol
-import enum Gemstone.TransactionInputType
+import struct Gemstone.GemConfirmMetadata
 import struct Gemstone.GemSwapQuoteSummary
 import func Gemstone.perpetualDetails
 import func Gemstone.swapQuoteSummary
-import BigInt
-import Components
+import enum Gemstone.TransactionInputType
+import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
 import Swap

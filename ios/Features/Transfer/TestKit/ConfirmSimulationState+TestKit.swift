@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import struct Gemstone.GemSimulationValue
 import enum Gemstone.GemListRow
+import struct Gemstone.GemSimulationValue
 import PrimitivesComponents
 @testable import Transfer
 

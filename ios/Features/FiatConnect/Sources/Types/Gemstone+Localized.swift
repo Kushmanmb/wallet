@@ -1,9 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
-import enum Gemstone.GemFiatQuotePhase
 import enum Gemstone.GemFiatAmountCheck
 import enum Gemstone.GemFiatButtonAction
+import enum Gemstone.GemFiatQuotePhase
 import GemstonePrimitives
 import Localization
 import Primitives

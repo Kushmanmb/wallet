@@ -69,9 +69,9 @@ public extension DB {
 
         try fiatRateStore.add([.mock()])
         try priceStore.updatePrices([
-                .mock(assetId: ethereum.id, price: 100, priceChangePercentage24h: 0),
-                .mock(assetId: bnb.id, price: 1000, priceChangePercentage24h: 0),
-            ])
+            .mock(assetId: ethereum.id, price: 100, priceChangePercentage24h: 0),
+            .mock(assetId: bnb.id, price: 1000, priceChangePercentage24h: 0),
+        ])
         try balanceStore.updateBalances(
             [
                 .mock(assetId: ethereum.id, available: 3),

@@ -3,11 +3,11 @@
 import BigInt
 import Foundation
 import Gemstone
+import enum Gemstone.GemNameInputStep
+import struct Gemstone.GemPriceAlertSession
 import GemstonePrimitives
 import Primitives
 import PrimitivesTestKit
-import struct Gemstone.GemPriceAlertSession
-import enum Gemstone.GemNameInputStep
 
 public final class GemPriceAlertServiceMock: GemPriceAlertServiceProtocol, @unchecked Sendable {
     private let lock = NSLock()
@@ -166,13 +166,17 @@ public final class GemPerpetualDetailsServiceMock: GemPerpetualDetailsServicePro
         candlesticksValue
     }
 
-    public func chartPeriod() -> Gemstone.ChartPeriod { chartPeriodValue }
+    public func chartPeriod() -> Gemstone.ChartPeriod {
+        chartPeriodValue
+    }
 
     public func closeTransfer(perpetual _: Gemstone.Perpetual, asset _: Gemstone.Asset, position _: Gemstone.PerpetualPosition?) throws -> Gemstone.GemTransferData {
         try closeTransferResult.get()
     }
 
-    public func infoRows(perpetual _: Gemstone.Perpetual, asset _: Gemstone.Asset) -> [GemListRow] { infoRowsValue }
+    public func infoRows(perpetual _: Gemstone.Perpetual, asset _: Gemstone.Asset) -> [GemListRow] {
+        infoRowsValue
+    }
 
     public func marketSubscription(perpetual: Gemstone.Perpetual) -> GemPerpetualSubscription {
         .marketData(symbol: perpetual.name)
@@ -187,7 +191,9 @@ public final class GemPerpetualDetailsServiceMock: GemPerpetualDetailsServicePro
         mergedCandlesValue
     }
 
-    public func modifyButtons() -> [GemPerpetualButton] { modifyButtonsValue }
+    public func modifyButtons() -> [GemPerpetualButton] {
+        modifyButtonsValue
+    }
 
     public func positionAction(
         perpetual _: Gemstone.Perpetual,
@@ -203,7 +209,9 @@ public final class GemPerpetualDetailsServiceMock: GemPerpetualDetailsServicePro
         positionDetailsValue
     }
 
-    public func sections(hasPosition _: Bool) -> [GemPerpetualSection] { sectionsValue }
+    public func sections(hasPosition _: Bool) -> [GemPerpetualSection] {
+        sectionsValue
+    }
 
     public func setChartPeriod(period: Gemstone.ChartPeriod) throws {
         setChartPeriods.append(period)
@@ -212,11 +220,15 @@ public final class GemPerpetualDetailsServiceMock: GemPerpetualDetailsServicePro
 
     public func syncPositions() async throws {
         syncPositionsCount += 1
-        if let syncPositionsError { throw syncPositionsError }
+        if let syncPositionsError {
+            throw syncPositionsError
+        }
     }
 
     public func syncTransactions(assetId: Gemstone.AssetId) async throws {
         syncedTransactionAssetIds.append(assetId)
-        if let syncTransactionsError { throw syncTransactionsError }
+        if let syncTransactionsError {
+            throw syncTransactionsError
+        }
     }
 }

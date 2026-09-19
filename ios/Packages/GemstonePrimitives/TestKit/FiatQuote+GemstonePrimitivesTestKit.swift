@@ -1,13 +1,13 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import func Gemstone.formattedAmount
-import func Gemstone.formattedCurrency
 import BigInt
 import Foundation
 import struct Gemstone.FiatProvider
 import enum Gemstone.FiatProviderName
 import struct Gemstone.FiatQuote
 import enum Gemstone.FiatQuoteType
+import func Gemstone.formattedAmount
+import func Gemstone.formattedCurrency
 import struct Gemstone.GemAssetRate
 import struct Gemstone.GemFiatQuoteRequest
 import struct Gemstone.GemFiatQuoteRow

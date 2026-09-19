@@ -1,20 +1,20 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import struct Gemstone.GemRewardsRedemption
-import struct Gemstone.RewardRedemptionOption
-import protocol Gemstone.GemRewardsServiceProtocol
-import struct Gemstone.GemWalletRow
-import func Gemstone.walletRow
-import func Gemstone.walletRows
-import struct Gemstone.GemRewardsState
-import GemstonePrimitives
 import Components
 import Foundation
+import struct Gemstone.GemRewardsRedemption
+import protocol Gemstone.GemRewardsServiceProtocol
+import struct Gemstone.GemRewardsState
+import enum Gemstone.GemServiceError
+import struct Gemstone.GemWalletRow
+import struct Gemstone.RewardRedemptionOption
+import func Gemstone.walletRow
+import func Gemstone.walletRows
+import GemstonePrimitives
 import Localization
 import Primitives
 import PrimitivesComponents
 import Style
-import enum Gemstone.GemServiceError
 
 @Observable
 @MainActor

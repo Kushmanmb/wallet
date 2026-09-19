@@ -1,8 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import struct Gemstone.GemTransferData
 import GemstonePrimitives
 import Primitives
-import struct Gemstone.GemTransferData
 
 public enum PaymentDestination: Identifiable, Sendable {
     case confirm(GemTransferData)

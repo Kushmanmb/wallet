@@ -1,8 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import protocol Gemstone.GemSecurityServiceProtocol
-import Primitives
 import LocalAuthentication
+import Primitives
 
 public struct BiometryAuthenticationService: BiometryAuthenticatable {
     private let keystorePassword: KeystorePassword

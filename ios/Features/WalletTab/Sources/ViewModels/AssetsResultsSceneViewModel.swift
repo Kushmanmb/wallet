@@ -1,19 +1,19 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import Foundation
+import func Gemstone.addressCopy
 import protocol Gemstone.GemAssetSelectionServiceProtocol
+import struct Gemstone.GemWalletSearchCounts
+import func Gemstone.walletSearchPhase
 import GemstonePrimitives
 import GemstoneServices
-import Foundation
 import Localization
 import Primitives
 import PrimitivesComponents
 import Store
 import Style
 import SwiftUI
-import func Gemstone.addressCopy
-import struct Gemstone.GemWalletSearchCounts
-import func Gemstone.walletSearchPhase
 
 @Observable
 @MainActor
@@ -152,8 +152,8 @@ extension AssetsResultsSceneViewModel {
     func setPerpetualPinned(_ perpetualId: PerpetualId, pinned: Bool) async throws {
         try await service.setPerpetualPinned(perpetualId: perpetualId.identifier, pinned: pinned)
     }
+
     var assetItems: ListAssetItemsViewModel {
         ListAssetItemsViewModel(currency: currency, rowStyle: service.flow(selectType: .walletSearchResults).rowStyle)
     }
-
 }

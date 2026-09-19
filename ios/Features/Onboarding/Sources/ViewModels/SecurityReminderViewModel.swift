@@ -1,12 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import Style
 import Components
 import Foundation
 import enum Gemstone.GemSecurityReminderItem
 import func Gemstone.securityReminderItems
 import GemstonePrimitives
 import Localization
+import Style
 
 @Observable
 final class SecurityReminderViewModel {

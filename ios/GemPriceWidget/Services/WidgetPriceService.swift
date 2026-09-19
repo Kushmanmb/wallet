@@ -4,8 +4,8 @@ import Foundation
 import class Gemstone.GemApiClient
 import enum Gemstone.GemImage
 import struct Gemstone.GemWidgetCoin
-import protocol Gemstone.GemWidgetServiceProtocol
 import class Gemstone.GemWidgetService
+import protocol Gemstone.GemWidgetServiceProtocol
 import enum Gemstone.GemWidgetSize
 import NativeProviderService
 import Primitives

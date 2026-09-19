@@ -1,10 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import Foundation
 import enum Gemstone.GemListRow
 import enum Gemstone.GemTransactionDetailRow
 import struct Gemstone.GemTransactionDetailSection
-import Foundation
 import Primitives
 import PrimitivesComponents
 import SwiftUI

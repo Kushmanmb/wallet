@@ -1,8 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import GemstonePrimitivesTestKit
 import Primitives
 import PrimitivesTestKit
-import GemstonePrimitivesTestKit
 import Testing
 @testable import Transfer
 import TransferTestKit
