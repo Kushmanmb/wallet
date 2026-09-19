@@ -1,8 +1,10 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
 import GemstoneServices
 import Localization
 import Primitives
+import PrimitivesComponents
 import SwiftUI
 
 public struct CreateWalletNavigationStack: View {
@@ -75,8 +77,12 @@ extension CreateWalletNavigationStack {
         switch route {
         case .securityReminder: navigationPath.append(Scenes.SecurityReminder())
         case .createWallet:
-            model.generateSecretPhrase()
-            navigationPath.append(Scenes.CreateWallet())
+            do {
+                try model.generateSecretPhrase()
+                navigationPath.append(Scenes.CreateWallet())
+            } catch {
+                model.isPresentingAlertMessage = AlertMessage(title: Localized.Errors.errorOccurred, error: error)
+            }
         case .verifyPhrase: navigationPath.append(Scenes.VerifyPhrase())
         case let .walletProfile(wallet): navigationPath.append(Scenes.WalletProfile(wallet: wallet))
         }

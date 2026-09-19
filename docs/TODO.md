@@ -16,7 +16,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 
 ## Execution order
 
-1. **Protect correctness:** K15/K16, F55/F59 and D60; resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
+1. **Protect correctness:** K15/K16, F55 and D60; resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
 2. **Establish consistency:** MIG1–MIG4 and MIG6; apply the atomic-write contract to U22–U24. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, C53 wallet creation/import with D43/R124, C54 transaction tracking, and D61 device observation. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
@@ -28,7 +28,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 
 | Screens / entry points | Existing owner or infrastructure to extend | Open work |
 |---|---|---|
-| Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | C53, D43, R124, F59, X172 |
+| Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | C53, D43, R124, X172 |
 | Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | B79, R107, R116, K17, X172 |
 | Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | K16, MIG2, R95, R111–R113, R133, U11/U25/U29, D46, D56, O59 |
 | Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | R111/R133, U11, D56, D62, D64, B76/B80, K18 |
@@ -222,7 +222,6 @@ The same product rule on both apps with a difference, each read on both sides on
 - **F56** **M** Android turns errors into text through two classifiers (`errorText()` for five Core types plus the raw message, `toGemErrorText()` for the confirm broadcast only), re-implements Core's `payment_error_text` in `GemPaymentException.userMessage` (so `NoPaymentOptions` shows the generic scan error where iOS shows Core's text), and wraps foreign exceptions into Core variants (`ChartViewModel.kt:61`, `SwapQuotesResult.kt:23`). Core `alien_error_text`/`payment_error_text` become `text()` methods; one Android classifier covering iOS `Errors.swift`'s set.
 - **F57** **S** Android WalletConnect shows hardcoded English ("Pair to X fail", "Wallet Connect unavailable…", "Connection failed", "Authentication failed": `WalletConnectCoordinator.kt:112-293`), drops scan-pairing errors (`onError = {}`) and treats a failed disconnect as success; iOS alerts all three. Localized errors surfaced like iOS.
 - **F58** **S** "Network fee missing" names the asset as `name == symbol ? name : "name (symbol)"` on iOS (a copy of `Asset::display_title`) and `"<chain native name> (symbol)"` on Android (`Asset.title`). `NetworkFeeMissing` carries `display_title()`. The info sheet for the same error names it a third way: Android `chain.asset().title` ("Arbitrum ETH (ETH)", `ConfirmErrorUIModel.kt:79-86`), iOS the bare symbol (`InfoSheetModelFactory.swift:43-45`); delete Android `Asset.title` with it.
-- **F59** **S** iOS crashes when phrase generation fails (`CreateWalletModel.swift:69-75`, `fatalError`); Android shows `errorText()`. Present Core's error.
 - **F60** **S** iOS service extensions swallow Core failures: `GemWalletSessionService.swift:8-37` returns `[]` or nil (callers return silently, `NavigationHandler.swift:173,323,342`) and invents an English "No wallet id", and `GemPerpetualDetailsService.swift:13-15` drops `setChartPeriod` errors with `try?`. Propagate or report them.
 - **F61** **S** Abbreviated values round differently: iOS `AbbreviatedFormatter` rounds toward zero regardless of the record's `rounding` ($1,235,999 reads "$1.23M" on iOS and "$1.24M" on Android) on perpetual volume and open interest, the candle tooltip, chart values and the widget; Android `percentText` ignores `rounding` and force-casts `Fraction`, and signs `BelowThreshold` values. Honour the record and add a shared parity fixture.
 - **F62** **S** The shared row renderers print dates differently: the `AllTime` date is Today/Yesterday-or-long on iOS and `DateFormat.MEDIUM` on Android, and the `Date` row is "Today, 3:45 PM" on iOS and "Today 3:45 PM" through `DateUtils` (not `GemDayBoundaries`) on Android; iOS keeps a second `RelativeDateFormatter`. One row-date renderer per app over `GemDayBoundaries`. Typed-data timestamps in signing and simulation payloads go through the same two renderers (`SimulationPayloadFieldViewModel.swift:40`, `SimulationPayloadFieldsContent.kt:44-46`, which also prints "" for 0).

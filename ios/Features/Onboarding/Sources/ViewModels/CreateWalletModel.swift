@@ -68,12 +68,8 @@ extension CreateWalletModel {
         isPresentingSelectImageWallet = wallet
     }
 
-    func generateSecretPhrase() {
-        do {
-            words = try service.createWallet()
-        } catch {
-            fatalError("Unable to create wallet")
-        }
+    func generateSecretPhrase() throws {
+        words = try service.createWallet()
     }
 
     func createWallet(words: [String]) async throws -> CreatedWallet {
