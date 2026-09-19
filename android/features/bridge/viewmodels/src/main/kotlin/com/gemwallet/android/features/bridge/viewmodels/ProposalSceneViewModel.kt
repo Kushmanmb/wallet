@@ -43,6 +43,7 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemWalletConnectException
+import uniffi.gemstone.GemWalletConnectRejectionReason
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.walletRows
@@ -125,7 +126,7 @@ class ProposalSceneViewModel @Inject constructor(
             }.getOrElse { error ->
                 Log.e(TAG, "session proposal rejected: ${error.message}")
                 if (error is GemWalletConnectException.InvalidOrigin) onNotify(BridgeRequestError.MaliciousSession)
-                reject(proposal)
+                reject(proposal, (error as? GemWalletConnectException)?.rejectionReason() ?: GemWalletConnectRejectionReason.USER_REJECTED)
                 return@launch
             }
             state.update { ProposalSceneState.Init(prepared.verificationStatus) }
@@ -178,10 +179,11 @@ class ProposalSceneViewModel @Inject constructor(
         _selectedWallet.update { availableWallets.value.firstOrNull { it.id == walletId } }
     }
 
-    private fun reject(proposal: WalletConnectSessionProposal) {
+    private fun reject(proposal: WalletConnectSessionProposal, reason: GemWalletConnectRejectionReason = GemWalletConnectRejectionReason.USER_REJECTED) {
         viewModelScope.launch(ioDispatcher) {
             approveWalletConnection.rejectConnection(
                 proposal = proposal,
+                reason = reason,
                 onSuccess = { finish(proposal) },
                 onError = { finish(proposal) },
             )
