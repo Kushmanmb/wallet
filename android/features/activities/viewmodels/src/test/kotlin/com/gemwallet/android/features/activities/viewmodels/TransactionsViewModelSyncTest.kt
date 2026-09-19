@@ -55,14 +55,15 @@ class TransactionsViewModelSyncTest {
 
     @Test
     fun `failed sync is retried on the next screen entry and shows the error while nothing is stored`() = runBlocking {
-        coEvery { service.refresh(null, false) } returns GemLoadState.Error(GemServiceException.Gateway("offline"))
+        val offline = GemServiceException.Gateway("offline")
+        coEvery { service.refresh(null, false) } returns GemLoadState.Error(offline)
         val viewModel = createViewModel()
 
         viewModel.syncIfNeeded()?.join()
         viewModel.syncIfNeeded()?.join()
 
         coVerify(exactly = 2) { service.refresh(null, false) }
-        assertEquals(GemListRow.Error(GemServiceException.Gateway("offline")), viewModel.errorRow.value)
+        assertEquals(GemListRow.Error(offline), viewModel.errorRow.value)
     }
 
     @Test
