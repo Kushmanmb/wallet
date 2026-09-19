@@ -11,6 +11,7 @@ import com.wallet.core.primitives.Resource
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import uniffi.gemstone.Delegation
 import uniffi.gemstone.EarnType
 import uniffi.gemstone.GemDelegationAmountInput
 import uniffi.gemstone.GemPerpetualPositionAction
@@ -56,7 +57,7 @@ sealed interface AmountParams {
 
         @Serializable
         @SerialName("stake.rewards")
-        data class Rewards(override val assetId: AssetId) : Stake
+        data class Rewards(override val assetId: AssetId, val delegations: List<@Contextual Delegation> = emptyList(), val validatorId: String? = null) : Stake
 
         @Serializable
         @SerialName("stake.freeze")
@@ -96,7 +97,7 @@ fun GemDelegationAmountInput.toAmountParams(assetId: AssetId): AmountParams = wh
         is GemStakeAmountInput.Redelegate -> AmountParams.Stake.Redelegate(assetId, input.delegation.validator.id, input.delegation.base.delegationId)
         is GemStakeAmountInput.Unstake -> AmountParams.Stake.Undelegate(assetId, input.delegation.validator.id, input.delegation.base.delegationId)
         is GemStakeAmountInput.Withdraw -> AmountParams.Stake.Withdraw(assetId, input.delegation.validator.id, input.delegation.base.delegationId)
-        is GemStakeAmountInput.Rewards -> AmountParams.Stake.Rewards(assetId)
+        is GemStakeAmountInput.Rewards -> AmountParams.Stake.Rewards(assetId, input.delegations, input.validator?.id)
         is GemStakeAmountInput.Freeze -> AmountParams.Stake.Freeze(assetId, input.resource.toPrimitives())
         is GemStakeAmountInput.Unfreeze -> AmountParams.Stake.Unfreeze(assetId, input.resource.toPrimitives())
     }

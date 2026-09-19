@@ -5,7 +5,6 @@ import com.gemwallet.android.application.perpetual.cases.GetPerpetual
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.stake.cases.GetDelegation
-import com.gemwallet.android.application.stake.cases.GetDelegations
 import com.gemwallet.android.application.stake.cases.GetValidators
 import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.testkit.mockAmountParamsPerpetual
@@ -33,9 +32,6 @@ class AmountProviderFactoryTest {
         },
         getDelegation = mockk<GetDelegation>(relaxed = true) {
             every { this@mockk.invoke(any(), any(), any()) } returns flowOf(null)
-        },
-        getDelegations = mockk<GetDelegations>(relaxed = true) {
-            every { this@mockk.invoke(any(), any(), any()) } returns flowOf(emptyList())
         },
         getStakeValidator = mockk(relaxed = true),
         getValidators = mockk<GetValidators>(relaxed = true) {

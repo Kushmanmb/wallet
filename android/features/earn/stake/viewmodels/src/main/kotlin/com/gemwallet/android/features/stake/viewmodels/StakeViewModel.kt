@@ -184,7 +184,7 @@ class StakeViewModel @Inject constructor(
         val assetInfo = assetInfo.value ?: return
         when (val destination = claimRewards.value?.destination ?: return) {
             is GemClaimRewardsDestination.Transfer -> onConfirm(ConfirmTransferInput(destination.transfer))
-            is GemClaimRewardsDestination.Amount -> onAmount(AmountParams.Stake.Rewards(assetInfo.asset.id))
+            is GemClaimRewardsDestination.Amount -> onAmount(AmountParams.Stake.Rewards(assetInfo.asset.id, destination.delegations))
         }
     }
 

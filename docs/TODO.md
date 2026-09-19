@@ -16,7 +16,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 
 ## Execution order
 
-1. **Protect correctness:** K15/K16 and D60; resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
+1. **Protect correctness:** K15/K16; resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
 2. **Establish consistency:** MIG2–MIG4 and MIG6; apply the atomic-write contract to U22–U24. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, C53 wallet creation/import with D43/R124, C54 transaction tracking, and D61 device observation. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
@@ -46,7 +46,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | D66, R98/R112, K14/K19, U24, O59 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73/S81, R96/R128, U28, F61/F62 |
 | Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | S75, R97, V91, K14 |
-| Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | R100/R101/R118, D60; preserve exact atomic values |
+| Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | R100/R101/R118; preserve exact atomic values |
 | Earn list, provider and deposit amount | Existing stake/earn owner and amount extras | D59, R119, R100/R101; preserve the existing feature gate |
 | NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | U27, R114–R116, S80 |
 | Price-alert list/target/auto-alert controls | `GemPriceAlertService`, alert session and existing notification port | MIG4, R109/R129, D68/D69, P97, S80, B80 |
@@ -240,7 +240,6 @@ The same product rule on both apps with a difference, each read on both sides on
 - **D56** **S** Wallet search: Android's empty state counts only some sections and draws "no assets" over matching lists, iOS `showAddToken` bypasses `flow.shows_add_token`, and pinned perpetuals vanish from iOS asset-list results. A Core search state from the full counts; both apps honour `shows_add_token`; one perpetual split.
 - **D58** **S** A support message interrupted by an app kill is failed on resume on Android (`failPendingSupportMessages`, outside the `GemSupportStore` trait) and spins "sending" forever on iOS, and Android restates Core's no-retry-for-images twice. `GemSupportStore::fail_pending_messages` from a Core entry point and message rows with a status outcome. Run interrupted-send recovery from the existing startup/resume lifecycle after identifying abandoned work; do not fail actively sending rows on every refresh. Reuse existing message status and retry rules.
 - **D59** **S** The Earn screen shows a failed sync on iOS and only logs it on Android, which also shows the empty state while syncing; the deposit gate and first-provider choice are written twice. `refresh_earn(asset_id, has_rows) -> GemLoadState` and an earn actions answer.
-- **D60** **S** Android discards the Core claim-rewards input (`StakeViewModel.kt:191`) and rebuilds it in `AmountStakeProvider`, calling `shows_rewards`, which requires Active, while Core's `claim_rewards` selects positive rewards without that restriction. An inactive delegation with rewards is claimable on iOS only; `DelegationViewModel.kt:109` also supplies an empty validator list. Carry the complete generated Core input through `AmountParams.Stake` with the existing contextual serialization pattern, remove reconstruction and test recipient/validator/reward identity through navigation.
 - **D61** **S** A currency change re-registers the device from the screen on iOS (`CurrencySceneViewModel` holds a second Core service) and from an observer on Android (`DeviceObserverService.kt:27`). Add currency to iOS's device observer and drop the service from the screen.
 - **D62** **S** Chain lists: the contact network picker is `Chain.allCases` on iOS (`ManageContactAddressViewModel.swift:103`) and Core's rank order on Android, and `GemChainSettingsService::chains` and `GemChainService::get_chains` have the same body with each app using a different one for the network list. iOS reads Core's order; one export per screen.
 - **P90** **S** The token-approval header is image-only on iOS but drawn as the symbol on Android transaction details (`GetTransactionDetailsImpl.kt:99-100`) and confirm (`ConfirmHeaderUIModel.kt:53`), merging Core's `AssetImage` into `Symbol`. Close the confirm half with C51 and the detail half with U18; do not add a third header mapping.
@@ -307,7 +306,7 @@ None of these is a code change until someone chooses; each is written so the cho
 
 ## Coverage
 
-The retained items came from the earlier two reviews on 2026-09-19. This architecture pass rechecked 56 distinct existing items: U14/U15/U19/U22–U25/U27–U30, K16/K18, C51, S71–S75/S79/S81–S83, R87/R94–R97/R100/R101/R104/R106/R118–R120/R122/R123/R129, D47/D49–D51/D55/D58–D61/D66/D67/D71, P89/P90, B78, F53/F55 and O59. It also narrowed the descriptions of R114/P97 and added MIG1–MIG6. U20, R87, F53, P88, S71, P89 and F55 have since landed on main and are no longer open work. Source-level failure interleavings are not runtime reproductions; the tasks specify the tests still required.
+The retained items came from the earlier two reviews on 2026-09-19. This architecture pass rechecked 56 distinct existing items: U14/U15/U19/U22–U25/U27–U30, K16/K18, C51, S71–S75/S79/S81–S83, R87/R94–R97/R100/R101/R104/R106/R118–R120/R122/R123/R129, D47/D49–D51/D55/D58–D61/D66/D67/D71, P89/P90, B78, F53/F55 and O59. It also narrowed the descriptions of R114/P97 and added MIG1–MIG6. U20, R87, F53, P88, S71, P89, F55 and D60 have since landed on main and are no longer open work. Source-level failure interleavings are not runtime reproductions; the tasks specify the tests still required.
 
 **Pass one split the product by area:** transfer, confirm and swap; assets, wallet and charts; perpetuals, earn and stake; settings, rewards and WalletConnect; onboarding, NFT, fiat and activity; and the cross-cutting Core surface. Each area paired its screens across the apps and compared the service held, the session driven, and the branches, sorts, composed strings and error paths.
 

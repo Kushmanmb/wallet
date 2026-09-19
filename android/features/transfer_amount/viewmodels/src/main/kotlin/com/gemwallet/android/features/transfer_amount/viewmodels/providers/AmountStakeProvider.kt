@@ -2,10 +2,10 @@ package com.gemwallet.android.features.transfer_amount.viewmodels.providers
 
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.stake.cases.GetDelegation
-import com.gemwallet.android.application.stake.cases.GetDelegations
 import com.gemwallet.android.application.stake.cases.GetStakeValidator
 import com.gemwallet.android.application.stake.cases.GetValidators
 import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.transfer_amount.viewmodels.models.ValidatorsUIModel
 import com.gemwallet.android.features.transfer_amount.viewmodels.models.uiModel
 import com.gemwallet.android.model.AmountParams
@@ -42,7 +42,6 @@ class AmountStakeProvider(
     val params: AmountParams.Stake,
     getAssetInfo: GetAssetInfo,
     private val getDelegation: GetDelegation,
-    private val getDelegations: GetDelegations,
     private val getStakeValidator: GetStakeValidator,
     getValidators: GetValidators,
     private val stakeService: GemStakeServiceInterface,
@@ -75,11 +74,7 @@ class AmountStakeProvider(
     }
 
     private val rewardsDelegations: StateFlow<List<Delegation>> = when (params) {
-        is AmountParams.Stake.Rewards -> assetInfo.filterNotNull().flatMapLatest { current ->
-            val walletId = current.walletId ?: return@flatMapLatest flowOf(emptyList())
-            getDelegations(walletId, current.asset.id).map { list -> list.filter { stakeService.showsRewards(it.base.toGem()) } }
-        }.flowOn(Dispatchers.IO).stateIn(scope, SharingStarted.Eagerly, emptyList())
-
+        is AmountParams.Stake.Rewards -> MutableStateFlow(params.delegations.map { it.toPrimitives() })
         else -> MutableStateFlow(emptyList())
     }
 

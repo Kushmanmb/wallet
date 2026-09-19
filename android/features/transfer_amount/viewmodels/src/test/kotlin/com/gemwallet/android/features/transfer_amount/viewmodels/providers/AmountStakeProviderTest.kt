@@ -2,7 +2,6 @@ package com.gemwallet.android.features.transfer_amount.viewmodels.providers
 
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.stake.cases.GetDelegation
-import com.gemwallet.android.application.stake.cases.GetDelegations
 import com.gemwallet.android.application.stake.cases.GetStakeValidator
 import com.gemwallet.android.application.stake.cases.GetValidators
 import com.gemwallet.android.domains.confirm.stakeType
@@ -56,9 +55,6 @@ class AmountStakeProviderTest {
     private val getDelegation = mockk<GetDelegation> {
         every { this@mockk.invoke(any(), any(), any()) } returns flowOf(delegation)
     }
-    private val getDelegations = mockk<GetDelegations> {
-        every { this@mockk.invoke(any(), any()) } returns flowOf(listOf(delegation))
-    }
     private val getValidators = mockk<GetValidators> {
         every { this@mockk.invoke(any()) } returns flowOf(listOf(validator, otherValidator))
     }
@@ -78,7 +74,6 @@ class AmountStakeProviderTest {
         params = params,
         getAssetInfo = getAssetInfo,
         getDelegation = getDelegation,
-        getDelegations = getDelegations,
         getStakeValidator = getStakeValidator,
         getValidators = getValidators,
         stakeService = stakeService,
