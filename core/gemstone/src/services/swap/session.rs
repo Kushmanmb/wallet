@@ -101,6 +101,7 @@ impl GemSwapSession {
 pub enum GemSwapErrorDisplay {
     NotSupportedAsset,
     NoQuote,
+    Offline,
     MinimumAmount { asset: Asset, min_amount: GemBigInt },
     AmountTooSmall,
 }
@@ -114,6 +115,7 @@ impl GemSwapErrorDisplay {
             | SwapperError::InvalidRoute
             | SwapperError::ComputeQuoteError(_)
             | SwapperError::TransactionError(_) => Self::NoQuote,
+            SwapperError::Offline => Self::Offline,
             SwapperError::InputAmountError { .. } => match (pay_asset, rules::minimum_amount(Some(error))) {
                 (Some(asset), Some(min_amount)) => Self::MinimumAmount { asset: asset.clone(), min_amount },
                 _ => Self::AmountTooSmall,
@@ -433,6 +435,7 @@ mod tests {
         }
         assert_eq!(GemSwapErrorDisplay::new(&SwapperError::NotSupportedChain, None), GemSwapErrorDisplay::NotSupportedAsset);
         assert_eq!(GemSwapErrorDisplay::new(&SwapperError::NotSupportedAsset, None), GemSwapErrorDisplay::NotSupportedAsset);
+        assert_eq!(GemSwapErrorDisplay::new(&SwapperError::Offline, None), GemSwapErrorDisplay::Offline);
     }
 
     #[test]

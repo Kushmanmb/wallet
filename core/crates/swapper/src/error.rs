@@ -20,6 +20,7 @@ pub enum SwapperError {
     ComputeQuoteError(String),
     TransactionError(String),
     NoQuoteAvailable,
+    Offline,
 }
 
 impl std::fmt::Display for SwapperError {
@@ -39,6 +40,7 @@ impl std::fmt::Display for SwapperError {
             Self::ComputeQuoteError(msg) => write!(f, "Compute quote error: {}", msg),
             Self::TransactionError(msg) => write!(f, "Transaction error: {}", msg),
             Self::NoQuoteAvailable => write!(f, "No quote available"),
+            Self::Offline => write!(f, "Network offline"),
         }
     }
 }
@@ -81,7 +83,7 @@ impl From<AlienError> for SwapperError {
             AlienError::RequestError { msg } => Self::ComputeQuoteError(msg),
             AlienError::ResponseError { msg } => Self::ComputeQuoteError(msg),
             AlienError::Http { status, .. } => Self::ComputeQuoteError(format!("HTTP error: status {}", status)),
-            AlienError::Offline => Self::ComputeQuoteError(err.to_string()),
+            AlienError::Offline => Self::Offline,
         }
     }
 }
@@ -190,5 +192,11 @@ mod tests {
             SwapperError::from(gem_solana::SolanaError::InvalidMessage),
             SwapperError::ComputeQuoteError("Solana error: Invalid message".to_string())
         );
+    }
+
+    #[test]
+    fn test_an_offline_request_stays_offline() {
+        assert_eq!(SwapperError::from(AlienError::Offline), SwapperError::Offline);
+        assert_eq!(SwapperError::from(AlienError::request_error("timeout")), SwapperError::ComputeQuoteError("timeout".to_string()));
     }
 }

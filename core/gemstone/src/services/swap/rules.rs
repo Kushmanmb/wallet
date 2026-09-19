@@ -269,7 +269,7 @@ impl GemSwapButtonInput {
 
 pub fn is_retryable(error: Option<&SwapperError>) -> bool {
     match error {
-        Some(SwapperError::NoQuoteAvailable | SwapperError::ComputeQuoteError(_) | SwapperError::TransactionError(_)) => true,
+        Some(SwapperError::NoQuoteAvailable | SwapperError::ComputeQuoteError(_) | SwapperError::TransactionError(_) | SwapperError::Offline) => true,
         Some(
             SwapperError::NotSupportedChain
             | SwapperError::NotSupportedAsset
@@ -780,6 +780,7 @@ mod tests {
         assert!(is_retryable(Some(&SwapperError::NoQuoteAvailable)));
         assert!(is_retryable(Some(&SwapperError::ComputeQuoteError("boom".to_string()))));
         assert!(is_retryable(Some(&SwapperError::TransactionError("boom".to_string()))));
+        assert!(is_retryable(Some(&SwapperError::Offline)));
         assert!(!is_retryable(Some(&SwapperError::NotSupportedChain)));
         assert!(!is_retryable(Some(&SwapperError::NotSupportedAsset)));
         assert!(!is_retryable(Some(&SwapperError::NoAvailableProvider)));

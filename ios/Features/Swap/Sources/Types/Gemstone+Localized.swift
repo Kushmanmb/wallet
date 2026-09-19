@@ -38,6 +38,7 @@ extension GemSwapErrorDisplay: @retroactive LocalizedError {
         switch self {
         case .notSupportedAsset: Localized.Errors.Swap.notSupportedAsset
         case .noQuote: Localized.Errors.Swap.noQuoteAvailable
+        case .offline: Localized.Errors.networkOffline
         case let .minimumAmount(asset, minAmount):
             Localized.Errors.Swap.minimumAmount(
                 ValueFormatter(style: .auto).string(minAmount, asset: asset.toPrimitives()).boldMarkdown()

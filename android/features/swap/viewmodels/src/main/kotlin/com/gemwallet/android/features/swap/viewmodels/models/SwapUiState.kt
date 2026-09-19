@@ -71,6 +71,7 @@ internal fun createSwapUiState(state: GemSwapViewState, context: Context) = Swap
 private fun GemSwapErrorDisplay.infoSheet(): InfoSheetEntity? = when (this) {
     is GemSwapErrorDisplay.NoQuote -> InfoSheetEntity.NoQuoteInfo
     is GemSwapErrorDisplay.NotSupportedAsset,
+    is GemSwapErrorDisplay.Offline,
     is GemSwapErrorDisplay.MinimumAmount,
     is GemSwapErrorDisplay.AmountTooSmall -> null
 }

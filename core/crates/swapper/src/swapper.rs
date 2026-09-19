@@ -201,6 +201,9 @@ impl GemSwapper {
     }
 
     fn quote_error(errors: Vec<SwapQuoteError>) -> SwapperError {
+        if !errors.is_empty() && errors.iter().all(|error| error.error == SwapperError::Offline) {
+            return SwapperError::Offline;
+        }
         let min_amounts: Vec<Option<BigInt>> = errors
             .into_iter()
             .filter_map(|error| match error.error {
@@ -488,6 +491,18 @@ mod tests {
             })),
         ]);
         assert_eq!(route_errors.get_quote(&request).await.unwrap_err(), SwapperError::NoQuoteAvailable);
+
+        let offline = GemSwapper::mock(vec![
+            Box::new(MockSwapper::new(SwapperProvider::UniswapV3, || Err(SwapperError::Offline))),
+            Box::new(MockSwapper::new(SwapperProvider::Jupiter, || Err(SwapperError::Offline))),
+        ]);
+        assert_eq!(offline.get_quote(&request).await.unwrap_err(), SwapperError::Offline);
+
+        let partly_offline = GemSwapper::mock(vec![
+            Box::new(MockSwapper::new(SwapperProvider::UniswapV3, || Err(SwapperError::Offline))),
+            Box::new(MockSwapper::new(SwapperProvider::Jupiter, || Err(SwapperError::NoQuoteAvailable))),
+        ]);
+        assert_eq!(partly_offline.get_quote(&request).await.unwrap_err(), SwapperError::NoQuoteAvailable);
     }
 
     #[test]

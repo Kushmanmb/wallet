@@ -22,6 +22,7 @@ internal fun GemSwapButtonAction.stringRes(): Int = when (this) {
 internal fun GemSwapErrorDisplay.text(context: Context): String = when (this) {
     is GemSwapErrorDisplay.NotSupportedAsset -> context.getString(R.string.errors_swap_not_supported_asset)
     is GemSwapErrorDisplay.NoQuote -> context.getString(R.string.errors_swap_no_quote_available)
+    is GemSwapErrorDisplay.Offline -> context.getString(R.string.errors_network_offline)
     is GemSwapErrorDisplay.MinimumAmount -> context.getString(
         R.string.errors_swap_minimum_amount,
         ValueFormatter(style = GemValueStyle.AUTO).string(minAmount, asset.toPrimitives()).boldMarkdown(),
