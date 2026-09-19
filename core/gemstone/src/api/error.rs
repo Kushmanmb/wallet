@@ -31,7 +31,7 @@ impl From<ClientError> for GemApiError {
                 status,
                 msg: String::from_utf8_lossy(&body).to_string(),
             },
-            ClientError::Response { status, message } => Self::Response { status, msg: message },
+            ClientError::Response { status, message, .. } => Self::Response { status, msg: message },
             ClientError::Serialization(msg) => Self::Serialization { msg },
         }
     }
@@ -54,6 +54,7 @@ mod tests {
         let error = GemApiError::from(ClientError::Response {
             status: 400,
             message: "Rewards are not enabled for this user".to_string(),
+            body: REWARDS_DISABLED.as_bytes().to_vec(),
         });
 
         assert_eq!(error.to_string(), "Rewards are not enabled for this user");

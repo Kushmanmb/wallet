@@ -18,7 +18,7 @@ pub enum ClientError<E = Vec<u8>> {
     Network(String),
     Timeout,
     Http { status: u16, body: E },
-    Response { status: u16, message: String },
+    Response { status: u16, message: String, body: Vec<u8> },
     Serialization(String),
 }
 
@@ -31,7 +31,7 @@ impl ClientError {
             },
             Self::Network(message) => ClientError::Network(message),
             Self::Timeout => ClientError::Timeout,
-            Self::Response { status, message } => ClientError::Response { status, message },
+            Self::Response { status, message, body } => ClientError::Response { status, message, body },
             Self::Serialization(message) => ClientError::Serialization(message),
         }
     }
@@ -46,7 +46,7 @@ impl fmt::Debug for ClientError {
                 let body_str = String::from_utf8_lossy(&body[..body.len().min(256)]);
                 f.debug_struct("Http").field("status", status).field("body", &body_str).finish()
             }
-            Self::Response { status, message } => f.debug_struct("Response").field("status", status).field("message", message).finish(),
+            Self::Response { status, message, .. } => f.debug_struct("Response").field("status", status).field("message", message).finish(),
             Self::Serialization(msg) => f.debug_tuple("Serialization").field(msg).finish(),
         }
     }
@@ -110,6 +110,9 @@ pub fn deserialize_response<R>(response: &Response) -> Result<R, ClientError>
 where
     R: DeserializeOwned,
 {
+    if http_error_status(response).is_some() {
+        validate_response(response)?;
+    }
     let data: &[u8] = if response.data.is_empty() { b"null" } else { &response.data };
     match serde_json::from_slice(data) {
         Ok(value) => Ok(value),
@@ -125,18 +128,17 @@ pub fn validate_response(response: &Response) -> Result<(), ClientError> {
         return Err(ClientError::Response {
             status: response.status.unwrap_or_default(),
             message: body.error.message,
+            body: response.data.clone(),
         });
     }
-    validate_http_status(response)
+    match http_error_status(response) {
+        Some(status) => Err(ClientError::Http { status, body: response.data.clone() }),
+        None => Ok(()),
+    }
 }
 
-fn validate_http_status(response: &Response) -> Result<(), ClientError> {
-    if let Some(status) = response.status {
-        if !(200..400).contains(&status) {
-            return Err(ClientError::Http { status, body: response.data.clone() });
-        }
-    }
-    Ok(())
+fn http_error_status(response: &Response) -> Option<u16> {
+    response.status.filter(|status| !(200..400).contains(status))
 }
 
 #[cfg(test)]
@@ -155,7 +157,8 @@ mod tests {
             }),
             Err(ClientError::Response {
                 status: 200,
-                message: USERNAME_ERROR_MESSAGE.to_string()
+                message: USERNAME_ERROR_MESSAGE.to_string(),
+                body: USERNAME_ERROR.as_bytes().to_vec(),
             })
         );
         assert_eq!(
@@ -165,7 +168,8 @@ mod tests {
             }),
             Err(ClientError::Response {
                 status: 400,
-                message: USERNAME_ERROR_MESSAGE.to_string()
+                message: USERNAME_ERROR_MESSAGE.to_string(),
+                body: USERNAME_ERROR.as_bytes().to_vec(),
             })
         );
         assert_eq!(
@@ -194,8 +198,58 @@ mod tests {
             }),
             Err(ClientError::Response {
                 status: 200,
-                message: USERNAME_ERROR_MESSAGE.to_string()
+                message: USERNAME_ERROR_MESSAGE.to_string(),
+                body: USERNAME_ERROR.as_bytes().to_vec(),
             })
         );
+    }
+
+    #[test]
+    fn test_deserialize_response_rejects_http_errors() {
+        for status in [400, 401, 403, 404, 429, 500, 502, 503] {
+            for data in [b"true".to_vec(), b"{}".to_vec(), b"null".to_vec(), Vec::new()] {
+                let response = Response { status: Some(status), data: data.clone() };
+                assert_eq!(deserialize_response::<Value>(&response), Err(ClientError::Http { status, body: data }));
+            }
+        }
+    }
+
+    #[test]
+    fn test_deserialize_response_preserves_http_error_body() {
+        let response = Response {
+            status: Some(404),
+            data: br#"{"reason":"Not found"}"#.to_vec(),
+        };
+        let error = deserialize_response::<Value>(&response).unwrap_err();
+
+        match error.decode_body::<HashMap<String, String>>() {
+            ClientError::Http { status, body } => assert_eq!((status, body), (404, Some(HashMap::from([("reason".to_string(), "Not found".to_string())])))),
+            error => panic!("Unexpected error: {error}"),
+        }
+    }
+
+    #[test]
+    fn test_deserialize_response_preserves_api_error() {
+        for status in [400, 404, 500] {
+            assert_eq!(
+                deserialize_response::<Value>(&Response {
+                    status: Some(status),
+                    data: USERNAME_ERROR.as_bytes().to_vec()
+                }),
+                Err(ClientError::Response {
+                    status,
+                    message: USERNAME_ERROR_MESSAGE.to_string(),
+                    body: USERNAME_ERROR.as_bytes().to_vec(),
+                })
+            );
+        }
+    }
+
+    #[test]
+    fn test_deserialize_response_preserves_success_and_redirect_policy() {
+        for status in [None, Some(200), Some(201), Some(299), Some(302), Some(399)] {
+            assert_eq!(deserialize_response::<bool>(&Response { status, data: b"true".to_vec() }), Ok(true));
+        }
+        assert_eq!(deserialize_response::<Option<Value>>(&Response { status: Some(204), data: Vec::new() }), Ok(None));
     }
 }
