@@ -164,7 +164,6 @@ The same product rule on both apps with a difference, each read on both sides on
 
 [ARCHITECTURE.md § 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android): a case that only forwards a Core call is migration debt, and one answer has one route.
 
-- **O56** **S** Android `WalletAvatarService` forwards `setNftImage` and `reset`; only the emoji rendering is platform work. Render in the view model and delete the class.
 - **O57** **S** `GemConfirmTransferService::row_contents`/`address_url` duplicate `GemConfirmation::row_contents`; Android uses the service and iOS the confirmation. Android calls the confirmation; move the service methods out of the exported block.
 - **O59** **S** "Show perpetuals" reaches the apps through three exports (`GemPreferencesService`, `GemAssetSelectionService`, `GemPerpetualService::should_connect_perpetuals`), the portfolio segment reads it around its own service on both apps, and `GemWalletHomeViewState` lacks it, so both apps fetch it separately. `shows_perpetuals` on the home view state and the portfolio session.
 - **O60** **S** The Android contact editor injects the concrete `GemAddressService` for `formatAll` (`ManageContactViewModel.kt:56,106`), the last concrete-service consumer in Android features; iOS uses `GemManageContactService.format_address`. Use the screen service.

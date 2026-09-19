@@ -106,12 +106,12 @@ class WalletViewModelTest {
 
     @Test
     fun `an avatar Core refuses shows an error until it is cleared`() = runTest(dispatcher) {
-        val avatars: WalletAvatarService = mockk {
-            coEvery { setNftImage(any(), any()) } throws IllegalStateException("no image")
+        val service: GemWalletServiceInterface = mockk {
+            coEvery { setAvatarImageUrl(any(), any()) } throws IllegalStateException("no image")
         }
         val details: GetWalletDetails = mockk { every { getWallet(any()) } returns flowOf(null) }
         val nfts: GetListNft = mockk { every { getListNft(any()) } returns flowOf(emptyList()) }
-        val model = WalletImageViewModel(details, nfts, avatars, route(), dispatcher).also { models.add(it) }
+        val model = WalletImageViewModel(details, nfts, service, route(), dispatcher, mockk(relaxed = true)).also { models.add(it) }
 
         model.setNftImage("https://example.com/a.png").join()
 
