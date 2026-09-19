@@ -4,13 +4,16 @@ Use for every code change. Guidance precedence is defined in [AGENTS.md](../AGEN
 
 ## Fix Causes, Not Symptoms
 
-Trace the failure to the code that owns the broken invariant. Fix that owner within the task's scope; this does not authorize a wider architectural migration.
+Trace the failure to the code that owns the broken invariant, and fix it there. Do the right fix even when it is the harder one: conform the type, change the Core contract, touch the extra files. Surrounding code is an example, never permission to copy a shape you can see is wrong.
+
+A real fix is not deferred into a plan item. Adding the correct change to [Open work](../docs/TODO.md) instead of making it leaves the wrong shape in place and hands the next change the same excuse. Only a scope the user set, another repository, a provider or a shipped client puts a fix genuinely out of reach.
 
 - Who produced this value or state? Fix it there (the parser that accepted the input, the mapper that built the value, the Core rule the apps consume, the config that declared support), not in the caller that noticed it, and delete the downstream guards the fix makes unnecessary (see § No Over-Defensive Code)
 - Is this condition real? A null check, swallowed error, retry, wider timeout, or sleep is a fix only when you can name the state it handles
 - Diagnose a failing test against the intended contract. Fix the implementation when it violates the contract; update the test when its expectation is stale or the task intentionally changes behavior. Never weaken an assertion just to pass
 - Is this the only place? Two similar patches usually mean one shared cause; check whether the failure recurs through another entry point, chain, provider, or timing
-- If the real fix is out of scope (another repository, a provider, shipped clients, a scope the user set), propose it in the handoff with the layer, the change, and what it would remove. Ship a symptom patch only if it is safe, minimal, and labeled temporary; never present it as the fix
+- If the real fix is genuinely out of reach (another repository, a provider, shipped clients, a scope the user set), propose it in the handoff with the layer, the change, and what it would remove. Ship a symptom patch only if it is safe, minimal, and labeled temporary; never present it as the fix
+- Verify a defect end to end before asserting it. Read the code that consumes the value, not only the code that produces it; a missing conformance or mapping is often already handled one layer down
 - The regression test reproduces the cause at the producer, not the guard at the consumer
 
 ## Clean Code Principles

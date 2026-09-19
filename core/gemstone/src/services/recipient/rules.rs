@@ -24,10 +24,10 @@ pub fn validation(chain: Chain, input: &str, state: &GemNameRecordState) -> GemR
 pub fn recipient(chain: Chain, input: &str, state: &GemNameRecordState, memo: Option<String>, references: Vec<String>) -> Result<GemRecipient, GemRecipientError> {
     let name_record = state.record_ref();
     if name_record.is_some_and(|record| !matches_input(record, chain, input)) {
-        return Err(GemRecipientError::NameRecordMismatch);
+        return Err(GemRecipientError::NameRecordMismatch { chain });
     }
     if !state.can_validate_recipient() || !is_valid(chain, input, name_record) {
-        return Err(GemRecipientError::InvalidAddress);
+        return Err(GemRecipientError::InvalidAddress { chain });
     }
     Ok(GemRecipient {
         address: address(chain, input, name_record),
@@ -72,7 +72,7 @@ pub fn scan_route(destination: GemPaymentDestination, recipient_type: &GemRecipi
             })
         }
         GemPaymentDestination::Recipient { payment, .. } => Ok(GemRecipientScan::Recipient { payment }),
-        GemPaymentDestination::SelectAsset { .. } | GemPaymentDestination::Unsupported => Err(GemRecipientError::InvalidAddress),
+        GemPaymentDestination::SelectAsset { .. } | GemPaymentDestination::Unsupported => Err(GemRecipientError::InvalidAddress { chain: recipient_type.asset().chain() }),
     }
 }
 
@@ -167,7 +167,7 @@ mod tests {
         assert_eq!(pending.address, "h3rman.near");
         assert!(!validation(Chain::Near, "h3rman.near", &GemNameRecordState::Error).is_valid);
         assert!(validation(Chain::Near, "h3rman.near", &GemNameRecordState::None).is_valid);
-        assert_eq!(recipient(Chain::Near, "h3rman.near", &loading, None, vec![]), Err(GemRecipientError::InvalidAddress));
+        assert_eq!(recipient(Chain::Near, "h3rman.near", &loading, None, vec![]), Err(GemRecipientError::InvalidAddress { chain: Chain::Near }));
     }
 
     #[test]
@@ -231,9 +231,12 @@ mod tests {
         assert_eq!(plain.name, None);
         assert_eq!(
             recipient(Chain::Ethereum, "other.eth", &GemNameRecordState::Complete { record: ens.clone() }, None, vec![]),
-            Err(GemRecipientError::NameRecordMismatch)
+            Err(GemRecipientError::NameRecordMismatch { chain: Chain::Ethereum })
         );
-        assert_eq!(recipient(Chain::Ethereum, "0xinvalid", &GemNameRecordState::None, None, vec![]), Err(GemRecipientError::InvalidAddress));
+        assert_eq!(
+            recipient(Chain::Ethereum, "0xinvalid", &GemNameRecordState::None, None, vec![]),
+            Err(GemRecipientError::InvalidAddress { chain: Chain::Ethereum })
+        );
     }
 
     #[test]
@@ -244,7 +247,10 @@ mod tests {
 
         let upper_prefix = ADDRESS.replacen("0x", "0X", 1);
         assert!(!validation(Chain::Ethereum, &upper_prefix, &GemNameRecordState::None).is_valid);
-        assert_eq!(recipient(Chain::Ethereum, &upper_prefix, &GemNameRecordState::None, None, vec![]), Err(GemRecipientError::InvalidAddress));
+        assert_eq!(
+            recipient(Chain::Ethereum, &upper_prefix, &GemNameRecordState::None, None, vec![]),
+            Err(GemRecipientError::InvalidAddress { chain: Chain::Ethereum })
+        );
     }
 
     #[test]
@@ -253,21 +259,21 @@ mod tests {
         assert!(!validation(Chain::Ethereum, "Vitalik.eth", &GemNameRecordState::Complete { record: ens.clone() }).is_valid);
         assert_eq!(
             recipient(Chain::Ethereum, "Vitalik.eth", &GemNameRecordState::Complete { record: ens.clone() }, None, vec![]),
-            Err(GemRecipientError::NameRecordMismatch)
+            Err(GemRecipientError::NameRecordMismatch { chain: Chain::Ethereum })
         );
         assert_eq!(
             recipient(Chain::Ethereum, " vitalik.eth", &GemNameRecordState::Complete { record: ens.clone() }, None, vec![]),
-            Err(GemRecipientError::NameRecordMismatch)
+            Err(GemRecipientError::NameRecordMismatch { chain: Chain::Ethereum })
         );
         assert_eq!(
             recipient(Chain::Polygon, "vitalik.eth", &GemNameRecordState::Complete { record: ens.clone() }, None, vec![]),
-            Err(GemRecipientError::NameRecordMismatch)
+            Err(GemRecipientError::NameRecordMismatch { chain: Chain::Polygon })
         );
 
         let empty = NameRecord::mock("vitalik.eth", "");
         assert_eq!(
             recipient(Chain::Ethereum, "vitalik.eth", &GemNameRecordState::Complete { record: empty.clone() }, None, vec![]),
-            Err(GemRecipientError::InvalidAddress)
+            Err(GemRecipientError::InvalidAddress { chain: Chain::Ethereum })
         );
         let fallback = validation(Chain::Ethereum, "vitalik.eth", &GemNameRecordState::Complete { record: empty.clone() });
         assert!(!fallback.is_valid);
@@ -289,7 +295,10 @@ mod tests {
         assert_eq!(tron_recipient.address, tron);
         assert_eq!(tron_recipient.memo.as_deref(), Some("  memo "));
         assert_eq!(tron_recipient.references, vec!["a".to_string(), "b".to_string()]);
-        assert_eq!(recipient(Chain::Tron, &tron.to_lowercase(), &GemNameRecordState::None, None, vec![]), Err(GemRecipientError::InvalidAddress));
+        assert_eq!(
+            recipient(Chain::Tron, &tron.to_lowercase(), &GemNameRecordState::None, None, vec![]),
+            Err(GemRecipientError::InvalidAddress { chain: Chain::Tron })
+        );
     }
 
     #[test]
@@ -329,12 +338,12 @@ mod tests {
         assert!(matches!(scan_route(recipient, &asset, |transfer| payments.transfer_data(transfer, Asset::from_chain(Chain::Ethereum))), Ok(GemRecipientScan::Recipient { payment: found }) if found == payment));
         assert!(matches!(
             scan_route(GemPaymentDestination::Unsupported, &asset, |transfer| payments.transfer_data(transfer, Asset::from_chain(Chain::Ethereum))),
-            Err(GemRecipientError::InvalidAddress)
+            Err(GemRecipientError::InvalidAddress { .. })
         ));
         assert!(matches!(
             scan_route(GemPaymentDestination::SelectAsset { payment, chains: vec![] }, &asset, |transfer| payments
                 .transfer_data(transfer, Asset::from_chain(Chain::Ethereum))),
-            Err(GemRecipientError::InvalidAddress)
+            Err(GemRecipientError::InvalidAddress { .. })
         ));
     }
 

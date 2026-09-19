@@ -26,6 +26,7 @@ import class Gemstone.GemPerpetual
 import enum Gemstone.GemPriceAlertLabel
 import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemPriceAlertText
+import enum Gemstone.GemRecipientError
 import enum Gemstone.GemRecipientErrorDisplay
 import enum Gemstone.GemSelectAssetSection
 import enum Gemstone.GemSelectAssetTitle
@@ -589,6 +590,10 @@ public extension GemBannerDescription {
         case .tradePerpetuals: Localized.Banner.Perpetuals.description
         }
     }
+}
+
+extension GemRecipientError: @retroactive LocalizedError {
+    public var errorDescription: String? { display().errorDescription }
 }
 
 extension GemRecipientErrorDisplay: @retroactive LocalizedError {

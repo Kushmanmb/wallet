@@ -39,7 +39,7 @@ impl GemRecipientService {
                     decimals: asset.decimals,
                 },
             )
-            .map_err(|_| GemRecipientError::InvalidAddress)?;
+            .map_err(|_| GemRecipientError::InvalidAddress { chain: asset.chain() })?;
         scan_route(destination, &recipient_type, |transfer| self.payments.transfer_data(transfer, asset))
     }
 

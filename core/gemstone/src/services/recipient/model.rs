@@ -18,15 +18,15 @@ pub enum GemRecipientErrorDisplay {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Error)]
 pub enum GemRecipientError {
-    InvalidAddress,
-    NameRecordMismatch,
+    InvalidAddress { chain: Chain },
+    NameRecordMismatch { chain: Chain },
 }
 
 impl std::fmt::Display for GemRecipientError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::InvalidAddress => write!(f, "invalid recipient address"),
-            Self::NameRecordMismatch => write!(f, "name record does not match the input"),
+            Self::InvalidAddress { .. } => write!(f, "invalid recipient address"),
+            Self::NameRecordMismatch { .. } => write!(f, "name record does not match the input"),
         }
     }
 }
@@ -35,10 +35,10 @@ impl std::error::Error for GemRecipientError {}
 
 #[uniffi::export]
 impl GemRecipientError {
-    pub fn display(&self, chain: Chain) -> GemRecipientErrorDisplay {
+    pub fn display(&self) -> GemRecipientErrorDisplay {
         match self {
-            Self::InvalidAddress | Self::NameRecordMismatch => GemRecipientErrorDisplay::InvalidAddress {
-                network: ChainAsset::from_chain(chain).network_name,
+            Self::InvalidAddress { chain } | Self::NameRecordMismatch { chain } => GemRecipientErrorDisplay::InvalidAddress {
+                network: ChainAsset::from_chain(*chain).network_name,
             },
         }
     }

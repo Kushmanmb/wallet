@@ -1,6 +1,5 @@
 package com.gemwallet.android.ui.models.name
 
-import com.gemwallet.android.ext.display
 import com.gemwallet.android.ext.validateRecipient
 import com.wallet.core.primitives.Chain
 import kotlinx.coroutines.CoroutineScope
@@ -67,7 +66,7 @@ class AddressInputModel(private val nameService: GemNameServiceInterface, scope:
     }
 
     fun markInvalid(rejection: GemRecipientException) {
-        _error.value = _chain.value?.let { rejection.display(it) }
+        _error.value = rejection.display()
     }
 
     fun reset() {
