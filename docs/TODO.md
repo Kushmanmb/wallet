@@ -53,7 +53,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 [ARCHITECTURE.md § 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android): a case that only forwards a Core call is migration debt — delete it and call the service. iOS has none left; Android has one class and one case, plus two sites that show a raw exception where every other screen shows Core's text.
 
-- **F4** **S** `android/features/bridge/viewmodels/.../WCRequestViewModel.kt` injects three Core services (wallet connect, sign message, metadata) — the narrow-cases rule; the request screen record comes from one service.
 
 
 
@@ -130,6 +129,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**F4 (2026-09-19).** Closed as correct: `WCRequestViewModel` calls one Core service, the WalletConnect one. `GemApplicationMetadataService` is a dependency-free rule object (iOS holds the same one as `.shared`), which [SERVICES.md](SERVICES.md) exempts, and the sign-message service is handed to the `WCRequest.SignMessage` review model the view model vends, the same split iOS makes between its request handler and `SignMessageSceneViewModel`.
 
 What each section of the 2026-09-15 and 2026-09-16 sweeps measured, what landed, and why the rest closed — kept so the same lead is not re-raised with the same answer. Commits carry the detail.
 
