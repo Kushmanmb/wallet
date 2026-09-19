@@ -29,10 +29,10 @@ impl GemRecipientService {
         self.names.recipient(chain, input, state, memo, references)
     }
 
-    pub fn recipient_sections(&self, wallets: Vec<Wallet>, chain: Chain, has_contacts: bool) -> Vec<GemRecipientSection> {
+    pub fn recipient_sections(&self, wallets: Vec<Wallet>, chain: Chain, contacts: Vec<GemRecipient>) -> Vec<GemRecipientSection> {
         let current = self.session.get_current_wallet_id().unwrap_or_default();
         let others = wallets.into_iter().filter(|wallet| Some(&wallet.id) != current.as_ref()).collect();
-        recipient_sections(others, chain, has_contacts)
+        recipient_sections(others, chain, contacts)
     }
 
     pub fn scan(&self, url: String, recipient_type: GemRecipientType) -> Result<GemRecipientScan, GemRecipientError> {

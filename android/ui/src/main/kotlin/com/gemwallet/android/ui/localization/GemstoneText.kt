@@ -46,7 +46,7 @@ import com.gemwallet.android.model.text
 import uniffi.gemstone.GemBalanceRowValue
 import uniffi.gemstone.FeeUnitType
 import uniffi.gemstone.GemLocalizedText
-import uniffi.gemstone.GemRecipientSection
+import uniffi.gemstone.GemRecipientSectionKind
 import uniffi.gemstone.GemTransactionFilter
 import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStateTone
@@ -380,11 +380,11 @@ fun GemCandleTooltipRow.stringRes(): Int = when (this) {
 }
 
 @StringRes
-fun GemRecipientSection.stringRes(): Int = when (this) {
-    is GemRecipientSection.Pinned -> R.string.common_pinned
-    is GemRecipientSection.Contacts -> R.string.contacts_title
-    is GemRecipientSection.Wallets -> R.string.transfer_recipient_my_wallets
-    is GemRecipientSection.ViewWallets -> R.string.transfer_recipient_view_wallets
+fun GemRecipientSectionKind.stringRes(): Int = when (this) {
+    GemRecipientSectionKind.PINNED -> R.string.common_pinned
+    GemRecipientSectionKind.CONTACTS -> R.string.contacts_title
+    GemRecipientSectionKind.WALLETS -> R.string.transfer_recipient_my_wallets
+    GemRecipientSectionKind.VIEW_WALLETS -> R.string.transfer_recipient_view_wallets
 }
 
 fun GemBalanceResource.titleRes(): Int = when (this) {

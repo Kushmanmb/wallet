@@ -1,7 +1,7 @@
-use primitives::{Asset, Chain, ChainAsset, NFTAsset, Wallet};
+use primitives::{Asset, Chain, ChainAsset, NFTAsset};
 
 use crate::payment::GemPaymentRecipient;
-use crate::services::transfer::GemTransferData;
+use crate::services::transfer::{GemRecipient, GemTransferData};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemRecipientValidation {
@@ -83,10 +83,23 @@ pub enum GemRecipientNext {
     Confirm { transfer: GemTransferData },
 }
 
-#[derive(Debug, Clone, uniffi::Enum)]
-pub enum GemRecipientSection {
-    Pinned { wallets: Vec<Wallet> },
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemRecipientSectionKind {
+    Pinned,
     Contacts,
-    Wallets { wallets: Vec<Wallet> },
-    ViewWallets { wallets: Vec<Wallet> },
+    Wallets,
+    ViewWallets,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemRecipientRow {
+    pub title: String,
+    pub subtitle: String,
+    pub recipient: GemRecipient,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemRecipientSection {
+    pub kind: GemRecipientSectionKind,
+    pub rows: Vec<GemRecipientRow>,
 }

@@ -9,7 +9,7 @@ import enum Gemstone.GemAmountError
 import enum Gemstone.GemAmountTitle
 import enum Gemstone.GemConfirmButtonKind
 import enum Gemstone.GemConfirmDestination
-import enum Gemstone.GemRecipientSection
+import enum Gemstone.GemRecipientSectionKind
 import enum Gemstone.GemConfirmError
 import enum Gemstone.GemConfirmErrorDisplay
 import enum Gemstone.GemConfirmTitle
@@ -161,7 +161,7 @@ extension GemConfirmDestination {
     }
 }
 
-extension GemRecipientSection {
+extension GemRecipientSectionKind {
     var title: String {
         switch self {
         case .pinned: Localized.Common.pinned

@@ -3,7 +3,6 @@
 import enum Gemstone.GemImage
 import struct Gemstone.GemPaymentRecipient
 import struct Gemstone.GemRecipient
-import enum Gemstone.GemRecipientSection
 import protocol Gemstone.GemNameServiceProtocol
 import protocol Gemstone.GemRecipientServiceProtocol
 import enum Gemstone.GemRecipientType
@@ -107,12 +106,12 @@ public final class RecipientSceneViewModel {
     }
 
     var recipientSections: [ListItemValueSection<GemRecipient>] {
-        service.recipientSections(wallets: walletsQuery.value, chain: asset.chain, hasContacts: contacts.isNotEmpty)
+        service.recipientSections(wallets: walletsQuery.value, chain: asset.chain, contacts: contactRecipients)
             .map {
                 ListItemValueSection(
-                    section: $0.title,
-                    image: $0.image,
-                    values: sectionRecipients(for: $0),
+                    section: $0.kind.title,
+                    image: $0.kind.image,
+                    values: $0.rows.map { ListItemValue(title: $0.title, subtitle: $0.subtitle, value: $0.recipient) },
                 )
             }
     }
@@ -187,12 +186,9 @@ extension RecipientSceneViewModel {
 // MARK: - Private
 
 extension RecipientSceneViewModel {
-    private func sectionRecipients(for section: GemRecipientSection) -> [ListItemValue<GemRecipient>] {
-        switch section {
-        case .contacts:
-            ContactRecipientSectionViewModel(contacts: contacts).listItems
-        case let .pinned(wallets), let .wallets(wallets), let .viewWallets(wallets):
-            WalletRecipientSectionViewModel(wallets: wallets.map { $0.toPrimitives() }, chain: asset.chain).listItems
+    private var contactRecipients: [GemRecipient] {
+        contacts.flatMap { data in
+            data.addresses.map { GemRecipient(address: $0.address, name: data.contact.name, memo: $0.memo) }
         }
     }
 

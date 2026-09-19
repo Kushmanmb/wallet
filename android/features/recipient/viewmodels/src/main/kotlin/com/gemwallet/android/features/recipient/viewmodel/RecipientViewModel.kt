@@ -57,7 +57,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import uniffi.gemstone.GemAddressService
 import uniffi.gemstone.GemNameRecordState
 import uniffi.gemstone.GemNameServiceInterface
 import uniffi.gemstone.GemPaymentRecipient
@@ -79,7 +78,6 @@ class RecipientViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val service: GemRecipientServiceInterface,
     nameService: GemNameServiceInterface,
-    private val addressService: GemAddressService,
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -139,8 +137,8 @@ class RecipientViewModel @Inject constructor(
     val sections: StateFlow<List<ListSection<RecipientRowUIModel>>> = combine(wallets, contacts, state) { wallets, contacts, state ->
         when (state) {
             RecipientState.Loading -> emptyList()
-            is RecipientState.Ready -> service.recipientSections(wallets, state.asset.chain.string, contacts.isNotEmpty())
-                .mapIndexed { index, section -> section.uiSection(index.toString(), context, addressService, contacts, state.asset.chain) }
+            is RecipientState.Ready -> service.recipientSections(wallets, state.asset.chain.string, contacts.map { GemRecipient(address = it.address, name = it.name, memo = it.memo) })
+                .mapIndexed { index, section -> section.uiSection(index.toString(), context) }
         }
     }
         .flowOn(Dispatchers.IO)
