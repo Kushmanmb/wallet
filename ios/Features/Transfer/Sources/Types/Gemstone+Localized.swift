@@ -43,6 +43,7 @@ extension GemConfirmButtonKind {
         switch self {
         case .confirm: Localized.Transfer.confirm
         case .retry: Localized.Common.tryAgain
+        case .accountMissing: Localized.Errors.walletAccountMissing
         }
     }
 }

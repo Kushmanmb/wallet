@@ -26,7 +26,7 @@ import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.confirm.models.ConfirmDetailElement
 import com.gemwallet.android.features.confirm.viewmodels.localization.broadcastLabel
-import com.gemwallet.android.features.confirm.viewmodels.localization.buttonLabel
+import com.gemwallet.android.features.confirm.viewmodels.localization.label
 import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetRequest
 import com.gemwallet.android.features.confirm.viewmodels.models.AcquireOptionUIModel
 import com.gemwallet.android.features.confirm.viewmodels.models.ConfirmHeaderUIModel
@@ -346,7 +346,7 @@ class ConfirmViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean> = screen.map { it.phase == GemConfirmPhase.LOADING }
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    val buttonLabel: StateFlow<String> = combine(screen, button) { screen, button -> screen.buttonLabel(context, button.kind) }
+    val buttonLabel: StateFlow<String> = button.map { it.kind.label(context) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, context.getString(R.string.transfer_confirm))
 
     val buttonState: StateFlow<ButtonState> = button.map { it.state.buttonState() }

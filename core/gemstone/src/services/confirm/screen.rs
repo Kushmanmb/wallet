@@ -15,6 +15,10 @@ impl GemConfirmScreen {
         }
     }
 
+    fn is_account_missing(&self) -> bool {
+        self.failure.as_ref().is_some_and(|failure| failure.error.is_account_missing())
+    }
+
     fn failed(&self, stage: GemConfirmStage, error: GemConfirmError) -> Self {
         Self {
             phase: GemConfirmPhase::Failed,
@@ -30,6 +34,7 @@ impl GemConfirmScreen {
         let button = |kind, state| GemConfirmButton { kind, state };
         match self.phase {
             GemConfirmPhase::Loading | GemConfirmPhase::Confirming => button(GemConfirmButtonKind::Confirm, GemConfirmButtonState::Loading),
+            GemConfirmPhase::Failed if self.is_account_missing() => button(GemConfirmButtonKind::AccountMissing, GemConfirmButtonState::Disabled),
             GemConfirmPhase::Failed => button(GemConfirmButtonKind::Retry, GemConfirmButtonState::Enabled),
             GemConfirmPhase::Ready if self.failure.is_some() || self.has_critical_warning => button(GemConfirmButtonKind::Confirm, GemConfirmButtonState::Disabled),
             GemConfirmPhase::Ready => button(GemConfirmButtonKind::Confirm, GemConfirmButtonState::Enabled),
@@ -47,6 +52,7 @@ impl GemConfirmScreen {
     pub fn action(&self) -> Option<GemConfirmAction> {
         match self.phase {
             GemConfirmPhase::Loading | GemConfirmPhase::Confirming => None,
+            GemConfirmPhase::Failed if self.is_account_missing() => None,
             GemConfirmPhase::Failed => Some(GemConfirmAction::Load),
             GemConfirmPhase::Ready if self.failure.is_some() => None,
             GemConfirmPhase::Ready => Some(GemConfirmAction::Execute),
@@ -107,6 +113,21 @@ mod tests {
 
     use super::super::model::{GemConfirmData, GemConfirmPreload};
     use super::*;
+
+    #[test]
+    fn test_a_missing_account_offers_no_retry() {
+        let missing = GemConfirmScreen::initial(None).on_load_failed(GemConfirmError::AccountMissing { chain: Chain::Tron });
+
+        assert_eq!(
+            missing.button(),
+            GemConfirmButton {
+                kind: GemConfirmButtonKind::AccountMissing,
+                state: GemConfirmButtonState::Disabled
+            }
+        );
+        assert_eq!(missing.action(), None);
+        assert_eq!(GemConfirmScreen::initial(None).on_load_failed(GemConfirmError::Offline).action(), Some(GemConfirmAction::Load));
+    }
 
     #[test]
     fn test_confirm_button_follows_the_phase_and_the_ready_checks() {

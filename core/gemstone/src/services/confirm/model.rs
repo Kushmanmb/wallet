@@ -266,6 +266,7 @@ pub enum GemConfirmAction {
 pub enum GemConfirmButtonKind {
     Confirm,
     Retry,
+    AccountMissing,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, uniffi::Enum)]

@@ -66,6 +66,31 @@ pub enum GemConfirmError {
     Cancelled,
 }
 
+impl GemConfirmError {
+    pub(crate) fn is_account_missing(&self) -> bool {
+        match self {
+            Self::AccountMissing { .. } => true,
+            Self::ScanMalicious
+            | Self::ScanMemoRequired { .. }
+            | Self::FeeRatesMissing
+            | Self::Offline
+            | Self::Network { .. }
+            | Self::Load { .. }
+            | Self::Broadcast { .. }
+            | Self::Record { .. }
+            | Self::BalanceMissing { .. }
+            | Self::InsufficientBalance { .. }
+            | Self::InsufficientNetworkFee { .. }
+            | Self::MinimumAccountBalanceTooLow { .. }
+            | Self::BelowSwapMinimum { .. }
+            | Self::SenderMismatch { .. }
+            | Self::Sign { .. }
+            | Self::ApprovalInvalid { .. }
+            | Self::Cancelled => false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemConfirmErrorDisplay {
     Offline,

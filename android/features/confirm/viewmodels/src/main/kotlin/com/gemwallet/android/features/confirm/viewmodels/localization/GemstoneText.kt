@@ -86,10 +86,10 @@ fun GemConfirmDestination.title(): Int = when (this) {
     is GemConfirmDestination.Provider -> R.string.common_provider
 }
 
-internal fun GemConfirmScreen.buttonLabel(context: Context, kind: GemConfirmButtonKind): String = when {
-    failure?.error is GemConfirmException.AccountMissing -> context.getString(R.string.errors_wallet_account_missing)
-    kind == GemConfirmButtonKind.RETRY -> context.getString(R.string.common_try_again)
-    else -> context.getString(R.string.transfer_confirm)
+internal fun GemConfirmButtonKind.label(context: Context): String = when (this) {
+    GemConfirmButtonKind.CONFIRM -> context.getString(R.string.transfer_confirm)
+    GemConfirmButtonKind.RETRY -> context.getString(R.string.common_try_again)
+    GemConfirmButtonKind.ACCOUNT_MISSING -> context.getString(R.string.errors_wallet_account_missing)
 }
 
 internal fun Throwable.broadcastLabel(context: Context): String = (this as? GemConfirmException)?.display()?.text(context)
