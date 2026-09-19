@@ -38,7 +38,7 @@ For Core crates with `default = []`, per-crate `cargo clippy -p <crate>` and `ca
 
 ## Format every platform you touched
 
-Run the formatter for each platform your change touched, before the closing checks. All three share a 240 column width and take about a second:
+Run the formatter for each platform your change touched, before the closing checks:
 
 | Platform | Command |
 |---|---|
@@ -46,7 +46,7 @@ Run the formatter for each platform your change touched, before the closing chec
 | iOS | `cd ios && just format` |
 | Android | `cd android && just format` (`just android format-all` sweeps every file) |
 
-Each is idempotent, so running it when nothing changed costs nothing. Formatting last keeps generated output and hand-written code in one style: `just generate-models` already formats the Rust it writes, so regenerating never fights `just format`.
+Each is idempotent and takes about a second, so running it when nothing changed costs nothing. `just generate-models` formats the Rust it writes, so regenerating never fights `just format`.
 
 Except for documentation-only changes, closing a task requires at least one real build or test command for the changed area. Do not substitute `git diff`, static inspection, or reasoning for execution. If execution is blocked by unrelated repo state, include the exact command and the blocking failure in the handoff.
 
