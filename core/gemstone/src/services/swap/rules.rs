@@ -137,7 +137,8 @@ pub fn swap_rate(from_asset: &Asset, from_value: &BigUint, to_asset: &Asset, to_
 }
 
 fn amount(value: &BigUint, decimals: i32) -> Option<f64> {
-    BigNumberFormatter::value_as_f64(&value.to_string(), u32::try_from(decimals).ok()?).ok()
+    let decimals = u32::try_from(decimals).ok()?;
+    Some(BigNumberFormatter::f64_value(value, decimals))
 }
 
 fn asset_rate(base: &Asset, quote: &Asset, value: f64) -> GemAssetRate {

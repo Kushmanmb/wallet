@@ -288,7 +288,7 @@ fn value_tone(value: &GemTransactionRowValue) -> GemValueTone {
 }
 
 fn amount_value(amount: GemTransactionAmount) -> GemTransactionRowValue {
-    let value = BigNumberFormatter::value_as_f64(&amount.value.to_string(), amount.asset.decimals as u32).unwrap_or_default();
+    let value = BigNumberFormatter::f64_value(&amount.value, amount.asset.decimals as u32);
     GemTransactionRowValue::Number {
         number: GemFormattedNumber::amount(value, Some(amount.asset.symbol), GemValueStyle::Short),
         sign: amount.sign,
@@ -304,7 +304,7 @@ fn row_value(extended: &TransactionExtended, value: GemTransactionValue) -> GemT
         GemTransactionValue::SwapReceived => swap_leg(extended, SwapLeg::To, GemAmountSign::Incoming).map_or(GemTransactionRowValue::None, amount_value),
         GemTransactionValue::SwapSpent => swap_leg(extended, SwapLeg::From, GemAmountSign::Outgoing).map_or(GemTransactionRowValue::None, amount_value),
         GemTransactionValue::PerpetualNotional => perpetual_collateral_asset()
-            .and_then(|asset| BigNumberFormatter::value_as_f64(&transaction.value.to_string(), asset.decimals as u32).ok())
+            .map(|asset| BigNumberFormatter::f64_value(&transaction.value, asset.decimals as u32))
             .map_or(GemTransactionRowValue::None, |value| GemTransactionRowValue::Number {
                 number: GemFormattedNumber::usd(value),
                 sign: GemAmountSign::None,

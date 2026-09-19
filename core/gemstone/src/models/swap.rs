@@ -46,7 +46,7 @@ impl GemSwapValue {
 
     pub fn fiat_value(&self) -> Option<f64> {
         let price = self.price?;
-        let amount = BigNumberFormatter::value_as_f64(&self.value.to_string(), self.decimals).ok()?;
+        let amount = BigNumberFormatter::f64_value(&self.value, self.decimals);
         Some(amount * price)
     }
 }

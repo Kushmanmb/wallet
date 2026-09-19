@@ -212,7 +212,7 @@ pub struct GemBalanceRecord {
 impl GemBalanceRecord {
     pub fn new(balance: GemAssetBalance, decimals: u32) -> Self {
         let value = |amount: GemBigUint| GemBalanceValue {
-            amount: BigNumberFormatter::value_as_f64(&amount.to_string(), decimals).unwrap_or_default(),
+            amount: BigNumberFormatter::f64_value(&amount, decimals),
             value: amount,
         };
         Self {

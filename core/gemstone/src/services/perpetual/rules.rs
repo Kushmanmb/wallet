@@ -13,16 +13,16 @@ use primitives::{
 use super::model::{
     GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine,
     GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSection,
-    GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionDetailRow, GemPerpetualPositionKind,
-    GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
+    GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionDetailRow,
+    GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
-use crate::models::placeholder::EMPTY_VALUE;
-use crate::services::localization::{GemLocalizedText, GemTriggerOrder};
 use crate::models::custom_types::GemBigInt;
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
+use crate::models::placeholder::EMPTY_VALUE;
 use crate::perpetual::GemPerpetual;
 use crate::services::error::GemServiceError;
+use crate::services::localization::{GemLocalizedText, GemTriggerOrder};
 use crate::services::transfer::GemTransferData;
 use num_bigint::BigUint;
 use primitives::{PerpetualConfirmData, PerpetualModifyConfirmData, PerpetualModifyPositionType, PerpetualReduceData, PerpetualType};
@@ -305,7 +305,7 @@ pub fn collateral_price(chain: Chain) -> Option<AssetPrice> {
 }
 
 pub fn order(provider: PerpetualProvider, input: GemPerpetualOrderInput) -> PerpetualType {
-    let usd_amount = input.usdc_value.to_string().parse::<f64>().unwrap_or_default() / 10f64.powi(input.usdc_decimals);
+    let usd_amount = BigNumberFormatter::f64_value(&input.usdc_value, u32::try_from(input.usdc_decimals).unwrap_or_default());
     let slippage = slippage_percent(input.slippage);
     let (size, fiat_value, margin_amount) = order_amounts(usd_amount, input.leverage, input.price);
     let price = slippage_price(input.price, input.direction.clone(), input.action.opens_position(), slippage);
@@ -644,7 +644,10 @@ pub fn position_details(position: &PerpetualPosition) -> Vec<GemPerpetualPositio
         ),
     };
     [
-        (GemPerpetualPositionDetailRow::Pnl, Some(label(GemListRowTitle::Pnl, pnl, GemValueTone::of(position.pnl), None))),
+        (
+            GemPerpetualPositionDetailRow::Pnl,
+            Some(label(GemListRowTitle::Pnl, pnl, GemValueTone::of(position.pnl), None)),
+        ),
         (
             GemPerpetualPositionDetailRow::Autoclose,
             Some(GemListRow::Lines {
@@ -653,10 +656,19 @@ pub fn position_details(position: &PerpetualPosition) -> Vec<GemPerpetualPositio
                 info: Some(GemInfoTopic::AutoClose),
             }),
         ),
-        (GemPerpetualPositionDetailRow::Size, Some(amount(GemListRowTitle::Size, GemFormattedNumber::usd(position.size_value), None))),
-        (GemPerpetualPositionDetailRow::EntryPrice, Some(amount(GemListRowTitle::EntryPrice, GemFormattedNumber::usd(position.entry_price), None))),
+        (
+            GemPerpetualPositionDetailRow::Size,
+            Some(amount(GemListRowTitle::Size, GemFormattedNumber::usd(position.size_value), None)),
+        ),
+        (
+            GemPerpetualPositionDetailRow::EntryPrice,
+            Some(amount(GemListRowTitle::EntryPrice, GemFormattedNumber::usd(position.entry_price), None)),
+        ),
         (GemPerpetualPositionDetailRow::LiquidationPrice, liquidation_price),
-        (GemPerpetualPositionDetailRow::Margin, Some(label(GemListRowTitle::Margin, margin, GemValueTone::Plain, None))),
+        (
+            GemPerpetualPositionDetailRow::Margin,
+            Some(label(GemListRowTitle::Margin, margin, GemValueTone::Plain, None)),
+        ),
         (GemPerpetualPositionDetailRow::FundingPayments, Some(funding)),
     ]
     .into_iter()
@@ -671,10 +683,13 @@ fn autoclose_lines(position: &PerpetualPosition) -> Vec<GemLocalizedText> {
             price: Some(GemFormattedNumber::usd(trigger.price)),
         })
     };
-    let lines: Vec<GemLocalizedText> = [line(GemTriggerOrder::TakeProfit, &position.take_profit), line(GemTriggerOrder::StopLoss, &position.stop_loss)]
-        .into_iter()
-        .flatten()
-        .collect();
+    let lines: Vec<GemLocalizedText> = [
+        line(GemTriggerOrder::TakeProfit, &position.take_profit),
+        line(GemTriggerOrder::StopLoss, &position.stop_loss),
+    ]
+    .into_iter()
+    .flatten()
+    .collect();
     match lines.is_empty() {
         true => vec![GemLocalizedText::Text { text: EMPTY_VALUE.to_string() }],
         false => lines,
@@ -715,8 +730,8 @@ pub fn modify_buttons() -> Vec<GemPerpetualButton> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::services::perpetual::model::GemPerpetualMarketSession;
     use crate::services::amount::{GemAmountPerpetualPosition, GemAmountType, rules::perpetual_amount_type};
+    use crate::services::perpetual::model::GemPerpetualMarketSession;
     use num_bigint::BigInt;
     use num_bigint::BigUint;
     use primitives::PerpetualTriggerOrder;
@@ -830,7 +845,10 @@ mod tests {
                 None,
                 None,
             )),
-            Some(row(vec![order(GemTriggerOrder::TakeProfit, Some(65000.0)), order(GemTriggerOrder::StopLoss, Some(55000.0))]))
+            Some(row(vec![
+                order(GemTriggerOrder::TakeProfit, Some(65000.0)),
+                order(GemTriggerOrder::StopLoss, Some(55000.0))
+            ]))
         );
         assert_eq!(
             autoclose_row(&PerpetualModifyConfirmData::mock(
@@ -854,7 +872,11 @@ mod tests {
             "a replaced order is not a cleared one"
         );
         assert_eq!(
-            autoclose_row(&PerpetualModifyConfirmData::mock(vec![PerpetualModifyPositionType::mock_tpsl(None, Some("50000"))], None, None)),
+            autoclose_row(&PerpetualModifyConfirmData::mock(
+                vec![PerpetualModifyPositionType::mock_tpsl(None, Some("50000"))],
+                None,
+                None
+            )),
             Some(row(vec![order(GemTriggerOrder::StopLoss, Some(50000.0))]))
         );
 
@@ -918,7 +940,13 @@ mod tests {
         );
         assert!(matches!(
             row(GemPerpetualPositionDetailRow::Margin),
-            GemListRow::Label { text: GemLocalizedText::Margin { margin_type: PerpetualMarginType::Cross, .. }, .. }
+            GemListRow::Label {
+                text: GemLocalizedText::Margin {
+                    margin_type: PerpetualMarginType::Cross,
+                    ..
+                },
+                ..
+            }
         ));
         assert_eq!(
             position_details(&PerpetualPosition::mock())

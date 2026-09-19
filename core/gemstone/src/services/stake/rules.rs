@@ -19,9 +19,9 @@ use crate::config::image::GemImage;
 use crate::config::stake::EARN_OFFERED;
 use crate::duration_formatter::{GemDurationPart, countdown_parts, day_parts};
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
-use crate::percentage::GemPercentageStyle;
 use crate::models::custom_types::GemBigUint;
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowIcon, GemListRowTitle, GemUrlTarget};
+use crate::percentage::GemPercentageStyle;
 use crate::precision::GemValueStyle;
 use crate::services::balance::{GemAssetBalance, GemBalanceRow};
 use crate::services::error::GemServiceError;
@@ -244,8 +244,7 @@ pub fn stake_info_rows(asset: &Asset, staking_apr: Option<f64>) -> Vec<GemListRo
             info: Some(GemInfoTopic::StakeLockTime),
         }),
         (minimum > BigInt::ZERO)
-            .then(|| BigNumberFormatter::value_as_f64(&minimum.to_string(), asset.decimals as u32).ok())
-            .flatten()
+            .then(|| BigNumberFormatter::f64_value(&minimum, asset.decimals as u32))
             .map(|value| GemListRow::Amount {
                 title: GemListRowTitle::MinimumAmount,
                 amount: GemFormattedNumber::amount(value, Some(asset.symbol.clone()), GemValueStyle::Auto),
@@ -383,9 +382,11 @@ pub fn stake_actions(wallet_type: WalletType, chain: Chain, has_validators: bool
 
 fn rewards_amount(chain: Chain, rewards: &BigUint) -> Option<GemFormattedNumber> {
     let asset = Asset::from_chain(chain);
-    BigNumberFormatter::value_as_f64(&rewards.to_string(), asset.decimals as u32)
-        .ok()
-        .map(|value| GemFormattedNumber::amount(value, Some(asset.symbol), GemValueStyle::Auto))
+    Some(GemFormattedNumber::amount(
+        BigNumberFormatter::f64_value(rewards, asset.decimals as u32),
+        Some(asset.symbol),
+        GemValueStyle::Auto,
+    ))
 }
 
 pub fn claim_rewards(chain: Chain, delegations: Vec<Delegation>) -> GemClaimRewards {
@@ -715,9 +716,15 @@ mod tests {
         };
         assert_eq!(validator_row(&earn).provider, Some(YieldProvider::Yo));
 
-        let paying = DelegationValidator { apr: 5.0, ..DelegationValidator::mock() };
+        let paying = DelegationValidator {
+            apr: 5.0,
+            ..DelegationValidator::mock()
+        };
         assert_eq!(validator_row(&paying).apr, Some(GemFormattedNumber::percentage(5.0, GemPercentageStyle::Unsigned)));
-        let idle = DelegationValidator { apr: 0.0, ..DelegationValidator::mock() };
+        let idle = DelegationValidator {
+            apr: 0.0,
+            ..DelegationValidator::mock()
+        };
         assert_eq!(validator_row(&idle).apr, None, "a validator paying nothing shows no rate");
 
         let unknown = DelegationValidator {

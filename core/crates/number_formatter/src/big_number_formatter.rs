@@ -41,6 +41,13 @@ impl BigNumberFormatter {
             .ok_or_else(|| NumberFormatterError::ConversionError("Cannot convert to f64".to_string()))
     }
 
+    pub fn f64_value(value: impl std::fmt::Display, decimals: u32) -> f64 {
+        Self::big_decimal_value(&value.to_string(), decimals)
+            .ok()
+            .and_then(|value| value.to_f64())
+            .unwrap_or_default()
+    }
+
     pub fn value_as_u64(value: &str, decimals: u32) -> Result<u64, NumberFormatterError> {
         Self::big_decimal_value(value, decimals)?
             .to_u64()
@@ -109,6 +116,17 @@ mod tests {
     use super::*;
     use bigdecimal::BigDecimal;
     use std::str::FromStr;
+
+    #[test]
+    fn test_f64_value() {
+        assert_eq!(BigNumberFormatter::f64_value(BigInt::from(123456789), 8), 1.23456789);
+        assert_eq!(BigNumberFormatter::f64_value(BigInt::from(0), 18), 0.0);
+        assert_eq!(BigNumberFormatter::f64_value(BigInt::from(-2500), 3), -2.5);
+        assert_eq!(BigNumberFormatter::f64_value(BigUint::from(1_000_000u32), 6), 1.0);
+
+        let huge = BigInt::from(10).pow(400);
+        assert!(BigNumberFormatter::f64_value(huge, 0).is_infinite(), "a value past f64 range saturates instead of failing");
+    }
 
     #[test]
     fn test_value() {

@@ -28,7 +28,7 @@ pub struct GemCustomFee {
 }
 
 pub fn fee_rate_text(unit_type: FeeUnitType, rate: &BigInt, decimals: u32, symbol: &str) -> GemLocalizedText {
-    let value = BigNumberFormatter::value_as_f64(&rate.to_string(), decimals).unwrap_or_default();
+    let value = BigNumberFormatter::f64_value(rate, decimals);
     let rate = match unit_type {
         FeeUnitType::Gwei => GemFormattedNumber::adaptive(value, None),
         FeeUnitType::SatVb => GemFormattedNumber::amount(value, None, GemValueStyle::Full),
@@ -74,7 +74,7 @@ impl GemCustomFee {
 
     pub fn placeholder(&self) -> Option<GemFormattedNumber> {
         let total = self.base_total.as_ref()?;
-        let value = BigNumberFormatter::value_as_f64(&total.to_string(), self.unit_decimals).unwrap_or_default();
+        let value = BigNumberFormatter::f64_value(total, self.unit_decimals);
         Some(GemFormattedNumber::amount(value, None, GemValueStyle::Auto))
     }
 

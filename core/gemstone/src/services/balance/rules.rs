@@ -11,7 +11,7 @@ use num_bigint::BigUint;
 use number_formatter::BigNumberFormatter;
 
 pub fn balance_amount(value: &BigUint, asset: &Asset) -> GemFormattedNumber {
-    let value = BigNumberFormatter::value_as_f64(&value.to_string(), asset.decimals.unsigned_abs()).unwrap_or_default();
+    let value = BigNumberFormatter::f64_value(value, asset.decimals.unsigned_abs());
     GemFormattedNumber::amount(value, Some(asset.symbol.clone()), GemValueStyle::Auto)
 }
 
