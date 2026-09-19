@@ -222,6 +222,7 @@ impl From<GemServiceError> for GemConfirmError {
     fn from(error: GemServiceError) -> Self {
         match error {
             GemServiceError::Cancelled => Self::Cancelled,
+            GemServiceError::Offline => Self::Offline,
             error => Self::Load { msg: error.to_string() },
         }
     }
@@ -259,6 +260,7 @@ mod tests {
     #[test]
     fn test_a_cancelled_keystore_prompt_is_a_cancel_not_a_load_failure() {
         assert!(matches!(GemConfirmError::from(GemServiceError::Cancelled), GemConfirmError::Cancelled));
+        assert!(matches!(GemConfirmError::from(GemServiceError::Offline), GemConfirmError::Offline));
         assert!(matches!(
             GemConfirmError::from(GemServiceError::Store { msg: "x".to_string() }),
             GemConfirmError::Load { .. }

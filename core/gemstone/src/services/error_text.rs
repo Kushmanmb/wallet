@@ -33,6 +33,7 @@ impl GemServiceError {
             | Self::InvalidInput { msg }
             | Self::NotFound { msg }
             | Self::Unsupported { msg } => GemErrorText::Message { text: msg.clone() },
+            Self::Offline => GemErrorText::NetworkOffline,
             Self::Cancelled => GemErrorText::Cancelled,
         }
     }
@@ -102,6 +103,7 @@ pub fn payment_error_text(error: GemPaymentError) -> GemErrorText {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::api::GemApiError;
 
     #[test]
     fn test_a_transport_message_is_named_apart_from_a_service_message() {
@@ -111,6 +113,12 @@ mod tests {
             "a transport failure reads as a network error on both apps"
         );
         assert_eq!(alien_error_text(AlienError::Offline), GemErrorText::NetworkOffline);
+        assert_eq!(GemServiceError::from(GatewayError::Offline).text(), GemErrorText::NetworkOffline);
+        assert_eq!(
+            GemServiceError::from(GemApiError::Network { msg: AlienError::Offline.to_string() }).text(),
+            GemErrorText::NetworkOffline
+        );
+        assert_ne!(GemServiceError::from(GatewayError::NetworkError { msg: "reset".to_string() }).text(), GemErrorText::NetworkOffline);
         assert_eq!(alien_error_text(AlienError::Http { status: 503, len: 0 }), GemErrorText::NetworkStatus { status: 503 });
         assert_eq!(
             GatewayError::NetworkError { msg: "reverted".into() }.text(),

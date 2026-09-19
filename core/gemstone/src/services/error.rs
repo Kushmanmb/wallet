@@ -1,4 +1,5 @@
 use crate::GemstoneError;
+use crate::alien::AlienError;
 use crate::api::GemApiError;
 use crate::gateway::GatewayError;
 
@@ -12,6 +13,7 @@ pub enum GemServiceError {
     InvalidInput { msg: String },
     NotFound { msg: String },
     Unsupported { msg: String },
+    Offline,
     Cancelled,
 }
 
@@ -26,6 +28,7 @@ impl std::fmt::Display for GemServiceError {
             | Self::InvalidInput { msg }
             | Self::NotFound { msg }
             | Self::Unsupported { msg } => write!(f, "{msg}"),
+            Self::Offline => write!(f, "network offline"),
             Self::Cancelled => write!(f, "cancelled"),
         }
     }
@@ -41,13 +44,19 @@ impl From<uniffi::UnexpectedUniFFICallbackError> for GemServiceError {
 
 impl From<GemApiError> for GemServiceError {
     fn from(error: GemApiError) -> Self {
-        Self::Api { msg: error.to_string() }
+        match error {
+            GemApiError::Network { msg } if msg.contains(&AlienError::Offline.to_string()) => Self::Offline,
+            error => Self::Api { msg: error.to_string() },
+        }
     }
 }
 
 impl From<GatewayError> for GemServiceError {
     fn from(error: GatewayError) -> Self {
-        Self::Gateway { msg: error.to_string() }
+        match error {
+            GatewayError::Offline => Self::Offline,
+            error => Self::Gateway { msg: error.to_string() },
+        }
     }
 }
 
