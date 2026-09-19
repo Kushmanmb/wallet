@@ -11,7 +11,6 @@ pub enum GemWalletConnectError {
 
 #[uniffi::export]
 impl GemWalletConnectError {
-    /// The CAIP-25 reason a proposal that failed with this error is rejected for.
     pub fn rejection_reason(&self) -> GemWalletConnectRejectionReason {
         match self {
             Self::UnsupportedChains => GemWalletConnectRejectionReason::UnsupportedChains,

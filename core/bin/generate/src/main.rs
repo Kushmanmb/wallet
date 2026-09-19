@@ -112,7 +112,6 @@ fn write_generated(path: &str, contents: String) {
     }
 }
 
-/// Generated Rust goes through the workspace formatter so that regenerating never fights `just format`.
 fn format_rust(path: &Path) {
     let status = Command::new("rustfmt").arg(path).status().expect("failed to run rustfmt");
     assert!(status.success(), "rustfmt failed on {}", path.display());
