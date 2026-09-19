@@ -1,7 +1,5 @@
 package com.gemwallet.android.features.stake.viewmodels
 
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import com.gemwallet.android.domains.confirm.ConfirmTransferInput
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
@@ -13,8 +11,10 @@ import com.gemwallet.android.application.assets.cases.GetWalletAssets
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.stake.cases.GetDelegations
 import com.gemwallet.android.application.stake.cases.GetValidators
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.domains.asset.stakeChain
+import com.gemwallet.android.domains.confirm.ConfirmTransferInput
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
@@ -31,7 +31,6 @@ import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Delegation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,6 +54,7 @@ import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemStakeServiceInterface
 import uniffi.gemstone.validatorRow
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -170,12 +170,7 @@ class StakeViewModel @Inject constructor(
         sync.update { true }
     }
 
-    fun onDelegation(
-        delegation: Delegation,
-        onOpenDetail: (String, String) -> Unit,
-        onAmount: AmountTransactionAction,
-        onConfirm: ConfirmTransactionAction,
-    ) {
+    fun onDelegation(delegation: Delegation, onOpenDetail: (String, String) -> Unit, onAmount: AmountTransactionAction, onConfirm: ConfirmTransactionAction) {
         val walletType = walletType.value ?: return
         val assetInfo = assetInfo.value ?: return
         when (val destination = stakeService.delegationDestination(walletType.toGem(), assetInfo.asset.toGem(), delegation.toGem())) {

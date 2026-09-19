@@ -36,9 +36,7 @@ internal fun ClipboardManager.setClip(context: Context, data: String, isSensitiv
     }
 }
 
-fun ClipboardManager.getPlainText(): String? {
-    return primaryClip?.getItemAt(0)?.text?.toString()
-}
+fun ClipboardManager.getPlainText(): String? = primaryClip?.getItemAt(0)?.text?.toString()
 
 fun ClipboardManager.clear() {
     clearPrimaryClip()

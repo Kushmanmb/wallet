@@ -9,9 +9,9 @@ import com.gemwallet.android.features.settings.networks.viewmodels.models.Servic
 import com.gemwallet.android.features.settings.networks.viewmodels.models.uiModel
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
+import com.gemwallet.android.ui.style.textStyle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,13 +21,10 @@ import kotlinx.coroutines.supervisorScope
 import uniffi.gemstone.GemLatencyStatus
 import uniffi.gemstone.GemServiceEndpoint
 import uniffi.gemstone.GemServiceStatusInterface
-import com.gemwallet.android.ui.style.textStyle
+import javax.inject.Inject
 
 @HiltViewModel
-class ServiceStatusViewModel @Inject constructor(
-    private val serviceStatus: GemServiceStatusInterface,
-    @param:ApplicationContext private val context: Context,
-) : ViewModel() {
+class ServiceStatusViewModel @Inject constructor(private val serviceStatus: GemServiceStatusInterface, @param:ApplicationContext private val context: Context) : ViewModel() {
     private val endpoints = serviceStatus.getEndpoints()
 
     private val _uiState = MutableStateFlow(ServiceStatusUIState(rows = loadingRows()))
@@ -58,13 +55,10 @@ class ServiceStatusViewModel @Inject constructor(
                     }
                 }
             }
-
         }
     }
 
-    private fun loadingRows(): List<ServiceStatusRowUiModel> {
-        return endpoints.map { it.toRow(GemLatencyStatus.Loading, context) }
-    }
+    private fun loadingRows(): List<ServiceStatusRowUiModel> = endpoints.map { it.toRow(GemLatencyStatus.Loading, context) }
 }
 
 private fun GemServiceEndpoint.toRow(statusState: GemLatencyStatus, context: Context): ServiceStatusRowUiModel {

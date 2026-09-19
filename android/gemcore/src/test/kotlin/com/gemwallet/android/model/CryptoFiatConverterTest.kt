@@ -12,7 +12,7 @@ class CryptoFiatConverterTest {
         assertEquals(
             0,
             CryptoFiatConverter.toFiat(Crypto(BigInteger("100000000")), decimals = 8, price = 50_000.0)
-                .atomicValue.compareTo(BigDecimal("50000"))
+                .atomicValue.compareTo(BigDecimal("50000")),
         )
     }
 }

@@ -4,16 +4,17 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class Appearance(val string: String) {
-	@SerialName("system")
-	System("system"),
-	@SerialName("light")
-	Light("light"),
-	@SerialName("dark")
-	Dark("dark"),
-}
+    @SerialName("system")
+    System("system"),
 
+    @SerialName("light")
+    Light("light"),
+
+    @SerialName("dark")
+    Dark("dark"),
+}

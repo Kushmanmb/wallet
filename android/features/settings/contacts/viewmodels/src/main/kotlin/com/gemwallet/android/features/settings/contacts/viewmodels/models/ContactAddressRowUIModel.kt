@@ -14,10 +14,7 @@ import com.wallet.core.primitives.ContactAddress
 import uniffi.gemstone.GemAddressFormatStyle
 import uniffi.gemstone.GemAddressServiceInterface
 
-data class ContactAddressRowUIModel(
-    val address: ContactAddress,
-    val model: ListItemModel,
-)
+data class ContactAddressRowUIModel(val address: ContactAddress, val model: ListItemModel)
 
 internal fun List<ContactAddress>.rows(addressService: GemAddressServiceInterface): List<ContactAddressRowUIModel> {
     val formatted = addressService.formatAll(map { ChainAddress(it.chain, it.address).toGem() }, GemAddressFormatStyle.Short)

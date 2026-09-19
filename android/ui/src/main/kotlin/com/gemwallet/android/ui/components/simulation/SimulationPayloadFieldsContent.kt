@@ -18,10 +18,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.PayloadField
 import uniffi.gemstone.GemSimulationPayloadValue
 
-fun LazyListScope.simulationPayloadFieldsContent(
-    fields: List<PayloadField>,
-    onDetailsClick: (() -> Unit)? = null,
-) {
+fun LazyListScope.simulationPayloadFieldsContent(fields: List<PayloadField>, onDetailsClick: (() -> Unit)? = null) {
     if (fields.isEmpty() && onDetailsClick == null) {
         return
     }
@@ -37,10 +34,12 @@ fun LazyListScope.simulationPayloadFieldsContent(
                 explorerLink = payload.explorerLink,
                 listPosition = listPosition,
             )
+
             is GemSimulationPayloadValue.Text -> ListItem(
                 model = ListItemModel(title = title, subtitle = value.text),
                 listPosition = listPosition,
             )
+
             is GemSimulationPayloadValue.Timestamp -> ListItem(
                 model = ListItemModel(title = title, subtitle = getRelativeDate(value.unixMs)),
                 listPosition = listPosition,
@@ -59,10 +58,7 @@ fun LazyListScope.simulationPayloadFieldsContent(
     }
 }
 
-fun LazyListScope.simulationPayloadDetailsContent(
-    primaryFields: List<PayloadField>,
-    secondaryFields: List<PayloadField>,
-) {
+fun LazyListScope.simulationPayloadDetailsContent(primaryFields: List<PayloadField>, secondaryFields: List<PayloadField>) {
     simulationPayloadFieldsContent(primaryFields)
     if (secondaryFields.isNotEmpty()) {
         item { SubheaderItem(R.string.common_details) }

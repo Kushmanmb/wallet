@@ -26,13 +26,7 @@ import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.theme.paddingDefault
 
 @Composable
-fun NftHeaderActions(
-    canSend: Boolean,
-    onSend: () -> Unit,
-    onRefresh: () -> Unit,
-    onSetAsAvatar: () -> Unit,
-    onReport: () -> Unit,
-) {
+fun NftHeaderActions(canSend: Boolean, onSend: () -> Unit, onRefresh: () -> Unit, onSetAsAvatar: () -> Unit, onReport: () -> Unit) {
     var actionFontSize by remember { mutableStateOf(16.sp) }
     var isMenuExpanded by remember { mutableStateOf(false) }
     val send = stringResource(R.string.wallet_send)

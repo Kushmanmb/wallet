@@ -36,9 +36,7 @@ fun mockPerpetualConfirmData(
     stopLoss = stopLoss,
 )
 
-fun mockGemPerpetualTransferData(
-    direction: PerpetualDirection = PerpetualDirection.Long,
-) = GemPerpetualTransferData(
+fun mockGemPerpetualTransferData(direction: PerpetualDirection = PerpetualDirection.Long) = GemPerpetualTransferData(
     provider = PerpetualProvider.Hypercore.toGem(),
     direction = direction.toGem(),
     asset = mockAssetHyperCoreUBTC().toGem(),

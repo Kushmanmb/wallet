@@ -26,11 +26,7 @@ import com.gemwallet.android.ui.shareText
 import com.wallet.core.primitives.AssetId
 
 @Composable
-fun RowScope.AssetDetailsMenu(
-    uiState: AssetInfoUIModel,
-    priceAlert: PriceAlertMenuUIModel,
-    onPriceAlert: (AssetId) -> Unit,
-) {
+fun RowScope.AssetDetailsMenu(uiState: AssetInfoUIModel, priceAlert: PriceAlertMenuUIModel, onPriceAlert: (AssetId) -> Unit) {
     val context = LocalContext.current
 
     var menuExpanded by remember { mutableStateOf(false) }
@@ -47,7 +43,7 @@ fun RowScope.AssetDetailsMenu(
     }
 
     IconButton(
-        onClick = enablePriceAlert
+        onClick = enablePriceAlert,
     ) {
         Icon(priceAlert.symbol.vector(), "")
     }

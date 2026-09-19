@@ -16,7 +16,6 @@ import com.wallet.core.primitives.Contact
 import com.wallet.core.primitives.ContactData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,6 +26,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemContactServiceInterface
 import uniffi.gemstone.contactRow
+import javax.inject.Inject
 
 @HiltViewModel
 class ContactsViewModel @Inject constructor(
@@ -60,5 +60,4 @@ class ContactsViewModel @Inject constructor(
     }
 
     fun clearError() = errorState.update { null }
-
 }

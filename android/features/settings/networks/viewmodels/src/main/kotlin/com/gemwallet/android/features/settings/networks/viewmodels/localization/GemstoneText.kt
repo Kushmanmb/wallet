@@ -1,14 +1,14 @@
 package com.gemwallet.android.features.settings.networks.viewmodels.localization
 
-import uniffi.gemstone.GemLatencyStatus
-import uniffi.gemstone.GemNodeRowTitle
-import uniffi.gemstone.GemNodeSubtitle
-import uniffi.gemstone.GemServiceEndpointType
 import android.content.Context
 import androidx.annotation.StringRes
 import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
+import uniffi.gemstone.GemLatencyStatus
 import uniffi.gemstone.GemNodeCheckRow
+import uniffi.gemstone.GemNodeRowTitle
+import uniffi.gemstone.GemNodeSubtitle
+import uniffi.gemstone.GemServiceEndpointType
 
 @StringRes
 internal fun GemNodeCheckRow.stringRes(): Int = when (this) {

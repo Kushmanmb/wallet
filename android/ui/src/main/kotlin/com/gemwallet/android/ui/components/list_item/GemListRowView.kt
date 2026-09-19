@@ -1,9 +1,9 @@
 package com.gemwallet.android.ui.components.list_item
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
@@ -28,14 +28,14 @@ import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkIte
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.progress.CircularProgressIndicator16
 import com.gemwallet.android.ui.icons.AppIcons
+import com.gemwallet.android.ui.localization.titleRes
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.open
+import com.gemwallet.android.ui.style.color
+import com.gemwallet.android.ui.style.icon
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.smallIconSize
-import com.gemwallet.android.ui.localization.titleRes
-import com.gemwallet.android.ui.style.color
-import com.gemwallet.android.ui.style.icon
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSection
@@ -71,6 +71,7 @@ fun GemListRowView(
             position = listPosition,
             icon = row.kind.icon(),
         )
+
         is GemListRowUIModel.Item -> GemListRowMenu(items = row.menu) { menuModifier ->
             ListItem(
                 model = row.model,
@@ -81,16 +82,19 @@ fun GemListRowView(
                     row.trailingImage != null -> {
                         { DataBadgeChevron(isShowChevron = false) { ListItemImageView(image = row.trailingImage, size = smallIconSize) } }
                     }
+
                     row.url != null || row.opensAnotherScreen -> {
                         {
                             DataBadgeChevron()
                             if (accessory != null) accessory()
                         }
                     }
+
                     else -> accessory
                 },
             )
         }
+
         is GemListRowUIModel.Icon -> Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -99,8 +103,11 @@ fun GemListRowView(
         ) {
             HeaderIcon(row.asset)
         }
+
         is GemListRowUIModel.Network -> PropertyNetworkItem(row.chain, value = row.name, listPosition = listPosition)
+
         is GemListRowUIModel.Address -> AddressCard(row = row) { clipboardManager.setCopy(context, row.copy) }
+
         is GemListRowUIModel.Toggle -> ListItem(
             model = row.model,
             listPosition = listPosition,
@@ -108,6 +115,7 @@ fun GemListRowView(
             minHeight = ListItemDefaults.plainMinHeight,
             accessory = { Switch(checked = row.isOn, onCheckedChange = { onToggle?.invoke(row.title, it) }) },
         )
+
         is GemListRowUIModel.Picker -> ListItem(
             model = row.model,
             listPosition = listPosition,
@@ -118,6 +126,7 @@ fun GemListRowView(
                 accessory?.invoke()
             },
         )
+
         is GemListRowUIModel.Social -> Column {
             row.links.forEachIndexed { index, link ->
                 ListItem(
@@ -129,6 +138,7 @@ fun GemListRowView(
                 )
             }
         }
+
         GemListRowUIModel.Loading -> Column(
             modifier = Modifier
                 .fillMaxWidth()

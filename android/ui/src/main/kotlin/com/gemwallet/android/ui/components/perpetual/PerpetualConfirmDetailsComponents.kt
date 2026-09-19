@@ -20,11 +20,7 @@ import com.gemwallet.android.ui.style.textStyle
 import uniffi.gemstone.GemPerpetualDetails
 
 @Composable
-fun PerpetualDetailsSummaryItem(
-    details: GemPerpetualDetails,
-    onClick: () -> Unit,
-    listPosition: ListPosition = ListPosition.Single,
-) {
+fun PerpetualDetailsSummaryItem(details: GemPerpetualDetails, onClick: () -> Unit, listPosition: ListPosition = ListPosition.Single) {
     ListItem(
         model = ListItemModel(
             title = stringResource(R.string.common_details),
@@ -38,11 +34,7 @@ fun PerpetualDetailsSummaryItem(
 }
 
 @Composable
-fun PerpetualDetailsBottomSheet(
-    isVisible: Boolean,
-    details: GemPerpetualDetails?,
-    onDismiss: () -> Unit,
-) {
+fun PerpetualDetailsBottomSheet(isVisible: Boolean, details: GemPerpetualDetails?, onDismiss: () -> Unit) {
     ModalBottomSheet(
         item = details.takeIf { isVisible },
         onDismissRequest = onDismiss,

@@ -4,59 +4,44 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class WalletConnectionSessionProposal (
-	val defaultWallet: Wallet,
-	val wallets: List<Wallet>,
-	val metadata: ApplicationMetadata
-)
+data class WalletConnectionSessionProposal(val defaultWallet: Wallet, val wallets: List<Wallet>, val metadata: ApplicationMetadata)
 
 @Serializable
 enum class WalletConnectionVerificationStatus(val string: String) {
-	@SerialName("verified")
-	Verified("verified"),
-	@SerialName("unknown")
-	Unknown("unknown"),
-	@SerialName("invalid")
-	Invalid("invalid"),
-	@SerialName("malicious")
-	Malicious("malicious"),
+    @SerialName("verified")
+    Verified("verified"),
+
+    @SerialName("unknown")
+    Unknown("unknown"),
+
+    @SerialName("invalid")
+    Invalid("invalid"),
+
+    @SerialName("malicious")
+    Malicious("malicious"),
 }
 
 @Serializable
-data class WCPairingProposal (
-	val pairingId: String,
-	val proposal: WalletConnectionSessionProposal,
-	val verificationStatus: WalletConnectionVerificationStatus
-)
+data class WCPairingProposal(val pairingId: String, val proposal: WalletConnectionSessionProposal, val verificationStatus: WalletConnectionVerificationStatus)
 
 @Serializable
 enum class WalletConnectionState(val string: String) {
-	@SerialName("started")
-	Started("started"),
-	@SerialName("active")
-	Active("active"),
-	@SerialName("expired")
-	Expired("expired"),
+    @SerialName("started")
+    Started("started"),
+
+    @SerialName("active")
+    Active("active"),
+
+    @SerialName("expired")
+    Expired("expired"),
 }
 
 @Serializable
-data class WalletConnectionSession (
-	val id: String,
-	val sessionId: String,
-	val state: WalletConnectionState,
-	val chains: List<Chain>,
-	val createdAt: SerializedDate,
-	val expireAt: SerializedDate,
-	val metadata: ApplicationMetadata
-)
+data class WalletConnectionSession(val id: String, val sessionId: String, val state: WalletConnectionState, val chains: List<Chain>, val createdAt: SerializedDate, val expireAt: SerializedDate, val metadata: ApplicationMetadata)
 
 @Serializable
-data class WalletConnection (
-	val session: WalletConnectionSession,
-	val wallet: Wallet
-)
-
+data class WalletConnection(val session: WalletConnectionSession, val wallet: Wallet)

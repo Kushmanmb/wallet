@@ -5,10 +5,7 @@ import com.wallet.core.primitives.DelegationValidator
 import uniffi.gemstone.GemFormattedNumber
 import uniffi.gemstone.GemValidatorRow
 
-fun mockGemValidatorRow(
-    validator: DelegationValidator = mockDelegationValidator(),
-    apr: GemFormattedNumber? = null,
-) = GemValidatorRow(
+fun mockGemValidatorRow(validator: DelegationValidator = mockDelegationValidator(), apr: GemFormattedNumber? = null) = GemValidatorRow(
     validator = validator.toGem(),
     name = validator.name,
     imageUrl = "",

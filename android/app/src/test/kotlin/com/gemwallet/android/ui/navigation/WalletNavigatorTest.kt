@@ -547,7 +547,6 @@ class WalletNavigatorTest {
         assertNull(navigator.toastMessage(target))
     }
 
-
     @Test
     fun showWalletConnectRequest_pushesOneRouteAndReplacesItForTheNextRequest() {
         val navigator = navigatorWith(WalletRootRoute)
@@ -569,17 +568,11 @@ class WalletNavigatorTest {
         assertEquals(listOf(WalletRootRoute, ReceiveRoute(mockAssetId(Chain.Tron))), navigator.backStack.toList())
     }
 
-    private fun navigatorWith(
-        vararg routes: NavKey,
-        assetsService: GemAssetsServiceInterface = mockk(),
-        scope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined),
-    ): WalletNavigator {
-        return WalletNavigator(
-            backStack = NavBackStack(*routes),
-            currentTab = mutableStateOf(assetsRoute),
-            deeplinkService = GemDeeplinkService(),
-            assetsService = assetsService,
-            scope = scope,
-        )
-    }
+    private fun navigatorWith(vararg routes: NavKey, assetsService: GemAssetsServiceInterface = mockk(), scope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)): WalletNavigator = WalletNavigator(
+        backStack = NavBackStack(*routes),
+        currentTab = mutableStateOf(assetsRoute),
+        deeplinkService = GemDeeplinkService(),
+        assetsService = assetsService,
+        scope = scope,
+    )
 }

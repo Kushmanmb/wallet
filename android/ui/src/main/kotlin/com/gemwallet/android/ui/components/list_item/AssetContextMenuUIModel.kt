@@ -11,24 +11,13 @@ import com.gemwallet.android.ui.localization.stringRes
 import com.wallet.core.primitives.AssetId
 import uniffi.gemstone.GemAssetMenuAction
 import uniffi.gemstone.GemAssetMenuInput
-import uniffi.gemstone.assetMenuActions
 import uniffi.gemstone.addressCopy
+import uniffi.gemstone.assetMenuActions
 
 @Immutable
-class AssetContextMenuItem(
-    @get:StringRes val titleRes: Int,
-    @get:DrawableRes val iconRes: Int,
-    val onClick: () -> Unit,
-)
+class AssetContextMenuItem(@get:StringRes val titleRes: Int, @get:DrawableRes val iconRes: Int, val onClick: () -> Unit)
 
-fun assetContextMenuItems(
-    context: Context,
-    assetId: AssetId,
-    address: String?,
-    isPinned: Boolean,
-    isBalanceEnabled: Boolean,
-    actions: AssetContextActions,
-): List<AssetContextMenuItem> {
+fun assetContextMenuItems(context: Context, assetId: AssetId, address: String?, isPinned: Boolean, isBalanceEnabled: Boolean, actions: AssetContextActions): List<AssetContextMenuItem> {
     if (actions.isEmpty) return emptyList()
     val clipboard = context.clipboardManager()
     return assetMenuActions(
@@ -38,7 +27,7 @@ fun assetContextMenuItems(
             address = address.orEmpty(),
             offersHide = actions.onHide != null,
             offersAddToWallet = actions.onAddToWallet != null,
-        )
+        ),
     ).mapNotNull { action ->
         when (action) {
             is GemAssetMenuAction.Pin -> actions.onTogglePin?.let { cb ->
@@ -48,12 +37,15 @@ fun assetContextMenuItems(
                     onClick = { cb(assetId) },
                 )
             }
+
             GemAssetMenuAction.Hide -> actions.onHide?.let { cb ->
                 AssetContextMenuItem(titleRes = action.stringRes(), iconRes = R.drawable.ic_visibility_off, onClick = { cb(assetId) })
             }
+
             GemAssetMenuAction.AddToWallet -> actions.onAddToWallet?.let { cb ->
                 AssetContextMenuItem(titleRes = action.stringRes(), iconRes = R.drawable.ic_add_circle_outlined, onClick = { cb(assetId) })
             }
+
             is GemAssetMenuAction.CopyAddress -> AssetContextMenuItem(
                 titleRes = action.stringRes(),
                 iconRes = R.drawable.ic_content_copy,

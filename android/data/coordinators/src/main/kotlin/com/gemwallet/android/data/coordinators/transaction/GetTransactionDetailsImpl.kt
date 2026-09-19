@@ -30,10 +30,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
+import uniffi.gemstone.BlockExplorerLink
 import uniffi.gemstone.GemTransactionAmount
 import uniffi.gemstone.GemTransactionDetailRow
-import uniffi.gemstone.GemTransactionDetailSection
 import uniffi.gemstone.GemTransactionDetailRows
+import uniffi.gemstone.GemTransactionDetailSection
 import uniffi.gemstone.GemTransactionDetailsService
 import uniffi.gemstone.GemTransactionDetailsServiceInterface
 import uniffi.gemstone.GemTransactionHeader
@@ -41,15 +42,10 @@ import uniffi.gemstone.GemTransactionHeaderAction
 import uniffi.gemstone.GemTransactionParticipant
 import uniffi.gemstone.GemTransactionParticipantRole
 import uniffi.gemstone.GemTransactionTitle
-import uniffi.gemstone.transactionDetailSections
 import uniffi.gemstone.GemValueStyle
-import uniffi.gemstone.BlockExplorerLink
+import uniffi.gemstone.transactionDetailSections
 
-class GetTransactionDetailsImpl(
-    private val getSession: GetSession,
-    private val getTransaction: GetTransaction,
-    private val transactionDetailsService: GemTransactionDetailsServiceInterface,
-) : GetTransactionDetails {
+class GetTransactionDetailsImpl(private val getSession: GetSession, private val getTransaction: GetTransaction, private val transactionDetailsService: GemTransactionDetailsServiceInterface) : GetTransactionDetails {
 
     override fun getTransactionDetails(id: TransactionId): Flow<TransactionDetailsAggregate?> = combine(
         getSession().filterNotNull(),
@@ -67,10 +63,7 @@ class GetTransactionDetailsImpl(
 }
 
 @Stable
-class TransactionDetailsAggregateImpl(
-    private val rows: GemTransactionDetailRows,
-    override val currency: Currency,
-) : TransactionDetailsAggregate {
+class TransactionDetailsAggregateImpl(private val rows: GemTransactionDetailRows, override val currency: Currency) : TransactionDetailsAggregate {
 
     private val valueFormatter = ValueFormatter(style = GemValueStyle.AUTO)
     private val rateFormatter = AssetRateFormatter()
@@ -86,6 +79,7 @@ class TransactionDetailsAggregateImpl(
 
     val amount: TransactionDetailsValue.Amount = when (val header = rows.header) {
         is GemTransactionHeader.Amount -> header.amount.plain(showsFiat = header.showsFiat)
+
         is GemTransactionHeader.Swap -> TransactionDetailsValue.Amount.Swap(
             fromAsset = header.from.priceValue(),
             fromValue = header.from.value,
@@ -93,10 +87,13 @@ class TransactionDetailsAggregateImpl(
             toValue = header.to.value,
             currency = currency,
         )
+
         is GemTransactionHeader.Nft -> TransactionDetailsValue.Amount.NFT(
             TransactionNFTTransferMetadata(assetId = NFTAssetId(header.assetId), name = header.name),
         )
+
         is GemTransactionHeader.Symbol -> header.asset.toPrimitives().let { TransactionDetailsValue.Amount.Plain(it, it.symbol, null) }
+
         is GemTransactionHeader.AssetImage -> header.asset.toPrimitives().let { TransactionDetailsValue.Amount.Plain(it, it.symbol, null) }
     }
 

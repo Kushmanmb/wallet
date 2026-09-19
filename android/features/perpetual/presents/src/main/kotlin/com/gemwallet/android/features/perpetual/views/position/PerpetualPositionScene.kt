@@ -95,7 +95,7 @@ internal fun PerpetualPositionScene(
             onRefresh = { onAction(PerpetualDetailsAction.Refresh) },
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             ) {
                 item {
                     PerpetualChartSection(
@@ -115,6 +115,7 @@ internal fun PerpetualPositionScene(
                                 onAutocloseClick = { onAction(PerpetualDetailsAction.Autoclose) },
                             )
                         }
+
                         is PerpetualDetailsSectionUIModel.Info -> {
                             if (section.buttons.isNotEmpty()) {
                                 item { PerpetualActions(section.buttons) { onButton(it) } }
@@ -148,7 +149,7 @@ private fun PerpetualPositionScenePreview() {
         name = "Bitcoin",
         symbol = "BTC",
         decimals = 8,
-        type = AssetType.NATIVE
+        type = AssetType.NATIVE,
     )
 
     val samplePerpetual = object : PerpetualDetailsDataAggregate {

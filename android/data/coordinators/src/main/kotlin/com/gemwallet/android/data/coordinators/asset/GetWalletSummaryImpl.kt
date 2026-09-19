@@ -3,20 +3,22 @@ package com.gemwallet.android.data.coordinators.asset
 import androidx.compose.runtime.Stable
 import com.gemwallet.android.application.assets.cases.GetWalletSummary
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
-import com.gemwallet.android.data.services.gemstone.config.UserConfig
-import com.gemwallet.android.data.services.gemstone.stores.GemstoneBannerStore
-import com.gemwallet.android.data.service.store.database.entities.toDTO
 import com.gemwallet.android.application.session.cases.GetSession
-import uniffi.gemstone.GemPercentageStyle
+import com.gemwallet.android.data.service.store.database.entities.toDTO
+import com.gemwallet.android.data.services.gemstone.config.UserConfig
+import com.gemwallet.android.data.services.gemstone.stores.GemstoneAssetStore
+import com.gemwallet.android.data.services.gemstone.stores.GemstoneBannerStore
 import com.gemwallet.android.domains.banner.BannerRow
 import com.gemwallet.android.domains.percentage.formatAsPercentage
 import com.gemwallet.android.domains.price.values.EquivalentValue
 import com.gemwallet.android.domains.wallet.aggregates.WalletSummaryAggregate
+import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.PriceChangeFormatter
 import com.wallet.core.primitives.BannerEvent
-import com.wallet.core.primitives.Wallet
 import com.wallet.core.primitives.Currency
+import com.wallet.core.primitives.Wallet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,15 +28,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import java.math.BigDecimal
-import com.gemwallet.android.ext.toGem
-import com.gemwallet.android.ext.toPrimitives
 import uniffi.gemstone.GemHeaderActions
+import uniffi.gemstone.GemPercentageStyle
 import uniffi.gemstone.GemWalletHomeServiceInterface
-import uniffi.gemstone.TotalFiatValue as GemTotalFiatValue
 import uniffi.gemstone.GemWalletRow
 import uniffi.gemstone.walletRow
-import com.gemwallet.android.data.services.gemstone.stores.GemstoneAssetStore
+import java.math.BigDecimal
+import uniffi.gemstone.TotalFiatValue as GemTotalFiatValue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetWalletSummaryImpl(
@@ -80,16 +80,10 @@ class GetWalletSummaryImpl(
         }
     }.stateIn(scope, SharingStarted.Eagerly, null)
 
-    override fun getWalletSummary(): Flow<WalletSummaryAggregate?> {
-        return walletSummary
-    }
+    override fun getWalletSummary(): Flow<WalletSummaryAggregate?> = walletSummary
 }
 
-internal fun buildWalletSummaryDisplayState(
-    currency: Currency,
-    total: GemTotalFiatValue,
-    showsPnl: Boolean,
-): WalletSummaryDisplayState {
+internal fun buildWalletSummaryDisplayState(currency: Currency, total: GemTotalFiatValue, showsPnl: Boolean): WalletSummaryDisplayState {
     val formatter = CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = currency)
     val totalValue = total.value.toBigDecimal()
     if (!showsPnl) {
@@ -108,11 +102,7 @@ internal fun buildWalletSummaryDisplayState(
     )
 }
 
-internal class WalletSummaryEquivalentValue(
-    override val currency: Currency,
-    override val value: Double?,
-    override val changePercentage: Double?,
-) : EquivalentValue {
+internal class WalletSummaryEquivalentValue(override val currency: Currency, override val value: Double?, override val changePercentage: Double?) : EquivalentValue {
     override val valueFormatted: String = value?.takeIf(Double::isFinite)?.let { amount ->
         PriceChangeFormatter(CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = currency)).string(amount)
     }.orEmpty()
@@ -120,10 +110,7 @@ internal class WalletSummaryEquivalentValue(
     override val changePercentageFormatted: String = changePercentage.formatAsPercentage(style = GemPercentageStyle.UNSIGNED)
 }
 
-internal data class WalletSummaryDisplayState(
-    val totalValue: String,
-    val changedValue: EquivalentValue?,
-)
+internal data class WalletSummaryDisplayState(val totalValue: String, val changedValue: EquivalentValue?)
 
 @Stable
 internal class WalletSummaryAggregateImpl(
@@ -137,5 +124,4 @@ internal class WalletSummaryAggregateImpl(
     override val walletTotalValue: String = displayState.totalValue
 
     override val changedValue: EquivalentValue? = displayState.changedValue
-
 }

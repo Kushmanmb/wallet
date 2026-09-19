@@ -9,14 +9,12 @@ import com.gemwallet.android.features.asset.viewmodels.details.viewmodels.AssetD
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.RefreshOnTimer
 import com.gemwallet.android.ui.components.screen.LoadingScene
+import com.gemwallet.android.ui.components.screen.ToastEffect
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 import com.gemwallet.android.ui.localization.text
-import com.gemwallet.android.ui.components.screen.ToastEffect
 
 @Composable
-fun AssetDetailsScreen(
-    onAction: (AssetDetailsAction.Navigation) -> Unit,
-) {
+fun AssetDetailsScreen(onAction: (AssetDetailsAction.Navigation) -> Unit) {
     val viewModel: AssetDetailsViewModel = hiltViewModel()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val transactions by viewModel.transactions.collectAsStateWithLifecycle()
@@ -39,14 +37,20 @@ fun AssetDetailsScreen(
             onAction = { action ->
                 when (action) {
                     AssetDetailsAction.Refresh -> viewModel.refresh()
+
                     AssetDetailsAction.Pin -> viewModel.pin()
+
                     AssetDetailsAction.Add -> viewModel.add()
+
                     is AssetDetailsAction.TogglePriceAlert -> viewModel.togglePriceAlert(action.assetId)
+
                     is AssetDetailsAction.CloseBanner -> viewModel.closeBanner(action.banner)
+
                     AssetDetailsAction.OpenPerpetuals -> {
                         viewModel.enablePerpetuals()
                         onAction(AssetDetailsAction.OpenPerpetuals)
                     }
+
                     is AssetDetailsAction.Navigation -> onAction(action)
                 }
             },

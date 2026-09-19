@@ -4,41 +4,32 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class PriceAlertDirection(val string: String) {
-	@SerialName("up")
-	Up("up"),
-	@SerialName("down")
-	Down("down"),
+    @SerialName("up")
+    Up("up"),
+
+    @SerialName("down")
+    Down("down"),
 }
 
 @Serializable
-data class PriceAlert (
-	val assetId: AssetId,
-	val currency: Currency,
-	val price: Double? = null,
-	val pricePercentChange: Double? = null,
-	val priceDirection: PriceAlertDirection? = null,
-	val lastNotifiedAt: SerializedDate? = null
-)
+data class PriceAlert(val assetId: AssetId, val currency: Currency, val price: Double? = null, val pricePercentChange: Double? = null, val priceDirection: PriceAlertDirection? = null, val lastNotifiedAt: SerializedDate? = null)
 
 @Serializable
-data class PriceAlertData (
-	val asset: Asset,
-	val price: Price? = null,
-	val priceAlert: PriceAlert
-)
+data class PriceAlertData(val asset: Asset, val price: Price? = null, val priceAlert: PriceAlert)
 
 @Serializable
 enum class PriceAlertNotificationType(val string: String) {
-	@SerialName("auto")
-	Auto("auto"),
-	@SerialName("price")
-	Price("price"),
-	@SerialName("pricePercentChange")
-	PricePercentChange("pricePercentChange"),
-}
+    @SerialName("auto")
+    Auto("auto"),
 
+    @SerialName("price")
+    Price("price"),
+
+    @SerialName("pricePercentChange")
+    PricePercentChange("pricePercentChange"),
+}

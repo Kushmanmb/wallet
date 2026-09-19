@@ -1,31 +1,31 @@
 package com.gemwallet.android.ui
 
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import com.gemwallet.android.ext.toGem
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavKey
+import com.gemwallet.android.PendingNavigationCoordinator
 import com.gemwallet.android.application.assets.cases.GetWalletSummary
-import com.gemwallet.android.application.update.cases.SkipAppUpdate
-import com.gemwallet.android.application.update.cases.SyncAppUpdate
 import com.gemwallet.android.application.device.cases.GetPushEnabled
 import com.gemwallet.android.application.device.cases.SwitchPushEnabled
-import com.gemwallet.android.data.services.gemstone.config.UserConfig
-import com.gemwallet.android.model.AppUpdateChannel
-import com.gemwallet.android.model.AppUpdateOffer
 import com.gemwallet.android.application.session.cases.GetCurrentWallet
 import com.gemwallet.android.application.session.cases.GetSession
-import com.gemwallet.android.application.wallet.cases.SetCurrentWallet
+import com.gemwallet.android.application.update.cases.SkipAppUpdate
+import com.gemwallet.android.application.update.cases.SyncAppUpdate
 import com.gemwallet.android.application.wallet.cases.GetWallets
-import androidx.navigation3.runtime.NavKey
+import com.gemwallet.android.application.wallet.cases.SetCurrentWallet
+import com.gemwallet.android.data.services.gemstone.config.UserConfig
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import com.gemwallet.android.ext.runCatchingCancellable
+import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.onboarding.OnboardingRoute
-import com.gemwallet.android.model.Session
+import com.gemwallet.android.model.AppUpdateChannel
+import com.gemwallet.android.model.AppUpdateOffer
 import com.gemwallet.android.model.NotificationsAvailable
-import com.gemwallet.android.PendingNavigationCoordinator
+import com.gemwallet.android.model.Session
 import com.gemwallet.android.ui.navigation.WalletRootRoute
-import android.util.Log
-import kotlinx.coroutines.CoroutineDispatcher
-import uniffi.gemstone.GemAppStartServiceInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,8 +39,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemAppStartServiceInterface
 import javax.inject.Inject
-import com.gemwallet.android.ext.runCatchingCancellable
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
@@ -196,11 +196,7 @@ class AppViewModel @Inject constructor(
     }
 }
 
-data class AppState(
-    val session: Session? = null,
-    val intent: AppIntent = AppIntent.None,
-    val update: AppUpdateOffer? = null,
-)
+data class AppState(val session: Session? = null, val intent: AppIntent = AppIntent.None, val update: AppUpdateOffer? = null)
 
 enum class AppIntent {
     None,

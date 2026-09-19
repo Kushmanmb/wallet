@@ -13,14 +13,10 @@ import uniffi.gemstone.GemAssetsService
 import uniffi.gemstone.GemAssetsServiceInterface
 import javax.inject.Inject
 
-class AssetNavigation @Inject constructor(
-    private val assetsService: GemAssetsServiceInterface,
-) {
+class AssetNavigation @Inject constructor(private val assetsService: GemAssetsServiceInterface) {
     suspend fun assetRoute(assetId: AssetId?): AssetRoute? = openAsset(assetId)?.let { AssetRoute(it.id) }
 
-    suspend fun fiatRoute(assetId: AssetId?, amount: Int?, type: FiatQuoteType): FiatInputRoute? {
-        return openAsset(assetId)?.let { FiatInputRoute(it.id, amount, type) }
-    }
+    suspend fun fiatRoute(assetId: AssetId?, amount: Int?, type: FiatQuoteType): FiatInputRoute? = openAsset(assetId)?.let { FiatInputRoute(it.id, amount, type) }
 
     private suspend fun openAsset(assetId: AssetId?): Asset? {
         if (assetId == null) {

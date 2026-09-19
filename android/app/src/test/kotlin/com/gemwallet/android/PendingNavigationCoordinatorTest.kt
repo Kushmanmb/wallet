@@ -6,6 +6,8 @@ import com.gemwallet.android.testkit.mockAsset
 import com.gemwallet.android.ui.navigation.routes.FiatInputRoute
 import com.gemwallet.android.ui.navigation.routes.PerpetualRoute
 import com.gemwallet.android.ui.navigation.routes.ReferralRoute
+import com.wallet.core.primitives.Chain
+import com.wallet.core.primitives.FiatQuoteType
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -17,8 +19,6 @@ import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import com.wallet.core.primitives.Chain
-import com.wallet.core.primitives.FiatQuoteType
 import uniffi.gemstone.GemDeeplinkService
 
 class PendingNavigationCoordinatorTest {
@@ -189,7 +189,11 @@ class PendingNavigationCoordinatorTest {
 
     private class RecordingWalletConnect : PendingNavigationCoordinator.WalletConnectHandler {
         val events = mutableListOf<String>()
-        override fun onPairing(uri: String) { events += "pairing:$uri" }
-        override fun onRequest() { events += "request" }
+        override fun onPairing(uri: String) {
+            events += "pairing:$uri"
+        }
+        override fun onRequest() {
+            events += "request"
+        }
     }
 }

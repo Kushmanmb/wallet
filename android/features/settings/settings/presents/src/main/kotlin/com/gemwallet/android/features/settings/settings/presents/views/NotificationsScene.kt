@@ -17,11 +17,7 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.ListPosition
 
 @Composable
-fun NotificationsScene(
-    onPriceAlerts: () -> Unit,
-    onCancel: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel(),
-) {
+fun NotificationsScene(onPriceAlerts: () -> Unit, onCancel: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val pushEnabled by viewModel.pushEnabled.collectAsStateWithLifecycle()
 
     Scene(
@@ -42,7 +38,7 @@ fun NotificationsScene(
                                 } else {
                                     viewModel.disableNotifications()
                                 }
-                            }
+                            },
                         )
                     },
                 )
@@ -55,5 +51,4 @@ fun NotificationsScene(
             }
         }
     }
-
 }

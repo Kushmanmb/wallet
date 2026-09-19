@@ -2,6 +2,7 @@ package com.gemwallet.android.features.confirm.viewmodels.models
 
 import android.content.Context
 import com.gemwallet.android.domains.confirm.FeeUIModel
+import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.ext.toChain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.confirm.viewmodels.localization.title
@@ -20,26 +21,12 @@ import uniffi.gemstone.GemConfirmDestination
 import uniffi.gemstone.GemConfirmRowContent
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.contactInitials
-import com.gemwallet.android.ext.networkName
 
 sealed interface ConfirmRowUIModel {
     data class Row(val row: GemListRow) : ConfirmRowUIModel
     data class Item(val model: ListItemModel) : ConfirmRowUIModel
-    data class Address(
-        val title: String,
-        val name: String?,
-        val address: String,
-        val chain: Chain,
-        val explorerLink: BlockExplorerLink,
-        val avatar: ListItemImage?,
-    ) : ConfirmRowUIModel
-    data class Validator(
-        val title: String,
-        val name: String,
-        val address: String,
-        val chain: Chain,
-        val explorerLink: BlockExplorerLink,
-    ) : ConfirmRowUIModel
+    data class Address(val title: String, val name: String?, val address: String, val chain: Chain, val explorerLink: BlockExplorerLink, val avatar: ListItemImage?) : ConfirmRowUIModel
+    data class Validator(val title: String, val name: String, val address: String, val chain: Chain, val explorerLink: BlockExplorerLink) : ConfirmRowUIModel
 }
 
 internal fun GemConfirmRowContent.uiModel(context: Context): ConfirmRowUIModel? = when (this) {
@@ -59,6 +46,7 @@ private fun GemConfirmRowContent.Recipient.uiModel(context: Context): ConfirmRow
             explorerLink = link.toPrimitives(),
             avatar = addressName?.avatar(destination.name),
         )
+
         is GemConfirmDestination.Contract -> ConfirmRowUIModel.Address(
             title = title,
             name = null,
@@ -67,6 +55,7 @@ private fun GemConfirmRowContent.Recipient.uiModel(context: Context): ConfirmRow
             explorerLink = link.toPrimitives(),
             avatar = null,
         )
+
         is GemConfirmDestination.Validator -> ConfirmRowUIModel.Validator(
             title = title,
             name = destination.name,
@@ -74,7 +63,9 @@ private fun GemConfirmRowContent.Recipient.uiModel(context: Context): ConfirmRow
             chain = chain.toChain(),
             explorerLink = link.toPrimitives(),
         )
+
         is GemConfirmDestination.Resource -> ConfirmRowUIModel.Item(ListItemModel(title = title, subtitle = context.getString(destination.resource.toPrimitives().stringRes())))
+
         is GemConfirmDestination.Provider -> ConfirmRowUIModel.Item(ListItemModel(title = title, subtitle = destination.name))
     }
 }
@@ -90,7 +81,9 @@ fun FeeUIModel.listItem(context: Context, feeAsset: Asset?, showsFeeAssetSymbol:
     val info = InfoSheetEntity.NetworkFeeInfo(feeAsset?.id?.chain?.networkName().orEmpty(), feeAsset?.symbol.orEmpty())
     return when (this) {
         FeeUIModel.Calculating -> ListItemModel(title = title, subtitleTagType = ListItemTagType.Progress, info = info)
+
         FeeUIModel.Error -> ListItemModel(title = title, subtitle = "~", info = info)
+
         is FeeUIModel.FeeInfo -> ListItemModel(
             title = title,
             subtitle = fiatAmount.ifEmpty { cryptoAmount },

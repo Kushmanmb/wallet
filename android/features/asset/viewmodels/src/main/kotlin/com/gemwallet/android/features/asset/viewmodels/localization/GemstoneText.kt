@@ -1,8 +1,8 @@
 package com.gemwallet.android.features.asset.viewmodels.localization
 
-import uniffi.gemstone.GemPriceAlertToggle
 import androidx.annotation.StringRes
 import com.gemwallet.android.ui.R
+import uniffi.gemstone.GemPriceAlertToggle
 import uniffi.gemstone.PortfolioStatistic
 
 @StringRes

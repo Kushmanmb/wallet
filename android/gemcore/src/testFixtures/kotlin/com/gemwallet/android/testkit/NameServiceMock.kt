@@ -25,9 +25,7 @@ class NameServiceMock : GemNameServiceInterface {
         else -> GemNameInputStep.Resolve(name, 500u)
     }
 
-    override fun resolvedState(state: GemNameRecordState, name: String, resolved: GemNameRecordState): GemNameRecordState =
-        if (state is GemNameRecordState.Loading && state.name == name) resolved else state
+    override fun resolvedState(state: GemNameRecordState, name: String, resolved: GemNameRecordState): GemNameRecordState = if (state is GemNameRecordState.Loading && state.name == name) resolved else state
 
-    override fun validateRecipient(chain: uniffi.gemstone.Chain, input: String, state: GemNameRecordState): GemRecipientValidation =
-        GemRecipientValidation(isValid = true, address = input, error = null)
+    override fun validateRecipient(chain: uniffi.gemstone.Chain, input: String, state: GemNameRecordState): GemRecipientValidation = GemRecipientValidation(isValid = true, address = input, error = null)
 }

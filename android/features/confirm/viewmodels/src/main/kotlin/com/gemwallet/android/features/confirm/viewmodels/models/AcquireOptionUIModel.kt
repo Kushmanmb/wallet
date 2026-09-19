@@ -6,10 +6,7 @@ import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemSymbol
 
-data class AcquireOptionUIModel(
-    val action: AcquireAssetAction,
-    val model: ListItemModel,
-)
+data class AcquireOptionUIModel(val action: AcquireAssetAction, val model: ListItemModel)
 
 internal fun acquireOptions(context: Context, buyAmount: Int?): List<AcquireOptionUIModel> = listOf(
     AcquireOptionUIModel(

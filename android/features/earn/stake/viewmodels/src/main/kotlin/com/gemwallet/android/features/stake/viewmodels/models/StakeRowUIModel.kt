@@ -14,12 +14,7 @@ import uniffi.gemstone.GemStakeActionItem
 
 enum class StakeAction { Stake, Freeze, Unfreeze, ClaimRewards }
 
-data class StakeActionUIModel(
-    val action: StakeAction,
-    val isEnabled: Boolean,
-    val requiresFrozenBalance: Boolean,
-    val model: ListItemModel,
-)
+data class StakeActionUIModel(val action: StakeAction, val isEnabled: Boolean, val requiresFrozenBalance: Boolean, val model: ListItemModel)
 
 internal fun GemStakeActionItem.uiModel(context: Context, assetInfo: AssetInfo): StakeActionUIModel = StakeActionUIModel(
     action = when (action) {

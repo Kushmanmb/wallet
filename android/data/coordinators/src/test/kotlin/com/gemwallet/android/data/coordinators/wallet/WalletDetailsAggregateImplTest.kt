@@ -17,11 +17,7 @@ class WalletDetailsAggregateImplTest {
 
     private val account = mockAccount(chain = Chain.Ethereum, address = "0x403BC00000000000000000000000000000051bDa")
 
-    private fun aggregate(
-        id: String,
-        type: WalletType,
-        accounts: List<Account>,
-    ) = WalletDetailsAggregateImpl(walletDetails(mockWallet(id = id, type = type, accounts = accounts).toGem()))
+    private fun aggregate(id: String, type: WalletType, accounts: List<Account>) = WalletDetailsAggregateImpl(walletDetails(mockWallet(id = id, type = type, accounts = accounts).toGem()))
 
     @Test
     fun singleAccountWallet_showsItsAddressAndSecret() {

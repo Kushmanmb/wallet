@@ -24,12 +24,7 @@ import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.ConfirmTransactionAction
 
 @Composable
-fun DelegationScene(
-    onAmount: AmountTransactionAction,
-    onConfirm: ConfirmTransactionAction,
-    onCancel: () -> Unit,
-    viewModel: DelegationViewModel = hiltViewModel(),
-) {
+fun DelegationScene(onAmount: AmountTransactionAction, onConfirm: ConfirmTransactionAction, onCancel: () -> Unit, viewModel: DelegationViewModel = hiltViewModel()) {
     val delegationInfo by viewModel.delegationInfo.collectAsStateWithLifecycle()
     val properties by viewModel.properties.collectAsStateWithLifecycle()
     val actions by viewModel.actions.collectAsStateWithLifecycle()
@@ -58,6 +53,7 @@ fun DelegationScene(
                 itemsPositioned(properties.rows) { position, row ->
                     when (row) {
                         is DelegationRowUIModel.Row -> GemListRowView(row = row.row, listPosition = position)
+
                         DelegationRowUIModel.Rewards -> PropertyAssetBalanceItem(
                             model = properties.rewards,
                             title = stringResource(R.string.stake_rewards),

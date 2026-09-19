@@ -12,11 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.gemwallet.android.ui.theme.paddingSmall
 
 @Composable
-fun PercentSuggestionsBar(
-    suggestions: List<Int>,
-    modifier: Modifier = Modifier,
-    onPercentSelected: (Int) -> Unit,
-) {
+fun PercentSuggestionsBar(suggestions: List<Int>, modifier: Modifier = Modifier, onPercentSelected: (Int) -> Unit) {
     SuggestionsBar(
         labels = suggestions.map { "$it%" },
         modifier = modifier,
@@ -25,11 +21,7 @@ fun PercentSuggestionsBar(
 }
 
 @Composable
-fun SuggestionsBar(
-    labels: List<String>,
-    modifier: Modifier = Modifier,
-    onSelected: (Int) -> Unit,
-) {
+fun SuggestionsBar(labels: List<String>, modifier: Modifier = Modifier, onSelected: (Int) -> Unit) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(paddingSmall),

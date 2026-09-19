@@ -12,11 +12,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.ListSection
 import com.gemwallet.android.ui.theme.paddingLarge
 
-fun <T> LazyListScope.listSections(
-    sections: List<ListSection<T>>,
-    key: ((T) -> Any)? = null,
-    itemContent: @Composable LazyItemScope.(position: ListPosition, item: T) -> Unit,
-) {
+fun <T> LazyListScope.listSections(sections: List<ListSection<T>>, key: ((T) -> Any)? = null, itemContent: @Composable LazyItemScope.(position: ListPosition, item: T) -> Unit) {
     sections.forEach { section ->
         section.title?.let { title ->
             item(key = "section:${section.id}") { SubheaderItem(title) }

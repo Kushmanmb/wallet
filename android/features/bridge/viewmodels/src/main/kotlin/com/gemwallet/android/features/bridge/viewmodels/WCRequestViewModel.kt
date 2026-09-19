@@ -1,8 +1,5 @@
 package com.gemwallet.android.features.bridge.viewmodels
 
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -16,17 +13,19 @@ import com.gemwallet.android.application.wallet_connect.WalletConnectSessionRequ
 import com.gemwallet.android.application.wallet_connect.WalletConnectVerifyContext
 import com.gemwallet.android.application.wallet_connect.cases.RespondWalletConnectRequest
 import com.gemwallet.android.application.wallet_connect.toJsonRpcResponse
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
 import com.gemwallet.android.features.bridge.viewmodels.model.ReviewTexts
 import com.gemwallet.android.features.bridge.viewmodels.model.WCRequest
 import com.gemwallet.android.features.bridge.viewmodels.model.map
 import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.buttonState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,12 +38,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemApplicationMetadataServiceInterface
+import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemSignMessageServiceInterface
 import uniffi.gemstone.GemWalletConnectFailure
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.GemWalletConnectSessionRequest
-import uniffi.gemstone.GemServiceException
-import com.gemwallet.android.ui.localization.text
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -84,12 +84,7 @@ class WCRequestViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Enabled)
 
-    fun onRequest(
-        sessionRequest: WalletConnectSessionRequest,
-        verifyContext: WalletConnectVerifyContext,
-        onNotify: (BridgeRequestError) -> Unit,
-        onError: (String) -> Unit,
-    ) {
+    fun onRequest(sessionRequest: WalletConnectSessionRequest, verifyContext: WalletConnectVerifyContext, onNotify: (BridgeRequestError) -> Unit, onError: (String) -> Unit) {
         if (requestJob != null && state.value.sessionRequest == sessionRequest) {
             return
         }
@@ -200,11 +195,7 @@ class WCRequestViewModel @Inject constructor(
     }
 }
 
-private data class RequestViewModelState(
-    val sessionRequest: WalletConnectSessionRequest? = null,
-    val approved: WCRequest? = null,
-    val responseState: RequestResponseState = RequestResponseState.Idle,
-) {
+private data class RequestViewModelState(val sessionRequest: WalletConnectSessionRequest? = null, val approved: WCRequest? = null, val responseState: RequestResponseState = RequestResponseState.Idle) {
     fun toSceneState(request: WCRequest?, texts: ReviewTexts): RequestSceneState {
         request ?: return RequestSceneState.Loading
         val requestState = RequestSceneState.Request(walletName = request.wallet.name, request = request)
@@ -228,14 +219,9 @@ sealed interface RequestSceneState {
         val request: WCRequest
     }
 
-    class Request(
-        override val walletName: String,
-        override val request: WCRequest,
-    ) : Content
+    class Request(override val walletName: String, override val request: WCRequest) : Content
 
-    class Responding(
-        private val requestState: Request,
-    ) : Content {
+    class Responding(private val requestState: Request) : Content {
         override val walletName: String get() = requestState.walletName
         override val request: WCRequest get() = requestState.request
     }

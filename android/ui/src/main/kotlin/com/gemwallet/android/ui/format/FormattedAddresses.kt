@@ -7,10 +7,7 @@ import com.gemwallet.android.ui.style.formatShort
 import com.wallet.core.primitives.Chain
 
 @Composable
-fun rememberFormattedAddress(
-    address: String,
-    chain: Chain? = null,
-): String {
+fun rememberFormattedAddress(address: String, chain: Chain? = null): String {
     val addressService = LocalAddressService.current
     return remember(addressService, address, chain) {
         addressService.formatShort(address, chain?.string)

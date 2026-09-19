@@ -47,8 +47,7 @@ class WalletViewModelTest {
 
     private val walletId = "multicoin_0xabc"
 
-    private fun route(vararg extra: Pair<String, Any?>) =
-        SavedStateHandle(mapOf(RouteArgument.WalletId.key to walletId) + extra)
+    private fun route(vararg extra: Pair<String, Any?>) = SavedStateHandle(mapOf(RouteArgument.WalletId.key to walletId) + extra)
 
     @Test
     fun `renaming a wallet goes to Core`() = runTest(dispatcher) {

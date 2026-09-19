@@ -346,10 +346,7 @@ fun WalletNavGraph(
 }
 
 @Composable
-private fun rememberWalletNavEntries(
-    backStack: List<NavKey>,
-    entryProvider: (NavKey) -> NavEntry<NavKey>,
-): List<NavEntry<NavKey>> {
+private fun rememberWalletNavEntries(backStack: List<NavKey>, entryProvider: (NavKey) -> NavEntry<NavKey>): List<NavEntry<NavKey>> {
     val keys = backStack.toList()
     return remember(keys, entryProvider) {
         val occurrences = mutableMapOf<Any, Int>()

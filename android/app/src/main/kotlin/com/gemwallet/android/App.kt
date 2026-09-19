@@ -18,12 +18,16 @@ import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 @HiltAndroidApp
-class App : Application(), SingletonImageLoader.Factory {
+class App :
+    Application(),
+    SingletonImageLoader.Factory {
 
     @Inject
     lateinit var appLifecycleCoordinator: AppLifecycleCoordinator
+
     @Inject
     lateinit var getActiveAssetsInfo: GetActiveAssetsInfo
+
     @Inject
     lateinit var getTransactions: GetTransactions
 
@@ -32,25 +36,23 @@ class App : Application(), SingletonImageLoader.Factory {
         ProcessLifecycleOwner.get().lifecycle.addObserver(appLifecycleCoordinator)
     }
 
-    override fun newImageLoader(context: PlatformContext): ImageLoader {
-        return ImageLoader.Builder(this)
-            .components {
-                add(OkHttpNetworkFetcherFactory(callFactory = ::imageHttpClient))
-                add(SvgDecoder.Factory())
-            }
-            .memoryCache {
-                MemoryCache.Builder()
-                    .maxSizePercent(this, 0.25)
-                    .build()
-            }
-            .diskCache {
-                DiskCache.Builder()
-                    .directory(cacheDir.resolve("image_cache"))
-                    .maxSizeBytes(512L * 1024 * 1024) // 512Mb
-                    .build()
-            }
-            .build()
-    }
+    override fun newImageLoader(context: PlatformContext): ImageLoader = ImageLoader.Builder(this)
+        .components {
+            add(OkHttpNetworkFetcherFactory(callFactory = ::imageHttpClient))
+            add(SvgDecoder.Factory())
+        }
+        .memoryCache {
+            MemoryCache.Builder()
+                .maxSizePercent(this, 0.25)
+                .build()
+        }
+        .diskCache {
+            DiskCache.Builder()
+                .directory(cacheDir.resolve("image_cache"))
+                .maxSizeBytes(512L * 1024 * 1024) // 512Mb
+                .build()
+        }
+        .build()
 
     private fun imageHttpClient() = OkHttpClient.Builder()
         .dispatcher(Dispatcher().apply { maxRequestsPerHost = IMAGE_REQUESTS_PER_HOST })

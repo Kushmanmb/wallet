@@ -8,15 +8,18 @@ import com.gemwallet.android.testkit.mockAsset
 import com.gemwallet.android.testkit.mockAssetInfo
 import com.gemwallet.android.testkit.mockChainAssetInfo
 import com.gemwallet.android.testkit.mockFormattedNumber
-import com.gemwallet.android.ui.R
 import com.gemwallet.android.testkit.mockGemAssetDetails
 import com.gemwallet.android.testkit.mockGemAssetDetailsState
+import com.gemwallet.android.ui.R
 import com.wallet.core.primitives.Chain
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import java.math.BigInteger
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
 import uniffi.gemstone.GemAssetBalanceRow
 import uniffi.gemstone.GemAssetDetailRow
 import uniffi.gemstone.GemAssetDetailSection
@@ -28,10 +31,7 @@ import uniffi.gemstone.GemListRowIcon
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSectionTitle
 import uniffi.gemstone.GemNumberUnit
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import java.math.BigInteger
 
 class AssetInfoUIModelFactoryTest {
 
@@ -125,11 +125,7 @@ class AssetInfoUIModelFactoryTest {
         every { getString(any(), *anyVararg()) } answers { "${firstArg<Int>()}${(args[1] as Array<*>).joinToString("")}" }
     }
 
-    private fun model(
-        assetInfo: AssetInfo,
-        sections: List<GemAssetDetailSection> = emptyList(),
-        fiatValue: GemFormattedNumber? = null,
-    ) = AssetInfoUIModelFactory(context).create(
+    private fun model(assetInfo: AssetInfo, sections: List<GemAssetDetailSection> = emptyList(), fiatValue: GemFormattedNumber? = null) = AssetInfoUIModelFactory(context).create(
         mockChainAssetInfo(assetInfo),
         mockGemAssetDetails(assetInfo.asset, mockGemAssetDetailsState(showsBanners = true), sections, fiatValue),
         banners = emptyList(),

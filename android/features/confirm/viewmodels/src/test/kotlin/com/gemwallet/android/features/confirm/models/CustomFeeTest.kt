@@ -8,9 +8,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.math.BigInteger
 import uniffi.gemstone.GemCustomFeeCheck
 import uniffi.gemstone.GemLocalizedText
+import java.math.BigInteger
 
 class CustomFeeTest {
 

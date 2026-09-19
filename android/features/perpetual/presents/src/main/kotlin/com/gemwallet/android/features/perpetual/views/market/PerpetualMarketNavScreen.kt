@@ -68,17 +68,26 @@ fun PerpetualMarketNavScreen(
         onAction = { action ->
             when (action) {
                 PerpetualMarketAction.Refresh -> viewModel.onRefresh()
+
                 is PerpetualMarketAction.SetSearching -> viewModel.setSearching(action.isSearching)
+
                 PerpetualMarketAction.Close -> onCancel()
+
                 PerpetualMarketAction.Withdraw -> amountAction(AmountParams.Withdraw(HypercoreUSDC.id))
+
                 PerpetualMarketAction.Deposit -> amountAction(AmountParams.Deposit(viewModel.depositAssetId))
+
                 PerpetualMarketAction.OpenPortfolio -> onOpenPortfolio()
+
                 is PerpetualMarketAction.TogglePin -> viewModel.onTogglePin(action.perpetualId)
+
                 is PerpetualMarketAction.OpenPerpetual -> {
                     onOpenPerpetualDetails(action.asset.id)
                     viewModel.onOpenPerpetual(action.asset)
                 }
+
                 is PerpetualMarketAction.OpenRecent -> onOpenPerpetualDetails(action.asset.id)
+
                 PerpetualMarketAction.OpenRecentsSheet -> recentsViewModel.show(types = listOf(RecentActivityType.Perpetual))
             }
         },
@@ -89,4 +98,3 @@ fun PerpetualMarketNavScreen(
         onSelect = { onOpenPerpetualDetails(it.id) },
     )
 }
-

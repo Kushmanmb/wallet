@@ -17,15 +17,9 @@ import com.gemwallet.android.ui.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 
-class ShowSystemNotificationImpl @Inject constructor(@param:ApplicationContext private val applicationContext: Context) :
-    ShowSystemNotification {
+class ShowSystemNotificationImpl @Inject constructor(@param:ApplicationContext private val applicationContext: Context) : ShowSystemNotification {
 
-    override fun showNotification(
-        title: String?,
-        subtitle: String?,
-        type: String?,
-        rawData: String?,
-    ) {
+    override fun showNotification(title: String?, subtitle: String?, type: String?, rawData: String?) {
         postNotification(
             title = title,
             subtitle = subtitle,
@@ -35,13 +29,7 @@ class ShowSystemNotificationImpl @Inject constructor(@param:ApplicationContext p
         )
     }
 
-    private fun postNotification(
-        title: String?,
-        subtitle: String?,
-        channelId: String?,
-        type: String?,
-        rawData: String?,
-    ) {
+    private fun postNotification(title: String?, subtitle: String?, channelId: String?, type: String?, rawData: String?) {
         val channelId = channelId ?: "default"
         val title = title ?: "GemWallet"
         val notificationId = "$type:$rawData".hashCode()
@@ -50,7 +38,8 @@ class ShowSystemNotificationImpl @Inject constructor(@param:ApplicationContext p
             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val pendingIntent = PendingIntent.getActivity(
             applicationContext,
-            notificationId, intent,
+            notificationId,
+            intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
         )
         val builder = NotificationCompat.Builder(applicationContext, channelId)

@@ -1,9 +1,6 @@
 package com.gemwallet.android.features.stake.viewmodels
 
 import android.net.Uri
-import uniffi.gemstone.GemLoadState
-import uniffi.gemstone.GemServiceException
-import uniffi.gemstone.GemStakeServiceInterface
 import androidx.lifecycle.SavedStateHandle
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.assets.cases.GetWalletAssets
@@ -37,6 +34,9 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemLoadState
+import uniffi.gemstone.GemServiceException
+import uniffi.gemstone.GemStakeServiceInterface
 import java.math.BigInteger
 import kotlin.time.Duration.Companion.seconds
 
@@ -103,5 +103,4 @@ class StakeViewModelTest {
         assertEquals(listOf(delegation), viewModel.delegations.value)
         assertEquals(offline, viewModel.loadError.value)
     }
-
 }

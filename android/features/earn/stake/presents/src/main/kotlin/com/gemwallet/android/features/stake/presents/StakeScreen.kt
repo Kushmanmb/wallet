@@ -12,13 +12,7 @@ import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.ConfirmTransactionAction
 
 @Composable
-fun StakeScreen(
-    amountAction: AmountTransactionAction,
-    onConfirm: ConfirmTransactionAction,
-    onDelegation: (String, String) -> Unit,
-    onCancel: () -> Unit,
-    viewModel: StakeViewModel = hiltViewModel()
-) {
+fun StakeScreen(amountAction: AmountTransactionAction, onConfirm: ConfirmTransactionAction, onDelegation: (String, String) -> Unit, onCancel: () -> Unit, viewModel: StakeViewModel = hiltViewModel()) {
     val inSync by viewModel.isSync.collectAsStateWithLifecycle()
     val assetInfo by viewModel.assetInfo.collectAsStateWithLifecycle()
     val delegations by viewModel.delegations.collectAsStateWithLifecycle()

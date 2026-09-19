@@ -40,7 +40,6 @@ import com.wallet.core.primitives.PerpetualDirection
 import com.wallet.core.primitives.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
@@ -68,6 +67,7 @@ import uniffi.gemstone.GemPerpetualDetailsServiceInterface
 import uniffi.gemstone.GemPerpetualPositionKind
 import uniffi.gemstone.GemPerpetualSection
 import uniffi.gemstone.candleTooltip
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -96,8 +96,8 @@ class PerpetualDetailsViewModel @Inject constructor(
             listOf(
                 TransactionType.PerpetualOpenPosition,
                 TransactionType.PerpetualClosePosition,
-            )
-        )
+            ),
+        ),
     )
 
     private val transactionSync = flow {
@@ -128,6 +128,7 @@ class PerpetualDetailsViewModel @Inject constructor(
         service.sections(position != null).map { section ->
             when (section) {
                 GemPerpetualSection.POSITION -> PerpetualDetailsSectionUIModel.Position(context.getString(section.stringRes()), positionRows(position))
+
                 GemPerpetualSection.INFO -> PerpetualDetailsSectionUIModel.Info(
                     title = context.getString(section.stringRes()),
                     buttons = if (perpetual == null) emptyList() else service.buttons(position != null).map { it.uiModel(context) },
@@ -140,8 +141,7 @@ class PerpetualDetailsViewModel @Inject constructor(
 
     val modifyButtons = service.modifyButtons().map { it.uiModel(context) }
 
-    private fun positionRows(position: PerpetualPositionDetailsDataAggregate?): List<PerpetualPositionRowUIModel> =
-        position?.let { service.positionDetails(it.position.toGem()).map { detail -> detail.uiModel() } }.orEmpty()
+    private fun positionRows(position: PerpetualPositionDetailsDataAggregate?): List<PerpetualPositionRowUIModel> = position?.let { service.positionDetails(it.position.toGem()).map { detail -> detail.uiModel() } }.orEmpty()
 
     val transactions = combine(
         getTransactions.getTransactions(transactionFilters),
@@ -248,8 +248,7 @@ class PerpetualDetailsViewModel @Inject constructor(
         fetch()
     }
 
-    fun openPosition(direction: PerpetualDirection, amountAction: AmountTransactionAction) =
-        position(GemPerpetualPositionKind.Open(direction.toGem()), amountAction)
+    fun openPosition(direction: PerpetualDirection, amountAction: AmountTransactionAction) = position(GemPerpetualPositionKind.Open(direction.toGem()), amountAction)
 
     fun increasePosition(amountAction: AmountTransactionAction) = position(GemPerpetualPositionKind.Increase, amountAction)
 
@@ -269,5 +268,4 @@ class PerpetualDetailsViewModel @Inject constructor(
     fun clearError() = errorState.update { null }
 }
 
-private fun List<ChartCandleStick>.toChartState(): StateViewType<List<ChartCandleStick>> =
-    if (isEmpty()) StateViewType.NoData else StateViewType.Data(this)
+private fun List<ChartCandleStick>.toChartState(): StateViewType<List<ChartCandleStick>> = if (isEmpty()) StateViewType.NoData else StateViewType.Data(this)

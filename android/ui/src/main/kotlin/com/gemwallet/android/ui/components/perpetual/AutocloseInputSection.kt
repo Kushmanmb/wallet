@@ -1,6 +1,5 @@
 package com.gemwallet.android.ui.components.perpetual
 
-import com.gemwallet.android.ui.localization.autocloseRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,11 +20,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.GemTextField
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
-import com.gemwallet.android.ui.style.color
 import com.gemwallet.android.ui.components.list_item.sectionHeaderHorizontalPadding
 import com.gemwallet.android.ui.icons.AppIcons
+import com.gemwallet.android.ui.localization.autocloseRes
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.perpetual.autoclose.AutocloseUIModel
+import com.gemwallet.android.ui.style.color
 import com.gemwallet.android.ui.theme.compactIconSize
 import com.gemwallet.android.ui.theme.space4
 import com.wallet.core.primitives.TpslType
@@ -40,12 +40,7 @@ private fun AutocloseValidation.toStringRes(): Int? = when (this) {
 }
 
 @Composable
-fun AutocloseInputSection(
-    field: AutocloseUIModel.Field,
-    text: String,
-    onTextChanged: (String) -> Unit,
-    onFocusChanged: (Boolean) -> Unit,
-) {
+fun AutocloseInputSection(field: AutocloseUIModel.Field, text: String, onTextChanged: (String) -> Unit, onFocusChanged: (Boolean) -> Unit) {
     SubheaderItem(
         title = stringResource(field.type.autocloseRes()),
     )
@@ -73,7 +68,9 @@ fun AutocloseInputSection(
                     tint = MaterialTheme.colorScheme.secondary,
                 )
             }
-        } else null,
+        } else {
+            null
+        },
     )
     Row(
         modifier = Modifier
@@ -83,8 +80,11 @@ fun AutocloseInputSection(
     ) {
         Text(
             text = stringResource(
-                if (field.isProfit) R.string.perpetual_auto_close_expected_profit
-                else R.string.perpetual_auto_close_expected_loss,
+                if (field.isProfit) {
+                    R.string.perpetual_auto_close_expected_profit
+                } else {
+                    R.string.perpetual_auto_close_expected_loss
+                },
             ),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,

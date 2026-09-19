@@ -1,22 +1,17 @@
 package com.gemwallet.android.features.settings.networks.viewmodels
 
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
-import com.gemwallet.android.features.settings.networks.viewmodels.models.uiModel
-import uniffi.gemstone.GemAddNodeException
-import uniffi.gemstone.GemServiceException
-import uniffi.gemstone.GemAddNodeSession
-import uniffi.gemstone.GemChainSettingsServiceInterface
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gemwallet.android.features.settings.networks.viewmodels.models.AddNodeUIModel
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import com.gemwallet.android.features.settings.networks.viewmodels.models.AddNodeUIModel
+import com.gemwallet.android.features.settings.networks.viewmodels.models.uiModel
 import com.wallet.core.primitives.Chain
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,14 +19,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemAddNodeException
+import uniffi.gemstone.GemAddNodeSession
+import uniffi.gemstone.GemChainSettingsServiceInterface
+import uniffi.gemstone.GemServiceException
 import javax.inject.Inject
 
 @HiltViewModel
-class AddNodeViewModel @Inject constructor(
-    private val service: GemChainSettingsServiceInterface,
-    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    @param:ApplicationContext private val context: Context,
-) : ViewModel() {
+class AddNodeViewModel @Inject constructor(private val service: GemChainSettingsServiceInterface, @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher, @param:ApplicationContext private val context: Context) : ViewModel() {
 
     private val session = MutableStateFlow<GemAddNodeSession?>(null)
     val uiModel = session.map { it?.uiModel(context) ?: AddNodeUIModel() }

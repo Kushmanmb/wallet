@@ -38,12 +38,7 @@ import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.theme.paddingLarge
 
 @Composable
-fun EarnScreen(
-    amountAction: AmountTransactionAction,
-    onDelegation: (String, String) -> Unit,
-    onCancel: () -> Unit,
-    viewModel: EarnViewModel = hiltViewModel(),
-) {
+fun EarnScreen(amountAction: AmountTransactionAction, onDelegation: (String, String) -> Unit, onCancel: () -> Unit, viewModel: EarnViewModel = hiltViewModel()) {
     val assetInfo by viewModel.assetInfo.collectAsStateWithLifecycle()
     val positions by viewModel.positions.collectAsStateWithLifecycle()
     val validatorRows by viewModel.validatorRows.collectAsStateWithLifecycle()

@@ -29,6 +29,5 @@ class PerpetualPositionDetailsDataAggregateImplTest {
         assertEquals("+\$20.47 (+0.00%)", aggregate.pnlWithPercentage)
     }
 
-    private fun aggregate(position: PerpetualPosition) =
-        PerpetualPositionDetailsDataAggregateImpl(mockPerpetualPositionData(position = position))
+    private fun aggregate(position: PerpetualPosition) = PerpetualPositionDetailsDataAggregateImpl(mockPerpetualPositionData(position = position))
 }

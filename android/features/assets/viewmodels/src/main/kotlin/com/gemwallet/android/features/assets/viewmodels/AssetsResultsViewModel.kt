@@ -28,7 +28,6 @@ import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.PerpetualId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +43,7 @@ import uniffi.gemstone.GemSelectAssetType
 import uniffi.gemstone.GemWalletSearchCounts
 import uniffi.gemstone.GemWalletSearchPhase
 import uniffi.gemstone.walletSearchPhase
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -75,7 +75,6 @@ class AssetsResultsViewModel @Inject constructor(
     private val isPullRefreshing = MutableStateFlow(false)
     val refreshing: StateFlow<Boolean> = isPullRefreshing
 
-
     val previewPerpetuals: StateFlow<List<PerpetualDataAggregate>> = when (scope) {
         is WalletSearchTag.List ->
             combine(
@@ -92,7 +91,10 @@ class AssetsResultsViewModel @Inject constructor(
     }
 
     val state: StateFlow<UIState> = combine(
-        pinned, unpinned, previewPerpetuals, isFetching,
+        pinned,
+        unpinned,
+        previewPerpetuals,
+        isFetching,
     ) { pinned, assets, perpetuals, fetching ->
         val counts = GemWalletSearchCounts(
             recents = 0u,
@@ -140,7 +142,6 @@ class AssetsResultsViewModel @Inject constructor(
         setPerpetualPinned(perpetualId, !item.isPinned)
         emitToast(assetPinnedToast(context, item.title, !item.isPinned))
     }
-
 }
 
 private fun searchKeyOf(savedStateHandle: SavedStateHandle, service: GemAssetSelectionServiceInterface): String {
@@ -149,13 +150,8 @@ private fun searchKeyOf(savedStateHandle: SavedStateHandle, service: GemAssetSel
     return service.searchKey(query, scope.toGem())
 }
 
-private fun selectSearchOf(
-    savedStateHandle: SavedStateHandle,
-    searchService: AssetsSearchService,
-    service: GemAssetSelectionServiceInterface,
-): SelectSearch {
-    return when (walletSearchTagOf(savedStateHandle.get<String?>(RouteArgument.Scope.key))) {
+private fun selectSearchOf(savedStateHandle: SavedStateHandle, searchService: AssetsSearchService, service: GemAssetSelectionServiceInterface): SelectSearch =
+    when (walletSearchTagOf(savedStateHandle.get<String?>(RouteArgument.Scope.key))) {
         is WalletSearchTag.List -> ListSelectSearch(searchService, searchKeyOf(savedStateHandle, service))
         WalletSearchTag.All -> BaseSelectSearch(searchService)
     }
-}

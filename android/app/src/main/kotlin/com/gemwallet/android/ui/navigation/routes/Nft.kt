@@ -26,14 +26,7 @@ data object NftUnverifiedCollectionsRoute : NavKey
 @Serializable
 data class NftAssetRoute(val nftAssetId: String) : NavKey
 
-fun EntryProviderScope<NavKey>.nftCollection(
-    cancelAction: CancelAction,
-    onRecipient: (NFTAsset) -> Unit,
-    onReceive: () -> Unit,
-    onUnverified: () -> Unit,
-    collectionIdAction: NftCollectionIdAction,
-    assetIdAction: NftAssetIdAction,
-) {
+fun EntryProviderScope<NavKey>.nftCollection(cancelAction: CancelAction, onRecipient: (NFTAsset) -> Unit, onReceive: () -> Unit, onUnverified: () -> Unit, collectionIdAction: NftCollectionIdAction, assetIdAction: NftAssetIdAction) {
     entry<NftListRoute> {
         NftListNavScreen(
             cancelAction = cancelAction,

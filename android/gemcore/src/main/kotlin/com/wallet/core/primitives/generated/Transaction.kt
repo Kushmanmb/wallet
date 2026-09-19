@@ -4,28 +4,27 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class Transaction (
-	val id: TransactionId,
-	val assetId: AssetId,
-	val from: String,
-	val to: String,
-	val contract: String? = null,
-	val type: TransactionType,
-	val state: TransactionState,
-	val blockNumber: String? = null,
-	val sequence: String? = null,
-	val fee: String,
-	val feeAssetId: AssetId,
-	val value: String,
-	val memo: String? = null,
-	val direction: TransactionDirection,
-	val utxoInputs: List<TransactionUtxoInput>? = null,
-	val utxoOutputs: List<TransactionUtxoInput>? = null,
-	val metadata: JsonValue? = null,
-	val createdAt: SerializedDate
+data class Transaction(
+    val id: TransactionId,
+    val assetId: AssetId,
+    val from: String,
+    val to: String,
+    val contract: String? = null,
+    val type: TransactionType,
+    val state: TransactionState,
+    val blockNumber: String? = null,
+    val sequence: String? = null,
+    val fee: String,
+    val feeAssetId: AssetId,
+    val value: String,
+    val memo: String? = null,
+    val direction: TransactionDirection,
+    val utxoInputs: List<TransactionUtxoInput>? = null,
+    val utxoOutputs: List<TransactionUtxoInput>? = null,
+    val metadata: JsonValue? = null,
+    val createdAt: SerializedDate,
 )
-

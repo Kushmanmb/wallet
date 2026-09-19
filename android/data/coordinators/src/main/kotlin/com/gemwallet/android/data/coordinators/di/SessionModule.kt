@@ -27,10 +27,7 @@ object SessionModule {
 
     @Provides
     @Singleton
-    fun provideGemCurrencyService(
-        preferencesService: GemPreferencesService,
-        priceService: GemPriceService,
-    ): GemCurrencyService = GemCurrencyService(preferencesService, priceService)
+    fun provideGemCurrencyService(preferencesService: GemPreferencesService, priceService: GemPriceService): GemCurrencyService = GemCurrencyService(preferencesService, priceService)
 
     @Provides
     fun provideGemCurrencyServiceInterface(service: GemCurrencyService): GemCurrencyServiceInterface = service

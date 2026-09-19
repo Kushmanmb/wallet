@@ -1,17 +1,17 @@
 package com.gemwallet.android.model
 
-import uniffi.gemstone.GemPrecision
 import android.icu.text.CompactDecimalFormat
-import java.math.BigDecimal
-import java.math.RoundingMode
-import java.text.DecimalFormat
-import java.text.NumberFormat
-import java.util.Locale
 import uniffi.gemstone.GemFormattedNumber
 import uniffi.gemstone.GemNumberDisplay
 import uniffi.gemstone.GemNumberNotation
 import uniffi.gemstone.GemNumberRounding
 import uniffi.gemstone.GemNumberUnit
+import uniffi.gemstone.GemPrecision
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.Locale
 
 fun GemFormattedNumber.text(locale: Locale = Locale.getDefault()): String = when (notation) {
     GemNumberNotation.PARENTHESISED -> "(${body(locale)})"
@@ -32,9 +32,11 @@ private fun GemFormattedNumber.body(locale: Locale): String = when (val display 
         is GemNumberUnit.Percent -> percentText(BigDecimal.valueOf(value), display.precision, showsSign, locale)
         else -> appendSymbol(numberText(BigDecimal.valueOf(value), display.precision, locale))
     }
+
     is GemNumberDisplay.Abbreviated -> appendSymbol(abbreviatedText(BigDecimal.valueOf(value), locale))
+
     is GemNumberDisplay.BelowThreshold -> appendSymbol(
-        "<${numberText(BigDecimal.valueOf(display.threshold), GemPrecision.Fraction(display.places, display.places), locale)}"
+        "<${numberText(BigDecimal.valueOf(display.threshold), GemPrecision.Fraction(display.places, display.places), locale)}",
     )
 }
 
@@ -91,7 +93,6 @@ private fun GemFormattedNumber.abbreviatedText(value: BigDecimal, locale: Locale
     return formatter.format(value)
 }
 
-private fun GemFormattedNumber.numberFormat(locale: Locale): NumberFormat =
-    currencyCode?.let { code ->
-        NumberFormat.getCurrencyInstance(locale).apply { currency = java.util.Currency.getInstance(code) }
-    } ?: NumberFormat.getInstance(locale)
+private fun GemFormattedNumber.numberFormat(locale: Locale): NumberFormat = currencyCode?.let { code ->
+    NumberFormat.getCurrencyInstance(locale).apply { currency = java.util.Currency.getInstance(code) }
+} ?: NumberFormat.getInstance(locale)

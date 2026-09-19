@@ -4,10 +4,7 @@ import uniffi.gemstone.GemAssetDetailsState
 import uniffi.gemstone.GemHeaderActions
 import uniffi.gemstone.GemPriceAlertToggle
 
-fun mockGemAssetDetailsState(
-    showsBanners: Boolean = false,
-    priceAlertsCount: Int = 0,
-) = GemAssetDetailsState(
+fun mockGemAssetDetailsState(showsBanners: Boolean = false, priceAlertsCount: Int = 0) = GemAssetDetailsState(
     isViewOnly = false,
     headerActions = GemHeaderActions.Buttons(emptyList()),
     showsBanners = showsBanners,

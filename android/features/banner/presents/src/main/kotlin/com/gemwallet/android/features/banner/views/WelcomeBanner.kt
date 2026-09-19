@@ -27,12 +27,7 @@ import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
 
 @Composable
-internal fun WelcomeBanner(
-    model: BannerItemUIModel,
-    onBuy: () -> Unit,
-    onReceive: () -> Unit,
-    onClose: () -> Unit,
-) {
+internal fun WelcomeBanner(model: BannerItemUIModel, onBuy: () -> Unit, onReceive: () -> Unit, onClose: () -> Unit) {
     Box(
         modifier = Modifier.fillMaxWidth().listItem(),
     ) {

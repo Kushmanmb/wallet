@@ -15,10 +15,7 @@ import uniffi.gemstone.GemNameInputStep
 import uniffi.gemstone.GemNameRecordState
 import uniffi.gemstone.GemNameServiceInterface
 
-class NameRecordController(
-    private val nameService: GemNameServiceInterface,
-    private val scope: CoroutineScope,
-) {
+class NameRecordController(private val nameService: GemNameServiceInterface, private val scope: CoroutineScope) {
     private var job: Job? = null
     private val _state = MutableStateFlow<GemNameRecordState>(GemNameRecordState.None)
     val state: StateFlow<GemNameRecordState> = _state.asStateFlow()

@@ -53,20 +53,25 @@ fun AssetSelectScreen(
     val clipboardManager = LocalContext.current.clipboardManager()
     val support: (AssetInfoDataAggregate) -> (@Composable () -> Unit)? = when (flow.subtitle) {
         GemAssetSubtitleStyle.NETWORK -> { item ->
-            if (item.asset.id.type() == AssetSubtype.NATIVE) null else {
+            if (item.asset.id.type() == AssetSubtype.NATIVE) {
+                null
+            } else {
                 @Composable { ListItemSupportText(item.asset.id.chain.networkName()) }
             }
         }
+
         GemAssetSubtitleStyle.PRICE -> { item -> assetPriceSupport(item.price) }
     }
     val itemTrailing: (@Composable (AssetInfoDataAggregate) -> Unit)? = when (flow.trailing) {
         GemAssetTrailingStyle.BALANCE -> { item -> getBalanceInfo(item)() }
+
         GemAssetTrailingStyle.TOGGLE -> { item ->
             Switch(
                 checked = item.balanceEnabled,
                 onCheckedChange = { viewModel.onChangeVisibility(item.asset.id, it) },
             )
         }
+
         GemAssetTrailingStyle.COPY -> { item ->
             IconButton(
                 onClick = { clipboardManager.setCopy(context, addressCopy(item.asset.id.chain.string, item.accountAddress)) },
@@ -80,6 +85,7 @@ fun AssetSelectScreen(
                 )
             }
         }
+
         GemAssetTrailingStyle.NONE -> null
     }
     val uiStates by viewModel.uiState.collectAsStateWithLifecycle()

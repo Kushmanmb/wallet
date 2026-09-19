@@ -1,7 +1,7 @@
 package com.gemwallet.android.features.activities.viewmodels
 
-import com.gemwallet.android.application.transactions.cases.GetTransactions
 import com.gemwallet.android.application.session.cases.GetSession
+import com.gemwallet.android.application.transactions.cases.GetTransactions
 import com.gemwallet.android.domains.transaction.aggregates.TransactionDataAggregate
 import com.gemwallet.android.model.Session
 import com.gemwallet.android.testkit.mockSession
@@ -18,9 +18,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assert.assertEquals
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemServiceException

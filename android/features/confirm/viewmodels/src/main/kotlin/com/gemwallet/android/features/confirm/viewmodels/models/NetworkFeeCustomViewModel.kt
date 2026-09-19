@@ -11,10 +11,7 @@ import com.gemwallet.android.math.numberFormat
 import uniffi.gemstone.GemCustomFeeCheck
 import java.math.BigInteger
 
-class NetworkFeeCustomViewModel(
-    private val model: FeeDetailsModel,
-    initialRate: BigInteger?,
-) {
+class NetworkFeeCustomViewModel(private val model: FeeDetailsModel, initialRate: BigInteger?) {
     private val decimals: Int = model.decimals
 
     var input by mutableStateOf(initialRate?.let { numberFormat().inputText(it.toString(), decimals.toUInt()) } ?: "")

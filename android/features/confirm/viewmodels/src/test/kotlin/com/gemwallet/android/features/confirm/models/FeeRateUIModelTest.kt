@@ -8,8 +8,8 @@ import com.gemwallet.android.testkit.mockFormattedNumber
 import com.wallet.core.primitives.FeePriority
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uniffi.gemstone.GemFeeRateRow
 import uniffi.gemstone.FeeUnitType
+import uniffi.gemstone.GemFeeRateRow
 import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemNumberUnit
 import java.math.BigInteger

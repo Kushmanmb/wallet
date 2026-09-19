@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.buy.views
 
-import com.gemwallet.android.features.buy.localization.titleRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
@@ -23,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gemwallet.android.features.buy.localization.titleRes
 import com.gemwallet.android.features.buy.viewmodels.FiatViewModel
 import com.gemwallet.android.features.buy.viewmodels.models.FiatSuggestion
 import com.gemwallet.android.features.buy.viewmodels.models.FiatUiState
@@ -41,11 +41,7 @@ import com.wallet.core.primitives.FiatQuoteType
 import kotlinx.coroutines.launch
 
 @Composable
-fun FiatNavScreen(
-    cancelAction: CancelAction,
-    onFiatTransactions: () -> Unit,
-    viewModel: FiatViewModel = hiltViewModel()
-) {
+fun FiatNavScreen(cancelAction: CancelAction, onFiatTransactions: () -> Unit, viewModel: FiatViewModel = hiltViewModel()) {
     val type by viewModel.type.collectAsStateWithLifecycle()
     val suggestedAmounts by viewModel.suggestedAmounts.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -98,17 +94,12 @@ fun FiatNavScreen(
                     .onSuccess { uriHandler.open(context, it) }
                     .onFailure { snackbar.showSnackbar(errorOccurred, R.drawable.ic_error) }
             }
-        }
+        },
     )
 }
 
 @Composable
-private fun FiatTitle(
-    asset: Asset,
-    type: FiatQuoteType,
-    showFiatTypePicker: Boolean,
-    onTypeClick: (FiatQuoteType) -> Unit,
-) {
+private fun FiatTitle(asset: Asset, type: FiatQuoteType, showFiatTypePicker: Boolean, onTypeClick: (FiatQuoteType) -> Unit) {
     if (showFiatTypePicker) {
         TabsBar(FiatQuoteType.entries, type, onTypeClick) { item ->
             Text(stringResource(item.titleRes(), ""))
@@ -140,4 +131,3 @@ fun LotButton(fiatSuggestion: FiatSuggestion, onLotClick: (FiatSuggestion) -> Un
         )
     }
 }
-

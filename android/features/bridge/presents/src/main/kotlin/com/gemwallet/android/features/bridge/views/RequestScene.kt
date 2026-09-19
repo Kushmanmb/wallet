@@ -18,19 +18,14 @@ import com.gemwallet.android.features.bridge.viewmodels.model.WCRequest
 import com.gemwallet.android.features.confirm.presents.ConfirmScreen
 import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetAction
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
+import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.LoadingScene
 import com.wallet.core.primitives.AssetId
-import com.gemwallet.android.ui.components.list_item.GemListRowView
-import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 
 @Composable
-fun RequestScene(
-    request: WalletConnectSessionRequest,
-    verifyContext: WalletConnectVerifyContext,
-    onAcquireAsset: (AcquireAssetAction, AssetId) -> Unit,
-    onError: (String) -> Unit,
-) {
+fun RequestScene(request: WalletConnectSessionRequest, verifyContext: WalletConnectVerifyContext, onAcquireAsset: (AcquireAssetAction, AssetId) -> Unit, onError: (String) -> Unit) {
     val viewModel: WCRequestViewModel = hiltViewModel()
     BackHandler(onBack = viewModel::onReject)
     val context = LocalContext.current
@@ -46,12 +41,13 @@ fun RequestScene(
                     BridgeRequestError.MaliciousSession -> Toast.makeText(
                         context,
                         R.string.errors_connections_malicious_origin,
-                        Toast.LENGTH_LONG
+                        Toast.LENGTH_LONG,
                     ).show()
+
                     BridgeRequestError.Expired -> Toast.makeText(
                         context,
                         R.string.wallet_connect_request_expired,
-                        Toast.LENGTH_LONG
+                        Toast.LENGTH_LONG,
                     ).show()
                 }
             },
@@ -68,6 +64,7 @@ fun RequestScene(
             onCancel = viewModel::onReject,
             closeIcon = true,
         )
+
         is RequestSceneState.Content -> (sceneState as RequestSceneState.Content).let { sceneState ->
             val request = sceneState.request
             when (request) {
@@ -78,6 +75,7 @@ fun RequestScene(
                     onApprove = { viewModel.onSign(reportError) },
                     onReject = viewModel::onReject,
                 )
+
                 is WCRequest.Transaction -> ConfirmScreen(
                     input = request.input,
                     simulationResult = request.simulation,

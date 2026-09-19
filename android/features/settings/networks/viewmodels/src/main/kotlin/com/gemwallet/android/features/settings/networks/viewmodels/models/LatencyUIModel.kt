@@ -6,11 +6,7 @@ import com.gemwallet.android.ui.components.list_item.ListItemTagType
 import uniffi.gemstone.GemLatencyStatus
 import uniffi.gemstone.GemValueTone
 
-data class LatencyUIModel(
-    val text: String,
-    val tone: GemValueTone,
-    val tagType: ListItemTagType,
-)
+data class LatencyUIModel(val text: String, val tone: GemValueTone, val tagType: ListItemTagType)
 
 internal fun GemLatencyStatus.uiModel(context: Context) = LatencyUIModel(
     text = text(context),

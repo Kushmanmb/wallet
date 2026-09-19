@@ -24,11 +24,7 @@ fun Chart(viewModel: ChartViewModel = hiltViewModel()) {
 }
 
 @Composable
-internal fun ChartSection(
-    state: ChartUIModel.State,
-    onPeriodSelect: (ChartPeriod) -> Unit,
-    periods: List<ChartPeriod> = ChartPeriod.entries,
-) {
+internal fun ChartSection(state: ChartUIModel.State, onPeriodSelect: (ChartPeriod) -> Unit, periods: List<ChartPeriod> = ChartPeriod.entries) {
     key(state.period) {
         var selectedIndex by remember { mutableStateOf<Int?>(null) }
 

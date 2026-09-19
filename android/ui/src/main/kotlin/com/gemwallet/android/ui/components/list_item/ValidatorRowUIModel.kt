@@ -5,13 +5,7 @@ import com.gemwallet.android.model.text
 import uniffi.gemstone.GemPercentageStyle
 import uniffi.gemstone.GemValidatorRow
 
-data class ValidatorRowUIModel(
-    val id: String,
-    val name: String,
-    val imageUrl: String?,
-    val placeholder: String,
-    val aprText: String,
-)
+data class ValidatorRowUIModel(val id: String, val name: String, val imageUrl: String?, val placeholder: String, val aprText: String)
 
 fun GemValidatorRow.uiModel() = ValidatorRowUIModel(
     id = validator.id,

@@ -25,7 +25,6 @@ import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PortfolioType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
@@ -45,6 +44,7 @@ import uniffi.gemstone.GemPortfolioServiceInterface
 import uniffi.gemstone.PortfolioChartType
 import uniffi.gemstone.PortfolioData
 import uniffi.gemstone.portfolioChartData
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -89,8 +89,10 @@ class PortfolioChartViewModel internal constructor(
             val periods = data?.availablePeriods.orEmpty().map { it.toPrimitives() }
             when {
                 data == null -> emit(state.copy(data = StateViewType.Error))
+
                 periods.isNotEmpty() && !periods.contains(state.period) ->
                     selectedPeriod.compareAndSet(state.period, periods.first())
+
                 else -> emit(state.copy(data = StateViewType.Data(data)))
             }
         }
@@ -162,4 +164,3 @@ class PortfolioChartViewModel internal constructor(
         context = context,
     )
 }
-

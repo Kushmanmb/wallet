@@ -5,9 +5,8 @@ import com.gemwallet.android.application.stake.cases.GetDelegation
 import com.gemwallet.android.application.stake.cases.GetDelegations
 import com.gemwallet.android.application.stake.cases.GetStakeValidator
 import com.gemwallet.android.application.stake.cases.GetValidators
-import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.domains.confirm.stakeType
-import com.wallet.core.primitives.StakeType
+import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.model.Crypto
 import com.gemwallet.android.testkit.mockAssetCosmos
 import com.gemwallet.android.testkit.mockAssetInfo
@@ -18,11 +17,10 @@ import com.gemwallet.android.testkit.mockGemTransferData
 import com.gemwallet.android.testkit.mockGemValidatorRow
 import com.gemwallet.android.testkit.mockWalletId
 import com.wallet.core.primitives.Resource
+import com.wallet.core.primitives.StakeType
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import uniffi.gemstone.GemStakeServiceInterface
-import uniffi.gemstone.TransactionInputType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,6 +32,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import uniffi.gemstone.GemStakeServiceInterface
+import uniffi.gemstone.TransactionInputType
 import java.math.BigInteger
 
 class AmountStakeProviderTest {
@@ -221,6 +221,5 @@ class AmountStakeProviderTest {
         assertEquals(Resource.Energy, (provider.stakeType() as StakeType.Unfreeze).content)
     }
 
-    private suspend fun AmountStakeProvider.stakeType(): StakeType? =
-        buildTransfer(Crypto(BigInteger.ONE), isMax = false).inputType.stakeType
+    private suspend fun AmountStakeProvider.stakeType(): StakeType? = buildTransfer(Crypto(BigInteger.ONE), isMax = false).inputType.stakeType
 }

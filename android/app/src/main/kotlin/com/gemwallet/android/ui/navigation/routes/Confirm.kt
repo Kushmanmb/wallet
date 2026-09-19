@@ -16,11 +16,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ConfirmRoute(val params: String) : NavKey
 
-fun EntryProviderScope<NavKey>.confirm(
-    finishAction: FinishConfirmAction,
-    onAcquireAsset: (AcquireAssetAction, AssetId) -> Unit,
-    cancelAction: CancelAction,
-) {
+fun EntryProviderScope<NavKey>.confirm(finishAction: FinishConfirmAction, onAcquireAsset: (AcquireAssetAction, AssetId) -> Unit, cancelAction: CancelAction) {
     entry<ConfirmRoute>(
         metadata = { key -> routeArguments(paramsArgument(key.params)) },
     ) { key ->

@@ -1,7 +1,7 @@
 package com.gemwallet.android.features.swap.viewmodels
 
-import com.gemwallet.android.ui.models.swap.SwapSlippage
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
@@ -42,12 +42,10 @@ import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelFactory
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelInput
 import com.gemwallet.android.ui.models.swap.SwapProviderUIModelFactory
+import com.gemwallet.android.ui.models.swap.SwapSlippage
 import com.wallet.core.primitives.AssetId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.math.BigDecimal
-import java.math.BigInteger
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -73,13 +71,15 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemSlippageSelection
 import uniffi.gemstone.GemSwapButtonAction
 import uniffi.gemstone.GemSwapPairSelection
-import uniffi.gemstone.GemSwapQuoteServiceInterface
 import uniffi.gemstone.GemSwapQuoteInput
+import uniffi.gemstone.GemSwapQuoteServiceInterface
 import uniffi.gemstone.GemSwapRequest
 import uniffi.gemstone.SwapProvider
 import uniffi.gemstone.SwapperException
 import uniffi.gemstone.swapperQuoteSummary
-import android.util.Log
+import java.math.BigDecimal
+import java.math.BigInteger
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -104,10 +104,9 @@ class SwapViewModel @Inject constructor(
     private val selectedSlippageBps = MutableStateFlow<UInt?>(null)
     val selectedSlippage: StateFlow<UInt?> = selectedSlippageBps.asStateFlow()
 
-    fun slippageState(bps: UInt?, isAuto: Boolean): SlippageStateUIModel =
-        swapQuoteService.newSlippageSession(if (isAuto) GemSlippageSelection.Auto else GemSlippageSelection.Manual(bps ?: 0u))
-            .viewState()
-            .uiModel(context, ::slippageText)
+    fun slippageState(bps: UInt?, isAuto: Boolean): SlippageStateUIModel = swapQuoteService.newSlippageSession(if (isAuto) GemSlippageSelection.Auto else GemSlippageSelection.Manual(bps ?: 0u))
+        .viewState()
+        .uiModel(context, ::slippageText)
 
     fun slippageBps(percent: Double): UInt? = swapQuoteService.slippageBpsFromPercent(percent)
 
@@ -141,17 +140,17 @@ class SwapViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val payEquivalentFormatted = combine(payValueFlow, payAsset) { text, pay ->
-            pay?.formatFiat(pay.calculateFiat(text.parseInputNumberOrNull() ?: BigDecimal.ZERO)) ?: ""
-        }
+        pay?.formatFiat(pay.calculateFiat(text.parseInputNumberOrNull() ?: BigDecimal.ZERO)) ?: ""
+    }
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     private val quoteRequestParams = combine(quoteInput, payAsset, receiveAsset) { input, pay, receive ->
-            if (input == null || pay == null || receive == null) {
-                null
-            } else {
-                SwapQuoteRequestParams(input, pay, receive)
-            }
+        if (input == null || pay == null || receive == null) {
+            null
+        } else {
+            SwapQuoteRequestParams(input, pay, receive)
         }
+    }
         .distinctUntilChangedBy { it?.key }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -170,70 +169,70 @@ class SwapViewModel @Inject constructor(
     }
 
     val quote = combine(session, payAsset, receiveAsset) { quoteSession, pay, receive ->
-            val request = quoteSession.quotes?.request
-            val selected = quoteSession.quote()
-            if (request == null || selected == null || pay?.id()?.toIdentifier() != request.payAssetId || receive?.id()?.toIdentifier() != request.receiveAssetId) {
-                null
-            } else {
-                QuoteState(selected, pay, receive)
-            }
+        val request = quoteSession.quotes?.request
+        val selected = quoteSession.quote()
+        if (request == null || selected == null || pay?.id()?.toIdentifier() != request.payAssetId || receive?.id()?.toIdentifier() != request.receiveAssetId) {
+            null
+        } else {
+            QuoteState(selected, pay, receive)
         }
+    }
         .distinctUntilChanged()
         .onEach { state -> setReceive(state?.formattedToAmount ?: "") }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val providers = combine(session, quote) { quoteSession, current ->
-            val receive = current?.receive ?: return@combine emptyList()
-            quoteSession.quotes?.quotes.orEmpty().map { item ->
-                SwapProviderUIModelFactory.create(
-                    provider = item.data.provider,
-                    receiveAsset = receive.toAssetPriceValue(),
-                    toValue = item.toValue,
-                )
-            }
+        val receive = current?.receive ?: return@combine emptyList()
+        quoteSession.quotes?.quotes.orEmpty().map { item ->
+            SwapProviderUIModelFactory.create(
+                provider = item.data.provider,
+                receiveAsset = receive.toAssetPriceValue(),
+                toValue = item.toValue,
+            )
         }
+    }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val toEquivalentFormatted = quote.mapLatest { quote ->
-            quote?.receive?.formatFiat(quote.receiveEquivalent) ?: ""
-        }
+        quote?.receive?.formatFiat(quote.receiveEquivalent) ?: ""
+    }
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     private val viewState = combine(session, payAsset) { quoteSession, pay ->
-            quoteSession.viewState(pay?.balance?.balance?.available ?: BigInteger.ZERO, pay?.asset?.toGem())
-        }
+        quoteSession.viewState(pay?.balance?.balance?.available ?: BigInteger.ZERO, pay?.asset?.toGem())
+    }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val swapDetails = combine(quote, providers, viewState) { quote, providers, state ->
-            if (quote == null) {
-                return@combine null
-            }
-            val summary = swapperQuoteSummary(quote.quote, quote.pay.asset.toGem(), quote.receive.asset.toGem())
-
-            val provider = providers.firstOrNull { item ->
-                item.id == quote.quote.data.provider.id &&
-                    item.title == quote.quote.data.provider.protocol
-            } ?: SwapProviderUIModelFactory.create(
-                provider = quote.quote.data.provider,
-                receiveAsset = quote.receive.toAssetPriceValue(),
-                toValue = quote.quote.toValue,
-            )
-
-            SwapDetailsUIModelFactory.create(
-                SwapDetailsUIModelInput(
-                    payAsset = quote.pay.toAssetPriceValue(),
-                    receiveAsset = quote.receive.toAssetPriceValue(),
-                    summary = summary,
-                    provider = provider,
-                    providers = providers,
-                    slippageBps = quote.quote.data.slippageBps,
-                    selectedSlippage = selectedSlippageBps.value,
-                    isProviderSelectable = state?.allowsProviderSelection ?: false,
-                    priceImpact = quote.pay.swapValue(quote.quote.fromValue)
-                        .priceImpact(quote.receive.swapValue(quote.quote.toValue)),
-                ),
-            )
+        if (quote == null) {
+            return@combine null
         }
+        val summary = swapperQuoteSummary(quote.quote, quote.pay.asset.toGem(), quote.receive.asset.toGem())
+
+        val provider = providers.firstOrNull { item ->
+            item.id == quote.quote.data.provider.id &&
+                item.title == quote.quote.data.provider.protocol
+        } ?: SwapProviderUIModelFactory.create(
+            provider = quote.quote.data.provider,
+            receiveAsset = quote.receive.toAssetPriceValue(),
+            toValue = quote.quote.toValue,
+        )
+
+        SwapDetailsUIModelFactory.create(
+            SwapDetailsUIModelInput(
+                payAsset = quote.pay.toAssetPriceValue(),
+                receiveAsset = quote.receive.toAssetPriceValue(),
+                summary = summary,
+                provider = provider,
+                providers = providers,
+                slippageBps = quote.quote.data.slippageBps,
+                selectedSlippage = selectedSlippageBps.value,
+                isProviderSelectable = state?.allowsProviderSelection ?: false,
+                priceImpact = quote.pay.swapValue(quote.quote.fromValue)
+                    .priceImpact(quote.receive.swapValue(quote.quote.toValue)),
+            ),
+        )
+    }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val uiState = viewState.map { state -> state?.let { createSwapUiState(it, context) } ?: SwapUiState() }
@@ -316,11 +315,7 @@ class SwapViewModel @Inject constructor(
         refreshRequests.tryEmit(Unit)
     }
 
-    fun onPrimaryAction(
-        onConfirm: (ConfirmTransferInput) -> Unit,
-        onShowPriceImpactWarning: () -> Unit,
-        authorize: (() -> Unit) -> Unit,
-    ) {
+    fun onPrimaryAction(onConfirm: (ConfirmTransferInput) -> Unit, onShowPriceImpactWarning: () -> Unit, authorize: (() -> Unit) -> Unit) {
         val state = uiState.value
         if (state.buttonState != ButtonState.Enabled) {
             return
@@ -333,9 +328,13 @@ class SwapViewModel @Inject constructor(
                     authorize { swap(onConfirm) }
                 }
             }
+
             GemSwapButtonAction.RetryTransfer -> authorize { swap(onConfirm) }
+
             GemSwapButtonAction.RetryQuote -> refresh()
+
             is GemSwapButtonAction.UseMinimumAmount -> setPayValue(action.value)
+
             GemSwapButtonAction.InsufficientBalance -> Unit
         }
     }

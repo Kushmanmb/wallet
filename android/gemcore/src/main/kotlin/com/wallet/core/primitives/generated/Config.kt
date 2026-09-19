@@ -4,13 +4,8 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class Release (
-	val version: String,
-	val store: PlatformStore,
-	val upgradeRequired: Boolean
-)
-
+data class Release(val version: String, val store: PlatformStore, val upgradeRequired: Boolean)

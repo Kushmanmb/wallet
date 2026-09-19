@@ -30,20 +30,18 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.wallet.core.primitives.Resource
 
 @Composable
-fun ProviderExtras(
-    provider: AmountDataProvider,
-    amount: String,
-    onPickValidator: () -> Unit,
-) {
+fun ProviderExtras(provider: AmountDataProvider, amount: String, onPickValidator: () -> Unit) {
     Column {
         when (provider) {
             is AmountStakeProvider -> StakeProviderSection(provider, onPickValidator)
+
             is AmountPerpetualProvider -> {
                 PerpetualLeverageSection(provider)
                 if (provider.showsAutoclose) {
                     PerpetualAutocloseSection(provider, amount)
                 }
             }
+
             is AmountTransferProvider -> Unit
         }
     }
@@ -53,11 +51,13 @@ fun ProviderExtras(
 private fun StakeProviderSection(provider: AmountStakeProvider, onPickValidator: () -> Unit) {
     when (provider.params) {
         is AmountParams.Stake.Freeze, is AmountParams.Stake.Unfreeze -> StakeResourceSection(provider)
+
         is AmountParams.Stake.Delegate,
         is AmountParams.Stake.Undelegate,
         is AmountParams.Stake.Redelegate,
         is AmountParams.Stake.Withdraw,
-        is AmountParams.Stake.Rewards -> StakeValidatorSection(provider, onPickValidator)
+        is AmountParams.Stake.Rewards,
+        -> StakeValidatorSection(provider, onPickValidator)
     }
 }
 
@@ -128,4 +128,3 @@ private fun PerpetualAutocloseSection(provider: AmountPerpetualProvider, amount:
         onDismiss = { sheetVisible = false },
     )
 }
-

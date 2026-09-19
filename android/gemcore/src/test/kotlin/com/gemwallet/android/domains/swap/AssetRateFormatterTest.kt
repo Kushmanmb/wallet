@@ -3,8 +3,8 @@ package com.gemwallet.android.domains.swap
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import uniffi.gemstone.GemAssetRate
-import uniffi.gemstone.formattedAdaptive
 import uniffi.gemstone.GemSwapRate
+import uniffi.gemstone.formattedAdaptive
 import java.util.Locale
 
 class AssetRateFormatterTest {

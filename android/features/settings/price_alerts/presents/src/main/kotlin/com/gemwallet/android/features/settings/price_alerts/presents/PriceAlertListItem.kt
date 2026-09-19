@@ -24,11 +24,7 @@ internal fun priceAlertSupport(item: PriceAlertDataAggregate): (@Composable () -
 }
 
 @Composable
-internal fun PriceAlertAutoAssetItem(
-    asset: AssetInfoDataAggregate,
-    enabled: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-) {
+internal fun PriceAlertAutoAssetItem(asset: AssetInfoDataAggregate, enabled: Boolean, onCheckedChange: (Boolean) -> Unit) {
     AssetListItem(
         asset = asset,
         listPosition = ListPosition.Single,
@@ -44,11 +40,7 @@ internal fun PriceAlertAutoAssetItem(
 }
 
 @Composable
-internal fun PriceAlertAssetItem(
-    item: PriceAlertDataAggregate,
-    listPosition: ListPosition,
-    modifier: Modifier = Modifier,
-) {
+internal fun PriceAlertAssetItem(item: PriceAlertDataAggregate, listPosition: ListPosition, modifier: Modifier = Modifier) {
     AssetListItem(
         modifier = modifier,
         asset = item.asset,

@@ -10,17 +10,17 @@ import com.gemwallet.android.testkit.mockFormattedNumber
 import com.wallet.core.primitives.FeePriority
 import io.mockk.every
 import io.mockk.mockk
-import java.math.BigInteger
-import java.util.Locale
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.FeeUnitType
 import uniffi.gemstone.GemFeeRateRow
 import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemNumberUnit
+import java.math.BigInteger
+import java.util.Locale
 
 class FeeRateRowUIModelTest {
 

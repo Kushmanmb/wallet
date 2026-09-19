@@ -4,21 +4,20 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class TransactionExtended (
-	val recordId: Long,
-	val transaction: Transaction,
-	val asset: Asset,
-	val feeAsset: Asset,
-	val price: Price? = null,
-	val feePrice: Price? = null,
-	val assets: List<Asset>,
-	val prices: List<AssetPrice>,
-	val fromAddress: AddressName? = null,
-	val toAddress: AddressName? = null,
-	val confirmationEtaSeconds: UInt? = null
+data class TransactionExtended(
+    val recordId: Long,
+    val transaction: Transaction,
+    val asset: Asset,
+    val feeAsset: Asset,
+    val price: Price? = null,
+    val feePrice: Price? = null,
+    val assets: List<Asset>,
+    val prices: List<AssetPrice>,
+    val fromAddress: AddressName? = null,
+    val toAddress: AddressName? = null,
+    val confirmationEtaSeconds: UInt? = null,
 )
-

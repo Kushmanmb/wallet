@@ -13,16 +13,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.gemwallet.android.ui.theme.paddingHalfSmall
 
 @Composable
-fun ListItemTitleText(
-    text: String,
-    titleBadge: (@Composable () -> Unit)? = null,
-    color: Color = MaterialTheme.colorScheme.onSurface,
-    style: TextStyle = MaterialTheme.typography.titleMedium,
-    maxLines: Int = 1,
-) {
+fun ListItemTitleText(text: String, titleBadge: (@Composable () -> Unit)? = null, color: Color = MaterialTheme.colorScheme.onSurface, style: TextStyle = MaterialTheme.typography.titleMedium, maxLines: Int = 1) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(paddingHalfSmall)
+        horizontalArrangement = Arrangement.spacedBy(paddingHalfSmall),
     ) {
         Text(
             modifier = Modifier.weight(1f, false),

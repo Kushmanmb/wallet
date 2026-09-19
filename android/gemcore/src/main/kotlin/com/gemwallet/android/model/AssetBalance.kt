@@ -1,8 +1,8 @@
 package com.gemwallet.android.model
 
 import com.gemwallet.android.ext.toGem
-import com.wallet.core.primitives.Asset
 import com.gemwallet.android.ext.toIdentifier
+import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.BalanceMetadata
 import uniffi.gemstone.GemAssetBalance
 import java.math.BigInteger
@@ -58,7 +58,6 @@ data class AssetBalance(
         }
     }
 }
-
 
 private fun Balance<BigInteger>.createAmount(decimals: Int) = Balance(
     available = Crypto(available).value(decimals).stripTrailingZeros().toDouble(),

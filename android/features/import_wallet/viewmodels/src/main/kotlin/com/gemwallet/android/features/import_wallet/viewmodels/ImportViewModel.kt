@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.wallet_import.values.WalletImportResult
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ext.words
@@ -19,7 +20,6 @@ import com.gemwallet.android.ui.style.indicator
 import com.wallet.core.primitives.WalletSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +40,7 @@ import uniffi.gemstone.GemWalletImportKind
 import uniffi.gemstone.GemWalletImportResult
 import uniffi.gemstone.GemWalletImportSession
 import uniffi.gemstone.GemWalletServiceInterface
-import com.gemwallet.android.ext.runCatchingCancellable
+import javax.inject.Inject
 
 @HiltViewModel
 class ImportViewModel @Inject constructor(
@@ -71,7 +71,7 @@ class ImportViewModel @Inject constructor(
         state.update {
             it.copy(
                 importType = type,
-                dataError = null
+                dataError = null,
             )
         }
     }
@@ -111,10 +111,7 @@ class ImportViewModel @Inject constructor(
         }
     }
 
-    fun import(
-        generatedName: String,
-        onImported: (WalletImportResult) -> Unit
-    ) {
+    fun import(generatedName: String, onImported: (WalletImportResult) -> Unit) {
         if (session.value.isImporting) {
             return
         }
@@ -163,20 +160,18 @@ data class ImportViewModelState(
     val dataError: Throwable? = null,
     val existingWalletResult: WalletImportResult.Existing? = null,
 ) {
-    fun toUIState(loading: Boolean): ImportUIState {
-        return ImportUIState(
-            loading = loading,
-            error = error,
-            defaultWalletName = defaultWalletName,
-            title = title,
-            showsTabs = showsTabs,
-            tabs = tabs.map { kind -> ImportTabUIModel(type = importType.copy(kind = kind), title = kind.tabStringRes(), isSelected = kind == importType.kind) },
-            input = importType.kind.inputUiModel(),
-            importType = importType,
-            dataError = dataError,
-            existingWalletResult = existingWalletResult,
-        )
-    }
+    fun toUIState(loading: Boolean): ImportUIState = ImportUIState(
+        loading = loading,
+        error = error,
+        defaultWalletName = defaultWalletName,
+        title = title,
+        showsTabs = showsTabs,
+        tabs = tabs.map { kind -> ImportTabUIModel(type = importType.copy(kind = kind), title = kind.tabStringRes(), isSelected = kind == importType.kind) },
+        input = importType.kind.inputUiModel(),
+        importType = importType,
+        dataError = dataError,
+        existingWalletResult = existingWalletResult,
+    )
 }
 
 data class ImportUIState(
@@ -194,19 +189,9 @@ data class ImportUIState(
 
 data class ImportTextUIModel(val text: String, val cursor: Int)
 
-data class ImportTabUIModel(
-    val type: ImportType,
-    @StringRes val title: Int,
-    val isSelected: Boolean,
-)
+data class ImportTabUIModel(val type: ImportType, @StringRes val title: Int, val isSelected: Boolean)
 
-data class ImportInputUIModel(
-    @StringRes val placeholder: Int,
-    val isPhrase: Boolean,
-    val protectsInput: Boolean,
-    val supportsPhraseSuggestions: Boolean,
-    val showsViewOnlyWarning: Boolean,
-)
+data class ImportInputUIModel(@StringRes val placeholder: Int, val isPhrase: Boolean, val protectsInput: Boolean, val supportsPhraseSuggestions: Boolean, val showsViewOnlyWarning: Boolean)
 
 internal fun GemWalletImportKind.inputUiModel() = ImportInputUIModel(
     placeholder = fieldStringRes(),
@@ -218,4 +203,3 @@ internal fun GemWalletImportKind.inputUiModel() = ImportInputUIModel(
     supportsPhraseSuggestions = supportsPhraseSuggestions(),
     showsViewOnlyWarning = showsViewOnlyWarning(),
 )
-

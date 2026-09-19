@@ -33,10 +33,7 @@ import com.gemwallet.android.ui.theme.compactIconSize
 import uniffi.gemstone.GemListRowTitle
 
 @Composable
-fun SecurityScene(
-    onCancel: () -> Unit,
-    viewModel: SecurityViewModel = hiltViewModel(),
-) {
+fun SecurityScene(onCancel: () -> Unit, viewModel: SecurityViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val lockInterval by viewModel.lockInterval.collectAsStateWithLifecycle(null)

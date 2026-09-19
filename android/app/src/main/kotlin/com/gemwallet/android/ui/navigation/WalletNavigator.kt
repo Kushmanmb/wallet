@@ -159,9 +159,7 @@ class WalletNavigator(
         backStack.add(route)
     }
 
-    fun toastMessage(route: NavKey): String? {
-        return toastMessages[route]
-    }
+    fun toastMessage(route: NavKey): String? = toastMessages[route]
 
     fun clearToastMessage(route: NavKey) {
         toastMessages.remove(route)
@@ -173,9 +171,7 @@ class WalletNavigator(
         pop()
     }
 
-    fun swapSelection(route: NavKey): SwapSelection? {
-        return swapSelections[route]
-    }
+    fun swapSelection(route: NavKey): SwapSelection? = swapSelections[route]
 
     fun clearSwapSelection(route: NavKey) {
         swapSelections.remove(route)
@@ -302,7 +298,7 @@ class WalletNavigator(
             when (destination) {
                 AcceptTermsDestination.Create -> CreateWalletAlertRoute
                 AcceptTermsDestination.Import -> ImportSelectTypeRoute
-            }
+            },
         )
     }
 
@@ -330,25 +326,24 @@ class WalletNavigator(
     }
 }
 
-internal fun NavKey.isConfirmFlowSegmentRoute(): Boolean {
-    return when (this) {
-        SwapRoute -> true
-        is SendSelectRoute,
-        is AmountRoute,
-        is ConfirmRoute,
-        is DelegationRoute,
-        is RecipientInputRoute,
-        is EarnRoute,
-        is StakeRoute,
-        is SwapPairRoute,
-        is SwapSelectRoute -> true
-        else -> false
-    }
+internal fun NavKey.isConfirmFlowSegmentRoute(): Boolean = when (this) {
+    SwapRoute -> true
+
+    is SendSelectRoute,
+    is AmountRoute,
+    is ConfirmRoute,
+    is DelegationRoute,
+    is RecipientInputRoute,
+    is EarnRoute,
+    is StakeRoute,
+    is SwapPairRoute,
+    is SwapSelectRoute,
+    -> true
+
+    else -> false
 }
 
-private fun ImportType.toImportRoute(): NavKey {
-    return when (val chain = chain) {
-        null -> ImportMulticoinWalletRoute
-        else -> ImportChainWalletRoute(kind, chain)
-    }
+private fun ImportType.toImportRoute(): NavKey = when (val chain = chain) {
+    null -> ImportMulticoinWalletRoute
+    else -> ImportChainWalletRoute(kind, chain)
 }

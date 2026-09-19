@@ -14,18 +14,13 @@ import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.perpetual.listItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 @HiltViewModel
-class PerpetualsPreviewViewModel @Inject constructor(
-    userConfig: UserConfig,
-    getSession: GetSession,
-    getPositions: GetPerpetualPositions,
-    @param:ApplicationContext private val context: Context,
-) : ViewModel() {
+class PerpetualsPreviewViewModel @Inject constructor(userConfig: UserConfig, getSession: GetSession, getPositions: GetPerpetualPositions, @param:ApplicationContext private val context: Context) : ViewModel() {
 
     val bannerListItem = ListItemModel(
         title = context.getString(R.string.banner_perpetuals_title),

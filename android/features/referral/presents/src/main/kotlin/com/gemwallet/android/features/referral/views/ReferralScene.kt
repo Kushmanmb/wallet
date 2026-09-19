@@ -32,7 +32,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.features.referral.viewmodels.SyncType
-import uniffi.gemstone.GemRewardsState
 import com.gemwallet.android.features.referral.viewmodels.models.RewardRedemptionUIModel
 import com.gemwallet.android.features.referral.views.components.referralHead
 import com.gemwallet.android.features.referral.views.components.referralInfo
@@ -43,8 +42,8 @@ import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.buttons.mainActionButtonColors
 import com.gemwallet.android.ui.components.clickable
 import com.gemwallet.android.ui.components.list_item.GemListRowView
-import com.gemwallet.android.ui.components.list_item.listItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.components.list_item.listItem
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.showSnackbar
@@ -63,6 +62,7 @@ import com.wallet.core.primitives.WalletId
 import com.wallet.core.primitives.WalletSource
 import com.wallet.core.primitives.WalletType
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemRewardsState
 
 private val referralCodeMaxWidth = 250.dp
 
@@ -85,7 +85,6 @@ fun ReferralScene(
     onClose: () -> Unit,
     snackbar: SnackbarHostState = remember { SnackbarHostState() },
 ) {
-
     val context = LocalContext.current
     val link = referralLink.orEmpty()
     val joinText = stringResource(R.string.rewards_share_text, link)
@@ -115,8 +114,7 @@ fun ReferralScene(
                         .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(paddingDefault))
                         .clickable(onWallet)
                         .padding(start = paddingDefault, end = paddingSmall)
-                        .padding(vertical = paddingSmall)
-                    ,
+                        .padding(vertical = paddingSmall),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
@@ -172,7 +170,7 @@ fun ReferralScene(
                             text = stringResource(R.string.rewards_activate_referral_code_description),
                             color = MaterialTheme.colorScheme.secondary,
                             style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }

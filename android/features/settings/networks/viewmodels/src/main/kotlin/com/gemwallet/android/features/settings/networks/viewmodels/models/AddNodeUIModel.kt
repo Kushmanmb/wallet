@@ -16,18 +16,9 @@ import uniffi.gemstone.GemAddNodeSession
 import uniffi.gemstone.GemNodeCheckRow
 import uniffi.gemstone.GemNodeSyncState
 
-data class AddNodeUIModel(
-    val chain: Chain? = null,
-    val errorText: String = "",
-    val checks: List<NodeCheckRowUIModel> = emptyList(),
-    val warning: ListItemModel? = null,
-    val buttonState: ButtonState = ButtonState.Disabled,
-)
+data class AddNodeUIModel(val chain: Chain? = null, val errorText: String = "", val checks: List<NodeCheckRowUIModel> = emptyList(), val warning: ListItemModel? = null, val buttonState: ButtonState = ButtonState.Disabled)
 
-data class NodeCheckRowUIModel(
-    val model: ListItemModel,
-    val isInSync: Boolean? = null,
-)
+data class NodeCheckRowUIModel(val model: ListItemModel, val isInSync: Boolean? = null)
 
 internal fun GemAddNodeSession.uiModel(context: Context): AddNodeUIModel {
     val state = viewState()
@@ -40,10 +31,14 @@ internal fun GemAddNodeSession.uiModel(context: Context): AddNodeUIModel {
         chain = chain.requireChain(),
         errorText = errorText,
         checks = checks,
-        warning = if (checks.isEmpty()) null else ListItemModel(
-            title = context.getString(R.string.asset_verification_warning_title),
-            titleExtra = context.getString(R.string.nodes_import_node_warning_message),
-        ),
+        warning = if (checks.isEmpty()) {
+            null
+        } else {
+            ListItemModel(
+                title = context.getString(R.string.asset_verification_warning_title),
+                titleExtra = context.getString(R.string.nodes_import_node_warning_message),
+            )
+        },
         buttonState = buttonState(enabled = state.canImport, loading = state.phase is GemAddNodePhase.Checking),
     )
 }
@@ -55,6 +50,7 @@ private fun GemNodeCheckRow.uiModel(context: Context) = NodeCheckRowUIModel(
             GemNodeSyncState.IN_SYNC -> true
             GemNodeSyncState.OUT_OF_SYNC -> false
         }
+
         is GemNodeCheckRow.ChainId, is GemNodeCheckRow.LatestBlock, is GemNodeCheckRow.Latency -> null
     },
 )

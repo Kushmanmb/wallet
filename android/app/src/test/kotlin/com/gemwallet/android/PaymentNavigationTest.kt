@@ -1,15 +1,13 @@
 package com.gemwallet.android
 
-import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.application.assets.cases.GetWalletAssets
-import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.domains.confirm.applicationMetadata
 import com.gemwallet.android.domains.confirm.asset
-import uniffi.gemstone.TransactionInputType
-import com.wallet.core.primitives.TransferDataOutputAction
-import com.wallet.core.primitives.TransferDataOutputType
+import com.gemwallet.android.domains.confirm.unpackTransferData
+import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toIdentifier
+import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.testkit.mockAccount
-import com.wallet.core.primitives.Chain
 import com.gemwallet.android.testkit.mockAssetInfo
 import com.gemwallet.android.testkit.mockAssetSolana
 import com.gemwallet.android.testkit.mockAssetSolanaUSDC
@@ -17,6 +15,10 @@ import com.gemwallet.android.testkit.mockGemPaymentTransaction
 import com.gemwallet.android.testkit.mockPaymentRequest
 import com.gemwallet.android.ui.navigation.routes.ConfirmRoute
 import com.wallet.core.primitives.ApplicationMetadataSource
+import com.wallet.core.primitives.Asset
+import com.wallet.core.primitives.Chain
+import com.wallet.core.primitives.TransferDataOutputAction
+import com.wallet.core.primitives.TransferDataOutputType
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -26,17 +28,14 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import uniffi.gemstone.AlienProvider
-import com.gemwallet.android.ext.toGem
-import com.wallet.core.primitives.Asset
 import uniffi.gemstone.GemAssetsServiceInterface
 import uniffi.gemstone.GemPaymentService
 import uniffi.gemstone.Payment
 import uniffi.gemstone.PaymentLink
+import uniffi.gemstone.TransactionInputType
 import java.math.BigInteger
-import com.gemwallet.android.domains.confirm.unpackTransferData
 
 class PaymentNavigationTest {
-
 
     @Test
     fun routes_paymentLink_loadsTransactionForExistingAccount() = runTest {
@@ -55,7 +54,7 @@ class PaymentNavigationTest {
         val navigation = PaymentNavigation(getWalletAssets, paymentService, assetsService(assetInfo.asset))
 
         val routes = navigation.routes(
-            Payment.Link(PaymentLink.SolanaPay("https://example.com/pay"))
+            Payment.Link(PaymentLink.SolanaPay("https://example.com/pay")),
         )
 
         val route = routes.single() as ConfirmRoute
@@ -88,7 +87,7 @@ class PaymentNavigationTest {
         val navigation = PaymentNavigation(getWalletAssets, paymentService, assetsService(assetInfo.asset))
 
         val routes = navigation.routes(
-            Payment.Link(PaymentLink.SolanaPay("https://example.com/pay"))
+            Payment.Link(PaymentLink.SolanaPay("https://example.com/pay")),
         )
 
         val route = routes.single() as ConfirmRoute
@@ -120,7 +119,7 @@ class PaymentNavigationTest {
         val navigation = PaymentNavigation(getWalletAssets, paymentService, assetsService(requestedAsset))
 
         val routes = navigation.routes(
-            Payment.Link(PaymentLink.SolanaPay("https://example.com/pay"))
+            Payment.Link(PaymentLink.SolanaPay("https://example.com/pay")),
         )
 
         val route = routes.single() as ConfirmRoute

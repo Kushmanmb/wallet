@@ -23,7 +23,6 @@ import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Banner
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,6 +34,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemWalletHomeServiceInterface
+import javax.inject.Inject
 
 @HiltViewModel
 class AssetsViewModel @Inject constructor(
@@ -45,17 +45,15 @@ class AssetsViewModel @Inject constructor(
     private val userConfig: UserConfig,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @param:ApplicationContext private val context: Context,
-) : ViewModel(), ToastEmitter by ToastEmitterImpl() {
+) : ViewModel(),
+    ToastEmitter by ToastEmitterImpl() {
 
     val currentWalletId = getSession()
         .map { it?.wallet?.id }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private data class AssetGroups(
-        val pinned: List<AssetInfoDataAggregate> = emptyList(),
-        val unpinned: List<AssetInfoDataAggregate> = emptyList(),
-    )
+    private data class AssetGroups(val pinned: List<AssetInfoDataAggregate> = emptyList(), val unpinned: List<AssetInfoDataAggregate> = emptyList())
 
     private fun groups(items: List<AssetInfoDataAggregate>): AssetGroups {
         val sections = assetConfig.assetSections(

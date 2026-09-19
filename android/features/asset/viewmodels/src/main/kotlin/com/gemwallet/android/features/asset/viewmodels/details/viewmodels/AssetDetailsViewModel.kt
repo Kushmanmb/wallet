@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.asset.viewmodels.details.viewmodels
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -22,15 +23,22 @@ import com.gemwallet.android.ext.toGemKey
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.features.asset.viewmodels.details.models.AssetInfoUIModel
 import com.gemwallet.android.features.asset.viewmodels.details.models.AssetInfoUIModelFactory
+import com.gemwallet.android.features.asset.viewmodels.localization.toastRes
 import com.gemwallet.android.model.ChainAssetInfo
 import com.gemwallet.android.model.Session
 import com.gemwallet.android.model.toGem
+import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.screen.assetAddedToast
+import com.gemwallet.android.ui.components.screen.assetPinnedToast
+import com.gemwallet.android.ui.models.ToastEmitter
+import com.gemwallet.android.ui.models.ToastEmitterImpl
+import com.gemwallet.android.ui.models.ToastMessage
 import com.gemwallet.android.ui.models.navigation.requireAssetId
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Banner
 import com.wallet.core.primitives.PriceAlert
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,15 +65,7 @@ import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemPriceAlertToggle
 import uniffi.gemstone.GemRefreshKind
-import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
-import com.gemwallet.android.ui.models.ToastEmitter
-import com.gemwallet.android.ui.models.ToastEmitterImpl
-import com.gemwallet.android.ui.models.ToastMessage
-import com.gemwallet.android.ui.components.screen.assetPinnedToast
-import com.gemwallet.android.ui.components.screen.assetAddedToast
-import com.gemwallet.android.features.asset.viewmodels.localization.toastRes
-import com.gemwallet.android.ui.R
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -83,7 +83,8 @@ class AssetDetailsViewModel @Inject constructor(
     private val connectionStatusObserver: ConnectionStatusObserver,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @param:ApplicationContext private val context: Context,
-) : ViewModel(), ToastEmitter by ToastEmitterImpl() {
+) : ViewModel(),
+    ToastEmitter by ToastEmitterImpl() {
 
     val refreshIntervalMillis: StateFlow<Long> = connectionStatusObserver.refreshIntervalMillis(GemRefreshKind.WALLET)
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0L)
@@ -140,12 +141,7 @@ class AssetDetailsViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private fun uiModel(
-        chainInfo: ChainAssetInfo?,
-        session: Session?,
-        banners: List<BannerRow>,
-        priceAlerts: List<PriceAlert>,
-    ): AssetInfoUIModel? {
+    private fun uiModel(chainInfo: ChainAssetInfo?, session: Session?, banners: List<BannerRow>, priceAlerts: List<PriceAlert>): AssetInfoUIModel? {
         session ?: return null
         val wallet = session.wallet
         val assetInfo = chainInfo?.assetInfo ?: return null
@@ -161,7 +157,7 @@ class AssetDetailsViewModel @Inject constructor(
                 bannerEvents = banners.map { row -> row.banner.event.toGem() },
                 priceAlerts = priceAlerts.map { alert -> alert.toGem() },
                 feeBalanceMetadata = chainInfo.feeAssetInfo.balance.metadata?.toGem(),
-            )
+            ),
         )
         return assetInfoUIModelFactory.create(chainAssetInfo = chainInfo, details = details, banners = banners)
     }

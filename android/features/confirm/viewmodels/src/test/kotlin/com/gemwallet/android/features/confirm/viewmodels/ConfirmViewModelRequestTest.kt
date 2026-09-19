@@ -16,6 +16,7 @@ import com.gemwallet.android.testkit.mockWallet
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.Currency
+import com.wallet.core.primitives.FeePriority
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -37,12 +38,11 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GemConfirmButtonState
+import uniffi.gemstone.GemConfirmFeeSelection
 import uniffi.gemstone.GemConfirmPhase
 import uniffi.gemstone.GemConfirmTransferService
 import uniffi.gemstone.GemConfirmation
 import uniffi.gemstone.GemRecipient
-import com.wallet.core.primitives.FeePriority
-import uniffi.gemstone.GemConfirmFeeSelection
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ConfirmViewModelRequestTest {
@@ -144,6 +144,9 @@ class ConfirmViewModelRequestTest {
         confirmService = confirmService,
         savedStateHandle = handle,
         ioDispatcher = testDispatcher,
-        context = mockk<Context> { every { getString(any()) } returns "Error"; every { getString(any(), *anyVararg()) } returns "Error" },
+        context = mockk<Context> {
+            every { getString(any()) } returns "Error"
+            every { getString(any(), *anyVararg()) } returns "Error"
+        },
     )
 }

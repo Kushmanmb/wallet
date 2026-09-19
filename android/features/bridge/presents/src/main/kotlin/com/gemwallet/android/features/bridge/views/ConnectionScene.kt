@@ -22,10 +22,7 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.ListPosition
 
 @Composable
-fun ConnectionScene(
-    onCancel: () -> Unit,
-    viewModel: ConnectionViewModel = hiltViewModel(),
-) {
+fun ConnectionScene(onCancel: () -> Unit, viewModel: ConnectionViewModel = hiltViewModel()) {
     val connectionListItem by viewModel.connectionListItem.collectAsStateWithLifecycle()
     val rows by viewModel.rows.collectAsStateWithLifecycle()
 

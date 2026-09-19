@@ -100,15 +100,15 @@ fun PriceAlertTargetScene(
                 onSelect = {
                     onType(it)
                     value.clearText()
-                }
+                },
             ) { item ->
                 Text(
                     stringResource(
                         when (item) {
-                            PriceAlertNotificationType.Price ->  R.string.asset_price
+                            PriceAlertNotificationType.Price -> R.string.asset_price
                             PriceAlertNotificationType.PricePercentChange -> R.string.common_percentage
                             PriceAlertNotificationType.Auto -> R.string.common_no
-                        }
+                        },
                     ),
                 )
             }
@@ -168,6 +168,7 @@ fun PriceAlertTargetScene(
                                     style = MaterialTheme.typography.displaySmall,
                                 )
                             }
+
                             PriceAlertNotificationType.PricePercentChange -> {
                                 Icon(
                                     modifier = Modifier.align(Alignment.CenterEnd).clickable {
@@ -188,6 +189,7 @@ fun PriceAlertTargetScene(
                                     },
                                 )
                             }
+
                             else -> {}
                         }
                     }
@@ -197,7 +199,7 @@ fun PriceAlertTargetScene(
                         lineLimits = TextFieldLineLimits.SingleLine,
                         textStyle = MaterialTheme.typography.displaySmall.copy(
                             textAlign = TextAlign.Center,
-                            color = if (value.text.isEmpty()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
+                            color = if (value.text.isEmpty()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface,
                         ),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
                         interactionSource = interactionSource,
@@ -206,7 +208,7 @@ fun PriceAlertTargetScene(
                             if (this.length == 0) {
                                 this.append("0")
                             }
-                        }
+                        },
                     )
                     Box(Modifier.weight(1f)) {
                         if (type == PriceAlertNotificationType.PricePercentChange) {

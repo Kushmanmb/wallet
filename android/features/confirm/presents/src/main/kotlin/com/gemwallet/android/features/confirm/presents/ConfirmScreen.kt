@@ -50,6 +50,7 @@ import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.property.AddressPropertyItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
+import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsBottomSheet
 import com.gemwallet.android.ui.components.perpetual.PerpetualDetailsSummaryItem
 import com.gemwallet.android.ui.components.screen.ModalBottomSheet
@@ -68,7 +69,6 @@ import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.ChainAddress
 import uniffi.gemstone.SimulationResult
-import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,7 +136,7 @@ fun ConfirmScreen(
                     }
                 },
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -152,7 +152,9 @@ fun ConfirmScreen(
                     ) {
                         AmountListHead(amount = "", icon = model.asset)
                     }
+
                     is ConfirmHeaderUIModel.Simulation -> AssetValueListHead(model.header)
+
                     is ConfirmHeaderUIModel.Swap -> SwapListHead(
                         fromAsset = model.fromAsset,
                         fromValueText = model.fromValueText,
@@ -161,9 +163,13 @@ fun ConfirmScreen(
                         toValueText = model.toValueText,
                         toEquivalentText = model.toEquivalentText,
                     )
+
                     is ConfirmHeaderUIModel.Nft -> NftHead(model.nftAsset)
+
                     is ConfirmHeaderUIModel.Symbol -> AmountListHead(amount = model.asset.symbol, icon = model.asset)
+
                     is ConfirmHeaderUIModel.Amount -> AmountListHead(amount = model.amount, equivalent = model.equivalent, icon = model.asset)
+
                     null -> Unit
                 }
             }
@@ -172,12 +178,15 @@ fun ConfirmScreen(
                 val listPosition = ListPosition.getPosition(index, sectionSize)
                 when (row) {
                     is ConfirmRowUIModel.Row -> GemListRowView(row = row.row, listPosition = listPosition)
+
                     is ConfirmRowUIModel.Item -> ListItem(model = row.model, listPosition = listPosition)
+
                     is ConfirmRowUIModel.Address -> AddressRow(
                         row = row,
                         listPosition = listPosition,
                         onClick = { selectedAddress = ChainAddress(row.chain, row.address) },
                     )
+
                     is ConfirmRowUIModel.Validator -> AddressPropertyItem(
                         title = row.title,
                         displayText = row.name,
@@ -257,7 +266,7 @@ fun ConfirmScreen(
                 simulationPayloadDetailsContent(
                     primaryFields = simulation.primaryPayloadFields,
                     secondaryFields = simulation.secondaryPayloadFields,
-                    )
+                )
             }
         }
 
@@ -283,37 +292,32 @@ fun ConfirmScreen(
             },
             text = {
                 Text(executeErrorText ?: stringResource(R.string.errors_error_occurred))
-            }
+            },
         )
     }
 }
 
 @Composable
-private fun ConfirmDetailElementRow(
-    item: ConfirmDetailElement,
-    listPosition: ListPosition,
-    onClick: () -> Unit,
-) {
+private fun ConfirmDetailElementRow(item: ConfirmDetailElement, listPosition: ListPosition, onClick: () -> Unit) {
     when (item) {
         is ConfirmDetailElement.SwapDetails -> SwapDetailsSummaryItem(
             model = item.model,
             onClick = onClick,
             listPosition = listPosition,
         )
+
         is ConfirmDetailElement.PerpetualDetails -> PerpetualDetailsSummaryItem(
             details = item.details,
             onClick = onClick,
             listPosition = listPosition,
         )
+
         is ConfirmDetailElement.PerpetualModifyAutoclose -> GemListRowView(row = item.row, listPosition = listPosition)
     }
 }
 
 @Composable
-private fun ConfirmDetailElementBottomSheet(
-    item: ConfirmDetailElement?,
-    onDismiss: () -> Unit,
-) {
+private fun ConfirmDetailElementBottomSheet(item: ConfirmDetailElement?, onDismiss: () -> Unit) {
     SwapDetailsBottomSheet(
         isVisible = item is ConfirmDetailElement.SwapDetails,
         isLoading = false,

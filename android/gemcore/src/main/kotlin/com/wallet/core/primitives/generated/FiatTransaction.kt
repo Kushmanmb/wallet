@@ -4,60 +4,60 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class FiatQuoteType(val string: String) {
-	@SerialName("buy")
-	Buy("buy"),
-	@SerialName("sell")
-	Sell("sell"),
+    @SerialName("buy")
+    Buy("buy"),
+
+    @SerialName("sell")
+    Sell("sell"),
 }
 
 @Serializable
 enum class FiatTransactionStatus(val string: String) {
-	@SerialName("complete")
-	Complete("complete"),
-	@SerialName("pending")
-	Pending("pending"),
-	@SerialName("failed")
-	Failed("failed"),
-	@SerialName("unknown")
-	Unknown("unknown"),
+    @SerialName("complete")
+    Complete("complete"),
+
+    @SerialName("pending")
+    Pending("pending"),
+
+    @SerialName("failed")
+    Failed("failed"),
+
+    @SerialName("unknown")
+    Unknown("unknown"),
 }
 
 @Serializable
-data class FiatTransaction (
-	val id: String,
-	val assetId: AssetId,
-	val transactionType: FiatQuoteType,
-	val provider: FiatProviderName,
-	val status: FiatTransactionStatus,
-	val fiatAmount: Double,
-	val fiatCurrency: String,
-	val value: String,
-	val createdAt: SerializedDate,
-	val updatedAt: SerializedDate
+data class FiatTransaction(
+    val id: String,
+    val assetId: AssetId,
+    val transactionType: FiatQuoteType,
+    val provider: FiatProviderName,
+    val status: FiatTransactionStatus,
+    val fiatAmount: Double,
+    val fiatCurrency: String,
+    val value: String,
+    val createdAt: SerializedDate,
+    val updatedAt: SerializedDate,
 )
 
 @Serializable
-data class FiatTransactionAssetData (
-	val id: String,
-	val asset: Asset,
-	val transactionType: FiatQuoteType,
-	val provider: FiatProviderName,
-	val status: FiatTransactionStatus,
-	val fiatAmount: Double,
-	val fiatCurrency: String,
-	val value: String,
-	val createdAt: SerializedDate,
-	val detailsUrl: String? = null
+data class FiatTransactionAssetData(
+    val id: String,
+    val asset: Asset,
+    val transactionType: FiatQuoteType,
+    val provider: FiatProviderName,
+    val status: FiatTransactionStatus,
+    val fiatAmount: Double,
+    val fiatCurrency: String,
+    val value: String,
+    val createdAt: SerializedDate,
+    val detailsUrl: String? = null,
 )
 
 @Serializable
-data class FiatTransactionData (
-	val transaction: FiatTransaction,
-	val detailsUrl: String? = null
-)
-
+data class FiatTransactionData(val transaction: FiatTransaction, val detailsUrl: String? = null)

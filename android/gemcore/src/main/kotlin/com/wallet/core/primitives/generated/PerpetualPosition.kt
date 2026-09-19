@@ -4,48 +4,45 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class PerpetualMarginType(val string: String) {
-	@SerialName("cross")
-	Cross("cross"),
-	@SerialName("isolated")
-	Isolated("isolated"),
+    @SerialName("cross")
+    Cross("cross"),
+
+    @SerialName("isolated")
+    Isolated("isolated"),
 }
 
 @Serializable
 enum class PerpetualOrderType(val string: String) {
-	@SerialName("market")
-	Market("market"),
-	@SerialName("limit")
-	Limit("limit"),
+    @SerialName("market")
+    Market("market"),
+
+    @SerialName("limit")
+    Limit("limit"),
 }
 
 @Serializable
-data class PerpetualTriggerOrder (
-	val price: Double,
-	val order_type: PerpetualOrderType,
-	val order_id: String
-)
+data class PerpetualTriggerOrder(val price: Double, val order_type: PerpetualOrderType, val order_id: String)
 
 @Serializable
-data class PerpetualPosition (
-	val id: String,
-	val perpetualId: PerpetualId,
-	val assetId: AssetId,
-	val size: Double,
-	val sizeValue: Double,
-	val leverage: UByte,
-	val entryPrice: Double,
-	val liquidationPrice: Double? = null,
-	val marginType: PerpetualMarginType,
-	val direction: PerpetualDirection,
-	val marginAmount: Double,
-	val takeProfit: PerpetualTriggerOrder? = null,
-	val stopLoss: PerpetualTriggerOrder? = null,
-	val pnl: Double,
-	val funding: Float? = null
+data class PerpetualPosition(
+    val id: String,
+    val perpetualId: PerpetualId,
+    val assetId: AssetId,
+    val size: Double,
+    val sizeValue: Double,
+    val leverage: UByte,
+    val entryPrice: Double,
+    val liquidationPrice: Double? = null,
+    val marginType: PerpetualMarginType,
+    val direction: PerpetualDirection,
+    val marginAmount: Double,
+    val takeProfit: PerpetualTriggerOrder? = null,
+    val stopLoss: PerpetualTriggerOrder? = null,
+    val pnl: Double,
+    val funding: Float? = null,
 )
-

@@ -8,27 +8,27 @@ import com.gemwallet.android.application.support.cases.ClearSupportTyping
 import com.gemwallet.android.application.support.cases.FailPendingSupportMessages
 import com.gemwallet.android.application.support.cases.GetSupportMessages
 import com.gemwallet.android.application.support.cases.GetSupportTyping
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.millisToSeconds
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.wallet.core.primitives.SupportMessage
 import com.wallet.core.primitives.SupportMessageSender
-import uniffi.gemstone.GemErrorText
-import uniffi.gemstone.GemSupportServiceInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import com.gemwallet.android.ext.errorText
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.launch
+import uniffi.gemstone.GemErrorText
+import uniffi.gemstone.GemSupportServiceInterface
+import javax.inject.Inject
 
 @HiltViewModel
 class SupportChatSceneViewModel @Inject constructor(

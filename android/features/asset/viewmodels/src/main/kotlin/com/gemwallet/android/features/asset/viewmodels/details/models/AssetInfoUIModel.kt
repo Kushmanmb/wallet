@@ -9,9 +9,9 @@ import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.AssetType
 import com.wallet.core.primitives.VerificationStatus
 import uniffi.gemstone.GemAssetDetailsState
+import uniffi.gemstone.GemAssetNetworkDestination
 import uniffi.gemstone.GemBalanceRow
 import uniffi.gemstone.GemListRow
-import uniffi.gemstone.GemAssetNetworkDestination
 import uniffi.gemstone.GemPriceAlertToggle
 import uniffi.gemstone.GemValueTone
 
@@ -44,11 +44,7 @@ class AssetInfoUIModel(
 
     val asset: Asset get() = assetInfo.asset
 
-    data class AccountInfoUIModel(
-        val totalBalance: String = "0",
-        val totalFiat: String = "",
-        val owner: String = "",
-    )
+    data class AccountInfoUIModel(val totalBalance: String = "0", val totalFiat: String = "", val owner: String = "")
 
     data class SectionUIModel(@StringRes val title: Int?, val rows: List<RowUIModel>)
 

@@ -4,22 +4,21 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class Device (
-	val id: String,
-	val platform: Platform,
-	val platformStore: PlatformStore,
-	val os: String,
-	val model: String,
-	val token: String,
-	val locale: DeviceLocale,
-	val version: String,
-	val currency: Currency,
-	val isPushEnabled: Boolean,
-	val isPriceAlertsEnabled: Boolean? = null,
-	val subscriptionsVersion: Int
+data class Device(
+    val id: String,
+    val platform: Platform,
+    val platformStore: PlatformStore,
+    val os: String,
+    val model: String,
+    val token: String,
+    val locale: DeviceLocale,
+    val version: String,
+    val currency: Currency,
+    val isPushEnabled: Boolean,
+    val isPriceAlertsEnabled: Boolean? = null,
+    val subscriptionsVersion: Int,
 )
-

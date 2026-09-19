@@ -13,13 +13,7 @@ import uniffi.gemstone.GemBannerDestination
 import uniffi.gemstone.GemBannerLink
 import uniffi.gemstone.GemTransferData
 
-data class BannerItemUIModel(
-    val title: String?,
-    val subtitle: String?,
-    val icon: ListItemImage?,
-    val canClose: Boolean,
-    val destination: BannerDestination?,
-)
+data class BannerItemUIModel(val title: String?, val subtitle: String?, val icon: ListItemImage?, val canClose: Boolean, val destination: BannerDestination?)
 
 sealed interface BannerDestination {
     data object Stake : BannerDestination
@@ -28,10 +22,7 @@ sealed interface BannerDestination {
     data class OpenUrl(val url: String) : BannerDestination
 }
 
-data class BannerRowUIModel(
-    val banner: Banner,
-    val model: BannerItemUIModel,
-)
+data class BannerRowUIModel(val banner: Banner, val model: BannerItemUIModel)
 
 fun BannerRow.uiModel(context: Context): BannerRowUIModel = BannerRowUIModel(
     banner = banner,

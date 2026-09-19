@@ -9,9 +9,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.image.ListItemImageView
@@ -25,10 +25,10 @@ import com.gemwallet.android.ui.theme.Spacer6
 import com.gemwallet.android.ui.theme.Spacer8
 import com.gemwallet.android.ui.theme.alpha10
 import com.gemwallet.android.ui.theme.listItemIconSize
-import com.gemwallet.android.ui.theme.smallIconSize
 import com.gemwallet.android.ui.theme.paddingHalfSmall
 import com.gemwallet.android.ui.theme.pendingColor
 import com.gemwallet.android.ui.theme.secondaryFaded
+import com.gemwallet.android.ui.theme.smallIconSize
 import com.gemwallet.android.ui.theme.space2
 import com.gemwallet.android.ui.theme.space6
 import com.wallet.core.primitives.AssetId
@@ -116,22 +116,18 @@ fun ListItemTextStyle.color(): Color = when (this) {
 
 private fun ListItemImage.leadingSize(): Dp = when (this) {
     is ListItemImage.Symbol -> if (isFilled) listItemIconSize else smallIconSize
+
     is ListItemImage.Asset,
     is ListItemImage.Url,
     is ListItemImage.Stored,
     is ListItemImage.Emoji,
     is ListItemImage.Initials,
-    is ListItemImage.Drawable -> listItemIconSize
+    is ListItemImage.Drawable,
+    -> listItemIconSize
 }
 
 @Composable
-fun ListItem(
-    model: ListItemModel,
-    listPosition: ListPosition,
-    modifier: Modifier = Modifier,
-    minHeight: Dp = Dp.Unspecified,
-    accessory: (@Composable () -> Unit)? = null,
-) {
+fun ListItem(model: ListItemModel, listPosition: ListPosition, modifier: Modifier = Modifier, minHeight: Dp = Dp.Unspecified, accessory: (@Composable () -> Unit)? = null) {
     if (model.image == null && model.titleExtra == null && model.titleTag == null && model.subtitleExtra == null) {
         PropertyItem(
             modifier = modifier,
@@ -188,6 +184,7 @@ fun ListItem(
 
 private fun subtitleBadge(model: ListItemModel, accessory: (@Composable () -> Unit)?): (@Composable () -> Unit)? = when (model.subtitleTagType) {
     ListItemTagType.None -> accessory
+
     ListItemTagType.Progress -> {
         {
             SubtitleTag(model)
@@ -203,6 +200,7 @@ private fun SubtitleTag(model: ListItemModel) {
             Spacer8()
             CircularProgressIndicator16(color = model.subtitleStyle.color())
         }
+
         ListItemTagType.None -> Unit
     }
 }
@@ -215,6 +213,7 @@ private fun TitleTag(text: String, style: ListItemTextStyle, type: ListItemTagTy
             CircularProgressIndicator14()
             return
         }
+
         ListItemTagType.None -> Unit
     }
     when (style) {
@@ -230,9 +229,11 @@ private fun TitleTag(text: String, style: ListItemTextStyle, type: ListItemTagTy
             color = style.color(),
             style = MaterialTheme.typography.bodyMedium,
         )
+
         ListItemTextStyle.Positive,
         ListItemTextStyle.Negative,
-        ListItemTextStyle.Warning -> Text(
+        ListItemTextStyle.Warning,
+        -> Text(
             modifier = Modifier
                 .padding(start = paddingHalfSmall)
                 .background(
@@ -246,8 +247,10 @@ private fun TitleTag(text: String, style: ListItemTextStyle, type: ListItemTagTy
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.labelMedium,
         )
+
         ListItemTextStyle.Body,
         ListItemTextStyle.Secondary,
-        ListItemTextStyle.Faded -> Badge(text)
+        ListItemTextStyle.Faded,
+        -> Badge(text)
     }
 }

@@ -11,12 +11,7 @@ import com.wallet.core.primitives.InAppNotification
 import uniffi.gemstone.GemNotificationIcon
 import uniffi.gemstone.notificationRow
 
-data class NotificationRowUIModel(
-    val id: String,
-    val createdAt: Long,
-    val url: String?,
-    val model: ListItemModel,
-)
+data class NotificationRowUIModel(val id: String, val createdAt: Long, val url: String?, val model: ListItemModel)
 
 internal fun InAppNotification.uiModel(context: Context): NotificationRowUIModel {
     val row = notificationRow(toGem())

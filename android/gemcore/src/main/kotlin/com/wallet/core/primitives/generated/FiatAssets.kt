@@ -4,12 +4,8 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class FiatAssets (
-	val version: UInt,
-	val assetIds: List<String>
-)
-
+data class FiatAssets(val version: UInt, val assetIds: List<String>)

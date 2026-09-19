@@ -7,11 +7,7 @@ import uniffi.gemstone.GemNftItem
 import uniffi.gemstone.GemNftRow
 import uniffi.gemstone.nftRows
 
-data class NftItemUIModel(
-    val collection: NFTCollection,
-    val asset: NFTAsset? = null,
-    val row: GemNftRow,
-) {
+data class NftItemUIModel(val collection: NFTCollection, val asset: NFTAsset? = null, val row: GemNftRow) {
     val imageUrl: String get() = row.imageUrl
     val name: String get() = row.title
     val isVerified: Boolean get() = row.isVerified

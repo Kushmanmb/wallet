@@ -7,8 +7,6 @@ import com.gemwallet.android.domains.asset.aggregates.AssetInfoDataAggregate
 import com.gemwallet.android.domains.asset.aggregates.toAssetInfoDataAggregate
 import com.gemwallet.android.domains.price.values.RowFormatters
 import com.gemwallet.android.model.AssetInfo
-import uniffi.gemstone.GemAssetRowStyle
-import uniffi.gemstone.GemAssetTitleStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,14 +14,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
+import uniffi.gemstone.GemAssetRowStyle
+import uniffi.gemstone.GemAssetTitleStyle
 import java.util.Locale
 
-class GetActiveAssetsInfoImpl(
-    getWalletAssets: GetWalletAssets,
-    userConfig: UserConfig,
-    rowStyle: GemAssetRowStyle,
-    scope: CoroutineScope = CoroutineScope(Dispatchers.Default),
-) : GetActiveAssetsInfo {
+class GetActiveAssetsInfoImpl(getWalletAssets: GetWalletAssets, userConfig: UserConfig, rowStyle: GemAssetRowStyle, scope: CoroutineScope = CoroutineScope(Dispatchers.Default)) : GetActiveAssetsInfo {
 
     private val rows = AssetRows(rowStyle.title)
 
@@ -31,8 +26,8 @@ class GetActiveAssetsInfoImpl(
         combine(getWalletAssets(), userConfig.isHideBalances()) { items, hideBalance ->
             rows.aggregates(items, hideBalance)
         }
-        .distinctUntilChanged()
-        .stateIn(scope, SharingStarted.Eagerly, emptyList())
+            .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     override fun assetsInfo(): StateFlow<List<AssetInfoDataAggregate>> = assetsInfo
 }

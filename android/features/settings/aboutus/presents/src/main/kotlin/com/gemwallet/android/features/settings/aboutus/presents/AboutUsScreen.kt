@@ -13,9 +13,7 @@ import com.gemwallet.android.ui.components.screen.Scene
 import uniffi.gemstone.aboutSections
 
 @Composable
-fun AboutUsScreen(
-    onCancel: () -> Unit
-) {
+fun AboutUsScreen(onCancel: () -> Unit) {
     val context = LocalContext.current
     val version = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         context.packageManager.getPackageInfo(context.packageName, PackageManager.PackageInfoFlags.of(0))

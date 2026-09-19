@@ -2,6 +2,7 @@ package com.gemwallet.android.features.settings.price_alerts.presents
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -10,24 +11,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalResources
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gemwallet.android.features.settings.price_alerts.viewmodels.PriceAlertViewModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 import com.gemwallet.android.ui.components.screen.showSnackbar
-import com.gemwallet.android.features.settings.price_alerts.viewmodels.PriceAlertViewModel
+import com.gemwallet.android.ui.localization.text
 import com.wallet.core.primitives.AssetId
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.LaunchedEffect
-import com.gemwallet.android.ui.localization.text
 
 @Composable
-fun PriceAlertsNavScreen(
-    toastMessage: String? = null,
-    onToastShown: () -> Unit = {},
-    onChart: (AssetId) -> Unit,
-    onAddPriceAlertTarget: (AssetId) -> Unit,
-    onCancel: () -> Unit,
-    viewModel: PriceAlertViewModel = hiltViewModel(),
-) {
+fun PriceAlertsNavScreen(toastMessage: String? = null, onToastShown: () -> Unit = {}, onChart: (AssetId) -> Unit, onAddPriceAlertTarget: (AssetId) -> Unit, onCancel: () -> Unit, viewModel: PriceAlertViewModel = hiltViewModel()) {
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val snackbar = rememberSnackbarState(
@@ -66,6 +59,7 @@ fun PriceAlertsNavScreen(
                     selectingAsset = false
                 },
             )
+
             false -> PriceAlertScene(
                 asset = asset,
                 sections = sections,

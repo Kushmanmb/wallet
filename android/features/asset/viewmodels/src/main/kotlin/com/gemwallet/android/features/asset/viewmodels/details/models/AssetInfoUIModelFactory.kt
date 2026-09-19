@@ -22,12 +22,12 @@ import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.localization.titleRes
 import com.wallet.core.primitives.Currency
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import uniffi.gemstone.GemAssetBalanceRow
 import uniffi.gemstone.GemAssetDetailRow
 import uniffi.gemstone.GemAssetDetails
 import uniffi.gemstone.GemBalanceRow
 import uniffi.gemstone.GemValueStyle
+import javax.inject.Inject
 
 class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private val context: Context) {
 
@@ -73,11 +73,15 @@ class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private va
 
     private fun row(row: GemAssetDetailRow): AssetInfoUIModel.RowUIModel = when (row) {
         GemAssetDetailRow.Price -> AssetInfoUIModel.RowUIModel.Price
+
         is GemAssetDetailRow.Network -> AssetInfoUIModel.RowUIModel.Network(row.name)
+
         is GemAssetDetailRow.Balance -> balance(row.row)
+
         is GemAssetDetailRow.Earn -> AssetInfoUIModel.RowUIModel.Earn(
             ListItemModel(title = context.getString(R.string.common_earn), subtitle = context.getString(R.string.stake_apr, row.apr?.text().orEmpty())),
         )
+
         is GemAssetDetailRow.Row -> AssetInfoUIModel.RowUIModel.Row(row.row)
     }
 

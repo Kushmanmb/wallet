@@ -46,15 +46,7 @@ fun AddressPropertyItem(
 }
 
 @Composable
-fun AddressPropertyItem(
-    title: String,
-    displayText: String,
-    copyValue: String,
-    image: ListItemImage? = null,
-    explorerLink: BlockExplorerLink? = null,
-    listPosition: ListPosition = ListPosition.Middle,
-    onClick: (() -> Unit)? = null,
-) {
+fun AddressPropertyItem(title: String, displayText: String, copyValue: String, image: ListItemImage? = null, explorerLink: BlockExplorerLink? = null, listPosition: ListPosition = ListPosition.Middle, onClick: (() -> Unit)? = null) {
     var isExpanded by remember { mutableStateOf(false) }
     val clipboardManager = LocalContext.current.clipboardManager()
     val context = LocalContext.current
@@ -76,9 +68,11 @@ fun AddressPropertyItem(
                             image != null -> {
                                 { DataBadgeChevron(onClick != null || explorerLink != null) { ListItemImageView(image = image, size = smallIconSize) } }
                             }
+
                             onClick != null || explorerLink != null -> {
                                 { DataBadgeChevron() }
                             }
+
                             else -> null
                         },
                     )

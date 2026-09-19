@@ -21,11 +21,7 @@ sealed interface PerpetualPositionRowUIModel {
     data class Autoclose(override val row: GemListRow) : PerpetualPositionRowUIModel
 }
 
-data class PerpetualButtonUIModel(
-    val title: String,
-    val action: PerpetualButtonAction,
-    val tone: PerpetualButtonTone,
-)
+data class PerpetualButtonUIModel(val title: String, val action: PerpetualButtonAction, val tone: PerpetualButtonTone)
 
 enum class PerpetualButtonAction { OpenLong, OpenShort, Modify, Close, Increase, Reduce }
 
@@ -42,10 +38,12 @@ internal fun GemPerpetualButton.uiModel(context: Context): PerpetualButtonUIMode
 
 internal fun GemPerpetualPositionDetail.uiModel(): PerpetualPositionRowUIModel = when (kind) {
     GemPerpetualPositionDetailRow.AUTOCLOSE -> PerpetualPositionRowUIModel.Autoclose(row)
+
     GemPerpetualPositionDetailRow.PNL,
     GemPerpetualPositionDetailRow.SIZE,
     GemPerpetualPositionDetailRow.ENTRY_PRICE,
     GemPerpetualPositionDetailRow.LIQUIDATION_PRICE,
     GemPerpetualPositionDetailRow.MARGIN,
-    GemPerpetualPositionDetailRow.FUNDING_PAYMENTS -> PerpetualPositionRowUIModel.Item(row)
+    GemPerpetualPositionDetailRow.FUNDING_PAYMENTS,
+    -> PerpetualPositionRowUIModel.Item(row)
 }

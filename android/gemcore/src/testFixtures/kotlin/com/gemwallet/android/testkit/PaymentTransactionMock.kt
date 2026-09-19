@@ -8,10 +8,7 @@ import com.wallet.core.primitives.TransactionType
 import uniffi.gemstone.GemPaymentTransaction
 import uniffi.gemstone.PaymentRequest
 
-fun mockGemPaymentTransaction(
-    account: Account = mockAccount(),
-    request: PaymentRequest = mockPaymentRequest(address = account.address),
-) = GemPaymentTransaction(
+fun mockGemPaymentTransaction(account: Account = mockAccount(), request: PaymentRequest = mockPaymentRequest(address = account.address)) = GemPaymentTransaction(
     merchant = mockApplicationMetadata(source = ApplicationMetadataSource.Payment).toGem(),
     account = ChainAddress(account.chain, account.address).toGem(),
     transaction = "encoded-transaction",

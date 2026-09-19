@@ -19,10 +19,7 @@ import uniffi.gemstone.GemConnectionServiceInterface
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
-data class WebSocketRequest(
-    val url: String,
-    val headers: Map<String, String> = emptyMap(),
-)
+data class WebSocketRequest(val url: String, val headers: Map<String, String> = emptyMap())
 
 sealed interface WebSocketEvent {
     data object Connected : WebSocketEvent
@@ -37,11 +34,7 @@ interface WebSocketConnectable {
     suspend fun send(message: String): Boolean
 }
 
-class WebSocketConnection(
-    private val requestProvider: suspend () -> WebSocketRequest,
-    client: OkHttpClient,
-    private val connectionService: GemConnectionServiceInterface,
-) : WebSocketConnectable {
+class WebSocketConnection(private val requestProvider: suspend () -> WebSocketRequest, client: OkHttpClient, private val connectionService: GemConnectionServiceInterface) : WebSocketConnectable {
     private val client = client.newBuilder()
         .pingInterval(connectionService.pingIntervalMilliseconds().toLong(), TimeUnit.MILLISECONDS)
         .build()
@@ -70,50 +63,52 @@ class WebSocketConnection(
     private fun observeSession(request: WebSocketRequest): Flow<WebSocketEvent> = callbackFlow {
         val session = WebSocketSession()
         activeSession.set(session)
-        val webSocket = client.newWebSocket(request.toOkHttpRequest(), object : WebSocketListener() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                if (activeSession.get() !== session) {
-                    webSocket.cancel()
-                    return
+        val webSocket = client.newWebSocket(
+            request.toOkHttpRequest(),
+            object : WebSocketListener() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    if (activeSession.get() !== session) {
+                        webSocket.cancel()
+                        return
+                    }
+                    session.webSocket.set(webSocket)
+                    if (trySend(WebSocketEvent.Connected).isFailure) {
+                        activeSession.compareAndSet(session, null)
+                        webSocket.cancel()
+                    }
                 }
-                session.webSocket.set(webSocket)
-                if (trySend(WebSocketEvent.Connected).isFailure) {
+
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    trySend(WebSocketEvent.Message(text))
+                }
+
+                override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                    webSocket.close(code, reason)
+                }
+
+                override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                     activeSession.compareAndSet(session, null)
-                    webSocket.cancel()
+                    close()
                 }
-            }
 
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                trySend(WebSocketEvent.Message(text))
-            }
-
-            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                webSocket.close(code, reason)
-            }
-
-            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                activeSession.compareAndSet(session, null)
-                close()
-            }
-
-            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                activeSession.compareAndSet(session, null)
-                close(t)
-            }
-        })
+                override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                    activeSession.compareAndSet(session, null)
+                    close(t)
+                }
+            },
+        )
         awaitClose {
             activeSession.compareAndSet(session, null)
             webSocket.cancel()
         }
     }
 
-    private fun WebSocketRequest.toOkHttpRequest(): Request =
-        Request.Builder()
-            .url(url)
-            .apply {
-                headers.forEach { (name, value) -> header(name, value) }
-            }
-            .build()
+    private fun WebSocketRequest.toOkHttpRequest(): Request = Request.Builder()
+        .url(url)
+        .apply {
+            headers.forEach { (name, value) -> header(name, value) }
+        }
+        .build()
 
     private class WebSocketSession {
         val webSocket = AtomicReference<WebSocket?>()

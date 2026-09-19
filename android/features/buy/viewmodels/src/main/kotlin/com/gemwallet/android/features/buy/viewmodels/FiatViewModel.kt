@@ -30,7 +30,6 @@ import com.wallet.core.primitives.FiatProviderName
 import com.wallet.core.primitives.FiatQuoteType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -55,6 +54,7 @@ import uniffi.gemstone.GemFiatQuoteServiceInterface
 import uniffi.gemstone.GemFiatQuotesResult
 import uniffi.gemstone.GemFiatViewState
 import uniffi.gemstone.GemServiceException
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
@@ -64,7 +64,7 @@ class FiatViewModel @Inject constructor(
     private val service: GemFiatQuoteServiceInterface,
     @ApplicationContext private val context: Context,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val currency = service.getCurrency().toPrimitives()
@@ -75,7 +75,7 @@ class FiatViewModel @Inject constructor(
         service.newSession(
             (savedStateHandle.get<FiatQuoteType>(RouteArgument.Type.key) ?: FiatQuoteType.Buy).toGem(),
             savedStateHandle.get<Int>(RouteArgument.FiatAmount.key)?.toUInt(),
-        )
+        ),
     )
     private val isUrlLoading = MutableStateFlow(false)
 
@@ -122,7 +122,6 @@ class FiatViewModel @Inject constructor(
         state.toUiState()
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, viewState.value.toUiState())
-
 
     val providers = combine(assetInfoUIModel.filterNotNull(), viewState) { asset, state ->
         state.quoteRows.map { row -> row.toProviderUIModel(asset.asset) }
@@ -226,10 +225,5 @@ class FiatViewModel @Inject constructor(
         const val TAG = "FiatViewModel"
     }
 
-    private data class QuoteFetch(
-        val request: GemFiatQuoteRequest,
-        val assetId: AssetId,
-        val ticker: Long,
-        val retry: Long,
-    )
+    private data class QuoteFetch(val request: GemFiatQuoteRequest, val assetId: AssetId, val ticker: Long, val retry: Long)
 }

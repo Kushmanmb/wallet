@@ -9,6 +9,7 @@ import com.gemwallet.android.application.contacts.cases.GetContacts
 import com.gemwallet.android.application.contacts.values.ContactRecipient
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.wallet.cases.GetWallets
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.domains.confirm.ConfirmTransferInput
 import com.gemwallet.android.ext.asset
@@ -20,6 +21,7 @@ import com.gemwallet.android.features.recipient.viewmodel.models.RecipientState
 import com.gemwallet.android.features.recipient.viewmodel.models.uiSection
 import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.ui.components.fields.NameResolveIndicatorUIModel
+import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.ListSection
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
@@ -33,9 +35,8 @@ import com.gemwallet.android.ui.models.navigation.requireAssetId
 import com.gemwallet.android.ui.style.indicator
 import com.wallet.core.primitives.AssetId
 import dagger.hilt.android.lifecycle.HiltViewModel
-import com.gemwallet.android.ui.localization.string
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -48,6 +49,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemNameServiceInterface
 import uniffi.gemstone.GemPaymentRecipient
@@ -56,12 +59,9 @@ import uniffi.gemstone.GemRecipientException
 import uniffi.gemstone.GemRecipientNext
 import uniffi.gemstone.GemRecipientScan
 import uniffi.gemstone.GemRecipientServiceInterface
-import uniffi.gemstone.GemRecipientType
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
 import uniffi.gemstone.GemRecipientSession
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
+import uniffi.gemstone.GemRecipientType
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -121,13 +121,13 @@ class RecipientViewModel @Inject constructor(
     val sections: StateFlow<List<ListSection<RecipientRowUIModel>>> = combine(wallets, contacts, state) { wallets, contacts, state ->
         when (state) {
             RecipientState.Loading -> emptyList()
+
             is RecipientState.Ready -> service.recipientSections(wallets, state.asset.chain.string, contacts.map { GemRecipient(address = it.address, name = it.name, memo = it.memo) })
                 .mapIndexed { index, section -> section.uiSection(index.toString(), context) }
         }
     }
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
 
     val buttonState: StateFlow<ButtonState> = addressInput.isValid
         .map { buttonState(enabled = it) }
@@ -157,11 +157,7 @@ class RecipientViewModel @Inject constructor(
         addressInput.validate()
     }
 
-    fun onNext(
-        recipient: RecipientState.Ready,
-        amountAction: AmountTransactionAction,
-        confirmAction: ConfirmTransactionAction,
-    ) {
+    fun onNext(recipient: RecipientState.Ready, amountAction: AmountTransactionAction, confirmAction: ConfirmTransactionAction) {
         if (!addressInput.validate()) return
         val next = try {
             recipientInput.updateAndGet { it.onAddressChanged(address.value) }.next(recipient.type, addressInput.nameRecordState)
@@ -172,12 +168,7 @@ class RecipientViewModel @Inject constructor(
         route(recipient, next, amountAction, confirmAction)
     }
 
-    fun onDestination(
-        recipient: RecipientState.Ready,
-        destination: GemRecipient,
-        amountAction: AmountTransactionAction,
-        confirmAction: ConfirmTransactionAction,
-    ) {
+    fun onDestination(recipient: RecipientState.Ready, destination: GemRecipient, amountAction: AmountTransactionAction, confirmAction: ConfirmTransactionAction) {
         val next = try {
             service.select(recipient.type, destination)
         } catch (rejection: GemRecipientException) {
@@ -187,16 +178,12 @@ class RecipientViewModel @Inject constructor(
         route(recipient, next, amountAction, confirmAction)
     }
 
-    private fun route(
-        recipient: RecipientState.Ready,
-        next: GemRecipientNext,
-        amountAction: AmountTransactionAction,
-        confirmAction: ConfirmTransactionAction,
-    ) {
+    private fun route(recipient: RecipientState.Ready, next: GemRecipientNext, amountAction: AmountTransactionAction, confirmAction: ConfirmTransactionAction) {
         when (next) {
             is GemRecipientNext.Amount -> amountAction(
-                AmountParams.Transfer(recipient.asset.id, next.payment.recipient, next.payment.recipient.memo, next.payment.recipient.references, next.payment.amount)
+                AmountParams.Transfer(recipient.asset.id, next.payment.recipient, next.payment.recipient.memo, next.payment.recipient.references, next.payment.amount),
             )
+
             is GemRecipientNext.Confirm -> confirmAction(ConfirmTransferInput(next.transfer))
         }
     }
@@ -235,5 +222,4 @@ class RecipientViewModel @Inject constructor(
         recipientInput.update { it.onPayment(payment) }
         addressInput.setScannedAddress(payment.recipient.address)
     }
-
 }

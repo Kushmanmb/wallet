@@ -29,4 +29,3 @@ fun TransactionDataAggregate.uiModel(context: Context) = TransactionRowUIModel(
     valueTone = valueTone,
     equivalentValue = equivalentValue,
 )
-

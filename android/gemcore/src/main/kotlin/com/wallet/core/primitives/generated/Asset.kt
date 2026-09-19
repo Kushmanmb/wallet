@@ -4,21 +4,11 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class Asset (
-	val id: AssetId,
-	val name: String,
-	val symbol: String,
-	val decimals: Int,
-	val type: AssetType
-)
+data class Asset(val id: AssetId, val name: String, val symbol: String, val decimals: Int, val type: AssetType)
 
 @Serializable
-data class ChainAsset (
-	val asset: Asset,
-	val networkName: String
-)
-
+data class ChainAsset(val asset: Asset, val networkName: String)

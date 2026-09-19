@@ -14,11 +14,7 @@ import com.gemwallet.android.ui.style.color
 import com.wallet.core.primitives.AssetId
 
 @Composable
-internal fun PriceItem(
-    uiState: AssetInfoUIModel,
-    listPosition: ListPosition,
-    onChart: (AssetId) -> Unit,
-) {
+internal fun PriceItem(uiState: AssetInfoUIModel, listPosition: ListPosition, onChart: (AssetId) -> Unit) {
     ListItem(
         model = uiState.priceListItem,
         listPosition = listPosition,

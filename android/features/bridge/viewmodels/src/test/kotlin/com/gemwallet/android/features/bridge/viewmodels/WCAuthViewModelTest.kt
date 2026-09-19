@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.bridge.viewmodels
 
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.wallet_connect.ActiveWalletConnectRequest
 import com.gemwallet.android.application.wallet_connect.WalletConnectAuthPayloadParams
@@ -36,6 +35,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemWalletConnectAuthAccount
 import uniffi.gemstone.GemWalletConnectServiceInterface
 
@@ -86,14 +86,13 @@ class WCAuthViewModelTest {
         every { connectionRow(any()) } returns mockGemConnectionRow()
     }
 
-    private fun service(accounts: (String) -> List<GemWalletConnectAuthAccount>): GemWalletConnectServiceInterface =
-        mockk(relaxed = true) {
-            every { isOriginRejected(any(), any(), any()) } returns false
-            every { authenticationChainIds(any()) } returns listOf("eip155:1")
-            every { authenticationMethods() } returns listOf("personal_sign")
-            every { authenticationAccounts(any(), any()) } answers { accounts(secondArg<uniffi.gemstone.Wallet>().id) }
-            coEvery { signMessage(any(), any()) } returns "0xsignature"
-        }
+    private fun service(accounts: (String) -> List<GemWalletConnectAuthAccount>): GemWalletConnectServiceInterface = mockk(relaxed = true) {
+        every { isOriginRejected(any(), any(), any()) } returns false
+        every { authenticationChainIds(any()) } returns listOf("eip155:1")
+        every { authenticationMethods() } returns listOf("personal_sign")
+        every { authenticationAccounts(any(), any()) } answers { accounts(secondArg<uniffi.gemstone.Wallet>().id) }
+        coEvery { signMessage(any(), any()) } returns "0xsignature"
+    }
 
     private fun approval(): ApproveWalletConnectAuthentication = mockk(relaxed = true) {
         every { authPayloadParams(any(), any(), any()) } answers { firstArg() }
@@ -106,11 +105,7 @@ class WCAuthViewModelTest {
         )
     }
 
-    private fun viewModel(
-        service: GemWalletConnectServiceInterface,
-        approve: ApproveWalletConnectAuthentication = approval(),
-        prepare: PrepareSessionProposal = proposals(),
-    ) = WCAuthViewModel(
+    private fun viewModel(service: GemWalletConnectServiceInterface, approve: ApproveWalletConnectAuthentication = approval(), prepare: PrepareSessionProposal = proposals()) = WCAuthViewModel(
         approveWalletConnectAuthentication = approve,
         prepareSessionProposal = prepare,
         activeRequest = ActiveWalletConnectRequest(events = emptyFlow()),

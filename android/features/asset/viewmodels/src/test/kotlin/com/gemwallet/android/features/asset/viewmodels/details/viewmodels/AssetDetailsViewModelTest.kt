@@ -47,9 +47,9 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GemAssetDetailsInput
+import uniffi.gemstone.GemAssetDetailsServiceInterface
 import uniffi.gemstone.GemAssetRefresh
 import uniffi.gemstone.GemLoadState
-import uniffi.gemstone.GemAssetDetailsServiceInterface
 import uniffi.gemstone.GemPriceAlertToggle
 
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -8,10 +8,10 @@ import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.features.asset_select.viewmodels.models.BaseSelectSearch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import uniffi.gemstone.GemAssetSelectionServiceInterface
 import uniffi.gemstone.GemSelectAssetType
+import javax.inject.Inject
 
 @HiltViewModel
 class ReceiveCollectionSelectViewModel @Inject constructor(

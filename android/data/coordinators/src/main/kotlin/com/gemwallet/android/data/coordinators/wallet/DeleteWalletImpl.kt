@@ -12,20 +12,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DeleteWalletImpl @Inject constructor(
-    private val walletService: GemWalletServiceInterface,
-    private val userConfig: UserConfig,
-) : DeleteWallet {
+class DeleteWalletImpl @Inject constructor(private val walletService: GemWalletServiceInterface, private val userConfig: UserConfig) : DeleteWallet {
 
-    override suspend fun deleteWallet(
-        walletId: WalletId,
-        onBoard: () -> Unit,
-        onComplete: () -> Unit
-    ) = withContext(Dispatchers.IO) {
+    override suspend fun deleteWallet(walletId: WalletId, onBoard: () -> Unit, onComplete: () -> Unit) = withContext(Dispatchers.IO) {
         val deletion = walletService.deleteWallet(walletId.id)
 
         val callback: () -> Unit = when (deletion) {
             GemWalletDeletion.WALLETS_REMAINING -> onComplete
+
             GemWalletDeletion.LAST_WALLET_DELETED -> {
                 userConfig.reload()
                 onBoard
@@ -36,5 +30,4 @@ class DeleteWalletImpl @Inject constructor(
             callback()
         }
     }
-
 }

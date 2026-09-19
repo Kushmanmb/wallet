@@ -4,28 +4,14 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class MarketDominance (
-	val assetId: String,
-	val dominance: Float
-)
+data class MarketDominance(val assetId: String, val dominance: Float)
 
 @Serializable
-data class MarketsAssets (
-	val trending: List<AssetId>,
-	val gainers: List<AssetId>,
-	val losers: List<AssetId>
-)
+data class MarketsAssets(val trending: List<AssetId>, val gainers: List<AssetId>, val losers: List<AssetId>)
 
 @Serializable
-data class Markets (
-	val marketCap: Float,
-	val marketCapChangePercentage24h: Float,
-	val assets: MarketsAssets,
-	val dominance: List<MarketDominance>,
-	val totalVolume24h: Float
-)
-
+data class Markets(val marketCap: Float, val marketCapChangePercentage24h: Float, val assets: MarketsAssets, val dominance: List<MarketDominance>, val totalVolume24h: Float)

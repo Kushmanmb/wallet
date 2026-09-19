@@ -27,10 +27,7 @@ data class AssetInfoDataAggregate(
     val accountAddress: String,
 )
 
-fun List<AssetInfo>.toAssetInfoDataAggregates(
-    naming: GemAssetTitleStyle = GemAssetTitleStyle.ASSET,
-    hideBalance: Boolean = false,
-): List<AssetInfoDataAggregate> {
+fun List<AssetInfo>.toAssetInfoDataAggregates(naming: GemAssetTitleStyle = GemAssetTitleStyle.ASSET, hideBalance: Boolean = false): List<AssetInfoDataAggregate> {
     val formatters = RowFormatters()
     return map { it.toAssetInfoDataAggregate(naming = naming, hideBalance = hideBalance, formatters = formatters) }
 }
@@ -75,9 +72,11 @@ fun AssetInfo.toAssetInfoDataAggregate(
 
 private fun AssetInfo.title(naming: GemAssetTitleStyle): String = when (naming) {
     GemAssetTitleStyle.ASSET -> asset.name
+
     GemAssetTitleStyle.CANONICAL_ASSET -> when (asset.subtype) {
         AssetSubtype.NATIVE -> asset.chain.asset().name
         AssetSubtype.TOKEN -> asset.name
     }
+
     GemAssetTitleStyle.NETWORK -> asset.id.chain.asset().name
 }

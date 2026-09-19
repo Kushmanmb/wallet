@@ -22,33 +22,33 @@ import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 
 @Composable
-internal fun AssetDetailRowItem(
-    uiState: AssetInfoUIModel,
-    row: AssetInfoUIModel.RowUIModel,
-    listPosition: ListPosition,
-    onSelect: (GemListRowTitle) -> Unit,
-    onAction: (AssetDetailsAction) -> Unit,
-) {
+internal fun AssetDetailRowItem(uiState: AssetInfoUIModel, row: AssetInfoUIModel.RowUIModel, listPosition: ListPosition, onSelect: (GemListRowTitle) -> Unit, onAction: (AssetDetailsAction) -> Unit) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     when (row) {
         AssetInfoUIModel.RowUIModel.Price -> PriceItem(uiState, listPosition, onChart = { onAction(AssetDetailsAction.OpenChart(it)) })
+
         is AssetInfoUIModel.RowUIModel.Network -> PropertyNetworkItem(
             chain = uiState.asset.chain,
             value = row.name,
             listPosition = listPosition,
             onOpenNetwork = uiState.networkNavigation?.let { { onAction(it) } },
         )
+
         is AssetInfoUIModel.RowUIModel.Balance -> {
             val onBalance: (() -> Unit)? = when (row.type) {
                 AssetInfoUIModel.BalanceViewType.Available,
-                AssetInfoUIModel.BalanceViewType.PendingUnconfirmed -> null
+                AssetInfoUIModel.BalanceViewType.PendingUnconfirmed,
+                -> null
+
                 AssetInfoUIModel.BalanceViewType.Stake -> {
                     { onAction(AssetDetailsAction.Stake(uiState.asset.id)) }
                 }
+
                 AssetInfoUIModel.BalanceViewType.Earn -> {
                     { onAction(AssetDetailsAction.Earn(uiState.asset.id)) }
                 }
+
                 AssetInfoUIModel.BalanceViewType.Reserved -> row.url?.let { url ->
                     { uriHandler.open(context, url) }
                 }
@@ -60,12 +60,14 @@ internal fun AssetDetailRowItem(
                 accessory = onBalance?.let { { DataBadgeChevron() } },
             )
         }
+
         is AssetInfoUIModel.RowUIModel.Earn -> ListItem(
             model = row.model,
             listPosition = listPosition,
             modifier = Modifier.clickable { onAction(AssetDetailsAction.Earn(uiState.asset.id)) },
             accessory = { DataBadgeChevron() },
         )
+
         is AssetInfoUIModel.RowUIModel.Row -> when (val listRow = row.row) {
             is GemListRow.Link -> GemListRowView(row = listRow, listPosition = listPosition, modifier = Modifier.clickable { onSelect(listRow.title) })
             else -> GemListRowView(row = listRow, listPosition = listPosition)

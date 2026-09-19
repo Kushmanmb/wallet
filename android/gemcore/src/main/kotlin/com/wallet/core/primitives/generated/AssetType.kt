@@ -4,46 +4,59 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class AssetSubtype(val string: String) {
-	@SerialName("NATIVE")
-	NATIVE("NATIVE"),
-	@SerialName("TOKEN")
-	TOKEN("TOKEN"),
+    @SerialName("NATIVE")
+    NATIVE("NATIVE"),
+
+    @SerialName("TOKEN")
+    TOKEN("TOKEN"),
 }
 
 @Serializable
 enum class AssetType(val string: String) {
-	@SerialName("NATIVE")
-	NATIVE("NATIVE"),
-	@SerialName("ERC20")
-	ERC20("ERC20"),
-	@SerialName("BEP20")
-	BEP20("BEP20"),
-	@SerialName("SPL")
-	SPL("SPL"),
-	@SerialName("SPL2022")
-	SPL2022("SPL2022"),
-	@SerialName("TRC20")
-	TRC20("TRC20"),
-	@SerialName("TIP20")
-	TIP20("TIP20"),
-	@SerialName("TOKEN")
-	TOKEN("TOKEN"),
-	@SerialName("IBC")
-	IBC("IBC"),
-	@SerialName("JETTON")
-	JETTON("JETTON"),
-	@SerialName("SYNTH")
-	SYNTH("SYNTH"),
-	@SerialName("ASA")
-	ASA("ASA"),
-	@SerialName("PERPETUAL")
-	PERPETUAL("PERPETUAL"),
-	@SerialName("SPOT")
-	SPOT("SPOT"),
-}
+    @SerialName("NATIVE")
+    NATIVE("NATIVE"),
 
+    @SerialName("ERC20")
+    ERC20("ERC20"),
+
+    @SerialName("BEP20")
+    BEP20("BEP20"),
+
+    @SerialName("SPL")
+    SPL("SPL"),
+
+    @SerialName("SPL2022")
+    SPL2022("SPL2022"),
+
+    @SerialName("TRC20")
+    TRC20("TRC20"),
+
+    @SerialName("TIP20")
+    TIP20("TIP20"),
+
+    @SerialName("TOKEN")
+    TOKEN("TOKEN"),
+
+    @SerialName("IBC")
+    IBC("IBC"),
+
+    @SerialName("JETTON")
+    JETTON("JETTON"),
+
+    @SerialName("SYNTH")
+    SYNTH("SYNTH"),
+
+    @SerialName("ASA")
+    ASA("ASA"),
+
+    @SerialName("PERPETUAL")
+    PERPETUAL("PERPETUAL"),
+
+    @SerialName("SPOT")
+    SPOT("SPOT"),
+}

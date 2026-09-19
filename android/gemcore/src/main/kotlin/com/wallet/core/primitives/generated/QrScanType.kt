@@ -4,26 +4,32 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class QRScanType(val string: String) {
-	@SerialName("universal")
-	Universal("universal"),
-	@SerialName("walletConnect")
-	WalletConnect("walletConnect"),
-	@SerialName("address")
-	Address("address"),
-	@SerialName("memo")
-	Memo("memo"),
-	@SerialName("url")
-	Url("url"),
-	@SerialName("tokenContract")
-	TokenContract("tokenContract"),
-	@SerialName("secretPhrase")
-	SecretPhrase("secretPhrase"),
-	@SerialName("privateKey")
-	PrivateKey("privateKey"),
-}
+    @SerialName("universal")
+    Universal("universal"),
 
+    @SerialName("walletConnect")
+    WalletConnect("walletConnect"),
+
+    @SerialName("address")
+    Address("address"),
+
+    @SerialName("memo")
+    Memo("memo"),
+
+    @SerialName("url")
+    Url("url"),
+
+    @SerialName("tokenContract")
+    TokenContract("tokenContract"),
+
+    @SerialName("secretPhrase")
+    SecretPhrase("secretPhrase"),
+
+    @SerialName("privateKey")
+    PrivateKey("privateKey"),
+}

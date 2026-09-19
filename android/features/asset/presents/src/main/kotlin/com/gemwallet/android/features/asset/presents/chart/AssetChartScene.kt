@@ -16,12 +16,12 @@ import com.gemwallet.android.features.asset.viewmodels.chart.models.ChartSection
 import com.gemwallet.android.features.asset.viewmodels.chart.viewmodels.AssetChartViewModel
 import com.gemwallet.android.features.asset.viewmodels.chart.viewmodels.ChartViewModel
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
-import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState

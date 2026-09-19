@@ -46,11 +46,7 @@ import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.WalletId
 
 @Composable
-fun ProposalScene(
-    proposal: WalletConnectSessionProposal,
-    verifyContext: WalletConnectVerifyContext,
-    onError: (String) -> Unit,
-) {
+fun ProposalScene(proposal: WalletConnectSessionProposal, verifyContext: WalletConnectVerifyContext, onError: (String) -> Unit) {
     val context = LocalContext.current
     val viewModel: ProposalSceneViewModel = hiltViewModel()
     BackHandler(onBack = viewModel::onReject)
@@ -70,12 +66,13 @@ fun ProposalScene(
                 BridgeRequestError.MaliciousSession -> Toast.makeText(
                     context,
                     R.string.errors_connections_malicious_origin,
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_LONG,
                 ).show()
+
                 BridgeRequestError.Expired -> Toast.makeText(
                     context,
                     R.string.wallet_connect_request_expired,
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_LONG,
                 ).show()
             }
         }
@@ -87,6 +84,7 @@ fun ProposalScene(
             onCancel = viewModel::onReject,
             closeIcon = true,
         )
+
         else -> Proposal(
             peer = currentPeer,
             state = state,
@@ -100,7 +98,7 @@ fun ProposalScene(
             buttonState = buttonState,
             onReject = viewModel::onReject,
             onApprove = { viewModel.onApprove { error -> onError(error.text(context).ifBlank { unknownErrorMessage }) } },
-            onWalletSelected = viewModel::onWalletSelected
+            onWalletSelected = viewModel::onWalletSelected,
         )
     }
 }
@@ -131,7 +129,7 @@ private fun Proposal(
             MainActionButton(
                 title = stringResource(id = R.string.transfer_confirm),
                 state = buttonState,
-                onClick = onApprove
+                onClick = onApprove,
             )
         },
         onClose = onReject,
@@ -190,4 +188,3 @@ private fun Proposal(
         onDismissRequest = { isShowSelectWallets = false },
     )
 }
-

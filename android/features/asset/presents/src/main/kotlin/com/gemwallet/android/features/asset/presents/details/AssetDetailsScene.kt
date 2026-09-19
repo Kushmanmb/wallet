@@ -14,13 +14,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.gemwallet.android.domains.confirm.ConfirmTransferInput
 import com.gemwallet.android.domains.transaction.aggregates.TransactionDataAggregate
-import com.gemwallet.android.features.asset.presents.details.components.AssetDetailsMenu
 import com.gemwallet.android.features.asset.presents.details.components.AssetDetailRowItem
+import com.gemwallet.android.features.asset.presents.details.components.AssetDetailsMenu
 import com.gemwallet.android.features.asset.presents.details.components.AssetHeadItem
 import com.gemwallet.android.features.asset.presents.details.components.BannerItem
 import com.gemwallet.android.features.asset.presents.details.components.EmptyTransactionsItem
 import com.gemwallet.android.features.asset.viewmodels.details.models.AssetInfoUIModel
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.list_item.property.verificationStatusItem
@@ -29,7 +30,6 @@ import com.gemwallet.android.ui.components.list_item.transaction.transactionsLis
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.showSnackbar
-import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.models.ListPosition
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
@@ -58,7 +58,7 @@ internal fun AssetDetailsScene(
             AssetDetailsAction.Swap(
                 fromAssetId = uiState.swapPayAssetId ?: uiState.asset.id,
                 toAssetId = uiState.swapReceiveAssetId,
-            )
+            ),
         )
     }
 
@@ -68,7 +68,7 @@ internal fun AssetDetailsScene(
                 Text(
                     text = uiState.name,
                     maxLines = 1,
-                    overflow = TextOverflow.MiddleEllipsis
+                    overflow = TextOverflow.MiddleEllipsis,
                 )
             }
         },
@@ -90,7 +90,7 @@ internal fun AssetDetailsScene(
             onRefresh = { onAction(AssetDetailsAction.Refresh) },
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             ) {
                 item {
                     AssetHeadItem(
@@ -124,7 +124,11 @@ internal fun AssetDetailsScene(
                         size = transactions.size,
                         symbol = uiState.asset.symbol,
                         isViewOnly = detailsState.isViewOnly,
-                        onBuy = if (uiState.emptyTransactions.showsBuy) { { onAction(AssetDetailsAction.Buy(uiState.asset.id)) } } else null,
+                        onBuy = if (uiState.emptyTransactions.showsBuy) {
+                            { onAction(AssetDetailsAction.Buy(uiState.asset.id)) }
+                        } else {
+                            null
+                        },
                         onSwap = if (uiState.emptyTransactions.showsSwap) swapAction else null,
                     )
                 }

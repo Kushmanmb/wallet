@@ -1,48 +1,43 @@
 package com.gemwallet.android.features.asset.viewmodels.chart.viewmodels
 
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import com.gemwallet.android.ext.toPrimitives
-import com.gemwallet.android.ext.toGem
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import com.gemwallet.android.ext.runCatchingCancellable
+import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toIdentifier
+import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.asset.viewmodels.chart.models.ChartUIModel
 import com.gemwallet.android.features.asset.viewmodels.chart.models.StopTimeoutMillis
 import com.gemwallet.android.ui.models.StateViewType
 import com.gemwallet.android.ui.models.navigation.requireAssetId
-import com.gemwallet.android.ext.toIdentifier
 import com.wallet.core.primitives.AssetId
-import kotlinx.coroutines.CoroutineDispatcher
-import uniffi.gemstone.GemChartService
-import uniffi.gemstone.GemChartServiceInterface
-import uniffi.gemstone.GemChartPhase
-import uniffi.gemstone.GemServiceException
 import com.wallet.core.primitives.ChartPeriod
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.launch
+import uniffi.gemstone.GemChartPhase
+import uniffi.gemstone.GemChartService
+import uniffi.gemstone.GemChartServiceInterface
+import uniffi.gemstone.GemServiceException
 import javax.inject.Inject
-import android.util.Log
-import com.gemwallet.android.ext.runCatchingCancellable
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class ChartViewModel internal constructor(
-    getCurrentCurrency: GetCurrentCurrency,
-    private val chartService: GemChartServiceInterface,
-    private val assetId: AssetId,
-    private val ioDispatcher: CoroutineDispatcher,
-) : ViewModel() {
+class ChartViewModel internal constructor(getCurrentCurrency: GetCurrentCurrency, private val chartService: GemChartServiceInterface, private val assetId: AssetId, private val ioDispatcher: CoroutineDispatcher) : ViewModel() {
     private val selectedPeriod = MutableStateFlow(chartService.chartPeriod())
     private val refreshController = ChartRefreshController()
 
@@ -113,7 +108,6 @@ class ChartViewModel internal constructor(
         assetId = savedStateHandle.requireAssetId(),
         ioDispatcher = ioDispatcher,
     )
-
 }
 
 private const val TAG = "Chart"

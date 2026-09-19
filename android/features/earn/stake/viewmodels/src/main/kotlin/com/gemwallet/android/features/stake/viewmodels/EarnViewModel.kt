@@ -14,6 +14,7 @@ import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
+import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
@@ -22,7 +23,6 @@ import com.wallet.core.primitives.StakeProviderType
 import com.wallet.core.primitives.WalletType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +43,7 @@ import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemStakeServiceInterface
 import uniffi.gemstone.GemValidatorRow
 import uniffi.gemstone.validatorRow
-import com.gemwallet.android.ext.toPrimitives
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel

@@ -9,9 +9,10 @@ import com.gemwallet.android.application.assets.cases.GetAssetTokenInfo
 import com.gemwallet.android.application.assets.cases.GetWalletAssets
 import com.gemwallet.android.application.pricealerts.cases.GetPriceAlerts
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.toGem
-import com.gemwallet.android.features.asset.viewmodels.chart.models.AssetMarketUIModelFactory
 import com.gemwallet.android.features.asset.viewmodels.chart.models.AssetMarketUIModel
+import com.gemwallet.android.features.asset.viewmodels.chart.models.AssetMarketUIModelFactory
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.ui.models.navigation.requireAssetId
 import com.wallet.core.primitives.AssetId
@@ -19,7 +20,6 @@ import com.wallet.core.primitives.AssetLink
 import com.wallet.core.primitives.AssetMarket
 import com.wallet.core.primitives.PriceAlert
 import dagger.hilt.android.lifecycle.HiltViewModel
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -64,12 +64,7 @@ class AssetChartViewModel internal constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, marketUIModel(storedAssetInfo, emptyList(), null, emptyList()))
 
-    private fun marketUIModel(
-        assetInfo: AssetInfo?,
-        links: List<AssetLink>,
-        market: AssetMarket?,
-        priceAlerts: List<PriceAlert>,
-    ): AssetMarketUIModel? = assetInfo?.let {
+    private fun marketUIModel(assetInfo: AssetInfo?, links: List<AssetLink>, market: AssetMarket?, priceAlerts: List<PriceAlert>): AssetMarketUIModel? = assetInfo?.let {
         marketUIModelFactory.create(
             chartService.sections(
                 asset = it.asset.toGem(),

@@ -9,11 +9,7 @@ import com.gemwallet.android.ui.localization.stringRes
 import com.wallet.core.primitives.FeePriority
 import uniffi.gemstone.GemLocalizedText
 
-data class FeeRateRowUIModel(
-    val model: ListItemModel,
-    val emoji: String,
-    val priority: FeePriority?,
-)
+data class FeeRateRowUIModel(val model: ListItemModel, val emoji: String, val priority: FeePriority?)
 
 fun FeeRateUIModel.rowUIModel(context: Context): FeeRateRowUIModel = FeeRateRowUIModel(
     model = ListItemModel(

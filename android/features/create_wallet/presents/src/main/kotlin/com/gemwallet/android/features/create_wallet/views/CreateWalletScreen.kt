@@ -55,10 +55,7 @@ import uniffi.gemstone.secretPhraseCopy
 private val loadingDialogSize = 100.dp
 
 @Composable
-fun CreateWalletScreen(
-    onCancel: () -> Unit,
-    onCreated: (walletId: WalletId?) -> Unit,
-) {
+fun CreateWalletScreen(onCancel: () -> Unit, onCreated: (walletId: WalletId?) -> Unit) {
     DisableScreenShooting()
     DetectScreenshot(AppUrl.howToSecureSecretPhrase)
 
@@ -77,7 +74,7 @@ fun CreateWalletScreen(
         transitionSpec = {
             navigationSlideTransition(forward = targetState)
         },
-        label = "phrase"
+        label = "phrase",
     ) { state ->
         when (state) {
             true -> verificationState?.let { verification ->
@@ -89,6 +86,7 @@ fun CreateWalletScreen(
                     onCancel = viewModel::handleCreateDismiss,
                 )
             }
+
             false -> UI(
                 defaultName = defaultNameText,
                 data = uiState.data,
@@ -101,7 +99,7 @@ fun CreateWalletScreen(
     if (uiState.loading) {
         Dialog(
             onDismissRequest = {},
-            DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+            DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
         ) {
             Box(
                 contentAlignment = Alignment.Center,
@@ -109,8 +107,8 @@ fun CreateWalletScreen(
                     .size(loadingDialogSize)
                     .background(
                         MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(paddingSmall)
-                    )
+                        shape = RoundedCornerShape(paddingSmall),
+                    ),
             ) {
                 CircularProgressIndicator()
             }
@@ -119,13 +117,7 @@ fun CreateWalletScreen(
 }
 
 @Composable
-private fun UI(
-    defaultName: String,
-    data: List<String>,
-    dataError: String?,
-    onCreate: (String) -> Unit,
-    onCancel: () -> Unit,
-) {
+private fun UI(defaultName: String, data: List<String>, dataError: String?, onCreate: (String) -> Unit, onCancel: () -> Unit) {
     val context = LocalContext.current
     val clipboardManager = LocalContext.current.clipboardManager()
     val name = defaultName
@@ -136,9 +128,9 @@ private fun UI(
         mainAction = {
             MainActionButton(
                 title = stringResource(id = R.string.common_continue),
-                onClick = { onCreate(name) }
+                onClick = { onCreate(name) },
             )
-        }
+        },
     ) {
         Column(
             modifier = Modifier
@@ -166,7 +158,6 @@ private fun UI(
     }
 }
 
-
 @Composable
 @Preview
 @Preview(name = "Pixel 2", device = Devices.PIXEL_2)
@@ -181,7 +172,7 @@ fun PreviewCreateUI() {
                 defaultName = "Wallet 2",
                 data = listOf(
                     "cinnamon", "two", "three", "cinnamon", "five", "six",
-                    "seven", "eight", "cinnamon", "ten", "eleven", "twelve"
+                    "seven", "eight", "cinnamon", "ten", "eleven", "twelve",
                 ),
                 dataError = null,
                 onCreate = {},

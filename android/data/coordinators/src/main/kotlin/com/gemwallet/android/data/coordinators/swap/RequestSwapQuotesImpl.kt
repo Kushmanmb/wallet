@@ -1,9 +1,9 @@
 package com.gemwallet.android.data.coordinators.swap
 
-import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.application.swap.cases.RequestSwapQuotes
 import com.gemwallet.android.application.swap.cases.SwapQuoteRequestParams
 import com.gemwallet.android.application.swap.cases.SwapQuotesResult
+import com.gemwallet.android.ext.toGem
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,12 +19,10 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.isActive
 import uniffi.gemstone.GemSwapQuoteServiceInterface
-import java.math.BigInteger
 import uniffi.gemstone.GemSwapRequest
+import java.math.BigInteger
 
-class RequestSwapQuotesImpl(
-    private val swapService: GemSwapQuoteServiceInterface,
-) : RequestSwapQuotes {
+class RequestSwapQuotesImpl(private val swapService: GemSwapQuoteServiceInterface) : RequestSwapQuotes {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun invoke(
@@ -60,7 +58,7 @@ class RequestSwapQuotesImpl(
                     }
             }
         }
-        .flowOn(Dispatchers.IO)
+            .flowOn(Dispatchers.IO)
     }
 
     private suspend fun requestQuotes(params: SwapQuoteRequestParams): SwapQuotesResult = try {

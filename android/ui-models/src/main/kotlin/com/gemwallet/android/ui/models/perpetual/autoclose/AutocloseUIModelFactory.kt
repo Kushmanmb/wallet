@@ -1,35 +1,30 @@
 package com.gemwallet.android.ui.models.perpetual.autoclose
 
-import com.gemwallet.android.ext.toGem
-import com.gemwallet.android.ext.toPrimitives
-import uniffi.gemstone.GemPercentageStyle
-import uniffi.gemstone.PriceChangeCalculator
 import com.gemwallet.android.domains.percentage.formatAsPercentage
 import com.gemwallet.android.domains.perpetual.aggregates.PerpetualPositionDataAggregateImpl
-import uniffi.gemstone.GemAutocloseEstimator
-import uniffi.gemstone.GemAutocloseField
-import uniffi.gemstone.GemAutocloseViewState
-import com.gemwallet.android.model.text
-import uniffi.gemstone.GemValueTone
 import com.gemwallet.android.domains.price.tone
+import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.CurrencyFormatter
+import com.gemwallet.android.model.text
+import com.gemwallet.android.serializer.toJson
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PerpetualPositionData
 import com.wallet.core.primitives.TpslType
 import uniffi.gemstone.AutocloseValidation
+import uniffi.gemstone.GemAutocloseEstimator
+import uniffi.gemstone.GemAutocloseField
+import uniffi.gemstone.GemAutocloseViewState
+import uniffi.gemstone.GemPercentageStyle
+import uniffi.gemstone.GemValueTone
+import uniffi.gemstone.PriceChangeCalculator
 import kotlin.math.abs
-import com.gemwallet.android.serializer.toJson
 
 object AutocloseUIModelFactory {
 
     private val currencyFormatter = CurrencyFormatter(type = CurrencyFormatter.Type.Currency, currency = Currency.USD)
 
-    fun create(
-        position: PerpetualPositionData,
-        takeProfit: GemAutocloseField,
-        stopLoss: GemAutocloseField,
-        state: GemAutocloseViewState,
-    ): AutocloseUIModel {
+    fun create(position: PerpetualPositionData, takeProfit: GemAutocloseField, stopLoss: GemAutocloseField, state: GemAutocloseViewState): AutocloseUIModel {
         val estimator = GemAutocloseEstimator(
             entryPrice = position.position.entryPrice,
             positionSize = position.position.size,
@@ -46,11 +41,7 @@ object AutocloseUIModelFactory {
         )
     }
 
-    fun createField(
-        field: GemAutocloseField,
-        estimator: GemAutocloseEstimator,
-        showErrors: Boolean = true,
-    ): AutocloseUIModel.Field {
+    fun createField(field: GemAutocloseField, estimator: GemAutocloseEstimator, showErrors: Boolean = true): AutocloseUIModel.Field {
         val priceForEstimation = field.price.takeIf { field.validation == AutocloseValidation.VALID }
         val pnl = priceForEstimation?.let { estimator.pnl(it) }
         val roe = priceForEstimation?.let { estimator.roe(it) }

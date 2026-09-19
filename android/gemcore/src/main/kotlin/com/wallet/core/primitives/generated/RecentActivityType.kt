@@ -4,26 +4,32 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class RecentActivityType(val string: String) {
-	@SerialName("search")
-	Search("search"),
-	@SerialName("transfer")
-	Transfer("transfer"),
-	@SerialName("receive")
-	Receive("receive"),
-	@SerialName("fiatBuy")
-	FiatBuy("fiatBuy"),
-	@SerialName("fiatSell")
-	FiatSell("fiatSell"),
-	@SerialName("swap")
-	Swap("swap"),
-	@SerialName("swapSelect")
-	SwapSelect("swapSelect"),
-	@SerialName("perpetual")
-	Perpetual("perpetual"),
-}
+    @SerialName("search")
+    Search("search"),
 
+    @SerialName("transfer")
+    Transfer("transfer"),
+
+    @SerialName("receive")
+    Receive("receive"),
+
+    @SerialName("fiatBuy")
+    FiatBuy("fiatBuy"),
+
+    @SerialName("fiatSell")
+    FiatSell("fiatSell"),
+
+    @SerialName("swap")
+    Swap("swap"),
+
+    @SerialName("swapSelect")
+    SwapSelect("swapSelect"),
+
+    @SerialName("perpetual")
+    Perpetual("perpetual"),
+}

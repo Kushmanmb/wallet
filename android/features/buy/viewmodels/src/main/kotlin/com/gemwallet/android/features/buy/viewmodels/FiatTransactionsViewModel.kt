@@ -5,12 +5,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.fiat.cases.ObserveFiatTransactions
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.features.buy.viewmodels.models.FiatTransactionRowUIModel
 import com.gemwallet.android.features.buy.viewmodels.models.uiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,8 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemFiatQuoteServiceInterface
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
+import javax.inject.Inject
 
 @HiltViewModel
 class FiatTransactionsViewModel @Inject constructor(

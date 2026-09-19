@@ -13,18 +13,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class GetPerpetualPositionImpl @Inject constructor(
-    private val perpetualStore: GemstonePerpetualStore
-) : GetPerpetualPosition {
+class GetPerpetualPositionImpl @Inject constructor(private val perpetualStore: GemstonePerpetualStore) : GetPerpetualPosition {
     override fun getPositionByPerpetual(walletId: WalletId, id: PerpetualId): Flow<PerpetualPositionDetailsDataAggregate?> {
         return perpetualStore.observePositionByPerpetualId(walletId, id).map { PerpetualPositionDetailsDataAggregateImpl(it ?: return@map null) }
     }
 }
 
-class PerpetualPositionDetailsDataAggregateImpl(
-    private val data: PerpetualPositionData,
-    private val positionData: PerpetualPositionDataAggregateImpl = PerpetualPositionDataAggregateImpl(data),
-) : PerpetualPositionDetailsDataAggregate,
+class PerpetualPositionDetailsDataAggregateImpl(private val data: PerpetualPositionData, private val positionData: PerpetualPositionDataAggregateImpl = PerpetualPositionDataAggregateImpl(data)) :
+    PerpetualPositionDetailsDataAggregate,
     PerpetualPositionDataAggregate by positionData {
 
     override val perpetualId: PerpetualId = data.position.perpetualId

@@ -23,10 +23,7 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.ListPosition
 
 @Composable
-fun ServiceStatusScene(
-    onCancel: () -> Unit,
-    viewModel: ServiceStatusViewModel = hiltViewModel(),
-) {
+fun ServiceStatusScene(onCancel: () -> Unit, viewModel: ServiceStatusViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val isStreamConnected by LocalStreamConnected.current.collectAsStateWithLifecycle()
 

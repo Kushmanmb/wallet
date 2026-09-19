@@ -30,13 +30,13 @@ import com.wallet.core.primitives.PerpetualId
 import com.wallet.core.primitives.RecentActivityType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -45,12 +45,12 @@ import uniffi.gemstone.GemAssetAction
 import uniffi.gemstone.GemMarketsRefreshTrigger
 import uniffi.gemstone.GemPerpetual
 import uniffi.gemstone.GemPerpetualMarketCounts
+import uniffi.gemstone.GemPerpetualMarketSession
 import uniffi.gemstone.GemPerpetualServiceInterface
 import uniffi.gemstone.GemPerpetualSubscription
 import uniffi.gemstone.GemRefreshKind
 import uniffi.gemstone.PerpetualProvider
-import kotlinx.coroutines.flow.distinctUntilChanged
-import uniffi.gemstone.GemPerpetualMarketSession
+import javax.inject.Inject
 
 @HiltViewModel
 class PerpetualMarketViewModel @Inject constructor(
@@ -79,7 +79,6 @@ class PerpetualMarketViewModel @Inject constructor(
     val refreshIntervalMillis: StateFlow<Long> = connectionStatusObserver.refreshIntervalMillis(GemRefreshKind.MARKET)
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0L)
 
-
     private val query: StateFlow<String?> = session.map { it.searchQuery().takeIf(String::isNotEmpty) }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -95,11 +94,15 @@ class PerpetualMarketViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val positions = combine(getPositions.getPerpetualPositions(), query) { items, q ->
         val needle = q.orEmpty()
-        if (needle.isEmpty()) items else items.filter {
-            it.title.contains(needle, ignoreCase = true) ||
-                it.perpetualId.symbol.contains(needle, ignoreCase = true) ||
-                it.asset.symbol.contains(needle, ignoreCase = true) ||
-                it.asset.name.contains(needle, ignoreCase = true)
+        if (needle.isEmpty()) {
+            items
+        } else {
+            items.filter {
+                it.title.contains(needle, ignoreCase = true) ||
+                    it.perpetualId.symbol.contains(needle, ignoreCase = true) ||
+                    it.asset.symbol.contains(needle, ignoreCase = true) ||
+                    it.asset.name.contains(needle, ignoreCase = true)
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 

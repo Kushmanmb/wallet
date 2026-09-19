@@ -7,9 +7,7 @@ import uniffi.gemstone.CryptoFiatConverter as GemCryptoFiatConverter
 object CryptoFiatConverter {
     private val converter = GemCryptoFiatConverter()
 
-    fun toFiat(crypto: Crypto, decimals: Int, price: Double): Fiat =
-        Fiat(BigDecimal(converter.toFiat(crypto.atomicValue, decimals.toUInt(), price)))
+    fun toFiat(crypto: Crypto, decimals: Int, price: Double): Fiat = Fiat(BigDecimal(converter.toFiat(crypto.atomicValue, decimals.toUInt(), price)))
 
-    fun toFiatString(crypto: Crypto, decimals: Int, price: Double, currency: Currency): String =
-        CurrencyFormatter(currency = currency).string(toFiat(crypto, decimals, price).atomicValue)
+    fun toFiatString(crypto: Crypto, decimals: Int, price: Double, currency: Currency): String = CurrencyFormatter(currency = currency).string(toFiat(crypto, decimals, price).atomicValue)
 }

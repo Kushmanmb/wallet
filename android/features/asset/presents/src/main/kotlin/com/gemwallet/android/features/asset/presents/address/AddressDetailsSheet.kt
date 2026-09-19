@@ -23,10 +23,7 @@ import com.wallet.core.primitives.ChainAddress
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddressDetailsSheet(
-    chainAddress: ChainAddress?,
-    onDismiss: () -> Unit,
-) {
+fun AddressDetailsSheet(chainAddress: ChainAddress?, onDismiss: () -> Unit) {
     ModalBottomSheet(
         item = chainAddress,
         onDismissRequest = onDismiss,

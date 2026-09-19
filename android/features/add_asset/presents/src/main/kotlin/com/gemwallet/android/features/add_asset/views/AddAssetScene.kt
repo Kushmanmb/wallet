@@ -15,15 +15,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gemwallet.android.AppUrl
 import com.gemwallet.android.domains.asset.chain
+import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.DocsInfoButton
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.fields.AddressChainField
 import com.gemwallet.android.ui.components.list_item.ChainItem
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
-import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.progress.CircularProgressIndicator16
 import com.gemwallet.android.ui.components.screen.Scene
@@ -31,9 +32,8 @@ import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.open
 import com.wallet.core.primitives.Asset
-import uniffi.gemstone.GemListSection
 import uniffi.gemstone.DocsUrl
-import com.gemwallet.android.ext.networkName
+import uniffi.gemstone.GemListSection
 
 private val networkItemHeight = 64.dp
 
@@ -75,11 +75,15 @@ internal fun AddAssetScene(
                 icon = network.chain,
                 onClick = if (canSelectChain) {
                     { onAction(AddAssetAction.SelectChain) }
-                } else null,
+                } else {
+                    null
+                },
                 listPosition = ListPosition.Single,
                 trailing = if (canSelectChain) {
                     { DataBadgeChevron() }
-                } else null
+                } else {
+                    null
+                },
             )
         }
         Column {

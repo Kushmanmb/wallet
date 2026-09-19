@@ -13,10 +13,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.paddingDefault
 
 @Composable
-internal fun AddressCard(
-    row: GemListRowUIModel.Address,
-    onCopy: () -> Unit,
-) {
+internal fun AddressCard(row: GemListRowUIModel.Address, onCopy: () -> Unit) {
     Text(
         modifier = Modifier
             .fillMaxWidth()

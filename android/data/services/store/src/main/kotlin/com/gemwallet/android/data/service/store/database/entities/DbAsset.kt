@@ -8,7 +8,6 @@ import androidx.room.Index
 import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toIdentifier
-import com.wallet.core.primitives.RecentActivityType
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetAssociation
 import com.wallet.core.primitives.AssetBasic
@@ -19,6 +18,7 @@ import com.wallet.core.primitives.AssetMarket
 import com.wallet.core.primitives.AssetType
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.ChartValuePercentage
+import com.wallet.core.primitives.RecentActivityType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -60,24 +60,14 @@ data class DbAssetBasicUpdate(
     @ColumnInfo("rank") val rank: Int = 0,
 )
 
-data class DbAssetProjection(
-    val id: String,
-    val name: String,
-    val symbol: String,
-    val decimals: Int,
-    val type: AssetType,
-)
+data class DbAssetProjection(val id: String, val name: String, val symbol: String, val decimals: Int, val type: AssetType)
 
 @Entity(
     tableName = "asset_links",
     primaryKeys = ["asset_id", "name"],
     foreignKeys = [ForeignKey(DbAsset::class, ["id"], ["asset_id"], onDelete = ForeignKey.CASCADE)],
 )
-data class DbAssetLink(
-    @ColumnInfo("asset_id") val assetId: String,
-    val name: String,
-    val url: String,
-)
+data class DbAssetLink(@ColumnInfo("asset_id") val assetId: String, val name: String, val url: String)
 
 @Entity(
     tableName = "asset_market",
@@ -93,12 +83,12 @@ data class DbAssetMarket(
     val circulatingSupply: Double? = null,
     val totalSupply: Double? = null,
     val maxSupply: Double? = null,
-	val allTimeHigh: Double? = null,
-	val allTimeHighDate: Long? = null,
-	val allTimeHighChangePercentage: Double? = null,
-	val allTimeLow: Double? = null,
-	val allTimeLowDate: Long? = null,
-	val allTimeLowChangePercentage: Double? = null
+    val allTimeHigh: Double? = null,
+    val allTimeHighDate: Long? = null,
+    val allTimeHighChangePercentage: Double? = null,
+    val allTimeLow: Double? = null,
+    val allTimeLowDate: Long? = null,
+    val allTimeLowChangePercentage: Double? = null,
 )
 
 @Entity(
@@ -110,18 +100,9 @@ data class DbAssetMarket(
         ForeignKey(DbWallet::class, ["id"], ["wallet_id"], onDelete = ForeignKey.CASCADE),
     ],
 )
-data class DbRecentActivity(
-    @ColumnInfo("asset_id") val assetId: String,
-    @ColumnInfo("wallet_id") val walletId: String,
-    @ColumnInfo("to_asset_id") val toAssetId: String? = null,
-    val type: RecentActivityType,
-    val addedAt: Long,
-)
+data class DbRecentActivity(@ColumnInfo("asset_id") val assetId: String, @ColumnInfo("wallet_id") val walletId: String, @ColumnInfo("to_asset_id") val toAssetId: String? = null, val type: RecentActivityType, val addedAt: Long)
 
-data class DbRecentAsset(
-    @Embedded val asset: DbAsset,
-    @ColumnInfo("added_at") val addedAt: Long,
-)
+data class DbRecentAsset(@Embedded val asset: DbAsset, @ColumnInfo("added_at") val addedAt: Long)
 
 fun List<DbAsset>.toDTO() = mapNotNull { it.toDTO() }
 
@@ -220,7 +201,7 @@ fun Flow<List<DbAssetLink>>.toAssetLinksModel() = map { it.toAssetLinksModel() }
 
 fun DbAssetLink.toDTO() = AssetLink(name = name, url = url)
 
-fun  AssetMarket.toRecord(assetId: AssetId) = DbAssetMarket(
+fun AssetMarket.toRecord(assetId: AssetId) = DbAssetMarket(
     assetId = assetId.toIdentifier(),
     marketCap = marketCap,
     marketCapFdv = marketCapFdv,
@@ -245,7 +226,7 @@ fun AssetMarket.toRecord(assetId: AssetId, rate: Double) = copy(
     allTimeLowValue = allTimeLowValue?.withRate(rate),
 ).toRecord(assetId)
 
-fun  DbAssetMarket.toDTO() = AssetMarket(
+fun DbAssetMarket.toDTO() = AssetMarket(
     marketCap = marketCap,
     marketCapFdv = marketCapFdv,
     marketCapRank = marketCapRank,
@@ -257,14 +238,14 @@ fun  DbAssetMarket.toDTO() = AssetMarket(
         ChartValuePercentage(
             value = it.toFloat(),
             date = allTimeHighDate ?: 0L,
-            percentage = allTimeHighChangePercentage?.toFloat() ?: 0F
+            percentage = allTimeHighChangePercentage?.toFloat() ?: 0F,
         )
     },
     allTimeLowValue = allTimeLow?.let {
         ChartValuePercentage(
             value = it.toFloat(),
             date = allTimeLowDate ?: 0L,
-            percentage = allTimeLowChangePercentage?.toFloat() ?: 0F
+            percentage = allTimeLowChangePercentage?.toFloat() ?: 0F,
         )
     },
 )

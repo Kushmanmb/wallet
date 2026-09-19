@@ -14,8 +14,8 @@ import com.gemwallet.android.ui.style.textStyle
 import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.GemConfirmSimulationState
 import uniffi.gemstone.GemConfirmationInterface
-import uniffi.gemstone.GemSimulationBalanceChange
 import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemSimulationBalanceChange
 import uniffi.gemstone.GemValueStyle
 import uniffi.gemstone.GemValueTone
 
@@ -28,10 +28,7 @@ data class Simulation(
     val balanceChanges: List<GemSimulationBalanceChange> = emptyList(),
 )
 
-fun GemConfirmSimulationState.toSimulation(
-    session: GemConfirmationInterface,
-    context: Context,
-): Simulation {
+fun GemConfirmSimulationState.toSimulation(session: GemConfirmationInterface, context: Context): Simulation {
     val simulationWarnings = warnings
     val details = simulation ?: return Simulation(warnings = simulationWarnings)
     val chain = this.chain.requireChain()
@@ -48,8 +45,7 @@ fun GemConfirmSimulationState.toSimulation(
     )
 }
 
-fun GemSimulationBalanceChange.formattedValue(): String =
-    sign.format(ValueFormatter(style = GemValueStyle.FULL).string(value.abs(), asset.decimals, asset.symbol))
+fun GemSimulationBalanceChange.formattedValue(): String = sign.format(ValueFormatter(style = GemValueStyle.FULL).string(value.abs(), asset.decimals, asset.symbol))
 
 fun GemSimulationBalanceChange.tone(): GemValueTone = when (sign) {
     GemAmountSign.INCOMING -> GemValueTone.POSITIVE

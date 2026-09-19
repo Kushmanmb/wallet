@@ -15,12 +15,7 @@ import uniffi.gemstone.GemListRow
 import java.text.DateFormat
 import java.util.Date
 
-data class NftDetailsUIModel(
-    val asset: NFTAsset,
-    val isVerified: Boolean,
-    val canSend: Boolean,
-    val sections: List<NftSectionUIModel>,
-)
+data class NftDetailsUIModel(val asset: NFTAsset, val isVerified: Boolean, val canSend: Boolean, val sections: List<NftSectionUIModel>)
 
 sealed interface NftSectionUIModel {
     data class Status(val status: VerificationStatus) : NftSectionUIModel
@@ -29,10 +24,7 @@ sealed interface NftSectionUIModel {
     data class Links(val title: String, val row: GemListRow) : NftSectionUIModel
 }
 
-data class ReportReasonUIModel(
-    val reason: ReportReason,
-    val model: ListItemModel,
-)
+data class ReportReasonUIModel(val reason: ReportReason, val model: ListItemModel)
 
 internal fun NftAssetDetailsData.uiModel(context: Context): NftDetailsUIModel = NftDetailsUIModel(
     asset = asset,
@@ -48,11 +40,14 @@ internal fun ReportReason.uiModel(context: Context): ReportReasonUIModel = Repor
 
 private fun GemCollectibleSection.uiModel(context: Context): NftSectionUIModel? = when (this) {
     is GemCollectibleSection.Status -> NftSectionUIModel.Status(status.toPrimitives())
+
     is GemCollectibleSection.Info -> NftSectionUIModel.Info(rows)
+
     is GemCollectibleSection.Attributes -> NftSectionUIModel.Attributes(
         title = context.getString(R.string.nft_properties),
         rows = attributes.map { ListItemModel(title = it.name, subtitle = it.value.text()) },
     )
+
     is GemCollectibleSection.Links -> NftSectionUIModel.Links(title = context.getString(R.string.social_links), row = GemListRow.Social(links))
 }
 

@@ -3,8 +3,8 @@ package com.gemwallet.android.data.coordinators.banner
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.banner.cases.GetActiveBanners
 import com.gemwallet.android.application.session.cases.GetSession
-import com.gemwallet.android.data.services.gemstone.stores.GemstoneBannerStore
 import com.gemwallet.android.data.service.store.database.entities.toDTO
+import com.gemwallet.android.data.services.gemstone.stores.GemstoneBannerStore
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.toGem
@@ -19,11 +19,7 @@ import kotlinx.coroutines.flow.flowOn
 import uniffi.gemstone.assetBannerContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class GetActiveBannersImpl(
-    private val getSession: GetSession,
-    private val getAssetInfo: GetAssetInfo,
-    private val bannerStore: GemstoneBannerStore,
-) : GetActiveBanners {
+class GetActiveBannersImpl(private val getSession: GetSession, private val getAssetInfo: GetAssetInfo, private val bannerStore: GemstoneBannerStore) : GetActiveBanners {
 
     override fun invoke(asset: Asset): Flow<List<Banner>> = getSession()
         .flatMapLatest { session ->

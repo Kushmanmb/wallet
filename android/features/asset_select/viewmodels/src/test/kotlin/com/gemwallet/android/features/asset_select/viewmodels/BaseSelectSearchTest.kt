@@ -75,7 +75,7 @@ class BaseSelectSearchTest {
         val filters = MutableStateFlow(
             mockSelectAssetFilters(
                 filters = listOf(GemAssetFilter.Buyable, GemAssetFilter.Chains(listOf(Chain.Ethereum.string)), GemAssetFilter.HasBalance),
-            )
+            ),
         )
         search.items(filters).first()
         verify(exactly = 1) {

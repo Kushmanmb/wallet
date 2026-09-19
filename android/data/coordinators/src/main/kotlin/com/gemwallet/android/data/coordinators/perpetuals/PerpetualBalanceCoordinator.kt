@@ -18,18 +18,14 @@ import com.gemwallet.android.domains.perpetual.values.PerpetualBalance as Perpet
 private val EmptyBalance = PerpetualBalance(available = 0.0, reserved = 0.0, withdrawable = 0.0)
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class PerpetualBalanceCoordinator(
-    private val perpetualStore: GemstonePerpetualStore,
-    private val getSession: GetSession,
-) : GetPerpetualBalance {
+class PerpetualBalanceCoordinator(private val perpetualStore: GemstonePerpetualStore, private val getSession: GetSession) : GetPerpetualBalance {
 
     override fun getBalance(): Flow<PerpetualBalance?> = getSession()
         .filterNotNull()
         .distinctUntilChangedBy { it.wallet.id }
         .flatMapLatest { perpetualStore.observeBalance(it.wallet.id, HypercoreUSDC.id) }
 
-    override fun getDisplayBalance(): Flow<PerpetualBalanceDisplay> =
-        getBalance().map { PerpetualBalanceDisplayValue(it ?: EmptyBalance) }
+    override fun getDisplayBalance(): Flow<PerpetualBalanceDisplay> = getBalance().map { PerpetualBalanceDisplayValue(it ?: EmptyBalance) }
 }
 
 private class PerpetualBalanceDisplayValue(val balance: PerpetualBalance) : PerpetualBalanceDisplay {

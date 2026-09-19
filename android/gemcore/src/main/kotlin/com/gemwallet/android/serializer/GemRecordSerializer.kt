@@ -19,10 +19,7 @@ import uniffi.gemstone.GemTransferData
 import java.nio.ByteBuffer
 import java.util.Base64
 
-class GemRecordSerializer<T : Any>(
-    private val converter: FfiConverter<T, *>,
-    name: String,
-) : KSerializer<T> {
+class GemRecordSerializer<T : Any>(private val converter: FfiConverter<T, *>, name: String) : KSerializer<T> {
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(name, PrimitiveKind.STRING)
 
@@ -40,8 +37,7 @@ class GemRecordSerializer<T : Any>(
     }
 }
 
-inline fun <reified T : Any> gemRecordSerializer(converter: FfiConverter<T, *>): GemRecordSerializer<T> =
-    GemRecordSerializer(converter, T::class.java.simpleName)
+inline fun <reified T : Any> gemRecordSerializer(converter: FfiConverter<T, *>): GemRecordSerializer<T> = GemRecordSerializer(converter, T::class.java.simpleName)
 
 val gemRecordSerializers = SerializersModule {
     contextual(GemRecipient::class, gemRecordSerializer(FfiConverterTypeGemRecipient))

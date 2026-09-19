@@ -20,10 +20,7 @@ import com.gemwallet.android.ui.components.list_item.rememberDateSections
 import com.gemwallet.android.ui.components.screen.Scene
 
 @Composable
-fun InAppNotificationsScene(
-    onAction: (InAppNotificationsAction) -> Unit,
-    viewModel: InAppNotificationsViewModel = hiltViewModel(),
-) {
+fun InAppNotificationsScene(onAction: (InAppNotificationsAction) -> Unit, viewModel: InAppNotificationsViewModel = hiltViewModel()) {
     val notifications by viewModel.notifications.collectAsStateWithLifecycle()
 
     Scene(

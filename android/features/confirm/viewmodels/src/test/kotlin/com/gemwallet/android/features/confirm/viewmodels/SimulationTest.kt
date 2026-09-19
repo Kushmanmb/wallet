@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.confirm.viewmodels
 
-import uniffi.gemstone.GemValueTone
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.testkit.mockAssetSolana
 import com.gemwallet.android.testkit.mockAssetSolanaUSDC
@@ -10,11 +9,12 @@ import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import java.util.Locale
 import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.GemConfirmation
 import uniffi.gemstone.GemSimulationBalanceChange
+import uniffi.gemstone.GemValueTone
 import java.math.BigInteger
+import java.util.Locale
 
 class SimulationTest {
 

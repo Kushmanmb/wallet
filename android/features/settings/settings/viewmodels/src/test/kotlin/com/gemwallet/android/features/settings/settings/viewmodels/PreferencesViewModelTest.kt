@@ -70,7 +70,10 @@ class PreferencesViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = PreferencesViewModel(userConfig, settingsService, getCurrentCurrency,
+        viewModel = PreferencesViewModel(
+            userConfig,
+            settingsService,
+            getCurrentCurrency,
             ioDispatcher = testDispatcher,
             context = mockk<Context> { every { getString(any()) } returns "None" },
         )

@@ -20,8 +20,8 @@ import com.gemwallet.android.model.toGem
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
-import com.gemwallet.android.ui.components.list_item.listItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
+import com.gemwallet.android.ui.components.list_item.listItemModel
 import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.models.perpetual.autoclose.AutocloseUIModel
 import com.gemwallet.android.ui.models.perpetual.autoclose.AutocloseUIModelFactory
@@ -65,7 +65,6 @@ class AmountPerpetualProvider(
     private val isOpenAction: Boolean =
         params.positionAction is GemPerpetualPositionAction.Open
 
-
     val perpetual: StateFlow<PerpetualDetailsDataAggregate?> =
         getPerpetual.getPerpetual(params.perpetualId)
             .stateIn(scope, SharingStarted.Eagerly, null)
@@ -103,7 +102,9 @@ class AmountPerpetualProvider(
         MutableStateFlow(null)
     }
 
-    fun setLeverage(value: Int) { userSelectedLeverage.value = value }
+    fun setLeverage(value: Int) {
+        userSelectedLeverage.value = value
+    }
 
     fun autocloseField(type: TpslType, amount: String, price: Double?, showErrors: Boolean): AutocloseUIModel.Field {
         val marketPrice = perpetual.value?.price ?: 0.0
@@ -180,11 +181,7 @@ class AmountPerpetualProvider(
         .perpetualAutocloseRow(takeProfit?.parseInputNumberOrNull()?.toDouble(), stopLoss?.parseInputNumberOrNull()?.toDouble())
         .listItemModel(context)
 
-    private fun autocloseTrigger(
-        input: StateFlow<String?>,
-        edited: StateFlow<Boolean>,
-        default: (GemPerpetualAutoclose) -> Double?,
-    ): StateFlow<String?> {
+    private fun autocloseTrigger(input: StateFlow<String?>, edited: StateFlow<Boolean>, default: (GemPerpetualAutoclose) -> Double?): StateFlow<String?> {
         if (!isOpenAction) return input
         return combine(input, edited, defaultAutoclose.filterNotNull(), perpetual.filterNotNull()) { value, isEdited, autoclose, market ->
             if (isEdited) {
@@ -213,16 +210,14 @@ class AmountPerpetualProvider(
         }
         .stateIn(scope, SharingStarted.Eagerly, null)
 
-    override suspend fun buildTransfer(amount: Crypto, isMax: Boolean): GemTransferData {
-        return service.perpetualTransferData(
-            action = params.positionAction,
-            value = amount.atomicValue,
-            useMaxAmount = isMax,
-            leverage = leverageState.value?.current?.toUByte() ?: params.positionAction.transferData().leverage,
-            takeProfit = trigger(takeProfit.value),
-            stopLoss = trigger(stopLoss.value),
-        )
-    }
+    override suspend fun buildTransfer(amount: Crypto, isMax: Boolean): GemTransferData = service.perpetualTransferData(
+        action = params.positionAction,
+        value = amount.atomicValue,
+        useMaxAmount = isMax,
+        leverage = leverageState.value?.current?.toUByte() ?: params.positionAction.transferData().leverage,
+        takeProfit = trigger(takeProfit.value),
+        stopLoss = trigger(stopLoss.value),
+    )
 
     private fun trigger(text: String?): Double? = if (showsAutoclose) text?.let { it.parseInputNumberOrNull()?.toDouble() } else null
 }

@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.asset.viewmodels.chart.viewmodels
 
-import com.gemwallet.android.testkit.mockFormattedNumber
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,10 +16,11 @@ import com.gemwallet.android.features.asset.viewmodels.chart.models.ChartSection
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.testkit.mockAssetInfo
 import com.gemwallet.android.testkit.mockAssetLink
-import com.gemwallet.android.testkit.mockGemSocialLink
 import com.gemwallet.android.testkit.mockAssetMarket
 import com.gemwallet.android.testkit.mockAssetPriceInfo
 import com.gemwallet.android.testkit.mockAssetSolanaUSDC
+import com.gemwallet.android.testkit.mockFormattedNumber
+import com.gemwallet.android.testkit.mockGemSocialLink
 import com.gemwallet.android.testkit.mockPriceAlert
 import com.wallet.core.primitives.AssetLink
 import com.wallet.core.primitives.AssetMarket
@@ -43,10 +43,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import uniffi.gemstone.GemListRow
-import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemChartSection
 import uniffi.gemstone.GemChartServiceInterface
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListRowTitle
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AssetChartViewModelTest {

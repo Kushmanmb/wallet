@@ -1,9 +1,9 @@
 package com.gemwallet.android.data.coordinators.swap
 
-import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.application.swap.cases.SwapQuoteRequestParams
 import com.gemwallet.android.application.swap.cases.SwapQuotesResult
 import com.gemwallet.android.application.swap.cases.matches
+import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.testkit.mockGemSwapSession
 import com.gemwallet.android.testkit.mockSwapQuoteRequestParams
 import com.gemwallet.android.testkit.mockSwapQuotesResult
@@ -22,18 +22,18 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uniffi.gemstone.GemNumberFormat
-import uniffi.gemstone.GemSwapPairSelection
-import uniffi.gemstone.GemSwapSide
-import uniffi.gemstone.GemSwapQuoteServiceInterface
-import uniffi.gemstone.GemSwapSession
-import uniffi.gemstone.SwapperSlippage
-import uniffi.gemstone.GemSwapPairSuggestion
-import uniffi.gemstone.GemSwapTransfer
-import uniffi.gemstone.SwapperQuote
-import java.math.BigDecimal
-import java.math.BigInteger
 import uniffi.gemstone.GemSlippageSelection
 import uniffi.gemstone.GemSlippageSession
+import uniffi.gemstone.GemSwapPairSelection
+import uniffi.gemstone.GemSwapPairSuggestion
+import uniffi.gemstone.GemSwapQuoteServiceInterface
+import uniffi.gemstone.GemSwapSession
+import uniffi.gemstone.GemSwapSide
+import uniffi.gemstone.GemSwapTransfer
+import uniffi.gemstone.SwapperQuote
+import uniffi.gemstone.SwapperSlippage
+import java.math.BigDecimal
+import java.math.BigInteger
 
 class RequestSwapQuotesImplTest {
 
@@ -252,23 +252,13 @@ class RequestSwapQuotesImplTest {
         }
     }
 
-    private class StubSwapService(
-        private val shouldFail: Boolean = false,
-        private val delayOnFirst: Long = 0,
-        private val nonCancellableOnFirst: Boolean = false,
-    ) : GemSwapQuoteServiceInterface {
+    private class StubSwapService(private val shouldFail: Boolean = false, private val delayOnFirst: Long = 0, private val nonCancellableOnFirst: Boolean = false) : GemSwapQuoteServiceInterface {
         private val firstRequestStarted = CompletableDeferred<Unit>()
         var requestCount = 0
 
         override fun newSession(): GemSwapSession = mockGemSwapSession()
 
-        override suspend fun getQuotes(
-            fromAsset: uniffi.gemstone.Asset,
-            toAsset: uniffi.gemstone.Asset,
-            value: BigInteger,
-            useMaxAmount: Boolean,
-            slippageBps: UInt?,
-        ): List<SwapperQuote> {
+        override suspend fun getQuotes(fromAsset: uniffi.gemstone.Asset, toAsset: uniffi.gemstone.Asset, value: BigInteger, useMaxAmount: Boolean, slippageBps: UInt?): List<SwapperQuote> {
             requestCount += 1
 
             if (!firstRequestStarted.isCompleted) {
@@ -303,13 +293,11 @@ class RequestSwapQuotesImplTest {
 
         override fun newSlippageSession(selection: GemSlippageSelection): GemSlippageSession = throw UnsupportedOperationException()
 
-        override fun amountForPercent(available: java.math.BigInteger, percent: UInt): java.math.BigInteger =
-            available * percent.toInt().toBigInteger() / java.math.BigInteger.valueOf(100)
+        override fun amountForPercent(available: java.math.BigInteger, percent: UInt): java.math.BigInteger = available * percent.toInt().toBigInteger() / java.math.BigInteger.valueOf(100)
 
         override fun slippageBpsFromPercent(percent: Double): UInt? = throw UnsupportedOperationException()
 
-        override fun selectPairAsset(selection: GemSwapPairSelection, side: GemSwapSide, assetId: String): GemSwapPairSelection =
-            throw UnsupportedOperationException()
+        override fun selectPairAsset(selection: GemSwapPairSelection, side: GemSwapSide, assetId: String): GemSwapPairSelection = throw UnsupportedOperationException()
 
         override fun slippagePercent(bps: UInt): Double = throw UnsupportedOperationException()
 

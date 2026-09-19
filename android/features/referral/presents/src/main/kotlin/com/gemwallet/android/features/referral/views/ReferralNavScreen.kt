@@ -35,10 +35,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import kotlinx.coroutines.launch
 
 @Composable
-fun ReferralNavScreen(
-    onClose: () -> Unit,
-    viewModel: ReferralViewModel = hiltViewModel(),
-) {
+fun ReferralNavScreen(onClose: () -> Unit, viewModel: ReferralViewModel = hiltViewModel()) {
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val loadingMessage = stringResource(R.string.common_loading)
@@ -99,7 +96,7 @@ fun ReferralNavScreen(
                     modifier = Modifier.clickable {
                         viewModel.setWallet(walletId = item.id)
                         isShowSelectWallets = false
-                    }
+                    },
                 )
             }
         }
@@ -112,11 +109,11 @@ fun ReferralNavScreen(
         }
         AlertDialog(
             containerColor = MaterialTheme.colorScheme.background,
-            onDismissRequest = { showErrorDialog = null},
+            onDismissRequest = { showErrorDialog = null },
             text = { Text(message) },
             confirmButton = {
-                Button({ showErrorDialog = null}) { Text(stringResource(R.string.common_cancel)) }
-            }
+                Button({ showErrorDialog = null }) { Text(stringResource(R.string.common_cancel)) }
+            },
         )
     }
 }

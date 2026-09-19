@@ -10,13 +10,7 @@ import com.wallet.core.primitives.AssetId
 import uniffi.gemstone.GemWalletPlaceholder
 import uniffi.gemstone.GemWalletRow
 
-data class WalletRowUIModel(
-    val id: String,
-    val name: String,
-    val subtitle: String,
-    val icon: Any?,
-    val supportIcon: String?,
-)
+data class WalletRowUIModel(val id: String, val name: String, val subtitle: String, val icon: Any?, val supportIcon: String?)
 
 fun GemWalletRow.uiModel(context: Context) = WalletRowUIModel(
     id = id,

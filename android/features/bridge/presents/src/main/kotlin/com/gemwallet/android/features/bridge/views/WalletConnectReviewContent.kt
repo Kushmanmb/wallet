@@ -77,11 +77,7 @@ internal fun WalletConnectPayloadDetailsSheet(
 }
 
 @Composable
-internal fun WalletConnectFullMessageSheet(
-    isVisible: Boolean,
-    message: String,
-    onDismissRequest: () -> Unit,
-) {
+internal fun WalletConnectFullMessageSheet(isVisible: Boolean, message: String, onDismissRequest: () -> Unit) {
     ModalBottomSheet(
         isVisible = isVisible,
         expansion = SheetExpansion.Full,
@@ -102,13 +98,7 @@ internal fun WalletConnectFullMessageSheet(
 }
 
 @Composable
-internal fun WalletSelectionSheet(
-    isVisible: Boolean,
-    walletRows: List<WalletRowUIModel>,
-    selectedWalletId: WalletId?,
-    onWalletSelected: (WalletId) -> Unit,
-    onDismissRequest: () -> Unit,
-) {
+internal fun WalletSelectionSheet(isVisible: Boolean, walletRows: List<WalletRowUIModel>, selectedWalletId: WalletId?, onWalletSelected: (WalletId) -> Unit, onDismissRequest: () -> Unit) {
     ModalBottomSheet(
         isVisible = isVisible,
         dragHandle = { BottomSheetDefaults.DragHandle() },

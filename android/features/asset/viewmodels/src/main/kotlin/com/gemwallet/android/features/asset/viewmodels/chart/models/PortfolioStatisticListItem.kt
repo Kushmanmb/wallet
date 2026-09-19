@@ -30,5 +30,4 @@ internal fun PortfolioStatistic.listItem(context: Context, currency: Currency): 
     }
 }
 
-private fun PortfolioMarginUsage.marginText(formatter: CurrencyFormatter): String =
-    "${formatter.string(usedValue)} (${usagePercent.formatAsPercentage(GemPercentageStyle.UNSIGNED)})"
+private fun PortfolioMarginUsage.marginText(formatter: CurrencyFormatter): String = "${formatter.string(usedValue)} (${usagePercent.formatAsPercentage(GemPercentageStyle.UNSIGNED)})"

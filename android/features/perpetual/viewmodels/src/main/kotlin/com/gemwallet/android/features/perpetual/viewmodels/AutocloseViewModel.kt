@@ -11,6 +11,7 @@ import com.gemwallet.android.domains.confirm.ConfirmTransferInput
 import com.gemwallet.android.ext.PerpetualFormatter
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.math.numberFormat
+import com.gemwallet.android.math.parseInputNumberOrNull
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.perpetual.listItem
@@ -22,7 +23,6 @@ import com.wallet.core.primitives.PerpetualPositionData
 import com.wallet.core.primitives.TpslType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -43,7 +43,7 @@ import uniffi.gemstone.GemAutocloseField
 import uniffi.gemstone.GemAutocloseModify
 import uniffi.gemstone.GemAutoclosePrices
 import uniffi.gemstone.GemAutocloseSession
-import com.gemwallet.android.math.parseInputNumberOrNull
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -56,7 +56,6 @@ class AutocloseViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val assetId: AssetId = savedStateHandle.requireAssetId()
-
 
     val position: StateFlow<PerpetualPositionData?> = getSession()
         .filterNotNull()
@@ -136,12 +135,7 @@ class AutocloseViewModel @Inject constructor(
         _confirmRequests.tryEmit(ConfirmTransferInput(modify.transfer(position.perpetual.provider.toGem(), position.asset.toGem())))
     }
 
-    private fun buildUiModel(
-        position: PerpetualPositionData,
-        takeProfitText: String,
-        stopLossText: String,
-        submitAttempted: Boolean,
-    ): AutocloseUIModel {
+    private fun buildUiModel(position: PerpetualPositionData, takeProfitText: String, stopLossText: String, submitAttempted: Boolean): AutocloseUIModel {
         val takeProfit = autocloseField(position, TpslType.TakeProfit, takeProfitText)
         val stopLoss = autocloseField(position, TpslType.StopLoss, stopLossText)
         val state = GemAutocloseSession(
@@ -158,11 +152,7 @@ class AutocloseViewModel @Inject constructor(
         )
     }
 
-    private fun autocloseField(
-        position: PerpetualPositionData,
-        type: TpslType,
-        text: String,
-    ): GemAutocloseField {
+    private fun autocloseField(position: PerpetualPositionData, type: TpslType, text: String): GemAutocloseField {
         val price = text.parseInputNumberOrNull()?.toDouble()
         val original = when (type) {
             TpslType.TakeProfit -> position.position.takeProfit

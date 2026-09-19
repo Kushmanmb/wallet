@@ -9,10 +9,7 @@ import com.wallet.core.primitives.FiatProviderName
 import uniffi.gemstone.GemFiatQuoteRow
 
 @Stable
-data class BuyFiatProviderUIModel(
-    val row: GemFiatQuoteRow,
-    override val asset: Asset,
-) : CryptoFormattedUIModel {
+data class BuyFiatProviderUIModel(val row: GemFiatQuoteRow, override val asset: Asset) : CryptoFormattedUIModel {
 
     val provider: FiatProviderName by lazy { row.provider.toPrimitives() }
 
@@ -31,5 +28,4 @@ data class BuyFiatProviderUIModel(
     }
 }
 
-fun GemFiatQuoteRow.toProviderUIModel(asset: Asset): BuyFiatProviderUIModel =
-    BuyFiatProviderUIModel(row = this, asset = asset)
+fun GemFiatQuoteRow.toProviderUIModel(asset: Asset): BuyFiatProviderUIModel = BuyFiatProviderUIModel(row = this, asset = asset)

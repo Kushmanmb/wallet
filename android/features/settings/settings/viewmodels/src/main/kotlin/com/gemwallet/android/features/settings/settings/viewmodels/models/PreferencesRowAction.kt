@@ -17,11 +17,7 @@ enum class PerpetualSetting { Leverage, TakeProfit, StopLoss }
 
 data class PickerOption(val value: Int, val label: String)
 
-data class PerpetualOptions(
-    val leverage: List<PickerOption>,
-    val takeProfit: List<PickerOption>,
-    val stopLoss: List<PickerOption>,
-) {
+data class PerpetualOptions(val leverage: List<PickerOption>, val takeProfit: List<PickerOption>, val stopLoss: List<PickerOption>) {
     fun of(setting: PerpetualSetting): List<PickerOption> = when (setting) {
         PerpetualSetting.Leverage -> leverage
         PerpetualSetting.TakeProfit -> takeProfit
@@ -44,15 +40,18 @@ fun GemListRow.preferencesAction(): PreferencesRowAction? = when (this) {
         GemListRowTitle.APPEARANCE -> PreferencesRowAction.Appearance
         else -> null
     }
+
     is GemListRow.Toggle -> when (title) {
         GemListRowTitle.PERPETUALS -> PreferencesRowAction.Perpetuals(isOn)
         else -> null
     }
+
     is GemListRow.Picker -> when (title) {
         GemListRowTitle.PERPETUAL_LEVERAGE -> PreferencesRowAction.Option(PerpetualSetting.Leverage)
         GemListRowTitle.PERPETUAL_TAKE_PROFIT -> PreferencesRowAction.Option(PerpetualSetting.TakeProfit)
         GemListRowTitle.PERPETUAL_STOP_LOSS -> PreferencesRowAction.Option(PerpetualSetting.StopLoss)
         else -> null
     }
+
     else -> null
 }

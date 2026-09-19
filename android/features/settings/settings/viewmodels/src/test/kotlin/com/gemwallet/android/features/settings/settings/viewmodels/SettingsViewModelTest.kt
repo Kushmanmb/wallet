@@ -6,6 +6,7 @@ import com.gemwallet.android.application.device.cases.GetPushEnabled
 import com.gemwallet.android.application.device.cases.SwitchPushEnabled
 import com.gemwallet.android.application.wallet.cases.GetWallets
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
+import com.gemwallet.android.features.settings.settings.viewmodels.models.settingsAction
 import com.gemwallet.android.testkit.mockWallet
 import com.gemwallet.android.ui.models.actions.SettingsSceneAction
 import com.wallet.core.primitives.Wallet
@@ -29,7 +30,6 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import com.gemwallet.android.features.settings.settings.viewmodels.models.settingsAction
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowIcon
 import uniffi.gemstone.GemListRowTitle

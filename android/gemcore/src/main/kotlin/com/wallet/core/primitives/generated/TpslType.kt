@@ -4,14 +4,14 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class TpslType(val string: String) {
-	@SerialName("takeProfit")
-	TakeProfit("takeProfit"),
-	@SerialName("stopLoss")
-	StopLoss("stopLoss"),
-}
+    @SerialName("takeProfit")
+    TakeProfit("takeProfit"),
 
+    @SerialName("stopLoss")
+    StopLoss("stopLoss"),
+}

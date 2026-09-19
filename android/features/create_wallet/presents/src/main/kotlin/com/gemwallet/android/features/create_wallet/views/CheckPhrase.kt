@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.create_wallet.views
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,17 +18,17 @@ import com.gemwallet.android.features.create_wallet.components.WordChip
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.CenteredDescriptionText
 import com.gemwallet.android.ui.components.buttons.MainActionButton
-import com.gemwallet.android.ui.models.buttonState
 import com.gemwallet.android.ui.components.screen.PhraseLayout
-import com.gemwallet.android.ui.components.screen.phraseRows
 import com.gemwallet.android.ui.components.screen.Scene
+import com.gemwallet.android.ui.components.screen.phraseRows
+import com.gemwallet.android.ui.models.buttonState
 import com.gemwallet.android.ui.theme.SceneSizing
-import com.gemwallet.android.ui.theme.space8
 import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.WindowDimension
 import com.gemwallet.android.ui.theme.isCompactDimension
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.sceneContentPaddingValues
+import com.gemwallet.android.ui.theme.space8
 import uniffi.gemstone.GemVerifyPhraseViewState
 
 private const val wordsPerGroup = 4
@@ -37,13 +37,7 @@ private const val verifyGroupCount = 3
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun CheckPhrase(
-    state: GemVerifyPhraseViewState,
-    loading: Boolean,
-    onPick: (Int) -> Boolean,
-    onDone: () -> Unit,
-    onCancel: () -> Unit,
-) {
+internal fun CheckPhrase(state: GemVerifyPhraseViewState, loading: Boolean, onPick: (Int) -> Boolean, onDone: () -> Unit, onCancel: () -> Unit) {
     val isSmallScreen = isCompactDimension(WindowDimension.Height)
     val progress = state.nextIndex?.toInt() ?: state.verified.size
     val choices = state.choices.withIndex().toList()
@@ -59,7 +53,7 @@ internal fun CheckPhrase(
             ) {
                 onDone()
             }
-        }
+        },
     ) {
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState()),

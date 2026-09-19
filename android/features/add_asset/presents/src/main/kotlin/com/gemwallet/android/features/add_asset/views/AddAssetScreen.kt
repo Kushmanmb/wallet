@@ -18,11 +18,7 @@ import com.gemwallet.android.ui.localization.text
 import com.wallet.core.primitives.QRScanType
 
 @Composable
-fun AddAssetScreen(
-    onFinish: () -> Unit,
-    onCancel: () -> Unit,
-    viewModel: AddAssetViewModel = hiltViewModel(),
-) {
+fun AddAssetScreen(onFinish: () -> Unit, onCancel: () -> Unit, viewModel: AddAssetViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val availableChains by viewModel.availableChains.collectAsStateWithLifecycle()
     val chains by viewModel.chains.collectAsStateWithLifecycle()
@@ -43,7 +39,7 @@ fun AddAssetScreen(
         transitionSpec = {
             navigationSlideTransition(forward = targetState)
         },
-        label = "phrase"
+        label = "phrase",
     ) { isSelectChain ->
         if (isSelectChain) {
             SelectChain(

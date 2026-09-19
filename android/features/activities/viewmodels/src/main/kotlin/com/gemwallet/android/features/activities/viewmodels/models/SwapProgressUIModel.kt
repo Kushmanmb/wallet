@@ -23,21 +23,9 @@ sealed interface SwapProgressMarkerUIModel {
     data class Icon(val symbol: ListItemSymbol) : SwapProgressMarkerUIModel
 }
 
-data class SwapProgressStepUIModel(
-    val title: String,
-    val subtitle: String,
-    val statusLabel: String?,
-    val style: ListItemTextStyle,
-    val marker: SwapProgressMarkerUIModel,
-    val showsEstimatedTime: Boolean,
-)
+data class SwapProgressStepUIModel(val title: String, val subtitle: String, val statusLabel: String?, val style: ListItemTextStyle, val marker: SwapProgressMarkerUIModel, val showsEstimatedTime: Boolean)
 
-data class SwapProgressUIModel(
-    val transfer: SwapProgressStepUIModel,
-    val swap: SwapProgressStepUIModel,
-    val estimatedTime: String?,
-    val isConnectorActive: Boolean,
-)
+data class SwapProgressUIModel(val transfer: SwapProgressStepUIModel, val swap: SwapProgressStepUIModel, val estimatedTime: String?, val isConnectorActive: Boolean)
 
 internal fun TransactionDetailsValue.SwapProgress.uiModel(context: Context): SwapProgressUIModel {
     val chainName = fromAsset.chain.networkName()

@@ -11,11 +11,7 @@ import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.models.ListPosition
 
-internal fun LazyListScope.positionProperties(
-    position: ListItemModel?,
-    rows: List<PerpetualPositionRowUIModel>,
-    onAutocloseClick: () -> Unit,
-) {
+internal fun LazyListScope.positionProperties(position: ListItemModel?, rows: List<PerpetualPositionRowUIModel>, onAutocloseClick: () -> Unit) {
     if (position == null) {
         return
     }
@@ -26,6 +22,7 @@ internal fun LazyListScope.positionProperties(
         val listPosition = if (index == rows.lastIndex) ListPosition.Last else ListPosition.Middle
         when (row) {
             is PerpetualPositionRowUIModel.Item -> GemListRowView(row = row.row, listPosition = listPosition)
+
             is PerpetualPositionRowUIModel.Autoclose -> GemListRowView(
                 row = row.row,
                 listPosition = listPosition,

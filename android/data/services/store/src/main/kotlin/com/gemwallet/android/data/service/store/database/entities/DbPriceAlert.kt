@@ -22,31 +22,27 @@ data class DbPriceAlert(
     val lastNotifiedAt: Long? = null,
 )
 
-fun DbPriceAlert.toDTO(): PriceAlertInfo {
-    return PriceAlertInfo(
-        id = id,
-        priceAlert = PriceAlert(
-            assetId = assetId.toAssetId() ?: throw IllegalStateException(),
-            price = price,
-            priceDirection = priceDirection,
-            pricePercentChange = pricePercentChange,
-            currency = currency,
-            lastNotifiedAt = lastNotifiedAt,
-        )
-    )
-}
-
-fun PriceAlert.toRecord(id: String): DbPriceAlert {
-    return DbPriceAlert(
-        id = id,
-        assetId = assetId.toIdentifier(),
+fun DbPriceAlert.toDTO(): PriceAlertInfo = PriceAlertInfo(
+    id = id,
+    priceAlert = PriceAlert(
+        assetId = assetId.toAssetId() ?: throw IllegalStateException(),
         price = price,
-        pricePercentChange = pricePercentChange,
         priceDirection = priceDirection,
+        pricePercentChange = pricePercentChange,
         currency = currency,
         lastNotifiedAt = lastNotifiedAt,
-    )
-}
+    ),
+)
+
+fun PriceAlert.toRecord(id: String): DbPriceAlert = DbPriceAlert(
+    id = id,
+    assetId = assetId.toIdentifier(),
+    price = price,
+    pricePercentChange = pricePercentChange,
+    priceDirection = priceDirection,
+    currency = currency,
+    lastNotifiedAt = lastNotifiedAt,
+)
 
 fun List<DbPriceAlert>.toDTO() = map { it.toDTO() }
 

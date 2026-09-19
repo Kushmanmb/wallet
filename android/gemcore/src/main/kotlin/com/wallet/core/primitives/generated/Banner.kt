@@ -4,42 +4,44 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class BannerEvent(val string: String) {
-	@SerialName("stake")
-	Stake("stake"),
-	@SerialName("accountActivation")
-	AccountActivation("accountActivation"),
-	@SerialName("accountBlockedMultiSignature")
-	AccountBlockedMultiSignature("accountBlockedMultiSignature"),
-	@SerialName("activateAsset")
-	ActivateAsset("activateAsset"),
-	@SerialName("suspiciousAsset")
-	SuspiciousAsset("suspiciousAsset"),
-	@SerialName("onboarding")
-	Onboarding("onboarding"),
-	@SerialName("tradePerpetuals")
-	TradePerpetuals("tradePerpetuals"),
+    @SerialName("stake")
+    Stake("stake"),
+
+    @SerialName("accountActivation")
+    AccountActivation("accountActivation"),
+
+    @SerialName("accountBlockedMultiSignature")
+    AccountBlockedMultiSignature("accountBlockedMultiSignature"),
+
+    @SerialName("activateAsset")
+    ActivateAsset("activateAsset"),
+
+    @SerialName("suspiciousAsset")
+    SuspiciousAsset("suspiciousAsset"),
+
+    @SerialName("onboarding")
+    Onboarding("onboarding"),
+
+    @SerialName("tradePerpetuals")
+    TradePerpetuals("tradePerpetuals"),
 }
 
 @Serializable
 enum class BannerState(val string: String) {
-	@SerialName("active")
-	Active("active"),
-	@SerialName("cancelled")
-	Cancelled("cancelled"),
-	@SerialName("alwaysActive")
-	AlwaysActive("alwaysActive"),
+    @SerialName("active")
+    Active("active"),
+
+    @SerialName("cancelled")
+    Cancelled("cancelled"),
+
+    @SerialName("alwaysActive")
+    AlwaysActive("alwaysActive"),
 }
 
 @Serializable
-data class Banner (
-	val walletId: WalletId? = null,
-	val asset: Asset? = null,
-	val event: BannerEvent,
-	val state: BannerState
-)
-
+data class Banner(val walletId: WalletId? = null, val asset: Asset? = null, val event: BannerEvent, val state: BannerState)

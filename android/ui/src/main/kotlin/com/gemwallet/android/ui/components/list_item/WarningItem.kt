@@ -21,18 +21,11 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.Spacer4
 import com.gemwallet.android.ui.theme.Spacer8
 import com.gemwallet.android.ui.theme.defaultPadding
-import com.gemwallet.android.ui.theme.smallIconSize
 import com.gemwallet.android.ui.theme.secondaryFaded
+import com.gemwallet.android.ui.theme.smallIconSize
 
 @Composable
-fun WarningItem(
-    title: String,
-    message: String? = null,
-    color: Color,
-    position: ListPosition,
-    icon: ImageVector = AppIcons.Warning,
-    onClick: (() -> Unit)? = null,
-) {
+fun WarningItem(title: String, message: String? = null, color: Color, position: ListPosition, icon: ImageVector = AppIcons.Warning, onClick: (() -> Unit)? = null) {
     Row(
         modifier = Modifier
             .listItem(position)

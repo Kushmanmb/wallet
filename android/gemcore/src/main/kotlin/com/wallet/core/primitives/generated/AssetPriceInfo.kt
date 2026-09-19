@@ -4,13 +4,8 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class AssetPriceInfo (
-	val assetId: AssetId,
-	val price: Price,
-	val market: AssetMarket
-)
-
+data class AssetPriceInfo(val assetId: AssetId, val price: Price, val market: AssetMarket)

@@ -1,13 +1,11 @@
 package com.gemwallet.android.data.coordinators.transaction
 
-import uniffi.gemstone.BlockExplorerLink as GemBlockExplorerLink
-import uniffi.gemstone.GemTransactionDetailsService
-import uniffi.gemstone.WalletType as GemWalletType
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.transactions.cases.GetTransaction
 import com.gemwallet.android.serializer.jsonEncoder
 import com.gemwallet.android.testkit.mockAccount
 import com.gemwallet.android.testkit.mockAsset
+import com.gemwallet.android.testkit.mockGemTransactionDetailRows
 import com.gemwallet.android.testkit.mockSession
 import com.gemwallet.android.testkit.mockTransaction
 import com.gemwallet.android.testkit.mockTransactionExtended
@@ -26,8 +24,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import com.gemwallet.android.testkit.mockGemTransactionDetailRows
 import org.junit.Test
+import uniffi.gemstone.GemTransactionDetailsService
+import uniffi.gemstone.BlockExplorerLink as GemBlockExplorerLink
+import uniffi.gemstone.WalletType as GemWalletType
 
 class GetTransactionDetailsImplTest {
 
@@ -68,7 +68,7 @@ class GetTransactionDetailsImplTest {
             asset = asset,
             feeAsset = asset,
             assets = listOf(asset),
-                    )
+        )
         val wallet = mockWallet(
             accounts = listOf(mockAccount(chain = Chain.Near, address = transaction.from)),
         )

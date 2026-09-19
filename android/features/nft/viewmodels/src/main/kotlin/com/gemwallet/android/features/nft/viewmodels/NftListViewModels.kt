@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.nft.cases.GetNftCollections
 import com.gemwallet.android.application.session.cases.GetSession
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.nft.viewmodels.localization.stringRes
@@ -17,7 +18,7 @@ import com.wallet.core.primitives.NFTData
 import com.wallet.core.primitives.WalletId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,8 +30,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemNftList
 import uniffi.gemstone.GemNftServiceInterface
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
+import javax.inject.Inject
 
 @HiltViewModel
 class NftListViewModels @Inject constructor(

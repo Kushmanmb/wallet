@@ -6,11 +6,7 @@ import uniffi.gemstone.PaymentAmount
 import uniffi.gemstone.PaymentRequest
 import java.math.BigInteger
 
-fun mockPaymentRequest(
-    address: String = mockAccount().address,
-    assetId: AssetId = mockAssetId(),
-    memo: String? = null,
-) = PaymentRequest(
+fun mockPaymentRequest(address: String = mockAccount().address, assetId: AssetId = mockAssetId(), memo: String? = null) = PaymentRequest(
     address = address,
     amount = PaymentAmount.AtomicValue(BigInteger("19000000")),
     memo = memo,

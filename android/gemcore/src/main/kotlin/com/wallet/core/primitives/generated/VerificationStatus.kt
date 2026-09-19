@@ -4,16 +4,17 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class VerificationStatus(val string: String) {
-	@SerialName("verified")
-	Verified("verified"),
-	@SerialName("unverified")
-	Unverified("unverified"),
-	@SerialName("suspicious")
-	Suspicious("suspicious"),
-}
+    @SerialName("verified")
+    Verified("verified"),
 
+    @SerialName("unverified")
+    Unverified("unverified"),
+
+    @SerialName("suspicious")
+    Suspicious("suspicious"),
+}

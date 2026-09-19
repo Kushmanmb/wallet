@@ -15,12 +15,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.WalletTheme
 
 @Composable
-fun ValidatorItem(
-    data: ValidatorRowUIModel,
-    listPosition: ListPosition,
-    isSelected: Boolean = false,
-    onClick: ((String) -> Unit)?
-) {
+fun ValidatorItem(data: ValidatorRowUIModel, listPosition: ListPosition, isSelected: Boolean = false, onClick: ((String) -> Unit)?) {
     ListItem(
         modifier = Modifier.clickable(enabled = onClick != null) { onClick?.invoke(data.id) },
         leading = {
@@ -45,10 +40,7 @@ fun ValidatorItem(
 }
 
 @Composable
-private fun ValidatorIcon(
-    data: ValidatorRowUIModel,
-    isSelected: Boolean,
-) {
+private fun ValidatorIcon(data: ValidatorRowUIModel, isSelected: Boolean) {
     if (isSelected) {
         IconWithBadge(
             icon = data.imageUrl,
@@ -62,7 +54,6 @@ private fun ValidatorIcon(
         )
     }
 }
-
 
 @Composable
 @Preview

@@ -17,10 +17,7 @@ import uniffi.gemstone.fiatProviderName
 import uniffi.gemstone.fiatTransactionStatus
 import java.math.BigInteger
 
-data class FiatTransactionRowUIModel(
-    val data: FiatTransactionAssetData,
-    val model: ListItemModel,
-)
+data class FiatTransactionRowUIModel(val data: FiatTransactionAssetData, val model: ListItemModel)
 
 internal fun FiatTransactionAssetData.uiModel(context: Context): FiatTransactionRowUIModel {
     val status = fiatTransactionStatus(this.status.toGem())

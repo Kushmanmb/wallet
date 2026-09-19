@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.bridge.viewmodels
 
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.wallet_connect.ActiveWalletConnectRequest
 import com.gemwallet.android.application.wallet_connect.cases.ApproveWalletConnection
@@ -33,6 +32,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemWalletConnectException
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.WalletConnectionVerificationStatus
@@ -75,11 +75,7 @@ class ProposalSceneViewModelTest {
         )
     }
 
-    private fun viewModel(
-        service: GemWalletConnectServiceInterface = service(),
-        approve: ApproveWalletConnection = mockk(relaxed = true),
-        prepare: PrepareSessionProposal = proposals(),
-    ) = ProposalSceneViewModel(
+    private fun viewModel(service: GemWalletConnectServiceInterface = service(), approve: ApproveWalletConnection = mockk(relaxed = true), prepare: PrepareSessionProposal = proposals()) = ProposalSceneViewModel(
         approveWalletConnection = approve,
         prepareSessionProposal = prepare,
         activeRequest = ActiveWalletConnectRequest(events = emptyFlow()),

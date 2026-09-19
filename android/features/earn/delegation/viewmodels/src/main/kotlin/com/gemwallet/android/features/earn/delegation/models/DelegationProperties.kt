@@ -7,20 +7,14 @@ import com.gemwallet.android.ui.models.RewardsInfoUIModel
 import uniffi.gemstone.GemDelegationAction
 import uniffi.gemstone.GemListRow
 
-class DelegationProperties(
-    val rows: List<DelegationRowUIModel>,
-    val rewards: RewardsInfoUIModel,
-)
+class DelegationProperties(val rows: List<DelegationRowUIModel>, val rewards: RewardsInfoUIModel)
 
 sealed interface DelegationRowUIModel {
     data class Row(val row: GemListRow) : DelegationRowUIModel
     data object Rewards : DelegationRowUIModel
 }
 
-data class DelegationActionUIModel(
-    val action: GemDelegationAction,
-    val model: ListItemModel,
-)
+data class DelegationActionUIModel(val action: GemDelegationAction, val model: ListItemModel)
 
 internal fun GemDelegationAction.uiModel(context: Context): DelegationActionUIModel = DelegationActionUIModel(
     action = this,

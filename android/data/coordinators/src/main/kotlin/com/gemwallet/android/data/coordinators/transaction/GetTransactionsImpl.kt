@@ -26,17 +26,16 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import uniffi.gemstone.GemTransactionRow
+import uniffi.gemstone.GemTransactionRowSubtitle
+import uniffi.gemstone.GemTransactionRowValue
+import uniffi.gemstone.GemTransactionStatus
+import uniffi.gemstone.GemTransactionTitle
+import uniffi.gemstone.GemTransactionsServiceInterface
+import uniffi.gemstone.GemValueTone
 import uniffi.gemstone.transactionRow
 import uniffi.gemstone.transactionRows
-import uniffi.gemstone.GemTransactionRowSubtitle
-import uniffi.gemstone.GemTransactionStatus
-import uniffi.gemstone.GemTransactionRowValue
-import uniffi.gemstone.GemTransactionTitle
-import uniffi.gemstone.GemTransactionRow
-import uniffi.gemstone.GemTransactionsServiceInterface
 import java.util.concurrent.ConcurrentHashMap
-import uniffi.gemstone.GemValueTone
-
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetTransactionsImpl(
@@ -54,9 +53,7 @@ class GetTransactionsImpl(
         getTransactions(TransactionsRequestFilter.activityDefaults()).launchIn(scope)
     }
 
-    override fun getTransactions(
-        filters: List<TransactionsRequestFilter>,
-    ): Flow<List<TransactionDataAggregate>> = getCurrentWalletId()
+    override fun getTransactions(filters: List<TransactionsRequestFilter>): Flow<List<TransactionDataAggregate>> = getCurrentWalletId()
         .flatMapLatest { walletId ->
             transactionStore.observeTransactions(walletId, filters)
                 .map { WalletTransactionRows(walletId, rows.aggregates(filters, it)) }
@@ -65,14 +62,10 @@ class GetTransactionsImpl(
         .map { it.rows }
         .flowOn(Dispatchers.IO)
 
-    override fun stored(filters: List<TransactionsRequestFilter>): List<TransactionDataAggregate> =
-        stored[filters]?.takeIf { it.walletId == getSession().value?.wallet?.id }?.rows.orEmpty()
+    override fun stored(filters: List<TransactionsRequestFilter>): List<TransactionDataAggregate> = stored[filters]?.takeIf { it.walletId == getSession().value?.wallet?.id }?.rows.orEmpty()
 }
 
-private class WalletTransactionRows(
-    val walletId: WalletId,
-    val rows: List<TransactionDataAggregate>,
-)
+private class WalletTransactionRows(val walletId: WalletId, val rows: List<TransactionDataAggregate>)
 
 internal class TransactionRows {
 
@@ -93,9 +86,7 @@ internal class TransactionRows {
 }
 
 @Stable
-class TransactionDataAggregateImpl(
-    private val row: GemTransactionRow,
-) : TransactionDataAggregate {
+class TransactionDataAggregateImpl(private val row: GemTransactionRow) : TransactionDataAggregate {
 
     override val id: TransactionId = TransactionId(row.id)
 

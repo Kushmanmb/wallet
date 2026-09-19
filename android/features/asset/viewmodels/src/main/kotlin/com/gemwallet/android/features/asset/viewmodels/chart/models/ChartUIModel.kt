@@ -12,9 +12,7 @@ import uniffi.gemstone.GemChartData
 
 internal const val StopTimeoutMillis = 5_000L
 
-data class ChartUIModel(
-    val chart: GemChartData,
-) {
+data class ChartUIModel(val chart: GemChartData) {
     private val priceFormatter by lazy { CurrencyFormatter(currency = chart.currency.toPrimitives()) }
 
     val renderPoints: List<ChartPoint> by lazy {
@@ -40,8 +38,5 @@ data class ChartUIModel(
         )
     }
 
-    data class State(
-        val period: ChartPeriod = ChartPeriod.Day,
-        val chart: StateViewType<ChartUIModel> = StateViewType.Loading,
-    )
+    data class State(val period: ChartPeriod = ChartPeriod.Day, val chart: StateViewType<ChartUIModel> = StateViewType.Loading)
 }

@@ -9,11 +9,7 @@ import com.wallet.core.primitives.Currency
 import uniffi.gemstone.GemCurrencies
 import uniffi.gemstone.GemCurrencyRow
 
-data class CurrencyRowUIModel(
-    val currency: Currency,
-    val isSelected: Boolean,
-    val model: ListItemModel,
-)
+data class CurrencyRowUIModel(val currency: Currency, val isSelected: Boolean, val model: ListItemModel)
 
 internal fun GemCurrencies.sections(context: Context): List<ListSection<CurrencyRowUIModel>> = listOf(
     ListSection(id = "recommended", title = context.getString(R.string.common_recommended), items = recommended.map { it.uiModel(selected) }),

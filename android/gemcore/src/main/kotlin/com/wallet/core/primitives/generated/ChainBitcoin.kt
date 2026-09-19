@@ -4,20 +4,23 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class BitcoinChain(val string: String) {
-	@SerialName("bitcoin")
-	Bitcoin("bitcoin"),
-	@SerialName("bitcoincash")
-	BitcoinCash("bitcoincash"),
-	@SerialName("litecoin")
-	Litecoin("litecoin"),
-	@SerialName("doge")
-	Doge("doge"),
-	@SerialName("zcash")
-	Zcash("zcash"),
-}
+    @SerialName("bitcoin")
+    Bitcoin("bitcoin"),
 
+    @SerialName("bitcoincash")
+    BitcoinCash("bitcoincash"),
+
+    @SerialName("litecoin")
+    Litecoin("litecoin"),
+
+    @SerialName("doge")
+    Doge("doge"),
+
+    @SerialName("zcash")
+    Zcash("zcash"),
+}

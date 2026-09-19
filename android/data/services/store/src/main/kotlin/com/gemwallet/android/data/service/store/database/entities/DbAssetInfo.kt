@@ -130,16 +130,22 @@ fun DbAssetInfo.toDTO(): AssetInfo? {
                 bandwidthAvailable = entity.bandwidthAvailable?.toUInt() ?: 0U,
                 bandwidthTotal = entity.bandwidthTotal?.toUInt() ?: 0U,
             )
-        } else null,
+        } else {
+            null
+        },
         isActive = assetIsActive != false,
     )
 
-    val account = if (entity.address.isNullOrEmpty()) null else Account(
-        chain = entity.chain,
-        address = entity.address,
-        derivationPath = entity.derivationPath ?: "",
-        extendedPublicKey = entity.extendedPublicKey,
-    )
+    val account = if (entity.address.isNullOrEmpty()) {
+        null
+    } else {
+        Account(
+            chain = entity.chain,
+            address = entity.address,
+            derivationPath = entity.derivationPath ?: "",
+            extendedPublicKey = entity.extendedPublicKey,
+        )
+    }
     return AssetInfo(
         owner = account,
         asset = asset,
@@ -152,9 +158,11 @@ fun DbAssetInfo.toDTO(): AssetInfo? {
                     price = entity.priceValue,
                     priceChangePercentage24h = entity.priceDayChanges ?: 0.0,
                     updatedAt = entity.priceUpdatedAt ?: 0,
-                )
+                ),
             )
-        } else null,
+        } else {
+            null
+        },
         metadata = AssetMetaData(
             isEnabled = entity.isEnabled,
             isBuyEnabled = entity.isBuyEnabled,
@@ -174,8 +182,4 @@ fun DbAssetInfo.toDTO(): AssetInfo? {
     )
 }
 
-data class DbAssetFiatValue(
-    val amount: Double,
-    val price: Double,
-    val priceChangePercentage24h: Double,
-)
+data class DbAssetFiatValue(val amount: Double, val price: Double, val priceChangePercentage24h: Double)

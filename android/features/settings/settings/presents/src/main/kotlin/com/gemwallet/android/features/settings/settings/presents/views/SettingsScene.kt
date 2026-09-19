@@ -42,11 +42,7 @@ import com.gemwallet.android.ui.theme.space0
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SettingsScene(
-    onAction: (SettingsSceneAction) -> Unit,
-    walletConnectEnabled: Boolean = true,
-    scrollState: ScrollState = rememberScrollState()
-) {
+fun SettingsScene(onAction: (SettingsSceneAction) -> Unit, walletConnectEnabled: Boolean = true, scrollState: ScrollState = rememberScrollState()) {
     val viewModel: SettingsViewModel = hiltViewModel()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val pushEnabled by viewModel.pushEnabled.collectAsStateWithLifecycle()
@@ -69,7 +65,7 @@ fun SettingsScene(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
+                .verticalScroll(scrollState),
         ) {
             sections.forEach { section ->
                 section.rows.forEachIndexed { index, row ->
@@ -86,7 +82,8 @@ fun SettingsScene(
                         )
                         if (opensDeveloperMenu) {
                             DropdownMenu(
-                                isShowDevelopEnable, { isShowDevelopEnable = false },
+                                isShowDevelopEnable,
+                                { isShowDevelopEnable = false },
                                 containerColor = MaterialTheme.colorScheme.background,
                             ) {
                                 DropdownMenuItem(
@@ -94,7 +91,7 @@ fun SettingsScene(
                                     onClick = {
                                         isShowDevelopEnable = false
                                         viewModel.developEnable()
-                                    }
+                                    },
                                 )
                             }
                         }

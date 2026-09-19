@@ -3,6 +3,7 @@ package com.gemwallet.android.features.create_wallet.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
@@ -15,8 +16,8 @@ import com.wallet.core.primitives.WalletId
 import com.wallet.core.primitives.WalletSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,21 +29,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemErrorText
+import uniffi.gemstone.GemVerifyPhraseSession
+import uniffi.gemstone.GemVerifyPhraseViewState
 import uniffi.gemstone.GemWalletDefaultName
 import uniffi.gemstone.GemWalletImportKind
 import uniffi.gemstone.GemWalletImportResult
-import uniffi.gemstone.GemVerifyPhraseSession
-import uniffi.gemstone.GemVerifyPhraseViewState
 import uniffi.gemstone.GemWalletServiceInterface
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
+import javax.inject.Inject
 
 @HiltViewModel
-class CreateWalletViewModel @Inject constructor(
-    private val service: GemWalletServiceInterface,
-    @param:ApplicationContext private val context: Context,
-    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-) : ViewModel() {
+class CreateWalletViewModel @Inject constructor(private val service: GemWalletServiceInterface, @param:ApplicationContext private val context: Context, @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher) : ViewModel() {
 
     private val state = MutableStateFlow(CreateWalletViewModelState())
     val uiState = state.asStateFlow()
@@ -132,4 +128,3 @@ data class CreateWalletViewModelState(
 
     override fun toString() = "CreateWalletViewModelState(loading=$loading, wordCount=${data.size}, isShowSafeMessage=$isShowSafeMessage)"
 }
-

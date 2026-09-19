@@ -22,13 +22,12 @@ import org.junit.Assert
 import org.junit.Test
 import uniffi.gemstone.BlockExplorerLink
 import uniffi.gemstone.GemAmountSign
+import uniffi.gemstone.GemAssetRate
 import uniffi.gemstone.GemSwapAgain
 import uniffi.gemstone.GemSwapProgress
 import uniffi.gemstone.GemSwapProgressMarker
 import uniffi.gemstone.GemSwapProgressState
 import uniffi.gemstone.GemSwapProgressStep
-import uniffi.gemstone.GemAssetRate
-import uniffi.gemstone.formattedAdaptive
 import uniffi.gemstone.GemSwapRate
 import uniffi.gemstone.GemTransactionDetailRow
 import uniffi.gemstone.GemTransactionDetailRows
@@ -36,6 +35,7 @@ import uniffi.gemstone.GemTransactionHeader
 import uniffi.gemstone.GemTransactionHeaderAction
 import uniffi.gemstone.GemTransactionParticipant
 import uniffi.gemstone.GemTransactionParticipantRole
+import uniffi.gemstone.formattedAdaptive
 import java.math.BigInteger
 
 class TransactionDetailsAggregateImplTest {
@@ -48,10 +48,8 @@ class TransactionDetailsAggregateImplTest {
 
     private val transaction = mockTransaction(id = mockTransactionId(hash = "tx123"), createdAt = 1767694414000)
 
-    private fun createAggregate(
-        rows: GemTransactionDetailRows = mockGemTransactionDetailRows(transaction = mockTransactionExtended(transaction)),
-        currency: Currency = Currency.USD,
-    ) = TransactionDetailsAggregateImpl(rows = rows, currency = currency)
+    private fun createAggregate(rows: GemTransactionDetailRows = mockGemTransactionDetailRows(transaction = mockTransactionExtended(transaction)), currency: Currency = Currency.USD) =
+        TransactionDetailsAggregateImpl(rows = rows, currency = currency)
 
     @Test
     fun testBasicProperties() {
@@ -233,5 +231,4 @@ class TransactionDetailsAggregateImplTest {
         Assert.assertEquals(720u, createAggregate(rows = mockGemTransactionDetailRows(estimatedConfirmationSeconds = 720u)).estimatedConfirmation?.seconds)
         Assert.assertNull(aggregate.estimatedConfirmation)
     }
-
 }

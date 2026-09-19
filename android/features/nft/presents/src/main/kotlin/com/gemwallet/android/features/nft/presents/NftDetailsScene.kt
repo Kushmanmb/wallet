@@ -29,13 +29,13 @@ import com.gemwallet.android.features.nft.viewmodels.models.ReportReasonUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.image.NftImage
 import com.gemwallet.android.ui.components.image.toImageSource
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemDefaults
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.list_item.property.verificationStatusItem
-import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.screen.ModalBottomSheet
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.showSnackbar
@@ -50,10 +50,7 @@ import com.wallet.core.primitives.ReportReason
 import kotlinx.coroutines.launch
 
 @Composable
-fun NFTDetailsScene(
-    cancelAction: CancelAction,
-    onRecipient: (NFTAsset) -> Unit,
-) {
+fun NFTDetailsScene(cancelAction: CancelAction, onRecipient: (NFTAsset) -> Unit) {
     val viewModel: NftDetailsViewModel = hiltViewModel()
     val assetData by viewModel.nftAsset.collectAsStateWithLifecycle()
 
@@ -123,11 +120,14 @@ fun NFTDetailsScene(
             model.sections.forEach { section ->
                 when (section) {
                     is NftSectionUIModel.Status -> verificationStatusItem(section.status)
+
                     is NftSectionUIModel.Info -> itemsPositioned(section.rows) { position, row -> GemListRowView(row = row, listPosition = position) }
+
                     is NftSectionUIModel.Attributes -> {
                         item { SubheaderItem(section.title) }
                         itemsPositioned(section.rows) { position, row -> ListItem(model = row, listPosition = position) }
                     }
+
                     is NftSectionUIModel.Links -> {
                         item { SubheaderItem(section.title) }
                         item { GemListRowView(row = section.row, listPosition = ListPosition.Single) }
@@ -153,12 +153,7 @@ fun NFTDetailsScene(
 }
 
 @Composable
-private fun ReportReasonSheet(
-    isVisible: Boolean,
-    reasons: List<ReportReasonUIModel>,
-    onDismiss: () -> Unit,
-    onSelect: (ReportReason) -> Unit,
-) {
+private fun ReportReasonSheet(isVisible: Boolean, reasons: List<ReportReasonUIModel>, onDismiss: () -> Unit, onSelect: (ReportReason) -> Unit) {
     ModalBottomSheet(
         isVisible = isVisible,
         onDismissRequest = onDismiss,

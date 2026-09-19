@@ -4,22 +4,20 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class LatencyType(val string: String) {
-	@SerialName("fast")
-	Fast("fast"),
-	@SerialName("normal")
-	Normal("normal"),
-	@SerialName("slow")
-	Slow("slow"),
+    @SerialName("fast")
+    Fast("fast"),
+
+    @SerialName("normal")
+    Normal("normal"),
+
+    @SerialName("slow")
+    Slow("slow"),
 }
 
 @Serializable
-data class Latency (
-	val latencyType: LatencyType,
-	val value: Double
-)
-
+data class Latency(val latencyType: LatencyType, val value: Double)

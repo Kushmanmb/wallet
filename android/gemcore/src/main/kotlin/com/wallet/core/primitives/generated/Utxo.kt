@@ -4,14 +4,8 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class UTXO (
-	val transaction_id: String,
-	val vout: Int,
-	val value: String,
-	val address: String
-)
-
+data class UTXO(val transaction_id: String, val vout: Int, val value: String, val address: String)

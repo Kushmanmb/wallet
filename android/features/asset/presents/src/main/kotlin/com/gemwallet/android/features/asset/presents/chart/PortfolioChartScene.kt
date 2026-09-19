@@ -38,10 +38,7 @@ import uniffi.gemstone.PortfolioChartType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PortfolioChartScene(
-    onCancel: () -> Unit,
-    viewModel: PortfolioChartViewModel = hiltViewModel(),
-) {
+fun PortfolioChartScene(onCancel: () -> Unit, viewModel: PortfolioChartViewModel = hiltViewModel()) {
     val statistics by viewModel.statistics.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val selectedType by viewModel.selectedType.collectAsStateWithLifecycle()
@@ -131,4 +128,3 @@ private fun PortfolioChart(viewModel: PortfolioChartViewModel) {
         periods = periods,
     )
 }
-

@@ -4,36 +4,47 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class StakeChain(val string: String) {
-	@SerialName("cosmos")
-	Cosmos("cosmos"),
-	@SerialName("osmosis")
-	Osmosis("osmosis"),
-	@SerialName("injective")
-	Injective("injective"),
-	@SerialName("sei")
-	Sei("sei"),
-	@SerialName("celestia")
-	Celestia("celestia"),
-	@SerialName("ethereum")
-	Ethereum("ethereum"),
-	@SerialName("solana")
-	Solana("solana"),
-	@SerialName("sui")
-	Sui("sui"),
-	@SerialName("smartchain")
-	SmartChain("smartchain"),
-	@SerialName("monad")
-	Monad("monad"),
-	@SerialName("tron")
-	Tron("tron"),
-	@SerialName("aptos")
-	Aptos("aptos"),
-	@SerialName("hypercore")
-	HyperCore("hypercore"),
-}
+    @SerialName("cosmos")
+    Cosmos("cosmos"),
 
+    @SerialName("osmosis")
+    Osmosis("osmosis"),
+
+    @SerialName("injective")
+    Injective("injective"),
+
+    @SerialName("sei")
+    Sei("sei"),
+
+    @SerialName("celestia")
+    Celestia("celestia"),
+
+    @SerialName("ethereum")
+    Ethereum("ethereum"),
+
+    @SerialName("solana")
+    Solana("solana"),
+
+    @SerialName("sui")
+    Sui("sui"),
+
+    @SerialName("smartchain")
+    SmartChain("smartchain"),
+
+    @SerialName("monad")
+    Monad("monad"),
+
+    @SerialName("tron")
+    Tron("tron"),
+
+    @SerialName("aptos")
+    Aptos("aptos"),
+
+    @SerialName("hypercore")
+    HyperCore("hypercore"),
+}

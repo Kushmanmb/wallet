@@ -29,15 +29,7 @@ import com.wallet.core.primitives.VerificationStatus
     ],
     indices = [Index("chain"), Index("walletId")],
 )
-data class DbAddress(
-    val chain: Chain,
-    val address: String,
-    val walletId: String?,
-    val name: String,
-    val type: AddressType,
-    val status: VerificationStatus,
-    val imageUrl: String? = null,
-)
+data class DbAddress(val chain: Chain, val address: String, val walletId: String?, val name: String, val type: AddressType, val status: VerificationStatus, val imageUrl: String? = null)
 
 val AddressType.isLocal: Boolean
     get() = when (this) {

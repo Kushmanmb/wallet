@@ -12,7 +12,6 @@ import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.WalletId
-import uniffi.gemstone.GemAssetTitleStyle
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +25,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
 import org.junit.Test
+import uniffi.gemstone.GemAssetTitleStyle
 
 class GetActiveAssetsInfoImplTest {
     private val assets = listOf(

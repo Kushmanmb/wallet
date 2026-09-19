@@ -12,16 +12,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.wallet.core.primitives.Chain
 
 @Composable
-fun ChainItem(
-    title: String,
-    modifier: Modifier = Modifier,
-    listPosition: ListPosition,
-    icon: Any? = null,
-    subtitle: String? = null,
-    paddingHorizontal: Dp? = null,
-    trailing: @Composable (() -> Unit)? = null,
-    onClick: (() -> Unit)? = {},
-) {
+fun ChainItem(title: String, modifier: Modifier = Modifier, listPosition: ListPosition, icon: Any? = null, subtitle: String? = null, paddingHorizontal: Dp? = null, trailing: @Composable (() -> Unit)? = null, onClick: (() -> Unit)? = {}) {
     val modifier = onClick?.let { modifier.clickable(onClick = it) } ?: modifier
     ListItem(
         modifier = modifier,

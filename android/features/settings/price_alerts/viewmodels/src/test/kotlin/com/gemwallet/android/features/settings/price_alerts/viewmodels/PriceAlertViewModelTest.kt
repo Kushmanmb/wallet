@@ -109,7 +109,10 @@ class PriceAlertViewModelTest {
         var state = enabled
         return mockk {
             every { isEnabled() } answers { state }
-            coEvery { setEnabled(any()) } answers { state = firstArg(); Unit }
+            coEvery { setEnabled(any()) } answers {
+                state = firstArg()
+                Unit
+            }
             coEvery { sync(any()) } returns Unit
         }
     }

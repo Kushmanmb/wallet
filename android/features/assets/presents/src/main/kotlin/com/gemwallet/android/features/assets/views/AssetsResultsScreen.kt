@@ -31,10 +31,7 @@ import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.PerpetualId
 
 @Composable
-fun AssetsResultsScreen(
-    onAction: (WalletSearchAction) -> Unit,
-    viewModel: AssetsResultsViewModel = hiltViewModel(),
-) {
+fun AssetsResultsScreen(onAction: (WalletSearchAction) -> Unit, viewModel: AssetsResultsViewModel = hiltViewModel()) {
     val pinned by viewModel.pinned.collectAsStateWithLifecycle()
     val unpinned by viewModel.unpinned.collectAsStateWithLifecycle()
     val previewPerpetuals by viewModel.previewPerpetuals.collectAsStateWithLifecycle()

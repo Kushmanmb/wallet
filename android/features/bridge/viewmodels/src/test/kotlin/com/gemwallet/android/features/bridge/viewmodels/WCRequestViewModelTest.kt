@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.bridge.viewmodels
 
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.wallet_connect.ActiveWalletConnectRequest
 import com.gemwallet.android.application.wallet_connect.WalletConnectJsonRpcResponse
@@ -37,6 +36,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemSignMessageServiceInterface
 import uniffi.gemstone.GemWalletConnectFailure
 import uniffi.gemstone.GemWalletConnectOutcome
@@ -75,9 +75,7 @@ class WCRequestViewModelTest {
         every { connectionRow(any()) } returns mockGemConnectionRow()
     }
 
-    private fun service(
-        onProcess: suspend (GemWalletConnectSessionRequest) -> GemWalletConnectOutcome = { idle },
-    ): GemWalletConnectServiceInterface = mockk(relaxed = true) {
+    private fun service(onProcess: suspend (GemWalletConnectSessionRequest) -> GemWalletConnectOutcome = { idle }): GemWalletConnectServiceInterface = mockk(relaxed = true) {
         every { userRejectedError() } returns GemWalletConnectRpcError(code = 4001, message = "User rejected")
         coEvery { processRequest(any()) } coAnswers { onProcess(firstArg()) }
     }
@@ -106,8 +104,7 @@ class WCRequestViewModelTest {
     private fun TestScope.pending(requests: WalletConnectPendingRequests, signature: CompletableDeferred<String>? = null): Job =
         launch { runCatching { requests.signMessage(mockGemWalletConnectMessageRequest(session = mockWalletConnectionSession(sessionId = topic))) }.onSuccess { signature?.complete(it) } }
 
-    private suspend fun WCRequestViewModel.awaitContent(): RequestSceneState.Content =
-        sceneState.first { it !is RequestSceneState.Loading } as RequestSceneState.Content
+    private suspend fun WCRequestViewModel.awaitContent(): RequestSceneState.Content = sceneState.first { it !is RequestSceneState.Loading } as RequestSceneState.Content
 
     @Test
     fun `a malicious origin notifies without responding`() = runTest(dispatcher) {

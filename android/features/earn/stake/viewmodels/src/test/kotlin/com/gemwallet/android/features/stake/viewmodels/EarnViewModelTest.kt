@@ -1,7 +1,5 @@
 package com.gemwallet.android.features.stake.viewmodels
 
-import uniffi.gemstone.GemListRow
-import uniffi.gemstone.GemListRowTitle
 import androidx.lifecycle.SavedStateHandle
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.session.cases.GetSession
@@ -23,9 +21,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -35,6 +33,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListRowTitle
 import java.math.BigInteger
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -64,10 +64,7 @@ class EarnViewModelTest {
     @After
     fun tearDown() = kotlinx.coroutines.Dispatchers.resetMain()
 
-    private fun viewModel(
-        providers: List<com.wallet.core.primitives.DelegationValidator> = listOf(provider),
-        positions: List<com.wallet.core.primitives.Delegation> = listOf(funded, empty),
-    ) = EarnViewModel(
+    private fun viewModel(providers: List<com.wallet.core.primitives.DelegationValidator> = listOf(provider), positions: List<com.wallet.core.primitives.Delegation> = listOf(funded, empty)) = EarnViewModel(
         getAssetInfo = getAssetInfo,
         getDelegations = mockk<GetDelegations> {
             every { this@mockk(any(), asset.id, StakeProviderType.Earn) } returns flowOf(positions)

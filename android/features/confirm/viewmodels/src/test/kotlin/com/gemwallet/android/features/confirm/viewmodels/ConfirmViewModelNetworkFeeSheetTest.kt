@@ -1,14 +1,12 @@
 package com.gemwallet.android.features.confirm.viewmodels
 
-import com.gemwallet.android.ui.components.InfoSheetEntity
-import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetRequest
-import uniffi.gemstone.GemAcquireAssetFlow
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.domains.confirm.pack
 import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetRequest
 import com.gemwallet.android.testkit.mockAccount
 import com.gemwallet.android.testkit.mockAssetSolana
 import com.gemwallet.android.testkit.mockGemConfirmLoad
@@ -16,6 +14,7 @@ import com.gemwallet.android.testkit.mockGemConfirmScreen
 import com.gemwallet.android.testkit.mockGemTransferData
 import com.gemwallet.android.testkit.mockSession
 import com.gemwallet.android.testkit.mockWallet
+import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.models.actions.FinishConfirmAction
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Chain
@@ -26,23 +25,24 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.job
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemAcquireAssetFlow
 import uniffi.gemstone.GemConfirmException
 import uniffi.gemstone.GemConfirmPhase
-import uniffi.gemstone.GemConfirmation
 import uniffi.gemstone.GemConfirmTransferService
+import uniffi.gemstone.GemConfirmation
 import java.math.BigInteger
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -118,7 +118,10 @@ class ConfirmViewModelNetworkFeeSheetTest {
             confirmService = confirmService,
             savedStateHandle = SavedStateHandle(mapOf(RouteArgument.Params.key to requireNotNull(transfer.pack()))),
             ioDispatcher = testDispatcher,
-            context = mockk<Context> { every { getString(any()) } returns "Error"; every { getString(any(), *anyVararg()) } returns "Error" },
+            context = mockk<Context> {
+                every { getString(any()) } returns "Error"
+                every { getString(any(), *anyVararg()) } returns "Error"
+            },
         )
     }
 }

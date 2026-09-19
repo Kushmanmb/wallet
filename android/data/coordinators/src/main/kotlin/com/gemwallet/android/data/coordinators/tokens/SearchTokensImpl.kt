@@ -10,10 +10,7 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAssetsService
 import uniffi.gemstone.GemAssetsServiceInterface
 
-class SearchTokensImpl(
-    private val assetsService: GemAssetsServiceInterface,
-    private val ioDispatcher: CoroutineDispatcher,
-) : SearchTokens {
+class SearchTokensImpl(private val assetsService: GemAssetsServiceInterface, private val ioDispatcher: CoroutineDispatcher) : SearchTokens {
 
     override suspend fun search(assetIds: List<AssetId>): Boolean = withContext(ioDispatcher) {
         runCatchingCancellable { assetsService.syncAssets(assetIds.map { it.toIdentifier() }) }

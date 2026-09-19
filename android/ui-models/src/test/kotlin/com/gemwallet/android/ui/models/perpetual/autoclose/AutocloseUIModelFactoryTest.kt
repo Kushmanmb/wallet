@@ -1,6 +1,5 @@
 package com.gemwallet.android.ui.models.perpetual.autoclose
 
-import uniffi.gemstone.AutocloseValidation
 import com.gemwallet.android.testkit.mockAutocloseField
 import com.gemwallet.android.testkit.mockAutocloseViewState
 import com.gemwallet.android.testkit.mockPerpetualPosition
@@ -9,6 +8,7 @@ import com.wallet.core.primitives.TpslType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
+import uniffi.gemstone.AutocloseValidation
 
 class AutocloseUIModelFactoryTest {
 

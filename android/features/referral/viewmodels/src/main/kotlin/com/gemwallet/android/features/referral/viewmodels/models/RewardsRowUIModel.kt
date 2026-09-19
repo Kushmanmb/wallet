@@ -9,11 +9,7 @@ import com.gemwallet.android.ui.components.list_item.ListItemModel
 import uniffi.gemstone.GemRewardsRedemption
 import uniffi.gemstone.GemRewardsState
 
-data class RewardRedemptionUIModel(
-    val redemption: GemRewardsRedemption,
-    val model: ListItemModel,
-    val confirmationMessage: String,
-)
+data class RewardRedemptionUIModel(val redemption: GemRewardsRedemption, val model: ListItemModel, val confirmationMessage: String)
 
 internal fun GemRewardsState.infoRows(context: Context): List<ListItemModel> = listOfNotNull(
     referralCode?.let { ListItemModel(title = context.getString(R.string.rewards_my_referral_code), subtitle = it) },

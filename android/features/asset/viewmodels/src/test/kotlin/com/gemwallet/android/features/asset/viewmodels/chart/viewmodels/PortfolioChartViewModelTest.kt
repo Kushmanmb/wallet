@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.asset.viewmodels.chart.viewmodels
 
-import com.gemwallet.android.ui.R
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +9,7 @@ import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.model.Session
 import com.gemwallet.android.testkit.mockPortfolioData
 import com.gemwallet.android.testkit.mockSession
+import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.StateViewType
 import com.gemwallet.android.ui.models.dataOrNull
 import com.wallet.core.primitives.ChartPeriod

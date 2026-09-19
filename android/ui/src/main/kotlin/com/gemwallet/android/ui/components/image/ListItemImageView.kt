@@ -27,11 +27,7 @@ import com.gemwallet.android.ui.theme.iconSize
 import com.gemwallet.android.ui.theme.space12
 
 @Composable
-fun ListItemImageView(
-    image: ListItemImage,
-    size: Dp,
-    modifier: Modifier = Modifier,
-) {
+fun ListItemImageView(image: ListItemImage, size: Dp, modifier: Modifier = Modifier) {
     when (image) {
         is ListItemImage.Asset -> AsyncImage(
             model = image.assetId.iconModel(),
@@ -39,20 +35,25 @@ fun ListItemImageView(
             size = size,
             placeholderText = image.assetId.icon().placeholder,
         )
+
         is ListItemImage.Url -> AsyncImage(model = image.url, modifier = modifier, size = size, placeholderText = image.placeholder)
+
         is ListItemImage.Stored -> AsyncImage(
             model = walletImageModel(LocalContext.current, image.name),
             modifier = modifier,
             size = size,
             placeholderText = image.placeholder,
         )
+
         is ListItemImage.Emoji -> EmojiView(
             emoji = image.glyph,
             modifier = modifier.size(size),
             background = image.backgroundColor?.let { Color(it) } ?: Color.Transparent,
             scale = AvatarScale.EMOJI,
         )
+
         is ListItemImage.Initials -> InitialsAvatar(text = image.text, size = size, modifier = modifier, placeholder = AppIcons.Person)
+
         is ListItemImage.Symbol -> if (image.isFilled) {
             Box(
                 modifier = modifier
@@ -75,6 +76,7 @@ fun ListItemImageView(
                 tint = MaterialTheme.colorScheme.onSurface,
             )
         }
+
         is ListItemImage.Drawable -> Image(
             painter = painterResource(image.id),
             contentDescription = null,

@@ -1,10 +1,10 @@
 package com.gemwallet.android.data.services.gemstone.stream
 
 import com.gemwallet.android.application.session.cases.GetSession
+import com.gemwallet.android.data.services.gemstone.connection.ConnectionComponentHealth
 import com.gemwallet.android.model.Session
 import com.gemwallet.android.testkit.mockSession
 import com.gemwallet.android.testkit.mockWallet
-import com.gemwallet.android.data.services.gemstone.connection.ConnectionComponentHealth
 import com.wallet.core.primitives.ConnectionComponent
 import com.wallet.core.primitives.Currency
 import io.mockk.coEvery

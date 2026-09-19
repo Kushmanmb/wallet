@@ -4,12 +4,8 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class FiatRate (
-	val symbol: Currency,
-	val rate: Double
-)
-
+data class FiatRate(val symbol: Currency, val rate: Double)

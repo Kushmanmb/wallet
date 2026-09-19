@@ -23,10 +23,10 @@ import coil3.request.transformations
 import coil3.transform.CircleCropTransformation
 import coil3.transform.Transformation
 import com.gemwallet.android.ui.theme.iconSize
-import com.wallet.core.primitives.Chain
-import uniffi.gemstone.SwapProvider
 import com.gemwallet.android.ui.theme.secondaryFaded
 import com.wallet.core.primitives.Asset
+import com.wallet.core.primitives.Chain
+import uniffi.gemstone.SwapProvider
 
 private val DefaultCircleCropTransformation = CircleCropTransformation()
 
@@ -66,7 +66,7 @@ fun AsyncImage(
                 circleColor = placeholderColor,
                 textMeasurer = textMeasurer,
                 text = placeholderText,
-                circleSize = placeholderSize
+                circleSize = placeholderSize,
             )
         }
     }
@@ -98,12 +98,7 @@ fun AsyncImage(
 }
 
 @Composable
-private fun BundledImage(
-    resource: Int,
-    contentDescription: String?,
-    size: Dp?,
-    modifier: Modifier,
-) {
+private fun BundledImage(resource: Int, contentDescription: String?, size: Dp?, modifier: Modifier) {
     Image(
         painter = painterResource(resource),
         contentDescription = contentDescription,

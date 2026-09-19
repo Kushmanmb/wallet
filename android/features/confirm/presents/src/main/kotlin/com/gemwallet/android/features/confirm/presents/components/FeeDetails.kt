@@ -1,15 +1,9 @@
 package com.gemwallet.android.features.confirm.presents.components
 
-import com.gemwallet.android.ui.theme.listItemIconSize
-import com.gemwallet.android.features.confirm.viewmodels.models.NetworkFeeCustomViewModel
-import com.gemwallet.android.ui.components.list_item.ListItemSupportText
-import com.gemwallet.android.ui.components.image.IconWithBadge
-import androidx.compose.ui.unit.Dp
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,22 +31,25 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import com.gemwallet.android.ui.localization.string
+import androidx.compose.ui.unit.Dp
 import com.gemwallet.android.domains.confirm.FeeAssetUIModel
 import com.gemwallet.android.domains.confirm.FeeDetailsModel
 import com.gemwallet.android.domains.confirm.FeeUIModel
 import com.gemwallet.android.features.confirm.presents.localization.suffix
 import com.gemwallet.android.features.confirm.viewmodels.models.FeeRateRowUIModel
 import com.gemwallet.android.features.confirm.viewmodels.models.FeeSelectionUIModel
+import com.gemwallet.android.features.confirm.viewmodels.models.NetworkFeeCustomViewModel
 import com.gemwallet.android.features.confirm.viewmodels.models.customFeeRowUIModel
 import com.gemwallet.android.features.confirm.viewmodels.models.listItem
 import com.gemwallet.android.features.confirm.viewmodels.models.rowUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.SuffixTextField
+import com.gemwallet.android.ui.components.image.IconWithBadge
 import com.gemwallet.android.ui.components.list_item.AssetListItem
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemDefaults
 import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.components.list_item.ListItemSupportText
 import com.gemwallet.android.ui.components.list_item.ListItemTitleText
 import com.gemwallet.android.ui.components.list_item.SelectionCheckmark
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
@@ -62,8 +60,10 @@ import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.ModalBottomSheet
 import com.gemwallet.android.ui.components.screen.SheetExpansion
 import com.gemwallet.android.ui.icons.AppIcons
+import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.alpha10
+import com.gemwallet.android.ui.theme.listItemIconSize
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingHalfSmall
 import com.gemwallet.android.ui.theme.paddingLarge
@@ -71,8 +71,8 @@ import com.gemwallet.android.ui.theme.paddingSmall
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.FeePriority
 import com.wallet.core.primitives.FeeUnitType
-import java.math.BigInteger
 import uniffi.gemstone.GemCustomFeeCheck
+import java.math.BigInteger
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,8 +113,10 @@ fun FeeDetails(
     }
     val onBack: (() -> Unit)? = when (page) {
         FeeDetailsPage.Details -> null
+
         FeeDetailsPage.CustomFee,
-        FeeDetailsPage.FeeAssets -> navigateToDetails
+        FeeDetailsPage.FeeAssets,
+        -> navigateToDetails
     }
     val onConfirm: (() -> Unit)? = when (page) {
         FeeDetailsPage.Details -> onCancel
@@ -135,7 +137,7 @@ fun FeeDetails(
                     FeeDetailsPage.Details -> R.string.transfer_network_fee
                     FeeDetailsPage.CustomFee -> R.string.fee_rate_custom
                     FeeDetailsPage.FeeAssets -> R.string.assets_select_asset
-                }
+                },
             ),
             onBack = onBack,
             onConfirm = onConfirm,
@@ -155,14 +157,19 @@ fun FeeDetails(
                 showsOptions = model.showsOptions,
                 feeAsset = feeAsset,
                 showFeeAssets = showFeeAssets,
-                onSelectPriority = { onSelectPriority(it); onCancel() },
+                onSelectPriority = {
+                    onSelectPriority(it)
+                    onCancel()
+                },
                 onCustom = { page = FeeDetailsPage.CustomFee },
                 onFeeAssets = { page = FeeDetailsPage.FeeAssets },
             )
+
             FeeDetailsPage.CustomFee -> CustomFeeInput(
                 model = customModel,
                 unitSymbol = unitSymbol,
             )
+
             FeeDetailsPage.FeeAssets -> FeeAssets(
                 assets = feeAssets,
                 selectedAssetId = currentFee.feeAsset.id,
@@ -241,11 +248,7 @@ private fun FeeRates(
 }
 
 @Composable
-private fun FeeAssets(
-    assets: List<FeeAssetUIModel>,
-    selectedAssetId: AssetId,
-    onSelect: (AssetId) -> Unit,
-) {
+private fun FeeAssets(assets: List<FeeAssetUIModel>, selectedAssetId: AssetId, onSelect: (AssetId) -> Unit) {
     LazyColumn {
         itemsIndexed(assets) { index, feeAsset ->
             FeeAssetRow(
@@ -260,13 +263,7 @@ private fun FeeAssets(
 }
 
 @Composable
-private fun FeeAssetRow(
-    feeAsset: FeeAssetUIModel,
-    isSelected: Boolean,
-    showChevron: Boolean,
-    listPosition: ListPosition,
-    onClick: () -> Unit,
-) {
+private fun FeeAssetRow(feeAsset: FeeAssetUIModel, isSelected: Boolean, showChevron: Boolean, listPosition: ListPosition, onClick: () -> Unit) {
     AssetListItem(
         asset = feeAsset.asset,
         modifier = Modifier.clickable(onClick = onClick),
@@ -285,10 +282,7 @@ private fun FeeAssetRow(
 }
 
 @Composable
-private fun ColumnScope.CustomFeeInput(
-    model: NetworkFeeCustomViewModel,
-    unitSymbol: String,
-) {
+private fun ColumnScope.CustomFeeInput(model: NetworkFeeCustomViewModel, unitSymbol: String) {
     val focusRequester = remember { FocusRequester() }
     Row(
         modifier = Modifier.fillMaxWidth().listItem(ListPosition.Single).padding(paddingDefault),
@@ -323,12 +317,7 @@ private fun ColumnScope.CustomFeeInput(
 }
 
 @Composable
-private fun FeeSheetHeader(
-    title: String,
-    onBack: (() -> Unit)?,
-    onConfirm: (() -> Unit)?,
-    isConfirmEnabled: Boolean,
-) {
+private fun FeeSheetHeader(title: String, onBack: (() -> Unit)?, onConfirm: (() -> Unit)?, isConfirmEnabled: Boolean) {
     Box(
         modifier = Modifier.fillMaxWidth().padding(paddingSmall),
         contentAlignment = Alignment.Center,
@@ -361,12 +350,7 @@ private fun FeeSheetHeader(
 }
 
 @Composable
-private fun FeeRow(
-    row: FeeRateRowUIModel,
-    isSelected: Boolean,
-    position: ListPosition,
-    onClick: () -> Unit,
-) {
+private fun FeeRow(row: FeeRateRowUIModel, isSelected: Boolean, position: ListPosition, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier.clickable { onClick() },
         leading = {
@@ -392,7 +376,11 @@ private fun FeeRow(
 private fun EmojiCircle(emoji: String, size: Dp, isSelected: Boolean = false) {
     IconWithBadge(
         size = size,
-        badge = if (isSelected) {{ SelectionCheckmark() }} else null,
+        badge = if (isSelected) {
+            { SelectionCheckmark() }
+        } else {
+            null
+        },
     ) {
         Box(
             modifier = Modifier
@@ -409,8 +397,7 @@ private fun EmojiCircle(emoji: String, size: Dp, isSelected: Boolean = false) {
 }
 
 @Composable
-private fun feeUnitSuffix(feeUnitType: FeeUnitType?, assetSymbol: String): String =
-    feeUnitType?.suffix(assetSymbol) ?: assetSymbol
+private fun feeUnitSuffix(feeUnitType: FeeUnitType?, assetSymbol: String): String = feeUnitType?.suffix(assetSymbol) ?: assetSymbol
 
 private enum class FeeDetailsPage {
     Details,

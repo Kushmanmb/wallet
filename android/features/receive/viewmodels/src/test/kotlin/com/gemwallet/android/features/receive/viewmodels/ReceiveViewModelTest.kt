@@ -31,8 +31,8 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import uniffi.gemstone.GemReceiveServiceInterface
 import uniffi.gemstone.GemReceiveNetworks
+import uniffi.gemstone.GemReceiveServiceInterface
 import uniffi.gemstone.GemReceiveWarning
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -58,10 +58,7 @@ class ReceiveViewModelTest {
         accounts = listOf(mockAccount(chain = Chain.Bitcoin, address = "bc1q"), mockAccount(chain = Chain.Ethereum, address = "0xabc")),
     )
 
-    private fun receiveModel(
-        service: GemReceiveServiceInterface,
-        assets: Map<com.wallet.core.primitives.AssetId, AssetInfo> = mapOf(bitcoin.id to mockAssetInfo(asset = bitcoin)),
-    ): ReceiveViewModel {
+    private fun receiveModel(service: GemReceiveServiceInterface, assets: Map<com.wallet.core.primitives.AssetId, AssetInfo> = mapOf(bitcoin.id to mockAssetInfo(asset = bitcoin))): ReceiveViewModel {
         val info: GetReceiveAssetInfo = mockk {
             every { this@mockk.invoke(any()) } answers { flowOf(assets[firstArg()]) }
         }

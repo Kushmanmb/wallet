@@ -17,6 +17,7 @@ fun GemListRow.settingsAction(): SettingsSceneAction? = when (this) {
         GemListRowTitle.DEVELOPER -> SettingsSceneAction.Develop
         else -> null
     }
+
     else -> null
 }
 

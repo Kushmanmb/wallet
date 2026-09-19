@@ -59,10 +59,11 @@ internal fun TransactionsScene(
             IconButton(onClick = { showFilters = !showFilters }) {
                 Icon(
                     imageVector = AppIcons.FilterAlt,
-                    tint = if (chainsFilter.isEmpty() && typeFilter.isEmpty())
+                    tint = if (chainsFilter.isEmpty() && typeFilter.isEmpty()) {
                         LocalContentColor.current
-                    else
-                        MaterialTheme.colorScheme.primary,
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
                     contentDescription = "Filter by networks",
                 )
             }
@@ -75,9 +76,11 @@ internal fun TransactionsScene(
         ) {
             when {
                 transactions == null -> Unit
+
                 errorRow != null -> LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item { GemListRowView(row = errorRow, listPosition = ListPosition.Single) }
                 }
+
                 transactions.isEmpty() -> LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item {
                         EmptyContentView(
@@ -91,6 +94,7 @@ internal fun TransactionsScene(
                         )
                     }
                 }
+
                 else -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     state = listState,
@@ -117,12 +121,7 @@ internal fun TransactionsScene(
     )
 }
 
-private fun transactionsEmptyContentType(
-    hasFilters: Boolean,
-    showBuyAction: Boolean,
-    showReceiveAction: Boolean,
-    onAction: (TransactionsListAction) -> Unit,
-): EmptyContentType {
+private fun transactionsEmptyContentType(hasFilters: Boolean, showBuyAction: Boolean, showReceiveAction: Boolean, onAction: (TransactionsListAction) -> Unit): EmptyContentType {
     if (hasFilters) {
         return EmptyContentType.SearchActivity {
             onAction(TransactionsListAction.ClearChainsFilter)

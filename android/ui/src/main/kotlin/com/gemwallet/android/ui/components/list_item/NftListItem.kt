@@ -17,11 +17,7 @@ import com.gemwallet.android.ui.theme.listItemIconSize
 import com.gemwallet.android.ui.theme.paddingSmall
 
 @Composable
-fun NftListItem(
-    model: NftItemUIModel,
-    listPosition: ListPosition,
-    onClick: () -> Unit,
-) {
+fun NftListItem(model: NftItemUIModel, listPosition: ListPosition, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
         listPosition = listPosition,

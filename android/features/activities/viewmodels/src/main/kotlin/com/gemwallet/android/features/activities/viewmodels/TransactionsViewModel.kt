@@ -16,7 +16,6 @@ import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.WalletId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -32,13 +31,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uniffi.gemstone.GemRefreshKind
-import uniffi.gemstone.GemTransactionFilter
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemLoadState
+import uniffi.gemstone.GemRefreshKind
+import uniffi.gemstone.GemTransactionFilter
 import uniffi.gemstone.GemTransactionsEmptyState
 import uniffi.gemstone.GemTransactionsServiceInterface
 import uniffi.gemstone.transactionsEmptyState
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -53,7 +53,6 @@ class TransactionsViewModel @Inject constructor(
 
     val refreshIntervalMillis: StateFlow<Long> = connectionStatusObserver.refreshIntervalMillis(GemRefreshKind.WALLET)
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0L)
-
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
@@ -91,12 +90,12 @@ class TransactionsViewModel @Inject constructor(
     ) { chains, types ->
         TransactionsRequestFilter.activity(chains, types)
     }
-    .flatMapLatest { filters -> getTransactions.getTransactions(filters) }
-    .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = getTransactions.stored(TransactionsRequestFilter.activityDefaults()).takeIf { it.isNotEmpty() },
-    )
+        .flatMapLatest { filters -> getTransactions.getTransactions(filters) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = getTransactions.stored(TransactionsRequestFilter.activityDefaults()).takeIf { it.isNotEmpty() },
+        )
 
     private val transactionsState = MutableStateFlow<GemLoadState>(GemLoadState.Loading)
 

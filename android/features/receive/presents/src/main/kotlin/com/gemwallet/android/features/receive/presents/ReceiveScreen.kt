@@ -36,10 +36,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.domains.asset.subtitleSymbol
 import com.gemwallet.android.ext.networkName
+import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.features.receive.presents.components.rememberQRCodePainter
 import com.gemwallet.android.features.receive.viewmodels.ReceiveViewModel
@@ -75,11 +75,7 @@ private val qrSizeCompact = 220.dp
 private val qrMinSize = 100.dp
 
 @Composable
-fun ReceiveScreen(
-    assetId: AssetId,
-    closeIcon: Boolean = false,
-    onCancel: () -> Unit,
-) {
+fun ReceiveScreen(assetId: AssetId, closeIcon: Boolean = false, onCancel: () -> Unit) {
     val viewModel = hiltViewModel<ReceiveViewModel, ReceiveViewModel.Factory>(
         key = assetId.toIdentifier(),
     ) { it.create(assetId) }
@@ -115,13 +111,7 @@ fun ReceiveScreen(
 }
 
 @Composable
-private fun ReceiveScene(
-    closeIcon: Boolean,
-    assetInfo: AssetInfo,
-    warning: String,
-    onSelectNetwork: (() -> Unit)?,
-    onCancel: () -> Unit,
-) {
+private fun ReceiveScene(closeIcon: Boolean, assetInfo: AssetInfo, warning: String, onSelectNetwork: (() -> Unit)?, onCancel: () -> Unit) {
     val context = LocalContext.current
     val clipboardManager = LocalContext.current.clipboardManager()
     val shareTitle = stringResource(R.string.common_share)
@@ -164,14 +154,14 @@ private fun ReceiveScene(
                 MainActionButton(onClick = onCopyClick) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(paddingHalfSmall)
+                        horizontalArrangement = Arrangement.spacedBy(paddingHalfSmall),
                     ) {
                         Icon(AppIcons.ContentCopy, "copy")
                         Text(stringResource(R.string.common_copy))
                     }
                 }
             }
-        }
+        },
     ) {
         if (assetInfo.owner?.address.isNullOrEmpty()) {
             return@Scene
@@ -180,7 +170,7 @@ private fun ReceiveScene(
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(imagePadding)
+            verticalArrangement = Arrangement.spacedBy(imagePadding),
         ) {
             CenteredListHead(
                 title = assetInfo.asset.name,
@@ -194,7 +184,7 @@ private fun ReceiveScene(
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White,
                     contentColor = Color.White,
-                )
+                ),
             ) {
                 Box(
                     modifier = Modifier
@@ -211,7 +201,7 @@ private fun ReceiveScene(
                             modifier = Modifier.fillMaxSize(),
                             painter = painter,
                             contentDescription = null,
-                            contentScale = ContentScale.FillWidth
+                            contentScale = ContentScale.FillWidth,
                         )
                     }
                 }

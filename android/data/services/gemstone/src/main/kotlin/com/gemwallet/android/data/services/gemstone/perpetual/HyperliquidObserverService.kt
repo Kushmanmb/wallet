@@ -1,12 +1,12 @@
 package com.gemwallet.android.data.services.gemstone.perpetual
 
-import com.gemwallet.android.ext.toPrimitives
-import com.gemwallet.android.ext.toGem
 import android.util.Log
 import com.gemwallet.android.application.perpetual.cases.PerpetualObserver
 import com.gemwallet.android.data.services.gemstone.stream.WebSocketConnectable
 import com.gemwallet.android.data.services.gemstone.stream.WebSocketEvent
 import com.gemwallet.android.ext.runCatchingCancellable
+import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toPrimitives
 import com.wallet.core.primitives.ChartCandleUpdate
 import com.wallet.core.primitives.PerpetualAccountMode
 import com.wallet.core.primitives.Wallet

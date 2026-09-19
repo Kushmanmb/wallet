@@ -1,26 +1,26 @@
 package com.gemwallet.android.features.perpetual.viewmodels
 
-import kotlinx.coroutines.flow.first
-import com.gemwallet.android.testkit.mockAsset
-import com.wallet.core.primitives.PerpetualProvider
-import com.wallet.core.primitives.PerpetualId
-import com.gemwallet.android.domains.perpetual.aggregates.PerpetualPositionDataAggregate
+import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualPositions
 import com.gemwallet.android.application.perpetual.cases.GetPerpetuals
 import com.gemwallet.android.application.perpetual.cases.PerpetualObserver
 import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
+import com.gemwallet.android.domains.perpetual.aggregates.PerpetualPositionDataAggregate
+import com.gemwallet.android.testkit.mockAsset
 import com.wallet.core.primitives.Chain
-import androidx.lifecycle.viewModelScope
+import com.wallet.core.primitives.PerpetualId
+import com.wallet.core.primitives.PerpetualProvider
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -53,7 +53,10 @@ class PerpetualMarketViewModelTest {
     fun `pull to refresh asks core for a user requested markets sync`() = runTest(dispatcher) {
         val trigger = CompletableDeferred<GemMarketsRefreshTrigger>()
         val service = mockk<GemPerpetualServiceInterface>()
-        coEvery { service.refresh(any()) } answers { trigger.complete(firstArg()); emptyList() }
+        coEvery { service.refresh(any()) } answers {
+            trigger.complete(firstArg())
+            emptyList()
+        }
 
         viewModel(service).onRefresh()
 
@@ -64,17 +67,17 @@ class PerpetualMarketViewModelTest {
     fun `opening the screen asks core for a scheduled refresh, not positions alone`() = runTest(dispatcher) {
         val trigger = CompletableDeferred<GemMarketsRefreshTrigger>()
         val service = mockk<GemPerpetualServiceInterface>()
-        coEvery { service.refresh(any()) } answers { trigger.complete(firstArg()); emptyList() }
+        coEvery { service.refresh(any()) } answers {
+            trigger.complete(firstArg())
+            emptyList()
+        }
 
         viewModel(service).fetch()
 
         assertEquals(GemMarketsRefreshTrigger.SCHEDULED, trigger.await())
     }
 
-    private fun viewModel(
-        service: GemPerpetualServiceInterface,
-        positions: List<PerpetualPositionDataAggregate> = emptyList(),
-    ): PerpetualMarketViewModel {
+    private fun viewModel(service: GemPerpetualServiceInterface, positions: List<PerpetualPositionDataAggregate> = emptyList()): PerpetualMarketViewModel {
         val getPerpetuals = mockk<GetPerpetuals>()
         every { getPerpetuals.getPerpetuals(any<Flow<String?>>()) } returns flowOf(emptyList())
         val getPositions = mockk<GetPerpetualPositions>()

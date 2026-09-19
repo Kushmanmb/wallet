@@ -26,12 +26,7 @@ import com.gemwallet.android.ui.theme.listItemIconSize
 import com.wallet.core.primitives.Chain
 
 @Composable
-internal fun NetworksListScene(
-    chains: List<Chain>,
-    chainFilter: TextFieldState,
-    listState: LazyListState = rememberLazyListState(),
-    onAction: (NetworksListAction) -> Unit,
-) {
+internal fun NetworksListScene(chains: List<Chain>, chainFilter: TextFieldState, listState: LazyListState = rememberLazyListState(), onAction: (NetworksListAction) -> Unit) {
     SelectChain(
         chains = chains,
         chainFilter = chainFilter,
@@ -48,9 +43,7 @@ internal fun NetworksListScene(
 }
 
 @Composable
-private fun StatusItem(
-    onClick: () -> Unit,
-) {
+private fun StatusItem(onClick: () -> Unit) {
     val model = ListItemModel(
         title = stringResource(R.string.transaction_status),
         image = ListItemImage.Drawable(R.drawable.brandmark, style = ListItemDrawableStyle.Avatar),

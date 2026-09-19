@@ -7,10 +7,10 @@ import com.gemwallet.android.features.settings.networks.viewmodels.localization.
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
+import com.gemwallet.android.ui.style.textStyle
 import com.wallet.core.primitives.Chain
 import uniffi.gemstone.GemExplorerRow
 import uniffi.gemstone.GemNodeRow
-import com.gemwallet.android.ui.style.textStyle
 
 data class NetworksUIState(
     val selectChain: Boolean = true,
@@ -26,19 +26,9 @@ sealed class NetworkSectionUIModel(@StringRes val title: Int) {
     data class Explorers(val rows: List<ExplorerRowUIModel>) : NetworkSectionUIModel(R.string.settings_networks_explorer)
 }
 
-data class NodeRowUIModel(
-    val url: String,
-    val host: String,
-    val isSelected: Boolean,
-    val canDelete: Boolean,
-    val model: ListItemModel,
-)
+data class NodeRowUIModel(val url: String, val host: String, val isSelected: Boolean, val canDelete: Boolean, val model: ListItemModel)
 
-data class ExplorerRowUIModel(
-    val name: String,
-    val isSelected: Boolean,
-    val model: ListItemModel,
-)
+data class ExplorerRowUIModel(val name: String, val isSelected: Boolean, val model: ListItemModel)
 
 internal fun GemNodeRow.uiModel(context: Context): NodeRowUIModel {
     val latency = latencyStatus.uiModel(context)

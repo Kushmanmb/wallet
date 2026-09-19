@@ -21,12 +21,12 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.job
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -36,8 +36,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GemConfirmPhase
-import uniffi.gemstone.GemConfirmation
 import uniffi.gemstone.GemConfirmTransferService
+import uniffi.gemstone.GemConfirmation
 import uniffi.gemstone.GemTransferData
 import java.math.BigInteger
 
@@ -100,7 +100,10 @@ class ConfirmViewModelHeaderTest {
             confirmService = confirmService,
             savedStateHandle = SavedStateHandle(mapOf(RouteArgument.Params.key to requireNotNull(transfer.pack()))),
             ioDispatcher = testDispatcher,
-            context = mockk<Context> { every { getString(any()) } returns "Error"; every { getString(any(), *anyVararg()) } returns "Error" },
+            context = mockk<Context> {
+                every { getString(any()) } returns "Error"
+                every { getString(any(), *anyVararg()) } returns "Error"
+            },
         )
     }
 }

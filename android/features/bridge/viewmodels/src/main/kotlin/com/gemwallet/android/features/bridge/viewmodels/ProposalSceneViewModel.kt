@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.bridge.viewmodels
 
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -31,7 +30,6 @@ import com.wallet.core.primitives.WalletConnectionSessionProposal
 import com.wallet.core.primitives.WalletId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -42,11 +40,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemWalletConnectException
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.walletRows
+import javax.inject.Inject
 
 @HiltViewModel
 class ProposalSceneViewModel @Inject constructor(
@@ -81,7 +81,7 @@ class ProposalSceneViewModel @Inject constructor(
     val selectedWallet = combine(_selectedWallet, _sessionProposal) { wallet, proposal ->
         wallet ?: proposal?.defaultWallet
     }
-    .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val walletListItem = selectedWallet.map { ListItemModel(title = context.getString(R.string.common_wallet), subtitle = it?.name.orEmpty()) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, ListItemModel(title = context.getString(R.string.common_wallet), subtitle = ""))
@@ -104,11 +104,7 @@ class ProposalSceneViewModel @Inject constructor(
         buttonState(enabled = wallet != null, loading = sceneState is ProposalSceneState.Approving)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Disabled)
 
-    fun onProposal(
-        proposal: WalletConnectSessionProposal,
-        verifyContext: WalletConnectVerifyContext,
-        onNotify: (BridgeRequestError) -> Unit,
-    ) {
+    fun onProposal(proposal: WalletConnectSessionProposal, verifyContext: WalletConnectVerifyContext, onNotify: (BridgeRequestError) -> Unit) {
         if (!walletConnectService.shouldProcessMessage("proposal_${proposal.proposerPublicKey}")) {
             return
         }
@@ -156,7 +152,7 @@ class ProposalSceneViewModel @Inject constructor(
                     wallet = wallet,
                     proposal = proposal,
                     onSuccess = { finish(proposal) },
-                    onError = { message -> fail(proposal, GemErrorText.Message(message), onError) }
+                    onError = { message -> fail(proposal, GemErrorText.Message(message), onError) },
                 )
             }
             result.onFailure { err -> fail(proposal, err.errorText(), onError) }
@@ -187,7 +183,7 @@ class ProposalSceneViewModel @Inject constructor(
             approveWalletConnection.rejectConnection(
                 proposal = proposal,
                 onSuccess = { finish(proposal) },
-                onError = { finish(proposal) }
+                onError = { finish(proposal) },
             )
         }
     }
@@ -217,7 +213,6 @@ class ProposalSceneViewModel @Inject constructor(
         state.update { ProposalSceneState.Init(WalletConnectionVerificationStatus.UNKNOWN) }
     }
 
-
     private companion object {
         const val TAG = "ProposalSceneViewModel"
     }
@@ -226,12 +221,7 @@ class ProposalSceneViewModel @Inject constructor(
 sealed interface ProposalSceneState {
     val verificationStatus: WalletConnectionVerificationStatus
 
-    data class Init(
-        override val verificationStatus: WalletConnectionVerificationStatus,
-    ) : ProposalSceneState
+    data class Init(override val verificationStatus: WalletConnectionVerificationStatus) : ProposalSceneState
 
-    data class Approving(
-        override val verificationStatus: WalletConnectionVerificationStatus,
-    ) : ProposalSceneState
-
+    data class Approving(override val verificationStatus: WalletConnectionVerificationStatus) : ProposalSceneState
 }

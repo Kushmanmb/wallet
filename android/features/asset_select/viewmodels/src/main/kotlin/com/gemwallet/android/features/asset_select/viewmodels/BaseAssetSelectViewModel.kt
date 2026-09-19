@@ -60,9 +60,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAssetAction
-import uniffi.gemstone.GemAssetTitleStyle
 import uniffi.gemstone.GemAssetSearchStep
 import uniffi.gemstone.GemAssetSelectionServiceInterface
+import uniffi.gemstone.GemAssetTitleStyle
 import uniffi.gemstone.GemSelectAssetState
 import uniffi.gemstone.GemSelectAssetType
 
@@ -75,7 +75,8 @@ open class BaseAssetSelectViewModel(
     selectType: GemSelectAssetType,
     protected val ioDispatcher: CoroutineDispatcher,
     protected val context: Context,
-) : ViewModel(), ToastEmitter by ToastEmitterImpl() {
+) : ViewModel(),
+    ToastEmitter by ToastEmitterImpl() {
 
     val flow = service.flow(selectType)
 
@@ -119,7 +120,7 @@ open class BaseAssetSelectViewModel(
             filters = flow.appliedFilters(chainFilter.map { it.string }, hasBalance),
         )
     }
-    .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val assetsContent = combine(
         filters,
@@ -134,8 +135,8 @@ open class BaseAssetSelectViewModel(
                 assetInfo.toAssetInfoDataAggregate(GemAssetTitleStyle.CANONICAL_ASSET, formatters = formatters)
             }
     }
-    .flowOn(ioDispatcher)
-    .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .flowOn(ioDispatcher)
+        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
     private data class AssetSections(
         val popular: ImmutableList<AssetInfoDataAggregate> = emptyList<AssetInfoDataAggregate>().toImmutableList(),
@@ -184,9 +185,9 @@ open class BaseAssetSelectViewModel(
                 recentAssetsService.getRecentAssets(RecentAssetsRequest(types = recentTypes, filters = assetFilters()))
             }
         }
-    .map { items -> items.map { it.asset }.toImmutableList() }
-    .flowOn(ioDispatcher)
-    .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList<Asset>().toImmutableList())
+        .map { items -> items.map { it.asset }.toImmutableList() }
+        .flowOn(ioDispatcher)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList<Asset>().toImmutableList())
 
     val showsRecents: StateFlow<Boolean> = combine(snapshotFlow { queryState.text.isNotEmpty() }, recent) { hasQuery, recents -> flow.showsRecents(hasQuery, recents.isNotEmpty()) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
@@ -198,7 +199,7 @@ open class BaseAssetSelectViewModel(
             GemSelectAssetState.EMPTY -> UIState.Empty
         }
     }
-    .stateIn(viewModelScope, SharingStarted.Eagerly, UIState.Idle)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, UIState.Idle)
 
     val isChainFilterAvailable = combine(getSession(), availableChains) { session, chains ->
         flow.showsChainFilter(session?.wallet?.type == WalletType.Multicoin, chains.isNotEmpty())

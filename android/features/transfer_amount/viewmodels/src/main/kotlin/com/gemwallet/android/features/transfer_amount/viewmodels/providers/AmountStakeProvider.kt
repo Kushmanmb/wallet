@@ -1,6 +1,5 @@
 package com.gemwallet.android.features.transfer_amount.viewmodels.providers
 
-import uniffi.gemstone.GemStakeServiceInterface
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.stake.cases.GetDelegation
 import com.gemwallet.android.application.stake.cases.GetDelegations
@@ -33,6 +32,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import uniffi.gemstone.GemAmountType
 import uniffi.gemstone.GemStakeAmountInput
+import uniffi.gemstone.GemStakeServiceInterface
 import uniffi.gemstone.GemStakeValidatorSelection
 import uniffi.gemstone.GemTransferData
 import uniffi.gemstone.GemValidatorRow
@@ -58,7 +58,7 @@ class AmountStakeProvider(
         when (params) {
             is AmountParams.Stake.Delegate -> params.validatorId
             else -> null
-        }
+        },
     )
 
     private val selectedResource = MutableStateFlow(
@@ -66,7 +66,7 @@ class AmountStakeProvider(
             is AmountParams.Stake.Freeze -> params.resource
             is AmountParams.Stake.Unfreeze -> params.resource
             else -> Resource.Bandwidth
-        }
+        },
     )
     val resource: StateFlow<Resource> = selectedResource.asStateFlow()
 
@@ -79,6 +79,7 @@ class AmountStakeProvider(
             val walletId = current.walletId ?: return@flatMapLatest flowOf(emptyList())
             getDelegations(walletId, current.asset.id).map { list -> list.filter { stakeService.showsRewards(it.base.toGem()) } }
         }.flowOn(Dispatchers.IO).stateIn(scope, SharingStarted.Eagerly, emptyList())
+
         else -> MutableStateFlow(emptyList())
     }
 
@@ -101,10 +102,12 @@ class AmountStakeProvider(
                     delegationId = delegationIdentity.delegationId,
                 )
             }
+
             params is AmountParams.Stake.Rewards ->
                 combine(rewardsDelegations, selectedValidatorId) { withRewards, pickedId ->
                     withRewards.firstOrNull { it.validator.id == pickedId } ?: withRewards.firstOrNull()
                 }
+
             else -> flowOf(null)
         }
         source.flowOn(Dispatchers.IO).stateIn(scope, SharingStarted.Eagerly, null)
@@ -137,20 +140,11 @@ class AmountStakeProvider(
         .map { it?.validators?.validator }
         .stateIn(scope, SharingStarted.Eagerly, null)
 
-    private data class StakeSelection(
-        val input: GemStakeAmountInput,
-        val validators: GemStakeValidatorSelection,
-    ) {
-        fun confirmed(resource: Resource): GemStakeAmountInput =
-            (validators.validator?.validator?.let(input::withValidator) ?: input).withResource(resource.toGem())
+    private data class StakeSelection(val input: GemStakeAmountInput, val validators: GemStakeValidatorSelection) {
+        fun confirmed(resource: Resource): GemStakeAmountInput = (validators.validator?.validator?.let(input::withValidator) ?: input).withResource(resource.toGem())
     }
 
-    private fun stakeInputFrom(
-        validators: List<DelegationValidator>,
-        delegation: Delegation?,
-        rewards: List<Delegation>,
-        picked: DelegationValidator?,
-    ): GemStakeAmountInput? = when (params) {
+    private fun stakeInputFrom(validators: List<DelegationValidator>, delegation: Delegation?, rewards: List<Delegation>, picked: DelegationValidator?): GemStakeAmountInput? = when (params) {
         is AmountParams.Stake.Delegate -> validators.takeIf { it.isNotEmpty() }?.let { GemStakeAmountInput.Stake(it.map { validator -> validator.toGem() }, picked?.toGem()) }
         is AmountParams.Stake.Redelegate -> delegation?.let { GemStakeAmountInput.Redelegate(validators.map { validator -> validator.toGem() }, it.toGem(), picked?.toGem()) }
         is AmountParams.Stake.Undelegate -> delegation?.let { GemStakeAmountInput.Unstake(it.toGem()) }
@@ -178,5 +172,4 @@ class AmountStakeProvider(
         val confirmed = checkNotNull(selected.value?.confirmed(selectedResource.value)) { "stake action requires a selection" }
         return stakeService.stakeTransferData(current.asset.toGem(), confirmed.stakeType(), amount.atomicValue, isMax)
     }
-
 }

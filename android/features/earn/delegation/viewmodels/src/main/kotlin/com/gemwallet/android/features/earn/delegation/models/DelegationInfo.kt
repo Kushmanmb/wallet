@@ -14,12 +14,9 @@ import uniffi.gemstone.GemValidatorRow
 import uniffi.gemstone.GemValueStyle
 
 @Stable
-class HeadDelegationInfo(
-    private val delegation: Delegation,
-    private val assetInfo: AssetInfo,
-    override val currency: Currency,
-    private val validator: GemValidatorRow,
-) : CryptoFormattedUIModel, FiatFormattedUIModel {
+class HeadDelegationInfo(private val delegation: Delegation, private val assetInfo: AssetInfo, override val currency: Currency, private val validator: GemValidatorRow) :
+    CryptoFormattedUIModel,
+    FiatFormattedUIModel {
 
     val iconUrl: String
         get() = validator.imageUrl
@@ -42,5 +39,4 @@ class HeadDelegationInfo(
     override val cryptoFormatted: String by lazy { ValueFormatter(style = GemValueStyle.AUTO).string(delegation.base.balance, asset) }
 
     override val fiatFormatted: String by lazy { super<FiatFormattedUIModel>.fiatFormatted }
-
 }

@@ -16,14 +16,9 @@ import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.theme.alpha10
 import com.gemwallet.android.ui.theme.paddingHalfSmall
 import com.gemwallet.android.ui.theme.paddingSmall
-
 import com.gemwallet.android.ui.theme.space0
 @Composable
-fun DialogBar(
-    onDismissRequest: () -> Unit,
-    title: String? = null,
-    dismissType: DialogBarDismissType = DialogBarDismissType.Close,
-) {
+fun DialogBar(onDismissRequest: () -> Unit, title: String? = null, dismissType: DialogBarDismissType = DialogBarDismissType.Close) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -40,7 +35,7 @@ fun DialogBar(
                         when (dismissType) {
                             DialogBarDismissType.Close -> Alignment.CenterStart
                             DialogBarDismissType.Confirm -> Alignment.CenterEnd
-                        }
+                        },
                     )
                     .padding(horizontal = paddingHalfSmall, vertical = paddingHalfSmall),
             ) {

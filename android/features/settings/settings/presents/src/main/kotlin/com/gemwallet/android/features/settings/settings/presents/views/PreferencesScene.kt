@@ -45,10 +45,7 @@ import com.wallet.core.primitives.Appearance
 import uniffi.gemstone.GemListRow
 
 @Composable
-fun PreferencesScene(
-    onAction: (PreferencesAction) -> Unit,
-    viewModel: PreferencesViewModel = hiltViewModel(),
-) {
+fun PreferencesScene(onAction: (PreferencesAction) -> Unit, viewModel: PreferencesViewModel = hiltViewModel()) {
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val appearance by viewModel.appearance.collectAsStateWithLifecycle()
     val perpetualDefaults by viewModel.perpetualDefaults.collectAsStateWithLifecycle()
@@ -70,6 +67,7 @@ fun PreferencesScene(
                             listPosition = position,
                             modifier = Modifier.clickable { onAction(action.action) },
                         )
+
                         PreferencesRowAction.Language -> GemListRowView(
                             row = row,
                             listPosition = position,
@@ -81,6 +79,7 @@ fun PreferencesScene(
                                 }
                             },
                         )
+
                         PreferencesRowAction.Appearance -> OptionPickerRow(
                             row = row,
                             listPosition = position,
@@ -89,12 +88,14 @@ fun PreferencesScene(
                             label = { stringResource(it.stringRes()) },
                             onSelect = { viewModel.setAppearance(it) },
                         )
+
                         is PreferencesRowAction.Perpetuals -> GemListRowView(
                             row = row,
                             listPosition = position,
                             modifier = Modifier.clickable { viewModel.setPerpetualEnabled(!action.isOn) },
                             onToggle = { _, isOn -> viewModel.setPerpetualEnabled(isOn) },
                         )
+
                         is PreferencesRowAction.Option -> {
                             val options = viewModel.perpetualOptions.of(action.setting)
                             OptionPickerRow(
@@ -106,6 +107,7 @@ fun PreferencesScene(
                                 onSelect = { viewModel.setPerpetualOption(action.setting, it) },
                             )
                         }
+
                         null -> GemListRowView(row = row, listPosition = position)
                     }
                 }
@@ -115,14 +117,7 @@ fun PreferencesScene(
 }
 
 @Composable
-private fun <T> OptionPickerRow(
-    row: GemListRow,
-    listPosition: ListPosition,
-    current: T,
-    options: List<T>,
-    label: @Composable (T) -> String,
-    onSelect: (T) -> Unit,
-) {
+private fun <T> OptionPickerRow(row: GemListRow, listPosition: ListPosition, current: T, options: List<T>, label: @Composable (T) -> String, onSelect: (T) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     GemListRowView(
         row = row,

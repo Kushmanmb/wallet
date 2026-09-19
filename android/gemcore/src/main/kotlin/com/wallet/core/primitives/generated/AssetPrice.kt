@@ -4,49 +4,45 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class AssetMarket (
-	val marketCap: Double? = null,
-	val marketCapFdv: Double? = null,
-	val marketCapRank: Int? = null,
-	val totalVolume: Double? = null,
-	val circulatingSupply: Double? = null,
-	val totalSupply: Double? = null,
-	val maxSupply: Double? = null,
-	val allTimeHighValue: ChartValuePercentage? = null,
-	val allTimeLowValue: ChartValuePercentage? = null
+data class AssetMarket(
+    val marketCap: Double? = null,
+    val marketCapFdv: Double? = null,
+    val marketCapRank: Int? = null,
+    val totalVolume: Double? = null,
+    val circulatingSupply: Double? = null,
+    val totalSupply: Double? = null,
+    val maxSupply: Double? = null,
+    val allTimeHighValue: ChartValuePercentage? = null,
+    val allTimeLowValue: ChartValuePercentage? = null,
 )
 
 @Serializable
-data class AssetPrice (
-	val assetId: AssetId,
-	val price: Double,
-	val priceChangePercentage24h: Double,
-	val updatedAt: SerializedDate
-)
+data class AssetPrice(val assetId: AssetId, val price: Double, val priceChangePercentage24h: Double, val updatedAt: SerializedDate)
 
 @Serializable
-data class ChartValue (
-	val timestamp: Int,
-	val value: Float
-)
+data class ChartValue(val timestamp: Int, val value: Float)
 
 @Serializable
 enum class ChartPeriod(val string: String) {
-	@SerialName("hour")
-	Hour("hour"),
-	@SerialName("day")
-	Day("day"),
-	@SerialName("week")
-	Week("week"),
-	@SerialName("month")
-	Month("month"),
-	@SerialName("year")
-	Year("year"),
-	@SerialName("all")
-	All("all"),
-}
+    @SerialName("hour")
+    Hour("hour"),
 
+    @SerialName("day")
+    Day("day"),
+
+    @SerialName("week")
+    Week("week"),
+
+    @SerialName("month")
+    Month("month"),
+
+    @SerialName("year")
+    Year("year"),
+
+    @SerialName("all")
+    All("all"),
+}

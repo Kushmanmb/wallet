@@ -9,11 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 
 @Composable
-internal fun MessageToast(
-    visible: Boolean,
-    @StringRes message: Int,
-    onShown: () -> Unit,
-) {
+internal fun MessageToast(visible: Boolean, @StringRes message: Int, onShown: () -> Unit) {
     val context = LocalContext.current
     val text = stringResource(id = message)
     LaunchedEffect(visible) {

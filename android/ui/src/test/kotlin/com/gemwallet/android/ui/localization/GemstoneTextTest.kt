@@ -3,9 +3,9 @@ package com.gemwallet.android.ui.localization
 import android.content.Context
 import com.gemwallet.android.model.text
 import com.gemwallet.android.testkit.mockFormattedNumber
+import com.gemwallet.android.ui.R
 import io.mockk.every
 import io.mockk.mockk
-import com.gemwallet.android.ui.R
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import uniffi.gemstone.FeeUnitType

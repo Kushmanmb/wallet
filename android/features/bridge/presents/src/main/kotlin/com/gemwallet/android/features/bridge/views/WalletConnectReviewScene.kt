@@ -3,6 +3,7 @@ package com.gemwallet.android.features.bridge.views
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,23 +20,16 @@ import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.list_head.AssetValueListHead
 import com.gemwallet.android.ui.components.list_head.CenteredListHead
 import com.gemwallet.android.ui.components.list_head.CenteredListHeadSubtitleLayout
+import com.gemwallet.android.ui.components.list_item.GemListRowView
+import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.simulation.simulationPayloadFieldsContent
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.requestAuth
 import com.gemwallet.android.ui.theme.paddingDefault
-import com.gemwallet.android.ui.components.list_item.GemListRowView
-import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
-import androidx.compose.foundation.lazy.LazyListScope
 
 @Composable
-internal fun WalletConnectReviewScene(
-    model: WalletConnectReviewModel,
-    buttonState: ButtonState,
-    details: LazyListScope.() -> Unit,
-    onApprove: () -> Unit,
-    onReject: () -> Unit,
-) {
+internal fun WalletConnectReviewScene(model: WalletConnectReviewModel, buttonState: ButtonState, details: LazyListScope.() -> Unit, onApprove: () -> Unit, onReject: () -> Unit) {
     val context = LocalContext.current
     var sheetType by remember { mutableStateOf<WalletConnectReviewSheetType?>(null) }
 

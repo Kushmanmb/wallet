@@ -24,9 +24,9 @@ import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.empty.EmptyContentType
 import com.gemwallet.android.ui.components.empty.EmptyContentView
+import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_head.CenteredListHead
 import com.gemwallet.android.ui.components.list_head.HeaderIcon
-import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_item.DelegationItem
 import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
@@ -87,19 +87,21 @@ internal fun StakeScene(
                     item { SubheaderItem(section.title) }
                     when (section) {
                         is StakeSectionUIModel.Manage -> stakeActions(
-                        actions = actions,
-                        assetId = assetInfo.id(),
+                            actions = actions,
+                            assetId = assetInfo.id(),
                             amountAction = amountAction,
                             onRewards = { onAction(StakeSceneAction.ClaimRewards) },
                         )
+
                         is StakeSectionUIModel.Resources -> energyItem(assetInfo.balance.metadata)
+
                         is StakeSectionUIModel.Delegations -> itemsIndexed(section.rows) { index, item ->
                             DelegationItem(
                                 assetInfo = assetInfo,
                                 delegation = item.delegation,
                                 validator = item.validator,
                                 listPosition = ListPosition.getPosition(index, section.rows.size),
-                                onClick = { onAction(StakeSceneAction.OpenDelegation(item.delegation)) }
+                                onClick = { onAction(StakeSceneAction.OpenDelegation(item.delegation)) },
                             )
                         }
                     }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,15 +37,9 @@ import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.defaultPadding
 import com.gemwallet.android.ui.theme.extraLargeIconSize
 import com.gemwallet.android.ui.theme.paddingDefault
-import androidx.compose.material3.SnackbarHostState
 
 @Composable
-internal fun WalletScene(
-    wallet: WalletDetailsAggregate?,
-    secret: WalletSecretUIModel?,
-    snackbar: SnackbarHostState? = null,
-    onAction: (WalletAction) -> Unit,
-) {
+internal fun WalletScene(wallet: WalletDetailsAggregate?, secret: WalletSecretUIModel?, snackbar: SnackbarHostState? = null, onAction: (WalletAction) -> Unit) {
     wallet ?: return
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -58,12 +53,12 @@ internal fun WalletScene(
             TextButton(
                 onClick = { onAction(WalletAction.Cancel) },
                 colors = ButtonDefaults.textButtonColors()
-                    .copy(contentColor = MaterialTheme.colorScheme.onBackground)
+                    .copy(contentColor = MaterialTheme.colorScheme.onBackground),
             ) {
                 Text(stringResource(R.string.common_done).uppercase())
             }
         },
-        onClose = { onAction(WalletAction.Cancel) }
+        onClose = { onAction(WalletAction.Cancel) },
     ) {
         Column(
             modifier = Modifier
@@ -113,16 +108,13 @@ internal fun WalletScene(
             onConfirm = {
                 showDeleteDialog = false
                 onAction(WalletAction.Delete)
-            }
+            },
         ) { showDeleteDialog = false }
     }
 }
 
 @Composable
-private fun WalletAvatarHeader(
-    wallet: WalletDetailsAggregate,
-    onClick: () -> Unit,
-) {
+private fun WalletAvatarHeader(wallet: WalletDetailsAggregate, onClick: () -> Unit) {
     WalletAvatar(
         imageUrl = wallet.row.imageUrl,
         placeholder = wallet.row.placeholder.iconModel(),

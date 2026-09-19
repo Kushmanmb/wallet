@@ -26,7 +26,6 @@ import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.PriceAlertData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,6 +48,7 @@ import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemPriceAlertSectionKind
 import uniffi.gemstone.GemPriceAlertServiceInterface
 import uniffi.gemstone.PriceAlertFormatter
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -169,7 +169,6 @@ class PriceAlertViewModel @Inject constructor(
     private companion object {
         const val TAG = "PriceAlerts"
     }
-
 }
 
 private fun GemPriceAlertSectionKind.sectionId(): String = when (this) {

@@ -4,22 +4,23 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class TransferDataOutputAction(val string: String) {
-	@SerialName("sign")
-	Sign("sign"),
-	@SerialName("send")
-	Send("send"),
+    @SerialName("sign")
+    Sign("sign"),
+
+    @SerialName("send")
+    Send("send"),
 }
 
 @Serializable
 enum class TransferDataOutputType(val string: String) {
-	@SerialName("encodedTransaction")
-	EncodedTransaction("encodedTransaction"),
-	@SerialName("signature")
-	Signature("signature"),
-}
+    @SerialName("encodedTransaction")
+    EncodedTransaction("encodedTransaction"),
 
+    @SerialName("signature")
+    Signature("signature"),
+}

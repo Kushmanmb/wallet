@@ -42,11 +42,7 @@ data class ManageContactState(
     val errorText: String? = null,
 )
 
-data class ContactAddressForm(
-    val editingId: String? = null,
-    val chain: Chain,
-    val memo: String = "",
-)
+data class ContactAddressForm(val editingId: String? = null, val chain: Chain, val memo: String = "")
 
 data class ContactAddressInput(
     val editingId: String? = null,

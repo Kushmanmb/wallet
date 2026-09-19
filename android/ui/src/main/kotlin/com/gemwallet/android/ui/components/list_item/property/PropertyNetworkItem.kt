@@ -12,12 +12,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.wallet.core.primitives.Chain
 
 @Composable
-fun PropertyNetworkItem(
-    chain: Chain,
-    value: String = chain.networkName(),
-    listPosition: ListPosition = ListPosition.Single,
-    onOpenNetwork: (() -> Unit)? = null
-) {
+fun PropertyNetworkItem(chain: Chain, value: String = chain.networkName(), listPosition: ListPosition = ListPosition.Single, onOpenNetwork: (() -> Unit)? = null) {
     val asset = chain.asset()
     PropertyItem(
         modifier = onOpenNetwork?.let {
@@ -27,7 +22,7 @@ fun PropertyNetworkItem(
         data = {
             PropertyDataText(
                 text = value,
-                badge = { DataBadgeChevron(asset.chain.iconModel(), onOpenNetwork != null) }
+                badge = { DataBadgeChevron(asset.chain.iconModel(), onOpenNetwork != null) },
             )
         },
         listPosition = listPosition,

@@ -78,11 +78,7 @@ private val loadingDialogSize = 100.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ImportScreen(
-    importType: ImportType,
-    onImported: (WalletImportResult) -> Unit,
-    onCancel: () -> Unit
-) {
+fun ImportScreen(importType: ImportType, onImported: (WalletImportResult) -> Unit, onCancel: () -> Unit) {
     DisableScreenShooting()
     DetectScreenshot(AppUrl.howToSecureSecretPhrase)
 
@@ -122,7 +118,7 @@ fun ImportScreen(
     if (uiState.loading) {
         Dialog(
             onDismissRequest = {},
-            DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+            DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
         ) {
             Box(
                 contentAlignment = Alignment.Center,
@@ -130,8 +126,8 @@ fun ImportScreen(
                     .size(loadingDialogSize)
                     .background(
                         MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(paddingSmall)
-                    )
+                        shape = RoundedCornerShape(paddingSmall),
+                    ),
             ) {
                 CircularProgressIndicator()
             }
@@ -154,7 +150,6 @@ fun ImportScreen(
             },
         )
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -176,7 +171,7 @@ private fun ImportScene(
     invalidWords: (String) -> Set<String>,
     suggestions: List<String>,
     onSelectSuggestion: (String) -> ImportTextUIModel,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
 ) {
     val generatedName = defaultWalletName.orEmpty()
     var dataErrorState by remember(dataError) { mutableStateOf(dataError) }
@@ -198,13 +193,13 @@ private fun ImportScene(
             modifier = Modifier.fillMaxSize(),
         ) {
             item {
-                Column (
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .listItem(ListPosition.Single)
                         .padding(sceneContentPadding())
                         .padding(bottom = space0),
-                    verticalArrangement = Arrangement.spacedBy(paddingHalfSmall)
+                    verticalArrangement = Arrangement.spacedBy(paddingHalfSmall),
                 ) {
                     TypeSelection(tabs, showsTabs) { type ->
                         onTypeChange(type)
@@ -221,7 +216,7 @@ private fun ImportScene(
                     Text(
                         modifier = Modifier.sectionHeaderItem(),
                         text = parseMarkdownToAnnotatedString(
-                            stringResource(R.string.wallet_import_address_warning)
+                            stringResource(R.string.wallet_import_address_warning),
                         ),
                         color = MaterialTheme.colorScheme.secondary,
                         style = MaterialTheme.typography.bodySmall,
@@ -258,7 +253,7 @@ private fun DataInput(
 
     if (suggestions.isNotEmpty() && input.supportsPhraseSuggestions) {
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(paddingSmall)
+            horizontalArrangement = Arrangement.spacedBy(paddingSmall),
         ) {
             items(suggestions) { word ->
                 SuggestionChip(
@@ -267,7 +262,7 @@ private fun DataInput(
                         inputState.value = TextFieldValue(text = edit.text, selection = TextRange(edit.cursor))
                         onChange()
                     },
-                    label = { Text(text = word) }
+                    label = { Text(text = word) },
                 )
             }
         }
@@ -276,11 +271,7 @@ private fun DataInput(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TypeSelection(
-    tabs: List<ImportTabUIModel>,
-    showsTabs: Boolean,
-    onTypeChange: (ImportType) -> Unit,
-) {
+private fun TypeSelection(tabs: List<ImportTabUIModel>, showsTabs: Boolean, onTypeChange: (ImportType) -> Unit) {
     if (!showsTabs) {
         return
     }
@@ -289,7 +280,7 @@ private fun TypeSelection(
         selectedTabIndex = tabs.indexOfFirst { it.isSelected }.coerceAtLeast(0),
         indicator = { Box {} },
         containerColor = Color.Transparent,
-        divider = {}
+        divider = {},
     ) {
         tabs.forEach { tab ->
             ImportKindTab(tab, onTypeChange)

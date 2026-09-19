@@ -1,6 +1,7 @@
 package com.gemwallet.android.features.receive.viewmodels
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.assets.cases.GetWalletAssets
@@ -31,10 +32,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import uniffi.gemstone.GemReceiveServiceInterface
 import uniffi.gemstone.GemReceiveNetworks
+import uniffi.gemstone.GemReceiveServiceInterface
 import uniffi.gemstone.GemReceiveWarning
-import android.util.Log
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel(assistedFactory = ReceiveViewModel.Factory::class)

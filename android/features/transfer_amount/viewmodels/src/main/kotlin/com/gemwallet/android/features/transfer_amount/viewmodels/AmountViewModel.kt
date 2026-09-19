@@ -25,8 +25,6 @@ import com.gemwallet.android.ui.style.amountSymbol
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Currency
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.math.BigInteger
-import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,13 +42,11 @@ import uniffi.gemstone.GemAmountEquivalent
 import uniffi.gemstone.GemAmountInputType
 import uniffi.gemstone.GemAmountServiceInterface
 import uniffi.gemstone.GemValueStyle
+import java.math.BigInteger
+import javax.inject.Inject
 
 @HiltViewModel
-class AmountViewModel @Inject constructor(
-    service: GemAmountServiceInterface,
-    factory: AmountProviderFactory,
-    savedStateHandle: SavedStateHandle,
-) : ViewModel() {
+class AmountViewModel @Inject constructor(service: GemAmountServiceInterface, factory: AmountProviderFactory, savedStateHandle: SavedStateHandle) : ViewModel() {
 
     private val valueFormatter = ValueFormatter(style = GemValueStyle.AUTO)
 
@@ -138,8 +134,7 @@ class AmountViewModel @Inject constructor(
         updateAmount(text)
     }
 
-    private fun maxAmountText(asset: Asset, value: BigInteger): String? =
-        numberFormat().inputText(value.toString(), asset.decimals.toUInt())
+    private fun maxAmountText(asset: Asset, value: BigInteger): String? = numberFormat().inputText(value.toString(), asset.decimals.toUInt())
 
     fun switchInputType() {
         amountInputType.update { it.toggled() }

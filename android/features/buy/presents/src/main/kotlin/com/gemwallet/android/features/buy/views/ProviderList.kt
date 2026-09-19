@@ -26,12 +26,7 @@ import com.wallet.core.primitives.FiatProviderName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProviderList(
-    isShow: MutableState<Boolean>,
-    providers: List<BuyFiatProviderUIModel>,
-    selectedProvider: BuyFiatProviderUIModel?,
-    onProviderSelect: (FiatProviderName) -> Unit,
-) {
+fun ProviderList(isShow: MutableState<Boolean>, providers: List<BuyFiatProviderUIModel>, selectedProvider: BuyFiatProviderUIModel?, onProviderSelect: (FiatProviderName) -> Unit) {
     ModalBottomSheet(
         isVisible = isShow.value,
         onDismissRequest = { isShow.value = false },
@@ -54,12 +49,7 @@ fun ProviderList(
 }
 
 @Composable
-private fun FiatProviderListItemView(
-    provider: BuyFiatProviderUIModel,
-    listPosition: ListPosition,
-    isSelected: Boolean,
-    onProviderSelect: () -> Unit,
-) {
+private fun FiatProviderListItemView(provider: BuyFiatProviderUIModel, listPosition: ListPosition, isSelected: Boolean, onProviderSelect: () -> Unit) {
     ListItem(
         modifier = Modifier.clickable(onClick = onProviderSelect),
         listPosition = listPosition,

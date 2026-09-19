@@ -5,18 +5,17 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.gemwallet.android.domains.duration.formatDuration
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.ValueFormatter
-import uniffi.gemstone.GemListRowTitle
-import uniffi.gemstone.GemListSectionTitle
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.localization.stringRes
 import com.wallet.core.primitives.Asset
-import uniffi.gemstone.GemRecipientErrorDisplay
 import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.FeePriority
@@ -28,9 +27,11 @@ import com.wallet.core.primitives.TpslType
 import com.wallet.core.primitives.TransactionState
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.FeeOption
+import uniffi.gemstone.FeeUnitType
 import uniffi.gemstone.GemApprovalValue
 import uniffi.gemstone.GemAssetMenuAction
 import uniffi.gemstone.GemBalanceResource
+import uniffi.gemstone.GemBalanceRowValue
 import uniffi.gemstone.GemBannerAmount
 import uniffi.gemstone.GemBannerDescription
 import uniffi.gemstone.GemBannerTitle
@@ -41,30 +42,29 @@ import uniffi.gemstone.GemEmptyStateText
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemHeaderButtonKind
-import com.gemwallet.android.model.text
-import uniffi.gemstone.GemBalanceRowValue
-import uniffi.gemstone.FeeUnitType
+import uniffi.gemstone.GemListRowTitle
+import uniffi.gemstone.GemListSectionTitle
 import uniffi.gemstone.GemLocalizedText
+import uniffi.gemstone.GemPerpetual
+import uniffi.gemstone.GemPositionChange
+import uniffi.gemstone.GemRecipientErrorDisplay
 import uniffi.gemstone.GemRecipientSectionKind
+import uniffi.gemstone.GemSimulationPayloadTitle
+import uniffi.gemstone.GemSlippageCheck
 import uniffi.gemstone.GemTransactionFilter
 import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemTransactionTitle
+import uniffi.gemstone.GemTriggerOrder
 import uniffi.gemstone.GemValueStyle
 import uniffi.gemstone.GemVerificationLevel
 import uniffi.gemstone.GemWalletSecretKind
 import uniffi.gemstone.GemWalletSubtitle
 import uniffi.gemstone.LinkType
-import uniffi.gemstone.GemSimulationPayloadTitle
-import uniffi.gemstone.WalletConnectionVerificationStatus
-import uniffi.gemstone.verificationLevel
-import uniffi.gemstone.GemSlippageCheck
-import com.gemwallet.android.domains.duration.formatDuration
-import uniffi.gemstone.GemPerpetual
-import uniffi.gemstone.GemPositionChange
-import uniffi.gemstone.GemTriggerOrder
 import uniffi.gemstone.PerpetualMarginType
 import uniffi.gemstone.PerpetualProvider
+import uniffi.gemstone.WalletConnectionVerificationStatus
+import uniffi.gemstone.verificationLevel
 import uniffi.gemstone.PriceChangeCalculator as GemPriceChangeCalculator
 
 fun GemTransactionTitle.string(context: Context): String = when (this) {
@@ -111,7 +111,7 @@ fun DelegationState.stateRes(): Int = when (this) {
 
 @Composable
 fun GemDelegationStatus.stateText(): String = stringResource(
-    state.stateRes()
+    state.stateRes(),
 )
 
 @StringRes
@@ -139,30 +139,51 @@ fun GemBalanceRowValue.text(context: Context): String = when (this) {
 
 fun GemLocalizedText.string(context: Context): String = when (this) {
     is GemLocalizedText.WalletDefaultName -> context.getString(R.string.wallet_default_name, index)
+
     is GemLocalizedText.WalletDefaultNameChain ->
         context.getString(R.string.wallet_default_name_chain, chain.requireChain().asset().name, index)
+
     GemLocalizedText.WalletMulticoin -> context.getString(R.string.wallet_multicoin)
+
     is GemLocalizedText.ChainNetworkName -> chain.requireChain().networkName()
+
     is GemLocalizedText.DelegationState -> context.getString(state.stateRes())
+
     is GemLocalizedText.TransactionState -> context.getString(state.toPrimitives().statusLabelRes())
+
     is GemLocalizedText.Resource -> context.getString(resource.toPrimitives().stringRes())
+
     is GemLocalizedText.Text -> text
+
     GemLocalizedText.RewardsUnverified -> context.getString(R.string.rewards_unverified_description)
+
     is GemLocalizedText.RewardsPending -> context.getString(R.string.rewards_pending_description, countdown.formatDuration())
+
     GemLocalizedText.RewardsPendingReady -> context.getString(R.string.rewards_pending_description_ready)
+
     GemLocalizedText.ErrorOccurred -> context.getString(R.string.errors_error_occurred)
+
     GemLocalizedText.UnlimitedApprovalWarning -> context.getString(R.string.simulation_warning_unlimited_token_approval_description)
+
     GemLocalizedText.ExternallyOwnedSpenderWarning -> context.getString(R.string.simulation_warning_externally_owned_spender_description)
+
     GemLocalizedText.SuspiciousAddress -> context.getString(R.string.common_suspicious_address)
+
     GemLocalizedText.InvalidTokenId -> context.getString(R.string.errors_token_invalid_id)
+
     is GemLocalizedText.TriggerOrder -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.triggerOrderText(context.getString(order.stringRes()), price?.text()) }
+
     is GemLocalizedText.Pnl -> GemPriceChangeCalculator().use { it.pnlText(amount.text(), percent.text()) }
+
     is GemLocalizedText.Margin -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.marginText(amount.text(), context.getString(marginType.stringRes())) }
+
     is GemLocalizedText.Position -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.positionText(context.getString(direction.toPrimitives().stringRes()), leverage) }
+
     is GemLocalizedText.PositionChange -> when (change) {
         GemPositionChange.INCREASE -> context.getString(R.string.perpetual_increase_direction, context.getString(direction.toPrimitives().stringRes()))
         GemPositionChange.REDUCE -> context.getString(R.string.perpetual_reduce_direction, context.getString(direction.toPrimitives().stringRes()))
     }
+
     is GemLocalizedText.FeeRate -> when (unit) {
         FeeUnitType.SAT_VB -> "${rate.text()} ${context.getString(R.string.fee_rate_satvB)}"
         FeeUnitType.GWEI -> "${rate.text()} ${context.getString(R.string.fee_rate_gwei)}"
@@ -229,19 +250,27 @@ fun GemSimulationPayloadTitle.text(context: Context): String = when (this) {
 @StringRes
 fun TransactionState.statusLabelRes(): Int = when (this) {
     TransactionState.Pending,
-    TransactionState.InTransit -> R.string.transaction_status_pending
+    TransactionState.InTransit,
+    -> R.string.transaction_status_pending
+
     TransactionState.Confirmed -> R.string.transaction_status_confirmed
+
     TransactionState.Failed -> R.string.transaction_status_failed
+
     TransactionState.Reverted -> R.string.transaction_status_reverted
+
     TransactionState.Refunded -> R.string.transaction_status_refunded
 }
 
 @StringRes
 fun GemTransactionStateTone.infoDescriptionRes(): Int = when (this) {
     GemTransactionStateTone.PENDING -> R.string.info_transaction_pending_description
+
     GemTransactionStateTone.SUCCESS -> R.string.info_transaction_success_description
+
     GemTransactionStateTone.ERROR,
-    GemTransactionStateTone.REFUNDED -> R.string.info_transaction_error_description
+    GemTransactionStateTone.REFUNDED,
+    -> R.string.info_transaction_error_description
 }
 
 @StringRes
@@ -415,8 +444,7 @@ fun GemTransactionRowSubtitle.text(context: Context): String? = when (this) {
     GemTransactionRowSubtitle.None -> null
 }
 
-private fun prefixed(context: Context, @StringRes prefix: Int?, value: String): String? =
-    prefix?.let { res -> value.takeIf { it.isNotEmpty() }?.let { "${context.getString(res)} $it" } }
+private fun prefixed(context: Context, @StringRes prefix: Int?, value: String): String? = prefix?.let { res -> value.takeIf { it.isNotEmpty() }?.let { "${context.getString(res)} $it" } }
 
 @StringRes
 fun FeeOption.stringRes(): Int = when (this) {
@@ -435,19 +463,25 @@ fun bannerTitle(context: Context, title: GemBannerTitle): String = when (title) 
 
 fun bannerDescription(context: Context, description: GemBannerDescription): String = when (description) {
     is GemBannerDescription.Stake -> context.getString(R.string.banner_stake_description, description.assetSymbol)
+
     is GemBannerDescription.AccountActivation -> context.getString(
         R.string.banner_account_activation_description,
         description.networkName,
         bannerAmount(description.fee),
     )
+
     is GemBannerDescription.ExternallyControlledAccount -> context.getString(R.string.warnings_externally_controlled_account, description.networkName)
+
     is GemBannerDescription.ActivateAsset -> context.getString(
         R.string.banner_activate_asset_description,
         description.assetSymbol,
         description.networkName,
     )
+
     GemBannerDescription.SuspiciousAsset -> context.getString(R.string.banner_asset_status_description)
+
     GemBannerDescription.Onboarding -> context.getString(R.string.banner_onboarding_description)
+
     GemBannerDescription.TradePerpetuals -> context.getString(R.string.banner_perpetuals_description)
 }
 

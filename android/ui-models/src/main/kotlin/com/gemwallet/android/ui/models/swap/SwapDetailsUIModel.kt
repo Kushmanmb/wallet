@@ -4,21 +4,9 @@ import com.gemwallet.android.domains.swap.AssetRatePair
 import uniffi.gemstone.SwapPriceImpactType
 import uniffi.gemstone.SwapProvider
 
-data class SwapProviderUIModel(
-    val id: SwapProvider,
-    val title: String,
-    val icon: Any?,
-    val amount: String? = null,
-    val fiat: String? = null,
-)
+data class SwapProviderUIModel(val id: SwapProvider, val title: String, val icon: Any?, val amount: String? = null, val fiat: String? = null)
 
-data class SwapPriceImpactUIModel(
-    val type: SwapPriceImpactType,
-    val displayText: String,
-    val warningText: String,
-    val isHigh: Boolean,
-    val showsInSummary: Boolean,
-)
+data class SwapPriceImpactUIModel(val type: SwapPriceImpactType, val displayText: String, val warningText: String, val isHigh: Boolean, val showsInSummary: Boolean)
 
 data class SwapDetailsUIModel(
     val rows: List<SwapDetailRowUIModel>,

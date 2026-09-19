@@ -6,19 +6,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.wallet.cases.GetWallets
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.domains.referral.values.ReferralError
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.referral.viewmodels.models.RewardRedemptionUIModel
-import com.gemwallet.android.features.referral.viewmodels.models.uiModel
 import com.gemwallet.android.features.referral.viewmodels.models.infoRows
+import com.gemwallet.android.features.referral.viewmodels.models.uiModel
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Wallet
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,8 +38,7 @@ import uniffi.gemstone.GemRewardsRedemption
 import uniffi.gemstone.GemRewardsServiceInterface
 import uniffi.gemstone.Rewards
 import uniffi.gemstone.walletRows
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -90,8 +90,8 @@ class ReferralViewModel @Inject constructor(
         }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val referralWallet = currentWallet.filterNotNull()
-    .onEach { sync(it, SyncType.Init) }
-    .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+        .onEach { sync(it, SyncType.Init) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     fun setWallet(walletId: String) {
         val wallet = availableWallets.value.firstOrNull { it.id.id == walletId } ?: return

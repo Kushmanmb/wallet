@@ -4,32 +4,32 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gemwallet.android.application.wallet.cases.GetWalletDetails
 import com.gemwallet.android.application.nft.cases.GetListNft
+import com.gemwallet.android.application.wallet.cases.GetWalletDetails
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import com.gemwallet.android.ext.errorText
+import com.gemwallet.android.ext.runCatchingCancellable
+import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ui.components.image.EmojiAvatarRenderer
 import com.gemwallet.android.ui.models.NftItemUIModel
+import com.gemwallet.android.ui.models.toUIModels
 import com.gemwallet.android.ui.theme.AvatarEmoji
+import com.wallet.core.primitives.NFTAssetData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-import com.gemwallet.android.ext.runCatchingCancellable
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import com.gemwallet.android.ext.errorText
-import com.gemwallet.android.ui.models.toUIModels
-import com.gemwallet.android.ext.toGem
-import com.wallet.core.primitives.NFTAssetData
+import kotlinx.coroutines.launch
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemNftItem
 import uniffi.gemstone.GemWalletServiceInterface
+import javax.inject.Inject
 
 @HiltViewModel
 class WalletImageViewModel @Inject constructor(
@@ -73,6 +73,4 @@ class WalletImageViewModel @Inject constructor(
     }
 
     fun clearError() = errorState.update { null }
-
-
 }

@@ -5,10 +5,7 @@ import com.wallet.core.primitives.Asset
 import uniffi.gemstone.GemConfirmLoad
 import uniffi.gemstone.GemConfirmPreload
 
-fun mockGemConfirmLoad(
-    asset: Asset = mockAssetEthereum(),
-    preload: GemConfirmPreload? = null,
-) = GemConfirmLoad(
+fun mockGemConfirmLoad(asset: Asset = mockAssetEthereum(), preload: GemConfirmPreload? = null) = GemConfirmLoad(
     sender = mockAccount(chain = asset.id.chain).toGem(),
     feeAsset = asset.toGem(),
     metadata = mockGemConfirmMetadata(asset),

@@ -4,33 +4,29 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class DelegationValidator (
-	val chain: Chain,
-	val id: String,
-	val name: String,
-	val isActive: Boolean,
-	val commission: Double,
-	val apr: Double,
-	val providerType: StakeProviderType
-)
+data class DelegationValidator(val chain: Chain, val id: String, val name: String, val isActive: Boolean, val commission: Double, val apr: Double, val providerType: StakeProviderType)
 
 @Serializable
 enum class DelegationState(val string: String) {
-	@SerialName("active")
-	Active("active"),
-	@SerialName("pending")
-	Pending("pending"),
-	@SerialName("inactive")
-	Inactive("inactive"),
-	@SerialName("activating")
-	Activating("activating"),
-	@SerialName("deactivating")
-	Deactivating("deactivating"),
-	@SerialName("awaitingwithdrawal")
-	AwaitingWithdrawal("awaitingwithdrawal"),
-}
+    @SerialName("active")
+    Active("active"),
 
+    @SerialName("pending")
+    Pending("pending"),
+
+    @SerialName("inactive")
+    Inactive("inactive"),
+
+    @SerialName("activating")
+    Activating("activating"),
+
+    @SerialName("deactivating")
+    Deactivating("deactivating"),
+
+    @SerialName("awaitingwithdrawal")
+    AwaitingWithdrawal("awaitingwithdrawal"),
+}

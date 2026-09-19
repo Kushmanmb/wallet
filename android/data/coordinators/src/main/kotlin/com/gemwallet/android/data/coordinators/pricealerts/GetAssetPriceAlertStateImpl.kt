@@ -10,12 +10,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class GetAssetPriceAlertStateImpl(
-    private val priceAlertStore: GemstonePriceAlertStore,
-) : GetAssetPriceAlertState {
+class GetAssetPriceAlertStateImpl(private val priceAlertStore: GemstonePriceAlertStore) : GetAssetPriceAlertState {
 
-    override fun isAssetPriceAlertEnabled(assetId: AssetId): Flow<Boolean> =
-        priceAlertStore.observeAssetPriceAlert(assetId)
-            .mapLatest { it?.priceAlert != null }
-            .flowOn(Dispatchers.IO)
+    override fun isAssetPriceAlertEnabled(assetId: AssetId): Flow<Boolean> = priceAlertStore.observeAssetPriceAlert(assetId)
+        .mapLatest { it?.priceAlert != null }
+        .flowOn(Dispatchers.IO)
 }

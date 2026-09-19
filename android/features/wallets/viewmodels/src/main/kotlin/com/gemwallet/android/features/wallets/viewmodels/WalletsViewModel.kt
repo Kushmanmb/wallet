@@ -1,29 +1,29 @@
 package com.gemwallet.android.features.wallets.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.wallet.cases.DeleteWallet
 import com.gemwallet.android.application.wallet.cases.GetAllWallets
 import com.gemwallet.android.application.wallet.cases.SetCurrentWallet
-import com.wallet.core.primitives.WalletId
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
-import com.gemwallet.android.ext.runCatchingCancellable
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.launch
-import uniffi.gemstone.GemWalletServiceInterface
-import javax.inject.Inject
-import android.content.Context
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.errorText
+import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ui.localization.text
+import com.wallet.core.primitives.WalletId
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemWalletServiceInterface
+import javax.inject.Inject
 
 @HiltViewModel
 class WalletsViewModel @Inject constructor(

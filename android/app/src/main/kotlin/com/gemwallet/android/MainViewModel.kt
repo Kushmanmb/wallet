@@ -2,6 +2,7 @@ package com.gemwallet.android
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.wallet_connect.cases.IsWalletConnectEnabled
@@ -12,15 +13,12 @@ import com.gemwallet.android.data.services.gemstone.pricealerts.MigratePriceAler
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.userMessage
 import com.gemwallet.android.model.AuthState
-import android.util.Log
 import com.gemwallet.android.services.MigrateV3KeystoreService
 import com.gemwallet.android.ui.localization.text
-import kotlinx.coroutines.CoroutineDispatcher
-import uniffi.gemstone.GemWalletService
-import uniffi.gemstone.GemWalletServiceInterface
 import com.wallet.core.primitives.Appearance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +34,8 @@ import uniffi.gemstone.GemAppStartFailure
 import uniffi.gemstone.GemAppStartServiceInterface
 import uniffi.gemstone.GemPaymentException
 import uniffi.gemstone.GemServiceException
+import uniffi.gemstone.GemWalletService
+import uniffi.gemstone.GemWalletServiceInterface
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 
@@ -60,7 +60,7 @@ class MainViewModel @Inject constructor(
         MainUIState(
             initialAuth = if (isInitialAuthRequired) AuthState.Required else AuthState.Success,
             hasUnlockedApp = !isInitialAuthRequired,
-        )
+        ),
     )
     val uiState: StateFlow<MainUIState> = _uiState.asStateFlow()
 

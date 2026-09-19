@@ -13,11 +13,11 @@ import com.gemwallet.android.model.AssetBalance
 import com.gemwallet.android.model.AssetData
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.testkit.mockAsset
-import com.gemwallet.android.testkit.mockGemFiatSession
 import com.gemwallet.android.testkit.mockAssetData
 import com.gemwallet.android.testkit.mockAssetMetaData
 import com.gemwallet.android.testkit.mockAssetPriceInfo
 import com.gemwallet.android.testkit.mockFiatQuote
+import com.gemwallet.android.testkit.mockGemFiatSession
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.navigation.RouteArgument
@@ -50,9 +50,9 @@ import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.FiatQuoteUrl
 import uniffi.gemstone.GemFiatQuoteServiceInterface
+import uniffi.gemstone.GemFiatSuggestedAmount
 import uniffi.gemstone.GemServiceException
 import java.math.BigInteger
-import uniffi.gemstone.GemFiatSuggestedAmount
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FiatViewModelTest {

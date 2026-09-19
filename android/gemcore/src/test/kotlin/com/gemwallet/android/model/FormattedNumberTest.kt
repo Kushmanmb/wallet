@@ -2,7 +2,6 @@ package com.gemwallet.android.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.util.Locale
 import uniffi.gemstone.GemFormattedNumber
 import uniffi.gemstone.GemNumberDisplay
 import uniffi.gemstone.GemNumberNotation
@@ -10,6 +9,7 @@ import uniffi.gemstone.GemNumberRounding
 import uniffi.gemstone.GemNumberUnit
 import uniffi.gemstone.GemPrecision
 import uniffi.gemstone.GemValueTone
+import java.util.Locale
 
 class FormattedNumberTest {
 

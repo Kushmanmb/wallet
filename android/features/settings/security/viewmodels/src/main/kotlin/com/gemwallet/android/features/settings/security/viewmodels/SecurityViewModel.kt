@@ -9,7 +9,6 @@ import com.gemwallet.android.features.settings.security.viewmodels.localization.
 import com.gemwallet.android.features.settings.security.viewmodels.models.LockPeriodOption
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,6 +20,7 @@ import uniffi.gemstone.GemSecurityInput
 import uniffi.gemstone.GemSettingsServiceInterface
 import uniffi.gemstone.lockPeriodFromMinutes
 import uniffi.gemstone.lockPeriods
+import javax.inject.Inject
 
 @HiltViewModel
 class SecurityViewModel @Inject constructor(
@@ -49,7 +49,7 @@ class SecurityViewModel @Inject constructor(
             privacyLockEnabled = false,
             privacyLockSupported = false,
             hideBalanceEnabled = hideBalances,
-        )
+        ),
     )
 
     fun setAuthRequired(required: Boolean) {

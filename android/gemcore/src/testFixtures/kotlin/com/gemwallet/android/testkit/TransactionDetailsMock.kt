@@ -8,12 +8,11 @@ import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.TransactionExtended
 import uniffi.gemstone.BlockExplorerLink
 import uniffi.gemstone.GemAmountSign
-import uniffi.gemstone.GemSwapAgain
-import uniffi.gemstone.GemSwapProgress
 import uniffi.gemstone.GemCurrencyStyle
 import uniffi.gemstone.GemNumberNotation
+import uniffi.gemstone.GemSwapAgain
+import uniffi.gemstone.GemSwapProgress
 import uniffi.gemstone.GemSwapRate
-import uniffi.gemstone.formattedCurrency
 import uniffi.gemstone.GemTransactionAmount
 import uniffi.gemstone.GemTransactionDetailRows
 import uniffi.gemstone.GemTransactionHeader
@@ -23,14 +22,10 @@ import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemTransactionStatus
 import uniffi.gemstone.GemTransactionTitle
 import uniffi.gemstone.Resource
+import uniffi.gemstone.formattedCurrency
 import java.math.BigInteger
 
-fun mockGemTransactionAmount(
-    asset: Asset = mockAsset(),
-    value: BigInteger = BigInteger.ONE,
-    sign: GemAmountSign = GemAmountSign.NONE,
-    price: AssetPrice? = null,
-) = GemTransactionAmount(
+fun mockGemTransactionAmount(asset: Asset = mockAsset(), value: BigInteger = BigInteger.ONE, sign: GemAmountSign = GemAmountSign.NONE, price: AssetPrice? = null) = GemTransactionAmount(
     asset = asset.toGem(),
     value = value,
     sign = sign,

@@ -113,7 +113,7 @@ internal fun PerpetualMarketScene(
             onRefresh = { onAction(PerpetualMarketAction.Refresh) },
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             ) {
                 if (!isSearching) {
                     item {
@@ -121,7 +121,7 @@ internal fun PerpetualMarketScene(
                             amount = balance.total,
                             equivalent = stringResource(
                                 R.string.wallet_available_balance,
-                                balance.available
+                                balance.available,
                             ),
                             onClick = { onAction(PerpetualMarketAction.OpenPortfolio) },
                         ) {
@@ -140,6 +140,7 @@ internal fun PerpetualMarketScene(
                             onSeeAll = { onAction(PerpetualMarketAction.OpenRecentsSheet) },
                             onSelect = { asset -> onAction(PerpetualMarketAction.OpenRecent(asset)) },
                         )
+
                         is PerpetualMarketSectionUIModel.Positions -> {
                             section.title?.let { title -> item { SubheaderItem(title) } }
                             itemsPositioned(positions) { position, item ->
@@ -150,6 +151,7 @@ internal fun PerpetualMarketScene(
                                 )
                             }
                         }
+
                         PerpetualMarketSectionUIModel.Pinned -> {
                             item {
                                 Spacer16()
@@ -165,6 +167,7 @@ internal fun PerpetualMarketScene(
                                 )
                             }
                         }
+
                         is PerpetualMarketSectionUIModel.Markets -> {
                             section.title?.let { title -> item { SubheaderItem(title) } }
                             itemsPositioned(unpinnedPerpetuals) { position, item ->
@@ -177,6 +180,7 @@ internal fun PerpetualMarketScene(
                                 )
                             }
                         }
+
                         PerpetualMarketSectionUIModel.Empty -> item {
                             EmptyContentView(
                                 type = EmptyContentType.SearchPerpetuals,
@@ -192,11 +196,7 @@ internal fun PerpetualMarketScene(
     }
 }
 
-private fun LazyListScope.recentPerpetuals(
-    items: List<Asset>,
-    onSeeAll: () -> Unit,
-    onSelect: (Asset) -> Unit,
-) {
+private fun LazyListScope.recentPerpetuals(items: List<Asset>, onSeeAll: () -> Unit, onSelect: (Asset) -> Unit) {
     if (items.isEmpty()) {
         return
     }
@@ -262,7 +262,7 @@ fun PreviewPerpetualMarketScene() {
                         name = "Bitcoin",
                         symbol = "BTC",
                         decimals = 8,
-                        type = AssetType.NATIVE
+                        type = AssetType.NATIVE,
                     )
                     override val isPinned: Boolean = false
                 },
@@ -281,7 +281,7 @@ fun PreviewPerpetualMarketScene() {
                         name = "Ethereum",
                         symbol = "ETH",
                         decimals = 18,
-                        type = AssetType.NATIVE
+                        type = AssetType.NATIVE,
                     )
                     override val isPinned: Boolean = false
                 },
@@ -300,7 +300,7 @@ fun PreviewPerpetualMarketScene() {
                         name = "Solana",
                         symbol = "SOL",
                         decimals = 9,
-                        type = AssetType.NATIVE
+                        type = AssetType.NATIVE,
                     )
                     override val isPinned: Boolean = false
                 },
@@ -319,7 +319,7 @@ fun PreviewPerpetualMarketScene() {
                         name = "Avalanche",
                         symbol = "AVAX",
                         decimals = 18,
-                        type = AssetType.NATIVE
+                        type = AssetType.NATIVE,
                     )
                     override val isPinned: Boolean = false
                 },
@@ -338,10 +338,10 @@ fun PreviewPerpetualMarketScene() {
                         name = "Chainlink",
                         symbol = "LINK",
                         decimals = 18,
-                        type = AssetType.ERC20
+                        type = AssetType.ERC20,
                     )
                     override val isPinned: Boolean = false
-                }
+                },
             ),
             pinnedPerpetuals = listOf(
                 object : PerpetualDataAggregate {
@@ -359,7 +359,7 @@ fun PreviewPerpetualMarketScene() {
                         name = "Bitcoin",
                         symbol = "BTC",
                         decimals = 8,
-                        type = AssetType.NATIVE
+                        type = AssetType.NATIVE,
                     )
                     override val isPinned: Boolean = false
                 },
@@ -378,7 +378,7 @@ fun PreviewPerpetualMarketScene() {
                         name = "Ethereum",
                         symbol = "ETH",
                         decimals = 18,
-                        type = AssetType.NATIVE
+                        type = AssetType.NATIVE,
                     )
                     override val isPinned: Boolean = false
                 },

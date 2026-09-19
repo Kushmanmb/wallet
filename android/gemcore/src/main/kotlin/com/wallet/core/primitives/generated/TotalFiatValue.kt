@@ -4,13 +4,8 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class TotalFiatValue (
-	val value: Double,
-	val pnlAmount: Double,
-	val pnlPercentage: Double
-)
-
+data class TotalFiatValue(val value: Double, val pnlAmount: Double, val pnlPercentage: Double)

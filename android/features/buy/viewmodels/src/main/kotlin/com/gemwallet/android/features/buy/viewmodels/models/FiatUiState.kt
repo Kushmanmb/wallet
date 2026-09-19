@@ -1,7 +1,7 @@
 package com.gemwallet.android.features.buy.viewmodels.models
 
-import com.gemwallet.android.features.buy.localization.stringRes
 import androidx.annotation.StringRes
+import com.gemwallet.android.features.buy.localization.stringRes
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.ButtonState
 import uniffi.gemstone.GemFiatButtonAction

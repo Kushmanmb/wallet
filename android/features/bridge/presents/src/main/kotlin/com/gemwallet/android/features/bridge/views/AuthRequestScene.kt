@@ -22,18 +22,15 @@ import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
+import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
 import com.gemwallet.android.ui.components.screen.FatalStateScene
 import com.gemwallet.android.ui.components.screen.LoadingScene
+import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.ListPosition
-import com.gemwallet.android.ui.localization.text
-import com.gemwallet.android.ui.components.list_item.property.PropertyNetworkItem
 
 @Composable
-fun AuthRequestScene(
-    request: WalletConnectAuthenticationRequest,
-    verifyContext: WalletConnectVerifyContext,
-) {
+fun AuthRequestScene(request: WalletConnectAuthenticationRequest, verifyContext: WalletConnectVerifyContext) {
     val context = LocalContext.current
     val viewModel: WCAuthViewModel = hiltViewModel()
     BackHandler(onBack = viewModel::onReject)
@@ -46,12 +43,13 @@ fun AuthRequestScene(
                 BridgeRequestError.MaliciousSession -> Toast.makeText(
                     context,
                     R.string.errors_connections_malicious_origin,
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_LONG,
                 ).show()
+
                 BridgeRequestError.Expired -> Toast.makeText(
                     context,
                     R.string.wallet_connect_request_expired,
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_LONG,
                 ).show()
             }
         }
@@ -63,11 +61,13 @@ fun AuthRequestScene(
             message = currentState.text.text(),
             onCancel = viewModel::onReject,
         )
+
         AuthSceneState.Loading -> LoadingScene(
             title = stringResource(id = R.string.transfer_review_request),
             onCancel = viewModel::onReject,
             closeIcon = true,
         )
+
         is AuthSceneState.Content -> AuthRequestContent(
             state = currentState,
             buttonState = buttonState,
@@ -79,13 +79,7 @@ fun AuthRequestScene(
 }
 
 @Composable
-private fun AuthRequestContent(
-    state: AuthSceneState.Content,
-    buttonState: ButtonState,
-    onApprove: () -> Unit,
-    onReject: () -> Unit,
-    onWalletSelected: (com.wallet.core.primitives.WalletId) -> Unit,
-) {
+private fun AuthRequestContent(state: AuthSceneState.Content, buttonState: ButtonState, onApprove: () -> Unit, onReject: () -> Unit, onWalletSelected: (com.wallet.core.primitives.WalletId) -> Unit) {
     var isShowSelectWallets by remember { mutableStateOf(false) }
     val canSelectWallet = state.availableWallets.size > 1
 

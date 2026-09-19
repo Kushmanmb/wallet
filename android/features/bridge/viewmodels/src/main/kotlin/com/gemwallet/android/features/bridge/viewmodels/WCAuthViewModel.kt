@@ -1,8 +1,5 @@
 package com.gemwallet.android.features.bridge.viewmodels
 
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +9,8 @@ import com.gemwallet.android.application.wallet_connect.WalletConnectAuthenticat
 import com.gemwallet.android.application.wallet_connect.WalletConnectVerifyContext
 import com.gemwallet.android.application.wallet_connect.cases.ApproveWalletConnectAuthentication
 import com.gemwallet.android.application.wallet_connect.cases.PrepareSessionProposal
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
@@ -32,7 +31,7 @@ import com.wallet.core.primitives.Wallet
 import com.wallet.core.primitives.WalletId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +40,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemApplicationMetadataServiceInterface
+import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemWalletConnectAuthAccount
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.MessageSigner
@@ -48,8 +49,7 @@ import uniffi.gemstone.MessageType
 import uniffi.gemstone.SignDigestType
 import uniffi.gemstone.SignMessage
 import uniffi.gemstone.walletRows
-import com.gemwallet.android.ext.errorText
-import uniffi.gemstone.GemErrorText
+import javax.inject.Inject
 
 @HiltViewModel
 class WCAuthViewModel @Inject constructor(
@@ -72,11 +72,7 @@ class WCAuthViewModel @Inject constructor(
         .map { buttonState(loading = it is AuthSceneState.Approving) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Enabled)
 
-    fun onRequest(
-        request: WalletConnectAuthenticationRequest,
-        verifyContext: WalletConnectVerifyContext,
-        onNotify: (BridgeRequestError) -> Unit,
-    ) {
+    fun onRequest(request: WalletConnectAuthenticationRequest, verifyContext: WalletConnectVerifyContext, onNotify: (BridgeRequestError) -> Unit) {
         authRequest = request
         hasResponded = false
         _state.update { AuthSceneState.Loading }
@@ -211,10 +207,7 @@ class WCAuthViewModel @Inject constructor(
         finish()
     }
 
-    private fun rejectRequest(
-        request: WalletConnectAuthenticationRequest,
-        errorState: AuthSceneState.Error,
-    ) {
+    private fun rejectRequest(request: WalletConnectAuthenticationRequest, errorState: AuthSceneState.Error) {
         if (!isActiveRequest(request)) {
             return
         }
@@ -223,9 +216,7 @@ class WCAuthViewModel @Inject constructor(
         _state.update { errorState }
     }
 
-    private fun isActiveRequest(request: WalletConnectAuthenticationRequest): Boolean {
-        return authRequest?.id == request.id && !hasResponded
-    }
+    private fun isActiveRequest(request: WalletConnectAuthenticationRequest): Boolean = authRequest?.id == request.id && !hasResponded
 
     private fun finish(request: WalletConnectAuthenticationRequest) {
         if (activeRequest.finish(request)) {
@@ -243,10 +234,7 @@ class WCAuthViewModel @Inject constructor(
         _state.update { AuthSceneState.Loading }
     }
 
-    private fun buildApproval(
-        request: WalletConnectAuthenticationRequest,
-        wallet: Wallet,
-    ): AuthApproval {
+    private fun buildApproval(request: WalletConnectAuthenticationRequest, wallet: Wallet): AuthApproval {
         val supportedAccounts = supportedAccounts(wallet, request)
         val selectedAccount = supportedAccounts.firstOrNull()
             ?: throw IllegalStateException("Requested chains are not supported")
@@ -272,22 +260,15 @@ class WCAuthViewModel @Inject constructor(
         )
     }
 
-    private fun supportedAccounts(
-        wallet: Wallet,
-        request: WalletConnectAuthenticationRequest,
-    ): List<GemWalletConnectAuthAccount> =
-        walletConnectService.authenticationAccounts(request.payloadParams.chains, wallet.toGem())
+    private fun supportedAccounts(wallet: Wallet, request: WalletConnectAuthenticationRequest): List<GemWalletConnectAuthAccount> = walletConnectService.authenticationAccounts(request.payloadParams.chains, wallet.toGem())
 
-    private fun payloadPreview(
-        chain: Chain,
-        message: String,
-    ): AuthPayloadPreview {
+    private fun payloadPreview(chain: Chain, message: String): AuthPayloadPreview {
         val signer = MessageSigner(
             SignMessage(
                 chain = chain.string,
                 signType = SignDigestType.SIWE,
                 data = message.toByteArray(),
-            )
+            ),
         )
         return try {
             signer.payloadPreview(emptyList())?.let { preview ->
@@ -304,11 +285,7 @@ class WCAuthViewModel @Inject constructor(
         }
     }
 
-    private suspend fun signAuthMessage(
-        wallet: Wallet,
-        chain: Chain,
-        message: String,
-    ): String = walletConnectService.signMessage(
+    private suspend fun signAuthMessage(wallet: Wallet, chain: Chain, message: String): String = walletConnectService.signMessage(
         wallet.id.id,
         SignMessage(
             chain = chain.string,
@@ -316,7 +293,6 @@ class WCAuthViewModel @Inject constructor(
             data = message.toByteArray(),
         ),
     )
-
 }
 
 sealed interface AuthSceneState {
@@ -325,7 +301,9 @@ sealed interface AuthSceneState {
 
     class Error(val text: GemErrorText) : AuthSceneState
 
-    sealed interface Content : AuthSceneState, WalletConnectReviewModel {
+    sealed interface Content :
+        AuthSceneState,
+        WalletConnectReviewModel {
         val peer: ConnectionHeadUIModel
         val availableWallets: List<Wallet>
         val availableWalletRows: List<WalletRowUIModel>
@@ -356,9 +334,7 @@ sealed interface AuthSceneState {
         override val texts: ReviewTexts,
     ) : Content
 
-    data class Approving(
-        private val request: Request,
-    ) : Content {
+    data class Approving(private val request: Request) : Content {
         override val peer: ConnectionHeadUIModel get() = request.peer
         override val availableWallets: List<Wallet> get() = request.availableWallets
         override val availableWalletRows: List<WalletRowUIModel> get() = request.availableWalletRows
@@ -381,8 +357,4 @@ data class AuthApproval(
     val chain: Chain get() = account.chain
 }
 
-private data class AuthPayloadPreview(
-    val messageType: MessageType = MessageType.TEXT,
-    val primaryFields: List<PayloadField> = emptyList(),
-    val secondaryFields: List<PayloadField> = emptyList(),
-)
+private data class AuthPayloadPreview(val messageType: MessageType = MessageType.TEXT, val primaryFields: List<PayloadField> = emptyList(), val secondaryFields: List<PayloadField> = emptyList())

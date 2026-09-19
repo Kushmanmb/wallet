@@ -9,17 +9,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.features.activities.viewmodels.TransactionDetailsViewModel
-import com.gemwallet.android.features.asset.presents.address.AddressDetailsSheet
 import com.gemwallet.android.features.activities.viewmodels.models.TransactionDetailsRowUIModel
+import com.gemwallet.android.features.asset.presents.address.AddressDetailsSheet
 import com.gemwallet.android.ui.components.screen.LoadingScene
 import com.gemwallet.android.ui.shareText
 import com.wallet.core.primitives.ChainAddress
 
 @Composable
-fun TransactionDetailsNavScreen(
-    onAction: (TransactionDetailsAction.Navigation) -> Unit,
-    viewModel: TransactionDetailsViewModel = hiltViewModel(),
-) {
+fun TransactionDetailsNavScreen(onAction: (TransactionDetailsAction.Navigation) -> Unit, viewModel: TransactionDetailsViewModel = hiltViewModel()) {
     val transaction by viewModel.data.collectAsStateWithLifecycle()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val headerTarget by viewModel.headerTarget.collectAsStateWithLifecycle()

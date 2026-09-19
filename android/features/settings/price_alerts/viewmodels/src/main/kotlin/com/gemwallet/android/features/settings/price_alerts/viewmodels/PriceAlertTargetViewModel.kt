@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.domains.percentage.formatAsPercentage
 import com.gemwallet.android.domains.price.tone
 import com.gemwallet.android.domains.pricealerts.formatAmount
@@ -15,9 +16,10 @@ import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
-import com.gemwallet.android.math.numberFormat
 import com.gemwallet.android.features.settings.price_alerts.viewmodels.localization.stringRes
 import com.gemwallet.android.features.settings.price_alerts.viewmodels.models.PriceAlertConfirmResult
+import com.gemwallet.android.math.numberFormat
+import com.gemwallet.android.math.parseInputNumberOrNull
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.buttonState
@@ -28,8 +30,7 @@ import com.wallet.core.primitives.PriceAlert
 import com.wallet.core.primitives.PriceAlertDirection
 import com.wallet.core.primitives.PriceAlertNotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.math.BigDecimal
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -46,9 +47,8 @@ import uniffi.gemstone.GemPriceAlertSession
 import uniffi.gemstone.GemPriceAlertViewState
 import uniffi.gemstone.GemValueTone
 import uniffi.gemstone.PriceAlertFormatter
-import com.gemwallet.android.math.parseInputNumberOrNull
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
+import java.math.BigDecimal
+import javax.inject.Inject
 
 @HiltViewModel
 class PriceAlertTargetViewModel @Inject constructor(
@@ -58,7 +58,6 @@ class PriceAlertTargetViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-
 
     val value = TextFieldState()
 
@@ -92,7 +91,11 @@ class PriceAlertTargetViewModel @Inject constructor(
     private val isSaving = MutableStateFlow(false)
 
     private val session: StateFlow<GemPriceAlertSession> = combine(
-        snapshotFlow { value.text }, currentPriceValue, _type, _direction, isSaving,
+        snapshotFlow { value.text },
+        currentPriceValue,
+        _type,
+        _direction,
+        isSaving,
     ) { text, currentPrice, type, selectedDirection, saving ->
         service.newAlertSession(assetId.toIdentifier())
             .onType(type.toGem())
@@ -151,5 +154,4 @@ class PriceAlertTargetViewModel @Inject constructor(
     }
 
     fun clearError() = errorState.update { null }
-
 }

@@ -6,9 +6,7 @@ import com.wallet.core.primitives.Currency
 import uniffi.gemstone.GemTransactionHeaderKind
 import java.math.BigInteger
 
-fun mockAmountUIModel(
-    fromAsset: AssetPriceValue = mockAssetPriceValue(asset = mockAssetSolana()),
-) = AmountUIModel(
+fun mockAmountUIModel(fromAsset: AssetPriceValue = mockAssetPriceValue(asset = mockAssetSolana())) = AmountUIModel(
     headerKind = GemTransactionHeaderKind.Amount(showsFiat = true),
     amount = BigInteger("1000000000"),
     fromAsset = fromAsset,

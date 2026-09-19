@@ -5,26 +5,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
 import com.gemwallet.android.application.session.cases.SetCurrentCurrency
+import com.gemwallet.android.ext.errorText
+import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.settings.currency.viewmodels.models.sections
+import com.gemwallet.android.ui.localization.text
 import com.wallet.core.primitives.Currency
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.Locale
-import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
-import uniffi.gemstone.GemCurrencyServiceInterface
-import com.gemwallet.android.ext.errorText
-import com.gemwallet.android.ext.runCatchingCancellable
-import com.gemwallet.android.ui.localization.text
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemCurrencyServiceInterface
+import java.util.Locale
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel

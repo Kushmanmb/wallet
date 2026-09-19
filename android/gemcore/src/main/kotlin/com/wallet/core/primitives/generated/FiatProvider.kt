@@ -4,22 +4,26 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 enum class FiatProviderName(val string: String) {
-	@SerialName("mercuryo")
-	Mercuryo("mercuryo"),
-	@SerialName("transak")
-	Transak("transak"),
-	@SerialName("moonpay")
-	MoonPay("moonpay"),
-	@SerialName("banxa")
-	Banxa("banxa"),
-	@SerialName("paybis")
-	Paybis("paybis"),
-	@SerialName("flashnet")
-	Flashnet("flashnet"),
-}
+    @SerialName("mercuryo")
+    Mercuryo("mercuryo"),
 
+    @SerialName("transak")
+    Transak("transak"),
+
+    @SerialName("moonpay")
+    MoonPay("moonpay"),
+
+    @SerialName("banxa")
+    Banxa("banxa"),
+
+    @SerialName("paybis")
+    Paybis("paybis"),
+
+    @SerialName("flashnet")
+    Flashnet("flashnet"),
+}

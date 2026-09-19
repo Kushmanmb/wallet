@@ -1,20 +1,20 @@
 package com.gemwallet.android.data.services.gemstone.di
 
 import com.gemwallet.android.data.service.store.database.PriceAlertsDao
+import com.gemwallet.android.data.services.gemstone.stores.GemstonePriceAlertStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import com.gemwallet.android.data.services.gemstone.stores.GemstonePriceAlertStore
 import uniffi.gemstone.GemDeviceApiClient
-import uniffi.gemstone.GemPreferencesService
 import uniffi.gemstone.GemDeviceService
+import uniffi.gemstone.GemNotificationPermissions
+import uniffi.gemstone.GemPreferencesService
 import uniffi.gemstone.GemPriceAlertService
 import uniffi.gemstone.GemPriceAlertServiceInterface
 import uniffi.gemstone.GemPriceAlertStore
-import javax.inject.Singleton
-import uniffi.gemstone.GemNotificationPermissions
 import uniffi.gemstone.PriceAlertFormatter
+import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -22,8 +22,7 @@ object PriceAlertsModule {
 
     @Singleton
     @Provides
-    fun provideGemstonePriceAlertStore(priceAlertsDao: PriceAlertsDao, priceAlertFormatter: PriceAlertFormatter): GemstonePriceAlertStore =
-        GemstonePriceAlertStore(priceAlertsDao, priceAlertFormatter)
+    fun provideGemstonePriceAlertStore(priceAlertsDao: PriceAlertsDao, priceAlertFormatter: PriceAlertFormatter): GemstonePriceAlertStore = GemstonePriceAlertStore(priceAlertsDao, priceAlertFormatter)
 
     @Provides
     @Singleton

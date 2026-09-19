@@ -45,11 +45,7 @@ import uniffi.gemstone.SwapPriceImpactType
 import uniffi.gemstone.SwapProvider
 
 @Composable
-fun SwapDetailsSummaryItem(
-    model: SwapDetailsUIModel,
-    onClick: () -> Unit,
-    listPosition: ListPosition = ListPosition.Single,
-) {
+fun SwapDetailsSummaryItem(model: SwapDetailsUIModel, onClick: () -> Unit, listPosition: ListPosition = ListPosition.Single) {
     val badgeText = model.summaryPriceImpactBadgeText
 
     ListItem(
@@ -137,9 +133,11 @@ fun SwapDetailsBottomSheet(
                 val listPosition = ListPosition.getPosition(index, model.rows.size)
                 when (row) {
                     is SwapDetailRowUIModel.Rate -> AssetRatePropertyItem(row.rate, listPosition)
+
                     is SwapDetailRowUIModel.EstimatedTime -> formatEstimatedConfirmation(row.seconds).takeIf { it.isNotEmpty() }?.let {
                         ListItem(model = ListItemModel(title = stringResource(R.string.swap_estimated_time_title), subtitle = it), listPosition = listPosition)
                     }
+
                     is SwapDetailRowUIModel.PriceImpact -> ListItem(
                         model = ListItemModel(
                             title = stringResource(R.string.swap_price_impact),
@@ -149,7 +147,9 @@ fun SwapDetailsBottomSheet(
                         ),
                         listPosition = listPosition,
                     )
+
                     is SwapDetailRowUIModel.MinimumReceive -> ListItem(model = ListItemModel(title = stringResource(R.string.swap_min_receive), subtitle = row.text), listPosition = listPosition)
+
                     is SwapDetailRowUIModel.Slippage -> ListItem(
                         model = ListItemModel(
                             title = stringResource(R.string.swap_slippage),
@@ -165,12 +165,7 @@ fun SwapDetailsBottomSheet(
 }
 
 @Composable
-private fun SwapProviderListItemView(
-    provider: SwapProviderUIModel,
-    listPosition: ListPosition,
-    isSelected: Boolean,
-    onProviderSelect: (SwapProvider) -> Unit,
-) {
+private fun SwapProviderListItemView(provider: SwapProviderUIModel, listPosition: ListPosition, isSelected: Boolean, onProviderSelect: (SwapProvider) -> Unit) {
     ListItem(
         modifier = Modifier.clickable { onProviderSelect(provider.id) },
         leading = {
@@ -191,9 +186,7 @@ private fun SwapProviderListItemView(
 }
 
 @Composable
-private fun SwapCurrentProviderRow(
-    provider: SwapProviderUIModel,
-) {
+private fun SwapCurrentProviderRow(provider: SwapProviderUIModel) {
     ListItem(
         leading = { SwapProviderIcon(provider.icon, listItemIconSize) },
         title = {
@@ -243,8 +236,12 @@ private const val MAX_INLINE_PROVIDERS = 3
 @Composable
 private fun SwapPriceImpactUIModel?.getColor() = when (this?.type) {
     SwapPriceImpactType.POSITIVE -> MaterialTheme.colorScheme.tertiary
+
     SwapPriceImpactType.MEDIUM -> pendingColor
+
     SwapPriceImpactType.HIGH -> MaterialTheme.colorScheme.error
+
     SwapPriceImpactType.LOW,
-    null -> MaterialTheme.colorScheme.secondary
+    null,
+    -> MaterialTheme.colorScheme.secondary
 }

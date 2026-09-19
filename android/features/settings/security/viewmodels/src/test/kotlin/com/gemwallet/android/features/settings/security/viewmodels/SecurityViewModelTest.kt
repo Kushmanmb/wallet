@@ -39,12 +39,11 @@ class SecurityViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun userConfig(authRequired: Boolean = false, lockMinutes: Int = 0, hideBalances: Boolean = false) =
-        mockk<UserConfig>(relaxed = true) {
-            every { isHideBalances() } returns flowOf(hideBalances)
-            every { getLockInterval() } returns flowOf(lockMinutes)
-            every { this@mockk.authRequired() } returns authRequired
-        }
+    private fun userConfig(authRequired: Boolean = false, lockMinutes: Int = 0, hideBalances: Boolean = false) = mockk<UserConfig>(relaxed = true) {
+        every { isHideBalances() } returns flowOf(hideBalances)
+        every { getLockInterval() } returns flowOf(lockMinutes)
+        every { this@mockk.authRequired() } returns authRequired
+    }
 
     private fun settings() = mockk<GemSettingsServiceInterface>(relaxed = true) {
         every { securitySections(any()) } answers {
@@ -101,5 +100,4 @@ class SecurityViewModelTest {
     }
 
     private fun context(): Context = mockk { every { getString(any()) } answers { firstArg<Int>().toString() } }
-
 }

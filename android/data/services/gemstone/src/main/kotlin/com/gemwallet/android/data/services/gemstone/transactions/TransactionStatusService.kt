@@ -1,11 +1,11 @@
 package com.gemwallet.android.data.services.gemstone.transactions
 
-import com.gemwallet.android.ext.toGem
 import android.util.Log
-import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.application.transactions.cases.CreateTransaction
 import com.gemwallet.android.ext.runCatchingCancellable
+import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
+import com.gemwallet.android.ext.toPrimitives
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Transaction
@@ -26,7 +26,8 @@ class TransactionStatusService(
     private val stateService: GemTransactionStateServiceInterface,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + ioDispatcher),
-) : CreateTransaction, GemTransactionStatusService {
+) : CreateTransaction,
+    GemTransactionStatusService {
 
     fun start() {
         scope.launch {

@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.contacts.cases.GetContacts
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.runCatchingCancellable
@@ -19,6 +20,7 @@ import com.gemwallet.android.features.settings.contacts.viewmodels.models.Manage
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.addAddressListItem
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.rows
 import com.gemwallet.android.ui.components.image.EmojiAvatarRenderer
+import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.models.name.AddressInputModel
 import com.gemwallet.android.ui.models.navigation.RouteArgument
@@ -26,10 +28,8 @@ import com.gemwallet.android.ui.style.indicator
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.ContactAddress
 import dagger.hilt.android.lifecycle.HiltViewModel
-import com.gemwallet.android.ui.localization.string
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.UUID
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -44,8 +44,8 @@ import uniffi.gemstone.GemContactAvatarChoice
 import uniffi.gemstone.GemContactSession
 import uniffi.gemstone.GemManageContactServiceInterface
 import uniffi.gemstone.GemNameServiceInterface
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
+import java.util.UUID
+import javax.inject.Inject
 
 @HiltViewModel
 class ManageContactViewModel @Inject constructor(
@@ -140,6 +140,7 @@ class ManageContactViewModel @Inject constructor(
                     )
                 }
             }
+
             Mode.Add -> Unit
         }
     }
@@ -268,5 +269,4 @@ class ManageContactViewModel @Inject constructor(
     }
 
     fun clearError() = state.update { it.copy(errorText = null) }
-
 }
