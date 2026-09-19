@@ -73,7 +73,7 @@ class PriceAlertDataAggregateImpl(
 ) : PriceAlertDataAggregate {
     override val assetId: AssetId = asset.id
     override val title: String = row.title
-    override val titleBadge: String = row.symbol.uppercase()
+    override val titleBadge: String? = row.symbol
 
     override val priceDirection = row.direction
 

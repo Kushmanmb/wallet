@@ -12,7 +12,7 @@ interface PriceAlertDataAggregate {
     val asset: Asset
     val assetId: AssetId
     val title: String
-    val titleBadge: String
+    val titleBadge: String?
     val priceDirection: PriceAlertDirection?
     val prefix: GemPriceAlertText
     val suffix: GemPriceAlertText

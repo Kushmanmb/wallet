@@ -67,10 +67,10 @@ class PriceAlertDataAggregateImplTest {
     }
 
     @Test
-    fun testTitleBadge_uppercase() {
+    fun testTitleBadge_keepsTheSymbolCase() {
         val aggregate = createAggregate(asset = solAsset)
 
-        assertEquals("SOL", aggregate.titleBadge)
+        assertEquals("sol", aggregate.titleBadge)
     }
 
     private fun PriceAlertDataAggregate.number(currency: Boolean): GemFormattedNumber? =

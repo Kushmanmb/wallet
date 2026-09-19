@@ -33,7 +33,7 @@ internal fun PriceAlertAutoAssetItem(
         asset = asset,
         listPosition = ListPosition.Single,
         support = assetPriceSupport(asset.price),
-        badge = asset.asset.symbol.uppercase(),
+        badge = asset.asset.symbol,
         trailing = {
             Switch(
                 checked = enabled,

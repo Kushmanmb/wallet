@@ -63,7 +63,7 @@ pub enum GemPriceAlertText {
 pub struct GemPriceAlertRow {
     pub asset_id: AssetId,
     pub title: String,
-    pub symbol: String,
+    pub symbol: Option<String>,
     pub kind: GemPriceAlertKind,
     pub direction: Option<PriceAlertDirection>,
     pub prefix: GemPriceAlertText,
@@ -184,7 +184,7 @@ pub fn price_alert_row(data: &PriceAlertData, price_currency: Currency) -> GemPr
     GemPriceAlertRow {
         asset_id: asset.id.clone(),
         title: asset.name.clone(),
-        symbol: asset.symbol.clone(),
+        symbol: (asset.name != asset.symbol).then(|| asset.symbol.clone()),
         kind,
         direction: row_direction(alert, current_price, price_change_percentage_24h),
         prefix,
@@ -368,6 +368,21 @@ mod tests {
     }
 
     #[test]
+    fn test_the_row_leaves_out_a_symbol_that_repeats_the_name() {
+        let named = |name: &str, symbol: &str| PriceAlertData {
+            asset: Asset {
+                name: name.to_string(),
+                symbol: symbol.to_string(),
+                ..Asset::from_chain(Chain::Bitcoin)
+            },
+            ..PriceAlertData::mock(PriceAlert::mock(Chain::Bitcoin, None), None, None)
+        };
+
+        assert_eq!(price_alert_row(&named("Lido Staked ETH", "stETH"), Currency::USD).symbol.as_deref(), Some("stETH"));
+        assert_eq!(price_alert_row(&named("USDC", "USDC"), Currency::USD).symbol, None);
+    }
+
+    #[test]
     fn test_each_kind_names_which_slot_holds_the_price_and_which_the_percent() {
         let asset = Asset::from_chain(Chain::Bitcoin);
         let asset_id = asset.id.clone();
@@ -432,7 +447,7 @@ mod tests {
             GemPriceAlertRow {
                 asset_id: asset.id.clone(),
                 title: asset.name.clone(),
-                symbol: asset.symbol.clone(),
+                symbol: Some(asset.symbol.clone()),
                 kind: GemPriceAlertKind::Auto,
                 prefix: GemPriceAlertText::Number {
                     value: GemFormattedNumber::currency(100.0, Currency::EUR, GemCurrencyStyle::Currency)
@@ -455,7 +470,7 @@ mod tests {
             GemPriceAlertRow {
                 asset_id: asset.id.clone(),
                 title: asset.name.clone(),
-                symbol: asset.symbol.clone(),
+                symbol: Some(asset.symbol.clone()),
                 kind: GemPriceAlertKind::Over,
                 prefix: GemPriceAlertText::Label { label: GemPriceAlertLabel::Over },
                 suffix: GemPriceAlertText::Number {
@@ -488,7 +503,7 @@ mod tests {
             GemPriceAlertRow {
                 asset_id: asset.id.clone(),
                 title: asset.name.clone(),
-                symbol: asset.symbol.clone(),
+                symbol: Some(asset.symbol.clone()),
                 kind: GemPriceAlertKind::Under,
                 prefix: GemPriceAlertText::Label { label: GemPriceAlertLabel::Under },
                 suffix: GemPriceAlertText::Number {
@@ -519,7 +534,7 @@ mod tests {
             GemPriceAlertRow {
                 asset_id: asset.id.clone(),
                 title: asset.name.clone(),
-                symbol: asset.symbol.clone(),
+                symbol: Some(asset.symbol.clone()),
                 kind: GemPriceAlertKind::Auto,
                 prefix: GemPriceAlertText::Number {
                     value: GemFormattedNumber::currency(120.0, Currency::USD, GemCurrencyStyle::Currency)
