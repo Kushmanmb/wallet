@@ -22,10 +22,6 @@ impl DurationFormatter {
         Self {}
     }
 
-    pub fn countdown_parts(&self, seconds: i64) -> Vec<GemDurationPart> {
-        countdown_parts(seconds)
-    }
-
     pub fn estimate_parts(&self, seconds: i64) -> Vec<GemDurationPart> {
         estimate_parts(seconds)
     }

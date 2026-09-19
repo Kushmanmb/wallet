@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import struct Gemstone.AddressName
+import enum Gemstone.GemAcquireAssetFlow
 import struct Gemstone.GemConfirmLoad
 import enum Gemstone.GemConfirmRowContent
 import enum Gemstone.GemExecuteResult
@@ -23,6 +24,7 @@ public extension ConfirmTransferSceneViewModel {
         load: Result<GemConfirmLoad, any Error> = .success(.mock()),
         execute: Result<GemExecuteResult, any Error> = .success(.signed(data: [])),
         rows: ((Gemstone.AddressName?) -> [GemConfirmRowContent])? = nil,
+        acquireFlow: GemAcquireAssetFlow = .fiat,
         confirmation: GemConfirmationMock? = nil,
     ) -> ConfirmTransferSceneViewModel {
         let wallet = Wallet.mock(accounts: [.mock(chain: data.chain)])
@@ -53,6 +55,7 @@ public extension ConfirmTransferSceneViewModel {
                 load: load,
                 execute: execute,
                 rows: rows,
+                acquireFlow: acquireFlow,
             ),
             onComplete: nil,
         )

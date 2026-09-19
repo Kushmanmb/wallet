@@ -7,13 +7,11 @@ use super::rules::{recipient_sections, scan_route, select_step};
 use crate::GemstoneError;
 use crate::models::payment::GemPayment;
 use crate::payment::{GemPaymentDestination, GemPaymentService, GemPaymentWalletAsset};
-use crate::services::name::{GemNameRecordState, GemNameService};
 use crate::services::transfer::model::GemRecipient;
 use crate::services::wallet_session::GemWalletSessionService;
 
 #[derive(uniffi::Object)]
 pub struct GemRecipientService {
-    names: Arc<GemNameService>,
     payments: Arc<GemPaymentService>,
     session: Arc<GemWalletSessionService>,
 }
@@ -21,12 +19,8 @@ pub struct GemRecipientService {
 #[uniffi::export]
 impl GemRecipientService {
     #[uniffi::constructor]
-    pub fn new(names: Arc<GemNameService>, payments: Arc<GemPaymentService>, session: Arc<GemWalletSessionService>) -> Self {
-        Self { names, payments, session }
-    }
-
-    pub fn recipient(&self, chain: Chain, input: String, state: GemNameRecordState, memo: Option<String>, references: Vec<String>) -> Result<GemRecipient, GemRecipientError> {
-        self.names.recipient(chain, input, state, memo, references)
+    pub fn new(payments: Arc<GemPaymentService>, session: Arc<GemWalletSessionService>) -> Self {
+        Self { payments, session }
     }
 
     pub fn recipient_sections(&self, wallets: Vec<Wallet>, chain: Chain, contacts: Vec<GemRecipient>) -> Vec<GemRecipientSection> {

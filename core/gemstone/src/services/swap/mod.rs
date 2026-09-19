@@ -50,7 +50,9 @@ impl GemSwapService {
             store,
         }
     }
+}
 
+impl GemSwapService {
     pub async fn get_quotes(
         &self,
         wallet: Wallet,
@@ -83,9 +85,7 @@ impl GemSwapService {
         let data = self.get_quote_data(&wallet, &quote).await?;
         rules::swap_transfer(&wallet, &quote, data)
     }
-}
 
-impl GemSwapService {
     pub fn pair_for_asset(&self, asset_id: AssetId, has_balance: bool) -> GemSwapPairSuggestion {
         rules::pair_for_asset(asset_id, has_balance)
     }

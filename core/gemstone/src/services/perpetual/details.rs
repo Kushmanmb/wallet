@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use primitives::chart::ChartCandleUpdate;
-use primitives::{Asset, AssetId, Chain, ChartPeriod, Currency, Perpetual, PerpetualPosition};
+use primitives::{Asset, AssetId, Chain, ChartPeriod, Perpetual, PerpetualPosition};
 
 use super::model::{GemPerpetualButton, GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionKind, GemPerpetualSection};
 use super::{GemPerpetualService, rules};
@@ -36,10 +36,6 @@ impl GemPerpetualDetailsService {
             preferences,
             session,
         }
-    }
-
-    pub fn get_currency(&self) -> Currency {
-        self.preferences.get_currency()
     }
 
     pub fn sections(&self, has_position: bool) -> Vec<GemPerpetualSection> {

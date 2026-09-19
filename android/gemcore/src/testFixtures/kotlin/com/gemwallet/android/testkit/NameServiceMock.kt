@@ -5,7 +5,6 @@ import com.wallet.core.primitives.Chain
 import uniffi.gemstone.GemNameInputStep
 import uniffi.gemstone.GemNameRecordState
 import uniffi.gemstone.GemNameServiceInterface
-import uniffi.gemstone.GemRecipient
 import uniffi.gemstone.GemRecipientValidation
 
 class NameServiceMock : GemNameServiceInterface {
@@ -25,9 +24,6 @@ class NameServiceMock : GemNameServiceInterface {
         !hasChain || !isNameSupported(name) -> GemNameInputStep.Reset
         else -> GemNameInputStep.Resolve(name, 500u)
     }
-
-    override fun recipient(chain: uniffi.gemstone.Chain, input: String, state: GemNameRecordState, memo: String?, references: List<String>): GemRecipient =
-        GemRecipient(address = input, memo = memo, references = references)
 
     override fun resolvedState(state: GemNameRecordState, name: String, resolved: GemNameRecordState): GemNameRecordState =
         if (state is GemNameRecordState.Loading && state.name == name) resolved else state

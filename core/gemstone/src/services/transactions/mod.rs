@@ -10,7 +10,7 @@ use crate::services::error::GemServiceError;
 use std::sync::Arc;
 
 use chrono::Utc;
-use primitives::{AssetId, Chain, Currency, Wallet, WalletId};
+use primitives::{AssetId, Chain, Wallet, WalletId};
 
 pub use details::GemTransactionDetailsService;
 pub use model::{
@@ -24,7 +24,6 @@ use crate::api::{GemApiError, GemDeviceApiClient};
 use crate::services::assets::GemAssetsService;
 use crate::services::chain::rules as chain_rules;
 use crate::services::name::GemAddressStore;
-use crate::services::preferences::GemPreferencesService;
 use crate::services::transaction_state::GemTransactionStatusService;
 use crate::services::wallet_preferences::GemWalletPreferencesService;
 use crate::services::wallet_session::GemWalletSessionService;
@@ -36,7 +35,6 @@ pub struct GemTransactionsService {
     store: Arc<dyn GemTransactionStore>,
     address_store: Arc<dyn GemAddressStore>,
     wallet_preferences: Arc<GemWalletPreferencesService>,
-    preferences: Arc<GemPreferencesService>,
     session: Arc<GemWalletSessionService>,
     transaction_status: Arc<dyn GemTransactionStatusService>,
 }
@@ -50,7 +48,6 @@ impl GemTransactionsService {
         store: Arc<dyn GemTransactionStore>,
         address_store: Arc<dyn GemAddressStore>,
         wallet_preferences: Arc<GemWalletPreferencesService>,
-        preferences: Arc<GemPreferencesService>,
         session: Arc<GemWalletSessionService>,
         transaction_status: Arc<dyn GemTransactionStatusService>,
     ) -> Self {
@@ -60,7 +57,6 @@ impl GemTransactionsService {
             store,
             address_store,
             wallet_preferences,
-            preferences,
             session,
             transaction_status,
         }
@@ -68,10 +64,6 @@ impl GemTransactionsService {
 
     pub fn filter_chains(&self, wallet: Wallet) -> Vec<Chain> {
         chain_rules::wallet_chains_by_rank(&wallet)
-    }
-
-    pub fn get_currency(&self) -> Currency {
-        self.preferences.get_currency()
     }
 
     pub async fn refresh(&self, asset_id: Option<AssetId>, has_transactions: bool) -> GemLoadState {

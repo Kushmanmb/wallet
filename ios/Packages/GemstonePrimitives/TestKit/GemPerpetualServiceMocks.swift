@@ -139,7 +139,6 @@ public final class GemPerpetualDetailsServiceMock: GemPerpetualDetailsServicePro
     public var sectionsValue: [GemPerpetualSection] = []
     public var infoRowsValue: [GemListRow] = []
     public var positionDetailsValue: [GemPerpetualPositionDetail] = []
-    public var currencyValue: Gemstone.Currency = Primitives.Currency.usd.toGem()
     public var chartPeriodValue: Gemstone.ChartPeriod = Primitives.ChartPeriod.day.toGem()
     public var candlesticksValue: [Gemstone.ChartCandleStick] = []
     public var mergedCandlesValue: [Gemstone.ChartCandleStick]?
@@ -172,8 +171,6 @@ public final class GemPerpetualDetailsServiceMock: GemPerpetualDetailsServicePro
     public func closeTransfer(perpetual _: Gemstone.Perpetual, asset _: Gemstone.Asset, position _: Gemstone.PerpetualPosition?) throws -> Gemstone.GemTransferData {
         try closeTransferResult.get()
     }
-
-    public func getCurrency() -> Gemstone.Currency { currencyValue }
 
     public func infoRows(perpetual _: Gemstone.Perpetual, asset _: Gemstone.Asset) -> [GemListRow] { infoRowsValue }
 

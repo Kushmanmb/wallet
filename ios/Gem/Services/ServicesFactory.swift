@@ -143,7 +143,6 @@ struct ServicesFactory {
             store: gemstoneTransactionStore,
             addressStore: gemstoneAddressStore,
             walletPreferences: walletPreferencesService,
-            preferences: preferencesService,
             session: walletSessionService,
             transactionStatus: GemstoneTransactionStatusService(service: transactionStateService),
         )

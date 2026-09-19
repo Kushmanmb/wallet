@@ -24,7 +24,6 @@ import uniffi.gemstone.GemTransactionStateServiceInterface
 import uniffi.gemstone.GemTransactionsService
 import uniffi.gemstone.GemTransactionsServiceInterface
 import javax.inject.Singleton
-import uniffi.gemstone.GemPreferencesService
 import uniffi.gemstone.GemWalletPreferencesService
 import uniffi.gemstone.GemWalletSessionService
 import com.gemwallet.android.data.services.gemstone.stores.GemstoneWalletStore
@@ -41,7 +40,6 @@ object TransactionsModule {
         transactionStore: GemstoneTransactionStore,
         addressStore: GemstoneAddressStore,
         walletPreferencesService: GemWalletPreferencesService,
-        preferencesService: GemPreferencesService,
         walletSessionService: GemWalletSessionService,
         tracker: TransactionStatusService,
     ): GemTransactionsService = GemTransactionsService(
@@ -50,7 +48,6 @@ object TransactionsModule {
         transactionStore,
         addressStore,
         walletPreferencesService,
-        preferencesService,
         walletSessionService,
         tracker,
     )

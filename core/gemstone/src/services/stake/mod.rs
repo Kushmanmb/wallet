@@ -90,11 +90,6 @@ impl GemStakeService {
         self.explorer.get_validator_url(validator.chain, address)
     }
 
-    pub async fn sync(&self, chain: Chain) -> Result<(), GemServiceError> {
-        let (wallet_id, address) = self.current_account(chain).await?;
-        self.sync_wallet(wallet_id, chain, address).await
-    }
-
     pub async fn refresh(&self, chain: Chain, delegations: Vec<Delegation>) -> GemLoadState {
         GemLoadState::refreshed(self.sync(chain).await, !delegations.is_empty())
     }
@@ -165,6 +160,11 @@ impl GemStakeService {
 }
 
 impl GemStakeService {
+    pub async fn sync(&self, chain: Chain) -> Result<(), GemServiceError> {
+        let (wallet_id, address) = self.current_account(chain).await?;
+        self.sync_wallet(wallet_id, chain, address).await
+    }
+
     pub async fn get_earn_data(&self, asset_id: AssetId, address: String, value: String, earn_type: GemEarnType) -> Result<GemContractCallData, GemServiceError> {
         Ok(self.gateway.get_earn_data(asset_id, address, value, earn_type).await?)
     }

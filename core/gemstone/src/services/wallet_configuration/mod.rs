@@ -22,7 +22,9 @@ impl GemWalletConfigurationService {
     pub fn new(api: Arc<GemDeviceApiClient>, banners: Arc<dyn GemBannerStore>, preferences: Arc<GemWalletPreferencesService>) -> Self {
         Self { api, banners, preferences }
     }
+}
 
+impl GemWalletConfigurationService {
     pub async fn sync(&self, wallet_id: WalletId) -> Result<(), GemServiceError> {
         if self.preferences.is_wallet_configuration_completed(wallet_id.clone())? {
             return Ok(());

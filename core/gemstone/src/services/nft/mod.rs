@@ -46,16 +46,6 @@ impl GemNftService {
         .await
     }
 
-    pub async fn refresh_asset(&self, wallet_id: WalletId, asset_id: NFTAssetId) -> Result<(), GemServiceError> {
-        self.api.client.refresh_nft_asset(wallet_id.id(), asset_id).await.map_err(GemApiError::from)?;
-        Ok(())
-    }
-
-    pub async fn report(&self, report: ReportNft) -> Result<(), GemServiceError> {
-        self.api.client.report_nft(report).await.map_err(GemApiError::from)?;
-        Ok(())
-    }
-
     pub fn list_items(&self, data: Vec<NFTData>, list: GemNftList) -> Vec<GemNftItem> {
         rules::list_items(data, list)
     }
@@ -78,6 +68,16 @@ where
 }
 
 impl GemNftService {
+    pub async fn refresh_asset(&self, wallet_id: WalletId, asset_id: NFTAssetId) -> Result<(), GemServiceError> {
+        self.api.client.refresh_nft_asset(wallet_id.id(), asset_id).await.map_err(GemApiError::from)?;
+        Ok(())
+    }
+
+    pub async fn report(&self, report: ReportNft) -> Result<(), GemServiceError> {
+        self.api.client.report_nft(report).await.map_err(GemApiError::from)?;
+        Ok(())
+    }
+
     pub async fn sync_wallet(&self, wallet_id: WalletId) -> Result<u32, GemServiceError> {
         let data = self.api.client.get_nft_assets(wallet_id.id()).await.map_err(GemApiError::from)?;
         let count = data.len() as u32;

@@ -34,10 +34,6 @@ pub struct GemBalanceService {
 
 #[uniffi::export]
 impl GemBalanceService {
-    pub async fn balances(&self, wallet_id: WalletId, asset_ids: Vec<AssetId>) -> Result<Vec<GemAssetBalance>, GemServiceError> {
-        self.store.get_available_balances(wallet_id, asset_ids).await
-    }
-
     #[uniffi::constructor]
     pub fn new(
         gateway: Arc<GemGateway>,
@@ -55,6 +51,12 @@ impl GemBalanceService {
             assets,
             stream,
         }
+    }
+}
+
+impl GemBalanceService {
+    pub async fn balances(&self, wallet_id: WalletId, asset_ids: Vec<AssetId>) -> Result<Vec<GemAssetBalance>, GemServiceError> {
+        self.store.get_available_balances(wallet_id, asset_ids).await
     }
 
     pub async fn set_assets_enabled(&self, wallet_id: WalletId, asset_ids: Vec<AssetId>, enabled: bool) -> Result<(), GemServiceError> {
@@ -108,9 +110,7 @@ impl GemBalanceService {
             None => Ok(()),
         }
     }
-}
 
-impl GemBalanceService {
     pub async fn update_enabled_balances(&self, wallet_id: WalletId) -> Result<(), GemServiceError> {
         let asset_ids = self.store.get_enabled_asset_ids(wallet_id.clone()).await?;
         self.update(wallet_id, asset_ids).await

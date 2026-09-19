@@ -103,7 +103,6 @@ impl DiscoveryTestkit {
             Arc::new(MemoryTransactionStore::default()),
             Arc::new(MemoryAddressStore::default()),
             wallet_preferences.clone(),
-            preferences.clone(),
             session.clone(),
             Arc::new(RecordingTransactionStatus::default()),
         ));

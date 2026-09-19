@@ -19,16 +19,18 @@ impl GemNodeStatusState {
         rules::latency_status(self)
     }
 
+    pub fn subtitle(&self) -> GemNodeSubtitle {
+        GemNodeSubtitle::LatestBlock {
+            value: self.latest_block().map(GemFormattedNumber::count),
+        }
+    }
+}
+
+impl GemNodeStatusState {
     pub fn latest_block(&self) -> Option<u64> {
         match self {
             Self::Result { latest_block_number, .. } => Some(*latest_block_number),
             Self::Loading | Self::Error => None,
-        }
-    }
-
-    pub fn subtitle(&self) -> GemNodeSubtitle {
-        GemNodeSubtitle::LatestBlock {
-            value: self.latest_block().map(GemFormattedNumber::count),
         }
     }
 }

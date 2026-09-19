@@ -44,7 +44,7 @@ public extension GemWalletService {
 
 public extension GemRecipientService {
     static func mock() -> GemRecipientService {
-        GemRecipientService(names: GemNameService.mock(), payments: GemPaymentService.mock(), session: GemWalletSessionService.mock())
+        GemRecipientService(payments: GemPaymentService.mock(), session: GemWalletSessionService.mock())
     }
 }
 

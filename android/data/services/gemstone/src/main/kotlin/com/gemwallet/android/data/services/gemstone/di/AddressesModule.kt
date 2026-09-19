@@ -44,10 +44,9 @@ object AddressesModule {
 
     @Provides
     fun provideGemRecipientService(
-        names: GemNameService,
         payments: GemPaymentService,
         session: GemWalletSessionService,
-    ): GemRecipientServiceInterface = GemRecipientService(names, payments, session)
+    ): GemRecipientServiceInterface = GemRecipientService(payments, session)
 
     @Provides
     fun provideGemSignMessageService(

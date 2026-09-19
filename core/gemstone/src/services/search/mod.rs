@@ -43,7 +43,9 @@ impl GemSearchService {
             store,
         }
     }
+}
 
+impl GemSearchService {
     pub async fn search(&self, wallet: Wallet, query: String, scope: GemSearchScope, currency: Currency) -> Result<bool, GemServiceError> {
         let query = query.trim().to_string();
         if scope.skips_search(&query) {
@@ -70,9 +72,7 @@ impl GemSearchService {
         self.save_assets(&wallet, &assets, currency, &GemSearchScope::All.search_key(&query)).await?;
         Ok(assets)
     }
-}
 
-impl GemSearchService {
     async fn save_assets(&self, wallet: &Wallet, assets: &[AssetBasic], currency: Currency, key: &str) -> Result<(), GemServiceError> {
         let asset_ids = rules::asset_ids(assets);
         self.asset_store.save_assets(assets.to_vec()).await?;

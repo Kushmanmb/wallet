@@ -123,24 +123,12 @@ impl GemAssetDetailsService {
         }
     }
 
-    pub async fn sync_transactions(&self, asset_id: Option<AssetId>) -> Result<(), GemServiceError> {
-        self.transactions.sync_wallet(self.session.current_wallet_id()?, asset_id).await
-    }
-
-    pub async fn update_balances(&self, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
-        self.balances.update(self.session.current_wallet_id()?, asset_ids).await
-    }
-
     pub async fn set_asset_pinned(&self, asset_id: AssetId, pinned: bool) -> Result<(), GemServiceError> {
         self.balances.set_asset_pinned(self.session.current_wallet_id()?, asset_id, pinned).await
     }
 
     pub async fn set_assets_enabled(&self, asset_ids: Vec<AssetId>, enabled: bool) -> Result<(), GemServiceError> {
         self.balances.set_assets_enabled(self.session.current_wallet_id()?, asset_ids, enabled).await
-    }
-
-    pub async fn add_prices(&self, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
-        self.stream.add_prices(asset_ids).await
     }
 
     pub fn banner_content(&self, event: BannerEvent, asset: Option<Asset>) -> GemBannerContent {

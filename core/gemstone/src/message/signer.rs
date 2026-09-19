@@ -56,32 +56,6 @@ impl MessageSigner {
         Self { message, timestamp }
     }
 
-    pub fn preview(&self) -> Result<MessagePreview, GemstoneError> {
-        match self.message.sign_type {
-            SignDigestType::Eip191 | SignDigestType::Siwe => Ok(siwe_or_text_preview(self.message.chain, &self.message.data)),
-            SignDigestType::SuiPersonal | SignDigestType::TronPersonal => Ok(MessagePreview::Text(self.data_as_utf8_or_hex())),
-            SignDigestType::TonPersonal => {
-                let string = self.data_as_utf8()?;
-                let Ok(ton_data) = TonSignMessageData::from_bytes(string.as_bytes()) else {
-                    return Ok(MessagePreview::Text(string));
-                };
-                Ok(MessagePreview::Text(ton_data.payload.data().to_string()))
-            }
-            SignDigestType::Eip712 => {
-                let string = self.data_as_utf8()?;
-                if string.is_empty() {
-                    return Err(GemstoneError::from("Empty EIP712 message string"));
-                }
-                let message = GemEIP712Message::from_json(&string).map_err(|e| GemstoneError::from(format!("Invalid EIP712 message: {e}")))?;
-                Ok(MessagePreview::EIP712(message))
-            }
-            SignDigestType::Base58 => {
-                let decoded = bs58::decode(&self.message.data).into_vec().unwrap_or_default();
-                Ok(MessagePreview::Text(String::from_utf8_lossy(&decoded).to_string()))
-            }
-        }
-    }
-
     pub fn payload_preview(&self, simulation_payload: Vec<SimulationPayloadField>) -> Result<Option<MessagePayloadPreview>, GemstoneError> {
         let payload_preview = match self.preview()? {
             MessagePreview::Text(_) => match self.message.sign_type {
@@ -120,6 +94,32 @@ impl MessageSigner {
 }
 
 impl MessageSigner {
+    pub fn preview(&self) -> Result<MessagePreview, GemstoneError> {
+        match self.message.sign_type {
+            SignDigestType::Eip191 | SignDigestType::Siwe => Ok(siwe_or_text_preview(self.message.chain, &self.message.data)),
+            SignDigestType::SuiPersonal | SignDigestType::TronPersonal => Ok(MessagePreview::Text(self.data_as_utf8_or_hex())),
+            SignDigestType::TonPersonal => {
+                let string = self.data_as_utf8()?;
+                let Ok(ton_data) = TonSignMessageData::from_bytes(string.as_bytes()) else {
+                    return Ok(MessagePreview::Text(string));
+                };
+                Ok(MessagePreview::Text(ton_data.payload.data().to_string()))
+            }
+            SignDigestType::Eip712 => {
+                let string = self.data_as_utf8()?;
+                if string.is_empty() {
+                    return Err(GemstoneError::from("Empty EIP712 message string"));
+                }
+                let message = GemEIP712Message::from_json(&string).map_err(|e| GemstoneError::from(format!("Invalid EIP712 message: {e}")))?;
+                Ok(MessagePreview::EIP712(message))
+            }
+            SignDigestType::Base58 => {
+                let decoded = bs58::decode(&self.message.data).into_vec().unwrap_or_default();
+                Ok(MessagePreview::Text(String::from_utf8_lossy(&decoded).to_string()))
+            }
+        }
+    }
+
     pub fn sign_with_keystore(&self, keystore: Arc<GemKeystore>, keystore_id: String, password: Vec<u8>) -> Result<String, GemstoneError> {
         let private_key = keystore.signing_key(&keystore_id, self.message.chain, password)?;
         self.sign(private_key)

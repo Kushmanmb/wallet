@@ -179,10 +179,6 @@ public final class GemNameServiceMock: GemNameServiceProtocol, @unchecked Sendab
     public func validateRecipient(chain: Gemstone.Chain, input: String, state: GemNameRecordState) -> GemRecipientValidation {
         rules.validateRecipient(chain: chain, input: input, state: state)
     }
-
-    public func recipient(chain: Gemstone.Chain, input: String, state: GemNameRecordState, memo: String?, references: [String]) throws -> GemRecipient {
-        try rules.recipient(chain: chain, input: input, state: state, memo: memo, references: references)
-    }
 }
 
 public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Sendable {
@@ -303,8 +299,6 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
         validators
     }
 
-    public func sync(chain _: Gemstone.Chain) async throws {}
-
     public func refresh(chain _: Gemstone.Chain, delegations _: [Gemstone.Delegation]) async -> GemLoadState {
         refreshState
     }
@@ -408,8 +402,6 @@ public final class GemTransactionsServiceMock: GemTransactionsServiceProtocol, @
     }
 
     public func filterChains(wallet _: Gemstone.Wallet) -> [Gemstone.Chain] { filterChainsValue }
-
-    public func getCurrency() -> Gemstone.Currency { Primitives.Currency.usd.toGem() }
 
     public func refresh(assetId: Gemstone.AssetId?, hasTransactions _: Bool) async -> GemLoadState {
         syncedAssetIds.append(assetId)

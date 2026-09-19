@@ -569,7 +569,7 @@ struct ConfirmTransferSceneViewModelTests {
 
     @Test
     func tronInsufficientBalanceActionShowsGetOptions() {
-        let model = ConfirmTransferSceneViewModel.mock(data: .mock(type: .transfer(.mockTronUSDT())))
+        let model = ConfirmTransferSceneViewModel.mock(data: .mock(type: .transfer(.mockTronUSDT())), acquireFlow: .options)
         model.onSelectListError(error: .confirm(.InsufficientBalance(asset: Asset.mockTron().toGem(), requirement: GemBalanceRequirement(required: 36_798_300, available: 36_070_000, shortfall: 728_300))))
 
         guard case let .info(sheet) = model.isPresentingSheet,
@@ -598,7 +598,7 @@ struct ConfirmTransferSceneViewModelTests {
     @Test
     func tronTokenInsufficientBalancePreservesAsset() {
         let asset = Asset.mockTronUSDT()
-        let model = ConfirmTransferSceneViewModel.mock(data: .mock(type: .transfer(asset)))
+        let model = ConfirmTransferSceneViewModel.mock(data: .mock(type: .transfer(asset)), acquireFlow: .options)
         model.onSelectListError(error: .confirm(.InsufficientBalance(asset: asset.toGem(), requirement: GemBalanceRequirement(required: 2, available: 1, shortfall: 1))))
 
         guard case let .info(.balanceRequired(_, _, _, .action(_, action))) = model.isPresentingSheet else {
@@ -669,7 +669,7 @@ struct ConfirmTransferSceneViewModelTests {
 
     @Test
     func tronInsufficientNetworkFeeUsesFeeAsset() {
-        let model = ConfirmTransferSceneViewModel.mock(data: .mock(type: .transfer(.mockTronUSDT())))
+        let model = ConfirmTransferSceneViewModel.mock(data: .mock(type: .transfer(.mockTronUSDT())), acquireFlow: .options)
         model.onSelectListError(error: .confirm(.InsufficientNetworkFee(asset: Asset.mockTron().toGem(), requirement: nil)))
 
         guard case let .info(sheet) = model.isPresentingSheet,

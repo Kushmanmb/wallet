@@ -102,7 +102,7 @@ extension ViewModelFactory {
         RecipientSceneViewModel(
             wallet: wallet,
             asset: asset,
-            service: GemRecipientService(names: nameService, payments: paymentService, session: walletSessionService),
+            service: GemRecipientService(payments: paymentService, session: walletSessionService),
             nameService: nameService,
             type: type,
             recipient: recipient,

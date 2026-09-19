@@ -8,8 +8,7 @@ use std::sync::Arc;
 use primitives::{AddressName, Chain, ChainAddress};
 
 use crate::api::{GemApiError, GemDeviceApiClient};
-use crate::services::recipient::{GemRecipientError, GemRecipientValidation, rules as recipient_rules};
-use crate::services::transfer::GemRecipient;
+use crate::services::recipient::{GemRecipientValidation, rules as recipient_rules};
 
 pub use model::{GemNameInputStep, GemNameRecordState};
 pub use store::GemAddressStore;
@@ -29,10 +28,6 @@ impl GemNameService {
 
     pub fn validate_recipient(&self, chain: Chain, input: String, state: GemNameRecordState) -> GemRecipientValidation {
         recipient_rules::validation(chain, &input, &state)
-    }
-
-    pub fn recipient(&self, chain: Chain, input: String, state: GemNameRecordState, memo: Option<String>, references: Vec<String>) -> Result<GemRecipient, GemRecipientError> {
-        recipient_rules::recipient(chain, &input, &state, memo, references)
     }
 
     pub fn is_name_supported(&self, name: String) -> bool {

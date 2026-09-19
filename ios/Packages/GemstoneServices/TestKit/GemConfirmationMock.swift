@@ -5,7 +5,6 @@ public import struct Gemstone.BlockExplorerLink
 public import typealias Gemstone.Chain
 public import typealias Gemstone.Currency
 public import enum Gemstone.GemAcquireAssetFlow
-public import class Gemstone.GemAssetConfigService
 public import struct Gemstone.GemConfirmLoad
 public import struct Gemstone.GemConfirmLoadOptions
 public import enum Gemstone.GemConfirmRowContent
@@ -24,7 +23,7 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
     private let executeResult: Result<GemExecuteResult, any Error>
     private let authenticationValue: GemKeystoreAuthentication
     private let rows: (Gemstone.AddressName?) -> [GemConfirmRowContent]
-    private let assetConfig = GemAssetConfigService()
+    private let acquireFlow: GemAcquireAssetFlow
     private var loaded: GemConfirmLoad?
     public var onLoad: (@MainActor () -> Void)?
 
@@ -34,12 +33,14 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
         execute: Result<GemExecuteResult, any Error> = .success(.signed(data: [])),
         authentication: GemKeystoreAuthentication = .none,
         rows: @escaping (Gemstone.AddressName?) -> [GemConfirmRowContent] = { _ in [] },
+        acquireFlow: GemAcquireAssetFlow = .fiat,
     ) {
         initialState = state
         loadResult = load
         executeResult = execute
         authenticationValue = authentication
         self.rows = rows
+        self.acquireFlow = acquireFlow
     }
 
     public func screen() -> GemConfirmScreen {
@@ -76,8 +77,8 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
         rows(addressName)
     }
 
-    public func acquireAssetFlow(chain: Chain) -> GemAcquireAssetFlow {
-        assetConfig.acquireFlow(chain: chain)
+    public func acquireAssetFlow(chain _: Chain) -> GemAcquireAssetFlow {
+        acquireFlow
     }
 
     public func insufficientNetworkFeeBuyAmount() -> Int32 {

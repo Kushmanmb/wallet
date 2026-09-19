@@ -2,9 +2,7 @@ use super::rules;
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigInt;
 use crate::models::list::GemListRow;
-use crate::perpetual::GemPerpetual;
 use crate::services::failures::StepFailure;
-use crate::services::transfer::model::GemRecipient;
 use primitives::chart::{ChartCandleStick, ChartCandleUpdate};
 use primitives::{Asset, Perpetual, PerpetualAccountMode, PerpetualConfirmData, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, PerpetualType};
 use serde::{Deserialize, Serialize};
@@ -260,10 +258,6 @@ impl GemPerpetualPositionAction {
         self.data().clone()
     }
 
-    pub fn recipient(&self) -> GemRecipient {
-        GemPerpetual::new(self.data().provider.clone()).recipient()
-    }
-
     pub fn shows_autoclose(&self) -> bool {
         matches!(self, Self::Open { .. })
     }
@@ -338,17 +332,6 @@ impl GemPerpetualMarketSession {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_position_action_recipient_names_the_provider_without_an_address() {
-        let data = GemPerpetualTransferData::mock();
-        let action = GemPerpetualPositionAction::Open { data };
-
-        let recipient = action.recipient();
-
-        assert_eq!(recipient.name.as_deref(), Some("Hyperliquid"));
-        assert!(recipient.address.is_empty());
-    }
 
     #[test]
     fn test_only_opening_a_position_shows_autoclose() {

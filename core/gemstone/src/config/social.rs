@@ -24,7 +24,6 @@ pub fn community_links() -> Vec<GemSocialLink> {
     social_links(links)
 }
 
-#[uniffi::export]
 pub fn social_links(links: Vec<AssetLink>) -> Vec<GemSocialLink> {
     let mut rows: Vec<GemSocialLink> = links.iter().filter_map(social_link).collect();
     rows.sort_by_key(|row| std::cmp::Reverse(link_type_order(row.link_type)));

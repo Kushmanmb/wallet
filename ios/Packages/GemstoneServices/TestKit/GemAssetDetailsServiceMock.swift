@@ -28,15 +28,9 @@ public final class GemAssetDetailsServiceMock: GemAssetDetailsServiceProtocol, @
         GemAssetRefresh(transactions: .data, failures: [])
     }
 
-    public func syncTransactions(assetId _: AssetId?) async throws {}
-
-    public func updateBalances(assetIds _: [AssetId]) async throws {}
-
     public func setAssetPinned(assetId _: AssetId, pinned _: Bool) async throws {}
 
     public func setAssetsEnabled(assetIds _: [AssetId], enabled _: Bool) async throws {}
-
-    public func addPrices(assetIds _: [AssetId]) async throws {}
 
     public func bannerContent(event _: BannerEvent, asset _: Asset?) -> GemBannerContent {
         GemBannerContent(icon: .none, title: .none, description: .none, destination: .none)

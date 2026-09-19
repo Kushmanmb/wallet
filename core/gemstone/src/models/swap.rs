@@ -17,7 +17,6 @@ pub enum GemSlippageCheck {
     AboveMaximum,
 }
 
-#[uniffi::export]
 impl GemSlippageCheck {
     pub fn allows_confirm(&self) -> bool {
         match self {

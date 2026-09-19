@@ -27,7 +27,9 @@ impl GemBannerService {
     pub fn new(store: Arc<dyn GemBannerStore>) -> Self {
         Self { store }
     }
+}
 
+impl GemBannerService {
     pub async fn setup_wallet(&self, wallet: Wallet) -> Result<(), GemServiceError> {
         self.add_missing_banners(rules::wallet_setup_keys(&wallet)).await
     }
@@ -39,9 +41,7 @@ impl GemBannerService {
     pub fn banner_content(&self, event: BannerEvent, asset: Option<Asset>) -> GemBannerContent {
         rules::banner_content(event, asset.as_ref())
     }
-}
 
-impl GemBannerService {
     pub async fn setup(&self) -> Result<(), GemServiceError> {
         self.add_missing_banners(rules::setup_keys()).await
     }

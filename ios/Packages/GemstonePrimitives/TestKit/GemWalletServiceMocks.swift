@@ -48,12 +48,6 @@ public final class GemPreferencesServiceMock: GemPreferencesServiceProtocol, @un
         Primitives.Currency.usd.toGem()
     }
 
-    public func getChartPeriod() -> Gemstone.ChartPeriod {
-        Primitives.ChartPeriod.day.toGem()
-    }
-
-    public func setChartPeriod(period _: Gemstone.ChartPeriod) throws {}
-
     public func isPushNotificationsEnabled() -> Bool {
         false
     }
@@ -76,12 +70,6 @@ public final class GemPreferencesServiceMock: GemPreferencesServiceProtocol, @un
 
     public func showPerpetuals(walletType _: Gemstone.WalletType, chains _: [Gemstone.Chain]) -> Bool {
         perpetualEnabled
-    }
-
-    public var collectionsShown = true
-
-    public func showCollections(walletType _: Gemstone.WalletType, chains _: [Gemstone.Chain]) -> Bool {
-        collectionsShown
     }
 
     public func isHideBalanceEnabled() -> Bool {
@@ -135,8 +123,6 @@ public final class GemPreferencesServiceMock: GemPreferencesServiceProtocol, @un
     }
 
     public func setNotificationsAsked() throws {}
-
-    public func clear() throws {}
 }
 
 public final class GemStreamServiceMock: GemStreamServiceProtocol, @unchecked Sendable {
@@ -207,50 +193,6 @@ public final class GemPortfolioServiceMock: GemPortfolioServiceProtocol, @unchec
             statistics: [allTimeHigh.map { .allTimeHigh(value: $0.toGem()) }, allTimeLow.map { .allTimeLow(value: $0.toGem()) }].compactMap(\.self),
             availablePeriods: [.day, .week, .month, .year, .all],
         )
-    }
-}
-
-public final class GemBalanceServiceMock: GemBalanceServiceProtocol, @unchecked Sendable {
-    private let onUpdate: @Sendable (String, [Gemstone.AssetId]) async -> Void
-    private let onSetAssetsEnabled: (@Sendable (String, [Gemstone.AssetId], Bool) async throws -> Void)?
-    private let onSetAssetPinned: (@Sendable (String, Gemstone.AssetId, Bool) async throws -> Void)?
-    private let assetBalances: [GemAssetBalance]
-
-    public init(
-        onUpdate: @escaping @Sendable (String, [Gemstone.AssetId]) async -> Void = { _, _ in },
-        onSetAssetsEnabled: (@Sendable (String, [Gemstone.AssetId], Bool) async throws -> Void)? = nil,
-        onSetAssetPinned: (@Sendable (String, Gemstone.AssetId, Bool) async throws -> Void)? = nil,
-        assetBalances: [GemAssetBalance] = [],
-    ) {
-        self.onUpdate = onUpdate
-        self.onSetAssetsEnabled = onSetAssetsEnabled
-        self.onSetAssetPinned = onSetAssetPinned
-        self.assetBalances = assetBalances
-    }
-
-    public func balances(walletId _: String, assetIds: [Gemstone.AssetId]) throws -> [GemAssetBalance] {
-        assetBalances.filter { assetIds.contains($0.assetId) }
-    }
-
-    public func update(walletId: String, assetIds: [Gemstone.AssetId]) async throws {
-        await onUpdate(walletId, assetIds)
-    }
-
-    public func setAssetsEnabled(walletId: String, assetIds: [Gemstone.AssetId], enabled: Bool) async throws {
-        try await onSetAssetsEnabled?(walletId, assetIds, enabled)
-    }
-
-    public func setAssetPinned(walletId: String, assetId: Gemstone.AssetId, pinned: Bool) async throws {
-        try await onSetAssetPinned?(walletId, assetId, pinned)
-    }
-}
-
-public extension GemBalanceServiceProtocol where Self == GemBalanceServiceMock {
-    static func mock(
-        onSetAssetsEnabled: (@Sendable (String, [Gemstone.AssetId], Bool) async throws -> Void)? = nil,
-        onSetAssetPinned: (@Sendable (String, Gemstone.AssetId, Bool) async throws -> Void)? = nil,
-    ) -> GemBalanceServiceMock {
-        GemBalanceServiceMock(onSetAssetsEnabled: onSetAssetsEnabled, onSetAssetPinned: onSetAssetPinned)
     }
 }
 
@@ -340,40 +282,6 @@ public final class GemCurrencyServiceMock: GemCurrencyServiceProtocol, @unchecke
     public func currencies(locale _: Gemstone.Currency?) -> GemCurrencies {
         let selected = GemCurrencyRow(currency: getCurrency(), flag: flag)
         return GemCurrencies(selected: selected, recommended: [selected], other: [])
-    }
-}
-
-public final class GemBannerServiceMock: GemBannerServiceProtocol, @unchecked Sendable {
-    public private(set) var closedKeys: [GemBannerKey] = []
-
-    public init() {}
-
-    public func close(key: GemBannerKey) async throws {
-        closedKeys.append(key)
-    }
-
-    public func setup() async throws {}
-
-    public func setupWallet(wallet _: Gemstone.Wallet) async throws {}
-
-    public func bannerContent(event _: Gemstone.BannerEvent, asset _: Gemstone.Asset?) -> GemBannerContent {
-        GemBannerContent(icon: .none, title: .none, description: .none, destination: .none)
-    }
-}
-
-public final class GemSearchServiceMock: GemSearchServiceProtocol, @unchecked Sendable {
-    private let assets: [Primitives.AssetBasic]
-
-    public init(assets: [Primitives.AssetBasic] = []) {
-        self.assets = assets
-    }
-
-    public func search(wallet _: Gemstone.Wallet, query _: String, scope _: GemSearchScope, currency _: Gemstone.Currency) async throws -> Bool {
-        !assets.isEmpty
-    }
-
-    public func searchAssets(wallet _: Gemstone.Wallet, query _: String, currency _: Gemstone.Currency) async throws -> [Gemstone.AssetBasic] {
-        assets.map { $0.toGem() }
     }
 }
 
