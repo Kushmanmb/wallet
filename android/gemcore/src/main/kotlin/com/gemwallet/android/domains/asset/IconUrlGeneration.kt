@@ -29,14 +29,6 @@ fun AssetId.iconChain(): Chain? = when (val image = icon().image) {
 
 fun AssetId.supportIconChain(): Chain? = icon().badge?.toChain()
 
-fun AssetId.remoteIconUrl(): String? = when (val image = icon().image) {
-    is GemAssetIconImage.Local,
-    is GemAssetIconImage.LocalToken,
-    -> null
-
-    is GemAssetIconImage.Remote -> image.url
-}
-
 fun getListIconUrl(listId: String): String = GemImage.AssetList(listId).url()
 
 fun TransactionNFTTransferMetadata.getImageUrl(): String = nftImageUrl(assetId.toIdentifier())

@@ -36,8 +36,6 @@ class ValueFormatter(private val style: GemValueStyle, private val locale: Local
         return appendCurrency(formatter.format(value, precision(value.abs())), currency)
     }
 
-    fun rounded(value: BigDecimal): BigDecimal = value.rounded(precision(value.abs()), ROUNDING_MODE)
-
     private fun precision(magnitude: BigDecimal): GemPrecision = style.precision(magnitude.toDouble())
 
     private fun abbreviated(decimal: BigDecimal): String {

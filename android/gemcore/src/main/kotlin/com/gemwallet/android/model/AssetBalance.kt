@@ -72,8 +72,6 @@ private fun Balance<BigInteger>.createAmount(decimals: Int) = Balance(
     earn = Crypto(earn).value(decimals).stripTrailingZeros().toDouble(),
 )
 
-fun Balance<BigInteger>.hasAvailable() = available > BigInteger.ZERO
-
 fun Balance<Double>.getTotalAmount() = available + frozen + locked + staked + pending + rewards + earn
 
 fun Balance<BigInteger>.getTotalAmount() = available + frozen + locked + staked + pending + rewards + earn

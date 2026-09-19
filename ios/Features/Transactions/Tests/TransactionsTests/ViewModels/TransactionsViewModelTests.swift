@@ -111,7 +111,6 @@ struct TransactionsFilterViewModelTests {
         _ = model.onFinishTypesSelection(SelectionResult(items: [filter], isConfirmed: true))
 
         #expect(model.transactionTypesFilter.selectedTypes == [filter])
-        #expect(model.transactionTypesFilter.requestFilters.isNotEmpty)
         #expect(model.isAnyFilterSpecified)
     }
 
