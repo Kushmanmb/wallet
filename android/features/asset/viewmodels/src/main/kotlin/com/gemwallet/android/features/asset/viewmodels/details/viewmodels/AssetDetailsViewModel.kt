@@ -54,6 +54,8 @@ import kotlinx.coroutines.launch
 import uniffi.gemstone.GemAssetDetailsInput
 import uniffi.gemstone.GemAssetDetailsServiceInterface
 import uniffi.gemstone.GemErrorText
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemPriceAlertToggle
 import uniffi.gemstone.GemRefreshKind
 
@@ -108,6 +110,12 @@ class AssetDetailsViewModel @Inject constructor(
         .map { it.toImmutableList() }
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, getTransactions.stored(transactionFilters).toImmutableList())
+
+    private val transactionsState = MutableStateFlow<GemLoadState>(GemLoadState.Loading)
+
+    val transactionsErrorRow: StateFlow<GemListRow?> = combine(transactionsState, transactions) { state, items ->
+        (state as? GemLoadState.Error)?.takeIf { items.isEmpty() }?.let { GemListRow.Error(it.error) }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val banners = chainAssetInfo.filterNotNull()
         .map { it.assetInfo.asset }
@@ -182,9 +190,9 @@ class AssetDetailsViewModel @Inject constructor(
     }
 
     private suspend fun syncAssetDetails() {
-        assetDetailsService
-            .refresh(assetId.toIdentifier())
-            .forEach { Log.e(TAG, "asset refresh ${it.step} failed: ${it.message}") }
+        val refresh = assetDetailsService.refresh(assetId.toIdentifier(), transactions.value.isNotEmpty())
+        transactionsState.value = refresh.transactions
+        refresh.failures.forEach { Log.e(TAG, "asset refresh ${it.step} failed: ${it.message}") }
     }
 
     fun pin() = viewModelScope.launch(ioDispatcher) {

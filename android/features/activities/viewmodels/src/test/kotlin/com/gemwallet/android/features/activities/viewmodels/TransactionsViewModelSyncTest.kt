@@ -10,9 +10,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +20,10 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.Assert.assertEquals
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemLoadState
+import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemTransactionsService
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -45,48 +46,46 @@ class TransactionsViewModelSyncTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        mockkStatic(Log::class)
-        every { Log.e(any(), any(), any()) } returns 0
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
-        unmockkStatic(Log::class)
     }
 
     @Test
-    fun `failed sync is retried on the next screen entry`() = runBlocking {
-        coEvery { service.sync(null) } throws IllegalStateException("offline")
+    fun `failed sync is retried on the next screen entry and shows the error while nothing is stored`() = runBlocking {
+        coEvery { service.refresh(null, false) } returns GemLoadState.Error(GemServiceException.Gateway("offline"))
         val viewModel = createViewModel()
 
         viewModel.syncIfNeeded()?.join()
         viewModel.syncIfNeeded()?.join()
 
-        coVerify(exactly = 2) { service.sync(null) }
+        coVerify(exactly = 2) { service.refresh(null, false) }
+        assertEquals(GemListRow.Error(GemServiceException.Gateway("offline")), viewModel.errorRow.value)
     }
 
     @Test
     fun `successful sync is not repeated for the same wallet`() = runBlocking {
-        coEvery { service.sync(null) } returns Unit
+        coEvery { service.refresh(null, any()) } returns GemLoadState.Data
         val viewModel = createViewModel()
 
         viewModel.syncIfNeeded()?.join()
         viewModel.syncIfNeeded()?.join()
 
-        coVerify(exactly = 1) { service.sync(null) }
+        coVerify(exactly = 1) { service.refresh(null, any()) }
     }
 
     @Test
     fun `wallet switch syncs the new wallet`() = runBlocking {
-        coEvery { service.sync(null) } returns Unit
+        coEvery { service.refresh(null, any()) } returns GemLoadState.Data
         val viewModel = createViewModel()
 
         viewModel.syncIfNeeded()?.join()
         session.value = mockSession(wallet = mockWallet(id = "wallet-2"))
         viewModel.syncIfNeeded()?.join()
 
-        coVerify(exactly = 2) { service.sync(null) }
+        coVerify(exactly = 2) { service.refresh(null, any()) }
     }
 
     private fun createViewModel() = TransactionsViewModel(

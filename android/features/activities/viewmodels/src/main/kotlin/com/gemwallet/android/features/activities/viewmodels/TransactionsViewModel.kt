@@ -1,7 +1,6 @@
 package com.gemwallet.android.features.activities.viewmodels
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.session.cases.GetSession
@@ -11,7 +10,6 @@ import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusO
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.domains.connection.refreshInterval
 import com.gemwallet.android.ext.requireChain
-import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ui.components.filters.TransactionFilterUIModel
 import com.gemwallet.android.ui.components.filters.transactionFilterOptions
@@ -37,6 +35,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemRefreshKind
 import uniffi.gemstone.GemTransactionFilter
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemTransactionsEmptyState
 import uniffi.gemstone.GemTransactionsServiceInterface
 import uniffi.gemstone.transactionsEmptyState
@@ -100,6 +100,12 @@ class TransactionsViewModel @Inject constructor(
         initialValue = getTransactions.stored(TransactionsRequestFilter.activityDefaults()).takeIf { it.isNotEmpty() },
     )
 
+    private val transactionsState = MutableStateFlow<GemLoadState>(GemLoadState.Loading)
+
+    val errorRow: StateFlow<GemListRow?> = combine(transactionsState, transactions) { state, items ->
+        (state as? GemLoadState.Error)?.takeIf { items?.isEmpty() == true }?.let { GemListRow.Error(it.error) }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     init {
         viewModelScope.launch {
             session
@@ -118,16 +124,15 @@ class TransactionsViewModel @Inject constructor(
         if (current == syncedWalletId) return null
         syncedWalletId = current
         return viewModelScope.launch(ioDispatcher) {
-            val synced = sync()
-            if (!synced && syncedWalletId == current) {
+            val state = sync()
+            if (state is GemLoadState.Error && syncedWalletId == current) {
                 syncedWalletId = null
             }
         }
     }
 
-    private suspend fun sync(): Boolean = runCatchingCancellable { service.sync(null) }
-        .onFailure { Log.e(TAG, "transactions sync failed", it) }
-        .isSuccess
+    private suspend fun sync(): GemLoadState = service.refresh(null, !transactions.value.isNullOrEmpty())
+        .also { transactionsState.value = it }
 
     fun refresh() = viewModelScope.launch(ioDispatcher) {
         _isRefreshing.update { true }
@@ -156,9 +161,5 @@ class TransactionsViewModel @Inject constructor(
         typeFilter.update {
             emptyList()
         }
-    }
-
-    private companion object {
-        const val TAG = "TransactionsViewModel"
     }
 }

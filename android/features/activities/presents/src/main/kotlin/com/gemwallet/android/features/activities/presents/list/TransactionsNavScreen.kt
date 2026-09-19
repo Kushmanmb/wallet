@@ -26,6 +26,7 @@ fun TransactionsNavScreen(
     val showsNoResults by viewModel.showsNoResults.collectAsStateWithLifecycle()
     val walletId by viewModel.walletId.collectAsStateWithLifecycle()
     val availableChains by viewModel.availableChains.collectAsStateWithLifecycle()
+    val errorRow by viewModel.errorRow.collectAsStateWithLifecycle()
 
     LaunchedEffect(walletId) {
         viewModel.syncIfNeeded()
@@ -37,6 +38,7 @@ fun TransactionsNavScreen(
     TransactionsScene(
         isRefreshing = isRefreshing,
         transactions = transactions,
+        errorRow = errorRow,
         availableChains = availableChains,
         chainsFilter = chainFilter,
         typeFilter = typeFilter,

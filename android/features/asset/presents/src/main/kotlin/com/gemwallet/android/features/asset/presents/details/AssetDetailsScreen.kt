@@ -20,6 +20,7 @@ fun AssetDetailsScreen(
     val viewModel: AssetDetailsViewModel = hiltViewModel()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val transactions by viewModel.transactions.collectAsStateWithLifecycle()
+    val transactionsErrorRow by viewModel.transactionsErrorRow.collectAsStateWithLifecycle()
     val priceAlertError by viewModel.error.collectAsStateWithLifecycle()
     val snackBar = rememberSnackbarState(message = priceAlertError?.text(), iconRes = R.drawable.ic_error, onShown = viewModel::clearError)
     val uiModel by viewModel.uiModel.collectAsStateWithLifecycle()
@@ -32,6 +33,7 @@ fun AssetDetailsScreen(
         AssetDetailsScene(
             uiState = uiModel ?: return,
             transactions = transactions,
+            transactionsErrorRow = transactionsErrorRow,
             isRefreshing = isRefreshing,
             snackBar = snackBar,
             requestNotificationPermission = requestNotificationPermission,

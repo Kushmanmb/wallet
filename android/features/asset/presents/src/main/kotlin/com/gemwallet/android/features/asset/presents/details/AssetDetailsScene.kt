@@ -30,7 +30,10 @@ import com.gemwallet.android.ui.components.list_item.transaction.transactionsLis
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.showSnackbar
+import com.gemwallet.android.ui.components.list_item.GemListRowView
+import com.gemwallet.android.ui.models.ListPosition
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,6 +41,7 @@ import uniffi.gemstone.GemListRowTitle
 internal fun AssetDetailsScene(
     uiState: AssetInfoUIModel,
     transactions: List<TransactionDataAggregate>,
+    transactionsErrorRow: GemListRow?,
     requestNotificationPermission: (() -> Unit) -> Unit,
     isRefreshing: Boolean,
     snackBar: SnackbarHostState = remember { SnackbarHostState() },
@@ -139,7 +143,7 @@ internal fun AssetDetailsScene(
                     }
                 }
                 item {
-                    EmptyTransactionsItem(
+                    transactionsErrorRow?.let { GemListRowView(row = it, listPosition = ListPosition.Single) } ?: EmptyTransactionsItem(
                         size = transactions.size,
                         symbol = uiState.asset.symbol,
                         isViewOnly = detailsState.isViewOnly,

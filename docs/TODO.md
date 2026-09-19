@@ -22,7 +22,6 @@ The last places where an app reaches the API, a rule or a table without going th
 
 Found by pairing every view model on both apps (see Coverage) and reading the ones whose logic did not match. Each is the same product rule written on both sides with a difference.
 
-- **D40** **M** The address and stake screens take their load state from Core (`GemLoadState` plus `GemLoad::data`, see [the load-state contract](ARCHITECTURE.md#a-screens-load-state-is-one-core-state-and-a-failed-refresh-keeps-what-is-shown); the stake screens through `GemStakeService::refresh`, which keeps the stored delegations on a failed sync and shows the error only in place of the empty state). The asset and transactions screens on both apps only log a failed refresh and never show the error when there is nothing to keep — adopt the same state there with `GemLoadState::refreshed`; the iOS activity list draws its empty state as an `EmptyContentView` overlay, which has no error type yet, so that screen needs the error empty state designed first.
 
 
 
@@ -118,6 +117,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**D40 (2026-09-19).** Landed: the asset screen and the activity list on both apps take their transactions load state from Core (`GemAssetDetailsService::refresh` returns it beside the step failures, `GemTransactionsService::refresh` replaces the bare `sync`), and a failed refresh with nothing stored shows the error row in place of the empty state. The iOS activity list needed no new empty-state type: it draws the same error row the stake screen uses, inside the list, and keeps its empty-state overlay for the no-error case.
 
 **V90 (2026-09-19).** Landed: R82 moved the chart market rows onto `GemListRow` (a ranked amount, an all-time row, an identifier row with copy and explorer), and the last two screens that still switched a bare row enum followed — the WalletConnect connection details (`GemConnectionDetailRow`) and the collectible info section (`GemCollectibleRow`, whose token id copies through the new `GemCopyKind::Plain`). The row enums left in Core are not plain rows: named outcomes (`GemNodeCheckRow`, `GemBalanceRow`), per-screen rich rows and composites that wrap a `GemListRow` case (confirm, swap, transaction and asset details), and layout grids (`GemSecretPhraseRow`).
 
