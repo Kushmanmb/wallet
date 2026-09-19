@@ -91,6 +91,15 @@ class AssetDetailsViewModel @Inject constructor(
 
     private val assetId = savedStateHandle.requireAssetId()
 
+    private val transactionFilters = listOf(TransactionsRequestFilter.Asset(assetId))
+
+    val transactions = getTransactions.getTransactions(transactionFilters)
+        .map { it.toImmutableList() }
+        .flowOn(ioDispatcher)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, getTransactions.stored(transactionFilters).toImmutableList())
+
+    private val transactionsState = MutableStateFlow<GemLoadState>(GemLoadState.Loading)
+
     private val chainAssetInfo = getChainAssetInfo(assetId)
         .onStart { restartAssetSync() }
         .filterNotNull()
@@ -103,15 +112,6 @@ class AssetDetailsViewModel @Inject constructor(
         val feeInfo = stored.firstOrNull { it.asset.id == AssetId(assetId.chain) } ?: return null
         return ChainAssetInfo(assetInfo, feeInfo)
     }
-
-    private val transactionFilters = listOf(TransactionsRequestFilter.Asset(assetId))
-
-    val transactions = getTransactions.getTransactions(transactionFilters)
-        .map { it.toImmutableList() }
-        .flowOn(ioDispatcher)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, getTransactions.stored(transactionFilters).toImmutableList())
-
-    private val transactionsState = MutableStateFlow<GemLoadState>(GemLoadState.Loading)
 
     val transactionsErrorRow: StateFlow<GemListRow?> = combine(transactionsState, transactions) { state, items ->
         (state as? GemLoadState.Error)?.takeIf { items.isEmpty() }?.let { GemListRow.Error(it.error) }

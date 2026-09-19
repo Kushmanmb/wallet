@@ -24,8 +24,11 @@ import com.gemwallet.android.testkit.mockSession
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Banner
 import com.wallet.core.primitives.PriceAlert
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -33,6 +36,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -43,6 +47,8 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GemAssetDetailsInput
+import uniffi.gemstone.GemAssetRefresh
+import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemAssetDetailsServiceInterface
 import uniffi.gemstone.GemPriceAlertToggle
 
@@ -109,7 +115,18 @@ class AssetDetailsViewModelTest {
         assertEquals(GemPriceAlertToggle.ENABLED, uiModel.detailsState.priceAlert)
     }
 
-    private fun createViewModel(): AssetDetailsViewModel = AssetDetailsViewModel(
+    @Test
+    fun `the sync the screen starts while it is built reads only state that is already set`() = runTest(testDispatcher) {
+        val immediate = UnconfinedTestDispatcher(testScheduler)
+        Dispatchers.setMain(immediate)
+        coEvery { service.refresh(any(), any()) } returns GemAssetRefresh(transactions = GemLoadState.Data, failures = emptyList())
+
+        createViewModel(ioDispatcher = immediate)
+
+        coVerify { service.refresh(asset.id.toIdentifier(), false) }
+    }
+
+    private fun createViewModel(ioDispatcher: CoroutineDispatcher = testDispatcher): AssetDetailsViewModel = AssetDetailsViewModel(
         getSession = getSession,
         savedStateHandle = SavedStateHandle(mapOf(RouteArgument.AssetId.key to asset.id.toIdentifier())),
         getChainAssetInfo = getChainAssetInfo,
@@ -120,7 +137,7 @@ class AssetDetailsViewModelTest {
         getPriceAlerts = getPriceAlerts,
         assetInfoUIModelFactory = AssetInfoUIModelFactory(mockk<Context> { every { getString(any()) } answers { firstArg<Int>().toString() } }),
         userConfig = mockk(relaxed = true),
-        ioDispatcher = testDispatcher,
+        ioDispatcher = ioDispatcher,
         connectionStatusObserver = mockk(relaxed = true),
     ).also(viewModels::add)
 }
