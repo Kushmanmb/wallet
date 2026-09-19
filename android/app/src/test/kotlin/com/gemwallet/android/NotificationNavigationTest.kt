@@ -243,13 +243,13 @@ class NotificationNavigationTest {
     }
 
     @Test
-    fun buyAssetNotification_isRejectedWhenCoreFails() = runBlocking {
+    fun buyAssetNotification_reportsWhenCoreFails() = runBlocking {
         val assetId = mockAssetId(Chain.Bitcoin)
         coEvery { assetsService.openAsset(assetId.toIdentifier()) } throws GemServiceException.Api("offline")
 
-        val route = subject.prepareNavigation(GemPushNotification.BuyAsset(assetId.toIdentifier()))
+        val result = runCatching { subject.prepareNavigation(GemPushNotification.BuyAsset(assetId.toIdentifier())) }
 
-        assertEquals(emptyList<Any>(), route)
+        assertTrue(result.exceptionOrNull() is GemServiceException.Api)
     }
 
     @Test
