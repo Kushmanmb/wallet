@@ -74,21 +74,6 @@ impl GemAssetsService {
         }
     }
 
-    pub async fn sync_assets(&self, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
-        let asset_ids = crate::services::collections::unique(asset_ids);
-        if asset_ids.is_empty() {
-            return Ok(());
-        }
-        let currency = self.preferences.get_currency();
-        let assets = self.get_assets(asset_ids, Some(currency.to_string())).await?;
-        if assets.is_empty() {
-            return Ok(());
-        }
-        let prices = rules::asset_prices(&assets);
-        self.store.save_assets(assets).await?;
-        self.price.update_prices(prices, currency).await
-    }
-
     pub async fn open_asset(&self, asset_id: AssetId) -> Result<Option<Asset>, GemServiceError> {
         let wallet = self.session.current_wallet().await?;
         self.open_wallet_asset(wallet, asset_id).await
@@ -136,7 +121,7 @@ impl GemAssetsService {
         if missing.is_empty() {
             return Ok(vec![]);
         }
-        let assets = self.get_assets(missing, None).await?;
+        let assets = self.api.client.get_assets(missing, None).await.map_err(GemApiError::from)?;
         let asset_ids = assets.iter().map(|asset| asset.asset.id.clone()).collect();
         self.store.save_assets(assets).await?;
         Ok(asset_ids)
@@ -188,10 +173,6 @@ impl GemAssetsService {
 
     pub async fn get_asset(&self, asset_id: AssetId) -> Result<AssetFull, GemApiError> {
         Ok(self.api.client.get_asset(asset_id).await?)
-    }
-
-    pub async fn get_assets(&self, asset_ids: Vec<AssetId>, currency: Option<String>) -> Result<Vec<AssetBasic>, GemApiError> {
-        Ok(self.api.client.get_assets(asset_ids, currency).await?)
     }
 
     pub async fn search_assets(&self, query: String, chains: Vec<Chain>) -> Result<Vec<AssetBasic>, GemApiError> {

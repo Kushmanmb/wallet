@@ -13,7 +13,6 @@ import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.application.session.cases.GetCurrentWallet
 import com.gemwallet.android.application.session.cases.GetCurrentWalletId
 import com.gemwallet.android.application.session.cases.GetSession
-import com.gemwallet.android.application.tokens.cases.SearchTokens
 import com.gemwallet.android.data.coordinators.asset.GetActiveAssetsInfoImpl
 import com.gemwallet.android.data.coordinators.asset.GetAssetByIdImpl
 import com.gemwallet.android.data.coordinators.asset.GetAssetInfoImpl

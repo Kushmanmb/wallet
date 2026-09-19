@@ -1474,6 +1474,8 @@ The app **localizes Core's error directly** — it does not translate it into a 
 
 State what has been saved when a later step fails, whether the action can be retried, and how reconciliation repairs partial progress. Preserve intentional local-first behavior. A matching preference or unchanged row must not skip an unfinished required effect. Return existing structured outcomes/step failures where available; keep successful work and expose required failures consistently.
 
+Wallet price requests use USD. `GemPriceService` applies the selected fiat rate once and preserves the USD price for later conversion; never pass server-converted prices into that path. The independent widget pricing path may request its display currency directly.
+
 [Price updates](../core/gemstone/src/services/price/mod.rs) use one `GemPriceStore.save_rates(rates, conversion)` transaction: Core selects the optional current-currency conversion, and each adapter commits it with the changed rates. A failed repricing rolls back the rates so an identical-rate retry still applies. [Price-alert enabling](../core/gemstone/src/services/price_alert/mod.rs) remains a recovery gap: it saves the preference before device synchronization, then a retry returns early (MIG4). Add a durable queue only if the actual recovery requirement needs it.
 
 Cancellation after an irreversible effect does not prove that the effect did not happen. Security exceptions, including scanner fail-open, remain explicit subsystem policy rather than incidental error handling.
