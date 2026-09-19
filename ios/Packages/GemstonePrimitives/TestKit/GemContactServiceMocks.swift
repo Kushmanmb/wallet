@@ -30,10 +30,6 @@ public final class GemManageContactServiceMock: GemManageContactServiceProtocol,
         )
     }
 
-    public func canSave(name: String, isSaving: Bool) -> Bool {
-        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isSaving
-    }
-
     public func scannedAddress(input: String) -> GemContactScannedAddress {
         service.scannedAddress(input: input)
     }

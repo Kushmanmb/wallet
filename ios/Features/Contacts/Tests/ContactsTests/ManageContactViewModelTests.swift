@@ -17,7 +17,7 @@ struct ManageContactViewModelTests {
 
         #expect(model.buttonState == .disabled)
 
-        model.nameInputModel.text = "John"
+        model.onChangeName("John")
 
         #expect(model.buttonState == .normal)
     }
@@ -28,7 +28,7 @@ struct ManageContactViewModelTests {
 
         #expect(model.buttonState == .normal)
 
-        model.nameInputModel.text = ""
+        model.onChangeName("")
 
         #expect(model.buttonState == .disabled)
     }

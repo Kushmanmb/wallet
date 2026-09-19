@@ -15,7 +15,9 @@ use crate::payment::GemPaymentService;
 use crate::services::file::{GemFileStore, IMAGE_EXTENSION};
 use crate::services::name::GemAddressStore;
 
-pub use model::{GemContactAddressInput, GemContactAvatar, GemContactInput, GemContactRow, GemContactScannedAddress, contact_initials, contact_row};
+pub use model::{
+    GemContactAddressInput, GemContactAvatar, GemContactAvatarChoice, GemContactInput, GemContactRow, GemContactScannedAddress, GemContactSession, contact_initials, contact_row,
+};
 pub use store::GemContactStore;
 
 #[derive(uniffi::Object)]
@@ -71,10 +73,6 @@ impl GemContactService {
         self.save_address_names(&contact, &addresses).await
     }
 
-    pub fn can_save(&self, name: String, is_saving: bool) -> bool {
-        rules::can_save_contact(&name, is_saving)
-    }
-
     pub fn default_chain(&self) -> Chain {
         rules::default_contact_chain()
     }
@@ -119,10 +117,6 @@ impl GemManageContactService {
             Ok(GemPayment::Link { link: _ }) | Err(_) => None,
         };
         rules::scanned_address(&input, request.as_ref())
-    }
-
-    pub fn can_save(&self, name: String, is_saving: bool) -> bool {
-        rules::can_save_contact(&name, is_saving)
     }
 
     pub fn default_chain(&self) -> Chain {
