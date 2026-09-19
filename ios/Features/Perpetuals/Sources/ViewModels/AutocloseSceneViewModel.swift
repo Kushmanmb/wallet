@@ -50,13 +50,13 @@ public final class AutocloseSceneViewModel {
     }
 
     public init(type: AutocloseType, currencyFormatter: CurrencyFormatter = .usd) {
+        let session = Self.session(for: type)
+        let separator = NumberInput.format(.current).decimalSeparator
+
         self.type = type
         self.currencyFormatter = currencyFormatter
-        estimator = Self.estimator(for: type)
-        let session = Self.session(for: type)
         self.session = session
-
-        let separator = NumberInput.format(.current).decimalSeparator
+        estimator = Self.estimator(for: type)
         input = AutocloseInput(
             type: type,
             takeProfitText: session.initialText(tpslType: .takeProfit, decimalSeparator: separator),
