@@ -43,6 +43,7 @@ import uniffi.gemstone.GemTransactionParticipantRole
 import uniffi.gemstone.GemTransactionTitle
 import uniffi.gemstone.transactionDetailSections
 import uniffi.gemstone.GemValueStyle
+import uniffi.gemstone.BlockExplorerLink
 
 class GetTransactionDetailsImpl(
     private val getSession: GetSession,
@@ -111,7 +112,7 @@ class TransactionDetailsAggregateImpl(
 
     val participant: TransactionDetailsValue.Destination? = rows.participant?.destination()
 
-    override val explorer: TransactionDetailsValue.Explorer = TransactionDetailsValue.Explorer(rows.explorer.link, rows.explorer.name)
+    override val explorer: BlockExplorerLink = rows.explorer
 
     val swapProgress: TransactionDetailsValue.SwapProgress? = rows.swapProgress?.let { progress ->
         TransactionDetailsValue.SwapProgress(

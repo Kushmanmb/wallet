@@ -107,7 +107,5 @@ sealed interface TransactionDetailsValue {
         val toAssetId: AssetId,
     ) : TransactionDetailsValue
 
-    class Explorer(val url: String, val name: String) : TransactionDetailsValue
-
     class Row(val row: GemListRow) : TransactionDetailsValue
 }

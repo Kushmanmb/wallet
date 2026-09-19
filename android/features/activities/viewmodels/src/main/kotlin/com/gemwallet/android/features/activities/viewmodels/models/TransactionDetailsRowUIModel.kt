@@ -37,7 +37,6 @@ internal fun TransactionDetailsValue.uiModel(context: Context, asset: Asset): Tr
             info = InfoSheetEntity.EstimatedConfirmationInfo(asset.chain),
         ),
     )
-    is TransactionDetailsValue.Explorer -> TransactionDetailsRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)
     is TransactionDetailsValue.Destination -> TransactionDetailsRowUIModel.Address(
         title = context.getString(stringRes()),
         address = data,

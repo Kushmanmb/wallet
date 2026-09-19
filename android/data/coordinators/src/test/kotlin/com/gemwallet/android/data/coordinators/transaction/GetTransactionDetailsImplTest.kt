@@ -86,7 +86,7 @@ class GetTransactionDetailsImplTest {
         assertEquals("NEAR Intents", result?.explorer?.name)
         assertEquals(
             "https://explorer.near-intents.org/transactions/${transaction.to}",
-            result?.explorer?.url,
+            result?.explorer?.link,
         )
     }
 }

@@ -63,7 +63,7 @@ class TransactionDetailsAggregateImplTest {
         Assert.assertEquals(btcAsset, aggregate.asset)
         Assert.assertEquals(Currency.USD, aggregate.currency)
         Assert.assertEquals("Mempool", aggregate.explorer.name)
-        Assert.assertEquals("https://mempool.space/tx/1", aggregate.explorer.url)
+        Assert.assertEquals("https://mempool.space/tx/1", aggregate.explorer.link)
     }
 
     @Test

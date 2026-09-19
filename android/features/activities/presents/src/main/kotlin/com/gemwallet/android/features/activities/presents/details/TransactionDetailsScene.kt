@@ -105,7 +105,6 @@ internal fun TransactionDetailsScene(
                         is TransactionDetailsValue.Destination,
                         is TransactionDetailsValue.SwapProgress,
                         is TransactionDetailsValue.Fee,
-                        is TransactionDetailsValue.Explorer,
                         is TransactionDetailsValue.Row,
                         is TransactionDetailsValue.EstimatedConfirmation -> Unit
                         is TransactionDetailsValue.Rate -> AssetRatePropertyItem(item.rate, position)
