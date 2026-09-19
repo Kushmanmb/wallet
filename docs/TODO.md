@@ -32,7 +32,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 [ARCHITECTURE.md § 5](ARCHITECTURE.md#a-view-never-names-a-core-type): what must not appear inside a SwiftUI `body` or a `@Composable` is the generated type itself; a `switch` over a Core enum inside the view and a Core record handed to a child view's initializer both move into the model unchanged. The 2026-09-15 sweep closed this family (B9/B10) as "the contract working" — that closure was wrong against the rule as written two days earlier, and it is reopened here with the count measured against the 644 generated type names rather than the `Gem` prefix, which the app's own `GemTextField`/`GemLineChart` components share.
 
-- **B74** **M** The rich rows the contract keeps outside the model — asset, wallet, chain, NFT, transaction, delegation, validator, swap-provider, and the network, validator and balance composites — each carry a heavier title and their own spacing on Android while their iOS twins are `ListAssetItemView` and friends. The reverse split exists too: iOS draws the recents assets and the delegation row through `ListItemModel` with a semibold title (`RecentsSceneViewModel.listItem`, `DelegationViewModel.listItem`) where Android draws `AssetListItem` and the delegation composite. Decide per composite whether it becomes a `ListItemModel` variant (a leading composite plus the model) or stays, and write the outcome into ARCHITECTURE § 5 by name; today the section names the family, not the files.
 
 - **R7** **M** Perpetual position detail rows — `GemPerpetualPositionDetailRow` (7 bare arms) is switched in iOS `PerpetualPositionViewModel.detailField` and Android `PerpetualDetailsUIModel` — a record with finished values.
 
@@ -122,6 +121,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**B74 (2026-09-19).** Decided per composite and written into [ARCHITECTURE § 5](ARCHITECTURE.md#a-view-never-names-a-core-type) by name: every rich row stays a composite on both apps (asset, recent assets, wallet, chain, NFT, transaction, delegation, validator, swap provider, network, balance), paired with its twin. The reverse split is the same weight reached two ways: iOS draws the recents and delegation rows through the row primitive with an explicit semibold title, which is the rich family's iOS form.
 
 **R86 (2026-09-19).** Closed as correct: the decision in the simulation header, an exact amount or an unlimited approval, is already Core's `GemApprovalValue`, and both apps only turn the exact big integer into locale text with the full style. Locale formatting is the apps' half of the split, and moving it into Core would route a transaction-critical amount through `GemFormattedNumber`'s `f64`, which cannot carry a full-precision approval.
 
