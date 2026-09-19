@@ -61,7 +61,6 @@ class GetWalletSummaryImpl(
                 balances = balances,
                 perpetual = perpetualBalance?.toGem(),
                 banners = banners.map { it.toDTO().toGem() },
-                isWalletEmpty = balances.all { it.amount == 0.0 },
             )
 
             WalletSummaryAggregateImpl(

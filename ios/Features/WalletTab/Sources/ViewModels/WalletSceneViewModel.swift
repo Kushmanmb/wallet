@@ -122,7 +122,6 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
             balances: fiatValuesQuery.value,
             perpetual: perpetualBalanceQuery.value,
             banners: bannersQuery.value,
-            isWalletEmpty: assets.allSatisfy(\.balance.total.isZero),
         )
         return WalletHomeState(
             sections: AssetsSections.from(assets),

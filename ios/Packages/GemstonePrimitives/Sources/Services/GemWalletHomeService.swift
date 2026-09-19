@@ -7,13 +7,12 @@ import struct Gemstone.GemWalletHomeViewState
 import Primitives
 
 public extension GemWalletHomeServiceProtocol {
-    func viewState(wallet: Wallet, balances: [AssetFiatValue], perpetual: PerpetualBalance?, banners: [Banner], isWalletEmpty: Bool) -> GemWalletHomeViewState {
+    func viewState(wallet: Wallet, balances: [AssetFiatValue], perpetual: PerpetualBalance?, banners: [Banner]) -> GemWalletHomeViewState {
         viewState(
             wallet: wallet.toGem(),
             balances: balances.map { $0.toGem() },
             perpetual: perpetual?.toGem(),
             banners: banners.map { $0.toGem() },
-            isWalletEmpty: isWalletEmpty,
         )
     }
 

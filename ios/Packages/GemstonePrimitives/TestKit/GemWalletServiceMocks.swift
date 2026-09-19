@@ -212,7 +212,7 @@ public final class GemWalletHomeServiceMock: GemWalletHomeServiceProtocol, @unch
         Gemstone.GemAssetRowStyle(title: .asset, showsSymbol: false, subtitle: .price, trailing: .balance)
     }
 
-    public func viewState(wallet: Gemstone.Wallet, balances: [Gemstone.AssetFiatValue], perpetual: Gemstone.PerpetualBalance?, banners: [Gemstone.Banner], isWalletEmpty: Bool) -> GemWalletHomeViewState {
+    public func viewState(wallet: Gemstone.Wallet, balances: [Gemstone.AssetFiatValue], perpetual: Gemstone.PerpetualBalance?, banners: [Gemstone.Banner]) -> GemWalletHomeViewState {
         let value = balances.reduce(0.0) { $0 + $1.amount * $1.price } + (perpetual.map { $0.available + $0.reserved } ?? 0)
         let total = Gemstone.TotalFiatValue(value: value, pnlAmount: 0, pnlPercentage: 0)
         let isEnabled = !banners.contains { $0.event == .accountBlockedMultiSignature }
@@ -224,7 +224,7 @@ public final class GemWalletHomeServiceMock: GemWalletHomeServiceProtocol, @unch
             hasAvailableBalance: false,
             isAssetActivated: true,
             assetRankScore: nil,
-            isWalletEmpty: isWalletEmpty,
+            isWalletEmpty: balances.allSatisfy { $0.amount == 0 },
         )
         return GemWalletHomeViewState(
             totalValue: total,

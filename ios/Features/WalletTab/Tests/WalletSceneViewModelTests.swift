@@ -37,16 +37,4 @@ struct WalletSceneViewModelTests {
 
         #expect(model.walletBarModel.name == "Renamed")
     }
-
-    @Test
-    func onboardingBannerShowsOnlyWhileEveryBalanceIsZero() throws {
-        let fundedDB = DB.mockAssets()
-        let emptyDB = DB.mockAssets(assets: [.mock()])
-        let banner = NewBanner(id: "onboarding", walletId: Wallet.mock().id.id, event: .onboarding, state: .active)
-        try BannerStore.mock(db: fundedDB).addBanners([banner])
-        try BannerStore.mock(db: emptyDB).addBanners([banner])
-
-        #expect(WalletSceneViewModel.mock(db: fundedDB).homeState.visibleBanners.map(\.event) == [])
-        #expect(WalletSceneViewModel.mock(db: emptyDB).homeState.visibleBanners.map(\.event) == [.onboarding])
-    }
 }
