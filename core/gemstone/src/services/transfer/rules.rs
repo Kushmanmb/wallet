@@ -562,8 +562,8 @@ impl GemPendingTransactionInput {
             metadata,
             Utc::now(),
         );
-        transaction.block_number = Some(transaction_metadata_block_number(&self.metadata));
-        transaction.sequence = Some(transaction_metadata_sequence(&self.metadata));
+        transaction.block_number = transaction_metadata_block_number(&self.metadata);
+        transaction.sequence = transaction_metadata_sequence(&self.metadata);
         transaction.direction = direction;
         Ok(Some(transaction))
     }

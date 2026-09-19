@@ -218,17 +218,17 @@ impl From<SignerInput> for GemSignerInput {
     }
 }
 
-pub fn transaction_metadata_block_number(metadata: &GemTransactionLoadMetadata) -> String {
+pub fn transaction_metadata_block_number(metadata: &GemTransactionLoadMetadata) -> Option<String> {
     match metadata {
         GemTransactionLoadMetadata::Polkadot { block_number, .. }
         | GemTransactionLoadMetadata::Tron { block_number, .. }
         | GemTransactionLoadMetadata::Xrp { block_number, .. }
-        | GemTransactionLoadMetadata::Cardano { block_number, .. } => block_number.to_string(),
-        _ => "0".to_string(),
+        | GemTransactionLoadMetadata::Cardano { block_number, .. } => Some(block_number.to_string()),
+        _ => None,
     }
 }
 
-pub fn transaction_metadata_sequence(metadata: &GemTransactionLoadMetadata) -> String {
+pub fn transaction_metadata_sequence(metadata: &GemTransactionLoadMetadata) -> Option<String> {
     match metadata {
         GemTransactionLoadMetadata::Ton { sequence, .. }
         | GemTransactionLoadMetadata::Cosmos { sequence, .. }
@@ -237,9 +237,9 @@ pub fn transaction_metadata_sequence(metadata: &GemTransactionLoadMetadata) -> S
         | GemTransactionLoadMetadata::Xrp { sequence, .. }
         | GemTransactionLoadMetadata::Algorand { sequence, .. }
         | GemTransactionLoadMetadata::Aptos { sequence, .. }
-        | GemTransactionLoadMetadata::Polkadot { sequence, .. } => sequence.to_string(),
-        GemTransactionLoadMetadata::Evm { nonce, .. } => nonce.to_string(),
-        _ => "0".to_string(),
+        | GemTransactionLoadMetadata::Polkadot { sequence, .. } => Some(sequence.to_string()),
+        GemTransactionLoadMetadata::Evm { nonce, .. } => Some(nonce.to_string()),
+        _ => None,
     }
 }
 
@@ -326,5 +326,16 @@ mod tests {
             ..fee
         };
         assert_eq!(fee.options.items(), vec![]);
+    }
+
+    #[test]
+    fn test_metadata_without_a_block_or_sequence_stores_none() {
+        let bitcoin = GemTransactionLoadMetadata::Bitcoin { utxos: vec![] };
+        assert_eq!(transaction_metadata_block_number(&bitcoin), None);
+        assert_eq!(transaction_metadata_sequence(&bitcoin), None);
+
+        let xrp = GemTransactionLoadMetadata::Xrp { sequence: 7, block_number: 91 };
+        assert_eq!(transaction_metadata_block_number(&xrp), Some("91".to_string()));
+        assert_eq!(transaction_metadata_sequence(&xrp), Some("7".to_string()));
     }
 }
