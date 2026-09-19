@@ -6,4 +6,4 @@
 --exclude ./Packages/Localization/WidgetSources/WidgetLocalized.swift
 --maxwidth 240
 --test-case-name-format standard-identifiers
---disable wrapPropertyBodies
+--disable wrapPropertyBodies,noForceUnwrapInTests
