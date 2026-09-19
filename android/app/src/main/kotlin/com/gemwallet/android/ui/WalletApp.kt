@@ -29,7 +29,6 @@ import com.gemwallet.android.ext.updateUrl
 import com.gemwallet.android.features.onboarding.AcceptTermsDestination
 import com.gemwallet.android.features.onboarding.OnboardScreen
 import com.gemwallet.android.flavors.ReviewManager
-import com.gemwallet.android.ui.components.PushRequest
 import com.gemwallet.android.ui.navigation.WalletNavGraph
 import com.gemwallet.android.ui.navigation.WalletRootRoute
 import com.gemwallet.android.ui.navigation.rememberWalletNavigationState
@@ -133,11 +132,10 @@ fun WalletApp(
         }
     }
 
-    if (askNotifications) {
-        PushRequest(
-            onNotificationEnable = viewModel::onNotificationsEnable,
-            onDismiss = viewModel::laterAskNotifications,
-        )
+    LaunchedEffect(askNotifications) {
+        if (askNotifications) {
+            viewModel.onNotificationsEnable()
+        }
     }
 }
 

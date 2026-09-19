@@ -8,7 +8,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.features.asset.viewmodels.details.viewmodels.AssetDetailsViewModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.RefreshOnTimer
-import com.gemwallet.android.ui.components.rememberNotificationPermissionGate
 import com.gemwallet.android.ui.components.screen.LoadingScene
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 import com.gemwallet.android.ui.localization.text
@@ -26,7 +25,6 @@ fun AssetDetailsScreen(
     val snackBar = rememberSnackbarState(message = priceAlertError?.text(), iconRes = R.drawable.ic_error, onShown = viewModel::clearError)
     ToastEffect(viewModel.toastEvents, snackBar)
     val uiModel by viewModel.uiModel.collectAsStateWithLifecycle()
-    val requestNotificationPermission = rememberNotificationPermissionGate()
 
     val refreshIntervalMillis by viewModel.refreshIntervalMillis.collectAsStateWithLifecycle()
     RefreshOnTimer(refreshIntervalMillis, viewModel::refresh)
@@ -38,7 +36,6 @@ fun AssetDetailsScreen(
             transactionsErrorRow = transactionsErrorRow,
             isRefreshing = isRefreshing,
             snackBar = snackBar,
-            requestNotificationPermission = requestNotificationPermission,
             onAction = { action ->
                 when (action) {
                     AssetDetailsAction.Refresh -> viewModel.refresh()

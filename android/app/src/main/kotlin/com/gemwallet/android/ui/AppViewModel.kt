@@ -153,12 +153,6 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    fun laterAskNotifications() {
-        viewModelScope.launch(ioDispatcher) {
-            userConfig.stopAskNotifications()
-        }
-    }
-
     private fun rateAs() {
         userConfig.increaseLaunchNumber()
         if (!userConfig.shouldRequestReview()) {

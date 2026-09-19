@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.ui.R
-import com.gemwallet.android.ui.components.rememberNotificationPermissionGate
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 import com.gemwallet.android.ui.components.screen.showSnackbar
 import com.gemwallet.android.features.settings.price_alerts.viewmodels.PriceAlertViewModel
@@ -46,7 +45,6 @@ fun PriceAlertsNavScreen(
     }
 
     var selectingAsset by remember { mutableStateOf(false) }
-    val requestNotificationPermission = rememberNotificationPermissionGate()
 
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val isAutoAlertEnabled by viewModel.isAutoAlertEnabled.collectAsStateWithLifecycle()
@@ -59,12 +57,10 @@ fun PriceAlertsNavScreen(
             true -> PriceAlertSelectScreen(
                 onCancel = { selectingAsset = false },
                 onSelect = { assetId ->
-                    requestNotificationPermission {
-                        viewModel.includeAsset(assetId) { asset ->
-                            val message = resources.getString(R.string.price_alerts_enabled_for, asset.name)
-                            scope.launch {
-                                snackbar.showSnackbar(message, R.drawable.ic_notifications)
-                            }
+                    viewModel.includeAsset(assetId) { asset ->
+                        val message = resources.getString(R.string.price_alerts_enabled_for, asset.name)
+                        scope.launch {
+                            snackbar.showSnackbar(message, R.drawable.ic_notifications)
                         }
                     }
                     selectingAsset = false
@@ -80,16 +76,8 @@ fun PriceAlertsNavScreen(
                 snackbar = snackbar,
                 onAction = { action ->
                     when (action) {
-                        is PriceAlertAction.TogglePriceAlerts -> if (action.enabled) {
-                            requestNotificationPermission { viewModel.togglePriceAlerts(true) }
-                        } else {
-                            viewModel.togglePriceAlerts(false)
-                        }
-                        is PriceAlertAction.ToggleAutoAlert -> if (action.enabled) {
-                            requestNotificationPermission { viewModel.toggleAutoAlert(true) }
-                        } else {
-                            viewModel.toggleAutoAlert(false)
-                        }
+                        is PriceAlertAction.TogglePriceAlerts -> viewModel.togglePriceAlerts(action.enabled)
+                        is PriceAlertAction.ToggleAutoAlert -> viewModel.toggleAutoAlert(action.enabled)
                         is PriceAlertAction.Exclude -> viewModel.excludeAsset(action.id)
                         PriceAlertAction.Refresh -> viewModel.refresh()
                         PriceAlertAction.Add -> selectingAsset = true

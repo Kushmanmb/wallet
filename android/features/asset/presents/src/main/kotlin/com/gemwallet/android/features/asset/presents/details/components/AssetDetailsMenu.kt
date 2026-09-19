@@ -29,7 +29,6 @@ import com.wallet.core.primitives.AssetId
 fun RowScope.AssetDetailsMenu(
     uiState: AssetInfoUIModel,
     priceAlert: PriceAlertMenuUIModel,
-    requestNotificationPermission: (() -> Unit) -> Unit,
     onPriceAlert: (AssetId) -> Unit,
 ) {
     val context = LocalContext.current
@@ -48,13 +47,7 @@ fun RowScope.AssetDetailsMenu(
     }
 
     IconButton(
-        onClick = {
-            if (priceAlert.needsPermission) {
-                requestNotificationPermission(enablePriceAlert)
-            } else {
-                enablePriceAlert()
-            }
-        }
+        onClick = enablePriceAlert
     ) {
         Icon(priceAlert.symbol.vector(), "")
     }

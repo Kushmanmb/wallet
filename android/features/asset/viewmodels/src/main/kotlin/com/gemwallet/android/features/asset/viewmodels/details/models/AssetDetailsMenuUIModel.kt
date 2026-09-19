@@ -8,7 +8,6 @@ import uniffi.gemstone.GemAssetEmptyAction
 import uniffi.gemstone.GemPriceAlertToggle
 
 data class PriceAlertMenuUIModel(
-    val needsPermission: Boolean,
     @param:StringRes val toastRes: Int,
     val symbol: ListItemSymbol,
 )
@@ -19,7 +18,6 @@ data class EmptyTransactionsUIModel(
 )
 
 internal fun GemPriceAlertToggle.menu(): PriceAlertMenuUIModel = PriceAlertMenuUIModel(
-    needsPermission = this == GemPriceAlertToggle.DISABLED,
     toastRes = toastRes(),
     symbol = symbol(),
 )

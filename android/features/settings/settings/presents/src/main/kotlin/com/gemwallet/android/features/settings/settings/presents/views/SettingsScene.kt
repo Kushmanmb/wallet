@@ -34,7 +34,6 @@ import com.gemwallet.android.features.settings.settings.viewmodels.models.opensD
 import com.gemwallet.android.features.settings.settings.viewmodels.models.settingsAction
 import com.gemwallet.android.ui.BuildConfig
 import com.gemwallet.android.ui.R
-import com.gemwallet.android.ui.components.PushRequest
 import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.ListPosition
@@ -52,20 +51,15 @@ fun SettingsScene(
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val pushEnabled by viewModel.pushEnabled.collectAsStateWithLifecycle()
     var isShowDevelopEnable by remember { mutableStateOf(false) }
-    var requestPushGrant by remember { mutableStateOf<(() -> Unit)?>(null) }
     val notificationsAvailable = viewModel.notificationsAvailable
 
     LaunchedEffect(walletConnectEnabled) { viewModel.setWalletConnectAvailable(walletConnectEnabled) }
 
     val onRowAction: (SettingsSceneAction) -> Unit = { action ->
         if (action == SettingsSceneAction.Support && notificationsAvailable && !pushEnabled) {
-            requestPushGrant = {
-                viewModel.enableNotifications()
-                onAction(action)
-            }
-        } else {
-            onAction(action)
+            viewModel.enableNotifications()
         }
+        onAction(action)
     }
 
     Scene(
@@ -109,14 +103,5 @@ fun SettingsScene(
             }
             Spacer(modifier = Modifier.size(it.calculateBottomPadding()))
         }
-    }
-
-    requestPushGrant?.let {
-        PushRequest(
-            onNotificationEnable = {
-                it()
-                requestPushGrant = null
-            }
-        ) { requestPushGrant = null }
     }
 }

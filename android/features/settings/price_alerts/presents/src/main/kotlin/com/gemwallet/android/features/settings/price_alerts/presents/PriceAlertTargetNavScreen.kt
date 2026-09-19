@@ -8,7 +8,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.features.settings.price_alerts.viewmodels.PriceAlertTargetViewModel
 import com.gemwallet.android.features.settings.price_alerts.viewmodels.models.PriceAlertConfirmResult
 import com.gemwallet.android.ui.R
-import com.gemwallet.android.ui.components.rememberNotificationPermissionGate
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.style.textStyle
@@ -36,8 +35,6 @@ fun PriceAlertTargetNavScreen(
     val error by viewModel.error.collectAsStateWithLifecycle()
     val snackbar = rememberSnackbarState(message = error?.text(), iconRes = R.drawable.ic_error, onShown = viewModel::clearError)
 
-    val requestNotificationPermission = rememberNotificationPermissionGate()
-
     PriceAlertTargetScene(
         value = viewModel.value,
         type = type,
@@ -56,9 +53,7 @@ fun PriceAlertTargetNavScreen(
         onType = viewModel::onType,
         onDirection = viewModel::onDirection,
         onConfirm = {
-            viewModel.onConfirm { result ->
-                requestNotificationPermission { onComplete(result.toMessage(resources)) }
-            }
+            viewModel.onConfirm { result -> onComplete(result.toMessage(resources)) }
         },
         onCancel = onCancel,
     )

@@ -40,7 +40,6 @@ internal fun AssetDetailsScene(
     uiState: AssetInfoUIModel,
     transactions: List<TransactionDataAggregate>,
     transactionsErrorRow: GemListRow?,
-    requestNotificationPermission: (() -> Unit) -> Unit,
     isRefreshing: Boolean,
     snackBar: SnackbarHostState = remember { SnackbarHostState() },
     onAction: (AssetDetailsAction) -> Unit,
@@ -78,7 +77,6 @@ internal fun AssetDetailsScene(
             AssetDetailsMenu(
                 uiState = uiState,
                 priceAlert = uiState.priceAlertMenu,
-                requestNotificationPermission = requestNotificationPermission,
                 onPriceAlert = { onAction(AssetDetailsAction.TogglePriceAlert(it)) },
             )
         },
