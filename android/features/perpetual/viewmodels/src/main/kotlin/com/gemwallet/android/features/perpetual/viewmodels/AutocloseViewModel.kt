@@ -36,13 +36,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import uniffi.gemstone.AutocloseValidator
-import uniffi.gemstone.GemAutocloseConfirmPolicy
 import uniffi.gemstone.GemAutocloseEstimator
 import uniffi.gemstone.GemAutocloseField
-import uniffi.gemstone.GemAutocloseModify
-import uniffi.gemstone.GemAutoclosePrices
 import uniffi.gemstone.GemAutocloseSession
+import uniffi.gemstone.autocloseSession
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -127,54 +124,25 @@ class AutocloseViewModel @Inject constructor(
     fun onConfirm() {
         submitAttempted.value = true
         val position = position.value ?: return
-        val assetIndex = position.perpetual.identifier.toIntOrNull() ?: return
-        val takeProfitField = autocloseField(position, TpslType.TakeProfit, takeProfitText.value)
-        val stopLossField = autocloseField(position, TpslType.StopLoss, stopLossText.value)
-        val modify = GemAutocloseModify(position.position.direction.toGem(), assetIndex, takeProfitField, stopLossField)
-        if (!GemAutocloseSession(modify, GemAutocloseConfirmPolicy.UNTIL_SUBMITTED, true, prices(position)).viewState().confirmEnabled) return
-        _confirmRequests.tryEmit(ConfirmTransferInput(modify.transfer(position.perpetual.provider.toGem(), position.asset.toGem())))
+        val session = session(position, takeProfitText.value, stopLossText.value).onSubmitAttempt()
+        if (!session.viewState().confirmEnabled) return
+        val transfer = runCatching { session.modify.transfer(position.perpetual.provider.toGem(), position.asset.toGem()) }.getOrNull() ?: return
+        _confirmRequests.tryEmit(ConfirmTransferInput(transfer))
     }
+
+    private fun session(position: PerpetualPositionData, takeProfitText: String, stopLossText: String): GemAutocloseSession = autocloseSession(position.perpetual.toGem(), position.asset.toGem(), position.position.toGem())
+        .onPrice(TpslType.TakeProfit.toGem(), takeProfitText.parseInputNumberOrNull()?.toDouble())
+        .onPrice(TpslType.StopLoss.toGem(), stopLossText.parseInputNumberOrNull()?.toDouble())
 
     private fun buildUiModel(position: PerpetualPositionData, takeProfitText: String, stopLossText: String, submitAttempted: Boolean): AutocloseUIModel {
-        val takeProfit = autocloseField(position, TpslType.TakeProfit, takeProfitText)
-        val stopLoss = autocloseField(position, TpslType.StopLoss, stopLossText)
-        val state = GemAutocloseSession(
-            GemAutocloseModify(position.position.direction.toGem(), 0, takeProfit, stopLoss),
-            GemAutocloseConfirmPolicy.UNTIL_SUBMITTED,
-            submitAttempted,
-            prices(position),
-        ).viewState()
+        val session = session(position, takeProfitText, stopLossText).let { if (submitAttempted) it.onSubmitAttempt() else it }
         return AutocloseUIModelFactory.create(
             position = position,
-            takeProfit = takeProfit,
-            stopLoss = stopLoss,
-            state = state,
+            takeProfit = session.modify.takeProfit,
+            stopLoss = session.modify.stopLoss,
+            state = session.viewState(),
         )
     }
-
-    private fun autocloseField(position: PerpetualPositionData, type: TpslType, text: String): GemAutocloseField {
-        val price = text.parseInputNumberOrNull()?.toDouble()
-        val original = when (type) {
-            TpslType.TakeProfit -> position.position.takeProfit
-            TpslType.StopLoss -> position.position.stopLoss
-        }
-        val validator = AutocloseValidator(type.toGem(), position.position.direction.toGem(), position.perpetual.price)
-        return GemAutocloseField(
-            tpslType = type.toGem(),
-            price = price,
-            originalPrice = original?.price,
-            formattedPrice = price?.let {
-                PerpetualFormatter.formatPrice(position.perpetual.provider, it, position.asset.decimals)
-            },
-            validation = validator.validate(price),
-            orderId = original?.order_id?.toULongOrNull(),
-        )
-    }
-
-    private fun prices(position: PerpetualPositionData) = GemAutoclosePrices(
-        entry = position.position.entryPrice,
-        market = position.perpetual.price,
-    )
 
     private fun estimator(position: PerpetualPositionData) = GemAutocloseEstimator(
         entryPrice = position.position.entryPrice,
@@ -184,16 +152,9 @@ class AutocloseViewModel @Inject constructor(
     )
 
     private fun initialText(position: PerpetualPositionData?, type: TpslType): String {
-        val trigger = position?.let {
-            when (type) {
-                TpslType.TakeProfit -> it.position.takeProfit
-                TpslType.StopLoss -> it.position.stopLoss
-            }
-        } ?: return ""
-        return PerpetualFormatter.formatInputPrice(
-            provider = position.perpetual.provider,
-            price = trigger.price,
-            decimals = position.asset.decimals,
-        )
+        position ?: return ""
+        return autocloseSession(position.perpetual.toGem(), position.asset.toGem(), position.position.toGem())
+            .initialText(type.toGem(), numberFormat().decimalSeparator.toString())
+            .orEmpty()
     }
 }

@@ -16,7 +16,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 
 ## Execution order
 
-1. **Protect correctness:** S71, P88/P89, K15/K16, F55/F59 and D60; resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
+1. **Protect correctness:** P89, K15/K16, F55/F59 and D60; resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
 2. **Establish consistency:** MIG1–MIG4 and MIG6; apply the atomic-write contract to U22–U24. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, C53 wallet creation/import with D43/R124, C54 transaction tracking, and D61 device observation. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
@@ -45,17 +45,17 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | S83, R106/R120/R122, D50/D64, U15, S80 |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | D66, R98/R112, K14/K19, U24, O59 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73/S81, R96/R128, U28, F61/F62 |
-| Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | S71/S75, R97, V91, K14 |
+| Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | S75, R97, V91, K14 |
 | Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | R100/R101/R118, D60; preserve exact atomic values |
 | Earn list, provider and deposit amount | Existing stake/earn owner and amount extras | D59, R119, R100/R101; preserve the existing feature gate |
 | NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | U27, R114–R116, S80 |
-| Price-alert list/target/auto-alert controls | `GemPriceAlertService`, alert session and existing notification port | MIG4, R109/R129, D68/D69, P88/P97, S80, B80 |
+| Price-alert list/target/auto-alert controls | `GemPriceAlertService`, alert session and existing notification port | MIG4, R109/R129, D68/D69, P97, S80, B80 |
 | Rewards/create/use/redeem referral | `GemRewardsService`, rewards state, shared load and list records | S79, D47, R104/R123, B77, V91 |
 | Contacts/list/editor/address picker | `GemContactService`, `GemManageContactService`, contact session/name component | U21/U22, D62/D65, O60, V92 |
 | Networks/node list/add/check | `GemChainSettingsService`, node sessions, shared rows | K20, D62, R131 |
 | Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | R108, D61, B77, O59; retain native locale/theme application |
 | Security/lock/biometry/recovery | `GemSecurityService`, existing keystore/auth ports and settings sections | D72, B77, X172; retain platform-only privacy lock |
-| Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | P88/P97, D48/D49/D58, S80, B77/B80 |
+| Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | P97, D48/D49/D58, S80, B77/B80 |
 | WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | P89, U14, F57, D71–D73; retain Android-only one-click auth |
 | About, app update, developer/service status | Existing settings/update/developer services and native store adapters | R117/R131, B77; platform delivery channels remain distinct |
 | Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | U9/U17, F61/F62; retain native widget scheduling |
@@ -83,7 +83,6 @@ These are additional tasks from the architecture review. MIG ids are a new names
 
 Found on 2026-09-19 and verified in the code: transaction-critical input, parsing that changes a shown amount, crashes, and regressions the earlier row migrations introduced. Work these before anything below.
 
-- **S71** **M** The iOS autoclose modify order falls back to asset index 0, a real HyperCore market, when the perpetual identifier does not parse (`AutocloseSceneViewModel.swift:189-193`, `Int32(identifier) ?? 0`), where Android returns without an order (`AutocloseViewModel.kt:132`) and Core's `asset_index` fails closed (`perpetual/rules.rs:341`); iOS `AutocloseInput.swift:79` also overrides Core's validation for a missing price. `GemPerpetualDetailsService::autoclose_session(perpetual, asset, position)` seeds a `GemAutocloseSession` with the modify input, original prices and order ids; delete the iOS field, asset-index and order-id helpers and Android `autocloseField`/`prices`/`initialText`.
 - **P89** **S** A failed WalletConnect proposal is rejected with different CAIP-25 codes: iOS maps Core's `GemWalletConnectError` (`RejectionReason+WalletConnectorService.swift:21-28`: unsupported chains 5100, unsupported accounts 5103), Android rejects every `prepareSessionProposal` failure as user-rejected 5000 (`ProposalSceneViewModel.kt:129-132`) and toasts only an invalid origin. `GemWalletConnectError::rejection_reason()`, or failures carry the finished `GemWalletConnectRejection` with a notice.
 - **K15** **M** Which transactions belong to an asset exists three times: Core `Transaction::asset_ids()` (`primitives/transaction.rs:285-310`, includes NEAR multi-token transfers), an iOS copy without them saved at write time (`Transaction+Primitives.swift:14-39`, `TransactionStore.swift:140-155`), and Android SQL fed by an app-side swap-metadata decode (`TransactionSwapMetadata.kt:11-25`) that throws on a swap leg on a chain the build does not know, failing the whole `saveTransactions` batch so the activity sync fails on every retry. `save_transactions` carries Core's asset ids per transaction; delete iOS `Transaction.assetIds` and Android's decode.
 - **K16** **S** The wallet header counts perpetual USDC collateral at price 1.0 in the user's currency (`wallet_home/rules.rs:9-17`), while every other entry is converted by the rate, so $1,000 of collateral adds €1,000 or ¥1,000; the only test is USD. `includes_perpetual_collateral` also turns a failed wallet read into "exclude" (`wallet_home/mod.rs:131-137`). Price it through `rate_or_base`, add a non-USD test, propagate the error. `view_state` is synchronous and the rate sits behind the async price store, so the collateral price reaches Core through the balance record the apps already read (iOS `PerpetualWalletBalanceRequest`, Android `GetPerpetualBalance`) joined to the stored collateral price.
@@ -260,7 +259,7 @@ None of these is a code change until someone chooses; each is written so the cho
 
 ## Coverage
 
-The retained items came from the earlier two reviews on 2026-09-19. This architecture pass rechecked 56 distinct existing items: U14/U15/U19/U22–U25/U27–U30, K16/K18, C51, S71–S75/S79/S81–S83, R87/R94–R97/R100/R101/R104/R106/R118–R120/R122/R123/R129, D47/D49–D51/D55/D58–D61/D66/D67/D71, P89/P90, B78, F53/F55 and O59. It also narrowed the descriptions of R114/P97 and added MIG1–MIG6. U20, R87 and F53 have since landed on main and are no longer open work. Source-level failure interleavings are not runtime reproductions; the tasks specify the tests still required.
+The retained items came from the earlier two reviews on 2026-09-19. This architecture pass rechecked 56 distinct existing items: U14/U15/U19/U22–U25/U27–U30, K16/K18, C51, S71–S75/S79/S81–S83, R87/R94–R97/R100/R101/R104/R106/R118–R120/R122/R123/R129, D47/D49–D51/D55/D58–D61/D66/D67/D71, P89/P90, B78, F53/F55 and O59. It also narrowed the descriptions of R114/P97 and added MIG1–MIG6. U20, R87, F53, P88 and S71 have since landed on main and are no longer open work. Source-level failure interleavings are not runtime reproductions; the tasks specify the tests still required.
 
 **Pass one split the product by area:** transfer, confirm and swap; assets, wallet and charts; perpetuals, earn and stake; settings, rewards and WalletConnect; onboarding, NFT, fiat and activity; and the cross-cutting Core surface. Each area paired its screens across the apps and compared the service held, the session driven, and the branches, sorts, composed strings and error paths.
 
