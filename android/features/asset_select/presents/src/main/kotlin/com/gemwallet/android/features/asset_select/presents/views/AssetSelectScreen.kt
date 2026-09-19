@@ -69,10 +69,7 @@ fun AssetSelectScreen(
         }
         GemAssetTrailingStyle.COPY -> { item ->
             IconButton(
-                onClick = {
-                    viewModel.onChangeVisibility(item.asset.id, true)
-                    clipboardManager.setCopy(context, addressCopy(item.asset.id.chain.string, item.accountAddress))
-                },
+                onClick = { clipboardManager.setCopy(context, addressCopy(item.asset.id.chain.string, item.accountAddress)) },
                 modifier = Modifier.size(iconSize),
             ) {
                 Icon(
