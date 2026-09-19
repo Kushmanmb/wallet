@@ -35,7 +35,6 @@ struct AssetsResultsSceneViewModelTests {
 
         await model.refresh()
 
-        #expect(model.showEmpty)
         if case .empty = model.searchState {} else { Issue.record("expected the empty state, got \(model.searchState)") }
     }
 
@@ -45,7 +44,7 @@ struct AssetsResultsSceneViewModelTests {
 
         await model.refresh()
 
-        #expect(model.showEmpty)
+        if case .empty = model.searchState {} else { Issue.record("expected the empty state, got \(model.searchState)") }
     }
 
     @Test
@@ -55,7 +54,7 @@ struct AssetsResultsSceneViewModelTests {
 
         #expect(model.showPinned)
         #expect(model.showAssets)
-        #expect(model.showEmpty == false)
+        if case .results = model.searchState {} else { Issue.record("expected results, got \(model.searchState)") }
     }
 
     @Test

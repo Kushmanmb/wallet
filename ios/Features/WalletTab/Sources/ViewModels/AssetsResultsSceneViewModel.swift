@@ -12,6 +12,8 @@ import Store
 import Style
 import SwiftUI
 import func Gemstone.addressCopy
+import struct Gemstone.GemWalletSearchCounts
+import func Gemstone.walletSearchPhase
 
 @Observable
 @MainActor
@@ -75,13 +77,20 @@ public final class AssetsResultsSceneViewModel: AssetActions, PerpetualPinAction
         searchQuery.request.scope.isList && sections.perpetuals.isNotEmpty && service.showPerpetuals(walletType: wallet.type.toGem(), chains: wallet.chains.map(\.rawValue))
     }
 
-    var showEmpty: Bool {
-        !showPinned && !showAssets && !showPerpetuals
-    }
-
     var searchState: SearchContentState {
-        guard showEmpty else { return .results }
-        return state.isLoading ? .loading : .empty(.search(type: .assets))
+        let counts = GemWalletSearchCounts(
+            recents: 0,
+            pinned: UInt32(sections.pinnedAssets.count),
+            assets: UInt32(sections.assets.count),
+            perpetuals: showPerpetuals ? UInt32(perpetuals.count) : 0,
+            lists: 0,
+            nfts: 0,
+        )
+        return switch walletSearchPhase(counts: counts, isLoading: state.isLoading) {
+        case .results: .results
+        case .loading: .loading
+        case .empty: .empty(.search(type: .assets))
+        }
     }
 
     func contextMenuItems(for assetData: AssetData) -> [ContextMenuItemType] {
