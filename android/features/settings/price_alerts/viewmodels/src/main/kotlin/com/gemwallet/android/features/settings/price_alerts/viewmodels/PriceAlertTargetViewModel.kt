@@ -19,7 +19,6 @@ import com.gemwallet.android.math.numberFormat
 import com.gemwallet.android.features.settings.price_alerts.viewmodels.localization.stringRes
 import com.gemwallet.android.features.settings.price_alerts.viewmodels.models.PriceAlertConfirmResult
 import com.gemwallet.android.model.CurrencyFormatter
-import com.gemwallet.android.model.NumericFormatter
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.buttonState
 import com.gemwallet.android.ui.models.navigation.RouteArgument
@@ -48,6 +47,7 @@ import uniffi.gemstone.GemPriceAlertSession
 import uniffi.gemstone.GemPriceAlertViewState
 import uniffi.gemstone.GemValueTone
 import uniffi.gemstone.PriceAlertFormatter
+import com.gemwallet.android.math.parseInputNumberOrNull
 
 @HiltViewModel
 class PriceAlertTargetViewModel @Inject constructor(
@@ -57,7 +57,6 @@ class PriceAlertTargetViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val numericFormatter = NumericFormatter()
 
     val value = TextFieldState()
 
@@ -96,7 +95,7 @@ class PriceAlertTargetViewModel @Inject constructor(
         service.newAlertSession(assetId.toIdentifier())
             .onType(type.toGem())
             .onDirection(selectedDirection.toGem())
-            .onInput(numericFormatter.double(text.toString()))
+            .onInput(text.toString().parseInputNumberOrNull()?.toDouble())
             .onPrice(currentPrice)
             .onSaving(saving)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, service.newAlertSession(assetId.toIdentifier()))
@@ -136,7 +135,7 @@ class PriceAlertTargetViewModel @Inject constructor(
     }
 
     fun onConfirm(onSaved: (PriceAlertConfirmResult) -> Unit) {
-        val inputValue = numericFormatter.double(value.text.toString()) ?: return
+        val inputValue = value.text.toString().parseInputNumberOrNull()?.toDouble() ?: return
         val type = type.value
         val direction = resolvedDirection.value ?: return
         val priceAlert = session.value.alert() ?: return

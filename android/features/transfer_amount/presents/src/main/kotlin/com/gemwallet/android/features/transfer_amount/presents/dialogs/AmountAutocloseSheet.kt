@@ -18,7 +18,6 @@ import com.gemwallet.android.ext.PerpetualFormatter
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.transfer_amount.viewmodels.providers.AmountPerpetualProvider
 import com.gemwallet.android.model.CurrencyFormatter
-import com.gemwallet.android.model.NumericFormatter
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.PercentSuggestionsBar
 import com.gemwallet.android.ui.components.buttons.MainActionButton
@@ -33,6 +32,7 @@ import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.TpslType
 import uniffi.gemstone.AutocloseValidation
+import com.gemwallet.android.math.parseInputNumberOrNull
 
 @Composable
 internal fun AmountAutocloseSheet(
@@ -58,10 +58,9 @@ internal fun AmountAutocloseSheet(
     var submitAttempted by remember { mutableStateOf(false) }
     var focused: TpslType? by remember { mutableStateOf(null) }
 
-    val numericFormatter = remember { NumericFormatter() }
     val estimator = provider.estimatorFor(amount)
-    val takeProfitPrice = numericFormatter.double(takeProfitText)
-    val stopLossPrice = numericFormatter.double(stopLossText)
+    val takeProfitPrice = takeProfitText.parseInputNumberOrNull()?.toDouble()
+    val stopLossPrice = stopLossText.parseInputNumberOrNull()?.toDouble()
     val takeProfitField = provider.autocloseField(TpslType.TakeProfit, amount, takeProfitPrice, submitAttempted)
     val stopLossField = provider.autocloseField(TpslType.StopLoss, amount, stopLossPrice, submitAttempted)
 

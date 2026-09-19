@@ -11,7 +11,6 @@ import com.gemwallet.android.domains.confirm.ConfirmTransferInput
 import com.gemwallet.android.ext.PerpetualFormatter
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.math.numberFormat
-import com.gemwallet.android.model.NumericFormatter
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.perpetual.listItem
@@ -44,6 +43,7 @@ import uniffi.gemstone.GemAutocloseField
 import uniffi.gemstone.GemAutocloseModify
 import uniffi.gemstone.GemAutoclosePrices
 import uniffi.gemstone.GemAutocloseSession
+import com.gemwallet.android.math.parseInputNumberOrNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -57,7 +57,6 @@ class AutocloseViewModel @Inject constructor(
 
     private val assetId: AssetId = savedStateHandle.requireAssetId()
 
-    private val numericFormatter = NumericFormatter()
 
     val position: StateFlow<PerpetualPositionData?> = getSession()
         .filterNotNull()
@@ -164,7 +163,7 @@ class AutocloseViewModel @Inject constructor(
         type: TpslType,
         text: String,
     ): GemAutocloseField {
-        val price = numericFormatter.double(text)
+        val price = text.parseInputNumberOrNull()?.toDouble()
         val original = when (type) {
             TpslType.TakeProfit -> position.position.takeProfit
             TpslType.StopLoss -> position.position.stopLoss

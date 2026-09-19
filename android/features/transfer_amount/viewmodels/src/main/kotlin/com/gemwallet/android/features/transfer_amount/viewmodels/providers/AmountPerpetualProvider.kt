@@ -17,7 +17,6 @@ import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.Crypto
 import com.gemwallet.android.model.CurrencyFormatter
-import com.gemwallet.android.model.NumericFormatter
 import com.gemwallet.android.model.toGem
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.InfoSheetEntity
@@ -68,7 +67,6 @@ class AmountPerpetualProvider(
     private val isOpenAction: Boolean =
         params.positionAction is GemPerpetualPositionAction.Open
 
-    private val numericFormatter = NumericFormatter()
 
     val perpetual: StateFlow<PerpetualDetailsDataAggregate?> =
         getPerpetual.getPerpetual(params.perpetualId)
@@ -181,8 +179,8 @@ class AmountPerpetualProvider(
     }
 
     private fun autocloseListItem(takeProfit: String?, stopLoss: String?): ListItemModel {
-        val takeProfitText = takeProfit?.toDoubleOrNull()?.let { context.getString(R.string.perpetual_take_profit) + ": " + usdFormatter.string(it) }
-        val stopLossText = stopLoss?.toDoubleOrNull()?.let { context.getString(R.string.perpetual_stop_loss) + ": " + usdFormatter.string(it) }
+        val takeProfitText = takeProfit?.parseInputNumberOrNull()?.toDouble()?.let { context.getString(R.string.perpetual_take_profit) + ": " + usdFormatter.string(it) }
+        val stopLossText = stopLoss?.parseInputNumberOrNull()?.toDouble()?.let { context.getString(R.string.perpetual_stop_loss) + ": " + usdFormatter.string(it) }
         return ListItemModel(
             title = context.getString(R.string.perpetual_auto_close),
             subtitle = takeProfitText ?: stopLossText ?: Placeholder.empty,
@@ -235,5 +233,5 @@ class AmountPerpetualProvider(
         )
     }
 
-    private fun trigger(text: String?): Double? = if (showsAutoclose) text?.let { numericFormatter.double(it) } else null
+    private fun trigger(text: String?): Double? = if (showsAutoclose) text?.let { it.parseInputNumberOrNull()?.toDouble() } else null
 }
