@@ -1,3 +1,5 @@
+use std::fmt;
+
 use primitives::Chain;
 
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
@@ -20,11 +22,21 @@ impl GemCopyKind {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct GemCopy {
     pub kind: GemCopyKind,
     pub value: String,
     pub display: String,
+}
+
+impl fmt::Debug for GemCopy {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.kind.is_sensitive() {
+            f.debug_struct("GemCopy").field("kind", &self.kind).finish_non_exhaustive()
+        } else {
+            f.debug_struct("GemCopy").field("kind", &self.kind).field("value", &self.value).field("display", &self.display).finish()
+        }
+    }
 }
 
 #[uniffi::export]
@@ -69,5 +81,13 @@ mod tests {
         assert_eq!(secret_phrase_copy(vec!["a".to_string(), "b".to_string()]).value, "a b");
         assert!(private_key_copy("key".to_string()).kind.is_sensitive());
         assert!(private_key_copy("key".to_string()).display.is_empty());
+    }
+
+    #[test]
+    fn test_debug_prints_an_address_but_never_a_secret() {
+        let printed = format!("{:?} {:?}", secret_phrase_copy(vec!["abandon".to_string(), "ability".to_string()]), private_key_copy("0xsecretkey".to_string()));
+
+        assert!(!printed.contains("abandon") && !printed.contains("secretkey"), "{printed}");
+        assert!(format!("{:?}", address_copy(Chain::Ethereum, "0xabc".to_string())).contains("0xabc"));
     }
 }

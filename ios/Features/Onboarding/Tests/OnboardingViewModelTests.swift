@@ -64,18 +64,6 @@ struct SecurityReminderViewModelTests {
     }
 }
 
-struct NewSecretPhraseViewModelTests {
-    @Test
-    func continuingHandsBackTheSameWords() {
-        let recorder = WordsRecorder()
-        let model = NewSecretPhraseViewModel(words: ["alpha", "bravo"], onCreateWallet: { recorder.record($0) })
-
-        model.continueAction?()
-
-        #expect(recorder.words == [["alpha", "bravo"]])
-    }
-}
-
 struct ImportWalletTypeViewModelTests {
     @Test
     func anEmptyQueryOffersEveryChain() {
@@ -150,14 +138,6 @@ struct ImportWalletViewModelTests {
         model.presentSelectImage(wallet: .mock(name: "Imported"))
 
         #expect(model.isPresentingSelectImageWallet?.name == "Imported")
-    }
-}
-
-private final class WordsRecorder: @unchecked Sendable {
-    private(set) var words: [[String]] = []
-
-    func record(_ value: [String]) {
-        words.append(value)
     }
 }
 

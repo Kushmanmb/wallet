@@ -15,7 +15,7 @@ import PrimitivesComponents
 public final class CreateWalletModel {
     private let service: any GemWalletServiceProtocol
 
-    func verifyPhraseModel(words: [String], onComplete: @escaping ([String]) async throws -> Void) -> VerifyPhraseViewModel {
+    func verifyPhraseModel(onComplete: @escaping ([String]) async throws -> Void) -> VerifyPhraseViewModel {
         VerifyPhraseViewModel(
             session: service.verifyPhraseSession(words: words),
             onComplete: onComplete,
@@ -24,6 +24,7 @@ public final class CreateWalletModel {
     private let preferences: ObservablePreferences
     let onComplete: VoidAction
 
+    private(set) var words: [String] = []
     var isPresentingSelectImageWallet: Wallet?
     var isPresentingAlertMessage: AlertMessage?
 
@@ -66,9 +67,9 @@ extension CreateWalletModel {
         isPresentingSelectImageWallet = wallet
     }
 
-    func generateSecretPhrase() -> [String] {
+    func generateSecretPhrase() {
         do {
-            return try service.createWallet()
+            words = try service.createWallet()
         } catch {
             fatalError("Unable to create wallet")
         }

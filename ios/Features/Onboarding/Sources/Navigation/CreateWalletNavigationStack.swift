@@ -18,9 +18,9 @@ public struct CreateWalletNavigationStack: View {
             rootScene
                 .toolbarDismissItem(type: .close, placement: .topBarLeading)
                 .navigationBarTitleDisplayMode(.inline)
-                .navigationDestination(for: Scenes.VerifyPhrase.self) { scene in
+                .navigationDestination(for: Scenes.VerifyPhrase.self) { _ in
                     VerifyPhraseWalletScene(
-                        model: model.verifyPhraseModel(words: scene.words, onComplete: onVerifyPhraseComplete),
+                        model: model.verifyPhraseModel(onComplete: onVerifyPhraseComplete),
                     )
                 }
                 .navigationDestination(for: Scenes.WalletProfile.self) { scene in
@@ -28,11 +28,11 @@ public struct CreateWalletNavigationStack: View {
                     .navigationBarBackButtonHidden()
                     .interactiveDismissDisabled()
                 }
-                .navigationDestination(for: Scenes.CreateWallet.self) {
+                .navigationDestination(for: Scenes.CreateWallet.self) { _ in
                     ShowSecretDataScene(
                         model: NewSecretPhraseViewModel(
-                            words: $0.words,
-                            onCreateWallet: { navigate(to: .verifyPhrase(words: $0)) },
+                            words: model.words,
+                            onContinue: { navigate(to: .verifyPhrase) },
                         ),
                     )
                 }
@@ -75,8 +75,9 @@ extension CreateWalletNavigationStack {
         switch route {
         case .securityReminder: navigationPath.append(Scenes.SecurityReminder())
         case .createWallet:
-            navigationPath.append(Scenes.CreateWallet(words: model.generateSecretPhrase()))
-        case let .verifyPhrase(words): navigationPath.append(Scenes.VerifyPhrase(words: words))
+            model.generateSecretPhrase()
+            navigationPath.append(Scenes.CreateWallet())
+        case .verifyPhrase: navigationPath.append(Scenes.VerifyPhrase())
         case let .walletProfile(wallet): navigationPath.append(Scenes.WalletProfile(wallet: wallet))
         }
     }

@@ -8,11 +8,11 @@ import uniffi.gemstone.secretPhraseCopy
 sealed interface WalletSecretContentUIModel {
     fun copy(): GemCopy
 
-    data class PrivateKey(val key: String) : WalletSecretContentUIModel {
+    class PrivateKey(val key: String) : WalletSecretContentUIModel {
         override fun copy(): GemCopy = privateKeyCopy(key)
     }
 
-    data class Words(val words: List<String>) : WalletSecretContentUIModel {
+    class Words(val words: List<String>) : WalletSecretContentUIModel {
         override fun copy(): GemCopy = secretPhraseCopy(words)
     }
 }

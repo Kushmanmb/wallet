@@ -6,12 +6,23 @@ use primitives::{Chain, ChainAddress, Wallet};
 
 use super::rules;
 
-#[derive(Debug, Clone, uniffi::Enum)]
+#[derive(Clone, uniffi::Enum)]
 pub enum GemWalletImportType {
     MulticoinPhrase { words: Vec<String>, chains: Vec<Chain> },
     SinglePhrase { words: Vec<String>, chain: Chain },
     PrivateKey { value: String, chain: Chain },
     Address { address: String, chain: Chain },
+}
+
+impl fmt::Debug for GemWalletImportType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::MulticoinPhrase { words, chains } => f.debug_struct("MulticoinPhrase").field("word_count", &words.len()).field("chains", chains).finish(),
+            Self::SinglePhrase { words, chain } => f.debug_struct("SinglePhrase").field("word_count", &words.len()).field("chain", chain).finish(),
+            Self::PrivateKey { chain, .. } => f.debug_struct("PrivateKey").field("chain", chain).finish_non_exhaustive(),
+            Self::Address { address, chain } => f.debug_struct("Address").field("address", address).field("chain", chain).finish(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -126,10 +137,19 @@ pub enum GemWalletDeletion {
     LastWalletDeleted,
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+#[derive(Clone, PartialEq, uniffi::Enum)]
 pub enum GemWalletSecret {
     Words { words: Vec<String> },
     PrivateKey { key: String },
+}
+
+impl fmt::Debug for GemWalletSecret {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Words { words } => f.debug_struct("Words").field("word_count", &words.len()).finish(),
+            Self::PrivateKey { .. } => f.debug_struct("PrivateKey").finish_non_exhaustive(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
@@ -242,5 +262,20 @@ mod import_session_tests {
         let debug = format!("{:?}", session(GemWalletImportKind::Phrase).on_input_changed("abandon ability".into(), None));
 
         assert!(!debug.contains("abandon"), "{debug}");
+    }
+
+    #[test]
+    fn test_debug_never_prints_an_import_or_exported_secret() {
+        let words = vec!["abandon".to_string(), "ability".to_string()];
+        let printed = format!(
+            "{:?} {:?} {:?} {:?} {:?}",
+            GemWalletImportType::MulticoinPhrase { words: words.clone(), chains: vec![Chain::Ethereum] },
+            GemWalletImportType::SinglePhrase { words: words.clone(), chain: Chain::Bitcoin },
+            GemWalletImportType::PrivateKey { value: "0xsecretkey".into(), chain: Chain::Ethereum },
+            GemWalletSecret::Words { words },
+            GemWalletSecret::PrivateKey { key: "0xsecretkey".into() },
+        );
+
+        assert!(!printed.contains("abandon") && !printed.contains("ability") && !printed.contains("secretkey"), "{printed}");
     }
 }

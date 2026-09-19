@@ -8,7 +8,7 @@ import SwiftUI
 import func Gemstone.secretPhraseCopy
 
 struct NewSecretPhraseViewModel: SecretPhraseViewableModel {
-    private let onCreateWallet: ([String]) -> Void
+    private let onContinue: VoidAction
     let words: [String]
 
     var calloutViewStyle: CalloutViewStyle? {
@@ -16,15 +16,15 @@ struct NewSecretPhraseViewModel: SecretPhraseViewableModel {
     }
 
     var continueAction: VoidAction {
-        { onCreateWallet(words) }
+        onContinue
     }
 
     init(
         words: [String],
-        onCreateWallet: @escaping (([String]) -> Void),
+        onContinue: VoidAction,
     ) {
         self.words = words
-        self.onCreateWallet = onCreateWallet
+        self.onContinue = onContinue
     }
 
     var title: String {

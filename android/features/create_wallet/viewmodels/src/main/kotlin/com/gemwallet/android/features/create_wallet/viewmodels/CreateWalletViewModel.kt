@@ -129,5 +129,7 @@ data class CreateWalletViewModelState(
     val isShowSafeMessage: Boolean = false,
 ) {
     fun isExistingWallets() = defaultName?.hasExistingWallets == true
+
+    override fun toString() = "CreateWalletViewModelState(loading=$loading, wordCount=${data.size}, isShowSafeMessage=$isShowSafeMessage)"
 }
 

@@ -23,12 +23,14 @@ struct CreateWalletModelTests {
     }
 
     @Test
-    func generateSecretPhraseReturnsGeneratedWords() {
+    func generatingASecretPhraseKeepsTheNewWords() {
         let model = CreateWalletModel.mock()
 
-        let words = model.generateSecretPhrase()
+        model.generateSecretPhrase()
+        let words = model.words
+        model.generateSecretPhrase()
 
         #expect(words.count == 12)
-        #expect(words != model.generateSecretPhrase())
+        #expect(words != model.words)
     }
 }
