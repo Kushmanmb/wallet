@@ -10,6 +10,7 @@ import struct Gemstone.GemSwapQuoteSummary
 import struct Gemstone.GemSwapRate
 import struct Gemstone.SwapperQuote
 import struct Gemstone.SwapPriceImpact
+import struct Gemstone.SwapProviderData
 import struct Gemstone.SwapQuote
 import Localization
 import Primitives
@@ -23,7 +24,7 @@ public final class SwapDetailsViewModel {
     let state: StateViewType<[SwapProviderItem]>
     private let fromAssetPrice: AssetPriceValue
     private let toAssetPrice: AssetPriceValue
-    private let providerViewModel: SwapProviderViewModel
+    private let providerData: SwapProviderData
     private let summary: GemSwapQuoteSummary
     private let selectedQuote: Gemstone.SwapQuote
     private let slippagePercent: Double?
@@ -50,7 +51,7 @@ public final class SwapDetailsViewModel {
         self.state = state
         self.fromAssetPrice = fromAssetPrice
         self.toAssetPrice = toAssetPrice
-        providerViewModel = SwapProviderViewModel(providerData: summary.quote.providerData)
+        providerData = summary.quote.providerData
         self.summary = summary
         selectedQuote = summary.quote
         self.slippagePercent = slippagePercent
@@ -91,11 +92,11 @@ public final class SwapDetailsViewModel {
     // MARK: - Provider
 
     var providerText: String {
-        providerViewModel.providerText
+        providerData.name
     }
 
     var providerImage: AssetImage {
-        providerViewModel.providerImage
+        AssetImage(imageURL: .none, placeholder: providerData.provider.toPrimitives().image, chainPlaceholder: .none)
     }
 
     var selectedProviderItem: SwapProviderItem {

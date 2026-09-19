@@ -1,10 +1,12 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Components
 import Foundation
 import enum Gemstone.GemLatencyStatus
 import struct Gemstone.GemServiceEndpoint
 import protocol Gemstone.GemServiceStatusProtocol
 import Localization
+import Style
 
 @Observable
 @MainActor
@@ -21,6 +23,10 @@ public final class ServiceStatusViewModel {
 
     var title: String {
         Localized.Transaction.status
+    }
+
+    func streamListItem(isConnected: Bool) -> ListItemModel {
+        ListItemModel(title: "Stream", subtitle: isConnected ? Emoji.greenCircle : Emoji.redCircle)
     }
 
     var itemModels: [ServiceStatusItemViewModel] {

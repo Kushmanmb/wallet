@@ -20,7 +20,7 @@ public struct ServiceStatusScene: View {
                     ListItemView(model: item.listItem)
                 }
 
-                ListItemView(model: streamModel.listItem)
+                ListItemView(model: model.streamListItem(isConnected: isStreamConnected))
             }
         }
         .listRowInsets(.assetListRowInsets)
@@ -34,9 +34,5 @@ public struct ServiceStatusScene: View {
         }
         .navigationTitle(model.title)
         .navigationBarTitleDisplayMode(.inline)
-    }
-
-    private var streamModel: StreamStatusItemViewModel {
-        StreamStatusItemViewModel(isConnected: isStreamConnected)
     }
 }

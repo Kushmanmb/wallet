@@ -91,7 +91,7 @@ public final class ConfirmTransferSceneViewModel {
     }
 
     var title: String {
-        dataModel.title
+        request.data.title().title
     }
 
     var progressMessage: String {
@@ -225,7 +225,7 @@ extension ConfirmTransferSceneViewModel {
     public func fieldModels(for fields: [GemSimulationPayloadRow]) -> [SimulationPayloadFieldViewModel] {
         payloadModel.fieldModels(
             for: fields,
-            explorerLink: { explorerLink(chain: dataModel.chain, address: $0) },
+            explorerLink: { explorerLink(chain: request.data.chain, address: $0) },
             onOpenURL: { [weak self] in self?.isPresentingSheet = .url($0) },
         )
     }
@@ -337,15 +337,11 @@ extension ConfirmTransferSceneViewModel {
     }
 
     public func swapFromAsset(to asset: Asset) -> Asset {
-        dataModel.asset.id == asset.id ? state.feeAsset : dataModel.asset
+        request.data.asset.id == asset.id ? state.feeAsset : request.data.asset
     }
 
     public var assetAcquisitionWallet: Wallet {
         wallet
-    }
-
-    private var dataModel: TransferDataViewModel {
-        TransferDataViewModel(data: request.data)
     }
 }
 

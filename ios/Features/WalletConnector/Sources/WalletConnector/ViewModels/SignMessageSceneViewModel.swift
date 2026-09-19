@@ -116,10 +116,6 @@ public final class SignMessageSceneViewModel {
         preview.text
     }
 
-    var textMessageViewModel: TextMessageViewModel {
-        TextMessageViewModel(message: preview.text)
-    }
-
     public var simulationWarnings: [GemListRow] {
         simulationWarningRows(warnings: request.simulation.warnings)
     }

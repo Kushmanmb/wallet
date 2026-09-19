@@ -26,7 +26,7 @@ public enum TransactionItemModel {
     case fee(ListItemModel)
     case header(TransactionHeaderItemModel)
     case swapProgress(TransactionSwapProgressItemModel)
-    case participant(TransactionParticipantItemModel)
+    case participant(AddressListItemViewModel)
     case rate(title: String, value: String)
     case row(GemListRow)
     case swapAgain(text: String)

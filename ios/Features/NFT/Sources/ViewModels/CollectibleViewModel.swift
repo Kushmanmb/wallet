@@ -91,7 +91,7 @@ public final class CollectibleViewModel {
     }
 
     var assetImage: AssetImage {
-        NFTAssetViewModel(asset: assetData.asset).assetImage
+        AssetImage(type: .text(assetData.asset.name), imageURL: assetData.asset.images.preview.url.asURL, placeholder: .none, chainPlaceholder: .none)
     }
 
     var headerButtons: [HeaderButton] {

@@ -3,6 +3,7 @@
 import Components
 import Foundation
 import protocol Gemstone.GemAssetSelectionServiceProtocol
+import enum Gemstone.GemImage
 import enum Gemstone.GemNftItem
 import struct Gemstone.GemWalletSearchLimits
 import GemstonePrimitives
@@ -30,7 +31,7 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
 
     private var state: StateViewType<Bool> = .noData
 
-    var searchModel: WalletSearchModel
+    var searchableQuery: String = .empty
 
     public let searchQuery: ObservableQuery<WalletSearchRequest>
     public let recentModel: RecentAssetsModel
@@ -60,13 +61,12 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
         self.onDismissSearch = onDismissSearch
         self.onSelectAssetAction = onSelectAssetAction
         self.onAddToken = onAddToken
-        searchModel = WalletSearchModel()
 
         searchQuery = ObservableQuery(
             WalletSearchRequest(
                 walletId: wallet.id,
                 limit: Int(service.walletSearchLimits(query: .empty).fetch),
-                types: WalletSearchModel.searchItemTypes,
+                types: [.asset, .perpetual, .list, .nft],
             ),
             initialValue: .empty,
         )
@@ -109,7 +109,7 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
     }
 
     var showRecents: Bool {
-        searchModel.searchableQuery.isEmpty && recentModel.hasAssets
+        searchableQuery.isEmpty && recentModel.hasAssets
     }
 
     var showPerpetuals: Bool {
@@ -166,7 +166,7 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
     }
 
     private var limits: GemWalletSearchLimits {
-        service.walletSearchLimits(query: searchModel.searchableQuery)
+        service.walletSearchLimits(query: searchableQuery)
     }
 
     var previewAssets: [AssetData] {
@@ -197,6 +197,14 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
         Scenes.AssetsResults(
             searchQuery: searchQuery.request.searchBy,
             scope: searchQuery.request.scope,
+        )
+    }
+
+    func listItem(for list: AssetList) -> ListItemModel {
+        ListItemModel(
+            title: list.name,
+            subtitle: String(list.count),
+            imageStyle: .settings(assetImage: AssetImage(type: .text(list.name), imageURL: GemImage.assetList(listId: list.id).imageURL)),
         )
     }
 
@@ -289,10 +297,10 @@ extension WalletSearchSceneViewModel {
     }
 
     private func updateRequest() {
-        searchQuery.request.searchBy = searchModel.searchableQuery
-        searchQuery.request.searchKey = service.searchKey(query: searchModel.searchableQuery, scope: searchQuery.request.scope.gemScope)
+        searchQuery.request.searchBy = searchableQuery
+        searchQuery.request.searchKey = service.searchKey(query: searchableQuery, scope: searchQuery.request.scope.gemScope)
         searchQuery.request.limit = Int(limits.fetch)
-        state = searchModel.searchableQuery.isNotEmpty ? .loading : .noData
+        state = searchableQuery.isNotEmpty ? .loading : .noData
     }
 
     private func search(query: String) async {

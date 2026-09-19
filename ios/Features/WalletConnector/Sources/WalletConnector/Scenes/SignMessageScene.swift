@@ -87,7 +87,7 @@ public struct SignMessageScene: View {
                         primaryModels: model.fieldModels(for: model.payloadModel.primaryFields),
                         secondaryModels: model.fieldModels(for: model.payloadModel.secondaryFields),
                         actionListItem: model.viewFullMessageListItem,
-                        actionDestination: AnyView(TextMessageScene(model: model.textMessageViewModel)),
+                        actionDestination: AnyView(TextMessageScene(text: model.messageText)),
                     )
                 }
                 .sheetPresentation([.large])

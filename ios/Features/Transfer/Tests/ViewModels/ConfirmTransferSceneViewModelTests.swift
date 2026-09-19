@@ -11,6 +11,7 @@ import enum Gemstone.GemConfirmError
 import struct Gemstone.GemConfirmFailure
 import struct Gemstone.GemFeeRate
 import enum Gemstone.GemListRow
+import enum Gemstone.TransactionInputType
 import protocol Gemstone.GemNameServiceProtocol
 import struct Gemstone.GemTransferData
 import func Gemstone.addressCopy
@@ -464,6 +465,16 @@ struct ConfirmTransferSceneViewModelTests {
     @Test
     func buttonEnabledWithNoWarnings() {
         #expect(ConfirmTransferSceneViewModel.mock().button.state == .loading)
+    }
+
+    @Test
+    func titleFollowsTheTransferType() {
+        let send = TransactionInputType.generic(asset: .mock(), metadata: .mock(), extra: .mock(outputAction: .send))
+        let sign = TransactionInputType.generic(asset: .mock(), metadata: .mock(), extra: .mock(outputAction: .sign))
+
+        #expect(ConfirmTransferSceneViewModel.mock(data: .mock(type: .deposit(.mock()))).title == "Deposit")
+        #expect(ConfirmTransferSceneViewModel.mock(data: .mock(type: send)).title == Localized.Transfer.reviewRequest)
+        #expect(ConfirmTransferSceneViewModel.mock(data: .mock(type: sign)).title == Localized.Transfer.reviewRequest)
     }
 
     @Test

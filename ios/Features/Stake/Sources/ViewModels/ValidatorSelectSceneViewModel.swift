@@ -75,7 +75,7 @@ public final class ValidatorSelectSceneViewModel {
         let model = ValidatorViewModel(row: validatorRow(for: validator))
         return ListItemValue(
             title: model.name,
-            subtitle: model.aprModel.text,
+            subtitle: model.aprText,
             value: validator,
         )
     }

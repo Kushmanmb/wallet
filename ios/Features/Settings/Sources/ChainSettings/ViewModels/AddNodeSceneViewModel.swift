@@ -36,11 +36,11 @@ final class AddNodeSceneViewModel {
         session = service.newAddNodeSession(chain: chain.rawValue)
     }
 
-    var state: StateViewType<AddNodeResultViewModel> {
+    var state: StateViewType<[ListItemField]> {
         switch session.viewState().phase {
         case .idle: .noData
         case .checking: .loading
-        case let .ready(check): .data(AddNodeResultViewModel(result: check))
+        case let .ready(check): .data(check.rows().map { ListItemField(title: $0.title, value: $0.text) })
         case let .failed(failure): .error(failure.error)
         }
     }

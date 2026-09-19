@@ -50,9 +50,10 @@ extension TransactionParticipantViewModel {
             addressType: name?.type,
         )
         return .participant(
-            TransactionParticipantItemModel(
+            AddressListItemViewModel(
                 title: participant.role.title,
                 account: account,
+                mode: .nameOrAddress,
                 addressLink: participant.link.toPrimitives(),
                 onAddContact: participant.canAddContact ? onAddContact : nil,
                 onSelect: selectAction(chainAddress: ChainAddress(chain: chain, address: participant.address)),

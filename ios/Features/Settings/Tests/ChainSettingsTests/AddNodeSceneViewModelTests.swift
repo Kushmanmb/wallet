@@ -28,8 +28,7 @@ struct AddNodeSceneViewModelTests {
             Issue.record("Expected .data, got \(model.state)")
             return
         }
-        #expect(result.url == "https://node")
-        #expect(result.fields.count == 4)
+        #expect(result.count == 4)
     }
 
     @Test

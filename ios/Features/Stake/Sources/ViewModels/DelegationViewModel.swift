@@ -45,8 +45,8 @@ public struct DelegationViewModel: Sendable {
         ListItemModel(
             title: validatorText,
             titleStyle: titleStyle,
-            titleExtra: stateModel.title,
-            titleStyleExtra: stateModel.textStyle,
+            titleExtra: status.state.title,
+            titleStyleExtra: TextStyle(font: .callout, color: status.tone.color),
             subtitle: balanceText,
             subtitleStyle: subtitleStyle,
             subtitleExtra: fiatValueText,
@@ -55,9 +55,6 @@ public struct DelegationViewModel: Sendable {
         )
     }
 
-    public var stateModel: DelegationStateViewModel {
-        DelegationStateViewModel(status: status)
-    }
 
     public var titleStyle: TextStyle {
         TextStyle(font: .body, color: .primary, fontWeight: .semibold)

@@ -12,6 +12,7 @@ import GemstonePrimitives
 import Formatters
 import Foundation
 import InfoSheet
+import Localization
 import Primitives
 import PrimitivesComponents
 import Store
@@ -73,10 +74,10 @@ extension TransactionSceneViewModel: ListSectionProvideable {
 
     public func itemModel(for row: GemTransactionDetailRow) -> any ItemModelProvidable<TransactionItemModel> {
         switch row {
-        case .header: TransactionHeaderViewModel(header: rows.header, currency: service.getCurrency().toPrimitives())
-        case .swapProgress: TransactionSwapProgressViewModel(progress: rows.swapProgress)
-        case .swapAgain: TransactionSwapButtonViewModel(swapAgain: rows.swapAgain)
-        case .estimatedConfirmation: TransactionEstimatedConfirmationViewModel(seconds: rows.estimatedConfirmationSeconds, onInfoAction: onSelectEstimatedConfirmationInfo)
+        case .header: headerItem
+        case .swapProgress: swapProgressItem
+        case .swapAgain: rows.swapAgain == nil ? TransactionItemModel.empty : .swapAgain(text: Localized.Transaction.swapAgain)
+        case .estimatedConfirmation: estimatedConfirmationItem
         case .participant: TransactionParticipantViewModel(
                 participant: rows.participant,
                 chain: transactionExtended.transaction.assetId.chain,
@@ -84,10 +85,48 @@ extension TransactionSceneViewModel: ListSectionProvideable {
                 onAddContact: onAddContact,
                 onSelectAddress: onSelectAddress,
             )
-        case .rate: TransactionRateViewModel(rate: rows.rate, isInverse: isRateInverse)
-        case .fee: TransactionNetworkFeeViewModel(feeDisplay: rows.fee.display(currency: service.getCurrency().toPrimitives(), formatter: .auto), onInfoAction: onSelectFee)
+        case .rate: rows.rate.map { TransactionItemModel.rate(title: Localized.Buy.rate, value: AssetRateViewModel(rate: $0).text(isInverse: isRateInverse)) } ?? .empty
+        case .fee: feeItem
         case let .row(row): TransactionItemModel.row(row)
         }
+    }
+
+    private var headerItem: TransactionItemModel {
+        let headerType = rows.header.headerType(currency: service.getCurrency().toPrimitives())
+        let showClearHeader = switch headerType {
+        case .amount, .nft, .asset, .assetValue: true
+        case .swap: false
+        }
+        return .header(TransactionHeaderItemModel(headerType: headerType, showClearHeader: showClearHeader))
+    }
+
+    private var swapProgressItem: TransactionItemModel {
+        guard let progress = rows.swapProgress else { return .empty }
+        let fromAsset = progress.fromAsset.toPrimitives()
+        let amount = ValueFormatter.auto.string(BigInt(progress.fromValue), asset: fromAsset)
+        return .swapProgress(TransactionSwapProgressItemModel(
+            transfer: .init(title: Localized.Transfer.title, subtitle: "\(amount) (\(fromAsset.id.chain.networkName))", state: progress.transfer),
+            swap: .init(title: Localized.Wallet.swap, subtitle: progress.providerName, state: progress.swap),
+            estimatedTime: progress.etaSeconds.map { EstimatedConfirmationFormatter().string(seconds: $0) },
+        ))
+    }
+
+    private var estimatedConfirmationItem: TransactionItemModel {
+        guard let seconds = rows.estimatedConfirmationSeconds else { return .empty }
+        return .listItem(ListItemModel(
+            title: Localized.Transaction.estimatedConfirmation,
+            subtitle: EstimatedConfirmationFormatter().string(seconds: seconds),
+            infoAction: onSelectEstimatedConfirmationInfo,
+        ))
+    }
+
+    private var feeItem: TransactionItemModel {
+        let display = rows.fee.display(currency: service.getCurrency().toPrimitives(), formatter: .auto)
+        return .fee(ListItemModel(
+            title: Localized.Transfer.networkFee,
+            subtitle: display.fiat?.text ?? display.amount.text,
+            infoAction: onSelectFee,
+        ))
     }
 }
 

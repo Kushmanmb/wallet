@@ -96,7 +96,7 @@ extension AddNodeScene {
             EmptyView()
         case let .data(result):
             Section {
-                ForEach(Array(result.fields.enumerated()), id: \.offset) {
+                ForEach(Array(result.enumerated()), id: \.offset) {
                     ListItemView(field: $0.element)
                 }
             }
