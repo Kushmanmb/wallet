@@ -11,7 +11,7 @@ import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
 import com.gemwallet.android.domains.asset.aggregates.AssetInfoDataAggregate
 import com.gemwallet.android.domains.asset.aggregates.toAssetInfoDataAggregate
-import com.gemwallet.android.domains.asset.assetConfig
+import com.gemwallet.android.domains.asset.assetSections
 import com.gemwallet.android.domains.asset.toQueryFilters
 import com.gemwallet.android.domains.price.values.RowFormatters
 import com.gemwallet.android.ext.getAccount
@@ -145,16 +145,15 @@ open class BaseAssetSelectViewModel(
     )
 
     private fun assetSections(items: List<AssetInfoDataAggregate>): AssetSections {
-        val sections = assetConfig.assetSections(
-            ids = items.map { it.asset.id.toIdentifier() },
-            pinnedIds = items.filter { it.pinned }.map { it.asset.id.toIdentifier() },
+        val sections = items.assetSections(
             showsPopular = flow.popularSection,
+            assetId = { it.asset.id },
+            isPinned = { it.pinned },
         )
-        val byId = items.associateBy { it.asset.id.toIdentifier() }
         return AssetSections(
-            popular = sections.popular.mapNotNull(byId::get).toImmutableList(),
-            pinned = sections.pinned.mapNotNull(byId::get).toImmutableList(),
-            unpinned = sections.assets.mapNotNull(byId::get).toImmutableList(),
+            popular = sections.popular.toImmutableList(),
+            pinned = sections.pinned.toImmutableList(),
+            unpinned = sections.unpinned.toImmutableList(),
         )
     }
 

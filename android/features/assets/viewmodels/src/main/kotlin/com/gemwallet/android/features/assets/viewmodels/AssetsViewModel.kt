@@ -10,7 +10,7 @@ import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.domains.asset.aggregates.AssetInfoDataAggregate
-import com.gemwallet.android.domains.asset.assetConfig
+import com.gemwallet.android.domains.asset.assetSections
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGemKey
 import com.gemwallet.android.ext.toIdentifier
@@ -53,17 +53,7 @@ class AssetsViewModel @Inject constructor(
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private data class AssetGroups(val pinned: List<AssetInfoDataAggregate> = emptyList(), val unpinned: List<AssetInfoDataAggregate> = emptyList())
-
-    private fun groups(items: List<AssetInfoDataAggregate>): AssetGroups {
-        val sections = assetConfig.assetSections(
-            ids = items.map { it.asset.id.toIdentifier() },
-            pinnedIds = items.filter { it.pinned }.map { it.asset.id.toIdentifier() },
-            showsPopular = false,
-        )
-        val byId = items.associateBy { it.asset.id.toIdentifier() }
-        return AssetGroups(pinned = sections.pinned.mapNotNull(byId::get), unpinned = sections.assets.mapNotNull(byId::get))
-    }
+    private fun groups(items: List<AssetInfoDataAggregate>) = items.assetSections(assetId = { it.asset.id }, isPinned = { it.pinned })
 
     val isLoadingAssets = MutableStateFlow(false)
 

@@ -10,7 +10,7 @@ import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.data.services.gemstone.stores.GemstoneAssetStore
 import com.gemwallet.android.domains.asset.aggregates.AssetInfoDataAggregate
 import com.gemwallet.android.domains.asset.aggregates.toAssetInfoDataAggregates
-import com.gemwallet.android.domains.asset.assetConfig
+import com.gemwallet.android.domains.asset.assetSections
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.model.AssetInfo
@@ -90,16 +90,10 @@ class NetworkAssetsViewModel @Inject constructor(
     }
 
     private fun groups(active: List<AssetInfo>, hidden: List<AssetInfo>): NetworkAssetGroups {
-        val tokens = active.tokens()
-        val sections = assetConfig.assetSections(
-            ids = tokens.map { it.asset.id.toIdentifier() },
-            pinnedIds = tokens.filter { it.metadata.isPinned }.map { it.asset.id.toIdentifier() },
-            showsPopular = false,
-        )
-        val byId = tokens.associateBy { it.asset.id.toIdentifier() }
+        val sections = active.tokens().assetSections(assetId = { it.asset.id }, isPinned = { it.metadata.isPinned })
         return NetworkAssetGroups(
-            pinned = sections.pinned.mapNotNull(byId::get).toAssetInfoDataAggregates(rowStyle.title),
-            unpinned = sections.assets.mapNotNull(byId::get).toAssetInfoDataAggregates(rowStyle.title),
+            pinned = sections.pinned.toAssetInfoDataAggregates(rowStyle.title),
+            unpinned = sections.unpinned.toAssetInfoDataAggregates(rowStyle.title),
             hidden = hidden.tokens().toAssetInfoDataAggregates(rowStyle.title),
             isLoaded = true,
         )

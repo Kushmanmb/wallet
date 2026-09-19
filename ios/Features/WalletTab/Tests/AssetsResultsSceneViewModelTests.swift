@@ -54,7 +54,10 @@ struct AssetsResultsSceneViewModelTests {
     @Test
     func assetsAndPinnedAssetsSplitOnTheirMetadata() {
         let model = AssetsResultsSceneViewModel.mock()
-        model.searchQuery.value = .mock(assets: [.mock(metadata: .mock(isPinned: true)), .mock(metadata: .mock(isPinned: false))])
+        model.searchQuery.value = .mock(assets: [
+            .mock(asset: .mockEthereum(), metadata: .mock(isPinned: true)),
+            .mock(asset: .mock(id: .mock(.bitcoin)), metadata: .mock(isPinned: false)),
+        ])
 
         #expect(model.showPinned)
         #expect(model.showAssets)
