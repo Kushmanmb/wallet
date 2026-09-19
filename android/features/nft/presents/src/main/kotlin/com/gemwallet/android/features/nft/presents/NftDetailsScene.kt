@@ -45,15 +45,14 @@ import com.gemwallet.android.ui.theme.compactIconSize
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.sceneContentPadding
-import com.wallet.core.primitives.AssetId
-import com.wallet.core.primitives.NFTAssetId
+import com.wallet.core.primitives.NFTAsset
 import com.wallet.core.primitives.ReportReason
 import kotlinx.coroutines.launch
 
 @Composable
 fun NFTDetailsScene(
     cancelAction: CancelAction,
-    onRecipient: (AssetId, NFTAssetId) -> Unit,
+    onRecipient: (NFTAsset) -> Unit,
 ) {
     val viewModel: NftDetailsViewModel = hiltViewModel()
     val assetData by viewModel.nftAsset.collectAsStateWithLifecycle()
@@ -98,7 +97,7 @@ fun NFTDetailsScene(
                 ) {
                     NftHeaderActions(
                         canSend = model.canSend,
-                        onSend = { onRecipient(AssetId(model.asset.chain), model.asset.id) },
+                        onSend = { onRecipient(model.asset) },
                         onRefresh = {
                             scope.launch {
                                 if (viewModel.refresh()) {

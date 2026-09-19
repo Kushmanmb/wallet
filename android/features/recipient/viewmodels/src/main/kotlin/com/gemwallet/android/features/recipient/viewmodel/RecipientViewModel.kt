@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.contacts.cases.GetContacts
 import com.gemwallet.android.application.contacts.values.ContactRecipient
-import com.gemwallet.android.application.nft.cases.GetAssetNft
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.wallet.cases.GetWallets
 import com.gemwallet.android.domains.asset.chain
@@ -28,27 +27,22 @@ import com.gemwallet.android.ui.models.actions.ConfirmTransactionAction
 import com.gemwallet.android.ui.models.buttonState
 import com.gemwallet.android.ui.models.name.AddressInputModel
 import com.gemwallet.android.ui.models.navigation.RouteArgument
-import com.gemwallet.android.ui.models.navigation.optionalNftAssetId
+import com.gemwallet.android.ui.models.navigation.optionalNft
 import com.gemwallet.android.ui.models.navigation.optionalPaymentRecipient
 import com.gemwallet.android.ui.models.navigation.requireAssetId
 import com.gemwallet.android.ui.style.indicator
 import com.wallet.core.primitives.AssetId
-import com.wallet.core.primitives.NFTAsset
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.gemwallet.android.ui.localization.string
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
@@ -76,7 +70,6 @@ class RecipientViewModel @Inject constructor(
     private val getWallets: GetWallets,
     private val getContacts: GetContacts,
     private val getAssetInfo: GetAssetInfo,
-    private val getAssetNft: GetAssetNft,
     savedStateHandle: SavedStateHandle,
     private val service: GemRecipientServiceInterface,
     nameService: GemNameServiceInterface,
@@ -101,24 +94,13 @@ class RecipientViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val assetId = savedStateHandle.requireAssetId(RouteArgument.AssetId)
-    private val nftAssetId = savedStateHandle.optionalNftAssetId(RouteArgument.NftAssetId)
-
-    private val nftAsset: Deferred<NFTAsset?> = viewModelScope.async(ioDispatcher, CoroutineStart.LAZY) {
-        val id = nftAssetId ?: return@async null
-        runCatching {
-            getAssetNft.getAssetNft(id).first().assets.firstOrNull()
-        }.getOrNull()
-    }
+    private val nft = savedStateHandle.optionalNft()
 
     val state: StateFlow<RecipientState> = getAssetInfo(assetId)
         .filterNotNull()
         .map { assetInfo ->
-            val type: GemRecipientType? = if (nftAssetId == null) {
-                GemRecipientType.Asset(assetInfo.asset.toGem())
-            } else {
-                nftAsset.await()?.let { GemRecipientType.Nft(it.toGem()) }
-            }
-            type?.let { RecipientState.Ready(assetInfo.asset, it) } ?: RecipientState.Loading
+            val type = nft?.let { GemRecipientType.Nft(it.toGem()) } ?: GemRecipientType.Asset(assetInfo.asset.toGem())
+            RecipientState.Ready(assetInfo.asset, type)
         }
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, RecipientState.Loading)

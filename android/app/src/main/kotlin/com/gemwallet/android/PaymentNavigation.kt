@@ -35,7 +35,7 @@ class PaymentNavigation @Inject constructor(
             PaymentDestination.Unsupported -> emptyList()
             is PaymentDestination.Confirm -> listOfNotNull(destination.transfer.pack()?.let(::ConfirmRoute))
             is PaymentDestination.Recipient -> listOf(
-                RecipientInputRoute(destination.assetId, nftAssetId = null, payment = destination.payment)
+                RecipientInputRoute(destination.assetId, payment = destination.payment)
             )
             is PaymentDestination.SelectAsset -> listOf(SendSelectRoute(destination.payment, destination.chains))
         }

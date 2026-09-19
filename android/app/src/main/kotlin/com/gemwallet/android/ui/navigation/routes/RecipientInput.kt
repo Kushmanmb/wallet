@@ -14,6 +14,7 @@ import com.gemwallet.android.ui.navigation.assetIdArgument
 import com.gemwallet.android.ui.navigation.routeArguments
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Chain
+import com.wallet.core.primitives.NFTAsset
 import kotlinx.serialization.Serializable
 import uniffi.gemstone.GemPaymentRecipient
 import kotlinx.serialization.Contextual
@@ -21,7 +22,7 @@ import kotlinx.serialization.Contextual
 @Serializable
 data class RecipientInputRoute(
     val assetId: AssetId,
-    val nftAssetId: String?,
+    val nft: NFTAsset? = null,
     val payment: @Contextual GemPaymentRecipient? = null,
 ) : NavKey
 
@@ -49,7 +50,7 @@ fun EntryProviderScope<NavKey>.recipientInput(
         metadata = { key ->
             routeArguments(
                 assetIdArgument(key.assetId),
-                RouteArgument.NftAssetId to key.nftAssetId,
+                RouteArgument.Nft to key.nft?.packRoutePayload(),
                 RouteArgument.Payment to key.payment?.packRoutePayload(),
             )
         },
