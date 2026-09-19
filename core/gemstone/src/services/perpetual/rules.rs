@@ -13,10 +13,11 @@ use primitives::{
 use super::model::{
     GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine,
     GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails, GemPerpetualDetailsAction, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSection,
-    GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind,
+    GemPerpetualMarketSections, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionDetailRow, GemPerpetualPositionKind,
     GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
-use crate::formatted_number::GemFormattedNumber;
+use crate::formatted_number::{GemFormattedNumber, GemValueTone};
+use crate::models::placeholder::EMPTY_VALUE;
 use crate::services::localization::{GemLocalizedText, GemTriggerOrder};
 use crate::models::custom_types::GemBigInt;
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
@@ -123,6 +124,7 @@ pub fn autoclose_row(data: &PerpetualModifyConfirmData) -> Option<GemListRow> {
     (!lines.is_empty()).then_some(GemListRow::Lines {
         title: GemListRowTitle::AutoClose,
         lines,
+        info: None,
     })
 }
 
@@ -601,22 +603,82 @@ pub fn perpetual_sections(has_position: bool) -> Vec<GemPerpetualSection> {
         .collect()
 }
 
-pub fn position_detail_rows(position: &PerpetualPosition) -> Vec<GemPerpetualPositionDetailRow> {
+pub fn position_details(position: &PerpetualPosition) -> Vec<GemPerpetualPositionDetail> {
+    let amount = |title: GemListRowTitle, amount: GemFormattedNumber, info: Option<GemInfoTopic>| GemListRow::Amount { title, amount, info };
+    let label = |title: GemListRowTitle, text: GemLocalizedText, tone: GemValueTone, info: Option<GemInfoTopic>| GemListRow::Label {
+        title,
+        text,
+        tone,
+        info,
+        progress: false,
+    };
+    let pnl = GemLocalizedText::Pnl {
+        amount: GemFormattedNumber::signed_usd(position.pnl),
+        percent: GemFormattedNumber::percentage(PriceChangeCalculator::pnl_percentage(position.pnl, position.margin_amount), GemPercentageStyle::Signed),
+    };
+    let margin = GemLocalizedText::Margin {
+        amount: GemFormattedNumber::usd(position.margin_amount),
+        margin_type: position.margin_type.clone(),
+    };
+    let liquidation_price = position.liquidation_price.filter(|price| *price > 0.0).map(|price| {
+        amount(
+            GemListRowTitle::LiquidationPrice,
+            GemFormattedNumber {
+                tone: GemValueTone::Neutral,
+                ..GemFormattedNumber::usd(price)
+            },
+            Some(GemInfoTopic::LiquidationPrice),
+        )
+    });
+    let funding = match position.funding {
+        Some(funding) => amount(
+            GemListRowTitle::FundingPayments,
+            GemFormattedNumber::signed_usd(funding as f64),
+            Some(GemInfoTopic::FundingPayments),
+        ),
+        None => label(
+            GemListRowTitle::FundingPayments,
+            GemLocalizedText::Text { text: EMPTY_VALUE.to_string() },
+            GemValueTone::Neutral,
+            Some(GemInfoTopic::FundingPayments),
+        ),
+    };
     [
-        Some(GemPerpetualPositionDetailRow::Pnl),
-        Some(GemPerpetualPositionDetailRow::Autoclose),
-        Some(GemPerpetualPositionDetailRow::Size),
-        Some(GemPerpetualPositionDetailRow::EntryPrice),
-        position
-            .liquidation_price
-            .filter(|value| *value > 0.0)
-            .map(|_| GemPerpetualPositionDetailRow::LiquidationPrice),
-        Some(GemPerpetualPositionDetailRow::Margin),
-        Some(GemPerpetualPositionDetailRow::FundingPayments),
+        (GemPerpetualPositionDetailRow::Pnl, Some(label(GemListRowTitle::Pnl, pnl, GemValueTone::of(position.pnl), None))),
+        (
+            GemPerpetualPositionDetailRow::Autoclose,
+            Some(GemListRow::Lines {
+                title: GemListRowTitle::AutoClose,
+                lines: autoclose_lines(position),
+                info: Some(GemInfoTopic::AutoClose),
+            }),
+        ),
+        (GemPerpetualPositionDetailRow::Size, Some(amount(GemListRowTitle::Size, GemFormattedNumber::usd(position.size_value), None))),
+        (GemPerpetualPositionDetailRow::EntryPrice, Some(amount(GemListRowTitle::EntryPrice, GemFormattedNumber::usd(position.entry_price), None))),
+        (GemPerpetualPositionDetailRow::LiquidationPrice, liquidation_price),
+        (GemPerpetualPositionDetailRow::Margin, Some(label(GemListRowTitle::Margin, margin, GemValueTone::Plain, None))),
+        (GemPerpetualPositionDetailRow::FundingPayments, Some(funding)),
     ]
     .into_iter()
-    .flatten()
+    .filter_map(|(kind, row)| row.map(|row| GemPerpetualPositionDetail { kind, row }))
     .collect()
+}
+
+fn autoclose_lines(position: &PerpetualPosition) -> Vec<GemLocalizedText> {
+    let line = |order: GemTriggerOrder, trigger: &Option<primitives::PerpetualTriggerOrder>| {
+        trigger.as_ref().map(|trigger| GemLocalizedText::TriggerOrder {
+            order,
+            price: Some(GemFormattedNumber::usd(trigger.price)),
+        })
+    };
+    let lines: Vec<GemLocalizedText> = [line(GemTriggerOrder::TakeProfit, &position.take_profit), line(GemTriggerOrder::StopLoss, &position.stop_loss)]
+        .into_iter()
+        .flatten()
+        .collect();
+    match lines.is_empty() {
+        true => vec![GemLocalizedText::Text { text: EMPTY_VALUE.to_string() }],
+        false => lines,
+    }
 }
 
 pub fn info_rows(row: GemPerpetualMarketRow) -> Vec<GemListRow> {
@@ -662,6 +724,7 @@ mod tests {
 
     #[test]
     fn test_the_perpetual_screen_names_its_sections_rows_and_buttons_from_the_position() {
+        let detail_kinds = |position: &PerpetualPosition| position_details(position).into_iter().map(|detail| detail.kind).collect::<Vec<_>>();
         assert_eq!(perpetual_sections(false), vec![GemPerpetualSection::Info]);
         assert_eq!(perpetual_sections(true), vec![GemPerpetualSection::Position, GemPerpetualSection::Info]);
         assert_eq!(perpetual_buttons(false), vec![GemPerpetualButton::Long, GemPerpetualButton::Short]);
@@ -672,20 +735,20 @@ mod tests {
             ..PerpetualPosition::mock()
         };
         assert!(
-            !position_detail_rows(&without_liquidation).contains(&GemPerpetualPositionDetailRow::LiquidationPrice),
+            !detail_kinds(&without_liquidation).contains(&GemPerpetualPositionDetailRow::LiquidationPrice),
             "a zero liquidation price is no liquidation price"
         );
         let unliquidatable = PerpetualPosition {
             liquidation_price: None,
             ..PerpetualPosition::mock()
         };
-        assert!(!position_detail_rows(&unliquidatable).contains(&GemPerpetualPositionDetailRow::LiquidationPrice));
+        assert!(!detail_kinds(&unliquidatable).contains(&GemPerpetualPositionDetailRow::LiquidationPrice));
         let liquidatable = PerpetualPosition {
             liquidation_price: Some(1.0),
             ..without_liquidation
         };
         assert_eq!(
-            position_detail_rows(&liquidatable),
+            detail_kinds(&liquidatable),
             vec![
                 GemPerpetualPositionDetailRow::Pnl,
                 GemPerpetualPositionDetailRow::Autoclose,
@@ -754,6 +817,7 @@ mod tests {
         let row = |lines: Vec<GemLocalizedText>| GemListRow::Lines {
             title: GemListRowTitle::AutoClose,
             lines,
+            info: None,
         };
         let order = |order: GemTriggerOrder, price: Option<f64>| GemLocalizedText::TriggerOrder {
             order,
@@ -803,6 +867,70 @@ mod tests {
             ))
             .is_none(),
             "cancelling an unrelated order leaves nothing to show"
+        );
+    }
+
+    #[test]
+    fn test_position_details_carry_finished_values() {
+        let position = PerpetualPosition {
+            pnl: 5.0,
+            funding: Some(-1.5),
+            take_profit: Some(primitives::PerpetualTriggerOrder {
+                price: 120.0,
+                order_type: primitives::PerpetualOrderType::Market,
+                order_id: "1".to_string(),
+            }),
+            ..PerpetualPosition::mock()
+        };
+        let row = |kind: GemPerpetualPositionDetailRow| position_details(&position).into_iter().find(|detail| detail.kind == kind).unwrap().row;
+
+        assert_eq!(
+            row(GemPerpetualPositionDetailRow::Pnl),
+            GemListRow::Label {
+                title: GemListRowTitle::Pnl,
+                text: GemLocalizedText::Pnl {
+                    amount: GemFormattedNumber::signed_usd(5.0),
+                    percent: GemFormattedNumber::percentage(25.0, GemPercentageStyle::Signed),
+                },
+                tone: GemValueTone::Positive,
+                info: None,
+                progress: false,
+            }
+        );
+        assert_eq!(
+            row(GemPerpetualPositionDetailRow::Autoclose),
+            GemListRow::Lines {
+                title: GemListRowTitle::AutoClose,
+                lines: vec![GemLocalizedText::TriggerOrder {
+                    order: GemTriggerOrder::TakeProfit,
+                    price: Some(GemFormattedNumber::usd(120.0)),
+                }],
+                info: Some(GemInfoTopic::AutoClose),
+            }
+        );
+        assert_eq!(
+            row(GemPerpetualPositionDetailRow::FundingPayments),
+            GemListRow::Amount {
+                title: GemListRowTitle::FundingPayments,
+                amount: GemFormattedNumber::signed_usd(-1.5),
+                info: Some(GemInfoTopic::FundingPayments),
+            }
+        );
+        assert!(matches!(
+            row(GemPerpetualPositionDetailRow::Margin),
+            GemListRow::Label { text: GemLocalizedText::Margin { margin_type: PerpetualMarginType::Cross, .. }, .. }
+        ));
+        assert_eq!(
+            position_details(&PerpetualPosition::mock())
+                .into_iter()
+                .find(|detail| detail.kind == GemPerpetualPositionDetailRow::Autoclose)
+                .map(|detail| detail.row),
+            Some(GemListRow::Lines {
+                title: GemListRowTitle::AutoClose,
+                lines: vec![GemLocalizedText::Text { text: "-".to_string() }],
+                info: Some(GemInfoTopic::AutoClose),
+            }),
+            "no trigger orders read as an empty value"
         );
     }
 

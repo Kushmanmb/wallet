@@ -4,7 +4,6 @@ import enum Gemstone.GemCandleTooltipRow
 import enum Gemstone.GemPerpetualButton
 import enum Gemstone.GemPerpetualChartLineKind
 import enum Gemstone.GemPerpetualMarketSection
-import enum Gemstone.GemPerpetualPositionDetailRow
 import enum Gemstone.GemPerpetualSection
 import Localization
 import Primitives
@@ -26,21 +25,6 @@ extension GemPerpetualSection {
         }
     }
 }
-
-extension GemPerpetualPositionDetailRow {
-    var title: String {
-        switch self {
-        case .pnl: Localized.Perpetual.pnl
-        case .autoclose: Localized.Perpetual.autoClose
-        case .size: Localized.Perpetual.size
-        case .entryPrice: Localized.Perpetual.entryPrice
-        case .liquidationPrice: Localized.Info.Perpetual.LiquidationPrice.title
-        case .margin: Localized.Perpetual.margin
-        case .fundingPayments: Localized.Info.Perpetual.FundingPayments.title
-        }
-    }
-}
-
 
 extension GemPerpetualButton {
     var title: String {

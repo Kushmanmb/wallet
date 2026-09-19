@@ -87,6 +87,11 @@ pub enum GemListRowTitle {
     Decimals,
     Type,
     AutoClose,
+    Size,
+    EntryPrice,
+    LiquidationPrice,
+    Margin,
+    FundingPayments,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -103,6 +108,9 @@ pub enum GemInfoTopic {
     StakeApr,
     StakeLockTime,
     TransactionStatus { state: TransactionState, tone: GemTransactionStateTone },
+    AutoClose,
+    LiquidationPrice,
+    FundingPayments,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -232,6 +240,7 @@ pub enum GemListRow {
     Lines {
         title: GemListRowTitle,
         lines: Vec<GemLocalizedText>,
+        info: Option<GemInfoTopic>,
     },
     Loading,
     Error {

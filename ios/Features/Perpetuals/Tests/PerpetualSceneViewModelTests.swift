@@ -37,16 +37,6 @@ struct PerpetualSceneViewModelTests {
     }
 
     @Test
-    func onlyTheRowsWithAnExplanationOfferOne() {
-        let model = PerpetualSceneViewModel.mock()
-
-        #expect(model.infoAction(for: GemPerpetualPositionDetailRow.pnl) == nil)
-        #expect(model.infoAction(for: GemPerpetualPositionDetailRow.autoclose) != nil)
-        #expect(model.infoAction(for: GemPerpetualPositionDetailRow.liquidationPrice) != nil)
-        #expect(model.infoAction(for: GemPerpetualPositionDetailRow.fundingPayments) != nil)
-    }
-
-    @Test
     func openingALongPositionPassesTheDirectionToCore() {
         let service = GemPerpetualDetailsServiceMock()
         var actions: [GemPerpetualPositionAction] = []
@@ -131,16 +121,16 @@ struct PerpetualSceneViewModelTests {
         model.onInfo(.fundingApr)
         #expect(model.isPresentingInfoSheet == .fundingApr)
 
-        model.onSelectFundingPaymentsInfo()
+        model.onInfo(.fundingPayments)
         #expect(model.isPresentingInfoSheet == .fundingPayments)
 
-        model.onSelectLiquidationPriceInfo()
+        model.onInfo(.liquidationPrice)
         #expect(model.isPresentingInfoSheet == .liquidationPrice)
 
         model.onInfo(.openInterest)
         #expect(model.isPresentingInfoSheet == .openInterest)
 
-        model.onSelectAutocloseInfo()
+        model.onInfo(.autoClose)
         #expect(model.isPresentingInfoSheet == .autoclose)
     }
 

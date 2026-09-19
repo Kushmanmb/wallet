@@ -3,7 +3,7 @@ use std::sync::Arc;
 use primitives::chart::ChartCandleUpdate;
 use primitives::{Asset, AssetId, Chain, ChartPeriod, Currency, Perpetual, PerpetualPosition};
 
-use super::model::{GemPerpetualButton, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualSection};
+use super::model::{GemPerpetualButton, GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionKind, GemPerpetualSection};
 use super::{GemPerpetualService, rules};
 use crate::models::list::GemListRow;
 use crate::models::perpetual::{GemChartCandleStick, GemPerpetualSubscription};
@@ -46,8 +46,8 @@ impl GemPerpetualDetailsService {
         rules::perpetual_sections(has_position)
     }
 
-    pub fn position_detail_rows(&self, position: PerpetualPosition) -> Vec<GemPerpetualPositionDetailRow> {
-        rules::position_detail_rows(&position)
+    pub fn position_details(&self, position: PerpetualPosition) -> Vec<GemPerpetualPositionDetail> {
+        rules::position_details(&position)
     }
 
     pub fn info_rows(&self, perpetual: Perpetual, asset: Asset) -> Vec<GemListRow> {

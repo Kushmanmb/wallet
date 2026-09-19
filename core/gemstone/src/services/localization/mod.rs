@@ -1,4 +1,4 @@
-use primitives::{Chain, DelegationState, FeeUnitType, Resource, TransactionState};
+use primitives::{Chain, DelegationState, FeeUnitType, PerpetualMarginType, Resource, TransactionState};
 
 use crate::duration_formatter::GemDurationPart;
 use crate::formatted_number::GemFormattedNumber;
@@ -23,6 +23,8 @@ pub enum GemLocalizedText {
     SuspiciousAddress,
     InvalidTokenId,
     TriggerOrder { order: GemTriggerOrder, price: Option<GemFormattedNumber> },
+    Pnl { amount: GemFormattedNumber, percent: GemFormattedNumber },
+    Margin { amount: GemFormattedNumber, margin_type: PerpetualMarginType },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

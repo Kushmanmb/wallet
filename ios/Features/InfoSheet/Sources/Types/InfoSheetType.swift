@@ -98,6 +98,9 @@ public extension InfoSheetType {
         case .fundingApr: .fundingApr
         case .stakeApr: .stakeApr(assetImage?.placeholder)
         case .stakeLockTime: .stakeLockTime(assetImage?.placeholder)
+        case .autoClose: .autoclose
+        case .liquidationPrice: .liquidationPrice
+        case .fundingPayments: .fundingPayments
         case let .transactionStatus(state, tone):
             .transactionState(
                 imageURL: assetImage?.imageURL,

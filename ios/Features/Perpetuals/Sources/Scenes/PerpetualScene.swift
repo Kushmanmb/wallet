@@ -134,21 +134,18 @@ public struct PerpetualScene: View {
     private func positionContent(_ position: PerpetualPositionViewModel) -> some View {
         ListAssetItemView(model: PerpetualPositionItemViewModel(model: position))
 
-        ForEach(model.positionRows(position), id: \.self) { row in
-            switch row {
+        ForEach(model.positionDetails(position), id: \.kind) { detail in
+            switch detail.kind {
             case .pnl:
-                ListItemView(field: position.detailField(for: row))
-                    .numericTransition(for: position.pnlWithPercentText)
+                GemListRowView(row: detail.row)
+                    .numericTransition(for: detail.row)
             case .autoclose:
                 NavigationCustomLink(
-                    with: ListItemView(model: model.autocloseListItem(position, row: row)),
+                    with: GemListRowView(row: detail.row, onInfo: model.onInfo),
                     action: model.onSelectAutoclose,
                 )
             case .size, .entryPrice, .liquidationPrice, .margin, .fundingPayments:
-                ListItemView(
-                    field: position.detailField(for: row),
-                    infoAction: model.infoAction(for: row),
-                )
+                GemListRowView(row: detail.row, onInfo: model.onInfo)
             }
         }
     }

@@ -42,6 +42,7 @@ import Primitives
 import Style
 import SwiftUI
 import class Gemstone.GemPerpetual
+import class Gemstone.PriceChangeCalculator
 import enum Gemstone.GemTriggerOrder
 
 
@@ -96,6 +97,10 @@ extension GemLocalizedText {
             Localized.Errors.Token.invalidId
         case let .triggerOrder(order, price):
             GemPerpetual(provider: .hypercore).triggerOrderText(label: order.title, formattedPrice: price?.text())
+        case let .pnl(amount, percent):
+            PriceChangeCalculator().pnlText(formattedAmount: amount.text(), formattedPercentage: percent.text())
+        case let .margin(amount, marginType):
+            GemPerpetual(provider: .hypercore).marginText(formattedAmount: amount.text(), marginTypeName: marginType.toPrimitives().title)
         }
     }
 }
@@ -672,6 +677,11 @@ public extension GemListRowTitle {
         case .decimals: Localized.Asset.decimals
         case .type: Localized.Common.type
         case .autoClose: Localized.Perpetual.autoClose
+        case .size: Localized.Perpetual.size
+        case .entryPrice: Localized.Perpetual.entryPrice
+        case .liquidationPrice: Localized.Info.Perpetual.LiquidationPrice.title
+        case .margin: Localized.Perpetual.margin
+        case .fundingPayments: Localized.Info.Perpetual.FundingPayments.title
         }
     }
 }

@@ -1,6 +1,7 @@
 use super::rules;
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::GemBigInt;
+use crate::models::list::GemListRow;
 use crate::perpetual::GemPerpetual;
 use crate::services::failures::StepFailure;
 use crate::services::transfer::model::GemRecipient;
@@ -208,6 +209,12 @@ pub enum GemPerpetualPositionDetailRow {
     LiquidationPrice,
     Margin,
     FundingPayments,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemPerpetualPositionDetail {
+    pub kind: GemPerpetualPositionDetailRow,
+    pub row: GemListRow,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

@@ -94,8 +94,15 @@ extension GemListRow {
             .social(links)
         case let .error(error):
             .notice(title: GemListRowTitle.error.text, message: error.localizedDescription, kind: .error)
-        case let .lines(title, lines):
-            .listItem(ListItemModel(title: title.text, subtitle: lines.first?.text, subtitleExtra: lines.dropFirst().first?.text))
+        case let .lines(title, lines, info):
+            .listItem(
+                ListItemModel(
+                    title: title.text,
+                    subtitle: lines.first?.text,
+                    subtitleExtra: lines.dropFirst().first?.text,
+                    infoAction: infoAction(info, onInfo: onInfo),
+                ),
+            )
         case let .explorer(name, url):
             .page(ListItemModel(title: Localized.Transaction.viewOn(name)), url: URL(string: url) ?? BlockExplorerLink(name: name, link: url).url)
         case let .icon(chain):

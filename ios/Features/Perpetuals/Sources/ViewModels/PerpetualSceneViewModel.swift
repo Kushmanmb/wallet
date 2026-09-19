@@ -6,7 +6,7 @@ import enum Gemstone.GemPerpetualPositionKind
 import enum Gemstone.GemPerpetualButton
 import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemListRow
-import enum Gemstone.GemPerpetualPositionDetailRow
+import struct Gemstone.GemPerpetualPositionDetail
 import enum Gemstone.GemPerpetualSection
 import Components
 import Foundation
@@ -119,26 +119,8 @@ public final class PerpetualSceneViewModel {
         service.infoRows(perpetual: perpetual.toGem(), asset: asset.toGem())
     }
 
-    public func positionRows(_ position: PerpetualPositionViewModel) -> [GemPerpetualPositionDetailRow] {
-        service.positionDetailRows(position: position.data.position.toGem())
-    }
-
-    public func autocloseListItem(_ position: PerpetualPositionViewModel, row: GemPerpetualPositionDetailRow) -> ListItemModel {
-        ListItemModel(
-            title: row.title,
-            subtitle: position.autocloseText.subtitle,
-            subtitleExtra: position.autocloseText.subtitleExtra,
-            infoAction: infoAction(for: row),
-        )
-    }
-
-    public func infoAction(for row: GemPerpetualPositionDetailRow) -> InfoSheetAction? {
-        switch row {
-        case .autoclose: onSelectAutocloseInfo
-        case .liquidationPrice: onSelectLiquidationPriceInfo
-        case .fundingPayments: onSelectFundingPaymentsInfo
-        case .pnl, .size, .entryPrice, .margin: nil
-        }
+    public func positionDetails(_ position: PerpetualPositionViewModel) -> [GemPerpetualPositionDetail] {
+        service.positionDetails(position: position.data.position.toGem())
     }
 
     public func onSelect(_ button: PerpetualButtonViewModel) {
@@ -211,20 +193,8 @@ public extension PerpetualSceneViewModel {
         isPresentingInfoSheet = InfoSheetType(topic: topic, assetImage: nil)
     }
 
-    func onSelectFundingPaymentsInfo() {
-        isPresentingInfoSheet = .fundingPayments
-    }
-
-    func onSelectLiquidationPriceInfo() {
-        isPresentingInfoSheet = .liquidationPrice
-    }
-
     func onSelectAutoclose() {
         isPresentingAutoclose = positions.first
-    }
-
-    func onSelectAutocloseInfo() {
-        isPresentingInfoSheet = .autoclose
     }
 
     func onModifyPosition() {

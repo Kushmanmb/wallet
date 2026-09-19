@@ -7,6 +7,7 @@ import enum Gemstone.GemListRow
 import func Gemstone.addressCopy
 import func Gemstone.walletRow
 import GemstonePrimitives
+import GemstonePrimitivesTestKit
 import Localization
 @testable import Primitives
 @testable import PrimitivesComponents
@@ -91,5 +92,36 @@ struct GemListRowItemTests {
         }
         model.infoAction?()
         #expect(opened == .stakeApr)
+    }
+
+    @Test
+    func aPositionRowJoinsItsPnlAndMargin() {
+        let pnl = GemListRow.label(
+            title: .pnl,
+            text: .pnl(amount: .mock(value: 500), percent: .mock(value: 50, unit: .percent)),
+            tone: .positive,
+            info: nil,
+            progress: false,
+        )
+        let margin = GemListRow.label(title: .margin, text: .margin(amount: .mock(value: 1000, notation: .plain), marginType: .isolated), tone: .plain, info: nil, progress: false)
+        guard case let .listItem(pnlModel) = pnl.item(onInfo: nil), case let .listItem(marginModel) = margin.item(onInfo: nil) else {
+            Issue.record("Expected list items")
+            return
+        }
+        #expect(pnlModel.subtitle == "+$500.00 (+50.00%)")
+        #expect(marginModel.subtitle == "$1,000.00 (Isolated)")
+    }
+
+    @Test
+    func autocloseLinesOfferTheirExplanation() {
+        var opened: GemInfoTopic?
+        let row = GemListRow.lines(title: .autoClose, lines: [.text(text: "TP: $120.00")], info: .autoClose)
+        guard case let .listItem(model) = row.item(onInfo: { opened = $0 }) else {
+            Issue.record("Expected a list item")
+            return
+        }
+        model.infoAction?()
+        #expect(model.subtitle == "TP: $120.00")
+        #expect(opened == .autoClose)
     }
 }
