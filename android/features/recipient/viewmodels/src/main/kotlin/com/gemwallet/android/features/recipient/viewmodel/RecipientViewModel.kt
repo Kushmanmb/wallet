@@ -46,7 +46,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
@@ -57,7 +56,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import uniffi.gemstone.GemNameRecordState
 import uniffi.gemstone.GemNameServiceInterface
 import uniffi.gemstone.GemPaymentRecipient
 import uniffi.gemstone.GemRecipient
@@ -66,6 +64,9 @@ import uniffi.gemstone.GemRecipientNext
 import uniffi.gemstone.GemRecipientScan
 import uniffi.gemstone.GemRecipientServiceInterface
 import uniffi.gemstone.GemRecipientType
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
+import uniffi.gemstone.GemRecipientSession
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -90,10 +91,9 @@ class RecipientViewModel @Inject constructor(
         .map { it?.string(context).orEmpty() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    private val _memo = MutableStateFlow("")
-    val memo = _memo.asStateFlow()
-    private var references = emptyList<String>()
-    private var requestedAmount: String? = null
+    private val recipientInput = MutableStateFlow(GemRecipientSession(address = "", memo = "", payment = null))
+    val memo: StateFlow<String> = recipientInput.map { it.memo }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     private val session = getSession()
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -179,7 +179,13 @@ class RecipientViewModel @Inject constructor(
         confirmAction: ConfirmTransactionAction,
     ) {
         if (!addressInput.validate()) return
-        submit(recipient, address.value, addressInput.nameRecordState, amountAction, confirmAction)
+        val next = try {
+            recipientInput.updateAndGet { it.onAddressChanged(address.value) }.next(recipient.type, addressInput.nameRecordState)
+        } catch (rejection: GemRecipientException) {
+            addressInput.markInvalid(rejection)
+            return
+        }
+        route(recipient, next, amountAction, confirmAction)
     }
 
     fun onDestination(
@@ -188,49 +194,42 @@ class RecipientViewModel @Inject constructor(
         amountAction: AmountTransactionAction,
         confirmAction: ConfirmTransactionAction,
     ) {
-        submit(recipient, destination.address, GemNameRecordState.None, amountAction, confirmAction, destination.name)
-    }
-
-    private fun submit(
-        recipient: RecipientState.Ready,
-        input: String,
-        state: GemNameRecordState,
-        amountAction: AmountTransactionAction,
-        confirmAction: ConfirmTransactionAction,
-        selectedName: String? = null,
-    ) {
-        val asset = recipient.asset
-        val resolved = try {
-            service.recipient(asset.chain.string, input, state, memo.value, references)
+        val next = try {
+            service.select(recipient.type, destination)
         } catch (rejection: GemRecipientException) {
             addressInput.markInvalid(rejection)
             return
         }
-        val destination = GemRecipient(address = resolved.address, name = resolved.name ?: selectedName)
-        when (val next = service.next(recipient.type, GemPaymentRecipient(destination, requestedAmount))) {
+        route(recipient, next, amountAction, confirmAction)
+    }
+
+    private fun route(
+        recipient: RecipientState.Ready,
+        next: GemRecipientNext,
+        amountAction: AmountTransactionAction,
+        confirmAction: ConfirmTransactionAction,
+    ) {
+        when (next) {
             is GemRecipientNext.Amount -> amountAction(
-                AmountParams.Transfer(asset.id, next.payment.recipient, memo.value, references, next.payment.amount)
+                AmountParams.Transfer(recipient.asset.id, next.payment.recipient, next.payment.recipient.memo, next.payment.recipient.references, next.payment.amount)
             )
             is GemRecipientNext.Confirm -> confirmAction(ConfirmTransferInput(next.transfer))
         }
     }
 
     fun onAddress(input: String) {
-        if (input != address.value) {
-            requestedAmount = null
-            references = emptyList()
-        }
+        recipientInput.update { it.onAddressChanged(input) }
         addressInput.onTextChange(input)
     }
 
     fun onMemo(input: String) {
-        _memo.value = input
+        recipientInput.update { it.onMemoChanged(input) }
     }
 
     fun setQrData(state: RecipientState.Ready, field: QrScanField, data: String, confirmAction: ConfirmTransactionAction) {
         when (field) {
             QrScanField.None -> Unit
-            QrScanField.Memo -> _memo.value = data
+            QrScanField.Memo -> onMemo(data)
             QrScanField.Address -> onAddressScan(state.type, data, confirmAction)
         }
     }
@@ -249,10 +248,8 @@ class RecipientViewModel @Inject constructor(
     }
 
     private fun updateFrom(payment: GemPaymentRecipient) {
+        recipientInput.update { it.onPayment(payment) }
         addressInput.setScannedAddress(payment.recipient.address)
-        payment.recipient.memo?.let { _memo.value = it }
-        references = payment.recipient.references
-        requestedAmount = payment.amount
     }
 
 }

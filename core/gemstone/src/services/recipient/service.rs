@@ -3,10 +3,10 @@ use std::sync::Arc;
 use primitives::{Chain, Wallet};
 
 use super::model::{GemRecipientError, GemRecipientNext, GemRecipientScan, GemRecipientSection, GemRecipientType};
-use super::rules::{next_step, recipient_sections, scan_route};
+use super::rules::{recipient_sections, scan_route, select_step};
 use crate::GemstoneError;
 use crate::models::payment::GemPayment;
-use crate::payment::{GemPaymentDestination, GemPaymentRecipient, GemPaymentService, GemPaymentWalletAsset};
+use crate::payment::{GemPaymentDestination, GemPaymentService, GemPaymentWalletAsset};
 use crate::services::name::{GemNameRecordState, GemNameService};
 use crate::services::transfer::model::GemRecipient;
 use crate::services::wallet_session::GemWalletSessionService;
@@ -49,8 +49,8 @@ impl GemRecipientService {
         scan_route(destination, &recipient_type, |transfer| self.payments.transfer_data(transfer, asset))
     }
 
-    pub fn next(&self, recipient_type: GemRecipientType, payment: GemPaymentRecipient) -> GemRecipientNext {
-        next_step(recipient_type, payment)
+    pub fn select(&self, recipient_type: GemRecipientType, recipient: GemRecipient) -> Result<GemRecipientNext, GemRecipientError> {
+        select_step(recipient_type, recipient)
     }
 }
 

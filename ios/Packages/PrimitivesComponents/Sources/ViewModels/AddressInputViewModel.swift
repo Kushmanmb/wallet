@@ -57,15 +57,6 @@ public final class AddressInputViewModel {
         validation.address
     }
 
-    public func recipient(memo: String?, references: [String] = []) throws -> GemRecipient {
-        try nameService.recipient(
-            chain: chain.rawValue,
-            input: text,
-            state: nameResolveState,
-            memo: memo,
-            references: references,
-        )
-    }
 
     private var validation: GemRecipientValidation {
         nameService.validateRecipient(chain: chain.rawValue, input: text, state: nameResolveState)

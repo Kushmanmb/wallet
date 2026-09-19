@@ -102,6 +102,17 @@ pub fn next_step(recipient_type: GemRecipientType, payment: GemPaymentRecipient)
     }
 }
 
+pub fn select_step(recipient_type: GemRecipientType, recipient: GemRecipient) -> Result<GemRecipientNext, GemRecipientError> {
+    let validated = self::recipient(recipient_type.asset().chain(), &recipient.address, &GemNameRecordState::None, recipient.memo.clone(), vec![])?;
+    Ok(next_step(
+        recipient_type,
+        GemPaymentRecipient {
+            recipient: GemRecipient { name: recipient.name, ..validated },
+            amount: None,
+        },
+    ))
+}
+
 pub fn recipient_sections(wallets: Vec<Wallet>, chain: Chain, contacts: Vec<GemRecipient>) -> Vec<GemRecipientSection> {
     let on_chain: Vec<Wallet> = wallets.into_iter().filter(|wallet| wallet.account(chain).is_some()).collect();
     let of = |pinned: bool, view: bool| -> Vec<Wallet> {
@@ -154,6 +165,7 @@ fn recipient_row(chain: Chain, recipient: GemRecipient) -> GemRecipientRow {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::services::recipient::model::GemRecipientSession;
     use crate::payment::GemPaymentService;
     use crate::testkit::TestAlienProvider;
     use std::sync::Arc;
@@ -404,6 +416,60 @@ mod tests {
             memo: Some("1".to_string()),
             references: vec![],
         }
+    }
+
+    #[test]
+    fn test_the_recipient_session_keeps_a_scanned_payment_until_the_address_changes() {
+        let asset = GemRecipientType::Asset {
+            asset: Asset::from_chain(Chain::Ethereum),
+        };
+        let payment = GemPaymentRecipient {
+            recipient: GemRecipient {
+                address: ADDRESS.to_string(),
+                name: None,
+                memo: Some("42".to_string()),
+                references: vec!["ref".to_string()],
+            },
+            amount: Some("1.5".to_string()),
+        };
+        let scanned = GemRecipientSession::default().on_memo_changed("typed".to_string()).on_payment(payment.clone());
+        assert_eq!(scanned.address, ADDRESS);
+        assert_eq!(scanned.memo, "42", "a scanned memo replaces the typed one");
+        assert_eq!(scanned.on_address_changed(ADDRESS.to_string()).payment, Some(payment.clone()));
+        assert_eq!(scanned.on_address_changed("0x1".to_string()).payment, None, "editing the address drops the scanned amount");
+
+        match scanned.next(asset.clone(), GemNameRecordState::None).unwrap() {
+            GemRecipientNext::Amount { payment } => {
+                assert_eq!(payment.amount.as_deref(), Some("1.5"));
+                assert_eq!(payment.recipient.memo.as_deref(), Some("42"));
+                assert_eq!(payment.recipient.references, vec!["ref".to_string()]);
+            }
+            GemRecipientNext::Confirm { .. } => panic!("an asset recipient asks for an amount"),
+        }
+        assert!(scanned.on_address_changed("not an address".to_string()).next(asset, GemNameRecordState::None).is_err());
+    }
+
+    #[test]
+    fn test_selecting_a_saved_recipient_keeps_its_name_and_memo_without_an_amount() {
+        let asset = GemRecipientType::Asset {
+            asset: Asset::from_chain(Chain::Ethereum),
+        };
+        let contact = GemRecipient {
+            address: ADDRESS.to_string(),
+            name: Some("Alice".to_string()),
+            memo: Some("7".to_string()),
+            references: vec![],
+        };
+
+        match select_step(asset.clone(), contact).unwrap() {
+            GemRecipientNext::Amount { payment } => {
+                assert_eq!(payment.recipient.name.as_deref(), Some("Alice"));
+                assert_eq!(payment.recipient.memo.as_deref(), Some("7"));
+                assert_eq!(payment.amount, None);
+            }
+            GemRecipientNext::Confirm { .. } => panic!("an asset recipient asks for an amount"),
+        }
+        assert!(select_step(asset, GemRecipient { address: "0x1".to_string(), name: None, memo: None, references: vec![] }).is_err());
     }
 
     #[test]

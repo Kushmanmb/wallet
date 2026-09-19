@@ -14,7 +14,7 @@ import Transfer
 public extension RecipientSceneViewModel {
     static func mock(
         asset: Asset = .mockEthereum(),
-        type: GemRecipientType = .asset(asset: Asset.mock().toGem()),
+        type: GemRecipientType? = nil,
         recipient: GemPaymentRecipient? = .none,
         onNavigate: TransferRouteAction = nil,
     ) -> RecipientSceneViewModel {
@@ -23,7 +23,7 @@ public extension RecipientSceneViewModel {
             asset: asset,
             service: GemRecipientService.mock(),
             nameService: GemNameService.mock(),
-            type: type,
+            type: type ?? .asset(asset: asset.toGem()),
             recipient: recipient,
             onNavigate: onNavigate,
         )

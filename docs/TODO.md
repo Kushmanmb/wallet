@@ -45,7 +45,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 [No hand-written twins](ARCHITECTURE.md): a type that only crosses the FFI is used as the uniffi type, and a twin exists only for a type an app persists. Android keeps four twins of exported Core enums, none persisted, and two of them let the app invent outcomes Core never produced.
 
 - **T5** **S** Android `ManageContactState` twins `GemContactInput` (name, description, avatar, addresses) — with **S43**, the session holds the input.
-- **O53** **S** iOS `NameRecordViewModel.state: GemNameRecordState` is stored — derive it from the address session.
 - **O54** **S** iOS `AmountStakeViewModel.action: GemStakeAmountInput` and `ImportWalletSceneViewModel.importType: GemWalletImportKind` are stored and switched on in the model — the session holds them (**S41**).
 
 
@@ -61,7 +60,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **K8** **M** `GemStreamService` holds 13 `Arc`s, `GemAssetDetailsService` and `GemWalletService` 10, `GemPerpetualService` 9 — for each, the dependencies reached only to forward one call move behind the composition service (§ 7).
 - **S41** **M** iOS `ImportWalletSceneViewModel` drives input, word suggestions, import kind and button state itself — `GemWalletImportSession` on both apps (Android `ImportUIState` carries the same).
 - **S43** **M** iOS `ManageContactViewModel` (name input, description, avatar, addresses, saving) and Android `ManageContactState` — `GemContactSession` over the `GemContactInput` both already hold.
-- **S45** **S** iOS `RecipientSceneViewModel` (address input, memo, `recipientData`) drives the recipient screen app-side; Android's does too — `GemRecipientSession` over `GemRecipientService.next`.
 
 
 ## 7. Decisions to make
@@ -127,6 +125,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**O53 (2026-09-19).** Closed as correct with S45: `NameRecordViewModel.state` is the outcome of the name lookup the app runs (the task, the debounce and the cancellation stay in the app), and Core already decides every transition through `name_input_step` and `resolved_state`. `GemRecipientSession.next` takes that state as an argument, which is [what a session cannot know](ARCHITECTURE.md#a-screen-whose-state-changes-is-a-session); the import screen reads the same model.
 
 **S48 (2026-09-19).** Closed as correct: the security toggles are optimistic mirrors of settings the platform stores securely (the keychain and biometry on iOS, `UserConfig` on Android), rolled back when the platform call fails, and every rule the screen shows already comes from Core through `GemSecurityInput` → `securitySections`. What stays app-side is platform knowledge: which biometry name to show, and that the privacy lock exists only on iOS. A Core session would hold a second copy of state the secure store owns, which is the mirror the Coverage pass already classes as app state.
 

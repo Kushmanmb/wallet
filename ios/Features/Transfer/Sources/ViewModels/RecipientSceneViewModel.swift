@@ -2,6 +2,8 @@
 
 import enum Gemstone.GemImage
 import struct Gemstone.GemPaymentRecipient
+import enum Gemstone.GemRecipientNext
+import struct Gemstone.GemRecipientSession
 import struct Gemstone.GemRecipient
 import protocol Gemstone.GemNameServiceProtocol
 import protocol Gemstone.GemRecipientServiceProtocol
@@ -29,8 +31,12 @@ public final class RecipientSceneViewModel {
 
     public var isPresentingScanner: RecipientScene.Field?
     var addressInputModel: AddressInputViewModel
-    var memo: String = ""
-    private(set) var recipientData: GemPaymentRecipient?
+    private(set) var session = GemRecipientSession(address: .empty, memo: .empty, payment: nil)
+
+    var memo: String {
+        get { session.memo }
+        set { session = session.onMemoChanged(memo: newValue) }
+    }
 
     public let contactsQuery: ObservableQuery<ContactsRequest>
     var contacts: [ContactData] {
@@ -131,11 +137,8 @@ extension RecipientSceneViewModel {
         guard addressInputModel.validate() else { return }
 
         do {
-            handle(
-                recipientData: GemPaymentRecipient(recipient: try addressInputModel.recipient(memo: memo, references: recipientData?.recipient.references ?? []),
-                    amount: recipientData?.amount,
-                ),
-            )
+            session = session.onAddressChanged(address: addressInputModel.text)
+            route(try session.next(recipientType: type, nameState: addressInputModel.nameResolveState))
         } catch {
             addressInputModel.update(error: error)
         }
@@ -160,23 +163,12 @@ extension RecipientSceneViewModel {
     }
 
     func onChangeAddressText(_: String, new: String) {
-        guard new != recipientData?.recipient.address else { return }
-        recipientData = .none
+        session = session.onAddressChanged(address: new)
     }
 
     func onSelectRecipient(_ recipient: GemRecipient) {
         do {
-            let validated = try service.recipient(
-                chain: asset.chain.rawValue,
-                input: recipient.address,
-                state: .none,
-                memo: recipient.memo,
-                references: [],
-            )
-            handle(
-                recipientData: GemPaymentRecipient(
-                    recipient: GemRecipient(address: validated.address, name: recipient.name, memo: validated.memo)),
-            )
+            route(try service.select(recipientType: type, recipient: recipient))
         } catch {
             addressInputModel.text = recipient.address
         }
@@ -200,17 +192,13 @@ extension RecipientSceneViewModel {
         }
     }
 
-    private func update(from recipientData: GemPaymentRecipient) {
-        self.recipientData = recipientData
-        addressInputModel.update(text: recipientData.recipient.address)
-
-        if let memo = recipientData.recipient.memo {
-            self.memo = memo
-        }
+    private func update(from payment: GemPaymentRecipient) {
+        session = session.onPayment(payment: payment)
+        addressInputModel.update(text: session.address)
     }
 
-    private func handle(recipientData: GemPaymentRecipient) {
-        switch service.next(recipientType: type, payment: recipientData) {
+    private func route(_ next: GemRecipientNext) {
+        switch next {
         case let .amount(payment): onNavigate?(.amount(AmountInput(type: .transfer(recipient: payment), asset: asset)))
         case let .confirm(transfer): onNavigate?(.confirm(transfer))
         }

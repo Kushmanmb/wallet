@@ -105,11 +105,11 @@ struct RecipientSceneViewModelTests {
         model.onHandleScan("ethereum:0x123?amount=1.5", for: .address)
         model.onChangeAddressText("", new: model.addressInputModel.text)
 
-        #expect(model.recipientData?.amount == "1.5")
+        #expect(model.session.payment?.amount == "1.5")
 
         model.onChangeAddressText("", new: "0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326")
 
-        #expect(model.recipientData == nil)
+        #expect(model.session.payment == nil)
     }
 
     @Test
@@ -124,11 +124,11 @@ struct RecipientSceneViewModelTests {
 
         #expect(model.addressInputModel.text == address)
         #expect(model.memo == "12345")
-        #expect(model.recipientData?.amount == "10")
+        #expect(model.session.payment?.amount == "10")
 
         model.onChangeAddressText(address, new: "0x5615e8ab93b9d695b6d4d6545f7792aa59e1069a")
 
-        #expect(model.recipientData == nil)
+        #expect(model.session.payment == nil)
     }
 
     @Test
@@ -140,7 +140,7 @@ struct RecipientSceneViewModelTests {
         model.onHandleScan("ethereum:0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326?amount=1.5", for: .address)
 
         #expect(transfer?.recipient.address == "0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326")
-        #expect(model.recipientData == nil)
+        #expect(model.session.payment == nil)
     }
 
     @Test
@@ -156,7 +156,7 @@ struct RecipientSceneViewModelTests {
 
     @Test
     func onContinueForAnNftConfirmsATransferOfTheAsset() {
-        let nftAsset = NFTAsset.mock()
+        let nftAsset = NFTAsset.mock(chain: .ethereum)
         var transfer: GemTransferData?
         let model = RecipientSceneViewModel.mock(type: .nft(nftAsset: nftAsset.toGem()), onNavigate: { if case let .confirm(data) = $0 { transfer = data } })
 

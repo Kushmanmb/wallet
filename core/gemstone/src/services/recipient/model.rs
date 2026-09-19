@@ -1,6 +1,7 @@
 use primitives::{Asset, Chain, ChainAsset, NFTAsset};
 
 use crate::payment::GemPaymentRecipient;
+use crate::services::name::GemNameRecordState;
 use crate::services::transfer::{GemRecipient, GemTransferData};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -83,6 +84,13 @@ pub enum GemRecipientNext {
     Confirm { transfer: GemTransferData },
 }
 
+#[derive(Debug, Clone, PartialEq, Default, uniffi::Record)]
+pub struct GemRecipientSession {
+    pub address: String,
+    pub memo: String,
+    pub payment: Option<GemPaymentRecipient>,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemRecipientSectionKind {
     Pinned,
@@ -102,4 +110,36 @@ pub struct GemRecipientRow {
 pub struct GemRecipientSection {
     pub kind: GemRecipientSectionKind,
     pub rows: Vec<GemRecipientRow>,
+}
+
+#[uniffi::export]
+impl GemRecipientSession {
+    pub fn on_address_changed(&self, address: String) -> Self {
+        let payment = self.payment.clone().filter(|payment| payment.recipient.address == address);
+        Self { address, payment, ..self.clone() }
+    }
+
+    pub fn on_memo_changed(&self, memo: String) -> Self {
+        Self { memo, ..self.clone() }
+    }
+
+    pub fn on_payment(&self, payment: GemPaymentRecipient) -> Self {
+        Self {
+            address: payment.recipient.address.clone(),
+            memo: payment.recipient.memo.clone().unwrap_or_else(|| self.memo.clone()),
+            payment: Some(payment),
+        }
+    }
+
+    pub fn next(&self, recipient_type: GemRecipientType, name_state: GemNameRecordState) -> Result<GemRecipientNext, GemRecipientError> {
+        let references = self.payment.as_ref().map(|payment| payment.recipient.references.clone()).unwrap_or_default();
+        let recipient = super::rules::recipient(recipient_type.asset().chain(), &self.address, &name_state, Some(self.memo.clone()), references)?;
+        Ok(super::rules::next_step(
+            recipient_type,
+            GemPaymentRecipient {
+                recipient,
+                amount: self.payment.as_ref().and_then(|payment| payment.amount.clone()),
+            },
+        ))
+    }
 }
