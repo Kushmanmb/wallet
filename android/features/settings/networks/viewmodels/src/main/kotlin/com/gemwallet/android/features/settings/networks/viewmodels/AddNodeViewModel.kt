@@ -4,7 +4,7 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.gemwallet.android.features.settings.networks.viewmodels.models.uiModel
 import uniffi.gemstone.GemAddNodeException
-import uniffi.gemstone.GemAddNodeFailure
+import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemAddNodeSession
 import uniffi.gemstone.GemChainSettingsServiceInterface
 import kotlinx.coroutines.withContext
@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.gemwallet.android.ext.runCatchingCancellable
 
 @HiltViewModel
 class AddNodeViewModel @Inject constructor(
@@ -63,8 +62,15 @@ class AddNodeViewModel @Inject constructor(
         val current = session.value ?: return
         val status = current.viewState().canImport.takeIf { it }?.let { (current.check) } ?: return
         viewModelScope.launch {
-            if (runCatchingCancellable { withContext(ioDispatcher) { service.addNode(current.chain, status.url) } }.isFailure) {
-                session.value = current.onFailed(GemAddNodeFailure.UNAVAILABLE)
+            try {
+                withContext(ioDispatcher) { service.addNode(current.chain, status.url) }
+            } catch (error: GemServiceException) {
+                session.value = current.onAddFailed(error)
+                return@launch
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Throwable) {
+                session.value = current.onAddFailed(null)
                 return@launch
             }
             url.value = ""
@@ -78,14 +84,12 @@ class AddNodeViewModel @Inject constructor(
         session.value = current.onChecking()
         session.value = try {
             current.onChecked(current.url, withContext(ioDispatcher) { service.checkNode(current.chain, current.url) })
-        } catch (error: GemAddNodeException.InvalidUrl) {
-            current.onCheckFailed(current.url, GemAddNodeFailure.INVALID_URL)
-        } catch (error: GemAddNodeException.InvalidNetworkId) {
-            current.onCheckFailed(current.url, GemAddNodeFailure.INVALID_NETWORK_ID)
+        } catch (error: GemAddNodeException) {
+            current.onCheckFailed(current.url, error)
         } catch (error: CancellationException) {
             throw error
         } catch (_: Throwable) {
-            current.onCheckFailed(current.url, GemAddNodeFailure.UNAVAILABLE)
+            current.onCheckFailed(current.url, null)
         }
     }
 }

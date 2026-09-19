@@ -2,22 +2,17 @@ use std::collections::HashMap;
 
 use primitives::Chain;
 
-use super::model::{GemNodeCheck, GemNodeSelection, GemNodeStatusState};
+use super::model::{GemAddNodeError, GemNodeCheck, GemNodeSelection, GemNodeStatusState};
 use super::rules;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemAddNodeFailure {
-    InvalidUrl,
-    InvalidNetworkId,
-    Unavailable,
-}
+use crate::services::error::GemServiceError;
+use crate::services::error_text::GemErrorText;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemAddNodePhase {
     Idle,
     Checking,
     Ready { check: GemNodeCheck },
-    Failed { failure: GemAddNodeFailure },
+    Failed { error: GemErrorText },
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -31,7 +26,7 @@ pub struct GemAddNodeSession {
     pub chain: Chain,
     pub url: String,
     pub check: Option<GemNodeCheck>,
-    pub failure: Option<GemAddNodeFailure>,
+    pub error: Option<GemErrorText>,
     pub is_checking: bool,
 }
 
@@ -41,7 +36,7 @@ impl GemAddNodeSession {
             chain,
             url: String::new(),
             check: None,
-            failure: None,
+            error: None,
             is_checking: false,
         }
     }
@@ -53,7 +48,7 @@ impl GemAddNodeSession {
         Self {
             url: url.trim().to_string(),
             check: None,
-            failure: None,
+            error: None,
             is_checking: false,
             ..self.clone()
         }
@@ -62,7 +57,7 @@ impl GemAddNodeSession {
     pub fn on_checking(&self) -> Self {
         Self {
             check: None,
-            failure: None,
+            error: None,
             is_checking: !self.url.is_empty(),
             ..self.clone()
         }
@@ -74,26 +69,21 @@ impl GemAddNodeSession {
         }
         Self {
             check: Some(check),
-            failure: None,
+            error: None,
             is_checking: false,
             ..self.clone()
         }
     }
 
-    pub fn on_check_failed(&self, url: String, failure: GemAddNodeFailure) -> Self {
+    pub fn on_check_failed(&self, url: String, error: Option<GemAddNodeError>) -> Self {
         if url != self.url {
             return self.clone();
         }
-        self.on_failed(failure)
+        self.failed(error.map(|error| error.text()))
     }
 
-    pub fn on_failed(&self, failure: GemAddNodeFailure) -> Self {
-        Self {
-            check: None,
-            failure: Some(failure),
-            is_checking: false,
-            ..self.clone()
-        }
+    pub fn on_add_failed(&self, error: Option<GemServiceError>) -> Self {
+        self.failed(error.map(|error| error.text()))
     }
 
     pub fn on_imported(&self) -> Self {
@@ -113,13 +103,22 @@ impl GemAddNodeSession {
 }
 
 impl GemAddNodeSession {
+    fn failed(&self, error: Option<GemErrorText>) -> Self {
+        Self {
+            check: None,
+            error: Some(error.unwrap_or(GemErrorText::Unknown)),
+            is_checking: false,
+            ..self.clone()
+        }
+    }
+
     fn phase(&self) -> GemAddNodePhase {
         if self.is_checking {
             return GemAddNodePhase::Checking;
         }
-        match (&self.check, self.failure) {
+        match (&self.check, &self.error) {
             (Some(check), _) => GemAddNodePhase::Ready { check: check.clone() },
-            (None, Some(failure)) => GemAddNodePhase::Failed { failure },
+            (None, Some(error)) => GemAddNodePhase::Failed { error: error.clone() },
             (None, None) => GemAddNodePhase::Idle,
         }
     }
@@ -128,6 +127,7 @@ impl GemAddNodeSession {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::gateway::GatewayError;
 
     #[test]
     fn test_an_empty_url_is_idle_and_never_starts_a_check() {
@@ -154,7 +154,7 @@ mod tests {
         let session = GemAddNodeSession::new(Chain::Ethereum).on_input("https://other".to_string()).on_checking();
 
         assert_eq!(session.on_checked("https://node".to_string(), GemNodeCheck::mock()), session);
-        assert_eq!(session.on_check_failed("https://node".to_string(), GemAddNodeFailure::InvalidUrl), session);
+        assert_eq!(session.on_check_failed("https://node".to_string(), Some(GemAddNodeError::InvalidUrl)), session);
     }
 
     #[test]
@@ -162,15 +162,34 @@ mod tests {
         let failed = GemAddNodeSession::new(Chain::Ethereum)
             .on_input("https://node".to_string())
             .on_checked("https://node".to_string(), GemNodeCheck::mock())
-            .on_failed(GemAddNodeFailure::InvalidNetworkId);
+            .on_check_failed("https://node".to_string(), Some(GemAddNodeError::InvalidNetworkId));
 
         assert_eq!(
             failed.view_state().phase,
             GemAddNodePhase::Failed {
-                failure: GemAddNodeFailure::InvalidNetworkId
+                error: GemErrorText::InvalidNetworkId
             }
         );
         assert!(!failed.view_state().can_import);
+    }
+
+    #[test]
+    fn test_a_failure_carries_the_error_the_apps_localize() {
+        let session = GemAddNodeSession::new(Chain::Ethereum).on_input("https://node".to_string()).on_checking();
+
+        assert_eq!(
+            session
+                .clone()
+                .on_check_failed("https://node".to_string(), Some(GemAddNodeError::Gateway(GatewayError::Offline)))
+                .error,
+            Some(GemErrorText::NetworkOffline),
+            "a transport failure does not pretend to be a bad url"
+        );
+        assert_eq!(
+            session.clone().on_add_failed(Some(GemServiceError::Store { msg: "disk full".to_string() })).error,
+            Some(GemErrorText::Message { text: "disk full".to_string() })
+        );
+        assert_eq!(session.on_check_failed("https://node".to_string(), None).error, Some(GemErrorText::Unknown));
     }
 
     #[test]

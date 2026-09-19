@@ -2,7 +2,6 @@
 
 import Components
 import enum Gemstone.GemAddNodeError
-import enum Gemstone.GemAddNodeFailure
 import enum Gemstone.GemAddNodePhase
 import struct Gemstone.GemAddNodeSession
 import protocol Gemstone.GemChainSettingsServiceProtocol
@@ -41,7 +40,7 @@ final class AddNodeSceneViewModel {
         case .idle: .noData
         case .checking: .loading
         case let .ready(check): .data(check.rows().map { ListItemField(title: $0.title, value: $0.text) })
-        case let .failed(failure): .error(failure.error)
+        case let .failed(error): .error(AnyError(error.text))
         }
     }
 
@@ -109,9 +108,9 @@ extension AddNodeSceneViewModel {
             session = session.onImported()
             return true
         } catch let error as GemServiceError {
-            isPresentingAlertMessage = AlertMessage(message: error.text().text)
+            session = session.onAddFailed(error: error)
         } catch {
-            debugLog("AddNodeSceneViewModel import error: \(error)")
+            session = session.onAddFailed(error: nil)
         }
         return false
     }
@@ -123,9 +122,9 @@ extension AddNodeSceneViewModel {
             let check = try await service.checkNode(chain: chain.rawValue, url: url)
             session = session.onChecked(url: url, check: check)
         } catch let error as GemAddNodeError {
-            session = session.onCheckFailed(url: url, failure: error.failure)
+            session = session.onCheckFailed(url: url, error: error)
         } catch {
-            session = session.onCheckFailed(url: url, failure: .unavailable)
+            session = session.onCheckFailed(url: url, error: nil)
         }
     }
 }

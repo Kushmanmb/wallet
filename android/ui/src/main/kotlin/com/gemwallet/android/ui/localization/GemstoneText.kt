@@ -28,7 +28,6 @@ import com.wallet.core.primitives.TpslType
 import com.wallet.core.primitives.TransactionState
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.FeeOption
-import uniffi.gemstone.GemAddNodeFailure
 import uniffi.gemstone.GemApprovalValue
 import uniffi.gemstone.GemAssetMenuAction
 import uniffi.gemstone.GemBalanceResource
@@ -97,13 +96,6 @@ fun GemFiatTransactionBadge.stringRes(): Int = when (this) {
 fun GemWalletSubtitle.string(context: Context): String = when (this) {
     GemWalletSubtitle.Multicoin -> context.getString(R.string.wallet_multicoin)
     is GemWalletSubtitle.Address -> value
-}
-
-@StringRes
-fun GemAddNodeFailure.stringRes(): Int = when (this) {
-    GemAddNodeFailure.INVALID_URL -> R.string.errors_invalid_url
-    GemAddNodeFailure.INVALID_NETWORK_ID -> R.string.errors_invalid_network_id
-    GemAddNodeFailure.UNAVAILABLE -> R.string.errors_error_occurred
 }
 
 @StringRes

@@ -35,7 +35,7 @@ public final class GemChainSettingsServiceMock: GemChainSettingsServiceProtocol,
     public func explorerRows(chain _: Chain) -> [GemExplorerRow] { explorerRowsValue }
 
     public func newAddNodeSession(chain: Chain) -> GemAddNodeSession {
-        GemAddNodeSession(chain: chain, url: "", check: nil, failure: nil, isChecking: false)
+        GemAddNodeSession(chain: chain, url: "", check: nil, error: nil, isChecking: false)
     }
 
     public func newNodeListSession(chain: Chain) -> GemNodeListSession {
