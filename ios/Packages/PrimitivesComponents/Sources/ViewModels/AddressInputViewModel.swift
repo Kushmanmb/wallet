@@ -5,6 +5,7 @@ import Foundation
 import enum Gemstone.GemNameRecordState
 import protocol Gemstone.GemNameServiceProtocol
 import struct Gemstone.GemRecipient
+import enum Gemstone.GemRecipientError
 import struct Gemstone.GemRecipientValidation
 import GemstonePrimitives
 import Localization
@@ -71,7 +72,11 @@ public final class AddressInputViewModel {
     }
 
     public func update(error: (any Error)?) {
-        inputModel.update(error: error)
+        if let error = error as? GemRecipientError {
+            inputModel.update(error: error.display(chain: chain.rawValue))
+        } else {
+            inputModel.update(error: error)
+        }
     }
 
     @discardableResult

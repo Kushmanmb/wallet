@@ -2,10 +2,12 @@
 
 import Components
 import struct Gemstone.GemPaymentRecipient
+import enum Gemstone.GemRecipientErrorDisplay
 import struct Gemstone.GemTransferData
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
 import Primitives
+@testable import PrimitivesComponents
 import PrimitivesTestKit
 import Testing
 @testable import Transfer
@@ -95,6 +97,29 @@ struct RecipientSceneViewModelTests {
         model.onContinue()
 
         #expect(recipientAddress == checksummed)
+    }
+
+    @Test
+    func mismatchedTokenScanShowsNetworkError() {
+        var didNavigate = false
+        let model = RecipientSceneViewModel.mock(asset: .mockSolanaUSDC(), onNavigate: { _ in didNavigate = true })
+
+        model.onHandleScan("ethereum:0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326", for: .address)
+
+        #expect(model.addressInputModel.inputModel.error as? GemRecipientErrorDisplay == .invalidAddress(network: "Solana"))
+        #expect(didNavigate == false)
+    }
+
+    @Test
+    func invalidRecipientShowsNetworkError() {
+        var didNavigate = false
+        let model = RecipientSceneViewModel.mock(onNavigate: { _ in didNavigate = true })
+
+        model.onSelectRecipient(.mock(address: "invalid address"))
+
+        #expect(model.addressInputModel.text == "invalid address")
+        #expect(model.addressInputModel.inputModel.error as? GemRecipientErrorDisplay == .invalidAddress(network: "Ethereum"))
+        #expect(didNavigate == false)
     }
 
     @Test

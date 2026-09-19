@@ -154,7 +154,7 @@ extension RecipientSceneViewModel {
             do {
                 try handleAddressScan(result)
             } catch {
-                addressInputModel.update(error: AnyError(Localized.Errors.invalidAssetAddress(asset.name)))
+                addressInputModel.update(error: error)
             }
 
         case .memo:
@@ -171,6 +171,7 @@ extension RecipientSceneViewModel {
             try route(service.select(recipientType: type, recipient: recipient))
         } catch {
             addressInputModel.text = recipient.address
+            addressInputModel.update(error: error)
         }
     }
 }

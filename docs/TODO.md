@@ -16,7 +16,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 
 ## Execution order
 
-1. **Protect correctness:** K15/K16, F55 and D60; resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
+1. **Protect correctness:** K15/K16 and D60; resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
 2. **Establish consistency:** MIG1–MIG4 and MIG6; apply the atomic-write contract to U22–U24. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, C53 wallet creation/import with D43/R124, C54 transaction tracking, and D61 device observation. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
@@ -36,8 +36,8 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | S74, R94, D70, O59, F61/F62 |
 | Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | S72, R103/R128, D44/D70, B76, F61/F62 |
 | Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | R132, D64; retain existing native QR/share adapters |
-| Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | U19, C52/C54, D49, F55/F56/F60 |
-| Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | F55, V92, D65; keep debounce/observation native |
+| Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | U19, C52/C54, D49, F56/F60 |
+| Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | V92, D65; keep debounce/observation native |
 | Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | B78, R119/R120, D55, U10, V91 |
 | Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | C51, R89/R90/R93, U30, D51/D55, F58, P90, D73 |
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | MIG3, S82, D67, R91/R92/R129, U15, D55 |
@@ -218,7 +218,6 @@ The same product rule on both apps with a difference, each read on both sides on
 
 - **V91** **S** `AutocloseValidation` is twinned on iOS (`PerpetualError.swift:6-20`) and mapped inside a `:ui` component on Android (`AutocloseInputSection.kt:35-40`, invisible to `just check-mappers`), and Android `ReferralError` invents an exception to carry `can_redeem`. Map both in the mapper files; delete the twins.
 - **V92** **S** Required-field validation exists on iOS only (`RequiredTextValidator`/`RequiredFieldError`, "{field} is required" on the address input and the contact name) while Core treats empty as silent (recipient `error_display`, `can_save_contact`) and Android follows Core. Delete them.
-- **F55** **S** iOS recipient errors skip Core: `RecipientSceneViewModel.swift:136-145` hands the raw `GemRecipientError` to the field (generic text), a failed scan shows an app-made "Invalid {asset name} address", and a rejected row tap silently fills the field; Android routes all three through `display(chain)`. iOS maps `error.display(chain:)`.
 - **F56** **M** Android turns errors into text through two classifiers (`errorText()` for five Core types plus the raw message, `toGemErrorText()` for the confirm broadcast only), re-implements Core's `payment_error_text` in `GemPaymentException.userMessage` (so `NoPaymentOptions` shows the generic scan error where iOS shows Core's text), and wraps foreign exceptions into Core variants (`ChartViewModel.kt:61`, `SwapQuotesResult.kt:23`). Core `alien_error_text`/`payment_error_text` become `text()` methods; one Android classifier covering iOS `Errors.swift`'s set.
 - **F57** **S** Android WalletConnect shows hardcoded English ("Pair to X fail", "Wallet Connect unavailable…", "Connection failed", "Authentication failed": `WalletConnectCoordinator.kt:112-293`), drops scan-pairing errors (`onError = {}`) and treats a failed disconnect as success; iOS alerts all three. Localized errors surfaced like iOS.
 - **F58** **S** "Network fee missing" names the asset as `name == symbol ? name : "name (symbol)"` on iOS (a copy of `Asset::display_title`) and `"<chain native name> (symbol)"` on Android (`Asset.title`). `NetworkFeeMissing` carries `display_title()`. The info sheet for the same error names it a third way: Android `chain.asset().title` ("Arbitrum ETH (ETH)", `ConfirmErrorUIModel.kt:79-86`), iOS the bare symbol (`InfoSheetModelFactory.swift:43-45`); delete Android `Asset.title` with it.
@@ -257,7 +256,7 @@ None of these is a code change until someone chooses; each is written so the cho
 
 ## Coverage
 
-The retained items came from the earlier two reviews on 2026-09-19. This architecture pass rechecked 56 distinct existing items: U14/U15/U19/U22–U25/U27–U30, K16/K18, C51, S71–S75/S79/S81–S83, R87/R94–R97/R100/R101/R104/R106/R118–R120/R122/R123/R129, D47/D49–D51/D55/D58–D61/D66/D67/D71, P89/P90, B78, F53/F55 and O59. It also narrowed the descriptions of R114/P97 and added MIG1–MIG6. U20, R87, F53, P88, S71 and P89 have since landed on main and are no longer open work. Source-level failure interleavings are not runtime reproductions; the tasks specify the tests still required.
+The retained items came from the earlier two reviews on 2026-09-19. This architecture pass rechecked 56 distinct existing items: U14/U15/U19/U22–U25/U27–U30, K16/K18, C51, S71–S75/S79/S81–S83, R87/R94–R97/R100/R101/R104/R106/R118–R120/R122/R123/R129, D47/D49–D51/D55/D58–D61/D66/D67/D71, P89/P90, B78, F53/F55 and O59. It also narrowed the descriptions of R114/P97 and added MIG1–MIG6. U20, R87, F53, P88, S71, P89 and F55 have since landed on main and are no longer open work. Source-level failure interleavings are not runtime reproductions; the tasks specify the tests still required.
 
 **Pass one split the product by area:** transfer, confirm and swap; assets, wallet and charts; perpetuals, earn and stake; settings, rewards and WalletConnect; onboarding, NFT, fiat and activity; and the cross-cutting Core surface. Each area paired its screens across the apps and compared the service held, the session driven, and the branches, sorts, composed strings and error paths.
 
