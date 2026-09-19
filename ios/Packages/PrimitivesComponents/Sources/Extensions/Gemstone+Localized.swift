@@ -704,7 +704,7 @@ extension GemCopyKind {
         case .plain: Localized.Common.copied(display)
         case .secretPhrase: Localized.Common.copied(Localized.Common.secretPhrase)
         case .privateKey: Localized.Common.copied(Localized.Common.privateKey)
-        case let .address(chain): Localized.Common.copied(String(format: "%@ (%@) ", Chain(core: chain).asset.name, display))
+        case let .address(chain): Localized.Common.copied(String(format: "%@ (%@)", Chain(core: chain).networkName, display))
         }
     }
 }
