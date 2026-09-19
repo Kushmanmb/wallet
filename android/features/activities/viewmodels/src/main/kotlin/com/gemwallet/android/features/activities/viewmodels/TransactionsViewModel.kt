@@ -8,7 +8,6 @@ import com.gemwallet.android.application.transactions.cases.GetTransactions
 import com.gemwallet.android.application.transactions.cases.TransactionsRequestFilter
 import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusObserver
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
-import com.gemwallet.android.domains.connection.refreshInterval
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ui.components.filters.TransactionFilterUIModel
@@ -52,8 +51,7 @@ class TransactionsViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
-    val refreshIntervalMillis: StateFlow<Long> = connectionStatusObserver.status
-        .map { it.refreshInterval(GemRefreshKind.WALLET).toMillis() }
+    val refreshIntervalMillis: StateFlow<Long> = connectionStatusObserver.refreshIntervalMillis(GemRefreshKind.WALLET)
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0L)
 
 

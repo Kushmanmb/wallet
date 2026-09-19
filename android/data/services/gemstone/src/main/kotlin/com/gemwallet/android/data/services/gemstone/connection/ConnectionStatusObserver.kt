@@ -18,6 +18,8 @@ import kotlinx.coroutines.launch
 import com.gemwallet.android.serializer.toJson
 import uniffi.gemstone.GemConnectionService
 import uniffi.gemstone.GemConnectionServiceInterface
+import kotlinx.coroutines.flow.Flow
+import uniffi.gemstone.GemRefreshKind
 
 class ConnectionStatusObserver(
     private val monitors: List<ConnectionComponentMonitor>,
@@ -34,6 +36,8 @@ class ConnectionStatusObserver(
         .stateIn(scope, SharingStarted.Eagerly, ConnectionStatus.Online)
 
     private var jobs: List<Job> = emptyList()
+
+    fun refreshIntervalMillis(kind: GemRefreshKind): Flow<Long> = status.map { connectionService.refreshInterval(kind, it.toGem()).toMillis() }
 
     fun start() {
         if (jobs.isNotEmpty()) return

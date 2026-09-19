@@ -175,6 +175,13 @@ mod tests {
             PriceAlert::generate_id(&eth, &Currency::USD, None, Some(10_000.10), Some(&PriceAlertDirection::Down)),
             "ethereum_USD_10000.1_down"
         );
+        assert_eq!(
+            PriceAlert::generate_id(&eth, &Currency::USD, Some(1.0), None, Some(&PriceAlertDirection::Up)),
+            "ethereum_USD_1_up"
+        );
+        assert_eq!(PriceAlert::generate_id(&eth, &Currency::USD, None, Some(0.23), None), "ethereum_USD_0.23");
+        assert_eq!(PriceAlert::generate_id(&eth, &Currency::USD, Some(50_000.01), None, None), "ethereum_USD_50000.01");
+        assert_eq!(PriceAlert::generate_id(&eth, &Currency::USD, Some(0.001234567), None, None), "ethereum_USD_0.001234567");
     }
 
     #[test]

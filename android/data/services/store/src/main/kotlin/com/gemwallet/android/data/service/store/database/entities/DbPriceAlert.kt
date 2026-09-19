@@ -2,7 +2,6 @@ package com.gemwallet.android.data.service.store.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.gemwallet.android.ext.id
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.model.PriceAlertInfo
@@ -37,7 +36,7 @@ fun DbPriceAlert.toDTO(): PriceAlertInfo {
     )
 }
 
-fun PriceAlert.toRecord(): DbPriceAlert {
+fun PriceAlert.toRecord(id: String): DbPriceAlert {
     return DbPriceAlert(
         id = id,
         assetId = assetId.toIdentifier(),
@@ -52,5 +51,3 @@ fun PriceAlert.toRecord(): DbPriceAlert {
 fun List<DbPriceAlert>.toDTO() = map { it.toDTO() }
 
 fun Flow<DbPriceAlert>.toDTO() = map { it.toDTO() }
-
-fun List<PriceAlert>.toRecord() = map { it.toRecord() }

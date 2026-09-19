@@ -85,6 +85,7 @@ class MainViewModel @Inject constructor(
     }
 
     init {
+        maintain()
         viewModelScope.launch {
             combine(
                 _uiState.map { it.initialAuth == AuthState.Success }.distinctUntilChanged(),
@@ -124,7 +125,7 @@ class MainViewModel @Inject constructor(
 
     fun isAuthRequired(): Boolean = userConfig.authRequired()
 
-    internal fun maintain() {
+    private fun maintain() {
         viewModelScope.launch(ioDispatcher) { appStartService.run().forEach(::logAppStartFailure) }
         viewModelScope.launch(ioDispatcher) {
             migratePriceAlertsPreference()

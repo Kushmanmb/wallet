@@ -14,6 +14,7 @@ import uniffi.gemstone.GemPriceAlertServiceInterface
 import uniffi.gemstone.GemPriceAlertStore
 import javax.inject.Singleton
 import uniffi.gemstone.GemNotificationPermissions
+import uniffi.gemstone.PriceAlertFormatter
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -21,7 +22,8 @@ object PriceAlertsModule {
 
     @Singleton
     @Provides
-    fun provideGemstonePriceAlertStore(priceAlertsDao: PriceAlertsDao): GemstonePriceAlertStore = GemstonePriceAlertStore(priceAlertsDao)
+    fun provideGemstonePriceAlertStore(priceAlertsDao: PriceAlertsDao, priceAlertFormatter: PriceAlertFormatter): GemstonePriceAlertStore =
+        GemstonePriceAlertStore(priceAlertsDao, priceAlertFormatter)
 
     @Provides
     @Singleton

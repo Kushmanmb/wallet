@@ -7,7 +7,6 @@ import com.gemwallet.android.application.assets.cases.GetWalletAssets
 import com.gemwallet.android.data.services.gemstone.stores.GemstonePriceAlertStore
 import com.gemwallet.android.domains.pricealerts.aggregates.PriceAlertDataAggregate
 import com.gemwallet.android.ext.toIdentifier
-import com.gemwallet.android.ext.id
 import uniffi.gemstone.PriceAlertFormatter
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
@@ -34,7 +33,7 @@ class GetPriceAlertsImpl(
         return priceAlertStore.observePriceAlerts(assetId)
             .flatMapLatest { items ->
                 val index = priceAlertFormatter.displayedAlertIds(items.map { it.priceAlert.toGem() })
-                    .mapNotNull { id -> items.firstOrNull { it.priceAlert.id == id } }
+                    .mapNotNull { id -> items.firstOrNull { it.id == id } }
                     .groupBy { it.priceAlert.assetId.toIdentifier() }
                 getWalletAssets.byIdentifiers(index.keys.toList()).mapLatest { assetInfos ->
                     assetInfos.flatMap { assetInfo ->

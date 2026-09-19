@@ -12,9 +12,11 @@ import com.wallet.core.primitives.AssetId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import uniffi.gemstone.GemPriceAlertStore
+import uniffi.gemstone.PriceAlertFormatter
 
 class GemstonePriceAlertStore(
     private val priceAlertsDao: PriceAlertsDao,
+    private val priceAlertFormatter: PriceAlertFormatter,
 ) : GemPriceAlertStore {
 
     override suspend fun getPriceAlerts(assetId: String?): List<uniffi.gemstone.PriceAlert> {
@@ -23,7 +25,7 @@ class GemstonePriceAlertStore(
     }
 
     override suspend fun updatePriceAlerts(alerts: List<uniffi.gemstone.PriceAlert>, deleteIds: List<String>) {
-        priceAlertsDao.update(alerts.map { it.toPrimitives().toRecord() }, deleteIds)
+        priceAlertsDao.update(alerts.map { it.toPrimitives().toRecord(priceAlertFormatter.alertId(it)) }, deleteIds)
     }
 
     fun observePriceAlerts(assetId: AssetId?): Flow<List<PriceAlertInfo>> =

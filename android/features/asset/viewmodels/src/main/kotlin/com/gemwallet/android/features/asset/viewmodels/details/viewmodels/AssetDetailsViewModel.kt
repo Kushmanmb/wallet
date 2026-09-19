@@ -15,7 +15,6 @@ import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusObserver
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.domains.banner.BannerRow
-import com.gemwallet.android.domains.connection.refreshInterval
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
@@ -76,8 +75,7 @@ class AssetDetailsViewModel @Inject constructor(
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
-    val refreshIntervalMillis: StateFlow<Long> = connectionStatusObserver.status
-        .map { it.refreshInterval(GemRefreshKind.WALLET).toMillis() }
+    val refreshIntervalMillis: StateFlow<Long> = connectionStatusObserver.refreshIntervalMillis(GemRefreshKind.WALLET)
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0L)
 
     private var syncJob: Job? = null

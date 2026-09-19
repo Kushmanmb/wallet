@@ -12,7 +12,6 @@ import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.domains.asset.aggregates.toAssetInfoDataAggregate
 import com.gemwallet.android.domains.pricealerts.aggregates.PriceAlertDataAggregate
 import com.gemwallet.android.ext.errorText
-import com.gemwallet.android.ext.id
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toGem
@@ -81,7 +80,7 @@ class PriceAlertViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val grouped = alerts.map { alerts ->
-        val byId = alerts.associateBy { it.priceAlert.id }
+        val byId = alerts.associateBy { it.id }
         priceAlertFormatter.sections(alerts.map { PriceAlertData(asset = it.asset, price = null, priceAlert = it.priceAlert).toGem() })
             .map { section -> section.kind to section.alertIds.mapNotNull { byId[it] } }
     }
