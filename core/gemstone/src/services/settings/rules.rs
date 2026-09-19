@@ -406,6 +406,8 @@ mod tests {
             | GemListRow::Link { title, .. }
             | GemListRow::Text { title, .. }
             | GemListRow::Amount { title, .. }
+            | GemListRow::Ranked { title, .. }
+            | GemListRow::AllTime { title, .. }
             | GemListRow::Duration { title, .. }
             | GemListRow::Label { title, .. }
             | GemListRow::Date { title, .. }
@@ -421,6 +423,7 @@ mod tests {
             | GemListRow::Icon { .. }
             | GemListRow::Address { .. }
             | GemListRow::Explorer { .. }
+            | GemListRow::Contract { .. }
             | GemListRow::Loading
             | GemListRow::Error { .. } => None,
         }

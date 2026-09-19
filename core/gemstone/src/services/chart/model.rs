@@ -1,27 +1,15 @@
 use super::rules;
 use crate::config::social::GemSocialLink;
 use crate::formatted_number::GemFormattedNumber;
-use primitives::{BlockExplorerLink, ChartDateValue, ChartValuePercentage, Currency};
+use crate::models::list::GemListRow;
+use primitives::{ChartDateValue, Currency};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemChartSection {
     PriceAlerts { count: u32 },
     SetPriceAlert,
-    Market { rows: Vec<GemAssetMarketRow> },
+    Market { rows: Vec<GemListRow> },
     Links { links: Vec<GemSocialLink> },
-}
-
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
-pub enum GemAssetMarketRow {
-    MarketCap { value: GemFormattedNumber, rank: Option<i32> },
-    FullyDilutedValuation { value: GemFormattedNumber },
-    TradingVolume { value: GemFormattedNumber },
-    Contract { token_id: String, explorer: Option<BlockExplorerLink> },
-    CirculatingSupply { value: GemFormattedNumber },
-    TotalSupply { value: GemFormattedNumber },
-    MaxSupply { value: GemFormattedNumber },
-    AllTimeHigh { value: ChartValuePercentage },
-    AllTimeLow { value: ChartValuePercentage },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, uniffi::Enum)]

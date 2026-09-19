@@ -9,6 +9,7 @@ import enum Gemstone.GemListRowTitle
 import enum Gemstone.GemNoticeKind
 import enum Gemstone.GemUrlTarget
 import enum Gemstone.GemValueTone
+import struct Gemstone.GemCopy
 import struct Gemstone.GemSocialLink
 import GemstonePrimitives
 import Localization
@@ -26,6 +27,7 @@ enum GemListRowItem {
     case picker(ListItemModel, title: GemListRowTitle)
     case toggle(label: String, title: GemListRowTitle, isOn: Bool, imageStyle: ListItemImageStyle?)
     case page(ListItemModel, url: URL)
+    case explorerPage(ListItemModel, context: ExplorerContextData)
     case external(ListItemModel, url: URL)
     case network(title: String, subtitle: String, image: AssetImage)
     case app(ListItemModel, website: URL?)
@@ -46,6 +48,25 @@ extension GemListRow {
             .listItem(ListItemModel(title: title.text, subtitle: value))
         case let .amount(title, amount, info):
             .listItem(ListItemModel(title: title.text, subtitle: amount.text(), subtitleStyle: subtitleStyle(amount.tone), infoAction: infoAction(info, onInfo: onInfo)))
+        case let .ranked(title, amount, rank):
+            .listItem(
+                ListItemModel(
+                    title: title.text,
+                    titleTag: " #\(rank) ",
+                    titleTagStyle: TextStyle(font: .system(.body), color: Colors.grayLight, background: Colors.grayVeryLight),
+                    subtitle: amount.text(),
+                ),
+            )
+        case let .allTime(title, value, date, change):
+            .listItem(
+                ListItemModel(
+                    title: title.text,
+                    titleExtra: TransactionDateFormatter(date: date).section,
+                    subtitle: value.text(),
+                    subtitleExtra: change.text(),
+                    subtitleStyleExtra: TextStyle(font: .callout, color: change.tone.color),
+                ),
+            )
         case let .duration(title, parts, info):
             .listItem(ListItemModel(title: title.text, subtitle: CountdownFormatter().string(parts: parts), infoAction: infoAction(info, onInfo: onInfo)))
         case let .label(title, text, tone, info, progress):
@@ -103,6 +124,8 @@ extension GemListRow {
                     infoAction: infoAction(info, onInfo: onInfo),
                 ),
             )
+        case let .contract(copy, explorer):
+            contractItem(copy: copy, explorer: explorer?.toPrimitives())
         case let .explorer(name, url):
             .page(ListItemModel(title: Localized.Transaction.viewOn(name)), url: URL(string: url) ?? BlockExplorerLink(name: name, link: url).url)
         case let .icon(chain):
@@ -134,6 +157,12 @@ extension GemListRow {
 
     private func listItem(title: GemListRowTitle, value: String?, icon: GemListRowIcon) -> ListItemModel {
         ListItemModel(title: title.text, subtitle: value, imageStyle: icon.imageStyle)
+    }
+
+    private func contractItem(copy: GemCopy, explorer: BlockExplorerLink?) -> GemListRowItem {
+        let model = ListItemModel(title: Localized.Asset.contract, subtitle: copy.display)
+        guard let explorer else { return .memo(model, copy: copy.value) }
+        return .explorerPage(model, context: ExplorerContextData(copyValue: copy.copyValue, explorerLink: explorer))
     }
 
     private func urlItem(title: GemListRowTitle, value: String?, icon: GemListRowIcon, url: String, target: GemUrlTarget) -> GemListRowItem {

@@ -58,6 +58,11 @@ public struct GemListRowView: View {
             SafariNavigationLink(url: url) {
                 ListItemView(model: model)
             }
+        case let .explorerPage(model, context):
+            SafariNavigationLink(url: context.explorerLink.url) {
+                ListItemView(model: model)
+            }
+            .explorerContext(context)
         case let .external(model, url):
             NavigationCustomLink(with: ListItemView(model: model)) {
                 openURL(url)

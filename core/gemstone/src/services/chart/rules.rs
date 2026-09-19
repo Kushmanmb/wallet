@@ -1,10 +1,14 @@
 use chrono::{DateTime, Utc};
-use primitives::{Asset, AssetLink, AssetMarket, AssetPrice, BlockExplorerLink, ChartDateValue, ChartPeriod, ChartValue, Currency, PriceAlert, PriceChangeCalculator};
+use primitives::{
+    Asset, AssetLink, AssetMarket, AssetPrice, BlockExplorerLink, ChartDateValue, ChartPeriod, ChartValue, ChartValuePercentage, Currency, PriceAlert, PriceChangeCalculator,
+};
 
-use super::model::{GemAssetMarketRow, GemChartBounds, GemChartData, GemChartHeader, GemChartSection, GemChartValueType};
+use super::model::{GemChartBounds, GemChartData, GemChartHeader, GemChartSection, GemChartValueType};
 use super::{GemChart, GemChartCurrent};
 use crate::config::social::social_links;
 use crate::formatted_number::GemFormattedNumber;
+use crate::models::copy::address_copy;
+use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
 use crate::percentage::GemPercentageStyle;
 use crate::precision::{GemCurrencyStyle, GemValueStyle};
 use crate::services::price::rules::has_price;
@@ -61,10 +65,10 @@ pub fn chart_sections(
     contract_explorer: Option<BlockExplorerLink>,
 ) -> Vec<GemChartSection> {
     let market_sections = [
-        market.map(|market| market_section(market, currency)).unwrap_or_default(),
+        market.map(|market| market_section(market, currency.clone())).unwrap_or_default(),
         available_rows([contract_row(asset, contract_explorer)]),
         market.map(|market| supply_section(market, &asset.symbol)).unwrap_or_default(),
-        market.map(all_time_section).unwrap_or_default(),
+        market.map(|market| all_time_section(market, currency.clone())).unwrap_or_default(),
     ]
     .into_iter()
     .filter(|rows| !rows.is_empty())
@@ -88,38 +92,64 @@ fn price_alert_section(price: Option<f64>, price_alerts: Vec<PriceAlert>) -> Opt
     })
 }
 
-fn market_section(market: &AssetMarket, currency: Currency) -> Vec<GemAssetMarketRow> {
-    let rank = market.market_cap_rank.filter(|rank| (1..=MARKET_CAP_RANK_BADGE_LIMIT).contains(rank));
+fn market_section(market: &AssetMarket, currency: Currency) -> Vec<GemListRow> {
     let value = |value: f64| GemFormattedNumber::currency(value, currency.clone(), GemCurrencyStyle::Abbreviated);
+    let rank = market.market_cap_rank.filter(|rank| (1..=MARKET_CAP_RANK_BADGE_LIMIT).contains(rank));
     available_rows([
-        market.market_cap.map(|market_cap| GemAssetMarketRow::MarketCap { value: value(market_cap), rank }),
-        market.market_cap_fdv.map(|fdv| GemAssetMarketRow::FullyDilutedValuation { value: value(fdv) }),
-        market.total_volume.map(|volume| GemAssetMarketRow::TradingVolume { value: value(volume) }),
+        market.market_cap.map(|market_cap| match rank {
+            Some(rank) => GemListRow::Ranked {
+                title: GemListRowTitle::MarketCap,
+                amount: value(market_cap),
+                rank,
+            },
+            None => amount_row(GemListRowTitle::MarketCap, value(market_cap), None),
+        }),
+        market
+            .market_cap_fdv
+            .map(|fdv| amount_row(GemListRowTitle::FullyDilutedValuation, value(fdv), Some(GemInfoTopic::FullyDilutedValuation))),
+        market.total_volume.map(|volume| amount_row(GemListRowTitle::TradingVolume, value(volume), None)),
     ])
 }
 
-fn contract_row(asset: &Asset, explorer: Option<BlockExplorerLink>) -> Option<GemAssetMarketRow> {
+fn contract_row(asset: &Asset, explorer: Option<BlockExplorerLink>) -> Option<GemListRow> {
     let token_id = asset.id.token_id.clone()?;
-    Some(GemAssetMarketRow::Contract { token_id, explorer })
+    Some(GemListRow::Contract {
+        copy: address_copy(asset.chain(), token_id),
+        explorer,
+    })
 }
 
-fn supply_section(market: &AssetMarket, symbol: &str) -> Vec<GemAssetMarketRow> {
+fn supply_section(market: &AssetMarket, symbol: &str) -> Vec<GemListRow> {
     let value = |value: f64| GemFormattedNumber::amount(value, Some(symbol.to_string()), GemValueStyle::Short);
     available_rows([
-        market.circulating_supply.map(|supply| GemAssetMarketRow::CirculatingSupply { value: value(supply) }),
-        market.total_supply.map(|supply| GemAssetMarketRow::TotalSupply { value: value(supply) }),
-        market.max_supply.map(|supply| GemAssetMarketRow::MaxSupply { value: value(supply) }),
+        market
+            .circulating_supply
+            .map(|supply| amount_row(GemListRowTitle::CirculatingSupply, value(supply), Some(GemInfoTopic::CirculatingSupply))),
+        market
+            .total_supply
+            .map(|supply| amount_row(GemListRowTitle::TotalSupply, value(supply), Some(GemInfoTopic::TotalSupply))),
+        market.max_supply.map(|supply| amount_row(GemListRowTitle::MaxSupply, value(supply), Some(GemInfoTopic::MaxSupply))),
     ])
 }
 
-fn all_time_section(market: &AssetMarket) -> Vec<GemAssetMarketRow> {
+fn all_time_section(market: &AssetMarket, currency: Currency) -> Vec<GemListRow> {
+    let row = |title: GemListRowTitle, value: &ChartValuePercentage| GemListRow::AllTime {
+        title,
+        value: GemFormattedNumber::currency(value.value as f64, currency.clone(), GemCurrencyStyle::Currency),
+        date: value.date,
+        change: GemFormattedNumber::percentage(value.percentage as f64, GemPercentageStyle::Signed),
+    };
     available_rows([
-        market.all_time_high_value.clone().map(|value| GemAssetMarketRow::AllTimeHigh { value }),
-        market.all_time_low_value.clone().map(|value| GemAssetMarketRow::AllTimeLow { value }),
+        market.all_time_high_value.as_ref().map(|value| row(GemListRowTitle::AllTimeHigh, value)),
+        market.all_time_low_value.as_ref().map(|value| row(GemListRowTitle::AllTimeLow, value)),
     ])
 }
 
-fn available_rows<const N: usize>(rows: [Option<GemAssetMarketRow>; N]) -> Vec<GemAssetMarketRow> {
+fn amount_row(title: GemListRowTitle, amount: GemFormattedNumber, info: Option<GemInfoTopic>) -> GemListRow {
+    GemListRow::Amount { title, amount, info }
+}
+
+fn available_rows<const N: usize>(rows: [Option<GemListRow>; N]) -> Vec<GemListRow> {
     rows.into_iter().flatten().collect()
 }
 
@@ -421,6 +451,26 @@ mod tests {
         assert!((negative.y_min + 2.01).abs() < 1e-9 && (negative.y_max + 1.99).abs() < 1e-9);
     }
 
+    fn amount(title: GemListRowTitle, amount: GemFormattedNumber, info: Option<GemInfoTopic>) -> GemListRow {
+        GemListRow::Amount { title, amount, info }
+    }
+
+    fn all_time(title: GemListRowTitle, value: ChartValuePercentage) -> GemListRow {
+        GemListRow::AllTime {
+            title,
+            value: GemFormattedNumber::currency(value.value as f64, Currency::USD, GemCurrencyStyle::Currency),
+            date: value.date,
+            change: GemFormattedNumber::percentage(value.percentage as f64, GemPercentageStyle::Signed),
+        }
+    }
+
+    fn contract(token: &Asset, explorer: Option<BlockExplorerLink>) -> GemListRow {
+        GemListRow::Contract {
+            copy: address_copy(token.chain(), token.id.token_id.clone().unwrap()),
+            explorer,
+        }
+    }
+
     #[test]
     fn test_chart_sections_group_the_market_rows_core_has() {
         let token = Asset::mock_ethereum_usdc();
@@ -433,38 +483,29 @@ mod tests {
                 GemChartSection::SetPriceAlert,
                 GemChartSection::Market {
                     rows: vec![
-                        GemAssetMarketRow::MarketCap { value: usd(100.0), rank: Some(1) },
-                        GemAssetMarketRow::FullyDilutedValuation { value: usd(120.0) },
-                        GemAssetMarketRow::TradingVolume { value: usd(10.0) },
+                        GemListRow::Ranked {
+                            title: GemListRowTitle::MarketCap,
+                            amount: usd(100.0),
+                            rank: 1
+                        },
+                        amount(GemListRowTitle::FullyDilutedValuation, usd(120.0), Some(GemInfoTopic::FullyDilutedValuation)),
+                        amount(GemListRowTitle::TradingVolume, usd(10.0), None),
                     ]
                 },
                 GemChartSection::Market {
-                    rows: vec![GemAssetMarketRow::Contract {
-                        token_id: token.id.token_id.clone().unwrap(),
-                        explorer: Some(BlockExplorerLink::mock()),
-                    }]
+                    rows: vec![contract(&token, Some(BlockExplorerLink::mock()))]
                 },
                 GemChartSection::Market {
                     rows: vec![
-                        GemAssetMarketRow::CirculatingSupply {
-                            value: supply(50.0, &token.symbol)
-                        },
-                        GemAssetMarketRow::TotalSupply {
-                            value: supply(60.0, &token.symbol)
-                        },
-                        GemAssetMarketRow::MaxSupply {
-                            value: supply(21.0, &token.symbol)
-                        },
+                        amount(GemListRowTitle::CirculatingSupply, supply(50.0, &token.symbol), Some(GemInfoTopic::CirculatingSupply)),
+                        amount(GemListRowTitle::TotalSupply, supply(60.0, &token.symbol), Some(GemInfoTopic::TotalSupply)),
+                        amount(GemListRowTitle::MaxSupply, supply(21.0, &token.symbol), Some(GemInfoTopic::MaxSupply)),
                     ]
                 },
                 GemChartSection::Market {
                     rows: vec![
-                        GemAssetMarketRow::AllTimeHigh {
-                            value: ChartValuePercentage::mock()
-                        },
-                        GemAssetMarketRow::AllTimeLow {
-                            value: ChartValuePercentage::mock_low()
-                        },
+                        all_time(GemListRowTitle::AllTimeHigh, ChartValuePercentage::mock()),
+                        all_time(GemListRowTitle::AllTimeLow, ChartValuePercentage::mock_low()),
                     ]
                 },
                 GemChartSection::Links { links: social_links(links) },
@@ -480,22 +521,16 @@ mod tests {
             sections,
             vec![
                 GemChartSection::Market {
-                    rows: vec![GemAssetMarketRow::FullyDilutedValuation { value: usd(120.0) }]
+                    rows: vec![amount(GemListRowTitle::FullyDilutedValuation, usd(120.0), Some(GemInfoTopic::FullyDilutedValuation))]
                 },
                 GemChartSection::Market {
                     rows: vec![
-                        GemAssetMarketRow::CirculatingSupply {
-                            value: supply(50.0, &Asset::mock().symbol)
-                        },
-                        GemAssetMarketRow::MaxSupply {
-                            value: supply(21.0, &Asset::mock().symbol)
-                        }
+                        amount(GemListRowTitle::CirculatingSupply, supply(50.0, &Asset::mock().symbol), Some(GemInfoTopic::CirculatingSupply)),
+                        amount(GemListRowTitle::MaxSupply, supply(21.0, &Asset::mock().symbol), Some(GemInfoTopic::MaxSupply)),
                     ]
                 },
                 GemChartSection::Market {
-                    rows: vec![GemAssetMarketRow::AllTimeHigh {
-                        value: ChartValuePercentage::mock()
-                    }]
+                    rows: vec![all_time(GemListRowTitle::AllTimeHigh, ChartValuePercentage::mock())]
                 },
             ]
         );
@@ -510,13 +545,14 @@ mod tests {
 
         assert_eq!(
             rank(MARKET_CAP_RANK_BADGE_LIMIT),
-            GemAssetMarketRow::MarketCap {
-                value: usd(100.0),
-                rank: Some(1000)
+            GemListRow::Ranked {
+                title: GemListRowTitle::MarketCap,
+                amount: usd(100.0),
+                rank: 1000
             }
         );
-        assert_eq!(rank(MARKET_CAP_RANK_BADGE_LIMIT + 1), GemAssetMarketRow::MarketCap { value: usd(100.0), rank: None });
-        assert_eq!(rank(0), GemAssetMarketRow::MarketCap { value: usd(100.0), rank: None });
+        assert_eq!(rank(MARKET_CAP_RANK_BADGE_LIMIT + 1), amount(GemListRowTitle::MarketCap, usd(100.0), None));
+        assert_eq!(rank(0), amount(GemListRowTitle::MarketCap, usd(100.0), None));
     }
 
     #[test]
@@ -526,10 +562,7 @@ mod tests {
         assert_eq!(
             chart_sections(&token, Currency::USD, None, None, vec![], vec![], None),
             vec![GemChartSection::Market {
-                rows: vec![GemAssetMarketRow::Contract {
-                    token_id: token.id.token_id.clone().unwrap(),
-                    explorer: None,
-                }]
+                rows: vec![contract(&token, None)]
             }]
         );
     }

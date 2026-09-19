@@ -92,6 +92,14 @@ pub enum GemListRowTitle {
     LiquidationPrice,
     Margin,
     FundingPayments,
+    MarketCap,
+    FullyDilutedValuation,
+    TradingVolume,
+    CirculatingSupply,
+    TotalSupply,
+    MaxSupply,
+    AllTimeHigh,
+    AllTimeLow,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -111,6 +119,10 @@ pub enum GemInfoTopic {
     AutoClose,
     LiquidationPrice,
     FundingPayments,
+    FullyDilutedValuation,
+    CirculatingSupply,
+    TotalSupply,
+    MaxSupply,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -164,6 +176,17 @@ pub enum GemListRow {
         title: GemListRowTitle,
         amount: GemFormattedNumber,
         info: Option<GemInfoTopic>,
+    },
+    Ranked {
+        title: GemListRowTitle,
+        amount: GemFormattedNumber,
+        rank: i32,
+    },
+    AllTime {
+        title: GemListRowTitle,
+        value: GemFormattedNumber,
+        date: DateTime<Utc>,
+        change: GemFormattedNumber,
     },
     Duration {
         title: GemListRowTitle,
@@ -236,6 +259,10 @@ pub enum GemListRow {
     Explorer {
         name: String,
         url: String,
+    },
+    Contract {
+        copy: GemCopy,
+        explorer: Option<BlockExplorerLink>,
     },
     Lines {
         title: GemListRowTitle,

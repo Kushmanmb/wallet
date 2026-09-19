@@ -101,6 +101,10 @@ public extension InfoSheetType {
         case .autoClose: .autoclose
         case .liquidationPrice: .liquidationPrice
         case .fundingPayments: .fundingPayments
+        case .fullyDilutedValuation: .fullyDilutedValuation
+        case .circulatingSupply: .circulatingSupply
+        case .totalSupply: .totalSupply
+        case .maxSupply: .maxSupply
         case let .transactionStatus(state, tone):
             .transactionState(
                 imageURL: assetImage?.imageURL,

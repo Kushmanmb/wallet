@@ -3,7 +3,7 @@
 import Components
 import Formatters
 import Foundation
-import enum Gemstone.GemAssetMarketRow
+import enum Gemstone.GemInfoTopic
 import struct Gemstone.GemChart
 import enum Gemstone.GemChartPhase
 import enum Gemstone.GemChartSection
@@ -99,10 +99,6 @@ public final class ChartSceneViewModel: ChartListViewable {
         }
     }
 
-    func marketValues(_ rows: [GemAssetMarketRow]) -> [MarketValueViewModel] {
-        AssetDetailsInfoViewModel(asset: asset, currency: service.currency).marketValues(rows)
-    }
-
 }
 
 // MARK: - Business Logic
@@ -134,7 +130,7 @@ public extension ChartSceneViewModel {
         onSetPriceAlert(assetModel.asset)
     }
 
-    internal func onSelectInfoSheet(_ type: InfoSheetType) {
-        isPresentingInfoSheet = type
+    internal func onInfo(_ topic: GemInfoTopic) {
+        isPresentingInfoSheet = InfoSheetType(topic: topic, assetImage: nil)
     }
 }

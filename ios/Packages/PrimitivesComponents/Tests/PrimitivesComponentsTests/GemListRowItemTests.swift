@@ -113,6 +113,47 @@ struct GemListRowItemTests {
     }
 
     @Test
+    func marketCapCarriesItsRankTag() {
+        guard case let .listItem(model) = GemListRow.ranked(title: .marketCap, amount: .mock(value: 1_000_000), rank: 7).item(onInfo: nil) else {
+            Issue.record("Expected a list item")
+            return
+        }
+        #expect(model.title == Localized.Asset.marketCap)
+        #expect(model.titleTag == " #7 ")
+    }
+
+    @Test
+    func anAllTimeRowShowsItsDateAndTonedChange() {
+        let row = GemListRow.allTime(title: .allTimeHigh, value: .mock(value: 100, notation: .plain), date: Date(), change: .mock(value: -12, unit: .percent, tone: .negative))
+        guard case let .listItem(model) = row.item(onInfo: nil) else {
+            Issue.record("Expected a list item")
+            return
+        }
+        #expect(model.title == Localized.Asset.allTimeHigh)
+        #expect(model.titleExtra != nil)
+        #expect(model.subtitle == "$100.00")
+        #expect(model.subtitleExtra == "-12.00%")
+        #expect(model.subtitleStyleExtra.color == Colors.red)
+    }
+
+    @Test
+    func aContractOpensTheExplorerOnlyWhenCoreGivesALink() {
+        let copy = addressCopy(chain: Chain.ethereum.rawValue, address: "0xdAC17F958D2ee523a2206206994597C13D831ec7")
+        let link = BlockExplorerLink(name: "Etherscan", link: "https://etherscan.io/token/0xdAC17F958D2ee523a2206206994597C13D831ec7")
+        guard case let .explorerPage(model, context) = GemListRow.contract(copy: copy, explorer: link.toGem()).item(onInfo: nil),
+              case let .memo(plain, copyValue) = GemListRow.contract(copy: copy, explorer: nil).item(onInfo: nil)
+        else {
+            Issue.record("Expected an explorer page and a copyable row")
+            return
+        }
+        #expect(model.title == Localized.Asset.contract)
+        #expect(model.subtitle == copy.display)
+        #expect(context.explorerLink == link)
+        #expect(plain.subtitle == copy.display)
+        #expect(copyValue == copy.value)
+    }
+
+    @Test
     func autocloseLinesOfferTheirExplanation() {
         var opened: GemInfoTopic?
         let row = GemListRow.lines(title: .autoClose, lines: [.text(text: "TP: $120.00")], info: .autoClose)

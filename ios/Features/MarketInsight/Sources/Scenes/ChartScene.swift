@@ -36,7 +36,11 @@ public struct ChartScene: View {
                         }
                     }
                 case let .market(rows):
-                    marketSection(model.marketValues(rows))
+                    Section {
+                        ForEach(rows, id: \.self) { row in
+                            GemListRowView(row: row, onInfo: model.onInfo)
+                        }
+                    }
                 case let .links(links):
                     Section(section.title ?? "") {
                         SocialLinksView(model: SocialLinksViewModel(links: links))
@@ -49,27 +53,5 @@ public struct ChartScene: View {
         .sheet(item: $model.isPresentingInfoSheet) {
             InfoSheetScene(type: $0)
         }
-    }
-
-    private func marketSection(_ items: [MarketValueViewModel]) -> some View {
-        Section {
-            ForEach(items, id: \.title) { item in
-                switch item.action {
-                case let .explorer(explorerContext):
-                    SafariNavigationLink(url: explorerContext.explorerLink.url) {
-                        ListItemView(model: item.listItem())
-                    }
-                    .explorerContext(explorerContext)
-                case let .info(type):
-                    marketItemView(item, infoAction: { model.onSelectInfoSheet(type) })
-                case .none:
-                    marketItemView(item)
-                }
-            }
-        }
-    }
-
-    private func marketItemView(_ item: MarketValueViewModel, infoAction: (() -> Void)? = nil) -> some View {
-        ListItemView(model: item.listItem(infoAction: infoAction))
     }
 }

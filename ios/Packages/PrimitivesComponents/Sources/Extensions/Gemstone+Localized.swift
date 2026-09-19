@@ -682,6 +682,14 @@ public extension GemListRowTitle {
         case .liquidationPrice: Localized.Info.Perpetual.LiquidationPrice.title
         case .margin: Localized.Perpetual.margin
         case .fundingPayments: Localized.Info.Perpetual.FundingPayments.title
+        case .marketCap: Localized.Asset.marketCap
+        case .fullyDilutedValuation: Localized.Info.FullyDilutedValuation.title
+        case .tradingVolume: Localized.Asset.tradingVolume
+        case .circulatingSupply: Localized.Asset.circulatingSupply
+        case .totalSupply: Localized.Asset.totalSupply
+        case .maxSupply: Localized.Info.MaxSupply.title
+        case .allTimeHigh: Localized.Asset.allTimeHigh
+        case .allTimeLow: Localized.Asset.allTimeLow
         }
     }
 }
