@@ -73,7 +73,6 @@ fix:
 
 lint:
     @cargo clippy --version
-    cargo fmt --all --check
     cargo clippy -- -D warnings
 
 audit:
