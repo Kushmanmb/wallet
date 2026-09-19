@@ -210,7 +210,10 @@ mod tests {
             assert!(steps.contains(&GemAssetRefreshStep::SyncAsset), "{failures:?}");
             assert!(steps.contains(&GemAssetRefreshStep::UpdateBalances), "{failures:?}");
             assert!(steps.contains(&GemAssetRefreshStep::SyncTransactions), "{failures:?}");
-            assert!(matches!(refresh.transactions, GemLoadState::Error { .. }), "a failed sync with nothing stored shows the error");
+            assert!(
+                matches!(refresh.transactions, GemLoadState::Error { .. }),
+                "a failed sync with nothing stored shows the error"
+            );
             assert_eq!(
                 testkit.service.refresh(Chain::Ethereum.as_asset_id(), true).await.transactions,
                 GemLoadState::Data,

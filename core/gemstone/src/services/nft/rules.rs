@@ -1,16 +1,13 @@
 use chrono::{DateTime, Utc};
 use primitives::{AddressFormatStyle, Asset, BlockExplorerLink, Chain, NFTAssetData, NFTAttribute, NFTAttributeType, NFTData, VerificationStatus, WalletType};
 
-use super::model::{
-    GemCollectibleAttribute, GemCollectibleAttributeValue, GemCollectibleDetails, GemCollectibleSection, GemNftItem, GemNftList,
-    GemNftRow, GemNftUnverifiedRow,
-};
+use super::model::{GemCollectibleAttribute, GemCollectibleAttributeValue, GemCollectibleDetails, GemCollectibleSection, GemNftItem, GemNftList, GemNftRow, GemNftUnverifiedRow};
 use crate::address_formatter::format_address;
+use crate::config::chain::supports_nft_transfer;
+use crate::config::social::social_links;
 use crate::models::copy::{GemCopy, GemCopyKind, address_copy};
 use crate::models::list::{GemListRow, GemListRowTitle};
 use crate::services::assets::rules::asset_text;
-use crate::config::chain::supports_nft_transfer;
-use crate::config::social::social_links;
 
 const TOKEN_ID_ADDRESS_LENGTH: usize = 16;
 
@@ -473,8 +470,7 @@ mod tests {
                 GemListRow::Text { .. } => "collection",
                 GemListRow::Network { .. } => "network",
                 GemListRow::Identifier {
-                    title: GemListRowTitle::Contract,
-                    ..
+                    title: GemListRowTitle::Contract, ..
                 } => "contract",
                 GemListRow::Identifier { .. } => "token_id",
                 _ => "other",

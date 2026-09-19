@@ -12,10 +12,7 @@ use std::sync::Arc;
 use primitives::{NFTAssetData, NFTAssetId, NFTData, ReportNft, WalletId};
 
 pub use collectible::GemCollectibleService;
-pub use model::{
-    GemCollectibleAttribute, GemCollectibleAttributeValue, GemCollectibleDetails, GemCollectibleSection, GemNftItem, GemNftList,
-    GemNftUnverifiedRow,
-};
+pub use model::{GemCollectibleAttribute, GemCollectibleAttributeValue, GemCollectibleDetails, GemCollectibleSection, GemNftItem, GemNftList, GemNftUnverifiedRow};
 pub use store::GemNftStore;
 
 use crate::api::{GemApiError, GemDeviceApiClient};

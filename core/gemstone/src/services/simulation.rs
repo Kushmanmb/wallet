@@ -19,9 +19,9 @@ use primitives::{
 };
 
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
+use crate::models::custom_types::GemBigInt;
 use crate::models::list::{GemListRow, GemListRowTitle, GemNoticeKind};
 use crate::services::localization::GemLocalizedText;
-use crate::models::custom_types::GemBigInt;
 use crate::{
     GemstoneError,
     alien::{AlienClient, AlienProvider, AlienProviderWrapper, coalescing_provider, new_alien_client},
@@ -378,7 +378,9 @@ pub fn warning_rows(warnings: &[SimulationWarning]) -> Vec<GemListRow> {
         .iter()
         .filter_map(|warning| {
             let kind = match &warning.warning {
-                SimulationWarningType::TokenApproval(approval) | SimulationWarningType::PermitApproval(approval) => approval.value.is_none().then_some(WarningKind::UnlimitedApproval),
+                SimulationWarningType::TokenApproval(approval) | SimulationWarningType::PermitApproval(approval) => {
+                    approval.value.is_none().then_some(WarningKind::UnlimitedApproval)
+                }
                 SimulationWarningType::PermitBatchApproval(value) => value.is_none().then_some(WarningKind::UnlimitedApproval),
                 SimulationWarningType::NftCollectionApproval(_) => Some(WarningKind::NftCollectionApproval),
                 SimulationWarningType::ExternallyOwnedSpender => Some(WarningKind::ExternallyOwnedSpender),

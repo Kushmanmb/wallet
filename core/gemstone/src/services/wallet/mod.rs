@@ -47,7 +47,9 @@ use crate::services::wallet_session::GemWalletSessionService;
 use primitives::BlockExplorerLink;
 
 pub use error::GemWalletImportError;
-pub use model::{GemWalletDefaultName, GemWalletDeletion, GemWalletImportKind, GemWalletImportResult, GemWalletImportScreen, GemWalletImportSession, GemWalletImportType, GemWalletSecret};
+pub use model::{
+    GemWalletDefaultName, GemWalletDeletion, GemWalletImportKind, GemWalletImportResult, GemWalletImportScreen, GemWalletImportSession, GemWalletImportType, GemWalletSecret,
+};
 pub use password::{GemKeystoreAuthentication, GemKeystorePassword};
 pub use store::GemWalletStore;
 pub use verify_phrase::GemVerifyPhraseSession;

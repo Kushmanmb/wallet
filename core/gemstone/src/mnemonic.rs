@@ -112,21 +112,54 @@ mod tests {
         assert_eq!(suggestions("act", 3), vec!["action", "actor", "actress", "actual"]);
         assert!(suggestions("wood", 4).is_empty());
         assert!(!suggestions("act", 3).contains(&"act".to_string()));
-        assert!(!suggestions("action", 3).contains(&"action".to_string()), "the word already in place is dropped when editing inside it");
+        assert!(
+            !suggestions("action", 3).contains(&"action".to_string()),
+            "the word already in place is dropped when editing inside it"
+        );
     }
 
     #[test]
     fn test_applying_a_suggestion_replaces_the_word_at_the_cursor() {
-        assert_eq!(apply("abandon woo", 11, "wood"), GemPhraseEdit { text: "abandon wood ".to_string(), cursor: 13 });
-        assert_eq!(apply("woo zoo", 3, "wood"), GemPhraseEdit { text: "wood zoo".to_string(), cursor: 5 });
-        assert_eq!(apply("abandon wo zoo", 9, "wool"), GemPhraseEdit { text: "abandon wool zoo".to_string(), cursor: 13 });
-        assert_eq!(apply("wo", 1, "wood"), GemPhraseEdit { text: "wood ".to_string(), cursor: 5 });
+        assert_eq!(
+            apply("abandon woo", 11, "wood"),
+            GemPhraseEdit {
+                text: "abandon wood ".to_string(),
+                cursor: 13
+            }
+        );
+        assert_eq!(
+            apply("woo zoo", 3, "wood"),
+            GemPhraseEdit {
+                text: "wood zoo".to_string(),
+                cursor: 5
+            }
+        );
+        assert_eq!(
+            apply("abandon wo zoo", 9, "wool"),
+            GemPhraseEdit {
+                text: "abandon wool zoo".to_string(),
+                cursor: 13
+            }
+        );
+        assert_eq!(
+            apply("wo", 1, "wood"),
+            GemPhraseEdit {
+                text: "wood ".to_string(),
+                cursor: 5
+            }
+        );
     }
 
     #[test]
     fn test_the_cursor_counts_utf16_units() {
         assert_eq!(suggestions("🙂 woo", 6), vec!["wood", "wool"]);
-        assert_eq!(apply("🙂 woo", 6, "wood"), GemPhraseEdit { text: "🙂 wood ".to_string(), cursor: 8 });
+        assert_eq!(
+            apply("🙂 woo", 6, "wood"),
+            GemPhraseEdit {
+                text: "🙂 wood ".to_string(),
+                cursor: 8
+            }
+        );
         assert!(suggestions("woo", 99).len() == 2, "a cursor past the end reads as the end");
     }
 

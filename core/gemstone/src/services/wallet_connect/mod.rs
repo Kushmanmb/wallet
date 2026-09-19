@@ -26,9 +26,9 @@ use crate::wallet_connect::{WalletConnect, WalletConnectAction, WalletConnectCha
 
 pub use error::GemWalletConnectError;
 pub use model::{
-    GemConnection, GemConnectionDetails, GemConnectionSection, GemSessionApproval, GemSessionProposal, GemWalletConnectAuthAccount,
-    GemWalletConnectFailure, GemWalletConnectMessageRequest, GemWalletConnectOutcome, GemWalletConnectRejection, GemWalletConnectRejectionReason, GemWalletConnectResponse,
-    GemWalletConnectRpcError, GemWalletConnectSessionRequest, GemWalletConnectTransactionAction, GemWalletConnectTransactionRequest,
+    GemConnection, GemConnectionDetails, GemConnectionSection, GemSessionApproval, GemSessionProposal, GemWalletConnectAuthAccount, GemWalletConnectFailure,
+    GemWalletConnectMessageRequest, GemWalletConnectOutcome, GemWalletConnectRejection, GemWalletConnectRejectionReason, GemWalletConnectResponse, GemWalletConnectRpcError,
+    GemWalletConnectSessionRequest, GemWalletConnectTransactionAction, GemWalletConnectTransactionRequest,
 };
 pub use sign_message::{GemSignMessagePreview, GemSignMessageService};
 pub use signer::GemWalletConnectSigner;

@@ -628,7 +628,9 @@ mod tests {
             decimal_separator: ".".to_string(),
         };
         let available = GemBigInt::from(2_000_000_000_000_000_000u128);
-        let changed = |session: &GemSwapSession, amount: &str| session.on_input_changed(amount.to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone());
+        let changed = |session: &GemSwapSession, amount: &str| {
+            session.on_input_changed(amount.to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone())
+        };
 
         assert!(GemSwapSession::default().input.is_none(), "no amount, no input");
 
@@ -675,9 +677,6 @@ mod tests {
         assert_eq!(state.button_action, GemSwapButtonAction::Swap);
         assert_eq!(state.button_state, GemSwapButtonState::Enabled);
         assert!(!state.is_quote_loading);
-        assert_eq!(
-            session.view_state(GemBigInt::from(50), None).button_action,
-            GemSwapButtonAction::InsufficientBalance
-        );
+        assert_eq!(session.view_state(GemBigInt::from(50), None).button_action, GemSwapButtonAction::InsufficientBalance);
     }
 }

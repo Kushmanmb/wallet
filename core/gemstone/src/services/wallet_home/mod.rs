@@ -65,13 +65,7 @@ impl GemWalletHomeService {
         asset_rules::wallet_asset_row_style()
     }
 
-    pub fn view_state(
-        &self,
-        wallet: Wallet,
-        balances: Vec<AssetFiatValue>,
-        perpetual: Option<PerpetualBalance>,
-        banners: Vec<Banner>,
-    ) -> GemWalletHomeViewState {
+    pub fn view_state(&self, wallet: Wallet, balances: Vec<AssetFiatValue>, perpetual: Option<PerpetualBalance>, banners: Vec<Banner>) -> GemWalletHomeViewState {
         let chains = wallet.chains();
         let is_wallet_empty = balances.iter().all(|balance| balance.amount == 0.0);
         let total_value = self.total_fiat_value(balances, perpetual);

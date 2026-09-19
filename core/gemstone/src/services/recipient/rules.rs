@@ -2,10 +2,11 @@ use primitives::name::NameRecord;
 use primitives::{Asset, Chain, ChainAsset, Wallet, WalletType};
 
 use super::model::{
-    GemRecipientError, GemRecipientErrorDisplay, GemRecipientNext, GemRecipientRow, GemRecipientScan, GemRecipientSection, GemRecipientSectionKind, GemRecipientType, GemRecipientValidation,
+    GemRecipientError, GemRecipientErrorDisplay, GemRecipientNext, GemRecipientRow, GemRecipientScan, GemRecipientSection, GemRecipientSectionKind, GemRecipientType,
+    GemRecipientValidation,
 };
-use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::address::{checksum_address, validate_address};
+use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::models::custom_types::GemBigInt;
 use crate::payment::{GemPaymentConfirmTransfer, GemPaymentDestination, GemPaymentRecipient};
 use crate::services::name::GemNameRecordState;
@@ -103,11 +104,20 @@ pub fn next_step(recipient_type: GemRecipientType, payment: GemPaymentRecipient)
 }
 
 pub fn select_step(recipient_type: GemRecipientType, recipient: GemRecipient) -> Result<GemRecipientNext, GemRecipientError> {
-    let validated = self::recipient(recipient_type.asset().chain(), &recipient.address, &GemNameRecordState::None, recipient.memo.clone(), vec![])?;
+    let validated = self::recipient(
+        recipient_type.asset().chain(),
+        &recipient.address,
+        &GemNameRecordState::None,
+        recipient.memo.clone(),
+        vec![],
+    )?;
     Ok(next_step(
         recipient_type,
         GemPaymentRecipient {
-            recipient: GemRecipient { name: recipient.name, ..validated },
+            recipient: GemRecipient {
+                name: recipient.name,
+                ..validated
+            },
             amount: None,
         },
     ))
@@ -145,7 +155,10 @@ pub fn recipient_sections(wallets: Vec<Wallet>, chain: Chain, contacts: Vec<GemR
 
     [
         section(GemRecipientSectionKind::Pinned, wallet_rows(pinned)),
-        section(GemRecipientSectionKind::Contacts, contacts.into_iter().map(|contact| recipient_row(chain, contact)).collect()),
+        section(
+            GemRecipientSectionKind::Contacts,
+            contacts.into_iter().map(|contact| recipient_row(chain, contact)).collect(),
+        ),
         section(GemRecipientSectionKind::Wallets, wallet_rows(of(false, false))),
         section(GemRecipientSectionKind::ViewWallets, wallet_rows(of(false, true))),
     ]
@@ -165,8 +178,8 @@ fn recipient_row(chain: Chain, recipient: GemRecipient) -> GemRecipientRow {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::services::recipient::model::GemRecipientSession;
     use crate::payment::GemPaymentService;
+    use crate::services::recipient::model::GemRecipientSession;
     use crate::testkit::TestAlienProvider;
     use std::sync::Arc;
 
@@ -469,7 +482,18 @@ mod tests {
             }
             GemRecipientNext::Confirm { .. } => panic!("an asset recipient asks for an amount"),
         }
-        assert!(select_step(asset, GemRecipient { address: "0x1".to_string(), name: None, memo: None, references: vec![] }).is_err());
+        assert!(
+            select_step(
+                asset,
+                GemRecipient {
+                    address: "0x1".to_string(),
+                    name: None,
+                    memo: None,
+                    references: vec![]
+                }
+            )
+            .is_err()
+        );
     }
 
     #[test]

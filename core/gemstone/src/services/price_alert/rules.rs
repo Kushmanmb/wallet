@@ -297,7 +297,10 @@ mod tests {
     #[test]
     fn test_sections_put_auto_alerts_first_and_group_the_rest_by_asset_name() {
         let named = |chain: Chain, name: &str, alert: PriceAlert| PriceAlertData {
-            asset: Asset { name: name.to_string(), ..Asset::from_chain(chain) },
+            asset: Asset {
+                name: name.to_string(),
+                ..Asset::from_chain(chain)
+            },
             ..PriceAlertData::mock(alert, None, None)
         };
         let solana = AssetId::from_chain(Chain::Solana);
@@ -307,10 +310,22 @@ mod tests {
             ..PriceAlert::new_price(bitcoin.clone(), Currency::USD, 90.0, PriceAlertDirection::Down)
         };
         let alerts = vec![
-            named(Chain::Solana, "Solana", PriceAlert::new_price(solana.clone(), Currency::USD, 200.0, PriceAlertDirection::Up)),
+            named(
+                Chain::Solana,
+                "Solana",
+                PriceAlert::new_price(solana.clone(), Currency::USD, 200.0, PriceAlertDirection::Up),
+            ),
             named(Chain::Bitcoin, "Bitcoin", PriceAlert::new_auto(bitcoin.clone(), Currency::USD)),
-            named(Chain::Bitcoin, "Bitcoin", PriceAlert::new_price(bitcoin.clone(), Currency::USD, 100.0, PriceAlertDirection::Up)),
-            named(Chain::Bitcoin, "Bitcoin", PriceAlert::new_price(bitcoin.clone(), Currency::USD, 120.0, PriceAlertDirection::Up)),
+            named(
+                Chain::Bitcoin,
+                "Bitcoin",
+                PriceAlert::new_price(bitcoin.clone(), Currency::USD, 100.0, PriceAlertDirection::Up),
+            ),
+            named(
+                Chain::Bitcoin,
+                "Bitcoin",
+                PriceAlert::new_price(bitcoin.clone(), Currency::USD, 120.0, PriceAlertDirection::Up),
+            ),
             named(Chain::Bitcoin, "Bitcoin", notified),
             named(Chain::Solana, "Solana", PriceAlert::new_auto(solana.clone(), Currency::USD)),
         ];

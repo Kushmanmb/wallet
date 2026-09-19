@@ -10,9 +10,9 @@ use super::{
     GemAcquireAssetFlow, GemConfirmError, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemExecuteResult,
     GemTransferAmountResult,
 };
+use crate::models::list::GemListRow;
 use crate::services::transfer::GemTransferData;
 use crate::services::wallet::GemKeystoreAuthentication;
-use crate::models::list::GemListRow;
 
 #[derive(uniffi::Object)]
 pub struct GemConfirmation {
@@ -200,7 +200,12 @@ mod tests {
             let confirmation = testkit.service.confirmation(wallet, transfer, None);
             let shown = confirmation.state().await.unwrap();
             let stale = GemConfirmLoad {
-                address_name: Some(AddressName::mock("THTR75o8xXAgCTQqpiot2AFRAjvW1tSbVV", "stale", AddressType::Address, VerificationStatus::Unverified)),
+                address_name: Some(AddressName::mock(
+                    "THTR75o8xXAgCTQqpiot2AFRAjvW1tSbVV",
+                    "stale",
+                    AddressType::Address,
+                    VerificationStatus::Unverified,
+                )),
                 ..shown
             };
 
@@ -208,7 +213,10 @@ mod tests {
             let newer = confirmation.latest_load.fetch_add(1, Ordering::SeqCst) + 1;
 
             assert!(matches!(confirmation.store_latest(older, Ok(stale.clone())).await, Err(GemConfirmError::Cancelled)));
-            assert!(matches!(confirmation.store_latest(older, Err(GemConfirmError::Offline)).await, Err(GemConfirmError::Cancelled)));
+            assert!(matches!(
+                confirmation.store_latest(older, Err(GemConfirmError::Offline)).await,
+                Err(GemConfirmError::Cancelled)
+            ));
             assert!(confirmation.state().await.unwrap().address_name.is_none());
 
             assert!(confirmation.store_latest(newer, Ok(stale)).await.is_ok());

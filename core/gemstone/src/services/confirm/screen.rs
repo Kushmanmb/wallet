@@ -126,7 +126,10 @@ mod tests {
             }
         );
         assert_eq!(missing.action(), None);
-        assert_eq!(GemConfirmScreen::initial(None).on_load_failed(GemConfirmError::Offline).action(), Some(GemConfirmAction::Load));
+        assert_eq!(
+            GemConfirmScreen::initial(None).on_load_failed(GemConfirmError::Offline).action(),
+            Some(GemConfirmAction::Load)
+        );
     }
 
     #[test]

@@ -234,7 +234,11 @@ mod import_session_tests {
 
         assert_eq!(typed.suggestions(), vec!["wood", "wool"]);
         assert_eq!(typed.on_input_changed("woo".into(), None).suggestions(), vec!["wood", "wool"], "no cursor reads as the end");
-        assert_eq!(typed.on_input_changed("woo".into(), Some(99)).suggestions(), vec!["wood", "wool"], "a stale cursor is clamped");
+        assert_eq!(
+            typed.on_input_changed("woo".into(), Some(99)).suggestions(),
+            vec!["wood", "wool"],
+            "a stale cursor is clamped"
+        );
         assert!(session(GemWalletImportKind::PrivateKey).on_input_changed("woo".into(), None).suggestions().is_empty());
     }
 
@@ -269,9 +273,18 @@ mod import_session_tests {
         let words = vec!["abandon".to_string(), "ability".to_string()];
         let printed = format!(
             "{:?} {:?} {:?} {:?} {:?}",
-            GemWalletImportType::MulticoinPhrase { words: words.clone(), chains: vec![Chain::Ethereum] },
-            GemWalletImportType::SinglePhrase { words: words.clone(), chain: Chain::Bitcoin },
-            GemWalletImportType::PrivateKey { value: "0xsecretkey".into(), chain: Chain::Ethereum },
+            GemWalletImportType::MulticoinPhrase {
+                words: words.clone(),
+                chains: vec![Chain::Ethereum]
+            },
+            GemWalletImportType::SinglePhrase {
+                words: words.clone(),
+                chain: Chain::Bitcoin
+            },
+            GemWalletImportType::PrivateKey {
+                value: "0xsecretkey".into(),
+                chain: Chain::Ethereum
+            },
             GemWalletSecret::Words { words },
             GemWalletSecret::PrivateKey { key: "0xsecretkey".into() },
         );

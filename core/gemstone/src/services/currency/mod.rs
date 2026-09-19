@@ -44,9 +44,9 @@ impl GemCurrencyService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use futures::executor::block_on;
     use crate::services::preferences::testkit::MemoryPreferencesStore;
     use crate::services::price::testkit::MemoryPriceStore;
+    use futures::executor::block_on;
 
     fn service(prices: MemoryPriceStore) -> (GemCurrencyService, Arc<MemoryPriceStore>) {
         let prices = Arc::new(prices);

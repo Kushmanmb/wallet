@@ -129,7 +129,9 @@ fn supply_section(market: &AssetMarket, symbol: &str) -> Vec<GemListRow> {
         market
             .total_supply
             .map(|supply| amount_row(GemListRowTitle::TotalSupply, value(supply), Some(GemInfoTopic::TotalSupply))),
-        market.max_supply.map(|supply| amount_row(GemListRowTitle::MaxSupply, value(supply), Some(GemInfoTopic::MaxSupply))),
+        market
+            .max_supply
+            .map(|supply| amount_row(GemListRowTitle::MaxSupply, value(supply), Some(GemInfoTopic::MaxSupply))),
     ])
 }
 
@@ -527,7 +529,11 @@ mod tests {
                 },
                 GemChartSection::Market {
                     rows: vec![
-                        amount(GemListRowTitle::CirculatingSupply, supply(50.0, &Asset::mock().symbol), Some(GemInfoTopic::CirculatingSupply)),
+                        amount(
+                            GemListRowTitle::CirculatingSupply,
+                            supply(50.0, &Asset::mock().symbol),
+                            Some(GemInfoTopic::CirculatingSupply)
+                        ),
                         amount(GemListRowTitle::MaxSupply, supply(21.0, &Asset::mock().symbol), Some(GemInfoTopic::MaxSupply)),
                     ]
                 },

@@ -4,18 +4,18 @@ use primitives::{Account, ApplicationMetadata, Asset, Chain, Wallet, WalletId};
 
 use crate::application::GemApplicationMetadataService;
 use crate::keystore::{GemKeystore, decode_password, keystore_id_for_wallet};
+use crate::message::sign_type::{MessageType, SignMessage};
+use crate::message::signer::MessageSigner;
 use crate::models::copy::address_copy;
 use crate::models::list::{GemListRow, GemListRowTitle};
 use crate::services::assets::rules::asset_text;
-use crate::services::wallet::model::wallet_row;
-use crate::message::sign_type::{MessageType, SignMessage};
-use crate::message::signer::MessageSigner;
 use crate::services::confirm::GemSimulationValue;
 use crate::services::error::GemServiceError;
 use crate::services::explorer::GemExplorerService;
 use crate::services::name::GemNameService;
 use crate::services::simulation::{GemSimulationFormatter, GemSimulationPayloadRow, address_requests, named_payload_rows};
 use crate::services::wallet::GemKeystorePassword;
+use crate::services::wallet::model::wallet_row;
 use crate::services::wallet_connect::model::GemWalletConnectMessageRequest;
 use primitives::BlockExplorerLink;
 
@@ -79,7 +79,9 @@ impl GemSignMessageService {
             primary_fields: payload.as_ref().map(|preview| preview.primary.clone()).unwrap_or_default(),
             secondary_fields: payload.map(|preview| preview.secondary).unwrap_or_default(),
             has_critical_warning,
-            rows: review_rows(chain, &wallet, &account, &session.metadata, header.is_some(), |chain, address| self.explorer.get_address_url(chain, address)),
+            rows: review_rows(chain, &wallet, &account, &session.metadata, header.is_some(), |chain, address| {
+                self.explorer.get_address_url(chain, address)
+            }),
             header,
         }
     }
