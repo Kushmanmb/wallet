@@ -172,3 +172,9 @@ fun DbAssetInfo.toDTO(): AssetInfo? {
         associations = entity.associations,
     )
 }
+
+data class DbAssetFiatValue(
+    val amount: Double,
+    val price: Double,
+    val priceChangePercentage24h: Double,
+)

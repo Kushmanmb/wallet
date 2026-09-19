@@ -87,14 +87,14 @@ object AssetModule {
     @Singleton
     fun provideGetWalletSummary(
         getSession: GetSession,
-        getWalletAssets: GetWalletAssets,
+        assetStore: GemstoneAssetStore,
         getPerpetualBalance: GetPerpetualBalance,
         bannerStore: GemstoneBannerStore,
         userConfig: UserConfig,
         walletHomeService: GemWalletHomeServiceInterface,
     ): GetWalletSummary = GetWalletSummaryImpl(
         getSession = getSession,
-        getWalletAssets = getWalletAssets,
+        assetStore = assetStore,
         getPerpetualBalance = getPerpetualBalance,
         bannerStore = bannerStore,
         userConfig = userConfig,

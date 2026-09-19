@@ -22,6 +22,7 @@ import com.wallet.core.primitives.RecentActivityType
 import com.wallet.core.primitives.AssetType
 import com.wallet.core.primitives.Chain
 import kotlinx.coroutines.flow.Flow
+import com.gemwallet.android.data.service.store.database.entities.DbAssetFiatValue
 
 private const val ASSET_INFO_COLUMNS = """
     asset.id AS id,
@@ -223,8 +224,11 @@ interface AssetsDao {
     @Query("SELECT asset_info.* FROM $ASSET_INFO WHERE chain = :chain AND id = :assetId")
     fun getTokenInfo(walletId: String, assetId: String, chain: Chain): Flow<DbAssetInfo?>
 
-    @Query("SELECT * FROM $ASSET_INFO WHERE walletId = :walletId AND visible != 0 AND assetRank >= 0 ORDER BY balanceFiatTotalAmount DESC, assetRank DESC LIMIT $ASSETS_LIMIT")
+    @Query("SELECT * FROM $ASSET_INFO WHERE walletId = :walletId AND visible != 0 AND assetRank >= 0 ORDER BY pinned DESC, balanceFiatTotalAmount DESC, assetRank DESC LIMIT $ASSETS_LIMIT")
     fun getAssetsInfo(walletId: String): Flow<List<DbAssetInfo>>
+
+    @Query("SELECT COALESCE(balanceTotalAmount, 0) AS amount, COALESCE(priceValue, 0) AS price, COALESCE(priceDayChanges, 0) AS priceChangePercentage24h FROM $ASSET_INFO WHERE walletId = :walletId AND visible != 0 AND assetRank >= 0")
+    fun getAssetFiatValues(walletId: String): Flow<List<DbAssetFiatValue>>
 
     @Query("SELECT * FROM $ASSET_INFO WHERE walletId = :walletId AND visible != 0 AND assetRank >= 0 AND balanceTotalAmount > 0 ORDER BY balanceFiatTotalAmount DESC, assetRank DESC")
     suspend fun getPortfolioAssets(walletId: String): List<DbAssetInfo>

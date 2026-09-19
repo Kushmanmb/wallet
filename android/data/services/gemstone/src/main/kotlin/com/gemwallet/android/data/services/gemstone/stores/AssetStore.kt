@@ -26,6 +26,7 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAssetStore
 import com.gemwallet.android.ext.toIdentifier
 import com.wallet.core.primitives.AssetId
+import uniffi.gemstone.AssetFiatValue as GemAssetFiatValue
 
 class GemstoneAssetStore(
     private val assetsDao: AssetsDao,
@@ -85,6 +86,10 @@ class GemstoneAssetStore(
     )
 
     fun observeAssetsInfo(walletId: String): Flow<List<AssetInfo>> = assetsDao.getAssetsInfo(walletId).toAssetInfoModel()
+
+    fun observeAssetFiatValues(walletId: String): Flow<List<GemAssetFiatValue>> = assetsDao.getAssetFiatValues(walletId).map { rows ->
+        rows.map { GemAssetFiatValue(amount = it.amount, price = it.price, priceChangePercentage24h = it.priceChangePercentage24h) }
+    }
 
     fun observeAssetsInfo(walletId: String, assetIds: List<String>): Flow<List<AssetInfo>> =
         assetsDao.getAssetsInfoByIds(walletId, assetIds).toAssetInfoModel()

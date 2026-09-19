@@ -3,7 +3,6 @@ package com.gemwallet.android.data.coordinators.asset
 import androidx.compose.runtime.Stable
 import com.gemwallet.android.application.assets.cases.GetWalletSummary
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
-import com.gemwallet.android.application.assets.cases.GetWalletAssets
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.data.services.gemstone.stores.GemstoneBannerStore
 import com.gemwallet.android.data.service.store.database.entities.toDTO
@@ -28,7 +27,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import java.math.BigDecimal
-import uniffi.gemstone.AssetFiatValue as GemAssetFiatValue
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import uniffi.gemstone.GemHeaderActions
@@ -36,11 +34,12 @@ import uniffi.gemstone.GemWalletHomeServiceInterface
 import uniffi.gemstone.TotalFiatValue as GemTotalFiatValue
 import uniffi.gemstone.GemWalletRow
 import uniffi.gemstone.walletRow
+import com.gemwallet.android.data.services.gemstone.stores.GemstoneAssetStore
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetWalletSummaryImpl(
     private val getSession: GetSession,
-    private val getWalletAssets: GetWalletAssets,
+    private val assetStore: GemstoneAssetStore,
     private val getPerpetualBalance: GetPerpetualBalance,
     private val bannerStore: GemstoneBannerStore,
     private val userConfig: UserConfig,
@@ -52,23 +51,17 @@ class GetWalletSummaryImpl(
         val wallet = session?.wallet ?: return@flatMapLatest flowOf(null)
 
         combine(
-            getWalletAssets(),
+            assetStore.observeAssetFiatValues(wallet.id.id),
             getPerpetualBalance.getBalance(),
             bannerStore.observeWalletBanners(wallet.id.id, listOf(BannerEvent.AccountBlockedMultiSignature, BannerEvent.Onboarding)),
             userConfig.isHideBalances(),
-        ) { assets, perpetualBalance, banners, hideBalances ->
+        ) { balances, perpetualBalance, banners, hideBalances ->
             val state = walletHomeService.viewState(
                 wallet = wallet.toGem(),
-                balances = assets.map { asset ->
-                    GemAssetFiatValue(
-                        amount = asset.balance.totalAmount,
-                        price = asset.price?.price?.price ?: 0.0,
-                        priceChangePercentage24h = asset.price?.price?.priceChangePercentage24h ?: 0.0,
-                    )
-                },
+                balances = balances,
                 perpetual = perpetualBalance?.toGem(),
                 banners = banners.map { it.toDTO().toGem() },
-                isWalletEmpty = assets.all { it.balance.totalAmount == 0.0 },
+                isWalletEmpty = balances.all { it.amount == 0.0 },
             )
 
             WalletSummaryAggregateImpl(
