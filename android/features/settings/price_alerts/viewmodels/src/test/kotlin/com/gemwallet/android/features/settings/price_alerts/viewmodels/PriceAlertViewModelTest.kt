@@ -28,6 +28,7 @@ import org.junit.Test
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemPriceAlertService
 import uniffi.gemstone.GemServiceException
+import uniffi.gemstone.PriceAlertFormatter
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PriceAlertViewModelTest {
@@ -94,11 +95,11 @@ class PriceAlertViewModelTest {
     private fun viewModel(service: GemPriceAlertService, assetId: AssetId? = null) = PriceAlertViewModel(
         getPriceAlerts = mockk<GetPriceAlerts> {
             every { this@mockk(any()) } returns flowOf(emptyList())
-            every { groupByTargetAndAsset(any()) } returns emptyMap()
         },
         getAssetPriceAlertState = mockk<GetAssetPriceAlertState> { every { isAssetPriceAlertEnabled(any()) } returns flowOf(false) },
         getAssetTokenInfo = mockk(relaxed = true),
         service = service,
+        priceAlertFormatter = PriceAlertFormatter(),
         savedStateHandle = SavedStateHandle(assetId?.let { mapOf(RouteArgument.AssetId.key to it.toIdentifier()) } ?: emptyMap()),
         ioDispatcher = dispatcher,
         context = mockk(relaxed = true),

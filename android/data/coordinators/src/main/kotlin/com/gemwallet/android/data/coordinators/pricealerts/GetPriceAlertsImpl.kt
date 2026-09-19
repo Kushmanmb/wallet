@@ -14,7 +14,6 @@ import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.PriceAlert
 import com.wallet.core.primitives.Price
 import com.wallet.core.primitives.PriceAlertData
-import uniffi.gemstone.GemPriceAlertKind
 import uniffi.gemstone.GemPriceAlertRow
 import uniffi.gemstone.GemPriceAlertText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -82,7 +81,5 @@ class PriceAlertDataAggregateImpl(
     override val prefix: GemPriceAlertText = row.prefix
 
     override val suffix: GemPriceAlertText = row.suffix
-
-    override val kind: GemPriceAlertKind = row.kind
 
 }

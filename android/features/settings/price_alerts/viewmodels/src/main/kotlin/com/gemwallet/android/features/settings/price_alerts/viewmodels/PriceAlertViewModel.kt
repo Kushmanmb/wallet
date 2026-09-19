@@ -12,15 +12,19 @@ import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.domains.asset.aggregates.toAssetInfoDataAggregate
 import com.gemwallet.android.domains.pricealerts.aggregates.PriceAlertDataAggregate
 import com.gemwallet.android.ext.errorText
+import com.gemwallet.android.ext.id
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
+import com.gemwallet.android.features.settings.price_alerts.viewmodels.localization.footer
+import com.gemwallet.android.features.settings.price_alerts.viewmodels.localization.title
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.ListSection
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
+import com.wallet.core.primitives.PriceAlertData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -43,7 +47,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAssetTitleStyle
 import uniffi.gemstone.GemErrorText
+import uniffi.gemstone.GemPriceAlertSectionKind
 import uniffi.gemstone.GemPriceAlertServiceInterface
+import uniffi.gemstone.PriceAlertFormatter
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -52,6 +58,7 @@ class PriceAlertViewModel @Inject constructor(
     private val getAssetPriceAlertState: GetAssetPriceAlertState,
     private val getAssetTokenInfo: GetAssetTokenInfo,
     private val service: GemPriceAlertServiceInterface,
+    private val priceAlertFormatter: PriceAlertFormatter,
     savedStateHandle: SavedStateHandle,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @param:ApplicationContext private val context: Context,
@@ -73,20 +80,22 @@ class PriceAlertViewModel @Inject constructor(
     private val alerts = assetId.flatMapLatest { getPriceAlerts(it) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    private val grouped = alerts.map { getPriceAlerts.groupByTargetAndAsset(it) }
+    private val grouped = alerts.map { alerts ->
+        val byId = alerts.associateBy { it.priceAlert.id }
+        priceAlertFormatter.sections(alerts.map { PriceAlertData(asset = it.asset, price = null, priceAlert = it.priceAlert).toGem() })
+            .map { section -> section.kind to section.alertIds.mapNotNull { byId[it] } }
+    }
 
-    val isAutoAlertEnabled = grouped.map { it[null].orEmpty().isNotEmpty() }
+    val isAutoAlertEnabled = grouped.map { sections -> sections.any { (kind, _) -> kind is GemPriceAlertSectionKind.Auto } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val sections: StateFlow<List<ListSection<PriceAlertDataAggregate>>> = combine(grouped, assetId) { grouped, assetId ->
-        grouped.entries.mapNotNull { (key, items) ->
-            val id = key ?: return@mapNotNull null
-            if (items.isEmpty()) return@mapNotNull null
-            ListSection(
-                id = id.toIdentifier(),
-                title = if (assetId != null) context.getString(R.string.stake_active) else items.first().title,
-                items = items,
-            )
+        grouped.mapNotNull { (kind, items) ->
+            when {
+                assetId == null -> ListSection(id = kind.sectionId(), title = kind.title(), items = items, footer = kind.footer(context))
+                kind is GemPriceAlertSectionKind.Asset -> ListSection(id = kind.sectionId(), title = context.getString(R.string.stake_active), items = items)
+                else -> null
+            }
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -162,4 +171,9 @@ class PriceAlertViewModel @Inject constructor(
         const val TAG = "PriceAlerts"
     }
 
+}
+
+private fun GemPriceAlertSectionKind.sectionId(): String = when (this) {
+    GemPriceAlertSectionKind.Auto -> "auto"
+    is GemPriceAlertSectionKind.Asset -> assetId
 }

@@ -70,6 +70,18 @@ pub struct GemPriceAlertRow {
     pub suffix: GemPriceAlertText,
 }
 
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemPriceAlertSectionKind {
+    Auto,
+    Asset { asset_id: AssetId, name: String },
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemPriceAlertSection {
+    pub kind: GemPriceAlertSectionKind,
+    pub alert_ids: Vec<String>,
+}
+
 fn text(number: Option<GemFormattedNumber>) -> GemPriceAlertText {
     match number {
         Some(value) => GemPriceAlertText::Number { value },
@@ -100,6 +112,36 @@ pub fn displayed_price_alert_ids(alerts: Vec<PriceAlert>) -> Vec<String> {
     sorted_price_alerts(alerts.into_iter().filter(PriceAlert::should_display).collect())
         .iter()
         .map(PriceAlert::id)
+        .collect()
+}
+
+pub fn price_alert_sections(alerts: Vec<PriceAlertData>) -> Vec<GemPriceAlertSection> {
+    let names: HashMap<AssetId, String> = alerts.iter().map(|data| (data.price_alert.asset_id.clone(), data.asset.name.clone())).collect();
+    let displayed = sorted_price_alerts(alerts.into_iter().map(|data| data.price_alert).filter(PriceAlert::should_display).collect());
+    let (auto, grouped): (Vec<PriceAlert>, Vec<PriceAlert>) = displayed.into_iter().partition(|alert| !alert_kind(alert).groups_by_asset());
+
+    let mut assets: Vec<(&String, AssetId, Vec<String>)> = Vec::new();
+    for alert in grouped {
+        match assets.iter_mut().find(|(_, asset_id, _)| *asset_id == alert.asset_id) {
+            Some((_, _, ids)) => ids.push(alert.id()),
+            None => {
+                if let Some(name) = names.get(&alert.asset_id) {
+                    assets.push((name, alert.asset_id.clone(), vec![alert.id()]));
+                }
+            }
+        }
+    }
+    assets.sort_by(|left, right| left.0.cmp(right.0).then_with(|| left.1.to_string().cmp(&right.1.to_string())));
+
+    let auto = (!auto.is_empty()).then(|| GemPriceAlertSection {
+        kind: GemPriceAlertSectionKind::Auto,
+        alert_ids: auto.iter().map(PriceAlert::id).collect(),
+    });
+    auto.into_iter()
+        .chain(assets.into_iter().map(|(name, asset_id, alert_ids)| GemPriceAlertSection {
+            kind: GemPriceAlertSectionKind::Asset { asset_id, name: name.clone() },
+            alert_ids,
+        }))
         .collect()
 }
 
@@ -251,6 +293,79 @@ mod tests {
 
     use crate::formatted_number::GemNumberUnit;
     use primitives::Asset;
+
+    #[test]
+    fn test_sections_put_auto_alerts_first_and_group_the_rest_by_asset_name() {
+        let named = |chain: Chain, name: &str, alert: PriceAlert| PriceAlertData {
+            asset: Asset { name: name.to_string(), ..Asset::from_chain(chain) },
+            ..PriceAlertData::mock(alert, None, None)
+        };
+        let solana = AssetId::from_chain(Chain::Solana);
+        let bitcoin = AssetId::from_chain(Chain::Bitcoin);
+        let notified = PriceAlert {
+            last_notified_at: Some(Utc::now()),
+            ..PriceAlert::new_price(bitcoin.clone(), Currency::USD, 90.0, PriceAlertDirection::Down)
+        };
+        let alerts = vec![
+            named(Chain::Solana, "Solana", PriceAlert::new_price(solana.clone(), Currency::USD, 200.0, PriceAlertDirection::Up)),
+            named(Chain::Bitcoin, "Bitcoin", PriceAlert::new_auto(bitcoin.clone(), Currency::USD)),
+            named(Chain::Bitcoin, "Bitcoin", PriceAlert::new_price(bitcoin.clone(), Currency::USD, 100.0, PriceAlertDirection::Up)),
+            named(Chain::Bitcoin, "Bitcoin", PriceAlert::new_price(bitcoin.clone(), Currency::USD, 120.0, PriceAlertDirection::Up)),
+            named(Chain::Bitcoin, "Bitcoin", notified),
+            named(Chain::Solana, "Solana", PriceAlert::new_auto(solana.clone(), Currency::USD)),
+        ];
+
+        let sections = price_alert_sections(alerts);
+
+        assert_eq!(
+            sections,
+            vec![
+                GemPriceAlertSection {
+                    kind: GemPriceAlertSectionKind::Auto,
+                    alert_ids: vec![
+                        PriceAlert::new_auto(bitcoin.clone(), Currency::USD).id(),
+                        PriceAlert::new_auto(solana.clone(), Currency::USD).id(),
+                    ],
+                },
+                GemPriceAlertSection {
+                    kind: GemPriceAlertSectionKind::Asset {
+                        asset_id: bitcoin.clone(),
+                        name: "Bitcoin".to_string(),
+                    },
+                    alert_ids: vec![
+                        PriceAlert::new_price(bitcoin.clone(), Currency::USD, 120.0, PriceAlertDirection::Up).id(),
+                        PriceAlert::new_price(bitcoin.clone(), Currency::USD, 100.0, PriceAlertDirection::Up).id(),
+                    ],
+                },
+                GemPriceAlertSection {
+                    kind: GemPriceAlertSectionKind::Asset {
+                        asset_id: solana.clone(),
+                        name: "Solana".to_string(),
+                    },
+                    alert_ids: vec![PriceAlert::new_price(solana, Currency::USD, 200.0, PriceAlertDirection::Up).id()],
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn test_sections_leave_out_an_empty_auto_group() {
+        let bitcoin = AssetId::from_chain(Chain::Bitcoin);
+        let alert = PriceAlert::new_price(bitcoin.clone(), Currency::USD, 100.0, PriceAlertDirection::Up);
+
+        let sections = price_alert_sections(vec![PriceAlertData::mock(alert.clone(), None, None)]);
+
+        assert_eq!(
+            sections,
+            vec![GemPriceAlertSection {
+                kind: GemPriceAlertSectionKind::Asset {
+                    asset_id: bitcoin,
+                    name: "Bitcoin".to_string(),
+                },
+                alert_ids: vec![alert.id()],
+            }]
+        );
+    }
 
     #[test]
     fn test_each_kind_names_which_slot_holds_the_price_and_which_the_percent() {

@@ -3,7 +3,6 @@ package com.gemwallet.android.domains.pricealerts.aggregates
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.PriceAlert
-import uniffi.gemstone.GemPriceAlertKind
 import uniffi.gemstone.GemPriceAlertText
 import uniffi.gemstone.PriceAlertDirection
 
@@ -17,5 +16,4 @@ interface PriceAlertDataAggregate {
     val priceDirection: PriceAlertDirection?
     val prefix: GemPriceAlertText
     val suffix: GemPriceAlertText
-    val kind: GemPriceAlertKind
 }
