@@ -62,7 +62,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 - **S41** **M** iOS `ImportWalletSceneViewModel` drives input, word suggestions, import kind and button state itself — `GemWalletImportSession` on both apps (Android `ImportUIState` carries the same).
 - **S43** **M** iOS `ManageContactViewModel` (name input, description, avatar, addresses, saving) and Android `ManageContactState` — `GemContactSession` over the `GemContactInput` both already hold.
 - **S45** **S** iOS `RecipientSceneViewModel` (address input, memo, `recipientData`) drives the recipient screen app-side; Android's does too — `GemRecipientSession` over `GemRecipientService.next`.
-- **S48** **S** iOS `SecurityViewModel` toggles (`isEnabled`, `lockPeriod`, `isPrivacyLockEnabled`, `isHideBalanceEnabled`) and Android `SecurityViewModel` — a `GemSecuritySession` whose sections the screen already reads.
 
 
 ## 7. Decisions to make
@@ -128,6 +127,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**S48 (2026-09-19).** Closed as correct: the security toggles are optimistic mirrors of settings the platform stores securely (the keychain and biometry on iOS, `UserConfig` on Android), rolled back when the platform call fails, and every rule the screen shows already comes from Core through `GemSecurityInput` → `securitySections`. What stays app-side is platform knowledge: which biometry name to show, and that the privacy lock exists only on iOS. A Core session would hold a second copy of state the secure store owns, which is the mirror the Coverage pass already classes as app state.
 
 **F4 (2026-09-19).** Closed as correct: `WCRequestViewModel` calls one Core service, the WalletConnect one. `GemApplicationMetadataService` is a dependency-free rule object (iOS holds the same one as `.shared`), which [SERVICES.md](SERVICES.md) exempts, and the sign-message service is handed to the `WCRequest.SignMessage` review model the view model vends, the same split iOS makes between its request handler and `SignMessageSceneViewModel`.
 
