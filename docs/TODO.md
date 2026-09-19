@@ -47,7 +47,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 ## 6. Core shapes that block an app move
 
-- **K8** **M** `GemStreamService` holds 13 `Arc`s, `GemAssetDetailsService` and `GemWalletService` 10, `GemPerpetualService` 9 — for each, the dependencies reached only to forward one call move behind the composition service (§ 7).
 
 
 ## 7. Decisions to make
@@ -58,7 +57,7 @@ None of these is a code change until someone chooses; each is written so the cho
 ## 8. Blocked upstream
 
 - **X168** **S** `WalletConfiguration.multi_signature_accounts` ([`wallet_configuration.rs`](../core/crates/primitives/src/wallet_configuration.rs)) is the old name of `externally_controlled_accounts`, which also covers Solana accounts assigned to another program. The API fills both because shipped apps read only the old field. Delete the field, its fill in [`wallet_configuration.rs`](../core/apps/api/src/devices/clients/wallet_configuration.rs) and the merge in [`externally_controlled_banners`](../core/gemstone/src/services/wallet_configuration/rules.rs) on 2026-12-18, three months after the release that reads `externally_controlled_accounts`.
-- **X163** **M** iOS pins the `Gemstone` package to Swift 5 language mode. Re-tested on 2026-09-16 against uniffi 0.32.1: both `uniffiTraitInterfaceCallAsync` sites still fail with "passing closure as a 'sending' parameter" because the generated `Task { }` captures three `@escaping` non-`Sendable` parameters. Nothing to decide and nothing to do until a uniffi release changes that function; re-test then.
+- **X163** **M** iOS pins the `Gemstone` package to Swift 5 language mode. Re-tested on 2026-09-16 against uniffi 0.32.1: both `uniffiTraitInterfaceCallAsync` sites still fail with "passing closure as a 'sending' parameter" because the generated `Task { }` captures three `@escaping` non-`Sendable` parameters. Nothing to decide and nothing to do until a uniffi release changes that function; re-test then. Rechecked on 2026-09-19: 0.32.1 is still the latest uniffi release.
 
 ## Coverage
 
@@ -106,6 +105,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**K8 (2026-09-19).** Closed as correct against § 7. `GemStreamService` is the stream event router: each of its dependencies handles one event kind, so a single use each is its shape, and a composition service in front of it would add a hop per event. `GemAssetDetailsService`, `GemWalletService` and `GemPerpetualService` are screen services composing collaborators, which § 7 prescribes. Their only pure one-call forwards are `GemWalletService::address_url` to the explorer and `GemPerpetualService::add_recent` to recent activity, and § 7 names exactly that as the route by which a screen reads a composition answer. Every other held dependency does work in more than one method or builds its input.
 
 **S35 (2026-09-19).** Decided without a session: the recents rule was the one section decision iOS still composed itself, and Core already answered it for Android (`GemSelectAssetFlow::shows_recents`), so the iOS wallet search now asks the same flow. Showing the pinned header when pinned assets or pinned perpetuals exist is layout, not a product decision: a section with no rows is not drawn, on both apps. The rest of the model is the query text and presentation state.
 
