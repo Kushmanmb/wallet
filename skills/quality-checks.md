@@ -36,6 +36,18 @@ Navigation, app wiring, wallet-critical UI, security-sensitive code, Room migrat
 
 For Core crates with `default = []`, per-crate `cargo clippy -p <crate>` and `cargo test -p <crate>` skip feature-gated modules and pass in seconds. Add `--all-features` or the gating feature (`just test <CRATE>` already does); see [Core Development Commands](../core/skills/development-commands.md).
 
+## Format every platform you touched
+
+Run the formatter for each platform your change touched, before the closing checks. All three share a 240 column width and take about a second:
+
+| Platform | Command |
+|---|---|
+| Core | `cd core && just format` |
+| iOS | `cd ios && just format` |
+| Android | `cd android && just format` (`just android format-all` sweeps every file) |
+
+Each is idempotent, so running it when nothing changed costs nothing. Formatting last keeps generated output and hand-written code in one style: `just generate-models` already formats the Rust it writes, so regenerating never fights `just format`.
+
 Except for documentation-only changes, closing a task requires at least one real build or test command for the changed area. Do not substitute `git diff`, static inspection, or reasoning for execution. If execution is blocked by unrelated repo state, include the exact command and the blocking failure in the handoff.
 
 Compiling a gated integration test with `--no-run` proves build compatibility, not live provider behavior. Report deterministic tests, gated live tests, and checks that were compiled but not executed as separate results.
@@ -46,10 +58,11 @@ If a broad suite fails outside the changed path, rerun the narrow affected check
 
 Do not run the closing matrix after every edit. Once the implementation is stable and no more code edits are expected, run the applicable closing checks as one batch:
 
-1. Regenerate models/bindings or localization if the changed inputs require it.
-2. Run the targeted tests that cover the changed behavior.
-3. Build the affected package/module/app according to the closing matrix.
-4. Exercise the changed UI flow when the platform guide requires a simulator, emulator, or device smoke check.
+1. Format every platform the change touched.
+2. Regenerate models/bindings or localization if the changed inputs require it.
+3. Run the targeted tests that cover the changed behavior.
+4. Build the affected package/module/app according to the closing matrix.
+5. Exercise the changed UI flow when the platform guide requires a simulator, emulator, or device smoke check.
 
 If any step modifies source files or forces a compile fix, return to the narrow iteration loop, then run the affected final checks again.
 
