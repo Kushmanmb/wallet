@@ -52,10 +52,6 @@ Host unit tests load the Rust `gemstone` library through JNA from `core/target/d
 ```bash
 cd ../core && cargo build --package gemstone
 ```
-`just test` now checks the library actually loads and stops with the loader's own message if it does not, because JNA reports an unloadable library as `NoClassDefFoundError` in every affected test rather than as a link error.
-
-One such failure is `mis-aligned LINKEDIT string pool` from dyld on macOS 27 with Xcode 27's `ld`. It rejects the linked `libgemstone.dylib` whatever the profile, while a minimal Rust `cdylib` loads, so it comes from one of gemstone's native link inputs rather than from size or debug info. CI is unaffected. Until it is traced, run the affected unit tests in CI and verify locally through builds and Core tests.
-
 If a test still fails on a clean tree with the library present, treat it as environmental: report it with the command and judge only the classes you touched.
 
 ### Connected Tests Crash Before Any Test Runs

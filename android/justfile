@@ -97,20 +97,8 @@ build-test:
 test: build-gemstone-host
     @./gradlew --continue testGoogleDebugUnitTest testDebugUnitTest
 
-# The unit tests reach Core through JNA, which reports an unloadable library as
-# NoClassDefFoundError in every affected test. Say so here instead.
 build-gemstone-host:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd ../core && cargo build --package gemstone
-    library="$PWD/target/debug/libgemstone.dylib"
-    [ "$(uname)" = "Darwin" ] || exit 0
-    if ! error=$(python3 -c "import ctypes,sys; ctypes.CDLL(sys.argv[1])" "$library" 2>&1); then
-        echo "The gemstone host library built but cannot be loaded, so every unit test that reaches Core will fail with NoClassDefFoundError." >&2
-        echo "  $library" >&2
-        echo "$error" | tail -1 >&2
-        exit 1
-    fi
+    @cd ../core && cargo build --package gemstone
 
 test-integration:
     @./gradlew connectedGoogleDebugAndroidTest connectedDebugAndroidTest
