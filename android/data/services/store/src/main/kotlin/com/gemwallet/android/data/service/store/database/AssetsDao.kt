@@ -38,6 +38,7 @@ private const val ASSET_INFO_COLUMNS = """
     asset.is_earn_enabled AS isEarnEnabled,
     asset.earn_apr AS earnApr,
     asset.rank AS assetRank,
+    asset.is_enabled AS isEnabled,
     asset.chain AS chain,
     asset.associations AS associations,
     accounts.address AS address,
@@ -261,6 +262,7 @@ interface AssetsDao {
             OR name LIKE '%' || :query || '%' COLLATE NOCASE
             OR asset_info.id LIKE '%' || :query || '%'
             OR (type = 'NATIVE' AND chain LIKE '%' || :query || '%' COLLATE NOCASE))
+            AND (NOT :enabled OR isEnabled = 1)
             AND (NOT :buyable OR isBuyEnabled = 1)
             AND (NOT :sellable OR isSellEnabled = 1)
             AND (NOT :swappable OR isSwapEnabled = 1)
@@ -276,6 +278,7 @@ interface AssetsDao {
         query: String,
         limit: Int = NO_QUERY_LIMIT,
         exclude: List<String> = emptyList(),
+        enabled: Boolean = false,
         buyable: Boolean = false,
         sellable: Boolean = false,
         swappable: Boolean = false,
@@ -298,6 +301,7 @@ interface AssetsDao {
             AND (walletId = :walletId OR walletId IS NULL)
             AND assetRank >= 0
             AND search.`query` = :query
+            AND (NOT :enabled OR isEnabled = 1)
             AND (NOT :buyable OR isBuyEnabled = 1)
             AND (NOT :sellable OR isSellEnabled = 1)
             AND (NOT :swappable OR isSwapEnabled = 1)
@@ -313,6 +317,7 @@ interface AssetsDao {
         query: String,
         limit: Int = NO_QUERY_LIMIT,
         exclude: List<String> = emptyList(),
+        enabled: Boolean = false,
         buyable: Boolean = false,
         sellable: Boolean = false,
         swappable: Boolean = false,
@@ -360,6 +365,7 @@ interface AssetsDao {
         WHERE
             recent_assets.type IN (:type)
             AND asset.rank >= 0
+            AND (NOT :enabled OR asset.is_enabled = 1)
             AND (NOT :buyable OR asset.is_buy_enabled = 1)
             AND (NOT :swappable OR asset.is_swap_enabled = 1)
             AND (NOT :hasBalance OR EXISTS (
@@ -382,6 +388,7 @@ interface AssetsDao {
     fun getRecentAssetsQuery(
         walletId: String,
         type: List<RecentActivityType>,
+        enabled: Boolean,
         buyable: Boolean,
         swappable: Boolean,
         hasBalance: Boolean,
@@ -400,6 +407,7 @@ interface AssetsDao {
     ): Flow<List<DbRecentAsset>> = getRecentAssetsQuery(
         walletId = walletId,
         type = type,
+        enabled = AssetFilter.Enabled in filters,
         buyable = AssetFilter.Buyable in filters,
         swappable = AssetFilter.Swappable in filters,
         hasBalance = AssetFilter.HasBalance in filters,

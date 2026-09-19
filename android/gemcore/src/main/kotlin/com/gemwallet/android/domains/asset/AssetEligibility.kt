@@ -4,9 +4,9 @@ import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.model.AssetFilter
 import uniffi.gemstone.GemAssetFilter
 
-fun List<GemAssetFilter>.toQueryFilters(): Set<AssetFilter> = mapNotNull { it.queryFilter() }.toSet()
+fun List<GemAssetFilter>.toQueryFilters(): Set<AssetFilter> = map { it.queryFilter() }.toSet()
 
-private fun GemAssetFilter.queryFilter(): AssetFilter? = when (this) {
+private fun GemAssetFilter.queryFilter(): AssetFilter = when (this) {
     GemAssetFilter.Buyable -> AssetFilter.Buyable
     GemAssetFilter.Sellable -> AssetFilter.Sellable
     GemAssetFilter.Swappable -> AssetFilter.Swappable
@@ -14,5 +14,5 @@ private fun GemAssetFilter.queryFilter(): AssetFilter? = when (this) {
     GemAssetFilter.HasAvailableBalance -> AssetFilter.HasAvailableBalance
     is GemAssetFilter.ChainsOrAssetIds -> AssetFilter.ChainsOrAssetIds(chains.map { it.requireChain() }, assetIds)
     is GemAssetFilter.Chains -> AssetFilter.Chains(chains.map { it.requireChain() })
-    GemAssetFilter.Enabled -> null
+    GemAssetFilter.Enabled -> AssetFilter.Enabled
 }

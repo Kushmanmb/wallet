@@ -36,6 +36,7 @@ data class DbAssetInfo(
     val isEarnEnabled: Boolean = false,
     val earnApr: Double? = null,
     val assetRank: Int,
+    val isEnabled: Boolean,
     val associations: List<AssetAssociation>,
     // account
     val address: String?,
@@ -155,7 +156,7 @@ fun DbAssetInfo.toDTO(): AssetInfo? {
             )
         } else null,
         metadata = AssetMetaData(
-            isEnabled = entity.assetRank >= 0,
+            isEnabled = entity.isEnabled,
             isBuyEnabled = entity.isBuyEnabled,
             isSellEnabled = entity.isSellEnabled,
             isSwapEnabled = entity.isSwapEnabled,
