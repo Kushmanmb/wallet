@@ -194,10 +194,7 @@ mod tests {
             vec!["affordable", "too-expensive", "sold-out", "last-one"],
             "an option that pays out nothing the wallet can hold is not a row"
         );
-        assert_eq!(
-            redemptions.iter().map(|redemption| redemption.can_redeem).collect::<Vec<_>>(),
-            vec![true, false, false, true]
-        );
+        assert_eq!(redemptions.iter().map(|redemption| redemption.can_redeem).collect::<Vec<_>>(), vec![true, false, false, true]);
     }
 
     #[test]
@@ -237,9 +234,7 @@ mod tests {
             state.error_notice,
             Some(GemListRow::Notice {
                 title: GemListRowTitle::Error,
-                message: Some(GemLocalizedText::Text {
-                    text: "verification required".to_string()
-                }),
+                message: Some(GemLocalizedText::Text { text: "verification required".to_string() }),
                 kind: GemNoticeKind::Error,
             })
         );

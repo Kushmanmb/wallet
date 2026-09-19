@@ -1,7 +1,5 @@
 use chrono::{DateTime, Utc};
-use primitives::{
-    Asset, AssetLink, AssetMarket, AssetPrice, BlockExplorerLink, ChartDateValue, ChartPeriod, ChartValue, ChartValuePercentage, Currency, PriceAlert, PriceChangeCalculator,
-};
+use primitives::{Asset, AssetLink, AssetMarket, AssetPrice, BlockExplorerLink, ChartDateValue, ChartPeriod, ChartValue, ChartValuePercentage, Currency, PriceAlert, PriceChangeCalculator};
 
 use super::model::{GemChartBounds, GemChartData, GemChartHeader, GemChartSection, GemChartValueType};
 use super::{GemChart, GemChartCurrent};
@@ -23,12 +21,7 @@ const FLAT_LINE_MIN_PADDING: f64 = 0.01;
 pub fn converted_values(prices: Vec<ChartValue>, rate: f64) -> Vec<ChartDateValue> {
     let mut values: Vec<ChartDateValue> = prices
         .into_iter()
-        .filter_map(|price| {
-            DateTime::from_timestamp(price.timestamp as i64, 0).map(|date| ChartDateValue {
-                date,
-                value: price.value as f64 * rate,
-            })
-        })
+        .filter_map(|price| DateTime::from_timestamp(price.timestamp as i64, 0).map(|date| ChartDateValue { date, value: price.value as f64 * rate }))
         .collect();
     values.sort_by_key(|value| value.date);
     values
@@ -55,15 +48,7 @@ fn change_percentage(period: ChartPeriod, base_value: f64, latest: &AssetPrice) 
     }
 }
 
-pub fn chart_sections(
-    asset: &Asset,
-    currency: Currency,
-    price: Option<f64>,
-    market: Option<&AssetMarket>,
-    price_alerts: Vec<PriceAlert>,
-    links: Vec<AssetLink>,
-    contract_explorer: Option<BlockExplorerLink>,
-) -> Vec<GemChartSection> {
+pub fn chart_sections(asset: &Asset, currency: Currency, price: Option<f64>, market: Option<&AssetMarket>, price_alerts: Vec<PriceAlert>, links: Vec<AssetLink>, contract_explorer: Option<BlockExplorerLink>) -> Vec<GemChartSection> {
     let market_sections = [
         market.map(|market| market_section(market, currency.clone())).unwrap_or_default(),
         available_rows([contract_row(asset, contract_explorer)]),
@@ -85,11 +70,7 @@ fn price_alert_section(price: Option<f64>, price_alerts: Vec<PriceAlert>) -> Opt
         return None;
     }
     let count = displayed_price_alert_ids(price_alerts).len() as u32;
-    Some(if count > 0 {
-        GemChartSection::PriceAlerts { count }
-    } else {
-        GemChartSection::SetPriceAlert
-    })
+    Some(if count > 0 { GemChartSection::PriceAlerts { count } } else { GemChartSection::SetPriceAlert })
 }
 
 fn market_section(market: &AssetMarket, currency: Currency) -> Vec<GemListRow> {
@@ -104,9 +85,7 @@ fn market_section(market: &AssetMarket, currency: Currency) -> Vec<GemListRow> {
             },
             None => amount_row(GemListRowTitle::MarketCap, value(market_cap), None),
         }),
-        market
-            .market_cap_fdv
-            .map(|fdv| amount_row(GemListRowTitle::FullyDilutedValuation, value(fdv), Some(GemInfoTopic::FullyDilutedValuation))),
+        market.market_cap_fdv.map(|fdv| amount_row(GemListRowTitle::FullyDilutedValuation, value(fdv), Some(GemInfoTopic::FullyDilutedValuation))),
         market.total_volume.map(|volume| amount_row(GemListRowTitle::TradingVolume, value(volume), None)),
     ])
 }
@@ -123,15 +102,9 @@ fn contract_row(asset: &Asset, explorer: Option<BlockExplorerLink>) -> Option<Ge
 fn supply_section(market: &AssetMarket, symbol: &str) -> Vec<GemListRow> {
     let value = |value: f64| GemFormattedNumber::amount(value, Some(symbol.to_string()), GemValueStyle::Short);
     available_rows([
-        market
-            .circulating_supply
-            .map(|supply| amount_row(GemListRowTitle::CirculatingSupply, value(supply), Some(GemInfoTopic::CirculatingSupply))),
-        market
-            .total_supply
-            .map(|supply| amount_row(GemListRowTitle::TotalSupply, value(supply), Some(GemInfoTopic::TotalSupply))),
-        market
-            .max_supply
-            .map(|supply| amount_row(GemListRowTitle::MaxSupply, value(supply), Some(GemInfoTopic::MaxSupply))),
+        market.circulating_supply.map(|supply| amount_row(GemListRowTitle::CirculatingSupply, value(supply), Some(GemInfoTopic::CirculatingSupply))),
+        market.total_supply.map(|supply| amount_row(GemListRowTitle::TotalSupply, value(supply), Some(GemInfoTopic::TotalSupply))),
+        market.max_supply.map(|supply| amount_row(GemListRowTitle::MaxSupply, value(supply), Some(GemInfoTopic::MaxSupply))),
     ])
 }
 
@@ -185,14 +158,7 @@ pub fn chart_bounds(values: &[ChartDateValue]) -> GemChartBounds {
 pub fn price_chart_data(chart: GemChart, currency: Currency) -> Option<GemChartData> {
     let base = chart.base_value;
     let current = chart.current;
-    let values: Vec<ChartDateValue> = chart
-        .values
-        .into_iter()
-        .chain(current.as_ref().map(|current| ChartDateValue {
-            date: current.date,
-            value: current.value,
-        }))
-        .collect();
+    let values: Vec<ChartDateValue> = chart.values.into_iter().chain(current.as_ref().map(|current| ChartDateValue { date: current.date, value: current.value })).collect();
     if values.len() < MIN_CHART_POINTS {
         return None;
     }
@@ -323,25 +289,13 @@ mod tests {
 
     #[test]
     fn test_change_chart_data_needs_a_series_that_moves() {
-        assert_eq!(
-            change_chart_data(
-                vec![ChartDateValue::mock(1, 5.0), ChartDateValue::mock(2, 5.0), ChartDateValue::mock(3, 5.0)],
-                true,
-                Currency::USD
-            ),
-            None
-        );
+        assert_eq!(change_chart_data(vec![ChartDateValue::mock(1, 5.0), ChartDateValue::mock(2, 5.0), ChartDateValue::mock(3, 5.0)], true, Currency::USD), None);
         assert_eq!(change_chart_data(vec![ChartDateValue::mock(1, 5.0)], true, Currency::USD), None);
     }
 
     #[test]
     fn test_change_chart_data_header_is_the_distance_from_the_first_value() {
-        let data = change_chart_data(
-            vec![ChartDateValue::mock(1, 10.0), ChartDateValue::mock(2, 12.0), ChartDateValue::mock(3, 15.0)],
-            true,
-            Currency::USD,
-        )
-        .expect("data");
+        let data = change_chart_data(vec![ChartDateValue::mock(1, 10.0), ChartDateValue::mock(2, 12.0), ChartDateValue::mock(3, 15.0)], true, Currency::USD).expect("data");
 
         assert_eq!(data.value_type, GemChartValueType::PriceChange);
         assert_eq!(data.base, 10.0);
@@ -377,20 +331,13 @@ mod tests {
         let change = change_chart_data(vec![ChartDateValue::mock(1, 100.0), ChartDateValue::mock(2, 90.0)], true, Currency::USD).expect("data");
         let change_header = change.header.expect("header");
         assert_eq!(change_header.value.tone, GemValueTone::Negative);
-        assert_eq!(
-            change_header.change.expect("change").tone,
-            GemValueTone::Negative,
-            "the parenthesised percentage follows the headline"
-        );
+        assert_eq!(change_header.change.expect("change").tone, GemValueTone::Negative, "the parenthesised percentage follows the headline");
     }
 
     #[test]
     fn test_header_hides_the_percentage_of_a_zero_value() {
         assert_eq!(super::super::candlestick_header(100.0, 0.0).change, None);
-        assert_eq!(
-            super::super::candlestick_header(100.0, 150.0).change,
-            Some(GemFormattedNumber::percentage(50.0, GemPercentageStyle::Signed))
-        );
+        assert_eq!(super::super::candlestick_header(100.0, 150.0).change, Some(GemFormattedNumber::percentage(50.0, GemPercentageStyle::Signed)));
     }
 
     #[test]
@@ -424,10 +371,7 @@ mod tests {
 
     #[test]
     fn test_base_value_is_the_first_non_zero_value() {
-        assert_eq!(
-            base_value(&[ChartDateValue::mock(0, 0.0), ChartDateValue::mock(0, 100.0), ChartDateValue::mock(0, 200.0)]),
-            100.0
-        );
+        assert_eq!(base_value(&[ChartDateValue::mock(0, 0.0), ChartDateValue::mock(0, 100.0), ChartDateValue::mock(0, 200.0)]), 100.0);
         assert_eq!(base_value(&[ChartDateValue::mock(0, 50.0), ChartDateValue::mock(0, 100.0)]), 50.0);
         assert_eq!(base_value(&[ChartDateValue::mock(0, 0.0)]), 0.0);
         assert_eq!(base_value(&[]), 0.0);
@@ -445,10 +389,7 @@ mod tests {
         assert!((flat.y_min - 4.95).abs() < 1e-9 && (flat.y_max - 5.05).abs() < 1e-9, "a flat line pads by one percent");
 
         let zero = chart_bounds(&points(&[0.0, 0.0]));
-        assert!(
-            (zero.y_min + 0.01).abs() < 1e-9 && (zero.y_max - 0.01).abs() < 1e-9,
-            "a flat line at zero keeps a minimum range"
-        );
+        assert!((zero.y_min + 0.01).abs() < 1e-9 && (zero.y_max - 0.01).abs() < 1e-9, "a flat line at zero keeps a minimum range");
 
         let negative = chart_bounds(&points(&[-2.0, -2.0]));
         assert!((negative.y_min + 2.01).abs() < 1e-9 && (negative.y_max + 1.99).abs() < 1e-9);
@@ -507,10 +448,7 @@ mod tests {
                     ]
                 },
                 GemChartSection::Market {
-                    rows: vec![
-                        all_time(GemListRowTitle::AllTimeHigh, ChartValuePercentage::mock()),
-                        all_time(GemListRowTitle::AllTimeLow, ChartValuePercentage::mock_low()),
-                    ]
+                    rows: vec![all_time(GemListRowTitle::AllTimeHigh, ChartValuePercentage::mock()), all_time(GemListRowTitle::AllTimeLow, ChartValuePercentage::mock_low()),]
                 },
                 GemChartSection::Links { links: social_links(links) },
             ]
@@ -529,11 +467,7 @@ mod tests {
                 },
                 GemChartSection::Market {
                     rows: vec![
-                        amount(
-                            GemListRowTitle::CirculatingSupply,
-                            supply(50.0, &Asset::mock().symbol),
-                            Some(GemInfoTopic::CirculatingSupply)
-                        ),
+                        amount(GemListRowTitle::CirculatingSupply, supply(50.0, &Asset::mock().symbol), Some(GemInfoTopic::CirculatingSupply)),
                         amount(GemListRowTitle::MaxSupply, supply(21.0, &Asset::mock().symbol), Some(GemInfoTopic::MaxSupply)),
                     ]
                 },
@@ -567,12 +501,7 @@ mod tests {
     fn test_chart_sections_without_market_keep_contract() {
         let token = Asset::mock_ethereum_usdc();
 
-        assert_eq!(
-            chart_sections(&token, Currency::USD, None, None, vec![], vec![], None),
-            vec![GemChartSection::Market {
-                rows: vec![contract(&token, None)]
-            }]
-        );
+        assert_eq!(chart_sections(&token, Currency::USD, None, None, vec![], vec![], None), vec![GemChartSection::Market { rows: vec![contract(&token, None)] }]);
     }
 
     #[test]

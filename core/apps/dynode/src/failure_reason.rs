@@ -41,10 +41,7 @@ mod tests {
             (ClientError::Timeout, FailureReason::Timeout),
             (ClientError::Http { status: 503, body: Vec::new() }, FailureReason::Status(503)),
             (ClientError::Network("request failed".to_string()), FailureReason::RequestError),
-            (
-                ClientError::Serialization("missing field `result` at line 1 column 2".to_string()),
-                FailureReason::RequestError,
-            ),
+            (ClientError::Serialization("missing field `result` at line 1 column 2".to_string()), FailureReason::RequestError),
         ];
 
         for (error, expected) in cases {

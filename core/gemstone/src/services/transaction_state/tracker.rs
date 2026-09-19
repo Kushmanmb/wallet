@@ -69,14 +69,7 @@ impl Drop for TrackedTransactions<'_> {
     }
 }
 
-pub async fn poll(
-    updater: &dyn GemTransactionUpdater,
-    store: &dyn GemTransactionStateStore,
-    tracking: &Tracking,
-    configuration: JobConfiguration,
-    wallet_id: WalletId,
-    transaction: Transaction,
-) {
+pub async fn poll(updater: &dyn GemTransactionUpdater, store: &dyn GemTransactionStateStore, tracking: &Tracking, configuration: JobConfiguration, wallet_id: WalletId, transaction: Transaction) {
     let Some(tracked) = tracking.start(&transaction.id) else {
         return;
     };
@@ -214,23 +207,13 @@ mod tests {
         let tracking = Tracking::default();
 
         {
-            let mut polling = Box::pin(poll(
-                &updater,
-                &store,
-                &tracking,
-                JobConfiguration::mock(),
-                WalletId::Multicoin("wallet".into()),
-                pending.clone(),
-            ));
+            let mut polling = Box::pin(poll(&updater, &store, &tracking, JobConfiguration::mock(), WalletId::Multicoin("wallet".into()), pending.clone()));
             let waker = futures::task::noop_waker();
             assert!(polling.as_mut().poll(&mut Context::from_waker(&waker)).is_pending());
             assert!(tracking.start(&pending.id).is_none(), "the poll owns the transaction while it runs");
         }
 
-        assert!(
-            tracking.start(&pending.id).is_some(),
-            "a poll dropped at its first sleep must free the transaction, or it is never tracked again"
-        );
+        assert!(tracking.start(&pending.id).is_some(), "a poll dropped at its first sleep must free the transaction, or it is never tracked again");
     }
 
     #[test]

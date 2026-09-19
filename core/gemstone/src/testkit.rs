@@ -40,10 +40,7 @@ impl TestAlienProvider {
 
     pub fn with_json_by_path(status: u16, bodies: &[(&str, &str)]) -> Self {
         Self {
-            by_path: bodies
-                .iter()
-                .map(|(path, body)| ((*path).to_string(), Arc::new(AlienResponse::new(Some(status), body.as_bytes().to_vec()))))
-                .collect(),
+            by_path: bodies.iter().map(|(path, body)| ((*path).to_string(), Arc::new(AlienResponse::new(Some(status), body.as_bytes().to_vec())))).collect(),
             ..Self::with_json(status, "[]")
         }
     }

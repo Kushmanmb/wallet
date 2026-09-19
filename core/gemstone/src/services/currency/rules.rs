@@ -17,10 +17,7 @@ pub fn currencies(current: Currency, locale: Option<Currency>) -> GemCurrencies 
 }
 
 pub(crate) fn row(currency: Currency) -> GemCurrencyRow {
-    GemCurrencyRow {
-        flag: currency.flag().to_string(),
-        currency,
-    }
+    GemCurrencyRow { flag: currency.flag().to_string(), currency }
 }
 
 fn recommended_currencies(current: Currency, locale: Option<Currency>) -> Vec<Currency> {
@@ -50,16 +47,7 @@ mod tests {
     fn test_recommended_currencies_lead_with_the_current_and_locale_currency_once() {
         assert_eq!(
             recommended_currencies(Currency::CHF, Some(Currency::EUR)),
-            vec![
-                Currency::CHF,
-                Currency::EUR,
-                Currency::USD,
-                Currency::GBP,
-                Currency::CNY,
-                Currency::JPY,
-                Currency::INR,
-                Currency::RUB
-            ]
+            vec![Currency::CHF, Currency::EUR, Currency::USD, Currency::GBP, Currency::CNY, Currency::JPY, Currency::INR, Currency::RUB]
         );
         assert_eq!(recommended_currencies(Currency::USD, None), DEFAULT_CURRENCIES.to_vec());
         assert_eq!(recommended_currencies(Currency::USD, Some(Currency::USD)).len(), DEFAULT_CURRENCIES.len());

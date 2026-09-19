@@ -3,9 +3,7 @@ use std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 use primitives::{Asset, AssetBasic, AssetFull, AssetId, Chain, DelegationBase, DelegationValidator, StakeProviderType, Transaction, Wallet, WalletId};
 
-use super::{
-    GemConfirmData, GemConfirmInput, GemConfirmLoad, GemConfirmMetadata, GemConfirmService, GemConfirmSimulationState, GemConfirmTransferService, GemTransactionSigner, SendInput,
-};
+use super::{GemConfirmData, GemConfirmInput, GemConfirmLoad, GemConfirmMetadata, GemConfirmService, GemConfirmSimulationState, GemConfirmTransferService, GemTransactionSigner, SendInput};
 use crate::GemstoneError;
 use crate::api::{GemApiClient, GemDeviceApiClient, GemStaticApiClient};
 use crate::gateway::GemGateway;
@@ -55,24 +53,12 @@ impl ConfirmTestkit {
             ..Default::default()
         });
         let session = Arc::new(GemWalletSessionService::new(selected.clone(), wallets.clone()));
-        let gateway = Arc::new(GemGateway::new(
-            provider.clone(),
-            Arc::new(GemNodeService::mock()),
-            preferences_store,
-            Arc::new(EmptyPreferences),
-        ));
+        let gateway = Arc::new(GemGateway::new(provider.clone(), Arc::new(GemNodeService::mock()), preferences_store, Arc::new(EmptyPreferences)));
         let api = Arc::new(GemApiClient::new(provider.clone()));
         let device_api = Arc::new(GemDeviceApiClient::new(provider.clone(), Arc::new(GemDeviceKeyService::new(Arc::new(EmptyPreferences)))));
         let price = Arc::new(GemPriceService::new(Arc::new(MemoryPriceStore::default())));
         let asset_store = Arc::new(MemoryAssetStore);
-        let assets = Arc::new(GemAssetsService::new(
-            api,
-            gateway.clone(),
-            asset_store.clone(),
-            price.clone(),
-            preferences.clone(),
-            session.clone(),
-        ));
+        let assets = Arc::new(GemAssetsService::new(api, gateway.clone(), asset_store.clone(), price.clone(), preferences.clone(), session.clone()));
         let balances = Arc::new(MemoryBalanceStore::with_balances(
             wallet.id.clone(),
             wallet
@@ -104,14 +90,7 @@ impl ConfirmTestkit {
             session.clone(),
         ));
         let nft = Arc::new(GemNftService::new(device_api.clone(), Arc::new(MemoryNftStore::default()), session.clone()));
-        let transactions = Arc::new(GemTransactionStateService::new(
-            gateway.clone(),
-            Arc::new(MemoryTransactionStateStore::default()),
-            assets.clone(),
-            balance.clone(),
-            stake,
-            nft,
-        ));
+        let transactions = Arc::new(GemTransactionStateService::new(gateway.clone(), Arc::new(MemoryTransactionStateStore::default()), assets.clone(), balance.clone(), stake, nft));
         let confirm = Arc::new(GemConfirmService::new(
             gateway,
             Arc::new(GemSimulationService::new(provider, Arc::new(GemNodeService::mock()))),

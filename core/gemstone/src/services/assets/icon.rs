@@ -30,9 +30,7 @@ pub fn asset_icon(asset_id: &AssetId) -> GemAssetIcon {
     let image = if let Some(token) = local_token {
         GemAssetIconImage::LocalToken { token }
     } else if icon_asset_id.is_native() {
-        GemAssetIconImage::Local {
-            chain: icon_chain(icon_asset_id.chain),
-        }
+        GemAssetIconImage::Local { chain: icon_chain(icon_asset_id.chain) }
     } else {
         GemAssetIconImage::Remote {
             url: GemImage::Asset { asset_id: icon_asset_id }.url(),
@@ -51,11 +49,7 @@ pub fn asset_icon(asset_id: &AssetId) -> GemAssetIcon {
 
 fn icon_asset_id(asset_id: &AssetId) -> AssetId {
     if let Some(coin) = perpetual_coin(asset_id) {
-        return Chain::all()
-            .into_iter()
-            .find(|chain| Asset::from_chain(*chain).symbol == coin)
-            .map(AssetId::from_chain)
-            .unwrap_or_else(|| asset_id.clone());
+        return Chain::all().into_iter().find(|chain| Asset::from_chain(*chain).symbol == coin).map(AssetId::from_chain).unwrap_or_else(|| asset_id.clone());
     }
     if asset_id.is_native() && is_ether_layer2(asset_id.chain) {
         return AssetId::from_chain(Chain::Ethereum);
@@ -145,10 +139,7 @@ mod tests {
     #[test]
     fn test_every_ethereum_layer2_draws_ether_exactly_when_its_native_coin_is_ether() {
         let ether = Asset::from_chain(Chain::Ethereum).symbol;
-        for chain in Chain::all()
-            .into_iter()
-            .filter(|chain| EVMChain::from_chain(*chain).is_some_and(|chain| chain.is_ethereum_layer2()))
-        {
+        for chain in Chain::all().into_iter().filter(|chain| EVMChain::from_chain(*chain).is_some_and(|chain| chain.is_ethereum_layer2())) {
             let icon = asset_icon(&AssetId::from_chain(chain));
             match Asset::from_chain(chain).symbol == ether {
                 true => assert_eq!(
@@ -206,10 +197,7 @@ mod tests {
                 placeholder: Some("SPL".to_string())
             }
         );
-        assert_eq!(
-            asset_icon(&HYPERCORE_PERPETUAL_USDC.id).image,
-            GemAssetIconImage::LocalToken { token: GemLocalTokenIcon::Usdc }
-        );
+        assert_eq!(asset_icon(&HYPERCORE_PERPETUAL_USDC.id).image, GemAssetIconImage::LocalToken { token: GemLocalTokenIcon::Usdc });
         assert_eq!(asset_icon(&TEMPO_BRIDGED_USDC.id).image, GemAssetIconImage::mock_remote(&TEMPO_BRIDGED_USDC.id));
         assert_eq!(asset_icon(&SUI_SBUSDT.id).image, GemAssetIconImage::mock_remote(&SUI_SBUSDT.id));
         assert_eq!(
@@ -222,22 +210,10 @@ mod tests {
     fn test_the_placeholder_names_the_chain_token_standard_not_the_symbol() {
         let placeholder = |asset_id: AssetId| asset_icon(&asset_id).placeholder;
 
-        assert_eq!(
-            placeholder(AssetId::from_token(Chain::Ethereum, "0x6982508145454Ce325dDbE47a25d4ec3d2311933")),
-            Some("ERC20".to_string())
-        );
-        assert_eq!(
-            placeholder(AssetId::from_token(Chain::SmartChain, "0x55d398326f99059fF775485246999027B3197955")),
-            Some("BEP20".to_string())
-        );
-        assert_eq!(
-            placeholder(AssetId::from_token(Chain::Tron, "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t")),
-            Some("TRC20".to_string())
-        );
-        assert_eq!(
-            placeholder(AssetId::from_token(Chain::Solana, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")),
-            Some("SPL".to_string())
-        );
+        assert_eq!(placeholder(AssetId::from_token(Chain::Ethereum, "0x6982508145454Ce325dDbE47a25d4ec3d2311933")), Some("ERC20".to_string()));
+        assert_eq!(placeholder(AssetId::from_token(Chain::SmartChain, "0x55d398326f99059fF775485246999027B3197955")), Some("BEP20".to_string()));
+        assert_eq!(placeholder(AssetId::from_token(Chain::Tron, "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t")), Some("TRC20".to_string()));
+        assert_eq!(placeholder(AssetId::from_token(Chain::Solana, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")), Some("SPL".to_string()));
         assert_eq!(placeholder(AssetId::from_chain(Chain::Bitcoin)), None, "a chain without tokens has no placeholder text");
     }
 

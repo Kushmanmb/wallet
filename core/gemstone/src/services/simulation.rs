@@ -10,12 +10,9 @@ use gem_solana::rpc::{SolanaClient, SolanaProvider};
 use gem_sui::rpc::{SuiClient, SuiProvider};
 use gem_ton::rpc::client::TonClient;
 use gem_tron::rpc::{TronProvider, client::TronClient};
-use gem_wallet_connect::{
-    SignDigestType as WcSignDigestType, WCEthereumTransactionData as WcEthereumTransactionData, WalletConnectTransactionType as WcWalletConnectTransactionType,
-};
+use gem_wallet_connect::{SignDigestType as WcSignDigestType, WCEthereumTransactionData as WcEthereumTransactionData, WalletConnectTransactionType as WcWalletConnectTransactionType};
 use primitives::{
-    AddressName, AssetId, Chain, ChainAddress, EVMChain, SimulationInput, SimulationPayloadField, SimulationPayloadFieldKind, SimulationPayloadFieldType, SimulationResult,
-    SimulationSeverity, SimulationWarning, SimulationWarningType,
+    AddressName, AssetId, Chain, ChainAddress, EVMChain, SimulationInput, SimulationPayloadField, SimulationPayloadFieldKind, SimulationPayloadFieldType, SimulationResult, SimulationSeverity, SimulationWarning, SimulationWarningType,
 };
 
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
@@ -80,14 +77,7 @@ impl GemSimulationService {
     }
 
     pub async fn simulate_transaction(&self, chain: Chain, encoded_transaction: String, signer_address: Option<String>) -> Result<SimulationResult, GemstoneError> {
-        self.simulate_chain_transaction(
-            chain,
-            SimulationInput {
-                encoded_transaction,
-                signer_address,
-            },
-        )
-        .await
+        self.simulate_chain_transaction(chain, SimulationInput { encoded_transaction, signer_address }).await
     }
 }
 
@@ -128,20 +118,13 @@ impl GemSimulationService {
             if calldata.is_empty() {
                 Ok(SimulationResult::default())
             } else {
-                SimulationClient::new(provider)
-                    .simulate_evm_calldata(chain, calldata, &transaction.to)
-                    .await
-                    .map_err(GemstoneError::from)
+                SimulationClient::new(provider).simulate_evm_calldata(chain, calldata, &transaction.to).await.map_err(GemstoneError::from)
             }
         };
         futures::join!(calldata_task, self.simulate_ethereum_balance_changes(provider, transaction))
     }
 
-    async fn simulate_ethereum_balance_changes(
-        &self,
-        provider: &EthereumProvider<AlienClient>,
-        transaction: &WcEthereumTransactionData,
-    ) -> Result<SimulationResult, GemstoneError> {
+    async fn simulate_ethereum_balance_changes(&self, provider: &EthereumProvider<AlienClient>, transaction: &WcEthereumTransactionData) -> Result<SimulationResult, GemstoneError> {
         let encoded_transaction = serde_json::to_string(&map_transaction_object(transaction)).map_err(|error| error.to_string())?;
 
         Ok(provider.simulate_transaction(SimulationInput::new(encoded_transaction)).await?)
@@ -214,10 +197,7 @@ impl GemSimulationFormatter {
         if !shows_header {
             return payload;
         }
-        payload
-            .into_iter()
-            .filter(|field| field.kind != SimulationPayloadFieldKind::Value && field.kind != SimulationPayloadFieldKind::Token)
-            .collect()
+        payload.into_iter().filter(|field| field.kind != SimulationPayloadFieldKind::Value && field.kind != SimulationPayloadFieldKind::Token).collect()
     }
 
     pub fn shows_header(&self, simulation: Option<SimulationResult>, is_approval: bool) -> bool {
@@ -378,9 +358,7 @@ pub fn warning_rows(warnings: &[SimulationWarning]) -> Vec<GemListRow> {
         .iter()
         .filter_map(|warning| {
             let kind = match &warning.warning {
-                SimulationWarningType::TokenApproval(approval) | SimulationWarningType::PermitApproval(approval) => {
-                    approval.value.is_none().then_some(WarningKind::UnlimitedApproval)
-                }
+                SimulationWarningType::TokenApproval(approval) | SimulationWarningType::PermitApproval(approval) => approval.value.is_none().then_some(WarningKind::UnlimitedApproval),
                 SimulationWarningType::PermitBatchApproval(value) => value.is_none().then_some(WarningKind::UnlimitedApproval),
                 SimulationWarningType::NftCollectionApproval(_) => Some(WarningKind::NftCollectionApproval),
                 SimulationWarningType::ExternallyOwnedSpender => Some(WarningKind::ExternallyOwnedSpender),
@@ -389,11 +367,7 @@ pub fn warning_rows(warnings: &[SimulationWarning]) -> Vec<GemListRow> {
             }?;
             Some(GemListRow::Notice {
                 title: kind.title(warning.severity),
-                message: warning
-                    .message
-                    .clone()
-                    .map(|text| GemLocalizedText::Text { text })
-                    .or_else(|| kind.default_message(warning.severity)),
+                message: warning.message.clone().map(|text| GemLocalizedText::Text { text }).or_else(|| kind.default_message(warning.severity)),
                 kind: match warning.severity {
                     SimulationSeverity::Critical => GemNoticeKind::Error,
                     SimulationSeverity::Low | SimulationSeverity::Warning => GemNoticeKind::Warning,
@@ -449,9 +423,7 @@ mod tests {
                 notice(GemListRowTitle::Error, Some(GemLocalizedText::SuspiciousAddress)),
                 GemListRow::Notice {
                     title: GemListRowTitle::Error,
-                    message: Some(GemLocalizedText::Text {
-                        text: "Chain ID mismatch".to_string()
-                    }),
+                    message: Some(GemLocalizedText::Text { text: "Chain ID mismatch".to_string() }),
                     kind: GemNoticeKind::Error,
                 },
             ]
@@ -498,10 +470,7 @@ mod tests {
             ],
             ..SimulationResult::default()
         };
-        let known = ["ethereum", "ethereum_0xdac17f958d2ee523a2206206994597c13d831ec7", "solana"]
-            .into_iter()
-            .map(|id| AssetId::new(id).unwrap())
-            .collect();
+        let known = ["ethereum", "ethereum_0xdac17f958d2ee523a2206206994597c13d831ec7", "solana"].into_iter().map(|id| AssetId::new(id).unwrap()).collect();
 
         let formatter = GemSimulationFormatter::new();
         let changes = formatter.balance_changes(Some(simulation), known);
@@ -542,56 +511,23 @@ mod tests {
     #[test]
     fn test_the_value_and_token_fields_give_way_to_the_header() {
         let payload = vec![
-            SimulationPayloadField::standard(
-                SimulationPayloadFieldKind::Value,
-                "",
-                SimulationPayloadFieldType::Text,
-                SimulationPayloadFieldDisplay::Primary,
-            ),
-            SimulationPayloadField::standard(
-                SimulationPayloadFieldKind::Token,
-                "",
-                SimulationPayloadFieldType::Text,
-                SimulationPayloadFieldDisplay::Primary,
-            ),
-            SimulationPayloadField::standard(
-                SimulationPayloadFieldKind::Spender,
-                "",
-                SimulationPayloadFieldType::Text,
-                SimulationPayloadFieldDisplay::Primary,
-            ),
+            SimulationPayloadField::standard(SimulationPayloadFieldKind::Value, "", SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Primary),
+            SimulationPayloadField::standard(SimulationPayloadFieldKind::Token, "", SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Primary),
+            SimulationPayloadField::standard(SimulationPayloadFieldKind::Spender, "", SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Primary),
         ];
         let formatter = GemSimulationFormatter::new();
 
         assert_eq!(formatter.payload_fields(payload.clone(), false).len(), 3);
-        assert_eq!(
-            formatter.payload_fields(payload, true).into_iter().map(|field| field.kind).collect::<Vec<_>>(),
-            vec![SimulationPayloadFieldKind::Spender]
-        );
+        assert_eq!(formatter.payload_fields(payload, true).into_iter().map(|field| field.kind).collect::<Vec<_>>(), vec![SimulationPayloadFieldKind::Spender]);
     }
 
     #[test]
     fn test_payload_rows_title_by_kind_and_carry_the_short_address_or_the_parsed_timestamp() {
         let address = "0xBA4D1d35bCe0e8F28E5a3403e7a0b996c5d50AC4";
         let fields = vec![
-            SimulationPayloadField::standard(
-                SimulationPayloadFieldKind::Spender,
-                address,
-                SimulationPayloadFieldType::Address,
-                SimulationPayloadFieldDisplay::Primary,
-            ),
-            SimulationPayloadField::standard(
-                SimulationPayloadFieldKind::Expiration,
-                "1662714817",
-                SimulationPayloadFieldType::Timestamp,
-                SimulationPayloadFieldDisplay::Primary,
-            ),
-            SimulationPayloadField::custom(
-                "issuedAt",
-                "2024-01-02T03:04:05.123Z",
-                SimulationPayloadFieldType::Timestamp,
-                SimulationPayloadFieldDisplay::Secondary,
-            ),
+            SimulationPayloadField::standard(SimulationPayloadFieldKind::Spender, address, SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Primary),
+            SimulationPayloadField::standard(SimulationPayloadFieldKind::Expiration, "1662714817", SimulationPayloadFieldType::Timestamp, SimulationPayloadFieldDisplay::Primary),
+            SimulationPayloadField::custom("issuedAt", "2024-01-02T03:04:05.123Z", SimulationPayloadFieldType::Timestamp, SimulationPayloadFieldDisplay::Secondary),
             SimulationPayloadField::custom("statement", "Sign in", SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary),
         ];
         let short = format_address(address, Some(Chain::Ethereum), GemAddressFormatStyle::Short);
@@ -630,18 +566,8 @@ mod tests {
         let other = "0x0000000000000000000000000000000000000001";
         let rows = payload_rows(
             &[
-                SimulationPayloadField::standard(
-                    SimulationPayloadFieldKind::Spender,
-                    address,
-                    SimulationPayloadFieldType::Address,
-                    SimulationPayloadFieldDisplay::Primary,
-                ),
-                SimulationPayloadField::standard(
-                    SimulationPayloadFieldKind::Contract,
-                    other,
-                    SimulationPayloadFieldType::Address,
-                    SimulationPayloadFieldDisplay::Primary,
-                ),
+                SimulationPayloadField::standard(SimulationPayloadFieldKind::Spender, address, SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Primary),
+                SimulationPayloadField::standard(SimulationPayloadFieldKind::Contract, other, SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Primary),
             ],
             Some(Chain::Ethereum),
             &[],
@@ -674,10 +600,7 @@ mod tests {
         );
         assert_eq!(
             address_requests(&named, Chain::Ethereum),
-            vec![
-                ChainAddress::new(Chain::Ethereum, address.to_string()),
-                ChainAddress::new(Chain::Ethereum, other.to_string())
-            ]
+            vec![ChainAddress::new(Chain::Ethereum, address.to_string()), ChainAddress::new(Chain::Ethereum, other.to_string())]
         );
     }
 

@@ -89,17 +89,11 @@ impl AssetId {
     }
 
     pub fn from_token(chain: Chain, token_id: &str) -> AssetId {
-        AssetId {
-            chain,
-            token_id: Some(token_id.to_string()),
-        }
+        AssetId { chain, token_id: Some(token_id.to_string()) }
     }
 
     pub fn token(chain: Chain, token_id: impl Into<String>) -> AssetId {
-        AssetId {
-            chain,
-            token_id: Some(token_id.into()),
-        }
+        AssetId { chain, token_id: Some(token_id.into()) }
     }
 
     pub fn from_chain(chain: Chain) -> AssetId {
@@ -230,10 +224,7 @@ mod tests {
     fn test_mirror_to_native() {
         let value = BigUint::from(5_000_000u64);
 
-        assert_eq!(
-            ARC_USDC_ASSET_ID.clone().mirror_to_native(value.clone()),
-            (AssetId::from_chain(Chain::Arc), BigUint::from(5_000_000_000_000_000_000u64))
-        );
+        assert_eq!(ARC_USDC_ASSET_ID.clone().mirror_to_native(value.clone()), (AssetId::from_chain(Chain::Arc), BigUint::from(5_000_000_000_000_000_000u64)));
         assert_eq!(ARC_EURC_ASSET_ID.clone().mirror_to_native(value.clone()), (ARC_EURC_ASSET_ID.clone(), value.clone()));
         assert_eq!(AssetId::from_chain(Chain::Arc).mirror_to_native(value.clone()), (AssetId::from_chain(Chain::Arc), value));
     }
@@ -261,10 +252,7 @@ mod tests {
     #[test]
     fn test_decode_token_id() {
         assert_eq!(AssetId::decode_token_id("USDC"), vec!["USDC"]);
-        assert_eq!(
-            AssetId::decode_token_id("USDC::0x6d1e7cde53ba9467b783cb7c530ce054::0"),
-            vec!["USDC", "0x6d1e7cde53ba9467b783cb7c530ce054", "0"]
-        );
+        assert_eq!(AssetId::decode_token_id("USDC::0x6d1e7cde53ba9467b783cb7c530ce054::0"), vec!["USDC", "0x6d1e7cde53ba9467b783cb7c530ce054", "0"]);
         assert_eq!(AssetId::decode_token_id("perpetual::BTC"), vec!["perpetual", "BTC"]);
         assert_eq!(AssetId::decode_token_id(""), vec![""]);
     }

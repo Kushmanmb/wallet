@@ -24,12 +24,7 @@ pub struct GemPerpetualDetailsService {
 #[uniffi::export]
 impl GemPerpetualDetailsService {
     #[uniffi::constructor]
-    pub fn new(
-        perpetuals: Arc<GemPerpetualService>,
-        transactions: Arc<GemTransactionsService>,
-        preferences: Arc<GemPreferencesService>,
-        session: Arc<GemWalletSessionService>,
-    ) -> Self {
+    pub fn new(perpetuals: Arc<GemPerpetualService>, transactions: Arc<GemTransactionsService>, preferences: Arc<GemPreferencesService>, session: Arc<GemWalletSessionService>) -> Self {
         Self {
             perpetuals,
             transactions,
@@ -58,13 +53,7 @@ impl GemPerpetualDetailsService {
         rules::modify_buttons()
     }
 
-    pub fn position_action(
-        &self,
-        perpetual: Perpetual,
-        asset: Asset,
-        position: Option<PerpetualPosition>,
-        kind: GemPerpetualPositionKind,
-    ) -> Result<GemPerpetualPositionAction, GemServiceError> {
+    pub fn position_action(&self, perpetual: Perpetual, asset: Asset, position: Option<PerpetualPosition>, kind: GemPerpetualPositionKind) -> Result<GemPerpetualPositionAction, GemServiceError> {
         rules::position_action(&perpetual, &asset, position, kind)
     }
 
@@ -88,9 +77,7 @@ impl GemPerpetualDetailsService {
     }
 
     pub fn market_subscription(&self, perpetual: Perpetual) -> GemPerpetualSubscription {
-        GemPerpetualSubscription::MarketData {
-            symbol: rules::symbol(&perpetual),
-        }
+        GemPerpetualSubscription::MarketData { symbol: rules::symbol(&perpetual) }
     }
 
     pub async fn candlesticks(&self, perpetual: Perpetual, period: ChartPeriod) -> Result<Vec<GemChartCandleStick>, GemServiceError> {

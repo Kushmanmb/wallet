@@ -110,13 +110,10 @@ mod tests {
         assert_eq!(names[0].status, VerificationStatus::Verified);
         assert_eq!(names[0].image_url.as_deref(), Some("image"));
 
-        let stale: Vec<String> = stale_addresses(
-            vec![ContactAddress::mock("a"), ContactAddress::mock("b")],
-            &[ContactAddress::mock("a"), ContactAddress::mock("c")],
-        )
-        .into_iter()
-        .map(|address| address.id)
-        .collect();
+        let stale: Vec<String> = stale_addresses(vec![ContactAddress::mock("a"), ContactAddress::mock("b")], &[ContactAddress::mock("a"), ContactAddress::mock("c")])
+            .into_iter()
+            .map(|address| address.id)
+            .collect();
         assert_eq!(stale, vec!["b".to_string()]);
     }
 
@@ -127,10 +124,7 @@ mod tests {
         assert_eq!(address.id, "contact_ethereum_0xabc");
         assert_eq!(address.contact_id, "contact");
         assert_eq!(address.memo, None);
-        assert_eq!(
-            contact_address("contact".into(), Chain::Ethereum, "0xabc".into(), Some(" note ".into())).memo.as_deref(),
-            Some("note")
-        );
+        assert_eq!(contact_address("contact".into(), Chain::Ethereum, "0xabc".into(), Some(" note ".into())).memo.as_deref(), Some("note"));
     }
 
     #[test]
@@ -149,13 +143,7 @@ mod tests {
         );
         let blank = PaymentRequest { address: "  ".into(), ..payment };
         assert_eq!(scanned_address(" raw ", Some(&blank)).address, "raw");
-        assert_eq!(
-            scanned_address(" raw ", None),
-            GemContactScannedAddress {
-                address: "raw".into(),
-                memo: None
-            }
-        );
+        assert_eq!(scanned_address(" raw ", None), GemContactScannedAddress { address: "raw".into(), memo: None });
     }
 
     #[test]
@@ -201,13 +189,7 @@ mod tests {
 
     #[test]
     fn test_a_contact_address_offers_a_memo_only_where_the_chain_carries_one() {
-        assert_eq!(
-            contact_address_fields(Chain::Ethereum),
-            vec![GemContactAddressField::Network, GemContactAddressField::Address]
-        );
-        assert_eq!(
-            contact_address_fields(Chain::Cosmos),
-            vec![GemContactAddressField::Network, GemContactAddressField::Address, GemContactAddressField::Memo]
-        );
+        assert_eq!(contact_address_fields(Chain::Ethereum), vec![GemContactAddressField::Network, GemContactAddressField::Address]);
+        assert_eq!(contact_address_fields(Chain::Cosmos), vec![GemContactAddressField::Network, GemContactAddressField::Address, GemContactAddressField::Memo]);
     }
 }

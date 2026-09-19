@@ -3,10 +3,7 @@ use crate::models::custom_types::GemBigUint;
 use crate::models::list::GemListRow;
 use crate::services::swap::model::GemSwapRate;
 use chrono::{DateTime, Utc};
-use primitives::{
-    AddressName, Asset, AssetId, AssetPrice, Chain, NFTAssetId, PerpetualDirection, Resource, TransactionDirection, TransactionExtended, TransactionId, TransactionState,
-    TransactionType,
-};
+use primitives::{AddressName, Asset, AssetId, AssetPrice, Chain, NFTAssetId, PerpetualDirection, Resource, TransactionDirection, TransactionExtended, TransactionId, TransactionState, TransactionType};
 
 use super::rules;
 use primitives::BlockExplorerLink;
@@ -332,10 +329,7 @@ pub enum GemSwapProgressMarker {
 
 impl GemSwapProgressStep {
     pub fn state(self) -> GemSwapProgressState {
-        GemSwapProgressState {
-            step: self,
-            marker: self.marker(),
-        }
+        GemSwapProgressState { step: self, marker: self.marker() }
     }
 
     fn marker(self) -> GemSwapProgressMarker {

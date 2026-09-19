@@ -4,11 +4,7 @@ use crate::models::account::TronAccount;
 
 pub fn map_address_status(account: &TronAccount) -> Vec<AddressStatus> {
     let address = account.address.as_deref().unwrap_or_default();
-    let Some((threshold, keys)) = account
-        .owner_permission
-        .as_ref()
-        .and_then(|permission| Some((permission.threshold.unwrap_or(1), permission.keys.as_ref()?)))
-    else {
+    let Some((threshold, keys)) = account.owner_permission.as_ref().and_then(|permission| Some((permission.threshold.unwrap_or(1), permission.keys.as_ref()?))) else {
         return vec![];
     };
     let own_weight: u64 = keys.iter().filter(|key| key.address == address).map(|key| key.weight).sum();

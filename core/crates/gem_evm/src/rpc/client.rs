@@ -53,13 +53,7 @@ impl<C: Client + Clone> EthereumClient<C> {
     pub async fn eth_call(&self, contract_address: &str, call_data: &[u8]) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
         let to_address = Address::from_str(contract_address)?;
         let transaction = TransactionObject::new_call(&to_address.to_string(), call_data.to_vec());
-        let result: String = self
-            .client
-            .request(EthereumRpc::Call {
-                transaction,
-                block: BlockParameter::Latest,
-            })
-            .await?;
+        let result: String = self.client.request(EthereumRpc::Call { transaction, block: BlockParameter::Latest }).await?;
         Ok(hex::decode(result)?)
     }
 

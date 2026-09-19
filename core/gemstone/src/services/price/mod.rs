@@ -192,24 +192,9 @@ mod tests {
     fn test_only_moved_rates_are_saved() {
         let store = MemoryPriceStore::default();
 
-        futures::executor::block_on(update_rates(
-            &store,
-            vec![FiatRate { symbol: Currency::EUR, rate: 0.9 }, FiatRate { symbol: Currency::GBP, rate: 0.8 }],
-            Currency::EUR,
-        ))
-        .unwrap();
-        futures::executor::block_on(update_rates(
-            &store,
-            vec![FiatRate { symbol: Currency::EUR, rate: 0.9 }, FiatRate { symbol: Currency::GBP, rate: 0.8 }],
-            Currency::EUR,
-        ))
-        .unwrap();
-        futures::executor::block_on(update_rates(
-            &store,
-            vec![FiatRate { symbol: Currency::EUR, rate: 0.9 }, FiatRate { symbol: Currency::GBP, rate: 0.7 }],
-            Currency::EUR,
-        ))
-        .unwrap();
+        futures::executor::block_on(update_rates(&store, vec![FiatRate { symbol: Currency::EUR, rate: 0.9 }, FiatRate { symbol: Currency::GBP, rate: 0.8 }], Currency::EUR)).unwrap();
+        futures::executor::block_on(update_rates(&store, vec![FiatRate { symbol: Currency::EUR, rate: 0.9 }, FiatRate { symbol: Currency::GBP, rate: 0.8 }], Currency::EUR)).unwrap();
+        futures::executor::block_on(update_rates(&store, vec![FiatRate { symbol: Currency::EUR, rate: 0.9 }, FiatRate { symbol: Currency::GBP, rate: 0.7 }], Currency::EUR)).unwrap();
 
         assert_eq!(
             *store.rate_writes.lock().unwrap(),

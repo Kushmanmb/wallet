@@ -36,14 +36,7 @@ impl GemChainSettingsService {
 
     pub fn explorer_rows(&self, chain: Chain) -> Vec<GemExplorerRow> {
         let selected = self.explorer.get_explorer_name(chain);
-        self.explorer
-            .get_explorers(chain)
-            .into_iter()
-            .map(|name| GemExplorerRow {
-                is_selected: name == selected,
-                name,
-            })
-            .collect()
+        self.explorer.get_explorers(chain).into_iter().map(|name| GemExplorerRow { is_selected: name == selected, name }).collect()
     }
 
     pub fn node_rows(&self, chain: Chain, nodes: Vec<GemNodeSelection>, statuses: HashMap<String, GemNodeStatusState>) -> Vec<GemNodeRow> {
@@ -126,12 +119,7 @@ mod tests {
 
         let other = names.last().unwrap().clone();
         service.set_explorer_name(Chain::Ethereum, other.clone()).unwrap();
-        let selected: Vec<String> = service
-            .explorer_rows(Chain::Ethereum)
-            .into_iter()
-            .filter(|row| row.is_selected)
-            .map(|row| row.name)
-            .collect();
+        let selected: Vec<String> = service.explorer_rows(Chain::Ethereum).into_iter().filter(|row| row.is_selected).map(|row| row.name).collect();
 
         assert_eq!(selected, vec![other]);
     }

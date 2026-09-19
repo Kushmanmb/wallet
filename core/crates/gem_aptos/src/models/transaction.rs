@@ -1,7 +1,4 @@
-use crate::{
-    FEE_PAYER_SIGNATURE_TYPE, FUNGIBLE_ASSET_DEPOSIT_EVENT, FUNGIBLE_ASSET_WITHDRAW_EVENT, NO_ACCOUNT_SIGNATURE_TYPE, SIMULATION_FEE_PAYER_ADDRESS, STAKE_DEPOSIT_EVENT,
-    STAKE_WITHDRAW_EVENT,
-};
+use crate::{FEE_PAYER_SIGNATURE_TYPE, FUNGIBLE_ASSET_DEPOSIT_EVENT, FUNGIBLE_ASSET_WITHDRAW_EVENT, NO_ACCOUNT_SIGNATURE_TYPE, SIMULATION_FEE_PAYER_ADDRESS, STAKE_DEPOSIT_EVENT, STAKE_WITHDRAW_EVENT};
 use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
 use serde_serializers::{deserialize_biguint_from_str, deserialize_option_biguint_from_str, deserialize_option_u64_from_str, deserialize_u64_from_str};

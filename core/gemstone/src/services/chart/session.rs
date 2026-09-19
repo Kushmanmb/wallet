@@ -122,8 +122,7 @@ mod tests {
 
     #[test]
     fn test_selecting_the_same_period_keeps_the_chart_it_already_loaded() {
-        let loaded =
-            GemChartSession::new(ChartPeriod::Day, Currency::USD).on_loaded(GemChart::mock(vec![ChartDateValue::mock(0, 0.0), ChartDateValue::mock(1, 1.0)]), ChartPeriod::Day);
+        let loaded = GemChartSession::new(ChartPeriod::Day, Currency::USD).on_loaded(GemChart::mock(vec![ChartDateValue::mock(0, 0.0), ChartDateValue::mock(1, 1.0)]), ChartPeriod::Day);
 
         assert_eq!(loaded.on_select_period(ChartPeriod::Day), loaded, "reselecting a period is not a reload");
         assert_eq!(loaded.on_select_period(ChartPeriod::Week).view_state().phase, GemChartPhase::Loading);
@@ -138,10 +137,7 @@ mod tests {
 
         assert!(state.is_refreshing);
         assert!(matches!(state.phase, GemChartPhase::Data { .. }), "the chart stays on screen while it refreshes");
-        assert_eq!(
-            GemChartSession::new(ChartPeriod::Day, Currency::USD).on_refresh().view_state().phase,
-            GemChartPhase::Loading
-        );
+        assert_eq!(GemChartSession::new(ChartPeriod::Day, Currency::USD).on_refresh().view_state().phase, GemChartPhase::Loading);
     }
 
     #[test]
@@ -167,10 +163,6 @@ mod tests {
             GemChartPhase::Loading,
             "a chart for the period the user left behind never reaches the screen"
         );
-        assert_eq!(
-            selected_week.on_failed(error, ChartPeriod::Day).view_state().phase,
-            GemChartPhase::Loading,
-            "neither does its failure"
-        );
+        assert_eq!(selected_week.on_failed(error, ChartPeriod::Day).view_state().phase, GemChartPhase::Loading, "neither does its failure");
     }
 }

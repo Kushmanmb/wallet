@@ -188,18 +188,12 @@ mod tests {
     use super::*;
     #[test]
     fn test_solana_error_mapping() {
-        assert_eq!(
-            SwapperError::from(gem_solana::SolanaError::InvalidMessage),
-            SwapperError::ComputeQuoteError("Solana error: Invalid message".to_string())
-        );
+        assert_eq!(SwapperError::from(gem_solana::SolanaError::InvalidMessage), SwapperError::ComputeQuoteError("Solana error: Invalid message".to_string()));
     }
 
     #[test]
     fn test_an_offline_request_stays_offline() {
         assert_eq!(SwapperError::from(AlienError::Offline), SwapperError::Offline);
-        assert_eq!(
-            SwapperError::from(AlienError::request_error("timeout")),
-            SwapperError::ComputeQuoteError("timeout".to_string())
-        );
+        assert_eq!(SwapperError::from(AlienError::request_error("timeout")), SwapperError::ComputeQuoteError("timeout".to_string()));
     }
 }

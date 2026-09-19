@@ -14,10 +14,7 @@ pub struct SolanaProvider<C: Client + Clone> {
 
 impl<C: Client + Clone> SolanaProvider<C> {
     pub fn new(client: SolanaClient<C>, transactions_by_address_provider: Box<dyn ChainTransactions>) -> Self {
-        Self {
-            client,
-            transactions_by_address_provider,
-        }
+        Self { client, transactions_by_address_provider }
     }
 
     pub fn new_rpc_only(client: SolanaClient<C>) -> Self {

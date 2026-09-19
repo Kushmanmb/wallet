@@ -48,10 +48,7 @@ pub fn node_selections(nodes: Vec<Node>, selected_url: &str) -> Vec<GemNodeSelec
 }
 
 fn node_host(url: &str) -> String {
-    Url::parse(url)
-        .ok()
-        .and_then(|parsed| parsed.host_str().map(str::to_string))
-        .unwrap_or_else(|| url.to_string())
+    Url::parse(url).ok().and_then(|parsed| parsed.host_str().map(str::to_string)).unwrap_or_else(|| url.to_string())
 }
 
 pub fn chain_node(chain: Chain, selected_url: Option<String>, stored_nodes: Vec<Node>) -> Node {
@@ -61,11 +58,7 @@ pub fn chain_node(chain: Chain, selected_url: Option<String>, stored_nodes: Vec<
 pub fn preferred_chain_node(chain: Chain, selected_url: Option<String>) -> Node {
     let nodes = default_nodes(chain);
     match selected_url {
-        Some(url) => nodes.into_iter().find(|node| node.url == url).unwrap_or(Node {
-            url,
-            status: NodeState::Active,
-            priority: 0,
-        }),
+        Some(url) => nodes.into_iter().find(|node| node.url == url).unwrap_or(Node { url, status: NodeState::Active, priority: 0 }),
         None => region_node(chain, NodeRegion::Us),
     }
 }
@@ -142,11 +135,7 @@ pub fn node_status_state(status: Option<NodeStatus>) -> GemNodeStatusState {
 
 pub fn visible_statuses(nodes: &[GemNodeSelection], statuses: &HashMap<String, GemNodeStatusState>) -> HashMap<String, GemNodeStatusState> {
     let urls: HashSet<&str> = nodes.iter().map(|node| node.url.as_str()).collect();
-    statuses
-        .iter()
-        .filter(|(url, _)| urls.contains(url.as_str()))
-        .map(|(url, state)| (url.clone(), state.clone()))
-        .collect()
+    statuses.iter().filter(|(url, _)| urls.contains(url.as_str())).map(|(url, state)| (url.clone(), state.clone())).collect()
 }
 
 #[cfg(test)]
@@ -218,12 +207,7 @@ mod tests {
             ..plain.clone()
         };
         assert_eq!(plain.title(), GemNodeRowTitle::Host { host: "rpc.example.com".into() });
-        assert_eq!(
-            gem.title(),
-            GemNodeRowTitle::GemNode {
-                flag: "\u{1f1fa}\u{1f1f8}".into()
-            }
-        );
+        assert_eq!(gem.title(), GemNodeRowTitle::GemNode { flag: "\u{1f1fa}\u{1f1f8}".into() });
     }
 
     #[test]
@@ -239,10 +223,7 @@ mod tests {
         let selections = node_selections(nodes, "https://rpc.example.com/two");
         let selected = selections.iter().filter(|selection| selection.is_selected).map(|selection| selection.url.as_str());
 
-        assert_eq!(
-            selections.iter().map(|selection| selection.host.as_str()).collect::<Vec<_>>(),
-            vec!["rpc.example.com", "rpc.example.com"]
-        );
+        assert_eq!(selections.iter().map(|selection| selection.host.as_str()).collect::<Vec<_>>(), vec!["rpc.example.com", "rpc.example.com"]);
         assert_eq!(selected.collect::<Vec<_>>(), vec!["https://rpc.example.com/two"]);
     }
 
@@ -251,10 +232,7 @@ mod tests {
         let chain = Chain::Ethereum;
 
         assert_eq!(chain_node(chain, None, vec![]).url, NodeRegion::Us.url(chain));
-        assert_eq!(
-            chain_node(chain, Some("https://custom".to_string()), vec![Node::mock("https://custom", 1)]).url,
-            "https://custom"
-        );
+        assert_eq!(chain_node(chain, Some("https://custom".to_string()), vec![Node::mock("https://custom", 1)]).url, "https://custom");
         assert!(default_nodes(chain).iter().any(|node| node.url == NodeRegion::Eu.url(chain)));
     }
 
@@ -269,12 +247,7 @@ mod tests {
 
     #[test]
     fn test_config_node_maps_priority_to_state() {
-        let config = |priority: NodePriority| {
-            config_node(node_config::Node {
-                url: "https://n".to_string(),
-                priority,
-            })
-        };
+        let config = |priority: NodePriority| config_node(node_config::Node { url: "https://n".to_string(), priority });
 
         assert_eq!((config(NodePriority::High).status, config(NodePriority::High).priority), (NodeState::Active, 3));
         assert_eq!((config(NodePriority::Low).status, config(NodePriority::Low).priority), (NodeState::Active, 1));
@@ -290,10 +263,7 @@ mod tests {
         assert!(can_delete_node(Chain::Ethereum, &added.url));
 
         let sorted = sorted_nodes(Chain::Ethereum, vec![added.clone(), Node::mock(&default_url, 3)]);
-        assert_eq!(
-            sorted.iter().map(|node| node.url.as_str()).collect::<Vec<_>>(),
-            vec![default_url.as_str(), added.url.as_str()]
-        );
+        assert_eq!(sorted.iter().map(|node| node.url.as_str()).collect::<Vec<_>>(), vec![default_url.as_str(), added.url.as_str()]);
     }
 
     #[test]
@@ -302,10 +272,7 @@ mod tests {
             latest_block_number: 21_000_000,
             latency_ms: 120,
         };
-        let stalled = NodeStatus {
-            latest_block_number: 0,
-            latency_ms: 5,
-        };
+        let stalled = NodeStatus { latest_block_number: 0, latency_ms: 5 };
 
         assert_eq!(
             node_status_state(Some(reachable)),

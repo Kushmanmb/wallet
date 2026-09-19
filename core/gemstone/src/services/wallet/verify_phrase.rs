@@ -25,10 +25,7 @@ pub struct GemVerifyPhraseViewState {
 
 impl fmt::Debug for GemVerifyPhraseSession {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("GemVerifyPhraseSession")
-            .field("word_count", &self.words.len())
-            .field("picked", &self.picked)
-            .finish()
+        f.debug_struct("GemVerifyPhraseSession").field("word_count", &self.words.len()).field("picked", &self.picked).finish()
     }
 }
 
@@ -80,12 +77,7 @@ impl GemVerifyPhraseSession {
     pub fn view_state(&self) -> GemVerifyPhraseViewState {
         let verified_count = self.picked.len();
         GemVerifyPhraseViewState {
-            verified: self
-                .words
-                .iter()
-                .enumerate()
-                .map(|(index, word)| if index < verified_count { word.clone() } else { String::new() })
-                .collect(),
+            verified: self.words.iter().enumerate().map(|(index, word)| if index < verified_count { word.clone() } else { String::new() }).collect(),
             choices: self
                 .choices
                 .iter()

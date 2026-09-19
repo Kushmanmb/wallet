@@ -72,12 +72,7 @@ impl DiscoveryTestkit {
             }),
             wallets.clone(),
         ));
-        let gateway = Arc::new(GemGateway::new(
-            provider.clone(),
-            Arc::new(GemNodeService::mock()),
-            preferences_store,
-            Arc::new(EmptyPreferences),
-        ));
+        let gateway = Arc::new(GemGateway::new(provider.clone(), Arc::new(GemNodeService::mock()), preferences_store, Arc::new(EmptyPreferences)));
         let device_api = Arc::new(GemDeviceApiClient::new(provider.clone(), Arc::new(GemDeviceKeyService::new(Arc::new(EmptyPreferences)))));
         let asset_store = Arc::new(MemoryAssetStore::default());
         let assets: Arc<GemAssetsService> = Arc::new(GemAssetsService::new(
@@ -108,14 +103,7 @@ impl DiscoveryTestkit {
             Arc::new(RecordingTransactionStatus::default()),
         ));
         let nft = Arc::new(GemNftService::new(device_api.clone(), Arc::new(MemoryNftStore::default()), session.clone()));
-        let discovery = Arc::new(GemAssetDiscoveryService::new(
-            device_api.clone(),
-            balance.clone(),
-            transactions.clone(),
-            nft,
-            wallets.clone(),
-            wallet_preferences.clone(),
-        ));
+        let discovery = Arc::new(GemAssetDiscoveryService::new(device_api.clone(), balance.clone(), transactions.clone(), nft, wallets.clone(), wallet_preferences.clone()));
         Self {
             discovery,
             assets,

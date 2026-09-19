@@ -17,8 +17,8 @@ use primitives::{Asset, AssetBasic, AssetFull, AssetId, AssetPrice, Chain, Confi
 pub use add::GemAddAssetService;
 pub use details::GemAssetDetailsService;
 pub use model::{
-    AssetList, GemAssetAction, GemAssetDetails, GemAssetDetailsInput, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetNetworkDestination, GemHeaderButton,
-    GemHeaderButtonKind, GemSelectAssetFlow, GemSelectAssetType, GemSelectRowAction, GemWalletSearchLimits,
+    AssetList, GemAssetAction, GemAssetDetails, GemAssetDetailsInput, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetNetworkDestination, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow, GemSelectAssetType,
+    GemSelectRowAction, GemWalletSearchLimits,
 };
 pub use selection::GemAssetSelectionService;
 pub use store::GemAssetStore;
@@ -42,14 +42,7 @@ pub struct GemAssetsService {
 #[uniffi::export]
 impl GemAssetsService {
     #[uniffi::constructor]
-    pub fn new(
-        api: Arc<GemApiClient>,
-        gateway: Arc<GemGateway>,
-        store: Arc<dyn GemAssetStore>,
-        price: Arc<GemPriceService>,
-        preferences: Arc<GemPreferencesService>,
-        session: Arc<GemWalletSessionService>,
-    ) -> Self {
+    pub fn new(api: Arc<GemApiClient>, gateway: Arc<GemGateway>, store: Arc<dyn GemAssetStore>, price: Arc<GemPriceService>, preferences: Arc<GemPreferencesService>, session: Arc<GemWalletSessionService>) -> Self {
         Self {
             api,
             gateway,
@@ -65,9 +58,7 @@ impl GemAssetsService {
             return Ok(asset);
         }
         self.sync_missing_assets(vec![asset_id.clone()]).await?;
-        self.stored_asset(&asset_id).await?.ok_or_else(|| GemServiceError::NotFound {
-            msg: format!("asset not found: {asset_id}"),
-        })
+        self.stored_asset(&asset_id).await?.ok_or_else(|| GemServiceError::NotFound { msg: format!("asset not found: {asset_id}") })
     }
 
     pub async fn ensure_token_asset(&self, asset_id: AssetId) -> Result<Asset, GemServiceError> {
@@ -122,10 +113,7 @@ impl GemAssetsService {
         let currency = self.preferences.get_currency();
         let asset = self.get_asset(asset_id.clone()).await?;
         self.store.save_asset(asset.clone()).await?;
-        let price = asset
-            .price
-            .as_ref()
-            .map(|price| AssetPrice::new(asset_id.clone(), price.price, price.price_change_percentage_24h, price.updated_at));
+        let price = asset.price.as_ref().map(|price| AssetPrice::new(asset_id.clone(), price.price, price.price_change_percentage_24h, price.updated_at));
         self.price.update_asset_price(asset_id.clone(), price, currency.clone()).await?;
         if let Some(market) = asset.market.clone() {
             self.price.update_market(asset_id, market, currency).await?;
@@ -169,9 +157,7 @@ impl GemAssetsService {
 
     async fn node_token_asset(&self, asset_id: AssetId) -> Result<Asset, GemServiceError> {
         let Some(token_id) = asset_id.token_id.clone() else {
-            return Err(GemServiceError::NotFound {
-                msg: format!("asset not found: {asset_id}"),
-            });
+            return Err(GemServiceError::NotFound { msg: format!("asset not found: {asset_id}") });
         };
         let asset = self.gateway.get_token_data(asset_id.chain, token_id).await?;
         self.store.save_assets(vec![rules::default_asset_basic(asset.clone())]).await?;
@@ -217,12 +203,7 @@ impl GemAssetsService {
     }
 
     pub async fn sync_availability(&self, versions: ConfigVersions) -> Result<(), GemServiceError> {
-        let results = futures::future::join_all(
-            rules::asset_list_versions(&versions)
-                .into_iter()
-                .map(|(list, remote_version)| self.sync_availability_list(list, remote_version)),
-        )
-        .await;
+        let results = futures::future::join_all(rules::asset_list_versions(&versions).into_iter().map(|(list, remote_version)| self.sync_availability_list(list, remote_version))).await;
         for result in results {
             result?;
         }
@@ -340,19 +321,13 @@ mod tests {
             let store = Arc::new(MemoryAssetStore::default());
             let service = GemAssetsService::mock(provider.clone(), store.clone());
 
-            let ids = service
-                .sync_missing_assets(vec![ETHEREUM_USDT_ASSET_ID.clone(), ETHEREUM_USDT_ASSET_ID.clone()])
-                .await
-                .unwrap();
+            let ids = service.sync_missing_assets(vec![ETHEREUM_USDT_ASSET_ID.clone(), ETHEREUM_USDT_ASSET_ID.clone()]).await.unwrap();
 
             assert_eq!(ids, vec![ETHEREUM_USDT_ASSET_ID.clone()], "a duplicated request is asked for and returned once");
             let saved = store.assets.lock().unwrap().clone();
             assert_eq!(saved.len(), 1);
             assert_eq!(saved[0].score.rank, 34, "the saved batch keeps the backend metadata");
-            assert!(
-                service.sync_missing_assets(vec![ETHEREUM_USDT_ASSET_ID.clone()]).await.unwrap().is_empty(),
-                "a stored asset is no longer missing"
-            );
+            assert!(service.sync_missing_assets(vec![ETHEREUM_USDT_ASSET_ID.clone()]).await.unwrap().is_empty(), "a stored asset is no longer missing");
         });
     }
 
@@ -388,10 +363,7 @@ mod tests {
 
             assert!(result.is_err());
             assert!(store.assets.lock().unwrap().is_empty());
-            assert_eq!(
-                provider.requested_paths(),
-                vec!["/v1/assets".to_string(), crate::services::node::rules::preferred_chain_node(Chain::Ethereum, None).url]
-            );
+            assert_eq!(provider.requested_paths(), vec!["/v1/assets".to_string(), crate::services::node::rules::preferred_chain_node(Chain::Ethereum, None).url]);
         });
     }
 }

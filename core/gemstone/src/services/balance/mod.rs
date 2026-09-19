@@ -10,10 +10,7 @@ use std::sync::Arc;
 use futures::future::join_all;
 use primitives::{Asset, AssetBalance, AssetId, Wallet, WalletId};
 
-pub use model::{
-    GemAssetBalance, GemAssetBalanceRow, GemBalanceRecord, GemBalanceRequirement, GemBalanceResource, GemBalanceRow, GemBalanceRowValue, GemBalanceUpdate, GemBalanceUpdateType,
-    GemBalanceValue,
-};
+pub use model::{GemAssetBalance, GemAssetBalanceRow, GemBalanceRecord, GemBalanceRequirement, GemBalanceResource, GemBalanceRow, GemBalanceRowValue, GemBalanceUpdate, GemBalanceUpdateType, GemBalanceValue};
 pub use store::GemBalanceStore;
 
 use crate::gateway::GemGateway;
@@ -35,14 +32,7 @@ pub struct GemBalanceService {
 #[uniffi::export]
 impl GemBalanceService {
     #[uniffi::constructor]
-    pub fn new(
-        gateway: Arc<GemGateway>,
-        wallet_store: Arc<dyn GemWalletStore>,
-        asset_store: Arc<dyn GemAssetStore>,
-        store: Arc<dyn GemBalanceStore>,
-        assets: Arc<GemAssetsService>,
-        stream: Arc<GemStreamSubscriptionService>,
-    ) -> Self {
+    pub fn new(gateway: Arc<GemGateway>, wallet_store: Arc<dyn GemWalletStore>, asset_store: Arc<dyn GemAssetStore>, store: Arc<dyn GemBalanceStore>, assets: Arc<GemAssetsService>, stream: Arc<GemStreamSubscriptionService>) -> Self {
         Self {
             gateway,
             wallet_store,
@@ -87,12 +77,7 @@ impl GemBalanceService {
     }
 
     pub async fn update(&self, wallet_id: WalletId, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
-        let Some(wallet) = self
-            .wallet_store
-            .get_wallet(wallet_id.clone())
-            .await
-            .map_err(|error| GemServiceError::Store { msg: error.to_string() })?
-        else {
+        let Some(wallet) = self.wallet_store.get_wallet(wallet_id.clone()).await.map_err(|error| GemServiceError::Store { msg: error.to_string() })? else {
             return Ok(());
         };
         let requests = rules::balance_requests(&wallet.accounts, &asset_ids);
@@ -156,9 +141,7 @@ impl GemBalanceService {
         let asset_ids: Vec<AssetId> = rules::unique_asset_ids(updates.iter().map(|update| update.asset_id.clone()).collect());
         let stored = self.store.get_available_balances(wallet_id.clone(), asset_ids.clone()).await?;
         let stored_ids: Vec<AssetId> = stored.iter().map(|balance| balance.asset_id.clone()).collect();
-        self.assets
-            .add_missing_balances(wallet_id.clone(), rules::missing_asset_ids(&asset_ids, &stored_ids))
-            .await?;
+        self.assets.add_missing_balances(wallet_id.clone(), rules::missing_asset_ids(&asset_ids, &stored_ids)).await?;
         let records = rules::balance_records(rules::changed_balances(stored, updates), assets);
         if records.is_empty() {
             return Ok(());
@@ -178,10 +161,7 @@ impl GemBalanceService {
             },
             async {
                 if request.coin {
-                    self.gateway
-                        .get_balance_staking(request.chain, request.address.clone())
-                        .await
-                        .map(|balance| balance.into_iter().collect())
+                    self.gateway.get_balance_staking(request.chain, request.address.clone()).await.map(|balance| balance.into_iter().collect())
                 } else {
                     Ok(Vec::new())
                 }
@@ -253,31 +233,14 @@ mod tests {
             let testkit = BalanceTestkit::new(MemoryBalanceStore::with_balances(wallet.id.clone(), vec![GemAssetBalance::zero(ethereum.clone())]));
             testkit
                 .assets
-                .save_assets(vec![
-                    default_asset_basic(Asset::from_chain(Chain::Ethereum)),
-                    default_asset_basic(Asset::from_chain(Chain::Cosmos)),
-                ])
+                .save_assets(vec![default_asset_basic(Asset::from_chain(Chain::Ethereum)), default_asset_basic(Asset::from_chain(Chain::Cosmos))])
                 .await
                 .unwrap();
-            let update = GemBalanceUpdate::mock(GemBalanceUpdateType::Token {
-                available: num_bigint::BigUint::ZERO,
-            });
+            let update = GemBalanceUpdate::mock(GemBalanceUpdateType::Token { available: num_bigint::BigUint::ZERO });
 
             testkit
                 .service
-                .update_balances(
-                    wallet.id.clone(),
-                    vec![
-                        GemBalanceUpdate {
-                            asset_id: ethereum,
-                            ..update.clone()
-                        },
-                        GemBalanceUpdate {
-                            asset_id: cosmos.clone(),
-                            ..update
-                        },
-                    ],
-                )
+                .update_balances(wallet.id.clone(), vec![GemBalanceUpdate { asset_id: ethereum, ..update.clone() }, GemBalanceUpdate { asset_id: cosmos.clone(), ..update }])
                 .await
                 .unwrap();
 
@@ -293,12 +256,7 @@ mod tests {
             let (enabled, disabled) = default_balances(&wallet);
             let missing_enabled = enabled[0].clone();
             let missing_disabled = disabled[0].clone();
-            let rows = [enabled, disabled]
-                .concat()
-                .into_iter()
-                .filter(|id| id != &missing_enabled && id != &missing_disabled)
-                .map(GemAssetBalance::zero)
-                .collect();
+            let rows = [enabled, disabled].concat().into_iter().filter(|id| id != &missing_enabled && id != &missing_disabled).map(GemAssetBalance::zero).collect();
             let testkit = BalanceTestkit::new(MemoryBalanceStore::with_balances(wallet.id.clone(), rows));
 
             testkit.service.setup_wallet(wallet.clone()).await.unwrap();

@@ -117,11 +117,7 @@ mod tests {
     #[test]
     fn test_a_redemption_that_fails_enables_nothing() {
         block_on(async {
-            let testkit = RewardsTestkit::with_provider(Arc::new(TestAlienProvider::with_json_by_path(
-                200,
-                &[("auth/nonce", TEST_NONCE), ("rewards/redeem", "not json")],
-            )))
-            .await;
+            let testkit = RewardsTestkit::with_provider(Arc::new(TestAlienProvider::with_json_by_path(200, &[("auth/nonce", TEST_NONCE), ("rewards/redeem", "not json")]))).await;
 
             assert!(testkit.service.redeem(testkit.wallet.clone(), "option-1".to_string()).await.is_err());
             assert!(testkit.balances.enable_writes.lock().unwrap().is_empty());
@@ -131,11 +127,7 @@ mod tests {
     #[test]
     fn test_a_referral_call_signs_with_the_wallet_before_it_reaches_the_api() {
         block_on(async {
-            let testkit = RewardsTestkit::with_provider(Arc::new(TestAlienProvider::with_json_by_path(
-                200,
-                &[("auth/nonce", TEST_NONCE), ("referrals/use", "true")],
-            )))
-            .await;
+            let testkit = RewardsTestkit::with_provider(Arc::new(TestAlienProvider::with_json_by_path(200, &[("auth/nonce", TEST_NONCE), ("referrals/use", "true")]))).await;
 
             testkit.service.use_referral_code(testkit.wallet.clone(), "code".to_string()).await.unwrap();
 

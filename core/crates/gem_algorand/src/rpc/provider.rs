@@ -2,8 +2,8 @@ use std::{error::Error, ops::Deref};
 
 use async_trait::async_trait;
 use chain_traits::{
-    ChainAccount, ChainBlockTransactions, ChainPerpetual, ChainProvider, ChainSimulation, ChainStaking, ChainTraits, ChainTransaction, ChainTransactions,
-    EmptyTransactionsProvider, TransactionIdRequest, TransactionsRequest, TransactionsResult,
+    ChainAccount, ChainBlockTransactions, ChainPerpetual, ChainProvider, ChainSimulation, ChainStaking, ChainTraits, ChainTransaction, ChainTransactions, EmptyTransactionsProvider, TransactionIdRequest, TransactionsRequest,
+    TransactionsResult,
 };
 use gem_client::Client;
 use primitives::{Chain, Transaction};

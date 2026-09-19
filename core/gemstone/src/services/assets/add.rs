@@ -172,10 +172,7 @@ impl GemAddAssetService {
     }
 
     pub fn sections(&self, session: GemAddAssetSession) -> Vec<GemListSection> {
-        let explorer = session
-            .asset
-            .as_ref()
-            .and_then(|asset| self.explorer.get_token_url(asset.id.chain, asset.id.token_id.clone()?));
+        let explorer = session.asset.as_ref().and_then(|asset| self.explorer.get_token_url(asset.id.chain, asset.id.token_id.clone()?));
         session.sections(explorer)
     }
 
@@ -206,9 +203,7 @@ mod session_tests {
 
     #[test]
     fn test_a_new_address_drops_the_token_found_for_the_previous_one() {
-        let found = GemAddAssetSession::new(Some(Chain::Ethereum))
-            .on_address("0xabc".to_string())
-            .on_found("0xabc".to_string(), Asset::mock());
+        let found = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_found("0xabc".to_string(), Asset::mock());
         assert!(found.view_state().can_add);
 
         let retyped = found.on_address("0xdef".to_string());
@@ -218,9 +213,7 @@ mod session_tests {
 
     #[test]
     fn test_switching_chain_starts_over() {
-        let found = GemAddAssetSession::new(Some(Chain::Ethereum))
-            .on_address("0xabc".to_string())
-            .on_found("0xabc".to_string(), Asset::mock());
+        let found = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_found("0xabc".to_string(), Asset::mock());
 
         assert_eq!(found.on_chain(Some(Chain::SmartChain)).view_state().phase, GemAddAssetPhase::Idle);
     }
@@ -236,9 +229,7 @@ mod session_tests {
 
     #[test]
     fn test_a_failed_lookup_is_not_an_empty_screen() {
-        let failed = GemAddAssetSession::new(Some(Chain::Ethereum))
-            .on_address("0xabc".to_string())
-            .on_failed("0xabc".to_string());
+        let failed = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_failed("0xabc".to_string());
 
         assert_eq!(failed.view_state().phase, GemAddAssetPhase::Failed);
         assert!(!failed.view_state().can_add);
@@ -286,9 +277,7 @@ mod tests {
 
     #[test]
     fn test_a_failed_lookup_reads_as_an_invalid_token_id() {
-        let failed = GemAddAssetSession::new(Some(Chain::Ethereum))
-            .on_address("0xabc".to_string())
-            .on_failed("0xabc".to_string());
+        let failed = GemAddAssetSession::new(Some(Chain::Ethereum)).on_address("0xabc".to_string()).on_failed("0xabc".to_string());
 
         assert_eq!(
             failed.sections(None),

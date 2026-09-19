@@ -32,11 +32,7 @@ pub fn social_links(links: Vec<AssetLink>) -> Vec<GemSocialLink> {
 fn social_link(link: &AssetLink) -> Option<GemSocialLink> {
     let link_type = link_type(&link.name)?;
     let host = (link_type == LinkType::Website).then(|| host(&link.url)).flatten();
-    Some(GemSocialLink {
-        link_type,
-        url: link.url.clone(),
-        host,
-    })
+    Some(GemSocialLink { link_type, url: link.url.clone(), host })
 }
 
 fn link_type(name: &str) -> Option<LinkType> {

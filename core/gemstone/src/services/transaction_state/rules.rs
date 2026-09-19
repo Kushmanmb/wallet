@@ -5,9 +5,7 @@ use super::model::{GemTransactionStateUpdate, TransactionPostProcessing};
 use crate::services::collections::unique;
 
 pub fn destination_chain(transaction: &Transaction) -> Option<Chain> {
-    (transaction.state == TransactionState::InTransit)
-        .then(|| transaction.swap_metadata().map(|metadata| metadata.to_asset.chain))
-        .flatten()
+    (transaction.state == TransactionState::InTransit).then(|| transaction.swap_metadata().map(|metadata| metadata.to_asset.chain)).flatten()
 }
 
 pub fn has_timed_out(transaction: &Transaction, now: DateTime<Utc>) -> bool {
@@ -26,15 +24,9 @@ pub fn post_processing(transaction: &Transaction, previous_state: TransactionSta
     }
     let balance_asset_ids = transaction.associated_asset_ids();
     if !state.is_completed() {
-        return Some(TransactionPostProcessing {
-            balance_asset_ids,
-            ..Default::default()
-        });
+        return Some(TransactionPostProcessing { balance_asset_ids, ..Default::default() });
     }
-    let mut processing = TransactionPostProcessing {
-        balance_asset_ids,
-        ..Default::default()
-    };
+    let mut processing = TransactionPostProcessing { balance_asset_ids, ..Default::default() };
     match transaction.transaction_type {
         TransactionType::StakeDelegate
         | TransactionType::StakeUndelegate

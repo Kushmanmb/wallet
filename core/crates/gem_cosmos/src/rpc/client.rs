@@ -5,8 +5,8 @@ use crate::models::account::Balances;
 use crate::models::staking::{Delegations, Rewards, UnbondingDelegations};
 use crate::models::{Account, AccountResponse, BroadcastRequest, BroadcastResponse, InjectiveAccount};
 use crate::models::{
-    AnnualProvisionsResponse, BaseFeeResponse, BlockResponse, FeemarketGasPriceResponse, InflationResponse, InjectiveBaseFeeResponse, OsmosisEpochProvisionsResponse,
-    OsmosisMintParamsResponse, SmartQueryResponse, StakingPoolResponse, SupplyResponse, TransactionResponse, TransactionsResponse, ValidatorsResponse,
+    AnnualProvisionsResponse, BaseFeeResponse, BlockResponse, FeemarketGasPriceResponse, InflationResponse, InjectiveBaseFeeResponse, OsmosisEpochProvisionsResponse, OsmosisMintParamsResponse, SmartQueryResponse, StakingPoolResponse,
+    SupplyResponse, TransactionResponse, TransactionsResponse, ValidatorsResponse,
 };
 use crate::provider::state_mapper::map_transfer_fee;
 use crate::rpc::target::CosmosTarget;
@@ -57,28 +57,14 @@ impl<C: Client> CosmosClient<C> {
 
         let inbound_query = format!("message.sender='{address}'");
         let outbound_query = format!("message.recipient='{address}'");
-        let (inbound, outbound) = futures::try_join!(
-            self.get_transactions_by_query(key, &inbound_query, limit),
-            self.get_transactions_by_query(key, &outbound_query, limit),
-        )?;
+        let (inbound, outbound) = futures::try_join!(self.get_transactions_by_query(key, &inbound_query, limit), self.get_transactions_by_query(key, &outbound_query, limit),)?;
         let responses = inbound.tx_responses.into_iter().chain(outbound.tx_responses).collect::<Vec<_>>();
         let txs = inbound.txs.into_iter().chain(outbound.txs).collect::<Vec<_>>();
-        Ok(responses
-            .into_iter()
-            .zip(txs)
-            .map(|(response, tx)| TransactionResponse { tx, tx_response: response })
-            .collect::<Vec<_>>())
+        Ok(responses.into_iter().zip(txs).map(|(response, tx)| TransactionResponse { tx, tx_response: response }).collect::<Vec<_>>())
     }
 
     pub async fn get_transactions_by_query(&self, key: &'static str, filter: &str, limit: usize) -> Result<TransactionsResponse, Box<dyn Error + Send + Sync>> {
-        Ok(self
-            .client
-            .get(CosmosTarget::GetTransactions {
-                key,
-                filter: filter.to_string(),
-                limit,
-            })
-            .await?)
+        Ok(self.client.get(CosmosTarget::GetTransactions { key, filter: filter.to_string(), limit }).await?)
     }
 
     pub async fn get_validators(&self) -> Result<ValidatorsResponse, Box<dyn Error + Send + Sync>> {

@@ -80,10 +80,7 @@ mod format_tests {
 
         assert_eq!(
             formatted,
-            addresses
-                .iter()
-                .map(|entry| service.format(entry.address.clone(), Some(entry.chain), GemAddressFormatStyle::Short))
-                .collect::<Vec<_>>()
+            addresses.iter().map(|entry| service.format(entry.address.clone(), Some(entry.chain), GemAddressFormatStyle::Short)).collect::<Vec<_>>()
         );
     }
 }

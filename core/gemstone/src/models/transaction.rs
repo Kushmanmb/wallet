@@ -5,10 +5,7 @@ use primitives::contract_call_data::ContractCallData;
 use primitives::solana_nft::SolanaNftStandard;
 use primitives::solana_token_program::SolanaTokenProgramId;
 use primitives::transaction_load_metadata::AgentPrivateKey;
-use primitives::{
-    AssetId, EarnType, FeeOption, GasPriceType, HyperliquidOrder, SignerInput, TransactionFee, TransactionInputType, TransactionLoadInput, TransactionLoadMetadata,
-    TransactionType, TronStakeData,
-};
+use primitives::{AssetId, EarnType, FeeOption, GasPriceType, HyperliquidOrder, SignerInput, TransactionFee, TransactionInputType, TransactionLoadInput, TransactionLoadMetadata, TransactionType, TronStakeData};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -227,10 +224,9 @@ impl From<SignerInput> for GemSignerInput {
 
 pub fn transaction_metadata_block_number(metadata: &GemTransactionLoadMetadata) -> Option<String> {
     match metadata {
-        GemTransactionLoadMetadata::Polkadot { block_number, .. }
-        | GemTransactionLoadMetadata::Tron { block_number, .. }
-        | GemTransactionLoadMetadata::Xrp { block_number, .. }
-        | GemTransactionLoadMetadata::Cardano { block_number, .. } => Some(block_number.to_string()),
+        GemTransactionLoadMetadata::Polkadot { block_number, .. } | GemTransactionLoadMetadata::Tron { block_number, .. } | GemTransactionLoadMetadata::Xrp { block_number, .. } | GemTransactionLoadMetadata::Cardano { block_number, .. } => {
+            Some(block_number.to_string())
+        }
         _ => None,
     }
 }

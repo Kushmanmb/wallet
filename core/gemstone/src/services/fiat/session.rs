@@ -183,14 +183,7 @@ impl GemFiatSession {
     fn amount_check(&self) -> GemFiatAmountCheck {
         let operation = self.current();
         match operation.parsed_amount() {
-            Some(amount) => rules::amount_check(
-                &get_fiat_config(),
-                operation.quote_type,
-                amount,
-                operation.selected_quote().as_ref(),
-                &self.available,
-                super::quote::CURRENCY,
-            ),
+            Some(amount) => rules::amount_check(&get_fiat_config(), operation.quote_type, amount, operation.selected_quote().as_ref(), &self.available, super::quote::CURRENCY),
             None => GemFiatAmountCheck::Valid,
         }
     }

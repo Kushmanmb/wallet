@@ -3,27 +3,21 @@
 
 use crate::models::custom_types::{GemBigInt, GemBigUint, GemJsonValue};
 use primitives::{
-    Account, AccountDataType, AddressName, AddressType, Appearance, ApplicationMetadata, ApplicationMetadataSource, ApprovalData, Asset, AssetAssociation, AssetAssociationType,
-    AssetBasic, AssetFiatValue, AssetFull, AssetLink, AssetList, AssetMarket, AssetMetaData, AssetPrice, AssetProperties, AssetRank, AssetScore, AssetType, AuthNonce, AuthPayload,
-    BalanceMetadata, Banner, BannerEvent, BannerState, BlockExplorerLink, CancelOrderData, Chain, ChainAddress, ChainAsset, ChainType, ChartCandleStick, ChartCandleUpdate,
-    ChartDateValue, ChartPeriod, ChartValuePercentage, ConnectionComponent, ConnectionStatus, Contact, ContactAddress, ContractCallData, CoreEmoji, CoreListItem,
-    CoreListItemBadge, CoreListItemIcon, Currency, Delegation, DelegationBase, DelegationState, DelegationValidator, Device, DeviceLocale, EarnType, FeePriority, FeeUnitType,
-    FiatAssets, FiatProvider, FiatProviderName, FiatQuote, FiatQuoteRequest, FiatQuoteType, FiatQuoteUrl, FiatRate, FiatTransaction, FiatTransactionData, FiatTransactionStatus,
-    GasPriceType, InAppNotification, Latency, LatencyType, LinkType, MarketDominance, Markets, MarketsAssets, NFTAsset, NFTAssetData, NFTAttribute, NFTAttributeType,
-    NFTCollection, NFTData, NFTImages, NFTResource, NFTType, NameProvider, NameRecord, Node, NodeState, Payment, PaymentAmount, PaymentLink, PaymentRequest, PaymentType,
-    Perpetual, PerpetualAccountMode, PerpetualAccountSummary, PerpetualBalance, PerpetualBasic, PerpetualConfirmData, PerpetualData, PerpetualDirection, PerpetualMarginType,
-    PerpetualMarketData, PerpetualMetadata, PerpetualModifyConfirmData, PerpetualModifyPositionType, PerpetualOrderType, PerpetualPortfolio, PerpetualPortfolioTimeframeData,
-    PerpetualPosition, PerpetualPositionsSummary, PerpetualProvider, PerpetualReduceData, PerpetualSearchData, PerpetualTriggerOrder, PerpetualType, Platform, PlatformStore,
-    PortfolioAsset, PortfolioChartData, PortfolioChartType, PortfolioData, PortfolioMarginUsage, PortfolioStatistic, PortfolioType, Price, PriceAlert, PriceAlertData,
-    PriceAlertDirection, PriceAlertNotificationType, PriceProvider, RecentActivityType, RedelegateData, RedemptionResult, RedemptionStatus, ReferralAllowance, ReferralQuota,
-    Release, ReportNft, Resource, RewardRedemption, RewardRedemptionOption, RewardRedemptionType, RewardStatus, Rewards, SearchResponse, SimulationBalanceChange, SimulationHeader,
-    SimulationPayloadField, SimulationPayloadFieldDisplay, SimulationPayloadFieldKind, SimulationPayloadFieldType, SimulationResult, SimulationSeverity, SimulationWarning,
-    SimulationWarningApproval, SimulationWarningType, SolanaNftStandard, SolanaTokenProgramId, StakeProviderType, StakeType, SupportAgent, SupportMessage, SupportMessageImage,
-    SupportMessageSender, SupportMessageStatus, SupportTyping, SupportTypingStatus, SwapData, SwapPriceImpact, SwapPriceImpactType, SwapProvider, SwapProviderData, SwapQuote,
-    SwapQuoteData, SwapQuoteDataType, TPSLOrderData, TotalFiatValue, TpslType, Transaction, TransactionDirection, TransactionExtended, TransactionInputType,
-    TransactionPerpetualMetadata, TransactionState, TransactionType, TransactionUtxoInput, TransactionsResponse, TransferDataExtra, TransferDataOutputAction,
-    TransferDataOutputType, TronStakeData, TronUnfreeze, TronVote, UTXO, VerificationStatus, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal,
-    WalletConnectionState, WalletConnectionVerificationStatus, WalletSource, WalletType, YieldProvider,
+    Account, AccountDataType, AddressName, AddressType, Appearance, ApplicationMetadata, ApplicationMetadataSource, ApprovalData, Asset, AssetAssociation, AssetAssociationType, AssetBasic, AssetFiatValue, AssetFull, AssetLink, AssetList,
+    AssetMarket, AssetMetaData, AssetPrice, AssetProperties, AssetRank, AssetScore, AssetType, AuthNonce, AuthPayload, BalanceMetadata, Banner, BannerEvent, BannerState, BlockExplorerLink, CancelOrderData, Chain, ChainAddress, ChainAsset,
+    ChainType, ChartCandleStick, ChartCandleUpdate, ChartDateValue, ChartPeriod, ChartValuePercentage, ConnectionComponent, ConnectionStatus, Contact, ContactAddress, ContractCallData, CoreEmoji, CoreListItem, CoreListItemBadge,
+    CoreListItemIcon, Currency, Delegation, DelegationBase, DelegationState, DelegationValidator, Device, DeviceLocale, EarnType, FeePriority, FeeUnitType, FiatAssets, FiatProvider, FiatProviderName, FiatQuote, FiatQuoteRequest,
+    FiatQuoteType, FiatQuoteUrl, FiatRate, FiatTransaction, FiatTransactionData, FiatTransactionStatus, GasPriceType, InAppNotification, Latency, LatencyType, LinkType, MarketDominance, Markets, MarketsAssets, NFTAsset, NFTAssetData,
+    NFTAttribute, NFTAttributeType, NFTCollection, NFTData, NFTImages, NFTResource, NFTType, NameProvider, NameRecord, Node, NodeState, Payment, PaymentAmount, PaymentLink, PaymentRequest, PaymentType, Perpetual, PerpetualAccountMode,
+    PerpetualAccountSummary, PerpetualBalance, PerpetualBasic, PerpetualConfirmData, PerpetualData, PerpetualDirection, PerpetualMarginType, PerpetualMarketData, PerpetualMetadata, PerpetualModifyConfirmData, PerpetualModifyPositionType,
+    PerpetualOrderType, PerpetualPortfolio, PerpetualPortfolioTimeframeData, PerpetualPosition, PerpetualPositionsSummary, PerpetualProvider, PerpetualReduceData, PerpetualSearchData, PerpetualTriggerOrder, PerpetualType, Platform,
+    PlatformStore, PortfolioAsset, PortfolioChartData, PortfolioChartType, PortfolioData, PortfolioMarginUsage, PortfolioStatistic, PortfolioType, Price, PriceAlert, PriceAlertData, PriceAlertDirection, PriceAlertNotificationType,
+    PriceProvider, RecentActivityType, RedelegateData, RedemptionResult, RedemptionStatus, ReferralAllowance, ReferralQuota, Release, ReportNft, Resource, RewardRedemption, RewardRedemptionOption, RewardRedemptionType, RewardStatus,
+    Rewards, SearchResponse, SimulationBalanceChange, SimulationHeader, SimulationPayloadField, SimulationPayloadFieldDisplay, SimulationPayloadFieldKind, SimulationPayloadFieldType, SimulationResult, SimulationSeverity, SimulationWarning,
+    SimulationWarningApproval, SimulationWarningType, SolanaNftStandard, SolanaTokenProgramId, StakeProviderType, StakeType, SupportAgent, SupportMessage, SupportMessageImage, SupportMessageSender, SupportMessageStatus, SupportTyping,
+    SupportTypingStatus, SwapData, SwapPriceImpact, SwapPriceImpactType, SwapProvider, SwapProviderData, SwapQuote, SwapQuoteData, SwapQuoteDataType, TPSLOrderData, TotalFiatValue, TpslType, Transaction, TransactionDirection,
+    TransactionExtended, TransactionInputType, TransactionPerpetualMetadata, TransactionState, TransactionType, TransactionUtxoInput, TransactionsResponse, TransferDataExtra, TransferDataOutputAction, TransferDataOutputType, TronStakeData,
+    TronUnfreeze, TronVote, UTXO, VerificationStatus, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionState, WalletConnectionVerificationStatus, WalletSource, WalletType, YieldProvider,
 };
 use std::str::FromStr;
 
@@ -330,18 +324,9 @@ pub enum FiatTransactionStatus {
 
 #[uniffi::remote(Enum)]
 pub enum GasPriceType {
-    Regular {
-        gas_price: GemBigInt,
-    },
-    Eip1559 {
-        gas_price: GemBigInt,
-        priority_fee: GemBigInt,
-    },
-    Solana {
-        gas_price: GemBigInt,
-        priority_fee: GemBigInt,
-        unit_price: GemBigInt,
-    },
+    Regular { gas_price: GemBigInt },
+    Eip1559 { gas_price: GemBigInt, priority_fee: GemBigInt },
+    Solana { gas_price: GemBigInt, priority_fee: GemBigInt, unit_price: GemBigInt },
 }
 
 #[uniffi::remote(Enum)]
@@ -733,50 +718,17 @@ pub enum TransactionDirection {
 
 #[uniffi::remote(Enum)]
 pub enum TransactionInputType {
-    Transfer {
-        asset: Asset,
-    },
-    Deposit {
-        asset: Asset,
-    },
-    Withdrawal {
-        asset: Asset,
-    },
-    Swap {
-        from_asset: Asset,
-        to_asset: Asset,
-        swap_data: SwapData,
-    },
-    Stake {
-        asset: Asset,
-        stake_type: StakeType,
-    },
-    TokenApprove {
-        asset: Asset,
-        approval_data: ApprovalData,
-    },
-    Generic {
-        asset: Asset,
-        metadata: ApplicationMetadata,
-        extra: TransferDataExtra,
-    },
-    TransferNft {
-        asset: Asset,
-        nft_asset: NFTAsset,
-    },
-    Account {
-        asset: Asset,
-        account_type: AccountDataType,
-    },
-    Perpetual {
-        asset: Asset,
-        perpetual_type: PerpetualType,
-    },
-    Earn {
-        asset: Asset,
-        earn_type: EarnType,
-        data: ContractCallData,
-    },
+    Transfer { asset: Asset },
+    Deposit { asset: Asset },
+    Withdrawal { asset: Asset },
+    Swap { from_asset: Asset, to_asset: Asset, swap_data: SwapData },
+    Stake { asset: Asset, stake_type: StakeType },
+    TokenApprove { asset: Asset, approval_data: ApprovalData },
+    Generic { asset: Asset, metadata: ApplicationMetadata, extra: TransferDataExtra },
+    TransferNft { asset: Asset, nft_asset: NFTAsset },
+    Account { asset: Asset, account_type: AccountDataType },
+    Perpetual { asset: Asset, perpetual_type: PerpetualType },
+    Earn { asset: Asset, earn_type: EarnType, data: ContractCallData },
 }
 
 #[uniffi::remote(Enum)]

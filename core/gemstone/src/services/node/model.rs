@@ -74,9 +74,7 @@ impl GemNodeCheck {
             GemNodeCheckRow::LatestBlock {
                 value: GemFormattedNumber::count(self.latest_block_number),
             },
-            GemNodeCheckRow::Latency {
-                milliseconds: self.latency.value as u32,
-            },
+            GemNodeCheckRow::Latency { milliseconds: self.latency.value as u32 },
         ]
     }
 }
@@ -222,9 +220,7 @@ mod tests {
             check.rows(),
             vec![
                 GemNodeCheckRow::ChainId { value: "-".to_string() },
-                GemNodeCheckRow::InSync {
-                    state: GemNodeSyncState::OutOfSync
-                },
+                GemNodeCheckRow::InSync { state: GemNodeSyncState::OutOfSync },
                 GemNodeCheckRow::LatestBlock {
                     value: GemFormattedNumber::count(21_000_000)
                 },

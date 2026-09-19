@@ -59,13 +59,7 @@ pub struct GemChartService {
 #[uniffi::export]
 impl GemChartService {
     #[uniffi::constructor]
-    pub fn new(
-        api: Arc<GemApiClient>,
-        price: Arc<GemPriceService>,
-        preferences: Arc<GemPreferencesService>,
-        price_alerts: Arc<GemPriceAlertService>,
-        explorer: Arc<GemExplorerService>,
-    ) -> Self {
+    pub fn new(api: Arc<GemApiClient>, price: Arc<GemPriceService>, preferences: Arc<GemPreferencesService>, price_alerts: Arc<GemPriceAlertService>, explorer: Arc<GemExplorerService>) -> Self {
         Self {
             api,
             price,

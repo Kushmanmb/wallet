@@ -49,11 +49,7 @@ impl<C: Client> ChainBalances for CosmosClient<C> {
         }
         let denom = chain.as_denom().ok_or("Chain does not have a denom")?;
 
-        let (delegations, unbonding, rewards) = try_join!(
-            self.get_delegations(&address),
-            self.get_unbonding_delegations(&address),
-            self.get_delegation_rewards(&address)
-        )?;
+        let (delegations, unbonding, rewards) = try_join!(self.get_delegations(&address), self.get_unbonding_delegations(&address), self.get_delegation_rewards(&address))?;
 
         Ok(Some(balances_mapper::map_balance_staking(delegations, unbonding, rewards, chain, denom)))
     }

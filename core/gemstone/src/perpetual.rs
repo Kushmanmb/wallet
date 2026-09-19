@@ -1,10 +1,7 @@
 use gem_hypercore::{models::websocket::HyperliquidSubscription, perpetual_formatter::PerpetualFormatter};
 use primitives::contract_constants::HYPERLIQUID_ARBITRUM_DEPOSIT_ADDRESS;
 use primitives::known_assets::ARBITRUM_USDC;
-use primitives::{
-    Asset, AutocloseEstimator as Estimator, AutocloseValidation, AutocloseValidator as Validator, PerpetualConfirmData, PerpetualDirection, PerpetualProvider, PerpetualType,
-    TpslType,
-};
+use primitives::{Asset, AutocloseEstimator as Estimator, AutocloseValidation, AutocloseValidator as Validator, PerpetualConfirmData, PerpetualDirection, PerpetualProvider, PerpetualType, TpslType};
 
 use crate::config::perpetual_config::{LEVERAGE_OPTIONS, STOP_LOSS_PERCENT_OPTIONS, TAKE_PROFIT_PERCENT_OPTIONS, leverage_options};
 use crate::models::GemAsset;

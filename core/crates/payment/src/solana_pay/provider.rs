@@ -13,10 +13,7 @@ pub(crate) struct SolanaPayProvider<C: Client> {
 
 impl<C: Client> SolanaPayProvider<C> {
     pub(crate) fn new(client: C, url: String) -> Self {
-        Self {
-            client: SolanaPayClient::new(client),
-            url,
-        }
+        Self { client: SolanaPayClient::new(client), url }
     }
 }
 
@@ -26,11 +23,7 @@ impl<C: Client> PaymentProvider for SolanaPayProvider<C> {
     }
 
     async fn load(&self, addresses: &[ChainAddress]) -> Result<PaymentTransaction, PaymentError> {
-        let account = addresses
-            .iter()
-            .find(|address| address.chain == Chain::Solana)
-            .cloned()
-            .ok_or(PaymentError::NoPaymentOptions)?;
+        let account = addresses.iter().find(|address| address.chain == Chain::Solana).cloned().ok_or(PaymentError::NoPaymentOptions)?;
         let (info, response) = futures::try_join!(self.client.get_info(), self.client.get_transaction(&account.address))?;
         let prepared = crate::solana_pay::transaction::prepare(&response.transaction, &account.address).map_err(|reason| PaymentError::InvalidRequest { reason })?;
 

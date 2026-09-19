@@ -11,9 +11,7 @@ use crate::config::swap_config::{SwapConfig, get_default_slippage};
 use crate::models::swap::GemSlippageCheck;
 use crate::services::amount::model::GemNumberFormat;
 use crate::services::amount::rules::value_from_input;
-use crate::services::swap::model::{
-    GemAssetRate, GemSwapButtonAction, GemSwapButtonInput, GemSwapPair, GemSwapPairSelection, GemSwapPairSuggestion, GemSwapRate, GemSwapSide, GemSwapTransfer,
-};
+use crate::services::swap::model::{GemAssetRate, GemSwapButtonAction, GemSwapButtonInput, GemSwapPair, GemSwapPairSelection, GemSwapPairSuggestion, GemSwapRate, GemSwapSide, GemSwapTransfer};
 use crate::services::swap::session::{GemSwapQuoteInput, GemSwapRequest};
 use std::collections::HashMap;
 
@@ -33,14 +31,7 @@ pub fn quote_request(wallet: &Wallet, from_asset: &Asset, to_asset: &Asset, valu
     })
 }
 
-pub fn quote_input(
-    pay_asset: &Asset,
-    receive_asset: &Asset,
-    value: &str,
-    available_value: &BigInt,
-    slippage_bps: Option<u32>,
-    format: &GemNumberFormat,
-) -> Option<GemSwapQuoteInput> {
+pub fn quote_input(pay_asset: &Asset, receive_asset: &Asset, value: &str, available_value: &BigInt, slippage_bps: Option<u32>, format: &GemNumberFormat) -> Option<GemSwapQuoteInput> {
     if pay_asset.id == receive_asset.id {
         return None;
     }
@@ -182,10 +173,7 @@ pub fn permit_single(approval: &Permit2ApprovalData, now: u64, config: &SwapConf
 
 fn slippage(from_asset: &Asset, slippage_bps: Option<u32>) -> SwapperSlippage {
     match slippage_bps {
-        Some(bps) => SwapperSlippage {
-            bps,
-            mode: SwapperSlippageMode::Exact,
-        },
+        Some(bps) => SwapperSlippage { bps, mode: SwapperSlippageMode::Exact },
         None => SwapperSlippage {
             mode: SwapperSlippageMode::Auto,
             ..get_default_slippage(&from_asset.chain())
@@ -203,24 +191,12 @@ fn quote_asset(asset: &Asset) -> SwapperQuoteAsset {
 }
 
 fn account_address(wallet: &Wallet, chain: Chain) -> Result<String, SwapperError> {
-    wallet
-        .accounts
-        .iter()
-        .find(|account| account.chain == chain)
-        .map(|account| account.address.clone())
-        .ok_or(SwapperError::NotSupportedChain)
+    wallet.accounts.iter().find(|account| account.chain == chain).map(|account| account.address.clone()).ok_or(SwapperError::NotSupportedChain)
 }
 
 pub fn most_swapped_receive_asset(pairs: &[GemSwapPair], pay_asset_id: &AssetId, supported: &AssetList) -> Option<AssetId> {
-    let received: Vec<&GemSwapPair> = pairs
-        .iter()
-        .filter(|pair| &pair.to_asset_id != pay_asset_id && supported.contains(&pair.to_asset_id))
-        .collect();
-    let received_for_pay_asset: Vec<AssetId> = received
-        .iter()
-        .filter(|pair| &pair.from_asset_id == pay_asset_id)
-        .map(|pair| pair.to_asset_id.clone())
-        .collect();
+    let received: Vec<&GemSwapPair> = pairs.iter().filter(|pair| &pair.to_asset_id != pay_asset_id && supported.contains(&pair.to_asset_id)).collect();
+    let received_for_pay_asset: Vec<AssetId> = received.iter().filter(|pair| &pair.from_asset_id == pay_asset_id).map(|pair| pair.to_asset_id.clone()).collect();
     most_frequent_asset(&received_for_pay_asset).or_else(|| {
         let received: Vec<AssetId> = received.iter().map(|pair| pair.to_asset_id.clone()).collect();
         most_frequent_asset(&received)
@@ -271,14 +247,7 @@ impl GemSwapButtonInput {
 pub fn is_retryable(error: Option<&SwapperError>) -> bool {
     match error {
         Some(SwapperError::NoQuoteAvailable | SwapperError::ComputeQuoteError(_) | SwapperError::TransactionError(_) | SwapperError::Offline) => true,
-        Some(
-            SwapperError::NotSupportedChain
-            | SwapperError::NotSupportedAsset
-            | SwapperError::NoAvailableProvider
-            | SwapperError::InvalidRoute
-            | SwapperError::InputAmountError { .. },
-        )
-        | None => false,
+        Some(SwapperError::NotSupportedChain | SwapperError::NotSupportedAsset | SwapperError::NoAvailableProvider | SwapperError::InvalidRoute | SwapperError::InputAmountError { .. }) | None => false,
     }
 }
 
@@ -331,9 +300,7 @@ mod tests {
     fn test_quote_input_parses_the_typed_value_and_flags_a_full_spend() {
         let pay = Asset::from_chain(Chain::Ethereum);
         let receive = Asset::from_chain(Chain::Bitcoin);
-        let format = GemNumberFormat {
-            decimal_separator: ".".to_string(),
-        };
+        let format = GemNumberFormat { decimal_separator: ".".to_string() };
         let available = BigInt::from(2_000_000_000_000_000_000u128);
 
         let input = quote_input(&pay, &receive, "1", &available, None, &format).unwrap();
@@ -354,10 +321,7 @@ mod tests {
 
     #[test]
     fn test_selected_quote_prefers_the_chosen_provider_then_the_best() {
-        let quotes = vec![
-            Quote::mock_with_provider(SwapperProvider::Okx, "1"),
-            Quote::mock_with_provider(SwapperProvider::Jupiter, "1"),
-        ];
+        let quotes = vec![Quote::mock_with_provider(SwapperProvider::Okx, "1"), Quote::mock_with_provider(SwapperProvider::Jupiter, "1")];
 
         assert_eq!(selected_quote(&quotes, Some(SwapperProvider::Jupiter)).unwrap().data.provider.id, SwapperProvider::Jupiter);
         assert_eq!(selected_quote(&quotes, Some(SwapperProvider::Thorchain)).unwrap().data.provider.id, SwapperProvider::Okx);
@@ -373,14 +337,8 @@ mod tests {
         let two_thousand_usdc = BigUint::from(2_000_000_000u64);
 
         let rate = swap_rate(&eth, &one_eth, &usdc, &two_thousand_usdc).unwrap();
-        assert_eq!(
-            (rate.direct.base_symbol.as_str(), rate.direct.quote_symbol.as_str(), rate.direct.value.value),
-            ("ETH", "USDC", 2000.0)
-        );
-        assert_eq!(
-            (rate.inverse.base_symbol.as_str(), rate.inverse.quote_symbol.as_str(), rate.inverse.value.value),
-            ("USDC", "ETH", 0.0005)
-        );
+        assert_eq!((rate.direct.base_symbol.as_str(), rate.direct.quote_symbol.as_str(), rate.direct.value.value), ("ETH", "USDC", 2000.0));
+        assert_eq!((rate.inverse.base_symbol.as_str(), rate.inverse.quote_symbol.as_str(), rate.inverse.value.value), ("USDC", "ETH", 0.0005));
 
         assert!(swap_rate(&eth, &BigUint::from(0u32), &usdc, &two_thousand_usdc).is_none());
         assert!(swap_rate(&eth, &one_eth, &usdc, &BigUint::from(0u32)).is_none());
@@ -402,11 +360,7 @@ mod tests {
         assert_eq!(amount_for_percent(&available, 50), BigInt::from(500_000_000u64));
         assert_eq!(amount_for_percent(&available, 25), BigInt::from(250_000_000u64));
         assert_eq!(amount_for_percent(&available, 0), BigInt::from(0u32));
-        assert_eq!(
-            amount_for_percent(&BigInt::from(3u32), 50),
-            BigInt::from(1u32),
-            "a share that does not divide evenly rounds down, never up past the balance"
-        );
+        assert_eq!(amount_for_percent(&BigInt::from(3u32), 50), BigInt::from(1u32), "a share that does not divide evenly rounds down, never up past the balance");
     }
 
     #[test]
@@ -467,20 +421,9 @@ mod tests {
         assert_eq!((swapped_back.pay_asset_id, swapped_back.receive_asset_id), (Some(btc.clone()), Some(eth.clone())));
 
         let replaced = select_pair_asset(pair, GemSwapSide::Pay, sol.clone());
-        assert_eq!(
-            (replaced.pay_asset_id, replaced.receive_asset_id),
-            (Some(sol.clone()), Some(btc)),
-            "any other asset only replaces the side it was chosen for"
-        );
+        assert_eq!((replaced.pay_asset_id, replaced.receive_asset_id), (Some(sol.clone()), Some(btc)), "any other asset only replaces the side it was chosen for");
 
-        let first = select_pair_asset(
-            GemSwapPairSelection {
-                pay_asset_id: None,
-                receive_asset_id: None,
-            },
-            GemSwapSide::Receive,
-            sol.clone(),
-        );
+        let first = select_pair_asset(GemSwapPairSelection { pay_asset_id: None, receive_asset_id: None }, GemSwapSide::Receive, sol.clone());
         assert_eq!((first.pay_asset_id, first.receive_asset_id), (None, Some(sol)));
     }
 
@@ -496,13 +439,7 @@ mod tests {
                 receive_asset_id: Some(usdc.clone()),
             }
         );
-        assert_eq!(
-            pair_for_asset(usdc.clone(), true),
-            GemSwapPairSuggestion {
-                pay_asset_id: usdc,
-                receive_asset_id: None,
-            }
-        );
+        assert_eq!(pair_for_asset(usdc.clone(), true), GemSwapPairSuggestion { pay_asset_id: usdc, receive_asset_id: None });
         assert_eq!(
             pair_for_asset(ethereum.clone(), false),
             GemSwapPairSuggestion {
@@ -519,35 +456,13 @@ mod tests {
     #[test]
     fn test_quote_request_uses_wallet_accounts_and_slippage() {
         let wallet = Wallet::mock_with_accounts(vec![Account::mock(Chain::Ethereum, "ethereum-address"), Account::mock(Chain::Solana, "solana-address")]);
-        let request = quote_request(
-            &wallet,
-            &Asset::from_chain(Chain::Ethereum),
-            &Asset::from_chain(Chain::Solana),
-            BigUint::from(100u32),
-            true,
-            Some(50),
-        )
-        .unwrap();
+        let request = quote_request(&wallet, &Asset::from_chain(Chain::Ethereum), &Asset::from_chain(Chain::Solana), BigUint::from(100u32), true, Some(50)).unwrap();
         assert_eq!(request.wallet_address, "ethereum-address");
         assert_eq!(request.destination_address, "solana-address");
-        assert_eq!(
-            request.options.slippage,
-            SwapperSlippage {
-                bps: 50,
-                mode: SwapperSlippageMode::Exact
-            }
-        );
+        assert_eq!(request.options.slippage, SwapperSlippage { bps: 50, mode: SwapperSlippageMode::Exact });
         assert!(request.options.use_max_amount);
 
-        let auto = quote_request(
-            &wallet,
-            &Asset::from_chain(Chain::Ethereum),
-            &Asset::from_chain(Chain::Solana),
-            BigUint::from(100u32),
-            false,
-            None,
-        )
-        .unwrap();
+        let auto = quote_request(&wallet, &Asset::from_chain(Chain::Ethereum), &Asset::from_chain(Chain::Solana), BigUint::from(100u32), false, None).unwrap();
         assert_eq!(auto.options.slippage.mode, SwapperSlippageMode::Auto);
         assert_eq!(auto.options.slippage.bps, get_default_slippage(&Chain::Ethereum).bps);
     }
@@ -556,14 +471,7 @@ mod tests {
     fn test_quote_request_requires_accounts() {
         let wallet = Wallet::mock_with_chains(&[Chain::Ethereum]);
         assert!(matches!(
-            quote_request(
-                &wallet,
-                &Asset::from_chain(Chain::Ethereum),
-                &Asset::from_chain(Chain::Solana),
-                BigUint::from(1u32),
-                false,
-                None
-            ),
+            quote_request(&wallet, &Asset::from_chain(Chain::Ethereum), &Asset::from_chain(Chain::Solana), BigUint::from(1u32), false, None),
             Err(SwapperError::NotSupportedChain)
         ));
     }
@@ -571,15 +479,7 @@ mod tests {
     #[test]
     fn test_swap_transfer_maps_quote_and_recipient() {
         let wallet = Wallet::mock_with_accounts(vec![Account::mock(Chain::Ethereum, "ethereum-address"), Account::mock(Chain::Solana, "solana-address")]);
-        let request = quote_request(
-            &wallet,
-            &Asset::from_chain(Chain::Ethereum),
-            &Asset::from_chain(Chain::Solana),
-            BigUint::from(100u32),
-            true,
-            Some(50),
-        )
-        .unwrap();
+        let request = quote_request(&wallet, &Asset::from_chain(Chain::Ethereum), &Asset::from_chain(Chain::Solana), BigUint::from(100u32), true, Some(50)).unwrap();
         let quote = Quote {
             from_value: BigUint::from(99u64),
             min_from_value: Some(BigUint::from(90u64)),
@@ -644,10 +544,7 @@ mod tests {
 
         let supported = AssetList::mock_with_chains(&[Chain::Bitcoin, Chain::Solana]);
 
-        assert_eq!(
-            most_swapped_receive_asset(&pairs, &AssetId::from_chain(Chain::Ethereum), &supported),
-            Some(AssetId::from_chain(Chain::Solana))
-        );
+        assert_eq!(most_swapped_receive_asset(&pairs, &AssetId::from_chain(Chain::Ethereum), &supported), Some(AssetId::from_chain(Chain::Solana)));
     }
 
     #[test]
@@ -660,10 +557,7 @@ mod tests {
 
         let supported = AssetList::mock_with_chains(&[Chain::Bitcoin, Chain::Solana]);
 
-        assert_eq!(
-            most_swapped_receive_asset(&pairs, &AssetId::from_chain(Chain::Ethereum), &supported),
-            Some(AssetId::from_chain(Chain::Solana))
-        );
+        assert_eq!(most_swapped_receive_asset(&pairs, &AssetId::from_chain(Chain::Ethereum), &supported), Some(AssetId::from_chain(Chain::Solana)));
     }
 
     #[test]
@@ -672,10 +566,7 @@ mod tests {
 
         let supported = AssetList::mock_with_chains(&[Chain::Bitcoin, Chain::Solana]);
 
-        assert_eq!(
-            most_swapped_receive_asset(&pairs, &AssetId::from_chain(Chain::Ethereum), &supported),
-            Some(AssetId::from_chain(Chain::Bitcoin))
-        );
+        assert_eq!(most_swapped_receive_asset(&pairs, &AssetId::from_chain(Chain::Ethereum), &supported), Some(AssetId::from_chain(Chain::Bitcoin)));
     }
 
     #[test]
@@ -688,10 +579,7 @@ mod tests {
 
         let supported = AssetList::mock_with_chains(&[Chain::Bitcoin, Chain::Solana]);
 
-        assert_eq!(
-            most_swapped_receive_asset(&pairs, &AssetId::from_chain(Chain::Ethereum), &supported),
-            Some(AssetId::from_chain(Chain::Solana))
-        );
+        assert_eq!(most_swapped_receive_asset(&pairs, &AssetId::from_chain(Chain::Ethereum), &supported), Some(AssetId::from_chain(Chain::Solana)));
     }
 
     #[test]
@@ -710,9 +598,7 @@ mod tests {
             (None, GemSwapButtonAction::Swap),
         ] {
             let input = GemSwapButtonInput {
-                quote_error: Some(SwapperError::InputAmountError {
-                    min_amount: min_amount.map(str::to_string),
-                }),
+                quote_error: Some(SwapperError::InputAmountError { min_amount: min_amount.map(str::to_string) }),
                 ..GemSwapButtonInput::mock(100, 18_900_023)
             };
             assert_eq!(input.action(), action);
@@ -768,9 +654,7 @@ mod tests {
         assert_eq!(input.action(), GemSwapButtonAction::RetryTransfer);
 
         let with_minimum = GemSwapButtonInput {
-            quote_error: Some(SwapperError::InputAmountError {
-                min_amount: Some("50".to_string()),
-            }),
+            quote_error: Some(SwapperError::InputAmountError { min_amount: Some("50".to_string()) }),
             ..input
         };
         assert_eq!(with_minimum.action(), GemSwapButtonAction::UseMinimumAmount { value: BigInt::from(50) });
@@ -794,16 +678,9 @@ mod tests {
     fn test_first_supported_receive_asset_skips_the_pay_asset_and_unsupported_assets() {
         let pay_asset_id = AssetId::from_chain(Chain::Ethereum);
         let supported = AssetList::mock_with_chains(&[Chain::Ethereum, Chain::Solana]);
-        let asset_ids = vec![
-            AssetId::from_chain(Chain::Ethereum),
-            AssetId::from_chain(Chain::Bitcoin),
-            AssetId::from_chain(Chain::Solana),
-        ];
+        let asset_ids = vec![AssetId::from_chain(Chain::Ethereum), AssetId::from_chain(Chain::Bitcoin), AssetId::from_chain(Chain::Solana)];
 
-        assert_eq!(
-            first_supported_receive_asset(asset_ids, &pay_asset_id, &supported),
-            Some(AssetId::from_chain(Chain::Solana))
-        );
+        assert_eq!(first_supported_receive_asset(asset_ids, &pay_asset_id, &supported), Some(AssetId::from_chain(Chain::Solana)));
         assert_eq!(first_supported_receive_asset(vec![pay_asset_id.clone()], &pay_asset_id, &supported), None);
         assert_eq!(
             first_supported_receive_asset(vec![AssetId::from_chain(Chain::Bitcoin)], &pay_asset_id, &supported),

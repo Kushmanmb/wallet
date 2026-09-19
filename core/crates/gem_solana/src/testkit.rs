@@ -4,10 +4,7 @@ use num_bigint::BigUint;
 
 use crate::{
     AccountMeta, AddressLookupTableAccount, CompiledInstruction, Instruction, Message, MessageHeader, Pubkey, SYSTEM_PROGRAM_ID, VersionedTransaction,
-    models::{
-        AccountData, BlockTransaction, EpochInfo, Info, Meta, Parsed, StakeDelegation, StakeInfo, TokenAccountData, TokenAccountInfo, TokenAccountInfoData, TokenAmount,
-        TokenBalance, Transaction, TransactionMessage, ValueData,
-    },
+    models::{AccountData, BlockTransaction, EpochInfo, Info, Meta, Parsed, StakeDelegation, StakeInfo, TokenAccountData, TokenAccountInfo, TokenAccountInfoData, TokenAmount, TokenBalance, Transaction, TransactionMessage, ValueData},
     siws::SiwsMessage,
 };
 
@@ -130,10 +127,7 @@ impl TokenBalance {
             account_index: 0,
             mint: mint.to_string(),
             owner: owner.to_string(),
-            ui_token_amount: TokenAmount {
-                amount: BigUint::from(amount),
-                decimals: 6,
-            },
+            ui_token_amount: TokenAmount { amount: BigUint::from(amount), decimals: 6 },
         }
     }
 }

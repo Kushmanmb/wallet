@@ -68,12 +68,7 @@ impl MessagePayloadFields {
     pub(super) fn from_siws(message: &SiwsMessage, simulation_payload: Vec<SimulationPayloadField>) -> Self {
         let mut fields = vec![
             MessagePayloadField::custom("domain", message.domain.clone(), SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary),
-            MessagePayloadField::custom(
-                "address",
-                message.address.clone(),
-                SimulationPayloadFieldType::Address,
-                SimulationPayloadFieldDisplay::Secondary,
-            ),
+            MessagePayloadField::custom("address", message.address.clone(), SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Secondary),
         ];
         fields.extend(
             [
@@ -104,27 +99,15 @@ impl MessagePayloadFields {
 
 fn grouped_payload_preview(message_type: MessageType, preview_fields: Vec<MessagePayloadField>, simulation_payload: Vec<SimulationPayloadField>) -> MessagePayloadFields {
     let merged_payload = merge_payload(simulation_payload.clone(), preview_fields);
-    let grouped_payload = if simulation_payload.is_empty() {
-        grouped_preview_fields(merged_payload)
-    } else {
-        merged_payload
-    };
+    let grouped_payload = if simulation_payload.is_empty() { grouped_preview_fields(merged_payload) } else { merged_payload };
 
     let grouped_payload = promote_single_secondary_payload_field(grouped_payload);
     let grouped_payload = promote_secondary_payload_when_primary_is_empty(grouped_payload);
 
     MessagePayloadFields {
         message_type,
-        primary: grouped_payload
-            .iter()
-            .filter(|field| field.display == SimulationPayloadFieldDisplay::Primary)
-            .cloned()
-            .collect(),
-        secondary: grouped_payload
-            .iter()
-            .filter(|field| field.display == SimulationPayloadFieldDisplay::Secondary)
-            .cloned()
-            .collect(),
+        primary: grouped_payload.iter().filter(|field| field.display == SimulationPayloadFieldDisplay::Primary).cloned().collect(),
+        secondary: grouped_payload.iter().filter(|field| field.display == SimulationPayloadFieldDisplay::Secondary).cloned().collect(),
     }
 }
 
@@ -177,13 +160,10 @@ fn preview_primary_keys(payload: &[SimulationPayloadField]) -> HashSet<PayloadMe
     let has_contract_action_payload = keys.iter().any(PayloadMergeKey::is_contract_action_key);
 
     if has_contract_action_payload {
-        let mut primary_keys = [
-            PayloadMergeKey::Kind(SimulationPayloadFieldKind::Contract),
-            PayloadMergeKey::Kind(SimulationPayloadFieldKind::Method),
-        ]
-        .into_iter()
-        .filter(|key| keys.contains(key))
-        .collect::<HashSet<_>>();
+        let mut primary_keys = [PayloadMergeKey::Kind(SimulationPayloadFieldKind::Contract), PayloadMergeKey::Kind(SimulationPayloadFieldKind::Method)]
+            .into_iter()
+            .filter(|key| keys.contains(key))
+            .collect::<HashSet<_>>();
 
         if keys.contains(&PayloadMergeKey::Kind(SimulationPayloadFieldKind::Token)) {
             primary_keys.insert(PayloadMergeKey::Kind(SimulationPayloadFieldKind::Token));
@@ -204,10 +184,7 @@ fn eip712_preview_fields(message: &GemEIP712Message) -> Vec<MessagePayloadField>
     let mut fields = vec![primary_type_payload_field(message)];
 
     if let Some(domain_name) = message.domain.name.as_ref() {
-        fields.insert(
-            0,
-            MessagePayloadField::custom("domain", domain_name.clone(), SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary),
-        );
+        fields.insert(0, MessagePayloadField::custom("domain", domain_name.clone(), SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary));
     }
 
     if let Some(verifying_contract) = message.domain.verifying_contract.as_ref() {
@@ -226,12 +203,7 @@ fn eip712_preview_fields(message: &GemEIP712Message) -> Vec<MessagePayloadField>
 fn primary_type_payload_field(message: &GemEIP712Message) -> MessagePayloadField {
     let primary_type = message.message.first().map(|section| section.name.clone()).unwrap_or_default();
 
-    MessagePayloadField::standard(
-        SimulationPayloadFieldKind::Method,
-        primary_type,
-        SimulationPayloadFieldType::Text,
-        SimulationPayloadFieldDisplay::Secondary,
-    )
+    MessagePayloadField::standard(SimulationPayloadFieldKind::Method, primary_type, SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary)
 }
 
 fn payload_field_from_eip712_value(field: &GemEIP712Value) -> MessagePayloadField {
@@ -251,32 +223,12 @@ fn payload_field_from_eip712_value(field: &GemEIP712Value) -> MessagePayloadFiel
 fn siwe_preview_fields(message: &SiweMessage) -> Vec<MessagePayloadField> {
     vec![
         MessagePayloadField::custom("domain", message.domain.clone(), SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary),
-        MessagePayloadField::custom(
-            "address",
-            message.address.clone(),
-            SimulationPayloadFieldType::Address,
-            SimulationPayloadFieldDisplay::Secondary,
-        ),
+        MessagePayloadField::custom("address", message.address.clone(), SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Secondary),
         MessagePayloadField::custom("uri", message.uri.clone(), SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary),
-        MessagePayloadField::custom(
-            "chainId",
-            message.chain_id.to_string(),
-            SimulationPayloadFieldType::Text,
-            SimulationPayloadFieldDisplay::Secondary,
-        ),
+        MessagePayloadField::custom("chainId", message.chain_id.to_string(), SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary),
         MessagePayloadField::custom("nonce", message.nonce.clone(), SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary),
-        MessagePayloadField::custom(
-            "issuedAt",
-            message.issued_at.clone(),
-            SimulationPayloadFieldType::Timestamp,
-            SimulationPayloadFieldDisplay::Secondary,
-        ),
-        MessagePayloadField::custom(
-            "version",
-            message.version.clone(),
-            SimulationPayloadFieldType::Text,
-            SimulationPayloadFieldDisplay::Secondary,
-        ),
+        MessagePayloadField::custom("issuedAt", message.issued_at.clone(), SimulationPayloadFieldType::Timestamp, SimulationPayloadFieldDisplay::Secondary),
+        MessagePayloadField::custom("version", message.version.clone(), SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary),
     ]
 }
 
@@ -394,14 +346,8 @@ impl MessagePayloadField {
 impl PayloadMergeKey {
     fn is_contract_action_key(&self) -> bool {
         match self {
-            Self::Kind(SimulationPayloadFieldKind::Contract)
-            | Self::Kind(SimulationPayloadFieldKind::Method)
-            | Self::Kind(SimulationPayloadFieldKind::Token)
-            | Self::Kind(SimulationPayloadFieldKind::Spender) => true,
-            Self::Kind(SimulationPayloadFieldKind::Value)
-            | Self::Kind(SimulationPayloadFieldKind::Expiration)
-            | Self::Kind(SimulationPayloadFieldKind::Custom)
-            | Self::Label(_) => false,
+            Self::Kind(SimulationPayloadFieldKind::Contract) | Self::Kind(SimulationPayloadFieldKind::Method) | Self::Kind(SimulationPayloadFieldKind::Token) | Self::Kind(SimulationPayloadFieldKind::Spender) => true,
+            Self::Kind(SimulationPayloadFieldKind::Value) | Self::Kind(SimulationPayloadFieldKind::Expiration) | Self::Kind(SimulationPayloadFieldKind::Custom) | Self::Label(_) => false,
         }
     }
 }
@@ -427,12 +373,7 @@ mod tests {
             preview.primary,
             vec![
                 SimulationPayloadField::custom("domain", "example.com", SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Primary),
-                SimulationPayloadField::custom(
-                    "address",
-                    "AKnL4NNf3DGWZJS6cPknBuEGnVsV4A4m5tgebLHaRSZ9",
-                    SimulationPayloadFieldType::Address,
-                    SimulationPayloadFieldDisplay::Primary
-                ),
+                SimulationPayloadField::custom("address", "AKnL4NNf3DGWZJS6cPknBuEGnVsV4A4m5tgebLHaRSZ9", SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Primary),
             ]
         );
         assert_eq!(
@@ -502,24 +443,9 @@ mod tests {
             }],
         }
         .payload_preview(vec![
-            SimulationPayloadField::standard(
-                SimulationPayloadFieldKind::Contract,
-                "0xContract",
-                SimulationPayloadFieldType::Address,
-                SimulationPayloadFieldDisplay::Primary,
-            ),
-            SimulationPayloadField::standard(
-                SimulationPayloadFieldKind::Method,
-                "Permit Single",
-                SimulationPayloadFieldType::Text,
-                SimulationPayloadFieldDisplay::Primary,
-            ),
-            SimulationPayloadField::standard(
-                SimulationPayloadFieldKind::Spender,
-                "0xSpender",
-                SimulationPayloadFieldType::Address,
-                SimulationPayloadFieldDisplay::Primary,
-            ),
+            SimulationPayloadField::standard(SimulationPayloadFieldKind::Contract, "0xContract", SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Primary),
+            SimulationPayloadField::standard(SimulationPayloadFieldKind::Method, "Permit Single", SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Primary),
+            SimulationPayloadField::standard(SimulationPayloadFieldKind::Spender, "0xSpender", SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Primary),
         ]);
 
         assert_eq!(preview.message_type, MessageType::Eip712);
@@ -539,10 +465,7 @@ mod tests {
                 verifying_contract: None,
                 salts: None,
             },
-            message: vec![GemEIP712Section {
-                name: "Action".into(),
-                values: vec![],
-            }],
+            message: vec![GemEIP712Section { name: "Action".into(), values: vec![] }],
         }
         .payload_preview(vec![SimulationPayloadField::standard(
             SimulationPayloadFieldKind::Contract,
@@ -567,12 +490,7 @@ mod tests {
                 version: "1".into(),
                 issued_at: "2026-03-09T15:48:34.458Z".into(),
             },
-            vec![SimulationPayloadField::custom(
-                "customField",
-                "value",
-                SimulationPayloadFieldType::Text,
-                SimulationPayloadFieldDisplay::Secondary,
-            )],
+            vec![SimulationPayloadField::custom("customField", "value", SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Secondary)],
         );
 
         assert_eq!(preview.primary.len(), 8);

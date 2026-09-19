@@ -258,10 +258,7 @@ mod tests {
             }
         );
 
-        let same = Asset {
-            name: asset.symbol.clone(),
-            ..asset
-        };
+        let same = Asset { name: asset.symbol.clone(), ..asset };
         assert_eq!(
             GemAmountError::InsufficientBalance { asset: same.clone(), requirement }.display(),
             GemAmountErrorDisplay::InsufficientBalance { title: same.symbol }

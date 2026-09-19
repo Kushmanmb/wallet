@@ -55,9 +55,7 @@ impl fmt::Debug for ClientError {
 pub fn decode_json_byte_array(values: Vec<Value>) -> Result<Vec<u8>, ClientError> {
     let mut bytes = Vec::with_capacity(values.len());
     for value in values {
-        let byte = value
-            .as_u64()
-            .ok_or_else(|| ClientError::Serialization("Expected byte array for binary content-type".to_string()))?;
+        let byte = value.as_u64().ok_or_else(|| ClientError::Serialization("Expected byte array for binary content-type".to_string()))?;
         if byte > u8::MAX as u64 {
             return Err(ClientError::Serialization("Binary body byte out of range".to_string()));
         }
@@ -135,10 +133,7 @@ pub fn validate_response(response: &Response) -> Result<(), ClientError> {
 fn validate_http_status(response: &Response) -> Result<(), ClientError> {
     if let Some(status) = response.status {
         if !(200..400).contains(&status) {
-            return Err(ClientError::Http {
-                status,
-                body: response.data.clone(),
-            });
+            return Err(ClientError::Http { status, body: response.data.clone() });
         }
     }
     Ok(())
@@ -178,10 +173,7 @@ mod tests {
                 status: Some(502),
                 data: b"Bad Gateway".to_vec()
             }),
-            Err(ClientError::Http {
-                status: 502,
-                body: b"Bad Gateway".to_vec()
-            })
+            Err(ClientError::Http { status: 502, body: b"Bad Gateway".to_vec() })
         );
         assert_eq!(
             validate_response(&Response {
@@ -194,13 +186,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_response() {
-        assert_eq!(
-            deserialize_response::<bool>(&Response {
-                status: Some(200),
-                data: b"true".to_vec()
-            }),
-            Ok(true)
-        );
+        assert_eq!(deserialize_response::<bool>(&Response { status: Some(200), data: b"true".to_vec() }), Ok(true));
         assert_eq!(
             deserialize_response::<bool>(&Response {
                 status: Some(200),

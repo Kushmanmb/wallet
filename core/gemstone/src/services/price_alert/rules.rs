@@ -101,18 +101,12 @@ pub struct PriceAlertSync {
 pub fn reconcile(local: Vec<PriceAlert>, remote: Vec<PriceAlert>) -> PriceAlertSync {
     let delete_ids = stale(local.iter().map(PriceAlert::id), remote.iter().map(PriceAlert::id));
     let local_notified: HashMap<String, Option<DateTime<Utc>>> = local.iter().map(|alert| (alert.id(), alert.last_notified_at)).collect();
-    let alerts = remote
-        .into_iter()
-        .filter(|alert| local_notified.get(&alert.id()) != Some(&alert.last_notified_at))
-        .collect();
+    let alerts = remote.into_iter().filter(|alert| local_notified.get(&alert.id()) != Some(&alert.last_notified_at)).collect();
     PriceAlertSync { delete_ids, alerts }
 }
 
 pub fn displayed_price_alert_ids(alerts: Vec<PriceAlert>) -> Vec<String> {
-    sorted_price_alerts(alerts.into_iter().filter(PriceAlert::should_display).collect())
-        .iter()
-        .map(PriceAlert::id)
-        .collect()
+    sorted_price_alerts(alerts.into_iter().filter(PriceAlert::should_display).collect()).iter().map(PriceAlert::id).collect()
 }
 
 pub fn price_alert_sections(alerts: Vec<PriceAlertData>) -> Vec<GemPriceAlertSection> {
@@ -153,11 +147,7 @@ pub fn price_alert_toggle(alerts: &[PriceAlert]) -> GemPriceAlertToggle {
 }
 
 pub fn price_alert_row(data: &PriceAlertData, price_currency: Currency) -> GemPriceAlertRow {
-    let PriceAlertData {
-        asset,
-        price: market,
-        price_alert: alert,
-    } = data;
+    let PriceAlertData { asset, price: market, price_alert: alert } = data;
     let current_price = market.map(|price| price.price);
     let price_change_percentage_24h = market.map(|price| price.price_change_percentage_24h);
     let kind = alert_kind(alert);
@@ -168,10 +158,7 @@ pub fn price_alert_row(data: &PriceAlertData, price_currency: Currency) -> GemPr
         };
         GemFormattedNumber::currency(price, currency, GemCurrencyStyle::Currency)
     });
-    let percent = alert
-        .price_percent_change
-        .or(price_change_percentage_24h)
-        .map(|percent| GemFormattedNumber::percentage(percent, percent_style(kind)));
+    let percent = alert.price_percent_change.or(price_change_percentage_24h).map(|percent| GemFormattedNumber::percentage(percent, percent_style(kind)));
 
     let (prefix, suffix) = match kind {
         GemPriceAlertKind::Auto => (text(price), text(percent)),
@@ -228,12 +215,7 @@ fn value_direction(value: Option<f64>) -> Option<PriceAlertDirection> {
     }
 }
 
-pub fn alert_direction(
-    notification_type: PriceAlertNotificationType,
-    input_value: Option<f64>,
-    current_price: Option<f64>,
-    selected_direction: PriceAlertDirection,
-) -> Option<PriceAlertDirection> {
+pub fn alert_direction(notification_type: PriceAlertNotificationType, input_value: Option<f64>, current_price: Option<f64>, selected_direction: PriceAlertDirection) -> Option<PriceAlertDirection> {
     let input_value = input_value.filter(|value| is_positive(*value))?;
     match notification_type {
         PriceAlertNotificationType::Price => match input_value.total_cmp(&current_price.filter(|price| is_positive(*price))?) {
@@ -252,12 +234,7 @@ fn is_positive(value: f64) -> bool {
 
 fn sorted_price_alerts(alerts: Vec<PriceAlert>) -> Vec<PriceAlert> {
     let mut sorted = alerts;
-    sorted.sort_by(|left, right| {
-        price(right)
-            .total_cmp(&price(left))
-            .then(direction(right).cmp(&direction(left)))
-            .then(percent(right).total_cmp(&percent(left)))
-    });
+    sorted.sort_by(|left, right| price(right).total_cmp(&price(left)).then(direction(right).cmp(&direction(left))).then(percent(right).total_cmp(&percent(left))));
     sorted
 }
 
@@ -310,22 +287,10 @@ mod tests {
             ..PriceAlert::new_price(bitcoin.clone(), Currency::USD, 90.0, PriceAlertDirection::Down)
         };
         let alerts = vec![
-            named(
-                Chain::Solana,
-                "Solana",
-                PriceAlert::new_price(solana.clone(), Currency::USD, 200.0, PriceAlertDirection::Up),
-            ),
+            named(Chain::Solana, "Solana", PriceAlert::new_price(solana.clone(), Currency::USD, 200.0, PriceAlertDirection::Up)),
             named(Chain::Bitcoin, "Bitcoin", PriceAlert::new_auto(bitcoin.clone(), Currency::USD)),
-            named(
-                Chain::Bitcoin,
-                "Bitcoin",
-                PriceAlert::new_price(bitcoin.clone(), Currency::USD, 100.0, PriceAlertDirection::Up),
-            ),
-            named(
-                Chain::Bitcoin,
-                "Bitcoin",
-                PriceAlert::new_price(bitcoin.clone(), Currency::USD, 120.0, PriceAlertDirection::Up),
-            ),
+            named(Chain::Bitcoin, "Bitcoin", PriceAlert::new_price(bitcoin.clone(), Currency::USD, 100.0, PriceAlertDirection::Up)),
+            named(Chain::Bitcoin, "Bitcoin", PriceAlert::new_price(bitcoin.clone(), Currency::USD, 120.0, PriceAlertDirection::Up)),
             named(Chain::Bitcoin, "Bitcoin", notified),
             named(Chain::Solana, "Solana", PriceAlert::new_auto(solana.clone(), Currency::USD)),
         ];
@@ -337,10 +302,7 @@ mod tests {
             vec![
                 GemPriceAlertSection {
                     kind: GemPriceAlertSectionKind::Auto,
-                    alert_ids: vec![
-                        PriceAlert::new_auto(bitcoin.clone(), Currency::USD).id(),
-                        PriceAlert::new_auto(solana.clone(), Currency::USD).id(),
-                    ],
+                    alert_ids: vec![PriceAlert::new_auto(bitcoin.clone(), Currency::USD).id(), PriceAlert::new_auto(solana.clone(), Currency::USD).id(),],
                 },
                 GemPriceAlertSection {
                     kind: GemPriceAlertSectionKind::Asset {
@@ -415,10 +377,7 @@ mod tests {
             assert!(is_price(&priced.suffix), "a price alert shows the target it waits for");
         }
 
-        for (direction, label) in [
-            (PriceAlertDirection::Up, GemPriceAlertLabel::IncreasesBy),
-            (PriceAlertDirection::Down, GemPriceAlertLabel::DecreasesBy),
-        ] {
+        for (direction, label) in [(PriceAlertDirection::Up, GemPriceAlertLabel::IncreasesBy), (PriceAlertDirection::Down, GemPriceAlertLabel::DecreasesBy)] {
             let percent = row(PriceAlert::new_price_percent(asset_id.clone(), Currency::USD, 5.0, direction));
             assert_eq!(percent.prefix, GemPriceAlertText::Label { label });
             assert!(is_percent(&percent.suffix), "a percent alert shows its own target");
@@ -437,10 +396,7 @@ mod tests {
             }
         );
 
-        let undirected = PriceAlert {
-            price_direction: None,
-            ..directed
-        };
+        let undirected = PriceAlert { price_direction: None, ..directed };
         let row = price_alert_row(&PriceAlertData::mock(undirected.clone(), Some(100.0), None), Currency::USD);
         assert_eq!(row.kind, GemPriceAlertKind::Auto);
         assert_eq!(
@@ -473,11 +429,7 @@ mod tests {
                 direction: Some(PriceAlertDirection::Down),
             }
         );
-        assert_eq!(
-            price_alert_row(&PriceAlertData::mock(auto.clone(), Some(100.0), None), Currency::USD).direction,
-            None,
-            "no change is neutral"
-        );
+        assert_eq!(price_alert_row(&PriceAlertData::mock(auto.clone(), Some(100.0), None), Currency::USD).direction, None, "no change is neutral");
 
         let over = PriceAlert::new_price(asset_id.clone(), Currency::USD, 120.0, PriceAlertDirection::Up);
         assert_eq!(
@@ -502,9 +454,7 @@ mod tests {
         assert_eq!(
             (increase_row.prefix, increase_row.suffix),
             (
-                GemPriceAlertText::Label {
-                    label: GemPriceAlertLabel::IncreasesBy
-                },
+                GemPriceAlertText::Label { label: GemPriceAlertLabel::IncreasesBy },
                 GemPriceAlertText::Number {
                     value: GemFormattedNumber::percentage(5.0, GemPercentageStyle::Unsigned)
                 }
@@ -529,10 +479,7 @@ mod tests {
         );
 
         let decrease = PriceAlert::new_price_percent(asset_id.clone(), Currency::USD, 5.0, PriceAlertDirection::Down);
-        assert_eq!(
-            price_alert_row(&PriceAlertData::mock(decrease.clone(), Some(100.0), None), Currency::USD).kind,
-            GemPriceAlertKind::Decrease
-        );
+        assert_eq!(price_alert_row(&PriceAlertData::mock(decrease.clone(), Some(100.0), None), Currency::USD).kind, GemPriceAlertKind::Decrease);
 
         assert_eq!(
             price_alert_row(&PriceAlertData::mock(auto.clone(), None, None), Currency::USD).direction,
@@ -540,10 +487,7 @@ mod tests {
             "an alert with no price to compare shows no direction"
         );
 
-        let priced = PriceAlert {
-            price: Some(120.0),
-            ..auto.clone()
-        };
+        let priced = PriceAlert { price: Some(120.0), ..auto.clone() };
         assert_eq!(
             price_alert_row(&PriceAlertData::mock(priced.clone(), Some(100.0), Some(-2.0)), Currency::USD),
             GemPriceAlertRow {
@@ -601,15 +545,7 @@ mod tests {
         let mut notified_auto = PriceAlert::new_auto(AssetId::from_chain(Chain::Bitcoin), Currency::USD);
         notified_auto.last_notified_at = DateTime::<Utc>::from_timestamp(10, 0);
 
-        let displayed = displayed_price_alert_ids(vec![
-            percent.clone(),
-            notified.clone(),
-            low_down.clone(),
-            auto.clone(),
-            high.clone(),
-            notified_auto.clone(),
-            low_up.clone(),
-        ]);
+        let displayed = displayed_price_alert_ids(vec![percent.clone(), notified.clone(), low_down.clone(), auto.clone(), high.clone(), notified_auto.clone(), low_up.clone()]);
 
         assert_eq!(displayed, vec![high.id(), low_up.id(), low_down.id(), percent.id(), auto.id(), notified_auto.id()]);
         assert!(!displayed.contains(&notified.id()));
@@ -631,23 +567,11 @@ mod tests {
         assert_eq!(alert_direction(PriceAlertNotificationType::Price, Some(-200.0), Some(150.0), PriceAlertDirection::Up), None);
         assert_eq!(alert_direction(PriceAlertNotificationType::Price, Some(0.0), Some(150.0), PriceAlertDirection::Up), None);
         assert_eq!(alert_direction(PriceAlertNotificationType::Price, None, Some(150.0), PriceAlertDirection::Up), None);
-        assert_eq!(
-            alert_direction(PriceAlertNotificationType::Price, Some(f64::NAN), Some(150.0), PriceAlertDirection::Up),
-            None
-        );
+        assert_eq!(alert_direction(PriceAlertNotificationType::Price, Some(f64::NAN), Some(150.0), PriceAlertDirection::Up), None);
 
-        assert_eq!(
-            alert_direction(PriceAlertNotificationType::PricePercentChange, Some(5.0), None, PriceAlertDirection::Down),
-            down
-        );
-        assert_eq!(
-            alert_direction(PriceAlertNotificationType::PricePercentChange, Some(5.0), Some(150.0), PriceAlertDirection::Up),
-            up
-        );
-        assert_eq!(
-            alert_direction(PriceAlertNotificationType::PricePercentChange, Some(-5.0), Some(150.0), PriceAlertDirection::Up),
-            None
-        );
+        assert_eq!(alert_direction(PriceAlertNotificationType::PricePercentChange, Some(5.0), None, PriceAlertDirection::Down), down);
+        assert_eq!(alert_direction(PriceAlertNotificationType::PricePercentChange, Some(5.0), Some(150.0), PriceAlertDirection::Up), up);
+        assert_eq!(alert_direction(PriceAlertNotificationType::PricePercentChange, Some(-5.0), Some(150.0), PriceAlertDirection::Up), None);
 
         assert_eq!(alert_direction(PriceAlertNotificationType::Auto, Some(5.0), Some(150.0), PriceAlertDirection::Up), None);
     }

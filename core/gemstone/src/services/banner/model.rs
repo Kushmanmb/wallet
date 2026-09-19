@@ -110,15 +110,11 @@ pub struct GemBannerKey {
 #[uniffi::export]
 impl GemBannerKey {
     pub fn identifier(&self) -> String {
-        [
-            self.wallet_id.as_ref().map(WalletId::id),
-            self.asset_id.as_ref().map(ToString::to_string),
-            Some(self.event.as_ref().to_string()),
-        ]
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>()
-        .join("_")
+        [self.wallet_id.as_ref().map(WalletId::id), self.asset_id.as_ref().map(ToString::to_string), Some(self.event.as_ref().to_string())]
+            .into_iter()
+            .flatten()
+            .collect::<Vec<_>>()
+            .join("_")
     }
 }
 
@@ -197,10 +193,7 @@ mod tests {
             rank_score: 42,
             ..AssetMetaData::mock()
         };
-        let empty = GemAssetBalance {
-            is_active: false,
-            ..GemAssetBalance::mock()
-        };
+        let empty = GemAssetBalance { is_active: false, ..GemAssetBalance::mock() };
         let funded = GemAssetBalance {
             staked: GemBigUint::from(5u32),
             is_active: true,

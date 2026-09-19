@@ -47,12 +47,7 @@ pub struct AssetBasic {
 
 impl AssetBasic {
     pub fn new(asset: Asset, properties: AssetProperties, score: AssetScore) -> Self {
-        Self {
-            asset,
-            properties,
-            score,
-            price: None,
-        }
+        Self { asset, properties, score, price: None }
     }
 }
 

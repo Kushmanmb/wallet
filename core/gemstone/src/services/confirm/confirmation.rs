@@ -6,10 +6,7 @@ use primitives::currency::Currency;
 use primitives::{AddressName, BlockExplorerLink, Chain, PerpetualModifyConfirmData, SimulationResult, Wallet};
 
 use super::rules::preload_simulation;
-use super::{
-    GemAcquireAssetFlow, GemConfirmError, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemExecuteResult,
-    GemTransferAmountResult,
-};
+use super::{GemAcquireAssetFlow, GemConfirmError, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemExecuteResult, GemTransferAmountResult};
 use crate::models::list::GemListRow;
 use crate::services::transfer::GemTransferData;
 use crate::services::wallet::GemKeystoreAuthentication;
@@ -109,9 +106,7 @@ impl GemConfirmation {
             GemTransferAmountResult::Error { error } => return Err(error),
         };
         let simulation = screen.and_then(|screen| screen.simulation.result);
-        self.service
-            .execute(self.wallet.clone(), preload.confirm_data, amount.value, amount.network_fee, simulation)
-            .await
+        self.service.execute(self.wallet.clone(), preload.confirm_data, amount.value, amount.network_fee, simulation).await
     }
 
     pub async fn state(&self) -> Result<GemConfirmLoad, GemConfirmError> {
@@ -157,9 +152,7 @@ mod tests {
             let transfer = GemTransferData {
                 recipient: GemRecipient::address("THTR75o8xXAgCTQqpiot2AFRAjvW1tSbVV".into()),
                 value: 0.into(),
-                ..GemTransferData::mock(TransactionInputType::Transfer {
-                    asset: Asset::from_chain(Chain::Tron),
-                })
+                ..GemTransferData::mock(TransactionInputType::Transfer { asset: Asset::from_chain(Chain::Tron) })
             };
             let confirmation = testkit.service.confirmation(wallet.clone(), transfer, None);
 
@@ -177,10 +170,7 @@ mod tests {
             };
             assert!(confirmation.load(options).await.is_err());
             assert_eq!(*testkit.balances.requests.lock().unwrap(), vec![wallet.id.clone(), wallet.id]);
-            assert!(
-                testkit.balances.balance_writes.lock().unwrap().is_empty(),
-                "confirming reads balances and never writes them"
-            );
+            assert!(testkit.balances.balance_writes.lock().unwrap().is_empty(), "confirming reads balances and never writes them");
             assert!(testkit.balances.enable_writes.lock().unwrap().is_empty());
         });
     }
@@ -193,19 +183,12 @@ mod tests {
             let transfer = GemTransferData {
                 recipient: GemRecipient::address("THTR75o8xXAgCTQqpiot2AFRAjvW1tSbVV".into()),
                 value: 0.into(),
-                ..GemTransferData::mock(TransactionInputType::Transfer {
-                    asset: Asset::from_chain(Chain::Tron),
-                })
+                ..GemTransferData::mock(TransactionInputType::Transfer { asset: Asset::from_chain(Chain::Tron) })
             };
             let confirmation = testkit.service.confirmation(wallet, transfer, None);
             let shown = confirmation.state().await.unwrap();
             let stale = GemConfirmLoad {
-                address_name: Some(AddressName::mock(
-                    "THTR75o8xXAgCTQqpiot2AFRAjvW1tSbVV",
-                    "stale",
-                    AddressType::Address,
-                    VerificationStatus::Unverified,
-                )),
+                address_name: Some(AddressName::mock("THTR75o8xXAgCTQqpiot2AFRAjvW1tSbVV", "stale", AddressType::Address, VerificationStatus::Unverified)),
                 ..shown
             };
 
@@ -213,10 +196,7 @@ mod tests {
             let newer = confirmation.latest_load.fetch_add(1, Ordering::SeqCst) + 1;
 
             assert!(matches!(confirmation.store_latest(older, Ok(stale.clone())).await, Err(GemConfirmError::Cancelled)));
-            assert!(matches!(
-                confirmation.store_latest(older, Err(GemConfirmError::Offline)).await,
-                Err(GemConfirmError::Cancelled)
-            ));
+            assert!(matches!(confirmation.store_latest(older, Err(GemConfirmError::Offline)).await, Err(GemConfirmError::Cancelled)));
             assert!(confirmation.state().await.unwrap().address_name.is_none());
 
             assert!(confirmation.store_latest(newer, Ok(stale)).await.is_ok());
@@ -232,9 +212,7 @@ mod tests {
             let transfer = GemTransferData {
                 recipient: GemRecipient::address("THTR75o8xXAgCTQqpiot2AFRAjvW1tSbVV".into()),
                 value: 0.into(),
-                ..GemTransferData::mock(TransactionInputType::Transfer {
-                    asset: Asset::from_chain(Chain::Tron),
-                })
+                ..GemTransferData::mock(TransactionInputType::Transfer { asset: Asset::from_chain(Chain::Tron) })
             };
             let confirmation = testkit.service.confirmation(wallet, transfer, None);
 
@@ -257,9 +235,7 @@ mod tests {
             let transfer = GemTransferData {
                 recipient: GemRecipient::address("THTR75o8xXAgCTQqpiot2AFRAjvW1tSbVV".into()),
                 value: 0.into(),
-                ..GemTransferData::mock(TransactionInputType::Transfer {
-                    asset: Asset::from_chain(Chain::Tron),
-                })
+                ..GemTransferData::mock(TransactionInputType::Transfer { asset: Asset::from_chain(Chain::Tron) })
             };
             let confirmation = testkit.service.confirmation(wallet, transfer, Some(simulation.clone()));
 

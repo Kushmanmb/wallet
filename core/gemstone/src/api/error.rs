@@ -67,10 +67,7 @@ mod tests {
 
     #[test]
     fn test_an_opaque_error_body_keeps_its_status_and_text() {
-        let error = GemApiError::from(ClientError::Http {
-            status: 502,
-            body: b"Bad Gateway".to_vec(),
-        });
+        let error = GemApiError::from(ClientError::Http { status: 502, body: b"Bad Gateway".to_vec() });
 
         assert!(matches!(error, GemApiError::Http { status: 502, .. }));
         assert_eq!(error.to_string(), "502: Bad Gateway");

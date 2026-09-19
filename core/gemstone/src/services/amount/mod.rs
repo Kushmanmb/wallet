@@ -8,8 +8,7 @@ use std::sync::Arc;
 use primitives::{Asset, Currency, PerpetualDirection};
 
 pub use model::{
-    GemAmountEarnType, GemAmountEntry, GemAmountEquivalent, GemAmountError, GemAmountInput, GemAmountInputType, GemAmountMaxEntry, GemAmountPerpetualPosition, GemAmountStakeType,
-    GemAmountTransfer, GemAmountType, GemPerpetualAutoclose,
+    GemAmountEarnType, GemAmountEntry, GemAmountEquivalent, GemAmountError, GemAmountInput, GemAmountInputType, GemAmountMaxEntry, GemAmountPerpetualPosition, GemAmountStakeType, GemAmountTransfer, GemAmountType, GemPerpetualAutoclose,
 };
 
 use crate::config::perpetual_config::{leverage_options, select_leverage};
@@ -49,28 +48,14 @@ impl GemAmountService {
     }
 
     pub fn perpetual_autoclose(&self, price: f64, direction: PerpetualDirection, leverage: u8) -> GemPerpetualAutoclose {
-        rules::perpetual_autoclose(
-            price,
-            direction,
-            leverage,
-            self.preferences.get_perpetual_take_profit_percent(),
-            self.preferences.get_perpetual_stop_loss_percent(),
-        )
+        rules::perpetual_autoclose(price, direction, leverage, self.preferences.get_perpetual_take_profit_percent(), self.preferences.get_perpetual_stop_loss_percent())
     }
 
     pub fn perpetual_autoclose_row(&self, take_profit: Option<f64>, stop_loss: Option<f64>) -> GemListRow {
         perpetual_rules::amount_autoclose_row(take_profit, stop_loss)
     }
 
-    pub fn perpetual_transfer_data(
-        &self,
-        action: GemPerpetualPositionAction,
-        value: GemBigInt,
-        use_max_amount: bool,
-        leverage: u8,
-        take_profit: Option<f64>,
-        stop_loss: Option<f64>,
-    ) -> GemTransferData {
+    pub fn perpetual_transfer_data(&self, action: GemPerpetualPositionAction, value: GemBigInt, use_max_amount: bool, leverage: u8, take_profit: Option<f64>, stop_loss: Option<f64>) -> GemTransferData {
         perpetual_rules::order_transfer(action, value, use_max_amount, leverage, take_profit, stop_loss)
     }
 
@@ -97,10 +82,7 @@ impl GemAmountService {
     pub async fn earn_transfer_data(&self, asset: Asset, earn_type: GemEarnType, value: GemBigInt, use_max_amount: bool) -> Result<GemTransferData, GemServiceError> {
         let wallet = self.session.current_wallet().await?;
         let account = required_account(&wallet, asset.chain())?;
-        let data = self
-            .stake
-            .get_earn_data(asset.id.clone(), account.address.clone(), value.to_string(), earn_type.clone())
-            .await?;
+        let data = self.stake.get_earn_data(asset.id.clone(), account.address.clone(), value.to_string(), earn_type.clone()).await?;
         Ok(transfer_rules::earn_transfer_data(asset, earn_type, data, value, use_max_amount))
     }
 }

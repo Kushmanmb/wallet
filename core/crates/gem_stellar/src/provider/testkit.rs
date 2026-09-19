@@ -29,10 +29,7 @@ impl Account {
             sequence: 1,
             balances: vec![],
             thresholds: Thresholds { med_threshold: 0 },
-            signers: vec![Signer {
-                key: address.to_string(),
-                weight: 1,
-            }],
+            signers: vec![Signer { key: address.to_string(), weight: 1 }],
         }
     }
 }

@@ -139,9 +139,7 @@ mod tests {
 
     #[test]
     fn test_a_new_url_clears_the_previous_answer() {
-        let checked = GemAddNodeSession::new(Chain::Ethereum)
-            .on_input("https://node".to_string())
-            .on_checked("https://node".to_string(), GemNodeCheck::mock());
+        let checked = GemAddNodeSession::new(Chain::Ethereum).on_input("https://node".to_string()).on_checked("https://node".to_string(), GemNodeCheck::mock());
         assert!(checked.view_state().can_import);
 
         let retyped = checked.on_input("https://other".to_string());
@@ -164,12 +162,7 @@ mod tests {
             .on_checked("https://node".to_string(), GemNodeCheck::mock())
             .on_check_failed("https://node".to_string(), Some(GemAddNodeError::InvalidNetworkId));
 
-        assert_eq!(
-            failed.view_state().phase,
-            GemAddNodePhase::Failed {
-                error: GemErrorText::InvalidNetworkId
-            }
-        );
+        assert_eq!(failed.view_state().phase, GemAddNodePhase::Failed { error: GemErrorText::InvalidNetworkId });
         assert!(!failed.view_state().can_import);
     }
 
@@ -178,10 +171,7 @@ mod tests {
         let session = GemAddNodeSession::new(Chain::Ethereum).on_input("https://node".to_string()).on_checking();
 
         assert_eq!(
-            session
-                .clone()
-                .on_check_failed("https://node".to_string(), Some(GemAddNodeError::Gateway(GatewayError::Offline)))
-                .error,
+            session.clone().on_check_failed("https://node".to_string(), Some(GemAddNodeError::Gateway(GatewayError::Offline))).error,
             Some(GemErrorText::NetworkOffline),
             "a transport failure does not pretend to be a bad url"
         );

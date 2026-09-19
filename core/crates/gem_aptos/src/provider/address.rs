@@ -34,9 +34,7 @@ mod chain_integration_tests {
     async fn test_get_address_status_rotated_key() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let client = create_aptos_test_client();
 
-        let status = client
-            .get_address_status("0xffd7f0d7b24ba690657dd2aa7ccb754c4be938e4fb970c72eef966d664bd1a45".to_string())
-            .await?;
+        let status = client.get_address_status("0xffd7f0d7b24ba690657dd2aa7ccb754c4be938e4fb970c72eef966d664bd1a45".to_string()).await?;
 
         assert_eq!(status, vec![AddressStatus::ExternallyControlled]);
 

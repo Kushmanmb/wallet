@@ -55,10 +55,7 @@ pub fn map_balance_staking(balance: &StakeBalance, chain: Chain) -> Result<Asset
     let available_biguint = BigNumberFormatter::value_from_amount_biguint(&balance.delegated, native_decimals).unwrap_or_default();
     let pending_biguint = BigNumberFormatter::value_from_amount_biguint(&balance.total_pending_withdrawal, native_decimals).unwrap_or_default();
 
-    Ok(AssetBalance::new_balance(
-        chain.as_asset_id(),
-        Balance::stake_balance(available_biguint, pending_biguint, None),
-    ))
+    Ok(AssetBalance::new_balance(chain.as_asset_id(), Balance::stake_balance(available_biguint, pending_biguint, None)))
 }
 
 #[cfg(test)]

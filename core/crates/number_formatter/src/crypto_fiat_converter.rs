@@ -63,10 +63,7 @@ mod tests {
         assert_eq!(CryptoFiatConverter::to_fiat("1000000000000000000", 18, 2500.5).unwrap(), "2500.5");
         assert_eq!(CryptoFiatConverter::to_fiat("1092000000000", 18, 3520.42).unwrap(), "0.00384429864");
         assert_eq!(CryptoFiatConverter::to_fiat("0", 8, 50_000.0).unwrap(), "0");
-        assert_eq!(
-            CryptoFiatConverter::to_fiat("123456789012345678901234567890", 18, 2.0).unwrap(),
-            "246913578024.69135780246913578"
-        );
+        assert_eq!(CryptoFiatConverter::to_fiat("123456789012345678901234567890", 18, 2.0).unwrap(), "246913578024.69135780246913578");
         assert!(CryptoFiatConverter::to_fiat("abc", 8, 50_000.0).is_err());
     }
 

@@ -18,9 +18,7 @@ pub struct CoinGeckoPricesProvider<C: Client = ReqwestClient> {
 
 impl CoinGeckoPricesProvider<ReqwestClient> {
     pub fn new(config: RemoteProviderConfig) -> Self {
-        Self {
-            client: CoinGeckoClient::new(config),
-        }
+        Self { client: CoinGeckoClient::new(config) }
     }
 }
 
@@ -69,14 +67,7 @@ impl<C: Client + 'static> PriceAssetsProvider for CoinGeckoPricesProvider<C> {
     }
 
     async fn get_assets_new(&self) -> Result<Vec<PriceProviderAsset>, Box<dyn Error + Send + Sync>> {
-        let ids: HashSet<String> = self
-            .client
-            .get_search_trending()
-            .await?
-            .get_coins_ids()
-            .into_iter()
-            .chain(self.client.get_coin_list_new().await?.ids())
-            .collect();
+        let ids: HashSet<String> = self.client.get_search_trending().await?.get_coins_ids().into_iter().chain(self.client.get_coin_list_new().await?.ids()).collect();
         if ids.is_empty() {
             return Ok(vec![]);
         }
@@ -86,10 +77,7 @@ impl<C: Client + 'static> PriceAssetsProvider for CoinGeckoPricesProvider<C> {
 
     async fn get_mappings_for_asset_id(&self, asset_id: &AssetId) -> Result<Vec<AssetPriceMapping>, Box<dyn Error + Send + Sync>> {
         let Some(token_id) = asset_id.token_id.as_deref() else {
-            return Ok(get_coingecko_market_id_for_chain(asset_id.chain)
-                .map(|id| AssetPriceMapping::new(asset_id.clone(), id.to_string()))
-                .into_iter()
-                .collect());
+            return Ok(get_coingecko_market_id_for_chain(asset_id.chain).map(|id| AssetPriceMapping::new(asset_id.clone(), id.to_string())).into_iter().collect());
         };
         let Some(platform_id) = get_coingecko_platform_id_for_chain(asset_id.chain) else {
             return Ok(vec![]);
@@ -117,11 +105,7 @@ impl<C: Client + 'static> PriceAssetsProvider for CoinGeckoPricesProvider<C> {
             match optional_coin(self.client.get_coin(&provider_price_id).await)? {
                 Some(coin_info) => metadata.extend(map_coin_info_metadata(mappings, coin_info)),
                 None => {
-                    warn_with_fields!(
-                        "skip unavailable price asset metadata",
-                        provider = PriceProvider::Coingecko.id(),
-                        provider_price_id = provider_price_id.as_str()
-                    );
+                    warn_with_fields!("skip unavailable price asset metadata", provider = PriceProvider::Coingecko.id(), provider_price_id = provider_price_id.as_str());
                 }
             }
         }

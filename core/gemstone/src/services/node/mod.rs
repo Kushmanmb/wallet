@@ -56,16 +56,7 @@ impl GemNodeService {
         if !rules::can_delete_node(chain, &url) {
             return Ok(());
         }
-        self.store
-            .add_node(
-                chain,
-                Node {
-                    url,
-                    status: NodeState::Active,
-                    priority: 0,
-                },
-            )
-            .await
+        self.store.add_node(chain, Node { url, status: NodeState::Active, priority: 0 }).await
     }
 
     pub async fn delete_node(&self, chain: Chain, url: String) -> Result<(), GemServiceError> {

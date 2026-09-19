@@ -20,8 +20,7 @@ use super::{
     solana, ton,
 };
 use crate::{
-    FetchQuoteData, ProviderData, ProviderType, Quote, QuoteRequest, Route, RpcClient, RpcProvider, SwapAmountMode, SwapResult, Swapper, SwapperChainAsset, SwapperError,
-    SwapperProvider, SwapperQuoteData,
+    FetchQuoteData, ProviderData, ProviderType, Quote, QuoteRequest, Route, RpcClient, RpcProvider, SwapAmountMode, SwapResult, Swapper, SwapperChainAsset, SwapperError, SwapperProvider, SwapperQuoteData,
     approval::{check_approval_erc20, check_approval_trc20},
     client_factory::create_ton_client,
     config::get_swap_proxy_url,
@@ -205,17 +204,7 @@ where
         let spender = quote_response.router_address().ok_or(SwapperError::InvalidRoute)?;
         let amount = U256::from_str(&quote.from_value.to_string()).map_err(SwapperError::from)?;
         let approval = match chain {
-            RelayChain::Evm(_) => {
-                check_approval_erc20(
-                    quote.request.wallet_address.clone(),
-                    token,
-                    spender,
-                    amount,
-                    self.rpc_provider.clone(),
-                    &from_asset_id.chain,
-                )
-                .await?
-            }
+            RelayChain::Evm(_) => check_approval_erc20(quote.request.wallet_address.clone(), token, spender, amount, self.rpc_provider.clone(), &from_asset_id.chain).await?,
             RelayChain::Tron => {
                 let spender = TronAddress::parse_hex_or_base58(&spender).map_err(|_| SwapperError::InvalidRoute)?.to_string();
                 check_approval_trc20(quote.request.wallet_address.clone(), token, spender, amount, self.rpc_provider.clone()).await?
@@ -339,9 +328,7 @@ mod swap_integration_tests {
     use crate::{SwapperQuoteAsset, alien::reqwest_provider::NativeProvider, models::Options};
     use primitives::{
         AssetId,
-        asset_constants::{
-            BASE_USDC_ASSET_ID, CELO_WETH_TOKEN_ID, SMARTCHAIN_USDT_ASSET_ID, SOLANA_USDC_ASSET_ID, SOLANA_USDT_ASSET_ID, TEMPO_BRIDGED_USDC_ASSET_ID, TRON_USDT_ASSET_ID,
-        },
+        asset_constants::{BASE_USDC_ASSET_ID, CELO_WETH_TOKEN_ID, SMARTCHAIN_USDT_ASSET_ID, SOLANA_USDC_ASSET_ID, SOLANA_USDT_ASSET_ID, TEMPO_BRIDGED_USDC_ASSET_ID, TRON_USDT_ASSET_ID},
         swap::{SwapQuoteDataType, SwapStatus},
         testkit::signer_mock::TEST_TON_SENDER,
     };
@@ -364,9 +351,7 @@ mod swap_integration_tests {
         assert!(quote.to_value > BigUint::ZERO);
         assert_eq!((data.value, data.data_type, data.approval), (quote.from_value, SwapQuoteDataType::Transfer, None));
         assert!(data.to.starts_with("bc1q"));
-        let result = relay
-            .get_swap_result(Chain::Bitcoin, "4e8707e3247bce0797315699ef78b6531cd0776e9dc186ac54512f17b5c04782")
-            .await?;
+        let result = relay.get_swap_result(Chain::Bitcoin, "4e8707e3247bce0797315699ef78b6531cd0776e9dc186ac54512f17b5c04782").await?;
         assert_eq!(result.status, SwapStatus::Completed);
         assert_eq!(result.metadata.unwrap().from_asset, AssetId::from_chain(Chain::Bitcoin));
         Ok(())
@@ -547,9 +532,7 @@ mod swap_integration_tests {
         assert_eq!(quote.from_value, reverse_request.value);
         assert!(quote.to_value > BigUint::ZERO);
 
-        let result = relay
-            .get_swap_result(Chain::Ton, "e86159ff0662a587649bc1d2ff0cd146e6628c3cc37396f7b680bd28260f44b5")
-            .await?;
+        let result = relay.get_swap_result(Chain::Ton, "e86159ff0662a587649bc1d2ff0cd146e6628c3cc37396f7b680bd28260f44b5").await?;
         assert_eq!(result.status, SwapStatus::Completed);
         assert_eq!(result.metadata.unwrap().from_asset, AssetId::from_chain(Chain::Ton));
 

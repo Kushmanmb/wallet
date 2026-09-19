@@ -118,12 +118,8 @@ impl GemAddressStore for MemoryAddressStore {
     }
 }
 
-pub const PHRASE: [&str; 12] = [
-    "shoot", "island", "position", "soft", "burden", "budget", "tooth", "cruel", "issue", "economy", "destroy", "above",
-];
-pub const OTHER_PHRASE: [&str; 12] = [
-    "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "about",
-];
+pub const PHRASE: [&str; 12] = ["shoot", "island", "position", "soft", "burden", "budget", "tooth", "cruel", "issue", "economy", "destroy", "above"];
+pub const OTHER_PHRASE: [&str; 12] = ["abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "about"];
 
 pub struct WalletTestkit {
     pub service: Arc<GemWalletService>,
@@ -187,9 +183,6 @@ impl WalletTestkit {
 
     pub fn lock_out(&self, wallet: &Wallet) {
         let password = decode_password(&self.service.password.get_password(false).unwrap());
-        self.service
-            .keystore
-            .change_password(keystore_id_for_wallet(wallet.id.id()), password, b"other".to_vec())
-            .unwrap();
+        self.service.keystore.change_password(keystore_id_for_wallet(wallet.id.id()), password, b"other".to_vec()).unwrap();
     }
 }

@@ -1,6 +1,4 @@
-use primitives::{
-    Asset, AssetId, AssetMetaData, AssetType, BalanceMetadata, BannerEvent, BlockExplorerLink, Chain, Currency, PriceAlert, RecentActivityType, VerificationStatus, WalletType,
-};
+use primitives::{Asset, AssetId, AssetMetaData, AssetType, BalanceMetadata, BannerEvent, BlockExplorerLink, Chain, Currency, PriceAlert, RecentActivityType, VerificationStatus, WalletType};
 
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::list::{GemListRow, GemListSectionTitle};
@@ -324,10 +322,7 @@ mod tests {
     #[test]
     fn test_action_filters_gate_on_the_balance_each_action_can_spend() {
         assert_eq!(GemAssetAction::Send.filters(), vec![GemAssetFilter::Enabled, GemAssetFilter::HasBalance]);
-        assert_eq!(
-            GemAssetAction::SwapPay.filters(),
-            vec![GemAssetFilter::Enabled, GemAssetFilter::Swappable, GemAssetFilter::HasAvailableBalance]
-        );
+        assert_eq!(GemAssetAction::SwapPay.filters(), vec![GemAssetFilter::Enabled, GemAssetFilter::Swappable, GemAssetFilter::HasAvailableBalance]);
         assert_eq!(GemAssetAction::SwapReceive.filters(), vec![GemAssetFilter::Enabled, GemAssetFilter::Swappable]);
         assert_eq!(GemAssetAction::Buy.filters(), vec![GemAssetFilter::Enabled, GemAssetFilter::Buyable]);
         assert_eq!(GemAssetAction::Sell.filters(), vec![GemAssetFilter::Enabled, GemAssetFilter::Sellable]);

@@ -56,19 +56,9 @@ impl FiatQuoteTestkit {
             wallets: Mutex::new(vec![wallet.clone()]),
             ..Default::default()
         });
-        let session = Arc::new(GemWalletSessionService::new(
-            Arc::new(MemoryWalletSessionStore {
-                current: Mutex::new(Some(wallet.id)),
-            }),
-            wallets.clone(),
-        ));
+        let session = Arc::new(GemWalletSessionService::new(Arc::new(MemoryWalletSessionStore { current: Mutex::new(Some(wallet.id)) }), wallets.clone()));
         let provider = Arc::new(TestAlienProvider::with_json(200, r#"{"redirectUrl":"https://provider.example/checkout"}"#));
-        let gateway = Arc::new(GemGateway::new(
-            provider.clone(),
-            Arc::new(GemNodeService::mock()),
-            preferences_store,
-            Arc::new(EmptyPreferences),
-        ));
+        let gateway = Arc::new(GemGateway::new(provider.clone(), Arc::new(GemNodeService::mock()), preferences_store, Arc::new(EmptyPreferences)));
         let asset_store = Arc::new(MemoryAssetStore {
             assets: Mutex::new(vec![AssetBasic::new(asset.clone(), AssetProperties::default(asset.id.clone()), AssetScore::default())]),
             ..Default::default()
@@ -82,14 +72,7 @@ impl FiatQuoteTestkit {
             session.clone(),
         ));
         let balances = Arc::new(MemoryBalanceStore::default());
-        let balance = Arc::new(GemBalanceService::new(
-            gateway,
-            wallets,
-            asset_store,
-            balances.clone(),
-            assets.clone(),
-            Arc::new(SubscriptionTestkit::new(&[], &[]).service),
-        ));
+        let balance = Arc::new(GemBalanceService::new(gateway, wallets, asset_store, balances.clone(), assets.clone(), Arc::new(SubscriptionTestkit::new(&[], &[]).service)));
         let fiat = Arc::new(GemFiatService::new(
             Arc::new(GemDeviceApiClient::new(provider, Arc::new(GemDeviceKeyService::new(Arc::new(EmptyPreferences))))),
             assets,

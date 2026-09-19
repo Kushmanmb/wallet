@@ -165,10 +165,7 @@ impl GemPreferencesService {
 
 impl GemPreferencesService {
     pub fn get_chart_period(&self) -> ChartPeriod {
-        self.store
-            .get(CHART_PERIOD.to_string())
-            .and_then(|value| ChartPeriod::from_str(&value).ok())
-            .unwrap_or(ChartPeriod::Day)
+        self.store.get(CHART_PERIOD.to_string()).and_then(|value| ChartPeriod::from_str(&value).ok()).unwrap_or(ChartPeriod::Day)
     }
 
     pub fn set_chart_period(&self, period: ChartPeriod) -> Result<(), GemServiceError> {
@@ -219,10 +216,7 @@ impl GemPreferencesService {
     }
 
     pub fn get_perpetual_chart_period(&self) -> ChartPeriod {
-        self.store
-            .get(PERPETUAL_CHART_PERIOD.to_string())
-            .and_then(|value| ChartPeriod::from_str(&value).ok())
-            .unwrap_or(ChartPeriod::Day)
+        self.store.get(PERPETUAL_CHART_PERIOD.to_string()).and_then(|value| ChartPeriod::from_str(&value).ok()).unwrap_or(ChartPeriod::Day)
     }
     pub fn set_perpetual_chart_period(&self, period: ChartPeriod) -> Result<(), GemServiceError> {
         self.store.set(PERPETUAL_CHART_PERIOD.to_string(), period.as_ref().to_string())

@@ -36,13 +36,7 @@ impl GemAddressDetailsService {
         let chain = details.chain;
         let (balances, name) = futures::join!(self.fetch_balances(chain, details.address.clone()), self.names.address_name(chain, details.address.clone()));
         let link = self.explorer.get_address_url(chain, details.address.clone());
-        rules::details(
-            chain,
-            details.address.clone(),
-            rules::display_name(name.ok().flatten(), &details.address),
-            link,
-            details.load().data(balances),
-        )
+        rules::details(chain, details.address.clone(), rules::display_name(name.ok().flatten(), &details.address), link, details.load().data(balances))
     }
 }
 

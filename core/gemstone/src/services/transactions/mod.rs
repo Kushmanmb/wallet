@@ -14,9 +14,9 @@ use primitives::{AssetId, Chain, Wallet, WalletId};
 
 pub use details::GemTransactionDetailsService;
 pub use model::{
-    GemAmountSign, GemSwapAgain, GemSwapProgress, GemSwapProgressStep, GemTransactionAmount, GemTransactionDetailRow, GemTransactionDetailRows, GemTransactionDetailSection,
-    GemTransactionFilter, GemTransactionHeader, GemTransactionHeaderAction, GemTransactionHeaderKind, GemTransactionParticipant, GemTransactionParticipantRole, GemTransactionRow,
-    GemTransactionRowSubtitle, GemTransactionRowValue, GemTransactionStateTone, GemTransactionStatus, GemTransactionTitle,
+    GemAmountSign, GemSwapAgain, GemSwapProgress, GemSwapProgressStep, GemTransactionAmount, GemTransactionDetailRow, GemTransactionDetailRows, GemTransactionDetailSection, GemTransactionFilter, GemTransactionHeader,
+    GemTransactionHeaderAction, GemTransactionHeaderKind, GemTransactionParticipant, GemTransactionParticipantRole, GemTransactionRow, GemTransactionRowSubtitle, GemTransactionRowValue, GemTransactionStateTone, GemTransactionStatus,
+    GemTransactionTitle,
 };
 pub use store::GemTransactionStore;
 

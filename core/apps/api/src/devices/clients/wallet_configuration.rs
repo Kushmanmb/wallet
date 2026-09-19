@@ -44,9 +44,7 @@ impl WalletConfigurationClient {
     }
 
     async fn is_externally_controlled(&self, address: &ChainAddress) -> bool {
-        self.get_statuses(address)
-            .await
-            .is_some_and(|statuses| statuses.contains(&AddressStatus::ExternallyControlled))
+        self.get_statuses(address).await.is_some_and(|statuses| statuses.contains(&AddressStatus::ExternallyControlled))
     }
 
     fn subscribed_addresses(&self, device_id: i32, wallet_id: i32) -> Result<HashSet<ChainAddress>, Box<dyn Error + Send + Sync>> {
@@ -55,23 +53,12 @@ impl WalletConfigurationClient {
             .wallets()?
             .get_subscriptions_by_wallet_id(device_id, wallet_id)?
             .into_iter()
-            .filter_map(|(subscription, address)| {
-                ADDRESS_STATUS_CHAINS
-                    .contains(&subscription.chain.0)
-                    .then_some(ChainAddress::new(subscription.chain.0, address.address))
-            })
+            .filter_map(|(subscription, address)| ADDRESS_STATUS_CHAINS.contains(&subscription.chain.0).then_some(ChainAddress::new(subscription.chain.0, address.address)))
             .collect())
     }
 
     async fn get_statuses(&self, address: &ChainAddress) -> Option<Vec<AddressStatus>> {
-        if let Some(statuses) = self
-            .cacher
-            .get_cached_optional::<Vec<AddressStatus>>(cache_key(address))
-            .await
-            .ok()
-            .flatten()
-            .filter(|statuses| !statuses.is_empty())
-        {
+        if let Some(statuses) = self.cacher.get_cached_optional::<Vec<AddressStatus>>(cache_key(address)).await.ok().flatten().filter(|statuses| !statuses.is_empty()) {
             return Some(statuses);
         }
 

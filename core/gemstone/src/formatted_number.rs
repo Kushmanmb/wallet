@@ -74,9 +74,7 @@ impl GemFormattedNumber {
             unit: GemNumberUnit::Currency { code },
             display: match style.abbreviates(value) {
                 true => GemNumberDisplay::Abbreviated,
-                false => GemNumberDisplay::Number {
-                    precision: style.precision(value),
-                },
+                false => GemNumberDisplay::Number { precision: style.precision(value) },
             },
         }
     }
@@ -101,10 +99,7 @@ impl GemFormattedNumber {
     }
 
     pub fn toned(self) -> Self {
-        Self {
-            tone: GemValueTone::of(self.value),
-            ..self
-        }
+        Self { tone: GemValueTone::of(self.value), ..self }
     }
 
     pub fn signed_currency(value: f64, currency: Currency, style: GemCurrencyStyle) -> Self {
@@ -227,9 +222,7 @@ fn value_display(value: f64, style: GemValueStyle) -> GemNumberDisplay {
             places: number_formatter::VALUE_DUST_PLACES,
         };
     }
-    GemNumberDisplay::Number {
-        precision: style.precision(value),
-    }
+    GemNumberDisplay::Number { precision: style.precision(value) }
 }
 
 #[cfg(test)]
@@ -238,15 +231,9 @@ mod tests {
 
     #[test]
     fn test_an_amount_never_rounds_above_what_is_held() {
-        assert_eq!(
-            GemFormattedNumber::amount(5.205516, Some("ATOM".to_string()), GemValueStyle::Auto).rounding,
-            GemNumberRounding::TowardZero
-        );
+        assert_eq!(GemFormattedNumber::amount(5.205516, Some("ATOM".to_string()), GemValueStyle::Auto).rounding, GemNumberRounding::TowardZero);
         assert_eq!(GemFormattedNumber::usd(5.205516).rounding, GemNumberRounding::ToNearest);
-        assert_eq!(
-            GemFormattedNumber::percentage(5.205516, GemPercentageStyle::Unsigned).rounding,
-            GemNumberRounding::ToNearest
-        );
+        assert_eq!(GemFormattedNumber::percentage(5.205516, GemPercentageStyle::Unsigned).rounding, GemNumberRounding::ToNearest);
     }
 
     #[test]
@@ -264,10 +251,7 @@ mod tests {
 
     #[test]
     fn test_only_an_abbreviating_style_reads_as_abbreviated() {
-        assert_eq!(
-            GemFormattedNumber::currency(1_000_000.0, Currency::USD, GemCurrencyStyle::Abbreviated).display,
-            GemNumberDisplay::Abbreviated
-        );
+        assert_eq!(GemFormattedNumber::currency(1_000_000.0, Currency::USD, GemCurrencyStyle::Abbreviated).display, GemNumberDisplay::Abbreviated);
         assert_eq!(
             GemFormattedNumber::currency(1_000_000.0, Currency::USD, GemCurrencyStyle::Currency).display,
             GemNumberDisplay::Number {

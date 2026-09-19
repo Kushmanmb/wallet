@@ -28,14 +28,7 @@ pub fn required_account(wallet: &Wallet, chain: Chain) -> Result<Account, GemSer
 impl std::fmt::Display for GemServiceError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Api { msg }
-            | Self::Gateway { msg }
-            | Self::Store { msg }
-            | Self::Core { msg }
-            | Self::Platform { msg }
-            | Self::InvalidInput { msg }
-            | Self::NotFound { msg }
-            | Self::Unsupported { msg } => write!(f, "{msg}"),
+            Self::Api { msg } | Self::Gateway { msg } | Self::Store { msg } | Self::Core { msg } | Self::Platform { msg } | Self::InvalidInput { msg } | Self::NotFound { msg } | Self::Unsupported { msg } => write!(f, "{msg}"),
             Self::NoAccountForChain { chain } => write!(f, "wallet has no {chain} account"),
             Self::Offline => write!(f, "network offline"),
             Self::WalletImport { error } => write!(f, "{error}"),

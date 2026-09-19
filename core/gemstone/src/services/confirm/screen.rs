@@ -1,10 +1,7 @@
 use primitives::SimulationResult;
 
 use super::error::GemConfirmError;
-use super::model::{
-    GemConfirmAction, GemConfirmButton, GemConfirmButtonKind, GemConfirmButtonState, GemConfirmFailure, GemConfirmFeeRow, GemConfirmLoad, GemConfirmPhase, GemConfirmScreen,
-    GemConfirmStage, GemTransferAmountResult,
-};
+use super::model::{GemConfirmAction, GemConfirmButton, GemConfirmButtonKind, GemConfirmButtonState, GemConfirmFailure, GemConfirmFeeRow, GemConfirmLoad, GemConfirmPhase, GemConfirmScreen, GemConfirmStage, GemTransferAmountResult};
 
 impl GemConfirmScreen {
     pub fn initial(simulation: Option<&SimulationResult>) -> Self {
@@ -75,10 +72,7 @@ impl GemConfirmScreen {
         Self {
             phase: GemConfirmPhase::Ready,
             has_critical_warning: load.simulation.simulation.as_ref().is_some_and(|simulation| simulation.has_critical_warning),
-            failure: amount_error.map(|error| GemConfirmFailure {
-                stage: GemConfirmStage::Load,
-                error,
-            }),
+            failure: amount_error.map(|error| GemConfirmFailure { stage: GemConfirmStage::Load, error }),
         }
     }
 
@@ -126,10 +120,7 @@ mod tests {
             }
         );
         assert_eq!(missing.action(), None);
-        assert_eq!(
-            GemConfirmScreen::initial(None).on_load_failed(GemConfirmError::Offline).action(),
-            Some(GemConfirmAction::Load)
-        );
+        assert_eq!(GemConfirmScreen::initial(None).on_load_failed(GemConfirmError::Offline).action(), Some(GemConfirmAction::Load));
     }
 
     #[test]
@@ -184,11 +175,7 @@ mod tests {
             }
         );
         assert_eq!(
-            GemConfirmScreen {
-                has_critical_warning: true,
-                ..ready.clone()
-            }
-            .button(),
+            GemConfirmScreen { has_critical_warning: true, ..ready.clone() }.button(),
             GemConfirmButton {
                 kind: GemConfirmButtonKind::Confirm,
                 state: GemConfirmButtonState::Disabled
@@ -227,14 +214,7 @@ mod tests {
             .fee_row(),
             GemConfirmFeeRow::Ready
         );
-        assert_eq!(
-            GemConfirmScreen {
-                phase: GemConfirmPhase::Failed,
-                ..loading
-            }
-            .fee_row(),
-            GemConfirmFeeRow::Unavailable
-        );
+        assert_eq!(GemConfirmScreen { phase: GemConfirmPhase::Failed, ..loading }.fee_row(), GemConfirmFeeRow::Unavailable);
     }
 
     #[test]
@@ -278,10 +258,7 @@ mod tests {
         assert_eq!(confirming.action(), None);
         assert_eq!(confirming.on_execute_cancelled().phase, GemConfirmPhase::Ready);
 
-        let execute_failed = confirming.on_execute_failed(GemConfirmError::Broadcast {
-            hashes: vec![],
-            msg: "rejected".to_string(),
-        });
+        let execute_failed = confirming.on_execute_failed(GemConfirmError::Broadcast { hashes: vec![], msg: "rejected".to_string() });
         assert_eq!(execute_failed.phase, GemConfirmPhase::Failed);
         assert_eq!(execute_failed.failure.as_ref().map(|failure| failure.stage), Some(GemConfirmStage::Execute));
         assert_eq!(execute_failed.action(), Some(GemConfirmAction::Load));
@@ -344,20 +321,13 @@ mod tests {
     fn test_every_execution_failure_reloads_before_retry() {
         let errors = [
             GemConfirmError::Offline,
-            GemConfirmError::Network {
-                msg: "request timed out".to_string(),
-            },
-            GemConfirmError::Broadcast {
-                hashes: vec![],
-                msg: "rejected".to_string(),
-            },
+            GemConfirmError::Network { msg: "request timed out".to_string() },
+            GemConfirmError::Broadcast { hashes: vec![], msg: "rejected".to_string() },
             GemConfirmError::Broadcast {
                 hashes: vec!["accepted-transaction".to_string()],
                 msg: "rejected".to_string(),
             },
-            GemConfirmError::Record {
-                msg: "store unavailable".to_string(),
-            },
+            GemConfirmError::Record { msg: "store unavailable".to_string() },
         ];
         for error in errors {
             assert_eq!(GemConfirmScreen::initial(None).on_execute_failed(error).action(), Some(GemConfirmAction::Load));

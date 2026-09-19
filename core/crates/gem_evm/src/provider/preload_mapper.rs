@@ -66,11 +66,7 @@ pub fn get_transaction_params(_chain: EVMChain, input: &TransactionLoadInput) ->
         }
         TransactionInputType::Swap { from_asset, swap_data, .. } => {
             if let Some(approval) = &swap_data.data.approval {
-                Ok(TransactionParams::new(
-                    approval.token.clone(),
-                    encode_erc20_approve_max_value(&approval.spender)?,
-                    BigInt::from(0),
-                ))
+                Ok(TransactionParams::new(approval.token.clone(), encode_erc20_approve_max_value(&approval.spender)?, BigInt::from(0)))
             } else {
                 match from_asset.id.token_subtype() {
                     AssetSubtype::NATIVE => {
@@ -91,22 +87,14 @@ pub fn get_transaction_params(_chain: EVMChain, input: &TransactionLoadInput) ->
                 }
             }
         }
-        TransactionInputType::TokenApprove { approval_data: approval, .. } => Ok(TransactionParams::new(
-            approval.token.clone(),
-            encode_erc20_approve_max_value(&approval.spender)?,
-            BigInt::from(0),
-        )),
+        TransactionInputType::TokenApprove { approval_data: approval, .. } => Ok(TransactionParams::new(approval.token.clone(), encode_erc20_approve_max_value(&approval.spender)?, BigInt::from(0))),
         TransactionInputType::Generic { extra, .. } => Ok(TransactionParams::new(extra.to.clone(), extra.data.clone().unwrap_or_default(), value)),
         TransactionInputType::Stake { .. } => Err("Unsupported chain for staking".into()),
         TransactionInputType::Earn { data: earn_data, .. } => {
             if let Some(approval) = &earn_data.approval {
                 Ok(TransactionParams::new_approval(approval.token.clone(), encode_erc20_approve_max_value(&approval.spender)?))
             } else {
-                Ok(TransactionParams::new(
-                    earn_data.contract_address.clone(),
-                    decode_hex(&earn_data.call_data)?,
-                    BigInt::from(0),
-                ))
+                Ok(TransactionParams::new(earn_data.contract_address.clone(), decode_hex(&earn_data.call_data)?, BigInt::from(0)))
             }
         }
         _ => Err("Unsupported transfer type".into()),
@@ -215,11 +203,7 @@ mod tests {
         for chain in EVMChain::all() {
             let rates = map_transaction_fee_rates(chain, &history).unwrap();
 
-            assert_eq!(
-                rates.into_iter().map(|rate| rate.gas_price_type.gas_price()).collect::<Vec<_>>(),
-                vec![BigInt::from(30), BigInt::from(30)],
-                "{chain:?}"
-            );
+            assert_eq!(rates.into_iter().map(|rate| rate.gas_price_type.gas_price()).collect::<Vec<_>>(), vec![BigInt::from(30), BigInt::from(30)], "{chain:?}");
         }
     }
 

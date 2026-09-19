@@ -8,9 +8,9 @@ use gem_jsonrpc::{RpcClientError, RpcProvider, Target};
 use primitives::name::NameRecord;
 use primitives::rewards::{RedemptionRequest, RedemptionResult};
 use primitives::{
-    AddressName, AuthNonce, AuthenticatedRequest, ChainAddress, ChartPeriod, Device, FiatQuoteType, FiatQuoteUrl, FiatQuotes, FiatTransactionData, InAppNotification, NFTAssetData,
-    NFTAssetId, NFTData, PortfolioAssets, PortfolioAssetsRequest, PriceAlert, ReferralCode, ReportNft, Rewards, ScanTransaction, ScanTransactionPayload, SupportMessage,
-    SupportMessageInput, TransactionsResponse, WalletConfigurationResult, WalletSubscription, WalletSubscriptionChains, transactions_page_limit,
+    AddressName, AuthNonce, AuthenticatedRequest, ChainAddress, ChartPeriod, Device, FiatQuoteType, FiatQuoteUrl, FiatQuotes, FiatTransactionData, InAppNotification, NFTAssetData, NFTAssetId, NFTData, PortfolioAssets,
+    PortfolioAssetsRequest, PriceAlert, ReferralCode, ReportNft, Rewards, ScanTransaction, ScanTransactionPayload, SupportMessage, SupportMessageInput, TransactionsResponse, WalletConfigurationResult, WalletSubscription,
+    WalletSubscriptionChains, transactions_page_limit,
 };
 use serde::de::DeserializeOwned;
 
@@ -276,20 +276,9 @@ impl<E: RpcClientError> GemDeviceApiClient<E> {
     fn authorization(&self, target: &GemDeviceApiTarget, body: &[u8]) -> Result<HashMap<String, String>, ClientError> {
         let path = target.path();
         let signed_path = path.split('?').next().unwrap_or(&path);
-        let timestamp_ms = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|error| ClientError::Serialization(error.to_string()))?
-            .as_millis() as u64;
+        let timestamp_ms = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|error| ClientError::Serialization(error.to_string()))?.as_millis() as u64;
 
-        let header = build_device_auth_header(
-            &self.device_key.private_key()?,
-            target.method().as_ref(),
-            signed_path,
-            target.wallet_id(),
-            body,
-            timestamp_ms,
-        )
-        .map_err(|error| ClientError::Serialization(error.to_string()))?;
+        let header = build_device_auth_header(&self.device_key.private_key()?, target.method().as_ref(), signed_path, target.wallet_id(), body, timestamp_ms).map_err(|error| ClientError::Serialization(error.to_string()))?;
 
         Ok(HashMap::from([("Authorization".to_string(), header)]))
     }

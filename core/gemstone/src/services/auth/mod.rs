@@ -24,12 +24,7 @@ pub struct GemAuthService {
 impl GemAuthService {
     #[uniffi::constructor]
     pub fn new(api: Arc<GemDeviceApiClient>, keystore: Arc<GemKeystore>, password: Arc<dyn GemKeystorePassword>, device_key: Arc<GemDeviceKeyService>) -> Self {
-        Self {
-            api,
-            keystore,
-            password,
-            device_key,
-        }
+        Self { api, keystore, password, device_key }
     }
 }
 

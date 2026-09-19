@@ -35,11 +35,7 @@ pub struct GemSecurityInput {
 
 pub fn preferences_sections(input: GemPreferencesInput) -> Vec<GemListSection> {
     let link = |title: GemListRowTitle, value: Option<String>, icon: GemListRowIcon| GemListRow::Link { title, value, icon };
-    let picker = |title: GemListRowTitle, value: String| GemListRow::Picker {
-        title,
-        value,
-        icon: GemListRowIcon::None,
-    };
+    let picker = |title: GemListRowTitle, value: String| GemListRow::Picker { title, value, icon: GemListRowIcon::None };
     let section = |rows: Vec<GemListRow>| GemListSection {
         title: GemListSectionTitle::None,
         footer: GemListSectionFooter::None,
@@ -164,13 +160,7 @@ fn store_url(store: PlatformStore) -> PublicUrl {
     match store {
         PlatformStore::AppStore => PublicUrl::AppStore,
         PlatformStore::GooglePlay => PublicUrl::PlayStore,
-        PlatformStore::Fdroid
-        | PlatformStore::Huawei
-        | PlatformStore::SolanaStore
-        | PlatformStore::SamsungStore
-        | PlatformStore::ApkUniversal
-        | PlatformStore::Emerald
-        | PlatformStore::Local => PublicUrl::APK,
+        PlatformStore::Fdroid | PlatformStore::Huawei | PlatformStore::SolanaStore | PlatformStore::SamsungStore | PlatformStore::ApkUniversal | PlatformStore::Emerald | PlatformStore::Local => PublicUrl::APK,
     }
 }
 
@@ -247,12 +237,7 @@ mod tests {
             preferences_sections(preferences_input(true, Some("English")))
                 .last()
                 .map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
-            Some(vec![
-                GemListRowTitle::Perpetuals,
-                GemListRowTitle::PerpetualLeverage,
-                GemListRowTitle::PerpetualTakeProfit,
-                GemListRowTitle::PerpetualStopLoss
-            ])
+            Some(vec![GemListRowTitle::Perpetuals, GemListRowTitle::PerpetualLeverage, GemListRowTitle::PerpetualTakeProfit, GemListRowTitle::PerpetualStopLoss])
         );
     }
 
@@ -270,24 +255,11 @@ mod tests {
         );
         assert_eq!(
             sections.first().map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
-            Some(vec![
-                GemListRowTitle::Currency,
-                GemListRowTitle::Language,
-                GemListRowTitle::Appearance,
-                GemListRowTitle::Networks,
-                GemListRowTitle::Contacts
-            ])
+            Some(vec![GemListRowTitle::Currency, GemListRowTitle::Language, GemListRowTitle::Appearance, GemListRowTitle::Networks, GemListRowTitle::Contacts])
         );
         assert_eq!(
-            preferences_sections(preferences_input(false, None))
-                .first()
-                .map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
-            Some(vec![
-                GemListRowTitle::Currency,
-                GemListRowTitle::Appearance,
-                GemListRowTitle::Networks,
-                GemListRowTitle::Contacts
-            ])
+            preferences_sections(preferences_input(false, None)).first().map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
+            Some(vec![GemListRowTitle::Currency, GemListRowTitle::Appearance, GemListRowTitle::Networks, GemListRowTitle::Contacts])
         );
     }
 
@@ -308,9 +280,7 @@ mod tests {
             "a device without authentication offers only the switch that turns it on"
         );
         assert_eq!(
-            security_sections(input(true))
-                .first()
-                .map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
+            security_sections(input(true)).first().map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
             Some(vec![GemListRowTitle::Authentication, GemListRowTitle::LockPeriod, GemListRowTitle::PrivacyLock])
         );
         assert_eq!(
@@ -362,12 +332,7 @@ mod tests {
 
     #[test]
     fn test_the_settings_rows_follow_what_the_device_and_wallet_offer() {
-        let titles = |sections: Vec<GemListSection>| {
-            sections
-                .iter()
-                .map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>())
-                .collect::<Vec<_>>()
-        };
+        let titles = |sections: Vec<GemListSection>| sections.iter().map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()).collect::<Vec<_>>();
 
         assert_eq!(
             titles(sections(3, true, true, true, true)),

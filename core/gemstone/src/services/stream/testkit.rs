@@ -30,12 +30,7 @@ impl SubscriptionTestkit {
             }),
             connection.clone(),
         );
-        Self {
-            service,
-            balances,
-            connection,
-            wallet_id,
-        }
+        Self { service, balances, connection, wallet_id }
     }
 }
 

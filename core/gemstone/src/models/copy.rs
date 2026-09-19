@@ -34,11 +34,7 @@ impl fmt::Debug for GemCopy {
         if self.kind.is_sensitive() {
             f.debug_struct("GemCopy").field("kind", &self.kind).finish_non_exhaustive()
         } else {
-            f.debug_struct("GemCopy")
-                .field("kind", &self.kind)
-                .field("value", &self.value)
-                .field("display", &self.display)
-                .finish()
+            f.debug_struct("GemCopy").field("kind", &self.kind).field("value", &self.value).field("display", &self.display).finish()
         }
     }
 }
@@ -89,11 +85,7 @@ mod tests {
 
     #[test]
     fn test_debug_prints_an_address_but_never_a_secret() {
-        let printed = format!(
-            "{:?} {:?}",
-            secret_phrase_copy(vec!["abandon".to_string(), "ability".to_string()]),
-            private_key_copy("0xsecretkey".to_string())
-        );
+        let printed = format!("{:?} {:?}", secret_phrase_copy(vec!["abandon".to_string(), "ability".to_string()]), private_key_copy("0xsecretkey".to_string()));
 
         assert!(!printed.contains("abandon") && !printed.contains("secretkey"), "{printed}");
         assert!(format!("{:?}", address_copy(Chain::Ethereum, "0xabc".to_string())).contains("0xabc"));

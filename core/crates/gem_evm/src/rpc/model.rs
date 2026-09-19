@@ -5,9 +5,7 @@ use primitives::{
     contract_constants::{ARC_SYSTEM_LOG_ADDRESS, EVM_ZERO_BLOCK_HASH},
 };
 use serde::{Deserialize, Serialize};
-use serde_serializers::{
-    bigint_from_hex_str, deserialize_biguint_from_hex_str, deserialize_biguint_from_option_hex_str, deserialize_u64_from_str, deserialize_u64_from_str_or_int,
-};
+use serde_serializers::{bigint_from_hex_str, deserialize_biguint_from_hex_str, deserialize_biguint_from_option_hex_str, deserialize_u64_from_str, deserialize_u64_from_str_or_int};
 use std::{borrow::Cow, collections::HashMap};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

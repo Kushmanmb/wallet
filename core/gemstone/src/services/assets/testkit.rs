@@ -46,14 +46,7 @@ impl GemAssetStore for MemoryAssetStore {
         Ok(self.get_assets(asset_ids).await?.into_iter().map(|asset| asset.id).collect())
     }
     async fn get_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<Asset>, GemServiceError> {
-        Ok(self
-            .assets
-            .lock()
-            .unwrap()
-            .iter()
-            .filter(|basic| asset_ids.contains(&basic.asset.id))
-            .map(|basic| basic.asset.clone())
-            .collect())
+        Ok(self.assets.lock().unwrap().iter().filter(|basic| asset_ids.contains(&basic.asset.id)).map(|basic| basic.asset.clone()).collect())
     }
     async fn save_assets(&self, assets: Vec<AssetBasic>) -> Result<(), GemServiceError> {
         self.assets.lock().unwrap().extend(assets);
@@ -94,10 +87,7 @@ impl GemAssetsService {
             store,
             Arc::new(GemPriceService::new(Arc::new(MemoryPriceStore::default()))),
             Arc::new(GemPreferencesService::new(preferences)),
-            Arc::new(GemWalletSessionService::new(
-                Arc::new(MemoryWalletSessionStore::default()),
-                Arc::new(MemoryWalletStore::default()),
-            )),
+            Arc::new(GemWalletSessionService::new(Arc::new(MemoryWalletSessionStore::default()), Arc::new(MemoryWalletStore::default()))),
         )
     }
 }
@@ -141,13 +131,7 @@ impl AssetDetailsTestkit {
             Arc::new(GemBannerService::new(Arc::new(MemoryBannerStore::default()))),
             swap,
             Arc::new(GemExplorerService::new(preferences.clone())),
-            Arc::new(GemPriceAlertService::new(
-                device_api,
-                preferences,
-                Arc::new(MemoryPriceAlertStore::default()),
-                device,
-                Arc::new(DeniedNotificationPermissions),
-            )),
+            Arc::new(GemPriceAlertService::new(device_api, preferences, Arc::new(MemoryPriceAlertStore::default()), device, Arc::new(DeniedNotificationPermissions))),
             Arc::new(SubscriptionTestkit::new(&[], &[]).service),
             Arc::new(GemDeeplinkService::new()),
             discovery.session.clone(),

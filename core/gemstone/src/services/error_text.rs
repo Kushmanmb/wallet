@@ -32,14 +32,9 @@ pub enum GemErrorText {
 impl GemServiceError {
     pub fn text(&self) -> GemErrorText {
         match self {
-            Self::Api { msg }
-            | Self::Gateway { msg }
-            | Self::Store { msg }
-            | Self::Core { msg }
-            | Self::Platform { msg }
-            | Self::InvalidInput { msg }
-            | Self::NotFound { msg }
-            | Self::Unsupported { msg } => GemErrorText::Message { text: msg.clone() },
+            Self::Api { msg } | Self::Gateway { msg } | Self::Store { msg } | Self::Core { msg } | Self::Platform { msg } | Self::InvalidInput { msg } | Self::NotFound { msg } | Self::Unsupported { msg } => {
+                GemErrorText::Message { text: msg.clone() }
+            }
             Self::NoAccountForChain { .. } => GemErrorText::NoAccountForChain,
             Self::Offline => GemErrorText::NetworkOffline,
             Self::WalletImport { error } => error.text(),
@@ -129,9 +124,7 @@ mod tests {
 
     #[test]
     fn test_a_missing_account_names_the_chain() {
-        let error = GemServiceError::NoAccountForChain {
-            chain: primitives::Chain::Ethereum,
-        };
+        let error = GemServiceError::NoAccountForChain { chain: primitives::Chain::Ethereum };
 
         assert_eq!(error.text(), GemErrorText::NoAccountForChain);
         assert_eq!(error.to_string(), "wallet has no ethereum account");
@@ -146,17 +139,8 @@ mod tests {
         );
         assert_eq!(alien_error_text(AlienError::Offline), GemErrorText::NetworkOffline);
         assert_eq!(GemServiceError::from(GatewayError::Offline).text(), GemErrorText::NetworkOffline);
-        assert_eq!(
-            GemServiceError::from(GemApiError::Network {
-                msg: AlienError::Offline.to_string()
-            })
-            .text(),
-            GemErrorText::NetworkOffline
-        );
-        assert_ne!(
-            GemServiceError::from(GatewayError::NetworkError { msg: "reset".to_string() }).text(),
-            GemErrorText::NetworkOffline
-        );
+        assert_eq!(GemServiceError::from(GemApiError::Network { msg: AlienError::Offline.to_string() }).text(), GemErrorText::NetworkOffline);
+        assert_ne!(GemServiceError::from(GatewayError::NetworkError { msg: "reset".to_string() }).text(), GemErrorText::NetworkOffline);
         assert_eq!(alien_error_text(AlienError::Http { status: 503, len: 0 }), GemErrorText::NetworkStatus { status: 503 });
         assert_eq!(
             GatewayError::NetworkError { msg: "reverted".into() }.text(),
@@ -167,16 +151,9 @@ mod tests {
 
     #[test]
     fn test_an_import_error_reaches_the_apps_as_its_own_text() {
-        let words = GemWalletImportError::InvalidSecretPhraseWords {
-            words: vec!["abandom".to_string()],
-        };
+        let words = GemWalletImportError::InvalidSecretPhraseWords { words: vec!["abandom".to_string()] };
 
-        assert_eq!(
-            GemServiceError::from(words.clone()).text(),
-            GemErrorText::InvalidSecretPhraseWords {
-                words: vec!["abandom".to_string()]
-            }
-        );
+        assert_eq!(GemServiceError::from(words.clone()).text(), GemErrorText::InvalidSecretPhraseWords { words: vec!["abandom".to_string()] });
         assert_eq!(GemServiceError::from(GemWalletImportError::InvalidPrivateKey).text(), GemErrorText::InvalidPrivateKey);
         assert!(!GemServiceError::from(words).to_string().contains("abandom"), "the log text never repeats a phrase word");
     }

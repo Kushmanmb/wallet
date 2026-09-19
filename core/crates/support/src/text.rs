@@ -64,11 +64,7 @@ pub fn parse_support_message_display_content(markdown: &str) -> SupportMessageDi
     append_text_and_labeled_links(&markdown[current_index..], &mut text, &mut links);
 
     SupportMessageDisplayContent {
-        text: if links.is_empty() {
-            markdown.to_string()
-        } else {
-            collapse_whitespace(&text, " ").trim().to_string()
-        },
+        text: if links.is_empty() { markdown.to_string() } else { collapse_whitespace(&text, " ").trim().to_string() },
         links,
     }
 }
@@ -89,11 +85,7 @@ impl SupportMessageLink {
             GEM_URL_SCHEME => Some(url.to_string()),
             HTTP_URL_SCHEME | HTTPS_URL_SCHEME => {
                 let host = parsed_url.host_str().filter(|host| !host.is_empty())?;
-                if is_app_link {
-                    None
-                } else {
-                    Some(host.strip_prefix("www.").unwrap_or(host).to_string())
-                }
+                if is_app_link { None } else { Some(host.strip_prefix("www.").unwrap_or(host).to_string()) }
             }
             _ => return None,
         };
@@ -143,9 +135,7 @@ fn next_bare_url_start(text: &str, from: usize) -> Option<usize> {
 
 fn starts_with_supported_url_scheme(text: &str) -> bool {
     let text = text.strip_prefix('<').unwrap_or(text);
-    [HTTP_URL_SCHEME, HTTPS_URL_SCHEME, GEM_URL_SCHEME]
-        .into_iter()
-        .any(|scheme| starts_with_url_scheme(text, scheme))
+    [HTTP_URL_SCHEME, HTTPS_URL_SCHEME, GEM_URL_SCHEME].into_iter().any(|scheme| starts_with_url_scheme(text, scheme))
 }
 
 fn starts_with_url_scheme(text: &str, scheme: &str) -> bool {
@@ -380,12 +370,6 @@ mod tests {
             }
         );
         let unclosed = "Open [Bitcoin](<https://gemwallet.com/tokens/bitcoin)";
-        assert_eq!(
-            parse_support_message_display_content(unclosed),
-            SupportMessageDisplayContent {
-                text: unclosed.to_string(),
-                links: vec![],
-            }
-        );
+        assert_eq!(parse_support_message_display_content(unclosed), SupportMessageDisplayContent { text: unclosed.to_string(), links: vec![] });
     }
 }

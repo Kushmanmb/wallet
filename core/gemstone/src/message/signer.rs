@@ -206,9 +206,7 @@ impl MessageSigner {
         let Ok(string) = String::from_utf8(self.hash()?) else {
             return Ok(None);
         };
-        Ok(SiwsMessage::parse(&string)
-            .map_err(GemstoneError::from)?
-            .map(|message| MessagePayloadFields::from_siws(&message, simulation_payload)))
+        Ok(SiwsMessage::parse(&string).map_err(GemstoneError::from)?.map(|message| MessagePayloadFields::from_siws(&message, simulation_payload)))
     }
 
     fn get_ton_result(&self, result: &TonSignResult) -> Result<String, GemstoneError> {
@@ -245,9 +243,7 @@ mod tests {
     #[test]
     fn test_eip712_chain_signer_matches_message_signer() {
         let json = include_str!("./test/eip712_seaport.json");
-        let via_chain_signer = ChainTransactionSigner::new(Chain::Ethereum)
-            .sign_message(json.as_bytes().to_vec(), TEST_PRIVATE_KEY.to_vec())
-            .unwrap();
+        let via_chain_signer = ChainTransactionSigner::new(Chain::Ethereum).sign_message(json.as_bytes().to_vec(), TEST_PRIVATE_KEY.to_vec()).unwrap();
         let via_message_signer = MessageSigner::new(SignMessage {
             chain: Chain::Ethereum,
             sign_type: SignDigestType::Eip712,
@@ -329,18 +325,14 @@ Issued At: 2026-03-09T15:48:34.458Z"#;
 
     #[test]
     fn test_get_result_eip191() {
-        let data = hex::decode("d80c5ffe75fcbac0706c5c5d3b8884ae3588c30065a95075e07fa6ebc24e56433e5030992ef438b1d23437ec8d66d3197b1ad92f85222af1624d8f295907a65800")
-            .expect("Invalid hex string");
+        let data = hex::decode("d80c5ffe75fcbac0706c5c5d3b8884ae3588c30065a95075e07fa6ebc24e56433e5030992ef438b1d23437ec8d66d3197b1ad92f85222af1624d8f295907a65800").expect("Invalid hex string");
         let decoder = MessageSigner::new(SignMessage {
             chain: Chain::Ethereum,
             sign_type: SignDigestType::Eip191,
             data: data.clone(),
         });
         let result = decoder.get_result(data.as_slice());
-        assert_eq!(
-            result,
-            "0xd80c5ffe75fcbac0706c5c5d3b8884ae3588c30065a95075e07fa6ebc24e56433e5030992ef438b1d23437ec8d66d3197b1ad92f85222af1624d8f295907a6581b"
-        );
+        assert_eq!(result, "0xd80c5ffe75fcbac0706c5c5d3b8884ae3588c30065a95075e07fa6ebc24e56433e5030992ef438b1d23437ec8d66d3197b1ad92f85222af1624d8f295907a6581b");
     }
 
     #[test]
@@ -409,10 +401,7 @@ Issued At: 2026-03-09T15:48:34.458Z"#;
         }
         let hash = decoder.hash().unwrap();
 
-        assert_eq!(
-            hex::encode(&hash),
-            "5468697320697320616e206578616d706c65206d65737361676520746f206265207369676e6564202d2031373437313235373539303630"
-        );
+        assert_eq!(hex::encode(&hash), "5468697320697320616e206578616d706c65206d65737361676520746f206265207369676e6564202d2031373437313235373539303630");
 
         assert_eq!(decoder.payload_preview(vec![]).unwrap(), None);
 
@@ -436,10 +425,7 @@ Issued At: 2026-03-09T15:48:34.458Z"#;
         assert_eq!(decoder.plain_preview(), message);
         assert_eq!(decoder.hash().unwrap(), message.as_bytes());
         assert_eq!(decoder.payload_preview(vec![]).unwrap().unwrap().message_type, MessageType::Siws);
-        assert_eq!(
-            decoder.sign(Zeroizing::new(TEST_PRIVATE_KEY.to_vec())).unwrap(),
-            bs58::encode(key_pair.sign(message.as_bytes())).into_string(),
-        );
+        assert_eq!(decoder.sign(Zeroizing::new(TEST_PRIVATE_KEY.to_vec())).unwrap(), bs58::encode(key_pair.sign(message.as_bytes())).into_string(),);
     }
 
     #[test]
@@ -464,10 +450,7 @@ Issued At: 2026-03-09T15:48:34.458Z"#;
             data: b"hello".to_vec(),
         });
 
-        assert_eq!(
-            decoder.sign(Zeroizing::new(TEST_PRIVATE_KEY.to_vec())).unwrap_err().to_string(),
-            "Base58 sign message is not supported for ethereum"
-        );
+        assert_eq!(decoder.sign(Zeroizing::new(TEST_PRIVATE_KEY.to_vec())).unwrap_err().to_string(), "Base58 sign message is not supported for ethereum");
     }
 
     #[test]
@@ -749,12 +732,7 @@ Issued At: 2026-03-09T15:48:34.458Z"#;
     #[test]
     fn test_ton_hash_and_sign_share_timestamp() {
         let sender_address = TonSigner::new(&TEST_PRIVATE_KEY).unwrap().address().encode();
-        let ton_data = TonSignMessageData::from_value(
-            serde_json::json!({"type": "text", "text": "timestamp consistency"}),
-            "example.com".to_string(),
-            sender_address,
-        )
-        .unwrap();
+        let ton_data = TonSignMessageData::from_value(serde_json::json!({"type": "text", "text": "timestamp consistency"}), "example.com".to_string(), sender_address).unwrap();
         let data = ton_data.to_bytes();
         let signer = MessageSigner::new(SignMessage {
             chain: Chain::Ton,

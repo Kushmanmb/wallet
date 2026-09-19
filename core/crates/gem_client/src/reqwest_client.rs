@@ -66,11 +66,7 @@ impl ReqwestClient {
     }
 
     fn build_request(&self, request: RequestBuilder, headers: HashMap<String, String>) -> RequestBuilder {
-        let request = if let Some(ref user_agent) = self.user_agent {
-            request.header(USER_AGENT, user_agent)
-        } else {
-            request
-        };
+        let request = if let Some(ref user_agent) = self.user_agent { request.header(USER_AGENT, user_agent) } else { request };
 
         let request = self.default_headers.iter().fold(request, |request, (key, value)| request.header(key, value));
         headers.into_iter().fold(request, |request, (key, value)| request.header(&key, &value))
@@ -146,11 +142,7 @@ impl ReqwestClient {
 
 pub async fn json_response<T: DeserializeOwned>(response: reqwest::Response) -> Result<T, ClientError> {
     let status = response.status().as_u16();
-    let data = response
-        .bytes()
-        .await
-        .map_err(|e| ClientError::Network(format!("Failed to read response body: {e}")))?
-        .to_vec();
+    let data = response.bytes().await.map_err(|e| ClientError::Network(format!("Failed to read response body: {e}")))?.to_vec();
     let response = Response { status: Some(status), data };
     deserialize_response(&response)
 }

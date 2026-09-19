@@ -114,12 +114,7 @@ mod tests {
     fn test_map_staking_delegations() {
         let now = DateTime::from_timestamp(1_757_000_000, 0).unwrap();
 
-        let result = map_staking_delegations(
-            vec![TokenAccountInfo::mock_stake(100, u64::MAX)],
-            EpochInfo::mock(0),
-            AssetId::from_chain(Chain::Solana),
-            now,
-        );
+        let result = map_staking_delegations(vec![TokenAccountInfo::mock_stake(100, u64::MAX)], EpochInfo::mock(0), AssetId::from_chain(Chain::Solana), now);
 
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].validator_id, "validator1");
@@ -131,15 +126,7 @@ mod tests {
     #[test]
     fn test_map_staking_delegations_completion_date() {
         let now = DateTime::from_timestamp(1_757_000_000, 0).unwrap();
-        let deactivating = |slot_index: u64| {
-            map_staking_delegations(
-                vec![TokenAccountInfo::mock_stake(100, 200)],
-                EpochInfo::mock(slot_index),
-                AssetId::from_chain(Chain::Solana),
-                now,
-            )[0]
-            .clone()
-        };
+        let deactivating = |slot_index: u64| map_staking_delegations(vec![TokenAccountInfo::mock_stake(100, 200)], EpochInfo::mock(slot_index), AssetId::from_chain(Chain::Solana), now)[0].clone();
 
         assert_eq!(deactivating(0).state, DelegationState::Deactivating);
 

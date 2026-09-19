@@ -86,10 +86,7 @@ impl GemWalletHomeService {
         let Ok(wallet_id) = self.session.current_wallet_id() else {
             return false;
         };
-        let completed = self
-            .wallet_preferences
-            .is_initial_load_completed(wallet_id.clone(), GemDiscoveryStep::Assets)
-            .unwrap_or(true);
+        let completed = self.wallet_preferences.is_initial_load_completed(wallet_id.clone(), GemDiscoveryStep::Assets).unwrap_or(true);
         rules::shows_initial_loading(completed, self.wallet_preferences.get_assets_timestamp(wallet_id))
     }
 
@@ -123,11 +120,7 @@ impl GemWalletHomeService {
     }
 
     fn includes_perpetual_collateral(&self) -> bool {
-        self.session
-            .get_current_wallet_id()
-            .ok()
-            .flatten()
-            .is_some_and(|wallet_id| self.wallet_preferences.includes_perpetual_collateral(wallet_id))
+        self.session.get_current_wallet_id().ok().flatten().is_some_and(|wallet_id| self.wallet_preferences.includes_perpetual_collateral(wallet_id))
     }
 }
 
@@ -162,20 +155,12 @@ mod tests {
     fn test_refresh_runs_discovery_even_when_the_balance_update_fails() {
         block_on(async {
             let testkit = WalletHomeTestkit::with_status(503);
-            testkit
-                .balances
-                .enabled_asset_ids
-                .lock()
-                .unwrap()
-                .insert(testkit.wallet_id.clone(), vec![AssetId::from_chain(Chain::Ethereum)]);
+            testkit.balances.enabled_asset_ids.lock().unwrap().insert(testkit.wallet_id.clone(), vec![AssetId::from_chain(Chain::Ethereum)]);
 
             assert!(testkit.service.refresh().await.is_err());
 
             let paths = testkit.provider.requested_paths();
-            assert!(
-                paths.iter().any(|path| path.contains("gemnodes.com")),
-                "the balance branch never reached the gateway: {paths:?}"
-            );
+            assert!(paths.iter().any(|path| path.contains("gemnodes.com")), "the balance branch never reached the gateway: {paths:?}");
             assert!(paths.iter().any(|path| path.contains("devices/assets")), "the discovery branch never ran: {paths:?}");
         })
     }
@@ -203,10 +188,7 @@ mod tests {
 
             assert!(testkit.service.shows_initial_loading());
 
-            testkit
-                .wallet_preferences
-                .set_initial_load_completed(testkit.wallet_id.clone(), GemDiscoveryStep::Assets)
-                .unwrap();
+            testkit.wallet_preferences.set_initial_load_completed(testkit.wallet_id.clone(), GemDiscoveryStep::Assets).unwrap();
 
             assert!(!testkit.service.shows_initial_loading());
         })

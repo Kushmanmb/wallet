@@ -24,16 +24,7 @@ mod tests {
     #[test]
     fn test_an_account_its_key_can_pay_from_is_its_own() {
         let co_signed = Account {
-            signers: vec![
-                Signer {
-                    key: ADDRESS.to_string(),
-                    weight: 2,
-                },
-                Signer {
-                    key: OTHER_ADDRESS.to_string(),
-                    weight: 1,
-                },
-            ],
+            signers: vec![Signer { key: ADDRESS.to_string(), weight: 2 }, Signer { key: OTHER_ADDRESS.to_string(), weight: 1 }],
             thresholds: Thresholds { med_threshold: 2 },
             ..Account::mock(ADDRESS)
         };
@@ -46,16 +37,7 @@ mod tests {
     #[test]
     fn test_a_key_below_the_payment_threshold_is_externally_controlled() {
         let master_disabled = Account {
-            signers: vec![
-                Signer {
-                    key: ADDRESS.to_string(),
-                    weight: 0,
-                },
-                Signer {
-                    key: OTHER_ADDRESS.to_string(),
-                    weight: 1,
-                },
-            ],
+            signers: vec![Signer { key: ADDRESS.to_string(), weight: 0 }, Signer { key: OTHER_ADDRESS.to_string(), weight: 1 }],
             ..Account::mock(ADDRESS)
         };
         let below_threshold = Account {

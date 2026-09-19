@@ -46,9 +46,7 @@ pub fn resolved(record: Option<NameRecord>) -> GemNameRecordState {
 }
 
 pub fn unique_requests(requests: Vec<ChainAddress>) -> Vec<ChainAddress> {
-    unique_by(requests.into_iter().filter(|request| !request.address.is_empty()), |request| {
-        (request.chain, request.address.clone())
-    })
+    unique_by(requests.into_iter().filter(|request| !request.address.is_empty()), |request| (request.chain, request.address.clone()))
 }
 
 #[cfg(test)]
@@ -60,11 +58,7 @@ mod tests {
 
         assert_eq!(name_input_step(&idle, "", true), GemNameInputStep::Reset);
         assert_eq!(name_input_step(&idle, "vitalik", true), GemNameInputStep::Reset, "a name without a suffix resolves nowhere");
-        assert_eq!(
-            name_input_step(&idle, "vitalik.eth", false),
-            GemNameInputStep::Reset,
-            "no chain, nothing to resolve against"
-        );
+        assert_eq!(name_input_step(&idle, "vitalik.eth", false), GemNameInputStep::Reset, "no chain, nothing to resolve against");
         assert_eq!(
             name_input_step(&GemNameRecordState::Loading { name: "vitalik.eth".to_string() }, "vitalik.eth", true),
             GemNameInputStep::Unchanged,
@@ -88,11 +82,7 @@ mod tests {
         let loading = GemNameRecordState::Loading { name: "vitalik.eth".to_string() };
 
         assert_eq!(resolved_state(&loading, "vitalik.eth", GemNameRecordState::Error), GemNameRecordState::Error);
-        assert_eq!(
-            resolved_state(&loading, "other.eth", GemNameRecordState::Error),
-            loading,
-            "the answer to an old query does not replace the current one"
-        );
+        assert_eq!(resolved_state(&loading, "other.eth", GemNameRecordState::Error), loading, "the answer to an old query does not replace the current one");
     }
     use super::*;
     use primitives::Chain;

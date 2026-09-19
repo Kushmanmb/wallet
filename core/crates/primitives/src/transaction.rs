@@ -195,11 +195,7 @@ impl Transaction {
         }
 
         let direction = if user_set.intersection(&input_set).next().is_some() {
-            if user_set.is_superset(&output_set) {
-                TransactionDirection::SelfTransfer
-            } else {
-                TransactionDirection::Outgoing
-            }
+            if user_set.is_superset(&output_set) { TransactionDirection::SelfTransfer } else { TransactionDirection::Outgoing }
         } else {
             TransactionDirection::Incoming
         };
@@ -209,25 +205,14 @@ impl Transaction {
                 .iter()
                 .find(|output| user_set.contains(&output.address))
                 .map(|output| (output.address.clone(), Self::utxo_calculate_value(utxo_outputs, &user_set))),
-            TransactionDirection::Outgoing => utxo_outputs
-                .iter()
-                .find(|output| !user_set.contains(&output.address))
-                .map(|output| (output.address.clone(), output.value.clone())),
-            TransactionDirection::SelfTransfer => utxo_outputs
-                .first()
-                .map(|output| (output.address.clone(), Self::utxo_calculate_value(utxo_outputs, &user_set))),
+            TransactionDirection::Outgoing => utxo_outputs.iter().find(|output| !user_set.contains(&output.address)).map(|output| (output.address.clone(), output.value.clone())),
+            TransactionDirection::SelfTransfer => utxo_outputs.first().map(|output| (output.address.clone(), Self::utxo_calculate_value(utxo_outputs, &user_set))),
         };
         let Some((to, value)) = recipient else {
             return self.clone();
         };
         let from = first_input.address.clone();
-        Self {
-            from,
-            to,
-            value,
-            direction,
-            ..self.clone()
-        }
+        Self { from, to, value, direction, ..self.clone() }
     }
 
     fn project_asset_transfer(&self, metadata: TransactionAssetTransfersMetadata, addresses: &[String]) -> Option<Self> {
@@ -239,11 +224,7 @@ impl Transaction {
         }
 
         let direction = if contains(&transfer.from) {
-            if contains(&transfer.to) {
-                TransactionDirection::SelfTransfer
-            } else {
-                TransactionDirection::Outgoing
-            }
+            if contains(&transfer.to) { TransactionDirection::SelfTransfer } else { TransactionDirection::Outgoing }
         } else {
             TransactionDirection::Incoming
         };
@@ -276,10 +257,7 @@ impl Transaction {
         if self.transaction_type != TransactionType::TransferNFT {
             return None;
         }
-        self.metadata
-            .as_ref()
-            .and_then(|value| TransactionNFTTransferMetadata::deserialize(value).ok())
-            .map(|metadata| metadata.asset_id)
+        self.metadata.as_ref().and_then(|value| TransactionNFTTransferMetadata::deserialize(value).ok()).map(|metadata| metadata.asset_id)
     }
 
     pub fn asset_ids(&self) -> Vec<AssetId> {
@@ -310,12 +288,7 @@ impl Transaction {
     }
 
     pub fn associated_asset_ids(&self) -> Vec<AssetId> {
-        self.asset_ids()
-            .into_iter()
-            .chain([self.asset_id.clone(), self.fee_asset_id.clone()])
-            .collect::<HashSet<_>>()
-            .into_iter()
-            .collect()
+        self.asset_ids().into_iter().chain([self.asset_id.clone(), self.fee_asset_id.clone()]).collect::<HashSet<_>>().into_iter().collect()
     }
 
     pub fn assets_addresses(&self) -> Vec<AssetAddress> {
@@ -323,25 +296,14 @@ impl Transaction {
             return metadata
                 .asset_transfers
                 .into_iter()
-                .flat_map(|transfer| {
-                    [
-                        AssetAddress::new(transfer.asset_id.clone(), transfer.from, None),
-                        AssetAddress::new(transfer.asset_id, transfer.to, None),
-                    ]
-                })
+                .flat_map(|transfer| [AssetAddress::new(transfer.asset_id.clone(), transfer.from, None), AssetAddress::new(transfer.asset_id, transfer.to, None)])
                 .collect::<HashSet<_>>()
                 .into_iter()
                 .collect();
         }
 
         match self.transaction_type {
-            TransactionType::Transfer | TransactionType::TransferNFT => self
-                .addresses()
-                .into_iter()
-                .map(|x| AssetAddress::new(self.asset_id.clone(), x, None))
-                .collect::<HashSet<_>>()
-                .into_iter()
-                .collect(),
+            TransactionType::Transfer | TransactionType::TransferNFT => self.addresses().into_iter().map(|x| AssetAddress::new(self.asset_id.clone(), x, None)).collect::<HashSet<_>>().into_iter().collect(),
             TransactionType::TokenApproval => vec![AssetAddress::new(self.asset_id.clone(), self.from.clone(), None)],
             TransactionType::StakeDelegate
             | TransactionType::StakeUndelegate
@@ -359,12 +321,7 @@ impl Transaction {
             | TransactionType::EarnWithdraw => vec![AssetAddress::new(self.asset_id.clone(), self.to.clone(), None)],
             TransactionType::Swap => self
                 .swap_metadata()
-                .map(|metadata| {
-                    vec![
-                        AssetAddress::new(metadata.from_asset, self.from.clone(), None),
-                        AssetAddress::new(metadata.to_asset, self.to.clone(), None),
-                    ]
-                })
+                .map(|metadata| vec![AssetAddress::new(metadata.from_asset, self.from.clone(), None), AssetAddress::new(metadata.to_asset, self.to.clone(), None)])
                 .unwrap_or_default(),
         }
     }
@@ -461,40 +418,15 @@ mod tests {
             ..Transaction::mock()
         };
         assert_eq!(transaction.assets_addresses().len(), 2);
-        assert!(
-            transaction
-                .assets_addresses()
-                .iter()
-                .any(|a| a.asset_id == Asset::mock_ethereum_usdc().id && a.address == "0xfrom")
-        );
-        assert!(
-            transaction
-                .assets_addresses()
-                .iter()
-                .any(|a| a.asset_id == Asset::mock_ethereum_usdc().id && a.address == "0xto")
-        );
+        assert!(transaction.assets_addresses().iter().any(|a| a.asset_id == Asset::mock_ethereum_usdc().id && a.address == "0xfrom"));
+        assert!(transaction.assets_addresses().iter().any(|a| a.asset_id == Asset::mock_ethereum_usdc().id && a.address == "0xto"));
 
         // With fee
         assert_eq!(Transaction::mock().assets_addresses_with_fee().len(), 2);
         assert_eq!(transaction.assets_addresses_with_fee().len(), 3);
-        assert!(
-            transaction
-                .assets_addresses_with_fee()
-                .iter()
-                .any(|a| a.asset_id == Asset::mock_eth().id && a.address == "0xfrom")
-        );
-        assert!(
-            transaction
-                .assets_addresses_with_fee()
-                .iter()
-                .any(|a| a.asset_id == Asset::mock_ethereum_usdc().id && a.address == "0xfrom")
-        );
-        assert!(
-            transaction
-                .assets_addresses_with_fee()
-                .iter()
-                .any(|a| a.asset_id == Asset::mock_ethereum_usdc().id && a.address == "0xto")
-        );
+        assert!(transaction.assets_addresses_with_fee().iter().any(|a| a.asset_id == Asset::mock_eth().id && a.address == "0xfrom"));
+        assert!(transaction.assets_addresses_with_fee().iter().any(|a| a.asset_id == Asset::mock_ethereum_usdc().id && a.address == "0xfrom"));
+        assert!(transaction.assets_addresses_with_fee().iter().any(|a| a.asset_id == Asset::mock_ethereum_usdc().id && a.address == "0xto"));
     }
 
     #[test]
@@ -540,17 +472,11 @@ mod tests {
     fn test_finalize_incoming_utxo() {
         let transaction = Transaction::mock_utxo(
             vec![TransactionUtxoInput::new("sender".into(), 50_000u32.into())],
-            vec![
-                TransactionUtxoInput::new("user".into(), 40_000u32.into()),
-                TransactionUtxoInput::new("change".into(), 9_000u32.into()),
-            ],
+            vec![TransactionUtxoInput::new("user".into(), 40_000u32.into()), TransactionUtxoInput::new("change".into(), 9_000u32.into())],
         )
         .finalize(vec!["user".to_string()]);
 
-        assert_eq!(
-            (transaction.from.as_str(), transaction.to.as_str(), transaction.value.to_string().as_str()),
-            ("sender", "user", "40000")
-        );
+        assert_eq!((transaction.from.as_str(), transaction.to.as_str(), transaction.value.to_string().as_str()), ("sender", "user", "40000"));
         assert_eq!(transaction.direction, TransactionDirection::Incoming);
     }
 
@@ -558,17 +484,11 @@ mod tests {
     fn test_finalize_outgoing_utxo() {
         let transaction = Transaction::mock_utxo(
             vec![TransactionUtxoInput::new("user".into(), 50_000u32.into())],
-            vec![
-                TransactionUtxoInput::new("recipient".into(), 40_000u32.into()),
-                TransactionUtxoInput::new("user".into(), 9_000u32.into()),
-            ],
+            vec![TransactionUtxoInput::new("recipient".into(), 40_000u32.into()), TransactionUtxoInput::new("user".into(), 9_000u32.into())],
         )
         .finalize(vec!["user".to_string()]);
 
-        assert_eq!(
-            (transaction.from.as_str(), transaction.to.as_str(), transaction.value.to_string().as_str()),
-            ("user", "recipient", "40000")
-        );
+        assert_eq!((transaction.from.as_str(), transaction.to.as_str(), transaction.value.to_string().as_str()), ("user", "recipient", "40000"));
         assert_eq!(transaction.direction, TransactionDirection::Outgoing);
     }
 
@@ -576,17 +496,11 @@ mod tests {
     fn test_finalize_self_transfer_utxo() {
         let transaction = Transaction::mock_utxo(
             vec![TransactionUtxoInput::new("user".into(), 50_000u32.into())],
-            vec![
-                TransactionUtxoInput::new("user".into(), 40_000u32.into()),
-                TransactionUtxoInput::new("user".into(), 9_000u32.into()),
-            ],
+            vec![TransactionUtxoInput::new("user".into(), 40_000u32.into()), TransactionUtxoInput::new("user".into(), 9_000u32.into())],
         )
         .finalize(vec!["user".to_string()]);
 
-        assert_eq!(
-            (transaction.from.as_str(), transaction.to.as_str(), transaction.value.to_string().as_str()),
-            ("user", "user", "49000")
-        );
+        assert_eq!((transaction.from.as_str(), transaction.to.as_str(), transaction.value.to_string().as_str()), ("user", "user", "49000"));
         assert_eq!(transaction.direction, TransactionDirection::SelfTransfer);
     }
 

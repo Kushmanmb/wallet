@@ -274,10 +274,7 @@ mod tests {
         assert_eq!(format!("{:?}", order.agent_private_key), "AgentPrivateKey([REDACTED])");
         assert_eq!(order.agent_private_key.key(), "0xkey");
 
-        assert_eq!(
-            TransactionLoadMetadata::None.get_hyperliquid_order().unwrap_err().to_string(),
-            "Hyperliquid order not available for this metadata type"
-        );
+        assert_eq!(TransactionLoadMetadata::None.get_hyperliquid_order().unwrap_err().to_string(), "Hyperliquid order not available for this metadata type");
 
         let metadata = TransactionLoadMetadata::Solana {
             sender_token_address: None,

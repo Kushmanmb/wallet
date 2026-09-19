@@ -10,8 +10,8 @@ use crate::models::list::GemListRow;
 use crate::services::assets::config::GemAssetConfigService;
 use crate::services::confirm::rules::{confirm_row_contents, is_insufficient_network_fee};
 use crate::services::confirm::{
-    GemAcquireAssetFlow, GemConfirmData, GemConfirmError, GemConfirmFeeLoad, GemConfirmInput, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmService,
-    GemConfirmSimulationState, GemConfirmation, GemExecuteResult, GemFeeAsset, GemTransactionSigner, SendInput,
+    GemAcquireAssetFlow, GemConfirmData, GemConfirmError, GemConfirmFeeLoad, GemConfirmInput, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmService, GemConfirmSimulationState, GemConfirmation, GemExecuteResult,
+    GemFeeAsset, GemTransactionSigner, SendInput,
 };
 use crate::services::explorer::GemExplorerService;
 use crate::services::name::GemNameService;
@@ -107,14 +107,7 @@ impl GemConfirmTransferService {
         get_fiat_config().insufficient_network_fee_buy_amount
     }
 
-    pub(super) async fn execute(
-        &self,
-        wallet: Wallet,
-        confirm: GemConfirmData,
-        value: GemBigInt,
-        network_fee: GemBigInt,
-        simulation: Option<SimulationResult>,
-    ) -> Result<GemExecuteResult, GemConfirmError> {
+    pub(super) async fn execute(&self, wallet: Wallet, confirm: GemConfirmData, value: GemBigInt, network_fee: GemBigInt, simulation: Option<SimulationResult>) -> Result<GemExecuteResult, GemConfirmError> {
         let wallet_id = wallet.id.clone();
         let input_type = confirm.input.transfer.input_type.clone();
         let input = SendInput {
@@ -206,9 +199,7 @@ mod tests {
             hashes: vec!["0xhash".to_string()],
             transactions: vec![],
         };
-        let signed = GemExecuteResult::Signed {
-            data: vec!["0xsigned".to_string()],
-        };
+        let signed = GemExecuteResult::Signed { data: vec!["0xsigned".to_string()] };
 
         assert!(is_broadcast(&sent));
         assert!(!is_broadcast(&signed));

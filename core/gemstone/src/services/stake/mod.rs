@@ -17,8 +17,8 @@ use crate::models::custom_types::GemBigInt;
 use crate::models::{GemContractCallData, GemEarnType};
 
 pub use model::{
-    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationStatus, GemStakeAction, GemStakeActionItem,
-    GemStakeAmountInput, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
+    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationStatus, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeSection,
+    GemStakeValidatorSelection, GemValidatorRow,
 };
 pub use store::GemStakeStore;
 
@@ -107,13 +107,7 @@ impl GemStakeService {
         rules::delegation_destination(wallet_type, asset, delegation)
     }
 
-    pub fn delegation_action_destination(
-        &self,
-        asset: Asset,
-        delegation: Delegation,
-        action: GemDelegationAction,
-        validators: Vec<DelegationValidator>,
-    ) -> GemDelegationDestination {
+    pub fn delegation_action_destination(&self, asset: Asset, delegation: Delegation, action: GemDelegationAction, validators: Vec<DelegationValidator>) -> GemDelegationDestination {
         rules::delegation_action_destination(asset, delegation, action, validators)
     }
 
@@ -182,9 +176,7 @@ impl GemStakeService {
             self.gateway.get_staking_delegation_validators(chain, address.clone()),
             self.gateway.get_staking_delegations(chain, address),
         );
-        let names: HashMap<String, String> = names
-            .map(|validators| validators.into_iter().map(|validator| (validator.id, validator.name)).collect())
-            .unwrap_or_default();
+        let names: HashMap<String, String> = names.map(|validators| validators.into_iter().map(|validator| (validator.id, validator.name)).collect()).unwrap_or_default();
         self.save_validators(chain, rules::merge_validators(validators?, delegation_validators?, &names)).await?;
         self.save_delegations(wallet_id, chain, delegations?, &names).await
     }
@@ -249,11 +241,7 @@ mod tests {
     #[test]
     fn test_missing_validators_only_for_unknown_ids() {
         let existing: HashMap<_, _> = [("known".to_string(), DelegationValidator::mock_cosmos("known"))].into();
-        let delegations = vec![
-            DelegationBase::mock_with_validator("known"),
-            DelegationBase::mock_with_validator("gone"),
-            DelegationBase::mock_with_validator("gone"),
-        ];
+        let delegations = vec![DelegationBase::mock_with_validator("known"), DelegationBase::mock_with_validator("gone"), DelegationBase::mock_with_validator("gone")];
         let names: HashMap<_, _> = [("gone".to_string(), "Gone".to_string())].into();
 
         let missing = missing_validators(Chain::Cosmos, &delegations, &existing, &names);

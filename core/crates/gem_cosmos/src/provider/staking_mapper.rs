@@ -30,25 +30,12 @@ pub fn map_staking_validators(validators: Vec<Validator>, chain: CosmosChain, ap
             let is_active = !validator.jailed && validator.status == BOND_STATUS_BONDED;
             let validator_apr = if is_active { apy.map(|apr| apr - (apr * commission_rate)).unwrap_or(0.0) } else { 0.0 };
 
-            DelegationValidator::stake(
-                chain.as_chain(),
-                validator.operator_address,
-                validator.description.moniker,
-                is_active,
-                commission_rate * 100.0,
-                validator_apr,
-            )
+            DelegationValidator::stake(chain.as_chain(), validator.operator_address, validator.description.moniker, is_active, commission_rate * 100.0, validator_apr)
         })
         .collect()
 }
 
-pub fn map_staking_delegations(
-    active_delegations: Delegations,
-    unbonding_delegations: UnbondingDelegations,
-    rewards: Rewards,
-    chain: CosmosChain,
-    denom: &str,
-) -> Vec<DelegationBase> {
+pub fn map_staking_delegations(active_delegations: Delegations, unbonding_delegations: UnbondingDelegations, rewards: Rewards, chain: CosmosChain, denom: &str) -> Vec<DelegationBase> {
     let asset_id = chain.as_chain().as_asset_id();
     let mut delegations = Vec::new();
 
@@ -75,10 +62,7 @@ pub fn map_staking_delegations(
             return None;
         }
 
-        let rewards = rewards_map
-            .get(&delegation.delegation.validator_address)
-            .map(|r| r.to_string())
-            .unwrap_or_else(|| "0".to_string());
+        let rewards = rewards_map.get(&delegation.delegation.validator_address).map(|r| r.to_string()).unwrap_or_else(|| "0".to_string());
 
         Some(DelegationBase {
             asset_id: asset_id.clone(),
@@ -209,9 +193,7 @@ mod tests {
             operator_address: "celestiavaloper1eualhqh07w7p45g45hvrjagkcxsfnflzdw5jzg".to_string(),
             jailed: true,
             status: BOND_STATUS_UNBONDED.to_string(),
-            description: ValidatorDescription {
-                moniker: "don't stake".to_string(),
-            },
+            description: ValidatorDescription { moniker: "don't stake".to_string() },
             commission: ValidatorCommission {
                 commission_rates: ValidatorCommissionRates { rate: 0.2 },
             },

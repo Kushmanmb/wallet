@@ -53,18 +53,6 @@ mod tests {
             failures
         });
 
-        assert_eq!(
-            failures,
-            vec![
-                Failure {
-                    step: 1,
-                    message: "offline".to_string()
-                },
-                Failure {
-                    step: 3,
-                    message: "cancelled".to_string()
-                },
-            ]
-        );
+        assert_eq!(failures, vec![Failure { step: 1, message: "offline".to_string() }, Failure { step: 3, message: "cancelled".to_string() },]);
     }
 }

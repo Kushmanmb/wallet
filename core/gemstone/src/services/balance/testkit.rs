@@ -73,16 +73,7 @@ impl MemoryBalanceStore {
 impl GemBalanceStore for MemoryBalanceStore {
     async fn get_available_balances(&self, wallet_id: WalletId, asset_ids: Vec<AssetId>) -> Result<Vec<GemAssetBalance>, GemServiceError> {
         self.requests.lock().unwrap().push(wallet_id.clone());
-        Ok(self
-            .balances
-            .lock()
-            .unwrap()
-            .get(&wallet_id)
-            .into_iter()
-            .flatten()
-            .filter(|balance| asset_ids.contains(&balance.asset_id))
-            .cloned()
-            .collect())
+        Ok(self.balances.lock().unwrap().get(&wallet_id).into_iter().flatten().filter(|balance| asset_ids.contains(&balance.asset_id)).cloned().collect())
     }
     async fn update_balances(&self, _: WalletId, balances: Vec<GemBalanceRecord>) -> Result<(), GemServiceError> {
         self.balance_writes.lock().unwrap().push(balances);
@@ -119,12 +110,7 @@ impl BalanceTestkit {
         let provider = Arc::new(TestAlienProvider::with_status(503));
         let preferences_store = Arc::new(MemoryPreferencesStore::default());
         let preferences = Arc::new(GemPreferencesService::new(preferences_store.clone()));
-        let gateway = Arc::new(GemGateway::new(
-            provider.clone(),
-            Arc::new(GemNodeService::mock()),
-            preferences_store,
-            Arc::new(EmptyPreferences),
-        ));
+        let gateway = Arc::new(GemGateway::new(provider.clone(), Arc::new(GemNodeService::mock()), preferences_store, Arc::new(EmptyPreferences)));
         let wallets = Arc::new(MemoryWalletStore::default());
         let session = Arc::new(GemWalletSessionService::new(Arc::new(MemoryWalletSessionStore::default()), wallets.clone()));
         let assets = Arc::new(MemoryAssetStore::default());
@@ -137,14 +123,7 @@ impl BalanceTestkit {
             session,
         ));
         let balances = Arc::new(balances);
-        let service = GemBalanceService::new(
-            gateway,
-            wallets,
-            assets.clone(),
-            balances.clone(),
-            assets_service,
-            Arc::new(SubscriptionTestkit::new(&[], &[]).service),
-        );
+        let service = GemBalanceService::new(gateway, wallets, assets.clone(), balances.clone(), assets_service, Arc::new(SubscriptionTestkit::new(&[], &[]).service));
         Self { service, assets, balances }
     }
 }

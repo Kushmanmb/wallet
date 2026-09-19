@@ -116,20 +116,14 @@ mod tests {
         let ethereum = AssetId::from_chain(Chain::Ethereum);
         let cosmos = AssetId::from_chain(Chain::Cosmos);
 
-        assert_eq!(
-            balance_rows(Chain::Ethereum, AssetBalance::new(ethereum, BigUint::ZERO), None),
-            vec![GemBalanceRow::Available { value: BigUint::ZERO }]
-        );
+        assert_eq!(balance_rows(Chain::Ethereum, AssetBalance::new(ethereum, BigUint::ZERO), None), vec![GemBalanceRow::Available { value: BigUint::ZERO }]);
         assert_eq!(
             balance_rows(
                 Chain::Cosmos,
                 AssetBalance::new(cosmos.clone(), BigUint::from(5u32)),
                 Some(AssetBalance::new_staking(cosmos.clone(), BigUint::from(100u32), BigUint::ZERO, BigUint::from(1u32))),
             ),
-            vec![
-                GemBalanceRow::Available { value: BigUint::from(5u32) },
-                GemBalanceRow::Staked { value: BigUint::from(101u32) },
-            ]
+            vec![GemBalanceRow::Available { value: BigUint::from(5u32) }, GemBalanceRow::Staked { value: BigUint::from(101u32) },]
         );
         assert_eq!(
             balance_rows(
@@ -168,13 +162,7 @@ mod tests {
 
     #[test]
     fn test_a_known_name_is_a_row_of_its_own_above_the_network() {
-        let named = details(
-            Chain::Ethereum,
-            "0x1".to_string(),
-            Some("Main Wallet".to_string()),
-            BlockExplorerLink::mock(),
-            GemLoad::loading(),
-        );
+        let named = details(Chain::Ethereum, "0x1".to_string(), Some("Main Wallet".to_string()), BlockExplorerLink::mock(), GemLoad::loading());
         let unnamed = details(Chain::Ethereum, "0x1".to_string(), None, BlockExplorerLink::mock(), GemLoad::loading());
         let network = GemListRow::Text {
             title: GemListRowTitle::Network,
@@ -197,14 +185,8 @@ mod tests {
     #[test]
     fn test_display_name() {
         assert_eq!(display_name(None, "0x1"), None);
-        assert_eq!(
-            display_name(Some(AddressName::mock("0x1", "", AddressType::Address, VerificationStatus::Unverified)), "0x1"),
-            None
-        );
-        assert_eq!(
-            display_name(Some(AddressName::mock("0x1", "0x1", AddressType::Address, VerificationStatus::Unverified)), "0x1"),
-            None
-        );
+        assert_eq!(display_name(Some(AddressName::mock("0x1", "", AddressType::Address, VerificationStatus::Unverified)), "0x1"), None);
+        assert_eq!(display_name(Some(AddressName::mock("0x1", "0x1", AddressType::Address, VerificationStatus::Unverified)), "0x1"), None);
         assert_eq!(
             display_name(Some(AddressName::mock("0x1", "Main Wallet", AddressType::Address, VerificationStatus::Unverified)), "0x1"),
             Some("Main Wallet".to_string())

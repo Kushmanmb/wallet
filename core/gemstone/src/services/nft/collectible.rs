@@ -28,10 +28,7 @@ impl GemCollectibleService {
         let (contract_explorer, token_explorer) = if contract.is_empty() {
             (None, None)
         } else {
-            (
-                self.explorer.get_token_url(chain, contract.clone()),
-                self.explorer.get_nft_url(chain, contract, asset_data.asset.token_id.clone()),
-            )
+            (self.explorer.get_token_url(chain, contract.clone()), self.explorer.get_nft_url(chain, contract, asset_data.asset.token_id.clone()))
         };
         rules::collectible_details(&wallet_type, &asset_data, is_owned, contract_explorer, token_explorer)
     }

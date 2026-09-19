@@ -55,19 +55,9 @@ impl Meta {
     }
 
     pub fn get_token_balance_changes_by_owner(&self, owner: &str) -> Vec<TokenBalanceChange> {
-        let pre_balances: HashMap<_, _> = self
-            .pre_token_balances
-            .iter()
-            .filter(|b| b.owner == owner)
-            .map(|b| (b.mint.clone(), b.get_amount()))
-            .collect();
+        let pre_balances: HashMap<_, _> = self.pre_token_balances.iter().filter(|b| b.owner == owner).map(|b| (b.mint.clone(), b.get_amount())).collect();
 
-        let post_balances: HashMap<_, _> = self
-            .post_token_balances
-            .iter()
-            .filter(|b| b.owner == owner)
-            .map(|b| (b.mint.clone(), b.get_amount()))
-            .collect();
+        let post_balances: HashMap<_, _> = self.post_token_balances.iter().filter(|b| b.owner == owner).map(|b| (b.mint.clone(), b.get_amount())).collect();
         let all_mints: HashSet<_> = pre_balances.keys().chain(post_balances.keys()).cloned().collect();
 
         all_mints
@@ -164,14 +154,7 @@ impl BlockTransaction {
 
     pub fn get_balance_changes_by_owner(&self, owner: &str) -> TokenBalanceChange {
         // Find all account indices that belong to the owner
-        let account_indices: Vec<usize> = self
-            .transaction
-            .message
-            .account_keys
-            .iter()
-            .enumerate()
-            .filter_map(|(i, k)| if k == owner { Some(i) } else { None })
-            .collect();
+        let account_indices: Vec<usize> = self.transaction.message.account_keys.iter().enumerate().filter_map(|(i, k)| if k == owner { Some(i) } else { None }).collect();
 
         let (total_pre, total_post) = account_indices.into_iter().fold((0u64, 0u64), |(pre_acc, post_acc), idx| {
             let pre = *self.meta.pre_balances.get(idx).unwrap_or(&0);

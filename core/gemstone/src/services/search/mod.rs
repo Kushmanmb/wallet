@@ -28,13 +28,7 @@ pub struct GemSearchService {
 #[uniffi::export]
 impl GemSearchService {
     #[uniffi::constructor]
-    pub fn new(
-        assets: Arc<GemAssetsService>,
-        asset_store: Arc<dyn GemAssetStore>,
-        price: Arc<GemPriceService>,
-        perpetual_store: Arc<dyn GemPerpetualStore>,
-        store: Arc<dyn GemSearchStore>,
-    ) -> Self {
+    pub fn new(assets: Arc<GemAssetsService>, asset_store: Arc<dyn GemAssetStore>, price: Arc<GemPriceService>, perpetual_store: Arc<dyn GemPerpetualStore>, store: Arc<dyn GemSearchStore>) -> Self {
         Self {
             assets,
             asset_store,

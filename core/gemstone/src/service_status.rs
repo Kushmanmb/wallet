@@ -83,11 +83,7 @@ impl GemServiceStatus {
     pub fn get_endpoints(&self) -> Vec<GemServiceEndpoint> {
         [GemServiceEndpoint::new(GemServiceEndpointType::Api, GEM_API_HOST, NodeRegion::Us.flag())]
             .into_iter()
-            .chain(
-                NodeRegion::all()
-                    .into_iter()
-                    .map(|region| GemServiceEndpoint::new(GemServiceEndpointType::GemNode, region.host(), region.flag())),
-            )
+            .chain(NodeRegion::all().into_iter().map(|region| GemServiceEndpoint::new(GemServiceEndpointType::GemNode, region.host(), region.flag())))
             .collect()
     }
 

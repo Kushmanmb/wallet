@@ -245,14 +245,7 @@ mod row_tests {
             .subtitle,
             None
         );
-        assert_eq!(
-            contact_row(Contact {
-                name: "Ada".into(),
-                ..Contact::mock()
-            })
-            .subtitle,
-            None
-        );
+        assert_eq!(contact_row(Contact { name: "Ada".into(), ..Contact::mock() }).subtitle, None);
     }
 
     #[test]
@@ -265,21 +258,7 @@ mod row_tests {
             .initials,
             "AD"
         );
-        assert_eq!(
-            contact_row(Contact {
-                name: "Q".into(),
-                ..Contact::mock()
-            })
-            .initials,
-            "Q"
-        );
-        assert_eq!(
-            contact_row(Contact {
-                name: "".into(),
-                ..Contact::mock()
-            })
-            .initials,
-            ""
-        );
+        assert_eq!(contact_row(Contact { name: "Q".into(), ..Contact::mock() }).initials, "Q");
+        assert_eq!(contact_row(Contact { name: "".into(), ..Contact::mock() }).initials, "");
     }
 }

@@ -47,9 +47,7 @@ use crate::services::wallet_session::GemWalletSessionService;
 use primitives::BlockExplorerLink;
 
 pub use error::GemWalletImportError;
-pub use model::{
-    GemWalletDefaultName, GemWalletDeletion, GemWalletImportKind, GemWalletImportResult, GemWalletImportScreen, GemWalletImportSession, GemWalletImportType, GemWalletSecret,
-};
+pub use model::{GemWalletDefaultName, GemWalletDeletion, GemWalletImportKind, GemWalletImportResult, GemWalletImportScreen, GemWalletImportSession, GemWalletImportType, GemWalletSecret};
 pub use password::{GemKeystoreAuthentication, GemKeystorePassword};
 pub use store::GemWalletStore;
 pub use verify_phrase::GemVerifyPhraseSession;
@@ -475,10 +473,7 @@ mod tests {
             let context = WalletTestkit::new();
             let phrase = context.import("Phrase", PHRASE).await;
             let key = "0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318".to_string();
-            let import = GemWalletImportType::PrivateKey {
-                value: key.clone(),
-                chain: Chain::Ethereum,
-            };
+            let import = GemWalletImportType::PrivateKey { value: key.clone(), chain: Chain::Ethereum };
             let GemWalletImportResult::New { wallet: private } = context.service.import_wallet("Key".to_string(), import, WalletSource::Import).await.unwrap() else {
                 panic!("expected a new wallet");
             };
@@ -543,28 +538,16 @@ mod tests {
 
             let before = context.service.app_preferences.get_subscriptions_version();
             context.service.setup_chains(vec![Chain::Ethereum, Chain::Solana]).await.unwrap();
-            assert_eq!(
-                context.service.app_preferences.get_subscriptions_version(),
-                before,
-                "a setup that adds no chain must not bump"
-            );
+            assert_eq!(context.service.app_preferences.get_subscriptions_version(), before, "a setup that adds no chain must not bump");
 
             let second = context.import("Second", OTHER_PHRASE).await;
             let before = context.service.app_preferences.get_subscriptions_version();
             context.service.delete_wallet(second.id.clone()).await.unwrap();
-            assert_eq!(
-                context.service.app_preferences.get_subscriptions_version(),
-                before + 1,
-                "deleting one of several wallets must bump"
-            );
+            assert_eq!(context.service.app_preferences.get_subscriptions_version(), before + 1, "deleting one of several wallets must bump");
 
             let before = context.service.app_preferences.get_subscriptions_version();
             context.service.delete_wallet(wallet.id.clone()).await.unwrap();
-            assert_eq!(
-                context.service.app_preferences.get_subscriptions_version(),
-                before + 1,
-                "deleting the last wallet must bump without resetting app preferences"
-            );
+            assert_eq!(context.service.app_preferences.get_subscriptions_version(), before + 1, "deleting the last wallet must bump without resetting app preferences");
         });
     }
 
@@ -575,11 +558,7 @@ mod tests {
             let wallet = context.import("Legacy", PHRASE).await;
             let keystore_id = keystore_id_for_wallet(wallet.id.id());
             let legacy = "0f0e0d0c0b0a09080706050403020100f0e0d0c0b0a090807060504030201000";
-            context
-                .service
-                .keystore
-                .change_password(keystore_id.clone(), decode_password(TEST_PASSWORD), decode_password(legacy))
-                .unwrap();
+            context.service.keystore.change_password(keystore_id.clone(), decode_password(TEST_PASSWORD), decode_password(legacy)).unwrap();
             context.passwords.wallet_passwords.lock().unwrap().insert(wallet.id.id(), legacy.to_string());
 
             assert_eq!(context.service.migrate_to_shared_password().await.unwrap(), 1);
@@ -612,19 +591,11 @@ mod tests {
             let keystore_id = keystore_id_for_wallet(wallet.id.id());
             let actual = "0f0e0d0c0b0a09080706050403020100f0e0d0c0b0a090807060504030201000";
             let wrong = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-            context
-                .service
-                .keystore
-                .change_password(keystore_id.clone(), decode_password(TEST_PASSWORD), decode_password(actual))
-                .unwrap();
+            context.service.keystore.change_password(keystore_id.clone(), decode_password(TEST_PASSWORD), decode_password(actual)).unwrap();
             context.passwords.wallet_passwords.lock().unwrap().insert(wallet.id.id(), wrong.to_string());
             let other = context.import("Migratable", OTHER_PHRASE).await;
             let other_keystore_id = keystore_id_for_wallet(other.id.id());
-            context
-                .service
-                .keystore
-                .change_password(other_keystore_id.clone(), decode_password(TEST_PASSWORD), decode_password(actual))
-                .unwrap();
+            context.service.keystore.change_password(other_keystore_id.clone(), decode_password(TEST_PASSWORD), decode_password(actual)).unwrap();
             context.passwords.wallet_passwords.lock().unwrap().insert(other.id.id(), actual.to_string());
 
             assert!(context.service.migrate_to_shared_password().await.is_err());

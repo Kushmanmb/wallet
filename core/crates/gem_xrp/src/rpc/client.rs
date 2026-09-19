@@ -10,10 +10,7 @@ use gem_jsonrpc::types::{ERROR_CLIENT_ERROR, JsonRpcError};
 use primitives::Chain;
 
 use crate::jsonrpc::XrpRpc;
-use crate::models::rpc::{
-    AccountInfo, AccountInfoResult, AccountLedger, AccountObjects, FeesResult, Ledger, LedgerData, LedgerInfo, ServerInfo, ServerInfoResult, TransactionBroadcast,
-    TransactionStatus,
-};
+use crate::models::rpc::{AccountInfo, AccountInfoResult, AccountLedger, AccountObjects, FeesResult, Ledger, LedgerData, LedgerInfo, ServerInfo, ServerInfoResult, TransactionBroadcast, TransactionStatus};
 
 #[derive(Clone, Debug)]
 pub struct XrpClient<C: Client + Clone> {
@@ -107,11 +104,7 @@ fn map_error_result(result: &Value) -> Option<JsonRpcError> {
         return None;
     }
 
-    let code = result
-        .get("error_code")
-        .and_then(Value::as_i64)
-        .and_then(|value| i32::try_from(value).ok())
-        .unwrap_or(ERROR_CLIENT_ERROR);
+    let code = result.get("error_code").and_then(Value::as_i64).and_then(|value| i32::try_from(value).ok()).unwrap_or(ERROR_CLIENT_ERROR);
     let error = result.get("error").and_then(Value::as_str);
     let error_message = result.get("error_message").and_then(Value::as_str);
     let message = match (error, error_message) {

@@ -24,9 +24,7 @@ use crate::message::signer::MessageSigner;
 use crate::models::swap::GemSwapQuoteData;
 use crate::services::error::GemServiceError;
 use crate::services::wallet::GemKeystorePassword;
-pub use model::{
-    GemAssetRate, GemSwapButtonAction, GemSwapButtonInput, GemSwapPair, GemSwapPairSuggestion, GemSwapQuoteSummary, GemSwapTransfer, swap_quote_summary, swapper_quote_summary,
-};
+pub use model::{GemAssetRate, GemSwapButtonAction, GemSwapButtonInput, GemSwapPair, GemSwapPairSuggestion, GemSwapQuoteSummary, GemSwapTransfer, swap_quote_summary, swapper_quote_summary};
 use primitives::AssetId;
 pub use session::{GemSwapButtonState, GemSwapQuotePhase, GemSwapQuotesResult, GemSwapRequest, GemSwapSession, GemSwapSessionAction, GemSwapTransferPhase};
 pub use store::GemSwapStore;
@@ -43,25 +41,12 @@ pub struct GemSwapService {
 impl GemSwapService {
     #[uniffi::constructor]
     pub fn new(swapper: Arc<GemSwapper>, keystore: Arc<GemKeystore>, password: Arc<dyn GemKeystorePassword>, store: Arc<dyn GemSwapStore>) -> Self {
-        Self {
-            swapper,
-            keystore,
-            password,
-            store,
-        }
+        Self { swapper, keystore, password, store }
     }
 }
 
 impl GemSwapService {
-    pub async fn get_quotes(
-        &self,
-        wallet: Wallet,
-        from_asset: Asset,
-        to_asset: Asset,
-        value: GemBigUint,
-        use_max_amount: bool,
-        slippage_bps: Option<u32>,
-    ) -> Result<Vec<Quote>, SwapperError> {
+    pub async fn get_quotes(&self, wallet: Wallet, from_asset: Asset, to_asset: Asset, value: GemBigUint, use_max_amount: bool, slippage_bps: Option<u32>) -> Result<Vec<Quote>, SwapperError> {
         let request = rules::quote_request(&wallet, &from_asset, &to_asset, value, use_max_amount, slippage_bps)?;
         self.swapper.preload_routes(from_asset.id, to_asset.id).await;
         self.swapper.get_quote(&request).await
@@ -106,10 +91,7 @@ impl GemSwapService {
         if let Some(asset_id) = rules::first_supported_receive_asset(recents, pay_asset_id, &supported) {
             return Ok(Some(asset_id));
         }
-        let candidates = self
-            .store
-            .get_receive_asset_ids(wallet.id.clone(), supported.chains.clone(), supported.asset_ids.clone())
-            .await?;
+        let candidates = self.store.get_receive_asset_ids(wallet.id.clone(), supported.chains.clone(), supported.asset_ids.clone()).await?;
         Ok(rules::first_supported_receive_asset(candidates, pay_asset_id, &supported))
     }
 
@@ -186,11 +168,7 @@ mod tests {
             *store.recent_asset_ids.lock().unwrap() = vec![Chain::Bitcoin.as_asset_id()];
 
             let wallet = Wallet::mock_with_chains(&[Chain::Ethereum, Chain::Solana]);
-            let suggestion = GemSwapService::mock(store)
-                .suggest_pair(wallet, Some(Chain::Ethereum.as_asset_id()))
-                .await
-                .unwrap()
-                .unwrap();
+            let suggestion = GemSwapService::mock(store).suggest_pair(wallet, Some(Chain::Ethereum.as_asset_id())).await.unwrap().unwrap();
 
             assert_eq!(suggestion.receive_asset_id, Some(Chain::Solana.as_asset_id()));
         });
@@ -203,11 +181,7 @@ mod tests {
             *store.recent_asset_ids.lock().unwrap() = vec![Chain::Ethereum.as_asset_id(), Chain::Bitcoin.as_asset_id(), Chain::Solana.as_asset_id()];
 
             let wallet = Wallet::mock_with_chains(&[Chain::Ethereum, Chain::Solana]);
-            let suggestion = GemSwapService::mock(store)
-                .suggest_pair(wallet, Some(Chain::Ethereum.as_asset_id()))
-                .await
-                .unwrap()
-                .unwrap();
+            let suggestion = GemSwapService::mock(store).suggest_pair(wallet, Some(Chain::Ethereum.as_asset_id())).await.unwrap().unwrap();
 
             assert_eq!(
                 suggestion.receive_asset_id,
@@ -245,11 +219,7 @@ mod tests {
             let store_ref = store.clone();
 
             let wallet = Wallet::mock_with_chains(&[Chain::Ethereum, Chain::Solana]);
-            let suggestion = GemSwapService::mock(store)
-                .suggest_pair(wallet, Some(Chain::Ethereum.as_asset_id()))
-                .await
-                .unwrap()
-                .unwrap();
+            let suggestion = GemSwapService::mock(store).suggest_pair(wallet, Some(Chain::Ethereum.as_asset_id())).await.unwrap().unwrap();
 
             assert_eq!(suggestion.receive_asset_id, Some(Chain::Solana.as_asset_id()));
             let (chains, asset_ids) = store_ref.receive_requests.lock().unwrap().first().cloned().unwrap();

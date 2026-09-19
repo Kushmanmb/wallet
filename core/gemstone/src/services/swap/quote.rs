@@ -29,13 +29,7 @@ pub struct GemSwapQuoteService {
 #[uniffi::export]
 impl GemSwapQuoteService {
     #[uniffi::constructor]
-    pub fn new(
-        swap: Arc<GemSwapService>,
-        preferences: Arc<GemPreferencesService>,
-        balances: Arc<GemBalanceService>,
-        stream: Arc<GemStreamSubscriptionService>,
-        session: Arc<GemWalletSessionService>,
-    ) -> Self {
+    pub fn new(swap: Arc<GemSwapService>, preferences: Arc<GemPreferencesService>, balances: Arc<GemBalanceService>, stream: Arc<GemStreamSubscriptionService>, session: Arc<GemWalletSessionService>) -> Self {
         Self {
             swap,
             preferences,

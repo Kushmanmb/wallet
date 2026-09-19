@@ -10,12 +10,11 @@ use serde::Serialize;
 use serde::de::DeserializeOwned;
 
 use crate::models::{
-    Account, Block, DelegationPoolStake, GasFee, Ledger, Resource, SimulateTransactionQuery, SponsoredSimulationSignature, StakingConfig, Transaction, TransactionPayload,
-    TransactionResponse, TransactionSimulation, ValidatorSet, ViewRequest,
+    Account, Block, DelegationPoolStake, GasFee, Ledger, Resource, SimulateTransactionQuery, SponsoredSimulationSignature, StakingConfig, Transaction, TransactionPayload, TransactionResponse, TransactionSimulation, ValidatorSet,
+    ViewRequest,
 };
 use crate::provider::payload_builder::{
-    build_stake_transaction_payload, build_swap_transaction_payload, build_token_transfer_transaction_payload, build_transfer_transaction_payload,
-    build_unstake_transaction_payload, build_withdraw_transaction_payload,
+    build_stake_transaction_payload, build_swap_transaction_payload, build_token_transfer_transaction_payload, build_transfer_transaction_payload, build_unstake_transaction_payload, build_withdraw_transaction_payload,
 };
 use crate::rpc::target::AptosTarget;
 use crate::{DEFAULT_MAX_GAS_AMOUNT, DEFAULT_SWAP_MAX_GAS_AMOUNT, SIMULATION_MAX_GAS_AMOUNT};
@@ -52,13 +51,7 @@ impl<C: Client> AptosClient<C> {
     }
 
     pub async fn get_account_resource<T: Serialize + DeserializeOwned + Send>(&self, address: String, resource: &str) -> Result<Resource<T>, Box<dyn Error + Send + Sync>> {
-        Ok(self
-            .client
-            .get(AptosTarget::GetAccountResource {
-                address,
-                resource: resource.to_string(),
-            })
-            .await?)
+        Ok(self.client.get(AptosTarget::GetAccountResource { address, resource: resource.to_string() }).await?)
     }
 
     pub async fn get_account_balance(&self, address: &str, asset_type: &str) -> Result<u64, Box<dyn Error + Send + Sync>> {
@@ -95,18 +88,13 @@ impl<C: Client> AptosClient<C> {
         let sequence = input.metadata.get_sequence()?;
 
         match &input.input_type {
-            TransactionInputType::Transfer { asset }
-            | TransactionInputType::Withdrawal { asset }
-            | TransactionInputType::Deposit { asset }
-            | TransactionInputType::TransferNft { asset, .. }
-            | TransactionInputType::Account { asset, .. } => {
+            TransactionInputType::Transfer { asset } | TransactionInputType::Withdrawal { asset } | TransactionInputType::Deposit { asset } | TransactionInputType::TransferNft { asset, .. } | TransactionInputType::Account { asset, .. } => {
                 let payload = match &asset.id.token_id {
                     None => build_transfer_transaction_payload(&input.destination_address, &input.value.to_string()),
                     Some(token_id) => build_token_transfer_transaction_payload(token_id, &input.destination_address, &input.value.to_string())?,
                 };
 
-                self.simulate_transaction(&input.sender_address, sequence, payload, &input.gas_price.gas_price().to_string())
-                    .await
+                self.simulate_transaction(&input.sender_address, sequence, payload, &input.gas_price.gas_price().to_string()).await
             }
             TransactionInputType::Swap { from_asset: asset, swap_data, .. } => match &swap_data.data.gas_limit {
                 Some(gas_limit) => gas_limit.parse::<u64>().map_err(|_| "Invalid Aptos gas limit".into()),
@@ -127,13 +115,10 @@ impl<C: Client> AptosClient<C> {
                 };
 
                 let payload = payload.ok_or("Unsupported Aptos stake type")?;
-                self.simulate_transaction(&input.sender_address, sequence, payload, &input.gas_price.gas_price().to_string())
-                    .await
+                self.simulate_transaction(&input.sender_address, sequence, payload, &input.gas_price.gas_price().to_string()).await
             }
             TransactionInputType::Generic { .. } => Ok(DEFAULT_MAX_GAS_AMOUNT),
-            TransactionInputType::TokenApprove { .. } | TransactionInputType::Perpetual { .. } | TransactionInputType::Earn { .. } => {
-                Err("Unsupported Aptos transaction type".into())
-            }
+            TransactionInputType::TokenApprove { .. } | TransactionInputType::Perpetual { .. } | TransactionInputType::Earn { .. } => Err("Unsupported Aptos transaction type".into()),
         }
     }
 
@@ -165,10 +150,7 @@ impl<C: Client> AptosClient<C> {
     }
 
     pub async fn get_staking_config(&self) -> Result<StakingConfig, Box<dyn Error + Send + Sync>> {
-        Ok(self
-            .get_account_resource::<StakingConfig>("0x1".to_string(), "0x1::staking_config::StakingConfig")
-            .await?
-            .data)
+        Ok(self.get_account_resource::<StakingConfig>("0x1".to_string(), "0x1::staking_config::StakingConfig").await?.data)
     }
 
     pub async fn get_delegation_pool_stake(&self, pool_address: &str, delegator_address: &str) -> Result<DelegationPoolStake, Box<dyn Error + Send + Sync>> {
@@ -257,10 +239,7 @@ mod tests {
     async fn test_gas_is_measured_as_a_sponsored_transaction_so_an_unfunded_sender_still_gets_a_fee() {
         let payload = build_transfer_transaction_payload("0x2", "1");
         let client = AptosClient::new(MockClient::new().with_post(|path, body| {
-            assert_eq!(
-                path,
-                "/v1/transactions/simulate?estimate_max_gas_amount=false&estimate_gas_unit_price=false&estimate_prioritized_gas_unit_price=false"
-            );
+            assert_eq!(path, "/v1/transactions/simulate?estimate_max_gas_amount=false&estimate_gas_unit_price=false&estimate_prioritized_gas_unit_price=false");
             let request = serde_json::from_slice::<Value>(body).unwrap();
             assert_eq!(request["max_gas_amount"], json!(SIMULATION_MAX_GAS_AMOUNT.to_string()));
             assert_eq!(request["signature"]["type"], json!("fee_payer_signature"));
@@ -270,8 +249,7 @@ mod tests {
 
         assert_eq!(client.simulate_transaction("0x1", 0, payload.clone(), "100").await.unwrap(), 5075);
 
-        let client =
-            AptosClient::new(MockClient::new().with_post(|_, _| Ok(br#"[{"success":false,"vm_status":"MAX_GAS_UNITS_BELOW_MIN_TRANSACTION_GAS_UNITS","gas_used":"0"}]"#.to_vec())));
+        let client = AptosClient::new(MockClient::new().with_post(|_, _| Ok(br#"[{"success":false,"vm_status":"MAX_GAS_UNITS_BELOW_MIN_TRANSACTION_GAS_UNITS","gas_used":"0"}]"#.to_vec())));
         assert_eq!(
             client.simulate_transaction("0x1", 0, payload, "100").await.unwrap_err().to_string(),
             "MAX_GAS_UNITS_BELOW_MIN_TRANSACTION_GAS_UNITS",

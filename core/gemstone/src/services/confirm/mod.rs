@@ -124,9 +124,7 @@ impl GemConfirmService {
                     input_type: transfer.input_type.clone(),
                     sender_address: input.from.address.clone(),
                     destination_address: destination,
-                    value: transfer.value.to_biguint().ok_or_else(|| GemConfirmError::Load {
-                        msg: "negative transfer value".to_string(),
-                    })?,
+                    value: transfer.value.to_biguint().ok_or_else(|| GemConfirmError::Load { msg: "negative transfer value".to_string() })?,
                     gas_price: selected.gas_price_type.clone(),
                     memo: transfer.recipient.memo.clone(),
                     is_max_value: transfer.use_max_amount,
@@ -157,14 +155,9 @@ impl GemConfirmService {
         let chain = input_type.transaction_asset().chain();
         let approval = input_type.approval_value();
         let shows_header = self.simulation_formatter.shows_header(simulation.clone(), approval.is_some());
-        let payload_fields = self
-            .simulation_formatter
-            .payload_fields(simulation.clone().map(|simulation| simulation.payload).unwrap_or_default(), shows_header);
+        let payload_fields = self.simulation_formatter.payload_fields(simulation.clone().map(|simulation| simulation.payload).unwrap_or_default(), shows_header);
         let header = match approval {
-            Some((asset_id, value)) => assets
-                .iter()
-                .find(|asset| asset.id == asset_id)
-                .map(|asset| GemSimulationValue { asset: asset.clone(), value }),
+            Some((asset_id, value)) => assets.iter().find(|asset| asset.id == asset_id).map(|asset| GemSimulationValue { asset: asset.clone(), value }),
             None => simulation.as_ref().and_then(|simulation| GemSimulationValue::from_simulation(simulation, &assets)),
         };
         let balance_changes = self
@@ -229,19 +222,13 @@ impl GemConfirmService {
         if fee_asset_ids.is_empty() {
             return Ok(Vec::new());
         }
-        let (assets, balances, prices) = futures::join!(
-            self.assets.assets(fee_asset_ids.clone()),
-            self.balance.balances(wallet_id, fee_asset_ids.clone()),
-            self.price.prices(fee_asset_ids),
-        );
+        let (assets, balances, prices) = futures::join!(self.assets.assets(fee_asset_ids.clone()), self.balance.balances(wallet_id, fee_asset_ids.clone()), self.price.prices(fee_asset_ids),);
         Ok(rules::selectable_fee_assets(assets?, balances?, prices?))
     }
     pub async fn preload(&self, wallet_id: WalletId, input: GemConfirmInput, options: GemConfirmLoadOptions) -> Result<GemConfirmFeeLoad, GemConfirmError> {
         let confirm_data = self.load(input, options).await?;
         let fee_asset_id = confirm_data.fee.fee_asset.clone();
-        let metadata = self
-            .input_metadata(wallet_id.clone(), &confirm_data.input.transfer.input_type, fee_asset_id.clone())
-            .await?;
+        let metadata = self.input_metadata(wallet_id.clone(), &confirm_data.input.transfer.input_type, fee_asset_id.clone()).await?;
         let fee_asset = self
             .assets
             .assets(vec![fee_asset_id.clone()])
@@ -338,8 +325,8 @@ mod tests {
 
     use futures::executor::block_on;
     use primitives::{
-        Account, Asset, AssetId, Chain, FeePriority, PerpetualConfirmData, PerpetualDirection, PerpetualType, TransactionInputType, Wallet,
-        asset_constants::HYPERCORE_SPOT_USDC_ASSET_ID, known_assets::HYPERCORE_PERPETUAL_USDC, swap::SwapData,
+        Account, Asset, AssetId, Chain, FeePriority, PerpetualConfirmData, PerpetualDirection, PerpetualType, TransactionInputType, Wallet, asset_constants::HYPERCORE_SPOT_USDC_ASSET_ID, known_assets::HYPERCORE_PERPETUAL_USDC,
+        swap::SwapData,
     };
 
     use super::testkit::ConfirmTestkit;

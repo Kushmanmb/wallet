@@ -110,11 +110,7 @@ impl GemSwapErrorDisplay {
     fn new(error: &SwapperError, pay_asset: Option<&Asset>) -> Self {
         match error {
             SwapperError::NotSupportedChain | SwapperError::NotSupportedAsset => Self::NotSupportedAsset,
-            SwapperError::NoQuoteAvailable
-            | SwapperError::NoAvailableProvider
-            | SwapperError::InvalidRoute
-            | SwapperError::ComputeQuoteError(_)
-            | SwapperError::TransactionError(_) => Self::NoQuote,
+            SwapperError::NoQuoteAvailable | SwapperError::NoAvailableProvider | SwapperError::InvalidRoute | SwapperError::ComputeQuoteError(_) | SwapperError::TransactionError(_) => Self::NoQuote,
             SwapperError::Offline => Self::Offline,
             SwapperError::InputAmountError { .. } => match (pay_asset, rules::minimum_amount(Some(error))) {
                 (Some(asset), Some(min_amount)) => Self::MinimumAmount { asset: asset.clone(), min_amount },
@@ -156,25 +152,13 @@ pub struct GemSwapSession {
 
 #[uniffi::export]
 impl GemSwapSession {
-    pub fn on_input_changed(
-        &self,
-        amount: String,
-        pay_asset: Option<Asset>,
-        receive_asset: Option<Asset>,
-        available_value: GemBigInt,
-        slippage_bps: Option<u32>,
-        format: GemNumberFormat,
-    ) -> GemSwapSession {
+    pub fn on_input_changed(&self, amount: String, pay_asset: Option<Asset>, receive_asset: Option<Asset>, available_value: GemBigInt, slippage_bps: Option<u32>, format: GemNumberFormat) -> GemSwapSession {
         let input = match (pay_asset, receive_asset) {
             (Some(pay), Some(receive)) => rules::quote_input(&pay, &receive, &amount, &available_value, slippage_bps, &format),
             _ => None,
         };
         let request = input.as_ref().map(|input| input.request.clone());
-        let session = if request.as_ref() == self.current_request() {
-            self.clone()
-        } else {
-            self.on_request_changed(request)
-        };
+        let session = if request.as_ref() == self.current_request() { self.clone() } else { self.on_request_changed(request) };
         GemSwapSession { input, ..session }
     }
 
@@ -197,11 +181,7 @@ impl GemSwapSession {
 
     pub fn on_quote_results(&self, results: GemSwapQuotesResult) -> GemSwapSession {
         let error = results.error.clone().or_else(|| results.quotes.is_empty().then_some(SwapperError::NoQuoteAvailable));
-        let quotes = if self.accepts_quotes() {
-            error.is_none().then_some(results.clone())
-        } else {
-            self.quotes.clone()
-        };
+        let quotes = if self.accepts_quotes() { error.is_none().then_some(results.clone()) } else { self.quotes.clone() };
         let quote_phase = if self.accepts_quote_phase() {
             match error {
                 Some(error) => GemSwapQuotePhase::Failed { request: results.request, error },
@@ -240,10 +220,7 @@ impl GemSwapSession {
         let request = self.quotes.as_ref()?.request.clone();
         let quote = self.quote()?;
         Some(GemSwapSession {
-            transfer_phase: GemSwapTransferPhase::Loading {
-                request,
-                provider: quote.data.provider.id,
-            },
+            transfer_phase: GemSwapTransferPhase::Loading { request, provider: quote.data.provider.id },
             ..self.clone()
         })
     }
@@ -358,9 +335,7 @@ impl GemSwapSession {
             GemSwapButtonAction::InsufficientBalance => GemSwapButtonState::Disabled,
             _ if self.is_quote_loading() || self.is_transfer_loading() => GemSwapButtonState::Loading,
             GemSwapButtonAction::Swap if self.current_quote().is_none() => GemSwapButtonState::Disabled,
-            GemSwapButtonAction::Swap | GemSwapButtonAction::RetryQuote | GemSwapButtonAction::RetryTransfer | GemSwapButtonAction::UseMinimumAmount { .. } => {
-                GemSwapButtonState::Enabled
-            }
+            GemSwapButtonAction::Swap | GemSwapButtonAction::RetryQuote | GemSwapButtonAction::RetryTransfer | GemSwapButtonAction::UseMinimumAmount { .. } => GemSwapButtonState::Enabled,
         }
     }
 }
@@ -441,14 +416,7 @@ mod tests {
     #[test]
     fn test_a_minimum_only_reaches_the_app_with_an_asset_and_a_positive_amount() {
         let asset = Asset::from_chain(Chain::Ethereum);
-        let display = |min_amount: Option<&str>, pay_asset: Option<&Asset>| {
-            GemSwapErrorDisplay::new(
-                &SwapperError::InputAmountError {
-                    min_amount: min_amount.map(str::to_string),
-                },
-                pay_asset,
-            )
-        };
+        let display = |min_amount: Option<&str>, pay_asset: Option<&Asset>| GemSwapErrorDisplay::new(&SwapperError::InputAmountError { min_amount: min_amount.map(str::to_string) }, pay_asset);
         assert_eq!(
             display(Some("123456"), Some(&asset)),
             GemSwapErrorDisplay::MinimumAmount {
@@ -488,12 +456,7 @@ mod tests {
         assert!(failed.quotes.is_none());
         assert!(failed.quote().is_none());
         assert_eq!(failed.quote_error(), Some(SwapperError::NoAvailableProvider));
-        assert_eq!(
-            failed.action(),
-            GemSwapSessionAction::QuoteError {
-                error: SwapperError::NoAvailableProvider
-            }
-        );
+        assert_eq!(failed.action(), GemSwapSessionAction::QuoteError { error: SwapperError::NoAvailableProvider });
 
         let empty = session.on_quote_results(GemSwapQuotesResult::mock(vec![]));
         assert_eq!(empty.quote_error(), Some(SwapperError::NoQuoteAvailable));
@@ -583,10 +546,7 @@ mod tests {
         assert!(!handed_off.on_refresh_resumed().refreshes_quotes(false));
         assert_eq!(handed_off.on_fetch_started(GemSwapRequest::mock()), handed_off);
 
-        assert_eq!(
-            GemSwapSession::mock_ready().on_transfer_handed_off(GemSwapTransferPhase::Idle),
-            GemSwapSession::mock_ready()
-        );
+        assert_eq!(GemSwapSession::mock_ready().on_transfer_handed_off(GemSwapTransferPhase::Idle), GemSwapSession::mock_ready());
     }
 
     #[test]
@@ -624,13 +584,9 @@ mod tests {
     fn test_input_changes_drive_the_request_and_dedupe() {
         let pay = Asset::from_chain(Chain::Ethereum);
         let receive = Asset::from_chain(Chain::Bitcoin);
-        let format = GemNumberFormat {
-            decimal_separator: ".".to_string(),
-        };
+        let format = GemNumberFormat { decimal_separator: ".".to_string() };
         let available = GemBigInt::from(2_000_000_000_000_000_000u128);
-        let changed = |session: &GemSwapSession, amount: &str| {
-            session.on_input_changed(amount.to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone())
-        };
+        let changed = |session: &GemSwapSession, amount: &str| session.on_input_changed(amount.to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone());
 
         assert!(GemSwapSession::default().input.is_none(), "no amount, no input");
 

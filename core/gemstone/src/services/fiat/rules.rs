@@ -32,9 +32,7 @@ pub fn amount_check(config: &FiatConfig, quote_type: FiatQuoteType, amount: f64,
         };
     }
     match (quote_type, quote) {
-        (FiatQuoteType::Sell, Some(quote)) if quote_value(quote).is_some_and(|value| value > *available) => GemFiatAmountCheck::InsufficientBalance {
-            title: quote.asset.display_title(),
-        },
+        (FiatQuoteType::Sell, Some(quote)) if quote_value(quote).is_some_and(|value| value > *available) => GemFiatAmountCheck::InsufficientBalance { title: quote.asset.display_title() },
         _ => GemFiatAmountCheck::Valid,
     }
 }
@@ -58,11 +56,7 @@ pub fn parse_amount(text: &str) -> FiatAmountInput {
 }
 
 pub fn selected_quote(quotes: &[FiatQuote], preferred: Option<FiatProviderName>) -> Option<FiatQuote> {
-    quotes
-        .iter()
-        .find(|quote| preferred.is_some_and(|provider| quote.provider.id == provider))
-        .or_else(|| quotes.first())
-        .cloned()
+    quotes.iter().find(|quote| preferred.is_some_and(|provider| quote.provider.id == provider)).or_else(|| quotes.first()).cloned()
 }
 
 pub fn quote_row(quote: &FiatQuote, asset_price: Option<f64>) -> GemFiatQuoteRow {
@@ -215,18 +209,9 @@ mod tests {
                 title: Asset::from_chain(Chain::Ethereum).display_title()
             }
         );
-        assert_eq!(
-            amount_check(&config, FiatQuoteType::Sell, 100.0, Some(&hundred), &BigUint::from(100u32), Currency::USD),
-            GemFiatAmountCheck::Valid
-        );
-        assert_eq!(
-            amount_check(&config, FiatQuoteType::Sell, 100.0, None, &BigUint::ZERO, Currency::USD),
-            GemFiatAmountCheck::Valid
-        );
-        assert_eq!(
-            amount_check(&config, FiatQuoteType::Buy, 100.0, Some(&two_hundred), &BigUint::ZERO, Currency::USD),
-            GemFiatAmountCheck::Valid
-        );
+        assert_eq!(amount_check(&config, FiatQuoteType::Sell, 100.0, Some(&hundred), &BigUint::from(100u32), Currency::USD), GemFiatAmountCheck::Valid);
+        assert_eq!(amount_check(&config, FiatQuoteType::Sell, 100.0, None, &BigUint::ZERO, Currency::USD), GemFiatAmountCheck::Valid);
+        assert_eq!(amount_check(&config, FiatQuoteType::Buy, 100.0, Some(&two_hundred), &BigUint::ZERO, Currency::USD), GemFiatAmountCheck::Valid);
     }
 
     #[test]

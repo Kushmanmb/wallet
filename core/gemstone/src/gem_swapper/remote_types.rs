@@ -2,9 +2,8 @@ use crate::models::custom_types::GemBigUint;
 
 use primitives::{AssetId, AssetType, Chain};
 pub use swapper::{
-    AssetList as SwapperAssetList, FetchQuoteData, Options as SwapperOptions, ProviderData as SwapperProviderData, ProviderType as SwapperProviderType, Quote as SwapperQuote,
-    QuoteRequest as SwapperQuoteRequest, Route as SwapperRoute, SwapperProvider, SwapperProviderMode, SwapperQuoteAsset, SwapperSlippage, SwapperSlippageMode,
-    permit2_data::Permit2Data,
+    AssetList as SwapperAssetList, FetchQuoteData, Options as SwapperOptions, ProviderData as SwapperProviderData, ProviderType as SwapperProviderType, Quote as SwapperQuote, QuoteRequest as SwapperQuoteRequest, Route as SwapperRoute,
+    SwapperProvider, SwapperProviderMode, SwapperQuoteAsset, SwapperSlippage, SwapperSlippageMode, permit2_data::Permit2Data,
 };
 
 pub use crate::models::swap::GemSwapQuoteData;

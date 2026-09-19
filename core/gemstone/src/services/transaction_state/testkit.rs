@@ -93,10 +93,6 @@ impl GemTransactionUpdater for TestTransactionUpdater {
 
 impl GemTransactionStateResult {
     pub fn mock(transaction_id: TransactionId, state: TransactionState) -> Self {
-        Self {
-            transaction_id,
-            state,
-            failures: Vec::new(),
-        }
+        Self { transaction_id, state, failures: Vec::new() }
     }
 }

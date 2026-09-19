@@ -104,17 +104,9 @@ impl GemAssetDetailsService {
         };
         record(&mut failures, GemAssetRefreshStep::AddPrices, self.stream.add_prices(vec![asset_id.clone()])).await;
 
-        record(
-            &mut failures,
-            GemAssetRefreshStep::SyncAsset,
-            self.assets.sync_asset_associations(asset_id.clone()).map_ok(|_| ()),
-        )
-        .await;
+        record(&mut failures, GemAssetRefreshStep::SyncAsset, self.assets.sync_asset_associations(asset_id.clone()).map_ok(|_| ())).await;
 
-        let (balances, transactions) = futures::join!(
-            self.balances.update(wallet_id.clone(), vec![asset_id.clone()]),
-            self.transactions.sync_wallet(wallet_id, Some(asset_id))
-        );
+        let (balances, transactions) = futures::join!(self.balances.update(wallet_id.clone(), vec![asset_id.clone()]), self.transactions.sync_wallet(wallet_id, Some(asset_id)));
         record_result(&mut failures, GemAssetRefreshStep::UpdateBalances, balances);
         record_result(&mut failures, GemAssetRefreshStep::SyncTransactions, transactions.clone());
         GemAssetRefresh {
@@ -210,10 +202,7 @@ mod tests {
             assert!(steps.contains(&GemAssetRefreshStep::SyncAsset), "{failures:?}");
             assert!(steps.contains(&GemAssetRefreshStep::UpdateBalances), "{failures:?}");
             assert!(steps.contains(&GemAssetRefreshStep::SyncTransactions), "{failures:?}");
-            assert!(
-                matches!(refresh.transactions, GemLoadState::Error { .. }),
-                "a failed sync with nothing stored shows the error"
-            );
+            assert!(matches!(refresh.transactions, GemLoadState::Error { .. }), "a failed sync with nothing stored shows the error");
             assert_eq!(
                 testkit.service.refresh(Chain::Ethereum.as_asset_id(), true).await.transactions,
                 GemLoadState::Data,

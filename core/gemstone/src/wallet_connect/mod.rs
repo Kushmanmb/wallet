@@ -1,7 +1,6 @@
 use gem_wallet_connect::{
-    EvmTransactionKind as WcEvmTransactionKind, SignDigestType as WcSignDigestType, WCEthereumTransactionData as WcEthereumTransactionData,
-    WalletConnectAction as WcWalletConnectAction, WalletConnectChainOperation as WcWalletConnectChainOperation, WalletConnectRequestHandler, WalletConnectResponseHandler,
-    WalletConnectResponseType as WcWalletConnectResponseType, WalletConnectTransaction as WcWalletConnectTransaction,
+    EvmTransactionKind as WcEvmTransactionKind, SignDigestType as WcSignDigestType, WCEthereumTransactionData as WcEthereumTransactionData, WalletConnectAction as WcWalletConnectAction,
+    WalletConnectChainOperation as WcWalletConnectChainOperation, WalletConnectRequestHandler, WalletConnectResponseHandler, WalletConnectResponseType as WcWalletConnectResponseType, WalletConnectTransaction as WcWalletConnectTransaction,
     WalletConnectTransactionType as WcWalletConnectTransactionType, config_session_properties,
 };
 use primitives::{Account, Chain, ChainAddress, TransactionType, TransferDataOutputType, WCEthereumTransaction, WalletConnectCAIP2, WalletConnectLink, WalletConnectRequest};
@@ -223,21 +222,13 @@ impl From<WcWalletConnectChainOperation> for WalletConnectChainOperation {
 impl From<WcWalletConnectAction> for WalletConnectAction {
     fn from(action: WcWalletConnectAction) -> Self {
         match action {
-            WcWalletConnectAction::SignMessage { chain, sign_type, data } => Self::SignMessage {
-                chain,
-                sign_type: sign_type.into(),
-                data,
-            },
+            WcWalletConnectAction::SignMessage { chain, sign_type, data } => Self::SignMessage { chain, sign_type: sign_type.into(), data },
             WcWalletConnectAction::SignTransaction { chain, transaction_type, data } => Self::SignTransaction {
                 chain,
                 transaction_type: transaction_type.into(),
                 data,
             },
-            WcWalletConnectAction::SignAllTransactions {
-                chain,
-                transaction_type,
-                transactions,
-            } => Self::SignAllTransactions {
+            WcWalletConnectAction::SignAllTransactions { chain, transaction_type, transactions } => Self::SignAllTransactions {
                 chain,
                 transaction_type: transaction_type.into(),
                 transactions,
@@ -275,15 +266,8 @@ impl From<WcEthereumTransactionData> for WCEthereumTransactionData {
 impl From<WcWalletConnectTransaction> for WalletConnectTransaction {
     fn from(t: WcWalletConnectTransaction) -> Self {
         match t {
-            WcWalletConnectTransaction::Ethereum { data, kind } => Self::Ethereum {
-                data: data.into(),
-                kind: kind.into(),
-            },
-            WcWalletConnectTransaction::Solana {
-                data,
-                output_type,
-                transaction_type,
-            } => Self::Solana {
+            WcWalletConnectTransaction::Ethereum { data, kind } => Self::Ethereum { data: data.into(), kind: kind.into() },
+            WcWalletConnectTransaction::Solana { data, output_type, transaction_type } => Self::Solana {
                 data: WCSolanaTransactionData { transaction: data.transaction },
                 output_type,
                 transaction_type,
@@ -343,10 +327,7 @@ impl WalletConnect {
     }
 
     pub fn config_session_properties(&self, properties: HashMap<String, String>, caip2_chains: Vec<String>, accounts: Vec<Account>) -> HashMap<String, String> {
-        let chains: Vec<Chain> = caip2_chains
-            .into_iter()
-            .filter_map(|caip2| WalletConnectCAIP2::get_chain_from_id(Some(caip2)).ok())
-            .collect();
+        let chains: Vec<Chain> = caip2_chains.into_iter().filter_map(|caip2| WalletConnectCAIP2::get_chain_from_id(Some(caip2)).ok()).collect();
         config_session_properties(properties, &chains, &accounts)
     }
 

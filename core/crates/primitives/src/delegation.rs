@@ -34,27 +34,15 @@ pub struct DelegationBase {
 
 impl DelegationBase {
     pub fn id(&self) -> String {
-        [
-            self.asset_id.to_string(),
-            self.validator_id.clone(),
-            self.state.as_ref().to_string(),
-            self.delegation_id.clone(),
-        ]
-        .join("_")
+        [self.asset_id.to_string(), self.validator_id.clone(), self.state.as_ref().to_string(), self.delegation_id.clone()].join("_")
     }
 
     pub fn total_active_balance(delegations: &[Self]) -> BigUint {
-        delegations
-            .iter()
-            .filter(|d| d.state == DelegationState::Active)
-            .fold(BigUint::from(0u32), |acc, d| acc + &d.balance)
+        delegations.iter().filter(|d| d.state == DelegationState::Active).fold(BigUint::from(0u32), |acc, d| acc + &d.balance)
     }
 
     pub fn total_active_rewards(delegations: &[Self]) -> BigUint {
-        delegations
-            .iter()
-            .filter(|d| d.state == DelegationState::Active)
-            .fold(BigUint::from(0u32), |acc, d| acc + &d.rewards)
+        delegations.iter().filter(|d| d.state == DelegationState::Active).fold(BigUint::from(0u32), |acc, d| acc + &d.rewards)
     }
 }
 

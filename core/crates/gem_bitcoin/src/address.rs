@@ -15,10 +15,7 @@ pub struct BitcoinAddress {
 impl BitcoinAddress {
     pub fn try_parse_for_chain(address: &str, chain: BitcoinChain) -> Option<Self> {
         let script_pubkey = script_for_address(chain, address).ok()?.script_pubkey;
-        Some(Self {
-            address: address.to_string(),
-            script_pubkey,
-        })
+        Some(Self { address: address.to_string(), script_pubkey })
     }
 
     pub fn is_valid_for_chain(address: &str, chain: Chain) -> bool {
@@ -41,15 +38,9 @@ impl BitcoinAddress {
 
 impl AddressTrait for BitcoinAddress {
     fn try_parse(address: &str) -> Option<Self> {
-        [
-            BitcoinChain::Bitcoin,
-            BitcoinChain::BitcoinCash,
-            BitcoinChain::Litecoin,
-            BitcoinChain::Doge,
-            BitcoinChain::Zcash,
-        ]
-        .into_iter()
-        .find_map(|chain| Self::try_parse_for_chain(address, chain))
+        [BitcoinChain::Bitcoin, BitcoinChain::BitcoinCash, BitcoinChain::Litecoin, BitcoinChain::Doge, BitcoinChain::Zcash]
+            .into_iter()
+            .find_map(|chain| Self::try_parse_for_chain(address, chain))
     }
 
     fn as_bytes(&self) -> &[u8] {
@@ -66,14 +57,9 @@ pub fn validate_address(address: &str, chain: Chain) -> bool {
 }
 
 fn bitcoin_cash_address(public_key_hash: [u8; 20]) -> Result<String, SignerError> {
-    let address = bitcoincash_addr::Address::new(
-        public_key_hash.to_vec(),
-        bitcoincash_addr::Scheme::CashAddr,
-        bitcoincash_addr::HashType::Key,
-        bitcoincash_addr::Network::Main,
-    )
-    .encode()
-    .map_err(SignerError::from_display)?;
+    let address = bitcoincash_addr::Address::new(public_key_hash.to_vec(), bitcoincash_addr::Scheme::CashAddr, bitcoincash_addr::HashType::Key, bitcoincash_addr::Network::Main)
+        .encode()
+        .map_err(SignerError::from_display)?;
     Ok(ModelAddress::new(address, Chain::BitcoinCash).short().to_string())
 }
 

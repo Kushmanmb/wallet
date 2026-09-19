@@ -79,9 +79,7 @@ impl GemSignMessageService {
             primary_fields: payload.as_ref().map(|preview| preview.primary.clone()).unwrap_or_default(),
             secondary_fields: payload.map(|preview| preview.secondary).unwrap_or_default(),
             has_critical_warning,
-            rows: review_rows(chain, &wallet, &account, &session.metadata, header.is_some(), |chain, address| {
-                self.explorer.get_address_url(chain, address)
-            }),
+            rows: review_rows(chain, &wallet, &account, &session.metadata, header.is_some(), |chain, address| self.explorer.get_address_url(chain, address)),
             header,
         }
     }
@@ -104,14 +102,7 @@ impl GemSignMessageService {
     }
 }
 
-fn review_rows(
-    chain: Chain,
-    wallet: &Wallet,
-    account: &Account,
-    metadata: &ApplicationMetadata,
-    shows_app: bool,
-    address_url: impl Fn(Chain, String) -> BlockExplorerLink,
-) -> Vec<GemListRow> {
+fn review_rows(chain: Chain, wallet: &Wallet, account: &Account, metadata: &ApplicationMetadata, shows_app: bool, address_url: impl Fn(Chain, String) -> BlockExplorerLink) -> Vec<GemListRow> {
     let app = shows_app.then(|| GemListRow::App {
         name: metadata.short_name(),
         icon_url: GemApplicationMetadataService::new().icon_url(metadata.clone()),

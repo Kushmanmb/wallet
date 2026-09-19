@@ -29,13 +29,7 @@ pub struct GemPriceAlertService {
 #[uniffi::export]
 impl GemPriceAlertService {
     #[uniffi::constructor]
-    pub fn new(
-        api: Arc<GemDeviceApiClient>,
-        preferences: Arc<GemPreferencesService>,
-        store: Arc<dyn GemPriceAlertStore>,
-        device: Arc<GemDeviceService>,
-        permissions: Arc<dyn GemNotificationPermissions>,
-    ) -> Self {
+    pub fn new(api: Arc<GemDeviceApiClient>, preferences: Arc<GemPreferencesService>, store: Arc<dyn GemPriceAlertStore>, device: Arc<GemDeviceService>, permissions: Arc<dyn GemNotificationPermissions>) -> Self {
         Self {
             api,
             preferences,
@@ -85,12 +79,7 @@ impl GemPriceAlertService {
     }
 
     pub async fn sync(&self, asset_id: Option<AssetId>) -> Result<(), GemServiceError> {
-        let remote = self
-            .api
-            .client
-            .get_price_alerts(asset_id.as_ref().map(ToString::to_string))
-            .await
-            .map_err(GemApiError::from)?;
+        let remote = self.api.client.get_price_alerts(asset_id.as_ref().map(ToString::to_string)).await.map_err(GemApiError::from)?;
         let remote = match &asset_id {
             Some(asset_id) => remote.into_iter().filter(|alert| alert.asset_id == *asset_id).collect(),
             None => remote,

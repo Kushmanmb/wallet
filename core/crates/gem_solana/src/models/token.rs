@@ -77,10 +77,7 @@ pub struct TokenAmount {
 
 impl Default for TokenAmount {
     fn default() -> Self {
-        Self {
-            amount: BigUint::from(0u64),
-            decimals: 0,
-        }
+        Self { amount: BigUint::from(0u64), decimals: 0 }
     }
 }
 

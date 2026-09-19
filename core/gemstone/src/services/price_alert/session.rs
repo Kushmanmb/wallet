@@ -54,17 +54,11 @@ impl GemPriceAlertSession {
 #[uniffi::export]
 impl GemPriceAlertSession {
     pub fn on_type(&self, notification_type: PriceAlertNotificationType) -> Self {
-        Self {
-            notification_type,
-            ..self.clone()
-        }
+        Self { notification_type, ..self.clone() }
     }
 
     pub fn on_direction(&self, selected_direction: PriceAlertDirection) -> Self {
-        Self {
-            selected_direction,
-            ..self.clone()
-        }
+        Self { selected_direction, ..self.clone() }
     }
 
     pub fn on_input(&self, input: Option<f64>) -> Self {
@@ -107,9 +101,7 @@ impl GemPriceAlertSession {
             can_confirm: !self.is_saving && self.direction().is_some(),
             is_saving: self.is_saving,
             percentage_suggestions: price.map(price_suggestion::percentage_suggestions).unwrap_or_default(),
-            price_suggestions: price
-                .map(|price| price_suggestion::price_rounded_values(price, SUGGESTION_OFFSET_PERCENT))
-                .unwrap_or_default(),
+            price_suggestions: price.map(|price| price_suggestion::price_rounded_values(price, SUGGESTION_OFFSET_PERCENT)).unwrap_or_default(),
         }
     }
 }
@@ -141,11 +133,7 @@ mod tests {
     #[test]
     fn test_the_prompt_follows_the_type_and_the_resolved_direction() {
         let session = GemPriceAlertSession::new(AssetId::from_chain(primitives::Chain::Ethereum), Currency::USD);
-        assert_eq!(
-            session.view_state().prompt,
-            GemPriceAlertPrompt::TargetPrice,
-            "a price alert with no input asks for a target"
-        );
+        assert_eq!(session.view_state().prompt, GemPriceAlertPrompt::TargetPrice, "a price alert with no input asks for a target");
 
         let priced = GemPriceAlertSession {
             current_price: Some(100.0),
@@ -153,15 +141,7 @@ mod tests {
             ..session.clone()
         };
         assert_eq!(priced.view_state().prompt, GemPriceAlertPrompt::PriceOver);
-        assert_eq!(
-            GemPriceAlertSession {
-                input: Some(80.0),
-                ..priced.clone()
-            }
-            .view_state()
-            .prompt,
-            GemPriceAlertPrompt::PriceUnder
-        );
+        assert_eq!(GemPriceAlertSession { input: Some(80.0), ..priced.clone() }.view_state().prompt, GemPriceAlertPrompt::PriceUnder);
 
         let percentage = priced.on_type(PriceAlertNotificationType::PricePercentChange);
         assert_eq!(percentage.view_state().prompt, GemPriceAlertPrompt::IncreasesBy);
@@ -180,11 +160,7 @@ mod tests {
     #[test]
     fn test_a_price_alert_carries_the_price_and_a_percentage_alert_the_percentage() {
         let price = GemPriceAlertSession::mock().on_input(Some(120.0)).alert().unwrap();
-        let percent = GemPriceAlertSession::mock()
-            .on_type(PriceAlertNotificationType::PricePercentChange)
-            .on_input(Some(5.0))
-            .alert()
-            .unwrap();
+        let percent = GemPriceAlertSession::mock().on_type(PriceAlertNotificationType::PricePercentChange).on_input(Some(5.0)).alert().unwrap();
 
         assert_eq!((price.price, price.price_percent_change), (Some(120.0), None));
         assert_eq!((percent.price, percent.price_percent_change), (None, Some(5.0)));

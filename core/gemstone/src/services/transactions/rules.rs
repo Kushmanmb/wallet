@@ -4,16 +4,14 @@ use strum::IntoEnumIterator;
 
 use number_formatter::BigNumberFormatter;
 use primitives::{
-    Asset, AssetId, AssetPrice, AssetType, BlockExplorerLink, Chain, ChainAsset, PerpetualDirection, Price, Transaction, TransactionDirection, TransactionExtended,
-    TransactionNFTTransferMetadata, TransactionPerpetualMetadata, TransactionResourceTypeMetadata, TransactionState, TransactionSwapMetadata, TransactionType,
-    TransactionWalletConnectMetadata, TransferDataOutputAction, WalletType,
+    Asset, AssetId, AssetPrice, AssetType, BlockExplorerLink, Chain, ChainAsset, PerpetualDirection, Price, Transaction, TransactionDirection, TransactionExtended, TransactionNFTTransferMetadata, TransactionPerpetualMetadata,
+    TransactionResourceTypeMetadata, TransactionState, TransactionSwapMetadata, TransactionType, TransactionWalletConnectMetadata, TransferDataOutputAction, WalletType,
 };
 
 use super::model::{
-    GemActivityFilters, GemAmountSign, GemSwapAgain, GemSwapProgress, GemSwapProgressStep, GemTransactionAmount, GemTransactionDetailRow, GemTransactionDetailRows,
-    GemTransactionDetailSection, GemTransactionDetails, GemTransactionFilter, GemTransactionHeader, GemTransactionHeaderAction, GemTransactionHeaderKind,
-    GemTransactionParticipant, GemTransactionParticipantRole, GemTransactionRow, GemTransactionRowSubtitle, GemTransactionRowValue, GemTransactionStateTone, GemTransactionStatus,
-    GemTransactionSubtitle, GemTransactionTitle, GemTransactionValue,
+    GemActivityFilters, GemAmountSign, GemSwapAgain, GemSwapProgress, GemSwapProgressStep, GemTransactionAmount, GemTransactionDetailRow, GemTransactionDetailRows, GemTransactionDetailSection, GemTransactionDetails, GemTransactionFilter,
+    GemTransactionHeader, GemTransactionHeaderAction, GemTransactionHeaderKind, GemTransactionParticipant, GemTransactionParticipantRole, GemTransactionRow, GemTransactionRowSubtitle, GemTransactionRowValue, GemTransactionStateTone,
+    GemTransactionStatus, GemTransactionSubtitle, GemTransactionTitle, GemTransactionValue,
 };
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::config::image::GemImage;
@@ -58,10 +56,7 @@ fn transaction_filter(transaction_type: &TransactionType) -> GemTransactionFilte
 }
 
 pub fn filter_transaction_types(filter: GemTransactionFilter) -> Vec<TransactionType> {
-    TransactionType::all()
-        .into_iter()
-        .filter(|transaction_type| transaction_filter(transaction_type) == filter)
-        .collect()
+    TransactionType::all().into_iter().filter(|transaction_type| transaction_filter(transaction_type) == filter).collect()
 }
 
 pub fn pending_transactions(transactions: &[Transaction]) -> Vec<Transaction> {
@@ -106,12 +101,7 @@ pub fn participant(extended: &TransactionExtended, link: impl FnOnce(&str) -> Bl
     })
 }
 
-pub fn detail_rows(
-    extended: &TransactionExtended,
-    wallet_type: WalletType,
-    participant: Option<GemTransactionParticipant>,
-    explorer: BlockExplorerLink,
-) -> GemTransactionDetailRows {
+pub fn detail_rows(extended: &TransactionExtended, wallet_type: WalletType, participant: Option<GemTransactionParticipant>, explorer: BlockExplorerLink) -> GemTransactionDetailRows {
     let transaction = &extended.transaction;
     let details = details(extended, wallet_type);
     GemTransactionDetailRows {
@@ -156,12 +146,7 @@ pub fn detail_sections(rows: &GemTransactionDetailRows) -> Vec<GemTransactionDet
         Some(list(status_row(rows))),
         rows.estimated_confirmation_seconds.is_some().then_some(EstimatedConfirmation),
         rows.participant.is_some().then_some(Participant),
-        rows.memo.clone().filter(|memo| !memo.is_empty()).map(|memo| {
-            list(GemListRow::Memo {
-                value: memo.clone(),
-                copy: Some(memo),
-            })
-        }),
+        rows.memo.clone().filter(|memo| !memo.is_empty()).map(|memo| list(GemListRow::Memo { value: memo.clone(), copy: Some(memo) })),
         rows.resource.map(|resource| {
             list(GemListRow::Label {
                 title: GemListRowTitle::Resource,
@@ -224,10 +209,7 @@ fn status_row(rows: &GemTransactionDetailRows) -> GemListRow {
             GemTransactionStateTone::Success => GemValueTone::Positive,
             GemTransactionStateTone::Error => GemValueTone::Negative,
         },
-        info: Some(GemInfoTopic::TransactionStatus {
-            state: rows.state,
-            tone: rows.status.tone,
-        }),
+        info: Some(GemInfoTopic::TransactionStatus { state: rows.state, tone: rows.status.tone }),
         progress: rows.status.shows_progress,
     }
 }
@@ -269,16 +251,9 @@ fn participant_name(extended: &TransactionExtended, address: &str) -> String {
 
 fn value_tone(value: &GemTransactionRowValue) -> GemValueTone {
     match value {
-        GemTransactionRowValue::Number {
-            sign: GemAmountSign::Incoming, ..
-        } => GemValueTone::Positive,
-        GemTransactionRowValue::Number {
-            sign: GemAmountSign::Outgoing, ..
-        } => GemValueTone::Plain,
-        GemTransactionRowValue::Number {
-            number,
-            sign: GemAmountSign::None,
-        } => match number.tone {
+        GemTransactionRowValue::Number { sign: GemAmountSign::Incoming, .. } => GemValueTone::Positive,
+        GemTransactionRowValue::Number { sign: GemAmountSign::Outgoing, .. } => GemValueTone::Plain,
+        GemTransactionRowValue::Number { number, sign: GemAmountSign::None } => match number.tone {
             GemValueTone::Positive => GemValueTone::Positive,
             GemValueTone::Negative => GemValueTone::Negative,
             GemValueTone::Neutral | GemValueTone::Plain | GemValueTone::Warning => GemValueTone::Plain,
@@ -330,10 +305,7 @@ fn header(extended: &TransactionExtended) -> GemTransactionHeader {
         },
         GemTransactionHeaderKind::Nft => match nft_metadata(transaction) {
             Some(metadata) => GemTransactionHeader::Nft {
-                image_url: GemImage::NftAsset {
-                    asset_id: metadata.asset_id.to_string(),
-                }
-                .url(),
+                image_url: GemImage::NftAsset { asset_id: metadata.asset_id.to_string() }.url(),
                 asset_id: metadata.asset_id,
                 name: metadata.name,
             },
@@ -354,19 +326,13 @@ fn header_action(transaction: &Transaction) -> Option<GemTransactionHeaderAction
         | TransactionType::StakeRedelegate
         | TransactionType::StakeWithdraw
         | TransactionType::StakeFreeze
-        | TransactionType::StakeUnfreeze => Some(GemTransactionHeaderAction::Asset {
-            asset_id: transaction.asset_id.clone(),
-        }),
+        | TransactionType::StakeUnfreeze => Some(GemTransactionHeaderAction::Asset { asset_id: transaction.asset_id.clone() }),
         TransactionType::TransferNFT => transaction.nft_asset_id().map(|asset_id| GemTransactionHeaderAction::Nft { asset_id }),
         TransactionType::Swap => transaction.swap_metadata().map(|metadata| GemTransactionHeaderAction::Swap {
             from_asset_id: metadata.from_asset,
             to_asset_id: metadata.to_asset,
         }),
-        TransactionType::PerpetualOpenPosition | TransactionType::PerpetualClosePosition | TransactionType::PerpetualModifyPosition => {
-            Some(GemTransactionHeaderAction::Perpetual {
-                asset_id: transaction.asset_id.clone(),
-            })
-        }
+        TransactionType::PerpetualOpenPosition | TransactionType::PerpetualClosePosition | TransactionType::PerpetualModifyPosition => Some(GemTransactionHeaderAction::Perpetual { asset_id: transaction.asset_id.clone() }),
         TransactionType::SmartContractCall | TransactionType::AssetActivation | TransactionType::EarnDeposit | TransactionType::EarnWithdraw => None,
     }
 }
@@ -421,11 +387,7 @@ fn asset_price(price: Option<&Price>, asset_id: &AssetId) -> Option<AssetPrice> 
 }
 
 fn address_name(extended: &TransactionExtended, address: &str) -> Option<primitives::AddressName> {
-    [extended.from_address.as_ref(), extended.to_address.as_ref()]
-        .into_iter()
-        .flatten()
-        .find(|name| name.address == address)
-        .cloned()
+    [extended.from_address.as_ref(), extended.to_address.as_ref()].into_iter().flatten().find(|name| name.address == address).cloned()
 }
 
 fn perpetual_collateral_asset() -> Option<Asset> {
@@ -452,12 +414,8 @@ fn transaction_title(transaction: &Transaction) -> GemTransactionTitle {
         TransactionType::StakeFreeze => GemTransactionTitle::Freeze,
         TransactionType::StakeUnfreeze => GemTransactionTitle::Unfreeze,
         TransactionType::EarnDeposit => GemTransactionTitle::Earn,
-        TransactionType::PerpetualOpenPosition => GemTransactionTitle::PerpetualOpen {
-            direction: perpetual_direction(transaction),
-        },
-        TransactionType::PerpetualClosePosition => GemTransactionTitle::PerpetualClose {
-            direction: perpetual_direction(transaction),
-        },
+        TransactionType::PerpetualOpenPosition => GemTransactionTitle::PerpetualOpen { direction: perpetual_direction(transaction) },
+        TransactionType::PerpetualClosePosition => GemTransactionTitle::PerpetualClose { direction: perpetual_direction(transaction) },
         TransactionType::PerpetualModifyPosition => GemTransactionTitle::PerpetualModify,
     }
 }
@@ -475,21 +433,17 @@ fn transfer_title(transaction: &Transaction) -> GemTransactionTitle {
 fn transaction_subtitle(transaction: &Transaction) -> GemTransactionSubtitle {
     match transaction.transaction_type {
         TransactionType::Transfer | TransactionType::TransferNFT | TransactionType::TokenApproval | TransactionType::SmartContractCall => match transaction.direction {
-            TransactionDirection::Incoming => GemTransactionSubtitle::FromAddress {
-                address: transaction.from.clone(),
-            },
+            TransactionDirection::Incoming => GemTransactionSubtitle::FromAddress { address: transaction.from.clone() },
             TransactionDirection::Outgoing | TransactionDirection::SelfTransfer => GemTransactionSubtitle::ToAddress { address: transaction.to.clone() },
         },
         TransactionType::StakeDelegate | TransactionType::StakeRedelegate | TransactionType::EarnDeposit => GemTransactionSubtitle::ToAddress { address: transaction.to.clone() },
         TransactionType::StakeUndelegate | TransactionType::EarnWithdraw => GemTransactionSubtitle::FromAddress { address: transaction.to.clone() },
         TransactionType::StakeFreeze => resource(transaction).map_or(GemTransactionSubtitle::None, |resource| GemTransactionSubtitle::ToResource { resource }),
         TransactionType::StakeUnfreeze => resource(transaction).map_or(GemTransactionSubtitle::None, |resource| GemTransactionSubtitle::FromResource { resource }),
-        TransactionType::PerpetualOpenPosition | TransactionType::PerpetualClosePosition | TransactionType::PerpetualModifyPosition => {
-            match perpetual_metadata(transaction).map(|metadata| metadata.price).filter(|price| *price > 0.0) {
-                Some(value) => GemTransactionSubtitle::Price { value },
-                None => GemTransactionSubtitle::None,
-            }
-        }
+        TransactionType::PerpetualOpenPosition | TransactionType::PerpetualClosePosition | TransactionType::PerpetualModifyPosition => match perpetual_metadata(transaction).map(|metadata| metadata.price).filter(|price| *price > 0.0) {
+            Some(value) => GemTransactionSubtitle::Price { value },
+            None => GemTransactionSubtitle::None,
+        },
         TransactionType::Swap | TransactionType::StakeRewards | TransactionType::StakeWithdraw | TransactionType::AssetActivation => GemTransactionSubtitle::None,
     }
 }
@@ -536,9 +490,7 @@ fn transaction_value(transaction: &Transaction) -> GemTransactionValue {
             None => GemTransactionValue::None,
         },
         TransactionType::StakeRewards | TransactionType::StakeWithdraw => GemTransactionValue::Amount { sign: GemAmountSign::Incoming },
-        TransactionType::Transfer => GemTransactionValue::Amount {
-            sign: amount_sign(&transaction.direction),
-        },
+        TransactionType::Transfer => GemTransactionValue::Amount { sign: amount_sign(&transaction.direction) },
         TransactionType::StakeDelegate
         | TransactionType::StakeUndelegate
         | TransactionType::StakeRedelegate
@@ -569,9 +521,7 @@ fn amount_sign(direction: &TransactionDirection) -> GemAmountSign {
 
 fn resource(transaction: &Transaction) -> Option<primitives::Resource> {
     let metadata = transaction.metadata.clone()?;
-    serde_json::from_value::<TransactionResourceTypeMetadata>(metadata)
-        .ok()
-        .map(|metadata| metadata.resource_type)
+    serde_json::from_value::<TransactionResourceTypeMetadata>(metadata).ok().map(|metadata| metadata.resource_type)
 }
 
 pub fn header_kind(transaction: &Transaction) -> GemTransactionHeaderKind {
@@ -596,9 +546,7 @@ pub fn header_kind(transaction: &Transaction) -> GemTransactionHeaderKind {
             None => GemTransactionHeaderKind::Amount { shows_fiat: false },
         },
         TransactionType::TokenApproval => GemTransactionHeaderKind::AssetImage,
-        TransactionType::AssetActivation | TransactionType::PerpetualOpenPosition | TransactionType::PerpetualClosePosition | TransactionType::PerpetualModifyPosition => {
-            GemTransactionHeaderKind::Symbol
-        }
+        TransactionType::AssetActivation | TransactionType::PerpetualOpenPosition | TransactionType::PerpetualClosePosition | TransactionType::PerpetualModifyPosition => GemTransactionHeaderKind::Symbol,
     }
 }
 
@@ -613,14 +561,10 @@ pub fn details(extended: &TransactionExtended, wallet_type: WalletType) -> GemTr
     let swap_progress = swap_progress(extended, swap_metadata.as_ref(), provider.as_ref());
     let perpetual = perpetual_metadata(transaction);
     GemTransactionDetails {
-        estimated_confirmation_seconds: extended
-            .confirmation_eta_seconds
-            .filter(|seconds| *seconds > 0 && transaction.state == TransactionState::Pending && swap_progress.is_none()),
+        estimated_confirmation_seconds: extended.confirmation_eta_seconds.filter(|seconds| *seconds > 0 && transaction.state == TransactionState::Pending && swap_progress.is_none()),
         swap_again: swap_again(transaction, swap_metadata.as_ref(), wallet_type),
         swap_progress,
-        provider_name: provider
-            .map(|provider| provider.name)
-            .or_else(|| swap_metadata.as_ref().and_then(|metadata| metadata.provider.clone())),
+        provider_name: provider.map(|provider| provider.name).or_else(|| swap_metadata.as_ref().and_then(|metadata| metadata.provider.clone())),
         pnl: perpetual.as_ref().map(|metadata| metadata.pnl).filter(|pnl| *pnl != 0.0),
         price: perpetual.as_ref().map(|metadata| metadata.price).filter(|price| *price > 0.0),
     }
@@ -655,9 +599,7 @@ fn swap_progress(extended: &TransactionExtended, metadata: Option<&TransactionSw
         provider_name: provider.name.clone(),
         transfer: transfer.state(),
         swap: swap.state(),
-        eta_seconds: extended
-            .confirmation_eta_seconds
-            .filter(|seconds| *seconds > 0 && !extended.transaction.state.is_completed()),
+        eta_seconds: extended.confirmation_eta_seconds.filter(|seconds| *seconds > 0 && !extended.transaction.state.is_completed()),
     })
 }
 
@@ -709,10 +651,7 @@ mod tests {
             number: GemFormattedNumber::amount(1.0, Some("ETH".to_string()), GemValueStyle::Short),
             sign,
         };
-        let usd = |number| GemTransactionRowValue::Number {
-            number,
-            sign: GemAmountSign::None,
-        };
+        let usd = |number| GemTransactionRowValue::Number { number, sign: GemAmountSign::None };
 
         assert_eq!(value_tone(&amount(GemAmountSign::Incoming)), GemValueTone::Positive);
         assert_eq!(value_tone(&amount(GemAmountSign::Outgoing)), GemValueTone::Plain);
@@ -777,63 +716,32 @@ mod tests {
         use TransactionDirection::{Incoming, Outgoing, SelfTransfer};
         use TransactionState::{Confirmed, Failed, InTransit, Pending};
 
-        assert_eq!(
-            transaction_title(&Transaction::mock_with_state(TransactionType::Transfer, Confirmed, Incoming)),
-            GemTransactionTitle::Received
-        );
-        assert_eq!(
-            transaction_title(&Transaction::mock_with_state(TransactionType::Transfer, Confirmed, Outgoing)),
-            GemTransactionTitle::Sent
-        );
-        assert_eq!(
-            transaction_title(&Transaction::mock_with_state(TransactionType::Transfer, Confirmed, SelfTransfer)),
-            GemTransactionTitle::Sent
-        );
-        assert_eq!(
-            transaction_title(&Transaction::mock_with_state(TransactionType::TransferNFT, Confirmed, Incoming)),
-            GemTransactionTitle::Received
-        );
+        assert_eq!(transaction_title(&Transaction::mock_with_state(TransactionType::Transfer, Confirmed, Incoming)), GemTransactionTitle::Received);
+        assert_eq!(transaction_title(&Transaction::mock_with_state(TransactionType::Transfer, Confirmed, Outgoing)), GemTransactionTitle::Sent);
+        assert_eq!(transaction_title(&Transaction::mock_with_state(TransactionType::Transfer, Confirmed, SelfTransfer)), GemTransactionTitle::Sent);
+        assert_eq!(transaction_title(&Transaction::mock_with_state(TransactionType::TransferNFT, Confirmed, Incoming)), GemTransactionTitle::Received);
 
         for state in [Pending, Failed, InTransit] {
-            assert_eq!(
-                transaction_title(&Transaction::mock_with_state(TransactionType::Transfer, state, Incoming)),
-                GemTransactionTitle::Transfer
-            );
+            assert_eq!(transaction_title(&Transaction::mock_with_state(TransactionType::Transfer, state, Incoming)), GemTransactionTitle::Transfer);
         }
     }
 
     #[test]
     fn test_transaction_title_separates_earn_from_stake() {
         assert_eq!(
-            transaction_title(&Transaction::mock_with_state(
-                TransactionType::StakeDelegate,
-                TransactionState::Confirmed,
-                TransactionDirection::Outgoing
-            )),
+            transaction_title(&Transaction::mock_with_state(TransactionType::StakeDelegate, TransactionState::Confirmed, TransactionDirection::Outgoing)),
             GemTransactionTitle::Stake
         );
         assert_eq!(
-            transaction_title(&Transaction::mock_with_state(
-                TransactionType::EarnDeposit,
-                TransactionState::Confirmed,
-                TransactionDirection::Outgoing
-            )),
+            transaction_title(&Transaction::mock_with_state(TransactionType::EarnDeposit, TransactionState::Confirmed, TransactionDirection::Outgoing)),
             GemTransactionTitle::Earn
         );
         assert_eq!(
-            transaction_title(&Transaction::mock_with_state(
-                TransactionType::EarnWithdraw,
-                TransactionState::Confirmed,
-                TransactionDirection::Outgoing
-            )),
+            transaction_title(&Transaction::mock_with_state(TransactionType::EarnWithdraw, TransactionState::Confirmed, TransactionDirection::Outgoing)),
             GemTransactionTitle::Withdraw
         );
         assert_eq!(
-            transaction_title(&Transaction::mock_with_state(
-                TransactionType::StakeWithdraw,
-                TransactionState::Confirmed,
-                TransactionDirection::Outgoing
-            )),
+            transaction_title(&Transaction::mock_with_state(TransactionType::StakeWithdraw, TransactionState::Confirmed, TransactionDirection::Outgoing)),
             GemTransactionTitle::Withdraw
         );
     }
@@ -850,21 +758,11 @@ mod tests {
             })
             .unwrap(),
         );
-        assert_eq!(
-            transaction_title(&open),
-            GemTransactionTitle::PerpetualOpen {
-                direction: Some(PerpetualDirection::Short)
-            }
-        );
+        assert_eq!(transaction_title(&open), GemTransactionTitle::PerpetualOpen { direction: Some(PerpetualDirection::Short) });
 
         let mut close = open.clone();
         close.transaction_type = TransactionType::PerpetualClosePosition;
-        assert_eq!(
-            transaction_title(&close),
-            GemTransactionTitle::PerpetualClose {
-                direction: Some(PerpetualDirection::Short)
-            }
-        );
+        assert_eq!(transaction_title(&close), GemTransactionTitle::PerpetualClose { direction: Some(PerpetualDirection::Short) });
     }
 
     #[test]
@@ -887,10 +785,7 @@ mod tests {
             transaction_subtitle(&Transaction::mock_with_state(TransactionType::StakeUndelegate, TransactionState::Confirmed, Outgoing)),
             GemTransactionSubtitle::FromAddress { address: "to".to_string() }
         );
-        assert_eq!(
-            transaction_subtitle(&Transaction::mock_with_state(TransactionType::Swap, TransactionState::Confirmed, Outgoing)),
-            GemTransactionSubtitle::None
-        );
+        assert_eq!(transaction_subtitle(&Transaction::mock_with_state(TransactionType::Swap, TransactionState::Confirmed, Outgoing)), GemTransactionSubtitle::None);
         assert_eq!(
             transaction_subtitle(&Transaction::mock_with_state(TransactionType::StakeRewards, TransactionState::Confirmed, Incoming)),
             GemTransactionSubtitle::None
@@ -1014,10 +909,7 @@ mod tests {
             transaction_value(&Transaction::mock_with_state(TransactionType::TokenApproval, TransactionState::Confirmed, Outgoing)),
             GemTransactionValue::AssetSymbol
         );
-        assert_eq!(
-            transaction_value(&Transaction::mock_with_state(TransactionType::TransferNFT, TransactionState::Confirmed, Incoming)),
-            GemTransactionValue::None
-        );
+        assert_eq!(transaction_value(&Transaction::mock_with_state(TransactionType::TransferNFT, TransactionState::Confirmed, Incoming)), GemTransactionValue::None);
     }
 
     #[test]
@@ -1095,11 +987,7 @@ mod tests {
             "a swap row shows both legs"
         );
         assert_eq!(
-            row(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(
-                TransactionState::Confirmed,
-                None
-            )))
-            .value,
+            row(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Confirmed, None))).value,
             GemTransactionRowValue::None,
             "a leg whose asset is unknown is not shown as a number"
         );
@@ -1117,24 +1005,11 @@ mod tests {
 
     #[test]
     fn test_row_shows_the_counterparty_name_when_the_wallet_knows_the_address() {
-        let mut incoming = TransactionExtended::mock_transaction(Transaction::mock_with_state(
-            TransactionType::Transfer,
-            TransactionState::Confirmed,
-            TransactionDirection::Incoming,
-        ));
-        incoming.from_address = Some(primitives::AddressName::mock(
-            "from",
-            "Alice",
-            primitives::AddressType::Address,
-            primitives::VerificationStatus::Verified,
-        ));
+        let mut incoming = TransactionExtended::mock_transaction(Transaction::mock_with_state(TransactionType::Transfer, TransactionState::Confirmed, TransactionDirection::Incoming));
+        incoming.from_address = Some(primitives::AddressName::mock("from", "Alice", primitives::AddressType::Address, primitives::VerificationStatus::Verified));
         assert_eq!(row(&incoming).subtitle, GemTransactionRowSubtitle::FromAddress { participant: "Alice".to_string() });
 
-        let outgoing = TransactionExtended::mock_transaction(Transaction::mock_with_state(
-            TransactionType::Transfer,
-            TransactionState::Confirmed,
-            TransactionDirection::Outgoing,
-        ));
+        let outgoing = TransactionExtended::mock_transaction(Transaction::mock_with_state(TransactionType::Transfer, TransactionState::Confirmed, TransactionDirection::Outgoing));
         assert_eq!(row(&outgoing).subtitle, GemTransactionRowSubtitle::ToAddress { participant: "to".to_string() });
         assert_eq!(
             row(&outgoing).value,
@@ -1193,29 +1068,14 @@ mod tests {
             })
         );
 
-        let mut transfer = TransactionExtended::mock_transaction(Transaction::mock_with_state(
-            TransactionType::Transfer,
-            TransactionState::Confirmed,
-            TransactionDirection::Outgoing,
-        ));
+        let mut transfer = TransactionExtended::mock_transaction(Transaction::mock_with_state(TransactionType::Transfer, TransactionState::Confirmed, TransactionDirection::Outgoing));
         transfer.transaction.memo = Some(String::new());
-        let unnamed = detail_rows(
-            &transfer,
-            WalletType::Multicoin,
-            participant(&transfer, BlockExplorerLink::mock_with_address),
-            explorer.clone(),
-        );
+        let unnamed = detail_rows(&transfer, WalletType::Multicoin, participant(&transfer, BlockExplorerLink::mock_with_address), explorer.clone());
         let recipient = unnamed.participant.clone().unwrap();
-        assert_eq!(
-            (recipient.role, recipient.address.as_str(), recipient.can_add_contact),
-            (GemTransactionParticipantRole::Recipient, "to", true)
-        );
+        assert_eq!((recipient.role, recipient.address.as_str(), recipient.can_add_contact), (GemTransactionParticipantRole::Recipient, "to", true));
         assert_eq!(recipient.link.link, "https://explorer/to");
         assert_eq!(unnamed.memo, None, "an empty memo is not a row");
-        assert_eq!(
-            (unnamed.fee.asset.id.clone(), unnamed.fee.value.clone(), unnamed.fee.sign),
-            (transfer.fee_asset.id.clone(), 1u32.into(), GemAmountSign::None)
-        );
+        assert_eq!((unnamed.fee.asset.id.clone(), unnamed.fee.value.clone(), unnamed.fee.sign), (transfer.fee_asset.id.clone(), 1u32.into(), GemAmountSign::None));
         assert!(matches!(unnamed.header, GemTransactionHeader::Amount { shows_fiat: true, .. }));
         assert_eq!(
             unnamed.header_action,
@@ -1224,26 +1084,12 @@ mod tests {
             })
         );
 
-        transfer.to_address = Some(primitives::AddressName::mock(
-            "to",
-            "Bob",
-            primitives::AddressType::Address,
-            primitives::VerificationStatus::Verified,
-        ));
-        let named_rows = detail_rows(
-            &transfer,
-            WalletType::Multicoin,
-            participant(&transfer, BlockExplorerLink::mock_with_address),
-            explorer.clone(),
-        );
+        transfer.to_address = Some(primitives::AddressName::mock("to", "Bob", primitives::AddressType::Address, primitives::VerificationStatus::Verified));
+        let named_rows = detail_rows(&transfer, WalletType::Multicoin, participant(&transfer, BlockExplorerLink::mock_with_address), explorer.clone());
         let recipient = named_rows.participant.unwrap();
         assert_eq!((recipient.name.map(|name| name.name), recipient.can_add_contact), (Some("Bob".to_string()), false));
 
-        let approval = TransactionExtended::mock_transaction(Transaction::mock_with_state(
-            TransactionType::TokenApproval,
-            TransactionState::Confirmed,
-            TransactionDirection::Outgoing,
-        ));
+        let approval = TransactionExtended::mock_transaction(Transaction::mock_with_state(TransactionType::TokenApproval, TransactionState::Confirmed, TransactionDirection::Outgoing));
         let approval_rows = detail_rows(&approval, WalletType::Multicoin, participant(&approval, BlockExplorerLink::mock_with_address), explorer);
         assert!(matches!(approval_rows.header, GemTransactionHeader::AssetImage { .. }));
         let contract = approval_rows.participant.unwrap();
@@ -1257,35 +1103,16 @@ mod tests {
             GemTransactionDetailRow::Row { row: GemListRow::Explorer { .. } } => "Explorer".to_string(),
             GemTransactionDetailRow::Row { row: GemListRow::Memo { .. } } => "Memo".to_string(),
             GemTransactionDetailRow::Row {
-                row:
-                    GemListRow::Date { title, .. }
-                    | GemListRow::Label { title, .. }
-                    | GemListRow::Text { title, .. }
-                    | GemListRow::Network { title, .. }
-                    | GemListRow::Amount { title, .. },
+                row: GemListRow::Date { title, .. } | GemListRow::Label { title, .. } | GemListRow::Text { title, .. } | GemListRow::Network { title, .. } | GemListRow::Amount { title, .. },
             } => format!("{title:?}"),
             other => format!("{other:?}"),
         };
-        let rows_of = |sections: Vec<GemTransactionDetailSection>| {
-            sections
-                .into_iter()
-                .map(|section| section.rows.into_iter().map(kind).collect::<Vec<_>>())
-                .collect::<Vec<_>>()
-        };
+        let rows_of = |sections: Vec<GemTransactionDetailSection>| sections.into_iter().map(|section| section.rows.into_iter().map(kind).collect::<Vec<_>>()).collect::<Vec<_>>();
 
-        let mut transfer = TransactionExtended::mock_transaction(Transaction::mock_with_state(
-            TransactionType::Transfer,
-            TransactionState::Confirmed,
-            TransactionDirection::Outgoing,
-        ));
+        let mut transfer = TransactionExtended::mock_transaction(Transaction::mock_with_state(TransactionType::Transfer, TransactionState::Confirmed, TransactionDirection::Outgoing));
         transfer.transaction.memo = Some("gm".to_string());
         assert_eq!(
-            rows_of(detail_sections(&detail_rows(
-                &transfer,
-                WalletType::Multicoin,
-                participant(&transfer, BlockExplorerLink::mock_with_address),
-                explorer.clone()
-            ))),
+            rows_of(detail_sections(&detail_rows(&transfer, WalletType::Multicoin, participant(&transfer, BlockExplorerLink::mock_with_address), explorer.clone()))),
             vec![vec!["Header"], vec!["Date", "Status", "Participant", "Memo", "Network"], vec!["Fee"], vec!["Explorer"]],
             "a transfer has no swap sections and shows its memo beside the recipient"
         );
@@ -1295,19 +1122,8 @@ mod tests {
             ..TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Pending, Some("near_intents")))
         };
         assert_eq!(
-            rows_of(detail_sections(&detail_rows(
-                &pending,
-                WalletType::Multicoin,
-                participant(&pending, BlockExplorerLink::mock_with_address),
-                explorer.clone()
-            ))),
-            vec![
-                vec!["Header"],
-                vec!["SwapProgress"],
-                vec!["Date", "Status", "Rate", "Network", "Provider"],
-                vec!["Fee"],
-                vec!["Explorer"]
-            ],
+            rows_of(detail_sections(&detail_rows(&pending, WalletType::Multicoin, participant(&pending, BlockExplorerLink::mock_with_address), explorer.clone()))),
+            vec![vec!["Header"], vec!["SwapProgress"], vec!["Date", "Status", "Rate", "Network", "Provider"], vec!["Fee"], vec!["Explorer"]],
             "a swap in flight shows its progress instead of a confirmation estimate, and its provider instead of a participant"
         );
 
@@ -1326,21 +1142,12 @@ mod tests {
             "a confirmed swap offers to swap again"
         );
         assert_eq!(
-            rows_of(detail_sections(&detail_rows(
-                &confirmed,
-                WalletType::View,
-                participant(&confirmed, BlockExplorerLink::mock_with_address),
-                explorer.clone()
-            )))[1],
+            rows_of(detail_sections(&detail_rows(&confirmed, WalletType::View, participant(&confirmed, BlockExplorerLink::mock_with_address), explorer.clone())))[1],
             vec!["Date", "Status", "Rate", "Network", "Provider"],
             "a watch-only wallet cannot sign, so the confirmed swap offers no swap again"
         );
 
-        let mut open = TransactionExtended::mock_transaction(Transaction::mock_with_state(
-            TransactionType::PerpetualOpenPosition,
-            TransactionState::Confirmed,
-            TransactionDirection::Outgoing,
-        ));
+        let mut open = TransactionExtended::mock_transaction(Transaction::mock_with_state(TransactionType::PerpetualOpenPosition, TransactionState::Confirmed, TransactionDirection::Outgoing));
         open.transaction.metadata = Some(
             serde_json::to_value(TransactionPerpetualMetadata {
                 pnl: -3.5,
@@ -1351,12 +1158,7 @@ mod tests {
             .unwrap(),
         );
         assert_eq!(
-            rows_of(detail_sections(&detail_rows(
-                &open,
-                WalletType::Multicoin,
-                participant(&open, BlockExplorerLink::mock_with_address),
-                explorer
-            )))[1],
+            rows_of(detail_sections(&detail_rows(&open, WalletType::Multicoin, participant(&open, BlockExplorerLink::mock_with_address), explorer)))[1],
             vec!["Date", "Status", "Network", "Pnl", "Price"],
             "a perpetual has no participant and shows its pnl and price after the network"
         );
@@ -1367,9 +1169,7 @@ mod tests {
             GemTransactionDetailRow::Row {
                 row: GemListRow::Label {
                     title: GemListRowTitle::Status,
-                    text: GemLocalizedText::TransactionState {
-                        state: TransactionState::Confirmed
-                    },
+                    text: GemLocalizedText::TransactionState { state: TransactionState::Confirmed },
                     tone: GemValueTone::Positive,
                     info: Some(GemInfoTopic::TransactionStatus {
                         state: TransactionState::Confirmed,
@@ -1410,67 +1210,40 @@ mod tests {
             ..TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Pending, Some("thorchain")))
         });
         let progress = pending.swap_progress.unwrap();
-        assert_eq!(
-            (progress.transfer.step, progress.swap.step, progress.eta_seconds),
-            (GemSwapProgressStep::Pending, GemSwapProgressStep::Waiting, Some(90))
-        );
+        assert_eq!((progress.transfer.step, progress.swap.step, progress.eta_seconds), (GemSwapProgressStep::Pending, GemSwapProgressStep::Waiting, Some(90)));
         assert_eq!(progress.from_value, 5u32.into());
         assert_eq!(pending.provider_name.as_deref(), Some(progress.provider_name.as_str()));
         assert_eq!(pending.estimated_confirmation_seconds, None, "the progress steps carry the eta");
         assert!(pending.swap_again.is_none());
 
-        let in_transit = signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(
-            TransactionState::InTransit,
-            Some("thorchain"),
-        )))
-        .swap_progress
-        .unwrap();
-        assert_eq!(
-            (in_transit.transfer.step, in_transit.swap.step),
-            (GemSwapProgressStep::Completed, GemSwapProgressStep::Pending)
-        );
+        let in_transit = signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::InTransit, Some("thorchain"))))
+            .swap_progress
+            .unwrap();
+        assert_eq!((in_transit.transfer.step, in_transit.swap.step), (GemSwapProgressStep::Completed, GemSwapProgressStep::Pending));
         let failed = signing_details(&TransactionExtended {
             confirmation_eta_seconds: Some(90),
             ..TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Failed, Some("thorchain")))
         })
         .swap_progress
         .unwrap();
-        assert_eq!(
-            (failed.transfer.step, failed.swap.step, failed.eta_seconds),
-            (GemSwapProgressStep::Completed, GemSwapProgressStep::Failed, None)
-        );
-        let reverted = signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(
-            TransactionState::Reverted,
-            Some("thorchain"),
-        )))
-        .swap_progress
-        .unwrap();
+        assert_eq!((failed.transfer.step, failed.swap.step, failed.eta_seconds), (GemSwapProgressStep::Completed, GemSwapProgressStep::Failed, None));
+        let reverted = signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Reverted, Some("thorchain"))))
+            .swap_progress
+            .unwrap();
         assert_eq!((reverted.transfer.step, reverted.swap.step), (GemSwapProgressStep::Reverted, GemSwapProgressStep::Waiting));
-        let refunded = signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(
-            TransactionState::Refunded,
-            Some("thorchain"),
-        )))
-        .swap_progress
-        .unwrap();
-        assert_eq!(
-            (refunded.transfer.step, refunded.swap.step),
-            (GemSwapProgressStep::Completed, GemSwapProgressStep::Refunded)
-        );
+        let refunded = signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Refunded, Some("thorchain"))))
+            .swap_progress
+            .unwrap();
+        assert_eq!((refunded.transfer.step, refunded.swap.step), (GemSwapProgressStep::Completed, GemSwapProgressStep::Refunded));
         assert_eq!(
             (refunded.transfer.marker, refunded.swap.marker),
             (GemSwapProgressMarker::Check, GemSwapProgressMarker::Swap),
             "a refund reads as a swap back, not as a failure"
         );
-        assert_eq!(
-            (progress.transfer.marker, progress.swap.marker),
-            (GemSwapProgressMarker::Spinner, GemSwapProgressMarker::Dots)
-        );
+        assert_eq!((progress.transfer.marker, progress.swap.marker), (GemSwapProgressMarker::Spinner, GemSwapProgressMarker::Dots));
         assert_eq!(failed.swap.marker, GemSwapProgressMarker::Cross);
 
-        let confirmed = signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(
-            TransactionState::Confirmed,
-            Some("thorchain"),
-        )));
+        let confirmed = signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Confirmed, Some("thorchain"))));
         assert!(confirmed.swap_progress.is_none());
         assert_eq!(
             confirmed.swap_again,
@@ -1480,12 +1253,9 @@ mod tests {
             })
         );
         assert!(
-            details(
-                &TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Confirmed, Some("thorchain"))),
-                WalletType::View
-            )
-            .swap_again
-            .is_none(),
+            details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Confirmed, Some("thorchain"))), WalletType::View)
+                .swap_again
+                .is_none(),
             "a watch-only wallet cannot sign a swap"
         );
 
@@ -1496,22 +1266,16 @@ mod tests {
         assert!(on_chain.swap_progress.is_none());
         assert_eq!(on_chain.estimated_confirmation_seconds, Some(90));
         assert_eq!(
-            signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(
-                TransactionState::Pending,
-                Some("unknown")
-            )))
-            .provider_name
-            .as_deref(),
+            signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Pending, Some("unknown"))))
+                .provider_name
+                .as_deref(),
             Some("unknown"),
             "an unknown provider still shows its id"
         );
         assert!(
-            signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(
-                TransactionState::Pending,
-                None
-            )))
-            .swap_progress
-            .is_none()
+            signing_details(&TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Pending, None)))
+                .swap_progress
+                .is_none()
         );
     }
 
@@ -1567,11 +1331,7 @@ mod tests {
             ..TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Confirmed, None))
         };
         let ethereum = AssetId::from_chain(Chain::Ethereum);
-        let leg_price = |extended: &TransactionExtended| {
-            swap_leg(extended, SwapLeg::From, GemAmountSign::Outgoing)
-                .and_then(|amount| amount.price)
-                .map(|price| price.price)
-        };
+        let leg_price = |extended: &TransactionExtended| swap_leg(extended, SwapLeg::From, GemAmountSign::Outgoing).and_then(|amount| amount.price).map(|price| price.price);
 
         swap.prices = vec![AssetPrice::new(ethereum.clone(), 0.0, 0.0, Utc::now())];
         assert_eq!(leg_price(&swap), None);
@@ -1585,11 +1345,7 @@ mod tests {
         let unfiltered = activity_filters(vec![], vec![]);
 
         assert_eq!(unfiltered.chains, vec![]);
-        assert_eq!(
-            unfiltered.transaction_types.len(),
-            TransactionType::iter().count(),
-            "no filter means every type, not no type filter"
-        );
+        assert_eq!(unfiltered.transaction_types.len(), TransactionType::iter().count(), "no filter means every type, not no type filter");
         assert_eq!(unfiltered.asset_rank_greater_than, crate::models::asset::default_token_rank());
 
         let swaps = activity_filters(vec![Chain::Ethereum], vec![GemTransactionFilter::Swaps]);

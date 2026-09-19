@@ -15,9 +15,7 @@ use crate::payment::GemPaymentService;
 use crate::services::file::{GemFileStore, IMAGE_EXTENSION};
 use crate::services::name::GemAddressStore;
 
-pub use model::{
-    GemContactAddressInput, GemContactAvatar, GemContactAvatarChoice, GemContactInput, GemContactRow, GemContactScannedAddress, GemContactSession, contact_initials, contact_row,
-};
+pub use model::{GemContactAddressInput, GemContactAvatar, GemContactAvatarChoice, GemContactInput, GemContactRow, GemContactScannedAddress, GemContactSession, contact_initials, contact_row};
 pub use store::GemContactStore;
 
 #[derive(uniffi::Object)]
@@ -47,9 +45,7 @@ impl GemContactService {
     pub async fn update_contact(&self, contact: Contact, addresses: Vec<ContactAddress>) -> Result<(), GemServiceError> {
         let existing = self.store.get_addresses(contact.id.clone()).await?;
         let stale = rules::stale_addresses(existing, &addresses);
-        self.store
-            .update_contact(contact.clone(), addresses.clone(), stale.iter().map(|address| address.id.clone()).collect())
-            .await?;
+        self.store.update_contact(contact.clone(), addresses.clone(), stale.iter().map(|address| address.id.clone()).collect()).await?;
         self.address_store.delete_address_names(rules::address_names(&contact, &stale)).await?;
         self.save_address_names(&contact, &addresses).await
     }
