@@ -41,6 +41,15 @@ pub enum GemSwapQuotePhase {
     },
 }
 
+impl GemSwapQuotePhase {
+    fn is_failed(&self) -> bool {
+        match self {
+            Self::Failed { .. } => true,
+            Self::NoInput | Self::Loading { .. } | Self::Ready => false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Default, uniffi::Enum)]
 pub enum GemSwapTransferPhase {
     #[default]
@@ -313,7 +322,7 @@ impl GemSwapSession {
     }
 
     pub fn refreshes_quotes(&self, is_screen_active: bool) -> bool {
-        is_screen_active && !self.refresh_paused_until_restart && !self.is_transfer_loading()
+        is_screen_active && !self.refresh_paused_until_restart && !self.is_transfer_loading() && !self.quote_phase.is_failed()
     }
 
     fn action(&self) -> GemSwapSessionAction {
@@ -485,6 +494,20 @@ mod tests {
 
         let empty = session.on_quote_results(GemSwapQuotesResult::mock(vec![]));
         assert_eq!(empty.quote_error(), Some(SwapperError::NoQuoteAvailable));
+    }
+
+    #[test]
+    fn test_a_failed_quote_stops_the_automatic_refresh_until_a_retry_or_new_input() {
+        let request = GemSwapRequest::mock();
+        let failed = GemSwapSession::default().on_request_changed(Some(request.clone())).on_quote_results(GemSwapQuotesResult {
+            request: request.clone(),
+            quotes: vec![],
+            error: Some(SwapperError::ComputeQuoteError("offline".into())),
+        });
+
+        assert!(!failed.refreshes_quotes(true));
+        assert!(failed.on_refresh_requested(request).refreshes_quotes(true));
+        assert!(failed.on_request_changed(None).refreshes_quotes(true));
     }
 
     #[test]
