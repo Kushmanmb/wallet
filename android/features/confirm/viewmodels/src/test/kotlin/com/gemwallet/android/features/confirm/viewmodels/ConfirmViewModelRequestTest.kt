@@ -41,6 +41,8 @@ import uniffi.gemstone.GemConfirmPhase
 import uniffi.gemstone.GemConfirmTransferService
 import uniffi.gemstone.GemConfirmation
 import uniffi.gemstone.GemRecipient
+import com.wallet.core.primitives.FeePriority
+import uniffi.gemstone.GemConfirmFeeSelection
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ConfirmViewModelRequestTest {
@@ -109,6 +111,21 @@ class ConfirmViewModelRequestTest {
 
         verify(exactly = 1) { confirmService.confirmation(connected.toGem(), transfer, any()) }
         verify(exactly = 0) { confirmService.confirmation(current.toGem(), any(), any()) }
+    }
+
+    @Test
+    fun initForTheSameTransferKeepsTheChosenFee() = runTest(testDispatcher) {
+        val transfer = mockGemTransferData(asset = asset, recipient = GemRecipient(address = account.address, memo = "fee"))
+        val viewModel = viewModel(SavedStateHandle()).also { model = it }
+        viewModel.init(transfer)
+        advanceUntilIdle()
+        val fast = GemConfirmFeeSelection.Priority(FeePriority.Fast.toGem())
+        viewModel.feeSelection.value = fast
+
+        viewModel.init(transfer)
+        advanceUntilIdle()
+
+        assertEquals(fast, viewModel.feeSelection.value)
     }
 
     private fun viewModel(handle: SavedStateHandle): ConfirmViewModel {

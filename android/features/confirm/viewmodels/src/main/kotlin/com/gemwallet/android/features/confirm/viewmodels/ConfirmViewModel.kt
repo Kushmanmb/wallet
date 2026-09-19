@@ -306,12 +306,12 @@ class ConfirmViewModel @Inject constructor(
     fun init(transfer: GemTransferData, simulationResult: SimulationResult? = null, wallet: Wallet? = null) {
         requestSimulation = simulationResult
         requestWallet.value = wallet
-        feeSelection.value = GemConfirmFeeSelection.Priority(transfer.defaultFeePriority())
         viewModelScope.launch(ioDispatcher) {
             val pack = transfer.pack()
             if (savedStateHandle.get<String?>(RouteArgument.Params.key) == pack) {
                 return@launch
             }
+            feeSelection.value = GemConfirmFeeSelection.Priority(transfer.defaultFeePriority())
             screen.update { it.onLoadStarted() }
             savedStateHandle[RouteArgument.Params.key] = pack
         }

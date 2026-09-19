@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import uniffi.gemstone.GemDeveloperServiceInterface
+import android.util.Log
+import com.gemwallet.android.ext.runCatchingCancellable
 
 @HiltViewModel
 class DevelopViewModel @Inject constructor(
@@ -32,11 +34,13 @@ class DevelopViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            _deviceId.value = service.deviceId()
-            _platformStore.value = service.platformStore().toPrimitives()
-            if (notificationsAvailable) {
-                _pushToken.value = service.pushToken()
-            }
+            runCatchingCancellable {
+                _deviceId.value = service.deviceId()
+                _platformStore.value = service.platformStore().toPrimitives()
+                if (notificationsAvailable) {
+                    _pushToken.value = service.pushToken()
+                }
+            }.onFailure { Log.e(TAG, "reading the developer values failed", it) }
         }
     }
 
@@ -68,6 +72,10 @@ class DevelopViewModel @Inject constructor(
     }
 
     private fun launchAction(action: suspend () -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) { action() }
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatchingCancellable { action() }.onFailure { Log.e(TAG, "developer action failed", it) }
+        }
     }
 }
+
+private const val TAG = "Develop"

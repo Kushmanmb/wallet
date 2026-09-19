@@ -79,7 +79,7 @@ class PendingNavigationCoordinator @Inject constructor(
         replace(loading ?: pending, routes.takeIf { it.isNotEmpty() }?.let(PendingNavigation::Routes))
 
         return when (pending) {
-            is PendingNavigation.FromIntent -> true
+            is PendingNavigation.FromIntent -> routes.isNotEmpty() || action !is UrlAction.Payment
             is PendingNavigation.FromScan -> routes.isNotEmpty() || action is UrlAction.WalletConnect
         }
     }

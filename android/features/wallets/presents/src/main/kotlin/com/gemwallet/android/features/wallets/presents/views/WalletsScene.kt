@@ -12,11 +12,13 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.features.wallets.presents.views.components.WalletsActions
 import com.gemwallet.android.features.wallets.presents.views.components.wallets
+import androidx.compose.material3.SnackbarHostState
 
 @Composable
 internal fun WalletsScene(
     pinnedWallets: List<WalletDataAggregate>,
     unpinnedWallets: List<WalletDataAggregate>,
+    snackbar: SnackbarHostState? = null,
     onAction: (WalletsAction) -> Unit,
 ) {
     val longPressedWallet = remember {
@@ -25,6 +27,7 @@ internal fun WalletsScene(
 
     Scene(
         title = stringResource(id = R.string.wallets_title),
+        snackbar = snackbar,
         onClose = { onAction(WalletsAction.Cancel) },
     ) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {

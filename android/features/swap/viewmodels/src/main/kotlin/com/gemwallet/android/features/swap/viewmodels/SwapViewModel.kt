@@ -79,6 +79,7 @@ import uniffi.gemstone.GemSwapRequest
 import uniffi.gemstone.SwapProvider
 import uniffi.gemstone.SwapperException
 import uniffi.gemstone.swapperQuoteSummary
+import android.util.Log
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -296,7 +297,8 @@ class SwapViewModel @Inject constructor(
         }
         selectedSlippageBps.update { slippageBps }
         viewModelScope.launch(ioDispatcher) {
-            swapQuoteService.setSlippageBps(slippageBps)
+            runCatchingCancellable { swapQuoteService.setSlippageBps(slippageBps) }
+                .onFailure { Log.e(TAG, "saving the slippage failed", it) }
         }
     }
 
@@ -395,3 +397,5 @@ class SwapViewModel @Inject constructor(
         val percentSuggestions = gemConfig.getSwapConfig().amountPercentPresets.map { it.toInt() }
     }
 }
+
+private const val TAG = "Swap"

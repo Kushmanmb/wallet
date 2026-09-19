@@ -1,6 +1,5 @@
 package com.gemwallet.android.data.coordinators.wallet
 
-import android.util.Log
 import com.gemwallet.android.application.wallet.cases.DeleteWallet
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.wallet.core.primitives.WalletId
@@ -23,12 +22,7 @@ class DeleteWalletImpl @Inject constructor(
         onBoard: () -> Unit,
         onComplete: () -> Unit
     ) = withContext(Dispatchers.IO) {
-        val deletion = try {
-            walletService.deleteWallet(walletId.id)
-        } catch (error: Exception) {
-            Log.e(TAG, "wallet removal failed for ${walletId.id}; retry delete to finish", error)
-            return@withContext
-        }
+        val deletion = walletService.deleteWallet(walletId.id)
 
         val callback: () -> Unit = when (deletion) {
             GemWalletDeletion.WALLETS_REMAINING -> onComplete
@@ -43,7 +37,4 @@ class DeleteWalletImpl @Inject constructor(
         }
     }
 
-    private companion object {
-        const val TAG = "DeleteWallet"
-    }
 }

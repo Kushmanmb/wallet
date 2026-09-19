@@ -32,6 +32,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+import android.util.Log
+import com.gemwallet.android.ext.runCatchingCancellable
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -88,7 +90,10 @@ class ChartViewModel internal constructor(
         if (period.toGem() == selectedPeriod.value) {
             return
         }
-        viewModelScope.launch(ioDispatcher) { chartService.setChartPeriod(period.toGem()) }
+        viewModelScope.launch(ioDispatcher) {
+            runCatchingCancellable { chartService.setChartPeriod(period.toGem()) }
+                .onFailure { Log.e(TAG, "saving the chart period failed", it) }
+        }
         selectedPeriod.value = period.toGem()
     }
 
@@ -110,3 +115,5 @@ class ChartViewModel internal constructor(
     )
 
 }
+
+private const val TAG = "Chart"

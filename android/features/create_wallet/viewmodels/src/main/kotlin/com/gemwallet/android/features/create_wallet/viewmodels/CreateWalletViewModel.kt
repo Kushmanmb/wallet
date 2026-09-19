@@ -64,9 +64,8 @@ class CreateWalletViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            state.update { it.copy(defaultName = service.defaultWalletName(null)) }
-            runCatchingCancellable { service.createWallet() }
-                .onSuccess { words -> state.update { it.copy(data = words) } }
+            runCatchingCancellable { service.defaultWalletName(null) to service.createWallet() }
+                .onSuccess { (defaultName, words) -> state.update { it.copy(defaultName = defaultName, data = words) } }
                 .onFailure { err -> state.update { it.copy(dataError = err.errorText()) } }
         }
     }

@@ -77,7 +77,7 @@ class NetworksViewModel @Inject constructor(
 
     fun refresh() {
         val chain = state.value.chain ?: return
-        refreshNodeStatuses(chain)
+        observeNodes(chain)
     }
 
     fun onSelectNode(url: String) {
@@ -120,9 +120,9 @@ class NetworksViewModel @Inject constructor(
     }
 
     private suspend fun loadNodes(chain: Chain) {
-        val nodes = service.nodes(chain.string)
-
-        updateState { it.copy(session = it.session?.onNodes(nodes)) }
+        runCatchingCancellable { service.nodes(chain.string) }
+            .onSuccess { nodes -> updateState { it.copy(session = it.session?.onNodes(nodes)) } }
+            .onFailure { error -> updateState { it.copy(errorText = error.errorText().text(context)) } }
     }
 
     private fun refreshNodeStatuses(chain: Chain) {

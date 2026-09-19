@@ -1,7 +1,5 @@
 package com.gemwallet.android
 
-import android.util.Log
-import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.navigation.routes.AssetRoute
@@ -28,14 +26,6 @@ class AssetNavigation @Inject constructor(
         if (assetId == null) {
             return null
         }
-        return withContext(Dispatchers.IO) {
-            runCatchingCancellable { assetsService.openAsset(assetId.toIdentifier()) }
-                .onFailure { Log.e(TAG, "opening ${assetId.toIdentifier()} failed", it) }
-                .getOrNull()
-        }?.toPrimitives()
-    }
-
-    private companion object {
-        const val TAG = "AssetNavigation"
+        return withContext(Dispatchers.IO) { assetsService.openAsset(assetId.toIdentifier()) }?.toPrimitives()
     }
 }

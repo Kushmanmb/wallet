@@ -34,6 +34,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.util.Log
+import com.gemwallet.android.ext.runCatchingCancellable
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -74,7 +76,10 @@ class RecentsSheetViewModel @Inject constructor(
 
     fun onClear() {
         val types = config.value?.types ?: RecentActivityType.entries
-        viewModelScope.launch(ioDispatcher) { recentActivityService.clear(types.map { it.toGem() }) }
+        viewModelScope.launch(ioDispatcher) {
+            runCatchingCancellable { recentActivityService.clear(types.map { it.toGem() }) }
+                .onFailure { Log.e(TAG, "clearing recents failed", it) }
+        }
     }
 
     private fun buildUIModel(items: List<RecentAsset>, searchText: String): RecentsSheetUIModel {
@@ -91,3 +96,5 @@ class RecentsSheetViewModel @Inject constructor(
         val types: List<RecentActivityType>,
     )
 }
+
+private const val TAG = "RecentsSheet"

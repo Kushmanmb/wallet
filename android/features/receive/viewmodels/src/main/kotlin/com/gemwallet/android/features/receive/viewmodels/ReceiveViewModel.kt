@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 import uniffi.gemstone.GemReceiveServiceInterface
 import uniffi.gemstone.GemReceiveNetworks
 import uniffi.gemstone.GemReceiveWarning
+import android.util.Log
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel(assistedFactory = ReceiveViewModel.Factory::class)
@@ -92,6 +93,9 @@ class ReceiveViewModel @AssistedInject constructor(
     fun setVisible() = viewModelScope.launch(ioDispatcher) {
         val assetId = asset.value?.asset?.id ?: return@launch
         val wallet = session.filterNotNull().first().wallet
-        service.enableAsset(wallet.id.id, assetId.toIdentifier())
+        runCatchingCancellable { service.enableAsset(wallet.id.id, assetId.toIdentifier()) }
+            .onFailure { Log.e(TAG, "enabling ${assetId.toIdentifier()} failed", it) }
     }
 }
+
+private const val TAG = "Receive"

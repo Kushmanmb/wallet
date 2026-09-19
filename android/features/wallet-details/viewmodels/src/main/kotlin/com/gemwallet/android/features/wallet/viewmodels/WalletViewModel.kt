@@ -1,7 +1,6 @@
 package com.gemwallet.android.features.wallet.viewmodels
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,6 +23,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemWalletServiceInterface
+import com.gemwallet.android.ext.errorText
+import com.gemwallet.android.ui.localization.text
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 @HiltViewModel
 class WalletViewModel @Inject constructor(
@@ -46,16 +50,22 @@ class WalletViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    private val errorState = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = errorState.asStateFlow()
+
     fun setWalletName(name: String) = viewModelScope.launch(ioDispatcher) {
         runCatchingCancellable { service.rename(walletId.id, name) }
-            .onFailure { Log.e(TAG, "renaming wallet ${walletId.id} failed", it) }
+            .onFailure(::showError)
     }
 
     fun delete(onBoard: () -> Unit, onComplete: () -> Unit) = viewModelScope.launch(ioDispatcher) {
-        deleteWallet.deleteWallet(walletId, onBoard, onComplete)
+        runCatchingCancellable { deleteWallet.deleteWallet(walletId, onBoard, onComplete) }
+            .onFailure(::showError)
     }
 
-    private companion object {
-        const val TAG = "Wallet"
+    fun clearError() = errorState.update { null }
+
+    private fun showError(error: Throwable) {
+        errorState.value = error.errorText().text(context)
     }
 }

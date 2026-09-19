@@ -62,7 +62,7 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `a rename Core refuses is swallowed by the screen`() = runTest(dispatcher) {
+    fun `a rename Core refuses shows its error`() = runTest(dispatcher) {
         val service: GemWalletServiceInterface = mockk(relaxed = true) {
             coEvery { rename(any(), any()) } throws IllegalStateException("taken")
         }
@@ -71,7 +71,9 @@ class WalletViewModelTest {
 
         model.setWalletName("Savings").join()
 
-        coVerify { service.rename(walletId, "Savings") }
+        assertEquals("taken", model.error.value)
+        model.clearError()
+        assertNull(model.error.value)
     }
 
     @Test

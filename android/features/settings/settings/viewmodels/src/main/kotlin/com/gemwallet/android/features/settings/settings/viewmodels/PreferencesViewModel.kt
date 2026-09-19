@@ -32,6 +32,8 @@ import uniffi.gemstone.GemPerpetual
 import uniffi.gemstone.GemPreferencesInput
 import uniffi.gemstone.GemSettingsServiceInterface
 import uniffi.gemstone.PerpetualProvider
+import android.util.Log
+import com.gemwallet.android.ext.runCatchingCancellable
 
 @HiltViewModel
 class PreferencesViewModel @Inject constructor(
@@ -95,8 +97,9 @@ class PreferencesViewModel @Inject constructor(
             PerpetualSetting.TakeProfit -> defaults.copy(takeProfitPercent = value.toUByte())
             PerpetualSetting.StopLoss -> defaults.copy(stopLossPercent = value.toUByte())
         }
-        settingsService.setPerpetualDefaults(updated)
-        perpetualDefaults.value = updated
+        runCatchingCancellable { settingsService.setPerpetualDefaults(updated) }
+            .onSuccess { perpetualDefaults.value = updated }
+            .onFailure { Log.e(TAG, "saving the perpetual defaults failed", it) }
     }
 
     private fun optionLabel(setting: PerpetualSetting, value: Int): String =
@@ -111,3 +114,5 @@ class PreferencesViewModel @Inject constructor(
         else -> null
     }
 }
+
+private const val TAG = "Preferences"

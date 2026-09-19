@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import com.gemwallet.android.ext.runCatchingCancellable
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
@@ -120,7 +121,8 @@ class AppViewModel @Inject constructor(
         if (update.isRequired) {
             return@launch
         }
-        skipAppUpdate.skipAppUpdate(update.version)
+        runCatchingCancellable { skipAppUpdate.skipAppUpdate(update.version) }
+            .onFailure { Log.e(TAG, "skipping update ${update.version} failed", it) }
         state.update { it.copy(update = null) }
     }
 

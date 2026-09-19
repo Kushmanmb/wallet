@@ -40,6 +40,7 @@ import uniffi.gemstone.GemWalletImportKind
 import uniffi.gemstone.GemWalletImportResult
 import uniffi.gemstone.GemWalletImportSession
 import uniffi.gemstone.GemWalletServiceInterface
+import com.gemwallet.android.ext.runCatchingCancellable
 
 @HiltViewModel
 class ImportViewModel @Inject constructor(
@@ -94,14 +95,15 @@ class ImportViewModel @Inject constructor(
 
     fun importSelect(importType: ImportType) = viewModelScope.launch {
         session.update { it.onKindChanged(importType.kind) }
-        val defaultName = withContext(ioDispatcher) {
-            service.defaultWalletName(importType.chain?.string)
+        val defaultName = runCatchingCancellable {
+            withContext(ioDispatcher) { service.defaultWalletName(importType.chain?.string) }
         }
         val screen = service.importScreen(importType.chain?.string)
         state.update {
             it.copy(
                 importType = importType,
-                defaultWalletName = defaultName.text.string(context),
+                defaultWalletName = defaultName.getOrNull()?.text?.string(context) ?: it.defaultWalletName,
+                dataError = defaultName.exceptionOrNull() ?: it.dataError,
                 title = screen.title.string(context),
                 tabs = screen.kinds,
                 showsTabs = screen.showsKinds,

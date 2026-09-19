@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.util.Log
+import com.gemwallet.android.ext.runCatchingCancellable
 
 @HiltViewModel
 class InAppUpdateViewModel @Inject constructor(
@@ -89,7 +91,8 @@ class InAppUpdateViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            skipAppUpdate.skipAppUpdate(update.version)
+            runCatchingCancellable { skipAppUpdate.skipAppUpdate(update.version) }
+                .onFailure { Log.e(TAG, "skipping update ${update.version} failed", it) }
         }
     }
 
@@ -108,3 +111,5 @@ sealed interface DownloadState {
     object Error : DownloadState
     object Canceled : DownloadState
 }
+
+private const val TAG = "InAppUpdate"

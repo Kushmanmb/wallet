@@ -197,12 +197,14 @@ class AssetDetailsViewModel @Inject constructor(
 
     fun pin() = viewModelScope.launch(ioDispatcher) {
         val assetInfo = chainAssetInfo.value?.assetInfo ?: return@launch
-        assetDetailsService.setAssetPinned(assetInfo.id().toIdentifier(), !assetInfo.metadata.isPinned)
+        runCatchingCancellable { assetDetailsService.setAssetPinned(assetInfo.id().toIdentifier(), !assetInfo.metadata.isPinned) }
+            .onFailure { Log.e(TAG, "pinning ${assetInfo.id().toIdentifier()} failed", it) }
     }
 
     fun add() = viewModelScope.launch(ioDispatcher) {
         val assetInfo = chainAssetInfo.value?.assetInfo ?: return@launch
-        assetDetailsService.setAssetsEnabled(listOf(assetInfo.id().toIdentifier()), true)
+        runCatchingCancellable { assetDetailsService.setAssetsEnabled(listOf(assetInfo.id().toIdentifier()), true) }
+            .onFailure { Log.e(TAG, "enabling ${assetInfo.id().toIdentifier()} failed", it) }
     }
 
     fun togglePriceAlert(assetId: AssetId) = viewModelScope.launch(ioDispatcher) {

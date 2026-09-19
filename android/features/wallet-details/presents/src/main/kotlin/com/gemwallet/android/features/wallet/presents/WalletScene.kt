@@ -36,11 +36,13 @@ import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.defaultPadding
 import com.gemwallet.android.ui.theme.extraLargeIconSize
 import com.gemwallet.android.ui.theme.paddingDefault
+import androidx.compose.material3.SnackbarHostState
 
 @Composable
 internal fun WalletScene(
     wallet: WalletDetailsAggregate?,
     secret: WalletSecretUIModel?,
+    snackbar: SnackbarHostState? = null,
     onAction: (WalletAction) -> Unit,
 ) {
     wallet ?: return
@@ -51,6 +53,7 @@ internal fun WalletScene(
     }
     Scene(
         title = stringResource(id = R.string.common_wallet),
+        snackbar = snackbar,
         actions = {
             TextButton(
                 onClick = { onAction(WalletAction.Cancel) },

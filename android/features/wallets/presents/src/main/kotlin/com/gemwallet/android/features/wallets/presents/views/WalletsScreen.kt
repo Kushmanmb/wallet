@@ -22,6 +22,7 @@ import com.wallet.core.primitives.WalletId
 import uniffi.gemstone.GemWalletPlaceholder
 import uniffi.gemstone.GemWalletRow
 import uniffi.gemstone.GemWalletSubtitle
+import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 
 @Composable
 fun WalletsScreen(
@@ -34,6 +35,8 @@ fun WalletsScreen(
 ) {
     val viewModel: WalletsViewModel = hiltViewModel()
     val wallets by viewModel.wallets.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
+    val snackbar = rememberSnackbarState(message = error, iconRes = R.drawable.ic_error, onShown = viewModel::clearError)
     val walletSections = remember(wallets) {
         wallets.toWalletSections()
     }
@@ -43,15 +46,13 @@ fun WalletsScreen(
     WalletsScene(
         pinnedWallets = walletSections.pinnedWallets,
         unpinnedWallets = walletSections.unpinnedWallets,
+        snackbar = snackbar,
         onAction = { action ->
             when (action) {
                 WalletsAction.Create -> onCreateWallet()
                 WalletsAction.Import -> onImportWallet()
                 is WalletsAction.Edit -> onEditWallet(action.walletId)
-                is WalletsAction.Select -> {
-                    viewModel.selectWallet(action.walletId)
-                    onSelectWallet()
-                }
+                is WalletsAction.Select -> viewModel.selectWallet(action.walletId, onSelectWallet)
                 is WalletsAction.Delete -> deleteWalletId = action.walletId
                 is WalletsAction.TogglePin -> viewModel.togglePin(action.walletId)
                 WalletsAction.Cancel -> onCancel()

@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.gemwallet.android.ext.runCatchingCancellable
 
 @HiltViewModel
 class AddNodeViewModel @Inject constructor(
@@ -58,17 +59,18 @@ class AddNodeViewModel @Inject constructor(
         }
     }
 
-    fun addUrl() {
+    fun addUrl(onAdded: () -> Unit) {
         val current = session.value ?: return
         val status = current.viewState().canImport.takeIf { it }?.let { (current.check) } ?: return
         viewModelScope.launch {
-            if (runCatching { withContext(ioDispatcher) { service.addNode(current.chain, status.url) } }.isFailure) {
+            if (runCatchingCancellable { withContext(ioDispatcher) { service.addNode(current.chain, status.url) } }.isFailure) {
                 session.value = current.onFailed(GemAddNodeFailure.UNAVAILABLE)
                 return@launch
             }
             url.value = ""
             checkUrlJob?.cancel()
             session.value = current.onImported()
+            onAdded()
         }
     }
 
