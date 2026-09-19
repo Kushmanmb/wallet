@@ -1,6 +1,7 @@
 package com.gemwallet.android.features.settings.networks.viewmodels
 
 import android.content.Context
+import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemTagType
 import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import io.mockk.coEvery
@@ -53,6 +54,15 @@ class ServiceStatusViewModelTest {
 
         assertEquals(listOf("api", "node"), viewModel.uiState.value.rows.map { it.id })
         assertEquals(listOf(ListItemTagType.Progress, ListItemTagType.Progress), viewModel.uiState.value.rows.map { it.model.titleTagType })
+    }
+
+    @Test
+    fun `rows are titled by the localized endpoint name`() = runTest(dispatcher) {
+        every { context.getString(R.string.nodes_gem_wallet_node) } returns "Gem Wallet Node"
+
+        val viewModel = ServiceStatusViewModel(service(emptyMap()), context)
+
+        assertEquals(listOf("API 🇺🇸", "Gem Wallet Node 🇯🇵"), viewModel.uiState.value.rows.map { it.model.title })
     }
 
     @Test

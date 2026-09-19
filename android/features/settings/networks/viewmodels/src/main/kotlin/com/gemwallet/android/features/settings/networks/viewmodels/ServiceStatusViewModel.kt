@@ -72,7 +72,7 @@ private fun GemServiceEndpoint.toRow(statusState: GemLatencyStatus, context: Con
     return ServiceStatusRowUiModel(
         id = url,
         model = ListItemModel(
-            title = title(name = endpointType.name),
+            title = title(name = endpointType.string(context)),
             titleTag = latency.text,
             titleTagStyle = latency.tone.textStyle(),
             titleTagType = latency.tagType,
