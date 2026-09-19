@@ -19,7 +19,6 @@ import PrimitivesComponents
 import Store
 import Style
 import SwiftUI
-import enum Gemstone.GemCollectibleRow
 
 @Observable
 @MainActor
@@ -114,43 +113,6 @@ public final class CollectibleViewModel {
         ]
     }
 
-    func networkImage(chain: Chain) -> AssetImage {
-        AssetImage(
-            imageURL: .none,
-            placeholder: ChainImage(chain: chain).image,
-            chainPlaceholder: .none,
-        )
-    }
-
-    func infoRows(_ rows: [GemCollectibleRow]) -> [CollectibleInfoRowModel] {
-        rows.map(infoRow)
-    }
-
-    private func infoRow(_ row: GemCollectibleRow) -> CollectibleInfoRowModel {
-        switch row {
-        case let .collection(name):
-            return CollectibleInfoRowModel(title: row.title, subtitle: name)
-        case let .network(chain):
-            let chain = Primitives.Chain(core: chain)
-            return CollectibleInfoRowModel(title: row.title, subtitle: chain.networkName, assetImage: networkImage(chain: chain))
-        case let .contract(identifier):
-            return CollectibleInfoRowModel(
-                title: row.title,
-                subtitle: identifier.text,
-                copyValue: .address(value: identifier.value, chain: assetData.asset.chain),
-                explorer: identifier.explorer.map { $0.toPrimitives() },
-            )
-        case let .tokenId(identifier):
-            return CollectibleInfoRowModel(
-                title: row.title,
-                subtitle: identifier.text,
-                copyValue: .plain(identifier.value),
-                explorer: identifier.explorer.map { $0.toPrimitives() },
-            )
-        }
-    }
-
-
     func attributeListItem(_ attribute: GemCollectibleAttribute) -> ListItemModel {
         ListItemModel(title: attribute.name, subtitle: attributeText(attribute.value))
     }
@@ -166,10 +128,6 @@ public final class CollectibleViewModel {
 // MARK: - Business Logic
 
 extension CollectibleViewModel {
-    func onSelectCopyValue(_ value: String) {
-        isPresentingToast = .copied(value)
-    }
-
     func onSelectHeaderButton(type: GemHeaderButtonKind) {
         guard let account = try? wallet.account(for: assetData.asset.chain) else {
             return
@@ -277,26 +235,4 @@ extension CollectibleViewModel {
         let saver = ImageGalleryService()
         try await saver.saveImageFromURL(url)
     }
-}
-
-public struct CollectibleInfoRowModel: Identifiable {
-    public let title: String
-    public let subtitle: String
-
-    public var listItem: ListItemModel {
-        ListItemModel(title: title, subtitle: subtitle)
-    }
-    public let assetImage: AssetImage?
-    public let copyValue: CopyValue?
-    public let explorer: BlockExplorerLink?
-
-    init(title: String, subtitle: String, assetImage: AssetImage? = nil, copyValue: CopyValue? = nil, explorer: BlockExplorerLink? = nil) {
-        self.title = title
-        self.subtitle = subtitle
-        self.assetImage = assetImage
-        self.copyValue = copyValue
-        self.explorer = explorer
-    }
-
-    public var id: String { "\(title)-\(subtitle)" }
 }

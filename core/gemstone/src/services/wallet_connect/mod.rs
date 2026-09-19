@@ -26,7 +26,7 @@ use crate::wallet_connect::{WalletConnect, WalletConnectAction, WalletConnectCha
 
 pub use error::GemWalletConnectError;
 pub use model::{
-    GemConnection, GemConnectionDetailRow, GemConnectionDetails, GemConnectionSection, GemSessionApproval, GemSessionProposal, GemWalletConnectAuthAccount,
+    GemConnection, GemConnectionDetails, GemConnectionSection, GemSessionApproval, GemSessionProposal, GemWalletConnectAuthAccount,
     GemWalletConnectFailure, GemWalletConnectMessageRequest, GemWalletConnectOutcome, GemWalletConnectRejection, GemWalletConnectRejectionReason, GemWalletConnectResponse,
     GemWalletConnectRpcError, GemWalletConnectSessionRequest, GemWalletConnectTransactionAction, GemWalletConnectTransactionRequest,
 };
@@ -166,9 +166,7 @@ impl GemWalletConnectService {
 
     pub fn connection_details(&self, connection: WalletConnection) -> GemConnectionDetails {
         GemConnectionDetails {
-            rows: vec![GemConnectionDetailRow::Wallet, GemConnectionDetailRow::Date],
-            wallet: connection.wallet.name.clone(),
-            date: connection.session.created_at,
+            rows: rules::connection_detail_rows(&connection),
             connection: self.gem_connection(connection),
         }
     }

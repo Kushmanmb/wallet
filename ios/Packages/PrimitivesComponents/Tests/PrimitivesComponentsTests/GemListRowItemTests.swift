@@ -137,11 +137,11 @@ struct GemListRowItemTests {
     }
 
     @Test
-    func aContractOpensTheExplorerOnlyWhenCoreGivesALink() {
+    func anIdentifierOpensTheExplorerOnlyWhenCoreGivesALink() {
         let copy = addressCopy(chain: Chain.ethereum.rawValue, address: "0xdAC17F958D2ee523a2206206994597C13D831ec7")
         let link = BlockExplorerLink(name: "Etherscan", link: "https://etherscan.io/token/0xdAC17F958D2ee523a2206206994597C13D831ec7")
-        guard case let .explorerPage(model, context) = GemListRow.contract(copy: copy, explorer: link.toGem()).item(onInfo: nil),
-              case let .memo(plain, copyValue) = GemListRow.contract(copy: copy, explorer: nil).item(onInfo: nil)
+        guard case let .explorerPage(model, context) = GemListRow.identifier(title: .contract, copy: copy, explorer: link.toGem()).item(onInfo: nil),
+              case let .memo(plain, copyValue) = GemListRow.identifier(title: .tokenId, copy: copy, explorer: nil).item(onInfo: nil)
         else {
             Issue.record("Expected an explorer page and a copyable row")
             return
@@ -149,6 +149,7 @@ struct GemListRowItemTests {
         #expect(model.title == Localized.Asset.contract)
         #expect(model.subtitle == copy.display)
         #expect(context.explorerLink == link)
+        #expect(plain.title == Localized.Asset.tokenId)
         #expect(plain.subtitle == copy.display)
         #expect(copyValue == copy.value)
     }

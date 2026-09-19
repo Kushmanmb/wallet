@@ -100,6 +100,10 @@ pub enum GemListRowTitle {
     MaxSupply,
     AllTimeHigh,
     AllTimeLow,
+    Wallet,
+    Contract,
+    TokenId,
+    Collection,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -260,7 +264,8 @@ pub enum GemListRow {
         name: String,
         url: String,
     },
-    Contract {
+    Identifier {
+        title: GemListRowTitle,
         copy: GemCopy,
         explorer: Option<BlockExplorerLink>,
     },

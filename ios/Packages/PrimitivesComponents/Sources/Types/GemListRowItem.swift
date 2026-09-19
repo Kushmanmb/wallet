@@ -124,8 +124,8 @@ extension GemListRow {
                     infoAction: infoAction(info, onInfo: onInfo),
                 ),
             )
-        case let .contract(copy, explorer):
-            contractItem(copy: copy, explorer: explorer?.toPrimitives())
+        case let .identifier(title, copy, explorer):
+            identifierItem(title: title, copy: copy, explorer: explorer?.toPrimitives())
         case let .explorer(name, url):
             .page(ListItemModel(title: Localized.Transaction.viewOn(name)), url: URL(string: url) ?? BlockExplorerLink(name: name, link: url).url)
         case let .icon(chain):
@@ -159,8 +159,8 @@ extension GemListRow {
         ListItemModel(title: title.text, subtitle: value, imageStyle: icon.imageStyle)
     }
 
-    private func contractItem(copy: GemCopy, explorer: BlockExplorerLink?) -> GemListRowItem {
-        let model = ListItemModel(title: Localized.Asset.contract, subtitle: copy.display)
+    private func identifierItem(title: GemListRowTitle, copy: GemCopy, explorer: BlockExplorerLink?) -> GemListRowItem {
+        let model = ListItemModel(title: title.text, subtitle: copy.display)
         guard let explorer else { return .memo(model, copy: copy.value) }
         return .explorerPage(model, context: ExplorerContextData(copyValue: copy.copyValue, explorerLink: explorer))
     }

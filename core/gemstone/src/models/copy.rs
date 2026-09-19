@@ -5,6 +5,7 @@ use crate::address_formatter::{GemAddressFormatStyle, format_address};
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
 pub enum GemCopyKind {
     Address { chain: Chain },
+    Plain,
     SecretPhrase,
     PrivateKey,
 }
@@ -13,7 +14,7 @@ pub enum GemCopyKind {
 impl GemCopyKind {
     pub fn is_sensitive(&self) -> bool {
         match self {
-            Self::Address { .. } => false,
+            Self::Address { .. } | Self::Plain => false,
             Self::SecretPhrase | Self::PrivateKey => true,
         }
     }

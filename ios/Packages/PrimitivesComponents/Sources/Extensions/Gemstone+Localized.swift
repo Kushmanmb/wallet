@@ -690,6 +690,10 @@ public extension GemListRowTitle {
         case .maxSupply: Localized.Info.MaxSupply.title
         case .allTimeHigh: Localized.Asset.allTimeHigh
         case .allTimeLow: Localized.Asset.allTimeLow
+        case .wallet: Localized.Common.wallet
+        case .contract: Localized.Asset.contract
+        case .tokenId: Localized.Asset.tokenId
+        case .collection: Localized.Nft.collection
         }
     }
 }
@@ -697,6 +701,7 @@ public extension GemListRowTitle {
 extension GemCopyKind {
     func copiedMessage(display: String) -> String {
         switch self {
+        case .plain: Localized.Common.copied(display)
         case .secretPhrase: Localized.Common.copied(Localized.Common.secretPhrase)
         case .privateKey: Localized.Common.copied(Localized.Common.privateKey)
         case let .address(chain): Localized.Common.copied(String(format: "%@ (%@) ", Chain(core: chain).asset.name, display))

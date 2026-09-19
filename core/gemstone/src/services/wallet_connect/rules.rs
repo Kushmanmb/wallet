@@ -13,6 +13,7 @@ use primitives::{
     WalletConnectionState, WalletId, WalletType,
 };
 
+use crate::models::list::{GemListRow, GemListRowTitle};
 use crate::services::error::GemServiceError;
 use crate::services::transfer::{GemRecipient, GemTransferData};
 use crate::services::wallet_connect::model::{
@@ -45,6 +46,19 @@ pub fn connection_groups(connections: Vec<WalletConnection>) -> Vec<(Wallet, Vec
         grouped.sort_by_key(|connection| std::cmp::Reverse(connection.session.created_at));
     }
     groups
+}
+
+pub fn connection_detail_rows(connection: &WalletConnection) -> Vec<GemListRow> {
+    vec![
+        GemListRow::Text {
+            title: GemListRowTitle::Wallet,
+            value: connection.wallet.name.clone(),
+        },
+        GemListRow::Date {
+            title: GemListRowTitle::Date,
+            date: connection.session.created_at,
+        },
+    ]
 }
 
 pub fn session_account(connection: &WalletConnection, chain: Chain) -> Result<Account, GemServiceError> {
@@ -489,6 +503,19 @@ mod tests {
             wallet: Wallet::mock_with_chains(&[Chain::Ethereum]),
         };
 
+        assert_eq!(
+            connection_detail_rows(&connection),
+            vec![
+                GemListRow::Text {
+                    title: GemListRowTitle::Wallet,
+                    value: connection.wallet.name.clone(),
+                },
+                GemListRow::Date {
+                    title: GemListRowTitle::Date,
+                    date: connection.session.created_at,
+                },
+            ]
+        );
         assert_eq!(session_account(&connection, Chain::Ethereum).unwrap().chain, Chain::Ethereum);
         assert!(session_account(&connection, Chain::Solana).is_err());
         assert!(session_account(&connection, Chain::Bitcoin).is_err());

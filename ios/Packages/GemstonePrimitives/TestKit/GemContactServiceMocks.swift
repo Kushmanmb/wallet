@@ -54,7 +54,7 @@ public final class GemManageContactServiceMock: GemManageContactServiceProtocol,
 public final class GemWalletConnectServiceMock: GemWalletConnectServiceProtocol, @unchecked Sendable {
     public var connectionSectionsValue: [GemConnectionSection] = []
     public var connectionRowValue = GemConnectionRow(title: "", host: nil, initial: nil, iconUrl: nil)
-    public var connectionDetailRows: [GemConnectionDetailRow] = []
+    public var connectionDetailRows: [GemListRow] = []
     public var originRejected = false
     public var hasSessionsValue = false
     public var signatureResult: Result<String, Error> = .success("0x")
@@ -89,8 +89,6 @@ public final class GemWalletConnectServiceMock: GemWalletConnectServiceProtocol,
         GemConnectionDetails(
             connection: GemConnection(connection: connection, row: connectionRowValue),
             rows: connectionDetailRows,
-            wallet: "",
-            date: Date(timeIntervalSince1970: 0),
         )
     }
 

@@ -39,12 +39,12 @@ struct ConnectionsViewModelTests {
     @Test
     func theDetailsSceneReadsCore() {
         let service = GemWalletConnectServiceMock()
-        service.connectionDetailRows = [.wallet, .date]
+        service.connectionDetailRows = [.text(title: .wallet, value: "Main Wallet")]
         let model = ConnectionsViewModel.mock(service: service)
 
         let details = model.connectionSceneModel(connection: .mock())
 
-        #expect(details.details.rows == [.wallet, .date])
+        #expect(details.details.rows == [.text(title: .wallet, value: "Main Wallet")])
     }
 
     @Test

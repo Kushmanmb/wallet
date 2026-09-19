@@ -1,5 +1,5 @@
 use crate::application::GemConnectionRow;
-use crate::models::custom_types::DateTimeUtc;
+use crate::models::list::GemListRow;
 use crate::services::transfer::GemTransferData;
 use primitives::{Account, Asset, Chain, SimulationResult, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionVerificationStatus};
 
@@ -164,18 +164,10 @@ pub struct GemConnectionSection {
     pub connections: Vec<GemConnection>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemConnectionDetailRow {
-    Wallet,
-    Date,
-}
-
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct GemConnectionDetails {
     pub connection: GemConnection,
-    pub rows: Vec<GemConnectionDetailRow>,
-    pub wallet: String,
-    pub date: DateTimeUtc,
+    pub rows: Vec<GemListRow>,
 }
 
 #[cfg(test)]

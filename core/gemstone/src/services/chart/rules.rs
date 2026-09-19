@@ -113,7 +113,8 @@ fn market_section(market: &AssetMarket, currency: Currency) -> Vec<GemListRow> {
 
 fn contract_row(asset: &Asset, explorer: Option<BlockExplorerLink>) -> Option<GemListRow> {
     let token_id = asset.id.token_id.clone()?;
-    Some(GemListRow::Contract {
+    Some(GemListRow::Identifier {
+        title: GemListRowTitle::Contract,
         copy: address_copy(asset.chain(), token_id),
         explorer,
     })
@@ -465,7 +466,8 @@ mod tests {
     }
 
     fn contract(token: &Asset, explorer: Option<BlockExplorerLink>) -> GemListRow {
-        GemListRow::Contract {
+        GemListRow::Identifier {
+            title: GemListRowTitle::Contract,
             copy: address_copy(token.chain(), token.id.token_id.clone().unwrap()),
             explorer,
         }

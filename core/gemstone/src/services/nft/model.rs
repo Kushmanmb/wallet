@@ -1,7 +1,8 @@
 use chrono::{DateTime, Utc};
-use primitives::{BlockExplorerLink, Chain, NFTAssetData, NFTData, VerificationStatus};
+use primitives::{NFTAssetData, NFTData, VerificationStatus};
 
 use crate::config::social::GemSocialLink;
+use crate::models::list::GemListRow;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemNftList {
@@ -45,24 +46,9 @@ pub struct GemCollectibleDetails {
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemCollectibleSection {
     Status { status: VerificationStatus },
-    Info { rows: Vec<GemCollectibleRow> },
+    Info { rows: Vec<GemListRow> },
     Attributes { attributes: Vec<GemCollectibleAttribute> },
     Links { links: Vec<GemSocialLink> },
-}
-
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
-pub enum GemCollectibleRow {
-    Collection { name: String },
-    Network { chain: Chain },
-    Contract { identifier: GemCollectibleIdentifier },
-    TokenId { identifier: GemCollectibleIdentifier },
-}
-
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
-pub struct GemCollectibleIdentifier {
-    pub value: String,
-    pub text: String,
-    pub explorer: Option<BlockExplorerLink>,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]

@@ -11,7 +11,7 @@ public extension GemCopy {
     var copyValue: CopyValue {
         switch kind {
         case let .address(chain): .address(value: value, chain: Chain(core: chain))
-        case .secretPhrase, .privateKey: .plain(value)
+        case .plain, .secretPhrase, .privateKey: .plain(value)
         }
     }
 }

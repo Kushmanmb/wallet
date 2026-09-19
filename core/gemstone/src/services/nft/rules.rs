@@ -1,11 +1,14 @@
 use chrono::{DateTime, Utc};
-use primitives::{AddressFormatStyle, BlockExplorerLink, Chain, NFTAssetData, NFTAttribute, NFTAttributeType, NFTData, VerificationStatus, WalletType};
+use primitives::{AddressFormatStyle, Asset, BlockExplorerLink, Chain, NFTAssetData, NFTAttribute, NFTAttributeType, NFTData, VerificationStatus, WalletType};
 
 use super::model::{
-    GemCollectibleAttribute, GemCollectibleAttributeValue, GemCollectibleDetails, GemCollectibleIdentifier, GemCollectibleRow, GemCollectibleSection, GemNftItem, GemNftList,
+    GemCollectibleAttribute, GemCollectibleAttributeValue, GemCollectibleDetails, GemCollectibleSection, GemNftItem, GemNftList,
     GemNftRow, GemNftUnverifiedRow,
 };
 use crate::address_formatter::format_address;
+use crate::models::copy::{GemCopy, GemCopyKind, address_copy};
+use crate::models::list::{GemListRow, GemListRowTitle};
+use crate::services::assets::rules::asset_text;
 use crate::config::chain::supports_nft_transfer;
 use crate::config::social::social_links;
 
@@ -145,16 +148,14 @@ pub fn collectible_details(
     }
 }
 
-fn info_rows(data: &NFTAssetData, contract_explorer: Option<BlockExplorerLink>, token_explorer: Option<BlockExplorerLink>) -> Vec<GemCollectibleRow> {
+fn info_rows(data: &NFTAssetData, contract_explorer: Option<BlockExplorerLink>, token_explorer: Option<BlockExplorerLink>) -> Vec<GemListRow> {
     let chain = data.asset.chain;
     let token_id = &data.asset.token_id;
     let contract = &data.collection.contract_address;
-    let contract_row = (!contract.is_empty() && contract != token_id).then(|| GemCollectibleRow::Contract {
-        identifier: GemCollectibleIdentifier {
-            value: contract.clone(),
-            text: format_address(contract, Some(chain), AddressFormatStyle::Short),
-            explorer: contract_explorer,
-        },
+    let contract_row = (!contract.is_empty() && contract != token_id).then(|| GemListRow::Identifier {
+        title: GemListRowTitle::Contract,
+        copy: address_copy(chain, contract.clone()),
+        explorer: contract_explorer,
     });
     let token_text = if token_id.chars().count() > TOKEN_ID_ADDRESS_LENGTH {
         format_address(token_id, Some(chain), AddressFormatStyle::Short)
@@ -162,17 +163,24 @@ fn info_rows(data: &NFTAssetData, contract_explorer: Option<BlockExplorerLink>, 
         format!("#{token_id}")
     };
     [
-        Some(GemCollectibleRow::Collection {
-            name: data.collection.name.clone(),
+        Some(GemListRow::Text {
+            title: GemListRowTitle::Collection,
+            value: data.collection.name.clone(),
         }),
-        Some(GemCollectibleRow::Network { chain }),
+        Some(GemListRow::Network {
+            title: GemListRowTitle::Network,
+            chain,
+            name: asset_text(&Asset::from_chain(chain)).network_name,
+        }),
         contract_row,
-        Some(GemCollectibleRow::TokenId {
-            identifier: GemCollectibleIdentifier {
+        Some(GemListRow::Identifier {
+            title: GemListRowTitle::TokenId,
+            copy: GemCopy {
+                kind: GemCopyKind::Plain,
                 value: token_id.clone(),
-                text: token_text,
-                explorer: token_explorer,
+                display: token_text,
             },
+            explorer: token_explorer,
         }),
     ]
     .into_iter()
@@ -346,23 +354,32 @@ mod tests {
         assert_eq!(
             rows,
             vec![
-                GemCollectibleRow::Collection {
-                    name: data.collection.name.clone()
+                GemListRow::Text {
+                    title: GemListRowTitle::Collection,
+                    value: data.collection.name.clone()
                 },
-                GemCollectibleRow::Network { chain: Chain::Ethereum },
-                GemCollectibleRow::Contract {
-                    identifier: GemCollectibleIdentifier {
+                GemListRow::Network {
+                    title: GemListRowTitle::Network,
+                    chain: Chain::Ethereum,
+                    name: "Ethereum".to_string()
+                },
+                GemListRow::Identifier {
+                    title: GemListRowTitle::Contract,
+                    copy: GemCopy {
+                        kind: GemCopyKind::Address { chain: Chain::Ethereum },
                         value: data.collection.contract_address.clone(),
-                        text: "0xdAC17...31ec7".to_string(),
-                        explorer: Some(link.clone()),
-                    }
+                        display: "0xdAC17...31ec7".to_string(),
+                    },
+                    explorer: Some(link.clone()),
                 },
-                GemCollectibleRow::TokenId {
-                    identifier: GemCollectibleIdentifier {
+                GemListRow::Identifier {
+                    title: GemListRowTitle::TokenId,
+                    copy: GemCopy {
+                        kind: GemCopyKind::Plain,
                         value: "1".to_string(),
-                        text: "#1".to_string(),
-                        explorer: Some(link),
-                    }
+                        display: "#1".to_string(),
+                    },
+                    explorer: Some(link),
                 },
             ]
         );
@@ -383,7 +400,11 @@ mod tests {
     #[test]
     fn test_collectible_token_id_reads_as_a_number_unless_it_is_address_sized() {
         let token_text = |data: NFTAssetData| match info_rows(&data, None, None).pop() {
-            Some(GemCollectibleRow::TokenId { identifier }) => identifier.text,
+            Some(GemListRow::Identifier {
+                title: GemListRowTitle::TokenId,
+                copy,
+                ..
+            }) => copy.display,
             row => panic!("expected a token id row, got {row:?}"),
         };
 
@@ -446,13 +467,17 @@ mod tests {
             .collect()
     }
 
-    fn row_names(rows: &[GemCollectibleRow]) -> Vec<&'static str> {
+    fn row_names(rows: &[GemListRow]) -> Vec<&'static str> {
         rows.iter()
             .map(|row| match row {
-                GemCollectibleRow::Collection { .. } => "collection",
-                GemCollectibleRow::Network { .. } => "network",
-                GemCollectibleRow::Contract { .. } => "contract",
-                GemCollectibleRow::TokenId { .. } => "token_id",
+                GemListRow::Text { .. } => "collection",
+                GemListRow::Network { .. } => "network",
+                GemListRow::Identifier {
+                    title: GemListRowTitle::Contract,
+                    ..
+                } => "contract",
+                GemListRow::Identifier { .. } => "token_id",
+                _ => "other",
             })
             .collect()
     }
