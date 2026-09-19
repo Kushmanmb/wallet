@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemNftList
 import uniffi.gemstone.GemNftServiceInterface
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 @HiltViewModel
 class NftListViewModels @Inject constructor(
@@ -37,6 +39,7 @@ class NftListViewModels @Inject constructor(
     getSession: GetSession,
     savedStateHandle: SavedStateHandle,
     @param:ApplicationContext private val context: Context,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     val list: GemNftList = savedStateHandle.nftList()
@@ -76,13 +79,13 @@ class NftListViewModels @Inject constructor(
         val current = walletId.value ?: return
         if (current == lastSyncedWalletId) return
         lastSyncedWalletId = current
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             sync()
         }
     }
 
     fun refresh() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             _isRefreshing.update { true }
             try {
                 sync()

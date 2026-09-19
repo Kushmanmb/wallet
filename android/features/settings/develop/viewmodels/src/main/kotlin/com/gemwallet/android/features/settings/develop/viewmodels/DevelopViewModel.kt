@@ -9,7 +9,6 @@ import com.gemwallet.android.model.NotificationsAvailable
 import com.gemwallet.android.serializer.decodeJson
 import com.wallet.core.primitives.PlatformStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -17,12 +16,15 @@ import javax.inject.Inject
 import uniffi.gemstone.GemDeveloperServiceInterface
 import android.util.Log
 import com.gemwallet.android.ext.runCatchingCancellable
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 @HiltViewModel
 class DevelopViewModel @Inject constructor(
     private val service: GemDeveloperServiceInterface,
     private val getSession: GetSession,
     val notificationsAvailable: NotificationsAvailable,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val _deviceId = MutableStateFlow("")
@@ -33,7 +35,7 @@ class DevelopViewModel @Inject constructor(
     val platformStore = _platformStore.asStateFlow()
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             runCatchingCancellable {
                 _deviceId.value = service.deviceId()
                 _platformStore.value = service.platformStore().toPrimitives()
@@ -72,7 +74,7 @@ class DevelopViewModel @Inject constructor(
     }
 
     private fun launchAction(action: suspend () -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             runCatchingCancellable { action() }.onFailure { Log.e(TAG, "developer action failed", it) }
         }
     }

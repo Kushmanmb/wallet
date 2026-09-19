@@ -30,7 +30,6 @@ import com.gemwallet.android.ui.localization.string
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.UUID
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -45,6 +44,8 @@ import uniffi.gemstone.GemContactAvatarChoice
 import uniffi.gemstone.GemContactSession
 import uniffi.gemstone.GemManageContactServiceInterface
 import uniffi.gemstone.GemNameServiceInterface
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 @HiltViewModel
 class ManageContactViewModel @Inject constructor(
@@ -54,6 +55,7 @@ class ManageContactViewModel @Inject constructor(
     nameService: GemNameServiceInterface,
     savedStateHandle: SavedStateHandle,
     private val addressService: GemAddressService,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private sealed interface Mode {
@@ -126,7 +128,7 @@ class ManageContactViewModel @Inject constructor(
 
     init {
         when (val mode = mode) {
-            is Mode.Edit -> viewModelScope.launch(Dispatchers.IO) {
+            is Mode.Edit -> viewModelScope.launch(ioDispatcher) {
                 val data = getContacts.getContact(mode.contactId) ?: return@launch
                 updateSession {
                     it.copy(
@@ -249,7 +251,7 @@ class ManageContactViewModel @Inject constructor(
         if (!current.session.canSave()) return
         updateSession { it.onSaving(true) }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             val input = current.session.input(
                 when (val avatar = current.session.avatar) {
                     GemContactAvatarChoice.Empty -> GemContactAvatar.Empty

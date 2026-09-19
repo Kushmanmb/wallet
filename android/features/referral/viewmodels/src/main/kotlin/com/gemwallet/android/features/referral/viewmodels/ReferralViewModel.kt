@@ -37,6 +37,8 @@ import uniffi.gemstone.GemRewardsRedemption
 import uniffi.gemstone.GemRewardsServiceInterface
 import uniffi.gemstone.Rewards
 import uniffi.gemstone.walletRows
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -46,6 +48,7 @@ class ReferralViewModel @Inject constructor(
     private val service: GemRewardsServiceInterface,
     private val savedStateHandle: SavedStateHandle,
     @param:ApplicationContext private val context: Context,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     val referralCode = savedStateHandle.getStateFlow<String?>(RouteArgument.Code.key, null)
@@ -99,7 +102,7 @@ class ReferralViewModel @Inject constructor(
         sync(referralWallet.value ?: return, SyncType.Refresh)
     }
 
-    private fun sync(wallet: Wallet, type: SyncType) = viewModelScope.launch(Dispatchers.IO) {
+    private fun sync(wallet: Wallet, type: SyncType) = viewModelScope.launch(ioDispatcher) {
         inSync.update { type }
         val rewards = try {
             runCatchingCancellable { service.getRewards(wallet.id.id) }.getOrNull()
@@ -109,7 +112,7 @@ class ReferralViewModel @Inject constructor(
         this@ReferralViewModel.rewards.update { rewards }
     }
 
-    fun createReferral(username: String, callback: (Exception?) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
+    fun createReferral(username: String, callback: (Exception?) -> Unit) = viewModelScope.launch(ioDispatcher) {
         val rewards = try {
             val wallet = currentWallet.value ?: return@launch
             val response = service.createReferral(wallet.toGem(), username)
@@ -126,7 +129,7 @@ class ReferralViewModel @Inject constructor(
         this@ReferralViewModel.rewards.update { rewards }
     }
 
-    fun useCode(code: String, callback: (Exception?) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
+    fun useCode(code: String, callback: (Exception?) -> Unit) = viewModelScope.launch(ioDispatcher) {
         try {
             val wallet = currentWallet.value ?: return@launch
             service.useReferralCode(wallet.toGem(), code)
@@ -142,7 +145,7 @@ class ReferralViewModel @Inject constructor(
 
     fun redeem(redemption: GemRewardsRedemption, callback: (Throwable?) -> Unit) {
         val wallet = currentWallet.value ?: return
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             try {
                 if (!redemption.canRedeem) throw ReferralError.InsufficientPoints
                 service.redeem(wallet.toGem(), redemption.option.id)

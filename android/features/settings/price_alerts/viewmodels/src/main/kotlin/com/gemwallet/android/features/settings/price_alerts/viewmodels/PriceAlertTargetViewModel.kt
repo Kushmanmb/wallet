@@ -30,7 +30,6 @@ import com.wallet.core.primitives.PriceAlertNotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.BigDecimal
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,6 +47,8 @@ import uniffi.gemstone.GemPriceAlertViewState
 import uniffi.gemstone.GemValueTone
 import uniffi.gemstone.PriceAlertFormatter
 import com.gemwallet.android.math.parseInputNumberOrNull
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 @HiltViewModel
 class PriceAlertTargetViewModel @Inject constructor(
@@ -55,6 +56,7 @@ class PriceAlertTargetViewModel @Inject constructor(
     private val service: GemPriceAlertServiceInterface,
     private val priceAlertFormatter: PriceAlertFormatter,
     savedStateHandle: SavedStateHandle,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
 
@@ -141,7 +143,7 @@ class PriceAlertTargetViewModel @Inject constructor(
         val priceAlert = session.value.alert() ?: return
         isSaving.value = true
         viewModelScope.launch {
-            runCatchingCancellable { withContext(Dispatchers.IO) { service.enablePriceAlert(priceAlert) } }
+            runCatchingCancellable { withContext(ioDispatcher) { service.enablePriceAlert(priceAlert) } }
                 .onSuccess { onSaved(PriceAlertConfirmResult(type, direction, type.formatAmount(inputValue, currency))) }
                 .onFailure { errorState.value = it.errorText() }
             isSaving.value = false

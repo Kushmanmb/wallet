@@ -40,7 +40,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,6 +66,8 @@ import uniffi.gemstone.GemRecipientType
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import uniffi.gemstone.GemRecipientSession
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -80,6 +81,7 @@ class RecipientViewModel @Inject constructor(
     private val service: GemRecipientServiceInterface,
     nameService: GemNameServiceInterface,
     @param:ApplicationContext private val context: Context,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val addressInput = AddressInputModel(nameService, viewModelScope)
@@ -101,7 +103,7 @@ class RecipientViewModel @Inject constructor(
     private val assetId = savedStateHandle.requireAssetId(RouteArgument.AssetId)
     private val nftAssetId = savedStateHandle.optionalNftAssetId(RouteArgument.NftAssetId)
 
-    private val nftAsset: Deferred<NFTAsset?> = viewModelScope.async(Dispatchers.IO, CoroutineStart.LAZY) {
+    private val nftAsset: Deferred<NFTAsset?> = viewModelScope.async(ioDispatcher, CoroutineStart.LAZY) {
         val id = nftAssetId ?: return@async null
         runCatching {
             getAssetNft.getAssetNft(id).first().assets.firstOrNull()
@@ -118,11 +120,11 @@ class RecipientViewModel @Inject constructor(
             }
             type?.let { RecipientState.Ready(assetInfo.asset, it) } ?: RecipientState.Loading
         }
-        .flowOn(Dispatchers.IO)
+        .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, RecipientState.Loading)
 
     private val wallets = combine(session, getWallets()) { _, wallets -> wallets.map { it.toGem() } }
-        .flowOn(Dispatchers.IO)
+        .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val contacts: StateFlow<List<ContactRecipient>> = state
@@ -141,7 +143,7 @@ class RecipientViewModel @Inject constructor(
                 .mapIndexed { index, section -> section.uiSection(index.toString(), context) }
         }
     }
-        .flowOn(Dispatchers.IO)
+        .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
 

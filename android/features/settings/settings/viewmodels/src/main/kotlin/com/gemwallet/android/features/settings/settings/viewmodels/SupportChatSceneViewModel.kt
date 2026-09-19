@@ -16,7 +16,6 @@ import com.wallet.core.primitives.SupportMessageSender
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemSupportServiceInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -28,6 +27,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import com.gemwallet.android.ext.errorText
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 @HiltViewModel
 class SupportChatSceneViewModel @Inject constructor(
@@ -37,6 +38,7 @@ class SupportChatSceneViewModel @Inject constructor(
     private val getSupportTyping: GetSupportTyping,
     private val clearSupportTyping: ClearSupportTyping,
     private val imageAttachmentFactory: SupportImageAttachmentFactory,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val messages = getSupportMessages()
@@ -57,7 +59,7 @@ class SupportChatSceneViewModel @Inject constructor(
     private val errorState = MutableStateFlow<GemErrorText?>(null)
     val error: StateFlow<GemErrorText?> = errorState.asStateFlow()
 
-    fun fetch() = viewModelScope.launch(Dispatchers.IO) {
+    fun fetch() = viewModelScope.launch(ioDispatcher) {
         runCatchingCancellable {
             failPendingSupportMessages()
             val fromTimestamp = supportService.syncFromTimestamp(messages.first().map { it.toGem() })
@@ -65,11 +67,11 @@ class SupportChatSceneViewModel @Inject constructor(
         }.onFailure { Log.e(TAG, "fetch error", it) }
     }
 
-    fun sendText(content: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun sendText(content: String) = viewModelScope.launch(ioDispatcher) {
         perform { supportService.sendText(content) }
     }
 
-    fun sendImage(uri: Uri) = viewModelScope.launch(Dispatchers.IO) {
+    fun sendImage(uri: Uri) = viewModelScope.launch(ioDispatcher) {
         perform {
             val attachment = imageAttachmentFactory.fromUri(uri)
             if (attachment == null) {
@@ -82,7 +84,7 @@ class SupportChatSceneViewModel @Inject constructor(
 
     fun retry(message: SupportMessage) {
         if (message.images.isNotEmpty()) return
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             perform { supportService.retryMessage(message.toGem()) }
         }
     }

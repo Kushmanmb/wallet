@@ -34,11 +34,14 @@ import uniffi.gemstone.GemWalletImportResult
 import uniffi.gemstone.GemVerifyPhraseSession
 import uniffi.gemstone.GemVerifyPhraseViewState
 import uniffi.gemstone.GemWalletServiceInterface
+import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 @HiltViewModel
 class CreateWalletViewModel @Inject constructor(
     private val service: GemWalletServiceInterface,
     @param:ApplicationContext private val context: Context,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val state = MutableStateFlow(CreateWalletViewModelState())
@@ -63,7 +66,7 @@ class CreateWalletViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             runCatchingCancellable { service.defaultWalletName(null) to service.createWallet() }
                 .onSuccess { (defaultName, words) -> state.update { it.copy(defaultName = defaultName, data = words) } }
                 .onFailure { err -> state.update { it.copy(dataError = err.errorText()) } }
@@ -91,7 +94,7 @@ class CreateWalletViewModel @Inject constructor(
             return
         }
         state.update { it.copy(isShowSafeMessage = true, loading = true) }
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             val newState = try {
                 val wallet = createWallet(state.value.name, state.value.data.joinToString(" "))
                 withContext(Dispatchers.Main) {
