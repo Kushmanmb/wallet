@@ -48,6 +48,10 @@ public final class GemAmountServiceMock: GemAmountServiceProtocol, @unchecked Se
     public func perpetualAutoclose(price _: Double, direction _: Gemstone.PerpetualDirection, leverage _: UInt8) -> GemPerpetualAutoclose {
         GemPerpetualAutoclose(takeProfit: nil, stopLoss: nil)
     }
+
+    public func perpetualAutocloseRow(takeProfit: Double?, stopLoss: Double?) -> GemListRow {
+        builder.perpetualAutocloseRow(takeProfit: takeProfit, stopLoss: stopLoss)
+    }
 }
 
 public final class GemFiatQuoteServiceMock: GemFiatQuoteServiceProtocol, @unchecked Sendable {

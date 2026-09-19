@@ -28,6 +28,8 @@ import org.junit.Test
 import uniffi.gemstone.GemAmountPerpetualPosition
 import uniffi.gemstone.GemAmountServiceInterface
 import uniffi.gemstone.GemAmountType
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemPerpetualAutoclose
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,6 +75,7 @@ class AmountPerpetualProviderTest {
             }
             every { perpetualLeverage(any()) } returns 5u
             every { perpetualAutoclose(any(), any(), any()) } returns GemPerpetualAutoclose(takeProfit = null, stopLoss = null)
+            every { perpetualAutocloseRow(any(), any()) } returns GemListRow.Lines(GemListRowTitle.AUTO_CLOSE, emptyList(), null)
         }
         val perpetualAggregate = mockk<PerpetualDetailsDataAggregate>(relaxed = true)
         val getPerpetual = mockk<GetPerpetual>(relaxed = true) {

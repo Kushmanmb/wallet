@@ -18,15 +18,14 @@ import com.gemwallet.android.model.Crypto
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.toGem
 import com.gemwallet.android.ui.R
-import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.components.list_item.listItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.models.perpetual.autoclose.AutocloseUIModel
 import com.gemwallet.android.ui.models.perpetual.autoclose.AutocloseUIModelFactory
 import com.gemwallet.android.ui.style.textStyle
-import com.gemwallet.android.ui.theme.Placeholder
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PerpetualDirection
 import com.wallet.core.primitives.TpslType
@@ -156,7 +155,7 @@ class AmountPerpetualProvider(
         }
     }.stateIn(scope, SharingStarted.Eagerly, null)
 
-    val autocloseListItem: StateFlow<ListItemModel> = combine(takeProfit, stopLoss, ::autocloseListItem)
+    val autocloseListItem: StateFlow<ListItemModel?> = combine(takeProfit, stopLoss, ::autocloseListItem)
         .stateIn(scope, SharingStarted.Eagerly, autocloseListItem(takeProfit.value, stopLoss.value))
 
     val marketPriceListItem: StateFlow<ListItemModel?> = perpetual.map { market ->
@@ -177,16 +176,9 @@ class AmountPerpetualProvider(
         )
     }
 
-    private fun autocloseListItem(takeProfit: String?, stopLoss: String?): ListItemModel {
-        val takeProfitText = takeProfit?.parseInputNumberOrNull()?.toDouble()?.let { context.getString(R.string.perpetual_take_profit) + ": " + usdFormatter.string(it) }
-        val stopLossText = stopLoss?.parseInputNumberOrNull()?.toDouble()?.let { context.getString(R.string.perpetual_stop_loss) + ": " + usdFormatter.string(it) }
-        return ListItemModel(
-            title = context.getString(R.string.perpetual_auto_close),
-            subtitle = takeProfitText ?: stopLossText ?: Placeholder.empty,
-            subtitleExtra = stopLossText.takeIf { takeProfitText != null },
-            info = InfoSheetEntity.AutoCloseInfo,
-        )
-    }
+    private fun autocloseListItem(takeProfit: String?, stopLoss: String?): ListItemModel? = service
+        .perpetualAutocloseRow(takeProfit?.parseInputNumberOrNull()?.toDouble(), stopLoss?.parseInputNumberOrNull()?.toDouble())
+        .listItemModel(context)
 
     private fun autocloseTrigger(
         input: StateFlow<String?>,

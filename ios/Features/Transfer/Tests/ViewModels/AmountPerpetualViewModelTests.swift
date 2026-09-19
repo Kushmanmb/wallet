@@ -59,17 +59,17 @@ struct AmountPerpetualViewModelTests {
     }
 
     @Test
-    func autocloseText() {
+    func autocloseListItem() {
         let model = AmountPerpetualViewModel.mock()
 
-        #expect(model.autocloseText.subtitle == "-")
-        #expect(model.autocloseText.subtitleExtra == nil)
+        #expect(model.autocloseListItem?.subtitle == "-")
+        #expect(model.autocloseListItem?.subtitleExtra == nil)
 
         model.takeProfit = "100"
-        #expect(model.autocloseText.subtitle.contains("TP"))
+        #expect(model.autocloseListItem?.subtitle == "TP: $100.00")
 
         model.stopLoss = "50"
-        #expect(model.autocloseText.subtitleExtra != nil)
+        #expect(model.autocloseListItem?.subtitleExtra == "SL: $50.00")
     }
 
     @Test

@@ -141,13 +141,7 @@ fn details_sections(direction: &PerpetualDirection, data: &PerpetualConfirmData,
             amount(GemListRowTitle::Margin, GemFormattedNumber::usd(data.margin_amount)),
             amount(GemListRowTitle::Size, GemFormattedNumber::usd(data.fiat_value)),
         ]),
-        trigger_order_lines(data).map(|lines| {
-            vec![GemListRow::Lines {
-                title: GemListRowTitle::AutoClose,
-                lines,
-                info: None,
-            }]
-        }),
+        trigger_order_section(data),
         Some(price_rows),
     ]
     .into_iter()
@@ -160,18 +154,51 @@ fn details_sections(direction: &PerpetualDirection, data: &PerpetualConfirmData,
     .collect()
 }
 
-fn trigger_order_lines(data: &PerpetualConfirmData) -> Option<Vec<GemLocalizedText>> {
-    let line = |order: GemTriggerOrder, price: &Option<String>| {
-        price.as_ref().and_then(|price| price.parse::<f64>().ok()).map(|price| GemLocalizedText::TriggerOrder {
+fn trigger_order_lines(take_profit: TriggerOrderState, stop_loss: TriggerOrderState) -> Vec<GemLocalizedText> {
+    let line = |order: GemTriggerOrder, state: TriggerOrderState| {
+        (state.price.is_some() || state.is_cleared).then(|| GemLocalizedText::TriggerOrder {
             order,
-            price: Some(GemFormattedNumber::usd(price)),
+            price: state.price.map(GemFormattedNumber::usd),
         })
     };
-    let lines: Vec<GemLocalizedText> = [line(GemTriggerOrder::TakeProfit, &data.take_profit), line(GemTriggerOrder::StopLoss, &data.stop_loss)]
+    [line(GemTriggerOrder::TakeProfit, take_profit), line(GemTriggerOrder::StopLoss, stop_loss)]
         .into_iter()
         .flatten()
-        .collect();
-    (!lines.is_empty()).then_some(lines)
+        .collect()
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+struct TriggerOrderState {
+    price: Option<f64>,
+    is_cleared: bool,
+}
+
+impl TriggerOrderState {
+    fn set(price: Option<f64>) -> Self {
+        Self { price, is_cleared: false }
+    }
+}
+
+pub fn amount_autoclose_row(take_profit: Option<f64>, stop_loss: Option<f64>) -> GemListRow {
+    let lines = trigger_order_lines(TriggerOrderState::set(take_profit), TriggerOrderState::set(stop_loss));
+    GemListRow::Lines {
+        title: GemListRowTitle::AutoClose,
+        lines: match lines.is_empty() {
+            true => vec![GemLocalizedText::Text { text: EMPTY_VALUE.to_string() }],
+            false => lines,
+        },
+        info: Some(GemInfoTopic::AutoClose),
+    }
+}
+
+fn trigger_order_section(data: &PerpetualConfirmData) -> Option<Vec<GemListRow>> {
+    let price = |value: &Option<String>| TriggerOrderState::set(value.as_ref().and_then(|value| value.parse::<f64>().ok()));
+    let lines = trigger_order_lines(price(&data.take_profit), price(&data.stop_loss));
+    (!lines.is_empty()).then_some(vec![GemListRow::Lines {
+        title: GemListRowTitle::AutoClose,
+        lines,
+        info: None,
+    }])
 }
 
 fn position_text(direction: &PerpetualDirection, leverage: u8) -> GemLocalizedText {
@@ -221,19 +248,16 @@ pub fn autoclose_row(data: &PerpetualModifyConfirmData) -> Option<GemListRow> {
     let take_profit_cleared = take_profit.is_none() && data.take_profit_order_id.is_some_and(|id| canceled.contains(&id));
     let stop_loss_cleared = stop_loss.is_none() && data.stop_loss_order_id.is_some_and(|id| canceled.contains(&id));
 
-    let line = |order: GemTriggerOrder, price: Option<f64>, cleared: bool| {
-        (price.is_some() || cleared).then(|| GemLocalizedText::TriggerOrder {
-            order,
-            price: price.map(GemFormattedNumber::usd),
-        })
-    };
-    let lines: Vec<GemLocalizedText> = [
-        line(GemTriggerOrder::TakeProfit, take_profit, take_profit_cleared),
-        line(GemTriggerOrder::StopLoss, stop_loss, stop_loss_cleared),
-    ]
-    .into_iter()
-    .flatten()
-    .collect();
+    let lines = trigger_order_lines(
+        TriggerOrderState {
+            price: take_profit,
+            is_cleared: take_profit_cleared,
+        },
+        TriggerOrderState {
+            price: stop_loss,
+            is_cleared: stop_loss_cleared,
+        },
+    );
     (!lines.is_empty()).then_some(GemListRow::Lines {
         title: GemListRowTitle::AutoClose,
         lines,
@@ -1710,6 +1734,45 @@ mod tests {
                 amount: GemFormattedNumber::usd(123.45),
                 info: None,
             })
+        );
+    }
+
+    #[test]
+    fn test_the_amount_autoclose_row_names_each_trigger_and_falls_back_to_a_dash() {
+        let lines = |row: GemListRow| match row {
+            GemListRow::Lines { lines, .. } => lines,
+            row => panic!("expected lines, got {row:?}"),
+        };
+
+        assert_eq!(
+            lines(amount_autoclose_row(Some(12.345), Some(9.0))),
+            vec![
+                GemLocalizedText::TriggerOrder {
+                    order: GemTriggerOrder::TakeProfit,
+                    price: Some(GemFormattedNumber::usd(12.345)),
+                },
+                GemLocalizedText::TriggerOrder {
+                    order: GemTriggerOrder::StopLoss,
+                    price: Some(GemFormattedNumber::usd(9.0)),
+                },
+            ]
+        );
+        assert_eq!(
+            lines(amount_autoclose_row(None, Some(9.0))),
+            vec![GemLocalizedText::TriggerOrder {
+                order: GemTriggerOrder::StopLoss,
+                price: Some(GemFormattedNumber::usd(9.0)),
+            }],
+            "a stop loss on its own is still named"
+        );
+        assert_eq!(lines(amount_autoclose_row(None, None)), vec![GemLocalizedText::Text { text: EMPTY_VALUE.to_string() }]);
+        assert_eq!(
+            amount_autoclose_row(None, None),
+            GemListRow::Lines {
+                title: GemListRowTitle::AutoClose,
+                lines: vec![GemLocalizedText::Text { text: EMPTY_VALUE.to_string() }],
+                info: Some(GemInfoTopic::AutoClose),
+            }
         );
     }
 

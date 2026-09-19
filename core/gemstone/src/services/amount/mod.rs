@@ -16,6 +16,7 @@ use crate::config::perpetual_config::{leverage_options, select_leverage};
 
 use crate::models::GemEarnType;
 use crate::models::custom_types::GemBigInt;
+use crate::models::list::GemListRow;
 use crate::services::error::{GemServiceError, required_account};
 use crate::services::perpetual::GemPerpetualPositionAction;
 use crate::services::perpetual::rules as perpetual_rules;
@@ -55,6 +56,10 @@ impl GemAmountService {
             self.preferences.get_perpetual_take_profit_percent(),
             self.preferences.get_perpetual_stop_loss_percent(),
         )
+    }
+
+    pub fn perpetual_autoclose_row(&self, take_profit: Option<f64>, stop_loss: Option<f64>) -> GemListRow {
+        perpetual_rules::amount_autoclose_row(take_profit, stop_loss)
     }
 
     pub fn perpetual_transfer_data(

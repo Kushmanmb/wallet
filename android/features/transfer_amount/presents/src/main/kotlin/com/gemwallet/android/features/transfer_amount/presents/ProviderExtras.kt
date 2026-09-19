@@ -112,12 +112,14 @@ private fun PerpetualAutocloseSection(provider: AmountPerpetualProvider, amount:
     val model by provider.autocloseListItem.collectAsStateWithLifecycle()
     var sheetVisible by remember { mutableStateOf(false) }
 
-    ListItem(
-        model = model,
-        listPosition = ListPosition.Single,
-        modifier = Modifier.clickable { sheetVisible = true },
-        accessory = { DataBadgeChevron() },
-    )
+    model?.let {
+        ListItem(
+            model = it,
+            listPosition = ListPosition.Single,
+            modifier = Modifier.clickable { sheetVisible = true },
+            accessory = { DataBadgeChevron() },
+        )
+    }
 
     AmountAutocloseSheet(
         isVisible = sheetVisible,

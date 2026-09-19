@@ -198,3 +198,6 @@ private fun GemInfoTopic.infoSheet(icon: Any?): InfoSheetEntity = when (this) {
         description = tone.infoDescriptionRes(),
     )
 }
+
+fun GemListRow.listItemModel(context: Context, infoIcon: Any? = null): ListItemModel? =
+    (uiModel(context, infoIcon) as? GemListRowUIModel.Item)?.model

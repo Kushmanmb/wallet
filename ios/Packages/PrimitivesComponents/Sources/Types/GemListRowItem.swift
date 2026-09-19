@@ -174,3 +174,10 @@ extension GemListRow {
         }
     }
 }
+
+public extension GemListRow {
+    func listItemModel(onInfo: ((GemInfoTopic) -> Void)? = nil) -> ListItemModel? {
+        guard case let .listItem(model) = item(onInfo: onInfo) else { return nil }
+        return model
+    }
+}

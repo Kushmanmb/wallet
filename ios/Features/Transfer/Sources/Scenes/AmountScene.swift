@@ -100,10 +100,10 @@ public struct AmountScene: View {
                     }
                 }
 
-                if perpetual.isAutocloseEnabled {
+                if perpetual.isAutocloseEnabled, let autocloseListItem = perpetual.autocloseListItem {
                     Section {
                         NavigationCustomLink(
-                            with: ListItemView(model: perpetual.autocloseListItem),
+                            with: ListItemView(model: autocloseListItem),
                             action: model.onSelectAutoclose,
                         )
                     }
