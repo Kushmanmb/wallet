@@ -99,7 +99,7 @@ internal fun PriceAlertScene(
                 } else {
                     item {
                         SwitchProperty(
-                            text = stringResource(R.string.settings_enable_value, ""),
+                            text = stringResource(R.string.settings_enable_value, stringResource(R.string.settings_price_alerts_title)),
                             checked = enabled,
                             onCheckedChange = { onAction(PriceAlertAction.TogglePriceAlerts(it)) }
                         )

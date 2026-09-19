@@ -41,7 +41,7 @@ public final class PriceAlertsSceneViewModel: Sendable {
     }
 
     var enableTitle: String {
-        Localized.Settings.enableValue("")
+        Localized.Settings.enableValue(Localized.Settings.PriceAlerts.title)
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
