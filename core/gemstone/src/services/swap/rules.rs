@@ -41,6 +41,9 @@ pub fn quote_input(
     slippage_bps: Option<u32>,
     format: &GemNumberFormat,
 ) -> Option<GemSwapQuoteInput> {
+    if pay_asset.id == receive_asset.id {
+        return None;
+    }
     let value = value_from_input(&format.decimal_separator, value, pay_asset.decimals as u32).ok()?;
     let atomic = value.to_biguint().filter(|value| *value > BigUint::ZERO)?;
     Some(GemSwapQuoteInput {

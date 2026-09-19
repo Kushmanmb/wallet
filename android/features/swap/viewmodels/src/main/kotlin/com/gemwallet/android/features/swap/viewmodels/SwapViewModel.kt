@@ -33,7 +33,7 @@ import com.gemwallet.android.features.swap.viewmodels.models.createSwapUiState
 import com.gemwallet.android.features.swap.viewmodels.models.formattedToAmount
 import com.gemwallet.android.features.swap.viewmodels.models.receiveEquivalent
 import com.gemwallet.android.math.numberFormat
-import com.gemwallet.android.model.Crypto
+import com.gemwallet.android.math.parseInputNumberOrNull
 import com.gemwallet.android.model.toAssetPriceValue
 import com.gemwallet.android.ui.components.swap.SlippageStateUIModel
 import com.gemwallet.android.ui.components.swap.uiModel
@@ -45,6 +45,7 @@ import com.gemwallet.android.ui.models.swap.SwapProviderUIModelFactory
 import com.wallet.core.primitives.AssetId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.math.BigDecimal
 import java.math.BigInteger
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -134,26 +135,12 @@ class SwapViewModel @Inject constructor(
         .flatMapLatest { assetId -> assetId?.let { getAssetInfo(it) } ?: flow { emit(null) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val quoteInput: StateFlow<GemSwapQuoteInput?> = combine(payValueFlow, payAsset, receiveAsset, selectedSlippageBps) { text, pay, receive, slippageBps ->
-            val available = pay?.balance?.balance?.available ?: BigInteger.ZERO
-            val format = numberFormat()
-            val quoteSession = session.value.onInputChanged(text, pay?.asset?.toGem(), receive?.asset?.toGem(), available, slippageBps, format)
-            session.value = quoteSession
-            if (pay == null || receive == null) {
-                null
-            } else {
-                quoteSession.currentInput(pay.asset.toGem(), receive.asset.toGem(), available, slippageBps, format)
-            }
-        }
+    private val quoteInput: StateFlow<GemSwapQuoteInput?> = session.map { it.input }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val payEquivalentFormatted = combine(quoteInput, payAsset) { input, pay ->
-            if (input == null || pay == null) {
-                ""
-            } else {
-                pay.formatFiat(pay.calculateFiat(Crypto(input.request.value).value(pay.asset.decimals)))
-            }
+    val payEquivalentFormatted = combine(payValueFlow, payAsset) { text, pay ->
+            pay?.formatFiat(pay.calculateFiat(text.parseInputNumberOrNull() ?: BigDecimal.ZERO)) ?: ""
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
@@ -211,9 +198,8 @@ class SwapViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    private val viewState = combine(session, quoteInput, payAsset) { quoteSession, input, pay ->
-            val available = pay?.balance?.balance?.available ?: BigInteger.ZERO
-            quoteSession.viewState(input?.request?.value ?: BigInteger.ZERO, available, pay?.asset?.toGem())
+    private val viewState = combine(session, payAsset) { quoteSession, pay ->
+            quoteSession.viewState(pay?.balance?.balance?.available ?: BigInteger.ZERO, pay?.asset?.toGem())
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -256,6 +242,9 @@ class SwapViewModel @Inject constructor(
         viewModelScope.launch {
             selectedSlippageBps.value = swapQuoteService.slippageBps()
         }
+        combine(payValueFlow, payAsset, receiveAsset, selectedSlippageBps) { text, pay, receive, slippageBps ->
+            session.update { it.onInputChanged(text, pay?.asset?.toGem(), receive?.asset?.toGem(), pay?.balance?.balance?.available ?: BigInteger.ZERO, slippageBps, numberFormat()) }
+        }.launchIn(viewModelScope)
         matchedQuoteResults
             .onEach(::onQuoteResults)
             .launchIn(viewModelScope)

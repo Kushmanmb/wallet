@@ -39,7 +39,7 @@ struct SwapButtonViewModelTests {
     @Test
     func insufficientBalanceNamesTheAssetAndDisablesTheButton() {
         let asset = AssetData.mock(asset: .mock(symbol: "BTC"))
-        let viewModel = SwapButtonViewModel.mock(session: .mockReady(), value: 2, availableBalance: 1, fromAsset: asset)
+        let viewModel = SwapButtonViewModel.mock(session: .mockReady(), availableBalance: 1, fromAsset: asset)
 
         #expect(viewModel.title == Localized.Transfer.insufficientBalance("BTC"))
         #expect(viewModel.type == ButtonType.primary(.disabled))

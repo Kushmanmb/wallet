@@ -139,23 +139,12 @@ pub struct GemSwapSession {
     pub transfer_phase: GemSwapTransferPhase,
     #[uniffi(default = false)]
     pub refresh_paused_until_restart: bool,
-    #[uniffi(default = "")]
-    pub amount: String,
+    #[uniffi(default = None)]
+    pub input: Option<GemSwapQuoteInput>,
 }
 
 #[uniffi::export]
 impl GemSwapSession {
-    pub fn current_input(
-        &self,
-        pay_asset: Asset,
-        receive_asset: Asset,
-        available_value: GemBigInt,
-        slippage_bps: Option<u32>,
-        format: GemNumberFormat,
-    ) -> Option<GemSwapQuoteInput> {
-        rules::quote_input(&pay_asset, &receive_asset, &self.amount, &available_value, slippage_bps, &format)
-    }
-
     pub fn on_input_changed(
         &self,
         amount: String,
@@ -165,17 +154,17 @@ impl GemSwapSession {
         slippage_bps: Option<u32>,
         format: GemNumberFormat,
     ) -> GemSwapSession {
-        let request = match (pay_asset, receive_asset) {
-            (Some(pay), Some(receive)) => rules::quote_input(&pay, &receive, &amount, &available_value, slippage_bps, &format).map(|input| input.request),
+        let input = match (pay_asset, receive_asset) {
+            (Some(pay), Some(receive)) => rules::quote_input(&pay, &receive, &amount, &available_value, slippage_bps, &format),
             _ => None,
         };
-        if request.as_ref() == self.current_request() {
-            return GemSwapSession { amount, ..self.clone() };
-        }
-        GemSwapSession {
-            amount,
-            ..self.on_request_changed(request)
-        }
+        let request = input.as_ref().map(|input| input.request.clone());
+        let session = if request.as_ref() == self.current_request() {
+            self.clone()
+        } else {
+            self.on_request_changed(request)
+        };
+        GemSwapSession { input, ..session }
     }
 
     pub fn on_refresh_requested(&self, request: GemSwapRequest) -> GemSwapSession {
@@ -276,8 +265,8 @@ impl GemSwapSession {
         }
     }
 
-    pub fn view_state(&self, value: GemBigInt, available_balance: GemBigInt, pay_asset: Option<Asset>) -> GemSwapViewState {
-        let button_action = self.button_action(value, available_balance);
+    pub fn view_state(&self, available_balance: GemBigInt, pay_asset: Option<Asset>) -> GemSwapViewState {
+        let button_action = self.button_action(available_balance);
         GemSwapViewState {
             action: self.action(),
             button_state: self.button_state(button_action.clone()),
@@ -343,9 +332,9 @@ impl GemSwapSession {
         }
     }
 
-    fn button_action(&self, value: GemBigInt, available_balance: GemBigInt) -> GemSwapButtonAction {
+    fn button_action(&self, available_balance: GemBigInt) -> GemSwapButtonAction {
         GemSwapButtonInput {
-            value,
+            value: self.input.as_ref().map(|input| GemBigInt::from(input.request.value.clone())).unwrap_or_default(),
             available_balance,
             quote_error: self.quote_error(),
             transfer_error: self.transfer_error(),
@@ -593,15 +582,15 @@ mod tests {
         assert_eq!(loading.button_state(GemSwapButtonAction::Swap), GemSwapButtonState::Loading);
 
         let session = GemSwapSession::mock_ready();
-        assert_eq!(session.button_action(GemBigInt::from(1), GemBigInt::from(2)), GemSwapButtonAction::Swap);
+        assert_eq!(session.button_action(GemBigInt::from(200)), GemSwapButtonAction::Swap);
         assert_eq!(session.button_state(GemSwapButtonAction::Swap), GemSwapButtonState::Enabled);
-        assert_eq!(session.button_action(GemBigInt::from(3), GemBigInt::from(2)), GemSwapButtonAction::InsufficientBalance);
+        assert_eq!(session.button_action(GemBigInt::from(50)), GemSwapButtonAction::InsufficientBalance);
         assert_eq!(session.button_state(GemSwapButtonAction::InsufficientBalance), GemSwapButtonState::Disabled);
 
         let started = session.start_transfer().unwrap();
         assert_eq!(started.button_state(GemSwapButtonAction::Swap), GemSwapButtonState::Loading);
         let failed = started.on_transfer_failed(started.transfer_phase.clone(), SwapperError::TransactionError("boom".into()));
-        assert_eq!(failed.button_action(GemBigInt::from(1), GemBigInt::from(2)), GemSwapButtonAction::RetryTransfer);
+        assert_eq!(failed.button_action(GemBigInt::from(200)), GemSwapButtonAction::RetryTransfer);
         assert_eq!(failed.button_state(GemSwapButtonAction::RetryTransfer), GemSwapButtonState::Enabled);
     }
 
@@ -613,34 +602,25 @@ mod tests {
             decimal_separator: ".".to_string(),
         };
         let available = GemBigInt::from(2_000_000_000_000_000_000u128);
+        let changed = |session: &GemSwapSession, amount: &str| session.on_input_changed(amount.to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone());
 
-        let session = GemSwapSession::default();
-        assert!(
-            session.current_input(pay.clone(), receive.clone(), available.clone(), None, format.clone()).is_none(),
-            "no amount, no input"
-        );
+        assert!(GemSwapSession::default().input.is_none(), "no amount, no input");
 
-        let typed = session.on_input_changed("1".to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone());
-        assert_eq!(typed.amount, "1");
+        let typed = changed(&GemSwapSession::default(), "1");
         assert!(matches!(typed.quote_phase, GemSwapQuotePhase::Loading { .. }), "a valid input starts loading");
-        let input = typed.current_input(pay.clone(), receive.clone(), available.clone(), None, format.clone()).unwrap();
+        let input = typed.input.clone().unwrap();
         assert_eq!(input.request.value, GemBigUint::from(1_000_000_000_000_000_000u128));
         assert!(!input.use_max_amount);
 
-        let same = typed.on_input_changed("1".to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone());
-        assert_eq!(same, typed, "re-deriving the same request changes nothing");
+        assert_eq!(changed(&typed, "1"), typed, "re-deriving the same request changes nothing");
+        assert!(changed(&typed, "2").input.unwrap().use_max_amount);
 
-        let maxed = typed.on_input_changed("2".to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone());
-        assert!(
-            maxed
-                .current_input(pay.clone(), receive.clone(), available.clone(), None, format.clone())
-                .unwrap()
-                .use_max_amount
-        );
-
-        let cleared = typed.on_input_changed("".to_string(), Some(pay.clone()), Some(receive.clone()), available.clone(), None, format.clone());
+        let cleared = changed(&typed, "");
         assert!(cleared.is_input_empty());
-        assert_eq!(cleared.amount, "");
+        assert!(cleared.input.is_none());
+
+        let same_asset = typed.on_input_changed("1".to_string(), Some(pay.clone()), Some(pay.clone()), available.clone(), None, format.clone());
+        assert!(same_asset.input.is_none(), "an asset does not swap into itself");
     }
 
     #[test]
@@ -658,19 +638,19 @@ mod tests {
 
     #[test]
     fn test_view_state_carries_the_quote_and_button_at_once() {
-        let idle = GemSwapSession::default().view_state(GemBigInt::from(0), GemBigInt::from(0), None);
+        let idle = GemSwapSession::default().view_state(GemBigInt::from(0), None);
         assert!(idle.is_input_empty);
         assert_eq!(idle.button_state, GemSwapButtonState::Disabled);
 
         let session = GemSwapSession::mock_ready();
-        let state = session.view_state(GemBigInt::from(1), GemBigInt::from(2), None);
+        let state = session.view_state(GemBigInt::from(200), None);
         assert_eq!(state.quote, session.quote());
         assert_eq!(state.action, GemSwapSessionAction::Ready);
         assert_eq!(state.button_action, GemSwapButtonAction::Swap);
         assert_eq!(state.button_state, GemSwapButtonState::Enabled);
         assert!(!state.is_quote_loading);
         assert_eq!(
-            session.view_state(GemBigInt::from(3), GemBigInt::from(2), None).button_action,
+            session.view_state(GemBigInt::from(50), None).button_action,
             GemSwapButtonAction::InsufficientBalance
         );
     }
