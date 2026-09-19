@@ -19,9 +19,9 @@ use crate::config::image::GemImage;
 use crate::config::stake::EARN_OFFERED;
 use crate::duration_formatter::{GemDurationPart, countdown_parts, day_parts};
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
+use crate::percentage::GemPercentageStyle;
 use crate::models::custom_types::GemBigUint;
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowIcon, GemListRowTitle, GemUrlTarget};
-use crate::percentage::GemPercentageStyle;
 use crate::precision::GemValueStyle;
 use crate::services::balance::{GemAssetBalance, GemBalanceRow};
 use crate::services::error::GemServiceError;
@@ -156,6 +156,7 @@ pub fn validator_row(validator: &DelegationValidator) -> GemValidatorRow {
         placeholder: name.chars().next().map(String::from).unwrap_or_default(),
         name,
         provider,
+        apr: (validator.apr > 0.0).then(|| GemFormattedNumber::percentage(validator.apr, GemPercentageStyle::Unsigned)),
         validator: validator.clone(),
     }
 }
@@ -713,6 +714,11 @@ mod tests {
             ..DelegationValidator::mock()
         };
         assert_eq!(validator_row(&earn).provider, Some(YieldProvider::Yo));
+
+        let paying = DelegationValidator { apr: 5.0, ..DelegationValidator::mock() };
+        assert_eq!(validator_row(&paying).apr, Some(GemFormattedNumber::percentage(5.0, GemPercentageStyle::Unsigned)));
+        let idle = DelegationValidator { apr: 0.0, ..DelegationValidator::mock() };
+        assert_eq!(validator_row(&idle).apr, None, "a validator paying nothing shows no rate");
 
         let unknown = DelegationValidator {
             id: "not-a-provider".to_string(),

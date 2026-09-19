@@ -47,7 +47,7 @@ fun PropertyValidatorItem(
         },
         data = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ListItemSupportText(R.string.stake_apr, " ${validator.aprText}")
+                ListItemSupportText(R.string.stake_apr, validator.aprText)
                 if (onClick != null) {
                     DataBadgeChevron()
                 }

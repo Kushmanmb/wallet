@@ -2,6 +2,7 @@
 
 import struct Gemstone.DelegationValidator
 import struct Gemstone.GemValidatorRow
+import struct Gemstone.GemFormattedNumber
 import GemstonePrimitives
 import Primitives
 import PrimitivesTestKit
@@ -9,6 +10,7 @@ import PrimitivesTestKit
 public extension GemValidatorRow {
     static func mock(
         validator: Gemstone.DelegationValidator = Primitives.DelegationValidator.mock().toGem(),
+        apr: GemFormattedNumber? = nil,
     ) -> GemValidatorRow {
         GemValidatorRow(
             validator: validator,
@@ -16,6 +18,7 @@ public extension GemValidatorRow {
             imageUrl: "https://assets.gemwallet.com/validator.png",
             placeholder: String(validator.name.prefix(1)),
             provider: .none,
+            apr: apr,
         )
     }
 }

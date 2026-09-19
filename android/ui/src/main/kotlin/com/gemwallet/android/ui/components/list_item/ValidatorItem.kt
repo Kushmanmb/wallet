@@ -38,7 +38,7 @@ fun ValidatorItem(
         listPosition = listPosition,
         trailing = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ListItemSupportText(R.string.stake_apr, " ${data.aprText}")
+                ListItemSupportText(R.string.stake_apr, data.aprText)
             }
         },
     )

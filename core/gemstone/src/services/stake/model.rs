@@ -147,4 +147,5 @@ pub struct GemValidatorRow {
     pub image_url: String,
     pub placeholder: String,
     pub provider: Option<YieldProvider>,
+    pub apr: Option<GemFormattedNumber>,
 }
