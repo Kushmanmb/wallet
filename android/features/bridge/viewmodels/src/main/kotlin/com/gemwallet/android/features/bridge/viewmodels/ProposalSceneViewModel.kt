@@ -13,7 +13,7 @@ import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
-import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
+import com.gemwallet.android.features.bridge.viewmodels.localization.text
 import com.gemwallet.android.features.bridge.viewmodels.model.ConnectionHeadUIModel
 import com.gemwallet.android.features.bridge.viewmodels.model.headUIModel
 import com.gemwallet.android.features.bridge.viewmodels.model.map
@@ -43,6 +43,7 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemWalletConnectException
+import uniffi.gemstone.GemWalletConnectFailure
 import uniffi.gemstone.GemWalletConnectRejectionReason
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.WalletConnectionVerificationStatus
@@ -105,7 +106,7 @@ class ProposalSceneViewModel @Inject constructor(
         buttonState(enabled = wallet != null, loading = sceneState is ProposalSceneState.Approving)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Disabled)
 
-    fun onProposal(proposal: WalletConnectSessionProposal, verifyContext: WalletConnectVerifyContext, onNotify: (BridgeRequestError) -> Unit) {
+    fun onProposal(proposal: WalletConnectSessionProposal, verifyContext: WalletConnectVerifyContext, onNotify: (String) -> Unit) {
         if (!walletConnectService.shouldProcessMessage("proposal_${proposal.proposerPublicKey}")) {
             return
         }
@@ -125,7 +126,7 @@ class ProposalSceneViewModel @Inject constructor(
                 }
             }.getOrElse { error ->
                 Log.e(TAG, "session proposal rejected: ${error.message}")
-                if (error is GemWalletConnectException.InvalidOrigin) onNotify(BridgeRequestError.MaliciousSession)
+                if (error is GemWalletConnectException.InvalidOrigin) onNotify(GemWalletConnectFailure.MaliciousOrigin.text(context))
                 reject(proposal, (error as? GemWalletConnectException)?.rejectionReason() ?: GemWalletConnectRejectionReason.USER_REJECTED)
                 return@launch
             }

@@ -13,7 +13,6 @@ import com.gemwallet.android.application.wallet_connect.WalletConnectSessionRequ
 import com.gemwallet.android.application.wallet_connect.WalletConnectVerifyContext
 import com.gemwallet.android.features.bridge.viewmodels.RequestSceneState
 import com.gemwallet.android.features.bridge.viewmodels.WCRequestViewModel
-import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
 import com.gemwallet.android.features.bridge.viewmodels.model.WCRequest
 import com.gemwallet.android.features.confirm.presents.ConfirmScreen
 import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetAction
@@ -36,20 +35,8 @@ fun RequestScene(request: WalletConnectSessionRequest, verifyContext: WalletConn
         viewModel.onRequest(
             sessionRequest = request,
             verifyContext = verifyContext,
-            onNotify = { error ->
-                when (error) {
-                    BridgeRequestError.MaliciousSession -> Toast.makeText(
-                        context,
-                        R.string.errors_connections_malicious_origin,
-                        Toast.LENGTH_LONG,
-                    ).show()
-
-                    BridgeRequestError.Expired -> Toast.makeText(
-                        context,
-                        R.string.wallet_connect_request_expired,
-                        Toast.LENGTH_LONG,
-                    ).show()
-                }
+            onNotify = { message ->
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             },
             onError = reportError,
         )

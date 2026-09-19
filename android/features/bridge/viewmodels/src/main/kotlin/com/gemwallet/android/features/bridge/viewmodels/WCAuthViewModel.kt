@@ -13,7 +13,7 @@ import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
-import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
+import com.gemwallet.android.features.bridge.viewmodels.localization.text
 import com.gemwallet.android.features.bridge.viewmodels.model.ConnectionHeadUIModel
 import com.gemwallet.android.features.bridge.viewmodels.model.ReviewTexts
 import com.gemwallet.android.features.bridge.viewmodels.model.WalletConnectReviewModel
@@ -43,6 +43,7 @@ import kotlinx.coroutines.launch
 import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemWalletConnectAuthAccount
+import uniffi.gemstone.GemWalletConnectFailure
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.MessageSigner
 import uniffi.gemstone.MessageType
@@ -72,12 +73,12 @@ class WCAuthViewModel @Inject constructor(
         .map { buttonState(loading = it is AuthSceneState.Approving) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Enabled)
 
-    fun onRequest(request: WalletConnectAuthenticationRequest, verifyContext: WalletConnectVerifyContext, onNotify: (BridgeRequestError) -> Unit) {
+    fun onRequest(request: WalletConnectAuthenticationRequest, verifyContext: WalletConnectVerifyContext, onNotify: (String) -> Unit) {
         authRequest = request
         hasResponded = false
         _state.update { AuthSceneState.Loading }
         if (walletConnectService.isOriginRejected(request.metadata?.url.orEmpty(), verifyContext.origin, verifyContext.map())) {
-            onNotify(BridgeRequestError.MaliciousSession)
+            onNotify(GemWalletConnectFailure.MaliciousOrigin.text(context))
             hasResponded = true
             approveWalletConnectAuthentication.rejectAuthentication(request)
             finish(request)

@@ -22,7 +22,6 @@ import com.gemwallet.android.application.wallet_connect.WalletConnectSessionProp
 import com.gemwallet.android.application.wallet_connect.WalletConnectVerifyContext
 import com.gemwallet.android.features.bridge.viewmodels.ProposalSceneState
 import com.gemwallet.android.features.bridge.viewmodels.ProposalSceneViewModel
-import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
 import com.gemwallet.android.features.bridge.viewmodels.model.ConnectionHeadUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.buttons.MainActionButton
@@ -61,20 +60,8 @@ fun ProposalScene(proposal: WalletConnectSessionProposal, verifyContext: WalletC
     val unknownErrorMessage = stringResource(id = R.string.errors_unknown_try_again)
 
     LaunchedEffect(proposal) {
-        viewModel.onProposal(proposal, verifyContext) { error ->
-            when (error) {
-                BridgeRequestError.MaliciousSession -> Toast.makeText(
-                    context,
-                    R.string.errors_connections_malicious_origin,
-                    Toast.LENGTH_LONG,
-                ).show()
-
-                BridgeRequestError.Expired -> Toast.makeText(
-                    context,
-                    R.string.wallet_connect_request_expired,
-                    Toast.LENGTH_LONG,
-                ).show()
-            }
+        viewModel.onProposal(proposal, verifyContext) { message ->
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
     }
 

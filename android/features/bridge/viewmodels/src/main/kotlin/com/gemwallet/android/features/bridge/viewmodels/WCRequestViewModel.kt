@@ -15,7 +15,7 @@ import com.gemwallet.android.application.wallet_connect.cases.RespondWalletConne
 import com.gemwallet.android.application.wallet_connect.toJsonRpcResponse
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.toGem
-import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
+import com.gemwallet.android.features.bridge.viewmodels.localization.text
 import com.gemwallet.android.features.bridge.viewmodels.model.ReviewTexts
 import com.gemwallet.android.features.bridge.viewmodels.model.WCRequest
 import com.gemwallet.android.features.bridge.viewmodels.model.map
@@ -84,7 +84,7 @@ class WCRequestViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Enabled)
 
-    fun onRequest(sessionRequest: WalletConnectSessionRequest, verifyContext: WalletConnectVerifyContext, onNotify: (BridgeRequestError) -> Unit, onError: (String) -> Unit) {
+    fun onRequest(sessionRequest: WalletConnectSessionRequest, verifyContext: WalletConnectVerifyContext, onNotify: (String) -> Unit, onError: (String) -> Unit) {
         if (requestJob != null && state.value.sessionRequest == sessionRequest) {
             return
         }
@@ -108,9 +108,8 @@ class WCRequestViewModel @Inject constructor(
             }
             when (val failure = outcome.failure) {
                 null -> Unit
-                GemWalletConnectFailure.MaliciousOrigin -> onNotify(BridgeRequestError.MaliciousSession)
-                GemWalletConnectFailure.Expired -> onNotify(BridgeRequestError.Expired)
-                is GemWalletConnectFailure.Failed -> onError(failure.message)
+                GemWalletConnectFailure.MaliciousOrigin, GemWalletConnectFailure.Expired -> onNotify(failure.text(context))
+                is GemWalletConnectFailure.Failed -> onError(failure.text(context))
             }
             when (val response = outcome.response) {
                 null -> activeRequest.finish(sessionRequest)

@@ -18,7 +18,6 @@ import com.gemwallet.android.application.wallet_connect.WalletConnectAuthenticat
 import com.gemwallet.android.application.wallet_connect.WalletConnectVerifyContext
 import com.gemwallet.android.features.bridge.viewmodels.AuthSceneState
 import com.gemwallet.android.features.bridge.viewmodels.WCAuthViewModel
-import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
@@ -38,20 +37,8 @@ fun AuthRequestScene(request: WalletConnectAuthenticationRequest, verifyContext:
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
 
     LaunchedEffect(request.id) {
-        viewModel.onRequest(request, verifyContext) { error ->
-            when (error) {
-                BridgeRequestError.MaliciousSession -> Toast.makeText(
-                    context,
-                    R.string.errors_connections_malicious_origin,
-                    Toast.LENGTH_LONG,
-                ).show()
-
-                BridgeRequestError.Expired -> Toast.makeText(
-                    context,
-                    R.string.wallet_connect_request_expired,
-                    Toast.LENGTH_LONG,
-                ).show()
-            }
+        viewModel.onRequest(request, verifyContext) { message ->
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
     }
 

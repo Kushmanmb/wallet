@@ -4,13 +4,13 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.wallet_connect.ActiveWalletConnectRequest
 import com.gemwallet.android.application.wallet_connect.cases.ApproveWalletConnection
 import com.gemwallet.android.application.wallet_connect.cases.PrepareSessionProposal
-import com.gemwallet.android.features.bridge.viewmodels.model.BridgeRequestError
 import com.gemwallet.android.testkit.mockGemConnectionRow
 import com.gemwallet.android.testkit.mockWalletConnectPairingProposal
 import com.gemwallet.android.testkit.mockWalletConnectSessionProposal
 import com.gemwallet.android.testkit.mockWalletConnectVerifyContext
 import com.gemwallet.android.testkit.mockWalletConnectionSessionProposal
 import com.gemwallet.android.testkit.mockWalletMulticoin
+import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.ButtonState
 import io.mockk.coEvery
 import io.mockk.every
@@ -82,7 +82,9 @@ class ProposalSceneViewModelTest {
         walletConnectService = service,
         metadataService = metadataService(),
         ioDispatcher = dispatcher,
-        context = mockk(relaxed = true),
+        context = mockk(relaxed = true) {
+            every { getString(R.string.errors_connections_malicious_origin) } returns "Malicious origin"
+        },
     ).also { models.add(it) }
 
     @Test
@@ -114,7 +116,7 @@ class ProposalSceneViewModelTest {
 
     @Test
     fun `an invalid origin notifies the scene and rejects the proposal`() = runTest(dispatcher) {
-        val notified = CompletableDeferred<BridgeRequestError>()
+        val notified = CompletableDeferred<String>()
         val approve: ApproveWalletConnection = mockk(relaxed = true)
         val prepare = proposals()
         coEvery {
@@ -123,7 +125,7 @@ class ProposalSceneViewModelTest {
 
         viewModel(approve = approve, prepare = prepare).onProposal(proposal, verifyContext) { notified.complete(it) }
 
-        assertEquals(BridgeRequestError.MaliciousSession, notified.await())
+        assertEquals("Malicious origin", notified.await())
         advanceUntilIdle()
         verify { approve.rejectConnection(proposal, any(), any(), any()) }
     }
