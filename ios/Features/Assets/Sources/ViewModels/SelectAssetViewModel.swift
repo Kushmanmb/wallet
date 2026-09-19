@@ -277,8 +277,10 @@ extension SelectAssetViewModel {
     private func searchAssets(query: String) async {
         do {
             let assets = try await service.searchAssets(query: query).map { $0.toPrimitives() }
+            guard flow.searchStep(query: searchableQuery) == .search(query: query) else { return }
             state = .data(assets)
         } catch {
+            guard flow.searchStep(query: searchableQuery) == .search(query: query) else { return }
             handle(error: error)
         }
     }

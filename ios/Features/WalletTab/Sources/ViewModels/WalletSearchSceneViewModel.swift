@@ -307,8 +307,10 @@ extension WalletSearchSceneViewModel {
         state = .loading
         do {
             let _ = try await service.search(query: query, scope: .all)
+            guard query == searchableQuery.trim() else { return }
             state = .data(true)
         } catch {
+            guard query == searchableQuery.trim() else { return }
             state.setError(error)
             debugLog("Search error: \(error)")
         }
