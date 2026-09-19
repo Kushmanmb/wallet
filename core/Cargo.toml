@@ -147,7 +147,10 @@ alloy-rlp = { version = "0.3.16" }
 jsonwebtoken = { version = "11.0.0", features = ["aws_lc_rs"] }
 
 [profile.dev]
-debug = 0
+# Not 0: without any debug info the linker emits a libgemstone.dylib whose LINKEDIT
+# string pool is 4-byte aligned, which dyld on macOS 27 refuses to load. JNA reports
+# that as NoClassDefFoundError, so every Android host unit test reaching Core fails.
+debug = "line-tables-only"
 
 [profile.dev.package.argon2]
 opt-level = 3
