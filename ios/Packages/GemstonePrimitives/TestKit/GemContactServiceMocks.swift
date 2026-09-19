@@ -167,7 +167,6 @@ public final class GemSupportServiceMock: GemSupportServiceProtocol, @unchecked 
 
     public private(set) var syncedTimestamps: [UInt64] = []
     public private(set) var sentTexts: [String] = []
-    public private(set) var sentImages: [String] = []
     public private(set) var retriedMessageIds: [String] = []
     public private(set) var requestedImageUrls: [String] = []
 
@@ -184,8 +183,7 @@ public final class GemSupportServiceMock: GemSupportServiceProtocol, @unchecked 
         if let sendError { throw sendError }
     }
 
-    public func sendImage(image _: Data, fileName: String, mimeType _: String) async throws {
-        sentImages.append(fileName)
+    public func sendImage(image _: Data) async throws {
         if let sendError { throw sendError }
     }
 
