@@ -20,10 +20,6 @@ public final class GemAmountServiceMock: GemAmountServiceProtocol, @unchecked Se
         Primitives.Currency.usd.toGem()
     }
 
-    public func stakeTransferData(asset: Gemstone.Asset, stakeType: Gemstone.StakeType, value: Gemstone.GemBigInt, useMaxAmount: Bool) -> GemTransferData {
-        builder.stakeTransferData(asset: asset, stakeType: stakeType, value: value, useMaxAmount: useMaxAmount)
-    }
-
     public func perpetualTransferData(action: GemPerpetualPositionAction, value: Gemstone.GemBigInt, useMaxAmount: Bool, leverage: UInt8, takeProfit: Double?, stopLoss: Double?) -> GemTransferData {
         builder.perpetualTransferData(action: action, value: value, useMaxAmount: useMaxAmount, leverage: leverage, takeProfit: takeProfit, stopLoss: stopLoss)
     }
@@ -39,10 +35,6 @@ public final class GemAmountServiceMock: GemAmountServiceProtocol, @unchecked Se
 
     public func perpetualAmountType(action: GemPerpetualPositionAction, leverage: UInt8) -> GemAmountType {
         builder.perpetualAmountType(action: action, leverage: leverage)
-    }
-
-    public func stakeValidatorSelection(chain: Gemstone.Chain, input: GemStakeAmountInput) -> GemStakeValidatorSelection {
-        builder.stakeValidatorSelection(chain: chain, input: input)
     }
 
     public func earnAmountType(earnType: Gemstone.EarnType) -> GemAmountType {
@@ -219,6 +211,11 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
 
     public func sortedDelegations(delegations: [Gemstone.Delegation]) -> [Gemstone.Delegation] {
         delegations
+    }
+
+    public func stakeValidatorSelection(chain _: Gemstone.Chain, input _: GemStakeAmountInput) -> GemStakeValidatorSelection {
+        let options = validators.map { Gemstone.GemValidatorRow.mock(validator: $0) }
+        return GemStakeValidatorSelection(options: options, recommended: [], validator: options.first, canSelect: true)
     }
 
     public func positions(delegations: [Gemstone.Delegation]) -> [Gemstone.Delegation] {

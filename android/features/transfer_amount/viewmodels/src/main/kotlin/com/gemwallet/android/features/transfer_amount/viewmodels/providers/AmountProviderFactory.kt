@@ -45,7 +45,6 @@ class AmountProviderFactory @Inject constructor(
             getDelegations = getDelegations,
             getStakeValidator = getStakeValidator,
             getValidators = getValidators,
-            service = service,
             stakeService = stakeService,
             scope = scope,
         )

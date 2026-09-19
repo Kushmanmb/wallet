@@ -120,6 +120,7 @@ extension ViewModelFactory {
             input: input,
             wallet: wallet,
             service: amountService,
+            stakeService: stakeService,
             onTransferAction: onTransferAction,
         )
     }

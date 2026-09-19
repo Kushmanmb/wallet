@@ -8,6 +8,7 @@ import enum Gemstone.GemAmountError
 import struct Gemstone.GemAmountInput
 import enum Gemstone.GemAmountInputType
 import protocol Gemstone.GemAmountServiceProtocol
+import protocol Gemstone.GemStakeServiceProtocol
 import struct Gemstone.GemTransferData
 import GemstonePrimitives
 import GemstoneServices
@@ -47,13 +48,14 @@ public final class AmountSceneViewModel {
         input: AmountInput,
         wallet: Wallet,
         service: any GemAmountServiceProtocol,
+        stakeService: any GemStakeServiceProtocol,
         onTransferAction: TransferDataAction,
     ) {
         self.wallet = wallet
         self.service = service
         self.onTransferAction = onTransferAction
         currencyFormatter = CurrencyFormatter(type: .currency, currencyCode: service.getCurrency().toPrimitives().rawValue)
-        provider = .make(from: input, service: service)
+        provider = .make(from: input, service: service, stakeService: stakeService)
         assetQuery = ObservableQuery(AssetRequest(walletId: wallet.id, assetId: input.asset.id), initialValue: .with(asset: input.asset))
         entry = provider.entry(from: assetQuery.value, inputType: .asset, text: .empty)
         amountInputModel = InputValidationViewModel(mode: .manual)

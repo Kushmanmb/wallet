@@ -73,6 +73,10 @@ impl GemStakeService {
         transfer_rules::stake_transfer_data(asset, stake_type, value, use_max_amount)
     }
 
+    pub fn stake_validator_selection(&self, chain: Chain, input: GemStakeAmountInput) -> GemStakeValidatorSelection {
+        rules::validator_selection(chain, &input)
+    }
+
     pub fn earn_apr_row(&self, providers: Vec<DelegationValidator>, asset_apr: Option<f64>) -> GemListRow {
         rules::earn_apr_row(&providers, asset_apr)
     }

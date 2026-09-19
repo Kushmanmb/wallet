@@ -21,7 +21,7 @@ import com.wallet.core.primitives.Resource
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import uniffi.gemstone.GemAmountServiceInterface
+import uniffi.gemstone.GemStakeServiceInterface
 import uniffi.gemstone.TransactionInputType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -65,7 +65,7 @@ class AmountStakeProviderTest {
     private val getStakeValidator = mockk<GetStakeValidator> {
         coEvery { this@mockk.invoke(asset.id, "v1") } returns validator
     }
-    private val service = mockk<GemAmountServiceInterface> {
+    private val stakeService = mockk<GemStakeServiceInterface> {
         every { stakeValidatorSelection(any(), any()) } returns mockGemStakeValidatorSelection(mockGemValidatorRow(validator))
         every { stakeTransferData(any(), any(), any(), any()) } answers {
             mockGemTransferData(inputType = TransactionInputType.Stake(firstArg(), secondArg()), value = thirdArg())
@@ -81,8 +81,7 @@ class AmountStakeProviderTest {
         getDelegations = getDelegations,
         getStakeValidator = getStakeValidator,
         getValidators = getValidators,
-        service = service,
-        stakeService = mockk(relaxed = true),
+        stakeService = stakeService,
         scope = scope,
     )
 
@@ -99,7 +98,7 @@ class AmountStakeProviderTest {
         coEvery { getStakeValidator(any(), any()) } returns null
         every { getDelegation(any(), any(), any()) } returns flowOf(null)
         every { getValidators(any()) } returns flowOf(emptyList())
-        every { service.stakeValidatorSelection(any(), any()) } returns mockGemStakeValidatorSelection(validator = null)
+        every { stakeService.stakeValidatorSelection(any(), any()) } returns mockGemStakeValidatorSelection(validator = null)
         val provider = makeProvider(AmountParams.Stake.Delegate(asset.id, validatorId = null))
         provider.assetInfo.filterNotNull().first()
         assertThrows(IllegalStateException::class.java) {
@@ -154,7 +153,7 @@ class AmountStakeProviderTest {
 
     @Test
     fun `redelegate sends to the validator Core selected, not the delegated one`() = runBlocking {
-        every { service.stakeValidatorSelection(any(), any()) } returns mockGemStakeValidatorSelection(mockGemValidatorRow(otherValidator))
+        every { stakeService.stakeValidatorSelection(any(), any()) } returns mockGemStakeValidatorSelection(mockGemValidatorRow(otherValidator))
         val provider = makeProvider(AmountParams.Stake.Redelegate(asset.id, "v1", "d1"))
         provider.validatorState.filterNotNull().first()
 
@@ -165,12 +164,12 @@ class AmountStakeProviderTest {
 
     @Test
     fun `validator selection follows what Core allows`() = runBlocking {
-        every { service.stakeValidatorSelection(any(), any()) } returns mockGemStakeValidatorSelection(mockGemValidatorRow(validator), canSelect = false)
+        every { stakeService.stakeValidatorSelection(any(), any()) } returns mockGemStakeValidatorSelection(mockGemValidatorRow(validator), canSelect = false)
         val locked = makeProvider(AmountParams.Stake.Undelegate(asset.id, "v1", "d1"))
         locked.validatorState.filterNotNull().first()
         assertEquals(false, locked.canSelectValidator.value)
 
-        every { service.stakeValidatorSelection(any(), any()) } returns mockGemStakeValidatorSelection(mockGemValidatorRow(validator))
+        every { stakeService.stakeValidatorSelection(any(), any()) } returns mockGemStakeValidatorSelection(mockGemValidatorRow(validator))
         val open = makeProvider(AmountParams.Stake.Delegate(asset.id))
         open.canSelectValidator.first { it }
         assertEquals(true, open.canSelectValidator.value)

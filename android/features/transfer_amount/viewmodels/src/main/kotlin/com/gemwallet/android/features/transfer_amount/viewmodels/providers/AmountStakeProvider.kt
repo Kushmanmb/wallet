@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import uniffi.gemstone.GemAmountServiceInterface
 import uniffi.gemstone.GemAmountType
 import uniffi.gemstone.GemStakeAmountInput
 import uniffi.gemstone.GemStakeValidatorSelection
@@ -46,7 +45,6 @@ class AmountStakeProvider(
     private val getDelegations: GetDelegations,
     private val getStakeValidator: GetStakeValidator,
     getValidators: GetValidators,
-    private val service: GemAmountServiceInterface,
     private val stakeService: GemStakeServiceInterface,
     scope: CoroutineScope,
 ) : AmountDataProvider(scope) {
@@ -123,7 +121,7 @@ class AmountStakeProvider(
         }.flowOn(Dispatchers.IO).stateIn(scope, SharingStarted.Eagerly, null)
 
     private val selected: StateFlow<StakeSelection?> = stakeInput
-        .map { current -> current?.let { StakeSelection(it, service.stakeValidatorSelection(params.assetId.chain.string, it)) } }
+        .map { current -> current?.let { StakeSelection(it, stakeService.stakeValidatorSelection(params.assetId.chain.string, it)) } }
         .flowOn(Dispatchers.IO)
         .stateIn(scope, SharingStarted.Eagerly, null)
 
@@ -178,7 +176,7 @@ class AmountStakeProvider(
     override suspend fun buildTransfer(amount: Crypto, isMax: Boolean): GemTransferData {
         val current = assetInfo.filterNotNull().first()
         val confirmed = checkNotNull(selected.value?.confirmed(selectedResource.value)) { "stake action requires a selection" }
-        return service.stakeTransferData(current.asset.toGem(), confirmed.stakeType(), amount.atomicValue, isMax)
+        return stakeService.stakeTransferData(current.asset.toGem(), confirmed.stakeType(), amount.atomicValue, isMax)
     }
 
 }

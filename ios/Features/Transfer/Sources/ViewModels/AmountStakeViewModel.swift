@@ -3,9 +3,9 @@
 import BigInt
 import Foundation
 import enum Gemstone.GemAmountType
-import protocol Gemstone.GemAmountServiceProtocol
 import enum Gemstone.GemStakeAmountInput
 import struct Gemstone.GemValidatorRow
+import protocol Gemstone.GemStakeServiceProtocol
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -28,10 +28,10 @@ public final class AmountStakeViewModel: AmountDataProvidable {
     let asset: Asset
     public let selection: AmountStakeSelection
     public let recommendedValidators: [DelegationValidator]
-    private let service: any GemAmountServiceProtocol
+    private let service: any GemStakeServiceProtocol
     private var action: GemStakeAmountInput
 
-    init(asset: Asset, type: GemStakeAmountInput, service: any GemAmountServiceProtocol) {
+    init(asset: Asset, type: GemStakeAmountInput, service: any GemStakeServiceProtocol) {
         self.asset = asset
         self.service = service
         if let resource = type.resource() {
