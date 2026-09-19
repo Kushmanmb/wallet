@@ -97,6 +97,20 @@ class ConfirmViewModelRequestTest {
         verify { confirmService.confirmation(any(), second, any()) }
     }
 
+    @Test
+    fun aRequestForAnotherWalletIsConfirmedForThatWallet() = runTest(testDispatcher) {
+        val current = mockWallet(accounts = listOf(account))
+        val connected = mockWallet(id = "wallet-2", name = "Connected", accounts = listOf(mockAccount(chain = Chain.Ethereum, address = "0xconnected")))
+        val transfer = mockGemTransferData(asset = asset, recipient = GemRecipient(address = account.address, memo = "connected"))
+        val viewModel = viewModel(SavedStateHandle()).also { model = it }
+
+        viewModel.init(transfer, wallet = connected)
+        advanceUntilIdle()
+
+        verify(exactly = 1) { confirmService.confirmation(connected.toGem(), transfer, any()) }
+        verify(exactly = 0) { confirmService.confirmation(current.toGem(), any(), any()) }
+    }
+
     private fun viewModel(handle: SavedStateHandle): ConfirmViewModel {
         every { confirmService.confirmation(any(), any(), any()) } returns confirmation
         every { confirmation.screen() } returns mockGemConfirmScreen()

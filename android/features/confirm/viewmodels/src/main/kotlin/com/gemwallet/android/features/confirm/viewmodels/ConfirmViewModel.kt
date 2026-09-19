@@ -55,6 +55,7 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.FeePriority
+import com.wallet.core.primitives.Wallet
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.math.BigInteger
@@ -121,6 +122,7 @@ class ConfirmViewModel @Inject constructor(
     val feeSelection = MutableStateFlow<GemConfirmFeeSelection>(GemConfirmFeeSelection.Priority(FeePriority.Normal.toGem()))
     private val feeAssetSelection = MutableStateFlow<FeeAssetSelection>(FeeAssetSelection.Automatic)
     private var requestSimulation: SimulationResult? = null
+    private val requestWallet = MutableStateFlow<Wallet?>(null)
 
     private val request = savedStateHandle.getStateFlow<String?>(RouteArgument.Params.key, null)
         .filterNotNull()
@@ -140,8 +142,11 @@ class ConfirmViewModel @Inject constructor(
     val session = getSession()
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val confirmation = combine(request.filterNotNull(), session.filterNotNull()) { request, session ->
-        confirmService.confirmation(session.wallet.toGem(), request, requestSimulation).also { screen.value = it.screen() }
+    private val wallet = combine(requestWallet, session) { requestWallet, session -> requestWallet ?: session?.wallet }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    private val confirmation = combine(request.filterNotNull(), wallet.filterNotNull()) { request, wallet ->
+        confirmService.confirmation(wallet.toGem(), request, requestSimulation).also { screen.value = it.screen() }
     }
     .flowOn(ioDispatcher)
     .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -245,10 +250,10 @@ class ConfirmViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val transactionRows: StateFlow<List<ConfirmRowUIModel>> = combine(request, session, content) { request, session, content ->
+    val transactionRows: StateFlow<List<ConfirmRowUIModel>> = combine(request, wallet, content) { request, wallet, content ->
         request ?: return@combine emptyList()
-        session ?: return@combine emptyList()
-        confirmService.rowContents(request, session.wallet.toGem(), content?.load?.addressName).mapNotNull { it.uiModel(context) }
+        wallet ?: return@combine emptyList()
+        confirmService.rowContents(request, wallet.toGem(), content?.load?.addressName).mapNotNull { it.uiModel(context) }
     }
     .flowOn(ioDispatcher)
     .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -298,8 +303,9 @@ class ConfirmViewModel @Inject constructor(
     fun dismissAcquire() = acquireRequestState.update { null }
 
 
-    fun init(transfer: GemTransferData, simulationResult: SimulationResult? = null) {
+    fun init(transfer: GemTransferData, simulationResult: SimulationResult? = null, wallet: Wallet? = null) {
         requestSimulation = simulationResult
+        requestWallet.value = wallet
         feeSelection.value = GemConfirmFeeSelection.Priority(transfer.defaultFeePriority())
         viewModelScope.launch(ioDispatcher) {
             val pack = transfer.pack()

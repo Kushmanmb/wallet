@@ -89,6 +89,6 @@ sealed class WCRequest(
         val isSendable: Boolean get() = request.isSendable
 
         val input: ConfirmTransferInput
-            get() = ConfirmTransferInput(request.transfer)
+            get() = ConfirmTransferInput(request.transfer, request.wallet)
     }
 }

@@ -115,7 +115,7 @@ fun ConfirmScreen(
             cancelAction()
             return@LaunchedEffect
         }
-        viewModel.init(input.data, simulationResult)
+        viewModel.init(input.data, simulationResult, input.wallet)
     }
 
     BackHandler(handleSystemBack) {
