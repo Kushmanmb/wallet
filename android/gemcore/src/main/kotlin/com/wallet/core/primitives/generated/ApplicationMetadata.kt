@@ -4,17 +4,23 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class ApplicationMetadataSource(val string: String) {
-    @SerialName("walletConnect")
-    WalletConnect("walletConnect"),
-
-    @SerialName("payment")
-    Payment("payment"),
+	@SerialName("walletConnect")
+	WalletConnect("walletConnect"),
+	@SerialName("payment")
+	Payment("payment"),
 }
 
 @Serializable
-data class ApplicationMetadata(val name: String, val description: String, val url: String, val icon: String, val source: ApplicationMetadataSource)
+data class ApplicationMetadata (
+	val name: String,
+	val description: String,
+	val url: String,
+	val icon: String,
+	val source: ApplicationMetadataSource
+)
+

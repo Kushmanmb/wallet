@@ -4,20 +4,18 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class WalletType(val string: String) {
-    @SerialName("multicoin")
-    Multicoin("multicoin"),
-
-    @SerialName("single")
-    Single("single"),
-
-    @SerialName("privateKey")
-    PrivateKey("privateKey"),
-
-    @SerialName("view")
-    View("view"),
+	@SerialName("multicoin")
+	Multicoin("multicoin"),
+	@SerialName("single")
+	Single("single"),
+	@SerialName("privateKey")
+	PrivateKey("privateKey"),
+	@SerialName("view")
+	View("view"),
 }
+

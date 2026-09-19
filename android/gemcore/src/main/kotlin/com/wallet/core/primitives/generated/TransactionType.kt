@@ -4,62 +4,46 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class TransactionType(val string: String) {
-    @SerialName("transfer")
-    Transfer("transfer"),
-
-    @SerialName("transferNFT")
-    TransferNFT("transferNFT"),
-
-    @SerialName("swap")
-    Swap("swap"),
-
-    @SerialName("tokenApproval")
-    TokenApproval("tokenApproval"),
-
-    @SerialName("stakeDelegate")
-    StakeDelegate("stakeDelegate"),
-
-    @SerialName("stakeUndelegate")
-    StakeUndelegate("stakeUndelegate"),
-
-    @SerialName("stakeRewards")
-    StakeRewards("stakeRewards"),
-
-    @SerialName("stakeRedelegate")
-    StakeRedelegate("stakeRedelegate"),
-
-    @SerialName("stakeWithdraw")
-    StakeWithdraw("stakeWithdraw"),
-
-    @SerialName("stakeFreeze")
-    StakeFreeze("stakeFreeze"),
-
-    @SerialName("stakeUnfreeze")
-    StakeUnfreeze("stakeUnfreeze"),
-
-    @SerialName("assetActivation")
-    AssetActivation("assetActivation"),
-
-    @SerialName("smartContractCall")
-    SmartContractCall("smartContractCall"),
-
-    @SerialName("perpetualOpenPosition")
-    PerpetualOpenPosition("perpetualOpenPosition"),
-
-    @SerialName("perpetualClosePosition")
-    PerpetualClosePosition("perpetualClosePosition"),
-
-    @SerialName("perpetualModifyPosition")
-    PerpetualModifyPosition("perpetualModifyPosition"),
-
-    @SerialName("earnDeposit")
-    EarnDeposit("earnDeposit"),
-
-    @SerialName("earnWithdraw")
-    EarnWithdraw("earnWithdraw"),
+	@SerialName("transfer")
+	Transfer("transfer"),
+	@SerialName("transferNFT")
+	TransferNFT("transferNFT"),
+	@SerialName("swap")
+	Swap("swap"),
+	@SerialName("tokenApproval")
+	TokenApproval("tokenApproval"),
+	@SerialName("stakeDelegate")
+	StakeDelegate("stakeDelegate"),
+	@SerialName("stakeUndelegate")
+	StakeUndelegate("stakeUndelegate"),
+	@SerialName("stakeRewards")
+	StakeRewards("stakeRewards"),
+	@SerialName("stakeRedelegate")
+	StakeRedelegate("stakeRedelegate"),
+	@SerialName("stakeWithdraw")
+	StakeWithdraw("stakeWithdraw"),
+	@SerialName("stakeFreeze")
+	StakeFreeze("stakeFreeze"),
+	@SerialName("stakeUnfreeze")
+	StakeUnfreeze("stakeUnfreeze"),
+	@SerialName("assetActivation")
+	AssetActivation("assetActivation"),
+	@SerialName("smartContractCall")
+	SmartContractCall("smartContractCall"),
+	@SerialName("perpetualOpenPosition")
+	PerpetualOpenPosition("perpetualOpenPosition"),
+	@SerialName("perpetualClosePosition")
+	PerpetualClosePosition("perpetualClosePosition"),
+	@SerialName("perpetualModifyPosition")
+	PerpetualModifyPosition("perpetualModifyPosition"),
+	@SerialName("earnDeposit")
+	EarnDeposit("earnDeposit"),
+	@SerialName("earnWithdraw")
+	EarnWithdraw("earnWithdraw"),
 }
+

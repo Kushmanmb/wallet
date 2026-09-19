@@ -4,26 +4,24 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class FeePriority(val string: String) {
-    @SerialName("normal")
-    Normal("normal"),
-
-    @SerialName("fast")
-    Fast("fast"),
+	@SerialName("normal")
+	Normal("normal"),
+	@SerialName("fast")
+	Fast("fast"),
 }
 
 @Serializable
 enum class FeeUnitType(val string: String) {
-    @SerialName("satVb")
-    SatVb("satVb"),
-
-    @SerialName("gwei")
-    Gwei("gwei"),
-
-    @SerialName("native")
-    Native("native"),
+	@SerialName("satVb")
+	SatVb("satVb"),
+	@SerialName("gwei")
+	Gwei("gwei"),
+	@SerialName("native")
+	Native("native"),
 }
+

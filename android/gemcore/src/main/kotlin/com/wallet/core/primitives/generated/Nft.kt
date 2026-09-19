@@ -4,83 +4,105 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class NFTType(val string: String) {
-    @SerialName("erc721")
-    ERC721("erc721"),
-
-    @SerialName("erc1155")
-    ERC1155("erc1155"),
-
-    @SerialName("spl")
-    SPL("spl"),
-
-    @SerialName("jetton")
-    JETTON("jetton"),
+	@SerialName("erc721")
+	ERC721("erc721"),
+	@SerialName("erc1155")
+	ERC1155("erc1155"),
+	@SerialName("spl")
+	SPL("spl"),
+	@SerialName("jetton")
+	JETTON("jetton"),
 }
 
 @Serializable
-data class NFTResource(val url: String, val mimeType: String)
-
-@Serializable
-data class NFTImages(val preview: NFTResource)
-
-@Serializable
-enum class NFTAttributeType(val string: String) {
-    @SerialName("string")
-    String("string"),
-
-    @SerialName("timestamp")
-    Timestamp("timestamp"),
-}
-
-@Serializable
-data class NFTAttribute(val name: String, val value: String, val valueType: NFTAttributeType? = null, val percentage: Double? = null)
-
-@Serializable
-data class NFTAsset(
-    val id: NFTAssetId,
-    val collectionId: NFTCollectionId,
-    val contractAddress: String? = null,
-    val tokenId: String,
-    val tokenType: NFTType,
-    val name: String,
-    val description: String? = null,
-    val chain: Chain,
-    val resource: NFTResource,
-    val images: NFTImages,
-    val attributes: List<NFTAttribute>,
+data class NFTResource (
+	val url: String,
+	val mimeType: String
 )
 
 @Serializable
-data class NFTCollection(val id: NFTCollectionId, val name: String, val description: String? = null, val chain: Chain, val contractAddress: String, val images: NFTImages, val status: VerificationStatus, val links: List<AssetLink>)
+data class NFTImages (
+	val preview: NFTResource
+)
 
 @Serializable
-data class NFTAssetData(val collection: NFTCollection, val asset: NFTAsset)
+enum class NFTAttributeType(val string: String) {
+	@SerialName("string")
+	String("string"),
+	@SerialName("timestamp")
+	Timestamp("timestamp"),
+}
 
 @Serializable
-data class NFTData(val collection: NFTCollection, val assets: List<NFTAsset>)
+data class NFTAttribute (
+	val name: String,
+	val value: String,
+	val valueType: NFTAttributeType? = null,
+	val percentage: Double? = null
+)
 
 @Serializable
-data class ReportNft(val collectionId: String, val assetId: String? = null, val reason: String? = null)
+data class NFTAsset (
+	val id: NFTAssetId,
+	val collectionId: NFTCollectionId,
+	val contractAddress: String? = null,
+	val tokenId: String,
+	val tokenType: NFTType,
+	val name: String,
+	val description: String? = null,
+	val chain: Chain,
+	val resource: NFTResource,
+	val images: NFTImages,
+	val attributes: List<NFTAttribute>
+)
+
+@Serializable
+data class NFTCollection (
+	val id: NFTCollectionId,
+	val name: String,
+	val description: String? = null,
+	val chain: Chain,
+	val contractAddress: String,
+	val images: NFTImages,
+	val status: VerificationStatus,
+	val links: List<AssetLink>
+)
+
+@Serializable
+data class NFTAssetData (
+	val collection: NFTCollection,
+	val asset: NFTAsset
+)
+
+@Serializable
+data class NFTData (
+	val collection: NFTCollection,
+	val assets: List<NFTAsset>
+)
+
+@Serializable
+data class ReportNft (
+	val collectionId: String,
+	val assetId: String? = null,
+	val reason: String? = null
+)
 
 @Serializable
 enum class ReportReason(val string: String) {
-    @SerialName("spam")
-    Spam("spam"),
-
-    @SerialName("malicious")
-    Malicious("malicious"),
-
-    @SerialName("inappropriate")
-    Inappropriate("inappropriate"),
-
-    @SerialName("copyright")
-    Copyright("copyright"),
-
-    @SerialName("other")
-    Other("other"),
+	@SerialName("spam")
+	Spam("spam"),
+	@SerialName("malicious")
+	Malicious("malicious"),
+	@SerialName("inappropriate")
+	Inappropriate("inappropriate"),
+	@SerialName("copyright")
+	Copyright("copyright"),
+	@SerialName("other")
+	Other("other"),
 }
+

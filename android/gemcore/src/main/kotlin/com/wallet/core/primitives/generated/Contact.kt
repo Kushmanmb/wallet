@@ -4,14 +4,31 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class Contact(val id: String, val name: String, val description: String? = null, val imageUrl: String? = null, val createdAt: SerializedDate, val updatedAt: SerializedDate)
+data class Contact (
+	val id: String,
+	val name: String,
+	val description: String? = null,
+	val imageUrl: String? = null,
+	val createdAt: SerializedDate,
+	val updatedAt: SerializedDate
+)
 
 @Serializable
-data class ContactAddress(val id: String, val contactId: String, val address: String, val chain: Chain, val memo: String? = null)
+data class ContactAddress (
+	val id: String,
+	val contactId: String,
+	val address: String,
+	val chain: Chain,
+	val memo: String? = null
+)
 
 @Serializable
-data class ContactData(val contact: Contact, val addresses: List<ContactAddress>)
+data class ContactData (
+	val contact: Contact,
+	val addresses: List<ContactAddress>
+)
+

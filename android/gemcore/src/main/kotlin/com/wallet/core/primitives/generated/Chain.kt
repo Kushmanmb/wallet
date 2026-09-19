@@ -4,176 +4,122 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class Chain(val string: String) {
-    @SerialName("bitcoin")
-    Bitcoin("bitcoin"),
-
-    @SerialName("bitcoincash")
-    BitcoinCash("bitcoincash"),
-
-    @SerialName("litecoin")
-    Litecoin("litecoin"),
-
-    @SerialName("ethereum")
-    Ethereum("ethereum"),
-
-    @SerialName("smartchain")
-    SmartChain("smartchain"),
-
-    @SerialName("solana")
-    Solana("solana"),
-
-    @SerialName("polygon")
-    Polygon("polygon"),
-
-    @SerialName("thorchain")
-    Thorchain("thorchain"),
-
-    @SerialName("mayachain")
-    Mayachain("mayachain"),
-
-    @SerialName("cosmos")
-    Cosmos("cosmos"),
-
-    @SerialName("osmosis")
-    Osmosis("osmosis"),
-
-    @SerialName("arbitrum")
-    Arbitrum("arbitrum"),
-
-    @SerialName("ton")
-    Ton("ton"),
-
-    @SerialName("tron")
-    Tron("tron"),
-
-    @SerialName("doge")
-    Doge("doge"),
-
-    @SerialName("zcash")
-    Zcash("zcash"),
-
-    @SerialName("optimism")
-    Optimism("optimism"),
-
-    @SerialName("aptos")
-    Aptos("aptos"),
-
-    @SerialName("base")
-    Base("base"),
-
-    @SerialName("avalanchec")
-    AvalancheC("avalanchec"),
-
-    @SerialName("sui")
-    Sui("sui"),
-
-    @SerialName("xrp")
-    Xrp("xrp"),
-
-    @SerialName("opbnb")
-    OpBNB("opbnb"),
-
-    @SerialName("fantom")
-    Fantom("fantom"),
-
-    @SerialName("gnosis")
-    Gnosis("gnosis"),
-
-    @SerialName("celestia")
-    Celestia("celestia"),
-
-    @SerialName("injective")
-    Injective("injective"),
-
-    @SerialName("sei")
-    Sei("sei"),
-
-    @SerialName("seievm")
-    SeiEvm("seievm"),
-
-    @SerialName("manta")
-    Manta("manta"),
-
-    @SerialName("blast")
-    Blast("blast"),
-
-    @SerialName("noble")
-    Noble("noble"),
-
-    @SerialName("zksync")
-    ZkSync("zksync"),
-
-    @SerialName("linea")
-    Linea("linea"),
-
-    @SerialName("mantle")
-    Mantle("mantle"),
-
-    @SerialName("celo")
-    Celo("celo"),
-
-    @SerialName("near")
-    Near("near"),
-
-    @SerialName("world")
-    World("world"),
-
-    @SerialName("stellar")
-    Stellar("stellar"),
-
-    @SerialName("sonic")
-    Sonic("sonic"),
-
-    @SerialName("algorand")
-    Algorand("algorand"),
-
-    @SerialName("polkadot")
-    Polkadot("polkadot"),
-
-    @SerialName("plasma")
-    Plasma("plasma"),
-
-    @SerialName("cardano")
-    Cardano("cardano"),
-
-    @SerialName("abstract")
-    Abstract("abstract"),
-
-    @SerialName("berachain")
-    Berachain("berachain"),
-
-    @SerialName("ink")
-    Ink("ink"),
-
-    @SerialName("unichain")
-    Unichain("unichain"),
-
-    @SerialName("hyperliquid")
-    Hyperliquid("hyperliquid"),
-
-    @SerialName("hypercore")
-    HyperCore("hypercore"),
-
-    @SerialName("monad")
-    Monad("monad"),
-
-    @SerialName("xlayer")
-    XLayer("xlayer"),
-
-    @SerialName("robinhood")
-    Robinhood("robinhood"),
-
-    @SerialName("stable")
-    Stable("stable"),
-
-    @SerialName("tempo")
-    Tempo("tempo"),
-
-    @SerialName("arc")
-    Arc("arc"),
+	@SerialName("bitcoin")
+	Bitcoin("bitcoin"),
+	@SerialName("bitcoincash")
+	BitcoinCash("bitcoincash"),
+	@SerialName("litecoin")
+	Litecoin("litecoin"),
+	@SerialName("ethereum")
+	Ethereum("ethereum"),
+	@SerialName("smartchain")
+	SmartChain("smartchain"),
+	@SerialName("solana")
+	Solana("solana"),
+	@SerialName("polygon")
+	Polygon("polygon"),
+	@SerialName("thorchain")
+	Thorchain("thorchain"),
+	@SerialName("mayachain")
+	Mayachain("mayachain"),
+	@SerialName("cosmos")
+	Cosmos("cosmos"),
+	@SerialName("osmosis")
+	Osmosis("osmosis"),
+	@SerialName("arbitrum")
+	Arbitrum("arbitrum"),
+	@SerialName("ton")
+	Ton("ton"),
+	@SerialName("tron")
+	Tron("tron"),
+	@SerialName("doge")
+	Doge("doge"),
+	@SerialName("zcash")
+	Zcash("zcash"),
+	@SerialName("optimism")
+	Optimism("optimism"),
+	@SerialName("aptos")
+	Aptos("aptos"),
+	@SerialName("base")
+	Base("base"),
+	@SerialName("avalanchec")
+	AvalancheC("avalanchec"),
+	@SerialName("sui")
+	Sui("sui"),
+	@SerialName("xrp")
+	Xrp("xrp"),
+	@SerialName("opbnb")
+	OpBNB("opbnb"),
+	@SerialName("fantom")
+	Fantom("fantom"),
+	@SerialName("gnosis")
+	Gnosis("gnosis"),
+	@SerialName("celestia")
+	Celestia("celestia"),
+	@SerialName("injective")
+	Injective("injective"),
+	@SerialName("sei")
+	Sei("sei"),
+	@SerialName("seievm")
+	SeiEvm("seievm"),
+	@SerialName("manta")
+	Manta("manta"),
+	@SerialName("blast")
+	Blast("blast"),
+	@SerialName("noble")
+	Noble("noble"),
+	@SerialName("zksync")
+	ZkSync("zksync"),
+	@SerialName("linea")
+	Linea("linea"),
+	@SerialName("mantle")
+	Mantle("mantle"),
+	@SerialName("celo")
+	Celo("celo"),
+	@SerialName("near")
+	Near("near"),
+	@SerialName("world")
+	World("world"),
+	@SerialName("stellar")
+	Stellar("stellar"),
+	@SerialName("sonic")
+	Sonic("sonic"),
+	@SerialName("algorand")
+	Algorand("algorand"),
+	@SerialName("polkadot")
+	Polkadot("polkadot"),
+	@SerialName("plasma")
+	Plasma("plasma"),
+	@SerialName("cardano")
+	Cardano("cardano"),
+	@SerialName("abstract")
+	Abstract("abstract"),
+	@SerialName("berachain")
+	Berachain("berachain"),
+	@SerialName("ink")
+	Ink("ink"),
+	@SerialName("unichain")
+	Unichain("unichain"),
+	@SerialName("hyperliquid")
+	Hyperliquid("hyperliquid"),
+	@SerialName("hypercore")
+	HyperCore("hypercore"),
+	@SerialName("monad")
+	Monad("monad"),
+	@SerialName("xlayer")
+	XLayer("xlayer"),
+	@SerialName("robinhood")
+	Robinhood("robinhood"),
+	@SerialName("stable")
+	Stable("stable"),
+	@SerialName("tempo")
+	Tempo("tempo"),
+	@SerialName("arc")
+	Arc("arc"),
 }
+

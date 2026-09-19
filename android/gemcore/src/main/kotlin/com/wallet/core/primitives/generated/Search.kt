@@ -4,8 +4,13 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class AssetList(val id: String, val name: String, val count: UInt)
+data class AssetList (
+	val id: String,
+	val name: String,
+	val count: UInt
+)
+

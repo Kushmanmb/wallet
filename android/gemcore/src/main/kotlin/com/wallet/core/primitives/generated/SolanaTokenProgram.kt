@@ -4,14 +4,14 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class SolanaTokenProgramId(val string: String) {
-    @SerialName("token")
-    Token("token"),
-
-    @SerialName("token2022")
-    Token2022("token2022"),
+	@SerialName("token")
+	Token("token"),
+	@SerialName("token2022")
+	Token2022("token2022"),
 }
+

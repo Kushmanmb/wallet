@@ -4,11 +4,12 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class PerpetualProvider(val string: String) {
-    @SerialName("hypercore")
-    Hypercore("hypercore"),
+	@SerialName("hypercore")
+	Hypercore("hypercore"),
 }
+

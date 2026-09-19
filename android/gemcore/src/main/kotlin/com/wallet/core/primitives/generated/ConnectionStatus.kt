@@ -4,17 +4,16 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class ConnectionStatus(val string: String) {
-    @SerialName("online")
-    Online("online"),
-
-    @SerialName("noInternet")
-    NoInternet("noInternet"),
-
-    @SerialName("noService")
-    NoService("noService"),
+	@SerialName("online")
+	Online("online"),
+	@SerialName("noInternet")
+	NoInternet("noInternet"),
+	@SerialName("noService")
+	NoService("noService"),
 }
+

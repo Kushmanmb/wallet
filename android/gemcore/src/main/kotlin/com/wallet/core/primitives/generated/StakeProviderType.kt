@@ -4,14 +4,14 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class StakeProviderType(val string: String) {
-    @SerialName("stake")
-    Stake("stake"),
-
-    @SerialName("earn")
-    Earn("earn"),
+	@SerialName("stake")
+	Stake("stake"),
+	@SerialName("earn")
+	Earn("earn"),
 }
+

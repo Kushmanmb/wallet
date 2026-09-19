@@ -4,8 +4,14 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class Account(val chain: Chain, val address: String, val derivationPath: String, val extendedPublicKey: String? = null)
+data class Account (
+	val chain: Chain,
+	val address: String,
+	val derivationPath: String,
+	val extendedPublicKey: String? = null
+)
+

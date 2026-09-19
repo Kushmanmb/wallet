@@ -4,14 +4,30 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class TransactionNFTTransferMetadata(val assetId: NFTAssetId, val name: String? = null)
+data class TransactionNFTTransferMetadata (
+	val assetId: NFTAssetId,
+	val name: String? = null
+)
 
 @Serializable
-data class TransactionPerpetualMetadata(val pnl: Double, val price: Double, val direction: PerpetualDirection, val isLiquidation: Boolean? = null, val provider: PerpetualProvider? = null)
+data class TransactionPerpetualMetadata (
+	val pnl: Double,
+	val price: Double,
+	val direction: PerpetualDirection,
+	val isLiquidation: Boolean? = null,
+	val provider: PerpetualProvider? = null
+)
 
 @Serializable
-data class TransactionSwapMetadata(val fromAsset: AssetId, val fromValue: String, val toAsset: AssetId, val toValue: String, val provider: String? = null)
+data class TransactionSwapMetadata (
+	val fromAsset: AssetId,
+	val fromValue: String,
+	val toAsset: AssetId,
+	val toValue: String,
+	val provider: String? = null
+)
+

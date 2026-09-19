@@ -197,7 +197,7 @@ impl GemAutocloseModify {
     pub fn mock(take_profit: GemAutocloseField, stop_loss: GemAutocloseField) -> Self {
         Self {
             direction: PerpetualDirection::Long,
-            asset_index: 5,
+            asset_index: Some(5),
             take_profit,
             stop_loss,
         }

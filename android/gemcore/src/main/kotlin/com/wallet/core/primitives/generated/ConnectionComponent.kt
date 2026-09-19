@@ -4,14 +4,14 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class ConnectionComponent(val string: String) {
-    @SerialName("internet")
-    Internet("internet"),
-
-    @SerialName("stream")
-    Stream("stream"),
+	@SerialName("internet")
+	Internet("internet"),
+	@SerialName("stream")
+	Stream("stream"),
 }
+

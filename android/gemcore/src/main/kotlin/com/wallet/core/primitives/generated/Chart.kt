@@ -4,14 +4,29 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class ChartCandleStick(val date: SerializedDate, val open: Double, val high: Double, val low: Double, val close: Double, val volume: Double)
+data class ChartCandleStick (
+	val date: SerializedDate,
+	val open: Double,
+	val high: Double,
+	val low: Double,
+	val close: Double,
+	val volume: Double
+)
 
 @Serializable
-data class ChartCandleUpdate(val coin: String, val interval: String, val candle: ChartCandleStick)
+data class ChartCandleUpdate (
+	val coin: String,
+	val interval: String,
+	val candle: ChartCandleStick
+)
 
 @Serializable
-data class ChartDateValue(val date: SerializedDate, val value: Double)
+data class ChartDateValue (
+	val date: SerializedDate,
+	val value: Double
+)
+

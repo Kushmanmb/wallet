@@ -4,8 +4,14 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class InAppNotification(val walletId: WalletId, val readAt: SerializedDate? = null, val createdAt: SerializedDate, val item: CoreListItem)
+data class InAppNotification (
+	val walletId: WalletId,
+	val readAt: SerializedDate? = null,
+	val createdAt: SerializedDate,
+	val item: CoreListItem
+)
+

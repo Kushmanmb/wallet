@@ -4,23 +4,20 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class AddressType(val string: String) {
-    @SerialName("address")
-    Address("address"),
-
-    @SerialName("contract")
-    Contract("contract"),
-
-    @SerialName("validator")
-    Validator("validator"),
-
-    @SerialName("contact")
-    Contact("contact"),
-
-    @SerialName("internalWallet")
-    InternalWallet("internalWallet"),
+	@SerialName("address")
+	Address("address"),
+	@SerialName("contract")
+	Contract("contract"),
+	@SerialName("validator")
+	Validator("validator"),
+	@SerialName("contact")
+	Contact("contact"),
+	@SerialName("internalWallet")
+	InternalWallet("internalWallet"),
 }
+

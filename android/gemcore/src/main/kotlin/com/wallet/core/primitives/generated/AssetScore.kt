@@ -4,8 +4,11 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class AssetScore(val rank: Int)
+data class AssetScore (
+	val rank: Int
+)
+

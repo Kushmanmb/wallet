@@ -4,8 +4,15 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class BalanceMetadata(val votes: UInt, val energyAvailable: UInt, val energyTotal: UInt, val bandwidthAvailable: UInt, val bandwidthTotal: UInt)
+data class BalanceMetadata (
+	val votes: UInt,
+	val energyAvailable: UInt,
+	val energyTotal: UInt,
+	val bandwidthAvailable: UInt,
+	val bandwidthTotal: UInt
+)
+

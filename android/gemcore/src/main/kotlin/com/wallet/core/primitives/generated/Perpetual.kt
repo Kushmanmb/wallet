@@ -4,69 +4,99 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class Perpetual(
-    val id: PerpetualId,
-    val name: String,
-    val provider: PerpetualProvider,
-    val assetId: AssetId,
-    val identifier: String,
-    val price: Double,
-    val pricePercentChange24h: Double,
-    val openInterest: Double,
-    val volume24h: Double,
-    val funding: Double,
-    val maxLeverage: UByte,
-    val isIsolatedOnly: Boolean,
+data class Perpetual (
+	val id: PerpetualId,
+	val name: String,
+	val provider: PerpetualProvider,
+	val assetId: AssetId,
+	val identifier: String,
+	val price: Double,
+	val pricePercentChange24h: Double,
+	val openInterest: Double,
+	val volume24h: Double,
+	val funding: Double,
+	val maxLeverage: UByte,
+	val isIsolatedOnly: Boolean
 )
 
 @Serializable
-data class PerpetualBalance(val available: Double, val reserved: Double, val withdrawable: Double)
+data class PerpetualBalance (
+	val available: Double,
+	val reserved: Double,
+	val withdrawable: Double
+)
 
 @Serializable
-data class PerpetualBasic(val assetId: AssetId, val perpetualId: PerpetualId, val provider: PerpetualProvider)
+data class PerpetualBasic (
+	val assetId: AssetId,
+	val perpetualId: PerpetualId,
+	val provider: PerpetualProvider
+)
 
 @Serializable
-data class PerpetualMetadata(val isPinned: Boolean)
+data class PerpetualMetadata (
+	val isPinned: Boolean
+)
 
 @Serializable
-data class PerpetualData(val perpetual: Perpetual, val asset: Asset, val metadata: PerpetualMetadata)
+data class PerpetualData (
+	val perpetual: Perpetual,
+	val asset: Asset,
+	val metadata: PerpetualMetadata
+)
 
 @Serializable
-data class PerpetualMarketData(val coin: String, val price: Double, val pricePercentChange24h: Double, val openInterest: Double, val volume24h: Double, val funding: Double)
+data class PerpetualMarketData (
+	val coin: String,
+	val price: Double,
+	val pricePercentChange24h: Double,
+	val openInterest: Double,
+	val volume24h: Double,
+	val funding: Double
+)
 
 @Serializable
-data class PerpetualPositionData(val perpetual: Perpetual, val asset: Asset, val position: PerpetualPosition)
+data class PerpetualPositionData (
+	val perpetual: Perpetual,
+	val asset: Asset,
+	val position: PerpetualPosition
+)
 
 @Serializable
-data class PerpetualPositionsSummary(val positions: List<PerpetualPosition>, val balance: PerpetualBalance)
+data class PerpetualPositionsSummary (
+	val positions: List<PerpetualPosition>,
+	val balance: PerpetualBalance
+)
 
 @Serializable
-data class PerpetualSearchData(val perpetual: Perpetual, val asset: Asset)
+data class PerpetualSearchData (
+	val perpetual: Perpetual,
+	val asset: Asset
+)
 
 @Serializable
 enum class AccountDataType(val string: String) {
-    @SerialName("activate")
-    Activate("activate"),
+	@SerialName("activate")
+	Activate("activate"),
 }
 
 @Serializable
 enum class PerpetualAccountMode(val string: String) {
-    @SerialName("standard")
-    Standard("standard"),
-
-    @SerialName("unified")
-    Unified("unified"),
+	@SerialName("standard")
+	Standard("standard"),
+	@SerialName("unified")
+	Unified("unified"),
 }
 
 @Serializable
 enum class PerpetualDirection(val string: String) {
-    @SerialName("short")
-    Short("short"),
-
-    @SerialName("long")
-    Long("long"),
+	@SerialName("short")
+	Short("short"),
+	@SerialName("long")
+	Long("long"),
 }
+

@@ -4,26 +4,22 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class TransactionState(val string: String) {
-    @SerialName("pending")
-    Pending("pending"),
-
-    @SerialName("confirmed")
-    Confirmed("confirmed"),
-
-    @SerialName("inTransit")
-    InTransit("inTransit"),
-
-    @SerialName("failed")
-    Failed("failed"),
-
-    @SerialName("reverted")
-    Reverted("reverted"),
-
-    @SerialName("refunded")
-    Refunded("refunded"),
+	@SerialName("pending")
+	Pending("pending"),
+	@SerialName("confirmed")
+	Confirmed("confirmed"),
+	@SerialName("inTransit")
+	InTransit("inTransit"),
+	@SerialName("failed")
+	Failed("failed"),
+	@SerialName("reverted")
+	Reverted("reverted"),
+	@SerialName("refunded")
+	Refunded("refunded"),
 }
+

@@ -4,14 +4,14 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class ScanReceiveMode(val string: String) {
-    @SerialName("scan")
-    Scan("scan"),
-
-    @SerialName("receive")
-    Receive("receive"),
+	@SerialName("scan")
+	Scan("scan"),
+	@SerialName("receive")
+	Receive("receive"),
 }
+

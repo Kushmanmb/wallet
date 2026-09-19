@@ -4,56 +4,48 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class NameProvider(val string: String) {
-    @SerialName("ud")
-    Ud("ud"),
-
-    @SerialName("ens")
-    Ens("ens"),
-
-    @SerialName("sns")
-    Sns("sns"),
-
-    @SerialName("ton")
-    Ton("ton"),
-
-    @SerialName("spaceid")
-    Spaceid("spaceid"),
-
-    @SerialName("did")
-    Did("did"),
-
-    @SerialName("suins")
-    Suins("suins"),
-
-    @SerialName("aptos")
-    Aptos("aptos"),
-
-    @SerialName("injective")
-    Injective("injective"),
-
-    @SerialName("icns")
-    Icns("icns"),
-
-    @SerialName("lens")
-    Lens("lens"),
-
-    @SerialName("basenames")
-    Basenames("basenames"),
-
-    @SerialName("hyperliquid")
-    Hyperliquid("hyperliquid"),
-
-    @SerialName("alldomains")
-    AllDomains("alldomains"),
-
-    @SerialName("near")
-    Near("near"),
+	@SerialName("ud")
+	Ud("ud"),
+	@SerialName("ens")
+	Ens("ens"),
+	@SerialName("sns")
+	Sns("sns"),
+	@SerialName("ton")
+	Ton("ton"),
+	@SerialName("spaceid")
+	Spaceid("spaceid"),
+	@SerialName("did")
+	Did("did"),
+	@SerialName("suins")
+	Suins("suins"),
+	@SerialName("aptos")
+	Aptos("aptos"),
+	@SerialName("injective")
+	Injective("injective"),
+	@SerialName("icns")
+	Icns("icns"),
+	@SerialName("lens")
+	Lens("lens"),
+	@SerialName("basenames")
+	Basenames("basenames"),
+	@SerialName("hyperliquid")
+	Hyperliquid("hyperliquid"),
+	@SerialName("alldomains")
+	AllDomains("alldomains"),
+	@SerialName("near")
+	Near("near"),
 }
 
 @Serializable
-data class NameRecord(val name: String, val chain: Chain, val address: String, val provider: NameProvider)
+data class NameRecord (
+	val name: String,
+	val chain: Chain,
+	val address: String,
+	val provider: NameProvider
+)
+

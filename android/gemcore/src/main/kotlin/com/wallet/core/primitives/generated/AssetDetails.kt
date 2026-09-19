@@ -4,37 +4,46 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class AssetProperties(
-    val isEnabled: Boolean,
-    val isBuyable: Boolean,
-    val isSellable: Boolean,
-    val isSwapable: Boolean,
-    val isStakeable: Boolean,
-    val stakingApr: Double? = null,
-    val isEarnable: Boolean,
-    val earnApr: Double? = null,
-    val hasImage: Boolean,
+data class AssetProperties (
+	val isEnabled: Boolean,
+	val isBuyable: Boolean,
+	val isSellable: Boolean,
+	val isSwapable: Boolean,
+	val isStakeable: Boolean,
+	val stakingApr: Double? = null,
+	val isEarnable: Boolean,
+	val earnApr: Double? = null,
+	val hasImage: Boolean
 )
 
 @Serializable
-data class AssetBasic(val asset: Asset, val properties: AssetProperties, val score: AssetScore, val price: Price? = null)
-
-@Serializable
-data class AssetLink(val name: String, val url: String)
-
-@Serializable
-data class AssetFull(
-    val asset: Asset,
-    val properties: AssetProperties,
-    val score: AssetScore,
-    val tags: List<String>,
-    val links: List<AssetLink>,
-    val associations: List<AssetAssociation>,
-    val perpetuals: List<PerpetualBasic>,
-    val price: Price? = null,
-    val market: AssetMarket? = null,
+data class AssetBasic (
+	val asset: Asset,
+	val properties: AssetProperties,
+	val score: AssetScore,
+	val price: Price? = null
 )
+
+@Serializable
+data class AssetLink (
+	val name: String,
+	val url: String
+)
+
+@Serializable
+data class AssetFull (
+	val asset: Asset,
+	val properties: AssetProperties,
+	val score: AssetScore,
+	val tags: List<String>,
+	val links: List<AssetLink>,
+	val associations: List<AssetAssociation>,
+	val perpetuals: List<PerpetualBasic>,
+	val price: Price? = null,
+	val market: AssetMarket? = null
+)
+

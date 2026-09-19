@@ -4,14 +4,14 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class Platform(val string: String) {
-    @SerialName("ios")
-    IOS("ios"),
-
-    @SerialName("android")
-    Android("android"),
+	@SerialName("ios")
+	IOS("ios"),
+	@SerialName("android")
+	Android("android"),
 }
+

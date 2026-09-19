@@ -4,17 +4,21 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class NodeState(val string: String) {
-    @SerialName("active")
-    Active("active"),
-
-    @SerialName("inactive")
-    Inactive("inactive"),
+	@SerialName("active")
+	Active("active"),
+	@SerialName("inactive")
+	Inactive("inactive"),
 }
 
 @Serializable
-data class Node(val url: String, val status: NodeState, val priority: Int)
+data class Node (
+	val url: String,
+	val status: NodeState,
+	val priority: Int
+)
+

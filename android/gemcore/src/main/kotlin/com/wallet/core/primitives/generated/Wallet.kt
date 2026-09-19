@@ -4,17 +4,27 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class WalletSource(val string: String) {
-    @SerialName("create")
-    Create("create"),
-
-    @SerialName("import")
-    Import("import"),
+	@SerialName("create")
+	Create("create"),
+	@SerialName("import")
+	Import("import"),
 }
 
 @Serializable
-data class Wallet(val id: WalletId, val externalId: String? = null, val name: String, val index: Int, val type: WalletType, val accounts: List<Account>, val isPinned: Boolean, val imageUrl: String? = null, val source: WalletSource)
+data class Wallet (
+	val id: WalletId,
+	val externalId: String? = null,
+	val name: String,
+	val index: Int,
+	val type: WalletType,
+	val accounts: List<Account>,
+	val isPinned: Boolean,
+	val imageUrl: String? = null,
+	val source: WalletSource
+)
+

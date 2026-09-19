@@ -4,21 +4,22 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class AssetMetaData(
-    val isEnabled: Boolean,
-    val isBalanceEnabled: Boolean,
-    val isBuyEnabled: Boolean,
-    val isSellEnabled: Boolean,
-    val isSwapEnabled: Boolean,
-    val isStakeEnabled: Boolean,
-    val isEarnEnabled: Boolean,
-    val isPinned: Boolean,
-    val isActive: Boolean,
-    val stakingApr: Double? = null,
-    val earnApr: Double? = null,
-    val rankScore: Int,
+data class AssetMetaData (
+	val isEnabled: Boolean,
+	val isBalanceEnabled: Boolean,
+	val isBuyEnabled: Boolean,
+	val isSellEnabled: Boolean,
+	val isSwapEnabled: Boolean,
+	val isStakeEnabled: Boolean,
+	val isEarnEnabled: Boolean,
+	val isPinned: Boolean,
+	val isActive: Boolean,
+	val stakingApr: Double? = null,
+	val earnApr: Double? = null,
+	val rankScore: Int
 )
+

@@ -4,11 +4,22 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class Price(val price: Double, val priceChangePercentage24h: Double, val updatedAt: SerializedDate)
+data class Price (
+	val price: Double,
+	val priceChangePercentage24h: Double,
+	val updatedAt: SerializedDate
+)
 
 @Serializable
-data class PriceData(val asset: Asset, val price: Price? = null, val priceAlerts: List<PriceAlert>, val market: AssetMarket? = null, val links: List<AssetLink>)
+data class PriceData (
+	val asset: Asset,
+	val price: Price? = null,
+	val priceAlerts: List<PriceAlert>,
+	val market: AssetMarket? = null,
+	val links: List<AssetLink>
+)
+

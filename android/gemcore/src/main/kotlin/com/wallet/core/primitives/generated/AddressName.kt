@@ -4,8 +4,16 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class AddressName(val chain: Chain, val address: String, val name: String, val type: AddressType, val status: VerificationStatus, val imageUrl: String? = null)
+data class AddressName (
+	val chain: Chain,
+	val address: String,
+	val name: String,
+	val type: AddressType,
+	val status: VerificationStatus,
+	val imageUrl: String? = null
+)
+

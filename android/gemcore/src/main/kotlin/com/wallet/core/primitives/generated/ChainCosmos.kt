@@ -4,32 +4,26 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class CosmosChain(val string: String) {
-    @SerialName("cosmos")
-    Cosmos("cosmos"),
-
-    @SerialName("osmosis")
-    Osmosis("osmosis"),
-
-    @SerialName("celestia")
-    Celestia("celestia"),
-
-    @SerialName("thorchain")
-    Thorchain("thorchain"),
-
-    @SerialName("mayachain")
-    Mayachain("mayachain"),
-
-    @SerialName("injective")
-    Injective("injective"),
-
-    @SerialName("sei")
-    Sei("sei"),
-
-    @SerialName("noble")
-    Noble("noble"),
+	@SerialName("cosmos")
+	Cosmos("cosmos"),
+	@SerialName("osmosis")
+	Osmosis("osmosis"),
+	@SerialName("celestia")
+	Celestia("celestia"),
+	@SerialName("thorchain")
+	Thorchain("thorchain"),
+	@SerialName("mayachain")
+	Mayachain("mayachain"),
+	@SerialName("injective")
+	Injective("injective"),
+	@SerialName("sei")
+	Sei("sei"),
+	@SerialName("noble")
+	Noble("noble"),
 }
+

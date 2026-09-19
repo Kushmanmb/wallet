@@ -4,74 +4,54 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 enum class SwapProvider(val string: String) {
-    @SerialName("uniswap_v3")
-    UniswapV3("uniswap_v3"),
-
-    @SerialName("uniswap_v4")
-    UniswapV4("uniswap_v4"),
-
-    @SerialName("pancakeswap_v3")
-    PancakeswapV3("pancakeswap_v3"),
-
-    @SerialName("aerodrome")
-    Aerodrome("aerodrome"),
-
-    @SerialName("panora")
-    Panora("panora"),
-
-    @SerialName("thorchain")
-    Thorchain("thorchain"),
-
-    @SerialName("jupiter")
-    Jupiter("jupiter"),
-
-    @SerialName("okx")
-    Okx("okx"),
-
-    @SerialName("across")
-    Across("across"),
-
-    @SerialName("oku")
-    Oku("oku"),
-
-    @SerialName("wagmi")
-    Wagmi("wagmi"),
-
-    @SerialName("stonfi_v2")
-    StonfiV2("stonfi_v2"),
-
-    @SerialName("mayan")
-    Mayan("mayan"),
-
-    @SerialName("chainflip")
-    Chainflip("chainflip"),
-
-    @SerialName("near_intents")
-    NearIntents("near_intents"),
-
-    @SerialName("cetus_clmm")
-    CetusClmm("cetus_clmm"),
-
-    @SerialName("relay")
-    Relay("relay"),
-
-    @SerialName("hyperliquid")
-    Hyperliquid("hyperliquid"),
-
-    @SerialName("orca")
-    Orca("orca"),
-
-    @SerialName("squid")
-    Squid("squid"),
-
-    @SerialName("mayachain")
-    Mayachain("mayachain"),
-
-    @SerialName("swaps_xyz")
-    SwapsXyz("swaps_xyz"),
+	@SerialName("uniswap_v3")
+	UniswapV3("uniswap_v3"),
+	@SerialName("uniswap_v4")
+	UniswapV4("uniswap_v4"),
+	@SerialName("pancakeswap_v3")
+	PancakeswapV3("pancakeswap_v3"),
+	@SerialName("aerodrome")
+	Aerodrome("aerodrome"),
+	@SerialName("panora")
+	Panora("panora"),
+	@SerialName("thorchain")
+	Thorchain("thorchain"),
+	@SerialName("jupiter")
+	Jupiter("jupiter"),
+	@SerialName("okx")
+	Okx("okx"),
+	@SerialName("across")
+	Across("across"),
+	@SerialName("oku")
+	Oku("oku"),
+	@SerialName("wagmi")
+	Wagmi("wagmi"),
+	@SerialName("stonfi_v2")
+	StonfiV2("stonfi_v2"),
+	@SerialName("mayan")
+	Mayan("mayan"),
+	@SerialName("chainflip")
+	Chainflip("chainflip"),
+	@SerialName("near_intents")
+	NearIntents("near_intents"),
+	@SerialName("cetus_clmm")
+	CetusClmm("cetus_clmm"),
+	@SerialName("relay")
+	Relay("relay"),
+	@SerialName("hyperliquid")
+	Hyperliquid("hyperliquid"),
+	@SerialName("orca")
+	Orca("orca"),
+	@SerialName("squid")
+	Squid("squid"),
+	@SerialName("mayachain")
+	Mayachain("mayachain"),
+	@SerialName("swaps_xyz")
+	SwapsXyz("swaps_xyz"),
 }
+

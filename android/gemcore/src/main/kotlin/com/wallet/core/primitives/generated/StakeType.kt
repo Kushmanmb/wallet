@@ -4,17 +4,20 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class TronVote(val validator: String, val count: Long)
+data class TronVote (
+	val validator: String,
+	val count: Long
+)
 
 @Serializable
 enum class Resource(val string: String) {
-    @SerialName("bandwidth")
-    Bandwidth("bandwidth"),
-
-    @SerialName("energy")
-    Energy("energy"),
+	@SerialName("bandwidth")
+	Bandwidth("bandwidth"),
+	@SerialName("energy")
+	Energy("energy"),
 }
+

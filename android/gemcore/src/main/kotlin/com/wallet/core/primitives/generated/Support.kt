@@ -4,49 +4,66 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class SupportAgent(val name: String)
+data class SupportAgent (
+	val name: String
+)
 
 @Serializable
 sealed class SupportMessageSender {
-    @Serializable
-    @SerialName("user")
-    object User : SupportMessageSender()
-
-    @Serializable
-    @SerialName("agent")
-    data class Agent(val data: SupportAgent) : SupportMessageSender()
+	@Serializable
+	@SerialName("user")
+	object User: SupportMessageSender()
+	@Serializable
+	@SerialName("agent")
+	data class Agent(val data: SupportAgent): SupportMessageSender()
 }
 
 @Serializable
 enum class SupportMessageStatus(val string: String) {
-    @SerialName("sending")
-    Sending("sending"),
-
-    @SerialName("sent")
-    Sent("sent"),
-
-    @SerialName("failed")
-    Failed("failed"),
+	@SerialName("sending")
+	Sending("sending"),
+	@SerialName("sent")
+	Sent("sent"),
+	@SerialName("failed")
+	Failed("failed"),
 }
 
 @Serializable
-data class SupportMessageImage(val id: String, val url: String, val thumbnailUrl: String? = null, val fileName: String? = null, val fileSize: Long? = null, val width: Int? = null, val height: Int? = null)
+data class SupportMessageImage (
+	val id: String,
+	val url: String,
+	val thumbnailUrl: String? = null,
+	val fileName: String? = null,
+	val fileSize: Long? = null,
+	val width: Int? = null,
+	val height: Int? = null
+)
 
 @Serializable
-data class SupportMessage(val id: String, val content: String, val sender: SupportMessageSender, val status: SupportMessageStatus, val createdAt: SerializedDate, val images: List<SupportMessageImage>)
+data class SupportMessage (
+	val id: String,
+	val content: String,
+	val sender: SupportMessageSender,
+	val status: SupportMessageStatus,
+	val createdAt: SerializedDate,
+	val images: List<SupportMessageImage>
+)
 
 @Serializable
 enum class SupportTypingStatus(val string: String) {
-    @SerialName("on")
-    On("on"),
-
-    @SerialName("off")
-    Off("off"),
+	@SerialName("on")
+	On("on"),
+	@SerialName("off")
+	Off("off"),
 }
 
 @Serializable
-data class SupportTyping(val status: SupportTypingStatus, val agent: SupportAgent)
+data class SupportTyping (
+	val status: SupportTypingStatus,
+	val agent: SupportAgent
+)
+

@@ -4,8 +4,12 @@
 
 package com.wallet.core.primitives
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
-data class TransactionUtxoInput(val address: String, val value: String)
+data class TransactionUtxoInput (
+	val address: String,
+	val value: String
+)
+
