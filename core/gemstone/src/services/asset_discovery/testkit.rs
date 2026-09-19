@@ -42,6 +42,7 @@ impl GemTransactionStatusService for RecordingTransactionStatus {
 pub struct DiscoveryTestkit {
     pub discovery: Arc<GemAssetDiscoveryService>,
     pub assets: Arc<GemAssetsService>,
+    pub asset_store: Arc<MemoryAssetStore>,
     pub transactions: Arc<GemTransactionsService>,
     pub wallets: Arc<MemoryWalletStore>,
     pub balance: Arc<GemBalanceService>,
@@ -91,7 +92,7 @@ impl DiscoveryTestkit {
         let balance = Arc::new(GemBalanceService::new(
             gateway,
             wallets.clone(),
-            asset_store,
+            asset_store.clone(),
             balances.clone(),
             assets.clone(),
             Arc::new(SubscriptionTestkit::new(&[], &[]).service),
@@ -118,6 +119,7 @@ impl DiscoveryTestkit {
         Self {
             discovery,
             assets,
+            asset_store,
             transactions,
             wallets,
             balance,
