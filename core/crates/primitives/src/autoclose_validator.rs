@@ -20,10 +20,6 @@ impl AutocloseValidator {
         Self { trigger_type, direction, market_price }
     }
 
-    pub fn validate_optional(&self, price: Option<f64>) -> AutocloseValidation {
-        price.map_or(AutocloseValidation::Valid, |price| self.validate(price))
-    }
-
     pub fn validate(&self, price: f64) -> AutocloseValidation {
         if price <= 0.0 {
             return AutocloseValidation::InvalidAmount;

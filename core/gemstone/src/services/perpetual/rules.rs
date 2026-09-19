@@ -454,7 +454,7 @@ pub fn order(provider: PerpetualProvider, input: GemPerpetualOrderInput) -> Perp
     }
 }
 
-pub(super) fn asset_index(perpetual: &Perpetual) -> Result<i32, GemServiceError> {
+fn asset_index(perpetual: &Perpetual) -> Result<i32, GemServiceError> {
     perpetual.identifier.parse().map_err(|_| GemServiceError::InvalidInput {
         msg: format!("perpetual {} has no asset index", perpetual.identifier),
     })
