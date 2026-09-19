@@ -54,13 +54,6 @@ Found by pairing every view model on both apps (see Coverage) and reading the on
 
 None of these is a code change until someone chooses; each is written so the choice is the only remaining step.
 
-- **O35** **S** `ios/Gem/ViewModels/RootSceneViewModel.swift:41` — `currentWallet` reads `viewModelFactory.stores.walletStore.getWallet(id:)` with `try?` on every `body` pass. `GemWalletSessionService.get_current_wallet` is the answer but it is `async`, and making the point read sync is not free: Room forbids a blocking query on the main thread, so the same signature would cost Android a threading rule nothing enforces (ARCHITECTURE.md § 2). Decide whether the root holds the wallet it was launched with and updates it from the session events, or the session service grows a sync read that Android answers from memory.
-- **S34** **L** `Features/Settings/RewardsViewModel.swift` — wallet selection, the loaded rewards state, sheets, alerts and toasts. The widest screen that derives a view state from state the user drives and has no session; a shape to agree.
-- **S35** **L** `Features/WalletTab/WalletSearchSceneViewModel.swift` — a search model driving three capped sections. Two of its section decisions are still app-side compositions of Core answers (`searchableQuery.isEmpty && recentModel.hasAssets`, `sections.pinnedAssets.isNotEmpty || showPinnedPerpetuals`) where [sections are records](ARCHITECTURE.md#sections-actions-and-destinations-are-records-too); a session would carry them.
-- **S37** **L** `Features/Assets/SelectAssetViewModel.swift` — a query, a filter and a selection over a loaded list.
-- **S38** **L** `Features/Transfer/ConfirmTransferSceneViewModel.swift` — holds `GemConfirmation`, which SERVICES.md explicitly calls not a session because it loads and executes; this is the item that decides whether that is still right.
-- **S40** **M** `Features/Transfer/AmountSceneViewModel.swift` — already has the derived half (`GemAmountEntry` is recomputed from the text on every change); a session would move the text and the input type into Core and turn two setters into events.
-- **X164** **M** `core/apps/api` and `core/apps/daemon` share `primitives` and `storage` with the mobile FFI, so a `primitives` change is a server change. Issue #1202 holds the measured baseline and the phased plan; decide whether the mobile surface gets its own crate boundary.
 
 ## 8. Blocked upstream
 
@@ -113,6 +106,20 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**S35 (2026-09-19).** Decided without a session: the recents rule was the one section decision iOS still composed itself, and Core already answered it for Android (`GemSelectAssetFlow::shows_recents`), so the iOS wallet search now asks the same flow. Showing the pinned header when pinned assets or pinned perpetuals exist is layout, not a product decision: a section with no rows is not drawn, on both apps. The rest of the model is the query text and presentation state.
+
+**S34 (2026-09-19).** Decided without a session: the rewards screen shows Core's `GemRewardsState` for the wallet Core picks (`selected_wallet`), so what the view model holds beyond that is sheets, alerts and toasts. One parity gap is open: with a single wallet, an incoming referral code is activated directly on iOS but always confirmed in a dialog on Android.
+
+**S37 (2026-09-19).** Decided without a session: select-asset already takes every decision from its Core `GemSelectAssetFlow` (add-token, search step, row action, deposit display, price alerts, recents), and the query, filter and selection it holds are the inputs those rules read.
+
+**S38 (2026-09-19).** Decided: `GemConfirmation` stays a service-held record, not a session. It loads the quote, fee and simulation and executes the transfer, and a session is a pure record the screen drives; the SERVICES.md split still describes it.
+
+**S40 (2026-09-19).** Decided without a session: `GemAmountEntry` already carries every answer the amount screen shows and is recomputed from the typed text on each change; the text belongs to the platform text field and the input type is a toggle, so a session would only rename two setters.
+
+**X164 (2026-09-19).** Decided: no separate mobile crate boundary. The shared `primitives` types are the wire contract between the API and the apps, so splitting them would duplicate the types both sides must agree on. The rebuild cost of a `primitives` change is cut the way issue #1202 lays out: `default-members` for mobile work (A6) and moving the modules only one consumer uses out of `primitives`.
+
+**O35 (2026-09-19).** Closed as correct: the root keeps deriving `currentWallet` from the observed `currentWalletId` in the same `body` pass. Caching it in the model breaks the one invariant that matters here, because `.onChange(of: currentWalletId)` runs after the body update: the frame after a switch would build the tabs for the previous wallet, and the frame after deleting the last wallet would build `MainTabView` for a wallet that no longer exists. Reading through the async `get_current_wallet` leaves the first frame without a wallet, so onboarding would flash at every launch, and a sync session read would put a main-thread query on Android that Room forbids. The per-pass read is one primary-key lookup, and root body passes are rare.
 
 **D40 (2026-09-19).** Landed: the asset screen and the activity list on both apps take their transactions load state from Core (`GemAssetDetailsService::refresh` returns it beside the step failures, `GemTransactionsService::refresh` replaces the bare `sync`), and a failed refresh with nothing stored shows the error row in place of the empty state. The iOS activity list needed no new empty-state type: it draws the same error row the stake screen uses, inside the list, and keeps its empty-state overlay for the no-error case.
 

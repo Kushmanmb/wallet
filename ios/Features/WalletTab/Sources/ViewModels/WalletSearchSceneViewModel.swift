@@ -109,7 +109,7 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
     }
 
     var showRecents: Bool {
-        searchableQuery.isEmpty && recentModel.hasAssets
+        service.flow(selectType: .walletSearch).showsRecents(isSearching: searchableQuery.isNotEmpty, hasRecents: recentModel.hasAssets)
     }
 
     var showPerpetuals: Bool {
