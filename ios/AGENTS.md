@@ -23,7 +23,7 @@ Read `core/AGENTS.md` when the task touches `core/`, generated bindings, or file
 
 ## Fast Test Loop
 
-For package changes, default to `just ios test-package <Package>` from the repo root (for example, `just ios test-package Assets`). Find the package name in its `Package.swift`; the command runs all of that package’s tests. Use `just ios check-test Primitives` for host-compatible packages. App-hosted tests and CI registration checks use `just ios test <TestTarget>`. Confirm tests actually executed; see [Testing](skills/testing.md). Closing checks still follow [Quality Checks](../skills/quality-checks.md).
+For package changes, default to `just ios test-package <Package>` from the repo root (for example, `just ios test-package Assets`). This runs the conventional `<Package>Tests` target through the app test plan. For other target names, use `just ios test <TestTarget>`; read `Package.swift` to identify them. Use `just ios check-test Primitives` for host-compatible packages. App-hosted tests and CI registration checks use `just ios test <TestTarget>`. Confirm tests actually executed; see [Testing](skills/testing.md). Closing checks still follow [Quality Checks](../skills/quality-checks.md).
 
 ## Task Completion
 

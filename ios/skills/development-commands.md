@@ -1,6 +1,6 @@
 # Development Commands
 
-Use the iOS `justfile` for every build and test. All xcodebuild recipes share build settings, simulator, Gemstone linker flags and cache paths. Stay with the package command during iteration: switching between the app project and a standalone package workspace can still rebuild targets. A raw `xcodebuild` call with different settings also causes unnecessary recompilation; when you need a variation, start from the command `just -n <recipe>` prints.
+Use the iOS `justfile` for every build and test. All xcodebuild recipes use the app project and share build settings, simulator, Gemstone linker flags and cache paths. A raw `xcodebuild` call with different settings also causes unnecessary recompilation; when you need a variation, start from the command `just -n <recipe>` prints.
 
 ## Build and Test
 
@@ -35,9 +35,9 @@ Run these commands from `ios/`, or prefix them with `just ios` from the repo roo
 
 SwiftPM builds for the host, so the two `check` recipes only cover packages that import neither UIKit nor SwiftUI, and among those only ones that do not link Gemstone can run their tests — the static library is built for the simulator. Everything with a UI or a Gemstone dependency uses the simulator through `just build-package` or `just test-package` while iterating. Read the owning `Package.swift` for the package/scheme and `.testTarget` names; do not infer the package name from the test target.
 
-`test-package` selects the existing package scheme and shares DerivedData, simulator, compiler settings and Gemstone linker flags with app builds. It does not select the Gem app scheme or inherit its test-plan exclusions. Use the app path for app-hosted `GemTests`, targets that require those exclusions, new-target registration checks and final app verification. A successful command with zero selected tests is not verification.
+`test-package Assets` is shorthand for `test AssetsTests`. It uses the existing app test plan, including its coverage settings and exclusions. For packages with multiple test targets or different naming, use `just test <TestTarget>`. Confirm the expected tests executed; a successful command with zero selected tests is not verification.
 
-The command discovers the package's schemes through Xcode and reads the app unit plan's coverage setting, supporting single-product and multi-product packages without a maintained package list or different coverage instrumentation. CI persists the existing Xcode compilation cache separately from SwiftPM downloads, keyed by the installed Xcode version. Its size defaults to 2G and can be changed with the repository variable `IOS_COMPILATION_CACHE_LIMIT_SIZE`; local builds retain the 20G default. Judge CI caching by transfer time plus build time, not cache hits alone.
+CI persists the existing Xcode compilation cache separately from SwiftPM downloads, keyed by the installed Xcode version. Its size defaults to 2G and can be changed with the repository variable `IOS_COMPILATION_CACHE_LIMIT_SIZE`; local builds retain the 20G default. Judge CI caching by transfer time plus build time, not cache hits alone.
 
 `swift build` reports every error in the package; `xcodebuild` stops at the first failing target, so a compile-fix loop driven by `just build` costs one build per error batch. `just test` builds what it needs, so a `just build` before it only adds a second build.
 

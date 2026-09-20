@@ -5,7 +5,7 @@ Use when adding, changing, or running iOS tests, or registering a new test targe
 
 - Always run tests through the iOS `justfile`
 - Default commands:
-  - `just test-package <Package>` to run all tests in the changed package
+  - `just test-package <Package>` as shorthand for `just test <Package>Tests`
   - `just check-test <Package>` for host-compatible packages without Gemstone linkage
   - `just test`
   - `just test <TARGET>` for app-hosted tests and app-plan registration checks
@@ -24,7 +24,7 @@ A package test target participates in the app/CI test plan only if it is registe
 2. The package is referenced in `Gem.xcodeproj` (Packages group)
 3. An entry in `GemTests/unit_frameworks.xctestplan`
 
-`just check-test` and `just test-package` bypass the app test plan: they verify the package but not its CI registration. xcodebuild silently ignores targets missing from the plan and plan entries pointing at deleted targets. After adding a test target, verify with `just test <TARGET>` from `ios/` and confirm the target's tests appear in the output.
+`just check-test` bypasses the app test plan and does not verify CI registration. Both `just test-package` and `just test` use the app test plan. xcodebuild silently ignores targets missing from the plan and plan entries pointing at deleted targets. After adding a test target, verify with `just test <TARGET>` from `ios/` and confirm the target's tests appear in the output.
 
 ## Test Structure
 
