@@ -17,15 +17,16 @@ class NameServiceMock : GemNameServiceInterface {
 
     override fun isNameSupported(name: String): Boolean = name.split(".").size >= 2
 
-    override fun nameInputStep(state: GemNameRecordState, name: String, hasChain: Boolean): GemNameInputStep = when {
-        name.isEmpty() -> GemNameInputStep.Reset
-        state is GemNameRecordState.Loading && state.name == name -> GemNameInputStep.Unchanged
-        state is GemNameRecordState.Complete && state.record.name == name -> GemNameInputStep.Unchanged
-        !hasChain || !isNameSupported(name) -> GemNameInputStep.Reset
+    override fun nameInputStep(state: GemNameRecordState, name: String, chain: uniffi.gemstone.Chain?): GemNameInputStep = when {
+        name.isEmpty() || chain == null -> GemNameInputStep.Reset
+        state is GemNameRecordState.Loading && state.name == name && state.chain == chain -> GemNameInputStep.Unchanged
+        state is GemNameRecordState.Complete && state.record.name == name && state.record.chain == chain -> GemNameInputStep.Unchanged
+        !isNameSupported(name) -> GemNameInputStep.Reset
         else -> GemNameInputStep.Resolve(name, 500u)
     }
 
-    override fun resolvedState(state: GemNameRecordState, name: String, resolved: GemNameRecordState): GemNameRecordState = if (state is GemNameRecordState.Loading && state.name == name) resolved else state
+    override fun resolvedState(state: GemNameRecordState, name: String, chain: uniffi.gemstone.Chain, resolved: GemNameRecordState): GemNameRecordState =
+        if (state is GemNameRecordState.Loading && state.name == name && state.chain == chain) resolved else state
 
     override fun validateRecipient(chain: uniffi.gemstone.Chain, input: String, state: GemNameRecordState): GemRecipientValidation = GemRecipientValidation(isValid = true, address = input, error = null)
 }

@@ -146,23 +146,23 @@ public final class GemNameServiceMock: GemNameServiceProtocol, @unchecked Sendab
         name.split(separator: ".").count >= 2
     }
 
-    public func nameInputStep(state: GemNameRecordState, name: String, hasChain: Bool) -> GemNameInputStep {
-        if name.isEmpty {
+    public func nameInputStep(state: GemNameRecordState, name: String, chain: Gemstone.Chain?) -> GemNameInputStep {
+        guard !name.isEmpty, let chain else {
             return .reset
         }
         switch state {
-        case let .loading(loading) where loading == name: return .unchanged
-        case let .complete(record) where record.name == name: return .unchanged
+        case let .loading(loading, loadingChain) where loading == name && loadingChain == chain: return .unchanged
+        case let .complete(record) where record.name == name && record.chain == chain: return .unchanged
         default: break
         }
-        guard hasChain, isNameSupported(name: name) else {
+        guard isNameSupported(name: name) else {
             return .reset
         }
         return .resolve(name: name, debounceMilliseconds: 0)
     }
 
-    public func resolvedState(state: GemNameRecordState, name: String, resolved: GemNameRecordState) -> GemNameRecordState {
-        state == .loading(name: name) ? resolved : state
+    public func resolvedState(state: GemNameRecordState, name: String, chain: Gemstone.Chain, resolved: GemNameRecordState) -> GemNameRecordState {
+        state == .loading(name: name, chain: chain) ? resolved : state
     }
 
     public func validateRecipient(chain: Gemstone.Chain, input: String, state: GemNameRecordState) -> GemRecipientValidation {

@@ -68,7 +68,7 @@ struct RecipientSceneViewModelTests {
 
         #expect(model.actionButtonState == .disabled)
 
-        model.addressInputModel.nameRecordViewModel.state = .loading(name: "test.eth")
+        model.addressInputModel.nameRecordViewModel.state = .loading(name: "test.eth", chain: Chain.ethereum.toGem())
         #expect(model.actionButtonState == .disabled)
 
         model.addressInputModel.text = "test.eth"

@@ -160,7 +160,10 @@ mod tests {
 
     #[test]
     fn test_a_pending_or_failed_name_lookup_is_never_a_valid_recipient() {
-        let loading = GemNameRecordState::Loading { name: "h3rman.near".into() };
+        let loading = GemNameRecordState::Loading {
+            name: "h3rman.near".into(),
+            chain: Chain::Near,
+        };
         let pending = validation(Chain::Near, "h3rman.near", &loading);
         assert!(!pending.is_valid);
         assert!(pending.error.is_none());

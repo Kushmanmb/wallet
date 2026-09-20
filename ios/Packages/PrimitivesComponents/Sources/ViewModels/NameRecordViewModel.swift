@@ -21,14 +21,14 @@ public final class NameRecordViewModel {
     }
 
     public func getNameRecord(name: String, chain: Chain) {
-        switch nameService.nameInputStep(state: state, name: name, hasChain: true) {
+        switch nameService.nameInputStep(state: state, name: name, chain: chain.toGem()) {
         case .unchanged:
             return
         case .reset:
             reset()
         case let .resolve(name, debounceMilliseconds):
             nameRecordTask?.cancel()
-            state = .loading(name: name)
+            state = .loading(name: name, chain: chain.toGem())
             nameRecordTask = Task { await resolve(name: name, chain: chain, debounceMilliseconds: debounceMilliseconds) }
         }
     }
@@ -37,11 +37,16 @@ public final class NameRecordViewModel {
         do {
             try await Task.sleep(for: .milliseconds(debounceMilliseconds))
             let resolved = try await nameService.getNameRecord(name: name, chain: chain)
-            state = nameService.resolvedState(state: state, name: name, resolved: resolved)
+            try Task.checkCancellation()
+            publish(resolved, name: name, chain: chain)
         } catch {
             guard !error.isCancelled else { return }
-            state = nameService.resolvedState(state: state, name: name, resolved: .error)
+            publish(.error, name: name, chain: chain)
         }
+    }
+
+    private func publish(_ resolved: GemNameRecordState, name: String, chain: Chain) {
+        state = nameService.resolvedState(state: state, name: name, chain: chain.toGem(), resolved: resolved)
     }
 
     public var isResolving: Bool {

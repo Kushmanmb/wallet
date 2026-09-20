@@ -34,12 +34,12 @@ impl GemNameService {
         rules::is_name_supported(&name)
     }
 
-    pub fn name_input_step(&self, state: GemNameRecordState, name: String, has_chain: bool) -> GemNameInputStep {
-        rules::name_input_step(&state, &name, has_chain)
+    pub fn name_input_step(&self, state: GemNameRecordState, name: String, chain: Option<Chain>) -> GemNameInputStep {
+        rules::name_input_step(&state, &name, chain)
     }
 
-    pub fn resolved_state(&self, state: GemNameRecordState, name: String, resolved: GemNameRecordState) -> GemNameRecordState {
-        rules::resolved_state(&state, &name, resolved)
+    pub fn resolved_state(&self, state: GemNameRecordState, name: String, chain: Chain, resolved: GemNameRecordState) -> GemNameRecordState {
+        rules::resolved_state(&state, &name, chain, resolved)
     }
 
     pub async fn get_name_record(&self, name: String, chain: Chain) -> Result<GemNameRecordState, GemServiceError> {

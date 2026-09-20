@@ -18,7 +18,7 @@ struct AddressInputViewModelTests {
         #expect(model.validate() == false)
 
         model.inputModel.text = "test.eth"
-        model.nameRecordViewModel.state = .loading(name: "test.eth")
+        model.nameRecordViewModel.state = .loading(name: "test.eth", chain: Chain.ethereum.toGem())
         #expect(model.validate() == false)
 
         model.nameRecordViewModel.state = .error
@@ -44,7 +44,7 @@ struct AddressInputViewModelTests {
         let model = AddressInputViewModel.mock()
 
         model.inputModel.text = "test.eth"
-        model.nameRecordViewModel.state = .loading(name: "test.eth")
+        model.nameRecordViewModel.state = .loading(name: "test.eth", chain: Chain.ethereum.toGem())
 
         #expect(model.validate() == false)
         #expect(model.inputModel.error == nil, "a name the resolver still owns must not read as a bad address")
