@@ -7,9 +7,8 @@ GEMSTONE_IOS_PROFILE := if XCODE_CONFIGURATION == "Release" { "release" } else {
 DERIVED_DATA := "build/DerivedData"
 SPM_CACHE := "build/SourcePackages"
 XCODEBUILD := "xcodebuild -project Gem.xcodeproj -derivedDataPath " + DERIVED_DATA + " -clonedSourcePackagesDirPath " + SPM_CACHE
-GEMSTONE_LINKER_FLAGS := '"OTHER_LDFLAGS=\$(inherited) ' + source_directory() + '/../core/target/aarch64-apple-ios-sim/' + GEMSTONE_IOS_PROFILE + '/libgemstone.a"'
-COMPILATION_CACHE_LIMIT := env("COMPILATION_CACHE_LIMIT_SIZE", "20G")
-COMPILATION_CACHE_FLAGS := if XCODE_CONFIGURATION == "Release" { "" } else { "COMPILATION_CACHE_ENABLE_CACHING=YES COMPILATION_CACHE_LIMIT_SIZE=" + COMPILATION_CACHE_LIMIT }
+GEMSTONE_LINKER_FLAGS := '"OTHER_LDFLAGS=\$(inherited) $PWD/../core/target/aarch64-apple-ios-sim/' + GEMSTONE_IOS_PROFILE + '/libgemstone.a"'
+COMPILATION_CACHE_FLAGS := if XCODE_CONFIGURATION == "Release" { "" } else { "COMPILATION_CACHE_ENABLE_CACHING=YES COMPILATION_CACHE_LIMIT_SIZE=20G" }
 SIMULATOR_BUILD_FLAGS := '-configuration "' + XCODE_CONFIGURATION + '" -destination "' + SIMULATOR_DEST + '" ONLY_ACTIVE_ARCH=YES -parallelizeTargets -jobs ' + BUILD_THREADS + ' ' + GEMSTONE_LINKER_FLAGS + ' ' + COMPILATION_CACHE_FLAGS
 
 default:

@@ -8,19 +8,5 @@ runs:
       uses: ./.github/actions/setup-rust-ci
 
     - name: Select Xcode
-      id: xcode
       shell: bash
-      env:
-        CACHE_LIMIT: ${{ vars.IOS_COMPILATION_CACHE_LIMIT_SIZE || '2G' }}
-      run: |
-        sudo xcode-select -s /Applications/Xcode.app
-        echo "version=$(xcodebuild -version | shasum -a 256 | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
-        echo "COMPILATION_CACHE_LIMIT_SIZE=$CACHE_LIMIT" >> "$GITHUB_ENV"
-
-    - name: Cache Xcode compilation results
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: ios/build/DerivedData/CompilationCache.noindex
-        key: ${{ runner.os }}-${{ runner.arch }}-xcode-${{ steps.xcode.outputs.version }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-${{ runner.arch }}-xcode-${{ steps.xcode.outputs.version }}-
+      run: sudo xcode-select -s /Applications/Xcode.app

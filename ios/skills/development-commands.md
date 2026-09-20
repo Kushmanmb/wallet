@@ -37,8 +37,6 @@ SwiftPM builds for the host, so the two `check` recipes only cover packages that
 
 `test-package Assets` is shorthand for `test AssetsTests`. It uses the existing app test plan, including its coverage settings and exclusions. For packages with multiple test targets or different naming, use `just test <TestTarget>`. Confirm the expected tests executed; a successful command with zero selected tests is not verification.
 
-CI persists the existing Xcode compilation cache separately from SwiftPM downloads, keyed by the installed Xcode version. Its size defaults to 2G and can be changed with the repository variable `IOS_COMPILATION_CACHE_LIMIT_SIZE`; local builds retain the 20G default. Judge CI caching by transfer time plus build time, not cache hits alone.
-
 `swift build` reports every error in the package; `xcodebuild` stops at the first failing target, so a compile-fix loop driven by `just build` costs one build per error batch. `just test` builds what it needs, so a `just build` before it only adds a second build.
 
 ## Core Changes
@@ -68,7 +66,7 @@ just build-package Components
 just build-package PrimitivesComponents
 ```
 
-For ViewModel or display-model behavior, run the package tests directly; they also build the package:
+For ViewModel or display-model behavior, run the targeted tests; they also build the package:
 
 ```bash
 just test-package Assets

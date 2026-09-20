@@ -98,7 +98,7 @@ test:
     @./gradlew --continue testGoogleDebugUnitTest testDebugUnitTest
 
 build-gemstone-host:
-    @cd ../core && cargo build --package gemstone
+    @./gradlew :gemstone:buildGemstoneHost
 
 test-integration:
     @./gradlew connectedGoogleDebugAndroidTest connectedDebugAndroidTest
