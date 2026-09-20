@@ -1,10 +1,10 @@
-mod rules;
+pub mod rules;
 #[cfg(test)]
 pub(crate) mod testkit;
 
 use std::sync::Arc;
 
-use primitives::{Asset, AssetFiatValue, AssetId, Banner, BannerEvent, Currency, PerpetualBalance, TotalFiatValue, Wallet};
+use primitives::{Asset, AssetFiatValue, AssetId, Banner, BannerEvent, Currency, TotalFiatValue, Wallet, WalletId};
 
 use crate::services::asset_discovery::GemAssetDiscoveryService;
 use crate::services::assets::model::{GemAssetRowStyle, GemHeaderActions};
@@ -16,6 +16,7 @@ use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_preferences::{GemDiscoveryStep, GemWalletPreferencesService};
 use crate::services::wallet_session::GemWalletSessionService;
+pub use rules::GemPerpetualCollateral;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemWalletHomeViewState {
@@ -65,10 +66,10 @@ impl GemWalletHomeService {
         asset_rules::wallet_asset_row_style()
     }
 
-    pub fn view_state(&self, wallet: Wallet, balances: Vec<AssetFiatValue>, perpetual: Option<PerpetualBalance>, banners: Vec<Banner>) -> GemWalletHomeViewState {
+    pub fn view_state(&self, wallet: Wallet, balances: Vec<AssetFiatValue>, perpetual: Option<GemPerpetualCollateral>, banners: Vec<Banner>) -> GemWalletHomeViewState {
         let chains = wallet.chains();
         let is_wallet_empty = balances.iter().all(|balance| balance.amount == 0.0);
-        let total_value = self.total_fiat_value(balances, perpetual);
+        let total_value = self.total_fiat_value(wallet.id.clone(), balances, perpetual);
         GemWalletHomeViewState {
             shows_pnl: balance_rules::shows_pnl(&total_value),
             header_actions: rules::header_actions(wallet.wallet_type, &chains, rules::header_buttons_enabled(&banners)),
@@ -115,12 +116,9 @@ impl GemWalletHomeService {
 }
 
 impl GemWalletHomeService {
-    fn total_fiat_value(&self, balances: Vec<AssetFiatValue>, perpetual: Option<PerpetualBalance>) -> TotalFiatValue {
-        balance_rules::total_fiat_value(&rules::wallet_balances(balances, perpetual.filter(|_| self.includes_perpetual_collateral())))
-    }
-
-    fn includes_perpetual_collateral(&self) -> bool {
-        self.session.get_current_wallet_id().ok().flatten().is_some_and(|wallet_id| self.wallet_preferences.includes_perpetual_collateral(wallet_id))
+    fn total_fiat_value(&self, wallet_id: WalletId, balances: Vec<AssetFiatValue>, collateral: Option<GemPerpetualCollateral>) -> TotalFiatValue {
+        let collateral = collateral.filter(|_| self.wallet_preferences.includes_perpetual_collateral(wallet_id));
+        balance_rules::total_fiat_value(&rules::wallet_balances(balances, collateral))
     }
 }
 

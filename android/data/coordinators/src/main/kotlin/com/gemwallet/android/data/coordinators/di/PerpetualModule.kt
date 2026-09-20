@@ -13,6 +13,7 @@ import com.gemwallet.android.data.coordinators.perpetuals.GetPerpetualPositionIm
 import com.gemwallet.android.data.coordinators.perpetuals.GetPerpetualPositionsImpl
 import com.gemwallet.android.data.coordinators.perpetuals.GetPerpetualsImpl
 import com.gemwallet.android.data.coordinators.perpetuals.PerpetualBalanceCoordinator
+import com.gemwallet.android.data.service.store.database.PricesDao
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.data.services.gemstone.stores.GemstonePerpetualStore
 import dagger.Module
@@ -56,8 +57,9 @@ object PerpetualModule {
 
     @Provides
     @Singleton
-    fun provideGetPerpetualBalance(perpetualStore: GemstonePerpetualStore, getSession: GetSession): GetPerpetualBalance = PerpetualBalanceCoordinator(
+    fun provideGetPerpetualBalance(perpetualStore: GemstonePerpetualStore, getSession: GetSession, pricesDao: PricesDao): GetPerpetualBalance = PerpetualBalanceCoordinator(
         perpetualStore = perpetualStore,
         getSession = getSession,
+        pricesDao = pricesDao,
     )
 }

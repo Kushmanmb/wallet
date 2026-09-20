@@ -2,16 +2,22 @@ use primitives::{AssetFiatValue, Banner, BannerEvent, Chain, PerpetualBalance, W
 
 use crate::services::assets::model::{GemHeaderActions, GemHeaderButton, GemHeaderButtonKind};
 
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct GemPerpetualCollateral {
+    pub balance: PerpetualBalance,
+    pub rate: f64,
+}
+
 pub fn shows_initial_loading(initial_load_completed: bool, assets_timestamp: u64) -> bool {
     !initial_load_completed && assets_timestamp == 0
 }
 
-pub fn wallet_balances(balances: Vec<AssetFiatValue>, perpetual: Option<PerpetualBalance>) -> Vec<AssetFiatValue> {
+pub fn wallet_balances(balances: Vec<AssetFiatValue>, collateral: Option<GemPerpetualCollateral>) -> Vec<AssetFiatValue> {
     balances
         .into_iter()
-        .chain(perpetual.map(|balance| AssetFiatValue {
-            amount: balance.available + balance.reserved,
-            price: 1.0,
+        .chain(collateral.map(|collateral| AssetFiatValue {
+            amount: collateral.balance.available + collateral.balance.reserved,
+            price: collateral.rate,
             price_change_percentage_24h: 0.0,
         }))
         .collect()
@@ -80,7 +86,7 @@ mod tests {
         };
         assert_eq!(wallet_balances(vec![eth], None), vec![eth]);
         assert_eq!(
-            wallet_balances(vec![eth], Some(collateral)),
+            wallet_balances(vec![eth], Some(GemPerpetualCollateral { balance: collateral.clone(), rate: 1.0 })),
             vec![
                 eth,
                 AssetFiatValue {
@@ -90,6 +96,15 @@ mod tests {
                 }
             ],
             "collateral is what is available plus what positions hold, not what can be withdrawn"
+        );
+        assert_eq!(
+            wallet_balances(Vec::new(), Some(GemPerpetualCollateral { balance: collateral, rate: 0.92 })),
+            vec![AssetFiatValue {
+                amount: 50.0,
+                price: 0.92,
+                price_change_percentage_24h: 0.0
+            }],
+            "collateral is a dollar amount and converts like every other entry"
         );
     }
 

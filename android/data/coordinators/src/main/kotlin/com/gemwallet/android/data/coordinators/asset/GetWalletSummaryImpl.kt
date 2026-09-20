@@ -52,14 +52,14 @@ class GetWalletSummaryImpl(
 
         combine(
             assetStore.observeAssetFiatValues(wallet.id.id),
-            getPerpetualBalance.getBalance(),
+            getPerpetualBalance.getCollateral(),
             bannerStore.observeWalletBanners(wallet.id.id, listOf(BannerEvent.AccountBlockedMultiSignature, BannerEvent.Onboarding)),
             userConfig.isHideBalances(),
         ) { balances, perpetualBalance, banners, hideBalances ->
             val state = walletHomeService.viewState(
                 wallet = wallet.toGem(),
                 balances = balances,
-                perpetual = perpetualBalance?.toGem(),
+                perpetual = perpetualBalance,
                 banners = banners.map { it.toDTO().toGem() },
             )
 
