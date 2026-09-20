@@ -36,14 +36,18 @@ pub struct MemoryPerpetualStore {
     pub markets: Mutex<Vec<PerpetualMarketData>>,
     pub price_writes: Mutex<Vec<HashMap<String, f64>>>,
     pub deleted: Mutex<u32>,
+    pub perpetual_writes: Mutex<Vec<Vec<PerpetualData>>>,
+    pub pin_writes: Mutex<Vec<(Vec<String>, bool)>>,
 }
 
 #[async_trait]
 impl GemPerpetualStore for MemoryPerpetualStore {
-    async fn save_perpetuals(&self, _: Vec<PerpetualData>) -> Result<(), GemServiceError> {
+    async fn save_perpetuals(&self, perpetuals: Vec<PerpetualData>) -> Result<(), GemServiceError> {
+        self.perpetual_writes.lock().unwrap().push(perpetuals);
         Ok(())
     }
-    async fn set_pinned(&self, _: Vec<String>, _: bool) -> Result<(), GemServiceError> {
+    async fn set_pinned(&self, ids: Vec<String>, pinned: bool) -> Result<(), GemServiceError> {
+        self.pin_writes.lock().unwrap().push((ids, pinned));
         Ok(())
     }
     async fn delete_perpetuals(&self) -> Result<(), GemServiceError> {

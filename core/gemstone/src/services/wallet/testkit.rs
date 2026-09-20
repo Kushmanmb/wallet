@@ -59,10 +59,16 @@ impl GemWalletStore for MemoryWalletStore {
         wallets.retain(|wallet| wallet.id != wallet_id);
         Ok(before != wallets.len())
     }
-    async fn set_pinned(&self, _wallet_id: WalletId, _pinned: bool) -> Result<(), GemServiceError> {
+    async fn set_pinned(&self, wallet_id: WalletId, pinned: bool) -> Result<(), GemServiceError> {
+        if let Some(wallet) = self.wallets.lock().unwrap().iter_mut().find(|wallet| wallet.id == wallet_id) {
+            wallet.is_pinned = pinned;
+        }
         Ok(())
     }
-    async fn set_name(&self, _wallet_id: WalletId, _name: String) -> Result<(), GemServiceError> {
+    async fn set_name(&self, wallet_id: WalletId, name: String) -> Result<(), GemServiceError> {
+        if let Some(wallet) = self.wallets.lock().unwrap().iter_mut().find(|wallet| wallet.id == wallet_id) {
+            wallet.name = name;
+        }
         Ok(())
     }
     async fn set_image_url(&self, wallet_id: WalletId, image_url: Option<String>) -> Result<(), GemServiceError> {

@@ -33,11 +33,15 @@ impl GemFiatQuotesResult {
     }
 }
 
-pub struct MemoryFiatStore;
+#[derive(Default)]
+pub struct MemoryFiatStore {
+    pub transaction_writes: std::sync::Mutex<Vec<(WalletId, Vec<FiatTransactionData>)>>,
+}
 
 #[async_trait]
 impl GemFiatStore for MemoryFiatStore {
-    async fn set_transactions(&self, _: WalletId, _: Vec<FiatTransactionData>) -> Result<(), GemServiceError> {
+    async fn set_transactions(&self, wallet_id: WalletId, transactions: Vec<FiatTransactionData>) -> Result<(), GemServiceError> {
+        self.transaction_writes.lock().unwrap().push((wallet_id, transactions));
         Ok(())
     }
 }
@@ -76,7 +80,7 @@ impl FiatQuoteTestkit {
         let fiat = Arc::new(GemFiatService::new(
             Arc::new(GemDeviceApiClient::new(provider, Arc::new(GemDeviceKeyService::new(Arc::new(EmptyPreferences))))),
             assets,
-            Arc::new(MemoryFiatStore),
+            Arc::new(MemoryFiatStore::default()),
         ));
         Self {
             service: GemFiatQuoteService::new(fiat, balance, session),

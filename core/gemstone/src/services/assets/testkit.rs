@@ -36,6 +36,16 @@ use crate::testkit::{EmptyPreferences, TestAlienProvider};
 pub struct MemoryAssetStore {
     pub assets: Mutex<Vec<AssetBasic>>,
     pub added_balances: Mutex<Vec<(WalletId, Vec<AssetId>, bool)>>,
+    pub availability_writes: Mutex<Vec<(GemAssetAvailability, Vec<AssetId>)>>,
+}
+
+/// Which availability list a `MemoryAssetStore` write was for.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GemAssetAvailability {
+    Buyable,
+    Sellable,
+    Swappable,
+    Stakeable,
 }
 
 #[async_trait]
@@ -62,16 +72,20 @@ impl GemAssetStore for MemoryAssetStore {
         self.added_balances.lock().unwrap().push((wallet_id, asset_ids, enabled));
         Ok(())
     }
-    async fn set_buyable_assets(&self, _asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
+    async fn set_buyable_assets(&self, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
+        self.availability_writes.lock().unwrap().push((GemAssetAvailability::Buyable, asset_ids));
         Ok(())
     }
-    async fn set_sellable_assets(&self, _asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
+    async fn set_sellable_assets(&self, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
+        self.availability_writes.lock().unwrap().push((GemAssetAvailability::Sellable, asset_ids));
         Ok(())
     }
-    async fn set_swappable_assets(&self, _asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
+    async fn set_swappable_assets(&self, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
+        self.availability_writes.lock().unwrap().push((GemAssetAvailability::Swappable, asset_ids));
         Ok(())
     }
-    async fn set_stakeable_assets(&self, _asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
+    async fn set_stakeable_assets(&self, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
+        self.availability_writes.lock().unwrap().push((GemAssetAvailability::Stakeable, asset_ids));
         Ok(())
     }
 }

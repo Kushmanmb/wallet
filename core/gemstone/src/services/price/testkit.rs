@@ -28,6 +28,7 @@ pub struct MemoryPriceStore {
     pub saved: Mutex<Vec<(Currency, Vec<GemPriceUpdate>)>>,
     pub converted: Mutex<Vec<(Currency, f64)>>,
     pub rate_error: Mutex<Option<GemServiceError>>,
+    pub markets: Mutex<Vec<(AssetId, AssetMarket)>>,
 }
 
 impl MemoryPriceStore {
@@ -77,7 +78,8 @@ impl GemPriceStore for MemoryPriceStore {
         self.converted.lock().unwrap().push((currency, rate));
         Ok(())
     }
-    async fn save_market(&self, _asset_id: AssetId, _market: AssetMarket) -> Result<(), GemServiceError> {
+    async fn save_market(&self, asset_id: AssetId, market: AssetMarket) -> Result<(), GemServiceError> {
+        self.markets.lock().unwrap().push((asset_id, market));
         Ok(())
     }
 }

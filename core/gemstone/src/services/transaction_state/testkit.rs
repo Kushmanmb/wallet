@@ -24,6 +24,7 @@ pub struct MemoryTransactionStateStore {
     pub updates: Mutex<Vec<(TransactionId, GemTransactionStateUpdate)>>,
     pub hash_updates: Mutex<Vec<(TransactionId, TransactionId)>>,
     pub deleted: Mutex<Vec<TransactionId>>,
+    pub added: Mutex<Vec<(WalletId, Vec<Transaction>)>>,
 }
 
 impl MemoryTransactionStateStore {
@@ -45,7 +46,8 @@ impl GemTransactionStateStore for MemoryTransactionStateStore {
         Ok(self.pending.lock().unwrap().iter().find(|pending| pending.transaction.id == transaction_id).cloned())
     }
 
-    async fn add_transactions(&self, _wallet_id: WalletId, _transactions: Vec<Transaction>) -> Result<(), GemServiceError> {
+    async fn add_transactions(&self, wallet_id: WalletId, transactions: Vec<Transaction>) -> Result<(), GemServiceError> {
+        self.added.lock().unwrap().push((wallet_id, transactions));
         Ok(())
     }
 
