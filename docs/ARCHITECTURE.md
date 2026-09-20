@@ -993,7 +993,6 @@ A refresh that asks several sources at once — [`GemBalanceService.update`](../
 - **A source that fails leaves its rows as they were.** There is no "unknown" state: the previous values stay and stay visible, so a total computed while one chain is offline is a total of older values for that chain, not a total missing it.
 - **The wallet is named, not implied.** Every write is keyed by the `WalletId` the refresh was asked for, so a response that lands after the user switched wallets writes the wallet it belongs to and never the one on screen.
 - **Only rows whose values differ are written.** The refresh reads the stored rows, folds its updates onto them by kind — a stake answer does not clear a coin's available balance — and drops the rows that come back equal.
-
 - **Overlapping refreshes publish in order, one wallet at a time.** Each refresh takes a sequence number when its fetch starts and holds that wallet's publication lane for its read-fold-write, so a concurrent coin and stake answer cannot lose each other and a response that arrives after a newer one for the same asset and kind is dropped instead of written. Other wallets and the price socket lane stay concurrent.
 
 Per-source publication would increase observer notifications and mixed-age totals; preserve the batch contract until the owner defines and tests a replacement.
