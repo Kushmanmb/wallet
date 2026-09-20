@@ -1,10 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
-import Formatters
-import enum Gemstone.GemValueTone
-import func Gemstone.valueTone
-import GemstonePrimitives
 import Primitives
 import Style
 import SwiftUI
@@ -18,50 +14,37 @@ final class CoinPriceRowViewModel {
     }
 
     var name: String {
-        coin.coin.name
+        coin.name
     }
 
     var symbol: String {
-        coin.coin.symbol
+        coin.symbol
     }
 
     var assetImage: AssetImage {
         AssetImage(
-            type: .text(coin.coin.symbol),
+            type: .text(coin.symbol),
             placeholder: coin.image,
             chainPlaceholder: chainPlaceholder,
         )
     }
 
     var chainPlaceholder: Image? {
-        let assetId = AssetId(core: coin.coin.assetId)
-        switch assetId.type {
-        case .native: return nil
-        case .token: return Images.name(assetId.chain.rawValue)
+        switch coin.assetId.type {
+        case .native: nil
+        case .token: Images.name(coin.assetId.chain.rawValue)
         }
     }
 
     var priceText: String {
-        coin.coin.price.text()
+        coin.priceText
     }
 
     var percentageText: String {
-        coin.coin.change.text()
+        coin.changeText
     }
 
     var percentageColor: Color {
-        valueTone(value: coin.coin.change.value).color
-    }
-}
-
-private extension GemValueTone {
-    var color: Color {
-        switch self {
-        case .plain: Colors.black
-        case .neutral: Colors.gray
-        case .positive: Colors.green
-        case .warning: Colors.orange
-        case .negative: Colors.red
-        }
+        coin.changeIsPositive ? Colors.green : Colors.red
     }
 }

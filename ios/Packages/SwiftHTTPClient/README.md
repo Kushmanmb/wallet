@@ -1,3 +1,3 @@
 # SwiftHTTPClient
 
-Native WebSocket transport and test fixtures for the iOS app.
+A description of this package.

@@ -93,6 +93,13 @@
     },
     {
       "target": {
+        "containerPath": "container:Packages/SwiftHTTPClient",
+        "identifier": "SwiftHTTPClientTests",
+        "name": "SwiftHTTPClientTests"
+      }
+    },
+    {
+      "target": {
         "containerPath": "container:Features/PriceAlerts",
         "identifier": "PriceAlertsTests",
         "name": "PriceAlertsTests"
