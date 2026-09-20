@@ -1,5 +1,6 @@
 package com.gemwallet.android.data.coordinators.di
 
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.stake.cases.GetDelegation
 import com.gemwallet.android.application.stake.cases.GetDelegations
 import com.gemwallet.android.application.stake.cases.GetStakeValidator
@@ -8,7 +9,6 @@ import com.gemwallet.android.data.coordinators.stake.GetDelegationImpl
 import com.gemwallet.android.data.coordinators.stake.GetDelegationsImpl
 import com.gemwallet.android.data.coordinators.stake.GetStakeValidatorImpl
 import com.gemwallet.android.data.coordinators.stake.GetValidatorsImpl
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.data.services.gemstone.stores.GemstoneStakeStore
 import dagger.Module
 import dagger.Provides

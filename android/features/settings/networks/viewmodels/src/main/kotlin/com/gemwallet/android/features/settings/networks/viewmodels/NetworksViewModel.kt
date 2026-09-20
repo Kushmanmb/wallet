@@ -5,7 +5,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.runCatchingCancellable

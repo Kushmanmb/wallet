@@ -3,11 +3,11 @@ package com.gemwallet.android.features.activities.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.transactions.cases.GetTransactions
 import com.gemwallet.android.application.transactions.cases.TransactionsRequestFilter
 import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusObserver
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ui.components.filters.TransactionFilterUIModel

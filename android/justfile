@@ -94,7 +94,7 @@ _run-adb TARGET:
 build-test:
     @./gradlew assembleGoogleDebugAndroidTest
 
-test: build-gemstone-host
+test:
     @./gradlew --continue testGoogleDebugUnitTest testDebugUnitTest
 
 build-gemstone-host:

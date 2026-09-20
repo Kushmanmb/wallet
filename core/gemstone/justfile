@@ -154,7 +154,7 @@ bindgen-kotlin:
     #!/usr/bin/env bash
     set -euo pipefail
     echo "Bindgen kotlin BUILD_MODE: ${BUILD_MODE}"
-    rm -rf ${GEN_KOTLIN_FOLDER} ${ANDROID_MODULE_FOLDER}/uniffi
+    rm -rf ${GEN_KOTLIN_FOLDER}
     mkdir -p ${GEN_KOTLIN_FOLDER} ${ANDROID_MODULE_FOLDER}
     if [ "${BUILD_MODE}" == "release" ]; then \
         export RUSTFLAGS="${RUSTFLAGS:-} -C strip=none"; \
@@ -165,7 +165,10 @@ bindgen-kotlin:
         exit 1; \
     fi; \
     cargo run {{CARGO_BUILD_FLAG}} -p uniffi-bindgen -- generate --language kotlin --crate ${LIB_NAME} --no-format -o ${GEN_KOTLIN_FOLDER} "${LIB_OUTPUT_PATH}"
-    cp -Rf ${GEN_KOTLIN_FOLDER}/uniffi ${ANDROID_MODULE_FOLDER}
+    if ! diff -qr "${GEN_KOTLIN_FOLDER}/uniffi" "${ANDROID_MODULE_FOLDER}/uniffi" >/dev/null 2>&1; then
+        rm -rf "${ANDROID_MODULE_FOLDER}/uniffi"
+        cp -R "${GEN_KOTLIN_FOLDER}/uniffi" "${ANDROID_MODULE_FOLDER}/uniffi"
+    fi
 
 build-android: bindgen-kotlin
     #!/usr/bin/env bash

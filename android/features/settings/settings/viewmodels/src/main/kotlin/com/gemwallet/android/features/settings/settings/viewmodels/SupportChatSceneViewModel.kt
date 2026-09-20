@@ -4,11 +4,11 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.support.cases.ClearSupportTyping
 import com.gemwallet.android.application.support.cases.FailPendingSupportMessages
 import com.gemwallet.android.application.support.cases.GetSupportMessages
 import com.gemwallet.android.application.support.cases.GetSupportTyping
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.millisToSeconds
 import com.gemwallet.android.ext.runCatchingCancellable

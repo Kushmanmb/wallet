@@ -3,9 +3,9 @@ package com.gemwallet.android.features.bridge.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.wallet_connect.cases.GetWalletConnections
 import com.gemwallet.android.application.wallet_connect.cases.PairWalletConnect
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.bridge.viewmodels.model.rowUIModel
 import com.gemwallet.android.ui.R

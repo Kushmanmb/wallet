@@ -4,7 +4,7 @@
 
 - Run tests through Gradle or the Android `justfile`
 - Default commands:
-  - `just test` — unit tests for every module (`testGoogleDebugUnitTest` for `:app` plus `testDebugUnitTest` for library modules) with `--continue`, so every failing module is reported; builds the host gemstone library first because gemstone-dependent tests load it through JNA
+  - `just test` — unit tests for every module (`testGoogleDebugUnitTest` for `:app` plus `testDebugUnitTest` for library modules) with `--continue`, so every failing module is reported; Gradle builds and fingerprints the host Gemstone library for JNA, including when running a single module
   - `just test-integration` — instrumented tests for every module (requires emulator)
   - `./gradlew :app:testGoogleDebugUnitTest` — app module only
   - `./gradlew :<module>:testDebugUnitTest` — one feature or shared module

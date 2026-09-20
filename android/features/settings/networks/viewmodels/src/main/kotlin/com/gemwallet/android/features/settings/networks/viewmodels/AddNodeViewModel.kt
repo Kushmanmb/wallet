@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.features.settings.networks.viewmodels.models.AddNodeUIModel
 import com.gemwallet.android.features.settings.networks.viewmodels.models.uiModel
 import com.wallet.core.primitives.Chain

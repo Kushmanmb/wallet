@@ -3,7 +3,7 @@ package com.gemwallet.android.features.wallet.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.features.wallet.viewmodels.models.WalletSecretContentUIModel
 import com.gemwallet.android.features.wallet.viewmodels.models.uiModel

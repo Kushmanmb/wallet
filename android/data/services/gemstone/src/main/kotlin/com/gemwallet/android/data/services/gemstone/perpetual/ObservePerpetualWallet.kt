@@ -1,8 +1,8 @@
 package com.gemwallet.android.data.services.gemstone.perpetual
 
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.session.cases.GetCurrentWallet
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.toGem
 import com.wallet.core.primitives.Wallet
 import kotlinx.coroutines.CoroutineDispatcher

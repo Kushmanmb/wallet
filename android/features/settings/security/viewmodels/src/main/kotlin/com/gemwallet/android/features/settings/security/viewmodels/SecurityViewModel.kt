@@ -3,8 +3,8 @@ package com.gemwallet.android.features.settings.security.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.features.settings.security.viewmodels.localization.stringRes
 import com.gemwallet.android.features.settings.security.viewmodels.models.LockPeriodOption
 import dagger.hilt.android.lifecycle.HiltViewModel

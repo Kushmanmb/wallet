@@ -2,7 +2,7 @@ package com.gemwallet.android.features.asset.viewmodels.address
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
+import com.gemwallet.android.application.IoDispatcher
 import com.wallet.core.primitives.ChainAddress
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory

@@ -3,9 +3,9 @@ package com.gemwallet.android.features.bridge.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.wallet_connect.cases.DisconnectWalletConnection
 import com.gemwallet.android.application.wallet_connect.cases.GetWalletConnections
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.bridge.viewmodels.model.listItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel

@@ -3,13 +3,13 @@ package com.gemwallet.android.features.asset.viewmodels.chart.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.assets.cases.GetAssetLinks
 import com.gemwallet.android.application.assets.cases.GetAssetMarket
 import com.gemwallet.android.application.assets.cases.GetAssetTokenInfo
 import com.gemwallet.android.application.assets.cases.GetWalletAssets
 import com.gemwallet.android.application.pricealerts.cases.GetPriceAlerts
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.asset.viewmodels.chart.models.AssetMarketUIModel
 import com.gemwallet.android.features.asset.viewmodels.chart.models.AssetMarketUIModelFactory

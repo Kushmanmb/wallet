@@ -49,7 +49,6 @@ android {
 
 dependencies {
     implementation(project(":gemcore"))
-    implementation(project(":data:services:gemstone"))
     implementation(project(":ui"))
 
     implementation(libs.hilt.android)

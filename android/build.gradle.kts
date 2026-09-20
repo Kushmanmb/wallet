@@ -19,6 +19,9 @@ plugins {
     alias(libs.plugins.compose.compiler) apply false
 }
 
+val gemstoneHostLibrary = File(rootDir, "../core/target/debug/${System.mapLibraryName("gemstone")}")
+extra["gemstoneHostLibrary"] = gemstoneHostLibrary
+
 allprojects {
     repositories {
         google()
@@ -36,7 +39,11 @@ subprojects {
         resolutionStrategy.activateDependencyLocking()
     }
     tasks.withType<Test>().configureEach {
-        systemProperty("jna.library.path", File(rootDir, "../core/target/debug").absolutePath)
+        dependsOn(":gemstone:buildGemstoneHost")
+        inputs.file(gemstoneHostLibrary)
+            .withPropertyName("gemstoneHostLibrary")
+            .withPathSensitivity(PathSensitivity.NONE)
+        systemProperty("jna.library.path", gemstoneHostLibrary.parentFile.absolutePath)
     }
     listOf("com.android.library", "com.android.application").forEach { pluginId ->
         plugins.withId(pluginId) {

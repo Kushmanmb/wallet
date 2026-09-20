@@ -61,7 +61,7 @@ just test                                              # every module, before a 
 just test-integration                                  # instrumented tests on a running emulator
 ```
 
-`just test` builds the host `gemstone` library, then runs every module's unit tests with `--continue`, so one run reports every failing module. A module-scoped Gradle task does not build that library; after a Core change, run `cd ../core && cargo build --package gemstone` before it.
+`just test` runs every module's unit tests with `--continue`, so one run reports every failing module. Every Gradle JVM test task depends on `:gemstone:buildGemstoneHost` and fingerprints the host library loaded through JNA, including module-scoped tests. Cargo checks its own incremental state on each invocation; the host library is a Gradle test input, so native-only changes invalidate previous test results. Unchanged native output keeps bindings and tests reusable. Android JNI packaging likewise lets Cargo check its own toolchain and compiler flags rather than duplicating its fingerprint rules in Gradle.
 
 ## Core Changes
 

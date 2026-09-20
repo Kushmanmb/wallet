@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
 import com.gemwallet.android.PendingNavigationCoordinator
+import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.assets.cases.GetWalletSummary
 import com.gemwallet.android.application.device.cases.GetPushEnabled
 import com.gemwallet.android.application.device.cases.SwitchPushEnabled
@@ -15,7 +16,6 @@ import com.gemwallet.android.application.update.cases.SyncAppUpdate
 import com.gemwallet.android.application.wallet.cases.GetWallets
 import com.gemwallet.android.application.wallet.cases.SetCurrentWallet
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
-import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.onboarding.OnboardingRoute
