@@ -6,7 +6,6 @@ import Primitives
 
 public enum NFTFilter: Sendable, Hashable {
     case all
-    case unverified
     case collection(id: String)
 }
 
@@ -33,7 +32,6 @@ public struct NFTRequest: DatabaseQueryable {
 
         switch filter {
         case .all: break
-        case .unverified: request = request.filter(NFTCollectionRecord.Columns.status != VerificationStatus.verified.rawValue)
         case let .collection(id): request = request.filter(NFTCollectionRecord.Columns.id == id)
         }
 
