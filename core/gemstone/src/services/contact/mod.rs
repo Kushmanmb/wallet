@@ -5,6 +5,7 @@ pub mod store;
 use crate::services::error::GemServiceError;
 use chrono::Utc;
 use std::sync::Arc;
+use uuid::Uuid;
 
 use primitives::contact::ContactAddress;
 use primitives::{Chain, Contact};
@@ -121,6 +122,10 @@ impl GemManageContactService {
 
     pub async fn save_contact(&self, input: GemContactInput) -> Result<Contact, GemServiceError> {
         self.contacts.save_contact(input).await
+    }
+
+    pub fn new_session(&self, contact: Option<Contact>, addresses: Vec<ContactAddress>) -> GemContactSession {
+        rules::new_session(contact, addresses, Uuid::new_v4().to_string())
     }
 
     pub fn format_address(&self, address: String, chain: Chain, style: GemAddressFormatStyle) -> String {

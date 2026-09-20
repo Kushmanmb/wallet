@@ -55,27 +55,20 @@ public final class ManageContactViewModel {
 
         switch mode {
         case let .add(recipient, chain):
-            let contactId = UUID().uuidString
-            let session = GemContactSession(id: contactId, existing: nil, name: "", description: "", avatar: .empty, addresses: [], isSaving: false)
+            let session = service.newSession(contact: nil, addresses: [])
             self.session = recipient.flatMap { recipient in
                 chain.map {
                     session.onAddressSaved(
-                        input: GemContactAddressInput(contactId: contactId, chain: $0, address: recipient.address, memo: recipient.memo, replacingId: nil),
+                        input: GemContactAddressInput(contactId: session.id, chain: $0, address: recipient.address, memo: recipient.memo, replacingId: nil),
                     )
                 }
             } ?? session
         case let .edit(contactData):
-            let contact = contactData.contact
-            session = GemContactSession(
-                id: contact.id,
-                existing: contact.toGem(),
-                name: contact.name,
-                description: contact.description ?? "",
-                avatar: contact.imageUrl.map { .image(imageUrl: $0) } ?? .empty,
+            session = service.newSession(
+                contact: contactData.contact.toGem(),
                 addresses: contactData.addresses.map { $0.toGem() },
-                isSaving: false,
             )
-            nameInputModel.text = contact.name
+            nameInputModel.text = contactData.contact.name
         }
     }
 

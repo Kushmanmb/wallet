@@ -43,7 +43,6 @@ import uniffi.gemstone.GemContactAvatarChoice
 import uniffi.gemstone.GemContactSession
 import uniffi.gemstone.GemManageContactServiceInterface
 import uniffi.gemstone.GemNameServiceInterface
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -65,21 +64,13 @@ class ManageContactViewModel @Inject constructor(
         val editContactId = savedStateHandle.get<String>(RouteArgument.ContactId.key)
         if (editContactId != null) Mode.Edit(editContactId) else Mode.Add
     }
-    private val contactId: String = (mode as? Mode.Edit)?.contactId ?: UUID.randomUUID().toString()
-
     private val addressInput = AddressInputModel(nameService, viewModelScope)
 
     private val state = MutableStateFlow(
         ManageContactState(
-            session = GemContactSession(
-                id = contactId,
-                existing = null,
-                name = "",
-                description = "",
-                avatar = GemContactAvatarChoice.Empty,
-                addresses = emptyList(),
-                isSaving = false,
-            ),
+            session = service.newSession(null, emptyList()).let { session ->
+                (mode as? Mode.Edit)?.let { session.copy(id = it.contactId) } ?: session
+            },
             isEdit = mode is Mode.Edit,
         ),
     )
@@ -128,15 +119,7 @@ class ManageContactViewModel @Inject constructor(
         when (val mode = mode) {
             is Mode.Edit -> viewModelScope.launch(ioDispatcher) {
                 val data = getContacts.getContact(mode.contactId) ?: return@launch
-                updateSession {
-                    it.copy(
-                        existing = data.contact.toGem(),
-                        name = data.contact.name,
-                        description = data.contact.description ?: "",
-                        avatar = data.contact.imageUrl?.let { url -> GemContactAvatarChoice.Image(url) } ?: GemContactAvatarChoice.Empty,
-                        addresses = data.addresses.map { address -> address.toGem() },
-                    )
-                }
+                updateSession { service.newSession(data.contact.toGem(), data.addresses.map { address -> address.toGem() }) }
             }
 
             Mode.Add -> Unit
@@ -233,7 +216,7 @@ class ManageContactViewModel @Inject constructor(
             current.copy(
                 session = current.session.onAddressSaved(
                     GemContactAddressInput(
-                        contactId = contactId,
+                        contactId = current.session.id,
                         chain = input.chain.string,
                         address = address,
                         memo = input.memo,

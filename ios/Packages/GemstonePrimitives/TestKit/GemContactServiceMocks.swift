@@ -45,6 +45,10 @@ public final class GemManageContactServiceMock: GemManageContactServiceProtocol,
     public func formatAddress(address: String, chain: Gemstone.Chain, style: GemAddressFormatStyle) -> String {
         service.formatAddress(address: address, chain: chain, style: style)
     }
+
+    public func newSession(contact: Gemstone.Contact?, addresses: [Gemstone.ContactAddress]) -> GemContactSession {
+        service.newSession(contact: contact, addresses: addresses)
+    }
 }
 
 public final class GemWalletConnectServiceMock: GemWalletConnectServiceProtocol, @unchecked Sendable {
