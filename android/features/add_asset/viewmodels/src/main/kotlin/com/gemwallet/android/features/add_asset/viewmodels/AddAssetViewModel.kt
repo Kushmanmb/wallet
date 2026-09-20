@@ -166,8 +166,8 @@ class AddAssetViewModel @Inject constructor(
 
     fun clearError() = state.update { it.copy(error = null) }
 
-    private suspend fun searchToken(session: GemAddAssetSession, chain: Chain, address: String): GemAddAssetSession = runCatchingCancellable { session.onFound(address, service.token(chain.string, address)) }
-        .getOrDefault(session.onFailed(address))
+    private suspend fun searchToken(session: GemAddAssetSession, chain: Chain, address: String): GemAddAssetSession = runCatchingCancellable { session.onFound(chain.string, address, service.token(chain.string, address)) }
+        .getOrDefault(session.onFailed(chain.string, address))
 
     private data class State(val isQrScan: Boolean = false, val isSelectChain: Boolean = false, val isImporting: Boolean = false, val error: GemErrorText? = null) {
         fun toUIState(): AddAssetUIState = AddAssetUIState(
