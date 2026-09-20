@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uniffi.gemstone.GemAddressService
 import uniffi.gemstone.GemContactAddressInput
 import uniffi.gemstone.GemContactAvatar
 import uniffi.gemstone.GemContactAvatarChoice
@@ -54,7 +53,6 @@ class ManageContactViewModel @Inject constructor(
     private val service: GemManageContactServiceInterface,
     nameService: GemNameServiceInterface,
     savedStateHandle: SavedStateHandle,
-    private val addressService: GemAddressService,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
@@ -105,7 +103,7 @@ class ManageContactViewModel @Inject constructor(
                 is GemContactAvatarChoice.Emoji -> ContactAvatarState.Emoji(avatar.emoji, current.emojiBackground)
             },
             addresses = addresses,
-            addressRows = addresses.rows(addressService),
+            addressRows = addresses.rows(service),
             addAddressListItem = addAddressListItem(context),
             page = current.page,
             isSaving = session.isSaving,

@@ -270,7 +270,6 @@ The same product rule on both apps with a difference, each read on both sides on
 [ARCHITECTURE.md § 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android): a case that only forwards a Core call is migration debt, and one answer has one route.
 
 - **O59** **S** "Show perpetuals" reaches the apps through three exports (`GemPreferencesService`, `GemAssetSelectionService`, `GemPerpetualService::should_connect_perpetuals`), the portfolio segment reads it around its own service on both apps, and `GemWalletHomeViewState` lacks it, so both apps fetch it separately. `shows_perpetuals` on the home view state and the portfolio session.
-- **O60** **S** The Android contact editor injects the concrete `GemAddressService` for `formatAll` (`ManageContactViewModel.kt:56,106`), the last concrete-service consumer in Android features; iOS uses `GemManageContactService.format_address`. Use the screen service.
 
 ## 6. Core shapes that block an app move
 
