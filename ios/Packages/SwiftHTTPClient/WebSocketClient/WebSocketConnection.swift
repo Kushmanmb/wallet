@@ -27,6 +27,7 @@ public actor WebSocketConnection: WebSocketConnectable {
 
     deinit {
         task?.cancel(with: .goingAway, reason: nil)
+        session?.invalidateAndCancel()
         reconnectTask?.cancel()
         keepaliveTask?.cancel()
         continuation?.finish()
@@ -188,6 +189,7 @@ public actor WebSocketConnection: WebSocketConnectable {
             },
         )
 
+        invalidateSession()
         session = URLSession(
             configuration: configuration.sessionConfiguration,
             delegate: delegate,
