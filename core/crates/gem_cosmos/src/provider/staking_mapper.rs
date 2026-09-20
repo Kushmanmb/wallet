@@ -106,7 +106,10 @@ mod tests {
     fn test_map_delegations() {
         let delegations: Delegations = serde_json::from_str(include_str!("../../testdata/staking_delegations.json")).unwrap();
 
-        let unbonding = UnbondingDelegations { unbonding_responses: vec![] };
+        let unbonding = UnbondingDelegations {
+            unbonding_responses: vec![],
+            pagination: None,
+        };
         let rewards = Rewards { rewards: vec![] };
 
         let result = map_staking_delegations(delegations, unbonding, rewards, CosmosChain::Cosmos, "uatom");
@@ -128,7 +131,10 @@ mod tests {
         let delegations: Delegations = serde_json::from_str(include_str!("../../testdata/staking_delegations.json")).unwrap();
         let rewards: Rewards = serde_json::from_str(include_str!("../../testdata/staking_rewards.json")).unwrap();
 
-        let unbonding = UnbondingDelegations { unbonding_responses: vec![] };
+        let unbonding = UnbondingDelegations {
+            unbonding_responses: vec![],
+            pagination: None,
+        };
 
         let result = map_staking_delegations(delegations, unbonding, rewards, CosmosChain::Cosmos, "uatom");
 
