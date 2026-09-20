@@ -10,8 +10,8 @@ val gemstoneSrc = gemstoneRoot.resolve("android/gemstone/src")
 val jniLibsDir = gemstoneSrc.resolve("main/jniLibs")
 val generatedKotlinDir = gemstoneSrc.resolve("main/java")
 val isRelease = System.getenv("BUILD_MODE") == "release"
-val cargoBuildFlag = if (isRelease) "--release" else null
-val hostLibrary = rootProject.extra["gemstoneHostLibrary"] as File
+val cargoBuildFlag = if (isRelease) "--release" else ""
+val gemstoneHostLibrary: File by rootProject.extra
 val defaultCargoNdkAbis = when {
     System.getenv("UNIT_TESTS") == "true" -> "x86_64"
     isRelease -> "arm64-v8a,armeabi-v7a"
@@ -69,7 +69,7 @@ tasks.withType<Exec>().configureEach {
 val buildGemstoneHost = tasks.register<Exec>("buildGemstoneHost") {
     description = "Build the host Gemstone library used by JVM tests"
     workingDir = coreRoot
-    outputs.file(hostLibrary)
+    outputs.file(gemstoneHostLibrary)
     outputs.upToDateWhen { false }
     commandLine("/bin/sh", "-l", "-c", "cargo build --package gemstone --lib")
 }
@@ -81,7 +81,7 @@ val bindgenKotlin = tasks.register<Exec>("bindgenKotlin") {
         outputs.upToDateWhen { false }
     } else {
         dependsOn(buildGemstoneHost)
-        inputs.file(hostLibrary)
+        inputs.file(gemstoneHostLibrary)
     }
     inputs.dir(coreRoot.resolve("bin/uniffi-bindgen"))
     inputs.files(
@@ -92,7 +92,7 @@ val bindgenKotlin = tasks.register<Exec>("bindgenKotlin") {
         gemstoneRoot.resolve("uniffi.toml"),
         gemstoneRoot.resolve("justfile"),
     )
-    inputs.property("cargoBuildFlag", cargoBuildFlag.orEmpty())
+    inputs.property("cargoBuildFlag", cargoBuildFlag)
     outputs.dir(generatedKotlinDir.resolve("uniffi"))
     commandLine("/bin/sh", "-l", "-c", "just bindgen-kotlin")
 }
@@ -102,7 +102,7 @@ val buildCargoNdk = tasks.register<Exec>("buildCargoNdk") {
     workingDir = gemstoneRoot
     outputs.dir(jniLibsDir)
     outputs.upToDateWhen { false }
-    commandLine("/bin/sh", "-l", "-c", "cargo ndk $cargoNdkTargets -o ${jniLibsDir.absolutePath} build --lib ${cargoBuildFlag.orEmpty()}")
+    commandLine("/bin/sh", "-l", "-c", "cargo ndk $cargoNdkTargets -o ${jniLibsDir.absolutePath} build --lib $cargoBuildFlag")
 }
 
 tasks.configureEach {

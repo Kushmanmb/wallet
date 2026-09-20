@@ -97,9 +97,6 @@ build-test:
 test:
     @./gradlew --continue testGoogleDebugUnitTest testDebugUnitTest
 
-build-gemstone-host:
-    @./gradlew :gemstone:buildGemstoneHost
-
 test-integration:
     @./gradlew connectedGoogleDebugAndroidTest connectedDebugAndroidTest
 
