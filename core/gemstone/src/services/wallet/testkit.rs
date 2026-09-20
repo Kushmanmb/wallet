@@ -33,6 +33,7 @@ pub const TEST_PASSWORD: &str = "000102030405060708090a0b0c0d0e0f101112131415161
 pub struct MemoryWalletStore {
     pub wallets: Mutex<Vec<Wallet>>,
     pub add_wallet_error: Mutex<Option<GemServiceError>>,
+    pub set_image_url_error: Mutex<Option<GemServiceError>>,
 }
 
 #[async_trait::async_trait]
@@ -64,7 +65,13 @@ impl GemWalletStore for MemoryWalletStore {
     async fn set_name(&self, _wallet_id: WalletId, _name: String) -> Result<(), GemServiceError> {
         Ok(())
     }
-    async fn set_image_url(&self, _wallet_id: WalletId, _image_url: Option<String>) -> Result<(), GemServiceError> {
+    async fn set_image_url(&self, wallet_id: WalletId, image_url: Option<String>) -> Result<(), GemServiceError> {
+        if let Some(error) = self.set_image_url_error.lock().unwrap().clone() {
+            return Err(error);
+        }
+        if let Some(wallet) = self.wallets.lock().unwrap().iter_mut().find(|wallet| wallet.id == wallet_id) {
+            wallet.image_url = image_url;
+        }
         Ok(())
     }
 }
