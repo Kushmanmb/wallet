@@ -145,16 +145,16 @@ async fn apply(store: &dyn GemTransactionStateStore, wallet_id: WalletId, transa
         Err(_) if timed_out => TransactionUpdate::new_state(TransactionState::Failed),
         Err(msg) => return Err(GemServiceError::Gateway { msg }),
     };
-    let (transaction_id, current_state) = match rules::new_hash(&update.changes) {
+    let transaction_id = match rules::new_hash(&update.changes) {
         Some(hash) => {
             let new_transaction_id = TransactionId::new(transaction.id.chain, hash.clone());
             store.update_transaction_hash(wallet_id.clone(), transaction.id.clone(), hash).await?;
-            let Some(state) = store.get_state(wallet_id.clone(), new_transaction_id.clone()).await? else {
-                return Ok(None);
-            };
-            (new_transaction_id, state)
+            new_transaction_id
         }
-        None => (transaction.id.clone(), transaction.state),
+        None => transaction.id.clone(),
+    };
+    let Some(current_state) = store.get_state(wallet_id.clone(), transaction_id.clone()).await? else {
+        return Ok(None);
     };
     let next_state = match current_state.merged_with(update.state) {
         state if timed_out && !state.is_completed() => TransactionState::Failed,
@@ -162,8 +162,11 @@ async fn apply(store: &dyn GemTransactionStateStore, wallet_id: WalletId, transa
     };
     let fields = rules::state_update(next_state, &update.changes).map_err(|error| GemServiceError::Core { msg: error.to_string() })?;
     if next_state == current_state && !fields.has_field_changes() {
-        let state = store.get_state(wallet_id, transaction_id.clone()).await?;
-        return Ok(state.map(|state| GemTransactionStateResult { transaction_id, state, failures: Vec::new() }));
+        return Ok(Some(GemTransactionStateResult {
+            transaction_id,
+            state: current_state,
+            failures: Vec::new(),
+        }));
     }
     if !store.update_transaction(wallet_id, transaction_id.clone(), fields).await? {
         return Ok(None);
@@ -190,7 +193,7 @@ mod tests {
     use crate::services::assets::GemAssetStore;
     use crate::services::assets::rules::default_asset_basic;
     use futures::executor::block_on;
-    use num_bigint::BigUint;
+    use num_bigint::{BigInt, BigUint};
     use primitives::{AssetId, Chain, TransactionChange, TransactionMetadata, TransactionSwapMetadata, TransactionType};
 
     #[test]
@@ -323,6 +326,30 @@ mod tests {
 
         assert_eq!(result.state, TransactionState::InTransit);
         assert!(store.updates.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn test_a_delayed_poll_merges_against_the_stored_state_not_its_own_snapshot() {
+        let now = Utc::now();
+        let store = MemoryTransactionStateStore::with(vec![(TransactionId::mock("hash"), TransactionState::Confirmed)]);
+        let polled = Transaction {
+            state: TransactionState::Pending,
+            created_at: now,
+            ..Transaction::mock_swap()
+        };
+
+        let unchanged = apply_update(&store, polled.clone(), Ok(TransactionUpdate::new(TransactionState::Pending, vec![])), now).unwrap().unwrap();
+
+        assert_eq!(unchanged.state, TransactionState::Confirmed);
+        assert!(store.updates.lock().unwrap().is_empty(), "a confirmed row is not written back to pending");
+
+        let with_fee = apply_update(&store, polled, Ok(TransactionUpdate::new(TransactionState::Pending, vec![TransactionChange::NetworkFee(BigInt::from(21000))])), now)
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(with_fee.state, TransactionState::Confirmed);
+        let (_, saved) = store.updates.lock().unwrap()[0].clone();
+        assert_eq!(saved.state, TransactionState::Confirmed, "late fields land on the stored state, not the snapshot's");
     }
 
     #[test]
