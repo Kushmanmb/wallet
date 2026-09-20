@@ -334,7 +334,7 @@
   <string name="stake_awaiting_withdrawal">等待赎回</string>
   <string name="stake_active_in">距激活</string>
   <string name="stake_minimum_amount">最低金额</string>
-  <string name="stake_state_empty_title">质押将显示在这里️</string>
+  <string name="stake_state_empty_title">质押将显示在这里</string>
   <string name="stake_state_empty_description">首次质押 %1$s</string>
   <string name="stake_resource">资源</string>
   <string name="stake_resource_energy">能量</string>
@@ -415,7 +415,7 @@
   <string name="price_alerts_set_alert_set_target_price">设定目标价格</string>
   <string name="price_alerts_set_alert_current_price">当前价格</string>
   <string name="price_alerts_added_for">为 %1$s 设置价格提醒</string>
-  <string name="price_alerts_state_empty_title">价格提醒将显示在这里️</string>
+  <string name="price_alerts_state_empty_title">价格提醒将显示在这里</string>
   <string name="price_alerts_state_empty_description">请添加币种，即可开始追踪资产</string>
   <string name="price_alerts_auto_footer">当价格发生重大变动时，警报就会触发。</string>
   <string name="price_alerts_set_alert_title">设置价格提醒</string>
@@ -480,7 +480,7 @@
   <string name="nft_collection">系列</string>
   <string name="nft_save_to_photos">保存到照片</string>
   <string name="nft_set_as_avatar">设为头像</string>
-  <string name="nft_state_empty_title">NFT 将显示在这里️</string>
+  <string name="nft_state_empty_title">NFT 将显示在这里</string>
   <string name="nft_state_empty_description">接收第一个 NFT</string>
   <string name="nft_report_reason_spam">垃圾信息</string>
   <string name="nft_report_reason_malicious">恶意</string>

@@ -266,7 +266,7 @@
   <string name="asset_decimals">Decimalen</string>
   <string name="asset_token_id">Token-ID</string>
   <string name="asset_contract">Contract</string>
-  <string name="asset_state_empty_title">Uw transacties verschijnen hier️</string>
+  <string name="asset_state_empty_title">Uw transacties verschijnen hier</string>
   <string name="asset_state_empty_description">Ontvangen, ruilen of kopen %1$s</string>
   <string name="asset_verification_unverified">Ongeverifieerd</string>
   <string name="asset_verification_suspicious">Verdacht</string>
@@ -415,7 +415,7 @@
   <string name="price_alerts_set_alert_set_target_price">Stel een doelprijs in</string>
   <string name="price_alerts_set_alert_current_price">Huidige prijs</string>
   <string name="price_alerts_added_for">Prijswaarschuwing instellen %1$s</string>
-  <string name="price_alerts_state_empty_title">Uw meldingen verschijnen hier️</string>
+  <string name="price_alerts_state_empty_title">Uw meldingen verschijnen hier</string>
   <string name="price_alerts_state_empty_description">Schakel ze in door munten toe te voegen aan de track</string>
   <string name="price_alerts_auto_footer">Waarschuwingen worden geactiveerd bij aanzienlijke prijsbewegingen.</string>
   <string name="price_alerts_set_alert_title">Prijswaarschuwing instellen</string>
@@ -480,7 +480,7 @@
   <string name="nft_collection">Collectie</string>
   <string name="nft_save_to_photos">Opslaan in Foto\'s</string>
   <string name="nft_set_as_avatar">Instellen als Avatar</string>
-  <string name="nft_state_empty_title">Uw NFT\'s verschijnen hier️</string>
+  <string name="nft_state_empty_title">Uw NFT\'s verschijnen hier</string>
   <string name="nft_state_empty_description">Ontvang uw eerste NFT</string>
   <string name="nft_report_reason_spam">Spam</string>
   <string name="nft_report_reason_malicious">Kwaadwillend</string>

@@ -266,7 +266,7 @@
   <string name="asset_decimals">Decimals</string>
   <string name="asset_token_id">Token ID</string>
   <string name="asset_contract">Contract</string>
-  <string name="asset_state_empty_title">Your transactions will appear here️</string>
+  <string name="asset_state_empty_title">Your transactions will appear here</string>
   <string name="asset_state_empty_description">Receive, swap or buy %1$s</string>
   <string name="asset_verification_unverified">Unverified</string>
   <string name="asset_verification_suspicious">Suspicious</string>
@@ -415,7 +415,7 @@
   <string name="price_alerts_set_alert_set_target_price">Set target price</string>
   <string name="price_alerts_set_alert_current_price">Current price</string>
   <string name="price_alerts_added_for">Set price alert %1$s</string>
-  <string name="price_alerts_state_empty_title">Your price alerts will appear here️</string>
+  <string name="price_alerts_state_empty_title">Your price alerts will appear here</string>
   <string name="price_alerts_state_empty_description">Enable them by adding coins to track</string>
   <string name="price_alerts_auto_footer">Alerts trigger on significant price moves.</string>
   <string name="price_alerts_set_alert_title">Set Price Alert</string>
@@ -480,7 +480,7 @@
   <string name="nft_collection">Collection</string>
   <string name="nft_save_to_photos">Save to Photos</string>
   <string name="nft_set_as_avatar">Set as Avatar</string>
-  <string name="nft_state_empty_title">Your NFTs will appear here️</string>
+  <string name="nft_state_empty_title">Your NFTs will appear here</string>
   <string name="nft_state_empty_description">Receive your first NFT</string>
   <string name="nft_report_reason_spam">Spam</string>
   <string name="nft_report_reason_malicious">Malicious</string>

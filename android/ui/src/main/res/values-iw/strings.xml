@@ -266,7 +266,7 @@
   <string name="asset_decimals">עשרוניות</string>
   <string name="asset_token_id">מזהה אסימון</string>
   <string name="asset_contract">חוֹזֶה</string>
-  <string name="asset_state_empty_title">העסקאות שלך יופיעו כאן️</string>
+  <string name="asset_state_empty_title">העסקאות שלך יופיעו כאן</string>
   <string name="asset_state_empty_description">קבל, החלף או קנה %1$s</string>
   <string name="asset_verification_unverified">לא מאומת</string>
   <string name="asset_verification_suspicious">חָשׁוּד</string>
@@ -415,7 +415,7 @@
   <string name="price_alerts_set_alert_set_target_price">קביעת מחיר יעד</string>
   <string name="price_alerts_set_alert_current_price">מחיר נוכחי</string>
   <string name="price_alerts_added_for">הגדר התראת מחיר %1$s</string>
-  <string name="price_alerts_state_empty_title">ההתראות שלך יופיעו כאן️</string>
+  <string name="price_alerts_state_empty_title">ההתראות שלך יופיעו כאן</string>
   <string name="price_alerts_state_empty_description">אפשרו להם על ידי הוספת מטבעות למעקב</string>
   <string name="price_alerts_auto_footer">התראות מופעלות על תנודות משמעותיות במחיר.</string>
   <string name="price_alerts_set_alert_title">הגדר התראת מחיר</string>
@@ -467,7 +467,7 @@
   <string name="info_fully_diluted_valuation_description">שווי השוק התיאורטי אם כל המטבעות היו במחזור. מחושב כמחיר כפול היצע מקסימלי.</string>
   <string name="info_circulating_supply_description">מספר המטבעות הזמינים ונסחרים כעת בשוק.</string>
   <string name="info_total_supply_description">המספר הכולל של מטבעות שקיימים, כולל מטבעות נעולים או שמורים.</string>
-  <string name="info_max_supply_title">אספקה ​​מקסימלית</string>
+  <string name="info_max_supply_title">אספקה מקסימלית</string>
   <string name="info_max_supply_description">המספר המקסימלי של מטבעות שאי פעם יהיה קיים.</string>
   <string name="info_perpetual_funding_apr_title">APR מימון</string>
   <string name="info_perpetual_funding_apr_description">השיעור השנתי שבו לונג משלם שורט (אם שלילי, שורט משלם לונג). אין עמלות הקשורות למימון, שהוא העברה עמית לעמית בין משתמשים כדי לדחוף את המחירים לכיוון מחיר הספוט.</string>
@@ -480,7 +480,7 @@
   <string name="nft_collection">אוסף</string>
   <string name="nft_save_to_photos">שמור בתמונות</string>
   <string name="nft_set_as_avatar">הגדר כאווטר</string>
-  <string name="nft_state_empty_title">ה-NFT שלך יופיע כאן️</string>
+  <string name="nft_state_empty_title">ה-NFT שלך יופיע כאן</string>
   <string name="nft_state_empty_description">קבל את ה-NFT הראשון שלך</string>
   <string name="nft_report_reason_spam">ספאם</string>
   <string name="nft_report_reason_malicious">זְדוֹנִי</string>

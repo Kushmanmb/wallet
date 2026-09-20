@@ -266,7 +266,7 @@
   <string name="asset_decimals">Desimal</string>
   <string name="asset_token_id">ID Token</string>
   <string name="asset_contract">Kontrak</string>
-  <string name="asset_state_empty_title">Transaksi Anda akan muncul di sini️</string>
+  <string name="asset_state_empty_title">Transaksi Anda akan muncul di sini</string>
   <string name="asset_state_empty_description">Terima, tukar atau beli %1$s</string>
   <string name="asset_verification_unverified">Belum diverifikasi</string>
   <string name="asset_verification_suspicious">Mencurigakan</string>
@@ -415,7 +415,7 @@
   <string name="price_alerts_set_alert_set_target_price">Tetapkan target harga</string>
   <string name="price_alerts_set_alert_current_price">Harga saat ini</string>
   <string name="price_alerts_added_for">Tetapkan peringatan harga %1$s</string>
-  <string name="price_alerts_state_empty_title">Peringatan Anda akan muncul di sini️</string>
+  <string name="price_alerts_state_empty_title">Peringatan Anda akan muncul di sini</string>
   <string name="price_alerts_state_empty_description">Aktifkan mereka dengan menambahkan koin untuk dilacak</string>
   <string name="price_alerts_auto_footer">Peringatan dipicu pada pergerakan harga yang signifikan.</string>
   <string name="price_alerts_set_alert_title">Tetapkan Peringatan Harga</string>
@@ -480,7 +480,7 @@
   <string name="nft_collection">Koleksi</string>
   <string name="nft_save_to_photos">Simpan ke Foto</string>
   <string name="nft_set_as_avatar">Tetapkan sebagai Avatar</string>
-  <string name="nft_state_empty_title">NFT Anda akan muncul di sini️</string>
+  <string name="nft_state_empty_title">NFT Anda akan muncul di sini</string>
   <string name="nft_state_empty_description">Terima NFT pertama Anda</string>
   <string name="nft_report_reason_spam">Spam</string>
   <string name="nft_report_reason_malicious">Berbahaya</string>

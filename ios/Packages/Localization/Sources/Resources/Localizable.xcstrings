@@ -4597,85 +4597,85 @@
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "আপনার লেনদেন এখানে প্রদর্শিত হবে️"
+            "value": "আপনার লেনদেন এখানে প্রদর্শিত হবে"
           }
         },
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vaše transakce se zobrazí zde ️"
+            "value": "Vaše transakce se zobrazí zde"
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dine transaktioner vil blive vist her️"
+            "value": "Dine transaktioner vil blive vist her"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ihre Transaktionen werden hier angezeigt️"
+            "value": "Ihre Transaktionen werden hier angezeigt"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your transactions will appear here️"
+            "value": "Your transactions will appear here"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tus transacciones aparecerán aquí️"
+            "value": "Tus transacciones aparecerán aquí"
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "تراکنش‌های شما اینجا نمایش داده می‌شوند️"
+            "value": "تراکنش‌های شما اینجا نمایش داده می‌شوند"
           }
         },
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ang iyong mga transaksyon ay lalabas dito️"
+            "value": "Ang iyong mga transaksyon ay lalabas dito"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vos transactions apparaîtront ici️"
+            "value": "Vos transactions apparaîtront ici"
           }
         },
         "ha": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ma'amalolinku za su bayyana a nan️"
+            "value": "Ma'amalolinku za su bayyana a nan"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "העסקאות שלך יופיעו כאן️"
+            "value": "העסקאות שלך יופיעו כאן"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "आपके लेन-देन यहां दिखाई देंगे️"
+            "value": "आपके लेन-देन यहां दिखाई देंगे"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Transaksi Anda akan muncul di sini️"
+            "value": "Transaksi Anda akan muncul di sini"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le tue transazioni appariranno qui️"
+            "value": "Le tue transazioni appariranno qui"
           }
         },
         "ja": {
@@ -4693,13 +4693,13 @@
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Transaksi anda akan muncul di sini️"
+            "value": "Transaksi anda akan muncul di sini"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Uw transacties verschijnen hier️"
+            "value": "Uw transacties verschijnen hier"
           }
         },
         "pl": {
@@ -4711,43 +4711,43 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Suas transações aparecerão aqui️"
+            "value": "Suas transações aparecerão aqui"
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tranzacțiile tale vor apărea aici️"
+            "value": "Tranzacțiile tale vor apărea aici"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ваши транзакции будут отображаться здесь️"
+            "value": "Ваши транзакции будут отображаться здесь"
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Shughuli zako za malipo zitaonekana hapa️"
+            "value": "Shughuli zako za malipo zitaonekana hapa"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ธุรกรรมของคุณจะปรากฏที่นี่️"
+            "value": "ธุรกรรมของคุณจะปรากฏที่นี่"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "İşlemleriniz burada görünecek️"
+            "value": "İşlemleriniz burada görünecek"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ваші транзакції з'являться тут ️"
+            "value": "Ваші транзакції з'являться тут"
           }
         },
         "ur": {
@@ -4759,7 +4759,7 @@
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giao dịch của bạn sẽ xuất hiện ở đây️"
+            "value": "Giao dịch của bạn sẽ xuất hiện ở đây"
           }
         },
         "zh-Hans": {
@@ -25339,7 +25339,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Salve seus endereços usados ​​com frequência."
+            "value": "Salve seus endereços usados com frequência."
           }
         },
         "ro": {
@@ -39992,7 +39992,7 @@
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "אספקה ​​מקסימלית"
+            "value": "אספקה מקסימלית"
           }
         },
         "hi": {
@@ -41425,7 +41425,7 @@
         "ur": {
           "stringUnit": {
             "state": "translated",
-            "value": "سالانہ شرح جس پر لانگ شارٹس ادا کرتا ہے (اگر منفی، شارٹس لانگ ادا کرتے ہیں)۔ فنڈنگ ​​سے وابستہ کوئی فیس نہیں ہے، جو کہ قیمتوں کو اسپاٹ پرائس کی طرف دھکیلنے کے لیے صارفین کے درمیان پیئر ٹو پیئر ٹرانسفر ہے۔"
+            "value": "سالانہ شرح جس پر لانگ شارٹس ادا کرتا ہے (اگر منفی، شارٹس لانگ ادا کرتے ہیں)۔ فنڈنگ سے وابستہ کوئی فیس نہیں ہے، جو کہ قیمتوں کو اسپاٹ پرائس کی طرف دھکیلنے کے لیے صارفین کے درمیان پیئر ٹو پیئر ٹرانسفر ہے۔"
           }
         },
         "vi": {
@@ -41759,7 +41759,7 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Płatności finansowe to okresowe płatności pomiędzy inwestorami, mające na celu utrzymanie ceny kontraktu wieczystego na poziomie zbliżonym do ceny spot instrumentu bazowego. Dodatnie finansowanie oznacza, że ​​długie pozycje opłacają krótkie pozycje, podczas gdy ujemne finansowanie oznacza, że ​​krótkie pozycje opłacają długie pozycje."
+            "value": "Płatności finansowe to okresowe płatności pomiędzy inwestorami, mające na celu utrzymanie ceny kontraktu wieczystego na poziomie zbliżonym do ceny spot instrumentu bazowego. Dodatnie finansowanie oznacza, że długie pozycje opłacają krótkie pozycje, podczas gdy ujemne finansowanie oznacza, że krótkie pozycje opłacają długie pozycje."
           }
         },
         "pt-BR": {
@@ -41807,7 +41807,7 @@
         "ur": {
           "stringUnit": {
             "state": "translated",
-            "value": "فنڈنگ ​​کی ادائیگیاں تاجروں کے درمیان متواتر ادائیگیاں ہوتی ہیں تاکہ دائمی معاہدے کی قیمت کو بنیادی اثاثہ کی جگہ کی قیمت کے قریب رکھا جا سکے۔ مثبت فنڈنگ ​​کا مطلب ہے لانگ پوزیشنز شارٹ پوزیشنز ادا کرتی ہیں، جبکہ منفی فنڈنگ ​​کا مطلب ہے کہ شارٹ پوزیشنز لانگ پوزیشنز ادا کرتی ہیں۔"
+            "value": "فنڈنگ کی ادائیگیاں تاجروں کے درمیان متواتر ادائیگیاں ہوتی ہیں تاکہ دائمی معاہدے کی قیمت کو بنیادی اثاثہ کی جگہ کی قیمت کے قریب رکھا جا سکے۔ مثبت فنڈنگ کا مطلب ہے لانگ پوزیشنز شارٹ پوزیشنز ادا کرتی ہیں، جبکہ منفی فنڈنگ کا مطلب ہے کہ شارٹ پوزیشنز لانگ پوزیشنز ادا کرتی ہیں۔"
           }
         },
         "vi": {
@@ -50819,85 +50819,85 @@
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "আপনার NFT গুলি এখানে প্রদর্শিত হবে️"
+            "value": "আপনার NFT গুলি এখানে প্রদর্শিত হবে"
           }
         },
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vaše NFT se zobrazí zde ️"
+            "value": "Vaše NFT se zobrazí zde"
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dine NFT'er vil blive vist her️"
+            "value": "Dine NFT'er vil blive vist her"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ihre NFTs werden hier angezeigt️"
+            "value": "Ihre NFTs werden hier angezeigt"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your NFTs will appear here️"
+            "value": "Your NFTs will appear here"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tus NFT aparecerán aquí️"
+            "value": "Tus NFT aparecerán aquí"
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "NFT های شما اینجا ظاهر خواهند شد️"
+            "value": "NFT های شما اینجا ظاهر خواهند شد"
           }
         },
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lalabas dito ang iyong mga NFT ️"
+            "value": "Lalabas dito ang iyong mga NFT"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vos NFT apparaîtront ici️"
+            "value": "Vos NFT apparaîtront ici"
           }
         },
         "ha": {
           "stringUnit": {
             "state": "translated",
-            "value": "NFT naku zasu bayyana anan️"
+            "value": "NFT naku zasu bayyana anan"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "ה-NFT שלך יופיע כאן️"
+            "value": "ה-NFT שלך יופיע כאן"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "आपके NFT यहां दिखाई देंगे️"
+            "value": "आपके NFT यहां दिखाई देंगे"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "NFT Anda akan muncul di sini️"
+            "value": "NFT Anda akan muncul di sini"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "I tuoi NFT appariranno qui️"
+            "value": "I tuoi NFT appariranno qui"
           }
         },
         "ja": {
@@ -50915,43 +50915,43 @@
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "NFT anda akan muncul di sini️"
+            "value": "NFT anda akan muncul di sini"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Uw NFT's verschijnen hier️"
+            "value": "Uw NFT's verschijnen hier"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Twoje NFT pojawią się tutaj️"
+            "value": "Twoje NFT pojawią się tutaj"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seus NFTs aparecerão aqui️"
+            "value": "Seus NFTs aparecerão aqui"
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "NFT-urile tale vor apărea aici️"
+            "value": "NFT-urile tale vor apărea aici"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ваши NFT будут здесь️"
+            "value": "Ваши NFT будут здесь"
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "NFT zako zitaonekana hapa️"
+            "value": "NFT zako zitaonekana hapa"
           }
         },
         "th": {
@@ -50963,13 +50963,13 @@
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "NFT'leriniz burada görünecek️"
+            "value": "NFT'leriniz burada görünecek"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ваші NFT з'являться тут ️"
+            "value": "Ваші NFT з'являться тут"
           }
         },
         "ur": {
@@ -50981,19 +50981,19 @@
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "NFT của bạn sẽ xuất hiện ở đây️"
+            "value": "NFT của bạn sẽ xuất hiện ở đây"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "NFT 将显示在这里️"
+            "value": "NFT 将显示在这里"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "NFT 將顯示在這裡️"
+            "value": "NFT 將顯示在這裡"
           }
         }
       }
@@ -66290,43 +66290,43 @@
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "আপনার সতর্কতাগুলি এখানে প্রদর্শিত হবে️"
+            "value": "আপনার সতর্কতাগুলি এখানে প্রদর্শিত হবে"
           }
         },
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vaše upozornění se zobrazí zde ️"
+            "value": "Vaše upozornění se zobrazí zde"
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dine alarmer vises her️"
+            "value": "Dine alarmer vises her"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ihre Benachrichtigungen werden hier angezeigt️"
+            "value": "Ihre Benachrichtigungen werden hier angezeigt"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your price alerts will appear here️"
+            "value": "Your price alerts will appear here"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tus alertas aparecerán aquí️"
+            "value": "Tus alertas aparecerán aquí"
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "هشدارهای شما اینجا نمایش داده می‌شوند️"
+            "value": "هشدارهای شما اینجا نمایش داده می‌شوند"
           }
         },
         "fil": {
@@ -66338,37 +66338,37 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vos alertes apparaîtront ici️"
+            "value": "Vos alertes apparaîtront ici"
           }
         },
         "ha": {
           "stringUnit": {
             "state": "translated",
-            "value": "Faɗin farashin ku zai bayyana anan️"
+            "value": "Faɗin farashin ku zai bayyana anan"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "ההתראות שלך יופיעו כאן️"
+            "value": "ההתראות שלך יופיעו כאן"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "आपके अलर्ट यहां दिखाई देंगे️"
+            "value": "आपके अलर्ट यहां दिखाई देंगे"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Peringatan Anda akan muncul di sini️"
+            "value": "Peringatan Anda akan muncul di sini"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "I tuoi avvisi appariranno qui️"
+            "value": "I tuoi avvisi appariranno qui"
           }
         },
         "ja": {
@@ -66386,43 +66386,43 @@
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Makluman anda akan dipaparkan di sini️"
+            "value": "Makluman anda akan dipaparkan di sini"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Uw meldingen verschijnen hier️"
+            "value": "Uw meldingen verschijnen hier"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Twoje alerty będą pojawiać się tutaj️"
+            "value": "Twoje alerty będą pojawiać się tutaj"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seus alertas aparecerão aqui️"
+            "value": "Seus alertas aparecerão aqui"
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Alertele tale vor apărea aici️"
+            "value": "Alertele tale vor apărea aici"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ваши оповещения о ценах будут появляться здесь️"
+            "value": "Ваши оповещения о ценах будут появляться здесь"
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Arifa zako zitaonekana hapa️"
+            "value": "Arifa zako zitaonekana hapa"
           }
         },
         "th": {
@@ -66434,13 +66434,13 @@
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Uyarılarınız burada görünecek️"
+            "value": "Uyarılarınız burada görünecek"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ваші сповіщення про ціни з'являтимуться тут️"
+            "value": "Ваші сповіщення про ціни з'являтимуться тут"
           }
         },
         "ur": {
@@ -66452,19 +66452,19 @@
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cảnh báo giá của bạn sẽ xuất hiện ở đây️"
+            "value": "Cảnh báo giá của bạn sẽ xuất hiện ở đây"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "价格提醒将显示在这里️"
+            "value": "价格提醒将显示在这里"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "價格提醒將顯示在這裡️"
+            "value": "價格提醒將顯示在這裡"
           }
         }
       }
@@ -87659,7 +87659,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "质押将显示在这里️"
+            "value": "质押将显示在这里"
           }
         },
         "zh-Hant": {

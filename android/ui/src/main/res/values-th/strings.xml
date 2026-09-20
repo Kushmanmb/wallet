@@ -266,7 +266,7 @@
   <string name="asset_decimals">ทศนิยม</string>
   <string name="asset_token_id">รหัสโทเค็น</string>
   <string name="asset_contract">สัญญา</string>
-  <string name="asset_state_empty_title">ธุรกรรมของคุณจะปรากฏที่นี่️</string>
+  <string name="asset_state_empty_title">ธุรกรรมของคุณจะปรากฏที่นี่</string>
   <string name="asset_state_empty_description">รับ แลกเปลี่ยน หรือ ซื้อ %1$s</string>
   <string name="asset_verification_unverified">ไม่ได้รับการยืนยัน</string>
   <string name="asset_verification_suspicious">สงสัย</string>

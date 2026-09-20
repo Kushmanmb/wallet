@@ -415,7 +415,7 @@
   <string name="price_alerts_set_alert_set_target_price">設定目標價格</string>
   <string name="price_alerts_set_alert_current_price">目前價格</string>
   <string name="price_alerts_added_for">價格提醒已設定：%1$s</string>
-  <string name="price_alerts_state_empty_title">價格提醒將顯示在這裡️</string>
+  <string name="price_alerts_state_empty_title">價格提醒將顯示在這裡</string>
   <string name="price_alerts_state_empty_description">請添加幣種，即可開始追蹤資產</string>
   <string name="price_alerts_auto_footer">價格大幅變動時會觸發提醒。</string>
   <string name="price_alerts_set_alert_title">設定價格提醒</string>
@@ -480,7 +480,7 @@
   <string name="nft_collection">系列</string>
   <string name="nft_save_to_photos">儲存到照片</string>
   <string name="nft_set_as_avatar">設為頭像</string>
-  <string name="nft_state_empty_title">NFT 將顯示在這裡️</string>
+  <string name="nft_state_empty_title">NFT 將顯示在這裡</string>
   <string name="nft_state_empty_description">接收第一個 NFT</string>
   <string name="nft_report_reason_spam">垃圾內容</string>
   <string name="nft_report_reason_malicious">惡意</string>

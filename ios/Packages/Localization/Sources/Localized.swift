@@ -91,8 +91,8 @@ public enum Localized {
         public static func description(_ p1: Any) -> String {
           return Localized.tr("Localizable", "asset.state.empty.description", String(describing: p1), fallback: "Receive, swap or buy %@")
         }
-        /// Your transactions will appear here️
-        public static let title = Localized.tr("Localizable", "asset.state.empty.title", fallback: "Your transactions will appear here️")
+        /// Your transactions will appear here
+        public static let title = Localized.tr("Localizable", "asset.state.empty.title", fallback: "Your transactions will appear here")
       }
     }
     public enum Verification {
@@ -789,8 +789,8 @@ public enum Localized {
       public enum Empty {
         /// Receive your first NFT
         public static let description = Localized.tr("Localizable", "nft.state.empty.description", fallback: "Receive your first NFT")
-        /// Your NFTs will appear here️
-        public static let title = Localized.tr("Localizable", "nft.state.empty.title", fallback: "Your NFTs will appear here️")
+        /// Your NFTs will appear here
+        public static let title = Localized.tr("Localizable", "nft.state.empty.title", fallback: "Your NFTs will appear here")
       }
     }
   }
@@ -1027,8 +1027,8 @@ public enum Localized {
       public enum Empty {
         /// Enable them by adding coins to track
         public static let description = Localized.tr("Localizable", "price_alerts.state.empty.description", fallback: "Enable them by adding coins to track")
-        /// Your price alerts will appear here️
-        public static let title = Localized.tr("Localizable", "price_alerts.state.empty.title", fallback: "Your price alerts will appear here️")
+        /// Your price alerts will appear here
+        public static let title = Localized.tr("Localizable", "price_alerts.state.empty.title", fallback: "Your price alerts will appear here")
       }
     }
   }

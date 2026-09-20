@@ -266,7 +266,7 @@
   <string name="asset_decimals">اعشار ها</string>
   <string name="asset_token_id">شناسه توکن</string>
   <string name="asset_contract">قرارداد</string>
-  <string name="asset_state_empty_title">تراکنش‌های شما اینجا نمایش داده می‌شوند️</string>
+  <string name="asset_state_empty_title">تراکنش‌های شما اینجا نمایش داده می‌شوند</string>
   <string name="asset_state_empty_description">دریافت، مبادله یا خرید %1$s</string>
   <string name="asset_verification_unverified">تایید نشده</string>
   <string name="asset_verification_suspicious">مشکوک</string>
@@ -415,7 +415,7 @@
   <string name="price_alerts_set_alert_set_target_price">تعیین قیمت هدف</string>
   <string name="price_alerts_set_alert_current_price">قیمت فعلی</string>
   <string name="price_alerts_added_for">تنظیم هشدار قیمت %1$s</string>
-  <string name="price_alerts_state_empty_title">هشدارهای شما اینجا نمایش داده می‌شوند️</string>
+  <string name="price_alerts_state_empty_title">هشدارهای شما اینجا نمایش داده می‌شوند</string>
   <string name="price_alerts_state_empty_description">با اضافه کردن سکه‌ها برای ردیابی، آنها را فعال کنید</string>
   <string name="price_alerts_auto_footer">هشدارها در صورت حرکت قابل توجه قیمت فعال می‌شوند.</string>
   <string name="price_alerts_set_alert_title">تنظیم هشدار قیمت</string>
@@ -480,7 +480,7 @@
   <string name="nft_collection">مجموعه</string>
   <string name="nft_save_to_photos">ذخیره در عکس ها</string>
   <string name="nft_set_as_avatar">به عنوان آواتار تنظیم کنید</string>
-  <string name="nft_state_empty_title">NFT های شما اینجا ظاهر خواهند شد️</string>
+  <string name="nft_state_empty_title">NFT های شما اینجا ظاهر خواهند شد</string>
   <string name="nft_state_empty_description">اولین NFT خود را دریافت کنید</string>
   <string name="nft_report_reason_spam">هرزنامه</string>
   <string name="nft_report_reason_malicious">مخرب</string>

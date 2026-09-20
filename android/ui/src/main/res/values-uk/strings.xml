@@ -266,7 +266,7 @@
   <string name="asset_decimals">Десяткові знаки</string>
   <string name="asset_token_id">Токен ID</string>
   <string name="asset_contract">Контракт</string>
-  <string name="asset_state_empty_title">Ваші транзакції з\'являться тут ️</string>
+  <string name="asset_state_empty_title">Ваші транзакції з\'являться тут</string>
   <string name="asset_state_empty_description">Отримати, обміняти або купити %1$s</string>
   <string name="asset_verification_unverified">Неперевірено</string>
   <string name="asset_verification_suspicious">Підозрілий</string>
@@ -415,7 +415,7 @@
   <string name="price_alerts_set_alert_set_target_price">Встановити цільову ціну</string>
   <string name="price_alerts_set_alert_current_price">Поточна ціна</string>
   <string name="price_alerts_added_for">Встановити сповіщення про ціну %1$s</string>
-  <string name="price_alerts_state_empty_title">Ваші сповіщення про ціни з\'являтимуться тут️</string>
+  <string name="price_alerts_state_empty_title">Ваші сповіщення про ціни з\'являтимуться тут</string>
   <string name="price_alerts_state_empty_description">Увімкніть їх, додавши монети до відстеження</string>
   <string name="price_alerts_auto_footer">Сповіщення спрацьовують у разі значних змін цін.</string>
   <string name="price_alerts_set_alert_title">Встановити сповіщення про ціну</string>
@@ -480,7 +480,7 @@
   <string name="nft_collection">Колекція</string>
   <string name="nft_save_to_photos">Зберегти до фотографій</string>
   <string name="nft_set_as_avatar">Встановити як аватар</string>
-  <string name="nft_state_empty_title">Ваші NFT з\'являться тут ️</string>
+  <string name="nft_state_empty_title">Ваші NFT з\'являться тут</string>
   <string name="nft_state_empty_description">Отримайте свій перший NFT</string>
   <string name="nft_report_reason_spam">Спам</string>
   <string name="nft_report_reason_malicious">Шкідливий</string>

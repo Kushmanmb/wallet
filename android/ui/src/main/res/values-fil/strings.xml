@@ -266,7 +266,7 @@
   <string name="asset_decimals">Mga desimal</string>
   <string name="asset_token_id">ID ng Token</string>
   <string name="asset_contract">Kontrata</string>
-  <string name="asset_state_empty_title">Ang iyong mga transaksyon ay lalabas dito️</string>
+  <string name="asset_state_empty_title">Ang iyong mga transaksyon ay lalabas dito</string>
   <string name="asset_state_empty_description">Tumanggap, magpalit o bumili ng %1$s</string>
   <string name="asset_verification_unverified">Hindi na-verify</string>
   <string name="asset_verification_suspicious">Kahina-hinala</string>
@@ -480,7 +480,7 @@
   <string name="nft_collection">Koleksyon</string>
   <string name="nft_save_to_photos">I-save sa Mga Larawan</string>
   <string name="nft_set_as_avatar">Itakda bilang Avatar</string>
-  <string name="nft_state_empty_title">Lalabas dito ang iyong mga NFT ️</string>
+  <string name="nft_state_empty_title">Lalabas dito ang iyong mga NFT</string>
   <string name="nft_state_empty_description">Tanggapin ang iyong unang NFT</string>
   <string name="nft_report_reason_spam">Spam</string>
   <string name="nft_report_reason_malicious">Malisyoso</string>
