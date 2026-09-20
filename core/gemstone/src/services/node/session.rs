@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use primitives::Chain;
 
-use super::model::{GemAddNodeError, GemNodeCheck, GemNodeSelection, GemNodeStatusState};
+use super::model::{GemAddNodeError, GemNodeCheck, GemNodeRow, GemNodeSelection, GemNodeStatusState};
 use super::rules;
 use crate::services::error::GemServiceError;
 use crate::services::error_text::GemErrorText;
@@ -236,6 +236,22 @@ impl GemNodeListSession {
         Self { statuses, ..self.clone() }
     }
 
+    pub fn rows(&self) -> Vec<GemNodeRow> {
+        self.nodes
+            .iter()
+            .map(|node| {
+                let status = self.statuses.get(&node.url).cloned().unwrap_or(GemNodeStatusState::Loading);
+                GemNodeRow {
+                    title: node.title(),
+                    subtitle: status.subtitle(),
+                    latency_status: status.latency_status(),
+                    can_delete: rules::can_delete_node(self.chain, &node.url),
+                    node: node.clone(),
+                }
+            })
+            .collect()
+    }
+
     pub fn node_urls(&self) -> Vec<String> {
         self.nodes.iter().map(|node| node.url.clone()).collect()
     }
@@ -243,7 +259,11 @@ impl GemNodeListSession {
 
 #[cfg(test)]
 mod node_list_tests {
+    use primitives::node_config::NodeRegion;
+
+    use super::super::model::GemNodeSubtitle;
     use super::*;
+    use crate::services::node::rules;
 
     #[test]
     fn test_a_status_for_a_node_that_is_gone_is_dropped() {
@@ -277,4 +297,34 @@ mod node_list_tests {
         assert_eq!(session.node_urls(), vec!["a".to_string(), "b".to_string()]);
         assert!(session.statuses.values().all(|state| *state == GemNodeStatusState::Loading));
     }
+    #[test]
+    fn test_node_rows_pair_each_node_with_its_own_status_and_defaults_the_rest_to_loading() {
+        let default_url = rules::region_node(Chain::Ethereum, NodeRegion::Us).url;
+        let selections = rules::node_selections(vec![rules::region_node(Chain::Ethereum, NodeRegion::Us)], &default_url);
+        let added = GemNodeSelection {
+            host: "node.example.com".to_string(),
+            ..GemNodeSelection::mock("https://node.example.com")
+        };
+        let nodes = vec![selections[0].clone(), added.clone()];
+        let statuses = HashMap::from([(added.url.clone(), GemNodeStatusState::mock_result(21_000_000))]);
+
+        let rows = GemNodeListSession {
+            chain: Chain::Ethereum,
+            nodes,
+            statuses,
+        }
+        .rows();
+
+        assert_eq!(rows.len(), 2);
+        assert_eq!(rows[0].subtitle, GemNodeSubtitle::LatestBlock { value: None }, "a node with no status yet is still loading");
+        assert_eq!(
+            rows[1].subtitle,
+            GemNodeSubtitle::LatestBlock {
+                value: Some(crate::formatted_number::GemFormattedNumber::count(21_000_000))
+            }
+        );
+        assert!(!rows[0].can_delete);
+        assert!(rows[1].can_delete);
+    }
+
 }

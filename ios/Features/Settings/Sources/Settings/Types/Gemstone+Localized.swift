@@ -1,6 +1,5 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import enum Gemstone.GemChainSettingsSection
 import enum Gemstone.GemNodeCheckRow
 import enum Gemstone.GemNodeSubtitle
 import enum Gemstone.GemServiceEndpointType
@@ -24,15 +23,6 @@ extension GemServiceEndpointType {
         switch self {
         case .api: "API"
         case .gemNode: Localized.Nodes.gemWalletNode
-        }
-    }
-}
-
-extension GemChainSettingsSection {
-    var title: String {
-        switch self {
-        case .nodes: Localized.Settings.Networks.source
-        case .explorer: Localized.Settings.Networks.explorer
         }
     }
 }

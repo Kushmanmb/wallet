@@ -79,12 +79,6 @@ impl GemNodeCheck {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemChainSettingsSection {
-    Nodes,
-    Explorer,
-}
-
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct GemExplorerRow {
     pub name: String,

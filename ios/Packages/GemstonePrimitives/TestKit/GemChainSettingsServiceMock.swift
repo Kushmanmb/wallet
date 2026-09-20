@@ -52,18 +52,6 @@ public final class GemChainSettingsServiceMock: GemChainSettingsServiceProtocol,
         0
     }
 
-    public func nodeRows(chain _: Chain, nodes: [GemNodeSelection], statuses: [String: GemNodeStatusState]) -> [GemNodeRow] {
-        nodes.map {
-            GemNodeRow(
-                node: $0,
-                title: .host(host: $0.host),
-                subtitle: (statuses[$0.url] ?? .loading).subtitle(),
-                latencyStatus: (statuses[$0.url] ?? .loading).latencyStatus(),
-                canDelete: true,
-            )
-        }
-    }
-
     public func nodeStatus(chain _: Chain, url: String) async -> GemNodeStatusState {
         statusCallsStorage.withLock { $0.append(url) }
         return statusByUrl[url] ?? .error
@@ -72,10 +60,6 @@ public final class GemChainSettingsServiceMock: GemChainSettingsServiceProtocol,
     public func nodes(chain _: Chain) async throws -> [GemNodeSelection] {
         defer { nodesCalls += 1 }
         return nodesByCall.indices.contains(nodesCalls) ? nodesByCall[nodesCalls] : nodesByCall.last ?? []
-    }
-
-    public func sections() -> [GemChainSettingsSection] {
-        [.nodes, .explorer]
     }
 
     public func selectNode(chain _: Chain, url: String) async throws {

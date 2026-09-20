@@ -2,7 +2,6 @@
 
 import Components
 import Foundation
-import enum Gemstone.GemChainSettingsSection
 import protocol Gemstone.GemChainSettingsServiceProtocol
 import struct Gemstone.GemExplorerRow
 import struct Gemstone.GemNodeListSession
@@ -37,21 +36,11 @@ public final class ChainSettingsSceneViewModel {
     }
 
     var sections: [ChainSettingsSectionViewModel] {
-        service.sections().map { section in
-            ChainSettingsSectionViewModel(id: String(describing: section), title: section.title, kind: kind(for: section))
-        }
-    }
-
-    private func kind(for section: GemChainSettingsSection) -> ChainSettingsSectionViewModel.Kind {
-        switch section {
-        case .nodes: .nodes
-        case .explorer: .explorer
-        }
+        ChainSettingsSectionViewModel.Kind.allCases.map(ChainSettingsSectionViewModel.init)
     }
 
     var nodesModels: [ChainNodeViewModel] {
-        service.nodeRows(chain: chain.rawValue, nodes: session.nodes, statuses: session.statuses)
-            .map { ChainNodeViewModel(row: $0) }
+        session.rows().map { ChainNodeViewModel(row: $0) }
     }
 
     var deleteButtonTitle: String {

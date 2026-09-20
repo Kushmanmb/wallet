@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
-import uniffi.gemstone.GemChainSettingsSection
 import uniffi.gemstone.GemChainSettingsServiceInterface
 import uniffi.gemstone.GemExplorerRow
 import uniffi.gemstone.GemNodeListSession
@@ -39,7 +38,6 @@ import javax.inject.Inject
 @HiltViewModel
 class NetworksViewModel @Inject constructor(private val service: GemChainSettingsServiceInterface, @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher, @param:ApplicationContext private val context: Context) : ViewModel() {
 
-    private val sections = service.sections()
     private val state = MutableStateFlow(State())
     val uiState = state
         .map { it.toUIState() }
@@ -161,12 +159,10 @@ class NetworksViewModel @Inject constructor(private val service: GemChainSetting
         chain = chain,
         chains = availableChains,
         selectChain = selectChain,
-        sections = sections.map { section ->
-            when (section) {
-                GemChainSettingsSection.NODES -> NetworkSectionUIModel.Nodes(session?.let { service.nodeRows(it.chain, it.nodes, it.statuses) }.orEmpty().map { it.uiModel(context) })
-                GemChainSettingsSection.EXPLORER -> NetworkSectionUIModel.Explorers(explorers.map { it.uiModel() })
-            }
-        },
+        sections = listOf(
+            NetworkSectionUIModel.Nodes(session?.rows().orEmpty().map { it.uiModel(context) }),
+            NetworkSectionUIModel.Explorers(explorers.map { it.uiModel() }),
+        ),
         availableAddNode = availableAddNode,
         errorText = errorText,
     )
