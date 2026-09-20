@@ -14,8 +14,7 @@ use crate::gateway::GemGateway;
 use crate::services::asset_discovery::testkit::DiscoveryTestkit;
 use crate::services::banner::GemBannerService;
 use crate::services::banner::testkit::{DeniedNotificationPermissions, MemoryBannerStore};
-use crate::services::device::testkit::MemoryDevicePlatform;
-use crate::services::device::{GemDeviceKeyService, GemDeviceService};
+use crate::services::device::GemDeviceKeyService;
 use crate::services::error::GemServiceError;
 use crate::services::explorer::GemExplorerService;
 use crate::services::node::GemNodeService;
@@ -26,7 +25,6 @@ use crate::services::price::testkit::MemoryPriceStore;
 use crate::services::price_alert::GemPriceAlertService;
 use crate::services::price_alert::testkit::MemoryPriceAlertStore;
 use crate::services::stream::testkit::SubscriptionTestkit;
-use crate::services::subscription::GemSubscriptionService;
 use crate::services::swap::GemSwapService;
 use crate::services::swap::testkit::MemorySwapStore;
 use crate::services::wallet::testkit::MemoryWalletStore;
@@ -116,13 +114,6 @@ impl AssetDetailsTestkit {
         let discovery = DiscoveryTestkit::with_provider(provider.clone(), Wallet::mock());
         let preferences = Arc::new(GemPreferencesService::new(Arc::new(MemoryPreferencesStore::default())));
         let device_api = Arc::new(GemDeviceApiClient::new(provider.clone(), Arc::new(GemDeviceKeyService::new(Arc::new(EmptyPreferences)))));
-        let device = Arc::new(GemDeviceService::new(
-            device_api.clone(),
-            Arc::new(GemSubscriptionService::new(device_api.clone(), discovery.wallets.clone())),
-            discovery.wallets.clone(),
-            Arc::new(MemoryDevicePlatform),
-            preferences.clone(),
-        ));
         let swap = Arc::new(GemSwapService::mock(Arc::new(MemorySwapStore::default())));
         let service = GemAssetDetailsService::new(
             discovery.assets.clone(),
@@ -131,7 +122,7 @@ impl AssetDetailsTestkit {
             Arc::new(GemBannerService::new(Arc::new(MemoryBannerStore::default()))),
             swap,
             Arc::new(GemExplorerService::new(preferences.clone())),
-            Arc::new(GemPriceAlertService::new(device_api, preferences, Arc::new(MemoryPriceAlertStore::default()), device, Arc::new(DeniedNotificationPermissions))),
+            Arc::new(GemPriceAlertService::new(device_api, preferences, Arc::new(MemoryPriceAlertStore::default()), Arc::new(DeniedNotificationPermissions))),
             Arc::new(SubscriptionTestkit::new(&[], &[]).service),
             Arc::new(GemDeeplinkService::new()),
             discovery.session.clone(),

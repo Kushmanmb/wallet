@@ -173,7 +173,6 @@ struct ServicesFactory {
             api: deviceApiClient,
             preferences: preferencesService,
             store: gemstonePriceAlertStore,
-            device: deviceService,
             permissions: notificationPermissions,
         )
         let fiatService = Gemstone.GemFiatService(

@@ -1,18 +1,15 @@
 use async_trait::async_trait;
-use primitives::{AssetId, Chain, Currency, PriceAlert, Wallet};
+use primitives::{AssetId, Chain, Currency, PriceAlert};
 use std::sync::{Arc, Mutex};
 
 use super::session::GemPriceAlertSession;
 use super::store::GemPriceAlertStore;
 use crate::api::GemDeviceApiClient;
 use crate::services::banner::GemNotificationPermissions;
-use crate::services::device::testkit::MemoryDevicePlatform;
-use crate::services::device::{GemDeviceKeyService, GemDeviceService};
+use crate::services::device::GemDeviceKeyService;
 use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::preferences::testkit::MemoryPreferencesStore;
-use crate::services::subscription::GemSubscriptionService;
-use crate::services::wallet::testkit::MemoryWalletStore;
 use crate::testkit::{EmptyPreferences, TestAlienProvider};
 
 impl GemPriceAlertSession {
@@ -84,19 +81,8 @@ impl PriceAlertTestkit {
     pub fn with_provider(provider: Arc<TestAlienProvider>, permissions: Arc<dyn GemNotificationPermissions>) -> Self {
         let store = Arc::new(MemoryPriceAlertStore::default());
         let preferences = Arc::new(GemPreferencesService::new(Arc::new(MemoryPreferencesStore::default())));
-        let wallets = Arc::new(MemoryWalletStore {
-            wallets: Mutex::new(vec![Wallet::mock()]),
-            ..Default::default()
-        });
         let api = Arc::new(GemDeviceApiClient::new(provider.clone(), Arc::new(GemDeviceKeyService::new(Arc::new(EmptyPreferences)))));
-        let device = Arc::new(GemDeviceService::new(
-            api.clone(),
-            Arc::new(GemSubscriptionService::new(api.clone(), wallets.clone())),
-            wallets,
-            Arc::new(MemoryDevicePlatform),
-            preferences.clone(),
-        ));
-        let service = super::GemPriceAlertService::new(api, preferences, store.clone(), device, permissions);
+        let service = super::GemPriceAlertService::new(api, preferences, store.clone(), permissions);
         Self { service, store, provider }
     }
 }

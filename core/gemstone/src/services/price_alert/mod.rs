@@ -11,7 +11,6 @@ use primitives::{AssetId, Currency, PriceAlert};
 
 use crate::api::{GemApiError, GemDeviceApiClient};
 use crate::services::banner::GemNotificationPermissions;
-use crate::services::device::GemDeviceService;
 use crate::services::preferences::GemPreferencesService;
 use session::GemPriceAlertSession;
 
@@ -22,21 +21,14 @@ pub struct GemPriceAlertService {
     api: Arc<GemDeviceApiClient>,
     preferences: Arc<GemPreferencesService>,
     store: Arc<dyn GemPriceAlertStore>,
-    device: Arc<GemDeviceService>,
     permissions: Arc<dyn GemNotificationPermissions>,
 }
 
 #[uniffi::export]
 impl GemPriceAlertService {
     #[uniffi::constructor]
-    pub fn new(api: Arc<GemDeviceApiClient>, preferences: Arc<GemPreferencesService>, store: Arc<dyn GemPriceAlertStore>, device: Arc<GemDeviceService>, permissions: Arc<dyn GemNotificationPermissions>) -> Self {
-        Self {
-            api,
-            preferences,
-            store,
-            device,
-            permissions,
-        }
+    pub fn new(api: Arc<GemDeviceApiClient>, preferences: Arc<GemPreferencesService>, store: Arc<dyn GemPriceAlertStore>, permissions: Arc<dyn GemNotificationPermissions>) -> Self {
+        Self { api, preferences, store, permissions }
     }
 
     pub fn is_enabled(&self) -> bool {
@@ -44,16 +36,16 @@ impl GemPriceAlertService {
     }
 
     pub async fn set_enabled(&self, enabled: bool) -> Result<(), GemServiceError> {
-        if self.is_enabled() != enabled {
-            if enabled {
-                if !self.permissions.request_permissions_or_open_settings().await? {
-                    return Ok(());
-                }
-                self.preferences.set_push_notifications_enabled(true)?;
-            }
-            self.preferences.set_price_alerts_enabled(enabled)?;
+        if self.is_enabled() == enabled {
+            return Ok(());
         }
-        self.device.synchronize_if_needed().await
+        if enabled {
+            if !self.permissions.request_permissions_or_open_settings().await? {
+                return Ok(());
+            }
+            self.preferences.set_push_notifications_enabled(true)?;
+        }
+        self.preferences.set_price_alerts_enabled(enabled)
     }
 
     pub fn new_alert_session(&self, asset_id: AssetId) -> GemPriceAlertSession {
@@ -129,19 +121,15 @@ mod tests {
     use std::sync::Arc;
 
     #[test]
-    fn test_set_enabled_keeps_retrying_the_device_sync_it_could_not_finish() {
+    fn test_set_enabled_asks_for_permission_and_writes_nothing_the_device_has_to_be_told() {
         let kit = PriceAlertTestkit::with_provider(Arc::new(TestAlienProvider::offline()), Arc::new(GrantedNotificationPermissions));
-        assert_eq!(block_on(kit.service.set_enabled(true)), Err(GemServiceError::Offline));
+        assert_eq!(block_on(kit.service.set_enabled(true)), Ok(()));
         assert!(kit.service.is_enabled());
-
-        let attempted = kit.provider.requested_paths().len();
-        assert_eq!(block_on(kit.service.set_enabled(true)), Err(GemServiceError::Offline));
-        assert!(kit.provider.requested_paths().len() > attempted, "the same value must repair the sync the first call could not finish");
+        assert!(kit.provider.requested_paths().is_empty(), "the device record is compared, never announced");
 
         let denied = PriceAlertTestkit::with_provider(Arc::new(TestAlienProvider::offline()), Arc::new(DeniedNotificationPermissions));
         assert_eq!(block_on(denied.service.set_enabled(true)), Ok(()));
         assert!(!denied.service.is_enabled());
-        assert!(denied.provider.requested_paths().is_empty());
     }
 
     #[test]
