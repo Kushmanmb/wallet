@@ -10,7 +10,7 @@ use crate::services::error::GemServiceError;
 use std::sync::Arc;
 
 use chrono::Utc;
-use primitives::{AssetId, Chain, Wallet, WalletId};
+use primitives::{AssetId, Chain, Transaction, Wallet, WalletId};
 
 pub use details::GemTransactionDetailsService;
 pub use model::{
@@ -24,6 +24,7 @@ use crate::api::{GemApiError, GemDeviceApiClient};
 use crate::services::assets::GemAssetsService;
 use crate::services::chain::rules as chain_rules;
 use crate::services::name::GemAddressStore;
+use crate::services::swap::GemSwapPair;
 use crate::services::transaction_state::GemTransactionStatusService;
 use crate::services::wallet_preferences::GemWalletPreferencesService;
 use crate::services::wallet_session::GemWalletSessionService;
@@ -37,6 +38,14 @@ pub struct GemTransactionsService {
     wallet_preferences: Arc<GemWalletPreferencesService>,
     session: Arc<GemWalletSessionService>,
     transaction_status: Arc<dyn GemTransactionStatusService>,
+}
+
+#[uniffi::export]
+pub fn transaction_swap_pair(transaction: Transaction) -> Option<GemSwapPair> {
+    transaction.swap_metadata().map(|metadata| GemSwapPair {
+        from_asset_id: metadata.from_asset,
+        to_asset_id: metadata.to_asset,
+    })
 }
 
 #[uniffi::export]
@@ -98,5 +107,28 @@ impl GemTransactionsService {
             self.transaction_status.track(wallet_id, pending);
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use primitives::{Chain, TransactionSwapMetadata};
+
+    #[test]
+    fn test_a_swap_leg_the_build_cannot_read_leaves_the_transaction_without_a_pair() {
+        let swap = Transaction::mock_swap();
+        assert_eq!(
+            transaction_swap_pair(swap.clone()),
+            Some(GemSwapPair {
+                from_asset_id: TransactionSwapMetadata::mock().from_asset,
+                to_asset_id: TransactionSwapMetadata::mock().to_asset,
+            })
+        );
+        let unreadable = Transaction {
+            metadata: Some(serde_json::json!({ "fromAsset": "gemchain", "toAsset": Chain::Ethereum.as_ref() })),
+            ..swap
+        };
+        assert_eq!(transaction_swap_pair(unreadable), None);
     }
 }
