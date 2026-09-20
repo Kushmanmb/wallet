@@ -5169,7 +5169,6 @@ dependencies = [
 name = "jupiter"
 version = "2.114.40"
 dependencies = [
- "async-trait",
  "gem_client",
  "reqwest 0.13.4",
  "serde",
@@ -8011,7 +8010,6 @@ dependencies = [
  "alloy-sol-types",
  "gem_client",
  "gem_evm",
- "gem_jsonrpc",
  "num-bigint 0.5.1",
  "num-traits",
  "primitives",
