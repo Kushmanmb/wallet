@@ -180,6 +180,9 @@ impl GemSwapSession {
     }
 
     pub fn on_quote_results(&self, results: GemSwapQuotesResult) -> GemSwapSession {
+        if self.current_request() != Some(&results.request) {
+            return self.clone();
+        }
         let error = results.error.clone().or_else(|| results.quotes.is_empty().then_some(SwapperError::NoQuoteAvailable));
         let quotes = if self.accepts_quotes() { error.is_none().then_some(results.clone()) } else { self.quotes.clone() };
         let quote_phase = if self.accepts_quote_phase() {
@@ -460,6 +463,28 @@ mod tests {
 
         let empty = session.on_quote_results(GemSwapQuotesResult::mock(vec![]));
         assert_eq!(empty.quote_error(), Some(SwapperError::NoQuoteAvailable));
+    }
+
+    #[test]
+    fn test_results_for_an_outdated_request_are_ignored() {
+        let outdated = GemSwapRequest {
+            value: BigUint::from(200u32),
+            ..GemSwapRequest::mock()
+        };
+        let loading = GemSwapSession::default().on_request_changed(Some(GemSwapRequest::mock()));
+
+        let late_success = loading.on_quote_results(GemSwapQuotesResult {
+            request: outdated.clone(),
+            ..GemSwapQuotesResult::mock(vec![SwapperQuote::mock_with_provider(SwapperProvider::Okx, "11")])
+        });
+        assert_eq!(late_success, loading);
+
+        let late_failure = loading.on_quote_results(GemSwapQuotesResult {
+            request: outdated,
+            quotes: vec![],
+            error: Some(SwapperError::Offline),
+        });
+        assert_eq!(late_failure, loading);
     }
 
     #[test]

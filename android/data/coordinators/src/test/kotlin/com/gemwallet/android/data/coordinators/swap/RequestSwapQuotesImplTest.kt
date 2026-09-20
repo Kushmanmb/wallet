@@ -2,11 +2,9 @@ package com.gemwallet.android.data.coordinators.swap
 
 import com.gemwallet.android.application.swap.cases.SwapQuoteRequestParams
 import com.gemwallet.android.application.swap.cases.SwapQuotesResult
-import com.gemwallet.android.application.swap.cases.matches
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.testkit.mockGemSwapSession
 import com.gemwallet.android.testkit.mockSwapQuoteRequestParams
-import com.gemwallet.android.testkit.mockSwapQuotesResult
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
@@ -99,14 +97,6 @@ class RequestSwapQuotesImplTest {
 
         assertEquals(integerKey, decimalKey)
         assertEquals(integerKey.hashCode(), decimalKey.hashCode())
-    }
-
-    @Test
-    fun `quotes state matches numerically equal request values`() {
-        val params = mockSwapQuoteRequestParams(BigDecimal("1"))
-        val quotesState = mockSwapQuotesResult(params)
-
-        assertTrue(quotesState.matches(mockSwapQuoteRequestParams(BigDecimal("1.0"))))
     }
 
     @Test

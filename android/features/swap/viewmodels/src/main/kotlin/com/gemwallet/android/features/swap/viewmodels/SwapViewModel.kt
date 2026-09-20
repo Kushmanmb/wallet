@@ -13,7 +13,6 @@ import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.swap.cases.RequestSwapQuotes
 import com.gemwallet.android.application.swap.cases.SwapQuoteRequestParams
 import com.gemwallet.android.application.swap.cases.SwapQuotesResult
-import com.gemwallet.android.application.swap.cases.matches
 import com.gemwallet.android.application.swap.cases.toGem
 import com.gemwallet.android.data.services.gemstone.di.IoDispatcher
 import com.gemwallet.android.domains.asset.calculateFiat
@@ -154,19 +153,14 @@ class SwapViewModel @Inject constructor(
         .distinctUntilChangedBy { it?.key }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val matchedQuoteResults = combine(
-        quoteRequestParams,
-        requestSwapQuotes(
-            requestParams = quoteRequestParams,
-            refreshRequests = refreshRequests,
-            refreshEnabled = quoteRefreshEnabled,
-            onFetchStarted = ::onQuoteFetchStarted,
-            refreshIntervalMillis = swapQuoteService.refreshIntervalMilliseconds().toLong(),
-            debounceMillis = swapQuoteService.quoteDebounceMilliseconds().toLong(),
-        ),
-    ) { params, results ->
-        results?.takeIf { it.matches(params) }
-    }
+    private val quoteResults = requestSwapQuotes(
+        requestParams = quoteRequestParams,
+        refreshRequests = refreshRequests,
+        refreshEnabled = quoteRefreshEnabled,
+        onFetchStarted = ::onQuoteFetchStarted,
+        refreshIntervalMillis = swapQuoteService.refreshIntervalMilliseconds().toLong(),
+        debounceMillis = swapQuoteService.quoteDebounceMilliseconds().toLong(),
+    )
 
     val quote = combine(session, payAsset, receiveAsset) { quoteSession, pay, receive ->
         val request = quoteSession.quotes?.request
@@ -245,7 +239,7 @@ class SwapViewModel @Inject constructor(
         combine(payValueFlow, payAsset, receiveAsset, selectedSlippageBps) { text, pay, receive, slippageBps ->
             session.update { it.onInputChanged(text, pay?.asset?.toGem(), receive?.asset?.toGem(), pay?.balance?.balance?.available ?: BigInteger.ZERO, slippageBps, numberFormat()) }
         }.launchIn(viewModelScope)
-        matchedQuoteResults
+        quoteResults
             .onEach(::onQuoteResults)
             .launchIn(viewModelScope)
         viewModelScope.launch { suggestPair() }

@@ -8,8 +8,6 @@ import uniffi.gemstone.SwapperQuote
 
 data class SwapQuotesResult(val items: List<SwapperQuote> = emptyList(), val requestKey: GemSwapRequest, val pay: AssetInfo, val receive: AssetInfo, val err: Throwable? = null)
 
-fun SwapQuotesResult.matches(params: SwapQuoteRequestParams?): Boolean = params?.key == requestKey
-
 fun SwapQuotesResult.toGem(): GemSwapQuotesResult = GemSwapQuotesResult(
     request = requestKey,
     quotes = items,
