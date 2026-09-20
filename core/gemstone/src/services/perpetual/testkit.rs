@@ -3,8 +3,9 @@ use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use num_bigint::BigInt;
+use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
 use primitives::perpetual::PerpetualData;
-use primitives::{Asset, AutocloseValidation, PerpetualDirection, PerpetualMarginType, PerpetualMarketData, PerpetualPosition, PerpetualProvider, TpslType, Wallet, WalletId};
+use primitives::{Asset, AssetBasic, AssetProperties, AssetScore, AutocloseValidation, PerpetualDirection, PerpetualMarginType, PerpetualMarketData, PerpetualPosition, PerpetualProvider, TpslType, Wallet, WalletId};
 
 use super::model::{GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualTransferData};
 use super::{GemAutocloseField, GemAutocloseModify, GemPerpetualService, GemPerpetualStore};
@@ -87,6 +88,31 @@ pub struct PerpetualTestkit {
 
 impl PerpetualTestkit {
     pub fn new() -> Self {
+        Self::with_provider(TestAlienProvider::with_status(503))
+    }
+
+    pub async fn with_unified_balance() -> Self {
+        let testkit = Self::with_provider(TestAlienProvider::with_json_by_request_type(&[
+            ("userAbstraction", r#""unifiedAccount""#),
+            (
+                "clearinghouseState",
+                r#"{"assetPositions":[],"marginSummary":{"accountValue":"0","totalNtlPos":"0","totalRawUsd":"0","totalMarginUsed":"0"},"crossMarginSummary":{"accountValue":"0","totalNtlPos":"0","totalRawUsd":"0","totalMarginUsed":"0"},"crossMaintenanceMarginUsed":"0","withdrawable":"0"}"#,
+            ),
+            (
+                "spotClearinghouseState",
+                r#"{"balances":[{"coin":"USDC","token":0,"total":"12.093224","hold":"0","entryNtl":"0"}],"tokenToAvailableAfterMaintenance":[[0,"12.093224"]]}"#,
+            ),
+        ]));
+        testkit
+            .service
+            .asset_store
+            .save_assets(vec![AssetBasic::new(HYPERCORE_PERPETUAL_USDC.clone(), AssetProperties::default(HYPERCORE_PERPETUAL_USDC.id.clone()), AssetScore::new(0))])
+            .await
+            .unwrap();
+        testkit
+    }
+
+    fn with_provider(provider: TestAlienProvider) -> Self {
         let wallet = Wallet::mock();
         let preferences_store = Arc::new(MemoryPreferencesStore::default());
         let preferences = Arc::new(GemPreferencesService::new(preferences_store.clone()));
@@ -100,7 +126,7 @@ impl PerpetualTestkit {
             }),
             wallets.clone(),
         ));
-        let provider = Arc::new(TestAlienProvider::with_status(503));
+        let provider = Arc::new(provider);
         let gateway = Arc::new(GemGateway::new(provider.clone(), Arc::new(GemNodeService::mock()), preferences_store, Arc::new(EmptyPreferences)));
         let price = Arc::new(GemPriceService::new(Arc::new(MemoryPriceStore::default())));
         let asset_store = Arc::new(MemoryAssetStore::default());

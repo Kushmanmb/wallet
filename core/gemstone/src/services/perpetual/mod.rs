@@ -113,7 +113,7 @@ impl GemPerpetualService {
         let Some(account) = hyperliquid_account(&wallet.accounts) else {
             return Ok(None);
         };
-        let chain = account.chain;
+        let chain = Chain::HyperCore;
         let address = account.address.clone();
         let mode = match self.sync_positions(wallet.id.clone(), chain, address.clone()).await {
             Ok(mode) => mode,
@@ -137,7 +137,7 @@ impl GemPerpetualService {
         let Some(account) = hyperliquid_account(&wallet.accounts) else {
             return Ok(());
         };
-        self.sync_positions(wallet.id, account.chain, account.address.clone()).await.map(|_| ())
+        self.sync_positions(wallet.id, Chain::HyperCore, account.address.clone()).await.map(|_| ())
     }
 
     pub async fn sync_markets(&self, chain: Chain) -> Result<(), GemServiceError> {
@@ -405,6 +405,49 @@ mod tests {
             assert!(testkit.provider.requested_paths().is_empty());
             assert!(testkit.store.position_writes.lock().unwrap().is_empty());
         })
+    }
+
+    #[test]
+    fn test_connection_uses_hypercore_for_evm_accounts() {
+        block_on(async {
+            for chains in [[Chain::Arbitrum, Chain::HyperCore], [Chain::Hyperliquid, Chain::HyperCore], [Chain::HyperCore, Chain::Arbitrum]] {
+                let testkit = PerpetualTestkit::with_unified_balance().await;
+                let wallet = Wallet::mock_with_accounts(Account::mock_chains(&chains, "0xc64c"));
+
+                let connection = testkit.service.connection(wallet.clone()).await.unwrap();
+
+                assert_eq!(
+                    connection,
+                    Some(GemPerpetualConnection {
+                        address: "0xc64c".to_string(),
+                        mode: PerpetualAccountMode::Unified
+                    })
+                );
+                let stored = testkit.balances.balances.lock().unwrap();
+                assert_eq!(stored[&wallet.id][0].available.to_string(), "12093224");
+                assert_eq!(stored[&wallet.id][0].withdrawable.to_string(), "12093224");
+            }
+        });
+    }
+
+    #[test]
+    fn test_refresh_uses_hypercore_for_evm_accounts() {
+        block_on(async {
+            for chains in [[Chain::Arbitrum, Chain::HyperCore], [Chain::Hyperliquid, Chain::HyperCore], [Chain::HyperCore, Chain::Arbitrum]] {
+                let testkit = PerpetualTestkit::with_unified_balance().await;
+                let wallet = Wallet::mock_with_accounts(Account::mock_chains(&chains, "0xc64c"));
+                *testkit.wallets.wallets.lock().unwrap() = vec![wallet.clone()];
+                testkit.service.session.set_current_wallet_id(Some(wallet.id.clone())).unwrap();
+                testkit.preferences.set_perpetual_markets_updated_at(Some(Utc::now().timestamp())).unwrap();
+
+                assert_eq!(testkit.service.refresh(GemMarketsRefreshTrigger::Scheduled).await, vec![]);
+
+                let stored = testkit.balances.balances.lock().unwrap();
+                assert_eq!(stored[&wallet.id][0].available.to_string(), "12093224");
+                assert_eq!(stored[&wallet.id][0].withdrawable.to_string(), "12093224");
+                assert_eq!(testkit.wallet_preferences.get_perpetual_account_mode(wallet.id).unwrap(), PerpetualAccountMode::Unified);
+            }
+        });
     }
 
     #[test]
