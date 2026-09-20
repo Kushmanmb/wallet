@@ -56,7 +56,6 @@ public struct TransactionInfoViewModel: Sendable {
         )
     }
 
-
     public func headerType(input: TransactionHeaderInputType) -> TransactionHeaderType {
         switch input {
         case let .amount(showFiat): .amount(

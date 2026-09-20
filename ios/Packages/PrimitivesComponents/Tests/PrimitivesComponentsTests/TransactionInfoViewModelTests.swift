@@ -40,8 +40,6 @@ struct TransactionInfoModelTests {
         #expect(display.fiat?.text == "$1.50")
     }
 
-
-
     @Test
     func headerTypeAmount() {
         let model = TransactionInfoViewModel.mock(sign: .incoming)
@@ -99,8 +97,6 @@ struct TransactionInfoModelTests {
         let display = model.amountDisplay()
         #expect(display.fiat == nil)
     }
-
-
 
     @Test
     func headerTypeAmountWithoutFiat() {
