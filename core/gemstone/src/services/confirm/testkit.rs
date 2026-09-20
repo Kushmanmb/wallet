@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
-use primitives::{Asset, AssetBasic, AssetFull, AssetId, Chain, DelegationBase, DelegationValidator, StakeProviderType, Transaction, Wallet, WalletId};
+use primitives::{Asset, AssetBasic, AssetFull, AssetId, Chain, Transaction, Wallet, WalletId};
 
 use super::{GemConfirmData, GemConfirmInput, GemConfirmLoad, GemConfirmMetadata, GemConfirmService, GemConfirmSimulationState, GemConfirmTransferService, GemTransactionSigner, SendInput};
 use crate::GemstoneError;
@@ -19,7 +19,8 @@ use crate::services::nft::{GemNftService, testkit::MemoryNftStore};
 use crate::services::node::GemNodeService;
 use crate::services::preferences::{GemPreferencesService, testkit::MemoryPreferencesStore};
 use crate::services::price::{GemPriceService, testkit::MemoryPriceStore};
-use crate::services::stake::{GemStakeService, GemStakeStore};
+use crate::services::stake::GemStakeService;
+use crate::services::stake::testkit::UnusedStakeStore;
 use crate::services::stream::testkit::SubscriptionTestkit;
 use crate::services::transaction_state::{GemTransactionStateService, GemTransactionStatusService, testkit::MemoryTransactionStateStore};
 use crate::services::transfer::GemTransferData;
@@ -148,30 +149,6 @@ impl GemAssetStore for MemoryAssetStore {
     }
     async fn set_stakeable_assets(&self, _: Vec<AssetId>) -> Result<(), GemServiceError> {
         panic!("unexpected asset write")
-    }
-}
-
-struct UnusedStakeStore;
-
-#[async_trait]
-impl GemStakeStore for UnusedStakeStore {
-    async fn get_apr(&self, _: AssetId, _: StakeProviderType) -> Result<Option<f64>, GemServiceError> {
-        panic!("unexpected stake read")
-    }
-    async fn get_validators(&self, _: AssetId, _: StakeProviderType) -> Result<Vec<DelegationValidator>, GemServiceError> {
-        panic!("unexpected stake read")
-    }
-    async fn save_validators(&self, _: Vec<DelegationValidator>) -> Result<(), GemServiceError> {
-        panic!("unexpected stake write")
-    }
-    async fn deactivate_validators(&self, _: AssetId, _: Vec<String>) -> Result<(), GemServiceError> {
-        panic!("unexpected stake write")
-    }
-    async fn get_delegation_ids(&self, _: WalletId, _: AssetId, _: StakeProviderType) -> Result<Vec<String>, GemServiceError> {
-        panic!("unexpected stake read")
-    }
-    async fn update_delegations(&self, _: WalletId, _: Vec<DelegationBase>, _: Vec<String>) -> Result<(), GemServiceError> {
-        panic!("unexpected stake write")
     }
 }
 

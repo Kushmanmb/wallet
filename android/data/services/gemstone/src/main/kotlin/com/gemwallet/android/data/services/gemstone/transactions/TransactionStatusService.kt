@@ -41,10 +41,7 @@ class TransactionStatusService(
     }
 
     override suspend fun createNotificationTransaction(wallet: Wallet, assetId: AssetId, transaction: Transaction): Asset? = withContext(ioDispatcher) {
-        val asset = stateService.addNotificationTransaction(wallet.toGem(), assetId.toIdentifier(), transaction.toGem())
-            ?.toPrimitives() ?: return@withContext null
-        track(wallet.id.id, listOf(transaction.toGem()))
-        asset
+        stateService.addNotificationTransaction(wallet.toGem(), assetId.toIdentifier(), transaction.toGem())?.toPrimitives()
     }
 
     override fun track(walletId: String, transactions: List<uniffi.gemstone.Transaction>) {

@@ -7,7 +7,7 @@ pub mod tracker;
 
 use crate::services::error::GemServiceError;
 use crate::services::failures::record;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
@@ -37,6 +37,7 @@ pub struct GemTransactionStateService {
     stake: Arc<GemStakeService>,
     nft: Arc<GemNftService>,
     tracking: Tracking,
+    status: OnceLock<Arc<dyn GemTransactionStatusService>>,
 }
 
 #[uniffi::export]
@@ -51,7 +52,12 @@ impl GemTransactionStateService {
             stake,
             nft,
             tracking: Tracking::default(),
+            status: OnceLock::new(),
         }
+    }
+
+    pub fn set_status(&self, status: Arc<dyn GemTransactionStatusService>) {
+        let _ = self.status.set(status);
     }
 
     pub async fn track_pending(&self) -> Result<(), GemServiceError> {
@@ -76,7 +82,10 @@ impl GemTransactionStateService {
         let Some(asset) = self.assets.open_wallet_asset(wallet.clone(), asset_id).await? else {
             return Ok(None);
         };
-        self.add_transactions(wallet.id, vec![transaction]).await?;
+        self.add_transactions(wallet.id.clone(), vec![transaction.clone()]).await?;
+        if let Some(status) = self.status.get() {
+            status.track(wallet.id, vec![transaction]);
+        }
         Ok(Some(asset))
     }
 }
@@ -177,8 +186,31 @@ impl GemTransactionUpdater for GemTransactionStateService {
 mod tests {
     use super::testkit::MemoryTransactionStateStore;
     use super::*;
+    use crate::services::asset_discovery::testkit::DiscoveryTestkit;
+    use crate::services::assets::GemAssetStore;
+    use crate::services::assets::rules::default_asset_basic;
+    use futures::executor::block_on;
     use num_bigint::BigUint;
     use primitives::{AssetId, Chain, TransactionChange, TransactionMetadata, TransactionSwapMetadata, TransactionType};
+
+    #[test]
+    fn test_a_transaction_that_arrived_by_push_is_tracked_without_the_app_asking() {
+        block_on(async {
+            let testkit = DiscoveryTestkit::with_status(200);
+            let wallet = Wallet::mock();
+            let asset = Asset::from_chain(Chain::Ethereum);
+            testkit.asset_store.save_assets(vec![default_asset_basic(asset.clone())]).await.unwrap();
+            let transaction = Transaction {
+                asset_id: asset.id.clone(),
+                ..Transaction::mock()
+            };
+
+            let opened = testkit.state.add_notification_transaction(wallet, asset.id.clone(), transaction.clone()).await.unwrap();
+
+            assert_eq!(opened, Some(asset));
+            assert_eq!(*testkit.status.tracked.lock().unwrap(), vec![vec![transaction]]);
+        });
+    }
 
     fn apply_update(store: &MemoryTransactionStateStore, transaction: Transaction, update: Result<TransactionUpdate, String>, now: DateTime<Utc>) -> Result<Option<GemTransactionStateResult>, GemServiceError> {
         futures::executor::block_on(apply(store, WalletId::Multicoin("wallet".into()), transaction, update, now))

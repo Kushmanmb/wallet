@@ -298,10 +298,15 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
 public final class GemTransactionStateServiceMock: GemTransactionStateServiceProtocol, @unchecked Sendable {
     private let store: (any GemTransactionStateStore)?
     private let notificationAsset: Gemstone.Asset?
+    private var status: (any GemTransactionStatusService)?
 
     public init(store: (any GemTransactionStateStore)? = nil, notificationAsset: Gemstone.Asset? = nil) {
         self.store = store
         self.notificationAsset = notificationAsset
+    }
+
+    public func setStatus(status: any GemTransactionStatusService) {
+        self.status = status
     }
 
     public func trackPending() async throws {}
@@ -314,6 +319,7 @@ public final class GemTransactionStateServiceMock: GemTransactionStateServicePro
         if let store {
             try await store.addTransactions(walletId: "", transactions: [transaction])
         }
+        status?.track(walletId: "", transactions: [transaction])
         return notificationAsset
     }
 }

@@ -74,7 +74,7 @@ object TransactionsModule {
 
     @Singleton
     @Provides
-    fun provideTransactionStatusService(stateService: GemTransactionStateService): TransactionStatusService = TransactionStatusService(stateService = stateService)
+    fun provideTransactionStatusService(stateService: GemTransactionStateService): TransactionStatusService = TransactionStatusService(stateService = stateService).also { stateService.setStatus(it) }
 
     @Singleton
     @Provides

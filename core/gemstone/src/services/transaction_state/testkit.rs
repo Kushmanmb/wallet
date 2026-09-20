@@ -3,8 +3,19 @@ use std::sync::{Arc, Mutex};
 use primitives::{Transaction, TransactionId, TransactionState, WalletId};
 
 use super::tracker::GemTransactionUpdater;
-use super::{GemPendingTransaction, GemTransactionStateResult, GemTransactionStateStore, GemTransactionStateUpdate};
+use super::{GemPendingTransaction, GemTransactionStateResult, GemTransactionStateStore, GemTransactionStateUpdate, GemTransactionStatusService};
 use crate::services::error::GemServiceError;
+
+#[derive(Default)]
+pub struct RecordingTransactionStatus {
+    pub tracked: Mutex<Vec<Vec<Transaction>>>,
+}
+
+impl GemTransactionStatusService for RecordingTransactionStatus {
+    fn track(&self, _: WalletId, transactions: Vec<Transaction>) {
+        self.tracked.lock().unwrap().push(transactions);
+    }
+}
 
 #[derive(Default)]
 pub struct MemoryTransactionStateStore {

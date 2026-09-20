@@ -271,16 +271,6 @@ extension NavigationHandler {
         try openWallet(walletId, path: getPath(for: asset))
     }
 
-    private func trackNotificationTransaction(walletId: WalletId, transaction: Primitives.Transaction) {
-        Task {
-            do {
-                try await transactionStateService.track(walletId: walletId.id, transactions: [transaction.toGem()])
-            } catch {
-                debugLog("navigation: transaction tracking failed \(error)")
-            }
-        }
-    }
-
     private func navigateToTransaction(walletId: WalletId, assetId: AssetId, transaction: Primitives.Transaction) async throws {
         guard let wallet = try? await walletSessionService.getWallet(walletId: walletId),
               let asset = try await transactionStateService.addNotificationTransaction(
@@ -291,7 +281,6 @@ extension NavigationHandler {
         else {
             return
         }
-        trackNotificationTransaction(walletId: walletId, transaction: transaction)
         let transaction = try transactionStore.getTransaction(walletId: walletId, transactionId: transaction.id)
 
         try openWallet(walletId, path: getPath(for: asset, transaction: transaction))

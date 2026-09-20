@@ -1,8 +1,9 @@
 use std::sync::{Arc, Mutex};
 
-use primitives::{Transaction, Wallet, WalletId};
+use primitives::{Wallet, WalletId};
 
 use super::GemAssetDiscoveryService;
+use crate::api::GemStaticApiClient;
 use crate::api::{GemApiClient, GemDeviceApiClient};
 use crate::gateway::GemGateway;
 use crate::services::assets::GemAssetsService;
@@ -10,6 +11,7 @@ use crate::services::assets::testkit::MemoryAssetStore;
 use crate::services::balance::GemBalanceService;
 use crate::services::balance::testkit::MemoryBalanceStore;
 use crate::services::device::GemDeviceKeyService;
+use crate::services::explorer::GemExplorerService;
 use crate::services::nft::GemNftService;
 use crate::services::nft::testkit::MemoryNftStore;
 use crate::services::node::GemNodeService;
@@ -17,8 +19,11 @@ use crate::services::preferences::GemPreferencesService;
 use crate::services::preferences::testkit::MemoryPreferencesStore;
 use crate::services::price::GemPriceService;
 use crate::services::price::testkit::MemoryPriceStore;
+use crate::services::stake::GemStakeService;
+use crate::services::stake::testkit::UnusedStakeStore;
 use crate::services::stream::testkit::SubscriptionTestkit;
-use crate::services::transaction_state::GemTransactionStatusService;
+use crate::services::transaction_state::GemTransactionStateService;
+use crate::services::transaction_state::testkit::{MemoryTransactionStateStore, RecordingTransactionStatus};
 use crate::services::transactions::GemTransactionsService;
 use crate::services::transactions::testkit::MemoryTransactionStore;
 use crate::services::wallet::testkit::{MemoryAddressStore, MemoryWalletStore};
@@ -28,19 +33,10 @@ use crate::services::wallet_session::GemWalletSessionService;
 use crate::services::wallet_session::testkit::MemoryWalletSessionStore;
 use crate::testkit::{EmptyPreferences, TestAlienProvider};
 
-#[derive(Default)]
-pub struct RecordingTransactionStatus {
-    pub tracked: Mutex<Vec<Vec<Transaction>>>,
-}
-
-impl GemTransactionStatusService for RecordingTransactionStatus {
-    fn track(&self, _: WalletId, transactions: Vec<Transaction>) {
-        self.tracked.lock().unwrap().push(transactions);
-    }
-}
-
 pub struct DiscoveryTestkit {
     pub discovery: Arc<GemAssetDiscoveryService>,
+    pub state: Arc<GemTransactionStateService>,
+    pub status: Arc<RecordingTransactionStatus>,
     pub assets: Arc<GemAssetsService>,
     pub asset_store: Arc<MemoryAssetStore>,
     pub transactions: Arc<GemTransactionsService>,
@@ -85,7 +81,7 @@ impl DiscoveryTestkit {
         ));
         let balances = Arc::new(MemoryBalanceStore::default());
         let balance = Arc::new(GemBalanceService::new(
-            gateway,
+            gateway.clone(),
             wallets.clone(),
             asset_store.clone(),
             balances.clone(),
@@ -103,9 +99,29 @@ impl DiscoveryTestkit {
             Arc::new(RecordingTransactionStatus::default()),
         ));
         let nft = Arc::new(GemNftService::new(device_api.clone(), Arc::new(MemoryNftStore::default()), session.clone()));
+        let status = Arc::new(RecordingTransactionStatus::default());
+        let state = Arc::new(GemTransactionStateService::new(
+            gateway.clone(),
+            Arc::new(MemoryTransactionStateStore::default()),
+            assets.clone(),
+            balance.clone(),
+            Arc::new(GemStakeService::new(
+                gateway.clone(),
+                Arc::new(GemStaticApiClient::new(provider.clone())),
+                Arc::new(UnusedStakeStore),
+                Arc::new(MemoryAddressStore::default()),
+                Arc::new(GemExplorerService::new(preferences.clone())),
+                preferences.clone(),
+                session.clone(),
+            )),
+            nft.clone(),
+        ));
+        state.set_status(status.clone());
         let discovery = Arc::new(GemAssetDiscoveryService::new(device_api.clone(), balance.clone(), transactions.clone(), nft, wallets.clone(), wallet_preferences.clone()));
         Self {
             discovery,
+            state,
+            status,
             assets,
             asset_store,
             transactions,
