@@ -358,10 +358,8 @@ public final class GemReceiveServiceMock: GemReceiveServiceProtocol, @unchecked 
     public var assetsById: [Gemstone.AssetId: Gemstone.Asset] = [:]
     public var onAsset: (@Sendable (Gemstone.AssetId) async -> Void)?
     public var enableAssetError: Error?
-    public var syncedNetworksResult: Result<GemReceiveNetworks, Error> = .success(GemReceiveNetworks(assetIds: [], showsSelector: false))
 
     public private(set) var enabledAssetIds: [Gemstone.AssetId] = []
-    public private(set) var syncedAssetIds: [Gemstone.AssetId] = []
     public private(set) var requestedAssetIds: [Gemstone.AssetId] = []
 
     public init() {}
@@ -384,11 +382,6 @@ public final class GemReceiveServiceMock: GemReceiveServiceProtocol, @unchecked 
 
     public func networks(assetId: Gemstone.AssetId, associations _: [Gemstone.AssetId], wallet _: Gemstone.Wallet) -> GemReceiveNetworks {
         networksValue ?? GemReceiveNetworks(assetIds: [assetId], showsSelector: false)
-    }
-
-    public func syncNetworks(assetId: Gemstone.AssetId, wallet _: Gemstone.Wallet) async throws -> GemReceiveNetworks {
-        syncedAssetIds.append(assetId)
-        return try syncedNetworksResult.get()
     }
 
     public func warnings(chain _: Gemstone.Chain) -> [GemReceiveWarning] {

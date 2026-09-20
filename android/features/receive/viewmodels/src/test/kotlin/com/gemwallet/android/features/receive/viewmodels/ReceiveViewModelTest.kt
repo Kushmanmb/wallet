@@ -4,7 +4,6 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.assets.cases.GetWalletAssets
 import com.gemwallet.android.application.receive.cases.GetReceiveAssetInfo
 import com.gemwallet.android.application.session.cases.GetSession
-import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.testkit.mockAccount
@@ -79,7 +78,6 @@ class ReceiveViewModelTest {
         val model = receiveModel(service)
 
         assertEquals(listOf(bitcoin.id.toIdentifier(), ethereum.id.toIdentifier()), model.networks.first { it.showsSelector }.assetIds)
-        coVerify { service.syncNetworks(bitcoin.id.toIdentifier(), wallet.toGem()) }
         assertEquals(listOf(GemReceiveWarning.NO_MEMO_REQUIRED), model.warnings(Chain.Bitcoin))
         assertEquals(emptyList<GemReceiveWarning>(), model.warnings(Chain.Ethereum))
     }

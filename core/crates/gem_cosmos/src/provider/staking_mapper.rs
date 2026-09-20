@@ -167,7 +167,9 @@ mod tests {
     #[test]
     fn test_an_unbonding_principal_larger_than_a_float_keeps_every_digit() {
         let delegations: Vec<Delegation> = serde_json::from_str::<Delegations>(include_str!("../../testdata/staking_delegations.json")).unwrap().delegation_responses;
-        let unbonding: Vec<UnbondingDelegation> = serde_json::from_str::<UnbondingDelegations>(include_str!("../../testdata/staking_unbonding_delegations_large.json")).unwrap().unbonding_responses;
+        let unbonding: Vec<UnbondingDelegation> = serde_json::from_str::<UnbondingDelegations>(include_str!("../../testdata/staking_unbonding_delegations_large.json"))
+            .unwrap()
+            .unbonding_responses;
 
         let result = map_staking_delegations(delegations, unbonding, Rewards { rewards: vec![] }, CosmosChain::Cosmos, "uatom");
 

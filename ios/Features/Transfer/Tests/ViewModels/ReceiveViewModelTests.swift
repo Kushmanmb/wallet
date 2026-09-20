@@ -63,32 +63,13 @@ struct ReceiveViewModelTests {
     }
 
     @Test
-    func openingTheSceneEnablesTheAssetAndSyncsItsNetworks() async {
+    func showingTheSceneEnablesTheAssetItShows() async {
         let service = GemReceiveServiceMock()
-        service.syncedNetworksResult = .success(GemReceiveNetworks(assetIds: [bitcoin.id.identifier, ethereum.id.identifier], showsSelector: true))
         let model = ReceiveViewModel.mock(service: service)
-        #expect(model.showNetworkSelector == false)
 
-        model.onTaskOnce()
-        await settle(until: { model.showNetworkSelector })
+        await model.onChangeAsset()
 
         #expect(service.enabledAssetIds == [bitcoin.id.identifier])
-        #expect(service.syncedAssetIds == [bitcoin.id.identifier])
-        #expect(model.networks.assetIds == [bitcoin.id.identifier, ethereum.id.identifier])
-    }
-
-    @Test
-    func aFailedNetworkSyncKeepsTheStoredNetworks() async {
-        let service = GemReceiveServiceMock()
-        service.networksValue = GemReceiveNetworks(assetIds: [bitcoin.id.identifier, ethereum.id.identifier], showsSelector: true)
-        service.syncedNetworksResult = .failure(AnyError("offline"))
-        let model = ReceiveViewModel.mock(service: service)
-
-        model.onTaskOnce()
-        await settle(until: { !service.syncedAssetIds.isEmpty })
-
-        #expect(model.networks.assetIds == [bitcoin.id.identifier, ethereum.id.identifier])
-        #expect(model.isPresentingAlertMessage == nil)
     }
 
     @Test
@@ -97,8 +78,7 @@ struct ReceiveViewModelTests {
         service.enableAssetError = AnyError("offline")
         let model = ReceiveViewModel.mock(service: service)
 
-        model.onTaskOnce()
-        await settle()
+        await model.onChangeAsset()
 
         #expect(model.isPresentingAlertMessage == nil)
     }
@@ -127,7 +107,8 @@ struct ReceiveViewModelTests {
         let model = ReceiveViewModel.mock(service: service)
 
         model.onFinishNetworkSelection([ReceiveNetworkItem(assetId: ethereum.id)])
-        await settle(until: { !service.enabledAssetIds.isEmpty })
+        await settle(until: { model.assetModel.asset.chain == .ethereum })
+        await model.onChangeAsset()
 
         #expect(service.requestedAssetIds == [ethereum.id.identifier])
         #expect(model.assetModel.asset.chain == .ethereum)
@@ -151,9 +132,10 @@ struct ReceiveViewModelTests {
         let resume = await pending.next()
 
         model.onFinishNetworkSelection([ReceiveNetworkItem(assetId: solana.id)])
-        await settle(until: { !service.enabledAssetIds.isEmpty })
+        await settle(until: { model.assetModel.asset.chain == .solana })
         resume?.resume()
         await settle()
+        await model.onChangeAsset()
 
         #expect(model.assetModel.asset.chain == .solana)
         #expect(model.address == "So1ana")

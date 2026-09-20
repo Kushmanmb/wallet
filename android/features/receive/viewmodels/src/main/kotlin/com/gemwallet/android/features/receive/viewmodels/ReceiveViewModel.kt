@@ -70,13 +70,6 @@ class ReceiveViewModel @AssistedInject constructor(
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, GemReceiveNetworks(assetIds = listOf(sourceAssetId.toIdentifier()), showsSelector = false))
 
-    init {
-        viewModelScope.launch(ioDispatcher) {
-            val wallet = session.filterNotNull().first().wallet
-            runCatchingCancellable { service.syncNetworks(sourceAssetId.toIdentifier(), wallet.toGem()) }
-        }
-    }
-
     fun warnings(chain: Chain): List<GemReceiveWarning> = service.warnings(chain.string)
 
     fun warningText(asset: Asset): String = warnings(asset.id.chain).joinToString(" ") { it.text(context, asset) }

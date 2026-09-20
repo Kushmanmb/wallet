@@ -26,7 +26,7 @@ public final class ReceiveViewModel: Sendable {
     private let wallet: Wallet
     private let service: any GemReceiveServiceProtocol
     private let generator = QRCodeGenerator()
-    private(set) var networks: GemReceiveNetworks
+    let networks: GemReceiveNetworks
     private var selectedAssetId: AssetId?
 
     private init(
@@ -133,29 +133,9 @@ public final class ReceiveViewModel: Sendable {
             guard selectedAssetId == assetId else { return }
             assetModel = AssetViewModel(asset: asset)
             address = account.address
-            await enableAsset(assetId: asset.id)
         } catch {
             guard selectedAssetId == assetId else { return }
             isPresentingAlertMessage = AlertMessage(error: error)
-        }
-    }
-
-    private func enableAsset(assetId: AssetId) async {
-        do {
-            try await service.enableAsset(walletId: wallet.id.id, assetId: assetId.identifier)
-        } catch {
-            debugLog("ReceiveViewModel enableAsset error: \(error)")
-        }
-    }
-
-    private func syncNetworks() async {
-        do {
-            networks = try await service.syncNetworks(
-                assetId: assetModel.asset.id.identifier,
-                wallet: wallet.toGem(),
-            )
-        } catch {
-            debugLog("ReceiveViewModel syncNetworks error: \(error)")
         }
     }
 
@@ -174,11 +154,11 @@ public final class ReceiveViewModel: Sendable {
 // MARK: - Actions
 
 extension ReceiveViewModel {
-    func onTaskOnce() {
-        Task {
-            async let enabled: Void = enableAsset(assetId: assetModel.asset.id)
-            async let synced: Void = syncNetworks()
-            _ = await (enabled, synced)
+    func onChangeAsset() async {
+        do {
+            try await service.enableAsset(walletId: wallet.id.id, assetId: assetModel.asset.id.identifier)
+        } catch {
+            debugLog("ReceiveViewModel enableAsset error: \(error)")
         }
     }
 
