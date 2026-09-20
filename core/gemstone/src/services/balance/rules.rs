@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::mem::{Discriminant, discriminant};
 
 use crate::services::collections::{missing, unique};
 
@@ -121,6 +122,22 @@ pub fn balance_updates(balances: Vec<(BalanceKind, AssetBalance)>) -> Vec<GemBal
                 update_type,
                 is_active: balance.is_active,
             }
+        })
+        .collect()
+}
+
+pub type PublishedSequences = HashMap<(AssetId, Discriminant<GemBalanceUpdateType>), u64>;
+
+pub fn newer_updates(published: &mut PublishedSequences, sequence: u64, updates: Vec<GemBalanceUpdate>) -> Vec<GemBalanceUpdate> {
+    updates
+        .into_iter()
+        .filter(|update| {
+            let key = (update.asset_id.clone(), discriminant(&update.update_type));
+            if published.get(&key).is_some_and(|applied| *applied > sequence) {
+                return false;
+            }
+            published.insert(key, sequence);
+            true
         })
         .collect()
 }

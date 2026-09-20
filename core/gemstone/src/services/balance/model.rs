@@ -205,6 +205,26 @@ pub struct GemBalanceRecord {
     pub is_active: bool,
 }
 
+impl From<GemBalanceRecord> for GemAssetBalance {
+    fn from(record: GemBalanceRecord) -> Self {
+        Self {
+            asset_id: record.asset_id,
+            available: record.available.value,
+            frozen: record.frozen.value,
+            locked: record.locked.value,
+            staked: record.staked.value,
+            pending: record.pending.value,
+            pending_unconfirmed: record.pending_unconfirmed.value,
+            rewards: record.rewards.value,
+            reserved: record.reserved.value,
+            withdrawable: record.withdrawable.value,
+            earn: record.earn.value,
+            metadata: record.metadata,
+            is_active: record.is_active,
+        }
+    }
+}
+
 impl GemBalanceRecord {
     pub fn new(balance: GemAssetBalance, decimals: u32) -> Self {
         let value = |amount: GemBigUint| GemBalanceValue {
