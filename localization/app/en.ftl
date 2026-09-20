@@ -584,7 +584,7 @@ asset_token_id = Token ID
 # Used in asset detail and asset verification screens for the contract label.
 asset_contract = Contract
 # Used in asset detail and asset verification screens for the state empty title.
-asset_state_empty_title = Your transactions will appear here️
+asset_state_empty_title = Your transactions will appear here
 # Used in asset detail and asset verification screens for the state empty description. Contains 1 string placeholder.
 asset_state_empty_description = Receive, swap or buy %@
 # Used in asset detail and asset verification screens for the verification unverified label.
@@ -932,7 +932,7 @@ price_alerts_set_alert_current_price = Current price
 # Used in Price Alerts screens for the added for label. Contains 1 string placeholder.
 price_alerts_added_for = Set price alert %@
 # Used in Price Alerts screens for the state empty title.
-price_alerts_state_empty_title = Your price alerts will appear here️
+price_alerts_state_empty_title = Your price alerts will appear here
 # Used in Price Alerts screens for the state empty description.
 price_alerts_state_empty_description = Enable them by adding coins to track
 # Used in Price Alerts screens for the auto footer helper text.
@@ -1085,7 +1085,7 @@ nft_save_to_photos = Save to Photos
 # Used in NFT detail and NFT collection screens for the set as avatar label.
 nft_set_as_avatar = Set as Avatar
 # Used in NFT detail and NFT collection screens for the state empty title.
-nft_state_empty_title = Your NFTs will appear here️
+nft_state_empty_title = Your NFTs will appear here
 # Used in NFT detail and NFT collection screens for the state empty description.
 nft_state_empty_description = Receive your first NFT
 # Used in NFT detail and NFT collection screens for the report reason spam label.
