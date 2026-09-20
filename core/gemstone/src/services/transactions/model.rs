@@ -143,7 +143,7 @@ pub enum GemTransactionRowSubtitle {
 pub enum GemTransactionRowValue {
     None,
     AssetSymbol { asset: Asset },
-    Number { number: GemFormattedNumber, sign: GemAmountSign },
+    Number { number: GemFormattedNumber },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

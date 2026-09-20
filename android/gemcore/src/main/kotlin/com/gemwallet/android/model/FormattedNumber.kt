@@ -36,9 +36,16 @@ private fun GemFormattedNumber.body(locale: Locale): String = when (val display 
     is GemNumberDisplay.Abbreviated -> appendSymbol(abbreviatedText(BigDecimal.valueOf(value), locale))
 
     is GemNumberDisplay.BelowThreshold -> appendSymbol(
-        "<${numberText(BigDecimal.valueOf(display.threshold), GemPrecision.Fraction(display.places, display.places), locale)}",
+        "$signText<${numberText(BigDecimal.valueOf(display.threshold), GemPrecision.Fraction(display.places, display.places), locale, withSign = false)}",
     )
 }
+
+private val GemFormattedNumber.signText: String
+    get() = when {
+        !showsSign -> ""
+        value < 0 -> "-"
+        else -> "+"
+    }
 
 private val GemFormattedNumber.currencyCode: String?
     get() = (unit as? GemNumberUnit.Currency)?.code
@@ -68,11 +75,11 @@ private fun GemFormattedNumber.appendSymbol(text: String): String = when (val un
     is GemNumberUnit.Currency, GemNumberUnit.Percent, GemNumberUnit.Plain -> text
 }
 
-private fun GemFormattedNumber.numberText(value: BigDecimal, precision: GemPrecision, locale: Locale): String {
+private fun GemFormattedNumber.numberText(value: BigDecimal, precision: GemPrecision, locale: Locale, withSign: Boolean = showsSign): String {
     val rounding = numberRounding
     val formatter = (numberFormat(locale) as DecimalFormat).apply {
         roundingMode = rounding
-        if (showsSign) {
+        if (withSign) {
             positivePrefix = "+" + positivePrefix
         }
     }

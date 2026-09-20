@@ -28,7 +28,7 @@ private extension GemFormattedNumber {
         case .abbreviated:
             abbreviatedText(locale: locale)
         case let .belowThreshold(threshold, places):
-            appendingSymbol("<\(thresholdText(threshold, places: places, locale: locale))")
+            appendingSymbol("\(signText)<\(thresholdText(threshold, places: places, locale: locale))")
         }
     }
 
@@ -51,6 +51,11 @@ private extension GemFormattedNumber {
         case .percent: true
         case .currency, .symbol, .plain, .multiplier: false
         }
+    }
+
+    var signText: String {
+        guard showsSign else { return "" }
+        return value < 0 ? "-" : "+"
     }
 
     var showsSign: Bool {

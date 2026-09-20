@@ -120,5 +120,5 @@ class TransactionDataAggregateImpl(private val row: GemTransactionRow) : Transac
 private fun GemTransactionRowValue.format(): String? = when (this) {
     GemTransactionRowValue.None -> null
     is GemTransactionRowValue.AssetSymbol -> asset.symbol
-    is GemTransactionRowValue.Number -> sign.format(number.text())
+    is GemTransactionRowValue.Number -> number.text()
 }

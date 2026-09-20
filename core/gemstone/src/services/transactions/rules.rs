@@ -15,7 +15,7 @@ use super::model::{
 };
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::config::image::GemImage;
-use crate::formatted_number::{GemFormattedNumber, GemValueTone};
+use crate::formatted_number::{GemFormattedNumber, GemNumberNotation, GemValueTone};
 use crate::models::asset::wallet_default_assets;
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
 use crate::precision::GemValueStyle;
@@ -251,9 +251,7 @@ fn participant_name(extended: &TransactionExtended, address: &str) -> String {
 
 fn value_tone(value: &GemTransactionRowValue) -> GemValueTone {
     match value {
-        GemTransactionRowValue::Number { sign: GemAmountSign::Incoming, .. } => GemValueTone::Positive,
-        GemTransactionRowValue::Number { sign: GemAmountSign::Outgoing, .. } => GemValueTone::Plain,
-        GemTransactionRowValue::Number { number, sign: GemAmountSign::None } => match number.tone {
+        GemTransactionRowValue::Number { number } => match number.tone {
             GemValueTone::Positive => GemValueTone::Positive,
             GemValueTone::Negative => GemValueTone::Negative,
             GemValueTone::Neutral | GemValueTone::Plain | GemValueTone::Warning => GemValueTone::Plain,
@@ -263,10 +261,23 @@ fn value_tone(value: &GemTransactionRowValue) -> GemValueTone {
 }
 
 fn amount_value(amount: GemTransactionAmount) -> GemTransactionRowValue {
-    let value = BigNumberFormatter::f64_value(&amount.value, amount.asset.decimals as u32);
+    let magnitude = BigNumberFormatter::f64_value(&amount.value, amount.asset.decimals as u32);
+    let number = GemFormattedNumber::amount(magnitude, Some(amount.asset.symbol), GemValueStyle::Short);
     GemTransactionRowValue::Number {
-        number: GemFormattedNumber::amount(value, Some(amount.asset.symbol), GemValueStyle::Short),
-        sign: amount.sign,
+        number: match amount.sign {
+            GemAmountSign::None => number,
+            GemAmountSign::Incoming => GemFormattedNumber {
+                notation: GemNumberNotation::Signed,
+                tone: GemValueTone::Positive,
+                ..number
+            },
+            GemAmountSign::Outgoing => GemFormattedNumber {
+                value: -number.value,
+                notation: GemNumberNotation::Signed,
+                tone: GemValueTone::Plain,
+                ..number
+            },
+        },
     }
 }
 
@@ -280,13 +291,9 @@ fn row_value(extended: &TransactionExtended, value: GemTransactionValue) -> GemT
         GemTransactionValue::SwapSpent => swap_leg(extended, SwapLeg::From, GemAmountSign::Outgoing).map_or(GemTransactionRowValue::None, amount_value),
         GemTransactionValue::PerpetualNotional => perpetual_collateral_asset()
             .map(|asset| BigNumberFormatter::f64_value(&transaction.value, asset.decimals as u32))
-            .map_or(GemTransactionRowValue::None, |value| GemTransactionRowValue::Number {
-                number: GemFormattedNumber::usd(value),
-                sign: GemAmountSign::None,
-            }),
+            .map_or(GemTransactionRowValue::None, |value| GemTransactionRowValue::Number { number: GemFormattedNumber::usd(value) }),
         GemTransactionValue::PerpetualPnl { value } => GemTransactionRowValue::Number {
             number: GemFormattedNumber::signed_usd(value),
-            sign: GemAmountSign::None,
         },
     }
 }
@@ -642,19 +649,36 @@ mod tests {
 
     #[test]
     fn test_the_value_tone_greens_an_incoming_amount_and_signs_a_pnl() {
-        use super::super::model::{GemAmountSign, GemTransactionRowValue};
-        use super::value_tone;
-        use crate::formatted_number::{GemFormattedNumber, GemValueTone};
-        use crate::precision::GemValueStyle;
+        use super::super::model::{GemAmountSign, GemTransactionAmount, GemTransactionRowValue};
+        use super::{amount_value, value_tone};
+        use crate::formatted_number::{GemFormattedNumber, GemNumberNotation, GemValueTone};
 
-        let amount = |sign| GemTransactionRowValue::Number {
-            number: GemFormattedNumber::amount(1.0, Some("ETH".to_string()), GemValueStyle::Short),
-            sign,
+        let amount = |sign| {
+            amount_value(GemTransactionAmount {
+                asset: Asset::from_chain(Chain::Ethereum),
+                value: Transaction::mock().value,
+                sign,
+                price: None,
+            })
         };
-        let usd = |number| GemTransactionRowValue::Number { number, sign: GemAmountSign::None };
+        let usd = |number| GemTransactionRowValue::Number { number };
+        let number_of = |value| match value {
+            GemTransactionRowValue::Number { number } => number,
+            _ => panic!("expected a number"),
+        };
+
+        let incoming = number_of(amount(GemAmountSign::Incoming));
+        let outgoing = number_of(amount(GemAmountSign::Outgoing));
+        let unsigned = number_of(amount(GemAmountSign::None));
+
+        assert_eq!(incoming.notation, GemNumberNotation::Signed);
+        assert!(incoming.value > 0.0, "an incoming amount reads positive without a second call to add the sign");
+        assert_eq!(outgoing.notation, GemNumberNotation::Signed);
+        assert!(outgoing.value < 0.0, "an outgoing amount carries its own minus");
+        assert_eq!(unsigned.notation, GemNumberNotation::Plain);
 
         assert_eq!(value_tone(&amount(GemAmountSign::Incoming)), GemValueTone::Positive);
-        assert_eq!(value_tone(&amount(GemAmountSign::Outgoing)), GemValueTone::Plain);
+        assert_eq!(value_tone(&amount(GemAmountSign::Outgoing)), GemValueTone::Plain, "an outgoing amount is not coloured like a loss");
         assert_eq!(value_tone(&usd(GemFormattedNumber::signed_usd(12.5))), GemValueTone::Positive);
         assert_eq!(value_tone(&usd(GemFormattedNumber::signed_usd(-0.5))), GemValueTone::Negative);
         assert_eq!(value_tone(&usd(GemFormattedNumber::signed_usd(0.0))), GemValueTone::Plain);
@@ -976,12 +1000,19 @@ mod tests {
             (swap_row.value, swap_row.equivalent_value),
             (
                 GemTransactionRowValue::Number {
-                    number: GemFormattedNumber::amount(0.00000001, Some("BTC".to_string()), GemValueStyle::Short),
-                    sign: GemAmountSign::Incoming,
+                    number: GemFormattedNumber {
+                        notation: GemNumberNotation::Signed,
+                        tone: GemValueTone::Positive,
+                        ..GemFormattedNumber::amount(0.00000001, Some("BTC".to_string()), GemValueStyle::Short)
+                    },
                 },
                 GemTransactionRowValue::Number {
-                    number: GemFormattedNumber::amount(0.000000000000000005, Some("ETH".to_string()), GemValueStyle::Short),
-                    sign: GemAmountSign::Outgoing,
+                    number: GemFormattedNumber {
+                        value: -0.000000000000000005,
+                        notation: GemNumberNotation::Signed,
+                        tone: GemValueTone::Plain,
+                        ..GemFormattedNumber::amount(0.000000000000000005, Some("ETH".to_string()), GemValueStyle::Short)
+                    },
                 },
             ),
             "a swap row shows both legs"
@@ -1014,8 +1045,12 @@ mod tests {
         assert_eq!(
             row(&outgoing).value,
             GemTransactionRowValue::Number {
-                number: GemFormattedNumber::amount(0.000000000000000001, Some("ETH".to_string()), GemValueStyle::Short),
-                sign: GemAmountSign::Outgoing,
+                number: GemFormattedNumber {
+                    value: -0.000000000000000001,
+                    notation: GemNumberNotation::Signed,
+                    tone: GemValueTone::Plain,
+                    ..GemFormattedNumber::amount(0.000000000000000001, Some("ETH".to_string()), GemValueStyle::Short)
+                },
             },
             "a transfer row shows its amount"
         );
@@ -1034,10 +1069,7 @@ mod tests {
         open.value = 1_500_000u32.into();
         assert_eq!(
             row(&TransactionExtended::mock_transaction(open)).value,
-            GemTransactionRowValue::Number {
-                number: GemFormattedNumber::usd(1.5),
-                sign: GemAmountSign::None,
-            },
+            GemTransactionRowValue::Number { number: GemFormattedNumber::usd(1.5) },
             "the notional is the value in collateral units"
         );
     }

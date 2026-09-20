@@ -38,8 +38,8 @@ public extension GemTransactionRowValue {
             nil
         case let .assetSymbol(asset):
             AmountDisplay.symbol(asset: asset.toPrimitives()).amount
-        case let .number(number, sign):
-            TextValue(text: sign.format(amount: number.text()), style: textStyle)
+        case let .number(number):
+            TextValue(text: number.text(), style: textStyle)
         }
     }
 }
