@@ -44,10 +44,10 @@ install-diesel:
 [positional-arguments]
 test CRATE="" FILTER="":
     @echo "Running unit tests only..."
-    @if [ -n "$1" ]; then \
-        cargo test --package "$1" --lib --bins --all-features "$2" -- --skip integration_tests; \
+    @if [ -n "{{ CRATE }}" ]; then \
+        cargo test --package "{{ CRATE }}" --lib --bins --all-features "{{ FILTER }}" -- --skip integration_tests; \
     else \
-        cargo test --lib --bins --workspace --features unit_tests "$2"; \
+        cargo test --lib --bins --workspace --features unit_tests "{{ FILTER }}"; \
     fi
 
 test-integration:
