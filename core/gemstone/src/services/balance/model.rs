@@ -24,7 +24,7 @@ pub struct GemBalanceValue {
     pub amount: f64,
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum GemBalanceUpdateType {
     Coin {
         available: GemBigUint,
@@ -53,7 +53,7 @@ pub enum GemBalanceUpdateType {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GemBalanceUpdate {
     pub asset_id: AssetId,
     pub update_type: GemBalanceUpdateType,

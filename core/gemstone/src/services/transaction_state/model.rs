@@ -27,7 +27,7 @@ impl GemTransactionStateUpdate {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GemTransactionStateResult {
     pub transaction_id: TransactionId,
     pub state: TransactionState,
@@ -42,7 +42,7 @@ pub enum GemPostProcessingStep {
     Nfts,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GemPostProcessingFailure {
     pub step: GemPostProcessingStep,
     pub message: String,

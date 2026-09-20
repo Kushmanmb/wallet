@@ -80,7 +80,7 @@ pub enum WalletConnectAction {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum WalletConnectTransactionType {
     Ethereum,
     Solana { output_type: TransferDataOutputType },

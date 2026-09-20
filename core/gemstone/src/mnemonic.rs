@@ -7,7 +7,7 @@ const PHRASE_SUGGESTION_LIMIT: usize = 20;
 #[derive(Debug, Default, uniffi::Object)]
 pub struct GemMnemonic;
 
-#[derive(Clone, PartialEq, uniffi::Record)]
+#[derive(Clone, PartialEq)]
 pub struct GemPhraseEdit {
     pub text: String,
     pub cursor: u32,

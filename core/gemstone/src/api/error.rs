@@ -1,6 +1,6 @@
 use gem_client::ClientError;
 
-#[derive(Debug, uniffi::Error)]
+#[derive(Debug)]
 pub enum GemApiError {
     Network { msg: String },
     Timeout,

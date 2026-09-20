@@ -8,7 +8,7 @@ use primitives::chart::{ChartCandleStick, ChartCandleUpdate};
 use primitives::{Asset, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, PerpetualType};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum GemPerpetualSocketUpdate {
     Applied,
     Candle { candle: ChartCandleUpdate },
@@ -17,14 +17,14 @@ pub enum GemPerpetualSocketUpdate {
     Unknown,
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum GemPerpetualOrderAction {
     Open,
     Increase,
     Reduce { position_direction: PerpetualDirection },
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GemPerpetualOrderInput {
     pub action: GemPerpetualOrderAction,
     pub direction: PerpetualDirection,
@@ -41,7 +41,7 @@ pub struct GemPerpetualOrderInput {
     pub stop_loss: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GemPerpetualCloseInput {
     pub asset_index: i32,
     pub direction: PerpetualDirection,

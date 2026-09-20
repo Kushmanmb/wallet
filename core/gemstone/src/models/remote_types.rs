@@ -4,20 +4,20 @@
 use crate::models::custom_types::{GemBigInt, GemBigUint, GemJsonValue};
 use primitives::{
     Account, AccountDataType, AddressName, AddressType, Appearance, ApplicationMetadata, ApplicationMetadataSource, ApprovalData, Asset, AssetAssociation, AssetAssociationType, AssetBasic, AssetFiatValue, AssetFull, AssetLink, AssetList,
-    AssetMarket, AssetMetaData, AssetPrice, AssetProperties, AssetRank, AssetScore, AssetType, AuthNonce, AuthPayload, BalanceMetadata, Banner, BannerEvent, BannerState, BlockExplorerLink, CancelOrderData, Chain, ChainAddress, ChainAsset,
-    ChainType, ChartCandleStick, ChartCandleUpdate, ChartDateValue, ChartPeriod, ChartValuePercentage, ConnectionComponent, ConnectionStatus, Contact, ContactAddress, ContractCallData, CoreEmoji, CoreListItem, CoreListItemBadge,
-    CoreListItemIcon, Currency, Delegation, DelegationBase, DelegationState, DelegationValidator, Device, DeviceLocale, EarnType, FeePriority, FeeUnitType, FiatAssets, FiatProvider, FiatProviderName, FiatQuote, FiatQuoteRequest,
-    FiatQuoteType, FiatQuoteUrl, FiatRate, FiatTransaction, FiatTransactionData, FiatTransactionStatus, GasPriceType, InAppNotification, Latency, LatencyType, LinkType, MarketDominance, Markets, MarketsAssets, NFTAsset, NFTAssetData,
-    NFTAttribute, NFTAttributeType, NFTCollection, NFTData, NFTImages, NFTResource, NFTType, NameProvider, NameRecord, Node, NodeState, Payment, PaymentAmount, PaymentLink, PaymentRequest, PaymentType, Perpetual, PerpetualAccountMode,
-    PerpetualAccountSummary, PerpetualBalance, PerpetualBasic, PerpetualConfirmData, PerpetualData, PerpetualDirection, PerpetualMarginType, PerpetualMarketData, PerpetualMetadata, PerpetualModifyConfirmData, PerpetualModifyPositionType,
-    PerpetualOrderType, PerpetualPortfolio, PerpetualPortfolioTimeframeData, PerpetualPosition, PerpetualPositionsSummary, PerpetualProvider, PerpetualReduceData, PerpetualSearchData, PerpetualTriggerOrder, PerpetualType, Platform,
-    PlatformStore, PortfolioAsset, PortfolioChartData, PortfolioChartType, PortfolioData, PortfolioMarginUsage, PortfolioStatistic, PortfolioType, Price, PriceAlert, PriceAlertData, PriceAlertDirection, PriceAlertNotificationType,
-    PriceProvider, RecentActivityType, RedelegateData, RedemptionResult, RedemptionStatus, ReferralAllowance, ReferralQuota, Release, ReportNft, Resource, RewardRedemption, RewardRedemptionOption, RewardRedemptionType, RewardStatus,
-    Rewards, SearchResponse, SimulationBalanceChange, SimulationHeader, SimulationPayloadField, SimulationPayloadFieldDisplay, SimulationPayloadFieldKind, SimulationPayloadFieldType, SimulationResult, SimulationSeverity, SimulationWarning,
-    SimulationWarningApproval, SimulationWarningType, SolanaNftStandard, SolanaTokenProgramId, StakeProviderType, StakeType, SupportAgent, SupportMessage, SupportMessageImage, SupportMessageSender, SupportMessageStatus, SupportTyping,
-    SupportTypingStatus, SwapData, SwapPriceImpact, SwapPriceImpactType, SwapProvider, SwapProviderData, SwapQuote, SwapQuoteData, SwapQuoteDataType, TPSLOrderData, TotalFiatValue, TpslType, Transaction, TransactionDirection,
-    TransactionExtended, TransactionInputType, TransactionPerpetualMetadata, TransactionState, TransactionType, TransactionUtxoInput, TransactionsResponse, TransferDataExtra, TransferDataOutputAction, TransferDataOutputType, TronStakeData,
-    TronUnfreeze, TronVote, UTXO, VerificationStatus, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionState, WalletConnectionVerificationStatus, WalletSource, WalletType, YieldProvider,
+    AssetMarket, AssetMetaData, AssetPrice, AssetProperties, AssetRank, AssetScore, AssetType, BalanceMetadata, Banner, BannerEvent, BannerState, BlockExplorerLink, CancelOrderData, Chain, ChainAddress, ChainAsset, ChainType,
+    ChartCandleStick, ChartCandleUpdate, ChartDateValue, ChartPeriod, ChartValuePercentage, ConnectionComponent, ConnectionStatus, Contact, ContactAddress, ContractCallData, CoreEmoji, CoreListItem, CoreListItemBadge, CoreListItemIcon,
+    Currency, Delegation, DelegationBase, DelegationState, DelegationValidator, DeviceLocale, EarnType, FeePriority, FeeUnitType, FiatProvider, FiatProviderName, FiatQuote, FiatQuoteType, FiatQuoteUrl, FiatRate, FiatTransaction,
+    FiatTransactionData, FiatTransactionStatus, GasPriceType, InAppNotification, Latency, LatencyType, LinkType, MarketDominance, Markets, MarketsAssets, NFTAsset, NFTAssetData, NFTAttribute, NFTAttributeType, NFTCollection, NFTData,
+    NFTImages, NFTResource, NFTType, NameProvider, NameRecord, Node, NodeState, Payment, PaymentAmount, PaymentLink, PaymentRequest, PaymentType, Perpetual, PerpetualAccountMode, PerpetualAccountSummary, PerpetualBalance, PerpetualBasic,
+    PerpetualConfirmData, PerpetualData, PerpetualDirection, PerpetualMarginType, PerpetualMarketData, PerpetualMetadata, PerpetualModifyConfirmData, PerpetualModifyPositionType, PerpetualOrderType, PerpetualPortfolioTimeframeData,
+    PerpetualPosition, PerpetualProvider, PerpetualReduceData, PerpetualSearchData, PerpetualTriggerOrder, PerpetualType, Platform, PlatformStore, PortfolioAsset, PortfolioChartData, PortfolioChartType, PortfolioData, PortfolioMarginUsage,
+    PortfolioStatistic, PortfolioType, Price, PriceAlert, PriceAlertData, PriceAlertDirection, PriceAlertNotificationType, PriceProvider, RecentActivityType, RedelegateData, RedemptionResult, RedemptionStatus, ReferralAllowance,
+    ReferralQuota, Release, ReportNft, Resource, RewardRedemption, RewardRedemptionOption, RewardRedemptionType, RewardStatus, Rewards, SimulationBalanceChange, SimulationHeader, SimulationPayloadField, SimulationPayloadFieldDisplay,
+    SimulationPayloadFieldKind, SimulationPayloadFieldType, SimulationResult, SimulationSeverity, SimulationWarning, SimulationWarningApproval, SimulationWarningType, SolanaNftStandard, SolanaTokenProgramId, StakeProviderType, StakeType,
+    SupportAgent, SupportMessage, SupportMessageImage, SupportMessageSender, SupportMessageStatus, SupportTyping, SupportTypingStatus, SwapData, SwapPriceImpact, SwapPriceImpactType, SwapProvider, SwapProviderData, SwapQuote,
+    SwapQuoteData, SwapQuoteDataType, TPSLOrderData, TotalFiatValue, TpslType, Transaction, TransactionDirection, TransactionExtended, TransactionInputType, TransactionState, TransactionType, TransactionUtxoInput, TransferDataExtra,
+    TransferDataOutputAction, TransferDataOutputType, TronStakeData, TronUnfreeze, TronVote, UTXO, VerificationStatus, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionState,
+    WalletConnectionVerificationStatus, WalletSource, WalletType, YieldProvider,
 };
 use std::str::FromStr;
 
@@ -977,21 +977,6 @@ pub struct AssetScore {
 }
 
 #[uniffi::remote(Record)]
-pub struct AuthNonce {
-    pub nonce: String,
-    pub timestamp: u32,
-}
-
-#[uniffi::remote(Record)]
-pub struct AuthPayload {
-    pub device_id: String,
-    pub chain: Chain,
-    pub address: String,
-    pub nonce: String,
-    pub signature: String,
-}
-
-#[uniffi::remote(Record)]
 pub struct BalanceMetadata {
     pub votes: u32,
     pub energy_available: u32,
@@ -1132,28 +1117,6 @@ pub struct DelegationValidator {
 }
 
 #[uniffi::remote(Record)]
-pub struct Device {
-    pub id: String,
-    pub platform: Platform,
-    pub platform_store: PlatformStore,
-    pub os: String,
-    pub model: String,
-    pub token: String,
-    pub locale: DeviceLocale,
-    pub version: String,
-    pub currency: Currency,
-    pub is_push_enabled: bool,
-    pub is_price_alerts_enabled: Option<bool>,
-    pub subscriptions_version: i32,
-}
-
-#[uniffi::remote(Record)]
-pub struct FiatAssets {
-    pub version: u32,
-    pub asset_ids: Vec<String>,
-}
-
-#[uniffi::remote(Record)]
 pub struct FiatProvider {
     pub id: FiatProviderName,
     pub name: String,
@@ -1178,16 +1141,6 @@ pub struct FiatQuote {
     pub value: GemBigUint,
     pub latency: u64,
     pub payment_methods: Vec<PaymentType>,
-}
-
-#[uniffi::remote(Record)]
-pub struct FiatQuoteRequest {
-    pub asset_id: primitives::AssetId,
-    pub quote_type: FiatQuoteType,
-    pub amount: f64,
-    pub currency: String,
-    pub provider_id: Option<String>,
-    pub ip_address: String,
 }
 
 #[uniffi::remote(Record)]
@@ -1434,15 +1387,6 @@ pub struct PerpetualModifyConfirmData {
 }
 
 #[uniffi::remote(Record)]
-pub struct PerpetualPortfolio {
-    pub day: Option<PerpetualPortfolioTimeframeData>,
-    pub week: Option<PerpetualPortfolioTimeframeData>,
-    pub month: Option<PerpetualPortfolioTimeframeData>,
-    pub all_time: Option<PerpetualPortfolioTimeframeData>,
-    pub account_summary: Option<PerpetualAccountSummary>,
-}
-
-#[uniffi::remote(Record)]
 pub struct PerpetualPortfolioTimeframeData {
     pub account_value_history: Vec<ChartDateValue>,
     pub pnl_history: Vec<ChartDateValue>,
@@ -1466,12 +1410,6 @@ pub struct PerpetualPosition {
     pub stop_loss: Option<PerpetualTriggerOrder>,
     pub pnl: f64,
     pub funding: Option<f32>,
-}
-
-#[uniffi::remote(Record)]
-pub struct PerpetualPositionsSummary {
-    pub positions: Vec<PerpetualPosition>,
-    pub balance: PerpetualBalance,
 }
 
 #[uniffi::remote(Record)]
@@ -1615,14 +1553,6 @@ pub struct Rewards {
     pub redemption_options: Vec<RewardRedemptionOption>,
     pub disable_reason: Option<String>,
     pub referral_allowance: ReferralAllowance,
-}
-
-#[uniffi::remote(Record)]
-pub struct SearchResponse {
-    pub assets: Vec<AssetBasic>,
-    pub perpetuals: Vec<PerpetualSearchData>,
-    pub nfts: Vec<NFTCollection>,
-    pub lists: Vec<AssetList>,
 }
 
 #[uniffi::remote(Record)]
@@ -1802,24 +1732,9 @@ pub struct TransactionExtended {
 }
 
 #[uniffi::remote(Record)]
-pub struct TransactionPerpetualMetadata {
-    pub pnl: f64,
-    pub price: f64,
-    pub direction: PerpetualDirection,
-    pub is_liquidation: Option<bool>,
-    pub provider: Option<PerpetualProvider>,
-}
-
-#[uniffi::remote(Record)]
 pub struct TransactionUtxoInput {
     pub address: String,
     pub value: GemBigUint,
-}
-
-#[uniffi::remote(Record)]
-pub struct TransactionsResponse {
-    pub transactions: Vec<Transaction>,
-    pub address_names: Vec<AddressName>,
 }
 
 #[uniffi::remote(Record)]

@@ -83,7 +83,7 @@ pub struct GemTransactionLoadFee {
     pub fee_asset: AssetId,
 }
 
-#[derive(Debug, Clone, uniffi::Record)]
+#[derive(Debug, Clone)]
 pub struct GemTransactionData {
     pub fee: GemTransactionLoadFee,
     pub metadata: GemTransactionLoadMetadata,

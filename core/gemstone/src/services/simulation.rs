@@ -377,7 +377,7 @@ pub fn warning_rows(warnings: &[SimulationWarning]) -> Vec<GemListRow> {
         .collect()
 }
 
-#[derive(Clone, Debug, PartialEq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct GemSimulationChange {
     pub asset_id: AssetId,
     pub value: GemBigInt,

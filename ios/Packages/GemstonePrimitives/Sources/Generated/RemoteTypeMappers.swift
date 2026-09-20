@@ -2194,62 +2194,6 @@ public extension Primitives.DelegationValidator {
     }
 }
 
-public extension Gemstone.Device {
-    func toPrimitives() -> Primitives.Device {
-        Primitives.Device(
-            id: id,
-            platform: platform.toPrimitives(),
-            platformStore: platformStore.toPrimitives(),
-            os: os,
-            model: model,
-            token: token,
-            locale: locale.toPrimitives(),
-            version: version,
-            currency: currency.toPrimitives(),
-            isPushEnabled: isPushEnabled,
-            isPriceAlertsEnabled: isPriceAlertsEnabled,
-            subscriptionsVersion: subscriptionsVersion,
-        )
-    }
-}
-
-public extension Primitives.Device {
-    func toGem() -> Gemstone.Device {
-        Gemstone.Device(
-            id: id,
-            platform: platform.toGem(),
-            platformStore: platformStore.toGem(),
-            os: os,
-            model: model,
-            token: token,
-            locale: locale.toGem(),
-            version: version,
-            currency: currency.toGem(),
-            isPushEnabled: isPushEnabled,
-            isPriceAlertsEnabled: isPriceAlertsEnabled,
-            subscriptionsVersion: subscriptionsVersion,
-        )
-    }
-}
-
-public extension Gemstone.FiatAssets {
-    func toPrimitives() -> Primitives.FiatAssets {
-        Primitives.FiatAssets(
-            version: version,
-            assetIds: assetIds,
-        )
-    }
-}
-
-public extension Primitives.FiatAssets {
-    func toGem() -> Gemstone.FiatAssets {
-        Gemstone.FiatAssets(
-            version: version,
-            assetIds: assetIds,
-        )
-    }
-}
-
 public extension Gemstone.FiatRate {
     func toPrimitives() -> Primitives.FiatRate {
         Primitives.FiatRate(
@@ -2788,30 +2732,6 @@ public extension Primitives.PerpetualMetadata {
     }
 }
 
-public extension Gemstone.PerpetualPortfolio {
-    func toPrimitives() -> Primitives.PerpetualPortfolio {
-        Primitives.PerpetualPortfolio(
-            day: day.map { $0.toPrimitives() },
-            week: week.map { $0.toPrimitives() },
-            month: month.map { $0.toPrimitives() },
-            allTime: allTime.map { $0.toPrimitives() },
-            accountSummary: accountSummary.map { $0.toPrimitives() },
-        )
-    }
-}
-
-public extension Primitives.PerpetualPortfolio {
-    func toGem() -> Gemstone.PerpetualPortfolio {
-        Gemstone.PerpetualPortfolio(
-            day: day.map { $0.toGem() },
-            week: week.map { $0.toGem() },
-            month: month.map { $0.toGem() },
-            allTime: allTime.map { $0.toGem() },
-            accountSummary: accountSummary.map { $0.toGem() },
-        )
-    }
-}
-
 public extension Gemstone.PerpetualPortfolioTimeframeData {
     func toPrimitives() -> Primitives.PerpetualPortfolioTimeframeData {
         Primitives.PerpetualPortfolioTimeframeData(
@@ -2872,24 +2792,6 @@ public extension Primitives.PerpetualPosition {
             stopLoss: stopLoss.map { $0.toGem() },
             pnl: pnl,
             funding: funding,
-        )
-    }
-}
-
-public extension Gemstone.PerpetualPositionsSummary {
-    func toPrimitives() -> Primitives.PerpetualPositionsSummary {
-        Primitives.PerpetualPositionsSummary(
-            positions: positions.map { $0.toPrimitives() },
-            balance: balance.toPrimitives(),
-        )
-    }
-}
-
-public extension Primitives.PerpetualPositionsSummary {
-    func toGem() -> Gemstone.PerpetualPositionsSummary {
-        Gemstone.PerpetualPositionsSummary(
-            positions: positions.map { $0.toGem() },
-            balance: balance.toGem(),
         )
     }
 }
@@ -3231,30 +3133,6 @@ public extension Primitives.TransactionExtended {
             fromAddress: fromAddress.map { $0.toGem() },
             toAddress: toAddress.map { $0.toGem() },
             confirmationEtaSeconds: confirmationEtaSeconds,
-        )
-    }
-}
-
-public extension Gemstone.TransactionPerpetualMetadata {
-    func toPrimitives() -> Primitives.TransactionPerpetualMetadata {
-        Primitives.TransactionPerpetualMetadata(
-            pnl: pnl,
-            price: price,
-            direction: direction.toPrimitives(),
-            isLiquidation: isLiquidation,
-            provider: provider.map { $0.toPrimitives() },
-        )
-    }
-}
-
-public extension Primitives.TransactionPerpetualMetadata {
-    func toGem() -> Gemstone.TransactionPerpetualMetadata {
-        Gemstone.TransactionPerpetualMetadata(
-            pnl: pnl,
-            price: price,
-            direction: direction.toGem(),
-            isLiquidation: isLiquidation,
-            provider: provider.map { $0.toGem() },
         )
     }
 }
