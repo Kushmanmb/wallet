@@ -40,6 +40,9 @@ interface PricesDao {
     @Query("SELECT usd_value FROM prices WHERE asset_id = :assetId LIMIT 1")
     fun getUsdPrice(assetId: String): Flow<Double?>
 
+    @Query("SELECT value FROM prices WHERE asset_id = :assetId LIMIT 1")
+    fun getPrice(assetId: String): Flow<Double?>
+
     @Query("DELETE FROM prices")
     suspend fun deleteAll()
 

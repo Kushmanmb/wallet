@@ -12,6 +12,7 @@ use std::sync::{Arc, Mutex};
 use futures::future::join_all;
 use futures::lock::Mutex as AsyncMutex;
 use primitives::{Asset, AssetBalance, AssetId, Wallet, WalletId};
+use std::mem::{Discriminant, discriminant};
 
 pub use model::{GemAssetBalance, GemAssetBalanceRow, GemBalanceRecord, GemBalanceRequirement, GemBalanceResource, GemBalanceRow, GemBalanceRowValue, GemBalanceUpdate, GemBalanceUpdateType, GemBalanceValue};
 pub use store::GemBalanceStore;
@@ -20,7 +21,9 @@ use crate::gateway::GemGateway;
 use crate::services::assets::{GemAssetStore, GemAssetsService};
 use crate::services::stream::GemStreamSubscriptionService;
 use crate::services::wallet::GemWalletStore;
-use rules::{BalanceKind, BalanceRequest, PublishedSequences};
+use rules::{BalanceKind, BalanceRequest};
+
+type PublishedSequences = HashMap<(AssetId, Discriminant<GemBalanceUpdateType>), u64>;
 
 #[derive(uniffi::Object)]
 pub struct GemBalanceService {
@@ -150,6 +153,20 @@ impl GemBalanceService {
         self.sequence.fetch_add(1, Ordering::SeqCst)
     }
 
+    fn newer_updates(published: &mut PublishedSequences, sequence: u64, updates: Vec<GemBalanceUpdate>) -> Vec<GemBalanceUpdate> {
+        updates
+            .into_iter()
+            .filter(|update| {
+                let key = (update.asset_id.clone(), discriminant(&update.update_type));
+                if published.get(&key).is_some_and(|applied| *applied > sequence) {
+                    return false;
+                }
+                published.insert(key, sequence);
+                true
+            })
+            .collect()
+    }
+
     fn wallet_publication(&self, wallet_id: &WalletId) -> Arc<AsyncMutex<PublishedSequences>> {
         self.published.lock().unwrap().entry(wallet_id.clone()).or_default().clone()
     }
@@ -157,7 +174,7 @@ impl GemBalanceService {
     async fn write_balances(&self, wallet_id: WalletId, sequence: u64, updates: Vec<GemBalanceUpdate>, assets: &[Asset]) -> Result<(), GemServiceError> {
         let publication = self.wallet_publication(&wallet_id);
         let mut published = publication.lock().await;
-        let updates = rules::newer_updates(&mut published, sequence, updates);
+        let updates = Self::newer_updates(&mut published, sequence, updates);
         if updates.is_empty() {
             return Ok(());
         }

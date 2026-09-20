@@ -17,10 +17,6 @@ impl MemoryFileStore {
             ..Default::default()
         }
     }
-
-    pub fn files(&self) -> Vec<String> {
-        self.files.lock().unwrap().clone()
-    }
 }
 
 impl GemFileStore for MemoryFileStore {

@@ -1,8 +1,8 @@
 use std::error::Error;
 
 use crate::constants::get_base_fee;
-use crate::models::account::{Balances, Page};
-use crate::models::staking::{Delegations, Rewards, UnbondingDelegations};
+use crate::models::account::{Balance, Balances, Page};
+use crate::models::staking::{Delegation, Delegations, Rewards, UnbondingDelegation, UnbondingDelegations};
 use crate::models::{Account, AccountResponse, BroadcastRequest, BroadcastResponse, InjectiveAccount};
 use crate::models::{
     AnnualProvisionsResponse, BaseFeeResponse, BlockResponse, FeemarketGasPriceResponse, InflationResponse, InjectiveBaseFeeResponse, OsmosisEpochProvisionsResponse, OsmosisMintParamsResponse, SmartQueryResponse, StakingPoolResponse,
@@ -99,9 +99,8 @@ impl<C: Client> CosmosClient<C> {
         Ok(self.client.get(CosmosTarget::GetOsmosisEpochProvisions).await?)
     }
 
-    pub async fn get_balances(&self, address: &str) -> Result<Balances, Box<dyn Error + Send + Sync>> {
-        let balances = self.get_all_pages::<Balances>(|page_key| CosmosTarget::GetBalances { address: address.to_string(), page_key }).await?;
-        Ok(Balances { balances, pagination: None })
+    pub async fn get_balances(&self, address: &str) -> Result<Vec<Balance>, Box<dyn Error + Send + Sync>> {
+        self.get_all_pages::<Balances>(|page_key| CosmosTarget::GetBalances { address: address.to_string(), page_key }).await
     }
 
     async fn get_all_pages<P: Page + DeserializeOwned + Send>(&self, target: impl Fn(Option<String>) -> CosmosTarget) -> Result<Vec<P::Item>, Box<dyn Error + Send + Sync>> {
@@ -118,14 +117,12 @@ impl<C: Client> CosmosClient<C> {
         }
     }
 
-    pub async fn get_delegations(&self, address: &str) -> Result<Delegations, Box<dyn Error + Send + Sync>> {
-        let delegation_responses = self.get_all_pages::<Delegations>(|page_key| CosmosTarget::GetDelegations { address: address.to_string(), page_key }).await?;
-        Ok(Delegations { delegation_responses, pagination: None })
+    pub async fn get_delegations(&self, address: &str) -> Result<Vec<Delegation>, Box<dyn Error + Send + Sync>> {
+        self.get_all_pages::<Delegations>(|page_key| CosmosTarget::GetDelegations { address: address.to_string(), page_key }).await
     }
 
-    pub async fn get_unbonding_delegations(&self, address: &str) -> Result<UnbondingDelegations, Box<dyn Error + Send + Sync>> {
-        let unbonding_responses = self.get_all_pages::<UnbondingDelegations>(|page_key| CosmosTarget::GetUnbondingDelegations { address: address.to_string(), page_key }).await?;
-        Ok(UnbondingDelegations { unbonding_responses, pagination: None })
+    pub async fn get_unbonding_delegations(&self, address: &str) -> Result<Vec<UnbondingDelegation>, Box<dyn Error + Send + Sync>> {
+        self.get_all_pages::<UnbondingDelegations>(|page_key| CosmosTarget::GetUnbondingDelegations { address: address.to_string(), page_key }).await
     }
 
     pub async fn get_delegation_rewards(&self, address: &str) -> Result<Rewards, Box<dyn Error + Send + Sync>> {
@@ -235,7 +232,7 @@ mod tests {
 
         let balances = CosmosClient::new(CosmosChain::Cosmos, client).get_balances("cosmos1").await.unwrap();
 
-        assert_eq!(balances.balances.iter().map(|balance| balance.denom.as_str()).collect::<Vec<_>>(), vec!["uatom", "uosmo"]);
+        assert_eq!(balances.iter().map(|balance| balance.denom.as_str()).collect::<Vec<_>>(), vec!["uatom", "uosmo"]);
         assert_eq!(
             *requested.lock().unwrap(),
             vec!["/cosmos/bank/v1beta1/balances/cosmos1".to_string(), "/cosmos/bank/v1beta1/balances/cosmos1?pagination.key=cGFnZSB0d28%3D".to_string()]
@@ -265,7 +262,7 @@ mod tests {
 
         let balances = CosmosClient::new(CosmosChain::Cosmos, client).get_balances("cosmos1").await.unwrap();
 
-        assert_eq!(balances.balances.len(), 2);
+        assert_eq!(balances.len(), 2);
         assert_eq!(request_count.load(Ordering::SeqCst), 2, "a repeated cursor ends the read instead of looping forever");
     }
 }

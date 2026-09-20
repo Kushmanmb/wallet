@@ -70,6 +70,7 @@ public extension DB {
         try priceStore.updatePrices([
             .mock(assetId: ethereum.id, price: 100, priceChangePercentage24h: 0),
             .mock(assetId: bnb.id, price: 1000, priceChangePercentage24h: 0),
+            .mock(assetId: perpetual.id, price: 0.92, priceChangePercentage24h: 0),
         ])
         try balanceStore.updateBalances(
             [

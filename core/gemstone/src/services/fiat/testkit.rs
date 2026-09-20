@@ -35,7 +35,7 @@ impl GemFiatQuotesResult {
 
 #[derive(Default)]
 pub struct MemoryFiatStore {
-    pub transaction_writes: std::sync::Mutex<Vec<(WalletId, Vec<FiatTransactionData>)>>,
+    pub transaction_writes: Mutex<Vec<(WalletId, Vec<FiatTransactionData>)>>,
 }
 
 #[async_trait]

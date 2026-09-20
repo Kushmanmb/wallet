@@ -5,7 +5,7 @@ use crate::services::assets::model::{GemHeaderActions, GemHeaderButton, GemHeade
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct GemPerpetualCollateral {
     pub balance: PerpetualBalance,
-    pub rate: f64,
+    pub price: f64,
 }
 
 pub fn shows_initial_loading(initial_load_completed: bool, assets_timestamp: u64) -> bool {
@@ -17,7 +17,7 @@ pub fn wallet_balances(balances: Vec<AssetFiatValue>, collateral: Option<GemPerp
         .into_iter()
         .chain(collateral.map(|collateral| AssetFiatValue {
             amount: collateral.balance.available + collateral.balance.reserved,
-            price: collateral.rate,
+            price: collateral.price,
             price_change_percentage_24h: 0.0,
         }))
         .collect()
@@ -86,7 +86,7 @@ mod tests {
         };
         assert_eq!(wallet_balances(vec![eth], None), vec![eth]);
         assert_eq!(
-            wallet_balances(vec![eth], Some(GemPerpetualCollateral { balance: collateral.clone(), rate: 1.0 })),
+            wallet_balances(vec![eth], Some(GemPerpetualCollateral { balance: collateral.clone(), price: 1.0 })),
             vec![
                 eth,
                 AssetFiatValue {
@@ -98,13 +98,13 @@ mod tests {
             "collateral is what is available plus what positions hold, not what can be withdrawn"
         );
         assert_eq!(
-            wallet_balances(Vec::new(), Some(GemPerpetualCollateral { balance: collateral, rate: 0.92 })),
+            wallet_balances(Vec::new(), Some(GemPerpetualCollateral { balance: collateral, price: 0.92 })),
             vec![AssetFiatValue {
                 amount: 50.0,
                 price: 0.92,
                 price_change_percentage_24h: 0.0
             }],
-            "collateral is a dollar amount and converts like every other entry"
+            "collateral is priced like every other entry"
         );
     }
 

@@ -41,7 +41,7 @@ public final class PerpetualsSceneViewModel {
     }
 
     var walletBalance: WalletBalance {
-        walletBalanceQuery.value.map { WalletBalance.perpetual(available: $0.available, reserved: $0.reserved) } ?? .zero
+        walletBalanceQuery.value.map { WalletBalance.perpetual(available: $0.balance.available, reserved: $0.balance.reserved) } ?? .zero
     }
 
     var isSearchPresented: Bool = false

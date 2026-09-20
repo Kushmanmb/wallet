@@ -35,7 +35,6 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
     public let walletQuery: ObservableQuery<WalletRequest>
     public let fiatValuesQuery: ObservableQuery<AssetFiatValuesRequest>
     public let perpetualBalanceQuery: ObservableQuery<PerpetualWalletBalanceRequest>
-    public let fiatRatesQuery: ObservableQuery<FiatRatesRequest>
     public let assetsQuery: ObservableQuery<AssetsRequest>
     public let bannersQuery: ObservableQuery<BannersRequest>
 
@@ -70,7 +69,6 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
             PerpetualWalletBalanceRequest(walletId: wallet.id, assetId: Chain.hyperCore.defaultAsset(type: .perpetual).id),
             initialValue: nil,
         )
-        fiatRatesQuery = ObservableQuery(FiatRatesRequest(), initialValue: [:])
         assetsQuery = ObservableQuery(AssetsRequest(walletId: wallet.id, filters: [.enabledBalance]), initialValue: [])
         bannersQuery = ObservableQuery(BannersRequest(walletId: wallet.id, assetId: .none, events: [.accountBlockedMultiSignature, .onboarding]), initialValue: [])
         self.isPresentingSelectedAssetInput = isPresentingSelectedAssetInput
@@ -122,7 +120,7 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
         let viewState = service.viewState(
             wallet: wallet,
             balances: fiatValuesQuery.value,
-            perpetual: perpetualCollateral(currency: currency),
+            perpetual: perpetualCollateral,
             banners: bannersQuery.value,
         )
         return WalletHomeState(
@@ -233,10 +231,8 @@ public extension WalletSceneViewModel {
 // MARK: - Private
 
 extension WalletSceneViewModel {
-    private func perpetualCollateral(currency: Currency) -> GemPerpetualCollateral? {
-        perpetualBalanceQuery.value.map {
-            GemPerpetualCollateral(balance: $0.toGem(), rate: fiatRatesQuery.value[currency] ?? 1)
-        }
+    private var perpetualCollateral: GemPerpetualCollateral? {
+        perpetualBalanceQuery.value.map { GemPerpetualCollateral(balance: $0.balance.toGem(), price: $0.price) }
     }
 
     private func loadOnce(wallet: Wallet) async {

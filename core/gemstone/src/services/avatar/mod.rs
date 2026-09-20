@@ -99,7 +99,7 @@ mod tests {
         block_on(service(files.clone(), wallets.clone()).set_image(wallet.id.clone(), vec![1])).unwrap();
 
         let stored = block_on(wallets.get_wallet(wallet.id.clone())).unwrap().unwrap();
-        assert_eq!(files.files(), vec![stored.image_url.clone().unwrap()], "the replaced file is retired only once its replacement is published");
+        assert_eq!(*files.files.lock().unwrap(), vec![stored.image_url.clone().unwrap()], "the replaced file is retired only once its replacement is published");
         assert_eq!(*files.removed.lock().unwrap(), vec!["old.png".to_string()]);
     }
 
@@ -111,7 +111,7 @@ mod tests {
 
         assert!(block_on(service(files.clone(), wallets.clone()).set_image(wallet.id.clone(), vec![1])).is_err());
 
-        assert_eq!(files.files(), vec!["old.png".to_string()], "the published avatar survives and the unpublished one is not left behind");
+        assert_eq!(*files.files.lock().unwrap(), vec!["old.png".to_string()], "the published avatar survives and the unpublished one is not left behind");
         assert_eq!(block_on(wallets.get_wallet(wallet.id)).unwrap().unwrap().image_url, Some("old.png".to_string()));
     }
 
@@ -123,6 +123,6 @@ mod tests {
 
         assert!(block_on(service(files.clone(), wallets.clone()).remove_image(wallet.id)).is_err());
 
-        assert_eq!(files.files(), vec!["old.png".to_string()], "a wallet that still points at its avatar keeps the file");
+        assert_eq!(*files.files.lock().unwrap(), vec!["old.png".to_string()], "a wallet that still points at its avatar keeps the file");
     }
 }

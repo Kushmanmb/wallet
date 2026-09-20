@@ -6,7 +6,7 @@ use primitives::chain_cosmos::CosmosChain;
 use primitives::{DelegationBase, DelegationState, DelegationValidator};
 
 use crate::constants::BOND_STATUS_BONDED;
-use crate::models::staking::{Delegations, Rewards, UnbondingDelegations, Validator};
+use crate::models::staking::{Delegation, Rewards, UnbondingDelegation, Validator};
 #[cfg(test)]
 use crate::models::staking::{StakingPoolResponse, ValidatorCommission, ValidatorCommissionRates, ValidatorDescription, ValidatorsResponse};
 
@@ -35,7 +35,7 @@ pub fn map_staking_validators(validators: Vec<Validator>, chain: CosmosChain, ap
         .collect()
 }
 
-pub fn map_staking_delegations(active_delegations: Delegations, unbonding_delegations: UnbondingDelegations, rewards: Rewards, chain: CosmosChain, denom: &str) -> Vec<DelegationBase> {
+pub fn map_staking_delegations(active_delegations: Vec<Delegation>, unbonding_delegations: Vec<UnbondingDelegation>, rewards: Rewards, chain: CosmosChain, denom: &str) -> Vec<DelegationBase> {
     let asset_id = chain.as_chain().as_asset_id();
     let mut delegations = Vec::new();
 
@@ -56,7 +56,7 @@ pub fn map_staking_delegations(active_delegations: Delegations, unbonding_delega
         })
         .collect();
 
-    let active_delegations = active_delegations.delegation_responses.into_iter().filter_map(|delegation| {
+    let active_delegations = active_delegations.into_iter().filter_map(|delegation| {
         let balance_value = BigNumberFormatter::value_from_amount(&delegation.balance.amount, 0).ok()?;
         if balance_value == "0" {
             return None;
@@ -77,7 +77,7 @@ pub fn map_staking_delegations(active_delegations: Delegations, unbonding_delega
     });
     delegations.extend(active_delegations);
 
-    for unbonding in unbonding_delegations.unbonding_responses {
+    for unbonding in unbonding_delegations {
         for entry in unbonding.entries {
             delegations.push(DelegationBase {
                 asset_id: asset_id.clone(),
@@ -99,17 +99,14 @@ pub fn map_staking_delegations(active_delegations: Delegations, unbonding_delega
 mod tests {
     use super::*;
     use crate::constants::BOND_STATUS_UNBONDED;
-    use crate::models::staking::{Delegations, Rewards};
+    use crate::models::staking::{Delegations, UnbondingDelegations};
     use primitives::Chain;
 
     #[test]
     fn test_map_delegations() {
-        let delegations: Delegations = serde_json::from_str(include_str!("../../testdata/staking_delegations.json")).unwrap();
+        let delegations: Vec<Delegation> = serde_json::from_str::<Delegations>(include_str!("../../testdata/staking_delegations.json")).unwrap().delegation_responses;
 
-        let unbonding = UnbondingDelegations {
-            unbonding_responses: vec![],
-            pagination: None,
-        };
+        let unbonding: Vec<UnbondingDelegation> = Vec::new();
         let rewards = Rewards { rewards: vec![] };
 
         let result = map_staking_delegations(delegations, unbonding, rewards, CosmosChain::Cosmos, "uatom");
@@ -128,13 +125,10 @@ mod tests {
 
     #[test]
     fn test_map_delegations_with_rewards() {
-        let delegations: Delegations = serde_json::from_str(include_str!("../../testdata/staking_delegations.json")).unwrap();
+        let delegations: Vec<Delegation> = serde_json::from_str::<Delegations>(include_str!("../../testdata/staking_delegations.json")).unwrap().delegation_responses;
         let rewards: Rewards = serde_json::from_str(include_str!("../../testdata/staking_rewards.json")).unwrap();
 
-        let unbonding = UnbondingDelegations {
-            unbonding_responses: vec![],
-            pagination: None,
-        };
+        let unbonding: Vec<UnbondingDelegation> = Vec::new();
 
         let result = map_staking_delegations(delegations, unbonding, rewards, CosmosChain::Cosmos, "uatom");
 
@@ -152,9 +146,9 @@ mod tests {
 
     #[test]
     fn test_map_delegations_counts_validator_rewards_once() {
-        let delegations: Delegations = serde_json::from_str(include_str!("../../testdata/staking_delegations.json")).unwrap();
+        let delegations: Vec<Delegation> = serde_json::from_str::<Delegations>(include_str!("../../testdata/staking_delegations.json")).unwrap().delegation_responses;
         let rewards: Rewards = serde_json::from_str(include_str!("../../testdata/staking_rewards.json")).unwrap();
-        let unbonding: UnbondingDelegations = serde_json::from_str(include_str!("../../testdata/staking_unbonding_delegations.json")).unwrap();
+        let unbonding: Vec<UnbondingDelegation> = serde_json::from_str::<UnbondingDelegations>(include_str!("../../testdata/staking_unbonding_delegations.json")).unwrap().unbonding_responses;
 
         let result = map_staking_delegations(delegations, unbonding, rewards, CosmosChain::Cosmos, "uatom");
 
@@ -172,8 +166,8 @@ mod tests {
 
     #[test]
     fn test_an_unbonding_principal_larger_than_a_float_keeps_every_digit() {
-        let delegations: Delegations = serde_json::from_str(include_str!("../../testdata/staking_delegations.json")).unwrap();
-        let unbonding: UnbondingDelegations = serde_json::from_str(include_str!("../../testdata/staking_unbonding_delegations_large.json")).unwrap();
+        let delegations: Vec<Delegation> = serde_json::from_str::<Delegations>(include_str!("../../testdata/staking_delegations.json")).unwrap().delegation_responses;
+        let unbonding: Vec<UnbondingDelegation> = serde_json::from_str::<UnbondingDelegations>(include_str!("../../testdata/staking_unbonding_delegations_large.json")).unwrap().unbonding_responses;
 
         let result = map_staking_delegations(delegations, unbonding, Rewards { rewards: vec![] }, CosmosChain::Cosmos, "uatom");
 

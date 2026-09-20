@@ -38,15 +38,11 @@ public final class NameRecordViewModel {
             try await Task.sleep(for: .milliseconds(debounceMilliseconds))
             let resolved = try await nameService.getNameRecord(name: name, chain: chain)
             try Task.checkCancellation()
-            publish(resolved, name: name, chain: chain)
+            state = nameService.resolvedState(state: state, name: name, chain: chain.toGem(), resolved: resolved)
         } catch {
             guard !error.isCancelled else { return }
-            publish(.error, name: name, chain: chain)
+            state = nameService.resolvedState(state: state, name: name, chain: chain.toGem(), resolved: .error)
         }
-    }
-
-    private func publish(_ resolved: GemNameRecordState, name: String, chain: Chain) {
-        state = nameService.resolvedState(state: state, name: name, chain: chain.toGem(), resolved: resolved)
     }
 
     public var isResolving: Bool {

@@ -29,7 +29,6 @@ impl Pagination {
     }
 }
 
-/// One page of a Cosmos collection response: its rows and the cursor to the next page.
 pub trait Page {
     type Item;
 

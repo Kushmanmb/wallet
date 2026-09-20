@@ -36,16 +36,10 @@ use crate::testkit::{EmptyPreferences, TestAlienProvider};
 pub struct MemoryAssetStore {
     pub assets: Mutex<Vec<AssetBasic>>,
     pub added_balances: Mutex<Vec<(WalletId, Vec<AssetId>, bool)>>,
-    pub availability_writes: Mutex<Vec<(GemAssetAvailability, Vec<AssetId>)>>,
-}
-
-/// Which availability list a `MemoryAssetStore` write was for.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum GemAssetAvailability {
-    Buyable,
-    Sellable,
-    Swappable,
-    Stakeable,
+    pub buyable_writes: Mutex<Vec<Vec<AssetId>>>,
+    pub sellable_writes: Mutex<Vec<Vec<AssetId>>>,
+    pub swappable_writes: Mutex<Vec<Vec<AssetId>>>,
+    pub stakeable_writes: Mutex<Vec<Vec<AssetId>>>,
 }
 
 #[async_trait]
@@ -73,19 +67,19 @@ impl GemAssetStore for MemoryAssetStore {
         Ok(())
     }
     async fn set_buyable_assets(&self, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
-        self.availability_writes.lock().unwrap().push((GemAssetAvailability::Buyable, asset_ids));
+        self.buyable_writes.lock().unwrap().push(asset_ids);
         Ok(())
     }
     async fn set_sellable_assets(&self, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
-        self.availability_writes.lock().unwrap().push((GemAssetAvailability::Sellable, asset_ids));
+        self.sellable_writes.lock().unwrap().push(asset_ids);
         Ok(())
     }
     async fn set_swappable_assets(&self, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
-        self.availability_writes.lock().unwrap().push((GemAssetAvailability::Swappable, asset_ids));
+        self.swappable_writes.lock().unwrap().push(asset_ids);
         Ok(())
     }
     async fn set_stakeable_assets(&self, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
-        self.availability_writes.lock().unwrap().push((GemAssetAvailability::Stakeable, asset_ids));
+        self.stakeable_writes.lock().unwrap().push(asset_ids);
         Ok(())
     }
 }

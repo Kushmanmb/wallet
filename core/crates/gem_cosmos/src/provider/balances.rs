@@ -16,7 +16,7 @@ impl<C: Client> ChainBalances for CosmosClient<C> {
         let chain = self.get_chain().as_chain();
         let denom = chain.as_denom().ok_or("Chain does not have a denom")?;
 
-        if let Some(balance) = balances.balances.iter().find(|balance| balance.denom == denom) {
+        if let Some(balance) = balances.iter().find(|balance| balance.denom == denom) {
             Ok(AssetBalance::new(chain.as_asset_id(), balance.amount.parse::<BigUint>().unwrap_or_default()))
         } else {
             Ok(AssetBalance::new_zero_balance(chain.as_asset_id()))
@@ -32,7 +32,7 @@ impl<C: Client> ChainBalances for CosmosClient<C> {
                     chain: self.get_chain().as_chain(),
                     token_id: Some(token_id.clone()),
                 };
-                match balances.balances.iter().find(|balance| balance.denom == *token_id) {
+                match balances.iter().find(|balance| balance.denom == *token_id) {
                     Some(balance) => AssetBalance::new(asset_id, balance.amount.parse::<BigUint>().unwrap_or_default()),
                     None => AssetBalance::new_zero_balance(asset_id),
                 }

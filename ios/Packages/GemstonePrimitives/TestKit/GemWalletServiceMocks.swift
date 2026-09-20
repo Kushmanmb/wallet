@@ -216,7 +216,8 @@ public final class GemWalletHomeServiceMock: GemWalletHomeServiceProtocol, @unch
     }
 
     public func viewState(wallet: Gemstone.Wallet, balances: [Gemstone.AssetFiatValue], perpetual: Gemstone.GemPerpetualCollateral?, banners: [Gemstone.Banner]) -> GemWalletHomeViewState {
-        let value = balances.reduce(0.0) { $0 + $1.amount * $1.price } + (perpetual.map { ($0.balance.available + $0.balance.reserved) * $0.rate } ?? 0)
+        let collateral: Double = perpetual.map { ($0.balance.available + $0.balance.reserved) * $0.price } ?? 0
+        let value = balances.reduce(0.0) { $0 + $1.amount * $1.price } + collateral
         let total = Gemstone.TotalFiatValue(value: value, pnlAmount: 0, pnlPercentage: 0)
         let isEnabled = !banners.contains { $0.event == .accountBlockedMultiSignature }
         let context = GemBannerContext(

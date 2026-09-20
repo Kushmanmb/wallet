@@ -20,7 +20,7 @@ final class PerpetualsPreviewViewModel {
     }
 
     var walletBalance: WalletBalance {
-        walletBalanceQuery.value.map { WalletBalance.perpetual(available: $0.available, reserved: $0.reserved) } ?? .zero
+        walletBalanceQuery.value.map { WalletBalance.perpetual(available: $0.balance.available, reserved: $0.balance.reserved) } ?? .zero
     }
 
     init(walletId: WalletId, currencyFormatter: CurrencyFormatter = .usd) {

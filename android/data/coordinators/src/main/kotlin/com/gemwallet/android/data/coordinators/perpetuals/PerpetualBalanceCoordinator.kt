@@ -6,6 +6,7 @@ import com.gemwallet.android.data.service.store.database.PricesDao
 import com.gemwallet.android.data.services.gemstone.stores.GemstonePerpetualStore
 import com.gemwallet.android.ext.HypercoreUSDC
 import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.model.CurrencyFormatter
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PerpetualBalance
@@ -31,10 +32,10 @@ class PerpetualBalanceCoordinator(private val perpetualStore: GemstonePerpetualS
 
     override fun getCollateral(): Flow<GemPerpetualCollateral?> = getSession()
         .filterNotNull()
-        .distinctUntilChangedBy { it.wallet.id to it.currency }
+        .distinctUntilChangedBy { it.wallet.id }
         .flatMapLatest { session ->
-            combine(perpetualStore.observeBalance(session.wallet.id, HypercoreUSDC.id), pricesDao.getRates(session.currency)) { balance, rate ->
-                balance?.let { GemPerpetualCollateral(balance = it.toGem(), rate = rate?.rate ?: 1.0) }
+            combine(perpetualStore.observeBalance(session.wallet.id, HypercoreUSDC.id), pricesDao.getPrice(HypercoreUSDC.id.toIdentifier())) { balance, price ->
+                balance?.let { GemPerpetualCollateral(balance = it.toGem(), price = price ?: 0.0) }
             }
         }
 
