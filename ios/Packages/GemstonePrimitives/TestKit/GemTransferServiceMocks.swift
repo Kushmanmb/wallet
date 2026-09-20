@@ -355,6 +355,8 @@ public final class GemReceiveServiceMock: GemReceiveServiceProtocol, @unchecked 
     public var networksValue: GemReceiveNetworks?
     public var warningsValue: [GemReceiveWarning] = []
     public var assetResult: Result<Gemstone.Asset, Error> = .success(Primitives.Asset.mock().toGem())
+    public var assetsById: [Gemstone.AssetId: Gemstone.Asset] = [:]
+    public var onAsset: (@Sendable (Gemstone.AssetId) async -> Void)?
     public var enableAssetError: Error?
     public var syncedNetworksResult: Result<GemReceiveNetworks, Error> = .success(GemReceiveNetworks(assetIds: [], showsSelector: false))
 
@@ -366,6 +368,10 @@ public final class GemReceiveServiceMock: GemReceiveServiceProtocol, @unchecked 
 
     public func asset(assetId: Gemstone.AssetId) async throws -> Gemstone.Asset {
         requestedAssetIds.append(assetId)
+        await onAsset?(assetId)
+        if let asset = assetsById[assetId] {
+            return asset
+        }
         return try assetResult.get()
     }
 

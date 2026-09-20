@@ -16,6 +16,7 @@ import TransferTestKit
 struct ReceiveViewModelTests {
     private let bitcoin = Primitives.Asset.mock(id: .mock(.bitcoin))
     private let ethereum = Primitives.Asset.mock(id: .mock(.ethereum))
+    private let solana = Primitives.Asset.mock(id: .mock(.solana))
 
     private func settle(until condition: () -> Bool = { false }) async {
         for _ in 0 ..< 200 {
@@ -132,6 +133,32 @@ struct ReceiveViewModelTests {
         #expect(model.assetModel.asset.chain == .ethereum)
         #expect(model.address == "0xabc")
         #expect(service.enabledAssetIds == [ethereum.id.identifier])
+    }
+
+    @Test
+    func aSlowerNetworkSwapDoesNotReplaceTheOneChosenAfterIt() async {
+        let service = GemReceiveServiceMock()
+        service.assetsById = [ethereum.id.identifier: ethereum.toGem(), solana.id.identifier: solana.toGem()]
+        let held = AsyncStream<CheckedContinuation<Void, Never>>.makeStream()
+        service.onAsset = { assetId in
+            guard assetId == ethereum.id.identifier else { return }
+            await withCheckedContinuation { held.continuation.yield($0) }
+        }
+        let model = ReceiveViewModel.mock(service: service)
+
+        model.onFinishNetworkSelection([ReceiveNetworkItem(assetId: ethereum.id)])
+        let slower = model.selectionTask
+        var pending = held.stream.makeAsyncIterator()
+        let resume = await pending.next()
+
+        model.onFinishNetworkSelection([ReceiveNetworkItem(assetId: solana.id)])
+        await model.selectionTask?.value
+        resume?.resume()
+        await slower?.value
+
+        #expect(model.assetModel.asset.chain == .solana)
+        #expect(model.address == "So1ana")
+        #expect(service.enabledAssetIds == [solana.id.identifier], "the network the user left is not enabled behind their back")
     }
 
     @Test

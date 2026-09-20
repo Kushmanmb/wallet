@@ -27,6 +27,7 @@ public final class ReceiveViewModel: Sendable {
     private let service: any GemReceiveServiceProtocol
     private let generator = QRCodeGenerator()
     private(set) var networks: GemReceiveNetworks
+    private(set) var selectionTask: Task<Void, Never>?
 
     private init(
         asset: Asset,
@@ -125,9 +126,23 @@ public final class ReceiveViewModel: Sendable {
         return [address]
     }
 
-    private func enableAsset() async {
+    private func selectNetwork(assetId: AssetId) async {
         do {
-            try await service.enableAsset(walletId: wallet.id.id, assetId: assetModel.asset.id.identifier)
+            let asset = try await service.asset(assetId: assetId.identifier).toPrimitives()
+            let account = try wallet.account(for: asset.chain)
+            try Task.checkCancellation()
+            assetModel = AssetViewModel(asset: asset)
+            address = account.address
+            await enableAsset(assetId: asset.id)
+        } catch {
+            guard !error.isCancelled else { return }
+            isPresentingAlertMessage = AlertMessage(error: error)
+        }
+    }
+
+    private func enableAsset(assetId: AssetId) async {
+        do {
+            try await service.enableAsset(walletId: wallet.id.id, assetId: assetId.identifier)
         } catch {
             debugLog("ReceiveViewModel enableAsset error: \(error)")
         }
@@ -161,7 +176,7 @@ public final class ReceiveViewModel: Sendable {
 extension ReceiveViewModel {
     func onTaskOnce() {
         Task {
-            async let enabled: Void = enableAsset()
+            async let enabled: Void = enableAsset(assetId: assetModel.asset.id)
             async let synced: Void = syncNetworks()
             _ = await (enabled, synced)
         }
@@ -175,17 +190,8 @@ extension ReceiveViewModel {
         presentation = nil
         guard let assetId = items.first?.assetId, assetId != assetModel.asset.id else { return }
 
-        Task {
-            do {
-                let asset = try await service.asset(assetId: assetId.identifier).toPrimitives()
-                let account = try wallet.account(for: asset.chain)
-                assetModel = AssetViewModel(asset: asset)
-                address = account.address
-                await enableAsset()
-            } catch {
-                isPresentingAlertMessage = AlertMessage(error: error)
-            }
-        }
+        selectionTask?.cancel()
+        selectionTask = Task { await selectNetwork(assetId: assetId) }
     }
 
     func onShareSheet() {
