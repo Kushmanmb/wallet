@@ -147,14 +147,13 @@ struct ReceiveViewModelTests {
         let model = ReceiveViewModel.mock(service: service)
 
         model.onFinishNetworkSelection([ReceiveNetworkItem(assetId: ethereum.id)])
-        let slower = model.selectionTask
         var pending = held.stream.makeAsyncIterator()
         let resume = await pending.next()
 
         model.onFinishNetworkSelection([ReceiveNetworkItem(assetId: solana.id)])
-        await model.selectionTask?.value
+        await settle(until: { !service.enabledAssetIds.isEmpty })
         resume?.resume()
-        await slower?.value
+        await settle()
 
         #expect(model.assetModel.asset.chain == .solana)
         #expect(model.address == "So1ana")

@@ -27,7 +27,7 @@ public final class ReceiveViewModel: Sendable {
     private let service: any GemReceiveServiceProtocol
     private let generator = QRCodeGenerator()
     private(set) var networks: GemReceiveNetworks
-    private(set) var selectionTask: Task<Void, Never>?
+    private var selectedAssetId: AssetId?
 
     private init(
         asset: Asset,
@@ -130,12 +130,12 @@ public final class ReceiveViewModel: Sendable {
         do {
             let asset = try await service.asset(assetId: assetId.identifier).toPrimitives()
             let account = try wallet.account(for: asset.chain)
-            try Task.checkCancellation()
+            guard selectedAssetId == assetId else { return }
             assetModel = AssetViewModel(asset: asset)
             address = account.address
             await enableAsset(assetId: asset.id)
         } catch {
-            guard !error.isCancelled else { return }
+            guard selectedAssetId == assetId else { return }
             isPresentingAlertMessage = AlertMessage(error: error)
         }
     }
@@ -190,8 +190,8 @@ extension ReceiveViewModel {
         presentation = nil
         guard let assetId = items.first?.assetId, assetId != assetModel.asset.id else { return }
 
-        selectionTask?.cancel()
-        selectionTask = Task { await selectNetwork(assetId: assetId) }
+        selectedAssetId = assetId
+        Task { await selectNetwork(assetId: assetId) }
     }
 
     func onShareSheet() {
