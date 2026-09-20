@@ -1,5 +1,6 @@
+use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
-use serde_serializers::deserialize_f64_from_str;
+use serde_serializers::{deserialize_biguint_from_str, deserialize_f64_from_str};
 
 use super::account::Balance;
 
@@ -34,8 +35,8 @@ pub struct UnbondingDelegation {
 pub struct UnbondingDelegationEntry {
     pub completion_time: String,
     pub creation_height: String,
-    #[serde(deserialize_with = "deserialize_f64_from_str")]
-    pub balance: f64,
+    #[serde(deserialize_with = "deserialize_biguint_from_str")]
+    pub balance: BigUint,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

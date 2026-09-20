@@ -79,12 +79,10 @@ pub fn map_staking_delegations(active_delegations: Delegations, unbonding_delega
 
     for unbonding in unbonding_delegations.unbonding_responses {
         for entry in unbonding.entries {
-            let balance = parse_to_biguint(&entry.balance.to_string());
-
             delegations.push(DelegationBase {
                 asset_id: asset_id.clone(),
                 state: DelegationState::Pending,
-                balance,
+                balance: entry.balance,
                 shares: BigUint::from(0u32),
                 rewards: BigUint::from(0u32),
                 completion_date: entry.completion_time.parse::<chrono::DateTime<chrono::Utc>>().ok(),
@@ -164,6 +162,17 @@ mod tests {
 
         let total: BigUint = result.iter().map(|x| x.rewards.clone()).sum();
         assert_eq!(total.to_string(), "307413");
+    }
+
+    #[test]
+    fn test_an_unbonding_principal_larger_than_a_float_keeps_every_digit() {
+        let delegations: Delegations = serde_json::from_str(include_str!("../../testdata/staking_delegations.json")).unwrap();
+        let unbonding: UnbondingDelegations = serde_json::from_str(include_str!("../../testdata/staking_unbonding_delegations_large.json")).unwrap();
+
+        let result = map_staking_delegations(delegations, unbonding, Rewards { rewards: vec![] }, CosmosChain::Cosmos, "uatom");
+
+        let pending = result.iter().find(|delegation| delegation.state == DelegationState::Pending).unwrap();
+        assert_eq!(pending.balance.to_string(), "9007199254740993");
     }
 
     #[test]

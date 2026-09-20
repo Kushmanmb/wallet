@@ -17,8 +17,7 @@ pub fn map_balance_staking(delegations: Delegations, unbonding: UnbondingDelegat
         .unbonding_responses
         .iter()
         .flat_map(|u| &u.entries)
-        .filter_map(|entry| BigNumberFormatter::value_from_amount(&entry.balance.to_string(), 0).ok())
-        .filter_map(|v| BigInt::from_str(&v).ok())
+        .map(|entry| BigInt::from(entry.balance.clone()))
         .fold(BigInt::from(0), |acc, amount| acc + amount);
 
     let rewards = rewards
@@ -58,5 +57,15 @@ mod tests {
         assert_eq!(result.balance.staked, BigUint::from(10250000_u64));
         assert_eq!(result.balance.pending, BigUint::from(0u32));
         assert_eq!(result.balance.rewards, BigUint::from(307413_u64));
+    }
+
+    #[test]
+    fn test_the_pending_total_keeps_every_digit_of_a_large_unbonding_principal() {
+        let delegations: Delegations = serde_json::from_str(include_str!("../../testdata/staking_delegations.json")).unwrap();
+        let unbonding: UnbondingDelegations = serde_json::from_str(include_str!("../../testdata/staking_unbonding_delegations_large.json")).unwrap();
+
+        let result = map_balance_staking(delegations, unbonding, Rewards { rewards: vec![] }, Chain::Cosmos, "uatom");
+
+        assert_eq!(result.balance.pending.to_string(), "9007199254740993");
     }
 }
