@@ -123,6 +123,9 @@ impl GemAssetStore for MemoryAssetStore {
     async fn get_asset_ids(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, GemServiceError> {
         Ok(asset_ids)
     }
+    async fn get_asset_basics(&self, _asset_ids: Vec<AssetId>) -> Result<Vec<AssetBasic>, GemServiceError> {
+        Ok(vec![])
+    }
     async fn get_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<Asset>, GemServiceError> {
         Ok(asset_ids.into_iter().map(|id| Asset::from_chain(id.chain)).collect())
     }

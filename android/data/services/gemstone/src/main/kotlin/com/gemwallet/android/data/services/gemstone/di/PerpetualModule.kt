@@ -19,7 +19,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
-import uniffi.gemstone.GemAssetStore
+import uniffi.gemstone.GemAssetsService
 import uniffi.gemstone.GemBalanceService
 import uniffi.gemstone.GemConnectionService
 import uniffi.gemstone.GemGateway
@@ -52,7 +52,7 @@ object PerpetualModule {
         gateway: GemGateway,
         priceService: GemPriceService,
         perpetualStore: GemstonePerpetualStore,
-        assetStore: GemAssetStore,
+        assetsService: GemAssetsService,
         preferencesService: GemPreferencesService,
         balanceService: GemBalanceService,
         walletPreferencesService: GemWalletPreferencesService,
@@ -62,7 +62,7 @@ object PerpetualModule {
         gateway,
         priceService,
         perpetualStore,
-        assetStore,
+        assetsService,
         preferencesService,
         balanceService,
         walletPreferencesService,

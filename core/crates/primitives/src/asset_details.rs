@@ -35,7 +35,7 @@ impl AssetFull {
 }
 
 #[typeshare(swift = "Sendable")]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AssetBasic {
     pub asset: Asset,
@@ -76,7 +76,7 @@ pub struct AssetMarketPrice {
 }
 
 #[typeshare(swift = "Sendable")]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AssetProperties {
     pub is_enabled: bool,

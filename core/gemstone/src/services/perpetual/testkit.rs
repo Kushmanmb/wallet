@@ -10,8 +10,8 @@ use primitives::{Asset, AssetBasic, AssetProperties, AssetScore, AutocloseValida
 use super::model::{GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualTransferData};
 use super::{GemAutocloseField, GemAutocloseModify, GemPerpetualService, GemPerpetualStore};
 use crate::gateway::GemGateway;
-use crate::services::assets::GemAssetsService;
 use crate::services::assets::testkit::MemoryAssetStore;
+use crate::services::assets::{GemAssetStore, GemAssetsService};
 use crate::services::balance::GemBalanceService;
 use crate::services::balance::testkit::MemoryBalanceStore;
 use crate::services::error::GemServiceError;
@@ -79,6 +79,7 @@ pub struct PerpetualTestkit {
     pub service: GemPerpetualService,
     pub provider: Arc<TestAlienProvider>,
     pub store: Arc<MemoryPerpetualStore>,
+    pub asset_store: Arc<MemoryAssetStore>,
     pub wallets: Arc<MemoryWalletStore>,
     pub balances: Arc<MemoryBalanceStore>,
     pub preferences: Arc<GemPreferencesService>,
@@ -104,7 +105,6 @@ impl PerpetualTestkit {
             ),
         ]));
         testkit
-            .service
             .asset_store
             .save_assets(vec![AssetBasic::new(HYPERCORE_PERPETUAL_USDC.clone(), AssetProperties::default(HYPERCORE_PERPETUAL_USDC.id.clone()), AssetScore::new(0))])
             .await
@@ -137,7 +137,7 @@ impl PerpetualTestkit {
             wallets.clone(),
             asset_store.clone(),
             balances.clone(),
-            assets,
+            assets.clone(),
             Arc::new(SubscriptionTestkit::new(&[], &[]).service),
         ));
         let wallet_preferences = Arc::new(GemWalletPreferencesService::new(Arc::new(MemoryWalletPreferencesStore::default())));
@@ -146,7 +146,7 @@ impl PerpetualTestkit {
             gateway,
             price,
             store.clone(),
-            asset_store,
+            assets,
             preferences.clone(),
             balance,
             wallet_preferences.clone(),
@@ -157,6 +157,7 @@ impl PerpetualTestkit {
             service,
             provider,
             store,
+            asset_store,
             wallets,
             balances,
             preferences,

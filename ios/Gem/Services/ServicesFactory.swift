@@ -156,7 +156,7 @@ struct ServicesFactory {
         let perpetualService = gatewayService.perpetualService(
             price: priceService,
             store: gemstonePerpetualStore,
-            assetStore: gemstoneAssetStore,
+            assets: assetsService,
             preferences: preferencesService,
             balance: balanceService,
             walletPreferences: walletPreferencesService,
@@ -317,7 +317,6 @@ struct ServicesFactory {
         )
         let searchService = Gemstone.GemSearchService(
             assets: assetsService,
-            assetStore: gemstoneAssetStore,
             price: priceService,
             perpetualStore: gemstonePerpetualStore,
             store: GemstoneSearchStore(store: stores.searchStore, assetListStore: stores.assetListStore),

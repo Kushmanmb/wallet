@@ -84,7 +84,7 @@ public actor GatewayService: Sendable {
     public nonisolated func perpetualService(
         price: GemPriceService,
         store: any GemPerpetualStore,
-        assetStore: any GemAssetStore,
+        assets: GemAssetsService,
         preferences: GemPreferencesService,
         balance: GemBalanceService,
         walletPreferences: GemWalletPreferencesService,
@@ -95,7 +95,7 @@ public actor GatewayService: Sendable {
             gateway: gateway,
             price: price,
             store: store,
-            assetStore: assetStore,
+            assets: assets,
             preferences: preferences,
             balance: balance,
             walletPreferences: walletPreferences,

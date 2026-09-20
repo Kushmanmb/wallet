@@ -35,6 +35,7 @@ use crate::testkit::{EmptyPreferences, TestAlienProvider};
 #[derive(Default)]
 pub struct MemoryAssetStore {
     pub assets: Mutex<Vec<AssetBasic>>,
+    pub asset_writes: Mutex<Vec<Vec<AssetBasic>>>,
     pub added_balances: Mutex<Vec<(WalletId, Vec<AssetId>, bool)>>,
     pub buyable_writes: Mutex<Vec<Vec<AssetId>>>,
     pub sellable_writes: Mutex<Vec<Vec<AssetId>>>,
@@ -50,8 +51,18 @@ impl GemAssetStore for MemoryAssetStore {
     async fn get_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<Asset>, GemServiceError> {
         Ok(self.assets.lock().unwrap().iter().filter(|basic| asset_ids.contains(&basic.asset.id)).map(|basic| basic.asset.clone()).collect())
     }
+    async fn get_asset_basics(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetBasic>, GemServiceError> {
+        Ok(self.assets.lock().unwrap().iter().filter(|basic| asset_ids.contains(&basic.asset.id)).cloned().collect())
+    }
     async fn save_assets(&self, assets: Vec<AssetBasic>) -> Result<(), GemServiceError> {
-        self.assets.lock().unwrap().extend(assets);
+        self.asset_writes.lock().unwrap().push(assets.clone());
+        let mut stored = self.assets.lock().unwrap();
+        for basic in assets {
+            match stored.iter_mut().find(|current| current.asset.id == basic.asset.id) {
+                Some(current) => *current = basic,
+                None => stored.push(basic),
+            }
+        }
         Ok(())
     }
     async fn save_asset(&self, asset: AssetFull) -> Result<(), GemServiceError> {

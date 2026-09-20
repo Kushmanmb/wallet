@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
@@ -94,6 +94,21 @@ pub fn default_assets() -> Vec<AssetBasic> {
         .flat_map(|chain| std::iter::once(Asset::from_chain(chain)).chain(wallet_default_assets(chain)))
         .map(default_asset_basic)
         .collect()
+}
+
+pub fn changed_assets(assets: Vec<AssetBasic>, stored: &[AssetBasic]) -> Vec<AssetBasic> {
+    let stored: HashMap<&AssetId, &AssetBasic> = stored.iter().map(|basic| (&basic.asset.id, basic)).collect();
+    assets
+        .into_iter()
+        .filter(|basic| match stored.get(&basic.asset.id) {
+            Some(current) => !is_persisted_same(basic, current),
+            None => true,
+        })
+        .collect()
+}
+
+fn is_persisted_same(left: &AssetBasic, right: &AssetBasic) -> bool {
+    left.asset == right.asset && left.properties == right.properties && left.score == right.score
 }
 
 pub fn missing_assets(assets: Vec<AssetBasic>, existing: Vec<AssetId>) -> Vec<AssetBasic> {
@@ -539,6 +554,30 @@ pub fn details_state(wallet_type: WalletType, metadata: &AssetMetaData, banner_e
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn test_changed_assets_drops_identical_rows_and_keeps_real_edits() {
+        let ethereum = default_asset_basic(Asset::from_chain(Chain::Ethereum));
+        let bitcoin = default_asset_basic(Asset::from_chain(Chain::Bitcoin));
+        let stored = vec![ethereum.clone()];
+
+        let mut renamed = ethereum.clone();
+        renamed.asset.name = "Ethereum Mainnet".to_string();
+        let mut reranked = ethereum.clone();
+        reranked.score.rank += 5;
+        let mut unstakeable = ethereum.clone();
+        unstakeable.properties.is_stakeable = !ethereum.properties.is_stakeable;
+
+        assert!(changed_assets(vec![ethereum.clone()], &stored).is_empty(), "an unchanged row is not written again");
+        assert_eq!(changed_assets(vec![bitcoin.clone()], &stored), vec![bitcoin]);
+        assert_eq!(changed_assets(vec![renamed.clone()], &stored), vec![renamed]);
+        assert_eq!(changed_assets(vec![reranked.clone()], &stored), vec![reranked], "rank is persisted, so it counts as a change");
+        assert_eq!(changed_assets(vec![unstakeable.clone()], &stored), vec![unstakeable], "properties are persisted too");
+        let mut imaged = ethereum.clone();
+        imaged.properties.has_image = !ethereum.properties.has_image;
+        assert_eq!(changed_assets(vec![imaged.clone()], &stored), vec![imaged], "every property both stores keep counts as a change");
+        assert!(changed_assets(vec![], &stored).is_empty());
+    }
 
     #[test]
     fn test_asset_text_names_the_asset_and_its_network_once() {

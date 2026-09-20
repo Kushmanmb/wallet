@@ -15,6 +15,8 @@ import com.wallet.core.primitives.AssetFull
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.AssetLink
 import com.wallet.core.primitives.AssetMarket
+import com.wallet.core.primitives.AssetProperties
+import com.wallet.core.primitives.AssetScore
 import com.wallet.core.primitives.AssetType
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.ChartValuePercentage
@@ -39,6 +41,7 @@ data class DbAsset(
     @ColumnInfo("is_earn_enabled", defaultValue = "0") val isEarnEnabled: Boolean = false,
     @ColumnInfo("earn_apr") val earnApr: Double? = null,
     @ColumnInfo("rank") val rank: Int = 0,
+    @ColumnInfo("has_image", defaultValue = "0") val hasImage: Boolean = false,
     @ColumnInfo("associations", defaultValue = "[]") val associations: List<AssetAssociation> = emptyList(),
 )
 
@@ -58,6 +61,7 @@ data class DbAssetBasicUpdate(
     @ColumnInfo("is_earn_enabled", defaultValue = "0") val isEarnEnabled: Boolean = false,
     @ColumnInfo("earn_apr") val earnApr: Double? = null,
     @ColumnInfo("rank") val rank: Int = 0,
+    @ColumnInfo("has_image", defaultValue = "0") val hasImage: Boolean = false,
 )
 
 data class DbAssetProjection(val id: String, val name: String, val symbol: String, val decimals: Int, val type: AssetType)
@@ -114,6 +118,23 @@ fun DbAsset.toDTO(): Asset? = DbAssetProjection(
     type = type,
 ).toDTO()
 
+fun DbAsset.toAssetBasic(): AssetBasic? = AssetBasic(
+    asset = toDTO() ?: return null,
+    properties = AssetProperties(
+        isEnabled = isEnabled,
+        isBuyable = isBuyEnabled,
+        isSellable = isSellEnabled,
+        isSwapable = isSwapEnabled,
+        isStakeable = isStakeEnabled,
+        stakingApr = stakingApr,
+        isEarnable = isEarnEnabled,
+        earnApr = earnApr,
+        hasImage = hasImage,
+    ),
+    score = AssetScore(rank = rank),
+    price = null,
+)
+
 fun DbAssetProjection.toDTO(): Asset? {
     return Asset(
         id = id.toAssetId() ?: return null,
@@ -140,6 +161,7 @@ fun AssetFull.toRecord() = DbAsset(
     isEarnEnabled = properties.isEarnable,
     earnApr = properties.earnApr,
     rank = score.rank,
+    hasImage = properties.hasImage,
     associations = associations,
 )
 
@@ -167,6 +189,7 @@ fun AssetBasic.toRecord() = DbAsset(
     isEarnEnabled = properties.isEarnable,
     earnApr = properties.earnApr,
     rank = score.rank,
+    hasImage = properties.hasImage,
 )
 
 fun AssetBasic.toUpdateRecord() = DbAssetBasicUpdate(
@@ -185,6 +208,7 @@ fun AssetBasic.toUpdateRecord() = DbAssetBasicUpdate(
     isEarnEnabled = properties.isEarnable,
     earnApr = properties.earnApr,
     rank = score.rank,
+    hasImage = properties.hasImage,
 )
 
 fun List<AssetLink>.toAssetLinkRecord(assetId: AssetId) = map { it.toRecord(assetId) }

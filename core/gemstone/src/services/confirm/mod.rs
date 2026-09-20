@@ -201,11 +201,9 @@ impl GemConfirmService {
             TransferDataOutputAction::Sign => Ok(GemExecuteResult::Signed {
                 data: transactions.into_iter().map(|transaction| transaction.data).collect(),
             }),
-            TransferDataOutputAction::Send => {
-                Ok(GemExecuteResult::Sent {
-                    hashes: self.send(input, transactions).await?,
-                })
-            }
+            TransferDataOutputAction::Send => Ok(GemExecuteResult::Sent {
+                hashes: self.send(input, transactions).await?,
+            }),
         }
     }
 }

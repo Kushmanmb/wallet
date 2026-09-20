@@ -2,6 +2,7 @@ package com.gemwallet.android.data.services.gemstone.stores
 
 import com.gemwallet.android.data.service.store.database.AssetsDao
 import com.gemwallet.android.data.service.store.database.entities.DbBalance
+import com.gemwallet.android.data.service.store.database.entities.toAssetBasic
 import com.gemwallet.android.data.service.store.database.entities.toAssetInfoModel
 import com.gemwallet.android.data.service.store.database.entities.toAssetLinkRecord
 import com.gemwallet.android.data.service.store.database.entities.toAssetLinksModel
@@ -35,6 +36,10 @@ class GemstoneAssetStore(private val assetsDao: AssetsDao) : GemAssetStore {
     }
 
     override suspend fun getAssets(assetIds: List<String>): List<uniffi.gemstone.Asset> = assetsDao.getAssetsByIds(assetIds).toDTO().map { it.toGem() }
+
+    override suspend fun getAssetBasics(assetIds: List<String>): List<uniffi.gemstone.AssetBasic> = withContext(Dispatchers.IO) {
+        assetsDao.getAssetsByIds(assetIds).mapNotNull { it.toAssetBasic()?.toGem() }
+    }
 
     override suspend fun saveAssets(assets: List<uniffi.gemstone.AssetBasic>) = withContext(Dispatchers.IO) {
         val basics = assets.map { it.toPrimitives() }

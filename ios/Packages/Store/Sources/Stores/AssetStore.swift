@@ -65,6 +65,15 @@ public struct AssetStore: Sendable {
         }
     }
 
+    public func getAssetBasics(for assetIds: [String]) throws -> [AssetBasic] {
+        try db.read { db in
+            try AssetRecord
+                .filter(assetIds.contains(AssetRecord.Columns.id))
+                .fetchAll(db)
+                .map { $0.mapToAssetBasic() }
+        }
+    }
+
     public func getAssets(for assetIds: [String]) throws -> [Asset] {
         try db.read { db in
             try AssetRecord

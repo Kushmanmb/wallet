@@ -129,8 +129,8 @@ object GatewayModule {
 
     @Provides
     @Singleton
-    fun provideGemSearchService(assetsService: GemAssetsService, assetStore: GemAssetStore, priceService: GemPriceService, perpetualStore: GemstonePerpetualStore, searchStore: GemSearchStore): GemSearchService =
-        GemSearchService(assetsService, assetStore, priceService, perpetualStore, searchStore)
+    fun provideGemSearchService(assetsService: GemAssetsService, priceService: GemPriceService, perpetualStore: GemstonePerpetualStore, searchStore: GemSearchStore): GemSearchService =
+        GemSearchService(assetsService, priceService, perpetualStore, searchStore)
 
     @Provides
     @Singleton

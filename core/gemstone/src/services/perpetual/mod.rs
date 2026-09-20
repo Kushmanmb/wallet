@@ -32,7 +32,7 @@ pub use store::GemPerpetualStore;
 
 use crate::gateway::GemGateway;
 use crate::models::perpetual::GemChartCandleStick;
-use crate::services::assets::{GemAssetAction, GemAssetStore};
+use crate::services::assets::{GemAssetAction, GemAssetsService};
 use crate::services::balance::GemBalanceService;
 use crate::services::price::GemPriceService;
 use crate::services::stream::rules::hyperliquid_account;
@@ -45,7 +45,7 @@ pub struct GemPerpetualService {
     gateway: Arc<GemGateway>,
     price: Arc<GemPriceService>,
     store: Arc<dyn GemPerpetualStore>,
-    asset_store: Arc<dyn GemAssetStore>,
+    assets: Arc<GemAssetsService>,
     preferences: Arc<GemPreferencesService>,
     balance: Arc<GemBalanceService>,
     wallet_preferences: Arc<GemWalletPreferencesService>,
@@ -60,7 +60,7 @@ impl GemPerpetualService {
         gateway: Arc<GemGateway>,
         price: Arc<GemPriceService>,
         store: Arc<dyn GemPerpetualStore>,
-        asset_store: Arc<dyn GemAssetStore>,
+        assets: Arc<GemAssetsService>,
         preferences: Arc<GemPreferencesService>,
         balance: Arc<GemBalanceService>,
         wallet_preferences: Arc<GemWalletPreferencesService>,
@@ -71,7 +71,7 @@ impl GemPerpetualService {
             gateway,
             price,
             store,
-            asset_store,
+            assets,
             preferences,
             balance,
             wallet_preferences,
@@ -143,7 +143,7 @@ impl GemPerpetualService {
     pub async fn sync_markets(&self, chain: Chain) -> Result<(), GemServiceError> {
         let currency = self.preferences.get_currency();
         let data = self.gateway.get_perpetuals_data(chain).await?;
-        self.asset_store.save_assets(rules::perpetual_asset_basics(&data)).await?;
+        self.assets.save_assets(rules::perpetual_asset_basics(&data)).await?;
         self.store.save_perpetuals(data).await?;
         if let Some(price) = rules::collateral_price(chain) {
             self.price.update_prices(vec![price], currency).await?;

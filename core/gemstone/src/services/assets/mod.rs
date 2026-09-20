@@ -106,6 +106,18 @@ impl GemAssetsService {
         Ok(asset)
     }
 
+    pub async fn save_assets(&self, assets: Vec<AssetBasic>) -> Result<(), GemServiceError> {
+        if assets.is_empty() {
+            return Ok(());
+        }
+        let stored = self.store.get_asset_basics(assets.iter().map(|basic| basic.asset.id.clone()).collect()).await?;
+        let changed = rules::changed_assets(assets, &stored);
+        if changed.is_empty() {
+            return Ok(());
+        }
+        self.store.save_assets(changed).await
+    }
+
     pub async fn sync_asset_associations(&self, asset_id: AssetId) -> Result<Vec<AssetId>, GemServiceError> {
         let asset = self.sync_asset(asset_id).await?;
         let associations: Vec<AssetId> = asset.associations.into_iter().map(|association| association.asset_id).collect();
@@ -270,6 +282,28 @@ mod tests {
     use crate::testkit::TestAlienProvider;
     use futures::executor::block_on;
     use primitives::asset_constants::{ARC_USDC_TOKEN_ID, ETHEREUM_USDT_ASSET_ID};
+
+    #[test]
+    fn test_saving_assets_writes_only_what_the_store_does_not_already_hold() {
+        block_on(async {
+            let store = Arc::new(MemoryAssetStore::default());
+            let service = GemAssetsService::mock(Arc::new(TestAlienProvider::with_status(503)), store.clone());
+            let ethereum = rules::default_asset_basic(Asset::from_chain(Chain::Ethereum));
+
+            service.save_assets(vec![ethereum.clone()]).await.unwrap();
+            service.save_assets(vec![ethereum.clone()]).await.unwrap();
+
+            assert_eq!(store.asset_writes.lock().unwrap().len(), 1, "an identical sync writes no rows");
+
+            let mut reranked = ethereum.clone();
+            reranked.score.rank += 5;
+            service.save_assets(vec![reranked.clone(), ethereum.clone()]).await.unwrap();
+
+            let writes = store.asset_writes.lock().unwrap();
+            assert_eq!(writes.len(), 2);
+            assert_eq!(writes[1], vec![reranked], "only the row that changed is written");
+        })
+    }
 
     const USDT_RESPONSE: &str = r#"[{
         "asset": {"id": "ethereum_0xdAC17F958D2ee523a2206206994597C13D831ec7", "name": "Tether", "symbol": "USDT", "decimals": 6, "type": "ERC20"},
