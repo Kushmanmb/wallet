@@ -106,7 +106,7 @@ impl GemTransactionStateService {
     pub async fn update(&self, wallet_id: WalletId, transaction: Transaction) -> Result<Option<GemTransactionStateResult>, GemServiceError> {
         let update = self.gateway.get_transaction_update(transaction.clone()).await.map_err(|error| error.to_string());
         let previous_state = transaction.state;
-        let result = apply(self.store.as_ref(), wallet_id.clone(), transaction.clone(), update, Utc::now()).await?;
+        let result = merge_update(self.store.as_ref(), wallet_id.clone(), transaction.clone(), update, Utc::now()).await?;
         let Some(mut result) = result else {
             return Ok(None);
         };
@@ -138,7 +138,7 @@ impl GemTransactionStateService {
     }
 }
 
-async fn apply(store: &dyn GemTransactionStateStore, wallet_id: WalletId, transaction: Transaction, update: Result<TransactionUpdate, String>, now: DateTime<Utc>) -> Result<Option<GemTransactionStateResult>, GemServiceError> {
+async fn merge_update(store: &dyn GemTransactionStateStore, wallet_id: WalletId, transaction: Transaction, update: Result<TransactionUpdate, String>, now: DateTime<Utc>) -> Result<Option<GemTransactionStateResult>, GemServiceError> {
     let timed_out = rules::has_timed_out(&transaction, now);
     let update = match update {
         Ok(update) => update,
@@ -215,8 +215,8 @@ mod tests {
         });
     }
 
-    fn apply_update(store: &MemoryTransactionStateStore, transaction: Transaction, update: Result<TransactionUpdate, String>, now: DateTime<Utc>) -> Result<Option<GemTransactionStateResult>, GemServiceError> {
-        futures::executor::block_on(apply(store, WalletId::Multicoin("wallet".into()), transaction, update, now))
+    fn merge_polled_update(store: &MemoryTransactionStateStore, transaction: Transaction, update: Result<TransactionUpdate, String>, now: DateTime<Utc>) -> Result<Option<GemTransactionStateResult>, GemServiceError> {
+        futures::executor::block_on(merge_update(store, WalletId::Multicoin("wallet".into()), transaction, update, now))
     }
 
     #[test]
@@ -224,7 +224,7 @@ mod tests {
         let now = Utc::now();
         let store = MemoryTransactionStateStore::with(vec![(TransactionId::mock("hash"), TransactionState::Pending)]);
 
-        let result = apply_update(
+        let result = merge_polled_update(
             &store,
             Transaction { created_at: now, ..Transaction::mock_swap() },
             Ok(TransactionUpdate::new(
@@ -250,7 +250,7 @@ mod tests {
         let now = Utc::now();
         let store = MemoryTransactionStateStore::with(vec![(TransactionId::mock("hash"), TransactionState::Pending)]);
 
-        let result = apply_update(
+        let result = merge_polled_update(
             &store,
             Transaction { created_at: now, ..Transaction::mock_swap() },
             Ok(TransactionUpdate::new(TransactionState::InTransit, vec![TransactionChange::HashChange { old: "hash".into(), new: "new-hash".into() }])),
@@ -269,7 +269,7 @@ mod tests {
         let now = Utc::now();
         let store = MemoryTransactionStateStore::with(vec![(TransactionId::mock("hash"), TransactionState::Pending), (TransactionId::mock("new-hash"), TransactionState::Confirmed)]);
 
-        let result = apply_update(
+        let result = merge_polled_update(
             &store,
             Transaction { created_at: now, ..Transaction::mock_swap() },
             Ok(TransactionUpdate::new(TransactionState::InTransit, vec![TransactionChange::HashChange { old: "hash".into(), new: "new-hash".into() }])),
@@ -290,7 +290,7 @@ mod tests {
         let now = Utc::now();
         let store = MemoryTransactionStateStore::with(vec![(TransactionId::mock("hash"), TransactionState::Pending)]);
         for hash in ["hash", "new-hash", "new-hash"] {
-            let result = apply_update(
+            let result = merge_polled_update(
                 &store,
                 Transaction { created_at: now, ..Transaction::mock_swap() },
                 Ok(TransactionUpdate::new(TransactionState::Confirmed, vec![TransactionChange::HashChange { old: "hash".into(), new: hash.into() }])),
@@ -311,7 +311,7 @@ mod tests {
         let now = Utc::now();
         let store = MemoryTransactionStateStore::with(vec![(TransactionId::mock("hash"), TransactionState::InTransit)]);
 
-        let result = apply_update(
+        let result = merge_polled_update(
             &store,
             Transaction {
                 state: TransactionState::InTransit,
@@ -338,12 +338,12 @@ mod tests {
             ..Transaction::mock_swap()
         };
 
-        let unchanged = apply_update(&store, polled.clone(), Ok(TransactionUpdate::new(TransactionState::Pending, vec![])), now).unwrap().unwrap();
+        let unchanged = merge_polled_update(&store, polled.clone(), Ok(TransactionUpdate::new(TransactionState::Pending, vec![])), now).unwrap().unwrap();
 
         assert_eq!(unchanged.state, TransactionState::Confirmed);
         assert!(store.updates.lock().unwrap().is_empty(), "a confirmed row is not written back to pending");
 
-        let with_fee = apply_update(&store, polled, Ok(TransactionUpdate::new(TransactionState::Pending, vec![TransactionChange::NetworkFee(BigInt::from(21000))])), now)
+        let with_fee = merge_polled_update(&store, polled, Ok(TransactionUpdate::new(TransactionState::Pending, vec![TransactionChange::NetworkFee(BigInt::from(21000))])), now)
             .unwrap()
             .unwrap();
 
@@ -358,7 +358,7 @@ mod tests {
         let store = MemoryTransactionStateStore::with(vec![]);
 
         for changes in [vec![], vec![TransactionChange::HashChange { old: "hash".into(), new: "new-hash".into() }]] {
-            let result = apply_update(&store, Transaction { created_at: now, ..Transaction::mock_swap() }, Ok(TransactionUpdate::new(TransactionState::Confirmed, changes)), now).unwrap();
+            let result = merge_polled_update(&store, Transaction { created_at: now, ..Transaction::mock_swap() }, Ok(TransactionUpdate::new(TransactionState::Confirmed, changes)), now).unwrap();
 
             assert_eq!(result, None);
         }
@@ -369,10 +369,10 @@ mod tests {
         let now = Utc::now();
         let store = MemoryTransactionStateStore::with(vec![(TransactionId::mock("hash"), TransactionState::Pending)]);
 
-        let fresh = apply_update(&store, Transaction { created_at: now, ..Transaction::mock_swap() }, Err("offline".into()), now);
+        let fresh = merge_polled_update(&store, Transaction { created_at: now, ..Transaction::mock_swap() }, Err("offline".into()), now);
         assert!(matches!(fresh, Err(GemServiceError::Gateway { .. })));
 
-        let stale = apply_update(
+        let stale = merge_polled_update(
             &store,
             Transaction {
                 created_at: now - chrono::Duration::hours(2),

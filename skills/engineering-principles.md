@@ -21,7 +21,7 @@ A real fix is not deferred into a plan item. Adding the correct change to [Open 
 - Touch only what the task requires; adjacent improvements go in their own PR or stay out
 - No code comments. Convey intent through names and structure; if code seems to need a comment, rename or restructure it. Only compiler- or tooling-required comments (attributes, lint directives, license headers) are exceptions
 - Full domain terms in names (`transaction`, not `tx`) except when preserving external protocol fields, database columns, or URLs verbatim
-- Intent-specific names that state the domain action and result (`parse_destination_tag`, `build_transfer_message`, `map_balance_assets`). Generic verbs such as `process`, `handle`, `manage`, `perform`, `execute`, and `resolve` hide the contract; keep them only when a framework or protocol owns the signature
+- Intent-specific names that state the domain action and result (`parse_destination_tag`, `build_transfer_message`, `map_balance_assets`). Generic verbs such as `apply`, `process`, `handle`, `manage`, `perform`, `execute`, and `resolve` hide the contract; keep them only when a framework or protocol owns the signature
 - Extend the existing component, domain type, mapper, or fixture before adding another. Reuse the flow's loading, error, navigation, and cancellation behavior; do not introduce a parallel path for the new entry point
 - Model variants with a type, not a boolean flag or a bare string. An enum or sealed hierarchy the compiler checks exhaustively replaces paired booleans, optional-plus-flag pairs, and default branches that hide a missing state
 - Keep types and functions single-purpose; expose only what current callers require

@@ -112,7 +112,7 @@ private extension PerpetualChartModel {
 
     func handleChartUpdate(_ update: ChartCandleUpdate, perpetual: Perpetual) {
         guard case let .data(loaded) = state,
-              let merged = service.apply(update: update, to: loaded.candles, perpetual: perpetual, period: loaded.period)
+              let merged = service.mergedCandles(update: update, into: loaded.candles, perpetual: perpetual, period: loaded.period)
         else {
             return
         }

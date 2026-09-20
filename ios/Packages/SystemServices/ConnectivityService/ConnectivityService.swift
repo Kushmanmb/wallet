@@ -30,7 +30,7 @@ public actor ConnectivityService {
         let states = monitor.stateStream()
         monitorTask = Task { [weak self] in
             for await state in states {
-                await self?.apply(state)
+                await self?.commitState(state)
             }
         }
     }
@@ -49,7 +49,7 @@ public actor ConnectivityService {
         return stream
     }
 
-    private func apply(_ state: ConnectivityState) {
+    private func commitState(_ state: ConnectivityState) {
         offlineTask?.cancel()
         offlineTask = nil
 
