@@ -115,10 +115,10 @@ struct StreamObserverServiceTests {
         let socket = WebSocketConnectionMock(onConnect: { opened.continuation.yield(()) })
         let service = GemStreamServiceMock(
             prepare: {
-                preparations.wrappedValue += 1
+                preparations.withLock { $0 += 1 }
                 return true
             },
-            onSession: { sessions.wrappedValue += 1 },
+            onSession: { sessions.withLock { $0 += 1 } },
         )
         let observer = StreamObserverService.mock(service: service, webSocket: socket)
         var connections = opened.stream.makeAsyncIterator()
@@ -185,7 +185,7 @@ struct StreamObserverServiceTests {
         let disconnects = Locked(wrappedValue: 0)
         let socket = WebSocketConnectionMock(onConnect: { opened.continuation.yield(true) })
         let service = GemStreamServiceMock(onDisconnected: {
-            disconnects.wrappedValue += 1
+            disconnects.withLock { $0 += 1 }
             if disconnects.wrappedValue == 1 {
                 await withCheckedContinuation { cleanup.continuation.yield($0) }
             }
@@ -235,7 +235,7 @@ struct StreamObserverServiceTests {
         let disconnects = Locked(wrappedValue: 0)
         let socket = WebSocketConnectionMock(onConnect: { opened.continuation.yield(true) })
         let service = GemStreamServiceMock(onDisconnected: {
-            disconnects.wrappedValue += 1
+            disconnects.withLock { $0 += 1 }
             if disconnects.wrappedValue == 1 {
                 await withCheckedContinuation { cleanup.continuation.yield($0) }
             }
@@ -281,11 +281,11 @@ struct StreamObserverServiceTests {
         let connectionCount = Locked(wrappedValue: 0)
         let disconnects = Locked(wrappedValue: 0)
         let socket = WebSocketConnectionMock(onConnect: {
-            connectionCount.wrappedValue += 1
+            connectionCount.withLock { $0 += 1 }
             opened.continuation.yield(connectionCount.wrappedValue)
         })
         let service = GemStreamServiceMock(onDisconnected: {
-            disconnects.wrappedValue += 1
+            disconnects.withLock { $0 += 1 }
             if disconnects.wrappedValue == 1 {
                 await withCheckedContinuation { cleanup.continuation.yield($0) }
             }

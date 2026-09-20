@@ -2,6 +2,7 @@
 
 import Foundation
 import Gemstone
+import class Primitives.Locked
 
 public final class GemChainSettingsServiceMock: GemChainSettingsServiceProtocol, @unchecked Sendable {
     public var nodesByCall: [[GemNodeSelection]] = []
@@ -14,7 +15,8 @@ public final class GemChainSettingsServiceMock: GemChainSettingsServiceProtocol,
     public private(set) var addedNodes: [String] = []
     public private(set) var setExplorerNames: [String] = []
     public private(set) var nodesCalls = 0
-    public private(set) var statusCalls: [String] = []
+    private let statusCallsStorage = Locked(wrappedValue: [String]())
+    public var statusCalls: [String] { statusCallsStorage.wrappedValue }
 
     public init() {}
 
@@ -63,7 +65,7 @@ public final class GemChainSettingsServiceMock: GemChainSettingsServiceProtocol,
     }
 
     public func nodeStatus(chain _: Chain, url: String) async -> GemNodeStatusState {
-        statusCalls.append(url)
+        statusCallsStorage.withLock { $0.append(url) }
         return statusByUrl[url] ?? .error
     }
 
