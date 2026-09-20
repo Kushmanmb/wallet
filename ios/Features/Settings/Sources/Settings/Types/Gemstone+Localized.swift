@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemCurrencySectionKind
 import enum Gemstone.GemNodeCheckRow
 import enum Gemstone.GemNodeSubtitle
 import enum Gemstone.GemServiceEndpointType
@@ -71,6 +72,15 @@ extension KeystoreAuthentication {
                 Localized.Settings.enablePasscode
             }
         case .passcode, .none: Localized.Settings.enablePasscode
+        }
+    }
+}
+
+extension GemCurrencySectionKind {
+    var title: String {
+        switch self {
+        case .recommended: Localized.Common.recommended
+        case .all: Localized.Common.all
         }
     }
 }

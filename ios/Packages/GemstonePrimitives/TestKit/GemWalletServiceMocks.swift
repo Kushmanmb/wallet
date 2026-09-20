@@ -266,16 +266,17 @@ public final class GemWalletHomeServiceMock: GemWalletHomeServiceProtocol, @unch
 
 public final class GemCurrencyServiceMock: GemCurrencyServiceProtocol, @unchecked Sendable {
     public private(set) var setCurrencies: [Gemstone.Currency] = []
+    public private(set) var queries: [String] = []
+    public var sectionsValue: [GemCurrencySection] = []
+    private let preferencesService: any GemPreferencesServiceProtocol
     private let error: Error?
-    private let flag: String
 
-    public init(flag: String = "🇺🇸", error: Error? = nil) {
-        self.flag = flag
+    public init(
+        preferencesService: any GemPreferencesServiceProtocol,
+        error: Error? = nil,
+    ) {
+        self.preferencesService = preferencesService
         self.error = error
-    }
-
-    public func getCurrency() -> Gemstone.Currency {
-        setCurrencies.last ?? Primitives.Currency.usd.toGem()
     }
 
     public func setCurrency(currency: Gemstone.Currency) async throws {
@@ -283,11 +284,12 @@ public final class GemCurrencyServiceMock: GemCurrencyServiceProtocol, @unchecke
             throw error
         }
         setCurrencies.append(currency)
+        try preferencesService.setCurrency(currency: currency)
     }
 
-    public func currencies(locale _: Gemstone.Currency?) -> GemCurrencies {
-        let selected = GemCurrencyRow(currency: getCurrency(), flag: flag)
-        return GemCurrencies(selected: selected, recommended: [selected], other: [])
+    public func sections(currency _: Gemstone.Currency, locale _: Gemstone.Currency?, query: String, localizedNames _: [String: String]) -> [GemCurrencySection] {
+        queries.append(query)
+        return sectionsValue
     }
 }
 

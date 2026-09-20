@@ -98,7 +98,6 @@ let package = Package(
             name: "CurrencyTests",
             dependencies: [
                 "Settings",
-                "SettingsTestKit",
                 "Primitives",
                 "GemstonePrimitives",
                 .product(name: "GemstonePrimitivesTestKit", package: "GemstonePrimitives"),

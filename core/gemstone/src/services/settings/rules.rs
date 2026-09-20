@@ -44,7 +44,7 @@ pub fn preferences_sections(input: GemPreferencesInput) -> Vec<GemListSection> {
     vec![
         section(
             [
-                Some(link(GemListRowTitle::Currency, Some(currency::rules::row(input.currency).text()), GemListRowIcon::Currency)),
+                Some(link(GemListRowTitle::Currency, Some(currency::rules::currency_text(&input.currency)), GemListRowIcon::Currency)),
                 input.language.map(|language| link(GemListRowTitle::Language, Some(language), GemListRowIcon::Language)),
                 Some(link(GemListRowTitle::Appearance, Some(input.appearance), GemListRowIcon::Appearance)),
                 Some(link(GemListRowTitle::Networks, None, GemListRowIcon::Networks)),

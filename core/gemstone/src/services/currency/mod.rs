@@ -1,11 +1,11 @@
 pub mod model;
 pub(crate) mod rules;
 
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use primitives::Currency;
 
-pub use model::{GemCurrencies, GemCurrencyRow};
+pub use model::{GemCurrencyRow, GemCurrencySection, GemCurrencySectionKind};
 
 use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
@@ -24,16 +24,12 @@ impl GemCurrencyService {
         Self { preferences, prices }
     }
 
-    pub fn get_currency(&self) -> Currency {
-        self.preferences.get_currency()
-    }
-
-    pub fn currencies(&self, locale: Option<Currency>) -> GemCurrencies {
-        rules::currencies(self.get_currency(), locale)
+    pub fn sections(&self, currency: Currency, locale: Option<Currency>, query: String, localized_names: HashMap<String, String>) -> Vec<GemCurrencySection> {
+        rules::sections(currency, locale, &query, &localized_names)
     }
 
     pub async fn set_currency(&self, currency: Currency) -> Result<(), GemServiceError> {
-        if currency == self.get_currency() {
+        if currency == self.preferences.get_currency() {
             return Ok(());
         }
         self.prices.change_currency(currency.clone()).await?;
@@ -57,10 +53,10 @@ mod tests {
     #[test]
     fn test_a_currency_without_a_rate_keeps_the_previous_currency() {
         let (service, prices) = service(MemoryPriceStore::default());
-        let previous = service.get_currency();
+        let previous = service.preferences.get_currency();
 
         assert!(block_on(service.set_currency(Currency::EUR)).is_err());
-        assert_eq!(service.get_currency(), previous);
+        assert_eq!(service.preferences.get_currency(), previous);
         assert!(prices.converted.lock().unwrap().is_empty());
     }
 
@@ -70,7 +66,7 @@ mod tests {
 
         block_on(service.set_currency(Currency::EUR)).unwrap();
 
-        assert_eq!(service.get_currency(), Currency::EUR);
+        assert_eq!(service.preferences.get_currency(), Currency::EUR);
         assert_eq!(*prices.converted.lock().unwrap(), vec![(Currency::EUR, 0.9)]);
     }
 }

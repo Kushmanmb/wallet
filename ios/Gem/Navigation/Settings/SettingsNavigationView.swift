@@ -135,5 +135,3 @@ struct SettingsNavigationView: View {
         }
     }
 }
-
-extension ObservablePreferences: @retroactive CurrencyStorable {}

@@ -36,6 +36,7 @@ import uniffi.gemstone.GemBannerAmount
 import uniffi.gemstone.GemBannerDescription
 import uniffi.gemstone.GemBannerTitle
 import uniffi.gemstone.GemCandleTooltipRow
+import uniffi.gemstone.GemCurrencySectionKind
 import uniffi.gemstone.GemDelegationStatus
 import uniffi.gemstone.GemEmptyStateAction
 import uniffi.gemstone.GemEmptyStateText
@@ -418,6 +419,12 @@ fun GemCandleTooltipRow.stringRes(): Int = when (this) {
     GemCandleTooltipRow.CLOSE -> R.string.charts_price_close
     GemCandleTooltipRow.CHANGE -> R.string.charts_price_change
     GemCandleTooltipRow.VOLUME -> R.string.perpetual_volume
+}
+
+@StringRes
+fun GemCurrencySectionKind.stringRes(): Int = when (this) {
+    GemCurrencySectionKind.RECOMMENDED -> R.string.common_recommended
+    GemCurrencySectionKind.ALL -> R.string.common_all
 }
 
 @StringRes
