@@ -5,7 +5,6 @@ import com.gemwallet.android.application.device.cases.GetPushEnabled
 import com.gemwallet.android.application.device.cases.GetPushToken
 import com.gemwallet.android.application.device.cases.SetPushToken
 import com.gemwallet.android.application.device.cases.SwitchPushEnabled
-import com.gemwallet.android.application.session.cases.GetCurrentCurrency
 import com.gemwallet.android.application.wallet.cases.GetWallets
 import com.gemwallet.android.data.service.store.ConfigStore
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
@@ -109,9 +108,8 @@ object DeviceModule {
 
     @Provides
     @Singleton
-    fun provideDeviceObserverService(getWallets: GetWallets, getCurrentCurrency: GetCurrentCurrency, deviceService: GemDeviceService): DeviceObserverService = DeviceObserverService(
+    fun provideDeviceObserverService(getWallets: GetWallets, deviceService: GemDeviceService): DeviceObserverService = DeviceObserverService(
         getWallets = getWallets,
-        getCurrentCurrency = getCurrentCurrency,
         deviceService = deviceService,
     )
 

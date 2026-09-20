@@ -1,11 +1,9 @@
 package com.gemwallet.android.data.services.gemstone.device
 
-import com.gemwallet.android.application.session.cases.GetCurrentCurrency
 import com.gemwallet.android.application.wallet.cases.GetWallets
 import com.gemwallet.android.testkit.mockAccount
 import com.gemwallet.android.testkit.mockWallet
 import com.wallet.core.primitives.Chain
-import com.wallet.core.primitives.Currency
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -25,10 +23,6 @@ class DeviceObserverServiceTest {
     private val getWallets = mockk<GetWallets> {
         every { this@mockk() } returns wallets
     }
-    private val currency = MutableStateFlow(Currency.USD)
-    private val getCurrentCurrency = mockk<GetCurrentCurrency> {
-        every { getCurrency() } returns currency
-    }
     private val deviceService = mockk<GemDeviceService>(relaxed = true)
 
     @Test
@@ -44,22 +38,8 @@ class DeviceObserverServiceTest {
         coVerify(exactly = 2) { deviceService.synchronizeIfNeeded() }
     }
 
-    @Test
-    fun synchronizesOnEveryCurrencyChange() = runTest {
-        val subject = service()
-        subject.start()
-        advanceUntilIdle()
-
-        currency.value = Currency.EUR
-        advanceUntilIdle()
-        subject.stop()
-
-        coVerify(exactly = 2) { deviceService.synchronizeIfNeeded() }
-    }
-
     private fun TestScope.service() = DeviceObserverService(
         getWallets = getWallets,
-        getCurrentCurrency = getCurrentCurrency,
         deviceService = deviceService,
         scope = this,
     )

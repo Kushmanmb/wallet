@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import GemstonePrimitivesTestKit
 import protocol Gemstone.GemPriceAlertServiceProtocol
+import GemstonePrimitivesTestKit
 import PriceAlerts
 
 public extension PriceAlertsSceneViewModel {

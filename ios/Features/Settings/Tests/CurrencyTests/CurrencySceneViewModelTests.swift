@@ -15,7 +15,7 @@ struct CurrencySceneViewModelTests {
     func setNewCurrency() async throws {
         let usdCurrencyStorage = CurrencyStorageMock()
         let service = GemCurrencyServiceMock()
-        let viewModel = CurrencySceneViewModel(currencyStorage: usdCurrencyStorage, service: service, deviceService: GemDeviceServiceMock())
+        let viewModel = CurrencySceneViewModel(currencyStorage: usdCurrencyStorage, service: service)
 
         try await viewModel.setCurrency(.ars)
 
@@ -30,7 +30,6 @@ struct CurrencySceneViewModelTests {
         let viewModel = CurrencySceneViewModel(
             currencyStorage: usdCurrencyStorage,
             service: GemCurrencyServiceMock(error: AnyError("offline")),
-            deviceService: GemDeviceServiceMock(),
         )
 
         await #expect(throws: (any Error).self) { try await viewModel.setCurrency(.ars) }
