@@ -6,6 +6,7 @@ on:
     paths:
       - "ios/**"
       - "core/**"
+      - "!core/apps/*/src/**"
       - "rust-toolchain.toml"
       - "localization/**"
       - ".gitmodules"
@@ -16,6 +17,7 @@ on:
     paths:
       - "ios/**"
       - "core/**"
+      - "!core/apps/*/src/**"
       - "rust-toolchain.toml"
       - "localization/**"
       - ".gitmodules"
