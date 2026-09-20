@@ -202,10 +202,8 @@ impl GemConfirmService {
                 data: transactions.into_iter().map(|transaction| transaction.data).collect(),
             }),
             TransferDataOutputAction::Send => {
-                let result = self.send(input, transactions).await?;
                 Ok(GemExecuteResult::Sent {
-                    hashes: result.hashes,
-                    transactions: result.transactions,
+                    hashes: self.send(input, transactions).await?,
                 })
             }
         }
@@ -246,11 +244,11 @@ impl GemConfirmService {
 }
 
 impl GemConfirmService {
-    async fn send(&self, input: SendInput, signed: Vec<GemSignedTransaction>) -> Result<GemSendResult, GemConfirmError> {
+    async fn send(&self, input: SendInput, signed: Vec<GemSignedTransaction>) -> Result<Vec<String>, GemConfirmError> {
         match self.broadcast(input.confirm.input.transfer.input_type.clone(), signed.clone()).await {
             Ok(hashes) => {
-                let transactions = self.store_pending(&input, &hashes, &signed).await;
-                Ok(GemSendResult { hashes, transactions })
+                self.store_pending(&input, &hashes, &signed).await;
+                Ok(hashes)
             }
             Err(GemConfirmError::Broadcast { hashes, msg }) => {
                 self.store_pending(&input, &hashes, &signed).await;
@@ -260,10 +258,9 @@ impl GemConfirmService {
         }
     }
 
-    async fn store_pending(&self, input: &SendInput, hashes: &[String], signed: &[GemSignedTransaction]) -> Vec<Transaction> {
+    async fn store_pending(&self, input: &SendInput, hashes: &[String], signed: &[GemSignedTransaction]) {
         let stored = self.record(input, hashes, signed).await.unwrap_or_default();
-        self.transaction_status.track(input.wallet.id.clone(), stored.clone());
-        stored
+        self.transaction_status.track(input.wallet.id.clone(), stored);
     }
 
     async fn broadcast(&self, input_type: TransactionInputType, transactions: Vec<GemSignedTransaction>) -> Result<Vec<String>, GemConfirmError> {

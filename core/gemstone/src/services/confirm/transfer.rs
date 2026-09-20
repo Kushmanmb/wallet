@@ -195,10 +195,7 @@ mod tests {
 
     #[test]
     fn test_only_a_broadcast_send_records_recent_activity() {
-        let sent = GemExecuteResult::Sent {
-            hashes: vec!["0xhash".to_string()],
-            transactions: vec![],
-        };
+        let sent = GemExecuteResult::Sent { hashes: vec!["0xhash".to_string()] };
         let signed = GemExecuteResult::Signed { data: vec!["0xsigned".to_string()] };
 
         assert!(is_broadcast(&sent));

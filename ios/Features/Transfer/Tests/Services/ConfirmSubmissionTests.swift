@@ -24,13 +24,12 @@ import TransferTestKit
 struct ConfirmSubmissionTests {
     @Test
     func confirmReportsEveryHashAndTracksSentTransactions() async throws {
-        let tracked = Primitives.Transaction.mock()
         let reported = ReportedValues()
 
         let request = ConfirmTransferRequest.mock(delegate: { reported.append(try? $0.get()) })
         try await ConfirmTransferSceneViewModel.mock(
             request: request,
-            execute: .success(.sent(hashes: ["hash-1", "hash-2"], transactions: [tracked.toGem()])),
+            execute: .success(.sent(hashes: ["hash-1", "hash-2"])),
         ).submit(request: request)
 
         #expect(reported.values == ["hash-1", "hash-2"])

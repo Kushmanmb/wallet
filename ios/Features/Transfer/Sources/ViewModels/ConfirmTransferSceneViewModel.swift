@@ -371,7 +371,7 @@ extension ConfirmTransferSceneViewModel {
         switch result {
         case let .signed(data):
             data.forEach { request.delegate?(.success($0)) }
-        case let .sent(hashes, _):
+        case let .sent(hashes):
             hashes.forEach { request.delegate?(.success($0)) }
         }
     }

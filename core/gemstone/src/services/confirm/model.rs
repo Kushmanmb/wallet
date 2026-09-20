@@ -13,7 +13,7 @@ use crate::services::transfer::model::GemConfirmDestination;
 use crate::transfer_amount::GemTransferAmount;
 use primitives::AssetPrice;
 use primitives::BlockExplorerLink;
-use primitives::{Account, AddressName, Asset, AssetId, Chain, ChainAddress, FeePriority, FeeUnitType, SimulationResult, Transaction, Wallet};
+use primitives::{Account, AddressName, Asset, AssetId, Chain, ChainAddress, FeePriority, FeeUnitType, SimulationResult, Wallet};
 
 pub type GemAccount = Account;
 
@@ -66,12 +66,7 @@ pub struct GemConfirmData {
 #[derive(Debug, Clone, uniffi::Enum)]
 pub enum GemExecuteResult {
     Signed { data: Vec<String> },
-    Sent { hashes: Vec<String>, transactions: Vec<Transaction> },
-}
-
-pub(super) struct GemSendResult {
-    pub(super) hashes: Vec<String>,
-    pub(super) transactions: Vec<Transaction>,
+    Sent { hashes: Vec<String> },
 }
 
 #[derive(Debug, Clone)]
