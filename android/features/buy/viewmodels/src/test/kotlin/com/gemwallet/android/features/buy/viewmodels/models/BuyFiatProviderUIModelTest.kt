@@ -25,7 +25,7 @@ class BuyFiatProviderUIModelTest {
 
     @Test
     fun `a rate reads as one unit of the asset and is empty without one`() {
-        val rate = GemAssetRate(baseSymbol = testAsset.symbol, quoteSymbol = Currency.USD.string, value = formattedCurrency(102500.0, Currency.USD.string, GemCurrencyStyle.CURRENCY))
+        val rate = GemAssetRate(baseSymbol = testAsset.symbol, value = formattedCurrency(102500.0, Currency.USD.string, GemCurrencyStyle.CURRENCY))
         assertEquals("1 ${testAsset.symbol} ≈ ${formatter.string(102500.0)}", mockFiatQuoteRow(rate = rate).toProviderUIModel(testAsset).rate)
         assertEquals("", mockFiatQuoteRow(rate = null).toProviderUIModel(testAsset).rate)
     }

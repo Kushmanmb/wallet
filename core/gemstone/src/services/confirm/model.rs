@@ -109,7 +109,6 @@ impl GemConfirmMetadata {
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemFeeRateRow {
     pub priority: FeePriority,
-    pub unit_value: GemBigInt,
     pub fee: Option<GemBigInt>,
     pub value: GemLocalizedText,
 }

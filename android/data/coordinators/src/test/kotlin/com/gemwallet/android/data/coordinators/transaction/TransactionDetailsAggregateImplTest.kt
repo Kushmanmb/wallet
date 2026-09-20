@@ -150,8 +150,8 @@ class TransactionDetailsAggregateImplTest {
     @Test
     fun testRate_formatsBothDirectionsFromTheCoreRate() {
         val rate = GemSwapRate(
-            direct = GemAssetRate(baseSymbol = "ETH", quoteSymbol = "USDT", value = formattedAdaptive(3000.0, null)),
-            inverse = GemAssetRate(baseSymbol = "USDT", quoteSymbol = "ETH", value = formattedAdaptive(1 / 3000.0, null)),
+            direct = GemAssetRate(baseSymbol = "ETH", value = formattedAdaptive(3000.0, null)),
+            inverse = GemAssetRate(baseSymbol = "USDT", value = formattedAdaptive(1 / 3000.0, null)),
         )
 
         val formatted = createAggregate(rows = mockGemTransactionDetailRows(rate = rate)).rate

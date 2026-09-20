@@ -25,7 +25,6 @@ pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
     let referral_code = rewards.code.clone().filter(|code| !code.is_empty());
     GemRewardsState {
         has_referral_code,
-        has_used_referral_code,
         can_invite: has_referral_code && matches!(rewards.status, RewardStatus::Verified | RewardStatus::Trusted | RewardStatus::Attribution),
         can_use_referral_code: !has_referral_code && !has_used_referral_code,
         shows_info: has_referral_code || has_used_referral_code,

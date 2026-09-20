@@ -135,7 +135,6 @@ fn amount(value: &BigUint, decimals: i32) -> Option<f64> {
 fn asset_rate(base: &Asset, quote: &Asset, value: f64) -> GemAssetRate {
     GemAssetRate {
         base_symbol: base.symbol.clone(),
-        quote_symbol: quote.symbol.clone(),
         value: GemFormattedNumber::adaptive(value, Some(quote.symbol.clone())),
     }
 }
@@ -337,8 +336,8 @@ mod tests {
         let two_thousand_usdc = BigUint::from(2_000_000_000u64);
 
         let rate = swap_rate(&eth, &one_eth, &usdc, &two_thousand_usdc).unwrap();
-        assert_eq!((rate.direct.base_symbol.as_str(), rate.direct.quote_symbol.as_str(), rate.direct.value.value), ("ETH", "USDC", 2000.0));
-        assert_eq!((rate.inverse.base_symbol.as_str(), rate.inverse.quote_symbol.as_str(), rate.inverse.value.value), ("USDC", "ETH", 0.0005));
+        assert_eq!((rate.direct.base_symbol.as_str(), rate.direct.value.value), ("ETH", 2000.0));
+        assert_eq!((rate.inverse.base_symbol.as_str(), rate.inverse.value.value), ("USDC", 0.0005));
 
         assert!(swap_rate(&eth, &BigUint::from(0u32), &usdc, &two_thousand_usdc).is_none());
         assert!(swap_rate(&eth, &one_eth, &usdc, &BigUint::from(0u32)).is_none());

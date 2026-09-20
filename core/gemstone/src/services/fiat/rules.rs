@@ -72,7 +72,6 @@ pub fn quote_row(quote: &FiatQuote, asset_price: Option<f64>) -> GemFiatQuoteRow
         fiat_amount: GemFormattedNumber::currency_code(fiat_amount, quote.fiat_currency.clone(), GemCurrencyStyle::Fiat),
         rate: (quote.crypto_amount > 0.0).then(|| GemAssetRate {
             base_symbol: quote.asset.symbol.clone(),
-            quote_symbol: quote.fiat_currency.clone(),
             value: GemFormattedNumber::currency_code(quote.fiat_amount / quote.crypto_amount, quote.fiat_currency.clone(), GemCurrencyStyle::Currency),
         }),
     }
@@ -157,7 +156,6 @@ mod tests {
             quote_row(&quote, None).rate,
             Some(GemAssetRate {
                 base_symbol: quote.asset.symbol.clone(),
-                quote_symbol: "USD".to_string(),
                 value: GemFormattedNumber::currency(25.0, Currency::USD, GemCurrencyStyle::Currency)
             })
         );

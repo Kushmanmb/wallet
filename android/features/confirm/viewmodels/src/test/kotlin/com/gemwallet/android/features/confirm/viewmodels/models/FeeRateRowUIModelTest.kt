@@ -45,7 +45,6 @@ class FeeRateRowUIModelTest {
         val model = FeeRateUIModel(
             row = GemFeeRateRow(
                 priority = FeePriority.Fast.toGem(),
-                unitValue = BigInteger.ONE,
                 fee = BigInteger("500000000000000000"),
                 value = GemLocalizedText.FeeRate(mockFormattedNumber(value = 2.5, unit = GemNumberUnit.Plain), FeeUnitType.GWEI),
             ),

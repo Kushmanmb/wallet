@@ -13,7 +13,6 @@ pub enum GemNodeStatusState {
     Result { latest_block_number: u64, latency: Latency },
 }
 
-#[uniffi::export]
 impl GemNodeStatusState {
     pub fn latency_status(&self) -> GemLatencyStatus {
         rules::latency_status(self)
@@ -24,9 +23,7 @@ impl GemNodeStatusState {
             value: self.latest_block().map(GemFormattedNumber::count),
         }
     }
-}
 
-impl GemNodeStatusState {
     pub fn latest_block(&self) -> Option<u64> {
         match self {
             Self::Result { latest_block_number, .. } => Some(*latest_block_number),

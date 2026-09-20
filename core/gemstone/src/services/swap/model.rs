@@ -12,7 +12,6 @@ use primitives::TransactionInputType;
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemAssetRate {
     pub base_symbol: String,
-    pub quote_symbol: String,
     pub value: GemFormattedNumber,
 }
 
@@ -181,7 +180,6 @@ mod tests {
     fn test_rate_text_names_the_base_and_keeps_the_formatted_value() {
         let rate = GemAssetRate {
             base_symbol: "BTC".to_string(),
-            quote_symbol: "USDT".to_string(),
             value: crate::formatted_number::GemFormattedNumber::adaptive(100.0, Some("USDT".to_string())),
         };
         assert_eq!(rate.text("100.00 USDT".to_string()), "1 BTC ≈ 100.00 USDT");

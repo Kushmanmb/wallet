@@ -407,7 +407,6 @@ fn fee_rate_rows(chain: Chain, fee_asset: &Asset, rates: &[GemFeeRate], selectio
                 GemFeeRateRow {
                     priority: rate.priority,
                     fee,
-                    unit_value,
                     value: fee_rate_text(unit_type, &display_value, unit_decimals, &fee_asset.symbol),
                 }
             })

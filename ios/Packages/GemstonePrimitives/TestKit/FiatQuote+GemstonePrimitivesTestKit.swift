@@ -72,7 +72,7 @@ public extension GemFiatQuoteRow {
             providerName: providerName,
             cryptoAmount: formattedAmount(value: cryptoAmount, symbol: "BTC", style: .auto),
             fiatAmount: formattedCurrency(value: fiatAmount, code: "USD", style: .fiat),
-            rate: rate.map { GemAssetRate(baseSymbol: "BTC", quoteSymbol: "USD", value: formattedCurrency(value: $0, code: "USD", style: .currency)) },
+            rate: rate.map { GemAssetRate(baseSymbol: "BTC", value: formattedCurrency(value: $0, code: "USD", style: .currency)) },
         )
     }
 }

@@ -7,7 +7,6 @@ internal fun previewRewardsState(
     referralCountText: String = "0",
     pointsText: String = "0",
     hasReferralCode: Boolean = false,
-    hasUsedReferralCode: Boolean = false,
     canInvite: Boolean = false,
     canUseReferralCode: Boolean = false,
     showsInfo: Boolean = false,
@@ -15,7 +14,6 @@ internal fun previewRewardsState(
     usedReferralCode: String? = null,
 ) = GemRewardsState(
     hasReferralCode = hasReferralCode,
-    hasUsedReferralCode = hasUsedReferralCode,
     canInvite = canInvite,
     canUseReferralCode = canUseReferralCode,
     showsInfo = showsInfo,

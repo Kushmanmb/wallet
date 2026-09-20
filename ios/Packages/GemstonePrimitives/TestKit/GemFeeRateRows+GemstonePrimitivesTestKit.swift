@@ -18,7 +18,7 @@ public extension GemFeeRateRows {
         customRate: GemLocalizedText? = nil,
     ) -> GemFeeRateRows {
         GemFeeRateRows(
-            rows: rows.map { GemFeeRateRow(priority: $0.0, unitValue: $0.1, fee: $0.2, value: value) },
+            rows: rows.map { GemFeeRateRow(priority: $0.0, fee: $0.2, value: value) },
             showsOptions: rows.count > 1,
             unitType: unitType,
             unitDecimals: decimals,

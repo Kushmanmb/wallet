@@ -77,7 +77,6 @@ public extension RedemptionResult {
 public extension GemRewardsState {
     static func mock(
         hasReferralCode: Bool = true,
-        hasUsedReferralCode: Bool = false,
         canInvite: Bool = true,
         canUseReferralCode: Bool = true,
         showsInfo: Bool = true,
@@ -95,7 +94,6 @@ public extension GemRewardsState {
     ) -> GemRewardsState {
         GemRewardsState(
             hasReferralCode: hasReferralCode,
-            hasUsedReferralCode: hasUsedReferralCode,
             canInvite: canInvite,
             canUseReferralCode: canUseReferralCode,
             showsInfo: showsInfo,
