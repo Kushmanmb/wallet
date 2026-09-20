@@ -15,7 +15,7 @@ pub struct TokenBalance {
     pub ui_token_amount: TokenAmount,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TokenBalanceChange {
     pub asset_id: AssetId,
     pub amount: BigInt,
