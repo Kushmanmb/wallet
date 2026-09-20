@@ -72,10 +72,6 @@ impl GemAddAssetSession {
         }
     }
 
-    fn answers(&self, chain: Chain, address: &str) -> bool {
-        self.chain == Some(chain) && address.trim() == self.address
-    }
-
     fn cleared(&self, chain: Option<Chain>, address: String) -> Self {
         Self {
             chain,
@@ -105,7 +101,7 @@ impl GemAddAssetSession {
     }
 
     pub fn on_found(&self, chain: Chain, address: String, asset: Asset) -> Self {
-        if !self.answers(chain, &address) {
+        if self.chain != Some(chain) || address.trim() != self.address {
             return self.clone();
         }
         Self {
@@ -117,7 +113,7 @@ impl GemAddAssetSession {
     }
 
     pub fn on_failed(&self, chain: Chain, address: String) -> Self {
-        if !self.answers(chain, &address) {
+        if self.chain != Some(chain) || address.trim() != self.address {
             return self.clone();
         }
         Self {
