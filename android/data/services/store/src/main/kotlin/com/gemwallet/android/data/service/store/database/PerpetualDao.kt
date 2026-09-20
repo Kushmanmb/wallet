@@ -27,9 +27,6 @@ interface PerpetualDao {
         update(items.map(DbPerpetual::toUpdate))
     }
 
-    @Query("SELECT * FROM perpetuals")
-    fun getPerpetuals(): Flow<List<DbPerpetual>>
-
     @Transaction
     @Query("SELECT * FROM perpetuals WHERE volume24h > 0 ORDER BY volume24h DESC")
     fun getPerpetualsData(): Flow<List<DbPerpetualData>>

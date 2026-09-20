@@ -19,10 +19,6 @@ public extension Primitives.Chain {
         chainAsset.networkName
     }
 
-    var minimumAccountBalance: BigInt {
-        BigInt(ChainConfig.config(chain: self).minimumAccountBalance ?? .zero)
-    }
-
     var isMemoSupported: Bool {
         ChainConfig.config(chain: self).isMemoSupported
     }

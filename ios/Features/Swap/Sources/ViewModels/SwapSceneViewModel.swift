@@ -82,7 +82,7 @@ public final class SwapSceneViewModel {
         TimeInterval(service.refreshIntervalMilliseconds()) / 1000
     }
 
-    private let toValueFormatter = SwapValueFormatter(valueFormatter: ValueFormatter(style: .auto))
+    private let toValueFormatter = ValueFormatter(style: .auto)
 
     public init(
         service: any GemSwapQuoteServiceProtocol,
@@ -414,7 +414,7 @@ extension SwapSceneViewModel {
     }
 
     private func setToValue(quote: SwapperQuote, asset: Asset) {
-        toValue = toValueFormatter.format(value: BigInt(quote.toValue), decimals: asset.decimals.asInt)
+        toValue = toValueFormatter.string(BigInt(quote.toValue), decimals: asset.decimals.asInt)
     }
 
     private func setFromValue(percent: Int, assetData: AssetData) {

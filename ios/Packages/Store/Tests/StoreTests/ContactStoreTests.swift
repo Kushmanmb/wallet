@@ -12,7 +12,7 @@ struct ContactStoreTests {
     func deleteAddressNamesRemovesContactName() throws {
         let addressStore = AddressStore.mock(db: .mockWithChains([.bitcoin]))
         let addressName = AddressName.mock(chain: .bitcoin, address: "bc1qml9s2f9k8wc0882x63lyplzp97srzg2c39fyaw", type: .contact)
-        try addressStore.addAddressNames([addressName])
+        try addressStore.updateAddressNames([addressName])
 
         try addressStore.deleteAddressNames([addressName])
 
@@ -23,7 +23,7 @@ struct ContactStoreTests {
     func deleteAddressNamesPreservesOtherTypes() throws {
         let addressStore = AddressStore.mock(db: .mockWithChains([.ethereum]))
         let addressName = AddressName.mock(chain: .ethereum, address: "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7", type: .contract)
-        try addressStore.addAddressNames([addressName])
+        try addressStore.updateAddressNames([addressName])
 
         try addressStore.deleteAddressNames([.mock(chain: addressName.chain, address: addressName.address, type: .contact)])
 
@@ -34,7 +34,7 @@ struct ContactStoreTests {
     func updateAddressNamesRenamesContactName() throws {
         let addressStore = AddressStore.mock(db: .mockWithChains([.bitcoin]))
         let addressName = AddressName.mock(chain: .bitcoin, address: "bc1qml9s2f9k8wc0882x63lyplzp97srzg2c39fyaw", type: .contact)
-        try addressStore.addAddressNames([addressName])
+        try addressStore.updateAddressNames([addressName])
         let renamed = AddressName.mock(chain: addressName.chain, address: addressName.address, name: "Bob", type: .contact)
 
         try addressStore.updateAddressNames([renamed])
@@ -46,7 +46,7 @@ struct ContactStoreTests {
     func updateAddressNamesKeepsRemoteNamesFromRenamingContacts() throws {
         let addressStore = AddressStore.mock(db: .mockWithChains([.bitcoin]))
         let addressName = AddressName.mock(chain: .bitcoin, address: "bc1qml9s2f9k8wc0882x63lyplzp97srzg2c39fyaw", type: .contact)
-        try addressStore.addAddressNames([addressName])
+        try addressStore.updateAddressNames([addressName])
         let remote = AddressName.mock(chain: addressName.chain, address: addressName.address, name: "Binance", type: .address)
 
         try addressStore.updateAddressNames([remote])
@@ -58,7 +58,7 @@ struct ContactStoreTests {
     func updateAddressNamesKeepsNamesReservedByAnotherLocalType() throws {
         let addressStore = AddressStore.mock(db: .mockWithChains([.bitcoin]))
         let addressName = AddressName.mock(chain: .bitcoin, address: "bc1qml9s2f9k8wc0882x63lyplzp97srzg2c39fyaw", type: .internalWallet)
-        try addressStore.addAddressNames([addressName])
+        try addressStore.updateAddressNames([addressName])
         let contact = AddressName.mock(chain: addressName.chain, address: addressName.address, name: "Bob", type: .contact)
 
         try addressStore.updateAddressNames([contact])

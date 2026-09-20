@@ -11,14 +11,6 @@ public struct AddressStore: Sendable {
         self.db = db.dbQueue
     }
 
-    public func addAddressNames(_ addressNames: [AddressName]) throws {
-        try db.write { db in
-            for addressName in addressNames {
-                try addressName.record.insert(db, onConflict: .replace)
-            }
-        }
-    }
-
     public func updateAddressNames(_ addressNames: [AddressName]) throws {
         if addressNames.isEmpty {
             return
