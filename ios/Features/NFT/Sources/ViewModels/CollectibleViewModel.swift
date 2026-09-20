@@ -150,7 +150,7 @@ extension CollectibleViewModel {
                 isPresentingToast = .success(Localized.Nft.saveToPhotos)
             } catch {
                 switch error {
-                case .wrongURL, .invalidData, .invalidResponse, .unexpectedStatusCode, .urlSessionError:
+                case .wrongURL, .invalidData, .invalidResponse, .unexpectedStatusCode, .urlSessionError, .saveFailed:
                     isPresentingAlertMessage = AlertMessage(message: Localized.Errors.errorOccurred)
                 case .permissionDenied:
                     isPresentingAlertMessage = AlertMessage(
