@@ -12,9 +12,11 @@ import PrimitivesTestKit
 public final class GemPriceAlertServiceMock: GemPriceAlertServiceProtocol, @unchecked Sendable {
     private let lock = NSLock()
     private var enabled: Bool
+    private let setEnabledError: Error?
 
-    public init(enabled: Bool = false) {
+    public init(enabled: Bool = false, setEnabledError: Error? = .none) {
         self.enabled = enabled
+        self.setEnabledError = setEnabledError
     }
 
     public func newAlertSession(assetId: Gemstone.AssetId) -> GemPriceAlertSession {
@@ -34,6 +36,9 @@ public final class GemPriceAlertServiceMock: GemPriceAlertServiceProtocol, @unch
     }
 
     public func setEnabled(enabled: Bool) async throws {
+        if let setEnabledError {
+            throw setEnabledError
+        }
         lock.withLock { self.enabled = enabled }
     }
 

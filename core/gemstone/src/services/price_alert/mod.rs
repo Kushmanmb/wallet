@@ -44,17 +44,16 @@ impl GemPriceAlertService {
     }
 
     pub async fn set_enabled(&self, enabled: bool) -> Result<(), GemServiceError> {
-        if self.is_enabled() == enabled {
-            return Ok(());
-        }
-        if enabled {
-            if !self.permissions.request_permissions_or_open_settings().await? {
-                return Ok(());
+        if self.is_enabled() != enabled {
+            if enabled {
+                if !self.permissions.request_permissions_or_open_settings().await? {
+                    return Ok(());
+                }
+                self.preferences.set_push_notifications_enabled(true)?;
             }
-            self.preferences.set_push_notifications_enabled(true)?;
+            self.preferences.set_price_alerts_enabled(enabled)?;
         }
-        self.preferences.set_price_alerts_enabled(enabled)?;
-        self.device.synchronize().await.map(|_| ())
+        self.device.synchronize_if_needed().await
     }
 
     pub fn new_alert_session(&self, asset_id: AssetId) -> GemPriceAlertSession {
@@ -94,23 +93,80 @@ impl GemPriceAlertService {
 
     pub async fn delete_price_alerts(&self, alerts: Vec<PriceAlert>) -> Result<(), GemServiceError> {
         self.store.update_price_alerts(Vec::new(), alerts.iter().map(|alert| alert.id()).collect()).await?;
-        self.api.client.delete_price_alerts(alerts).await.map_err(GemApiError::from)?;
-        Ok(())
+        match self.api.client.delete_price_alerts(alerts.clone()).await {
+            Ok(()) => Ok(()),
+            Err(error) => {
+                self.store.update_price_alerts(alerts, Vec::new()).await?;
+                Err(GemApiError::from(error).into())
+            }
+        }
     }
 }
 
 impl GemPriceAlertService {
     pub async fn add_price_alerts(&self, alerts: Vec<PriceAlert>) -> Result<(), GemServiceError> {
         self.store.update_price_alerts(alerts.clone(), Vec::new()).await?;
-        self.api.client.add_price_alerts(alerts).await.map_err(GemApiError::from)?;
-        Ok(())
+        match self.api.client.add_price_alerts(alerts.clone()).await {
+            Ok(()) => Ok(()),
+            Err(error) => {
+                self.store.update_price_alerts(Vec::new(), alerts.iter().map(|alert| alert.id()).collect()).await?;
+                Err(GemApiError::from(error).into())
+            }
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::rules::reconcile;
+    use super::testkit::{GrantedNotificationPermissions, PriceAlertTestkit};
+    use crate::services::banner::testkit::DeniedNotificationPermissions;
+    use crate::services::error::GemServiceError;
+    use crate::services::price_alert::store::GemPriceAlertStore;
+    use crate::testkit::TestAlienProvider;
+    use futures::executor::block_on;
     use primitives::{Chain, PriceAlert};
+    use std::sync::Arc;
+
+    #[test]
+    fn test_set_enabled_keeps_retrying_the_device_sync_it_could_not_finish() {
+        let kit = PriceAlertTestkit::with_provider(Arc::new(TestAlienProvider::offline()), Arc::new(GrantedNotificationPermissions));
+        assert_eq!(block_on(kit.service.set_enabled(true)), Err(GemServiceError::Offline));
+        assert!(kit.service.is_enabled());
+
+        let attempted = kit.provider.requested_paths().len();
+        assert_eq!(block_on(kit.service.set_enabled(true)), Err(GemServiceError::Offline));
+        assert!(kit.provider.requested_paths().len() > attempted, "the same value must repair the sync the first call could not finish");
+
+        let denied = PriceAlertTestkit::with_provider(Arc::new(TestAlienProvider::offline()), Arc::new(DeniedNotificationPermissions));
+        assert_eq!(block_on(denied.service.set_enabled(true)), Ok(()));
+        assert!(!denied.service.is_enabled());
+        assert!(denied.provider.requested_paths().is_empty());
+    }
+
+    #[test]
+    fn test_an_alert_the_api_refused_is_not_left_behind_for_the_next_reconciliation() {
+        let alert = PriceAlert::mock(Chain::Bitcoin, Some(1.0));
+
+        let added = PriceAlertTestkit::with_provider(Arc::new(TestAlienProvider::offline()), Arc::new(GrantedNotificationPermissions));
+        assert_eq!(block_on(added.service.add_price_alerts(vec![alert.clone()])), Err(GemServiceError::Offline));
+        assert!(added.store.identifiers().is_empty());
+
+        let deleted = PriceAlertTestkit::with_provider(Arc::new(TestAlienProvider::offline()), Arc::new(GrantedNotificationPermissions));
+        block_on(deleted.store.update_price_alerts(vec![alert.clone()], Vec::new())).unwrap();
+        assert_eq!(block_on(deleted.service.delete_price_alerts(vec![alert.clone()])), Err(GemServiceError::Offline));
+        assert_eq!(deleted.store.identifiers(), vec![alert.id()]);
+    }
+
+    #[test]
+    fn test_a_store_that_cannot_write_never_reaches_the_api() {
+        let kit = PriceAlertTestkit::with_provider(Arc::new(TestAlienProvider::offline()), Arc::new(GrantedNotificationPermissions));
+        let error = GemServiceError::Store { msg: "disk full".to_string() };
+        *kit.store.write_error.lock().unwrap() = Some(error.clone());
+
+        assert_eq!(block_on(kit.service.add_price_alerts(vec![PriceAlert::mock(Chain::Bitcoin, Some(1.0))])), Err(error));
+        assert!(kit.provider.requested_paths().is_empty());
+    }
 
     #[test]
     fn test_reconcile() {

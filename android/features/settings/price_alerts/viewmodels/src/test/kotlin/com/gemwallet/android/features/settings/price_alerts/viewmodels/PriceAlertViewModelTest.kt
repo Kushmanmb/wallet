@@ -77,6 +77,21 @@ class PriceAlertViewModelTest {
     }
 
     @Test
+    fun `a failed master toggle surfaces the Core message and keeps the stored state`() = runTest {
+        val service = service(enabled = false)
+        coEvery { service.setEnabled(any()) } throws GemServiceException.Api("offline")
+        val viewModel = viewModel(service)
+        try {
+            viewModel.togglePriceAlerts(true).join()
+
+            assertEquals(GemErrorText.Message("offline"), viewModel.error.value)
+            assertEquals(false, viewModel.priceAlertEnabled.first { it != null })
+        } finally {
+            viewModel.viewModelScope.cancel()
+        }
+    }
+
+    @Test
     fun `a failed auto alert write surfaces the Core message until it is shown`() = runTest {
         val service = service(enabled = false)
         coEvery { service.setAutoAlert(any(), any()) } throws GemServiceException.Api("offline")

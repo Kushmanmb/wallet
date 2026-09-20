@@ -25,9 +25,7 @@ impl SubscriptionTestkit {
         connection.connected.store(true, Ordering::SeqCst);
         let service = GemStreamSubscriptionService::new(
             balances.clone(),
-            Arc::new(MemoryPriceAlertStore {
-                alerts: alerted.iter().map(|chain| PriceAlert::mock(*chain, None)).collect(),
-            }),
+            Arc::new(MemoryPriceAlertStore::with_alerts(alerted.iter().map(|chain| PriceAlert::mock(*chain, None)).collect())),
             connection.clone(),
         );
         Self { service, balances, connection, wallet_id }
