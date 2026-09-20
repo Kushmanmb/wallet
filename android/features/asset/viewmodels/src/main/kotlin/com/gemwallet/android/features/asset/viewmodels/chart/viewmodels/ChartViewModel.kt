@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
+import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusObserver
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
@@ -32,14 +33,24 @@ import kotlinx.coroutines.launch
 import uniffi.gemstone.GemChartPhase
 import uniffi.gemstone.GemChartService
 import uniffi.gemstone.GemChartServiceInterface
+import uniffi.gemstone.GemRefreshKind
 import uniffi.gemstone.GemServiceException
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class ChartViewModel internal constructor(getCurrentCurrency: GetCurrentCurrency, private val chartService: GemChartServiceInterface, private val assetId: AssetId, private val ioDispatcher: CoroutineDispatcher) : ViewModel() {
+class ChartViewModel internal constructor(
+    getCurrentCurrency: GetCurrentCurrency,
+    private val chartService: GemChartServiceInterface,
+    private val assetId: AssetId,
+    connectionStatusObserver: ConnectionStatusObserver,
+    private val ioDispatcher: CoroutineDispatcher,
+) : ViewModel() {
     private val selectedPeriod = MutableStateFlow(chartService.chartPeriod())
     private val refreshController = ChartRefreshController()
+
+    val refreshIntervalMillis = connectionStatusObserver.refreshIntervalMillis(GemRefreshKind.CHART)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, 0L)
 
     val isRefreshing = refreshController.isRefreshing
 
@@ -101,11 +112,13 @@ class ChartViewModel internal constructor(getCurrentCurrency: GetCurrentCurrency
         getCurrentCurrency: GetCurrentCurrency,
         chartService: GemChartService,
         savedStateHandle: SavedStateHandle,
+        connectionStatusObserver: ConnectionStatusObserver,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
     ) : this(
         getCurrentCurrency = getCurrentCurrency,
         chartService = chartService,
         assetId = savedStateHandle.requireAssetId(),
+        connectionStatusObserver = connectionStatusObserver,
         ioDispatcher = ioDispatcher,
     )
 }

@@ -10,6 +10,8 @@ import Swap
 import SwiftUI
 
 public struct ConfirmTransferScene: View {
+    @Environment(\.connectionStatus) private var connectionStatus
+
     @Bindable var model: ConfirmTransferSceneViewModel
 
     public init(model: ConfirmTransferSceneViewModel) {
@@ -28,6 +30,10 @@ public struct ConfirmTransferScene: View {
         }
         .frame(maxWidth: .infinity)
         .task(id: model.preloadSelection) {
+            await model.load()
+        }
+        .refreshableTimer(every: connectionStatus.refreshInterval(for: .confirm)) { @MainActor _ in
+            guard model.state.screen.phase == .ready else { return }
             await model.load()
         }
         .navigationTitle(model.title)

@@ -16,6 +16,7 @@ import com.gemwallet.android.features.asset.viewmodels.chart.models.ChartSection
 import com.gemwallet.android.features.asset.viewmodels.chart.viewmodels.AssetChartViewModel
 import com.gemwallet.android.features.asset.viewmodels.chart.viewmodels.ChartViewModel
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.RefreshOnTimer
 import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
@@ -39,6 +40,9 @@ fun AssetChartScene(
     viewModel: AssetChartViewModel = hiltViewModel(),
     chartViewModel: ChartViewModel = hiltViewModel(),
 ) {
+    val refreshIntervalMillis by chartViewModel.refreshIntervalMillis.collectAsStateWithLifecycle()
+    RefreshOnTimer(refreshIntervalMillis, chartViewModel::refresh)
+
     val marketModel by viewModel.marketUIModel.collectAsStateWithLifecycle()
     val title by viewModel.title.collectAsStateWithLifecycle()
     val isChartRefreshing by chartViewModel.isRefreshing.collectAsStateWithLifecycle()

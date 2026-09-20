@@ -137,6 +137,7 @@ class ChartViewModelTest {
         getCurrentCurrency = getCurrentCurrency,
         chartService = chartService,
         assetId = asset.id,
+        connectionStatusObserver = mockk(relaxed = true),
         ioDispatcher = testDispatcher,
     ).also(viewModels::add)
 }

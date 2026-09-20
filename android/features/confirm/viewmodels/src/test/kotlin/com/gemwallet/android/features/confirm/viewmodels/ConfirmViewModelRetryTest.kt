@@ -40,6 +40,7 @@ import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GasPriceType
 import uniffi.gemstone.GemConfirmData
+import uniffi.gemstone.GemConfirmFeeSelection
 import uniffi.gemstone.GemConfirmInput
 import uniffi.gemstone.GemConfirmPhase
 import uniffi.gemstone.GemConfirmPreload
@@ -75,7 +76,7 @@ class ConfirmViewModelRetryTest {
     }
 
     @Test
-    fun retryAfterPreloadFailureRunsThePreloaderAgain() = runTest(testDispatcher) {
+    fun retryAndRefreshUseTheCurrentFeeSelection() = runTest(testDispatcher) {
         val transfer = mockGemTransferData(
             inputType = TransactionInputType.Perpetual(asset.toGem(), PerpetualType.Open(mockPerpetualConfirmData(direction = PerpetualDirection.Long))),
             value = BigInteger.TEN,
@@ -92,6 +93,13 @@ class ConfirmViewModelRetryTest {
         coVerify(exactly = 2) { confirmation.load(any()) }
         assertEquals(GemConfirmPhase.READY, viewModel.screen.value.phase)
         assertEquals(asset, viewModel.feeAsset.value?.asset)
+
+        viewModel.changeFeePriority(FeePriority.Fast)
+        advanceUntilIdle()
+        viewModel.fetch()
+        advanceUntilIdle()
+        coVerify(exactly = 4) { confirmation.load(any()) }
+        coVerify(exactly = 2) { confirmation.load(match { it.feeSelection == GemConfirmFeeSelection.Priority(FeePriority.Fast.toGem()) }) }
     }
 
     private fun viewModel(transfer: GemTransferData): ConfirmViewModel {
@@ -138,6 +146,7 @@ class ConfirmViewModelRetryTest {
             },
             confirmService = confirmService,
             savedStateHandle = SavedStateHandle(mapOf(RouteArgument.Params.key to requireNotNull(transfer.pack()))),
+            connectionStatusObserver = mockk(relaxed = true),
             ioDispatcher = testDispatcher,
             context = mockk<Context> {
                 every { getString(any()) } returns "Error"

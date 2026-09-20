@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.session.cases.GetSession
+import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusObserver
 import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.domains.confirm.AmountUIModel
 import com.gemwallet.android.domains.confirm.FeeAssetUIModel
@@ -59,8 +60,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -68,14 +69,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAcquireAssetFlow
 import uniffi.gemstone.GemConfirmAction
 import uniffi.gemstone.GemConfirmButton
@@ -93,6 +95,7 @@ import uniffi.gemstone.GemConfirmTransferServiceInterface
 import uniffi.gemstone.GemConfirmation
 import uniffi.gemstone.GemExecuteResult
 import uniffi.gemstone.GemPerpetual
+import uniffi.gemstone.GemRefreshKind
 import uniffi.gemstone.GemTransferAmountResult
 import uniffi.gemstone.GemTransferData
 import uniffi.gemstone.PerpetualProvider
@@ -110,11 +113,15 @@ class ConfirmViewModel @Inject constructor(
     private val getSession: GetSession,
     private val confirmService: GemConfirmTransferServiceInterface,
     private val savedStateHandle: SavedStateHandle,
+    connectionStatusObserver: ConnectionStatusObserver,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
-    private val restart = MutableStateFlow(false)
+    val refreshIntervalMillis = connectionStatusObserver.refreshIntervalMillis(GemRefreshKind.CONFIRM)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, 0L)
+
+    private val reload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val screen = MutableStateFlow(GemConfirmScreen(phase = GemConfirmPhase.LOADING, hasCriticalWarning = false, failure = null))
 
     val isErrorSheetVisible = MutableStateFlow(false)
@@ -164,23 +171,21 @@ class ConfirmViewModel @Inject constructor(
         confirmation.filterNotNull(),
         feeSelection,
         feeAssetSelection,
-        restart,
+        reload.onStart { emit(Unit) },
     ) { session, feeSelection, feeAssetSelection, _ ->
         session to confirmLoadOptions(feeSelection, feeAssetSelection)
     }
-        .flatMapLatest { (session, options) ->
-            flow {
-                screen.update { it.onLoadStarted() }
-                try {
-                    emit(session.state())
-                    val load = session.load(options)
-                    emit(load)
-                    screen.update { it.onLoaded(load) }
-                } catch (error: CancellationException) {
-                    throw error
-                } catch (err: Throwable) {
-                    showError(err)
-                }
+        .transformLatest { (session, options) ->
+            screen.update { it.onLoadStarted() }
+            try {
+                emit(session.state())
+                val load = session.load(options)
+                emit(load)
+                screen.update { it.onLoaded(load) }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (err: Throwable) {
+                showError(err)
             }
         }
         .flowOn(ioDispatcher)
@@ -382,10 +387,15 @@ class ConfirmViewModel @Inject constructor(
         feeAssetSelection.update { selection }
     }
 
-    fun send(finishAction: FinishConfirmAction) = viewModelScope.launch(ioDispatcher) {
+    fun fetch() {
+        screen.update { it.onLoadStarted() }
+        reload.tryEmit(Unit)
+    }
+
+    fun send(finishAction: FinishConfirmAction) = viewModelScope.launch {
         when (screen.value.action()) {
             GemConfirmAction.LOAD -> {
-                restart.update { !it }
+                fetch()
                 return@launch
             }
 
@@ -396,13 +406,11 @@ class ConfirmViewModel @Inject constructor(
         val session = confirmation.value ?: return@launch
 
         try {
-            val transactionHash = when (val result = session.execute()) {
+            val transactionHash = when (val result = withContext(ioDispatcher) { session.execute() }) {
                 is GemExecuteResult.Signed -> result.data.first()
                 is GemExecuteResult.Sent -> result.hashes.last()
             }
-            viewModelScope.launch(Dispatchers.Main) {
-                finishAction(transactionHash)
-            }
+            finishAction(transactionHash)
         } catch (error: CancellationException) {
             throw error
         } catch (_: GemConfirmException.Cancelled) {
