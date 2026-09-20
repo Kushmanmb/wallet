@@ -162,20 +162,20 @@ impl BlockTransaction {
             (pre_acc.wrapping_add(pre), post_acc.wrapping_add(post))
         });
 
-        let (sign, diff) = if total_post > total_pre {
-            let diff = total_post - total_pre;
-            (num_bigint::Sign::Plus, BigUint::from(diff))
-        } else {
-            let diff = total_pre - total_post;
-            (num_bigint::Sign::Minus, BigUint::from(diff))
+        let delta = BigInt::from(total_post) - BigInt::from(total_pre);
+        let amount = match self.is_fee_payer(owner) {
+            true => delta + BigInt::from(self.meta.fee),
+            false => delta,
         };
-        let fee = self.fee();
-        let data = if fee > diff { BigUint::from(0u64) } else { diff - fee };
 
         TokenBalanceChange {
             asset_id: Chain::Solana.as_asset_id(),
-            amount: BigInt::from_biguint(sign, data),
+            amount,
         }
+    }
+
+    fn is_fee_payer(&self, owner: &str) -> bool {
+        self.transaction.message.account_keys.first().is_some_and(|key| key == owner)
     }
 }
 
@@ -260,6 +260,19 @@ mod tests {
     fn test_balance_change_received() {
         let tx = BlockTransaction::mock(&["sender"], vec![100_000], vec![200_000]);
         assert_eq!(tx.get_balance_change("sender"), 0);
+    }
+
+    #[test]
+    fn test_the_owner_balance_change_restores_the_fee_only_for_the_account_that_paid_it() {
+        let sent = BlockTransaction::mock(&["sender", "recipient"], vec![100_000, 0], vec![85_000, 10_000]);
+        assert_eq!(sent.get_balance_changes_by_owner("sender").amount, BigInt::from(-10_000), "the payer sent the transfer, not the transfer plus its fee");
+
+        let received = BlockTransaction::mock(&["receiver"], vec![100_000], vec![200_000]);
+        assert_eq!(received.get_balance_changes_by_owner("receiver").amount, BigInt::from(105_000), "a payer who receives already paid the fee out of what arrived");
+
+        let sponsored = BlockTransaction::mock(&["payer", "owner"], vec![100_000, 0], vec![90_000, 5_000]);
+        assert_eq!(sponsored.get_balance_changes_by_owner("owner").amount, BigInt::from(5_000), "an account that paid no fee has none to restore");
+        assert_eq!(sponsored.get_balance_changes_by_owner("unknown").amount, BigInt::from(0));
     }
 
     #[test]

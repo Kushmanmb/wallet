@@ -414,7 +414,7 @@ mod tests {
             from_asset: AssetId::from_token(Chain::Solana, "BKpSnSdNdANUxKPsn4AQ8mf4b9BoeVs9JD1Q8cVkpump"),
             from_value: BigUint::from(393647577456u64),
             to_asset: Chain::Solana.as_asset_id(),
-            to_value: BigUint::from(139512057u64),
+            to_value: BigUint::from(140927839u64),
             provider: Some(SwapProvider::Jupiter.id().to_owned()),
         };
 
