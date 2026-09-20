@@ -11,14 +11,17 @@ import PrimitivesTestKit
 
 public actor GemDeviceServiceMock: GemDeviceServiceProtocol {
     private let syncError: Error?
+    private let onSynchronize: (@Sendable () -> Void)?
     public private(set) var synchronizeIfNeededCalls = 0
 
-    public init(syncError: Error? = nil) {
+    public init(syncError: Error? = nil, onSynchronize: (@Sendable () -> Void)? = nil) {
         self.syncError = syncError
+        self.onSynchronize = onSynchronize
     }
 
     public func synchronizeIfNeeded() async throws {
         synchronizeIfNeededCalls += 1
+        onSynchronize?()
         if let syncError {
             throw syncError
         }

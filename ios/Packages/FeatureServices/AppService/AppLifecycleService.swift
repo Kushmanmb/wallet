@@ -104,7 +104,11 @@ extension AppLifecycleService {
     private func setupDeviceObserver() async {
         do {
             for try await _ in subscriptionsObserver.observe().dropFirst() {
-                try await deviceService.synchronizeIfNeeded()
+                do {
+                    try await deviceService.synchronizeIfNeeded()
+                } catch {
+                    debugLog("AppLifecycleService device sync error: \(error)")
+                }
             }
         } catch {
             debugLog("AppLifecycleService setupDeviceObserver error: \(error)")
