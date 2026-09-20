@@ -11,7 +11,7 @@ Before running checks, confirm the active checkout/worktree and command director
 | Change Type | Inner Loop Checks |
 |-------------|-------------------|
 | iOS presentation-only SwiftUI | `cd ios && just build-package <PACKAGE>` |
-| iOS ViewModel, formatter, validation, or display-model behavior | `cd ios && just build-package <PACKAGE>`<br>`cd ios && just test <TARGET>` when a targeted test exists or is added |
+| iOS ViewModel, formatter, validation, or display-model behavior | `cd ios && just test-package <PACKAGE>` when package tests exist; otherwise `just build-package <PACKAGE>`<br>Use `just test <TARGET>` for app-hosted tests or new-target registration |
 | Android presentation-only Compose or resource change | `cd android && ./gradlew :<module>:assembleDebug` |
 | Android ViewModel, formatter, validation, or display-model behavior | `cd android && ./gradlew :<module>:assembleDebug`<br>`cd android && ./gradlew :<module>:testDebugUnitTest` when a targeted test exists or is added |
 | Core-only Rust change with no mobile API impact | `cd core && just test <CRATE>` |
@@ -68,7 +68,7 @@ If any step modifies source files or forces a compile fix, return to the narrow 
 
 If you change shared models or bindings, also run the generation steps and validate both mobile apps.
 
-App checks see a Core change only through what each app links. Run `just generate-stone` before iOS builds and tests; it rebuilds the iOS library and bindings and costs a few seconds when nothing changed. Android app builds regenerate bindings and native libraries on their own, and Android unit tests load the host library that `just android test` builds first.
+App checks see a Core change only through what each app links. Run `just generate-stone` before iOS builds and tests; it rebuilds the iOS library and bindings and costs a few seconds when nothing changed. Android app builds regenerate bindings and native libraries on their own. Gradle builds the host library before Android unit tests, including single-module runs, and includes it in their cache inputs.
 
 If a user-facing shared flow changes on only one platform, call out the parity gap explicitly before finishing.
 

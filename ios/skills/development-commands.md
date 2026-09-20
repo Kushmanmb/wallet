@@ -1,6 +1,6 @@
 # Development Commands
 
-Use the iOS `justfile` for every build and test. All xcodebuild recipes share one set of build settings (configuration, simulator, Gemstone linker flags, compilation cache), so moving between `build-package`, `build`, and `test` reuses the modules the previous command compiled. A raw `xcodebuild` call with different settings recompiles most of the app on the next `just` command; when you need a variation, start from the command `just -n <recipe>` prints.
+Use the iOS `justfile` for every build and test. All xcodebuild recipes share build settings, simulator, Gemstone linker flags and cache paths. Stay with the package command during iteration: switching between the app project and a standalone package workspace can still rebuild targets. A raw `xcodebuild` call with different settings also causes unnecessary recompilation; when you need a variation, start from the command `just -n <recipe>` prints.
 
 ## Build and Test
 
@@ -11,29 +11,33 @@ just check GemstonePrimitives          # compile one UIKit-free package with Swi
 just check-test Primitives             # run one UIKit- and Gemstone-free package's tests with SwiftPM
 just build-package Assets              # build one package or feature scheme
 just build                             # build the app
-just test AssetsTests                  # build what one test target needs and run it
+just test-package Assets               # build and test one package on the simulator
+just test GemTests                     # app-hosted tests through the Gem scheme
 just test                              # run the whole unit test plan
 just build-for-testing                 # build every test target once
 just test-without-building AssetsTests # re-run tests without building; omit the target for the whole plan
 just test-ui                           # run the UI test plan on a reset simulator
 ```
 
-The test recipes boot the simulator first. A targeted run executes serially on that simulator; the whole plan runs in parallel clones.
+Run these commands from `ios/`, or prefix them with `just ios` from the repo root. The test recipes boot the simulator first. Package and targeted app-plan runs execute serially on that simulator; the whole app plan runs in parallel clones.
 
 ## Pick the cheapest command that can fail
 
-Measured on a warm tree:
+| command | use it for |
+|---|---|
+| `just check <Package>` | compile a platform-independent package |
+| `just check-test <Package>` | run a host-compatible package's tests |
+| `just build-package <Package>` | compile a UI package or feature |
+| `just test-package <Package>` | default test loop for package changes, including UI and Gemstone-dependent packages |
+| `just test <TestTarget>` | app-hosted tests or verification that a target is registered in the app test plan |
+| `just build` | verify app composition and linking |
+| `just test` | run the whole app unit-test plan |
 
-| command | warm | use it for |
-|---|---|---|
-| `just check <Package>` | 1-2s | does this package still compile — the default while editing a platform-independent package |
-| `just check-test <Package>` | 2s | that package's tests, same limits as above |
-| `just build-package <Package>` | 3-5s | a UI package or feature compiles |
-| `just test <TestTarget>` | 8-11s | one test target, including Gemstone-dependent ones |
-| `just build` | 8s | the app links, before a commit |
-| `just test` | ~55s | the whole suite, before a commit |
+SwiftPM builds for the host, so the two `check` recipes only cover packages that import neither UIKit nor SwiftUI, and among those only ones that do not link Gemstone can run their tests — the static library is built for the simulator. Everything with a UI or a Gemstone dependency uses the simulator through `just build-package` or `just test-package` while iterating. Read the owning `Package.swift` for the package/scheme and `.testTarget` names; do not infer the package name from the test target.
 
-SwiftPM builds for the host, so the two `check` recipes only cover packages that import neither UIKit nor SwiftUI, and among those only ones that do not link Gemstone can run their tests — the static library is built for the simulator. Everything with a UI or a Gemstone dependency goes through `just build-package`, `just build`, and `just test <TestTarget>`.
+`test-package` selects the existing package scheme and shares DerivedData, simulator, compiler settings and Gemstone linker flags with app builds. It does not select the Gem app scheme or inherit its test-plan exclusions. Use the app path for app-hosted `GemTests`, targets that require those exclusions, new-target registration checks and final app verification. A successful command with zero selected tests is not verification.
+
+The command discovers the package's schemes through Xcode and reads the app unit plan's coverage setting, supporting single-product and multi-product packages without a maintained package list or different coverage instrumentation. CI persists the existing Xcode compilation cache separately from SwiftPM downloads, keyed by the installed Xcode version. Its size defaults to 2G and can be changed with the repository variable `IOS_COMPILATION_CACHE_LIMIT_SIZE`; local builds retain the 20G default. Judge CI caching by transfer time plus build time, not cache hits alone.
 
 `swift build` reports every error in the package; `xcodebuild` stops at the first failing target, so a compile-fix loop driven by `just build` costs one build per error batch. `just test` builds what it needs, so a `just build` before it only adds a second build.
 
@@ -64,11 +68,11 @@ just build-package Components
 just build-package PrimitivesComponents
 ```
 
-For ViewModel or display-model behavior, pair the package build with the narrowest matching test target:
+For ViewModel or display-model behavior, run the package tests directly; they also build the package:
 
 ```bash
-just test AssetsTests
-just test LockManagerTests
+just test-package Assets
+just test-package GemstoneServices
 ```
 
 Use `just build` when the change touches app composition, navigation wiring, generated bindings, or code that cannot be validated by a package build.

@@ -5,21 +5,26 @@ Use when adding, changing, or running iOS tests, or registering a new test targe
 
 - Always run tests through the iOS `justfile`
 - Default commands:
+  - `just test-package <Package>` to run all tests in the changed package
+  - `just check-test <Package>` for host-compatible packages without Gemstone linkage
   - `just test`
-  - `just test <TARGET>`
+  - `just test <TARGET>` for app-hosted tests and app-plan registration checks
   - `just build-for-testing` followed by `just test-without-building` for repeated test-debug loops
   - `just test-integration` or `just test-ui` for the iOS integration suite
 - Run the narrowest relevant target while iterating, then finish with the appropriate broader validation
+- Commands above run from `ios/`; from the repo root use `just ios <recipe>`. Read the owning `Package.swift` for package and test-target names. Confirm a nonzero test count and the expected suite in the output
+
+Performance benchmarks are opt-in: `TEST_RUNNER_BENCHMARKS=1 just test-package GemstoneServices` forwards `BENCHMARKS=1` to the simulator test process. Normal tests retain keystore correctness coverage and skip the repeated KDF timing benchmark; do not reduce cryptographic parameters to speed tests up.
 
 ## New Test Targets
 
-A test target only runs if it is registered in all three places:
+A package test target participates in the app/CI test plan only if it is registered in all three places:
 
 1. `.testTarget` in the package's `Package.swift`
 2. The package is referenced in `Gem.xcodeproj` (Packages group)
 3. An entry in `GemTests/unit_frameworks.xctestplan`
 
-`swift test` inside the package and Xcode's package scheme bypass the test plan, so green there proves nothing about CI. xcodebuild silently ignores targets missing from the plan and plan entries pointing at deleted targets. After adding a test target, verify with `just test <TARGET>` from `ios/` and confirm the target's tests appear in the output.
+`just check-test` and `just test-package` bypass the app test plan: they verify the package but not its CI registration. xcodebuild silently ignores targets missing from the plan and plan entries pointing at deleted targets. After adding a test target, verify with `just test <TARGET>` from `ios/` and confirm the target's tests appear in the output.
 
 ## Test Structure
 

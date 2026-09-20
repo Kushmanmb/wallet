@@ -6,9 +6,11 @@ XCODE_CONFIGURATION := env("CONFIGURATION", "Debug")
 GEMSTONE_IOS_PROFILE := if XCODE_CONFIGURATION == "Release" { "release" } else { "debug" }
 DERIVED_DATA := "build/DerivedData"
 SPM_CACHE := "build/SourcePackages"
-XCODEBUILD := "xcodebuild -project Gem.xcodeproj -derivedDataPath " + DERIVED_DATA + " -clonedSourcePackagesDirPath " + SPM_CACHE
-GEMSTONE_LINKER_FLAGS := '"OTHER_LDFLAGS=\$(inherited) $PWD/../core/target/aarch64-apple-ios-sim/' + GEMSTONE_IOS_PROFILE + '/libgemstone.a"'
-COMPILATION_CACHE_FLAGS := if XCODE_CONFIGURATION == "Release" { "" } else { "COMPILATION_CACHE_ENABLE_CACHING=YES COMPILATION_CACHE_LIMIT_SIZE=20G" }
+XCODEBUILD_CACHE := 'xcodebuild -derivedDataPath "' + source_directory() / DERIVED_DATA + '" -clonedSourcePackagesDirPath "' + source_directory() / SPM_CACHE + '"'
+XCODEBUILD := XCODEBUILD_CACHE + " -project Gem.xcodeproj"
+GEMSTONE_LINKER_FLAGS := '"OTHER_LDFLAGS=\$(inherited) ' + source_directory() + '/../core/target/aarch64-apple-ios-sim/' + GEMSTONE_IOS_PROFILE + '/libgemstone.a"'
+COMPILATION_CACHE_LIMIT := env("COMPILATION_CACHE_LIMIT_SIZE", "20G")
+COMPILATION_CACHE_FLAGS := if XCODE_CONFIGURATION == "Release" { "" } else { "COMPILATION_CACHE_ENABLE_CACHING=YES COMPILATION_CACHE_LIMIT_SIZE=" + COMPILATION_CACHE_LIMIT }
 SIMULATOR_BUILD_FLAGS := '-configuration "' + XCODE_CONFIGURATION + '" -destination "' + SIMULATOR_DEST + '" ONLY_ACTIVE_ARCH=YES -parallelizeTargets -jobs ' + BUILD_THREADS + ' ' + GEMSTONE_LINKER_FLAGS + ' ' + COMPILATION_CACHE_FLAGS
 
 default:
@@ -122,6 +124,26 @@ test-without-building TARGET="": boot-simulator (_test "test-without-building" T
 # Example: just test
 # Example: just test PrimitivesTests
 test TARGET="": boot-simulator (_test "test" TARGET)
+
+[positional-arguments]
+test-package PACKAGE: boot-simulator
+    #!/usr/bin/env bash
+    set -euo pipefail
+    package_name="$1"
+    package_directory="Packages/$package_name"
+    if [ ! -f "$package_directory/Package.swift" ]; then
+        package_directory="Features/$package_name"
+    fi
+    if [ ! -f "$package_directory/Package.swift" ]; then
+        echo "No package named $package_name in Packages/ or Features/" >&2
+        exit 1
+    fi
+    cd "$package_directory"
+    scheme=$(xcodebuild -list -json -clonedSourcePackagesDirPath "{{source_directory() / SPM_CACHE}}" | python3 -c 'import json, sys; workspace = json.load(sys.stdin)["workspace"]; name = workspace["name"]; print(next(s for s in (name + "-Package", name) if s in workspace["schemes"]))')
+    coverage=$(python3 -c 'import json, sys; print("YES" if json.load(open(sys.argv[1]))["defaultOptions"].get("codeCoverage", False) else "NO")' "{{source_directory()}}/GemTests/unit_frameworks.xctestplan")
+    {{ XCODEBUILD_CACHE }} -scheme "$scheme" \
+        {{ SIMULATOR_BUILD_FLAGS }} \
+        -enableCodeCoverage "$coverage" -parallel-testing-enabled NO test | xcbeautify {{ XCBEAUTIFY_ARGS }}
 
 test-all: test
 
