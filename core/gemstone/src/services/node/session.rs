@@ -308,12 +308,7 @@ mod node_list_tests {
         let nodes = vec![selections[0].clone(), added.clone()];
         let statuses = HashMap::from([(added.url.clone(), GemNodeStatusState::mock_result(21_000_000))]);
 
-        let rows = GemNodeListSession {
-            chain: Chain::Ethereum,
-            nodes,
-            statuses,
-        }
-        .rows();
+        let rows = GemNodeListSession { chain: Chain::Ethereum, nodes, statuses }.rows();
 
         assert_eq!(rows.len(), 2);
         assert_eq!(rows[0].subtitle, GemNodeSubtitle::LatestBlock { value: None }, "a node with no status yet is still loading");
@@ -326,5 +321,4 @@ mod node_list_tests {
         assert!(!rows[0].can_delete);
         assert!(rows[1].can_delete);
     }
-
 }

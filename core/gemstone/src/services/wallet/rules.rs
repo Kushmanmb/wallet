@@ -183,7 +183,7 @@ pub fn view_wallet(name: String, chain: Chain, address: String) -> Wallet {
             chain,
             address,
             derivation_path: String::new(),
-            extended_public_key: Some(String::new()),
+            extended_public_key: None,
         }],
         is_pinned: false,
         image_url: None,
@@ -196,7 +196,7 @@ pub fn account(account: GemKeystoreAccount) -> Account {
         chain: account.chain,
         address: account.address,
         derivation_path: account.derivation_path,
-        extended_public_key: Some(account.public_key.unwrap_or_default()),
+        extended_public_key: account.public_key,
     }
 }
 

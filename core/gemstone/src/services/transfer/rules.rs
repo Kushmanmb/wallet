@@ -473,7 +473,7 @@ impl GemPendingTransactionInput {
         };
         let transfer_value = self.value.to_biguint().ok_or_else(|| "negative transfer value".to_string())?;
         let (recipient, value, memo) = match &approval {
-            Some(approval) => (approval.spender.clone(), approval.value.clone(), String::new()),
+            Some(approval) => (approval.spender.clone(), approval.value.clone(), None),
             None => {
                 let recipient = match &transfer.input_type {
                     TransactionInputType::Swap { swap_data, .. } => swap_data.data.to.clone(),
@@ -481,8 +481,8 @@ impl GemPendingTransactionInput {
                 };
                 let value = simulation_header.as_ref().and_then(|header| header.value.clone()).unwrap_or(transfer_value);
                 let memo = match &transfer.input_type {
-                    TransactionInputType::Swap { .. } => String::new(),
-                    _ => transfer.recipient.memo.clone().unwrap_or_default(),
+                    TransactionInputType::Swap { .. } => None,
+                    _ => transfer.recipient.memo.clone().filter(|memo| !memo.is_empty()),
                 };
                 (recipient, value, memo)
             }
@@ -508,7 +508,7 @@ impl GemPendingTransactionInput {
             self.network_fee.to_biguint().ok_or_else(|| "negative network fee".to_string())?,
             self.fee.fee_asset,
             value,
-            Some(memo),
+            memo,
             metadata,
             Utc::now(),
         );
@@ -1045,6 +1045,19 @@ mod tests {
     }
 
     #[test]
+    fn test_a_transfer_keeps_its_memo_and_reports_a_blank_one_as_absent() {
+        let transfer = TransactionInputType::Transfer { asset: Asset::from_chain(Chain::Cosmos) };
+        let written = GemPendingTransactionInput::mock(transfer.clone(), TransactionType::Transfer, "0xhash", 0, 1).pending_transaction().unwrap().unwrap();
+
+        assert_eq!(written.memo.as_deref(), Some("memo"));
+
+        let mut blank = GemPendingTransactionInput::mock(transfer, TransactionType::Transfer, "0xhash", 0, 1);
+        blank.transfer.recipient.memo = Some(String::new());
+
+        assert_eq!(blank.pending_transaction().unwrap().unwrap().memo, None, "a blank memo field is no memo, not an empty one");
+    }
+
+    #[test]
     fn test_pending_transaction_uses_swap_router_and_hypercore_tracking() {
         let swap = TransactionInputType::Swap {
             from_asset: Asset::from_chain(Chain::Ethereum),
@@ -1061,7 +1074,7 @@ mod tests {
         let transaction = GemPendingTransactionInput::mock(swap, TransactionType::Swap, "0xhash", 0, 1).pending_transaction().unwrap().unwrap();
         assert_eq!(transaction.to, "0xrouter");
         assert_eq!(transaction.value, BigUint::from(99u64));
-        assert_eq!(transaction.memo.as_deref(), Some(""));
+        assert_eq!(transaction.memo, None, "a swap carries no memo, which is absence and not an empty one");
         assert_eq!(transaction.direction, TransactionDirection::Outgoing);
         assert!(transaction.metadata.is_some());
 
