@@ -8,6 +8,7 @@
   - `just test-integration` — instrumented tests for every module (requires emulator)
   - `./gradlew :app:testGoogleDebugUnitTest` — app module only
   - `./gradlew :<module>:testDebugUnitTest` — one feature or shared module
+  - `./gradlew testGoogleDebugUnitTest` on its own runs the app module only: library modules have no flavored test task, so their tests are silently skipped and the build still succeeds. Use `just test` to cover both.
 - Run the narrowest relevant target while iterating, then finish with broader validation
 - For local instrumented tests, start the emulator from the repo root first with `just start-emulator`, then run `just android test-integration`
 
