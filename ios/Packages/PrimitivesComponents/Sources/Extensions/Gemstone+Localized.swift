@@ -83,6 +83,8 @@ public extension GemLocalizedText {
             number.text()
         case .none:
             Localized.Common.none
+        case .slippageAuto:
+            Localized.Swap.slippageAuto
         case .rewardsUnverified:
             Localized.Rewards.Unverified.description
         case let .rewardsPending(countdown):
@@ -715,6 +717,9 @@ public extension GemListRowTitle {
         case .position: Localized.Perpetual.position
         case .details: Localized.Common.details
         case .slippage: Localized.Swap.slippage
+        case .priceImpact: Localized.Swap.priceImpact
+        case .minimumReceive: Localized.Swap.minReceive
+        case .estimatedTime: Localized.Swap.EstimatedTime.title
         case .marketPrice: Localized.Perpetual.marketPrice
         case .fundingPayments: Localized.Info.Perpetual.FundingPayments.title
         case .marketCap: Localized.Asset.marketCap

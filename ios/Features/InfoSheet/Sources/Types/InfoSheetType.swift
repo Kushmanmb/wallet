@@ -98,6 +98,8 @@ public extension InfoSheetType {
         case let .networkFee(asset): .networkFee(asset.toPrimitives())
         case let .minimumAmount(asset, minimum): .minimumAmount(asset.toPrimitives(), required: minimum, action: buyAction)
         case .noQuote: .noQuote
+        case .priceImpact: .priceImpact
+        case .slippage: .slippage
         case .openInterest: .openInterest
         case .fundingApr: .fundingApr
         case .stakeApr: .stakeApr(assetImage?.placeholder)

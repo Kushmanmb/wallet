@@ -170,6 +170,8 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
 
     GemLocalizedText.None -> context.getString(R.string.common_none)
 
+    GemLocalizedText.SlippageAuto -> context.getString(R.string.swap_slippage_auto)
+
     GemLocalizedText.RewardsUnverified -> context.getString(R.string.rewards_unverified_description)
 
     is GemLocalizedText.RewardsPending -> context.getString(R.string.rewards_pending_description, countdown.formatDuration())
@@ -591,6 +593,9 @@ fun GemListRowTitle.text(context: Context): String = when (this) {
     GemListRowTitle.POSITION -> context.getString(R.string.perpetual_position)
     GemListRowTitle.DETAILS -> context.getString(R.string.common_details)
     GemListRowTitle.SLIPPAGE -> context.getString(R.string.swap_slippage)
+    GemListRowTitle.PRICE_IMPACT -> context.getString(R.string.swap_price_impact)
+    GemListRowTitle.MINIMUM_RECEIVE -> context.getString(R.string.swap_min_receive)
+    GemListRowTitle.ESTIMATED_TIME -> context.getString(R.string.swap_estimated_time_title)
     GemListRowTitle.MARKET_PRICE -> context.getString(R.string.perpetual_market_price)
     GemListRowTitle.ENTRY_PRICE -> context.getString(R.string.perpetual_entry_price)
     GemListRowTitle.LIQUIDATION_PRICE -> context.getString(R.string.info_perpetual_liquidation_price_title)

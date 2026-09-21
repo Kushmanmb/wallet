@@ -103,6 +103,9 @@ pub enum GemListRowTitle {
     Position,
     Details,
     Slippage,
+    PriceImpact,
+    MinimumReceive,
+    EstimatedTime,
     MarketPrice,
     EntryPrice,
     LiquidationPrice,
@@ -132,6 +135,8 @@ pub enum GemNoticeKind {
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemInfoTopic {
     NetworkFee { asset: Asset },
+    PriceImpact,
+    Slippage,
     MinimumAmount { asset: Asset, minimum: GemBigInt },
     NoQuote,
     OpenInterest,

@@ -211,6 +211,10 @@ fun GemInfoTopic.infoSheet(context: Context, icon: Any?, onBuy: (() -> Unit)? = 
 
     GemInfoTopic.NoQuote -> InfoSheetEntity.NoQuoteInfo
 
+    GemInfoTopic.PriceImpact -> InfoSheetEntity.PriceImpactInfo
+
+    GemInfoTopic.Slippage -> InfoSheetEntity.Slippage
+
     GemInfoTopic.OpenInterest -> InfoSheetEntity.OpenInterestInfo
 
     GemInfoTopic.FundingApr -> InfoSheetEntity.FundingAprInfo

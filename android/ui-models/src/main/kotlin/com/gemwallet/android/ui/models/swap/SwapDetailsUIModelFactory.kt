@@ -2,10 +2,10 @@ package com.gemwallet.android.ui.models.swap
 
 import com.gemwallet.android.domains.percentage.formatAsPercentage
 import com.gemwallet.android.domains.swap.AssetRateFormatter
+import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.model.AssetPriceValue
 import com.gemwallet.android.model.ValueFormatter
 import uniffi.gemstone.GemPercentageStyle
-import uniffi.gemstone.GemSwapDetailRow
 import uniffi.gemstone.GemSwapProviderRow
 import uniffi.gemstone.GemSwapQuoteSummary
 import uniffi.gemstone.GemValueStyle
@@ -44,16 +44,7 @@ object SwapDetailsUIModelFactory {
         val minReceiveAtomic = input.summary.minReceiveValue
         val minimumReceive = ValueFormatter(style = GemValueStyle.AUTO).string(minReceiveAtomic, input.receiveAsset.asset)
         val slippageText = slippagePercent.formatAsPercentage(style = GemPercentageStyle.UNSIGNED)
-        val rows = input.summary.rows(priceImpact != null).mapNotNull { row ->
-            when (row) {
-                GemSwapDetailRow.PROVIDER -> null
-                GemSwapDetailRow.RATE -> SwapDetailRowUIModel.Rate(rate)
-                GemSwapDetailRow.ESTIMATED_TIME -> input.summary.quote.etaInSeconds?.let(SwapDetailRowUIModel::EstimatedTime)
-                GemSwapDetailRow.PRICE_IMPACT -> priceImpact?.let(SwapDetailRowUIModel::PriceImpact)
-                GemSwapDetailRow.MINIMUM_RECEIVE -> SwapDetailRowUIModel.MinimumReceive(minimumReceive)
-                GemSwapDetailRow.SLIPPAGE -> SwapDetailRowUIModel.Slippage(input.selectedSlippage?.let { slippageText })
-            }
-        }
+        val rows = input.summary.detailRows(input.receiveAsset.asset.toGem(), input.priceImpact, input.selectedSlippage != null)
 
         return SwapDetailsUIModel(
             rows = rows,

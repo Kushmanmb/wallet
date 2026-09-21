@@ -1,6 +1,7 @@
 package com.gemwallet.android.ui.models.swap
 
 import com.gemwallet.android.domains.swap.AssetRatePair
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemSwapProviderRow
 import uniffi.gemstone.SwapPriceImpactType
 import uniffi.gemstone.SwapProvider
@@ -8,7 +9,7 @@ import uniffi.gemstone.SwapProvider
 data class SwapPriceImpactUIModel(val type: SwapPriceImpactType, val displayText: String, val warningText: String, val isHigh: Boolean, val showsInSummary: Boolean)
 
 data class SwapDetailsUIModel(
-    val rows: List<SwapDetailRowUIModel>,
+    val rows: List<GemListRow>,
     val provider: GemSwapProviderRow,
     val providers: List<GemSwapProviderRow> = emptyList(),
     val rate: AssetRatePair,
@@ -28,12 +29,4 @@ data class SwapDetailsUIModel(
 
     val shouldShowPriceImpactWarning: Boolean
         get() = priceImpact?.isHigh == true
-}
-
-sealed interface SwapDetailRowUIModel {
-    data class Rate(val rate: AssetRatePair) : SwapDetailRowUIModel
-    data class EstimatedTime(val seconds: UInt) : SwapDetailRowUIModel
-    data class PriceImpact(val model: SwapPriceImpactUIModel) : SwapDetailRowUIModel
-    data class MinimumReceive(val text: String) : SwapDetailRowUIModel
-    data class Slippage(val text: String?) : SwapDetailRowUIModel
 }
