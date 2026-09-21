@@ -33,7 +33,6 @@ import uniffi.gemstone.GemApprovalValue
 import uniffi.gemstone.GemAssetMenuAction
 import uniffi.gemstone.GemBalanceResource
 import uniffi.gemstone.GemBalanceRowValue
-import uniffi.gemstone.GemBannerAmount
 import uniffi.gemstone.GemBannerDescription
 import uniffi.gemstone.GemBannerTitle
 import uniffi.gemstone.GemCandleTooltipRow
@@ -500,7 +499,7 @@ fun bannerDescription(context: Context, description: GemBannerDescription): Stri
     is GemBannerDescription.AccountActivation -> context.getString(
         R.string.banner_account_activation_description,
         description.networkName,
-        bannerAmount(description.fee),
+        description.fee.text(),
     )
 
     is GemBannerDescription.ExternallyControlledAccount -> context.getString(R.string.warnings_externally_controlled_account, description.networkName)
@@ -518,8 +517,6 @@ fun bannerDescription(context: Context, description: GemBannerDescription): Stri
     GemBannerDescription.TradePerpetuals -> context.getString(R.string.banner_perpetuals_description)
 }
 
-private fun bannerAmount(amount: GemBannerAmount): String = ValueFormatter(style = GemValueStyle.AUTO)
-    .string(amount.value, decimals = amount.decimals, currency = amount.symbol)
 fun GemRecipientErrorDisplay.string(context: Context): String = when (this) {
     is GemRecipientErrorDisplay.InvalidAddress -> context.getString(R.string.errors_invalid_asset_address, network)
 }

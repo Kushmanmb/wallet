@@ -7,7 +7,6 @@ import enum Gemstone.FeeOption
 import enum Gemstone.GemApprovalValue
 import enum Gemstone.GemAssetMenuAction
 import enum Gemstone.GemBalanceRowValue
-import struct Gemstone.GemBannerAmount
 import enum Gemstone.GemBannerDescription
 import enum Gemstone.GemBannerTitle
 import enum Gemstone.GemContactAddressField
@@ -596,10 +595,10 @@ public extension GemBannerTitle {
 }
 
 public extension GemBannerDescription {
-    func text(amount: (GemBannerAmount) -> String) -> String {
+    var text: String {
         switch self {
         case let .stake(assetSymbol): Localized.Banner.Stake.description(assetSymbol)
-        case let .accountActivation(networkName, fee): Localized.Banner.AccountActivation.description(networkName, amount(fee))
+        case let .accountActivation(networkName, fee): Localized.Banner.AccountActivation.description(networkName, fee.text())
         case let .externallyControlledAccount(networkName): Localized.Warnings.externallyControlledAccount(networkName)
         case let .activateAsset(assetSymbol, networkName): Localized.Banner.ActivateAsset.description(assetSymbol, networkName)
         case .suspiciousAsset: Localized.Banner.AssetStatus.description
