@@ -5,10 +5,10 @@ import Formatters
 import Foundation
 import struct Gemstone.GemChart
 import enum Gemstone.GemChartPhase
-import struct Gemstone.GemListSection
 import protocol Gemstone.GemChartServiceProtocol
 import struct Gemstone.GemChartSession
 import enum Gemstone.GemInfoTopic
+import struct Gemstone.GemListSection
 import enum Gemstone.GemServiceError
 import GemstonePrimitives
 import GemstoneServices

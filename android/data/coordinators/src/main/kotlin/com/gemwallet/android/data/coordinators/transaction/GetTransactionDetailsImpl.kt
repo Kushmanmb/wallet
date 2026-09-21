@@ -99,10 +99,7 @@ class TransactionDetailsAggregateImpl(private val rows: GemTransactionDetailRows
 
     override val headerAction: GemTransactionHeaderAction? = rows.headerAction
 
-    override val fee: TransactionDetailsValue.Fee = rows.fee.let { fee ->
-        val asset = fee.asset.toPrimitives()
-        TransactionDetailsValue.Fee(asset, valueFormatter.string(fee.value, asset), fee.fiat(asset).orEmpty())
-    }
+    override val fee: TransactionDetailsValue.Fee = TransactionDetailsValue.Fee(rows.feeRow)
 
     val estimatedConfirmation: TransactionDetailsValue.EstimatedConfirmation? = rows.estimatedConfirmationSeconds
         ?.let { TransactionDetailsValue.EstimatedConfirmation(it) }

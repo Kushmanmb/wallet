@@ -9,12 +9,16 @@ import com.wallet.core.primitives.TransactionExtended
 import uniffi.gemstone.BlockExplorerLink
 import uniffi.gemstone.GemAmountSign
 import uniffi.gemstone.GemCurrencyStyle
+import uniffi.gemstone.GemInfoTopic
+import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemNumberNotation
+import uniffi.gemstone.GemNumberUnit
 import uniffi.gemstone.GemSwapAgain
 import uniffi.gemstone.GemSwapProgress
 import uniffi.gemstone.GemSwapRate
 import uniffi.gemstone.GemTransactionAmount
 import uniffi.gemstone.GemTransactionDetailRows
+import uniffi.gemstone.GemTransactionFeeRow
 import uniffi.gemstone.GemTransactionHeader
 import uniffi.gemstone.GemTransactionHeaderAction
 import uniffi.gemstone.GemTransactionParticipant
@@ -47,6 +51,7 @@ fun mockGemTransactionDetailRows(
     pnl: Double? = null,
     price: Double? = null,
     fee: GemTransactionAmount = mockGemTransactionAmount(),
+    feeRow: GemTransactionFeeRow = mockGemTransactionFeeRow(fee),
     explorer: BlockExplorerLink = BlockExplorerLink("Explorer", "https://example.com"),
 ) = GemTransactionDetailRows(
     id = transaction.transaction.id.toIdentifier(),
@@ -69,10 +74,18 @@ fun mockGemTransactionDetailRows(
     pnl = pnl?.let { formattedCurrency(it, Currency.USD.string, GemCurrencyStyle.CURRENCY).copy(notation = GemNumberNotation.SIGNED) },
     price = price?.let { formattedCurrency(it, Currency.USD.string, GemCurrencyStyle.CURRENCY) },
     fee = fee,
+    feeRow = feeRow,
     explorer = explorer,
     status = GemTransactionStatus(
         tone = GemTransactionStateTone.SUCCESS,
         showsBadge = false,
         showsProgress = false,
     ),
+)
+
+fun mockGemTransactionFeeRow(fee: GemTransactionAmount = mockGemTransactionAmount(), fiat: Double? = null) = GemTransactionFeeRow(
+    title = GemListRowTitle.NETWORK_FEE,
+    amount = mockFormattedNumber(1.0, GemNumberUnit.Symbol(fee.asset.symbol)),
+    fiat = fiat?.let { formattedCurrency(it, Currency.USD.string, GemCurrencyStyle.CURRENCY) },
+    info = GemInfoTopic.NetworkFee(fee.asset),
 )

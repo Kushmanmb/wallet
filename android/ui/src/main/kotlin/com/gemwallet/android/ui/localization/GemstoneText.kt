@@ -566,6 +566,7 @@ fun GemListRowTitle.text(context: Context): String = when (this) {
     GemListRowTitle.STAKE_APR -> context.getString(R.string.stake_apr, "")
     GemListRowTitle.LOCK_TIME -> context.getString(R.string.stake_lock_time)
     GemListRowTitle.MINIMUM_AMOUNT -> context.getString(R.string.stake_minimum_amount)
+    GemListRowTitle.NETWORK_FEE -> context.getString(R.string.transfer_network_fee)
     GemListRowTitle.VALIDATOR -> context.getString(R.string.stake_validator)
     GemListRowTitle.PROVIDER -> context.getString(R.string.common_provider)
     GemListRowTitle.STATUS -> context.getString(R.string.transaction_status)

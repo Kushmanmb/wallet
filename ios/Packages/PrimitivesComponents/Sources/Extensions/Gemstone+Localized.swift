@@ -678,6 +678,7 @@ public extension GemListRowTitle {
         case .stakeApr: Localized.Stake.apr("")
         case .lockTime: Localized.Stake.lockTime
         case .minimumAmount: Localized.Stake.minimumAmount
+        case .networkFee: Localized.Transfer.networkFee
         case .validator: Localized.Stake.validator
         case .provider: Localized.Common.provider
         case .status: Localized.Transaction.status

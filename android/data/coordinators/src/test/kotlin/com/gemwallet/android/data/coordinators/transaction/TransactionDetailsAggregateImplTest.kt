@@ -10,6 +10,7 @@ import com.gemwallet.android.testkit.mockAssetEthereumUSDT
 import com.gemwallet.android.testkit.mockAssetPrice
 import com.gemwallet.android.testkit.mockGemTransactionAmount
 import com.gemwallet.android.testkit.mockGemTransactionDetailRows
+import com.gemwallet.android.testkit.mockGemTransactionFeeRow
 import com.gemwallet.android.testkit.mockNftAssetId
 import com.gemwallet.android.testkit.mockTransaction
 import com.gemwallet.android.testkit.mockTransactionExtended
@@ -126,26 +127,10 @@ class TransactionDetailsAggregateImplTest {
     }
 
     @Test
-    fun testFee_formatsTheCoreFeeAndItsFiat() {
-        val fee = mockGemTransactionAmount(asset = btcAsset, value = BigInteger("1000"), price = mockAssetPrice(assetId = btcAsset.id, price = 50000.0))
+    fun testFee_passesTheCoreRowThrough() {
+        val row = mockGemTransactionFeeRow(fee = mockGemTransactionAmount(asset = btcAsset), fiat = 0.5)
 
-        val withPrice = createAggregate(rows = mockGemTransactionDetailRows(fee = fee)).fee
-        Assert.assertEquals(btcAsset, withPrice.asset)
-        Assert.assertEquals("0.00001 BTC", withPrice.value)
-        Assert.assertEquals("\$0.5", withPrice.equivalent)
-
-        val smallPrice = createAggregate(rows = mockGemTransactionDetailRows(fee = fee.copy(price = mockAssetPrice(assetId = btcAsset.id, price = 4.2795161).toGem()))).fee
-        Assert.assertEquals("\$0.0000428", smallPrice.equivalent)
-
-        val noPrice = createAggregate(rows = mockGemTransactionDetailRows(fee = fee.copy(price = null))).fee
-        Assert.assertEquals("", noPrice.equivalent)
-
-        val otherAsset = createAggregate(rows = mockGemTransactionDetailRows(fee = mockGemTransactionAmount(asset = ethAsset, value = BigInteger("1000000000000000")))).fee
-        Assert.assertEquals(ethAsset, otherAsset.asset)
-        Assert.assertEquals("0.001 ETH", otherAsset.value)
-
-        val dust = createAggregate(rows = mockGemTransactionDetailRows(fee = mockGemTransactionAmount(asset = ethAsset, value = BigInteger("9646202573492")))).fee
-        Assert.assertEquals("0.000009646 ETH", dust.value)
+        Assert.assertEquals(row, createAggregate(rows = mockGemTransactionDetailRows(feeRow = row)).fee.row)
     }
 
     @Test

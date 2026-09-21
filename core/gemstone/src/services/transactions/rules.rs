@@ -4,21 +4,21 @@ use strum::IntoEnumIterator;
 
 use number_formatter::BigNumberFormatter;
 use primitives::{
-    Asset, AssetId, AssetPrice, AssetType, BlockExplorerLink, Chain, ChainAsset, PerpetualDirection, Price, Transaction, TransactionDirection, TransactionExtended, TransactionNFTTransferMetadata, TransactionPerpetualMetadata,
+    Asset, AssetId, AssetPrice, AssetType, BlockExplorerLink, Chain, ChainAsset, Currency, PerpetualDirection, Price, Transaction, TransactionDirection, TransactionExtended, TransactionNFTTransferMetadata, TransactionPerpetualMetadata,
     TransactionResourceTypeMetadata, TransactionState, TransactionSwapMetadata, TransactionType, TransactionWalletConnectMetadata, TransferDataOutputAction, WalletType,
 };
 
 use super::model::{
-    GemActivityFilters, GemAmountSign, GemSwapAgain, GemSwapProgress, GemSwapProgressStep, GemTransactionAmount, GemTransactionDetailRow, GemTransactionDetailRows, GemTransactionDetailSection, GemTransactionDetails, GemTransactionFilter,
-    GemTransactionHeader, GemTransactionHeaderAction, GemTransactionHeaderKind, GemTransactionParticipant, GemTransactionParticipantRole, GemTransactionRow, GemTransactionRowSubtitle, GemTransactionRowValue, GemTransactionStateTone,
-    GemTransactionStatus, GemTransactionSubtitle, GemTransactionTitle, GemTransactionValue,
+    GemActivityFilters, GemAmountSign, GemSwapAgain, GemSwapProgress, GemSwapProgressStep, GemTransactionAmount, GemTransactionDetailRow, GemTransactionDetailRows, GemTransactionDetailSection, GemTransactionDetails, GemTransactionFeeRow,
+    GemTransactionFilter, GemTransactionHeader, GemTransactionHeaderAction, GemTransactionHeaderKind, GemTransactionParticipant, GemTransactionParticipantRole, GemTransactionRow, GemTransactionRowSubtitle, GemTransactionRowValue,
+    GemTransactionStateTone, GemTransactionStatus, GemTransactionSubtitle, GemTransactionTitle, GemTransactionValue,
 };
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::config::image::GemImage;
 use crate::formatted_number::{GemFormattedNumber, GemNumberNotation, GemValueTone};
 use crate::models::asset::wallet_default_assets;
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
-use crate::precision::GemValueStyle;
+use crate::precision::{GemCurrencyStyle, GemValueStyle};
 use crate::services::collections::unique;
 use crate::services::localization::GemLocalizedText;
 use crate::services::swap::model::GemSwapRate;
@@ -105,9 +105,15 @@ pub fn participant(extended: &TransactionExtended, link: impl FnOnce(&str) -> Bl
     })
 }
 
-pub fn detail_rows(extended: &TransactionExtended, wallet_type: WalletType, participant: Option<GemTransactionParticipant>, explorer: BlockExplorerLink) -> GemTransactionDetailRows {
+pub fn detail_rows(extended: &TransactionExtended, wallet_type: WalletType, participant: Option<GemTransactionParticipant>, explorer: BlockExplorerLink, currency: Currency) -> GemTransactionDetailRows {
     let transaction = &extended.transaction;
     let details = details(extended, wallet_type);
+    let fee = GemTransactionAmount {
+        asset: extended.fee_asset.clone(),
+        value: transaction.fee.clone(),
+        sign: GemAmountSign::None,
+        price: asset_price(extended.fee_price.as_ref(), &extended.fee_asset.id),
+    };
     GemTransactionDetailRows {
         id: transaction.id.clone(),
         asset: extended.asset.clone(),
@@ -129,13 +135,19 @@ pub fn detail_rows(extended: &TransactionExtended, wallet_type: WalletType, part
         rate: swap_rate(extended),
         pnl: details.pnl.map(GemFormattedNumber::signed_usd),
         price: details.price.map(GemFormattedNumber::usd),
-        fee: GemTransactionAmount {
-            asset: extended.fee_asset.clone(),
-            value: transaction.fee.clone(),
-            sign: GemAmountSign::None,
-            price: asset_price(extended.fee_price.as_ref(), &extended.fee_asset.id),
-        },
+        fee_row: fee_row(&fee, currency),
+        fee,
         explorer,
+    }
+}
+
+fn fee_row(fee: &GemTransactionAmount, currency: Currency) -> GemTransactionFeeRow {
+    let value = BigNumberFormatter::f64_value(fee.value.to_string(), fee.asset.decimals as u32);
+    GemTransactionFeeRow {
+        title: GemListRowTitle::NetworkFee,
+        amount: GemFormattedNumber::amount(value, Some(fee.asset.symbol.clone()), GemValueStyle::Auto),
+        fiat: fee.price.as_ref().map(|price| GemFormattedNumber::currency(value * price.price, currency, GemCurrencyStyle::Currency)),
+        info: GemInfoTopic::NetworkFee { asset: fee.asset.clone() },
     }
 }
 
@@ -1112,7 +1124,7 @@ mod tests {
             assets: vec![Asset::mock_eth(), Asset::mock_btc()],
             ..TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Confirmed, None))
         };
-        let rows = detail_rows(&swap, WalletType::Multicoin, participant(&swap, BlockExplorerLink::mock_with_address), explorer.clone());
+        let rows = detail_rows(&swap, WalletType::Multicoin, participant(&swap, BlockExplorerLink::mock_with_address), explorer.clone(), Currency::USD);
         match rows.header {
             GemTransactionHeader::Swap { from, to } => {
                 assert_eq!((from.asset.id, to.asset.id), (AssetId::from_chain(Chain::Ethereum), AssetId::from_chain(Chain::Bitcoin)));
@@ -1132,12 +1144,24 @@ mod tests {
 
         let mut transfer = TransactionExtended::mock_transaction(Transaction::mock_with_state(TransactionType::Transfer, TransactionState::Confirmed, TransactionDirection::Outgoing));
         transfer.transaction.memo = Some(String::new());
-        let unnamed = detail_rows(&transfer, WalletType::Multicoin, participant(&transfer, BlockExplorerLink::mock_with_address), explorer.clone());
+        let unnamed = detail_rows(&transfer, WalletType::Multicoin, participant(&transfer, BlockExplorerLink::mock_with_address), explorer.clone(), Currency::USD);
         let recipient = unnamed.participant.clone().unwrap();
         assert_eq!((recipient.role, recipient.address.as_str(), recipient.can_add_contact), (GemTransactionParticipantRole::Recipient, "to", true));
         assert_eq!(recipient.link.link, "https://explorer/to");
         assert_eq!(unnamed.memo, None, "an empty memo is not a row");
         assert_eq!((unnamed.fee.asset.id.clone(), unnamed.fee.value.clone(), unnamed.fee.sign), (transfer.fee_asset.id.clone(), 1u32.into(), GemAmountSign::None));
+        assert_eq!(unnamed.fee_row.title, GemListRowTitle::NetworkFee);
+        assert_eq!(unnamed.fee_row.amount.unit, crate::formatted_number::GemNumberUnit::Symbol { symbol: transfer.fee_asset.symbol.clone() });
+        assert_eq!(unnamed.fee_row.info, GemInfoTopic::NetworkFee { asset: transfer.fee_asset.clone() });
+        assert_eq!(unnamed.fee_row.fiat, None, "a fee with no price names no fiat value");
+        let priced = TransactionExtended {
+            fee_price: Some(Price::new(4.0, 0.0, Utc::now(), primitives::PriceProvider::Coingecko)),
+            ..transfer.clone()
+        };
+        assert_eq!(
+            detail_rows(&priced, WalletType::Multicoin, None, explorer.clone(), Currency::USD).fee_row.fiat,
+            Some(GemFormattedNumber::currency(unnamed.fee_row.amount.value * 4.0, Currency::USD, GemCurrencyStyle::Currency))
+        );
         assert!(matches!(unnamed.header, GemTransactionHeader::Amount { shows_fiat: true, .. }));
         assert_eq!(
             unnamed.header_action,
@@ -1147,12 +1171,12 @@ mod tests {
         );
 
         transfer.to_address = Some(primitives::AddressName::mock("to", "Bob", primitives::AddressType::Address, primitives::VerificationStatus::Verified));
-        let named_rows = detail_rows(&transfer, WalletType::Multicoin, participant(&transfer, BlockExplorerLink::mock_with_address), explorer.clone());
+        let named_rows = detail_rows(&transfer, WalletType::Multicoin, participant(&transfer, BlockExplorerLink::mock_with_address), explorer.clone(), Currency::USD);
         let recipient = named_rows.participant.unwrap();
         assert_eq!((recipient.name.map(|name| name.name), recipient.can_add_contact), (Some("Bob".to_string()), false));
 
         let approval = TransactionExtended::mock_transaction(Transaction::mock_with_state(TransactionType::TokenApproval, TransactionState::Confirmed, TransactionDirection::Outgoing));
-        let approval_rows = detail_rows(&approval, WalletType::Multicoin, participant(&approval, BlockExplorerLink::mock_with_address), explorer);
+        let approval_rows = detail_rows(&approval, WalletType::Multicoin, participant(&approval, BlockExplorerLink::mock_with_address), explorer, Currency::USD);
         assert!(matches!(approval_rows.header, GemTransactionHeader::AssetImage { .. }));
         let contract = approval_rows.participant.unwrap();
         assert_eq!((contract.role, contract.can_add_contact), (GemTransactionParticipantRole::Contract, false));
@@ -1174,7 +1198,13 @@ mod tests {
         let mut transfer = TransactionExtended::mock_transaction(Transaction::mock_with_state(TransactionType::Transfer, TransactionState::Confirmed, TransactionDirection::Outgoing));
         transfer.transaction.memo = Some("gm".to_string());
         assert_eq!(
-            rows_of(detail_sections(&detail_rows(&transfer, WalletType::Multicoin, participant(&transfer, BlockExplorerLink::mock_with_address), explorer.clone()))),
+            rows_of(detail_sections(&detail_rows(
+                &transfer,
+                WalletType::Multicoin,
+                participant(&transfer, BlockExplorerLink::mock_with_address),
+                explorer.clone(),
+                Currency::USD
+            ))),
             vec![vec!["Header"], vec!["Date", "Status", "Participant", "Memo", "Network"], vec!["Fee"], vec!["Explorer"]],
             "a transfer has no swap sections and shows its memo beside the recipient"
         );
@@ -1184,7 +1214,13 @@ mod tests {
             ..TransactionExtended::mock_transaction(Transaction::mock_swap_with_provider(TransactionState::Pending, Some("near_intents")))
         };
         assert_eq!(
-            rows_of(detail_sections(&detail_rows(&pending, WalletType::Multicoin, participant(&pending, BlockExplorerLink::mock_with_address), explorer.clone()))),
+            rows_of(detail_sections(&detail_rows(
+                &pending,
+                WalletType::Multicoin,
+                participant(&pending, BlockExplorerLink::mock_with_address),
+                explorer.clone(),
+                Currency::USD
+            ))),
             vec![vec!["Header"], vec!["SwapProgress"], vec!["Date", "Status", "Rate", "Network", "Provider"], vec!["Fee"], vec!["Explorer"]],
             "a swap in flight shows its progress instead of a confirmation estimate, and its provider instead of a participant"
         );
@@ -1198,13 +1234,20 @@ mod tests {
                 &confirmed,
                 WalletType::Multicoin,
                 participant(&confirmed, BlockExplorerLink::mock_with_address),
-                explorer.clone()
+                explorer.clone(),
+                Currency::USD
             )))[1],
             vec!["SwapAgain"],
             "a confirmed swap offers to swap again"
         );
         assert_eq!(
-            rows_of(detail_sections(&detail_rows(&confirmed, WalletType::View, participant(&confirmed, BlockExplorerLink::mock_with_address), explorer.clone())))[1],
+            rows_of(detail_sections(&detail_rows(
+                &confirmed,
+                WalletType::View,
+                participant(&confirmed, BlockExplorerLink::mock_with_address),
+                explorer.clone(),
+                Currency::USD
+            )))[1],
             vec!["Date", "Status", "Rate", "Network", "Provider"],
             "a watch-only wallet cannot sign, so the confirmed swap offers no swap again"
         );
@@ -1220,12 +1263,12 @@ mod tests {
             .unwrap(),
         );
         assert_eq!(
-            rows_of(detail_sections(&detail_rows(&open, WalletType::Multicoin, participant(&open, BlockExplorerLink::mock_with_address), explorer)))[1],
+            rows_of(detail_sections(&detail_rows(&open, WalletType::Multicoin, participant(&open, BlockExplorerLink::mock_with_address), explorer, Currency::USD)))[1],
             vec!["Date", "Status", "Network", "Pnl", "Price"],
             "a perpetual has no participant and shows its pnl and price after the network"
         );
 
-        let status = detail_sections(&detail_rows(&transfer, WalletType::Multicoin, None, BlockExplorerLink::mock_with_address("tx")))[1].rows[1].clone();
+        let status = detail_sections(&detail_rows(&transfer, WalletType::Multicoin, None, BlockExplorerLink::mock_with_address("tx"), Currency::USD))[1].rows[1].clone();
         assert_eq!(
             status,
             GemTransactionDetailRow::Row {

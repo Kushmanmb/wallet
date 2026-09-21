@@ -94,6 +94,7 @@ public enum InfoSheetType: Identifiable, Sendable, Equatable {
 public extension InfoSheetType {
     init(topic: GemInfoTopic, assetImage: AssetImage?) {
         self = switch topic {
+        case let .networkFee(asset): .networkFee(asset.toPrimitives())
         case .openInterest: .openInterest
         case .fundingApr: .fundingApr
         case .stakeApr: .stakeApr(assetImage?.placeholder)

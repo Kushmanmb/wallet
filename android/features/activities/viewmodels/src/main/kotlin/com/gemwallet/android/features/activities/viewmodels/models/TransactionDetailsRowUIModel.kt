@@ -6,10 +6,13 @@ import com.gemwallet.android.domains.duration.formatEstimatedConfirmation
 import com.gemwallet.android.domains.transaction.values.TransactionDetailsValue
 import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.features.activities.viewmodels.localization.stringRes
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.components.list_item.infoSheet
+import com.gemwallet.android.ui.localization.text
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.BlockExplorerLink
 import com.wallet.core.primitives.Chain
@@ -43,10 +46,10 @@ internal fun TransactionDetailsValue.uiModel(context: Context, asset: Asset): Tr
 
     is TransactionDetailsValue.Fee -> TransactionDetailsRowUIModel.Fee(
         ListItemModel(
-            title = context.getString(R.string.transfer_network_fee),
-            subtitle = value,
-            subtitleExtra = equivalent.takeIf { it.isNotEmpty() },
-            info = InfoSheetEntity.NetworkFeeInfo(this.asset.id.chain.networkName(), this.asset.symbol),
+            title = row.title.text(context),
+            subtitle = row.amount.text(),
+            subtitleExtra = row.fiat?.text(),
+            info = row.info.infoSheet(asset.iconModel()),
         ),
     )
 

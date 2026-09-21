@@ -14,6 +14,7 @@ import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.TransactionNFTTransferMetadata
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemSwapProgress
+import uniffi.gemstone.GemTransactionFeeRow
 import uniffi.gemstone.GemValueStyle
 import java.math.BigInteger
 
@@ -32,7 +33,7 @@ sealed interface TransactionDetailsValue {
         class Plain(val asset: Asset, val value: String, val equivalent: String?) : Amount
     }
 
-    class Fee(val asset: Asset, val value: String, val equivalent: String) : TransactionDetailsValue
+    class Fee(val row: GemTransactionFeeRow) : TransactionDetailsValue
 
     sealed class Destination(val data: String, val text: String, val chain: Chain? = null, val addressType: AddressType? = null, val explorerLink: BlockExplorerLink? = null) : TransactionDetailsValue {
         class Sender(data: String, text: String, chain: Chain, addressType: AddressType? = null, explorerLink: BlockExplorerLink? = null) : Destination(data, text, chain, addressType, explorerLink)

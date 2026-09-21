@@ -1,9 +1,11 @@
 package com.gemwallet.android.ui.components.list_item
 
 import android.content.Context
+import com.gemwallet.android.domains.asset.chain
 import com.gemwallet.android.domains.duration.formatDuration
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.ext.errorText
+import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.math.getRelativeDate
@@ -193,7 +195,9 @@ private fun GemListRowIcon.image(): ListItemImage? = when (this) {
     GemListRowIcon.ADD_TO_WALLET -> ListItemImage.Symbol(ListItemSymbol.AddCircle)
 }
 
-private fun GemInfoTopic.infoSheet(icon: Any?): InfoSheetEntity = when (this) {
+fun GemInfoTopic.infoSheet(icon: Any?): InfoSheetEntity = when (this) {
+    is GemInfoTopic.NetworkFee -> asset.toPrimitives().let { InfoSheetEntity.NetworkFeeInfo(it.chain.networkName(), it.symbol) }
+
     GemInfoTopic.OpenInterest -> InfoSheetEntity.OpenInterestInfo
 
     GemInfoTopic.FundingApr -> InfoSheetEntity.FundingAprInfo

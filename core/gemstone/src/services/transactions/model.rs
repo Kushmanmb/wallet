@@ -1,6 +1,6 @@
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::custom_types::GemBigUint;
-use crate::models::list::GemListRow;
+use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
 use crate::services::swap::model::GemSwapRate;
 use chrono::{DateTime, Utc};
 use primitives::{AddressName, Asset, AssetId, AssetPrice, Chain, ChainAsset, NFTAssetId, PerpetualDirection, Resource, Transaction, TransactionDirection, TransactionExtended, TransactionId, TransactionState, TransactionType};
@@ -276,7 +276,16 @@ pub struct GemTransactionDetailRows {
     pub pnl: Option<GemFormattedNumber>,
     pub price: Option<GemFormattedNumber>,
     pub fee: GemTransactionAmount,
+    pub fee_row: GemTransactionFeeRow,
     pub explorer: BlockExplorerLink,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemTransactionFeeRow {
+    pub title: GemListRowTitle,
+    pub amount: GemFormattedNumber,
+    pub fiat: Option<GemFormattedNumber>,
+    pub info: GemInfoTopic,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]

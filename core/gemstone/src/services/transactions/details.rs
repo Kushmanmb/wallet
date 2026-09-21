@@ -34,6 +34,6 @@ impl GemTransactionDetailsService {
             Some(transaction.transaction.to.clone()),
             transaction.transaction.memo.clone(),
         );
-        rules::detail_rows(&transaction, wallet_type, participant, explorer)
+        rules::detail_rows(&transaction, wallet_type, participant, explorer, self.get_currency())
     }
 }

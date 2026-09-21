@@ -121,11 +121,12 @@ extension TransactionSceneViewModel: ListSectionProvideable {
     }
 
     private var feeItem: TransactionItemModel {
-        let display = rows.fee.display(currency: service.getCurrency().toPrimitives(), formatter: .auto)
+        let fee = rows.feeRow
         return .fee(ListItemModel(
-            title: Localized.Transfer.networkFee,
-            subtitle: display.fiat?.text ?? display.amount.text,
-            infoAction: onSelectFee,
+            title: fee.title.text,
+            subtitle: fee.amount.text(),
+            subtitleExtra: fee.fiat?.text(),
+            infoAction: { [weak self] in self?.onInfo(fee.info) },
         ))
     }
 }
@@ -160,10 +161,6 @@ extension TransactionSceneViewModel {
 
     func onSelectFeeDetails() {
         isPresentingTransactionSheet = .feeDetails
-    }
-
-    private func onSelectFee() {
-        isPresentingTransactionSheet = .info(.networkFee(transactionExtended.feeAsset))
     }
 
     func onInfo(_ topic: GemInfoTopic) {

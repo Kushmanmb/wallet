@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use primitives::{BlockExplorerLink, Chain, TransactionState};
+use primitives::{Asset, BlockExplorerLink, Chain, TransactionState};
 
 use crate::config::social::GemSocialLink;
 use crate::duration_formatter::GemDurationPart;
@@ -72,6 +72,7 @@ pub enum GemListRowTitle {
     StakeApr,
     LockTime,
     MinimumAmount,
+    NetworkFee,
     Validator,
     Provider,
     Status,
@@ -127,8 +128,9 @@ pub enum GemNoticeKind {
     Info,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemInfoTopic {
+    NetworkFee { asset: Asset },
     OpenInterest,
     FundingApr,
     StakeApr,
