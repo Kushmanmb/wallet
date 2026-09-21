@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.assets.cases.GetAssetTokenInfo
-import com.gemwallet.android.application.pricealerts.cases.GetAssetPriceAlertState
 import com.gemwallet.android.application.pricealerts.cases.GetPriceAlerts
 import com.gemwallet.android.domains.asset.aggregates.toAssetInfoDataAggregate
 import com.gemwallet.android.domains.pricealerts.aggregates.PriceAlertDataAggregate
@@ -54,7 +53,6 @@ import javax.inject.Inject
 @HiltViewModel
 class PriceAlertViewModel @Inject constructor(
     getPriceAlerts: GetPriceAlerts,
-    private val getAssetPriceAlertState: GetAssetPriceAlertState,
     private val getAssetTokenInfo: GetAssetTokenInfo,
     private val service: GemPriceAlertServiceInterface,
     private val priceAlertFormatter: PriceAlertFormatter,
@@ -100,11 +98,7 @@ class PriceAlertViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val priceAlertEnabled = assetId.flatMapLatest { id ->
-        if (id == null) {
-            alertsEnabled
-        } else {
-            getAssetPriceAlertState.isAssetPriceAlertEnabled(id)
-        }
+        if (id == null) alertsEnabled else isAutoAlertEnabled
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

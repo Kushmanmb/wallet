@@ -25,6 +25,4 @@ class GemstonePriceAlertStore(private val priceAlertsDao: PriceAlertsDao, privat
     }
 
     fun observePriceAlerts(assetId: AssetId?): Flow<List<PriceAlertInfo>> = (assetId?.let { priceAlertsDao.getAlerts(it.toIdentifier()) } ?: priceAlertsDao.getAlerts()).map { it.toDTO() }
-
-    fun observeAssetPriceAlert(assetId: AssetId): Flow<PriceAlertInfo?> = priceAlertsDao.getAssetPriceAlert(assetId.toIdentifier()).map { it?.toDTO() }
 }

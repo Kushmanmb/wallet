@@ -2,7 +2,6 @@ package com.gemwallet.android.features.settings.price_alerts.viewmodels
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.gemwallet.android.application.pricealerts.cases.GetAssetPriceAlertState
 import com.gemwallet.android.application.pricealerts.cases.GetPriceAlerts
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ui.models.navigation.RouteArgument
@@ -111,7 +110,6 @@ class PriceAlertViewModelTest {
         getPriceAlerts = mockk<GetPriceAlerts> {
             every { this@mockk(any()) } returns flowOf(emptyList())
         },
-        getAssetPriceAlertState = mockk<GetAssetPriceAlertState> { every { isAssetPriceAlertEnabled(any()) } returns flowOf(false) },
         getAssetTokenInfo = mockk(relaxed = true),
         service = service,
         priceAlertFormatter = PriceAlertFormatter(),
