@@ -153,7 +153,7 @@ struct ServicesFactory {
         let notificationPermissions = GemstoneNotificationPermissions(service: pushNotificationEnablerService)
         let bannerService = Gemstone.GemBannerService(store: gemstoneBannerStore)
         let navigationPresenter = NavigationPresenter(assetsService: assetsService, nftService: nftService, recentActivity: recentAssetsService)
-        let gemstonePerpetualStore = GemstonePerpetualStore(store: stores.perpetualStore, balanceStore: stores.balanceStore)
+        let gemstonePerpetualStore = GemstonePerpetualStore(store: stores.perpetualStore)
         let perpetualService = gatewayService.perpetualService(
             price: priceService,
             store: gemstonePerpetualStore,

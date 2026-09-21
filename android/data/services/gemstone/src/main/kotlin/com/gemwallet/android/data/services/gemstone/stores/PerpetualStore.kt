@@ -11,7 +11,6 @@ import com.gemwallet.android.data.service.store.database.entities.toDB
 import com.gemwallet.android.data.service.store.database.entities.toDTO
 import com.gemwallet.android.data.service.store.database.entities.toDto
 import com.gemwallet.android.data.service.store.database.entities.toRecord
-import com.gemwallet.android.ext.HypercoreUSDC
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
@@ -46,10 +45,10 @@ class GemstonePerpetualStore(
 
     override suspend fun setPinned(perpetualIds: List<String>, pinned: Boolean) = perpetualDao.setPinned(perpetualIds, pinned)
 
-    override suspend fun deletePerpetuals() = transactionRunner.run {
+    override suspend fun clearPerpetuals(collateralAssetIds: List<String>) = transactionRunner.run {
         perpetualPositionDao.deleteAll()
         perpetualDao.deleteAll()
-        balancesDao.deleteByAssetId(HypercoreUSDC.id.toIdentifier())
+        collateralAssetIds.forEach { balancesDao.deleteByAssetId(it) }
     }
 
     override suspend fun getPositions(walletId: String, provider: GemPerpetualProvider): List<uniffi.gemstone.PerpetualPosition> = perpetualPositionDao.getPositionsByProvider(walletId, provider.toPrimitives()).map { it.toDto().toGem() }

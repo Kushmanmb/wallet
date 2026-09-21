@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use num_bigint::BigInt;
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
 use primitives::perpetual::PerpetualData;
-use primitives::{Asset, AssetBasic, AssetProperties, AssetScore, AutocloseValidation, PerpetualDirection, PerpetualMarginType, PerpetualMarketData, PerpetualPosition, PerpetualProvider, TpslType, Wallet, WalletId};
+use primitives::{Asset, AssetBasic, AssetId, AssetProperties, AssetScore, AutocloseValidation, PerpetualDirection, PerpetualMarginType, PerpetualMarketData, PerpetualPosition, PerpetualProvider, TpslType, Wallet, WalletId};
 
 use super::model::{GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualTransferData};
 use super::{GemAutocloseField, GemAutocloseModify, GemPerpetualService, GemPerpetualStore};
@@ -37,6 +37,7 @@ pub struct MemoryPerpetualStore {
     pub markets: Mutex<Vec<PerpetualMarketData>>,
     pub price_writes: Mutex<Vec<HashMap<String, f64>>>,
     pub deleted: Mutex<u32>,
+    pub cleared_collateral: Mutex<Vec<Vec<AssetId>>>,
     pub perpetual_writes: Mutex<Vec<Vec<PerpetualData>>>,
     pub pin_writes: Mutex<Vec<(Vec<String>, bool)>>,
 }
@@ -51,8 +52,9 @@ impl GemPerpetualStore for MemoryPerpetualStore {
         self.pin_writes.lock().unwrap().push((ids, pinned));
         Ok(())
     }
-    async fn delete_perpetuals(&self) -> Result<(), GemServiceError> {
+    async fn clear_perpetuals(&self, collateral_asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
         *self.deleted.lock().unwrap() += 1;
+        self.cleared_collateral.lock().unwrap().push(collateral_asset_ids);
         Ok(())
     }
     async fn get_positions(&self, _: WalletId, _: PerpetualProvider) -> Result<Vec<PerpetualPosition>, GemServiceError> {

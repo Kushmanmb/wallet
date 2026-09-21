@@ -225,7 +225,7 @@ impl GemPerpetualService {
     }
 
     pub async fn clear_markets(&self) -> Result<(), GemServiceError> {
-        self.store.delete_perpetuals().await?;
+        self.store.clear_perpetuals(rules::collateral_asset_ids()).await?;
         self.preferences.set_perpetual_markets_updated_at(None)
     }
 
@@ -351,6 +351,11 @@ mod tests {
             assert!(!testkit.service.sync_enablement(None, GemMarketsRefreshTrigger::UserRequested).await.unwrap());
 
             assert_eq!(*testkit.store.deleted.lock().unwrap(), 1);
+            assert_eq!(
+                testkit.store.cleared_collateral.lock().unwrap().clone(),
+                vec![vec![primitives::known_assets::HYPERCORE_PERPETUAL_USDC.id.clone()]],
+                "the store is told which collateral the clear takes with the markets"
+            );
             assert!(testkit.provider.requested_paths().is_empty());
         })
     }

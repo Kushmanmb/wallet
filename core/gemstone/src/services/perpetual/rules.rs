@@ -8,6 +8,7 @@ use primitives::perpetual::{PerpetualBalance, PerpetualData};
 use primitives::{
     Asset, AssetBasic, AssetId, AssetPrice, AssetProperties, AssetScore, AssetType, Chain, ChartPeriod, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, WalletType,
 };
+use strum::IntoEnumIterator;
 
 use super::model::{
     GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails,
@@ -414,6 +415,16 @@ pub fn stale_position_ids(existing_ids: Vec<String>, positions: &[PerpetualPosit
 
 pub fn collateral_asset_id(chain: Chain) -> Option<AssetId> {
     wallet_default_assets(chain).into_iter().find(|asset| asset.asset_type == AssetType::PERPETUAL).map(|asset| asset.id)
+}
+
+pub fn collateral_asset_ids() -> Vec<AssetId> {
+    PerpetualProvider::iter().filter_map(|provider| collateral_asset_id(provider_chain(&provider))).collect()
+}
+
+fn provider_chain(provider: &PerpetualProvider) -> Chain {
+    match provider {
+        PerpetualProvider::Hypercore => Chain::HyperCore,
+    }
 }
 
 pub fn collateral_price(chain: Chain) -> Option<AssetPrice> {
