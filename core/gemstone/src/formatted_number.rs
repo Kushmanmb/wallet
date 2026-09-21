@@ -217,6 +217,11 @@ pub fn formatted_amount(value: f64, symbol: Option<String>, style: GemValueStyle
 }
 
 #[uniffi::export]
+pub fn formatted_percentage(value: f64, style: GemPercentageStyle) -> GemFormattedNumber {
+    GemFormattedNumber::percentage(value, style)
+}
+
+#[uniffi::export]
 pub fn leverage_number(value: f64) -> GemFormattedNumber {
     GemFormattedNumber::leverage(value)
 }

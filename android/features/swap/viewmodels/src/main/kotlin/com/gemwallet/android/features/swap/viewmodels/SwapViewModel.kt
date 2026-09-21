@@ -67,6 +67,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemPercentageStyle
 import uniffi.gemstone.GemSlippageSelection
 import uniffi.gemstone.GemSwapButtonAction
 import uniffi.gemstone.GemSwapPairSelection
@@ -75,6 +76,7 @@ import uniffi.gemstone.GemSwapQuoteServiceInterface
 import uniffi.gemstone.GemSwapRequest
 import uniffi.gemstone.SwapProvider
 import uniffi.gemstone.SwapperException
+import uniffi.gemstone.formattedPercentage
 import uniffi.gemstone.swapperQuoteSummary
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -387,7 +389,7 @@ class SwapViewModel @Inject constructor(
     }
 
     companion object {
-        val percentSuggestions = gemConfig.getSwapConfig().amountPercentPresets.map { it.toInt() }
+        val percentSuggestions = gemConfig.getSwapConfig().amountPercentPresets.map { formattedPercentage(it.toDouble(), GemPercentageStyle.UNSIGNED_COMPACT) }
     }
 }
 

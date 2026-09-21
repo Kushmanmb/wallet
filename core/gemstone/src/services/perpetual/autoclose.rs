@@ -1,8 +1,13 @@
-use crate::formatted_number::GemFormattedNumber;
+use std::sync::Arc;
+
+use crate::formatted_number::{GemFormattedNumber, GemValueTone, value_tone};
 use crate::models::custom_types::GemBigInt;
+use crate::percentage::GemPercentageStyle;
+use crate::perpetual::GemAutocloseEstimator;
 use crate::perpetual::GemPerpetual;
 use crate::precision::GemCurrencyStyle;
 use crate::services::error::GemServiceError;
+use crate::services::localization::GemLocalizedText;
 use crate::services::transfer::GemTransferData;
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
 use primitives::perpetual::{CancelOrderData, PerpetualModifyConfirmData, PerpetualModifyPositionType, TPSLOrderData};
@@ -57,6 +62,45 @@ impl GemAutocloseField {
 
     fn set_price(&self) -> Option<String> {
         self.should_set().then(|| self.formatted_price.clone()).flatten()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAutocloseFieldState {
+    pub tpsl_type: TpslType,
+    pub is_profit: bool,
+    pub estimate: Option<GemLocalizedText>,
+    pub tone: GemValueTone,
+    pub suggestions: Vec<GemFormattedNumber>,
+    pub validation: AutocloseValidation,
+}
+
+#[uniffi::export]
+pub fn autoclose_field_state(field: GemAutocloseField, estimator: Arc<GemAutocloseEstimator>, shows_errors: bool) -> GemAutocloseFieldState {
+    let estimate = field.price.map(|price| {
+        let percent = GemFormattedNumber::percentage(estimator.roe(price), GemPercentageStyle::Signed);
+        match estimator.has_size() {
+            true => GemLocalizedText::Pnl {
+                amount: GemFormattedNumber::signed_currency(estimator.pnl(price), Currency::USD, GemCurrencyStyle::Currency),
+                percent,
+            },
+            false => GemLocalizedText::Number { number: percent },
+        }
+    });
+    GemAutocloseFieldState {
+        tpsl_type: field.tpsl_type,
+        is_profit: estimator.is_profit(field.price, field.tpsl_type),
+        estimate,
+        tone: field.price.map(|price| value_tone(estimator.roe(price))).unwrap_or(GemValueTone::Neutral),
+        suggestions: estimator
+            .percent_suggestions()
+            .into_iter()
+            .map(|percent| GemFormattedNumber::percentage(percent as f64, GemPercentageStyle::UnsignedCompact))
+            .collect(),
+        validation: match shows_errors {
+            true => field.validation,
+            false => AutocloseValidation::Valid,
+        },
     }
 }
 
@@ -272,6 +316,28 @@ mod tests {
         assert!(session.on_submit_attempt().view_state().shows_errors);
     }
     use super::*;
+
+    #[test]
+    fn test_a_field_estimates_from_any_typed_price_and_names_its_outcome() {
+        let estimator = Arc::new(GemAutocloseEstimator::new(100.0, 2.0, PerpetualDirection::Long, 5));
+        let profit = autoclose_field_state(GemAutocloseField::mock(Some(120.0), None, true, None), estimator.clone(), true);
+        let loss = autoclose_field_state(GemAutocloseField::mock(Some(80.0), None, false, None), estimator.clone(), true);
+        let empty = autoclose_field_state(GemAutocloseField::mock(None, None, false, None), estimator.clone(), true);
+
+        assert!(profit.is_profit);
+        assert_eq!(profit.tone, GemValueTone::Positive);
+        assert!(matches!(profit.estimate, Some(GemLocalizedText::Pnl { .. })), "a sized position names the amount and the percent");
+        assert!(!loss.is_profit, "a take profit under the market still estimates, as a loss");
+        assert_eq!(loss.tone, GemValueTone::Negative);
+        assert_eq!(empty.estimate, None);
+        assert_eq!(empty.tone, GemValueTone::Neutral);
+        assert!(profit.suggestions.iter().all(|value| value.unit == crate::formatted_number::GemNumberUnit::Percent));
+        assert_eq!(
+            autoclose_field_state(GemAutocloseField::mock(Some(80.0), None, false, None), estimator, false).validation,
+            AutocloseValidation::Valid,
+            "errors wait for a submit attempt"
+        );
+    }
 
     #[test]
     fn test_field_rules() {

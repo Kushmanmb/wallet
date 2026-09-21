@@ -208,12 +208,6 @@ extension AutocloseSceneViewModel {
     }
 
     private func autocloseModel(type: TpslType, price: Double?) -> AutocloseViewModel {
-        AutocloseViewModel(
-            type: type,
-            price: price,
-            estimator: estimator,
-            currencyFormatter: currencyFormatter,
-            percentFormatter: percentFormatter,
-        )
+        AutocloseViewModel(type: type, price: price, estimator: estimator)
     }
 }

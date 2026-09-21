@@ -24,8 +24,6 @@ public extension AutocloseViewModel {
                 direction: Primitives.PerpetualDirection.long.toGem(),
                 leverage: leverage,
             ),
-            currencyFormatter: CurrencyFormatter(currencyCode: "USD"),
-            percentFormatter: .signed,
         )
     }
 }
