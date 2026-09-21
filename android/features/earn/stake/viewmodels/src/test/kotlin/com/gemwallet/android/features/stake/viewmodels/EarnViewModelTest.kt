@@ -33,6 +33,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemEarnActions
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 import java.math.BigInteger
@@ -49,6 +50,9 @@ class EarnViewModelTest {
     private val aprRow = GemListRow.Text(GemListRowTitle.STAKE_APR, "4.00%")
     private val stakeService = mockk<uniffi.gemstone.GemStakeServiceInterface>(relaxed = true) {
         every { earnAprRow(any(), any()) } returns aprRow
+        every { earnActions(any(), any()) } answers {
+            GemEarnActions(depositProvider = secondArg<List<uniffi.gemstone.DelegationValidator>>().firstOrNull().takeIf { firstArg<uniffi.gemstone.WalletType>() != uniffi.gemstone.WalletType.VIEW })
+        }
     }
     private val getAssetInfo = mockk<GetAssetInfo> {
         every { this@mockk(asset.id) } returns flowOf(mockAssetInfo(asset = asset))

@@ -40,6 +40,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
+import uniffi.gemstone.GemLoadState
+import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemStakeServiceInterface
 import uniffi.gemstone.GemValidatorRow
 import uniffi.gemstone.validatorRow
@@ -90,12 +92,16 @@ class EarnViewModel @Inject constructor(
     val depositListItem = ListItemModel(title = context.getString(R.string.wallet_deposit))
 
     val depositParams = combine(providers, session) { items, current ->
-        val provider = items.firstOrNull() ?: return@combine null
-        if (current?.wallet?.type == WalletType.View) return@combine null
+        val provider = stakeService.earnActions((current?.wallet?.type ?: WalletType.View).toGem(), items.map { it.toGem() }).depositProvider ?: return@combine null
         AmountParams.Earn.Deposit(assetId, provider.id)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val sync = MutableStateFlow(true)
+    private val loadState = MutableStateFlow<GemLoadState>(GemLoadState.Loading)
+
+    val loadError: StateFlow<GemServiceException?> = loadState
+        .map { (it as? GemLoadState.Error)?.error }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val isSync = sync
         .flatMapLatest { isSync ->
@@ -106,8 +112,9 @@ class EarnViewModel @Inject constructor(
                 }
                 assetInfo.filterNotNull().first()
                 emit(true)
-                runCatchingCancellable { stakeService.syncEarn(assetId.toIdentifier()) }
-                    .onFailure { Log.e(TAG, "earn sync failed", it) }
+                val state = stakeService.refreshEarn(assetId.toIdentifier(), positions.value.isNotEmpty())
+                (state as? GemLoadState.Error)?.let { Log.e(TAG, "earn sync failed", it.error) }
+                loadState.value = state
                 emit(false)
                 sync.update { false }
             }

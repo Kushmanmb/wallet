@@ -19,7 +19,7 @@ use crate::models::custom_types::GemBigInt;
 use crate::models::{GemContractCallData, GemEarnType};
 
 pub use model::{
-    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationStatus, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeSection,
+    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationStatus, GemEarnActions, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeSection,
     GemStakeValidatorSelection, GemValidatorRow,
 };
 pub use store::GemStakeStore;
@@ -95,6 +95,14 @@ impl GemStakeService {
 
     pub async fn refresh(&self, chain: Chain, delegations: Vec<Delegation>) -> GemLoadState {
         GemLoadState::refreshed(self.sync(chain).await, !delegations.is_empty())
+    }
+
+    pub async fn refresh_earn(&self, asset_id: AssetId, has_rows: bool) -> GemLoadState {
+        GemLoadState::refreshed(self.sync_earn(asset_id).await, has_rows)
+    }
+
+    pub fn earn_actions(&self, wallet_type: WalletType, providers: Vec<DelegationValidator>) -> GemEarnActions {
+        rules::earn_actions(wallet_type, providers)
     }
 
     pub async fn sync_earn(&self, asset_id: AssetId) -> Result<(), GemServiceError> {

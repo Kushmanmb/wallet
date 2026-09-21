@@ -141,6 +141,11 @@ pub struct GemStakeValidatorSelection {
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemEarnActions {
+    pub deposit_provider: Option<DelegationValidator>,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemValidatorRow {
     pub validator: DelegationValidator,
     pub name: String,

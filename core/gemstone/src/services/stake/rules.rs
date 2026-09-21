@@ -12,7 +12,7 @@ use rand::seq::IndexedRandom;
 use std::str::FromStr;
 
 use super::model::{
-    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationStatus, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeSection,
+    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationStatus, GemEarnActions, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeSection,
     GemStakeValidatorSelection, GemValidatorRow,
 };
 use crate::config::image::GemImage;
@@ -421,6 +421,12 @@ impl GemAssetBalance {
 
     fn shows_stake_balance(&self, chain: Chain, is_stake_enabled: bool) -> bool {
         StakeChain::from_chain(chain).is_some() && (is_stake_enabled || self.staked_value(chain) > GemBigUint::ZERO)
+    }
+}
+
+pub fn earn_actions(wallet_type: WalletType, providers: Vec<DelegationValidator>) -> GemEarnActions {
+    GemEarnActions {
+        deposit_provider: (wallet_type != WalletType::View).then(|| selectable_validators(providers).into_iter().next()).flatten(),
     }
 }
 
@@ -1453,6 +1459,20 @@ mod tests {
         assert!(can_claim_stake_rewards(Chain::Cosmos, &BigUint::from(10u32)));
         assert!(!can_claim_stake_rewards(Chain::Cosmos, &BigUint::ZERO));
         assert!(!can_claim_stake_rewards(Chain::Bitcoin, &BigUint::from(10u32)));
+    }
+
+    #[test]
+    fn test_only_a_signing_wallet_deposits_and_it_deposits_with_the_best_provider() {
+        let mut best = DelegationValidator::mock_cosmos("best");
+        best.apr = 9.0;
+        let mut worse = DelegationValidator::mock_cosmos("worse");
+        worse.apr = 1.0;
+        let mut inactive = DelegationValidator::mock_cosmos("inactive");
+        inactive.is_active = false;
+
+        assert_eq!(earn_actions(WalletType::Multicoin, vec![worse.clone(), best.clone()]).deposit_provider.map(|provider| provider.id), Some(best.id.clone()));
+        assert_eq!(earn_actions(WalletType::View, vec![best]).deposit_provider, None, "a watch wallet cannot deposit");
+        assert_eq!(earn_actions(WalletType::Multicoin, vec![inactive]).deposit_provider, None, "an inactive provider is no provider");
     }
 
     #[test]

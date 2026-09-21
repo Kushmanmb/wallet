@@ -293,6 +293,14 @@ public final class GemStakeServiceMock: GemStakeServiceProtocol, @unchecked Send
     }
 
     public func syncEarn(assetId _: Gemstone.AssetId) async throws {}
+
+    public func refreshEarn(assetId _: Gemstone.AssetId, hasRows _: Bool) async -> GemLoadState {
+        refreshState
+    }
+
+    public func earnActions(walletType: Gemstone.WalletType, providers: [Gemstone.DelegationValidator]) -> GemEarnActions {
+        GemEarnActions(depositProvider: walletType == .view ? nil : providers.first)
+    }
 }
 
 public final class GemTransactionStateServiceMock: GemTransactionStateServiceProtocol, @unchecked Sendable {

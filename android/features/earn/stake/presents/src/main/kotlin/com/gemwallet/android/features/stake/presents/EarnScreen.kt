@@ -36,6 +36,7 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.theme.paddingLarge
+import uniffi.gemstone.GemListRow
 
 @Composable
 fun EarnScreen(amountAction: AmountTransactionAction, onDelegation: (String, String) -> Unit, onCancel: () -> Unit, viewModel: EarnViewModel = hiltViewModel()) {
@@ -45,6 +46,7 @@ fun EarnScreen(amountAction: AmountTransactionAction, onDelegation: (String, Str
     val aprRow by viewModel.aprRow.collectAsStateWithLifecycle()
     val depositParams by viewModel.depositParams.collectAsStateWithLifecycle()
     val inSync by viewModel.isSync.collectAsStateWithLifecycle()
+    val loadError by viewModel.loadError.collectAsStateWithLifecycle()
 
     val earnAssetInfo = assetInfo
     if (earnAssetInfo == null) {
@@ -83,9 +85,14 @@ fun EarnScreen(amountAction: AmountTransactionAction, onDelegation: (String, Str
                 }
 
                 if (positions.isEmpty()) {
-                    item {
-                        Spacer(modifier = Modifier.height(paddingLarge))
-                        EmptyContentView(type = EmptyContentType.Earn(symbol = earnAssetInfo.asset.symbol))
+                    if (!inSync) {
+                        item {
+                            Spacer(modifier = Modifier.height(paddingLarge))
+                            when (val error = loadError) {
+                                null -> EmptyContentView(type = EmptyContentType.Earn(symbol = earnAssetInfo.asset.symbol))
+                                else -> GemListRowView(row = GemListRow.Error(error), listPosition = ListPosition.Single)
+                            }
+                        }
                     }
                 } else {
                     item { SubheaderItem(R.string.perpetual_positions) }

@@ -3,6 +3,7 @@
 import Components
 import Foundation
 import enum Gemstone.GemListRow
+import enum Gemstone.GemLoadState
 import protocol Gemstone.GemStakeServiceProtocol
 import GemstonePrimitives
 import GemstoneServices
@@ -16,7 +17,7 @@ import Store
 public final class EarnSceneViewModel {
     private let service: any GemStakeServiceProtocol
     private let onNavigate: StakeRouteAction
-    private var viewState: StateViewType<Bool> = .loading
+    private var viewState: GemLoadState = .loading
 
     public let wallet: Wallet
     public let asset: Asset
@@ -87,8 +88,8 @@ public final class EarnSceneViewModel {
     }
 
     private var depositRoute: StakeRoute? {
-        guard wallet.canSign, let provider = providers.first else { return nil }
-        return .transfer(.amount(AmountInput(type: .earn(.deposit(provider.toGem())), asset: asset)))
+        guard let provider = service.earnActions(walletType: wallet.type.toGem(), providers: providersQuery.value.map { $0.toGem() }).depositProvider else { return nil }
+        return .transfer(.amount(AmountInput(type: .earn(.deposit(provider)), asset: asset)))
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
@@ -110,7 +111,7 @@ public final class EarnSceneViewModel {
     }
 
     var showEmptyState: Bool {
-        !hasPositions && !viewState.isLoading
+        !hasPositions && viewState != .loading
     }
 
     var positionsSectionTitle: String {
@@ -140,11 +141,6 @@ extension EarnSceneViewModel {
 
     func load() async {
         viewState = .loading
-        do {
-            try await service.syncEarn(assetId: asset.id.identifier)
-            viewState = .data(true)
-        } catch {
-            viewState = .error(error)
-        }
+        viewState = await service.refreshEarn(assetId: asset.id.identifier, hasRows: hasPositions)
     }
 }
