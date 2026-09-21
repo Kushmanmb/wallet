@@ -27,16 +27,19 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GemApplicationMetadataServiceInterface
+import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemSignMessageServiceInterface
 import uniffi.gemstone.GemWalletConnectFailure
 import uniffi.gemstone.GemWalletConnectOutcome
@@ -244,6 +247,33 @@ class WCRequestViewModelTest {
 
         assertNull(requests.current.value)
         verify(exactly = 0) { respond.respond(any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `a failed signature leaves the request open and only a cancelled one answers the dapp`() = runTest(dispatcher) {
+        val requests = WalletConnectPendingRequests()
+        val service = service()
+        val signMessageService = signMessageService()
+        coEvery { service.signMessage(any(), any()) } throws GemServiceException.Api("offline")
+        val model = viewModel(service = service, signMessageService = signMessageService, requests = requests)
+
+        model.onRequest(sessionRequest, verifyContext, onNotify = {}, onError = {})
+        val job = pending(requests)
+        model.awaitContent()
+
+        val errors = mutableListOf<String>()
+        model.onSign(onError = errors::add)
+        advanceUntilIdle()
+
+        assertEquals(1, errors.size)
+        assertNotNull(requests.current.value)
+
+        coEvery { service.signMessage(any(), any()) } throws GemServiceException.Cancelled()
+        model.onSign(onError = errors::add)
+        job.join()
+
+        assertEquals(1, errors.size)
+        assertNull(requests.current.value)
     }
 
     @Test

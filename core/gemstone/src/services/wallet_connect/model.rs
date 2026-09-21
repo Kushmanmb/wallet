@@ -1,5 +1,6 @@
 use crate::application::GemConnectionRow;
 use crate::models::list::GemListRow;
+use crate::services::error_text::GemErrorText;
 use crate::services::transfer::GemTransferData;
 use primitives::{Account, Asset, Chain, SimulationResult, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionVerificationStatus};
 
@@ -60,6 +61,12 @@ pub enum GemWalletConnectFailure {
     MaliciousOrigin,
     Expired,
     Failed { message: String },
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemSignerFailure {
+    Retry { error: GemErrorText },
+    Reject,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]

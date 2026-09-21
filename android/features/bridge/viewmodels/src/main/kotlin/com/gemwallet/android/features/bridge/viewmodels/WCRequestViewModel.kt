@@ -41,9 +41,11 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemSignMessageServiceInterface
+import uniffi.gemstone.GemSignerFailure
 import uniffi.gemstone.GemWalletConnectFailure
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.GemWalletConnectSessionRequest
+import uniffi.gemstone.signerFailure
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -136,8 +138,10 @@ class WCRequestViewModel @Inject constructor(
             } catch (err: GemServiceException) {
                 Log.e(TAG, "Sign message failed topic=${request.pending.sessionId}", err)
                 state.update { it.copy(responseState = RequestResponseState.Idle, approved = null) }
-                onError(err.text().text(context))
-                request.reject()
+                when (val failure = signerFailure(err.text())) {
+                    is GemSignerFailure.Retry -> onError(failure.error.text(context))
+                    GemSignerFailure.Reject -> request.reject()
+                }
                 return@launch
             }
             request.approve(signature)

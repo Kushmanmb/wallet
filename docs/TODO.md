@@ -56,7 +56,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | R108, B77, O59; retain native locale/theme application |
 | Security/lock/biometry/recovery | `GemSecurityService`, existing keystore/auth ports and settings sections | D72, B77, X172; retain platform-only privacy lock |
 | Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | P97, D48/D49/D58, S80, B77/B80 |
-| WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | F57, D71–D73; retain Android-only one-click auth |
+| WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | F57, D72/D73; retain Android-only one-click auth |
 | About, app update, developer/service status | Existing settings/update/developer services and native store adapters | R131, B77; platform delivery channels remain distinct |
 | Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | U9/U17, F61/F62; retain native widget scheduling |
 
@@ -233,7 +233,6 @@ The same product rule on both apps with a difference, each read on both sides on
 - **D65** **S** Pasting a payment URI into a contact address is parsed on Android only (`ManageContactViewModel.kt:199-207` through `scannedAddress`); iOS pastes the raw text, so `ripple:r…?dt=5` fills address and memo on Android and is invalid on iOS. One rule through `scanned_address`.
 - **D66** **S** Perpetual market membership differs: iOS takes the top 100 by volume and derives pins from that capped set (`PerpetualsRequest.swift:8,28`); Android excludes zero volume except on priority search (`PerpetualDao.kt:34`, `PerpetualStore.kt:84-99`). Define listed/tradable eligibility in Core and a consistent query contract, read pins independently of the result cap, and retain native indexed search/order. Keep delisted metadata needed for held positions/history; do not delete markets just to hide them from discovery. Test pinned-outside-cap, zero-volume search and a held delisted position.
 - **D67** **S** Swap's default pay asset depends on adapter candidate order: iOS uses enabled swappable candidates with pins first, Android uses a capped visible nonnegative-rank list and re-sorts away pinned precedence; recent limits/filtering also differ (20 versus 10). `GemSwapService::suggest_pair` already owns selection. Define one eligibility, ranking and limit contract on its existing store input, implement it in both indexed queries, and remove redundant app re-sorting. Do not load/sort an unbounded wallet in Core. Test hidden/enabled, pins, caps and recents with paired query fixtures.
-- **D71** **S** A failed WalletConnect message signature ends differently: Android shows the error and rejects the request as user-cancelled (`WCRequestViewModel.kt:139-147`, `WalletConnectPendingRequest.kt:41-42`), so the dApp hears "user rejected"; iOS alerts and leaves it open for another attempt. Core owns the signer-failure outcome.
 
 ## 3. The view boundary
 

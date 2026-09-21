@@ -3,11 +3,13 @@
 import Components
 import Foundation
 import enum Gemstone.GemListRow
+import enum Gemstone.GemServiceError
 import struct Gemstone.GemSignMessagePreview
 import protocol Gemstone.GemSignMessageServiceProtocol
 import struct Gemstone.GemSimulationPayloadRow
 import struct Gemstone.GemSimulationValue
 import struct Gemstone.GemWalletConnectMessageRequest
+import func Gemstone.signerFailure
 import func Gemstone.simulationWarningRows
 import GemstonePrimitives
 import Localization
@@ -125,6 +127,14 @@ public final class SignMessageSceneViewModel {
             do {
                 try await signMessage()
                 onComplete()
+            } catch let error as GemServiceError {
+                switch signerFailure(error: error.text()) {
+                case let .retry(text):
+                    isPresentingAlertMessage = AlertMessage(title: Localized.Errors.errorOccurred, message: text.text)
+                case .reject:
+                    confirmTransferDelegate(.failure(error))
+                    onComplete()
+                }
             } catch {
                 isPresentingAlertMessage = AlertMessage(error: error)
             }

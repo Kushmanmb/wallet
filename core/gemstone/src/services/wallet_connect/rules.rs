@@ -12,8 +12,9 @@ use primitives::{Account, ApplicationMetadata, ApplicationMetadataSource, Chain,
 
 use crate::models::list::{GemListRow, GemListRowTitle};
 use crate::services::error::GemServiceError;
+use crate::services::error_text::GemErrorText;
 use crate::services::transfer::{GemRecipient, GemTransferData};
-use crate::services::wallet_connect::model::{GemWalletConnectAuthAccount, GemWalletConnectRejection, GemWalletConnectRejectionReason, GemWalletConnectRpcError, GemWalletConnectTransactionAction};
+use crate::services::wallet_connect::model::{GemSignerFailure, GemWalletConnectAuthAccount, GemWalletConnectRejection, GemWalletConnectRejectionReason, GemWalletConnectRpcError, GemWalletConnectTransactionAction};
 use crate::wallet_connect::{EvmTransactionKind, WalletConnect, WalletConnectTransaction, wallet_connect_chain, wallet_connect_namespace};
 use num_bigint::BigInt;
 use primitives::GasPriceType;
@@ -181,6 +182,13 @@ pub fn session_rejection(reason: GemWalletConnectRejectionReason) -> GemWalletCo
         code,
         message: message.to_string(),
         deletes_session: true,
+    }
+}
+
+pub fn signer_failure(error: GemErrorText) -> GemSignerFailure {
+    match error {
+        GemErrorText::Cancelled => GemSignerFailure::Reject,
+        error => GemSignerFailure::Retry { error },
     }
 }
 
@@ -677,6 +685,16 @@ pub fn record_seen_message(seen: &mut Vec<String>, message_id: String, limit: us
 #[cfg(test)]
 mod message_tests {
     use super::*;
+
+    #[test]
+    fn test_only_a_cancelled_signature_answers_the_dapp() {
+        assert_eq!(signer_failure(GemErrorText::Cancelled), GemSignerFailure::Reject);
+        assert_eq!(
+            signer_failure(GemErrorText::NetworkOffline),
+            GemSignerFailure::Retry { error: GemErrorText::NetworkOffline },
+            "a signature that failed on its own leaves the request open to try again"
+        );
+    }
 
     #[test]
     fn test_a_repeated_message_is_only_processed_once() {
