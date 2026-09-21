@@ -22,6 +22,7 @@ import org.junit.Test
 import uniffi.gemstone.GemNumberFormat
 import uniffi.gemstone.GemSlippageSelection
 import uniffi.gemstone.GemSlippageSession
+import uniffi.gemstone.GemSwapPairFailure
 import uniffi.gemstone.GemSwapPairSelection
 import uniffi.gemstone.GemSwapPairSuggestion
 import uniffi.gemstone.GemSwapQuoteServiceInterface
@@ -265,8 +266,6 @@ class RequestSwapQuotesImplTest {
 
         override suspend fun suggestPair(payAssetId: String?): GemSwapPairSuggestion? = null
 
-        override suspend fun addPrices(assetIds: List<String>) = Unit
-
         override fun getCurrency(): uniffi.gemstone.Currency = com.wallet.core.primitives.Currency.USD.toGem()
 
         override fun defaultSlippage(chain: String): SwapperSlippage = throw UnsupportedOperationException()
@@ -291,6 +290,6 @@ class RequestSwapQuotesImplTest {
 
         override fun slippagePercent(bps: UInt): Double = throw UnsupportedOperationException()
 
-        override suspend fun updateBalances(assetIds: List<String>) = Unit
+        override suspend fun refreshPair(assetIds: List<String>): List<GemSwapPairFailure> = emptyList()
     }
 }

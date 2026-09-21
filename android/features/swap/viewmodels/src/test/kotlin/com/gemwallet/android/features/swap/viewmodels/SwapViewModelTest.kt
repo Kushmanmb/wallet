@@ -152,7 +152,7 @@ class SwapViewModelTest {
     )
 
     @Test
-    fun `both legs of the pair are subscribed for live prices`() = runTest(testDispatcher) {
+    fun `the pair is refreshed once, for both legs together`() = runTest(testDispatcher) {
         val wallet = mockWallet(
             accounts = listOf(mockAccount(chain = solAsset.id.chain), mockAccount(chain = usdcAsset.id.chain)),
         )
@@ -161,8 +161,7 @@ class SwapViewModelTest {
         createViewModel(swapSavedState())
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { swapQuoteService.addPrices(listOf(solAsset.id.toIdentifier())) }
-        coVerify(exactly = 1) { swapQuoteService.addPrices(listOf(usdcAsset.id.toIdentifier())) }
+        coVerify(exactly = 1) { swapQuoteService.refreshPair(listOf(solAsset.id.toIdentifier(), usdcAsset.id.toIdentifier())) }
     }
 
     @Test
