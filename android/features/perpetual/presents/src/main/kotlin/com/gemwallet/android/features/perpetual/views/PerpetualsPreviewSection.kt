@@ -21,12 +21,13 @@ fun PerpetualsPreviewSection(onOpenPerpetuals: () -> Unit, onOpenPerpetualDetail
     val show by viewModel.showPerpetuals.collectAsStateWithLifecycle()
     if (!show) return
     val positions by viewModel.positions.collectAsStateWithLifecycle()
+    val tradeListItem by viewModel.tradeListItem.collectAsStateWithLifecycle()
 
     Column {
         SubheaderItem(stringResource(R.string.perpetuals_title), onClick = onOpenPerpetuals)
         if (positions.isEmpty()) {
             ListItem(
-                model = viewModel.bannerListItem,
+                model = tradeListItem,
                 listPosition = ListPosition.Single,
                 modifier = Modifier.clickable(onClick = onOpenPerpetuals),
                 accessory = { DataBadgeChevron() },
