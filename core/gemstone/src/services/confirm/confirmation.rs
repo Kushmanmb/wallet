@@ -5,6 +5,8 @@ use futures::lock::Mutex;
 use primitives::currency::Currency;
 use primitives::{AddressName, AssetId, BlockExplorerLink, Chain, PerpetualModifyConfirmData, SimulationResult, Wallet};
 
+use super::error::GemConfirmErrorInfo;
+use super::model::GemConfirmMetadata;
 use super::rules::{acquire_swap_pair, preload_simulation};
 use super::{GemAcquireAssetFlow, GemConfirmError, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemSubmitResult, GemTransferAmountResult};
 use crate::models::list::GemListRow;
@@ -92,6 +94,10 @@ impl GemConfirmation {
     pub fn acquire_swap_pair(&self, fee_asset_id: Option<AssetId>, asset_id: AssetId) -> GemSwapPairSelection {
         let fee_asset_id = fee_asset_id.unwrap_or_else(|| self.transfer.fee_asset().id);
         acquire_swap_pair(&self.transfer.input_asset().id, &fee_asset_id, asset_id)
+    }
+
+    pub fn error_info(&self, error: GemConfirmError, metadata: Option<GemConfirmMetadata>) -> Option<GemConfirmErrorInfo> {
+        super::error::confirm_error_info(error, metadata.map(|metadata| metadata.prices).unwrap_or_default(), self.get_currency())
     }
 
     pub fn insufficient_network_fee_buy_amount(&self) -> i32 {

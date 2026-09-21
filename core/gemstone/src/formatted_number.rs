@@ -79,6 +79,14 @@ impl GemFormattedNumber {
         }
     }
 
+    pub fn asset_amount(value: &num_bigint::BigInt, asset: &primitives::Asset, style: GemValueStyle) -> Self {
+        Self::amount(asset_value(value, asset.decimals), Some(asset.symbol.clone()), style)
+    }
+
+    pub fn asset_fiat(value: &num_bigint::BigInt, asset: &primitives::Asset, price: f64, currency: Currency) -> Self {
+        Self::currency(asset_value(value, asset.decimals) * price, currency, GemCurrencyStyle::Currency)
+    }
+
     pub fn usd(value: f64) -> Self {
         Self::currency(value, Currency::USD, GemCurrencyStyle::Currency)
     }
@@ -237,6 +245,10 @@ fn value_display(value: f64, style: GemValueStyle) -> GemNumberDisplay {
         };
     }
     GemNumberDisplay::Number { precision: style.precision(value) }
+}
+
+fn asset_value(value: &num_bigint::BigInt, decimals: i32) -> f64 {
+    number_formatter::BigNumberFormatter::value(&value.to_string(), decimals).ok().and_then(|text| text.parse::<f64>().ok()).unwrap_or_default()
 }
 
 #[cfg(test)]
