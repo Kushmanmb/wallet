@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import com.gemwallet.android.ext.toGem
-import com.gemwallet.android.features.settings.settings.viewmodels.SupportChatLink
 import com.gemwallet.android.features.settings.settings.viewmodels.SupportChatMessage
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.clipboard.clipboardManager
@@ -65,6 +64,7 @@ import com.wallet.core.primitives.SupportMessageImage
 import com.wallet.core.primitives.SupportMessageSender
 import com.wallet.core.primitives.SupportMessageStatus
 import uniffi.gemstone.GemSupportMessageOutcome
+import uniffi.gemstone.SupportMessageLink
 import uniffi.gemstone.supportMessageOutcome
 import java.text.DateFormat
 import java.util.Date
@@ -204,7 +204,7 @@ private fun MessageText(text: String, textColor: Color, linkColor: Color, metaCo
 }
 
 @Composable
-private fun SupportMessageLinks(links: List<SupportChatLink>, linkColor: Color, metaColor: Color, showTopDivider: Boolean, onClick: (String) -> Unit) {
+private fun SupportMessageLinks(links: List<SupportMessageLink>, linkColor: Color, metaColor: Color, showTopDivider: Boolean, onClick: (String) -> Unit) {
     Column {
         val dividerColor = metaColor.copy(alpha = 0.3f)
         if (showTopDivider) {
@@ -225,7 +225,7 @@ private fun SupportMessageLinks(links: List<SupportChatLink>, linkColor: Color, 
 }
 
 @Composable
-private fun SupportMessageLinkRow(link: SupportChatLink, linkColor: Color, metaColor: Color, onClick: (String) -> Unit) {
+private fun SupportMessageLinkRow(link: SupportMessageLink, linkColor: Color, metaColor: Color, onClick: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
