@@ -34,12 +34,12 @@ sealed interface TransactionDetailsValue {
 
     class Fee(val asset: Asset, val value: String, val equivalent: String) : TransactionDetailsValue
 
-    sealed class Destination(val data: String, val chain: Chain? = null, val name: String? = null, val addressType: AddressType? = null, val explorerLink: BlockExplorerLink? = null) : TransactionDetailsValue {
-        class Sender(data: String, chain: Chain, name: String? = null, addressType: AddressType? = null, explorerLink: BlockExplorerLink? = null) : Destination(data, chain, name, addressType, explorerLink)
-        class Recipient(data: String, chain: Chain, name: String? = null, addressType: AddressType? = null, explorerLink: BlockExplorerLink? = null) : Destination(data, chain, name, addressType, explorerLink)
-        class Contract(data: String, chain: Chain, name: String? = null, explorerLink: BlockExplorerLink? = null) : Destination(data, chain = chain, name = name, explorerLink = explorerLink)
-        class Validator(data: String, chain: Chain, name: String? = null, explorerLink: BlockExplorerLink? = null) : Destination(data, chain = chain, name = name, explorerLink = explorerLink)
-        class ProviderAddress(data: String, chain: Chain, name: String? = null, explorerLink: BlockExplorerLink? = null) : Destination(data, chain = chain, name = name, explorerLink = explorerLink)
+    sealed class Destination(val data: String, val text: String, val chain: Chain? = null, val addressType: AddressType? = null, val explorerLink: BlockExplorerLink? = null) : TransactionDetailsValue {
+        class Sender(data: String, text: String, chain: Chain, addressType: AddressType? = null, explorerLink: BlockExplorerLink? = null) : Destination(data, text, chain, addressType, explorerLink)
+        class Recipient(data: String, text: String, chain: Chain, addressType: AddressType? = null, explorerLink: BlockExplorerLink? = null) : Destination(data, text, chain, addressType, explorerLink)
+        class Contract(data: String, text: String, chain: Chain, explorerLink: BlockExplorerLink? = null) : Destination(data, text, chain = chain, explorerLink = explorerLink)
+        class Validator(data: String, text: String, chain: Chain, explorerLink: BlockExplorerLink? = null) : Destination(data, text, chain = chain, explorerLink = explorerLink)
+        class ProviderAddress(data: String, text: String, chain: Chain, explorerLink: BlockExplorerLink? = null) : Destination(data, text, chain = chain, explorerLink = explorerLink)
     }
 
     class EstimatedConfirmation(val seconds: UInt) : TransactionDetailsValue

@@ -63,7 +63,7 @@ internal fun TransactionDetailsScene(data: TransactionDetailsAggregate, sections
 
                     is TransactionDetailsRowUIModel.Address -> AddressPropertyItem(
                         title = row.title,
-                        displayText = row.name ?: rememberFormattedAddress(row.address, row.chain),
+                        displayText = row.text,
                         copyValue = row.address,
                         explorerLink = row.explorerLink,
                         listPosition = position,

@@ -166,23 +166,23 @@ class TransactionDetailsAggregateImplTest {
         val name = AddressName(Chain.Bitcoin, "sender-address", "Alice", AddressType.Contact, VerificationStatus.Verified)
         val sender = createAggregate(
             rows = mockGemTransactionDetailRows(
-                participant = GemTransactionParticipant(GemTransactionParticipantRole.SENDER, "sender-address", name.toGem(), link, canAddContact = false),
+                participant = GemTransactionParticipant(GemTransactionParticipantRole.SENDER, "sender-address", "Alice", name.toGem(), link, canAddContact = false),
             ),
         ).participant
         Assert.assertTrue(sender is TransactionDetailsValue.Destination.Sender)
         Assert.assertEquals("sender-address", sender?.data)
         Assert.assertEquals(Chain.Bitcoin, sender?.chain)
-        Assert.assertEquals("Alice", sender?.name)
+        Assert.assertEquals("Alice", sender?.text)
         Assert.assertEquals(AddressType.Contact, sender?.addressType)
         Assert.assertEquals("https://example.com/address", sender?.explorerLink?.link)
 
         val validator = createAggregate(
             rows = mockGemTransactionDetailRows(
-                participant = GemTransactionParticipant(GemTransactionParticipantRole.VALIDATOR, "validator-address", null, link, canAddContact = false),
+                participant = GemTransactionParticipant(GemTransactionParticipantRole.VALIDATOR, "validator-address", "valid…ress", null, link, canAddContact = false),
             ),
         ).participant
         Assert.assertTrue(validator is TransactionDetailsValue.Destination.Validator)
-        Assert.assertNull(validator?.name)
+        Assert.assertEquals("valid…ress", validator?.text)
 
         Assert.assertNull(createAggregate().participant)
     }

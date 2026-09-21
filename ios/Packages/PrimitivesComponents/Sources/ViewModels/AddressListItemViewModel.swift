@@ -15,6 +15,7 @@ public struct AddressListItemViewModel {
         case auto(addressStyle: GemAddressFormatStyle)
         case address(addressStyle: GemAddressFormatStyle)
         case nameOrAddress
+        case text(String)
     }
 
     public let title: String
@@ -45,6 +46,7 @@ public struct AddressListItemViewModel {
         case let .auto(style): auto(for: style)
         case let .address(style): address(for: style)
         case .nameOrAddress: account.name ?? account.address
+        case let .text(text): text
         }
     }
 

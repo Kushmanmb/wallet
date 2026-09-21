@@ -121,6 +121,7 @@ pub enum GemTransactionParticipantRole {
 pub struct GemTransactionParticipant {
     pub role: GemTransactionParticipantRole,
     pub address: String,
+    pub text: String,
     pub name: Option<AddressName>,
     pub link: BlockExplorerLink,
     pub can_add_contact: bool,

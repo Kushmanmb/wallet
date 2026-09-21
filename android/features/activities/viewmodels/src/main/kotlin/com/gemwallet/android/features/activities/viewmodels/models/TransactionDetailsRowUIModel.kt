@@ -17,7 +17,7 @@ import uniffi.gemstone.GemListRow
 
 sealed interface TransactionDetailsRowUIModel {
     data class Item(val model: ListItemModel, val url: String? = null) : TransactionDetailsRowUIModel
-    data class Address(val title: String, val address: String, val chain: Chain?, val name: String?, val explorerLink: BlockExplorerLink?) : TransactionDetailsRowUIModel
+    data class Address(val title: String, val address: String, val chain: Chain?, val text: String, val explorerLink: BlockExplorerLink?) : TransactionDetailsRowUIModel
     data class Fee(val model: ListItemModel) : TransactionDetailsRowUIModel
     data class SwapProgress(val model: SwapProgressUIModel) : TransactionDetailsRowUIModel
     data class Value(val value: TransactionDetailsValue) : TransactionDetailsRowUIModel
@@ -37,7 +37,7 @@ internal fun TransactionDetailsValue.uiModel(context: Context, asset: Asset): Tr
         title = context.getString(stringRes()),
         address = data,
         chain = chain,
-        name = name,
+        text = text,
         explorerLink = explorerLink,
     )
 

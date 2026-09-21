@@ -154,11 +154,11 @@ class TransactionDetailsAggregateImpl(private val rows: GemTransactionDetailRows
         val name = name?.toPrimitives()
         val link = link.toPrimitives()
         return when (role) {
-            GemTransactionParticipantRole.SENDER -> TransactionDetailsValue.Destination.Sender(address, chain, name?.name, name?.type, link)
-            GemTransactionParticipantRole.RECIPIENT -> TransactionDetailsValue.Destination.Recipient(address, chain, name?.name, name?.type, link)
-            GemTransactionParticipantRole.CONTRACT -> TransactionDetailsValue.Destination.Contract(address, chain, name?.name, link)
-            GemTransactionParticipantRole.VALIDATOR -> TransactionDetailsValue.Destination.Validator(address, chain, name?.name, link)
-            GemTransactionParticipantRole.PROVIDER -> TransactionDetailsValue.Destination.ProviderAddress(address, chain, name?.name, link)
+            GemTransactionParticipantRole.SENDER -> TransactionDetailsValue.Destination.Sender(address, text, chain, name?.type, link)
+            GemTransactionParticipantRole.RECIPIENT -> TransactionDetailsValue.Destination.Recipient(address, text, chain, name?.type, link)
+            GemTransactionParticipantRole.CONTRACT -> TransactionDetailsValue.Destination.Contract(address, text, chain, link)
+            GemTransactionParticipantRole.VALIDATOR -> TransactionDetailsValue.Destination.Validator(address, text, chain, link)
+            GemTransactionParticipantRole.PROVIDER -> TransactionDetailsValue.Destination.ProviderAddress(address, text, chain, link)
         }
     }
 }

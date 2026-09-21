@@ -95,6 +95,10 @@ pub fn participant(extended: &TransactionExtended, link: impl FnOnce(&str) -> Bl
     Some(GemTransactionParticipant {
         role,
         link: link(&address),
+        text: match &name {
+            Some(name) => name.name.clone(),
+            None => format_address(&address, Some(transaction.asset_id.chain), GemAddressFormatStyle::Short),
+        },
         name,
         address,
         can_add_contact,
@@ -864,6 +868,28 @@ mod tests {
         let mut approval = Transaction::mock();
         approval.transaction_type = TransactionType::TokenApproval;
         assert_eq!(header_kind(&approval), GemTransactionHeaderKind::AssetImage);
+    }
+
+    #[test]
+    fn test_the_participant_reads_as_its_name_or_a_short_address() {
+        let mut extended = TransactionExtended::mock();
+        extended.transaction.to = "0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326".to_string();
+        let link = |address: &str| BlockExplorerLink::mock_with_address(address);
+
+        let unnamed = participant(&extended, link).expect("a transfer has a participant");
+        assert_ne!(unnamed.text, unnamed.address, "an unnamed participant reads short on both apps");
+        assert_eq!(unnamed.text, format_address(&unnamed.address, Some(extended.transaction.asset_id.chain), GemAddressFormatStyle::Short));
+
+        let mut named = extended.clone();
+        named.to_address = Some(primitives::AddressName {
+            chain: extended.transaction.asset_id.chain,
+            address: unnamed.address.clone(),
+            name: "Binance".to_string(),
+            address_type: primitives::AddressType::Address,
+            status: primitives::VerificationStatus::Verified,
+            image_url: None,
+        });
+        assert_eq!(participant(&named, link).unwrap().text, "Binance");
     }
 
     #[test]

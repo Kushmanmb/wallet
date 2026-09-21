@@ -53,7 +53,7 @@ extension TransactionParticipantViewModel {
             AddressListItemViewModel(
                 title: participant.role.title,
                 account: account,
-                mode: .nameOrAddress,
+                mode: .text(participant.text),
                 addressLink: participant.link.toPrimitives(),
                 onAddContact: participant.canAddContact ? onAddContact : nil,
                 onSelect: selectAction(chainAddress: ChainAddress(chain: chain, address: participant.address)),
