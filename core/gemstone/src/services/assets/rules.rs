@@ -426,6 +426,13 @@ pub fn fiat_value(asset: &Asset, balance: &GemAssetBalance, price: Option<f64>, 
     (value > 0.0).then(|| GemFormattedNumber::currency(value, currency, GemCurrencyStyle::Currency))
 }
 
+fn price_row(price: Option<f64>, change: Option<f64>, currency: Currency) -> GemAssetDetailRow {
+    GemAssetDetailRow::Price {
+        price: price.filter(|price| *price > 0.0).map(|price| GemFormattedNumber::currency(price, currency, GemCurrencyStyle::Currency)),
+        change: change.map(|change| GemFormattedNumber::percentage(change, GemPercentageStyle::Signed).toned()),
+    }
+}
+
 fn apr(apr: Option<f64>) -> Option<GemFormattedNumber> {
     apr.filter(|apr| *apr > 0.0).map(|apr| GemFormattedNumber::percentage(apr, GemPercentageStyle::Unsigned))
 }
@@ -453,6 +460,8 @@ pub struct DetailsSectionsInput<'a> {
     pub metadata: &'a AssetMetaData,
     pub balance: &'a GemAssetBalance,
     pub price: Option<f64>,
+    pub price_change_percentage_24h: Option<f64>,
+    pub currency: Currency,
     pub price_alerts: &'a [PriceAlert],
     pub fee_balance_metadata: Option<BalanceMetadata>,
 }
@@ -464,6 +473,8 @@ pub fn details_sections(input: DetailsSectionsInput) -> Vec<GemAssetDetailSectio
         metadata,
         balance,
         price,
+        price_change_percentage_24h,
+        currency,
         price_alerts,
         fee_balance_metadata,
     } = input;
@@ -489,7 +500,7 @@ pub fn details_sections(input: DetailsSectionsInput) -> Vec<GemAssetDetailSectio
         section(
             GemListSectionTitle::None,
             [
-                Some(GemAssetDetailRow::Price),
+                Some(price_row(price, price_change_percentage_24h, currency.clone())),
                 (has_price(price) && displayed_alerts > 0).then(|| link(GemListRowTitle::PriceAlerts, Some(displayed_alerts.to_string()), GemListRowIcon::None)),
                 Some(GemAssetDetailRow::Network { name: asset_text(asset).network_full_name }),
             ]
@@ -501,7 +512,9 @@ pub fn details_sections(input: DetailsSectionsInput) -> Vec<GemAssetDetailSectio
         section(
             GemListSectionTitle::None,
             match shows_earn {
-                true => vec![GemAssetDetailRow::Earn { apr: apr(metadata.earn_apr) }],
+                true => vec![GemAssetDetailRow::Earn {
+                    row: crate::services::stake::rules::earn_apr_row(&[], metadata.earn_apr),
+                }],
                 false => vec![],
             },
         ),
@@ -1062,6 +1075,8 @@ mod tests {
             metadata,
             balance,
             price,
+            price_change_percentage_24h: None,
+            currency: Currency::USD,
             price_alerts,
             fee_balance_metadata: None,
         })
@@ -1226,6 +1241,8 @@ mod tests {
                 metadata: &AssetMetaData::mock(),
                 balance: &GemAssetBalance::mock(),
                 price: Some(1.0),
+                price_change_percentage_24h: None,
+                currency: Currency::USD,
                 price_alerts: &[],
                 fee_balance_metadata,
             });
@@ -1245,6 +1262,38 @@ mod tests {
     }
 
     #[test]
+    fn test_a_price_row_carries_the_quote_and_hides_one_nobody_gave() {
+        let quoted = price_row(Some(1234.5), Some(-2.5), Currency::USD);
+        let GemAssetDetailRow::Price { price, change } = quoted else { panic!("a price row is a price row") };
+        let price = price.expect("a quoted price is shown");
+        let change = change.expect("a change is shown beside it");
+
+        assert_eq!(price.value, 1234.5);
+        assert_eq!(price.unit, crate::formatted_number::GemNumberUnit::Currency { code: "USD".to_string() });
+        assert_eq!(change.tone, crate::formatted_number::GemValueTone::Negative, "a falling price reads red on both apps");
+
+        let unquoted = price_row(Some(0.0), None, Currency::USD);
+        assert_eq!(unquoted, GemAssetDetailRow::Price { price: None, change: None }, "neither app has to decide what a zero price reads as");
+        assert_eq!(price_row(None, None, Currency::USD), GemAssetDetailRow::Price { price: None, change: None });
+    }
+
+    #[test]
+    fn test_the_earn_row_reads_its_apr_the_same_way_stake_does() {
+        let earn_enabled = AssetMetaData {
+            is_earn_enabled: true,
+            earn_apr: Some(4.0),
+            ..AssetMetaData::mock()
+        };
+        let rows = sections(&Asset::from_chain(Chain::Ethereum), &earn_enabled, &GemAssetBalance::mock(), Some(1.0), &[]);
+        let earn = rows.iter().flat_map(|section| section.rows.clone()).find_map(|row| match row {
+            GemAssetDetailRow::Earn { row } => Some(row),
+            _ => None,
+        });
+
+        assert_eq!(earn, EARN_OFFERED.then(|| crate::services::stake::rules::earn_apr_row(&[], Some(4.0))));
+    }
+
+    #[test]
     fn test_details_sections_list_price_network_and_balances_in_order() {
         let token = Asset::mock_ethereum_usdc();
         let reserving = GemAssetBalance {
@@ -1254,7 +1303,8 @@ mod tests {
         let sections = sections(&token, &AssetMetaData::mock(), &reserving, Some(1.0), &[]);
 
         assert_eq!(sections.iter().map(|section| section.title).collect::<Vec<_>>(), vec![GemListSectionTitle::None, GemListSectionTitle::Balances]);
-        assert_eq!(sections[0].rows, vec![GemAssetDetailRow::Price, GemAssetDetailRow::Network { name: "Ethereum (ERC20)".to_string() }]);
+        assert!(matches!(sections[0].rows[0], GemAssetDetailRow::Price { .. }));
+        assert_eq!(sections[0].rows[1], GemAssetDetailRow::Network { name: "Ethereum (ERC20)".to_string() });
         assert!(sections[1].rows.iter().all(|row| matches!(row, GemAssetDetailRow::Balance { .. })));
     }
 

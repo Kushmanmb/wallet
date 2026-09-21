@@ -489,10 +489,10 @@ pub struct GemAssetDetailsState {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemAssetDetailRow {
-    Price,
+    Price { price: Option<GemFormattedNumber>, change: Option<GemFormattedNumber> },
     Network { name: String },
     Balance { row: GemAssetBalanceRow },
-    Earn { apr: Option<GemFormattedNumber> },
+    Earn { row: GemListRow },
     Row { row: GemListRow },
 }
 
@@ -510,6 +510,7 @@ pub struct GemAssetDetailsInput {
     pub metadata: AssetMetaData,
     pub balance: GemAssetBalance,
     pub price: Option<f64>,
+    pub price_change_percentage_24h: Option<f64>,
     pub currency: Currency,
     pub banner_events: Vec<BannerEvent>,
     pub price_alerts: Vec<PriceAlert>,
@@ -519,6 +520,7 @@ pub struct GemAssetDetailsInput {
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct GemAssetDetails {
     pub state: GemAssetDetailsState,
+    pub balance_value: GemFormattedNumber,
     pub sections: Vec<GemAssetDetailSection>,
     pub title: String,
     pub fiat_value: Option<GemFormattedNumber>,
