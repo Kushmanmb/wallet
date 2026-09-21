@@ -165,13 +165,13 @@ extension SelectAssetViewModel {
         }
     }
 
-    func handleAction(assetId: AssetId, enabled: Bool) async {
+    func setAssetEnabled(assetId: AssetId, enabled: Bool) async {
         switch flow.rowAction {
         case .toggle:
             do {
                 try await service.setAssetsEnabled(assetIds: [assetId.identifier], enabled: enabled)
             } catch {
-                debugLog("SelectAssetViewModel handleAction error: \(error)")
+                debugLog("SelectAssetViewModel set asset enabled error: \(error)")
             }
         case .navigate, .select:
             break
@@ -196,14 +196,14 @@ extension SelectAssetViewModel {
         switch action {
         case let .switcher(enabled):
             Task {
-                await handleAction(assetId: asset.id, enabled: enabled)
+                await setAssetEnabled(assetId: asset.id, enabled: enabled)
             }
         case .copy:
             let address = assetData.account.address
             copyTypeViewModel = CopyTypeViewModel(content: addressCopy(chain: asset.chain.toGem(), address: address))
             isPresentingCopyToast = true
             Task {
-                await handleAction(assetId: asset.id, enabled: true)
+                await setAssetEnabled(assetId: asset.id, enabled: true)
             }
         }
     }
@@ -280,7 +280,7 @@ extension SelectAssetViewModel {
             state = .data(assets)
         } catch {
             guard flow.searchStep(query: searchableQuery) == .search(query: query) else { return }
-            handle(error: error)
+            showError(error)
         }
     }
 
@@ -288,11 +288,11 @@ extension SelectAssetViewModel {
         do {
             try await service.setPriceAlert(assetId: assetId.identifier, enabled: enabled)
         } catch {
-            handle(error: error)
+            showError(error)
         }
     }
 
-    private func handle(error: any Error) {
+    private func showError(_ error: any Error) {
         state.setError(error)
         debugLog("SelectAssetScene scene error: \(error)")
     }

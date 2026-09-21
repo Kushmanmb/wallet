@@ -38,7 +38,7 @@ struct RootScene: View {
         .environment(\.isStreamConnected, connectionStatusObserver.isHealthyByComponent[.stream] == true)
         .onOpenURL { url in
             Task {
-                await model.handleOpenUrl(url)
+                await model.openUrl(url)
             }
         }
         .sheet(isPresented: presenter.isPresentingWallets) {

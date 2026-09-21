@@ -79,7 +79,7 @@ extension NavigationPresenter {
         try presentAssetInput(type: .swap(fromAsset, toAsset), for: fromAsset, wallet: wallet)
     }
 
-    func handleTransactionHeaderAction(
+    func openTransactionHeaderAction(
         _ action: GemTransactionHeaderAction,
         wallet: Wallet,
         navigationState: NavigationStateManager,

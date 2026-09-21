@@ -258,7 +258,7 @@ extension SwapSceneViewModel {
 
     func load() async {
         guard session.refreshesQuotes(isScreenActive: true), let input = session.input else { return }
-        await performFetch(input: input)
+        await fetchQuotes(input: input)
     }
 
     func onAppear() {
@@ -316,7 +316,7 @@ extension SwapSceneViewModel {
 
     func onAssetIdsChange(assetIds: Set<AssetId>) async {
         let assetIds = Array(assetIds)
-        async let balances: () = performUpdate(for: assetIds)
+        async let balances: () = updateBalances(for: assetIds)
         async let prices: () = subscribePrices(for: assetIds)
         _ = await (balances, prices)
     }
@@ -467,7 +467,7 @@ extension SwapSceneViewModel {
         }
     }
 
-    private func performFetch(input: GemSwapQuoteInput) async {
+    private func fetchQuotes(input: GemSwapQuoteInput) async {
         guard
             !isTransferDataLoading,
             let fromAsset, fromAsset.asset.id.identifier == input.request.payAssetId,
@@ -490,7 +490,7 @@ extension SwapSceneViewModel {
         }
     }
 
-    private func performUpdate(for assetIds: [AssetId]) async {
+    private func updateBalances(for assetIds: [AssetId]) async {
         do {
             try await service.updateBalances(assetIds: assetIds)
         } catch {

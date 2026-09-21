@@ -13,7 +13,7 @@ struct PriceAlertsSceneViewModelTests {
         let model = PriceAlertsSceneViewModel.mock(service: GemPriceAlertServiceMock(setEnabledError: AnyError("offline")))
         model.isPriceAlertsEnabled = true
 
-        await model.handleAlertsEnabled(enabled: true)
+        await model.setAlertsEnabled(true)
 
         #expect(model.isPresentingAlertMessage?.message == "offline")
         #expect(model.isPriceAlertsEnabled == false)

@@ -79,7 +79,7 @@ extension PriceAlertsSceneViewModel {
         }
     }
 
-    func handleAlertsEnabled(enabled: Bool) async {
+    func setAlertsEnabled(_ enabled: Bool) async {
         do {
             try await service.setEnabled(enabled: enabled)
         } catch {

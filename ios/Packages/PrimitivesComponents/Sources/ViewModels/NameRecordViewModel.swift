@@ -29,11 +29,11 @@ public final class NameRecordViewModel {
         case let .resolve(name, debounceMilliseconds):
             nameRecordTask?.cancel()
             state = .loading(name: name, chain: chain.toGem())
-            nameRecordTask = Task { await resolve(name: name, chain: chain, debounceMilliseconds: debounceMilliseconds) }
+            nameRecordTask = Task { await loadNameRecord(name: name, chain: chain, debounceMilliseconds: debounceMilliseconds) }
         }
     }
 
-    private func resolve(name: String, chain: Chain, debounceMilliseconds: UInt64) async {
+    private func loadNameRecord(name: String, chain: Chain, debounceMilliseconds: UInt64) async {
         do {
             try await Task.sleep(for: .milliseconds(debounceMilliseconds))
             let resolved = try await nameService.getNameRecord(name: name, chain: chain)

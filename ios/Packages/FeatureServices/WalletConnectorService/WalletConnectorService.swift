@@ -70,16 +70,16 @@ extension WalletConnectorService: WalletConnectorServiceable {
             let sessionDeleteStream = UncheckedSendable(value: self.interactor.sessionDeleteStream)
 
             _ = Task {
-                await self.handleSessions(sessionsStream.value)
+                await self.observeSessions(sessionsStream.value)
             }
             _ = Task {
-                await self.handleSessionProposals(sessionProposalStream.value)
+                await self.observeSessionProposals(sessionProposalStream.value)
             }
             _ = Task {
-                await self.handleSessionRequests(sessionRequestStream.value)
+                await self.observeSessionRequests(sessionRequestStream.value)
             }
             _ = Task {
-                await self.handleSessionDeletes(sessionDeleteStream.value)
+                await self.observeSessionDeletes(sessionDeleteStream.value)
             }
         }
     }
@@ -109,28 +109,28 @@ extension WalletConnectorService: WalletConnectorServiceable {
 // MARK: - Private
 
 extension WalletConnectorService {
-    private func handleSessions(_ stream: AsyncStream<[Session]>) async {
+    private func observeSessions(_ stream: AsyncStream<[Session]>) async {
         for await sessions in stream {
             await updateSessions(sessions)
         }
     }
 
-    private func handleSessionProposals(_ stream: AsyncStream<(proposal: Session.Proposal, context: VerifyContext?)>) async {
+    private func observeSessionProposals(_ stream: AsyncStream<(proposal: Session.Proposal, context: VerifyContext?)>) async {
         for await (proposal, verifyContext) in stream {
             debugLog("Session proposal received: \(proposal)")
             debugLog("Verify context: \(String(describing: verifyContext))")
 
             do {
-                try await processSession(proposal: proposal, verifyContext: verifyContext)
+                try await approveSession(proposal: proposal, verifyContext: verifyContext)
             } catch {
                 debugLog("Error accepting proposal: \(error)")
 
-                await handleRejectSession(proposal: proposal, error: error)
+                await rejectSession(proposal: proposal, error: error)
             }
         }
     }
 
-    private func handleRejectSession(proposal: Session.Proposal, error: Error) async {
+    private func rejectSession(proposal: Session.Proposal, error: Error) async {
         let rejection = service.sessionRejection(reason: GemWalletConnectRejectionReason(from: error))
         do {
             try await WalletKit.instance.rejectSession(
@@ -150,7 +150,7 @@ extension WalletConnectorService {
         await walletConnectorInteractor.sessionReject(error: error)
     }
 
-    private func handleSessionRequests(_ stream: AsyncStream<(request: Request, context: VerifyContext?)>) async {
+    private func observeSessionRequests(_ stream: AsyncStream<(request: Request, context: VerifyContext?)>) async {
         for await (request, verifyContext) in stream {
             debugLog("Session request received: \(request.method)")
             debugLog("Verify context: \(String(describing: verifyContext))")
@@ -196,7 +196,7 @@ extension WalletConnectorService {
         await walletConnectorInteractor.sessionReject(error: error)
     }
 
-    private func handleSessionDeletes(_ stream: AsyncStream<(topic: String, code: Int, message: String)>) async {
+    private func observeSessionDeletes(_ stream: AsyncStream<(topic: String, code: Int, message: String)>) async {
         for await deletion in stream {
             debugLog("Session deleted by peer: topic: \(deletion.topic), reason: \(deletion.message) (code: \(deletion.code))")
         }
@@ -224,7 +224,7 @@ extension WalletConnectorService {
         service.metadata(name: metadata.name, description: metadata.description, url: metadata.url, icons: metadata.icons)
     }
 
-    private func processSession(proposal: Session.Proposal, verifyContext: VerifyContext?) async throws {
+    private func approveSession(proposal: Session.Proposal, verifyContext: VerifyContext?) async throws {
         let messageId = proposal.messageId
 
         guard service.shouldProcessMessage(messageId: messageId) else {

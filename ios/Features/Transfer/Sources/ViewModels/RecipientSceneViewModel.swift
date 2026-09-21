@@ -152,7 +152,7 @@ extension RecipientSceneViewModel {
         switch field {
         case .address:
             do {
-                try handleAddressScan(result)
+                try scanRecipient(result)
             } catch {
                 addressInputModel.update(error: error)
             }
@@ -185,7 +185,7 @@ extension RecipientSceneViewModel {
         }
     }
 
-    private func handleAddressScan(_ string: String) throws {
+    private func scanRecipient(_ string: String) throws {
         switch try service.scan(url: string, recipientType: type) {
         case let .confirm(transfer): onNavigate?(.confirm(transfer))
         case let .recipient(payment): update(from: payment)

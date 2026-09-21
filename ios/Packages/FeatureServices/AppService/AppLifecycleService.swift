@@ -71,7 +71,7 @@ public actor AppLifecycleService: Sendable {
         }
     }
 
-    public func handleScenePhase(_ phase: ScenePhase) async {
+    public func onScenePhase(_ phase: ScenePhase) async {
         switch phase {
         case .active:
             debugLog("AppLifecycleService: App active — connecting observers")

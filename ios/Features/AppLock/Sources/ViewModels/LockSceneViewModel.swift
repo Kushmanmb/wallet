@@ -87,7 +87,7 @@ public class LockSceneViewModel {
 // MARK: - Business Logic
 
 extension LockSceneViewModel {
-    func handleSceneChange(to phase: ScenePhase) {
+    func onScenePhase(_ phase: ScenePhase) {
         switch phase {
         case .background:
             if case let .unlocking(attempt) = state, !attempt.isInvalidated {

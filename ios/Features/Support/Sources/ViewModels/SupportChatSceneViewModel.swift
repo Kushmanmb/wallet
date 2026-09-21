@@ -70,7 +70,7 @@ public final class SupportChatSceneViewModel {
 
     func sendText(_ content: String) {
         Task {
-            await perform {
+            await alertOnFailure {
                 try await service.sendMessage(.text(content))
             }
         }
@@ -79,7 +79,7 @@ public final class SupportChatSceneViewModel {
     func sendImages(_ items: [PhotosPickerItem]) {
         Task {
             for item in items {
-                await perform {
+                await alertOnFailure {
                     guard let attachment = try await item.imageAttachment() else {
                         throw AnyError(Localized.Errors.notSupported)
                     }
@@ -91,7 +91,7 @@ public final class SupportChatSceneViewModel {
 
     func retry(_ message: SupportMessage) {
         Task {
-            await perform {
+            await alertOnFailure {
                 try await service.retryMessage(message)
             }
         }
@@ -100,7 +100,7 @@ public final class SupportChatSceneViewModel {
     func openPreview(_ image: SupportMessageImage) {
         guard let url = image.url.asURL else { return }
         Task {
-            await perform {
+            await alertOnFailure {
                 previewURL = try await URL(fileURLWithPath: service.imageFile(url: url.absoluteString))
             }
         }
@@ -110,7 +110,7 @@ public final class SupportChatSceneViewModel {
 // MARK: - Private
 
 private extension SupportChatSceneViewModel {
-    func perform(_ operation: () async throws -> Void) async {
+    func alertOnFailure(_ operation: () async throws -> Void) async {
         do {
             try await operation()
         } catch {

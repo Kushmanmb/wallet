@@ -75,7 +75,7 @@ extension PriceAlertsScene {
 
     func onAlertsEnable(_ _: Bool, newValue: Bool) {
         Task {
-            await model.handleAlertsEnabled(enabled: newValue)
+            await model.setAlertsEnabled(newValue)
         }
     }
 }

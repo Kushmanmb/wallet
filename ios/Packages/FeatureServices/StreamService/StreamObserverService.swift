@@ -65,7 +65,7 @@ public actor StreamObserverService: Sendable {
             if shouldConnect {
                 for await event in await webSocket.connect() {
                     try Task.checkCancellation()
-                    await handle(event)
+                    await onSocketEvent(event)
                 }
             }
         } catch is CancellationError {
@@ -80,7 +80,7 @@ public actor StreamObserverService: Sendable {
         }
     }
 
-    private func handle(_ event: WebSocketEvent) async {
+    private func onSocketEvent(_ event: WebSocketEvent) async {
         do {
             switch event {
             case .connected:

@@ -109,7 +109,7 @@ final class RootSceneViewModel {
 
 extension RootSceneViewModel {
     func setup() {
-        rateService.perform()
+        rateService.requestReviewIfDue()
         Task { await checkForUpdate() }
         Task { await appLifecycleService.setup() }
         Task { await setupWallets() }
@@ -117,7 +117,7 @@ extension RootSceneViewModel {
 
     func onScenePhaseChanged(_: ScenePhase, _ newPhase: ScenePhase) {
         Task {
-            await appLifecycleService.handleScenePhase(newPhase)
+            await appLifecycleService.onScenePhase(newPhase)
         }
     }
 
@@ -140,7 +140,7 @@ extension RootSceneViewModel {
         setup(wallet: currentWallet)
     }
 
-    func handleOpenUrl(_ url: URL) async {
+    func openUrl(_ url: URL) async {
         await navigationRouter.open(url: url)
     }
 

@@ -61,7 +61,7 @@ public final class TransactionSceneViewModel {
 
     var onTransactionHeaderTap: TransactionHeaderActionHandler? {
         guard onHeaderAction != nil, rows.headerAction != nil else { return nil }
-        return { [weak self] tap in self?.handleHeaderTap(tap) }
+        return { [weak self] tap in self?.onHeaderTap(tap) }
     }
 }
 
@@ -133,7 +133,7 @@ extension TransactionSceneViewModel: ListSectionProvideable {
 // MARK: - Actions
 
 extension TransactionSceneViewModel {
-    private func handleHeaderTap(_ tap: TransactionHeaderTap) {
+    private func onHeaderTap(_ tap: TransactionHeaderTap) {
         guard let onHeaderAction, let headerAction = rows.headerAction else { return }
         switch tap {
         case .header:

@@ -106,11 +106,11 @@ private extension PerpetualChartModel {
             if Task.isCancelled {
                 break
             }
-            handleChartUpdate(update, perpetual: perpetual)
+            mergeCandle(update, perpetual: perpetual)
         }
     }
 
-    func handleChartUpdate(_ update: ChartCandleUpdate, perpetual: Perpetual) {
+    func mergeCandle(_ update: ChartCandleUpdate, perpetual: Perpetual) {
         guard case let .data(loaded) = state,
               let merged = service.mergedCandles(update: update, into: loaded.candles, perpetual: perpetual, period: loaded.period)
         else {

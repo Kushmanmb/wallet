@@ -12,7 +12,7 @@ public struct RateService: Sendable {
         self.preferencesService = preferencesService
     }
 
-    public func perform() {
+    public func requestReviewIfDue() {
         #if targetEnvironment(simulator)
         #else
             guard preferencesService.shouldRequestReview() else { return }

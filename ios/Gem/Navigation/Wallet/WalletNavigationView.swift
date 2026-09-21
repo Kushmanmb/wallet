@@ -104,7 +104,7 @@ struct WalletNavigationView: View {
                     onHeaderAction: { action in
                         Task {
                             do {
-                                try await presenter.handleTransactionHeaderAction(
+                                try await presenter.openTransactionHeaderAction(
                                     action,
                                     wallet: model.wallet,
                                     navigationState: navigationState,
