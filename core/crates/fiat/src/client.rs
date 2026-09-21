@@ -273,7 +273,7 @@ impl FiatClient {
             allowed &= self.rate_limiter.consume(key, scope, self.config.get_rate_limit(key)?).await?;
         }
         if !allowed {
-            return Err(RequestError::Forbidden.into());
+            return Err(RequestError::LimitReached.into());
         }
         Ok(())
     }
