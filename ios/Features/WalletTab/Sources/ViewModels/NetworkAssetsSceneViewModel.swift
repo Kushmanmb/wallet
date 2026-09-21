@@ -5,6 +5,7 @@ import Foundation
 import struct Gemstone.GemNetworkAssetCounts
 import struct Gemstone.GemNetworkAssetSections
 import protocol Gemstone.GemWalletHomeServiceProtocol
+import func Gemstone.showsOnNetworkAssets
 import GemstoneServices
 import Localization
 import Primitives
@@ -61,7 +62,7 @@ public final class NetworkAssetsSceneViewModel: AssetActions {
     }
 
     var active: [AssetData] {
-        activeQuery.value.filter { $0.asset.type != .native }
+        activeQuery.value.filter { showsOnNetworkAssets(assetId: $0.asset.id.identifier) }
     }
 
     var pinned: [AssetData] {
@@ -77,7 +78,7 @@ public final class NetworkAssetsSceneViewModel: AssetActions {
     }
 
     var hidden: [AssetData] {
-        hiddenQuery.value.filter { $0.asset.type != .native }
+        hiddenQuery.value.filter { showsOnNetworkAssets(assetId: $0.asset.id.identifier) }
     }
 
     var showPinned: Bool {

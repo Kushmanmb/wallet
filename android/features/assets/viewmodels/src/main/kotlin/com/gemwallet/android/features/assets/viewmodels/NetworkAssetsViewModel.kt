@@ -17,7 +17,6 @@ import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.navigation.requireChain
 import com.wallet.core.primitives.AssetId
-import com.wallet.core.primitives.AssetType
 import com.wallet.core.primitives.Chain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -36,6 +35,7 @@ import uniffi.gemstone.GemAssetRowStyle
 import uniffi.gemstone.GemNetworkAssetCounts
 import uniffi.gemstone.GemNetworkAssetSections
 import uniffi.gemstone.GemWalletHomeServiceInterface
+import uniffi.gemstone.showsOnNetworkAssets
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -99,7 +99,7 @@ class NetworkAssetsViewModel @Inject constructor(
         )
     }
 
-    private fun List<AssetInfo>.tokens(): List<AssetInfo> = filter { it.asset.type != AssetType.NATIVE }
+    private fun List<AssetInfo>.tokens(): List<AssetInfo> = filter { showsOnNetworkAssets(it.asset.id.toIdentifier()) }
 
     fun hideAsset(assetId: AssetId) = setEnabled(assetId, false)
 

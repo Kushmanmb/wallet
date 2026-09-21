@@ -376,6 +376,11 @@ pub struct GemNetworkAssetSections {
 }
 
 #[uniffi::export]
+pub fn shows_on_network_assets(asset_id: AssetId) -> bool {
+    asset_id.is_token()
+}
+
+#[uniffi::export]
 impl GemNetworkAssetCounts {
     pub fn sections(&self) -> GemNetworkAssetSections {
         GemNetworkAssetSections {

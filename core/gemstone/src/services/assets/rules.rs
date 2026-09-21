@@ -791,6 +791,14 @@ mod tests {
     }
 
     #[test]
+    fn test_the_network_screen_lists_the_chain_tokens_without_its_coin() {
+        use super::super::model::shows_on_network_assets;
+
+        assert!(!shows_on_network_assets(AssetId::from_chain(Chain::Ethereum)));
+        assert!(shows_on_network_assets(Asset::mock_ethereum_usdc().id));
+    }
+
+    #[test]
     fn test_network_assets_are_empty_only_when_every_section_is() {
         use super::super::model::GemNetworkAssetCounts;
         let counts = |pinned, unpinned, hidden| GemNetworkAssetCounts { pinned, unpinned, hidden }.sections();
