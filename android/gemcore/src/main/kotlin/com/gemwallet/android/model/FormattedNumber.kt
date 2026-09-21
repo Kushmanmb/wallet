@@ -29,7 +29,7 @@ private val GemFormattedNumber.numberRounding: RoundingMode
 
 private fun GemFormattedNumber.body(locale: Locale): String = when (val display = display) {
     is GemNumberDisplay.Number -> when (unit) {
-        is GemNumberUnit.Percent -> percentText(BigDecimal.valueOf(value), display.precision, showsSign, locale)
+        is GemNumberUnit.Percent -> percentText(BigDecimal.valueOf(value), display.precision, showsSign, numberRounding, locale)
         else -> appendSymbol(numberText(BigDecimal.valueOf(value), display.precision, locale))
     }
 
@@ -53,12 +53,20 @@ private val GemFormattedNumber.currencyCode: String?
 private val GemFormattedNumber.symbol: String?
     get() = (unit as? GemNumberUnit.Symbol)?.symbol
 
-private fun percentText(value: BigDecimal, precision: GemPrecision, showsSign: Boolean, locale: Locale): String {
-    val fraction = precision as GemPrecision.Fraction
+private fun percentText(value: BigDecimal, precision: GemPrecision, showsSign: Boolean, rounding: RoundingMode, locale: Locale): String {
     val formatter = (NumberFormat.getPercentInstance(locale) as DecimalFormat).apply {
-        minimumFractionDigits = fraction.min.toInt()
-        maximumFractionDigits = fraction.max.toInt()
-        roundingMode = RoundingMode.HALF_EVEN
+        when (precision) {
+            is GemPrecision.Fraction -> {
+                minimumFractionDigits = precision.min.toInt()
+                maximumFractionDigits = precision.max.toInt()
+            }
+
+            is GemPrecision.Significant -> {
+                minimumFractionDigits = 0
+                maximumFractionDigits = Int.MAX_VALUE
+            }
+        }
+        roundingMode = rounding
         if (showsSign) {
             positivePrefix = "+"
         } else {
@@ -66,7 +74,13 @@ private fun percentText(value: BigDecimal, precision: GemPrecision, showsSign: B
             negativePrefix = ""
         }
     }
-    return formatter.format(value.movePointLeft(2))
+    val amount = value.movePointLeft(2)
+    return formatter.format(
+        when (precision) {
+            is GemPrecision.Fraction -> amount
+            is GemPrecision.Significant -> amount.rounded(precision, rounding)
+        },
+    )
 }
 
 private fun GemFormattedNumber.appendSymbol(text: String): String = when (val unit = unit) {

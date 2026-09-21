@@ -99,9 +99,9 @@ private extension GemFormattedNumber {
     func abbreviatedText(locale: Locale) -> String {
         let formatter = AbbreviatedFormatter(locale: locale)
         if let currencyCode {
-            return formatter.string(from: value, currency: currencyCode) ?? numberText(precision: .fraction(min: 2, max: 2), locale: locale)
+            return formatter.string(from: value, currency: currencyCode, rule: roundingRule) ?? numberText(precision: .fraction(min: 2, max: 2), locale: locale)
         }
-        return appendingSymbol(formatter.string(from: value) ?? numberText(precision: .fraction(min: 2, max: 2), locale: locale))
+        return appendingSymbol(formatter.string(from: value, rule: roundingRule) ?? numberText(precision: .fraction(min: 2, max: 2), locale: locale))
     }
 
     func thresholdText(_ threshold: Double, places: UInt32, locale: Locale) -> String {

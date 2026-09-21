@@ -3,10 +3,34 @@
 import BigInt
 import Foundation
 import func Gemstone.formattedAmount
+import struct Gemstone.GemFormattedNumber
 @testable import GemstonePrimitives
 import Testing
 
 struct FormattedNumberTests {
+    @Test
+    func anAbbreviatedValueRoundsTheWayTheRecordAsks() {
+        let toNearest = GemFormattedNumber(
+            value: 1_235_999,
+            unit: .currency(code: "USD"),
+            display: .abbreviated,
+            notation: .plain,
+            tone: .plain,
+            rounding: .toNearest,
+        )
+        let towardZero = GemFormattedNumber(
+            value: 1_235_999,
+            unit: .currency(code: "USD"),
+            display: .abbreviated,
+            notation: .plain,
+            tone: .plain,
+            rounding: .towardZero,
+        )
+
+        #expect(toNearest.text(locale: .US) == "$1.24M")
+        #expect(towardZero.text(locale: .US) == "$1.23M", "the record asks for truncation and gets it")
+    }
+
     @Test
     func anAmountReadsLikeTheValueFormatter() throws {
         let formatter = ValueFormatter(locale: .US, style: .auto)
