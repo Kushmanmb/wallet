@@ -18,6 +18,7 @@ import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.model.Crypto
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.ValueFormatter
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.components.fields.AmountSymbolUIModel
 import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.buttonState
@@ -76,7 +77,7 @@ class AmountViewModel @Inject constructor(service: GemAmountServiceInterface, fa
         if (current == null || amountType == null || input == null) {
             null
         } else {
-            amountType.entry(current.asset.toGem(), input, current.price?.price?.price, inputType, text.plainInputNumber())
+            amountType.entry(current.asset.toGem(), input, current.price?.price?.price, inputType, text.plainInputNumber(), currency.toGem())
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -101,7 +102,7 @@ class AmountViewModel @Inject constructor(service: GemAmountServiceInterface, fa
     ) { current, entry ->
         val asset = current?.asset ?: return@combine ""
         when (val equivalent = entry?.equivalent) {
-            is GemAmountEquivalent.Fiat -> currencyFormatter.string(equivalent.amount)
+            is GemAmountEquivalent.Fiat -> equivalent.amount.text()
             is GemAmountEquivalent.Asset -> valueFormatter.string(equivalent.value, asset.decimals, asset.symbol)
             null -> ""
         }

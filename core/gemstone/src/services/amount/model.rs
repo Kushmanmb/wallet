@@ -1,3 +1,4 @@
+use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::{GemBigInt, GemBigUint};
 use crate::payment::GemPaymentRecipient;
 use crate::services::balance::GemBalanceRequirement;
@@ -121,7 +122,7 @@ impl GemAmountInputType {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemAmountEquivalent {
-    Fiat { amount: f64 },
+    Fiat { amount: GemFormattedNumber },
     Asset { value: GemBigInt },
 }
 
@@ -129,7 +130,7 @@ pub enum GemAmountEquivalent {
 pub struct GemAmountEntry {
     pub value: Option<GemBigInt>,
     pub error: Option<GemAmountError>,
-    pub equivalent: Option<GemAmountEquivalent>,
+    pub equivalent: GemAmountEquivalent,
     pub is_max: bool,
     pub reserved_fee: Option<GemBigInt>,
 }
