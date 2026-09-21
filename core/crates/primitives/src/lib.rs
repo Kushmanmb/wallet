@@ -236,7 +236,6 @@ pub mod image_formatter;
 pub use self::image_formatter::ImageFormatter;
 pub mod block_explorer;
 pub use block_explorer::BlockExplorerLink;
-pub mod explorers;
 pub mod validator;
 pub use self::validator::StakeValidator;
 pub mod solana_nft;

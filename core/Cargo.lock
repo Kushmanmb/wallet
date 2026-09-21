@@ -1390,6 +1390,15 @@ dependencies = [
  "generic-array",
 ]
 
+
+[[package]]
+name = "block_explorers"
+version = "2.114.40"
+dependencies = [
+ "primitives",
+ "url",
+]
+
 [[package]]
 name = "blocking"
 version = "1.6.2"
@@ -4023,6 +4032,7 @@ version = "2.114.40"
 dependencies = [
  "async-trait",
  "base64 0.23.0",
+ "block_explorers",
  "bs58",
  "chain_traits",
  "chrono",
