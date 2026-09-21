@@ -1,5 +1,6 @@
 use super::model::GemConfirmRowContent;
 use crate::application::GemApplicationMetadataService;
+use crate::formatted_number::GemValueTone;
 use crate::models::copy::address_copy;
 use crate::models::list::{GemListRow, GemListRowTitle};
 use crate::models::placeholder::text_or_placeholder;
@@ -231,6 +232,14 @@ impl GemConfirmLoad {
             preload: Some(fee.preload),
             ..self
         }
+    }
+}
+
+pub fn balance_change_tone(sign: GemAmountSign) -> GemValueTone {
+    match sign {
+        GemAmountSign::Incoming => GemValueTone::Positive,
+        GemAmountSign::Outgoing => GemValueTone::Negative,
+        GemAmountSign::None => GemValueTone::Neutral,
     }
 }
 
@@ -1318,6 +1327,13 @@ mod tests {
         assert_eq!(balance_change_sign(&BigInt::from(750_000)), GemAmountSign::Incoming);
         assert_eq!(balance_change_sign(&BigInt::from(-100_005_000)), GemAmountSign::Outgoing);
         assert_eq!(balance_change_sign(&BigInt::ZERO), GemAmountSign::None);
+    }
+
+    #[test]
+    fn test_the_balance_change_tone_follows_its_sign() {
+        assert_eq!(balance_change_tone(GemAmountSign::Incoming), GemValueTone::Positive);
+        assert_eq!(balance_change_tone(GemAmountSign::Outgoing), GemValueTone::Negative);
+        assert_eq!(balance_change_tone(GemAmountSign::None), GemValueTone::Neutral, "a change of nothing is neither a gain nor a loss");
     }
 
     #[test]

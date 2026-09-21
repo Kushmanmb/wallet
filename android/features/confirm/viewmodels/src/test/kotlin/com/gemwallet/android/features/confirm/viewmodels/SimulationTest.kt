@@ -31,18 +31,14 @@ class SimulationTest {
         val usdc = mockAssetSolanaUSDC()
         val simulation = mockGemConfirmSimulationState(
             balanceChanges = listOf(
-                GemSimulationBalanceChange(asset = solana.toGem(), value = BigInteger("-100005000"), sign = GemAmountSign.OUTGOING),
-                GemSimulationBalanceChange(asset = usdc.toGem(), value = BigInteger("750000"), sign = GemAmountSign.INCOMING),
+                GemSimulationBalanceChange(asset = solana.toGem(), value = BigInteger("-100005000"), sign = GemAmountSign.OUTGOING, tone = GemValueTone.NEGATIVE),
+                GemSimulationBalanceChange(asset = usdc.toGem(), value = BigInteger("750000"), sign = GemAmountSign.INCOMING, tone = GemValueTone.POSITIVE),
             ),
         ).toSimulation(confirmation, mockk(relaxed = true))
 
         assertEquals(
             listOf("-0.100005 SOL", "+0.75 USDC"),
             simulation.balanceChanges.map { it.formattedValue() },
-        )
-        assertEquals(
-            listOf(GemValueTone.NEGATIVE, GemValueTone.POSITIVE),
-            simulation.balanceChanges.map { it.tone() },
         )
     }
 }

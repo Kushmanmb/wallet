@@ -105,11 +105,11 @@ struct ConfirmSubmissionTests {
     func simulationStateMapsBalanceChanges() async {
         let usdt = Asset.mockEthereumUSDT()
         let model = ConfirmTransferSceneViewModel.mock(load: .success(.mock(
-            simulation: .mock(balanceChanges: [GemSimulationBalanceChange(asset: usdt.toGem(), value: "-25", sign: .outgoing)]),
+            simulation: .mock(balanceChanges: [GemSimulationBalanceChange(asset: usdt.toGem(), value: "-25", sign: .outgoing, tone: .negative)]),
         )))
         await model.load()
 
-        #expect(model.state.simulation.balanceChanges == [GemSimulationBalanceChange(asset: usdt.toGem(), value: "-25", sign: .outgoing)])
+        #expect(model.state.simulation.balanceChanges == [GemSimulationBalanceChange(asset: usdt.toGem(), value: "-25", sign: .outgoing, tone: .negative)])
     }
 }
 

@@ -1,5 +1,6 @@
 use super::error::GemConfirmError;
 use super::rules::approval_value_from;
+use crate::formatted_number::GemValueTone;
 use crate::models::custom_types::{GemBigInt, GemBigUint};
 use crate::models::gateway::GemFeeRate;
 use crate::models::list::GemListRow;
@@ -212,6 +213,7 @@ pub struct GemSimulationBalanceChange {
     pub asset: Asset,
     pub value: GemBigInt,
     pub sign: GemAmountSign,
+    pub tone: GemValueTone,
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
