@@ -1755,7 +1755,7 @@ The table locates the existing owners and consumers; it is not proof that a scre
 | `GemWalletConnectService` | — | `WalletConnectorService`, `ConnectionsViewModel` | `WCRequestViewModel`, `ProposalSceneViewModel`, `WCAuthViewModel`, `ConnectionsViewModel`, `ConnectionViewModel` |
 | `GemWalletHomeService` | — | `WalletSceneViewModel`, `NetworkAssetsSceneViewModel` | `AssetsViewModel`, `NetworkAssetsViewModel` |
 | `GemWalletService` | — | onboarding and manage-wallet view models, and `WalletImageViewModel` for the avatar (`WalletIDetailViewModel` exports the secret through `export_secret`) | `CreateWalletViewModel`, `ImportViewModel`, `WalletsViewModel`, `WalletViewModel` / `SetupWalletViewModel` (`rename`), `WalletSecretDataViewModel` (`export_secret`), `WalletAvatarService`, wallet cases |
-| `GemWalletSessionService` | — | `RootSceneViewModel`, `NavigationHandler` | `SessionCoordinator` (+ the services it composes) |
+| `GemWalletSessionService` | — | `RootSceneViewModel`, `NavigationRouter` | `SessionCoordinator` (+ the services it composes) |
 | `GemWidgetService` | — | `WidgetPriceService` (the price widget) | `WidgetCoinUIModel` and `WidgetPriceSyncWorker` through `WidgetEntryPoint` |
 
 ### Composition and lifecycle services
@@ -1785,7 +1785,7 @@ These primarily serve Core composition or native lifecycle integration. Reuse th
 | `GemAppStartService` | iOS `OnstartService`, Android `MainViewModel` — launch orchestration, not a screen |
 | `GemConnectionService` | iOS `ConnectionStatusObserver`, Android `RefreshInterval` |
 | `GemPerpetualStreamService` | `HyperliquidObserverService` on both apps |
-| `GemPushNotificationService` | iOS `NavigationHandler`, Android notification routing |
+| `GemPushNotificationService` | iOS `NavigationRouter`, Android notification routing |
 | `GemTransactionStateService` | composed by `confirm`; tracked off-thread by the `TransactionStatusService` port on both apps |
 | `GemSecurityService` | iOS `BiometryAuthenticationService` (used by `LockSceneViewModel`), Android `LockTimer` |
 
