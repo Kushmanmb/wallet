@@ -4,6 +4,7 @@ import Components
 import Foundation
 import enum Gemstone.GemIncomingCode
 import enum Gemstone.GemListRow
+import struct Gemstone.GemRewardsLoad
 import struct Gemstone.GemRewardsRedemption
 import protocol Gemstone.GemRewardsServiceProtocol
 import struct Gemstone.GemRewardsState
@@ -11,6 +12,9 @@ import enum Gemstone.GemServiceError
 import struct Gemstone.GemWalletRow
 import func Gemstone.incomingReferralCode
 import struct Gemstone.RewardRedemptionOption
+import func Gemstone.rewardsAccepted
+import func Gemstone.rewardsLoading
+import func Gemstone.rewardsUpdated
 import func Gemstone.walletRow
 import func Gemstone.walletRows
 import GemstonePrimitives
@@ -24,12 +28,12 @@ import Style
 public final class RewardsViewModel: Sendable {
     private let service: any GemRewardsServiceProtocol
     private let activateCode: String?
-    private let emptyState: GemRewardsState
+    private var loadTask: Task<Void, Never>?
 
     private(set) var selectedWallet: Wallet
     private(set) var wallets: [Wallet]
 
-    var state: StateViewType<GemRewardsState> = .loading
+    private(set) var load: GemRewardsLoad
     var toastMessage: ToastMessage?
     var isPresentingSheet: RewardsSheetType?
     var isPresentingAlert: AlertMessage?
@@ -43,7 +47,7 @@ public final class RewardsViewModel: Sendable {
         let core = wallets.map { $0.toGem() }
         guard let wallet = service.selectedWallet(current: currentWallet?.toGem(), wallets: core).map({ $0.toPrimitives() }) else { return nil }
         self.service = service
-        emptyState = service.state(rewards: nil)
+        load = rewardsLoading(walletId: wallet.id.id)
         selectedWallet = wallet
         self.wallets = service.wallets(wallets: core).map { $0.toPrimitives() }
         self.activateCode = activateCode
@@ -123,10 +127,7 @@ public final class RewardsViewModel: Sendable {
     }
 
     var rewardsState: GemRewardsState {
-        if case let .data(state) = state {
-            return state
-        }
-        return emptyState
+        load.rewards
     }
 
     var referralCode: String? {
@@ -167,7 +168,7 @@ public final class RewardsViewModel: Sendable {
             wallet: selectedWallet,
         ) { [weak self] rewards in
             guard let self else { return }
-            state = .data(service.state(rewards: rewards))
+            load = rewardsUpdated(shown: load, rewards: rewards)
         }
     }
 
@@ -179,7 +180,7 @@ public final class RewardsViewModel: Sendable {
         ) { [weak self] _ in
             guard let self else { return }
             showActivatedToast()
-            Task { await self.load() }
+            Task { await self.refresh() }
         }
     }
 
@@ -188,15 +189,17 @@ public final class RewardsViewModel: Sendable {
     func selectWallet(id: String) {
         guard let wallet = wallets.first(where: { $0.id.id == id }) else { return }
         selectedWallet = wallet
-        Task { await load(wallet: wallet) }
+        loadTask?.cancel()
+        loadTask = Task { await refresh(wallet: wallet) }
     }
 
-    func load() async {
-        await load(wallet: selectedWallet)
+    func refresh() async {
+        loadTask?.cancel()
+        await refresh(wallet: selectedWallet)
     }
 
     func onTaskOnce() async {
-        await load()
+        await refresh()
 
         switch incomingReferralCode(code: activateCode, wallets: wallets.map { $0.toGem() }) {
         case let .activate(code): await useReferralCode(code)
@@ -213,7 +216,7 @@ public final class RewardsViewModel: Sendable {
     private func useReferralCode(_ code: String) async {
         do {
             let rewards = try await service.useReferralCode(wallet: selectedWallet, code: code)
-            state = .data(service.state(rewards: rewards))
+            load = rewardsUpdated(shown: load, rewards: rewards)
             showActivatedToast()
         } catch let error as GemServiceError {
             showError(error.text().text)
@@ -240,7 +243,7 @@ public final class RewardsViewModel: Sendable {
                 AlertAction(title: Localized.Transfer.confirm, isDefaultAction: true) { [weak self] in
                     Task {
                         await self?.redeem(option: option)
-                        await self?.load()
+                        await self?.refresh()
                     }
                 },
                 .cancel(title: Localized.Common.cancel),
@@ -271,13 +274,11 @@ public final class RewardsViewModel: Sendable {
         )
     }
 
-    private func load(wallet: Wallet) async {
-        state = .loading
-        do {
-            let rewards = try await service.getRewards(wallet: wallet)
-            state = .data(service.state(rewards: rewards))
-        } catch {
-            state = .noData
-        }
+    private func refresh(wallet: Wallet) async {
+        let requested = rewardsLoading(walletId: wallet.id.id)
+        load = requested
+        let loaded = await service.refresh(walletId: wallet.id.id, shown: requested)
+        guard !Task.isCancelled else { return }
+        load = rewardsAccepted(shown: load, loaded: loaded)
     }
 }

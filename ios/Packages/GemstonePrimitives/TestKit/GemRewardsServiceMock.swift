@@ -21,9 +21,12 @@ public final class GemRewardsServiceMock: GemRewardsServiceProtocol, @unchecked 
         return try rewardsResult.get()
     }
 
-    public func getRewards(walletId: WalletId) async throws -> Rewards {
+    public func refresh(walletId: WalletId, shown _: GemRewardsLoad) async -> GemRewardsLoad {
         rewardsCalls.append(walletId)
-        return try rewardsResult.get()
+        guard let rewards = try? rewardsResult.get() else {
+            return GemRewardsLoad(walletId: walletId, state: .error(error: .Api(msg: "offline")), rewards: stateForRewards(nil))
+        }
+        return GemRewardsLoad(walletId: walletId, state: .data, rewards: stateForRewards(rewards))
     }
 
     public func redeem(wallet _: Wallet, redemptionId: String) async throws -> RedemptionResult {
@@ -36,10 +39,6 @@ public final class GemRewardsServiceMock: GemRewardsServiceProtocol, @unchecked 
 
     public func selectedWallet(current: Wallet?, wallets _: [Wallet]) -> Wallet? {
         current
-    }
-
-    public func state(rewards: Rewards?) -> GemRewardsState {
-        stateForRewards(rewards)
     }
 
     public func useReferralCode(wallet: Wallet, code: String) async throws -> Rewards {

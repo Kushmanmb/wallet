@@ -7,6 +7,7 @@ import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.wallet.cases.GetWallets
 import com.gemwallet.android.features.referral.viewmodels.models.IncomingCodeUIModel
 import com.gemwallet.android.model.Session
+import com.gemwallet.android.testkit.mockGemRewardsLoad
 import com.gemwallet.android.testkit.mockGemRewardsState
 import com.gemwallet.android.testkit.mockRewards
 import com.gemwallet.android.testkit.mockSession
@@ -30,8 +31,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemRewardsServiceInterface
-import uniffi.gemstone.Rewards
+import uniffi.gemstone.GemServiceException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ReferralViewModelTest {
@@ -55,12 +57,8 @@ class ReferralViewModelTest {
     private val service = mockk<GemRewardsServiceInterface> {
         every { wallets(any()) } answers { firstArg() }
         every { selectedWallet(any(), any()) } answers { firstArg() }
-        every { state(any()) } answers {
-            val current = firstArg<Rewards?>()
-            mockGemRewardsState(referralCode = current?.code, usedReferralCode = current?.usedReferralCode, showsPendingActivation = current?.usedReferralCode != null)
-        }
-        coEvery { getRewards(any()) } returns mockRewards()
-        coEvery { useReferralCode(any(), any()) } returns mockRewards(usedReferralCode = "friend")
+        coEvery { refresh(any(), any()) } answers { mockGemRewardsLoad(walletId = firstArg()) }
+        coEvery { useReferralCode(any(), any()) } returns mockRewards(usedReferralCode = "friend", verifyAfter = 4_102_444_800)
     }
 
     @Before
@@ -85,6 +83,43 @@ class ReferralViewModelTest {
             runCurrent()
 
             assertEquals("friend", viewModel.uiState.value.pendingCode)
+        } finally {
+            viewModel.viewModelScope.cancel()
+        }
+    }
+
+    @Test
+    fun `a failed load reads as an error instead of a wallet without a code`() = runTest(testDispatcher) {
+        coEvery { service.refresh(any(), any()) } answers {
+            mockGemRewardsLoad(walletId = firstArg(), state = GemLoadState.Error(GemServiceException.Gateway("offline")), rewards = mockGemRewardsState())
+        }
+        val viewModel = createViewModel()
+
+        try {
+            runCurrent()
+
+            assertEquals("offline", (viewModel.loadError.value as? GemServiceException.Gateway)?.msg)
+        } finally {
+            viewModel.viewModelScope.cancel()
+        }
+    }
+
+    @Test
+    fun `a load for a wallet that is no longer shown is dropped`() = runTest(testDispatcher) {
+        coEvery { service.refresh(any(), any()) } answers {
+            mockGemRewardsLoad(walletId = wallet.id.id, rewards = mockGemRewardsState(referralCode = "first"))
+        }
+        walletsFlow.value = listOf(wallet, secondWallet)
+        val viewModel = createViewModel()
+
+        try {
+            runCurrent()
+            assertEquals("https://gemwallet.com/join?code=first", viewModel.referralLink.value)
+
+            viewModel.setWallet(secondWallet.id.id)
+            runCurrent()
+
+            assertNull("the first wallet's code must not follow the selection", viewModel.referralLink.value)
         } finally {
             viewModel.viewModelScope.cancel()
         }

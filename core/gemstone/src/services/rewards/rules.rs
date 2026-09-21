@@ -2,12 +2,14 @@ use crate::duration_formatter::countdown_parts;
 use crate::precision::GemValueStyle;
 use chrono::{DateTime, Utc};
 use number_formatter::BigNumberFormatter;
-use primitives::{CoreEmoji, RewardRedemptionOption, RewardStatus, Rewards, Wallet};
+use primitives::{CoreEmoji, RewardRedemptionOption, RewardStatus, Rewards, Wallet, WalletId};
 
-use super::model::{GemIncomingCode, GemRewardsRedemption, GemRewardsState};
+use super::model::{GemIncomingCode, GemRewardsLoad, GemRewardsRedemption, GemRewardsState};
 use crate::config::rewards::get_referral_url;
 use crate::formatted_number::{GemFormattedNumber, GemNumberUnit};
 use crate::models::list::{GemListRow, GemListRowTitle, GemNoticeKind};
+use crate::models::state::GemLoadState;
+use crate::services::error::GemServiceError;
 use crate::services::localization::GemLocalizedText;
 
 pub fn incoming_code(code: Option<&str>, wallets: &[Wallet]) -> Option<GemIncomingCode> {
@@ -16,6 +18,42 @@ pub fn incoming_code(code: Option<&str>, wallets: &[Wallet]) -> Option<GemIncomi
         [] => None,
         [_] => Some(GemIncomingCode::Activate { code }),
         _ => Some(GemIncomingCode::Confirm { code }),
+    }
+}
+
+pub fn loading(wallet_id: Option<WalletId>, now: DateTime<Utc>) -> GemRewardsLoad {
+    GemRewardsLoad {
+        wallet_id,
+        state: GemLoadState::Loading,
+        rewards: state(None, now),
+    }
+}
+
+pub fn loaded(shown: &GemRewardsLoad, wallet_id: WalletId, rewards: Result<Rewards, GemServiceError>, now: DateTime<Utc>) -> GemRewardsLoad {
+    let shows_rewards = shown.wallet_id.as_ref() == Some(&wallet_id) && shown.state == GemLoadState::Data;
+    GemRewardsLoad {
+        state: GemLoadState::refreshed(rewards.as_ref().map(|_| ()).map_err(Clone::clone), shows_rewards),
+        rewards: match (&rewards, shows_rewards) {
+            (Ok(rewards), _) => state(Some(rewards), now),
+            (Err(_), true) => shown.rewards.clone(),
+            (Err(_), false) => state(None, now),
+        },
+        wallet_id: Some(wallet_id),
+    }
+}
+
+pub fn updated(shown: &GemRewardsLoad, rewards: Rewards, now: DateTime<Utc>) -> GemRewardsLoad {
+    GemRewardsLoad {
+        wallet_id: shown.wallet_id.clone(),
+        state: GemLoadState::Data,
+        rewards: state(Some(&rewards), now),
+    }
+}
+
+pub fn accepted(shown: GemRewardsLoad, loaded: GemRewardsLoad) -> GemRewardsLoad {
+    match shown.wallet_id == loaded.wallet_id {
+        true => loaded,
+        false => shown,
     }
 }
 
@@ -128,6 +166,43 @@ fn has_value(code: Option<&str>) -> bool {
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn test_a_failed_load_reads_as_an_error_instead_of_a_wallet_without_a_code() {
+        let wallet_id = WalletId::Multicoin("0x1".to_string());
+        let offline = || Err(GemServiceError::Gateway { msg: "offline".to_string() });
+        let shown = loading(Some(wallet_id.clone()), now());
+
+        let failed = loaded(&shown, wallet_id.clone(), offline(), now());
+        assert!(matches!(failed.state, GemLoadState::Error { .. }), "a wallet with a code must not be offered the create-code screen");
+        assert!(!failed.rewards.can_invite);
+
+        let invited = Rewards {
+            code: Some("GEM123".to_string()),
+            ..Rewards::mock(None, RewardStatus::Verified)
+        };
+        let shown = loaded(&shown, wallet_id.clone(), Ok(invited), now());
+        assert_eq!(shown.state, GemLoadState::Data);
+
+        let kept = loaded(&shown, wallet_id.clone(), offline(), now());
+        assert_eq!((kept.state, kept.rewards), (GemLoadState::Data, shown.rewards.clone()), "a failed refresh keeps the code already on screen");
+
+        let other = WalletId::Multicoin("0x2".to_string());
+        let switched = loaded(&shown, other.clone(), offline(), now());
+        assert!(matches!(switched.state, GemLoadState::Error { .. }), "another wallet's rows are not this wallet's rows");
+        assert_eq!(switched.wallet_id, Some(other));
+    }
+
+    #[test]
+    fn test_a_load_for_a_wallet_that_is_no_longer_shown_is_dropped() {
+        let first = WalletId::Multicoin("0x1".to_string());
+        let second = WalletId::Multicoin("0x2".to_string());
+        let shown = loading(Some(second.clone()), now());
+        let late = loaded(&loading(Some(first.clone()), now()), first, Ok(Rewards::mock(None, RewardStatus::Verified)), now());
+
+        assert_eq!(accepted(shown.clone(), late.clone()), shown, "the wallet moved on before the answer arrived");
+        assert_eq!(accepted(late.clone(), late.clone()), late);
+    }
 
     #[test]
     fn test_the_info_rows_hold_every_value_the_screen_shows_and_skip_the_absent_ones() {

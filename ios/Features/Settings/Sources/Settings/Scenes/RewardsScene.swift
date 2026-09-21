@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import enum Gemstone.GemServiceError
 import Localization
 import Primitives
 import PrimitivesComponents
@@ -16,7 +17,7 @@ public struct RewardsScene: View {
 
     public var body: some View {
         List {
-            switch model.state {
+            switch model.load.state {
             case .loading:
                 CenterLoadingView()
             case let .error(error):
@@ -39,7 +40,7 @@ public struct RewardsScene: View {
                 inviteFriendsSection
             }
         }
-        .refreshable { await model.load() }
+        .refreshable { await model.refresh() }
         .contentMargins(.top, .scene.top, for: .scrollContent)
         .listSectionSpacing(.compact)
         .listStyle(.insetGrouped)
@@ -99,15 +100,15 @@ public struct RewardsScene: View {
         .alertSheet($model.isPresentingAlert)
     }
 
-    private func stateErrorView(error: Error) -> some View {
+    private func stateErrorView(error: GemServiceError) -> some View {
         Section {
             StateEmptyView(
                 title: model.errorTitle,
-                description: error.localizedDescription,
+                description: error.text().text,
                 image: nil,
             ) {
                 Button(Localized.Common.tryAgain) {
-                    Task { await model.load() }
+                    Task { await model.refresh() }
                 }
                 .buttonStyle(.blue())
             }

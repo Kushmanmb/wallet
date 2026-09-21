@@ -1,6 +1,14 @@
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::list::GemListRow;
-use primitives::RewardRedemptionOption;
+use crate::models::state::GemLoadState;
+use primitives::{RewardRedemptionOption, WalletId};
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemRewardsLoad {
+    pub wallet_id: Option<WalletId>,
+    pub state: GemLoadState,
+    pub rewards: GemRewardsState,
+}
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemRewardsState {

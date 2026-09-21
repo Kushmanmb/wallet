@@ -24,6 +24,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,13 +35,19 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemIncomingCode
+import uniffi.gemstone.GemLoadState
+import uniffi.gemstone.GemRewardsLoad
 import uniffi.gemstone.GemRewardsRedemption
 import uniffi.gemstone.GemRewardsServiceInterface
-import uniffi.gemstone.Rewards
+import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.incomingReferralCode
+import uniffi.gemstone.rewardsAccepted
+import uniffi.gemstone.rewardsLoading
+import uniffi.gemstone.rewardsUpdated
 import uniffi.gemstone.walletRows
 import javax.inject.Inject
 
@@ -59,11 +66,15 @@ class ReferralViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val currentWallet = MutableStateFlow<Wallet?>(null)
-    private val rewards = MutableStateFlow<Rewards?>(null)
+    private val load = MutableStateFlow(rewardsLoading(null))
+    private var syncJob: Job? = null
     val inSync = MutableStateFlow(SyncType.Init)
 
-    private val rewardsState = rewards.mapLatest { service.state(it) }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, service.state(null))
+    val loadError: StateFlow<GemServiceException?> = load.map { (it.state as? GemLoadState.Error)?.error }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    private val rewardsState = load.map { it.rewards }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, load.value.rewards)
 
     val uiState: StateFlow<ReferralUIState> = rewardsState.map { it.uiState() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, rewardsState.value.uiState())
@@ -113,63 +124,47 @@ class ReferralViewModel @Inject constructor(
         sync(referralWallet.value ?: return, SyncType.Refresh)
     }
 
-    private fun sync(wallet: Wallet, type: SyncType) = viewModelScope.launch(ioDispatcher) {
-        inSync.update { type }
-        val rewards = try {
-            runCatchingCancellable { service.getRewards(wallet.id.id) }.getOrNull()
-        } finally {
-            inSync.update { SyncType.None }
+    private fun sync(wallet: Wallet, type: SyncType) {
+        syncJob?.cancel()
+        syncJob = viewModelScope.launch(ioDispatcher) {
+            inSync.update { type }
+            val shown = load.updateAndGet { current ->
+                current.takeIf { it.walletId == wallet.id.id } ?: rewardsLoading(wallet.id.id)
+            }
+            try {
+                val loaded = service.refresh(wallet.id.id, shown)
+                load.update { current -> rewardsAccepted(current, loaded) }
+            } finally {
+                inSync.update { SyncType.None }
+            }
         }
-        this@ReferralViewModel.rewards.update { rewards }
     }
 
-    fun createReferral(username: String, callback: (Exception?) -> Unit) = viewModelScope.launch(ioDispatcher) {
-        val rewards = try {
-            val wallet = currentWallet.value ?: return@launch
-            val response = service.createReferral(wallet.toGem(), username)
-            withContext(Dispatchers.Main) {
-                callback(null)
-            }
-            response
-        } catch (err: Exception) {
-            withContext(Dispatchers.Main) {
-                callback(err)
-            }
-            null
-        }
-        this@ReferralViewModel.rewards.update { rewards }
+    fun createReferral(username: String, callback: (Throwable?) -> Unit) = viewModelScope.launch(ioDispatcher) {
+        val wallet = currentWallet.value ?: return@launch
+        runCatchingCancellable { service.createReferral(wallet.toGem(), username) }
+            .onSuccess { rewards -> load.update { rewardsUpdated(it, rewards) } }
+            .report(callback)
     }
 
-    fun useCode(code: String, callback: (Exception?) -> Unit) = viewModelScope.launch(ioDispatcher) {
-        try {
-            val wallet = currentWallet.value ?: return@launch
-            val rewards = service.useReferralCode(wallet.toGem(), code)
-            this@ReferralViewModel.rewards.update { rewards }
-            withContext(Dispatchers.Main) {
-                callback(null)
-            }
-        } catch (err: Exception) {
-            withContext(Dispatchers.Main) {
-                callback(err)
-            }
-        }
+    fun useCode(code: String, callback: (Throwable?) -> Unit) = viewModelScope.launch(ioDispatcher) {
+        val wallet = currentWallet.value ?: return@launch
+        runCatchingCancellable { service.useReferralCode(wallet.toGem(), code) }
+            .onSuccess { rewards -> load.update { rewardsUpdated(it, rewards) } }
+            .report(callback)
     }
 
     fun redeem(redemption: GemRewardsRedemption, callback: (Throwable?) -> Unit) {
         val wallet = currentWallet.value ?: return
         viewModelScope.launch(ioDispatcher) {
-            try {
-                service.redeem(wallet.toGem(), redemption.option.id)
-                sync()
-                withContext(Dispatchers.Main) {
-                    callback(null)
-                }
-            } catch (err: Throwable) {
-                withContext(Dispatchers.Main) {
-                    callback(err)
-                }
-            }
+            runCatchingCancellable { service.redeem(wallet.toGem(), redemption.option.id) }
+                .onSuccess { sync() }
+                .report(callback)
         }
+    }
+
+    private suspend fun <T> Result<T>.report(callback: (Throwable?) -> Unit) = withContext(Dispatchers.Main) {
+        callback(exceptionOrNull())
     }
 
     fun cancelCode() {

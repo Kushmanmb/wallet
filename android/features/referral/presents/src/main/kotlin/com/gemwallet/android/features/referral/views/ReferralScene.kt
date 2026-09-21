@@ -66,12 +66,15 @@ import com.wallet.core.primitives.WalletId
 import com.wallet.core.primitives.WalletSource
 import com.wallet.core.primitives.WalletType
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemServiceException
 
 private val referralCodeMaxWidth = 250.dp
 
 @Composable
 fun ReferralScene(
     inSync: SyncType,
+    loadError: GemServiceException?,
     isAvailableWalletSelect: Boolean,
     referralLink: String?,
     uiState: ReferralUIState,
@@ -79,8 +82,8 @@ fun ReferralScene(
     redemptions: List<RewardRedemptionUIModel>,
     currentWallet: Wallet?,
     incomingCode: IncomingCodeUIModel = IncomingCodeUIModel(),
-    onUsername: (String, (Exception?) -> Unit) -> Unit,
-    onCode: (String, (Exception?) -> Unit) -> Unit,
+    onUsername: (String, (Throwable?) -> Unit) -> Unit,
+    onCode: (String, (Throwable?) -> Unit) -> Unit,
     onCancelCode: () -> Unit,
     onRefresh: () -> Unit,
     onWallet: () -> Unit,
@@ -104,7 +107,7 @@ fun ReferralScene(
         context.shareText(subject = link, text = joinText, chooserTitle = shareTitle)
     }
 
-    val onCodeResult = fun (error: Exception?) {
+    val onCodeResult = fun (error: Throwable?) {
         val message = error?.errorText()?.text(context)
         scope.launch {
             if (message == null) {
@@ -164,6 +167,10 @@ fun ReferralScene(
             onRefresh = onRefresh,
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
+                if (loadError != null) {
+                    item { GemListRowView(row = GemListRow.Error(loadError), listPosition = ListPosition.Single) }
+                    return@LazyColumn
+                }
                 referralHead(
                     joinPointsCost = uiState.joinPointsCost,
                     canInvite = uiState.canInvite,
@@ -239,6 +246,7 @@ fun ReferralScene(
 private fun ReferralScenePreview() {
     WalletTheme {
         ReferralScene(
+            loadError = null,
             inSync = SyncType.None,
             isAvailableWalletSelect = false,
             referralLink = null,
@@ -267,6 +275,7 @@ private fun ReferralScenePreview() {
 private fun ReferralSceneNoRewardsPreview() {
     WalletTheme {
         ReferralScene(
+            loadError = null,
             inSync = SyncType.None,
             isAvailableWalletSelect = false,
             referralLink = null,
