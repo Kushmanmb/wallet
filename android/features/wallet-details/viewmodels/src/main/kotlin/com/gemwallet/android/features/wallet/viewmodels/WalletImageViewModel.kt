@@ -10,6 +10,8 @@ import com.gemwallet.android.application.wallet.cases.GetWalletDetails
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.features.wallet.viewmodels.models.WalletDetailsUIModel
+import com.gemwallet.android.features.wallet.viewmodels.models.uiModel
 import com.gemwallet.android.ui.components.image.EmojiAvatarRenderer
 import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.models.NftItemUIModel
@@ -43,7 +45,8 @@ class WalletImageViewModel @Inject constructor(
 
     private val walletId = savedStateHandle.requireWalletId()
 
-    val wallet = getWalletDetails.getWallet(walletId)
+    val details: StateFlow<WalletDetailsUIModel?> = getWalletDetails.getWallet(walletId)
+        .map { it?.uiModel() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val emojis: List<String> = AvatarEmoji.all

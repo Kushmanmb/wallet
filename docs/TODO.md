@@ -20,7 +20,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 2. **Establish consistency:** MIG6. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, and C53 wallet creation/import. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
-5. **Close the boundary:** finish B76–B79, U9, U18, U33, N12, F56/F61 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
+5. **Close the boundary:** finish B76–B78, U9, U18, U33, N12, F56/F61 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
 
 ## Screen coverage and existing infrastructure
 
@@ -29,7 +29,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Screens / entry points | Existing owner or infrastructure to extend | Open work |
 |---|---|---|
 | Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | C53, X172 |
-| Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | B79, N7, X172 |
+| Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | N7, X172 |
 | Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | U25, O59, AUD23, AUD25, AUD26, AUD27, AUD28 |
 | Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | B76, AUD20, AUD43, AUD44, U26 |
 | Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | B76, AUD36 |
@@ -196,7 +196,6 @@ The same product rule on both apps with a difference, each read on both sides on
 - **B76** **M** Asset and chart screens decide from Core types again: `AssetScene.swift:97-174` switches `GemAssetDetailRow`/`GemAssetNetworkDestination`/`GemAssetBalanceRow` (added by b15426c878), `ChartScene.swift:21-48` switches `GemChartSection`, and Android `AssetDetailRowItem.kt:76-81`, `AssetDetailsScene.kt:52-76` (routes on `GemListRowTitle` and picks toasts), `AssetSelectScreen.kt:54-87` with `AssetSelectFlowUIModel.kt:9-23`, `AssetInfoUIModel.kt:35-38`, `BannerItem.kt:17` and `GemLineChart.kt:82`. The B67 shapes.
 - **B77** **M** Settings, referral and support views name Core types: `ReferralScene.kt` takes `GemRewardsState` and branches on eight flags (7f4d7b0741), `SecurityScene.kt:57-58`, `PreferencesScene.kt:45,119,130`, `AboutUsScreen.kt` calls `aboutSections` in the composable with no view model,. A referral UI state, a `securityAction()` mapper and an About view model. The About view model is also what Android needs to reach the developer preference, so the toggle can move off the Settings About Us row (`SettingsScene.kt:83-105`, `opensDeveloperMenu()`) onto the About version row where iOS keeps it. The support bubble is not one of these: its link row renders a title, a subtitle and a url with no decision in it, and [ARCHITECTURE.md § 5](ARCHITECTURE.md#a-view-never-names-a-core-type) says not to wrap a generated type only to hide its name.
 - **B78** **M** The Android amount screen has no UI state: `AmountScreen.kt:74,76` calls Core in the composable, `ProviderExtras.kt:32-128` receives the provider and branches on `AmountStakeProvider`/`AmountParams.Stake.*`, and `AmountErrorText.kt:9-14` checks `GemAmountException` in a composable. `AmountUiState`.
-- **B79** **M** Android's wallet screens hand `GemWalletRow` to composables through two app aggregates (`WalletDataAggregate`, `WalletDetailsAggregate`, the latter restating `GemWalletDetails`), and the composables map and decide from it: `item.row.uiModel(LocalContext.current)`, the pin label from `row.isPinned`, the pinned split and `row.placeholder.iconModel()` (`WalletItemsList.kt:38-56`, `WalletsScreen.kt:84`, `WalletScene.kt:120-131`); the census missed them because no Core type is named. The cases return the records and the view models emit row UI models; iOS already vends the `ListItemModel`.
 
 ## 4. App-side twins and outcomes the app invents
 

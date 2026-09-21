@@ -10,7 +10,7 @@ import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 
 @Composable
 fun WalletImageNavScreen(onCancel: () -> Unit, source: WalletImageSource = WalletImageSource.Wallet, viewModel: WalletImageViewModel = hiltViewModel()) {
-    val wallet by viewModel.wallet.collectAsStateWithLifecycle()
+    val wallet by viewModel.details.collectAsStateWithLifecycle()
     val nftImages by viewModel.nftImages.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val snackbar = rememberSnackbarState(message = error, iconRes = R.drawable.ic_error, onShown = viewModel::clearError)
