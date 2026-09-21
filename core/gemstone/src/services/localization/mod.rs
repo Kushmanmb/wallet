@@ -6,7 +6,7 @@ use crate::formatted_number::GemFormattedNumber;
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemLocalizedText {
     WalletDefaultName { index: i32 },
-    WalletDefaultNameChain { chain: Chain, index: i32 },
+    WalletDefaultNameChain { network_name: String, index: i32 },
     WalletMulticoin,
     ChainNetworkName { chain: Chain },
     DelegationState { state: DelegationState },

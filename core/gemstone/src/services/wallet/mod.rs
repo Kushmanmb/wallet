@@ -31,7 +31,7 @@ pub(crate) mod testkit;
 use std::sync::Arc;
 
 use gem_keystore::Mnemonic;
-use primitives::{Chain, NameRecord, Wallet, WalletId, WalletSource, WalletType};
+use primitives::{Chain, ChainAsset, NameRecord, Wallet, WalletId, WalletSource, WalletType};
 
 use crate::keystore::decode_password;
 use crate::keystore::{GemImportType, GemKeystore, GemWalletImport, keystore_id_for_wallet};
@@ -132,7 +132,10 @@ impl GemWalletService {
         let index = rules::next_wallet_index(&self.store.get_wallets().await?);
         Ok(GemWalletDefaultName {
             text: match chain {
-                Some(chain) => GemLocalizedText::WalletDefaultNameChain { chain, index },
+                Some(chain) => GemLocalizedText::WalletDefaultNameChain {
+                    network_name: ChainAsset::from_chain(chain).network_name,
+                    index,
+                },
                 None => GemLocalizedText::WalletDefaultName { index },
             },
             has_existing_wallets: index > 1,

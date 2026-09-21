@@ -152,7 +152,7 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     is GemLocalizedText.WalletDefaultName -> context.getString(R.string.wallet_default_name, index)
 
     is GemLocalizedText.WalletDefaultNameChain ->
-        context.getString(R.string.wallet_default_name_chain, chain.requireChain().asset().name, index)
+        context.getString(R.string.wallet_default_name_chain, networkName, index)
 
     GemLocalizedText.WalletMulticoin -> context.getString(R.string.wallet_multicoin)
 
