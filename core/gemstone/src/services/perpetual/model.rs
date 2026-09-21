@@ -2,7 +2,7 @@ use super::rules;
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::custom_types::GemBigInt;
 use crate::models::list::{GemListRow, GemListSection};
-use crate::services::assets::model::GemHeaderActions;
+use crate::services::assets::model::{GemHeaderActions, GemPriceRow};
 use crate::services::failures::StepFailure;
 use crate::services::localization::GemLocalizedText;
 use primitives::chart::{ChartCandleStick, ChartCandleUpdate};
@@ -103,7 +103,7 @@ pub fn perpetual_position_row(perpetual: Perpetual, asset: Asset, position: Perp
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemPerpetualMarketRow {
     pub title: String,
-    pub shows_price: bool,
+    pub price: GemPriceRow,
     pub volume_24h: GemFormattedNumber,
     pub open_interest: GemFormattedNumber,
     pub funding_apr: GemFormattedNumber,

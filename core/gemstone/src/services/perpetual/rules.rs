@@ -710,7 +710,7 @@ pub fn market_row(perpetual: &Perpetual, asset: &Asset) -> GemPerpetualMarketRow
             true => asset.symbol.clone(),
             false => perpetual.name.clone(),
         },
-        shows_price: perpetual.price != 0.0,
+        price: crate::services::assets::rules::price_row(Some(perpetual.price), Some(perpetual.price_percent_change_24h), Currency::USD),
         volume_24h: GemFormattedNumber::usd_abbreviated(perpetual.volume_24h),
         open_interest: GemFormattedNumber::usd_abbreviated(perpetual.open_interest),
         funding_apr: GemFormattedNumber::percentage(funding_apr(perpetual.funding), GemPercentageStyle::Signed),
@@ -1210,9 +1210,13 @@ mod tests {
 
         let asset = Asset::from_chain(Chain::HyperCore);
 
-        assert!(market_row(&priced, &asset).shows_price);
-        assert!(!market_row(&unpriced, &asset).shows_price);
         assert_eq!(market_row(&priced, &asset).title, "BTC");
+        assert_eq!(
+            market_row(&priced, &asset).price,
+            crate::services::assets::rules::price_row(Some(priced.price), Some(priced.price_percent_change_24h), Currency::USD),
+            "the row carries its price the way every other row does"
+        );
+        assert_eq!(market_row(&unpriced, &asset).price.price, None);
     }
 
     #[test]
