@@ -18,6 +18,13 @@ pub fn balance_amount(value: &BigUint, asset: &Asset) -> GemFormattedNumber {
     balance_amount_styled(value, asset, GemValueStyle::Auto)
 }
 
+#[uniffi::export]
+pub fn available_balance_text(asset: Asset, balance: GemAssetBalance) -> GemLocalizedText {
+    GemLocalizedText::Balance {
+        amount: GemFormattedNumber::amount(BigNumberFormatter::f64_value(&balance.available, asset.decimals.unsigned_abs()), None, GemValueStyle::Auto),
+    }
+}
+
 pub fn balance_amount_styled(value: &BigUint, asset: &Asset, style: GemValueStyle) -> GemFormattedNumber {
     let value = BigNumberFormatter::f64_value(value, asset.decimals.unsigned_abs());
     GemFormattedNumber::amount(value, Some(asset.symbol.clone()), style)
@@ -196,6 +203,19 @@ pub fn exclude_native_mirrors(asset_ids: Vec<AssetId>) -> Vec<AssetId> {
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn test_the_available_balance_reads_as_one_sentence_without_a_symbol() {
+        let asset = Asset::from_chain(Chain::Ethereum);
+        let balance = GemAssetBalance::mock_with_available(2_000_000_000_000_000_000);
+
+        let GemLocalizedText::Balance { amount } = available_balance_text(asset.clone(), balance) else {
+            panic!("a balance sentence carries an amount");
+        };
+
+        assert_eq!(amount.value, 2.0);
+        assert_eq!(amount.unit, crate::formatted_number::GemNumberUnit::Plain, "the swap input names the asset elsewhere");
+    }
 
     #[test]
     fn test_the_header_shows_the_total_as_it_is_and_the_change_only_when_there_is_one() {

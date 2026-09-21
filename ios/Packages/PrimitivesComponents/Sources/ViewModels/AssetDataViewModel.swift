@@ -63,10 +63,6 @@ public struct AssetDataViewModel: Sendable {
         balanceViewModel.balanceText
     }
 
-    public var availableBalanceText: String {
-        balanceViewModel.availableBalanceText
-    }
-
     public var availableBalanceTextWithSymbol: String {
         balanceViewModel.availableBalanceTextWithSymbol
     }

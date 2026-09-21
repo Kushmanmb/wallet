@@ -50,13 +50,6 @@ public struct BalanceViewModel: Sendable {
         return formatter.string(total, decimals: asset.decimals.asInt)
     }
 
-    public var availableBalanceText: String {
-        guard !balance.available.isZero else {
-            return .zero
-        }
-        return formatter.string(balance.available, decimals: asset.decimals.asInt)
-    }
-
     public var availableBalanceTextWithSymbol: String {
         formatter.string(balance.available, decimals: asset.decimals.asInt, currency: asset.symbol)
     }

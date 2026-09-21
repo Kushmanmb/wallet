@@ -113,6 +113,8 @@ public extension GemLocalizedText {
             Localized.Stake.apr(value?.text() ?? .empty)
         case let .priceImpactWarning(percent, symbol):
             Localized.Swap.PriceImpactWarning.description(percent.text(), symbol)
+        case let .balance(amount):
+            Localized.Transfer.balance(amount.text())
         case let .positionChange(change, direction):
             switch change {
             case .increase: Localized.Perpetual.increaseDirection(direction.toPrimitives().title)

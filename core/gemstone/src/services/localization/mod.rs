@@ -31,6 +31,7 @@ pub enum GemLocalizedText {
     Position { direction: PerpetualDirection, leverage: String },
     Apr { value: Option<GemFormattedNumber> },
     PriceImpactWarning { percent: GemFormattedNumber, symbol: String },
+    Balance { amount: GemFormattedNumber },
     PositionChange { change: GemPositionChange, direction: PerpetualDirection },
 }
 

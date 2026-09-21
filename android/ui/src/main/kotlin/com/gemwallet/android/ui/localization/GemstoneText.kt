@@ -200,6 +200,8 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
 
     is GemLocalizedText.PriceImpactWarning -> context.getString(R.string.swap_price_impact_warning_description, percent.text(), symbol)
 
+    is GemLocalizedText.Balance -> context.getString(R.string.transfer_balance, amount.text())
+
     is GemLocalizedText.PositionChange -> when (change) {
         GemPositionChange.INCREASE -> context.getString(R.string.perpetual_increase_direction, context.getString(direction.toPrimitives().stringRes()))
         GemPositionChange.REDUCE -> context.getString(R.string.perpetual_reduce_direction, context.getString(direction.toPrimitives().stringRes()))
