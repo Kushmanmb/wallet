@@ -66,7 +66,7 @@ import com.gemwallet.android.ui.theme.paddingHalfSmall
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.space0
 import com.wallet.core.primitives.AssetId
-import uniffi.gemstone.addressCopy
+import uniffi.gemstone.GemCopy
 
 private val qrCardElevation = 3.dp
 
@@ -92,6 +92,8 @@ fun ReceiveScreen(assetId: AssetId, closeIcon: Boolean = false, onCancel: () -> 
             closeIcon = closeIcon,
             assetInfo = info,
             warning = remember(info.asset.id) { viewModel.warningText(info.asset) },
+            shareText = viewModel.shareAddress(),
+            copyText = viewModel.copyAddress(),
             onSelectNetwork = if (networks.showsSelector) {
                 { isShowingNetworkSelector = true }
             } else {
@@ -111,7 +113,7 @@ fun ReceiveScreen(assetId: AssetId, closeIcon: Boolean = false, onCancel: () -> 
 }
 
 @Composable
-private fun ReceiveScene(closeIcon: Boolean, assetInfo: AssetInfo, warning: String, onSelectNetwork: (() -> Unit)?, onCancel: () -> Unit) {
+private fun ReceiveScene(closeIcon: Boolean, assetInfo: AssetInfo, warning: String, shareText: String?, copyText: GemCopy?, onSelectNetwork: (() -> Unit)?, onCancel: () -> Unit) {
     val context = LocalContext.current
     val clipboardManager = LocalContext.current.clipboardManager()
     val shareTitle = stringResource(R.string.common_share)
@@ -120,12 +122,11 @@ private fun ReceiveScene(closeIcon: Boolean, assetInfo: AssetInfo, warning: Stri
     val imagePadding = if (isCompactHeight) paddingSmall else paddingDefault
 
     val onShare = fun () {
-        val subject = "${assetInfo.owner?.chain}\n${assetInfo.asset.symbol}"
-        context.shareText(subject = subject, text = assetInfo.owner?.address, chooserTitle = shareTitle)
+        context.shareText(subject = null, text = shareText, chooserTitle = shareTitle)
     }
 
     val onCopyClick = fun () {
-        assetInfo.owner?.address?.let { clipboardManager.setCopy(context, addressCopy(assetInfo.asset.id.chain.string, it)) }
+        copyText?.let { clipboardManager.setCopy(context, it) }
     }
 
     Scene(

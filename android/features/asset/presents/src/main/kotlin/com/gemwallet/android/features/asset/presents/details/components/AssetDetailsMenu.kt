@@ -34,8 +34,7 @@ fun RowScope.AssetDetailsMenu(uiState: AssetInfoUIModel, priceAlert: PriceAlertM
     val shareTitle = stringResource(id = R.string.common_share)
 
     val onShare = fun () {
-        val subject = "${uiState.assetInfo.owner?.chain}\n${uiState.assetInfo.asset.symbol}"
-        context.shareText(subject = subject, text = uiState.shareUrl, chooserTitle = shareTitle)
+        context.shareText(subject = null, text = uiState.shareUrl, chooserTitle = shareTitle)
     }
 
     val enablePriceAlert = fun () {

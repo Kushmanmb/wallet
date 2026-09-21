@@ -32,9 +32,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemCopy
 import uniffi.gemstone.GemReceiveNetworks
 import uniffi.gemstone.GemReceiveServiceInterface
 import uniffi.gemstone.GemReceiveWarning
+import uniffi.gemstone.addressCopy
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel(assistedFactory = ReceiveViewModel.Factory::class)
@@ -76,6 +78,12 @@ class ReceiveViewModel @AssistedInject constructor(
 
     fun selectAsset(assetId: AssetId) {
         selectedAssetId.value = assetId
+    }
+
+    fun shareAddress(): String? = asset.value?.owner?.address
+
+    fun copyAddress(): GemCopy? = asset.value?.let { assetInfo ->
+        assetInfo.owner?.address?.let { addressCopy(assetInfo.asset.id.chain.string, it) }
     }
 
     @AssistedFactory
