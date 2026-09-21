@@ -5,7 +5,6 @@ import struct Gemstone.GemWalletRow
 import enum Gemstone.GemWalletSecret
 import enum Gemstone.GemWalletSecretKind
 import protocol Gemstone.GemWalletServiceProtocol
-import func Gemstone.walletDetails
 import func Gemstone.walletRow
 import GemstonePrimitives
 import GemstoneServices
@@ -51,7 +50,7 @@ public final class WalletDetailViewModel {
     }
 
     var details: GemWalletDetails {
-        walletDetails(wallet: wallet.toGem())
+        service.walletDetails(wallet: wallet.toGem())
     }
 
     var row: GemWalletRow {
@@ -75,10 +74,10 @@ public final class WalletDetailViewModel {
     }
 
     var address: WalletDetailAddress? {
-        guard let account = details.address?.toPrimitives() else { return .none }
+        guard let account = details.address?.toPrimitives(), let link = details.addressExplorer?.toPrimitives() else { return .none }
         return .account(
             SimpleAccount(name: .none, chain: account.chain, address: account.address, assetImage: .none),
-            link: service.addressUrl(chain: account.chain.rawValue, address: account.address).toPrimitives(),
+            link: link,
         )
     }
 

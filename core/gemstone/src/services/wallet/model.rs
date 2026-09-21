@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::mnemonic::{apply_phrase_suggestion, phrase_suggestions};
 use crate::services::localization::GemLocalizedText;
-use primitives::{Chain, ChainAddress, Wallet};
+use primitives::{BlockExplorerLink, Chain, ChainAddress, Wallet};
 
 use super::rules;
 
@@ -202,9 +202,9 @@ pub struct GemWalletDetails {
     pub row: GemWalletRow,
     pub secret_kind: Option<GemWalletSecretKind>,
     pub address: Option<ChainAddress>,
+    pub address_explorer: Option<BlockExplorerLink>,
 }
 
-#[uniffi::export]
 pub fn wallet_details(wallet: Wallet) -> GemWalletDetails {
     rules::details(&wallet)
 }

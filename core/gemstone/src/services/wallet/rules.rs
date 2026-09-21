@@ -169,6 +169,7 @@ pub fn details(wallet: &Wallet) -> GemWalletDetails {
             [account] => Some(ChainAddress::new(account.chain, account.address.clone())),
             _ => None,
         },
+        address_explorer: None,
     }
 }
 

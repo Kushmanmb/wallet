@@ -26,7 +26,7 @@ object WalletModule {
 
     @Provides
     @Singleton
-    fun provideGetWalletDetails(walletStore: GemstoneWalletStore): GetWalletDetails = GetWalletDetailsImpl(walletStore)
+    fun provideGetWalletDetails(walletStore: GemstoneWalletStore, walletService: GemWalletService): GetWalletDetails = GetWalletDetailsImpl(walletStore, walletService)
 
     @Provides
     @Singleton

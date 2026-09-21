@@ -85,7 +85,7 @@ internal fun WalletScene(wallet: WalletDetailsAggregate?, secret: WalletSecretUI
                     accessory = { DataBadgeChevron() },
                 )
             }
-            WalletAddress(wallet.address)
+            WalletAddress(wallet.address, wallet.addressExplorer)
 
             Spacer16()
 

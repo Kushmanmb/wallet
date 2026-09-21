@@ -47,7 +47,7 @@ use crate::services::wallet_session::GemWalletSessionService;
 use primitives::BlockExplorerLink;
 
 pub use error::GemWalletImportError;
-pub use model::{GemWalletDefaultName, GemWalletDeletion, GemWalletImportKind, GemWalletImportResult, GemWalletImportScreen, GemWalletImportSession, GemWalletImportType, GemWalletSecret};
+pub use model::{GemWalletDefaultName, GemWalletDeletion, GemWalletDetails, GemWalletImportKind, GemWalletImportResult, GemWalletImportScreen, GemWalletImportSession, GemWalletImportType, GemWalletSecret};
 pub use password::{GemKeystoreAuthentication, GemKeystorePassword};
 pub use store::GemWalletStore;
 pub use verify_phrase::GemVerifyPhraseSession;
@@ -109,6 +109,14 @@ impl GemWalletService {
 
     pub fn set_current_wallet_id(&self, wallet_id: WalletId) -> Result<(), GemServiceError> {
         self.session.set_current_wallet_id(Some(wallet_id))
+    }
+
+    pub fn wallet_details(&self, wallet: Wallet) -> GemWalletDetails {
+        let details = model::wallet_details(wallet);
+        GemWalletDetails {
+            address_explorer: details.address.as_ref().map(|address| self.explorer.get_address_url(address.chain, address.address.clone())),
+            ..details
+        }
     }
 
     pub fn address_url(&self, chain: Chain, address: String) -> BlockExplorerLink {
@@ -378,6 +386,24 @@ fn keystore_import(import: GemWalletImportType) -> GemImportType {
 
 #[cfg(test)]
 mod tests {
+    use primitives::Account;
+
+    #[test]
+    fn test_wallet_details_carry_the_explorer_for_a_single_account() {
+        let testkit = WalletTestkit::new();
+        let wallet = Wallet::mock_with_accounts(Account::mock_chains(&[Chain::Ethereum], "0xabc"));
+
+        let details = testkit.service.wallet_details(wallet.clone());
+
+        assert_eq!(details.address.as_ref().map(|address| address.address.as_str()), Some("0xabc"));
+        assert!(details.address_explorer.is_some(), "the screen does not ask a second service for the link");
+
+        let multiple = Wallet::mock_with_accounts(Account::mock_chains(&[Chain::Ethereum, Chain::Bitcoin], "0xabc"));
+        let details = testkit.service.wallet_details(multiple);
+
+        assert!(details.address.is_none());
+        assert!(details.address_explorer.is_none(), "no single address means no link");
+    }
     use std::fs;
 
     use futures::executor::block_on;
