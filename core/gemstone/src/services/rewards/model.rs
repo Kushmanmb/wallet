@@ -20,6 +20,12 @@ pub struct GemRewardsState {
     pub redemptions: Vec<GemRewardsRedemption>,
 }
 
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemIncomingCode {
+    Activate { code: String },
+    Confirm { code: String },
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemRewardsRedemption {
     pub option: RewardRedemptionOption,

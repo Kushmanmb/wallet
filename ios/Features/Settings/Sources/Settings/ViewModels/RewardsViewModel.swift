@@ -2,12 +2,14 @@
 
 import Components
 import Foundation
+import enum Gemstone.GemIncomingCode
 import enum Gemstone.GemListRow
 import struct Gemstone.GemRewardsRedemption
 import protocol Gemstone.GemRewardsServiceProtocol
 import struct Gemstone.GemRewardsState
 import enum Gemstone.GemServiceError
 import struct Gemstone.GemWalletRow
+import func Gemstone.incomingReferralCode
 import struct Gemstone.RewardRedemptionOption
 import func Gemstone.walletRow
 import func Gemstone.walletRows
@@ -196,32 +198,23 @@ public final class RewardsViewModel: Sendable {
     func onTaskOnce() async {
         await load()
 
-        if wallets.count == 1, activateCode != nil {
-            await useReferralCode()
-        } else if let code = activateCode {
-            isPresentingSheet = .activateCode(code: code)
-        }
-    }
-
-    private func useReferralCode() async {
-        guard let code = activateCode else { return }
-        do {
-            try await service.useReferralCode(wallet: selectedWallet, code: code)
-            showActivatedToast()
-            await load()
-        } catch let error as GemServiceError {
-            showError(error.text().text)
-        } catch {
-            debugLog("rewards error: \(error)")
+        switch incomingReferralCode(code: activateCode, wallets: wallets.map { $0.toGem() }) {
+        case let .activate(code): await useReferralCode(code)
+        case let .confirm(code): isPresentingSheet = .activateCode(code: code)
+        case .none: break
         }
     }
 
     func activatePendingReferral() async {
         guard let code = rewardsState.usedReferralCode else { return }
+        await useReferralCode(code)
+    }
+
+    private func useReferralCode(_ code: String) async {
         do {
-            try await service.useReferralCode(wallet: selectedWallet, code: code)
+            let rewards = try await service.useReferralCode(wallet: selectedWallet, code: code)
+            state = .data(service.state(rewards: rewards))
             showActivatedToast()
-            await load()
         } catch let error as GemServiceError {
             showError(error.text().text)
         } catch {

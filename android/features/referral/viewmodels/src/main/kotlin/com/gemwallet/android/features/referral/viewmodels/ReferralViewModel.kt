@@ -33,9 +33,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemIncomingCode
 import uniffi.gemstone.GemRewardsRedemption
 import uniffi.gemstone.GemRewardsServiceInterface
 import uniffi.gemstone.Rewards
+import uniffi.gemstone.incomingReferralCode
 import uniffi.gemstone.walletRows
 import javax.inject.Inject
 
@@ -74,6 +76,10 @@ class ReferralViewModel @Inject constructor(
 
     val availableWalletRows = availableWallets.mapLatest { wallets -> walletRows(wallets.map { it.toGem() }) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val incomingCode: StateFlow<GemIncomingCode?> = combine(referralCode, availableWallets) { code, wallets ->
+        incomingReferralCode(code, wallets.map { it.toGem() })
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val session = getSession()
         .filterNotNull()
@@ -131,7 +137,8 @@ class ReferralViewModel @Inject constructor(
     fun useCode(code: String, callback: (Exception?) -> Unit) = viewModelScope.launch(ioDispatcher) {
         try {
             val wallet = currentWallet.value ?: return@launch
-            service.useReferralCode(wallet.toGem(), code)
+            val rewards = service.useReferralCode(wallet.toGem(), code)
+            this@ReferralViewModel.rewards.update { rewards }
             withContext(Dispatchers.Main) {
                 callback(null)
             }

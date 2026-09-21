@@ -2,13 +2,22 @@ use crate::duration_formatter::countdown_parts;
 use crate::precision::GemValueStyle;
 use chrono::{DateTime, Utc};
 use number_formatter::BigNumberFormatter;
-use primitives::{CoreEmoji, RewardRedemptionOption, RewardStatus, Rewards};
+use primitives::{CoreEmoji, RewardRedemptionOption, RewardStatus, Rewards, Wallet};
 
-use super::model::{GemRewardsRedemption, GemRewardsState};
+use super::model::{GemIncomingCode, GemRewardsRedemption, GemRewardsState};
 use crate::config::rewards::get_referral_url;
 use crate::formatted_number::{GemFormattedNumber, GemNumberUnit};
 use crate::models::list::{GemListRow, GemListRowTitle, GemNoticeKind};
 use crate::services::localization::GemLocalizedText;
+
+pub fn incoming_code(code: Option<&str>, wallets: &[Wallet]) -> Option<GemIncomingCode> {
+    let code = code.map(str::trim).filter(|code| !code.is_empty())?.to_string();
+    match wallets {
+        [] => None,
+        [_] => Some(GemIncomingCode::Activate { code }),
+        _ => Some(GemIncomingCode::Confirm { code }),
+    }
+}
 
 pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
     let Some(rewards) = rewards else {

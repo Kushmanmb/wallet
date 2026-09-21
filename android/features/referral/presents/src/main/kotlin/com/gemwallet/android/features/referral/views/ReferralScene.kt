@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,6 +64,7 @@ import com.wallet.core.primitives.WalletId
 import com.wallet.core.primitives.WalletSource
 import com.wallet.core.primitives.WalletType
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemIncomingCode
 import uniffi.gemstone.GemRewardsState
 
 private val referralCodeMaxWidth = 250.dp
@@ -76,7 +78,7 @@ fun ReferralScene(
     infoRows: List<ListItemModel>,
     redemptions: List<RewardRedemptionUIModel>,
     currentWallet: Wallet?,
-    referralCode: String? = null,
+    incomingCode: GemIncomingCode? = null,
     onUsername: (String, (Exception?) -> Unit) -> Unit,
     onCode: (String, (Exception?) -> Unit) -> Unit,
     onCancelCode: () -> Unit,
@@ -92,14 +94,31 @@ fun ReferralScene(
     val shareTitle = stringResource(id = R.string.common_share, link)
 
     var getStartedDialogShow by remember(uiState) { mutableStateOf(false) }
-    var codeDialogShow by remember(referralCode, inSync) { mutableStateOf(referralCode != null && inSync == SyncType.None) }
-    var referralCode by remember(referralCode) { mutableStateOf(referralCode) }
+    var codeDialogShow by remember(incomingCode, inSync) { mutableStateOf(incomingCode is GemIncomingCode.Confirm && inSync == SyncType.None) }
+    val referralCode = (incomingCode as? GemIncomingCode.Confirm)?.code
 
     val successStr = stringResource(R.string.common_done)
     val scope = rememberCoroutineScope()
 
     val onShare = fun () {
         context.shareText(subject = link, text = joinText, chooserTitle = shareTitle)
+    }
+
+    val onCodeResult = fun (error: Exception?) {
+        val message = error?.errorText()?.text(context)
+        scope.launch {
+            if (message == null) {
+                snackbar.showSnackbar(successStr, R.drawable.ic_check_circle)
+            } else {
+                snackbar.showSnackbar(message, R.drawable.ic_error)
+            }
+        }
+    }
+
+    LaunchedEffect(incomingCode) {
+        val code = (incomingCode as? GemIncomingCode.Activate)?.code ?: return@LaunchedEffect
+        onCancelCode()
+        onCode(code, onCodeResult)
     }
 
     Scene(
@@ -188,17 +207,7 @@ fun ReferralScene(
                                     title = stringResource(R.string.transfer_confirm),
                                     state = buttonState(enabled = uiState.canActivatePendingReferral),
                                 ) {
-                                    onCode(code) { error ->
-                                        val message = error?.errorText()?.text(context)
-                                        scope.launch {
-                                            if (message == null) {
-                                                snackbar.showSnackbar(successStr, R.drawable.ic_check_circle)
-                                            } else {
-                                                snackbar.showSnackbar(message, R.drawable.ic_error)
-                                            }
-                                        }
-                                        onRefresh()
-                                    }
+                                    onCode(code, onCodeResult)
                                 }
                             }
                         }
