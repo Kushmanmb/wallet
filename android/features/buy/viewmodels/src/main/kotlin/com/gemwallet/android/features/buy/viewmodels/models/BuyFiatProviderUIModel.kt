@@ -17,7 +17,7 @@ data class BuyFiatProviderUIModel(val row: GemFiatQuoteRow, override val asset: 
 
     override val cryptoAmount: Double get() = row.cryptoAmount.value
 
-    override val cryptoFormatted: String by lazy { "≈ $cryptoText" }
+    override val cryptoFormatted: String by lazy { row.cryptoEstimateText(cryptoText) }
 
     val cryptoText: String by lazy { row.cryptoAmount.text() }
 

@@ -13,7 +13,7 @@ import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.TransactionNFTTransferMetadata
 import uniffi.gemstone.GemListRow
-import uniffi.gemstone.GemSwapProgressState
+import uniffi.gemstone.GemSwapProgress
 import uniffi.gemstone.GemValueStyle
 import java.math.BigInteger
 
@@ -46,7 +46,7 @@ sealed interface TransactionDetailsValue {
 
     class Rate(val rate: AssetRatePair) : TransactionDetailsValue
 
-    class SwapProgress(val fromAsset: Asset, val fromValue: BigInteger, val providerName: String, val transfer: GemSwapProgressState, val swap: GemSwapProgressState, val etaInSeconds: UInt?) : TransactionDetailsValue
+    class SwapProgress(val progress: GemSwapProgress) : TransactionDetailsValue
 
     class SwapAgain(val fromAssetId: AssetId, val toAssetId: AssetId) : TransactionDetailsValue
 

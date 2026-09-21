@@ -215,7 +215,7 @@ public final class FiatSceneViewModel {
 
     var cryptoAmountValue: String {
         guard let selectedQuoteViewModel else { return " " }
-        return "≈ \(selectedQuoteViewModel.amountText)"
+        return selectedQuoteViewModel.row.cryptoEstimateText(formattedValue: selectedQuoteViewModel.amountText)
     }
 
     var rateValue: String {

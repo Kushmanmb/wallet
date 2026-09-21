@@ -111,16 +111,7 @@ class TransactionDetailsAggregateImpl(private val rows: GemTransactionDetailRows
 
     override val explorer: BlockExplorerLink = rows.explorer
 
-    val swapProgress: TransactionDetailsValue.SwapProgress? = rows.swapProgress?.let { progress ->
-        TransactionDetailsValue.SwapProgress(
-            fromAsset = progress.fromAsset.toPrimitives(),
-            fromValue = progress.fromValue,
-            providerName = progress.providerName,
-            transfer = progress.transfer,
-            swap = progress.swap,
-            etaInSeconds = progress.etaSeconds,
-        )
-    }
+    val swapProgress: TransactionDetailsValue.SwapProgress? = rows.swapProgress?.let(TransactionDetailsValue::SwapProgress)
 
     val rate: TransactionDetailsValue.Rate? = rows.rate?.let { TransactionDetailsValue.Rate(rateFormatter.format(it)) }
 

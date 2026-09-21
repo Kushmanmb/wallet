@@ -3,6 +3,7 @@ package com.gemwallet.android.data.coordinators.transaction
 import com.gemwallet.android.domains.transaction.values.TransactionDetailsValue
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
+import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.testkit.mockAsset
 import com.gemwallet.android.testkit.mockAssetEthereum
 import com.gemwallet.android.testkit.mockAssetEthereumUSDT
@@ -201,12 +202,12 @@ class TransactionDetailsAggregateImplTest {
             ),
         )
         val swapProgress = progress.swapProgress
-        Assert.assertEquals(ethAsset, swapProgress?.fromAsset)
-        Assert.assertEquals(BigInteger("1000000000000000000"), swapProgress?.fromValue)
-        Assert.assertEquals("NEAR Intents", swapProgress?.providerName)
-        Assert.assertEquals(GemSwapProgressStep.PENDING, swapProgress?.transfer?.step)
-        Assert.assertEquals(GemSwapProgressStep.WAITING, swapProgress?.swap?.step)
-        Assert.assertEquals(720u, swapProgress?.etaInSeconds)
+        Assert.assertEquals(ethAsset, swapProgress?.progress?.fromAsset?.toPrimitives())
+        Assert.assertEquals(BigInteger("1000000000000000000"), swapProgress?.progress?.fromValue)
+        Assert.assertEquals("NEAR Intents", swapProgress?.progress?.providerName)
+        Assert.assertEquals(GemSwapProgressStep.PENDING, swapProgress?.progress?.transfer?.step)
+        Assert.assertEquals(GemSwapProgressStep.WAITING, swapProgress?.progress?.swap?.step)
+        Assert.assertEquals(720u, swapProgress?.progress?.etaSeconds)
 
         val again = createAggregate(
             rows = mockGemTransactionDetailRows(swapAgain = GemSwapAgain(fromAssetId = ethAsset.id.toIdentifier(), toAssetId = btcAsset.id.toIdentifier())),

@@ -105,7 +105,7 @@ extension TransactionSceneViewModel: ListSectionProvideable {
         let fromAsset = progress.fromAsset.toPrimitives()
         let amount = ValueFormatter.auto.string(BigInt(progress.fromValue), asset: fromAsset)
         return .swapProgress(TransactionSwapProgressItemModel(
-            transfer: .init(title: Localized.Transfer.title, subtitle: "\(amount) (\(fromAsset.id.chain.networkName))", state: progress.transfer),
+            transfer: .init(title: Localized.Transfer.title, subtitle: progress.transferText(formattedValue: amount), state: progress.transfer),
             swap: .init(title: Localized.Wallet.swap, subtitle: progress.providerName, state: progress.swap),
             estimatedTime: progress.etaSeconds.map { EstimatedConfirmationFormatter().string(seconds: $0) },
         ))

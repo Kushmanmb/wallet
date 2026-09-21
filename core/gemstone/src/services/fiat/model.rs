@@ -27,6 +27,13 @@ pub struct GemFiatQuoteRow {
     pub rate: Option<GemAssetRate>,
 }
 
+#[uniffi::export]
+impl GemFiatQuoteRow {
+    pub fn crypto_estimate_text(&self, formatted_value: String) -> String {
+        format!("≈ {formatted_value}")
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemFiatTransactionBadge {
     Pending,

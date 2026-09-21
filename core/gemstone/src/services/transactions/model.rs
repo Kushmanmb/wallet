@@ -3,7 +3,7 @@ use crate::models::custom_types::GemBigUint;
 use crate::models::list::GemListRow;
 use crate::services::swap::model::GemSwapRate;
 use chrono::{DateTime, Utc};
-use primitives::{AddressName, Asset, AssetId, AssetPrice, Chain, NFTAssetId, PerpetualDirection, Resource, TransactionDirection, TransactionExtended, TransactionId, TransactionState, TransactionType};
+use primitives::{AddressName, Asset, AssetId, AssetPrice, Chain, ChainAsset, NFTAssetId, PerpetualDirection, Resource, TransactionDirection, TransactionExtended, TransactionId, TransactionState, TransactionType};
 
 use super::rules;
 use primitives::BlockExplorerLink;
@@ -302,6 +302,13 @@ pub struct GemSwapProgress {
     pub eta_seconds: Option<u32>,
 }
 
+#[uniffi::export]
+impl GemSwapProgress {
+    pub fn transfer_text(&self, formatted_value: String) -> String {
+        format!("{formatted_value} ({})", ChainAsset::from_chain(self.from_asset.chain()).network_name)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
 pub struct GemSwapProgressState {
     pub step: GemSwapProgressStep,
@@ -351,6 +358,27 @@ pub struct GemSwapAgain {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    #[test]
+    fn test_a_swap_transfer_names_the_network_beside_the_amount() {
+        let progress = GemSwapProgress {
+            from_asset: Asset::from_chain(Chain::Ethereum),
+            from_value: GemBigUint::ZERO,
+            provider_name: "Thorchain".to_string(),
+            transfer: GemSwapProgressState {
+                step: GemSwapProgressStep::Pending,
+                marker: GemSwapProgressMarker::Spinner,
+            },
+            swap: GemSwapProgressState {
+                step: GemSwapProgressStep::Waiting,
+                marker: GemSwapProgressMarker::Spinner,
+            },
+            eta_seconds: None,
+        };
+
+        assert_eq!(progress.transfer_text("0.5 ETH".to_string()), "0.5 ETH (Ethereum)");
+    }
     use super::GemAmountSign;
 
     #[test]
