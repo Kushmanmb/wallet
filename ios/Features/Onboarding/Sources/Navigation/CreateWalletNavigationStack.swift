@@ -56,7 +56,7 @@ public struct CreateWalletNavigationStack: View {
         if model.isAcceptTermsCompleted {
             securityReminderScene
         } else {
-            AcceptTermsScene(model: AcceptTermsViewModel(onNext: { navigate(to: .securityReminder) }))
+            AcceptTermsScene(model: AcceptTermsViewModel(preferences: model.preferences, onNext: { navigate(to: .securityReminder) }))
         }
     }
 

@@ -22,7 +22,7 @@ public final class CreateWalletModel {
         )
     }
 
-    private let preferences: ObservablePreferences
+    let preferences: ObservablePreferences
     let onComplete: VoidAction
 
     private(set) var words: [String] = []
@@ -79,7 +79,6 @@ extension CreateWalletModel {
             type: service.importRequest(kind: .phrase, chain: nil, input: words.joined(separator: " "), nameRecord: nil),
             source: .create,
         )
-        preferences.acceptTerms()
         return CreatedWallet(wallet: result.wallet, hasExistingWallets: name.hasExistingWallets)
     }
 

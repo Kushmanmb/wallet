@@ -13,7 +13,7 @@ import SwiftUI
 @MainActor
 public final class ImportWalletViewModel {
     private let service: any GemWalletServiceProtocol
-    private let preferences: ObservablePreferences
+    let preferences: ObservablePreferences
     private let nameService: any GemNameServiceProtocol
     let onComplete: VoidAction
 

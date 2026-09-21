@@ -19,7 +19,7 @@ import SwiftUI
 @MainActor
 final class ImportWalletSceneViewModel {
     private let service: any GemWalletServiceProtocol
-    private let preferences: ObservablePreferences
+    let preferences: ObservablePreferences
     let type: ImportWalletType
 
     private(set) var session = GemWalletImportSession(kind: .phrase, text: "", cursor: nil, isImporting: false)
@@ -202,7 +202,6 @@ extension ImportWalletSceneViewModel {
     }
 
     private func activateWallet(_ wallet: Wallet) async {
-        preferences.acceptTerms()
         do {
             try service.setCurrentWalletId(walletId: wallet.id.id)
         } catch let error as GemServiceError {
