@@ -35,6 +35,7 @@ class GetPriceAlertsImpl(private val priceAlertStore: GemstonePriceAlertStore, p
                         PriceAlertDataAggregateImpl(
                             id = item.id,
                             asset = assetInfo.asset,
+                            rankScore = assetInfo.metadata.rankScore,
                             priceAlert = item.priceAlert,
                             row = priceAlertFormatter.row(
                                 data = PriceAlertData(
@@ -47,6 +48,7 @@ class GetPriceAlertsImpl(private val priceAlertStore: GemstonePriceAlertStore, p
                                         )
                                     },
                                     priceAlert = item.priceAlert,
+                                    rankScore = assetInfo.metadata.rankScore,
                                 ).toGem(),
                                 priceCurrency = (assetInfo.price?.currency ?: item.priceAlert.currency).toGem(),
                             ),
@@ -58,7 +60,7 @@ class GetPriceAlertsImpl(private val priceAlertStore: GemstonePriceAlertStore, p
 }
 
 @Stable
-class PriceAlertDataAggregateImpl(override val id: String, override val asset: Asset, override val priceAlert: PriceAlert, private val row: GemPriceAlertRow) : PriceAlertDataAggregate {
+class PriceAlertDataAggregateImpl(override val id: String, override val asset: Asset, override val rankScore: Int, override val priceAlert: PriceAlert, private val row: GemPriceAlertRow) : PriceAlertDataAggregate {
     override val assetId: AssetId = asset.id
     override val title: String = row.title
     override val titleBadge: String? = row.symbol

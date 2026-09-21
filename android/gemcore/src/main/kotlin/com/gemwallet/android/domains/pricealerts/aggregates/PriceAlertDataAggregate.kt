@@ -11,6 +11,7 @@ interface PriceAlertDataAggregate {
     val priceAlert: PriceAlert
     val asset: Asset
     val assetId: AssetId
+    val rankScore: Int
     val title: String
     val titleBadge: String?
     val priceDirection: PriceAlertDirection?

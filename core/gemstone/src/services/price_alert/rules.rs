@@ -109,7 +109,12 @@ pub fn displayed_price_alert_ids(alerts: Vec<PriceAlert>) -> Vec<String> {
     sorted_price_alerts(alerts.into_iter().filter(PriceAlert::should_display).collect()).iter().map(PriceAlert::id).collect()
 }
 
+pub fn shows_alerted_asset(rank_score: i32) -> bool {
+    rank_score >= 0
+}
+
 pub fn price_alert_sections(alerts: Vec<PriceAlertData>) -> Vec<GemPriceAlertSection> {
+    let alerts: Vec<PriceAlertData> = alerts.into_iter().filter(|data| shows_alerted_asset(data.rank_score)).collect();
     let names: HashMap<AssetId, String> = alerts.iter().map(|data| (data.price_alert.asset_id.clone(), data.asset.name.clone())).collect();
     let displayed = sorted_price_alerts(alerts.into_iter().map(|data| data.price_alert).filter(PriceAlert::should_display).collect());
     let (auto, grouped): (Vec<PriceAlert>, Vec<PriceAlert>) = displayed.into_iter().partition(|alert| !alert_kind(alert).groups_by_asset());
@@ -147,7 +152,9 @@ pub fn price_alert_toggle(alerts: &[PriceAlert]) -> GemPriceAlertToggle {
 }
 
 pub fn price_alert_row(data: &PriceAlertData, price_currency: Currency) -> GemPriceAlertRow {
-    let PriceAlertData { asset, price: market, price_alert: alert } = data;
+    let PriceAlertData {
+        asset, price: market, price_alert: alert, ..
+    } = data;
     let current_price = market.map(|price| price.price);
     let price_change_percentage_24h = market.map(|price| price.price_change_percentage_24h);
     let kind = alert_kind(alert);
@@ -574,5 +581,17 @@ mod tests {
         assert_eq!(alert_direction(PriceAlertNotificationType::PricePercentChange, Some(-5.0), Some(150.0), PriceAlertDirection::Up), None);
 
         assert_eq!(alert_direction(PriceAlertNotificationType::Auto, Some(5.0), Some(150.0), PriceAlertDirection::Up), None);
+    }
+
+    #[test]
+    fn test_an_alert_on_a_spam_ranked_asset_is_not_listed() {
+        let alert = |rank_score| PriceAlertData {
+            rank_score,
+            ..PriceAlertData::mock(PriceAlert::mock(Chain::Bitcoin, None), Some(1.0), None)
+        };
+
+        assert!(price_alert_sections(vec![alert(-1)]).is_empty(), "an alert on a spam-ranked asset is not listed");
+        assert!(!price_alert_sections(vec![alert(0)]).is_empty());
+        assert!(!price_alert_sections(vec![alert(20)]).is_empty());
     }
 }

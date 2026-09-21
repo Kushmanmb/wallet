@@ -50,6 +50,7 @@ public final class AssetPriceAlertsViewModel: Sendable {
                 asset: asset,
                 price: priceQuery.value?.price,
                 priceAlert: .default(for: asset.id, currency: .default),
+                rankScore: 0,
             ),
             currency: currency,
         )

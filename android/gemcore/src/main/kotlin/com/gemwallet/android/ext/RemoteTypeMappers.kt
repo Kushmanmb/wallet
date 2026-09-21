@@ -1940,12 +1940,14 @@ fun uniffi.gemstone.PriceAlertData.toPrimitives(): com.wallet.core.primitives.Pr
     asset = asset.toPrimitives(),
     price = price?.let { it.toPrimitives() },
     priceAlert = priceAlert.toPrimitives(),
+    rankScore = rankScore,
 )
 
 fun com.wallet.core.primitives.PriceAlertData.toGem(): uniffi.gemstone.PriceAlertData = uniffi.gemstone.PriceAlertData(
     asset = asset.toGem(),
     price = price?.let { it.toGem() },
     priceAlert = priceAlert.toGem(),
+    rankScore = rankScore,
 )
 
 fun uniffi.gemstone.Release.toPrimitives(): com.wallet.core.primitives.Release = com.wallet.core.primitives.Release(

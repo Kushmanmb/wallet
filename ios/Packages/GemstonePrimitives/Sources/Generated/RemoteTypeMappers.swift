@@ -2888,6 +2888,7 @@ public extension Gemstone.PriceAlertData {
             asset: asset.toPrimitives(),
             price: price.map { $0.toPrimitives() },
             priceAlert: priceAlert.toPrimitives(),
+            rankScore: rankScore,
         )
     }
 }
@@ -2898,6 +2899,7 @@ public extension Primitives.PriceAlertData {
             asset: asset.toGem(),
             price: price.map { $0.toGem() },
             priceAlert: priceAlert.toGem(),
+            rankScore: rankScore,
         )
     }
 }

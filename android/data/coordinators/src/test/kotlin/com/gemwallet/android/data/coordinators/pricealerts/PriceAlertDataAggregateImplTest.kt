@@ -31,6 +31,7 @@ class PriceAlertDataAggregateImplTest {
     private fun createAggregate(id: String = "1", asset: Asset = btcAsset, assetPrice: AssetPriceInfo? = mockAssetPriceInfo(), priceAlert: PriceAlert = mockPriceAlert(assetId = asset.id)) = PriceAlertDataAggregateImpl(
         id = id,
         asset = asset,
+        rankScore = 20,
         priceAlert = priceAlert,
         row = PriceAlertFormatter().row(
             data = PriceAlertData(
@@ -43,6 +44,7 @@ class PriceAlertDataAggregateImplTest {
                     )
                 },
                 priceAlert = priceAlert,
+                rankScore = 20,
             ).toGem(),
             priceCurrency = (assetPrice?.currency ?: priceAlert.currency).toGem(),
         ),

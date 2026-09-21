@@ -81,7 +81,7 @@ class PriceAlertViewModel @Inject constructor(
 
     private val grouped = alerts.map { alerts ->
         val byId = alerts.associateBy { it.id }
-        priceAlertFormatter.sections(alerts.map { PriceAlertData(asset = it.asset, price = null, priceAlert = it.priceAlert).toGem() })
+        priceAlertFormatter.sections(alerts.map { PriceAlertData(asset = it.asset, price = null, priceAlert = it.priceAlert, rankScore = it.rankScore).toGem() })
             .map { section -> section.kind to section.alertIds.mapNotNull { byId[it] } }
     }
 

@@ -1482,6 +1482,7 @@ pub struct PriceAlertData {
     pub asset: Asset,
     pub price: Option<Price>,
     pub price_alert: PriceAlert,
+    pub rank_score: i32,
 }
 
 #[uniffi::remote(Record)]
