@@ -1,5 +1,5 @@
-use crate::duration::{DAY, HOUR, MINUTE, WEEK};
-use crate::{Chain, ListProviderName, PriceProvider, ScanProvider, SwapProvider};
+use primitives::duration::{DAY, HOUR, MINUTE, WEEK};
+use primitives::{Chain, ListProviderName, PriceProvider, ScanProvider, SwapProvider};
 use std::time::Duration;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 

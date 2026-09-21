@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{Chain, Device, WalletId, WalletSource};
+use primitives::{Chain, Device, WalletId, WalletSource};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

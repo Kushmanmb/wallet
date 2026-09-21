@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use super::error::{PaymentDecoderError, Result};
-use crate::{Chain, ChainType, payment::Payment};
+use primitives::{Chain, ChainType, payment::Payment};
 
 use super::{bip21, bip321, erc681, solana_pay, ton_pay, xrp};
 
@@ -48,7 +48,7 @@ fn get_chain(scheme: &str) -> Option<Chain> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
+    use primitives::{
         AssetId, Chain,
         payment::{PaymentAmount, PaymentRequest},
     };

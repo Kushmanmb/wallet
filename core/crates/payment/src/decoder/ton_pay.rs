@@ -1,7 +1,7 @@
 use super::amount;
 use super::error::{PaymentDecoderError, Result};
 use super::query;
-use crate::{
+use primitives::{
     AssetId, Chain,
     payment::{Payment, PaymentAmount, PaymentRequest},
 };

@@ -1,5 +1,7 @@
-use crate::{Device, PushNotification};
 use serde::{Deserialize, Serialize};
+
+use crate::notification::PushNotification;
+use primitives::Device;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GorushNotifications {
@@ -44,7 +46,7 @@ impl GorushNotification {
             message: String::new(),
             topic: None,
             data: PushNotification {
-                notification_type: crate::PushNotificationTypes::Test,
+                notification_type: crate::notification::PushNotificationTypes::Test,
                 data: None,
             },
             device_id: String::new(),
@@ -93,12 +95,30 @@ impl PushErrorLog {
 
 #[cfg(test)]
 mod tests {
+    use primitives::{Currency, DeviceLocale, Platform, PlatformStore};
+
     use super::*;
+
+    fn device(is_push_enabled: bool, token: &str) -> Device {
+        Device {
+            id: "test-device-id".to_string(),
+            platform: Platform::IOS,
+            platform_store: PlatformStore::AppStore,
+            os: "iOS 17.0".to_string(),
+            model: "iPhone 15".to_string(),
+            token: token.to_string(),
+            locale: DeviceLocale::EN,
+            version: "1.0.0".to_string(),
+            currency: Currency::USD,
+            is_push_enabled,
+            is_price_alerts_enabled: Some(true),
+            subscriptions_version: 1,
+        }
+    }
 
     #[test]
     fn from_device() {
-        let device = Device::mock();
-        let result = GorushNotification::from_device(device.clone(), "title".to_string(), "msg".to_string(), PushNotification::mock());
+        let result = GorushNotification::from_device(device(true, "test-token-123"), "title".to_string(), "msg".to_string(), PushNotification::mock());
         assert!(result.is_some());
 
         let notification = result.unwrap();
@@ -107,11 +127,8 @@ mod tests {
         assert_eq!(notification.message, "msg");
         assert_eq!(notification.device_id, "test-device-id");
 
-        let disabled = Device::mock_with(false, "token".to_string(), None);
-        assert!(GorushNotification::from_device(disabled, "t".to_string(), "m".to_string(), PushNotification::mock()).is_none());
-
-        let empty_token = Device::mock_with(true, "".to_string(), None);
-        assert!(GorushNotification::from_device(empty_token, "t".to_string(), "m".to_string(), PushNotification::mock()).is_none());
+        assert!(GorushNotification::from_device(device(false, "token"), "t".to_string(), "m".to_string(), PushNotification::mock()).is_none());
+        assert!(GorushNotification::from_device(device(true, ""), "t".to_string(), "m".to_string(), PushNotification::mock()).is_none());
     }
 
     #[test]

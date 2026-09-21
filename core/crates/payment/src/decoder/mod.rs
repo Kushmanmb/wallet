@@ -10,4 +10,4 @@ mod ton_pay;
 mod xrp;
 
 pub use self::decoder::PaymentURLDecoder;
-pub use self::error::{PaymentDecoderError, Result};
+pub use self::error::PaymentDecoderError;

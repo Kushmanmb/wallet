@@ -1,7 +1,7 @@
 use super::amount;
 use super::error::{PaymentDecoderError, Result};
 use super::query;
-use crate::{
+use primitives::{
     AssetId, Chain,
     payment::{Payment, PaymentAmount, PaymentLink, PaymentRequest},
 };
@@ -63,7 +63,7 @@ fn transaction_link(path: &str) -> Result<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::asset_constants::SOLANA_USDC_TOKEN_ID;
+    use primitives::asset_constants::SOLANA_USDC_TOKEN_ID;
 
     const RECIPIENT: &str = "HA4hQMs22nCuRN7iLDBsBkboz2SnLM1WkNtzLo6xEDY5";
 

@@ -1,7 +1,7 @@
 use super::bip21;
 use super::error::{PaymentDecoderError, Result};
 use super::query;
-use crate::{Chain, payment::Payment};
+use primitives::{Chain, payment::Payment};
 
 const QUERY_SEGWIT_ADDRESS: &str = "bc";
 
@@ -17,7 +17,7 @@ pub fn decode(path: &str) -> Result<Payment> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
+    use primitives::{
         AssetId,
         payment::{PaymentAmount, PaymentRequest},
     };

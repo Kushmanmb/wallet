@@ -2,7 +2,7 @@ use std::fmt;
 
 use num_bigint::BigUint;
 
-use crate::{Chain, asset::Asset};
+use primitives::{Chain, asset::Asset};
 
 const MAX_EXPONENT: u32 = 78;
 

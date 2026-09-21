@@ -10,8 +10,9 @@ use crate::services::transfer::model::{GemRecipient, GemTransferData};
 use num_bigint::BigUint;
 use number_formatter::BigNumberFormatter;
 use payment::PaymentService as CorePaymentService;
+use payment::PaymentURLDecoder;
 use primitives::TransactionInputType;
-use primitives::{Asset, AssetId, Chain, ChainAddress, ChainType, PaymentURLDecoder, TransferDataExtra, TransferDataOutputAction, TransferDataOutputType, hex};
+use primitives::{Asset, AssetId, Chain, ChainAddress, ChainType, TransferDataExtra, TransferDataOutputAction, TransferDataOutputType, hex};
 
 pub type GemPaymentError = payment::PaymentError;
 

@@ -5,7 +5,9 @@ use std::{
 };
 
 use async_trait::async_trait;
-use primitives::{NodeCheckReport, NodeCheckRequest, NodeCheckResult, NodeCheckStatus, NodeSyncStatus, TransactionIdRequest};
+use primitives::{NodeSyncStatus, TransactionIdRequest};
+
+use super::{NodeCheckReport, NodeCheckRequest, NodeCheckResult, NodeCheckStatus};
 
 use crate::{ChainBalances, ChainBlockTransactions, ChainProvider, ChainState, ChainTransaction};
 

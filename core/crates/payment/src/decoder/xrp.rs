@@ -1,7 +1,7 @@
 use super::bip21;
 use super::error::Result;
 use super::query;
-use crate::{
+use primitives::{
     Chain,
     payment::{Payment, PaymentRequest},
 };
@@ -22,7 +22,7 @@ pub fn decode(path: &str) -> Result<Payment> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{AssetId, payment::PaymentAmount};
+    use primitives::{AssetId, payment::PaymentAmount};
 
     const ADDRESS: &str = "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh";
 

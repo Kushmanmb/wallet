@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, EnumString};
 
-use crate::{AssetId, Transaction, WalletId};
+use primitives::{AssetId, Transaction, WalletId};
 
 #[derive(Debug, Serialize, Deserialize, Clone, AsRefStr, EnumString)]
 #[serde(rename_all = "camelCase")]
@@ -87,4 +87,14 @@ pub struct PushNotificationReward {
 pub struct PushNotificationWalletAsset {
     pub wallet_id: WalletId,
     pub asset_id: AssetId,
+}
+
+#[cfg(test)]
+impl PushNotification {
+    pub(crate) fn mock() -> Self {
+        Self {
+            notification_type: PushNotificationTypes::Test,
+            data: None,
+        }
+    }
 }
