@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use primitives::chart::ChartCandleUpdate;
-use primitives::{Asset, AssetId, Chain, ChartPeriod, Perpetual, PerpetualPosition};
+use primitives::{Asset, AssetId, Chain, ChartPeriod, Perpetual, PerpetualPosition, TransactionType};
 
 use super::model::{GemPerpetualButton, GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionKind, GemPerpetualSection};
 use super::{GemPerpetualService, rules};
@@ -9,7 +9,7 @@ use crate::models::list::GemListRow;
 use crate::models::perpetual::{GemChartCandleStick, GemPerpetualSubscription};
 use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
-use crate::services::transactions::GemTransactionsService;
+use crate::services::transactions::{GemTransactionFilter, GemTransactionsService, rules as transaction_rules};
 use crate::services::transfer::GemTransferData;
 use crate::services::wallet_session::GemWalletSessionService;
 
@@ -35,6 +35,10 @@ impl GemPerpetualDetailsService {
 
     pub fn sections(&self, has_position: bool) -> Vec<GemPerpetualSection> {
         rules::perpetual_sections(has_position)
+    }
+
+    pub fn activity_types(&self) -> Vec<TransactionType> {
+        transaction_rules::filter_transaction_types(GemTransactionFilter::Perpetuals)
     }
 
     pub fn position_details(&self, position: PerpetualPosition) -> Vec<GemPerpetualPositionDetail> {

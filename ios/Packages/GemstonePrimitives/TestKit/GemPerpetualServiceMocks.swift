@@ -144,6 +144,7 @@ public final class GemPerpetualDetailsServiceMock: GemPerpetualDetailsServicePro
     public var sectionsValue: [GemPerpetualSection] = []
     public var infoRowsValue: [GemListRow] = []
     public var positionDetailsValue: [GemPerpetualPositionDetail] = []
+    public var activityTypesValue: [Gemstone.TransactionType] = [.perpetualOpenPosition, .perpetualClosePosition, .perpetualModifyPosition]
     public var chartPeriodValue: Gemstone.ChartPeriod = Primitives.ChartPeriod.day.toGem()
     public var candlesticksValue: [Gemstone.ChartCandleStick] = []
     public var mergedCandlesValue: [Gemstone.ChartCandleStick]?
@@ -158,6 +159,10 @@ public final class GemPerpetualDetailsServiceMock: GemPerpetualDetailsServicePro
     public private(set) var setChartPeriods: [Gemstone.ChartPeriod] = []
 
     public init() {}
+
+    public func activityTypes() -> [Gemstone.TransactionType] {
+        activityTypesValue
+    }
 
     public func buttons(hasPosition: Bool) -> [GemPerpetualButton] {
         hasPosition ? modifyButtonsValue : buttonsValue

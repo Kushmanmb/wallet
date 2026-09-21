@@ -37,7 +37,6 @@ import com.gemwallet.android.ui.models.navigation.requireAssetId
 import com.wallet.core.primitives.ChartCandleStick
 import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.PerpetualDirection
-import com.wallet.core.primitives.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -92,12 +91,7 @@ class PerpetualDetailsViewModel @Inject constructor(
 
     private val transactionFilters = listOf(
         TransactionsRequestFilter.Asset(assetId),
-        TransactionsRequestFilter.Types(
-            listOf(
-                TransactionType.PerpetualOpenPosition,
-                TransactionType.PerpetualClosePosition,
-            ),
-        ),
+        TransactionsRequestFilter.Types(service.activityTypes().map { it.toPrimitives() }),
     )
 
     private val transactionSync = flow {

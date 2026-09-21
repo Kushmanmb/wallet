@@ -709,7 +709,11 @@ mod tests {
         assert_eq!(transaction_filter(&TransactionType::TokenApproval), GemTransactionFilter::Swaps);
         assert_eq!(transaction_filter(&TransactionType::EarnWithdraw), GemTransactionFilter::Stake);
         assert_eq!(transaction_filter(&TransactionType::AssetActivation), GemTransactionFilter::Others);
-        assert_eq!(filter_transaction_types(GemTransactionFilter::Perpetuals).len(), 3);
+        assert_eq!(
+            filter_transaction_types(GemTransactionFilter::Perpetuals),
+            vec![TransactionType::PerpetualOpenPosition, TransactionType::PerpetualClosePosition, TransactionType::PerpetualModifyPosition],
+            "the perpetual screen reads this list for its activity"
+        );
     }
 
     use super::super::model::GemSwapProgressMarker;

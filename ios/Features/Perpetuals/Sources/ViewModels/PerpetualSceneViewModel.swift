@@ -74,7 +74,7 @@ public final class PerpetualSceneViewModel {
         perpetualQuery = ObservableQuery(PerpetualRequest(assetId: asset.id), initialValue: .empty)
         transactionsQuery = ObservableQuery(
             MappedRequest(
-                TransactionsRequest.perpetualScene(walletId: wallet.id, assetId: asset.id, limit: Int(transactionsListLimit())),
+                TransactionsRequest.perpetualScene(walletId: wallet.id, assetId: asset.id, types: service.activityTypes().map { $0.toPrimitives() }, limit: Int(transactionsListLimit())),
                 transform: TransactionViewModel.sections,
             ),
             initialValue: [],
