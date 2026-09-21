@@ -20,7 +20,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 2. **Establish consistency:** MIG6. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, and C53 wallet creation/import. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
-5. **Close the boundary:** finish U9, U18, U33, N12, F56/F61 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
+5. **Close the boundary:** finish U9, U18, U33, N12, F61 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
 
 ## Screen coverage and existing infrastructure
 
@@ -36,7 +36,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | S74, O59, F61 |
 | Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | AUD14, F61 |
 | Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | AUD44; retain existing native QR/share adapters |
-| Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | U19, C52, F56 |
+| Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | U19, C52 |
 | Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | Keep debounce/observation native |
 | Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | — |
 | Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | C51, AUD5, AUD42, AUD45, P90, D73 |
@@ -198,7 +198,6 @@ The same product rule on both apps with a difference, each read on both sides on
 
 [No hand-written twins](ARCHITECTURE.md): a type that only crosses the FFI is used as the uniffi type, and an error is Core's error localized directly.
 
-- **F56** **M** Android turns errors into text through two classifiers (`errorText()` for five Core types plus the raw message, `toGemErrorText()` for the confirm broadcast only), re-implements Core's `payment_error_text` in `GemPaymentException.userMessage` (so `NoPaymentOptions` shows the generic scan error where iOS shows Core's text), and wraps foreign exceptions into Core variants (`ChartViewModel.kt:61`, `SwapQuotesResult.kt:23`). Core `alien_error_text`/`payment_error_text` become `text()` methods; one Android classifier covering iOS `Errors.swift`'s set.
 - **F61** **S** The shared abbreviated parity fixture is still missing. Android's abbreviated path uses `android.icu.text.CompactDecimalFormat`, a framework class absent from plain JVM unit tests, so a test of it throws `NullPointerException` in `:gemcore:testDebugUnitTest`; it needs Robolectric or instrumentation (X172, AUD35). iOS covers both rounding modes in [FormattedNumberTests](../ios/Packages/GemstonePrimitives/Tests/GemstonePrimitivesTests/FormattedNumberTests.swift). The rounding itself is fixed: `AbbreviatedFormatter` takes the record's rule instead of always truncating, and Android's `percentText` honours `rounding` and handles `Significant` instead of force-casting to `Fraction`. `BelowThreshold` signing was fixed with K19.
 
 ## 5. Forwarders and façades

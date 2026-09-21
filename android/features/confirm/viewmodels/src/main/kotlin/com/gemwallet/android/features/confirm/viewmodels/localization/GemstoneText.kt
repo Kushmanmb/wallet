@@ -3,8 +3,8 @@ package com.gemwallet.android.features.confirm.viewmodels.localization
 import android.content.Context
 import androidx.annotation.StringRes
 import com.gemwallet.android.ext.boldMarkdown
+import com.gemwallet.android.ext.errorTextOrNull
 import com.gemwallet.android.ext.networkName
-import com.gemwallet.android.ext.toGemErrorText
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.ValueFormatter
 import com.gemwallet.android.ui.R
@@ -106,5 +106,5 @@ internal fun GemConfirmButtonKind.label(context: Context): String = when (this) 
 }
 
 internal fun Throwable.broadcastLabel(context: Context): String = (this as? GemConfirmException)?.display()?.text(context)
-    ?: toGemErrorText()?.text(context)
+    ?: errorTextOrNull()?.text(context)
     ?: "${context.getString(R.string.errors_transfer_error)}: ${message ?: toString()}"

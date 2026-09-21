@@ -714,7 +714,7 @@ class SwapViewModelTest {
         assertEquals(ButtonState.Disabled, viewModel.uiState.value.buttonState)
     }
 
-    private suspend fun failQuote(viewModel: SwapViewModel, quotesFlow: MutableSharedFlow<SwapQuotesResult?>, error: Throwable) {
+    private suspend fun failQuote(viewModel: SwapViewModel, quotesFlow: MutableSharedFlow<SwapQuotesResult?>, error: SwapperException) {
         viewModel.payValue.setTextAndPlaceCursorAtEnd("1")
         Snapshot.sendApplyNotifications()
         testDispatcher.scheduler.advanceUntilIdle()

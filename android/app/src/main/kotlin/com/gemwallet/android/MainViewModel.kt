@@ -11,7 +11,6 @@ import com.gemwallet.android.application.wallet_connect.cases.PairWalletConnect
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.data.services.gemstone.pricealerts.MigratePriceAlertsPreference
 import com.gemwallet.android.ext.errorText
-import com.gemwallet.android.ext.userMessage
 import com.gemwallet.android.model.AuthState
 import com.gemwallet.android.services.MigrateV3KeystoreService
 import com.gemwallet.android.ui.localization.text
@@ -103,8 +102,7 @@ class MainViewModel @Inject constructor(
                         pendingNavigationCoordinator.clear()
                         if (isLoadingPayment) {
                             _uiState.update { state ->
-                                error.userMessage?.let { state.copy(navigationError = it) }
-                                    ?: state.copy(isScanErrorVisible = true)
+                                state.copy(navigationError = error.errorText().text(context))
                             }
                         }
                     } catch (error: GemServiceException) {

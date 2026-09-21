@@ -21,8 +21,6 @@ import com.wallet.core.primitives.ChartPeriod
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -87,9 +85,8 @@ class ChartViewModel internal constructor(
             try {
                 val chart = chartService.syncCharts(assetId.toIdentifier(), period)
                 session.update { held -> held.onLoaded(chart, period) }
-            } catch (e: Exception) {
-                currentCoroutineContext().ensureActive()
-                session.update { held -> held.onFailed(e as? GemServiceException ?: GemServiceException.Core(e.message.orEmpty()), period) }
+            } catch (e: GemServiceException) {
+                session.update { held -> held.onFailed(e, period) }
             }
             emit(Unit)
         }
