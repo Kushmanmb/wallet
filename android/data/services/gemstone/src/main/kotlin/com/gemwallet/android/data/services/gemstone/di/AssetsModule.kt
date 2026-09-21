@@ -55,6 +55,7 @@ import uniffi.gemstone.GemPriceAlertStore
 import uniffi.gemstone.GemPriceService
 import uniffi.gemstone.GemReceiveService
 import uniffi.gemstone.GemReceiveServiceInterface
+import uniffi.gemstone.GemRecentActivityService
 import uniffi.gemstone.GemStreamService
 import uniffi.gemstone.GemStreamServiceInterface
 import uniffi.gemstone.GemStreamSubscriptionService
@@ -201,7 +202,8 @@ object AssetsModule {
         GemAssetsService(apiClient, gateway, assetStore, priceService, preferencesService, session)
 
     @Provides
-    fun provideGemReceiveService(balanceService: GemBalanceService, assetsService: GemAssetsService): GemReceiveServiceInterface = GemReceiveService(balanceService, assetsService)
+    fun provideGemReceiveService(balanceService: GemBalanceService, assetsService: GemAssetsService, recentActivityService: GemRecentActivityService): GemReceiveServiceInterface =
+        GemReceiveService(balanceService, assetsService, recentActivityService)
 
     @Provides
     fun provideGemAddressDetailsService(gateway: GemGateway, explorerService: GemExplorerService, nameService: GemNameService): GemAddressDetailsServiceInterface = GemAddressDetailsService(gateway, explorerService, nameService)

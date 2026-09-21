@@ -1333,7 +1333,7 @@ fun togglePriceAlerts(enable: Boolean) = viewModelScope.launch(ioDispatcher) {
 
 [`GetPriceAlertsImpl`](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/pricealerts/GetPriceAlertsImpl.kt) separately observes through `GemstonePriceAlertStore`; it does not wrap commands. Domain classification still belongs to Core (D68 tracks the remaining SQL-based auto-alert classification).
 
-For a real platform-only concern, iOS uses a feature service in `Features/<Feature>/Sources/Services/`, constructed by the app and injected. Android uses a case in `gemcore` `application/<area>/cases/`, implemented in `data/coordinators/<area>/`. Neither path bypasses a Core persistence owner. Recent activity commands belong to `GemRecentActivityService`; the native stores supply persistence and observation (D64).
+For a real platform-only concern, iOS uses a feature service in `Features/<Feature>/Sources/Services/`, constructed by the app and injected. Android uses a case in `gemcore` `application/<area>/cases/`, implemented in `data/coordinators/<area>/`. Neither path bypasses a Core persistence owner. Recent activity commands belong to `GemRecentActivityService`; the native stores supply persistence and observation.
 
 ### Composition services are reached through the screen service
 

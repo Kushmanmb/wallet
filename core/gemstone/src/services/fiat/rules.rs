@@ -7,6 +7,7 @@ use super::model::{GemFiatAmountCheck, GemFiatQuoteRow, GemFiatTransactionBadge,
 use crate::config::fiat_config::FiatConfig;
 use crate::formatted_number::GemFormattedNumber;
 use crate::precision::{GemCurrencyStyle, GemValueStyle};
+use crate::services::assets::GemAssetAction;
 use crate::services::swap::GemAssetRate;
 
 pub fn default_amount(config: &FiatConfig, quote_type: FiatQuoteType) -> u32 {
@@ -74,6 +75,13 @@ pub fn quote_row(quote: &FiatQuote, asset_price: Option<f64>) -> GemFiatQuoteRow
             base_symbol: quote.asset.symbol.clone(),
             value: GemFormattedNumber::currency_code(quote.fiat_amount / quote.crypto_amount, quote.fiat_currency.clone(), GemCurrencyStyle::Currency),
         }),
+    }
+}
+
+pub fn quote_action(quote_type: &FiatQuoteType) -> GemAssetAction {
+    match quote_type {
+        FiatQuoteType::Buy => GemAssetAction::Buy,
+        FiatQuoteType::Sell => GemAssetAction::Sell,
     }
 }
 

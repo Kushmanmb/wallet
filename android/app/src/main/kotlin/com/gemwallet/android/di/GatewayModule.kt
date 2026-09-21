@@ -54,6 +54,7 @@ import uniffi.gemstone.GemPreferencesService
 import uniffi.gemstone.GemPreferencesStore
 import uniffi.gemstone.GemPriceAlertService
 import uniffi.gemstone.GemPriceService
+import uniffi.gemstone.GemRecentActivityService
 import uniffi.gemstone.GemRewardsService
 import uniffi.gemstone.GemRewardsServiceInterface
 import uniffi.gemstone.GemScanService
@@ -166,8 +167,8 @@ object GatewayModule {
     fun provideGemFiatServiceInterface(service: GemFiatService): GemFiatServiceInterface = service
 
     @Provides
-    fun provideGemFiatQuoteService(fiatService: GemFiatService, balanceService: GemBalanceService, walletSessionService: GemWalletSessionService): GemFiatQuoteServiceInterface =
-        GemFiatQuoteService(fiatService, balanceService, walletSessionService)
+    fun provideGemFiatQuoteService(fiatService: GemFiatService, balanceService: GemBalanceService, walletSessionService: GemWalletSessionService, recentActivityService: GemRecentActivityService): GemFiatQuoteServiceInterface =
+        GemFiatQuoteService(fiatService, balanceService, walletSessionService, recentActivityService)
 
     @Provides
     @Singleton

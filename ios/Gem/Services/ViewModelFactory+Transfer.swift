@@ -88,7 +88,7 @@ public extension ViewModelFactory {
     }
 
     private func receiveService() -> GemReceiveService {
-        GemReceiveService(balances: balanceService, assets: assetsService)
+        GemReceiveService(balances: balanceService, assets: assetsService, recentActivity: recentAssetsService)
     }
 
     @MainActor
@@ -133,7 +133,7 @@ public extension ViewModelFactory {
         amount: Int? = nil,
     ) -> FiatSceneViewModel {
         FiatSceneViewModel(
-            service: GemFiatQuoteService(fiat: fiatService, balances: balanceService, session: walletSessionService),
+            service: GemFiatQuoteService(fiat: fiatService, balances: balanceService, session: walletSessionService, recentActivity: recentAssetsService),
             assetAddress: assetAddress,
             wallet: wallet,
             type: type,

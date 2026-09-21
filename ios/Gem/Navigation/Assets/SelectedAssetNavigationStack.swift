@@ -126,9 +126,6 @@ struct SelectedAssetNavigationStack: View {
                     ),
                 )
             }
-            .taskOnce {
-                presenter.recordRecent(input: input)
-            }
         }
     }
 }
