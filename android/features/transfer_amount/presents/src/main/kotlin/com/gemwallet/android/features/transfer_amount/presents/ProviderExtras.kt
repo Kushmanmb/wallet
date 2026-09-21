@@ -95,7 +95,7 @@ private fun StakeValidatorSection(provider: AmountStakeProvider, onPickValidator
 private fun StakeResourceSection(provider: AmountStakeProvider) {
     val resource by provider.resource.collectAsStateWithLifecycle()
     TabsBar(
-        tabs = listOf(Resource.Bandwidth, Resource.Energy),
+        tabs = provider.resourceOptions,
         selected = resource,
         onSelect = provider::setResource,
     ) { item ->

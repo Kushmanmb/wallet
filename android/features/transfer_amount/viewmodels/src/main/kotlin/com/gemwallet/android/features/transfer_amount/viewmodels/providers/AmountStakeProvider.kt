@@ -69,6 +69,8 @@ class AmountStakeProvider(
     )
     val resource: StateFlow<Resource> = selectedResource.asStateFlow()
 
+    val resourceOptions: List<Resource> by lazy { stakeService.resourceOptions(params.assetId.chain.string).map { it.toPrimitives() } }
+
     fun setResource(value: Resource) {
         selectedResource.update { value }
     }
