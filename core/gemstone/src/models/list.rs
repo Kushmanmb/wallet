@@ -5,6 +5,7 @@ use crate::config::social::GemSocialLink;
 use crate::duration_formatter::GemDurationPart;
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::copy::GemCopy;
+use crate::models::custom_types::GemBigInt;
 use crate::services::error::GemServiceError;
 use crate::services::localization::GemLocalizedText;
 use crate::services::service_status::GemLatencyStatus;
@@ -131,6 +132,8 @@ pub enum GemNoticeKind {
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemInfoTopic {
     NetworkFee { asset: Asset },
+    MinimumAmount { asset: Asset, minimum: GemBigInt },
+    NoQuote,
     OpenInterest,
     FundingApr,
     StakeApr,

@@ -38,9 +38,9 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | R132; retain existing native QR/share adapters |
 | Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | U19, C52, D49, F56/F60 |
 | Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | V92; keep debounce/observation native |
-| Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | B78, R120, D55, V91 |
-| Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | C51, R89/R90/R93, U30, D55, F58, P90, D73 |
-| Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | S82, D67, R91/R129, U15, D55 |
+| Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | B78, R120, V91 |
+| Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | C51, R89/R90/R93, U30, F58, P90, D73 |
+| Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | S82, D67, R91/R129, U15 |
 | Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | U18, R121/R127, P90, F62 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | S83, R120/R122, U15, S80 |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | D66, R98/R112, K14/K19, O59 |
@@ -213,7 +213,6 @@ Rows, headers, screen state and flows that an app still assembles from Core ingr
 
 The same product rule on both apps with a difference, each read on both sides on 2026-09-19.
 
-- **D55** **S** A below-minimum amount opens a minimum-amount sheet with Buy on iOS (`AmountSceneViewModel.swift:228-236`) and is text only on Android, and "only NoQuote has a sheet" is decided per app for swap. `info()` on `GemAmountErrorDisplay` and `GemSwapErrorDisplay`.
 - **D56** **S** Wallet search: Android's empty state counts only some sections and draws "no assets" over matching lists, iOS `showAddToken` bypasses `flow.shows_add_token`, and pinned perpetuals vanish from iOS asset-list results. A Core search state from the full counts; both apps honour `shows_add_token`; one perpetual split.
 - **D58** **S** A support message interrupted by an app kill is failed on resume on Android (`failPendingSupportMessages`, outside the `GemSupportStore` trait) and spins "sending" forever on iOS, and Android restates Core's no-retry-for-images twice. `GemSupportStore::fail_pending_messages` from a Core entry point and message rows with a status outcome. Run interrupted-send recovery from the existing startup/resume lifecycle after identifying abandoned work; do not fail actively sending rows on every refresh. Reuse existing message status and retry rules.
 - **P90** **S** The token-approval header is image-only on iOS but drawn as the symbol on Android transaction details (`GetTransactionDetailsImpl.kt:99-100`) and confirm (`ConfirmHeaderUIModel.kt:53`), merging Core's `AssetImage` into `Symbol`. Close the confirm half with C51 and the detail half with U18; do not add a third header mapping.

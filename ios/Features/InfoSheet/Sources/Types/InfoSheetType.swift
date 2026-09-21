@@ -30,7 +30,7 @@ public enum InfoSheetType: Identifiable, Sendable, Equatable {
     case assetStatus(VerificationStatus)
     case accountMinimalBalance(Asset, required: BigInt)
     /// stake / perpetual / earn
-    case minimumAmount(Asset, required: BigInt, action: InfoSheetAction)
+    case minimumAmount(Asset, required: BigInt, action: InfoSheetAction?)
     case swapMinimumAmount(Asset, providerName: String, image: AssetImage, requirement: BalanceRequirement, price: Price?, currency: String, button: InfoSheetButton)
     // stake
     case stakingReservedFees(image: AssetImage)
@@ -92,9 +92,11 @@ public enum InfoSheetType: Identifiable, Sendable, Equatable {
 }
 
 public extension InfoSheetType {
-    init(topic: GemInfoTopic, assetImage: AssetImage?) {
+    init(topic: GemInfoTopic, assetImage: AssetImage?, buyAction: InfoSheetAction? = nil) {
         self = switch topic {
         case let .networkFee(asset): .networkFee(asset.toPrimitives())
+        case let .minimumAmount(asset, minimum): .minimumAmount(asset.toPrimitives(), required: minimum, action: buyAction)
+        case .noQuote: .noQuote
         case .openInterest: .openInterest
         case .fundingApr: .fundingApr
         case .stakeApr: .stakeApr(assetImage?.placeholder)

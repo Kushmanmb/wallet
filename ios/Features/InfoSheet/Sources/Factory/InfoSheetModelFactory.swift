@@ -129,7 +129,7 @@ public enum InfoSheetModelFactory {
                 title: Localized.Info.MinimumAmount.title,
                 description: Localized.Info.MinimumAmount.description(chain, amount),
                 image: .image(Images.Logo.logo),
-                button: .action(title: Localized.Asset.buyAsset(asset.symbol), action: action),
+                button: action.map { .action(title: Localized.Asset.buyAsset(asset.symbol), action: $0) },
             )
         case let .swapMinimumAmount(asset, providerName, image, requirement, price, currency, button):
             return InfoSheetModel(
