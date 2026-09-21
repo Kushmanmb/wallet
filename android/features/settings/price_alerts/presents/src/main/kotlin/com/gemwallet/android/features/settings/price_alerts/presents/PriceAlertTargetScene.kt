@@ -72,7 +72,7 @@ fun PriceAlertTargetScene(
     currency: Currency,
     currentPriceFormatted: String,
     priceSuggestions: List<Pair<String, String>> = emptyList(),
-    percentageSuggestions: List<Int> = listOf(5, 10, 15),
+    percentageSuggestions: List<Pair<String, String>> = emptyList(),
     asset: Asset? = null,
     assetPriceFormatted: String = "",
     assetPriceChangeFormatted: String = "",
@@ -117,7 +117,7 @@ fun PriceAlertTargetScene(
             if (value.text.isEmpty()) {
                 val suggestions = when (type) {
                     PriceAlertNotificationType.Price -> priceSuggestions
-                    PriceAlertNotificationType.PricePercentChange -> percentageSuggestions.map { "$it%" to it.toString() }
+                    PriceAlertNotificationType.PricePercentChange -> percentageSuggestions
                     else -> emptyList()
                 }
                 if (suggestions.isNotEmpty()) {
@@ -260,7 +260,7 @@ fun PriceAlertTargetScenePricePreview() {
             currentPriceFormatted = "$901.80",
             prompt = R.string.price_alerts_set_alert_price_over,
             priceSuggestions = listOf("$850" to "850", "$950" to "950"),
-            percentageSuggestions = listOf(3, 6, 9),
+            percentageSuggestions = listOf("3%" to "3", "6%" to "6", "9%" to "9"),
             buttonState = ButtonState.Enabled,
             onType = {},
             onDirection = {},
@@ -282,7 +282,7 @@ fun PriceAlertTargetScenePercentagePreview() {
             currentPriceFormatted = "$901.80",
             prompt = R.string.price_alerts_set_alert_price_over,
             priceSuggestions = listOf("$850" to "850", "$950" to "950"),
-            percentageSuggestions = listOf(3, 6, 9),
+            percentageSuggestions = listOf("3%" to "3", "6%" to "6", "9%" to "9"),
             buttonState = ButtonState.Enabled,
             onType = {},
             onDirection = {},
