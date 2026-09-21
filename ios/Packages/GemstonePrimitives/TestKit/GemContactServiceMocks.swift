@@ -19,11 +19,11 @@ public extension GemContactService {
     }
 }
 
-public final class GemManageContactServiceMock: GemManageContactServiceProtocol, @unchecked Sendable {
-    private let service: GemManageContactService
+public final class GemContactEditorServiceMock: GemContactEditorServiceProtocol, @unchecked Sendable {
+    private let service: GemContactEditorService
 
     public init() {
-        service = GemManageContactService(
+        service = GemContactEditorService(
             contacts: .mock(),
             addresses: GemAddressService(),
             payments: GemPaymentService.mock(),

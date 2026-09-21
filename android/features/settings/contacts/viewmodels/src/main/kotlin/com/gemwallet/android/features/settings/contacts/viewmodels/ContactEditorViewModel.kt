@@ -14,9 +14,9 @@ import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactAddressForm
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactAddressInput
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactAvatarState
-import com.gemwallet.android.features.settings.contacts.viewmodels.models.ManageContactPage
-import com.gemwallet.android.features.settings.contacts.viewmodels.models.ManageContactState
-import com.gemwallet.android.features.settings.contacts.viewmodels.models.ManageContactUIState
+import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactEditorPage
+import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactEditorState
+import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactEditorUIState
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.addAddressListItem
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.rows
 import com.gemwallet.android.ui.components.image.EmojiAvatarRenderer
@@ -40,16 +40,16 @@ import kotlinx.coroutines.launch
 import uniffi.gemstone.GemContactAddressInput
 import uniffi.gemstone.GemContactAvatar
 import uniffi.gemstone.GemContactAvatarChoice
+import uniffi.gemstone.GemContactEditorServiceInterface
 import uniffi.gemstone.GemContactSession
-import uniffi.gemstone.GemManageContactServiceInterface
 import uniffi.gemstone.GemNameServiceInterface
 import javax.inject.Inject
 
 @HiltViewModel
-class ManageContactViewModel @Inject constructor(
+class ContactEditorViewModel @Inject constructor(
     private val getContacts: GetContacts,
     @param:ApplicationContext private val context: Context,
-    private val service: GemManageContactServiceInterface,
+    private val service: GemContactEditorServiceInterface,
     nameService: GemNameServiceInterface,
     savedStateHandle: SavedStateHandle,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
@@ -67,14 +67,14 @@ class ManageContactViewModel @Inject constructor(
     private val addressInput = AddressInputModel(nameService, viewModelScope)
 
     private val state = MutableStateFlow(
-        ManageContactState(
+        ContactEditorState(
             session = service.newSession(null, emptyList()).let { session ->
                 (mode as? Mode.Edit)?.let { session.copy(id = it.contactId) } ?: session
             },
             isEdit = mode is Mode.Edit,
         ),
     )
-    val uiState: StateFlow<ManageContactUIState> = combine(
+    val uiState: StateFlow<ContactEditorUIState> = combine(
         state,
         addressInput.text,
         addressInput.nameResolveState,
@@ -83,7 +83,7 @@ class ManageContactViewModel @Inject constructor(
     ) { current, address, resolve, addressError, isValid ->
         val session = current.session
         val addresses = session.addresses.map { it.toPrimitives() }
-        ManageContactUIState(
+        ContactEditorUIState(
             isEdit = current.isEdit,
             name = session.name,
             initials = session.initials(),
@@ -113,7 +113,7 @@ class ManageContactViewModel @Inject constructor(
                 )
             },
         )
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, ManageContactUIState(isEdit = mode is Mode.Edit))
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, ContactEditorUIState(isEdit = mode is Mode.Edit))
 
     init {
         when (val mode = mode) {
@@ -132,15 +132,15 @@ class ManageContactViewModel @Inject constructor(
 
     fun setDescription(value: String) = updateSession { it.onDescriptionChanged(value) }
 
-    fun selectAvatar() = state.update { it.copy(page = ManageContactPage.Avatar) }
+    fun selectAvatar() = state.update { it.copy(page = ContactEditorPage.Avatar) }
 
-    fun cancelAvatar() = state.update { it.copy(page = ManageContactPage.Form) }
+    fun cancelAvatar() = state.update { it.copy(page = ContactEditorPage.Form) }
 
     fun setAvatar(emoji: String, backgroundColor: Int) = state.update {
         it.copy(
             session = it.session.onAvatarChanged(GemContactAvatarChoice.Emoji(emoji)),
             emojiBackground = backgroundColor,
-            page = ManageContactPage.Form,
+            page = ContactEditorPage.Form,
         )
     }
 
@@ -152,7 +152,7 @@ class ManageContactViewModel @Inject constructor(
         val form = ContactAddressForm(chain = service.defaultChain().requireChain())
         addressInput.reset()
         addressInput.setChain(form.chain)
-        state.update { it.copy(page = ManageContactPage.Address, form = form) }
+        state.update { it.copy(page = ContactEditorPage.Address, form = form) }
     }
 
     fun editAddress(address: ContactAddress) {
@@ -161,7 +161,7 @@ class ManageContactViewModel @Inject constructor(
         addressInput.onTextChange(address.address)
         state.update {
             it.copy(
-                page = ManageContactPage.Address,
+                page = ContactEditorPage.Address,
                 form = ContactAddressForm(
                     editingId = address.id,
                     chain = address.chain,
@@ -173,7 +173,7 @@ class ManageContactViewModel @Inject constructor(
 
     fun cancelAddress() {
         addressInput.reset()
-        state.update { it.copy(page = ManageContactPage.Form) }
+        state.update { it.copy(page = ContactEditorPage.Form) }
     }
 
     fun setAddress(value: String) = addressInput.onTextChange(value)
@@ -190,14 +190,14 @@ class ManageContactViewModel @Inject constructor(
         updateInput { it.copy(memo = scan.memo ?: it.memo) }
     }
 
-    fun selectChain() = state.update { it.copy(page = ManageContactPage.SelectChain) }
+    fun selectChain() = state.update { it.copy(page = ContactEditorPage.SelectChain) }
 
-    fun cancelSelectChain() = state.update { it.copy(page = ManageContactPage.Address) }
+    fun cancelSelectChain() = state.update { it.copy(page = ContactEditorPage.Address) }
 
     fun setChain(chain: Chain) {
         addressInput.setChain(chain)
         state.update {
-            it.copy(page = ManageContactPage.Address, form = it.form?.copy(chain = chain, memo = ""))
+            it.copy(page = ContactEditorPage.Address, form = it.form?.copy(chain = chain, memo = ""))
         }
     }
 
@@ -223,7 +223,7 @@ class ManageContactViewModel @Inject constructor(
                         replacingId = input.editingId,
                     ),
                 ),
-                page = ManageContactPage.Form,
+                page = ContactEditorPage.Form,
             )
         }
     }

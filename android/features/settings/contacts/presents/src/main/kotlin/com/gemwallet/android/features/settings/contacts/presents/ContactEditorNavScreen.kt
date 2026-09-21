@@ -6,13 +6,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gemwallet.android.features.settings.contacts.viewmodels.ManageContactViewModel
-import com.gemwallet.android.features.settings.contacts.viewmodels.models.ManageContactPage
+import com.gemwallet.android.features.settings.contacts.viewmodels.ContactEditorViewModel
+import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactEditorPage
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 
 @Composable
-fun ManageContactNavScreen(onSaved: () -> Unit, onCancel: () -> Unit, viewModel: ManageContactViewModel = hiltViewModel()) {
+fun ContactEditorNavScreen(onSaved: () -> Unit, onCancel: () -> Unit, viewModel: ContactEditorViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = rememberSnackbarState(message = uiState.errorText, iconRes = R.drawable.ic_error, onShown = viewModel::clearError)
 
@@ -22,28 +22,28 @@ fun ManageContactNavScreen(onSaved: () -> Unit, onCancel: () -> Unit, viewModel:
         }
     }
 
-    AnimatedContent(targetState = uiState.page, label = "manage_contact") { page ->
+    AnimatedContent(targetState = uiState.page, label = "contact_editor") { page ->
         when (page) {
-            ManageContactPage.Form -> ManageContactScene(
+            ContactEditorPage.Form -> ContactEditorScene(
                 state = uiState,
                 snackbar = snackbar,
                 onNameChange = viewModel::setName,
                 onDescriptionChange = viewModel::setDescription,
                 onAction = { action ->
                     when (action) {
-                        ManageContactAction.SelectAvatar -> viewModel.selectAvatar()
-                        ManageContactAction.RemoveAvatar -> viewModel.removeAvatar()
-                        ManageContactAction.AddAddress -> viewModel.addAddress()
-                        is ManageContactAction.EditAddress -> viewModel.editAddress(action.address)
-                        is ManageContactAction.DeleteAddress -> viewModel.deleteAddress(action.address)
-                        ManageContactAction.Save -> viewModel.save()
-                        ManageContactAction.Cancel -> onCancel()
+                        ContactEditorAction.SelectAvatar -> viewModel.selectAvatar()
+                        ContactEditorAction.RemoveAvatar -> viewModel.removeAvatar()
+                        ContactEditorAction.AddAddress -> viewModel.addAddress()
+                        is ContactEditorAction.EditAddress -> viewModel.editAddress(action.address)
+                        is ContactEditorAction.DeleteAddress -> viewModel.deleteAddress(action.address)
+                        ContactEditorAction.Save -> viewModel.save()
+                        ContactEditorAction.Cancel -> onCancel()
                     }
                 },
             )
 
-            ManageContactPage.Address -> uiState.addressInput?.let { input ->
-                ManageContactAddressScene(
+            ContactEditorPage.Address -> uiState.addressInput?.let { input ->
+                ContactAddressEditorScene(
                     input = input,
                     onAddressChange = viewModel::setAddress,
                     onMemoChange = viewModel::setMemo,
@@ -51,20 +51,20 @@ fun ManageContactNavScreen(onSaved: () -> Unit, onCancel: () -> Unit, viewModel:
                     onPaste = viewModel::pasteAddress,
                     onAction = { action ->
                         when (action) {
-                            ManageContactAddressAction.SelectChain -> viewModel.selectChain()
-                            ManageContactAddressAction.Confirm -> viewModel.confirmAddress()
-                            ManageContactAddressAction.Cancel -> viewModel.cancelAddress()
+                            ContactAddressEditorAction.SelectChain -> viewModel.selectChain()
+                            ContactAddressEditorAction.Confirm -> viewModel.confirmAddress()
+                            ContactAddressEditorAction.Cancel -> viewModel.cancelAddress()
                         }
                     },
                 )
             }
 
-            ManageContactPage.SelectChain -> ContactChainSelectScene(
+            ContactEditorPage.SelectChain -> ContactChainSelectScene(
                 onSelect = viewModel::setChain,
                 onCancel = viewModel::cancelSelectChain,
             )
 
-            ManageContactPage.Avatar -> ContactAvatarScene(
+            ContactEditorPage.Avatar -> ContactAvatarScene(
                 onSelect = viewModel::setAvatar,
                 onCancel = viewModel::cancelAvatar,
             )

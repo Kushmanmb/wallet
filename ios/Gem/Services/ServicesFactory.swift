@@ -367,7 +367,7 @@ struct ServicesFactory {
             balanceService: balanceService,
             confirmService: confirmService,
             contactService: contactService,
-            manageContactService: Gemstone.GemManageContactService(
+            contactEditorService: Gemstone.GemContactEditorService(
                 contacts: contactService,
                 addresses: addressService,
                 payments: paymentService,

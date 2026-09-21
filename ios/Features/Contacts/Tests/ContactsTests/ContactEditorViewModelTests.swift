@@ -10,10 +10,10 @@ import PrimitivesTestKit
 import Testing
 
 @MainActor
-struct ManageContactViewModelTests {
+struct ContactEditorViewModelTests {
     @Test
     func buttonStateAddMode() {
-        let model = ManageContactViewModel.mock()
+        let model = ContactEditorViewModel.mock()
 
         #expect(model.buttonState == .disabled)
 
@@ -24,7 +24,7 @@ struct ManageContactViewModelTests {
 
     @Test
     func buttonStateEditMode() {
-        let model = ManageContactViewModel.mock(mode: .edit(.mock(contact: .mock(name: "John"), addresses: [.mock()])))
+        let model = ContactEditorViewModel.mock(mode: .edit(.mock(contact: .mock(name: "John"), addresses: [.mock()])))
 
         #expect(model.buttonState == .normal)
 

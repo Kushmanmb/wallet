@@ -3,11 +3,11 @@
 import Contacts
 import GemstonePrimitivesTestKit
 
-public extension ManageContactViewModel {
+public extension ContactEditorViewModel {
     @MainActor
-    static func mock(mode: Mode = .add()) -> ManageContactViewModel {
-        ManageContactViewModel(
-            service: GemManageContactServiceMock(),
+    static func mock(mode: Mode = .add()) -> ContactEditorViewModel {
+        ContactEditorViewModel(
+            service: GemContactEditorServiceMock(),
             nameService: GemNameServiceMock(),
             mode: mode,
         )

@@ -7,10 +7,10 @@ import PrimitivesComponents
 import Style
 import SwiftUI
 
-public struct ManageContactScene: View {
+public struct ContactEditorScene: View {
     @Environment(\.dismiss) private var dismiss
 
-    @State private var model: ManageContactViewModel
+    @State private var model: ContactEditorViewModel
 
     @FocusState private var focusedField: Field?
     enum Field: Int, Hashable {
@@ -18,7 +18,7 @@ public struct ManageContactScene: View {
         case description
     }
 
-    public init(model: ManageContactViewModel) {
+    public init(model: ContactEditorViewModel) {
         _model = State(initialValue: model)
     }
 
@@ -68,14 +68,14 @@ public struct ManageContactScene: View {
         }
     }
 
-    private func contactAddressScene(mode: ManageContactAddressViewModel.Mode) -> some View {
-        ManageContactAddressScene(model: model.addressModel(mode: mode))
+    private func contactAddressScene(mode: ContactAddressEditorViewModel.Mode) -> some View {
+        ContactAddressEditorScene(model: model.addressModel(mode: mode))
     }
 }
 
 // MARK: - UI Components
 
-extension ManageContactScene {
+extension ContactEditorScene {
     private var avatarSection: some View {
         Section {
             AvatarView(
@@ -132,7 +132,7 @@ extension ManageContactScene {
 
 // MARK: - Actions
 
-extension ManageContactScene {
+extension ContactEditorScene {
     private func onAddAddress() {
         focusedField = .none
         model.isPresentingAddress = .add

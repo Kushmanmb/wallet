@@ -8,14 +8,14 @@ import uniffi.gemstone.GemContactAddressField
 import uniffi.gemstone.GemContactSession
 import uniffi.gemstone.contactAddressFields
 
-enum class ManageContactPage {
+enum class ContactEditorPage {
     Form,
     Address,
     SelectChain,
     Avatar,
 }
 
-data class ManageContactUIState(
+data class ContactEditorUIState(
     val isEdit: Boolean = false,
     val name: String = "",
     val initials: String = "",
@@ -24,7 +24,7 @@ data class ManageContactUIState(
     val addresses: List<ContactAddress> = emptyList(),
     val addressRows: List<ContactAddressRowUIModel> = emptyList(),
     val addAddressListItem: ListItemModel? = null,
-    val page: ManageContactPage = ManageContactPage.Form,
+    val page: ContactEditorPage = ContactEditorPage.Form,
     val addressInput: ContactAddressInput? = null,
     val isSaving: Boolean = false,
     val saved: Boolean = false,
@@ -32,11 +32,11 @@ data class ManageContactUIState(
     val isSaveEnabled: Boolean = false,
 )
 
-data class ManageContactState(
+data class ContactEditorState(
     val session: GemContactSession,
     val isEdit: Boolean,
     val emojiBackground: Int = 0,
-    val page: ManageContactPage = ManageContactPage.Form,
+    val page: ContactEditorPage = ContactEditorPage.Form,
     val form: ContactAddressForm? = null,
     val saved: Boolean = false,
     val errorText: String? = null,

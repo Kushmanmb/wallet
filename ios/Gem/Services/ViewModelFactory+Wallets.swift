@@ -61,11 +61,11 @@ public extension ViewModelFactory {
 
     @MainActor
     func contactsScene(mode: ContactsViewModel.Mode = .list) -> ContactsViewModel {
-        ContactsViewModel(service: contactService, manageContact: manageContactScene, mode: mode)
+        ContactsViewModel(service: contactService, contactEditor: contactEditorScene, mode: mode)
     }
 
     @MainActor
-    func manageContactScene(mode: ManageContactViewModel.Mode) -> ManageContactViewModel {
-        ManageContactViewModel(service: manageContactService, nameService: nameService, mode: mode)
+    func contactEditorScene(mode: ContactEditorViewModel.Mode) -> ContactEditorViewModel {
+        ContactEditorViewModel(service: contactEditorService, nameService: nameService, mode: mode)
     }
 }

@@ -7,10 +7,10 @@ import QRScanner
 import Style
 import SwiftUI
 
-public struct ManageContactAddressScene: View {
+public struct ContactAddressEditorScene: View {
     @Environment(\.dismiss) private var dismiss
 
-    @State private var model: ManageContactAddressViewModel
+    @State private var model: ContactAddressEditorViewModel
 
     @FocusState private var focusedField: Field?
     enum Field: Int, Hashable {
@@ -18,7 +18,7 @@ public struct ManageContactAddressScene: View {
         case memo
     }
 
-    public init(model: ManageContactAddressViewModel) {
+    public init(model: ContactAddressEditorViewModel) {
         _model = State(initialValue: model)
     }
 
@@ -55,7 +55,7 @@ public struct ManageContactAddressScene: View {
 
 // MARK: - UI Components
 
-extension ManageContactAddressScene {
+extension ContactAddressEditorScene {
     @ViewBuilder
     private func section(for field: ContactAddressField) -> some View {
         switch field {
@@ -100,7 +100,7 @@ extension ManageContactAddressScene {
 
 // MARK: - Actions
 
-extension ManageContactAddressScene {
+extension ContactAddressEditorScene {
     private func onFinishChainSelection(chains: [Chain]) {
         guard let chain = chains.first else { return }
         model.onSelectChain(chain)

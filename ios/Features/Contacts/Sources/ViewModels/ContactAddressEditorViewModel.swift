@@ -6,7 +6,7 @@ import func Gemstone.contactAddressFields
 import class Gemstone.GemChainService
 import enum Gemstone.GemContactAddressField
 import struct Gemstone.GemContactAddressInput
-import protocol Gemstone.GemManageContactServiceProtocol
+import protocol Gemstone.GemContactEditorServiceProtocol
 import protocol Gemstone.GemNameServiceProtocol
 import GemstonePrimitives
 import Localization
@@ -18,7 +18,7 @@ import UIKit
 
 @Observable
 @MainActor
-public final class ManageContactAddressViewModel {
+public final class ContactAddressEditorViewModel {
     public enum Mode: Identifiable {
         case add
         case edit(ContactAddress)
@@ -41,7 +41,7 @@ public final class ManageContactAddressViewModel {
     private let contactId: String
     private let mode: Mode
     private let chains: [Chain]
-    private let service: any GemManageContactServiceProtocol
+    private let service: any GemContactEditorServiceProtocol
     private let onComplete: (GemContactAddressInput) -> Void
 
     var addressInputModel: AddressInputViewModel
@@ -49,7 +49,7 @@ public final class ManageContactAddressViewModel {
     var isPresentingScanner = false
 
     public init(
-        service: any GemManageContactServiceProtocol,
+        service: any GemContactEditorServiceProtocol,
         nameService: any GemNameServiceProtocol,
         contactId: String,
         mode: Mode,
@@ -128,7 +128,7 @@ public final class ManageContactAddressViewModel {
 
 // MARK: - Actions
 
-extension ManageContactAddressViewModel {
+extension ContactAddressEditorViewModel {
     func onSelectChain(_ chain: Chain) {
         addressInputModel.chain = chain
         memo = ""

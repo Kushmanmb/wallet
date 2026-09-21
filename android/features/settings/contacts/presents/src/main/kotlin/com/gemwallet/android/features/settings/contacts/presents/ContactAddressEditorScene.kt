@@ -23,15 +23,15 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.wallet.core.primitives.QRScanType
 
 @Composable
-fun ManageContactAddressScene(input: ContactAddressInput, onAddressChange: (String) -> Unit, onMemoChange: (String) -> Unit, onScan: (String) -> Unit, onPaste: (String) -> Unit, onAction: (ManageContactAddressAction) -> Unit) {
+fun ContactAddressEditorScene(input: ContactAddressInput, onAddressChange: (String) -> Unit, onMemoChange: (String) -> Unit, onScan: (String) -> Unit, onPaste: (String) -> Unit, onAction: (ContactAddressEditorAction) -> Unit) {
     var scanning by remember { mutableStateOf(false) }
 
     Scene(
         title = stringResource(R.string.common_address),
         backHandle = true,
-        onClose = { onAction(ManageContactAddressAction.Cancel) },
+        onClose = { onAction(ContactAddressEditorAction.Cancel) },
         actions = {
-            IconButton(onClick = { onAction(ManageContactAddressAction.Confirm) }, enabled = input.isConfirmEnabled) {
+            IconButton(onClick = { onAction(ContactAddressEditorAction.Confirm) }, enabled = input.isConfirmEnabled) {
                 Icon(imageVector = AppIcons.Check, contentDescription = "")
             }
         },
@@ -42,7 +42,7 @@ fun ManageContactAddressScene(input: ContactAddressInput, onAddressChange: (Stri
             icon = input.chain,
             listPosition = ListPosition.Single,
             trailing = { DataBadgeChevron() },
-            onClick = { onAction(ManageContactAddressAction.SelectChain) },
+            onClick = { onAction(ContactAddressEditorAction.SelectChain) },
         )
         AddressChainField(
             value = input.address,

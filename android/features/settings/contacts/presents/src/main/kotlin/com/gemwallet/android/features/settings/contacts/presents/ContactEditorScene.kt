@@ -17,7 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactAvatarState
-import com.gemwallet.android.features.settings.contacts.viewmodels.models.ManageContactUIState
+import com.gemwallet.android.features.settings.contacts.viewmodels.models.ContactEditorUIState
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.GemTextField
 import com.gemwallet.android.ui.components.list_item.ActionIcon
@@ -32,15 +32,15 @@ import com.gemwallet.android.ui.theme.extraLargeIconSize
 import com.gemwallet.android.ui.theme.paddingDefault
 
 @Composable
-fun ManageContactScene(state: ManageContactUIState, snackbar: SnackbarHostState? = null, onNameChange: (String) -> Unit, onDescriptionChange: (String) -> Unit, onAction: (ManageContactAction) -> Unit) {
+fun ContactEditorScene(state: ContactEditorUIState, snackbar: SnackbarHostState? = null, onNameChange: (String) -> Unit, onDescriptionChange: (String) -> Unit, onAction: (ContactEditorAction) -> Unit) {
     val revealed = remember { mutableStateOf<String?>(null) }
 
     Scene(
         title = stringResource(R.string.contacts_contact),
-        onClose = { onAction(ManageContactAction.Cancel) },
+        onClose = { onAction(ContactEditorAction.Cancel) },
         snackbar = snackbar,
         actions = {
-            IconButton(onClick = { onAction(ManageContactAction.Save) }, enabled = state.isSaveEnabled) {
+            IconButton(onClick = { onAction(ContactEditorAction.Save) }, enabled = state.isSaveEnabled) {
                 Icon(imageVector = AppIcons.Check, contentDescription = "")
             }
         },
@@ -57,11 +57,11 @@ fun ManageContactScene(state: ManageContactUIState, snackbar: SnackbarHostState?
                         initials = state.initials,
                         avatar = state.avatar,
                         size = extraLargeIconSize,
-                        modifier = Modifier.clickable { onAction(ManageContactAction.SelectAvatar) },
+                        modifier = Modifier.clickable { onAction(ContactEditorAction.SelectAvatar) },
                         onRemove = if (state.avatar is ContactAvatarState.Empty) {
                             null
                         } else {
-                            { onAction(ManageContactAction.RemoveAvatar) }
+                            { onAction(ContactEditorAction.RemoveAvatar) }
                         },
                     )
                 }
@@ -91,7 +91,7 @@ fun ManageContactScene(state: ManageContactUIState, snackbar: SnackbarHostState?
                     actions = {
                         ActionIcon(
                             onClick = {
-                                onAction(ManageContactAction.DeleteAddress(row.address))
+                                onAction(ContactEditorAction.DeleteAddress(row.address))
                                 revealed.value = null
                             },
                             backgroundColor = MaterialTheme.colorScheme.error,
@@ -105,7 +105,7 @@ fun ManageContactScene(state: ManageContactUIState, snackbar: SnackbarHostState?
                     ListItem(
                         model = row.model,
                         listPosition = position,
-                        modifier = Modifier.clickable { onAction(ManageContactAction.EditAddress(row.address)) },
+                        modifier = Modifier.clickable { onAction(ContactEditorAction.EditAddress(row.address)) },
                         accessory = { DataBadgeChevron() },
                     )
                 }
@@ -116,7 +116,7 @@ fun ManageContactScene(state: ManageContactUIState, snackbar: SnackbarHostState?
                     ListItem(
                         model = it,
                         listPosition = if (state.addressRows.isEmpty()) ListPosition.Single else ListPosition.Last,
-                        modifier = Modifier.clickable { onAction(ManageContactAction.AddAddress) },
+                        modifier = Modifier.clickable { onAction(ContactEditorAction.AddAddress) },
                     )
                 }
             }

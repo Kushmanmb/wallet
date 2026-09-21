@@ -1209,7 +1209,7 @@ Choose the home from ownership first, then decide how it crosses FFI:
 | The answer requires I/O, stored dependencies or platform ports | method on the service that owns the flow | `confirmService.preload(...)` |
 | An app value must be encoded into a Core case | app mapping extension | `.stake(asset, stakeType)` |
 
-**Never add a free exported function or a service wrapper — stateless or not — for an answer already owned by one local Core type.** The transfer record answers for itself: `GemTransferData` exports `input_asset()`, `fee_asset()`, `header_kind()` and `title()`, and the apps call `transfer.feeAsset()` rather than asking a service or a free function. A method that ignores `self` is the same mistake even on a service with real dependencies: a simulation's asset ids are `SimulationResult.asset_ids()`, not a method on an eight-dependency orchestrator. Keep the owning service when the rule performs I/O, holds real dependencies, or combines inputs without a single honest receiver. A request record is an honest receiver when it contains the complete instruction: `GemContactAddressInput.add_address(addresses)` owns its replacement identifier and new address; `GemManageContactService.add_address(addresses, input)` would ignore every service dependency.
+**Never add a free exported function or a service wrapper — stateless or not — for an answer already owned by one local Core type.** The transfer record answers for itself: `GemTransferData` exports `input_asset()`, `fee_asset()`, `header_kind()` and `title()`, and the apps call `transfer.feeAsset()` rather than asking a service or a free function. A method that ignores `self` is the same mistake even on a service with real dependencies: a simulation's asset ids are `SimulationResult.asset_ids()`, not a method on an eight-dependency orchestrator. Keep the owning service when the rule performs I/O, holds real dependencies, or combines inputs without a single honest receiver. A request record is an honest receiver when it contains the complete instruction: `GemContactAddressInput.add_address(addresses)` owns its replacement identifier and new address; `GemContactEditorService.add_address(addresses, input)` would ignore every service dependency.
 
 Do not manufacture a receiver by choosing the first parameter. The type is honest only when the answer is part of that type's meaning, the method uses `self`, and extra arguments are plain input values rather than stores, clients or services. For a repository-owned Rust type, prefer an inherent `impl Type`; do not create a one-method extension trait to imitate Swift or Kotlin. Intrinsic structure belongs in the defining crate (`SimulationResult.asset_ids()`), while feature or product policy remains in Gemstone even when it consumes a primitives type.
 
@@ -1269,18 +1269,18 @@ class DevelopViewModel @Inject constructor(
 
 A second service is never the way to reach a value the screen renders. When a view model needs an answer its own service does not hold, the fix is one of three, in order: the answer is a pure projection and becomes a function of the value it projects ([a row is projected from its value](#a-row-is-projected-from-its-value-never-fetched-from-a-service)); the screen's own service or session already receives the input and returns the answer alongside the rest of its view state; or the screen was drawn around the wrong service. Widening the constructor is not on the list, and neither is having the composition root call the other service and pass the result in — a factory line that reads `walletService.walletRow(...)` next to an unrelated service is the same coupling with a longer path.
 
-When a real screen-level service is needed, name it for the screen it backs, not for the layer: `GemManageContactService` backs the add-and-edit screen. No `Scene` or `Facade` in the name. A service that only forwards calls to an owner is wrapper debt, not the pattern: the contacts list screen holds the owning `GemContactService`. When a screen needs a cohesive answer from several Core owners, Core composes them:
+When a real screen-level service is needed, name it for the screen it backs, not for the layer: `GemContactEditorService` backs the add-and-edit screen. No `Scene` or `Facade` in the name. A service that only forwards calls to an owner is wrapper debt, not the pattern: the contacts list screen holds the owning `GemContactService`. When a screen needs a cohesive answer from several Core owners, Core composes them:
 
 ```rust
 #[derive(uniffi::Object)]
-pub struct GemManageContactService {
+pub struct GemContactEditorService {
     contacts: Arc<GemContactService>,
     addresses: Arc<GemAddressService>,
     payments: Arc<GemPaymentService>,
 }
 
 #[uniffi::export]
-impl GemManageContactService {
+impl GemContactEditorService {
     #[uniffi::constructor]
     pub fn new(contacts: Arc<GemContactService>, addresses: Arc<GemAddressService>, payments: Arc<GemPaymentService>) -> Self { ... }
 
@@ -1339,7 +1339,7 @@ On Android the Hilt module binds both the concrete class and the generated inter
 
 ### A service never hands out another service
 
-A service method that returns another service (`service.manageContact()`) is the same reach-through as `model.nameService`, one level down: the caller depends on something it was not given. Every service is constructed in the composition root and injected. Returning `Arc<GemFooService>` from an exported service is migration debt, not an exception to this rule.
+A service method that returns another service (`service.contactEditor()`) is the same reach-through as `model.nameService`, one level down: the caller depends on something it was not given. Every service is constructed in the composition root and injected. Returning `Arc<GemFooService>` from an exported service is migration debt, not an exception to this rule.
 
 A **shared component** — `AddressInputViewModel`, `NetworkSelectorViewModel` — takes the Core service it needs by its own protocol: `AddressInputViewModel` and `NameRecordViewModel` take `any GemNameServiceProtocol` (`GemNameServiceInterface` on Android), and the parent view model receives that `nameService` as a plain constructor dependency beside its `service` and passes it down. The screen service does not forward name methods and the client does not declare a protocol intersection (`any GemFooServiceProtocol & AddressInputResolving`) or a builder closure to reach the component's dependency — both hide a second dependency inside the first. `NetworkSelectorViewModel` needs only the dependency-free `GemChainService` and reads `GemChainService.shared` itself ([the fieldless exception](#8-services-are-injected-never-constructed-at-a-call-site)).
 
@@ -1347,8 +1347,8 @@ A **shared component** — `AddressInputViewModel`, `NetworkSelectorViewModel` �
 
 ```swift
 // wrong — the view assembles the child from the parent's internals
-ManageContactAddressScene(
-    model: ManageContactAddressViewModel(
+ContactAddressEditorScene(
+    model: ContactAddressEditorViewModel(
         defaultChain: model.defaultChain,
         nameService: model.nameService,
         addressService: model.addressService,
@@ -1357,14 +1357,14 @@ ManageContactAddressScene(
 )
 
 // right — the parent owns the wiring, the view asks for a model
-ManageContactAddressScene(model: model.addressModel(mode: mode))
+ContactAddressEditorScene(model: model.addressModel(mode: mode))
 ```
 
 Where the child is a different screen with its own service, the parent cannot build it — feature modules cannot see the composition root. The app passes the builder in:
 
 ```swift
 public func contactsScene(mode: ContactsViewModel.Mode = .list) -> ContactsViewModel {
-    ContactsViewModel(service: contactService, manageContact: manageContactScene, mode: mode)
+    ContactsViewModel(service: contactService, contactEditor: contactEditorScene, mode: mode)
 }
 ```
 
@@ -1373,9 +1373,9 @@ Android does not hit this at all for a child of the same screen: one Hilt view m
 ```kotlin
 AnimatedContent(targetState = uiState.page) { page ->
     when (page) {
-        ManageContactPage.Form -> ManageContactScene(state = uiState, onAction = ...)
-        ManageContactPage.Address -> uiState.addressInput?.let { input ->
-            ManageContactAddressScene(input = input, onAction = ...)
+        ContactEditorPage.Form -> ContactEditorScene(state = uiState, onAction = ...)
+        ContactEditorPage.Address -> uiState.addressInput?.let { input ->
+            ContactAddressEditorScene(input = input, onAction = ...)
         }
     }
 }
@@ -1401,7 +1401,7 @@ A `GemFooService()` in a field initialiser or at file scope is a second instance
 
 Dependency-free FFI transport adapters are the exception: `GemSimulationFormatter` and `PriceAlertFormatter` may be constructed locally because they have no state to substitute. Do not extend that exception to a service, store, client or a type whose behavior can cross on its honest receiver.
 
-A fieldless Core rule object is the second exception. `GemAssetConfigService` and `GemConnectionService` carry no state, no store and no client, so a module-level lazy instance is not a second instance of anything — there is nothing to substitute and nothing to keep in step. Keep them there only while they back top-level extensions on a primitive that neither a composable nor a constructor can reach (`Chain.asset()`, `AssetId.icon()`, `ConnectionStatus.refreshInterval(kind)`); a caller that already has a view model asks its service instead. The same holds for the iOS `.shared` accessors in `Config.swift`: a leaf value model a view builds from a value — a row, a formatted address, a search predicate — has no constructor the composition root controls, so it reads the fieldless object directly. `ImportWalletTypeViewModel` is that shape: it reads `GemChainService.shared` itself, so its parent vends it with no argument. What is never acceptable is a flow parent reaching for one to hand to a child: the parent takes the child's vendor from the factory, the way `ViewModelFactory` hands `ContactsViewModel` its `ManageContactViewModel` builder. The composable reading one still [may not call it from its body](#keep-the-crossings-few).
+A fieldless Core rule object is the second exception. `GemAssetConfigService` and `GemConnectionService` carry no state, no store and no client, so a module-level lazy instance is not a second instance of anything — there is nothing to substitute and nothing to keep in step. Keep them there only while they back top-level extensions on a primitive that neither a composable nor a constructor can reach (`Chain.asset()`, `AssetId.icon()`, `ConnectionStatus.refreshInterval(kind)`); a caller that already has a view model asks its service instead. The same holds for the iOS `.shared` accessors in `Config.swift`: a leaf value model a view builds from a value — a row, a formatted address, a search predicate — has no constructor the composition root controls, so it reads the fieldless object directly. `ImportWalletTypeViewModel` is that shape: it reads `GemChainService.shared` itself, so its parent vends it with no argument. What is never acceptable is a flow parent reaching for one to hand to a child: the parent takes the child's vendor from the factory, the way `ViewModelFactory` hands `ContactsViewModel` its `ContactEditorViewModel` builder. The composable reading one still [may not call it from its body](#keep-the-crossings-few).
 
 Prefer the [generated abstraction](#depend-on-the-generated-abstraction-not-the-concrete-object) wherever a test needs substitution: any unstubbed method on a mocked concrete UniFFI object can reach a native handle the mock does not have.
 
@@ -1738,7 +1738,7 @@ The table locates the existing owners and consumers; it is not proof that a scre
 | `GemDeviceService` | — | `RootSceneViewModel`, `AppLifecycleService`, `CurrencySceneViewModel` | `DeviceObserverService`, `DevicePushSettings` |
 | `GemDeveloperService` | — | `DeveloperViewModel` | `DevelopViewModel` |
 | `GemFiatQuoteService` | `GemFiatSession` | `FiatSceneViewModel` | `FiatViewModel` |
-| `GemManageContactService` | — | `ManageContactViewModel` (+ `nameService`) | `ManageContactViewModel` (+ `GemNameServiceInterface`) |
+| `GemContactEditorService` | — | `ContactEditorViewModel` (+ `nameService`) | `ContactEditorViewModel` (+ `GemNameServiceInterface`) |
 | `GemNftService` | — | `CollectionsViewModel`, `CollectionViewModel`, `UnverifiedCollectionsViewModel` | `NftListViewModels` |
 | `GemNotificationService` | — | `InAppNotificationsViewModel` | `InAppNotificationsViewModel` |
 | `GemNotificationsService` | — | `NotificationsViewModel` | `DevicePushSettings` (the push cases `SettingsViewModel` calls) |

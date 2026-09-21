@@ -10,10 +10,10 @@ import PrimitivesTestKit
 import Testing
 
 @MainActor
-struct ManageContactAddressViewModelTests {
+struct ContactAddressEditorViewModelTests {
     @Test
     func buttonStateAddMode() {
-        let model = ManageContactAddressViewModel.mock()
+        let model = ContactAddressEditorViewModel.mock()
 
         #expect(model.buttonState == .disabled)
 
@@ -24,7 +24,7 @@ struct ManageContactAddressViewModelTests {
 
     @Test
     func buttonStateEditMode() {
-        let model = ManageContactAddressViewModel.mock(mode: .edit(.mock(address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh")))
+        let model = ContactAddressEditorViewModel.mock(mode: .edit(.mock(address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh")))
 
         #expect(model.buttonState == .normal)
 
@@ -35,7 +35,7 @@ struct ManageContactAddressViewModelTests {
 
     @Test
     func memoFieldFollowsTheChain() {
-        let model = ManageContactAddressViewModel.mock()
+        let model = ContactAddressEditorViewModel.mock()
 
         model.addressInputModel.chain = .bitcoin
         #expect(model.fields == [.network, .address])
@@ -46,7 +46,7 @@ struct ManageContactAddressViewModelTests {
 
     @Test
     func nameResolveState() {
-        let model = ManageContactAddressViewModel.mock()
+        let model = ContactAddressEditorViewModel.mock()
         model.addressInputModel.text = "john"
 
         model.addressInputModel.nameRecordViewModel.state = .loading(name: "john", chain: Chain.ethereum.toGem())
@@ -64,7 +64,7 @@ struct ManageContactAddressViewModelTests {
 
     @Test
     func aPaymentUriFillsTheAddressAndMemo() {
-        let model = ManageContactAddressViewModel.mock()
+        let model = ContactAddressEditorViewModel.mock()
 
         model.onScan("ripple:rLpq5RcRzA5FLmVp8jZmdvfMiRZ2xtVvZK?dt=5")
 
@@ -74,7 +74,7 @@ struct ManageContactAddressViewModelTests {
 
     @Test
     func theNetworkPickerFollowsCoreChainOrder() {
-        let model = ManageContactAddressViewModel.mock()
+        let model = ContactAddressEditorViewModel.mock()
         let chains = GemChainService.shared.getChains(query: .empty).map { Chain(core: $0) }
 
         #expect(model.networkSelectorModel.state.value?.items == chains)

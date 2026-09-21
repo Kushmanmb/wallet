@@ -5,8 +5,8 @@ import Foundation
 import struct Gemstone.GemContactAddressInput
 import enum Gemstone.GemContactAvatar
 import enum Gemstone.GemContactAvatarChoice
+import protocol Gemstone.GemContactEditorServiceProtocol
 import struct Gemstone.GemContactSession
-import protocol Gemstone.GemManageContactServiceProtocol
 import protocol Gemstone.GemNameServiceProtocol
 import struct Gemstone.GemRecipient
 import func Gemstone.walletAvatarEmojis
@@ -21,26 +21,26 @@ import UIKit
 
 @Observable
 @MainActor
-public final class ManageContactViewModel {
+public final class ContactEditorViewModel {
     public enum Mode {
         case add(recipient: GemRecipient? = nil, chain: Chain? = nil)
         case edit(ContactData)
     }
 
-    private let service: any GemManageContactServiceProtocol
+    private let service: any GemContactEditorServiceProtocol
     private let nameService: any GemNameServiceProtocol
     private let mode: Mode
 
     private(set) var session: GemContactSession
     var nameInputModel: InputValidationViewModel
-    var isPresentingAddress: ManageContactAddressViewModel.Mode?
+    var isPresentingAddress: ContactAddressEditorViewModel.Mode?
     var isPresentingAvatar: Bool = false
     var isPresentingAlertMessage: AlertMessage?
 
     let emojiList: [EmojiValue] = walletAvatarEmojis().map { EmojiValue(emoji: $0, color: Colors.grayVeryLight) }
 
     public init(
-        service: any GemManageContactServiceProtocol,
+        service: any GemContactEditorServiceProtocol,
         nameService: any GemNameServiceProtocol,
         mode: Mode,
     ) {
@@ -174,8 +174,8 @@ public final class ManageContactViewModel {
         )
     }
 
-    func addressModel(mode: ManageContactAddressViewModel.Mode) -> ManageContactAddressViewModel {
-        ManageContactAddressViewModel(
+    func addressModel(mode: ContactAddressEditorViewModel.Mode) -> ContactAddressEditorViewModel {
+        ContactAddressEditorViewModel(
             service: service,
             nameService: nameService,
             contactId: session.id,

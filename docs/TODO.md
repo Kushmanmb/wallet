@@ -51,7 +51,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | S80, AUD22 |
 | Price-alert list/target/auto-alert controls | `GemPriceAlertService`, alert session and existing notification port | S80, U33 |
 | Rewards/create/use/redeem referral | `GemRewardsService`, rewards state, shared load and list records | S79, B77 |
-| Contacts/list/editor/address picker | `GemContactService`, `GemManageContactService`, contact session/name component | N14 |
+| Contacts/list/editor/address picker | `GemContactService`, `GemContactEditorService`, contact session/name component | — |
 | Networks/node list/add/check | `GemChainSettingsService`, node sessions, shared rows | R131, AUD20, AUD31 |
 | Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | B77, O59, AUD13, AUD30; retain native locale/theme application |
 | Security/lock/biometry/recovery | `GemSecurityService`, existing keystore/auth ports and settings sections | D72, B77, X172, AUD37; retain platform-only privacy lock |
@@ -135,7 +135,6 @@ Surveyed on 2026-09-21. Each item names what was counted and where; confirm the 
 
 ### Names
 
-- **N14** **M** **The contact editor is named `ManageContact` end to end.** Core exports `GemManageContactService` from `services/manage_contact/`, and both apps follow: iOS `ManageContactViewModel` with `manageContactModel(mode:)`, `manageContact(for:)` and `manageContactScene(mode:)`, Android `ManageContactViewModel` and `ManageContactNavScreen`. `manage` is one of the verbs [Engineering Principles](../skills/engineering-principles.md) rejects, and the screen adds or edits one contact. Rename the Core service and module with both apps' types in one commit, so the three app functions can say what they build; a half-rename leaves the apps and Core disagreeing.
 
 ### Rows and records
 
