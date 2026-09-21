@@ -164,7 +164,7 @@ public final class FiatSceneViewModel {
     }
 
     func emptyTitle(_ viewState: GemFiatViewState) -> String {
-        viewState.phase.emptyTitle(action: type.action)
+        viewState.quotesMessage()?.title(action: type.action) ?? .empty
     }
 
     var assetTitle: String {

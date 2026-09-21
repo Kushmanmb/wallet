@@ -5,10 +5,12 @@ import androidx.annotation.StringRes
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.localization.text
 import com.wallet.core.primitives.FiatQuoteType
 import uniffi.gemstone.GemFiatAmountCheck
 import uniffi.gemstone.GemFiatButtonAction
 import uniffi.gemstone.GemFiatQuotePhase
+import uniffi.gemstone.GemFiatQuotesMessage
 import uniffi.gemstone.GemFiatViewState
 
 @StringRes
@@ -50,21 +52,15 @@ fun GemFiatViewState.amountErrorText(context: Context): String? = when (val phas
     -> null
 }
 
-fun GemFiatViewState.quotesMessage(context: Context): String? = when (phase) {
-    GemFiatQuotePhase.NoInput,
-    GemFiatQuotePhase.InvalidInput,
-    -> context.getString(
+fun GemFiatViewState.quotesMessage(context: Context): String? = when (val message = quotesMessage()) {
+    GemFiatQuotesMessage.EnterAmount -> context.getString(
         R.string.input_enter_amount_to,
-        context.getString(quoteType.toPrimitives().titleRes(), ""),
+        context.getString(quoteType.toPrimitives().actionRes()),
     )
 
-    is GemFiatQuotePhase.Invalid,
-    GemFiatQuotePhase.NoQuotes,
-    -> context.getString(R.string.buy_no_results)
+    GemFiatQuotesMessage.NoResults -> context.getString(R.string.buy_no_results)
 
-    is GemFiatQuotePhase.Failed -> context.getString(R.string.errors_unknown_try_again)
+    is GemFiatQuotesMessage.Failed -> message.error.text(context)
 
-    is GemFiatQuotePhase.Loading,
-    GemFiatQuotePhase.Ready,
-    -> null
+    null -> null
 }

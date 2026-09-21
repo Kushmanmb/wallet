@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.features.buy.localization.titleRes
 import com.gemwallet.android.features.buy.viewmodels.FiatViewModel
 import com.gemwallet.android.features.buy.viewmodels.models.FiatSuggestion
@@ -31,6 +32,7 @@ import com.gemwallet.android.ui.components.TabsBar
 import com.gemwallet.android.ui.components.clickable
 import com.gemwallet.android.ui.components.screen.LoadingScene
 import com.gemwallet.android.ui.components.screen.showSnackbar
+import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.models.actions.CancelAction
 import com.gemwallet.android.ui.open
 import com.gemwallet.android.ui.theme.iconSize
@@ -57,7 +59,6 @@ fun FiatNavScreen(cancelAction: CancelAction, onFiatTransactions: () -> Unit, vi
     val uriHandler = LocalUriHandler.current
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
-    val errorOccurred = stringResource(R.string.errors_error_occurred)
     val title = stringResource(type.titleRes(), "")
     val currentAssetInfo = asset ?: return LoadingScene(title = title, onCancel = { cancelAction() })
     val currentAsset = currentAssetInfo.asset
@@ -92,7 +93,7 @@ fun FiatNavScreen(cancelAction: CancelAction, onFiatTransactions: () -> Unit, vi
             scope.launch {
                 viewModel.quoteUrl()
                     .onSuccess { uriHandler.open(context, it) }
-                    .onFailure { snackbar.showSnackbar(errorOccurred, R.drawable.ic_error) }
+                    .onFailure { snackbar.showSnackbar(it.errorText().text(context), R.drawable.ic_error) }
             }
         },
     )

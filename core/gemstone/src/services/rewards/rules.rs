@@ -293,7 +293,7 @@ mod tests {
                 .info_rows
                 .iter()
                 .filter_map(|row| match row {
-                    GemListRow::Amount { title, amount, .. } => Some((title.clone(), amount.value)),
+                    GemListRow::Amount { title, amount, .. } => Some((*title, amount.value)),
                     _ => None,
                 })
                 .collect::<Vec<_>>(),

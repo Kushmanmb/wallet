@@ -1535,7 +1535,7 @@ mod tests {
         let ethereum = AssetId::from_chain(Chain::Ethereum);
         let usdc = Asset::mock_ethereum_usdc().id;
 
-        assert!(!shows_fee_assets(&[ethereum.clone()], Some(&ethereum)));
+        assert!(!shows_fee_assets(std::slice::from_ref(&ethereum), Some(&ethereum)));
         assert!(shows_fee_assets(&[ethereum.clone(), usdc], Some(&ethereum)));
         assert!(!shows_fee_assets(&[], Some(&ethereum)));
         assert!(shows_fee_assets(&[ethereum], None), "with nothing selected yet, another asset is still offered");

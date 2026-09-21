@@ -4,9 +4,11 @@ import Foundation
 import enum Gemstone.GemFiatAmountCheck
 import enum Gemstone.GemFiatButtonAction
 import enum Gemstone.GemFiatQuotePhase
+import enum Gemstone.GemFiatQuotesMessage
 import GemstonePrimitives
 import Localization
 import Primitives
+import PrimitivesComponents
 
 extension GemFiatButtonAction {
     var title: String {
@@ -28,14 +30,17 @@ extension GemFiatAmountCheck {
     }
 }
 
-extension GemFiatQuotePhase {
-    func emptyTitle(action: String) -> String {
+extension GemFiatQuotesMessage {
+    func title(action: String) -> String {
         switch self {
-        case .noInput, .invalidInput: Localized.Input.enterAmountTo(action)
-        case .invalid, .loading, .ready, .noQuotes, .failed: Localized.Buy.noResults
+        case .enterAmount: Localized.Input.enterAmountTo(action)
+        case .noResults: Localized.Buy.noResults
+        case let .failed(error): error.text
         }
     }
+}
 
+extension GemFiatQuotePhase {
     var inputErrorText: String? {
         switch self {
         case .invalidInput: Localized.Errors.invalidAmount

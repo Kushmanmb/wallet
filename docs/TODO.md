@@ -42,7 +42,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | C51, R89/R90/R93, U30, D51/D55, F58, P90, D73 |
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | S82, D67, R91/R92/R129, U15, D55 |
 | Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | U18, R105/R121/R127, P90, F62 |
-| Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | S83, R106/R120/R122, D50/D64, U15, S80 |
+| Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | S83, R106/R120/R122, D64, U15, S80 |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | D66, R98/R112, K14/K19, O59 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73/S81, R96/R128, F61/F62 |
 | Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | S75, R97, V91, K14 |
@@ -226,7 +226,6 @@ The same product rule on both apps with a difference, each read on both sides on
 
 - **D44** **S** An asset's price alerts sync only when stored alerts exist on iOS (asset screen and chart) and on every open and pull on Android, which never syncs from the chart; Core exports `sync_price_alerts` twice. A `GemAssetRefreshStep` with the rule in Core; remove both exports.
 - **D47** **S** An incoming referral code is activated directly with one wallet on iOS (`RewardsViewModel.swift:215-235`, toast and reload) and always confirmed on Android (`ReferralScene.kt:95`), which never refreshes after `useCode`. Core `incoming_code(code, wallets) -> Activate | Confirm`, and `use_referral_code` returns the new state (the gap S34 recorded).
-- **D50** **S** Fiat quote messages: Android fills "Enter amount to %s" with `buy_title` formatted with `""` (Japanese reads wrong, English gets a trailing space) and shows "Unknown error" for a failed phase, iOS uses `wallet_buy` and Core's error; a failed quote URL is a generic snackbar on Android. `GemFiatViewState.quotes_message`.
 - **D51** **S** Acquiring a missing asset from confirm pre-fills the swap pay asset on iOS (`ConfirmTransferSceneViewModel.swift:339-341`) and leaves it empty on Android (`WalletNavigator.kt:257-288`). `GemConfirmation::acquire_swap_pair`.
 - **D55** **S** A below-minimum amount opens a minimum-amount sheet with Buy on iOS (`AmountSceneViewModel.swift:228-236`) and is text only on Android, and "only NoQuote has a sheet" is decided per app for swap. `info()` on `GemAmountErrorDisplay` and `GemSwapErrorDisplay`.
 - **D56** **S** Wallet search: Android's empty state counts only some sections and draws "no assets" over matching lists, iOS `showAddToken` bypasses `flow.shows_add_token`, and pinned perpetuals vanish from iOS asset-list results. A Core search state from the full counts; both apps honour `shows_add_token`; one perpetual split.

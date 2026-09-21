@@ -31,6 +31,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -213,7 +214,7 @@ class FiatViewModelTest {
             advanceTimeBy(DebounceSettleMs)
             runCurrent()
 
-            assertEquals("string:${R.string.errors_unknown_try_again}", viewModel.uiState.value.quotesMessage)
+            assertEquals("offline", viewModel.uiState.value.quotesMessage)
             assertTrue(viewModel.uiState.value.retries)
             assertEquals(ButtonState.Enabled, viewModel.uiState.value.buttonState)
 
@@ -227,6 +228,21 @@ class FiatViewModelTest {
             coVerify(exactly = 2) {
                 service.quotes(FiatQuoteType.Buy.toGem(), asset.id.toIdentifier(), 50.0)
             }
+        } finally {
+            viewModel.viewModelScope.cancel()
+        }
+    }
+
+    @Test
+    fun `an empty amount asks to enter an amount to buy`() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+
+        try {
+            viewModel.updateAmount("")
+            runCurrent()
+
+            assertEquals("string:${R.string.input_enter_amount_to}", viewModel.uiState.value.quotesMessage)
+            verify { context.getString(R.string.input_enter_amount_to, "string:${R.string.wallet_buy}") }
         } finally {
             viewModel.viewModelScope.cancel()
         }
