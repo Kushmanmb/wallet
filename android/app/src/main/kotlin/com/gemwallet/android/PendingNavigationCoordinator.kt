@@ -47,13 +47,13 @@ class PendingNavigationCoordinator @Inject constructor(
     private val _pendingNavigation = MutableStateFlow<PendingNavigation?>(null)
     internal val pendingNavigation: StateFlow<PendingNavigation?> = _pendingNavigation.asStateFlow()
 
-    fun handleIntent(intent: Intent) {
+    fun pendIntent(intent: Intent) {
         if (intent.hasNotificationPayload() || intent.dataString != null) {
             _pendingNavigation.update { PendingNavigation.FromIntent(Intent(intent)) }
         }
     }
 
-    fun handleScan(code: String) {
+    fun pendScan(code: String) {
         _pendingNavigation.update { PendingNavigation.FromScan(code) }
     }
 

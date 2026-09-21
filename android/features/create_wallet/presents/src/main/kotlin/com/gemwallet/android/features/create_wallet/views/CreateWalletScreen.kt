@@ -66,7 +66,7 @@ fun CreateWalletScreen(onCancel: () -> Unit, onCreated: (walletId: WalletId?) ->
     val verificationState by viewModel.verificationState.collectAsStateWithLifecycle()
 
     BackHandler(uiState.isShowSafeMessage) {
-        viewModel.handleCreateDismiss()
+        viewModel.dismissSafeMessage()
     }
 
     AnimatedContent(
@@ -82,8 +82,8 @@ fun CreateWalletScreen(onCancel: () -> Unit, onCreated: (walletId: WalletId?) ->
                     state = verification,
                     loading = uiState.loading,
                     onPick = viewModel::onPickWord,
-                    onDone = { viewModel.handleCreate(onCreated) },
-                    onCancel = viewModel::handleCreateDismiss,
+                    onDone = { viewModel.createWallet(onCreated) },
+                    onCancel = viewModel::dismissSafeMessage,
                 )
             }
 
@@ -91,7 +91,7 @@ fun CreateWalletScreen(onCancel: () -> Unit, onCreated: (walletId: WalletId?) ->
                 defaultName = defaultNameText,
                 data = uiState.data,
                 dataError = errorText,
-                onCreate = viewModel::handleReadyToCreate,
+                onCreate = viewModel::confirmPhrase,
                 onCancel = onCancel,
             )
         }

@@ -69,6 +69,6 @@ class MainScreenViewModelTest {
 
         model.onScan("bitcoin:bc1q")
 
-        verify { coordinator.handleScan("bitcoin:bc1q") }
+        verify { coordinator.pendScan("bitcoin:bc1q") }
     }
 }

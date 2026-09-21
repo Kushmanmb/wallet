@@ -206,7 +206,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun handleIntent(intent: Intent) = pendingNavigationCoordinator.handleIntent(intent)
+    fun pendIntent(intent: Intent) = pendingNavigationCoordinator.pendIntent(intent)
 
     fun consumePendingNavigation() = pendingNavigationCoordinator.clear()
 

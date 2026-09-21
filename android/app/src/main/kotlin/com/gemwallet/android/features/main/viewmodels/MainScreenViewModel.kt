@@ -32,5 +32,5 @@ class MainScreenViewModel @Inject constructor(
         .map { if (it == 0) null else it.toString() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    fun onScan(code: String) = pendingNavigationCoordinator.handleScan(code)
+    fun onScan(code: String) = pendingNavigationCoordinator.pendScan(code)
 }

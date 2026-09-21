@@ -90,13 +90,13 @@ class HyperliquidObserverService(
         connection.connect().collect { event ->
             when (event) {
                 WebSocketEvent.Connected -> send { streamService.connected(address, mode.toGem()) }
-                is WebSocketEvent.Message -> handle(walletId, mode, event.text)
+                is WebSocketEvent.Message -> onMessage(walletId, mode, event.text)
                 WebSocketEvent.Disconnected -> streamService.disconnected()
             }
         }
     }
 
-    private suspend fun handle(walletId: WalletId, mode: PerpetualAccountMode, text: String) {
+    private suspend fun onMessage(walletId: WalletId, mode: PerpetualAccountMode, text: String) {
         runCatchingCancellable { streamService.handle(walletId.id, mode.toGem(), text.encodeToByteArray()) }
             .onSuccess { candle -> candle?.toPrimitives()?.let { chartFlow.emit(it) } }
             .onFailure { Log.e(TAG, "Handle message error: ${text.take(MESSAGE_LOG_LIMIT)}", it) }

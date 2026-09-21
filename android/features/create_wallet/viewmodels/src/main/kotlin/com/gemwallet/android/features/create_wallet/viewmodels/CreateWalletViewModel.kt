@@ -69,13 +69,13 @@ class CreateWalletViewModel @Inject constructor(private val service: GemWalletSe
         }
     }
 
-    fun handleCreateDismiss() {
+    fun dismissSafeMessage() {
         state.update {
             it.copy(isShowSafeMessage = false)
         }
     }
 
-    fun handleReadyToCreate(walletName: String) {
+    fun confirmPhrase(walletName: String) {
         verification.value = service.verifyPhraseSession(state.value.data)
         state.update {
             it.copy(
@@ -85,7 +85,7 @@ class CreateWalletViewModel @Inject constructor(private val service: GemWalletSe
         }
     }
 
-    fun handleCreate(onCreated: (walletId: WalletId?) -> Unit) {
+    fun createWallet(onCreated: (walletId: WalletId?) -> Unit) {
         if (state.value.loading) {
             return
         }

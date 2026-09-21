@@ -68,15 +68,15 @@ class SupportChatSceneViewModel @Inject constructor(
     }
 
     fun sendText(content: String) = viewModelScope.launch(ioDispatcher) {
-        perform { supportService.sendText(content) }
+        alertOnFailure { supportService.sendText(content) }
     }
 
     fun sendImage(uri: Uri) = viewModelScope.launch(ioDispatcher) {
-        perform {
+        alertOnFailure {
             val image = imageAttachmentFactory.fromUri(uri)
             if (image == null) {
                 errorState.value = GemErrorText.NotSupported
-                return@perform
+                return@alertOnFailure
             }
             supportService.sendImage(image)
         }
@@ -85,7 +85,7 @@ class SupportChatSceneViewModel @Inject constructor(
     fun retry(message: SupportMessage) {
         if (message.images.isNotEmpty()) return
         viewModelScope.launch(ioDispatcher) {
-            perform { supportService.retryMessage(message.toGem()) }
+            alertOnFailure { supportService.retryMessage(message.toGem()) }
         }
     }
 
@@ -94,7 +94,7 @@ class SupportChatSceneViewModel @Inject constructor(
         clearSupportTyping.clearTyping()
     }
 
-    private suspend fun perform(block: suspend () -> Unit) {
+    private suspend fun alertOnFailure(block: suspend () -> Unit) {
         runCatchingCancellable(block).onFailure { errorState.value = it.errorText() }
     }
 

@@ -25,11 +25,11 @@ class NameRecordController(private val nameService: GemNameServiceInterface, pri
         when (val step = nameService.nameInputStep(_state.value, value, chain?.toGem())) {
             GemNameInputStep.Unchanged -> return
             GemNameInputStep.Reset -> reset()
-            is GemNameInputStep.Resolve -> resolve(step, requireNotNull(chain))
+            is GemNameInputStep.Resolve -> loadNameRecord(step, requireNotNull(chain))
         }
     }
 
-    private fun resolve(step: GemNameInputStep.Resolve, chain: Chain) {
+    private fun loadNameRecord(step: GemNameInputStep.Resolve, chain: Chain) {
         job?.cancel()
         _state.value = GemNameRecordState.Loading(step.name, chain.toGem())
         job = scope.launch {

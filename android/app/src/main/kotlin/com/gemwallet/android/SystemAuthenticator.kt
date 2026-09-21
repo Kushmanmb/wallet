@@ -39,7 +39,7 @@ internal class SystemAuthenticator(private val activity: FragmentActivity, priva
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     if (viewModel.uiState.value.initialAuth != AuthState.Success) {
-                        handleInitialAuthError(errorCode)
+                        retryOrCloseAfterAuthError(errorCode)
                     } else if (authRequests.hasActive()) {
                         cancelActiveAuthRequest()
                     }
@@ -116,7 +116,7 @@ internal class SystemAuthenticator(private val activity: FragmentActivity, priva
         runCatching { biometricPrompt.cancelAuthentication() }
     }
 
-    private fun handleInitialAuthError(errorCode: Int) {
+    private fun retryOrCloseAfterAuthError(errorCode: Int) {
         val retryDelay = SystemAuthPolicy.initialRetryDelay(errorCode)
         if (retryDelay == null) {
             activity.finishAffinity()

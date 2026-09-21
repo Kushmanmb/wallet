@@ -88,7 +88,7 @@ class MainActivity :
         systemAuthenticator.prepare()
         systemAuthenticator.refreshEnrollment()
 
-        viewModel.handleIntent(intent)
+        viewModel.pendIntent(intent)
         viewModel.maintain()
 
         lifecycleScope.launch {
@@ -180,7 +180,7 @@ class MainActivity :
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        viewModel.handleIntent(intent)
+        viewModel.pendIntent(intent)
     }
 
     override fun requestAuth(auth: AuthRequest, onSuccess: () -> Unit) {

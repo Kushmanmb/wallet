@@ -61,7 +61,7 @@ class AppViewModel @Inject constructor(
 ) : ViewModel() {
 
     fun openPayment(payload: String) {
-        pendingNavigationCoordinator.handleScan(payload)
+        pendingNavigationCoordinator.pendScan(payload)
     }
 
     private val state = MutableStateFlow(AppState())
@@ -98,7 +98,7 @@ class AppViewModel @Inject constructor(
             startDestination.value = getStartDestination()
         }
         viewModelScope.launch(ioDispatcher) {
-            handleAppVersion()
+            offerStoreUpdate()
             rateAs()
             getSession().collectLatest {
                 onSession(it ?: return@collectLatest)
@@ -133,7 +133,7 @@ class AppViewModel @Inject constructor(
         state.update { it.copy(update = null) }
     }
 
-    private suspend fun handleAppVersion() {
+    private suspend fun offerStoreUpdate() {
         val offer = syncAppUpdate.syncAppUpdate() ?: return
         if (offer.channel != AppUpdateChannel.Store) {
             return

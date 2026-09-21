@@ -73,7 +73,7 @@ class WalletConnectCoordinator(
                 initWalletConnect()
                 sync()
                 pingActiveSessions()
-                handlePendingRequests()
+                emitPendingRequests()
             }
         }
         scope.launch(Dispatchers.IO) {
@@ -204,7 +204,7 @@ class WalletConnectCoordinator(
         walletConnectService.updateSessions(sessions.mapNotNull { it.toConnectionSession(walletConnectService)?.toGem() })
     }
 
-    private fun handlePendingRequests() {
+    private fun emitPendingRequests() {
         for (session in activeSessions().orEmpty()) {
             val request = walletConnectClient.pendingSessionRequests(session.topic).firstOrNull() ?: continue
             val verifyContext = walletConnectClient.verifyContext(request.request.id) ?: continue
