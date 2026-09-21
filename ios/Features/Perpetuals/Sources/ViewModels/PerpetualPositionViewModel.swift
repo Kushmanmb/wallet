@@ -3,8 +3,6 @@
 import Components
 import Formatters
 import Foundation
-import enum Gemstone.GemCurrencyStyle
-import class Gemstone.GemPerpetual
 import struct Gemstone.GemPerpetualPositionRow
 import func Gemstone.perpetualPositionRow
 import GemstonePrimitives
@@ -14,18 +12,11 @@ import SwiftUI
 
 public struct PerpetualPositionViewModel {
     public let data: PerpetualPositionData
-    private let currencyFormatter: CurrencyFormatter
-    private let percentFormatter = PercentFormatter.signed
     private let row: GemPerpetualPositionRow
-    private let perpetual = GemPerpetual(provider: .hypercore)
 
-    public init(
-        _ data: PerpetualPositionData,
-        currencyStyle: GemCurrencyStyle = .currency,
-    ) {
+    public init(_ data: PerpetualPositionData) {
         self.data = data
         row = perpetualPositionRow(perpetual: data.perpetual.toGem(), asset: data.asset.toGem(), position: data.position.toGem())
-        currencyFormatter = CurrencyFormatter(type: currencyStyle, currencyCode: Currency.usd.rawValue)
     }
 
     public var assetImage: AssetImage {
@@ -45,32 +36,23 @@ public struct PerpetualPositionViewModel {
     }
 
     public var positionTypeText: String {
-        perpetual.positionText(directionName: directionText, formattedLeverage: leverageText)
+        row.position.text
     }
 
     public var positionTypeColor: Color {
         PerpetualDirectionViewModel(direction: data.position.direction).color
     }
 
-    public var pnlViewModel: PnLViewModel {
-        PnLViewModel(
-            pnl: data.position.pnl,
-            marginAmount: data.position.marginAmount,
-            currencyFormatter: currencyFormatter,
-            percentFormatter: percentFormatter,
-        )
-    }
-
     public var pnlColor: Color {
-        pnlViewModel.color
+        row.pnlTone.color
     }
 
     public var pnlWithPercentText: String {
-        pnlViewModel.text ?? ""
+        row.pnl.text
     }
 
     public var marginAmountText: String {
-        currencyFormatter.string(data.position.marginAmount)
+        row.margin.text()
     }
 }
 

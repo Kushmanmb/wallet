@@ -1,8 +1,10 @@
 use crate::percentage::GemPercentageStyle;
+use crate::precision::GemCurrencyStyle;
 use chrono::Utc;
 use number_formatter::{BigNumberFormatter, NumberFormatterError};
 use primitives::PriceChangeCalculator;
 use primitives::chart::{ChartCandleStick, ChartCandleUpdate};
+use primitives::currency::Currency;
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
 use primitives::perpetual::{PerpetualBalance, PerpetualData};
 use primitives::{
@@ -716,13 +718,22 @@ pub fn market_row(perpetual: &Perpetual, asset: &Asset) -> GemPerpetualMarketRow
 }
 
 pub fn position_row(perpetual: &Perpetual, asset: &Asset, position: &PerpetualPosition) -> GemPerpetualPositionRow {
+    let leverage = crate::perpetual::leverage_text(position.leverage);
+    let (pnl, pnl_tone) = pnl_text(position.pnl, position.margin_amount);
     GemPerpetualPositionRow {
         title: match asset.symbol.is_empty() {
             true => perpetual.name.clone(),
             false => asset.symbol.clone(),
         },
-        leverage: crate::perpetual::leverage_text(position.leverage),
+        position: GemLocalizedText::Position {
+            direction: position.direction.clone(),
+            leverage: leverage.clone(),
+        },
+        margin: GemFormattedNumber::currency(position.margin_amount, Currency::USD, GemCurrencyStyle::Fiat),
+        leverage,
         direction: position.direction.clone(),
+        pnl,
+        pnl_tone,
     }
 }
 
@@ -1282,6 +1293,33 @@ mod tests {
         assert_eq!(position_row(&market, &symboled, &held).title, symboled.symbol);
         assert_eq!(position_row(&market, &unsymboled, &held).title, "BTC");
         assert_eq!(position_row(&market, &symboled, &held).leverage, "40x");
+    }
+
+    #[test]
+    fn test_a_position_row_carries_its_margin_its_change_and_its_label() {
+        let market = Perpetual::mock();
+        let held = PerpetualPosition {
+            leverage: 5,
+            margin_amount: 0.5432,
+            pnl: -0.25,
+            direction: PerpetualDirection::Short,
+            ..PerpetualPosition::mock()
+        };
+
+        let row = position_row(&market, &Asset::from_chain(Chain::HyperCore), &held);
+
+        assert_eq!(row.margin.value, 0.5432);
+        assert_eq!(row.margin.unit, crate::formatted_number::GemNumberUnit::Currency { code: "USD".to_string() });
+        assert_eq!(row.pnl_tone, GemValueTone::Negative, "a losing position reads as a loss on both apps");
+        assert!(matches!(&row.pnl, GemLocalizedText::Pnl { amount, .. } if amount.value == -0.25));
+        assert_eq!(
+            row.position,
+            GemLocalizedText::Position {
+                direction: PerpetualDirection::Short,
+                leverage: "5x".to_string()
+            },
+            "the label is one value, not a direction and a leverage each app joins"
+        );
     }
 
     #[test]

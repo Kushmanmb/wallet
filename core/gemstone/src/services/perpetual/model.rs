@@ -88,6 +88,10 @@ pub struct GemPerpetualPositionRow {
     pub title: String,
     pub leverage: String,
     pub direction: PerpetualDirection,
+    pub position: GemLocalizedText,
+    pub margin: GemFormattedNumber,
+    pub pnl: GemLocalizedText,
+    pub pnl_tone: GemValueTone,
 }
 
 #[uniffi::export]
