@@ -42,8 +42,8 @@ fun InAppNotificationsScene(onAction: (InAppNotificationsAction) -> Unit, viewMo
                     ListItem(
                         model = notification.model,
                         listPosition = listPosition,
-                        modifier = notification.url?.let { url -> Modifier.clickable { onAction(InAppNotificationsAction.OpenUrl(url)) } } ?: Modifier,
-                        accessory = notification.url?.let { { DataBadgeChevron() } },
+                        modifier = notification.destination?.let { destination -> Modifier.clickable { onAction(InAppNotificationsAction.Open(destination)) } } ?: Modifier,
+                        accessory = notification.destination?.let { { DataBadgeChevron() } },
                     )
                 }
             }

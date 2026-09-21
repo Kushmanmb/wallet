@@ -29,6 +29,7 @@ import com.gemwallet.android.ui.navigation.routeArguments
 import com.gemwallet.android.ui.open
 import com.wallet.core.primitives.AssetId
 import kotlinx.serialization.Serializable
+import uniffi.gemstone.GemNotificationDestination
 
 const val settingsRoute = "settings"
 
@@ -98,13 +99,17 @@ fun EntryProviderScope<NavKey>.settingsScreen(onAction: (SettingsAction) -> Unit
     }
 
     entry<InAppNotificationsRoute> {
+        val context = LocalContext.current
+        val uriHandler = LocalUriHandler.current
         InAppNotificationsScene(
             onAction = { action ->
                 when (action) {
                     InAppNotificationsAction.Cancel -> onAction(SettingsAction.Cancel)
 
-                    is InAppNotificationsAction.OpenUrl ->
-                        onAction(SettingsAction.OpenNotificationUrl(action.url))
+                    is InAppNotificationsAction.Open -> when (val destination = action.destination) {
+                        is GemNotificationDestination.InApp -> onAction(SettingsAction.OpenNotification(destination.action))
+                        is GemNotificationDestination.Web -> uriHandler.open(context, destination.url)
+                    }
                 }
             },
         )

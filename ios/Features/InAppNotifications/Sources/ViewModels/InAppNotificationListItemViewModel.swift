@@ -2,6 +2,7 @@
 
 import Components
 import Foundation
+import enum Gemstone.GemNotificationDestination
 import enum Gemstone.GemNotificationIcon
 import struct Gemstone.GemNotificationRow
 import func Gemstone.notificationRow
@@ -21,8 +22,8 @@ public struct InAppNotificationListItemViewModel: Identifiable, Sendable {
         row = notificationRow(notification: notification.toGem())
     }
 
-    public var url: URL? {
-        row.url?.asURL
+    public var destination: GemNotificationDestination? {
+        row.destination
     }
 
     var listItemModel: ListItemModel {

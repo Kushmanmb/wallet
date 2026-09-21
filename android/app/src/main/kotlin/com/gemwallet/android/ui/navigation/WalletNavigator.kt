@@ -211,8 +211,13 @@ class WalletNavigator(
     fun openDeveloperPayments() = push(DevelopPaymentsRoute)
     fun openInAppNotifications() = push(InAppNotificationsRoute)
     fun openNotificationUrl(url: String): Boolean {
-        val action = runCatching { deeplinkService.urlAction(url) }.getOrNull() as? UrlAction.Deeplink ?: return false
-        when (val route = action.deeplink.toRoute() ?: return false) {
+        val action = runCatching { deeplinkService.urlAction(url) }.getOrNull() ?: return false
+        return openUrlAction(action)
+    }
+
+    fun openUrlAction(action: UrlAction): Boolean {
+        val deeplink = (action as? UrlAction.Deeplink)?.deeplink ?: return false
+        when (val route = deeplink.toRoute() ?: return false) {
             is AssetRoute -> openAssetRoute(route)
             else -> push(route)
         }

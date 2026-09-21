@@ -256,7 +256,7 @@ fun WalletNavGraph(
                         SettingsAction.InAppNotifications -> navigator.openInAppNotifications()
                         SettingsAction.DeveloperPayments -> navigator.openDeveloperPayments()
                         is SettingsAction.Payment -> currentOnPayment(action.payload)
-                        is SettingsAction.OpenNotificationUrl -> navigator.openNotificationUrl(action.url)
+                        is SettingsAction.OpenNotification -> navigator.openUrlAction(action.action)
                         SettingsAction.Cancel -> onCancel()
                     }
                 },
