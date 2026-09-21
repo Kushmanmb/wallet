@@ -109,7 +109,7 @@ private fun GemTransactionAmount.head(currency: Currency, showsFiat: Boolean): T
     val asset = asset.toPrimitives()
     return TransactionDetailsRowUIModel.AmountHead(
         asset = asset,
-        amount = sign.format(ValueFormatter(style = GemValueStyle.AUTO).string(value, asset)),
+        amount = sign.amount(value, asset.decimals.toUInt(), asset.symbol, GemValueStyle.AUTO).text(),
         equivalent = fiat(currency).takeIf { showsFiat }.orEmpty(),
     )
 }

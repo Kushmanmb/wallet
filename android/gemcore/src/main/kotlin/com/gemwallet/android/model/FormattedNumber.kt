@@ -111,7 +111,10 @@ private fun GemFormattedNumber.abbreviatedText(value: BigDecimal, locale: Locale
         }
         currencyCode?.let { currency = android.icu.util.Currency.getInstance(it) }
     }
-    return formatter.format(value)
+    return when {
+        showsSign -> "$signText${formatter.format(value.abs())}"
+        else -> formatter.format(value)
+    }
 }
 
 private fun GemFormattedNumber.numberFormat(locale: Locale): NumberFormat = currencyCode?.let { code ->
