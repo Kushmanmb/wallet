@@ -14,6 +14,7 @@ import Primitives
 import PrimitivesComponents
 import Style
 import SwiftUI
+import UIKit
 
 @Observable
 @MainActor
@@ -137,7 +138,12 @@ extension ManageContactAddressViewModel {
         isPresentingScanner = true
     }
 
-    func onHandleScan(_ result: String) {
+    func onSelectPaste() {
+        guard let text = UIPasteboard.general.string else { return }
+        onScan(text)
+    }
+
+    func onScan(_ result: String) {
         let scan = service.scannedAddress(input: result)
         addressInputModel.update(text: scan.address)
         if let scannedMemo = scan.memo {

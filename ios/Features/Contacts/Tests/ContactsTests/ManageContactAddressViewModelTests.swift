@@ -63,6 +63,16 @@ struct ManageContactAddressViewModelTests {
     }
 
     @Test
+    func aPaymentUriFillsTheAddressAndMemo() {
+        let model = ManageContactAddressViewModel.mock()
+
+        model.onScan("ripple:rLpq5RcRzA5FLmVp8jZmdvfMiRZ2xtVvZK?dt=5")
+
+        #expect(model.addressInputModel.text == "rLpq5RcRzA5FLmVp8jZmdvfMiRZ2xtVvZK")
+        #expect(model.memo == "5")
+    }
+
+    @Test
     func theNetworkPickerFollowsCoreChainOrder() {
         let model = ManageContactAddressViewModel.mock()
         let chains = GemChainService.shared.getChains(query: .empty).map { Chain(core: $0) }
