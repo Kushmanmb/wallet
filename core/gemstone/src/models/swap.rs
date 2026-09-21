@@ -43,8 +43,10 @@ impl GemSwapValue {
     pub fn price_impact(&self, receive: Arc<GemSwapValue>) -> Option<SwapPriceImpact> {
         calculate_swap_price_impact(self.fiat_value()?, receive.fiat_value()?)
     }
+}
 
-    pub fn fiat_value(&self) -> Option<f64> {
+impl GemSwapValue {
+    fn fiat_value(&self) -> Option<f64> {
         let price = self.price?;
         let amount = BigNumberFormatter::f64_value(&self.value, self.decimals);
         Some(amount * price)

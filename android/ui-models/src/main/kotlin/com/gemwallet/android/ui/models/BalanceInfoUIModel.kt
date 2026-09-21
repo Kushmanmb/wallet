@@ -16,10 +16,7 @@ open class BalanceInfoUIModel(override val asset: Asset, private val balance: Bi
 
     override val cryptoAmount: Double by lazy { Crypto(balance).value(asset.decimals).toDouble() }
 
-    override val fiat: Double? by lazy {
-        val price = price ?: return@lazy null
-        if (price == 0.0) null else CryptoFiatConverter.toFiat(Crypto(balance), asset.decimals, price).atomicValue.toDouble()
-    }
+    override val fiat: Double? by lazy { CryptoFiatConverter.fiatValue(Crypto(balance), asset.decimals, price) }
 }
 
 class RewardsInfoUIModel(assetInfo: AssetInfo, balance: BigInteger) :

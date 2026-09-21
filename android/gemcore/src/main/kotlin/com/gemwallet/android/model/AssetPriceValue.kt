@@ -9,7 +9,7 @@ import java.math.BigInteger
 data class AssetPriceValue(val asset: Asset, val price: AssetPriceInfo?) {
     val currency: Currency? get() = price?.currency
 
-    fun calculateFiat(value: BigInteger): BigDecimal = swapValue(value).fiatValue()?.toBigDecimal() ?: BigDecimal.ZERO
+    fun calculateFiat(value: BigInteger): BigDecimal = CryptoFiatConverter.fiatValue(Crypto(value), asset.decimals, price?.price?.price)?.toBigDecimal() ?: BigDecimal.ZERO
 
     fun calculateFiat(value: BigDecimal): BigDecimal = calculateFiat(Crypto(value, asset.decimals).atomicValue)
 

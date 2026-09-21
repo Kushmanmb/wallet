@@ -28,10 +28,7 @@ class HeadDelegationInfo(private val delegation: Delegation, private val assetIn
         Crypto(delegation.base.balance).value(asset.decimals).toDouble()
     }
 
-    override val fiat: Double? by lazy {
-        val price = assetInfo.price?.price?.price ?: return@lazy null
-        if (price == 0.0) null else CryptoFiatConverter.toFiat(Crypto(delegation.base.balance), asset.decimals, price).atomicValue.toDouble()
-    }
+    override val fiat: Double? by lazy { CryptoFiatConverter.fiatValue(Crypto(delegation.base.balance), asset.decimals, assetInfo.price?.price?.price) }
 
     override val asset: Asset
         get() = assetInfo.asset
