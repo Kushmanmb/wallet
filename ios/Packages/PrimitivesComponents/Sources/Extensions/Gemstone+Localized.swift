@@ -725,6 +725,11 @@ public extension GemListRowTitle {
         case .marketCap: Localized.Asset.marketCap
         case .fullyDilutedValuation: Localized.Info.FullyDilutedValuation.title
         case .tradingVolume: Localized.Asset.tradingVolume
+        case .unrealizedPnl: Localized.Perpetual.unrealizedPnl
+        case .accountLeverage: Localized.Perpetual.accountLeverage
+        case .marginUsage: Localized.Perpetual.marginUsage
+        case .allTimePnl: Localized.Perpetual.allTimePnl
+        case .volume: Localized.Perpetual.volume
         case .circulatingSupply: Localized.Asset.circulatingSupply
         case .totalSupply: Localized.Asset.totalSupply
         case .maxSupply: Localized.Info.MaxSupply.title
