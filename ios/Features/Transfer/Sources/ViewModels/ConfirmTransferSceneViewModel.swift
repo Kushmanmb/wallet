@@ -15,6 +15,7 @@ import enum Gemstone.GemListRow
 import protocol Gemstone.GemPreferencesServiceProtocol
 import struct Gemstone.GemSimulationPayloadRow
 import enum Gemstone.GemSubmitResult
+import struct Gemstone.GemSwapPairSelection
 import enum Gemstone.GemTransferAmountResult
 import struct Gemstone.GemTransferData
 import struct Gemstone.SimulationResult
@@ -337,8 +338,8 @@ extension ConfirmTransferSceneViewModel {
         AssetAddress(asset: asset, address: senderAddress)
     }
 
-    public func swapFromAsset(to asset: Asset) -> Asset {
-        request.data.asset.id == asset.id ? state.feeAsset : request.data.asset
+    public func acquireSwapPair(to asset: Asset) -> GemSwapPairSelection {
+        confirmation.acquireSwapPair(feeAssetId: state.feeAsset.id.identifier, assetId: asset.id.identifier)
     }
 
     public var assetAcquisitionWallet: Wallet {

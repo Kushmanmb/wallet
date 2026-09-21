@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.domains.confirm.pack
 import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.features.confirm.viewmodels.models.AcquireAssetRequest
 import com.gemwallet.android.testkit.mockAccount
 import com.gemwallet.android.testkit.mockAssetSolana
+import com.gemwallet.android.testkit.mockAssetSolanaUSDC
 import com.gemwallet.android.testkit.mockGemConfirmLoad
 import com.gemwallet.android.testkit.mockGemConfirmScreen
 import com.gemwallet.android.testkit.mockGemTransferData
@@ -43,12 +45,14 @@ import uniffi.gemstone.GemConfirmException
 import uniffi.gemstone.GemConfirmPhase
 import uniffi.gemstone.GemConfirmTransferService
 import uniffi.gemstone.GemConfirmation
+import uniffi.gemstone.GemSwapPairSelection
 import java.math.BigInteger
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ConfirmViewModelNetworkFeeSheetTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val asset = mockAssetSolana()
+    private val payAsset = mockAssetSolanaUSDC()
     private val account = mockAccount(chain = Chain.Solana)
     private val confirmService = mockk<GemConfirmTransferService>(relaxed = true)
     private val confirmation = mockk<GemConfirmation> { every { rowContents(any()) } returns emptyList() }
@@ -93,7 +97,7 @@ class ConfirmViewModelNetworkFeeSheetTest {
         assertTrue(error.info is InfoSheetEntity.NetworkFeeRequiredInfo)
 
         viewModel.acquire(asset, 10)
-        assertEquals(AcquireAssetRequest(asset = asset, buyAmount = 10, offersOptions = false), viewModel.acquireRequest.value)
+        assertEquals(AcquireAssetRequest(asset = asset, buyAmount = 10, offersOptions = false, swapPayAssetId = payAsset.id), viewModel.acquireRequest.value)
         viewModel.dismissAcquire()
         assertEquals(null, viewModel.acquireRequest.value)
     }
@@ -103,6 +107,7 @@ class ConfirmViewModelNetworkFeeSheetTest {
         every { confirmation.getCurrency() } returns Currency.USD.toGem()
         every { confirmation.insufficientNetworkFeeBuyAmount() } returns 10
         every { confirmation.acquireAssetFlow(any()) } returns GemAcquireAssetFlow.FIAT
+        every { confirmation.acquireSwapPair(any(), any()) } returns GemSwapPairSelection(payAssetId = payAsset.id.toIdentifier(), receiveAssetId = asset.id.toIdentifier())
         every { confirmService.confirmation(any(), transfer, any()) } returns confirmation
         every { confirmation.screen() } returns mockGemConfirmScreen()
         coEvery { confirmation.state() } returns mockGemConfirmLoad(asset)

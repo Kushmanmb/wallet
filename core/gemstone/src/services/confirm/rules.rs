@@ -26,6 +26,7 @@ use crate::models::transaction::{GemSignedTransaction, GemSignerInput, GemTransa
 use crate::services::balance::GemAssetBalance;
 use crate::services::balance::GemBalanceRequirement;
 use crate::services::collections::unique;
+use crate::services::swap::model::GemSwapPairSelection;
 use crate::services::transactions::GemAmountSign;
 use crate::services::transfer::GemPendingTransactionInput;
 use crate::services::transfer::rules::TransferInput;
@@ -287,6 +288,14 @@ pub fn acquire_asset_flow(chain: Chain) -> GemAcquireAssetFlow {
     match chain {
         Chain::Tron => GemAcquireAssetFlow::Options,
         _ => GemAcquireAssetFlow::Fiat,
+    }
+}
+
+pub fn acquire_swap_pair(input_asset_id: &AssetId, fee_asset_id: &AssetId, asset_id: AssetId) -> GemSwapPairSelection {
+    let pay_asset_id = if *input_asset_id == asset_id { fee_asset_id } else { input_asset_id };
+    GemSwapPairSelection {
+        pay_asset_id: Some(pay_asset_id.clone()).filter(|pay| *pay != asset_id),
+        receive_asset_id: Some(asset_id),
     }
 }
 
@@ -1151,6 +1160,37 @@ mod tests {
     fn test_acquire_asset_flow_offers_options_only_on_tron() {
         assert_eq!(acquire_asset_flow(Chain::Tron), GemAcquireAssetFlow::Options);
         assert_eq!(acquire_asset_flow(Chain::Ethereum), GemAcquireAssetFlow::Fiat);
+    }
+
+    #[test]
+    fn test_acquiring_an_asset_pays_with_the_other_one_on_the_screen() {
+        let usdt = Asset::mock_ethereum_usdc().id;
+        let ethereum = Asset::from_chain(Chain::Ethereum).id;
+
+        assert_eq!(
+            acquire_swap_pair(&usdt, &ethereum, usdt.clone()),
+            GemSwapPairSelection {
+                pay_asset_id: Some(ethereum.clone()),
+                receive_asset_id: Some(usdt.clone())
+            },
+            "the missing transfer asset is bought with the fee asset"
+        );
+        assert_eq!(
+            acquire_swap_pair(&usdt, &ethereum, ethereum.clone()),
+            GemSwapPairSelection {
+                pay_asset_id: Some(usdt),
+                receive_asset_id: Some(ethereum.clone())
+            },
+            "the missing fee asset is bought with the transfer asset"
+        );
+        assert_eq!(
+            acquire_swap_pair(&ethereum, &ethereum, ethereum.clone()),
+            GemSwapPairSelection {
+                pay_asset_id: None,
+                receive_asset_id: Some(ethereum)
+            },
+            "an asset cannot be swapped for itself"
+        );
     }
 
     #[test]

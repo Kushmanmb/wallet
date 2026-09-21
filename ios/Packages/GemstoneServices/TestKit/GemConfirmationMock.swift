@@ -13,6 +13,7 @@ public import struct Gemstone.GemConfirmScreen
 public import enum Gemstone.GemKeystoreAuthentication
 public import enum Gemstone.GemListRow
 public import enum Gemstone.GemSubmitResult
+public import struct Gemstone.GemSwapPairSelection
 public import typealias Gemstone.PerpetualModifyConfirmData
 import GemstonePrimitivesTestKit
 import Primitives
@@ -79,6 +80,10 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
 
     public func acquireAssetFlow(chain _: Chain) -> GemAcquireAssetFlow {
         acquireFlow
+    }
+
+    public func acquireSwapPair(feeAssetId: String?, assetId: String) -> GemSwapPairSelection {
+        GemSwapPairSelection(payAssetId: feeAssetId, receiveAssetId: assetId)
     }
 
     public func insufficientNetworkFeeBuyAmount() -> Int32 {

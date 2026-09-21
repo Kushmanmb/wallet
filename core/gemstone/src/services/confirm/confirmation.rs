@@ -3,11 +3,12 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use futures::lock::Mutex;
 use primitives::currency::Currency;
-use primitives::{AddressName, BlockExplorerLink, Chain, PerpetualModifyConfirmData, SimulationResult, Wallet};
+use primitives::{AddressName, AssetId, BlockExplorerLink, Chain, PerpetualModifyConfirmData, SimulationResult, Wallet};
 
-use super::rules::preload_simulation;
+use super::rules::{acquire_swap_pair, preload_simulation};
 use super::{GemAcquireAssetFlow, GemConfirmError, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemSubmitResult, GemTransferAmountResult};
 use crate::models::list::GemListRow;
+use crate::services::swap::model::GemSwapPairSelection;
 use crate::services::transfer::GemTransferData;
 use crate::services::wallet::GemKeystoreAuthentication;
 
@@ -86,6 +87,11 @@ impl GemConfirmation {
 
     pub fn acquire_asset_flow(&self, chain: Chain) -> GemAcquireAssetFlow {
         self.service.acquire_asset_flow(chain)
+    }
+
+    pub fn acquire_swap_pair(&self, fee_asset_id: Option<AssetId>, asset_id: AssetId) -> GemSwapPairSelection {
+        let fee_asset_id = fee_asset_id.unwrap_or_else(|| self.transfer.fee_asset().id);
+        acquire_swap_pair(&self.transfer.input_asset().id, &fee_asset_id, asset_id)
     }
 
     pub fn insufficient_network_fee_buy_amount(&self) -> i32 {

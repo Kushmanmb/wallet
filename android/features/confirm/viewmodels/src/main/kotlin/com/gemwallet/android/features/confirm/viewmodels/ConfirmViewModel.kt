@@ -22,6 +22,7 @@ import com.gemwallet.android.domains.confirm.swapData
 import com.gemwallet.android.domains.confirm.toAsset
 import com.gemwallet.android.domains.confirm.toFeeAssetUIModel
 import com.gemwallet.android.domains.confirm.unpackTransferData
+import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toAssetPriceValue
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
@@ -305,7 +306,13 @@ class ConfirmViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     fun acquire(asset: Asset, buyAmount: Int?) {
-        acquireRequestState.value = AcquireAssetRequest(asset, buyAmount, offersOptions = acquireFlow(asset) == GemAcquireAssetFlow.OPTIONS)
+        val pair = confirmation.value?.acquireSwapPair(feeAsset.value?.asset?.id?.toIdentifier(), asset.id.toIdentifier())
+        acquireRequestState.value = AcquireAssetRequest(
+            asset = asset,
+            buyAmount = buyAmount,
+            offersOptions = acquireFlow(asset) == GemAcquireAssetFlow.OPTIONS,
+            swapPayAssetId = pair?.payAssetId?.toAssetId(),
+        )
     }
 
     fun dismissAcquire() = acquireRequestState.update { null }
@@ -344,7 +351,7 @@ class ConfirmViewModel @Inject constructor(
     val balanceChangeRows: StateFlow<List<ListItemModel>> = simulation.map { it.balanceChanges.map { change -> change.listItem() } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val acquireOptions: StateFlow<List<AcquireOptionUIModel>> = acquireRequest.map { request -> request?.let { acquireOptions(context, it.buyAmount) }.orEmpty() }
+    val acquireOptions: StateFlow<List<AcquireOptionUIModel>> = acquireRequest.map { request -> request?.let { acquireOptions(context, it) }.orEmpty() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val executeErrorText: StateFlow<String?> = screen.map { it.failure?.takeIf { failure -> failure.stage == GemConfirmStage.EXECUTE }?.error?.broadcastLabel(context) }

@@ -3,15 +3,15 @@ package com.gemwallet.android.features.confirm.viewmodels.models
 import android.content.Context
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemImage
+import com.gemwallet.android.ui.components.list_item.ListItemImageStyle
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemSymbol
-import com.gemwallet.android.ui.components.list_item.ListItemImageStyle
 
 data class AcquireOptionUIModel(val action: AcquireAssetAction, val model: ListItemModel)
 
-internal fun acquireOptions(context: Context, buyAmount: Int?): List<AcquireOptionUIModel> = listOf(
+internal fun acquireOptions(context: Context, request: AcquireAssetRequest): List<AcquireOptionUIModel> = listOf(
     AcquireOptionUIModel(
-        action = AcquireAssetAction.Buy(buyAmount),
+        action = AcquireAssetAction.Buy(request.buyAmount),
         model = ListItemModel(
             title = context.getString(R.string.wallet_buy),
             titleExtra = context.getString(R.string.wallet_pay_with_card_or_bank),
@@ -19,7 +19,7 @@ internal fun acquireOptions(context: Context, buyAmount: Int?): List<AcquireOpti
         ),
     ),
     AcquireOptionUIModel(
-        action = AcquireAssetAction.Swap,
+        action = AcquireAssetAction.Swap(request.swapPayAssetId),
         model = ListItemModel(
             title = context.getString(R.string.wallet_swap),
             titleExtra = context.getString(R.string.wallet_from_your_wallet_assets),

@@ -558,13 +558,16 @@ struct ConfirmTransferSceneViewModelTests {
     }
 
     @Test
-    func swapFromAssetUsesLoadedFeeAsset() {
+    func acquireSwapPairAsksCoreWithTheLoadedFeeAsset() {
         let asset = Asset.mockTempoPathUSD()
         let feeAsset = Asset.mockTempoUSDC()
         let model = ConfirmTransferSceneViewModel.mock(data: .mock(type: .transfer(asset)))
         model.state = .mock(load: .mock(preload: .mock()), feeAsset: feeAsset, screen: .mock(phase: .ready))
 
-        #expect(model.swapFromAsset(to: asset) == feeAsset)
+        let pair = model.acquireSwapPair(to: asset)
+
+        #expect(pair.payAssetId == feeAsset.id.identifier)
+        #expect(pair.receiveAssetId == asset.id.identifier)
     }
 
     @Test

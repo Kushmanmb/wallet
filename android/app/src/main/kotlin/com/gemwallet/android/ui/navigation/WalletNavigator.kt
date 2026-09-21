@@ -284,7 +284,7 @@ class WalletNavigator(
     fun openAcquireAsset(action: AcquireAssetAction, assetId: AssetId) {
         when (action) {
             is AcquireAssetAction.Buy -> openBuy(assetId, amount = action.amount)
-            AcquireAssetAction.Swap -> openSwapTo(assetId)
+            is AcquireAssetAction.Swap -> action.payAssetId?.let { openSwap(from = it, to = assetId) } ?: openSwapTo(assetId)
             AcquireAssetAction.Receive -> openReceive(assetId)
         }
     }

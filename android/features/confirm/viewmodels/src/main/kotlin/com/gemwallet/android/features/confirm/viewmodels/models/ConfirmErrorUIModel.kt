@@ -15,6 +15,7 @@ import com.gemwallet.android.ui.components.InfoSheetEntity.NetworkBalanceRequire
 import com.gemwallet.android.ui.components.InfoSheetEntity.NetworkFeeRequiredInfo
 import com.gemwallet.android.ui.components.InfoSheetEntity.SwapMinimumAmountInfo
 import com.wallet.core.primitives.Asset
+import com.wallet.core.primitives.AssetId
 import uniffi.gemstone.GemAcquireAssetFlow
 import uniffi.gemstone.GemBalanceRequirement
 import uniffi.gemstone.GemConfirmErrorDisplay
@@ -23,7 +24,7 @@ import java.math.BigInteger
 
 data class ConfirmErrorUIModel(val text: String, val info: InfoSheetEntity?)
 
-data class AcquireAssetRequest(val asset: Asset, val buyAmount: Int?, val offersOptions: Boolean)
+data class AcquireAssetRequest(val asset: Asset, val buyAmount: Int?, val offersOptions: Boolean, val swapPayAssetId: AssetId? = null)
 
 internal fun GemConfirmErrorDisplay.uiModel(
     context: Context,
