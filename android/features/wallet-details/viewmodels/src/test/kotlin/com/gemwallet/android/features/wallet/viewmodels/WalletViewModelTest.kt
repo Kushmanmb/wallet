@@ -107,6 +107,7 @@ class WalletViewModelTest {
     fun `an avatar Core refuses shows an error until it is cleared`() = runTest(dispatcher) {
         val service: GemWalletServiceInterface = mockk {
             coEvery { setAvatarImageUrl(any(), any()) } throws IllegalStateException("no image")
+            every { avatarItems(any()) } returns emptyList()
         }
         val details: GetWalletDetails = mockk { every { getWallet(any()) } returns flowOf(null) }
         val nfts: GetListNft = mockk { every { getListNft(any()) } returns flowOf(emptyList()) }

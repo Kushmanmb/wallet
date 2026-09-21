@@ -21,13 +21,13 @@ pub fn unverified_row(data: Vec<NFTData>, list: GemNftList) -> Option<GemNftUnve
             let count = unverified_collections(data).len();
             (count > 0).then(|| GemNftUnverifiedRow { count_text: count.to_string() })
         }
-        GemNftList::Unverified | GemNftList::Collection => None,
+        GemNftList::Unverified | GemNftList::Collection | GemNftList::Avatar => None,
     }
 }
 
 pub fn list_items(data: Vec<NFTData>, list: GemNftList) -> Vec<GemNftItem> {
     let collections = match list {
-        GemNftList::Collections => collections(data, true),
+        GemNftList::Collections | GemNftList::Avatar => collections(data, true),
         GemNftList::Unverified => collections(data, false),
         GemNftList::Collection => data.into_iter().filter(|item| !item.assets.is_empty()).collect(),
     };
@@ -35,7 +35,7 @@ pub fn list_items(data: Vec<NFTData>, list: GemNftList) -> Vec<GemNftItem> {
         .into_iter()
         .flat_map(|data| match list {
             GemNftList::Collections | GemNftList::Unverified => vec![item(data)],
-            GemNftList::Collection => asset_items(data),
+            GemNftList::Collection | GemNftList::Avatar => asset_items(data),
         })
         .collect()
 }
@@ -244,6 +244,11 @@ mod tests {
 
         assert_eq!(labels(list_items(items.clone(), GemNftList::Collections)), vec!["collection zebra (3)", "asset alpha of alpha"]);
         assert_eq!(labels(list_items(items.clone(), GemNftList::Unverified)), vec!["collection beta (2)", "asset gamma of gamma"]);
+        assert_eq!(
+            labels(list_items(items, GemNftList::Avatar)),
+            vec!["asset zebra of zebra", "asset zebra of zebra", "asset zebra of zebra", "asset alpha of alpha"],
+            "an avatar is picked from the assets of the verified collections, in the same order"
+        );
     }
 
     #[test]

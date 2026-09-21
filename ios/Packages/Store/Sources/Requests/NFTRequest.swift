@@ -38,11 +38,6 @@ public struct NFTRequest: DatabaseQueryable {
         return try request
             .fetchAll(db)
             .map { $0.mapToNFTData() }
-            .filter(\.assets.isNotEmpty)
-            .sorted(using: [
-                KeyPathComparator(\.assets.count, order: .reverse),
-                KeyPathComparator(\.collection.name),
-            ])
     }
 }
 

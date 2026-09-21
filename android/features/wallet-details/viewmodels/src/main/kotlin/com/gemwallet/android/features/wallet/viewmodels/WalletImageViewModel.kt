@@ -49,9 +49,7 @@ class WalletImageViewModel @Inject constructor(
     val emojis: List<String> = AvatarEmoji.all
 
     val nftImages: StateFlow<List<NftItemUIModel>> = getListNftCase.getListNft(walletId)
-        .map { data ->
-            data.flatMap { nftData -> nftData.assets.map { asset -> GemNftItem.Asset(NFTAssetData(nftData.collection, asset).toGem()) } }.toUIModels()
-        }
+        .map { data -> walletService.avatarItems(data.map { it.toGem() }).toUIModels() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val errorState = MutableStateFlow<GemErrorText?>(null)

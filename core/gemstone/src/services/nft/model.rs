@@ -9,6 +9,7 @@ pub enum GemNftList {
     Collections,
     Unverified,
     Collection,
+    Avatar,
 }
 
 #[allow(clippy::large_enum_variant)]

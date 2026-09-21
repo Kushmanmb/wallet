@@ -18,6 +18,7 @@ internal fun ReportReason.stringRes(): Int = when (this) {
 internal fun GemNftList.stringRes(): Int = when (this) {
     GemNftList.COLLECTIONS,
     GemNftList.COLLECTION,
+    GemNftList.AVATAR,
     -> R.string.nft_collections
 
     GemNftList.UNVERIFIED -> R.string.asset_verification_unverified

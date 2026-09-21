@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import Components
 public import struct Gemstone.GemPickerOption
+import Components
 
 extension Gemstone.GemPickerOption: @retroactive Identifiable {}
 

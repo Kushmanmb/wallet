@@ -31,7 +31,7 @@ pub(crate) mod testkit;
 use std::sync::Arc;
 
 use gem_keystore::Mnemonic;
-use primitives::{Chain, ChainAsset, NameRecord, Wallet, WalletId, WalletSource, WalletType};
+use primitives::{Chain, ChainAsset, NFTData, NameRecord, Wallet, WalletId, WalletSource, WalletType};
 
 use crate::keystore::decode_password;
 use crate::keystore::{GemImportType, GemKeystore, GemWalletImport, keystore_id_for_wallet};
@@ -42,6 +42,8 @@ use crate::services::file::GemFileStore;
 use crate::services::localization::GemLocalizedText;
 use crate::services::name::GemAddressStore;
 use crate::services::name::store::GemAddressNameWriter;
+use crate::services::nft::model::{GemNftItem, GemNftList};
+use crate::services::nft::rules as nft_rules;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_preferences::GemWalletPreferencesService;
 use crate::services::wallet_session::GemWalletSessionService;
@@ -302,6 +304,10 @@ impl GemWalletService {
 
     pub async fn set_avatar_image_url(&self, wallet_id: WalletId, url: String) -> Result<(), GemServiceError> {
         self.avatar.set_image_url(wallet_id, url).await
+    }
+
+    pub fn avatar_items(&self, data: Vec<NFTData>) -> Vec<GemNftItem> {
+        nft_rules::list_items(data, GemNftList::Avatar)
     }
 
     pub async fn remove_avatar_image(&self, wallet_id: WalletId) -> Result<(), GemServiceError> {
