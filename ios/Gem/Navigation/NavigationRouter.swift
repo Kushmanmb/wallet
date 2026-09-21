@@ -273,10 +273,10 @@ extension NavigationRouter {
     private func navigateToTransaction(walletId: WalletId, assetId: AssetId, transaction: Primitives.Transaction) async throws {
         let wallet = try await walletSessionService.requireWallet(walletId: walletId)
         guard let asset = try await transactionStateService.addNotificationTransaction(
-                  wallet: wallet.toGem(),
-                  assetId: assetId.identifier,
-                  transaction: transaction.toGem(),
-              ).map({ $0.toPrimitives() })
+            wallet: wallet.toGem(),
+            assetId: assetId.identifier,
+            transaction: transaction.toGem(),
+        ).map({ $0.toPrimitives() })
         else {
             return
         }
