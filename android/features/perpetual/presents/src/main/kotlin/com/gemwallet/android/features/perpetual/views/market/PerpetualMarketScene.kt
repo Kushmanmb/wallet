@@ -27,13 +27,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.gemwallet.android.domains.perpetual.aggregates.PerpetualDataAggregate
-import com.gemwallet.android.domains.perpetual.values.PerpetualBalance
 import com.gemwallet.android.domains.price.values.EquivalentValue
+import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualMarketSceneState
 import com.gemwallet.android.features.perpetual.viewmodels.models.PerpetualMarketSectionUIModel
 import com.gemwallet.android.features.perpetual.viewmodels.models.PerpetualPositionRowUIModel
 import com.gemwallet.android.features.perpetual.views.components.MarketHeadActions
 import com.gemwallet.android.features.perpetual.views.components.PerpetualItem
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.SearchBar
 import com.gemwallet.android.ui.components.clickable
@@ -64,12 +65,17 @@ import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PerpetualId
 import com.wallet.core.primitives.PerpetualProvider
+import com.wallet.core.primitives.WalletType
+import uniffi.gemstone.GemHeaderActions
+import uniffi.gemstone.GemHeaderButtonKind
+import uniffi.gemstone.GemPerpetualBalanceHeader
+import uniffi.gemstone.PerpetualBalance
+import uniffi.gemstone.perpetualBalanceHeader
 
 @Composable
 internal fun PerpetualMarketScene(
     sceneState: PerpetualMarketSceneState,
-    balance: PerpetualBalance,
-    canWithdraw: Boolean,
+    balanceHeader: GemPerpetualBalanceHeader,
     positions: List<PerpetualPositionRowUIModel>,
     unpinnedPerpetuals: List<PerpetualDataAggregate>,
     pinnedPerpetuals: List<PerpetualDataAggregate>,
@@ -118,18 +124,22 @@ internal fun PerpetualMarketScene(
                 if (!isSearching) {
                     item {
                         AmountListHead(
-                            amount = balance.total,
+                            amount = balanceHeader.total.text(),
                             equivalent = stringResource(
                                 R.string.wallet_available_balance,
-                                balance.available,
+                                balanceHeader.available.text(),
                             ),
                             onClick = { onAction(PerpetualMarketAction.OpenPortfolio) },
                         ) {
-                            MarketHeadActions(
-                                canWithdraw = canWithdraw,
-                                onWithdraw = { onAction(PerpetualMarketAction.Withdraw) },
-                                onDeposit = { onAction(PerpetualMarketAction.Deposit) },
-                            )
+                            when (val actions = balanceHeader.actions) {
+                                GemHeaderActions.WatchOnly -> Unit
+
+                                is GemHeaderActions.Buttons -> MarketHeadActions(
+                                    canWithdraw = actions.buttons.any { it.kind == GemHeaderButtonKind.WITHDRAW && it.isEnabled },
+                                    onWithdraw = { onAction(PerpetualMarketAction.Withdraw) },
+                                    onDeposit = { onAction(PerpetualMarketAction.Deposit) },
+                                )
+                            }
                         }
                     }
                 }
@@ -238,13 +248,10 @@ fun PreviewPerpetualMarketScene() {
             query = androidx.compose.foundation.text.input.TextFieldState(),
             sections = emptyList(),
             isSearching = false,
-            canWithdraw = true,
-            balance = object : PerpetualBalance {
-                override val deposit: String = "$50,000.00"
-                override val available: String = "$45,000.00"
-                override val withdrawable: String = "$42,000.00"
-                override val total: String = "$137,000.00"
-            },
+            balanceHeader = perpetualBalanceHeader(
+                PerpetualBalance(available = 45_000.0, reserved = 92_000.0, withdrawable = 42_000.0),
+                WalletType.Multicoin.toGem(),
+            ),
             positions = emptyList(),
             unpinnedPerpetuals = listOf(
                 object : PerpetualDataAggregate {

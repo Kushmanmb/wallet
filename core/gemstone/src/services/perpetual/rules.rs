@@ -11,8 +11,8 @@ use primitives::{
 use strum::IntoEnumIterator;
 
 use super::model::{
-    GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput, GemPerpetualDetails,
-    GemPerpetualDetailsSummary, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSection, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetail,
+    GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualBalanceHeader, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput,
+    GemPerpetualDetails, GemPerpetualDetailsSummary, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSection, GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetail,
     GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
@@ -20,6 +20,7 @@ use crate::models::custom_types::GemBigInt;
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle, GemListSection, GemListSectionFooter, GemListSectionTitle};
 use crate::models::placeholder::EMPTY_VALUE;
 use crate::perpetual::{GemPerpetual, leverage_text};
+use crate::services::assets::model::{GemHeaderActions, GemHeaderButton, GemHeaderButtonKind};
 use crate::services::error::GemServiceError;
 use crate::services::localization::{GemLocalizedText, GemPositionChange, GemTriggerOrder};
 use crate::services::transfer::GemTransferData;
@@ -415,6 +416,33 @@ pub fn stale_position_ids(existing_ids: Vec<String>, positions: &[PerpetualPosit
 
 pub fn collateral_asset_id(chain: Chain) -> Option<AssetId> {
     wallet_default_assets(chain).into_iter().find(|asset| asset.asset_type == AssetType::PERPETUAL).map(|asset| asset.id)
+}
+
+pub fn balance_header(balance: Option<PerpetualBalance>, wallet_type: WalletType) -> GemPerpetualBalanceHeader {
+    let balance = balance.unwrap_or(PerpetualBalance {
+        available: 0.0,
+        reserved: 0.0,
+        withdrawable: 0.0,
+    });
+    GemPerpetualBalanceHeader {
+        total: GemFormattedNumber::usd(balance.available + balance.reserved),
+        available: GemFormattedNumber::usd(balance.available),
+        actions: match wallet_type {
+            WalletType::View => GemHeaderActions::WatchOnly,
+            WalletType::Multicoin | WalletType::Single | WalletType::PrivateKey => GemHeaderActions::Buttons {
+                buttons: vec![
+                    GemHeaderButton {
+                        kind: GemHeaderButtonKind::Withdraw,
+                        is_enabled: balance.available > 0.0,
+                    },
+                    GemHeaderButton {
+                        kind: GemHeaderButtonKind::Deposit,
+                        is_enabled: true,
+                    },
+                ],
+            },
+        },
+    }
 }
 
 pub fn collateral_asset_ids() -> Vec<AssetId> {
@@ -1738,5 +1766,55 @@ mod tests {
             ),
             vec![GemPerpetualMarketSection::Empty]
         );
+    }
+
+    #[test]
+    fn test_the_balance_header_totals_the_collateral_and_offers_a_withdrawal_only_with_something_to_withdraw() {
+        let header = balance_header(
+            Some(PerpetualBalance {
+                available: 50.0,
+                reserved: 25.0,
+                withdrawable: 50.0,
+            }),
+            WalletType::Multicoin,
+        );
+
+        assert_eq!(header.total, GemFormattedNumber::usd(75.0));
+        assert_eq!(header.available, GemFormattedNumber::usd(50.0));
+        assert_eq!(
+            header.actions,
+            GemHeaderActions::Buttons {
+                buttons: vec![
+                    GemHeaderButton {
+                        kind: GemHeaderButtonKind::Withdraw,
+                        is_enabled: true
+                    },
+                    GemHeaderButton {
+                        kind: GemHeaderButtonKind::Deposit,
+                        is_enabled: true
+                    }
+                ]
+            }
+        );
+
+        let empty = balance_header(None, WalletType::Multicoin);
+        assert_eq!(empty.total, GemFormattedNumber::usd(0.0));
+        assert_eq!(
+            empty.actions,
+            GemHeaderActions::Buttons {
+                buttons: vec![
+                    GemHeaderButton {
+                        kind: GemHeaderButtonKind::Withdraw,
+                        is_enabled: false
+                    },
+                    GemHeaderButton {
+                        kind: GemHeaderButtonKind::Deposit,
+                        is_enabled: true
+                    }
+                ]
+            },
+            "an empty balance has nothing to withdraw"
+        );
+        assert_eq!(balance_header(None, WalletType::View).actions, GemHeaderActions::WatchOnly);
     }
 }

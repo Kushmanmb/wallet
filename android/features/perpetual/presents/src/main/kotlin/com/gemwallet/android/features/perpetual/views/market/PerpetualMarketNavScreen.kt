@@ -31,8 +31,7 @@ fun PerpetualMarketNavScreen(
     val unpinnedPerpetuals by viewModel.unpinnedPerpetuals.collectAsStateWithLifecycle()
     val pinnedPerpetuals by viewModel.pinnedPerpetuals.collectAsStateWithLifecycle()
     val positions by viewModel.positionRows.collectAsStateWithLifecycle()
-    val balance by viewModel.balance.collectAsStateWithLifecycle()
-    val canWithdraw by viewModel.canWithdraw.collectAsStateWithLifecycle()
+    val balanceHeader by viewModel.balanceHeader.collectAsStateWithLifecycle()
     val recent by viewModel.recent.collectAsStateWithLifecycle()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
@@ -56,8 +55,7 @@ fun PerpetualMarketNavScreen(
 
     PerpetualMarketScene(
         sceneState = sceneState,
-        balance = balance,
-        canWithdraw = canWithdraw,
+        balanceHeader = balanceHeader,
         unpinnedPerpetuals = unpinnedPerpetuals,
         pinnedPerpetuals = pinnedPerpetuals,
         positions = positions,

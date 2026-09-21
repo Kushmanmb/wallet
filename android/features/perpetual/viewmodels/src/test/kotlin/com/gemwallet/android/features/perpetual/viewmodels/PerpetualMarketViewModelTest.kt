@@ -5,6 +5,7 @@ import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualPositions
 import com.gemwallet.android.application.perpetual.cases.GetPerpetuals
 import com.gemwallet.android.application.perpetual.cases.PerpetualObserver
+import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
 import com.gemwallet.android.domains.perpetual.aggregates.PerpetualPositionDataAggregate
 import com.gemwallet.android.testkit.mockAsset
@@ -19,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -83,16 +85,18 @@ class PerpetualMarketViewModelTest {
         val getPositions = mockk<GetPerpetualPositions>()
         every { getPositions.getPerpetualPositions() } returns flowOf(positions)
         val getBalance = mockk<GetPerpetualBalance>()
-        every { getBalance.getDisplayBalance() } returns emptyFlow()
         every { getBalance.getBalance() } returns emptyFlow()
         val recentAssetsService = mockk<RecentAssetsService>()
         every { recentAssetsService.getRecentAssets(any()) } returns flowOf(emptyList())
         val perpetualObserver = mockk<PerpetualObserver>()
+        val getSession = mockk<GetSession>()
+        every { getSession() } returns MutableStateFlow(null)
 
         return PerpetualMarketViewModel(
             getPerpetuals = getPerpetuals,
             getPositions = getPositions,
             getBalance = getBalance,
+            getSession = getSession,
             recentAssetsService = recentAssetsService,
             service = service,
             perpetualObserver = perpetualObserver,

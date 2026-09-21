@@ -5,10 +5,12 @@ import Foundation
 import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemMarketsRefreshTrigger
 import struct Gemstone.GemPerpetualMarketCounts
+import struct Gemstone.GemPerpetualBalanceHeader
 import enum Gemstone.GemPerpetualMarketSection
 import struct Gemstone.GemPerpetualMarketSession
 import protocol Gemstone.GemPerpetualServiceProtocol
 import protocol Gemstone.GemRecentActivityServiceProtocol
+import func Gemstone.perpetualBalanceHeader
 import GemstonePrimitives
 import GemstoneServices
 import Localization
@@ -40,8 +42,8 @@ public final class PerpetualsSceneViewModel {
         perpetualsQuery.value
     }
 
-    var walletBalance: WalletBalance {
-        walletBalanceQuery.value.map { WalletBalance.perpetual(available: $0.balance.available, reserved: $0.balance.reserved) } ?? .zero
+    var balanceHeader: GemPerpetualBalanceHeader {
+        perpetualBalanceHeader(balance: walletBalanceQuery.value?.balance.toGem(), walletType: wallet.type.toGem())
     }
 
     var isSearchPresented: Bool = false
@@ -123,10 +125,7 @@ public final class PerpetualsSceneViewModel {
     }
 
     var headerViewModel: PerpetualsHeaderViewModel {
-        PerpetualsHeaderViewModel(
-            walletType: wallet.type,
-            balance: walletBalance,
-        )
+        PerpetualsHeaderViewModel(header: balanceHeader)
     }
 }
 

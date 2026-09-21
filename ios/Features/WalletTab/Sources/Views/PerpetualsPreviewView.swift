@@ -19,7 +19,7 @@ struct PerpetualsPreviewView: View {
     ) {
         self.wallet = wallet
         _showBalancePrivacy = showBalancePrivacy
-        _viewModel = State(initialValue: PerpetualsPreviewViewModel(walletId: wallet.id))
+        _viewModel = State(initialValue: PerpetualsPreviewViewModel(walletId: wallet.id, walletType: wallet.type))
     }
 
     var body: some View {

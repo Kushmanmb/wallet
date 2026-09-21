@@ -9,9 +9,9 @@ import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualPositions
 import com.gemwallet.android.application.perpetual.cases.GetPerpetuals
 import com.gemwallet.android.application.perpetual.cases.PerpetualObserver
+import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
 import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusObserver
-import com.gemwallet.android.domains.perpetual.values.PerpetualBalance
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toGem
@@ -28,6 +28,7 @@ import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PerpetualId
 import com.wallet.core.primitives.RecentActivityType
+import com.wallet.core.primitives.WalletType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,12 +45,14 @@ import kotlinx.coroutines.launch
 import uniffi.gemstone.GemAssetAction
 import uniffi.gemstone.GemMarketsRefreshTrigger
 import uniffi.gemstone.GemPerpetual
+import uniffi.gemstone.GemPerpetualBalanceHeader
 import uniffi.gemstone.GemPerpetualMarketCounts
 import uniffi.gemstone.GemPerpetualMarketSession
 import uniffi.gemstone.GemPerpetualServiceInterface
 import uniffi.gemstone.GemPerpetualSubscription
 import uniffi.gemstone.GemRefreshKind
 import uniffi.gemstone.PerpetualProvider
+import uniffi.gemstone.perpetualBalanceHeader
 import javax.inject.Inject
 
 @HiltViewModel
@@ -57,6 +60,7 @@ class PerpetualMarketViewModel @Inject constructor(
     private val getPerpetuals: GetPerpetuals,
     private val getPositions: GetPerpetualPositions,
     private val getBalance: GetPerpetualBalance,
+    private val getSession: GetSession,
     private val recentAssetsService: RecentAssetsService,
     private val service: GemPerpetualServiceInterface,
     private val perpetualObserver: PerpetualObserver,
@@ -109,11 +113,10 @@ class PerpetualMarketViewModel @Inject constructor(
     val positionRows: StateFlow<List<PerpetualPositionRowUIModel>> = positions
         .map { items -> items.map { PerpetualPositionRowUIModel(it.asset, it.listItem(context)) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val balance = getBalance.getDisplayBalance()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, EmptyPerpetualBalance)
-    val canWithdraw: StateFlow<Boolean> = getBalance.getBalance()
-        .map { balance -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.canWithdraw(balance?.available ?: 0.0) } }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val balanceHeader: StateFlow<GemPerpetualBalanceHeader> = combine(getBalance.getBalance(), getSession()) { balance, session ->
+        perpetualBalanceHeader(balance?.toGem(), (session?.wallet?.type ?: WalletType.View).toGem())
+    }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, perpetualBalanceHeader(null, WalletType.View.toGem()))
     val recent: StateFlow<List<Asset>> =
         recentAssetsService.getRecentAssets(RecentAssetsRequest(types = listOf(RecentActivityType.Perpetual)))
             .map { items -> items.map { it.asset } }
@@ -173,12 +176,4 @@ class PerpetualMarketViewModel @Inject constructor(
     private companion object {
         const val TAG = "PerpetualMarket"
     }
-}
-
-private object EmptyPerpetualBalance : PerpetualBalance {
-    private val zero = CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = Currency.USD).string(0.0)
-    override val deposit: String = zero
-    override val available: String = zero
-    override val withdrawable: String = zero
-    override val total: String = zero
 }

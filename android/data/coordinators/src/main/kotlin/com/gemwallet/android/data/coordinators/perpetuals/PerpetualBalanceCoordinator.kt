@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import uniffi.gemstone.GemPerpetualCollateral
-import com.gemwallet.android.domains.perpetual.values.PerpetualBalance as PerpetualBalanceDisplay
 
 private val EmptyBalance = PerpetualBalance(available = 0.0, reserved = 0.0, withdrawable = 0.0)
 
@@ -38,14 +37,4 @@ class PerpetualBalanceCoordinator(private val perpetualStore: GemstonePerpetualS
                 balance?.let { GemPerpetualCollateral(balance = it.toGem(), price = price ?: 0.0) }
             }
         }
-
-    override fun getDisplayBalance(): Flow<PerpetualBalanceDisplay> = getBalance().map { PerpetualBalanceDisplayValue(it ?: EmptyBalance) }
-}
-
-private class PerpetualBalanceDisplayValue(val balance: PerpetualBalance) : PerpetualBalanceDisplay {
-    private val formatter = CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = Currency.USD)
-    override val deposit: String get() = formatter.string(balance.reserved)
-    override val available: String get() = formatter.string(balance.available)
-    override val withdrawable: String get() = formatter.string(balance.withdrawable)
-    override val total: String get() = formatter.string(balance.available + balance.reserved)
 }

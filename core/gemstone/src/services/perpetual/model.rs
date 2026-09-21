@@ -2,10 +2,12 @@ use super::rules;
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::custom_types::GemBigInt;
 use crate::models::list::{GemListRow, GemListSection};
+use crate::services::assets::model::GemHeaderActions;
 use crate::services::failures::StepFailure;
 use crate::services::localization::GemLocalizedText;
 use primitives::chart::{ChartCandleStick, ChartCandleUpdate};
-use primitives::{Asset, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, PerpetualType};
+use primitives::perpetual::PerpetualBalance;
+use primitives::{Asset, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, PerpetualType, WalletType};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -322,4 +324,16 @@ mod tests {
         assert!(GemPerpetualPositionAction::Open { data: data.clone() }.shows_autoclose());
         assert!(!GemPerpetualPositionAction::Increase { data }.shows_autoclose());
     }
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemPerpetualBalanceHeader {
+    pub total: GemFormattedNumber,
+    pub available: GemFormattedNumber,
+    pub actions: GemHeaderActions,
+}
+
+#[uniffi::export]
+pub fn perpetual_balance_header(balance: Option<PerpetualBalance>, wallet_type: WalletType) -> GemPerpetualBalanceHeader {
+    rules::balance_header(balance, wallet_type)
 }
