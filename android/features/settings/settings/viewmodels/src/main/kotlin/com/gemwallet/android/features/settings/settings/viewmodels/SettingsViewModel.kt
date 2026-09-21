@@ -43,7 +43,6 @@ class SettingsViewModel @Inject constructor(
 
     private val wallets = getWallets()
     private val developerEnabled = MutableStateFlow(userConfig.developEnabled())
-    val isDeveloperEnabled = developerEnabled.asStateFlow()
     private val walletConnectAvailable = MutableStateFlow(true)
 
     val sections = combine(wallets, developerEnabled, walletConnectAvailable) { wallets, _, walletConnect ->
@@ -69,8 +68,7 @@ class SettingsViewModel @Inject constructor(
     val pushEnabled = getPushEnabled.getPushEnabled()
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    fun toggleDeveloperMode() {
-        userConfig.developEnabled(!userConfig.developEnabled())
+    fun refreshDeveloperMode() {
         developerEnabled.value = userConfig.developEnabled()
     }
 

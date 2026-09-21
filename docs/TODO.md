@@ -20,7 +20,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 2. **Establish consistency:** MIG6. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, and C53 wallet creation/import. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
-5. **Close the boundary:** finish B76–B77, U9, U18, U33, N12, F56/F61 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
+5. **Close the boundary:** finish B76, U9, U18, U33, N12, F56/F61 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
 
 ## Screen coverage and existing infrastructure
 
@@ -50,14 +50,14 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Earn list, provider and deposit amount | Existing stake/earn owner and amount extras | Preserve the existing feature gate |
 | NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | S80, AUD22 |
 | Price-alert list/target/auto-alert controls | `GemPriceAlertService`, alert session and existing notification port | S80, U33 |
-| Rewards/create/use/redeem referral | `GemRewardsService`, rewards state, shared load and list records | S79, B77 |
+| Rewards/create/use/redeem referral | `GemRewardsService`, rewards state, shared load and list records | S79 |
 | Contacts/list/editor/address picker | `GemContactService`, `GemContactEditorService`, contact session/name component | — |
 | Networks/node list/add/check | `GemChainSettingsService`, node sessions, shared rows | R131, AUD20, AUD31 |
-| Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | B77, O59, AUD13, AUD30; retain native locale/theme application |
-| Security/lock/biometry/recovery | `GemSecurityService`, existing keystore/auth ports and settings sections | D72, B77, X172, AUD37; retain platform-only privacy lock |
-| Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | D48, S80, B77, AUD32 |
+| Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | O59, AUD13, AUD30; retain native locale/theme application |
+| Security/lock/biometry/recovery | `GemSecurityService`, existing keystore/auth ports and settings sections | D72, X172, AUD37; retain platform-only privacy lock |
+| Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | D48, S80, AUD32 |
 | WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | AUD17, D72/D73; retain Android-only one-click auth |
-| About, app update, developer/service status | Existing settings/update/developer services and native store adapters | R131, B77; platform delivery channels remain distinct |
+| About, app update, developer/service status | Existing settings/update/developer services and native store adapters | R131; platform delivery channels remain distinct |
 | Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | U9/U17, K19, F61; retain native widget scheduling |
 
 An id belongs in this table only while its bullet exists below. MIG5, MIG6, K13, K21, N8, N10, N12, AUD35, and the decision and upstream items stay in their own sections.
@@ -194,7 +194,6 @@ The same product rule on both apps with a difference, each read on both sides on
 [ARCHITECTURE.md § 5](ARCHITECTURE.md#a-view-never-names-a-core-type): feature views consume prepared UI values and do not call Core, choose localized wording from domain cases or reconstruct domain decisions. Shared row renderers and opaque row-key dispatch are intentional exceptions. Move interpretation into the model/mapper; do not add a wrapper solely to hide a generated type name. B67 records an earlier census; inspect each current hit for the actual behavior described below.
 
 - **B76** **M** Asset and chart screens decide from Core types again: `AssetScene.swift:97-174` switches `GemAssetDetailRow`/`GemAssetNetworkDestination`/`GemAssetBalanceRow` (added by b15426c878), `ChartScene.swift:21-48` switches `GemChartSection`, and Android `AssetDetailRowItem.kt:76-81`, `AssetDetailsScene.kt:52-76` (routes on `GemListRowTitle` and picks toasts), `AssetSelectScreen.kt:54-87` with `AssetSelectFlowUIModel.kt:9-23`, `AssetInfoUIModel.kt:35-38`, `BannerItem.kt:17` and `GemLineChart.kt:82`. The B67 shapes.
-- **B77** **M** Settings, referral and support views name Core types: `ReferralScene.kt` takes `GemRewardsState` and branches on eight flags (7f4d7b0741), `SecurityScene.kt:57-58`, `PreferencesScene.kt:45,119,130`, `AboutUsScreen.kt` calls `aboutSections` in the composable with no view model,. A referral UI state, a `securityAction()` mapper and an About view model. The About view model is also what Android needs to reach the developer preference, so the toggle can move off the Settings About Us row (`SettingsScene.kt:83-105`, `opensDeveloperMenu()`) onto the About version row where iOS keeps it. The support bubble is not one of these: its link row renders a title, a subtitle and a url with no decision in it, and [ARCHITECTURE.md § 5](ARCHITECTURE.md#a-view-never-names-a-core-type) says not to wrap a generated type only to hide its name.
 
 ## 4. App-side twins and outcomes the app invents
 
@@ -312,7 +311,7 @@ What each earlier sweep closed as correct, kept so the same lead is not re-raise
 
 **Consistency review (2026-09-17).** Dismissed as platform-owned: the app-update rule (Play in-app update vs App Store release check), the keystore flows (`setup_chains` vs `migrate_to_shared_password`), CAIP-2 (both through Core by different entry points), the sign-message preview (`payload_preview` is Android's one-click-auth flow), and the auth prompt outcome read by halves (iOS needs `is_cancelled`, Android `retry_delay_milliseconds`; both are Core rules). One-sided enum mappings that pick an icon or translate enum to enum are not label choices; `just check-mappers` is the label check.
 
-**B67 (2026-09-17).** The historical view-boundary census (a lead generator, not a blanket prohibition on shared renderer inputs): collect `pub struct|enum|trait Gem*` under `core/gemstone/src` plus the public types in `Gemstone.swift`, then list `ios/**/Scenes`, `ios/**/Views`, `*Scene.swift`, `*View.swift` and every Android file containing `@Composable` (tests, generated, the mapper files and previews excluded) that names one. It read 0 and 0 on 2026-09-17; B76 and B77 are what it finds now.
+**B67 (2026-09-17).** The historical view-boundary census (a lead generator, not a blanket prohibition on shared renderer inputs): collect `pub struct|enum|trait Gem*` under `core/gemstone/src` plus the public types in `Gemstone.swift`, then list `ios/**/Scenes`, `ios/**/Views`, `*Scene.swift`, `*View.swift` and every Android file containing `@Composable` (tests, generated, the mapper files and previews excluded) that names one. It read 0 and 0 on 2026-09-17; B76 is what it finds now.
 
 **Contract checks (2026-09-16).** Kept as correct: a UI state class may carry `NameResolveIndicatorUIModel` from the shared field; the dependency-free rule objects and the Hilt providers that construct concrete services are the only concrete-class holders; view models with several `show*` members read Core sections and rules; navigation values are app types (`ConfirmTransferInput`, `ImportType`, `WalletSecretInput`); a screen flag that is a computed projection of the session phase is not a second state; a row model may carry the edit input and pre-formatted texts the record cannot; an application case with branches that only plumb a flow is a narrow read.
 

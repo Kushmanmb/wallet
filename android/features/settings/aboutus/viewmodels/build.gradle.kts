@@ -3,11 +3,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.compose.compiler)
+    id("com.google.devtools.ksp")
 }
 
 android {
-    namespace = "com.gemwallet.android.features.settings.aboutus.presents"
+    namespace = "com.gemwallet.android.features.settings.aboutus.viewmodels"
     compileSdk = 37
 
     defaultConfig {
@@ -35,9 +35,6 @@ android {
             freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
         }
     }
-    buildFeatures {
-        compose = true
-    }
     packaging {
         resources {
             excludes += "META-INF/*"
@@ -50,8 +47,15 @@ android {
 }
 
 dependencies {
+    implementation(project(":data:services:gemstone"))
     implementation(project(":ui"))
-    implementation(project(":features:settings:aboutus:viewmodels"))
 
-    implementation(libs.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    implementation(libs.lifecycle.viewmodel)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk.android)
 }

@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.referral.views
 
+import com.gemwallet.android.features.referral.viewmodels.models.uiState
 import uniffi.gemstone.GemFormattedNumber
 import uniffi.gemstone.GemNumberDisplay
 import uniffi.gemstone.GemNumberNotation
@@ -9,7 +10,7 @@ import uniffi.gemstone.GemPrecision
 import uniffi.gemstone.GemRewardsState
 import uniffi.gemstone.GemValueTone
 
-internal fun previewRewardsState(
+internal fun previewReferralState(
     referralCode: String? = null,
     hasReferralCode: Boolean = false,
     canInvite: Boolean = false,
@@ -39,4 +40,4 @@ internal fun previewRewardsState(
     usedReferralCode = usedReferralCode,
     infoRows = emptyList(),
     redemptions = emptyList(),
-)
+).uiState()
