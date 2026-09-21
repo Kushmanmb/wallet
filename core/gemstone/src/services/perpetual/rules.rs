@@ -729,6 +729,7 @@ pub fn position_row(perpetual: &Perpetual, asset: &Asset, position: &PerpetualPo
             direction: position.direction.clone(),
             leverage: leverage.clone(),
         },
+        direction_tone: direction_tone(&position.direction),
         margin: GemFormattedNumber::currency(position.margin_amount, Currency::USD, GemCurrencyStyle::Fiat),
         leverage,
         direction: position.direction.clone(),
@@ -1311,6 +1312,7 @@ mod tests {
         assert_eq!(row.margin.value, 0.5432);
         assert_eq!(row.margin.unit, crate::formatted_number::GemNumberUnit::Currency { code: "USD".to_string() });
         assert_eq!(row.pnl_tone, GemValueTone::Negative, "a losing position reads as a loss on both apps");
+        assert_eq!(row.direction_tone, GemValueTone::Negative, "a short reads red on both apps");
         assert!(matches!(&row.pnl, GemLocalizedText::Pnl { amount, .. } if amount.value == -0.25));
         assert_eq!(
             row.position,

@@ -89,6 +89,7 @@ pub struct GemPerpetualPositionRow {
     pub leverage: String,
     pub direction: PerpetualDirection,
     pub position: GemLocalizedText,
+    pub direction_tone: GemValueTone,
     pub margin: GemFormattedNumber,
     pub pnl: GemLocalizedText,
     pub pnl_tone: GemValueTone,
