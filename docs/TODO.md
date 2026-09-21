@@ -40,7 +40,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | V92; keep debounce/observation native |
 | Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | B78, R120, V91 |
 | Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | C51, R89/R90/R93, U30, F58, P90, D73 |
-| Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | S82, D67, R91/R129, U15 |
+| Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | S82, R91/R129, U15 |
 | Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | U18, R121/R127, P90, F62 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | S83, R120/R122, U15, S80 |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | R98/R112, K14/K19, O59 |
@@ -214,7 +214,6 @@ Rows, headers, screen state and flows that an app still assembles from Core ingr
 The same product rule on both apps with a difference, each read on both sides on 2026-09-19.
 
 - **P90** **S** The token-approval header is image-only on iOS but drawn as the symbol on Android transaction details (`GetTransactionDetailsImpl.kt:99-100`) and confirm (`ConfirmHeaderUIModel.kt:53`), merging Core's `AssetImage` into `Symbol`. Close the confirm half with C51 and the detail half with U18; do not add a third header mapping.
-- **D67** **S** Swap's default pay asset depends on adapter candidate order: iOS uses enabled swappable candidates with pins first, Android uses a capped visible nonnegative-rank list and re-sorts away pinned precedence; recent limits/filtering also differ (20 versus 10). `GemSwapService::suggest_pair` already owns selection. Define one eligibility, ranking and limit contract on its existing store input, implement it in both indexed queries, and remove redundant app re-sorting. Do not load/sort an unbounded wallet in Core. Test hidden/enabled, pins, caps and recents with paired query fixtures.
 
 ## 3. The view boundary
 
