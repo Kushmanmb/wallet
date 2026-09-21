@@ -1,7 +1,7 @@
 use super::rules;
 use crate::formatted_number::GemFormattedNumber;
 use crate::services::swap::GemAssetRate;
-use primitives::{FiatProviderName, FiatTransactionStatus};
+use primitives::{FiatProviderName, FiatQuoteType, FiatTransactionAssetData, FiatTransactionStatus};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemFiatAmountCheck {
@@ -44,6 +44,23 @@ pub enum GemFiatTransactionBadge {
 pub struct GemFiatTransactionStatus {
     pub badge: Option<GemFiatTransactionBadge>,
     pub is_dimmed: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemFiatTransactionRow {
+    pub quote_type: FiatQuoteType,
+    pub provider: FiatProviderName,
+    pub subtitle: String,
+    pub value: GemFormattedNumber,
+    pub fiat_value: GemFormattedNumber,
+    pub badge: Option<GemFiatTransactionBadge>,
+    pub is_dimmed: bool,
+    pub details_url: Option<String>,
+}
+
+#[uniffi::export]
+pub fn fiat_transaction_row(data: FiatTransactionAssetData) -> GemFiatTransactionRow {
+    rules::transaction_row(&data)
 }
 
 #[uniffi::export]

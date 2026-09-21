@@ -7,17 +7,17 @@ use primitives::{
     AssetMarket, AssetMetaData, AssetPrice, AssetProperties, AssetRank, AssetScore, AssetType, BalanceMetadata, Banner, BannerEvent, BannerState, BlockExplorerLink, CancelOrderData, Chain, ChainAddress, ChainAsset, ChainType,
     ChartCandleStick, ChartCandleUpdate, ChartDateValue, ChartPeriod, ChartValuePercentage, ConnectionComponent, ConnectionStatus, Contact, ContactAddress, ContractCallData, CoreEmoji, CoreListItem, CoreListItemBadge, CoreListItemIcon,
     Currency, Delegation, DelegationBase, DelegationState, DelegationValidator, DeviceLocale, EarnType, FeePriority, FeeUnitType, FiatProvider, FiatProviderName, FiatQuote, FiatQuoteType, FiatQuoteUrl, FiatRate, FiatTransaction,
-    FiatTransactionData, FiatTransactionStatus, GasPriceType, InAppNotification, Latency, LatencyType, LinkType, MarketDominance, Markets, MarketsAssets, NFTAsset, NFTAssetData, NFTAttribute, NFTAttributeType, NFTCollection, NFTData,
-    NFTImages, NFTResource, NFTType, NameProvider, NameRecord, Node, NodeState, Payment, PaymentAmount, PaymentLink, PaymentRequest, PaymentType, Perpetual, PerpetualAccountMode, PerpetualAccountSummary, PerpetualBalance, PerpetualBasic,
-    PerpetualConfirmData, PerpetualData, PerpetualDirection, PerpetualMarginType, PerpetualMarketData, PerpetualMetadata, PerpetualModifyConfirmData, PerpetualModifyPositionType, PerpetualOrderType, PerpetualPortfolioTimeframeData,
-    PerpetualPosition, PerpetualProvider, PerpetualReduceData, PerpetualSearchData, PerpetualTriggerOrder, PerpetualType, Platform, PlatformStore, PortfolioAsset, PortfolioChartData, PortfolioChartType, PortfolioData, PortfolioMarginUsage,
-    PortfolioStatistic, PortfolioType, Price, PriceAlert, PriceAlertData, PriceAlertDirection, PriceAlertNotificationType, PriceProvider, RecentActivityType, RedelegateData, RedemptionResult, RedemptionStatus, ReferralAllowance,
-    ReferralQuota, Release, ReportNft, Resource, RewardRedemption, RewardRedemptionOption, RewardRedemptionType, RewardStatus, Rewards, SimulationBalanceChange, SimulationHeader, SimulationPayloadField, SimulationPayloadFieldDisplay,
-    SimulationPayloadFieldKind, SimulationPayloadFieldType, SimulationResult, SimulationSeverity, SimulationWarning, SimulationWarningApproval, SimulationWarningType, SolanaNftStandard, SolanaTokenProgramId, StakeProviderType, StakeType,
-    SupportAgent, SupportMessage, SupportMessageImage, SupportMessageSender, SupportMessageStatus, SupportTyping, SupportTypingStatus, SwapData, SwapPriceImpact, SwapPriceImpactType, SwapProvider, SwapProviderData, SwapQuote,
-    SwapQuoteData, SwapQuoteDataType, TPSLOrderData, TotalFiatValue, TpslType, Transaction, TransactionDirection, TransactionExtended, TransactionInputType, TransactionState, TransactionType, TransactionUtxoInput, TransferDataExtra,
-    TransferDataOutputAction, TransferDataOutputType, TronStakeData, TronUnfreeze, TronVote, UTXO, VerificationStatus, Wallet, WalletConnection, WalletConnectionSession, WalletConnectionSessionProposal, WalletConnectionState,
-    WalletConnectionVerificationStatus, WalletSource, WalletType, YieldProvider,
+    FiatTransactionAssetData, FiatTransactionData, FiatTransactionStatus, GasPriceType, InAppNotification, Latency, LatencyType, LinkType, MarketDominance, Markets, MarketsAssets, NFTAsset, NFTAssetData, NFTAttribute, NFTAttributeType,
+    NFTCollection, NFTData, NFTImages, NFTResource, NFTType, NameProvider, NameRecord, Node, NodeState, Payment, PaymentAmount, PaymentLink, PaymentRequest, PaymentType, Perpetual, PerpetualAccountMode, PerpetualAccountSummary,
+    PerpetualBalance, PerpetualBasic, PerpetualConfirmData, PerpetualData, PerpetualDirection, PerpetualMarginType, PerpetualMarketData, PerpetualMetadata, PerpetualModifyConfirmData, PerpetualModifyPositionType, PerpetualOrderType,
+    PerpetualPortfolioTimeframeData, PerpetualPosition, PerpetualProvider, PerpetualReduceData, PerpetualSearchData, PerpetualTriggerOrder, PerpetualType, Platform, PlatformStore, PortfolioAsset, PortfolioChartData, PortfolioChartType,
+    PortfolioData, PortfolioMarginUsage, PortfolioStatistic, PortfolioType, Price, PriceAlert, PriceAlertData, PriceAlertDirection, PriceAlertNotificationType, PriceProvider, RecentActivityType, RedelegateData, RedemptionResult,
+    RedemptionStatus, ReferralAllowance, ReferralQuota, Release, ReportNft, Resource, RewardRedemption, RewardRedemptionOption, RewardRedemptionType, RewardStatus, Rewards, SimulationBalanceChange, SimulationHeader, SimulationPayloadField,
+    SimulationPayloadFieldDisplay, SimulationPayloadFieldKind, SimulationPayloadFieldType, SimulationResult, SimulationSeverity, SimulationWarning, SimulationWarningApproval, SimulationWarningType, SolanaNftStandard, SolanaTokenProgramId,
+    StakeProviderType, StakeType, SupportAgent, SupportMessage, SupportMessageImage, SupportMessageSender, SupportMessageStatus, SupportTyping, SupportTypingStatus, SwapData, SwapPriceImpact, SwapPriceImpactType, SwapProvider,
+    SwapProviderData, SwapQuote, SwapQuoteData, SwapQuoteDataType, TPSLOrderData, TotalFiatValue, TpslType, Transaction, TransactionDirection, TransactionExtended, TransactionInputType, TransactionState, TransactionType,
+    TransactionUtxoInput, TransferDataExtra, TransferDataOutputAction, TransferDataOutputType, TronStakeData, TronUnfreeze, TronVote, UTXO, VerificationStatus, Wallet, WalletConnection, WalletConnectionSession,
+    WalletConnectionSessionProposal, WalletConnectionState, WalletConnectionVerificationStatus, WalletSource, WalletType, YieldProvider,
 };
 use std::str::FromStr;
 
@@ -1170,6 +1170,20 @@ pub struct FiatTransaction {
     pub transaction_hash: Option<String>,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[uniffi::remote(Record)]
+pub struct FiatTransactionAssetData {
+    pub id: String,
+    pub asset: Asset,
+    pub transaction_type: FiatQuoteType,
+    pub provider: FiatProviderName,
+    pub status: FiatTransactionStatus,
+    pub fiat_amount: f64,
+    pub fiat_currency: String,
+    pub value: GemBigUint,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub details_url: Option<String>,
 }
 
 #[uniffi::remote(Record)]

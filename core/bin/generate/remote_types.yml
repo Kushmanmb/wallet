@@ -196,6 +196,7 @@ remote:
   - SupportTyping
   - FiatTransaction
   - FiatTransactionData
+  - FiatTransactionAssetData
 codes:
   - Chain
 identifiers:

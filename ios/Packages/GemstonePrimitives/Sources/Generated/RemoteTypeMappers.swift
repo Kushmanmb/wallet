@@ -2249,6 +2249,40 @@ public extension Primitives.FiatTransaction {
     }
 }
 
+public extension Gemstone.FiatTransactionAssetData {
+    func toPrimitives() -> Primitives.FiatTransactionAssetData {
+        Primitives.FiatTransactionAssetData(
+            id: id,
+            asset: asset.toPrimitives(),
+            transactionType: transactionType.toPrimitives(),
+            provider: provider.toPrimitives(),
+            status: status.toPrimitives(),
+            fiatAmount: fiatAmount,
+            fiatCurrency: fiatCurrency,
+            value: value.description,
+            createdAt: createdAt,
+            detailsUrl: detailsUrl,
+        )
+    }
+}
+
+public extension Primitives.FiatTransactionAssetData {
+    func toGem() -> Gemstone.FiatTransactionAssetData {
+        Gemstone.FiatTransactionAssetData(
+            id: id,
+            asset: asset.toGem(),
+            transactionType: transactionType.toGem(),
+            provider: provider.toGem(),
+            status: status.toGem(),
+            fiatAmount: fiatAmount,
+            fiatCurrency: fiatCurrency,
+            value: BigUInt(stringLiteral: value),
+            createdAt: createdAt,
+            detailsUrl: detailsUrl,
+        )
+    }
+}
+
 public extension Gemstone.FiatTransactionData {
     func toPrimitives() -> Primitives.FiatTransactionData {
         Primitives.FiatTransactionData(

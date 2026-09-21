@@ -1,9 +1,9 @@
 use num_bigint::BigUint;
 use number_formatter::BigNumberFormatter;
-use primitives::{Currency, FiatProviderName, FiatQuote, FiatQuoteType, FiatTransactionStatus};
+use primitives::{Currency, FiatProviderName, FiatQuote, FiatQuoteType, FiatTransactionAssetData, FiatTransactionStatus};
 use rand::RngExt;
 
-use super::model::{GemFiatAmountCheck, GemFiatQuoteRow, GemFiatTransactionBadge, GemFiatTransactionStatus};
+use super::model::{GemFiatAmountCheck, GemFiatQuoteRow, GemFiatTransactionBadge, GemFiatTransactionRow, GemFiatTransactionStatus};
 use crate::config::fiat_config::FiatConfig;
 use crate::formatted_number::GemFormattedNumber;
 use crate::precision::{GemCurrencyStyle, GemValueStyle};
@@ -92,6 +92,20 @@ pub fn transaction_status(status: FiatTransactionStatus) -> GemFiatTransactionSt
     }
 }
 
+pub fn transaction_row(data: &FiatTransactionAssetData) -> GemFiatTransactionRow {
+    let status = transaction_status(data.status.clone());
+    GemFiatTransactionRow {
+        quote_type: data.transaction_type,
+        provider: data.provider,
+        subtitle: format!("{} ({})", data.asset.name, data.provider.name()),
+        value: GemFormattedNumber::amount(BigNumberFormatter::f64_value(data.value.to_string(), data.asset.decimals as u32), Some(data.asset.symbol.clone()), GemValueStyle::Short),
+        fiat_value: GemFormattedNumber::currency_code(data.fiat_amount, data.fiat_currency.clone(), GemCurrencyStyle::Fiat),
+        badge: status.badge,
+        is_dimmed: status.is_dimmed,
+        details_url: data.details_url.clone(),
+    }
+}
+
 pub fn quote_value(quote: &FiatQuote) -> Option<BigUint> {
     let amount = format!("{:.precision$}", quote.crypto_amount, precision = quote.asset.decimals as usize);
     BigNumberFormatter::value_from_amount_biguint(&amount, quote.asset.decimals as u32).ok()
@@ -125,6 +139,32 @@ mod tests {
     use super::*;
     use crate::config::fiat_config::get_fiat_config;
     use primitives::{Asset, Chain};
+
+    #[test]
+    fn test_a_transaction_row_names_its_asset_provider_value_and_status() {
+        let data = FiatTransactionAssetData {
+            id: "1".to_string(),
+            asset: Asset::from_chain(Chain::Ethereum),
+            transaction_type: FiatQuoteType::Buy,
+            provider: FiatProviderName::MoonPay,
+            status: FiatTransactionStatus::Pending,
+            fiat_amount: 25.0,
+            fiat_currency: "USD".to_string(),
+            value: BigUint::from(1_500_000_000_000_000_000u64),
+            created_at: chrono::Utc::now(),
+            details_url: Some("https://moonpay.test/1".to_string()),
+        };
+
+        let row = transaction_row(&data);
+
+        assert_eq!(row.subtitle, "Ethereum (MoonPay)");
+        assert_eq!(row.value.value, 1.5);
+        assert_eq!(row.value.unit, GemNumberUnit::Symbol { symbol: "ETH".to_string() });
+        assert_eq!(row.fiat_value.value, 25.0);
+        assert_eq!(row.badge, Some(GemFiatTransactionBadge::Pending));
+        assert!(!row.is_dimmed);
+        assert_eq!(row.details_url.as_deref(), Some("https://moonpay.test/1"));
+    }
 
     #[test]
     fn test_row_prices_a_buy_off_the_asset_price_and_a_sell_off_the_quote() {

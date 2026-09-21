@@ -1527,6 +1527,32 @@ fun com.wallet.core.primitives.FiatTransaction.toGem(): uniffi.gemstone.FiatTran
     updatedAt = updatedAt,
 )
 
+fun uniffi.gemstone.FiatTransactionAssetData.toPrimitives(): com.wallet.core.primitives.FiatTransactionAssetData = com.wallet.core.primitives.FiatTransactionAssetData(
+    id = id,
+    asset = asset.toPrimitives(),
+    transactionType = transactionType.toPrimitives(),
+    provider = provider.toPrimitives(),
+    status = status.toPrimitives(),
+    fiatAmount = fiatAmount,
+    fiatCurrency = fiatCurrency,
+    value = value.toString(),
+    createdAt = createdAt,
+    detailsUrl = detailsUrl,
+)
+
+fun com.wallet.core.primitives.FiatTransactionAssetData.toGem(): uniffi.gemstone.FiatTransactionAssetData = uniffi.gemstone.FiatTransactionAssetData(
+    id = id,
+    asset = asset.toGem(),
+    transactionType = transactionType.toGem(),
+    provider = provider.toGem(),
+    status = status.toGem(),
+    fiatAmount = fiatAmount,
+    fiatCurrency = fiatCurrency,
+    value = java.math.BigInteger(value),
+    createdAt = createdAt,
+    detailsUrl = detailsUrl,
+)
+
 fun uniffi.gemstone.FiatTransactionData.toPrimitives(): com.wallet.core.primitives.FiatTransactionData = com.wallet.core.primitives.FiatTransactionData(
     transaction = transaction.toPrimitives(),
     detailsUrl = detailsUrl,
