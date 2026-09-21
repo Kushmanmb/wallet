@@ -302,6 +302,18 @@ pub struct GemPerpetualMarketSession {
     pub is_searching: bool,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct GemPerpetualMarketQuery {
+    pub search: String,
+    pub limit: u32,
+    pub requires_volume: bool,
+}
+
+#[uniffi::export]
+pub fn perpetual_market_query(search: String) -> GemPerpetualMarketQuery {
+    super::rules::market_query(search.trim().to_string())
+}
+
 #[uniffi::export]
 impl GemPerpetualMarketSession {
     pub fn on_query_changed(&self, query: String) -> Self {
@@ -324,6 +336,18 @@ impl GemPerpetualMarketSession {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_browsing_lists_traded_markets_and_a_search_reaches_every_one() {
+        let browsing = perpetual_market_query(String::new());
+        assert!(browsing.requires_volume, "the market list is what is being traded");
+        assert_eq!(browsing.limit, super::super::rules::MARKETS_LIMIT);
+
+        let searching = perpetual_market_query("  btc ".to_string());
+        assert_eq!(searching.search, "btc", "the query reaches the store trimmed");
+        assert!(!searching.requires_volume, "a search reaches a market that has not traded today");
+        assert_eq!(searching.limit, browsing.limit);
+    }
 
     #[test]
     fn test_only_opening_a_position_shows_autoclose() {

@@ -43,7 +43,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | S82, D67, R91/R129, U15 |
 | Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | U18, R121/R127, P90, F62 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | S83, R120/R122, U15, S80 |
-| Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | D66, R98/R112, K14/K19, O59 |
+| Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | R98/R112, K14/K19, O59 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73/S81, R96/R128, F61/F62 |
 | Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | S75, V91, K14 |
 | Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | R100/R101/R118; preserve exact atomic values |
@@ -214,7 +214,6 @@ Rows, headers, screen state and flows that an app still assembles from Core ingr
 The same product rule on both apps with a difference, each read on both sides on 2026-09-19.
 
 - **P90** **S** The token-approval header is image-only on iOS but drawn as the symbol on Android transaction details (`GetTransactionDetailsImpl.kt:99-100`) and confirm (`ConfirmHeaderUIModel.kt:53`), merging Core's `AssetImage` into `Symbol`. Close the confirm half with C51 and the detail half with U18; do not add a third header mapping.
-- **D66** **S** Perpetual market membership differs: iOS takes the top 100 by volume and derives pins from that capped set (`PerpetualsRequest.swift:8,28`); Android excludes zero volume except on priority search (`PerpetualDao.kt:34`, `PerpetualStore.kt:84-99`). Define listed/tradable eligibility in Core and a consistent query contract, read pins independently of the result cap, and retain native indexed search/order. Keep delisted metadata needed for held positions/history; do not delete markets just to hide them from discovery. Test pinned-outside-cap, zero-volume search and a held delisted position.
 - **D67** **S** Swap's default pay asset depends on adapter candidate order: iOS uses enabled swappable candidates with pins first, Android uses a capped visible nonnegative-rank list and re-sorts away pinned precedence; recent limits/filtering also differ (20 versus 10). `GemSwapService::suggest_pair` already owns selection. Define one eligibility, ranking and limit contract on its existing store input, implement it in both indexed queries, and remove redundant app re-sorting. Do not load/sort an unbounded wallet in Core. Test hidden/enabled, pins, caps and recents with paired query fixtures.
 
 ## 3. The view boundary

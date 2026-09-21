@@ -12,7 +12,7 @@ use strum::IntoEnumIterator;
 
 use super::model::{
     GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualBalanceHeader, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput,
-    GemPerpetualConfirmDetails, GemPerpetualConfirmDetailsSummary, GemPerpetualDetails, GemPerpetualMarketCounts, GemPerpetualMarketRow, GemPerpetualMarketSection, GemPerpetualOrderAction, GemPerpetualOrderInput,
+    GemPerpetualConfirmDetails, GemPerpetualConfirmDetailsSummary, GemPerpetualDetails, GemPerpetualMarketCounts, GemPerpetualMarketQuery, GemPerpetualMarketRow, GemPerpetualMarketSection, GemPerpetualOrderAction, GemPerpetualOrderInput,
     GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
@@ -652,6 +652,16 @@ fn merge_candle(candles: Vec<ChartCandleStick>, candle: ChartCandleStick) -> Vec
     }
     merged.push(candle);
     merged
+}
+
+pub const MARKETS_LIMIT: u32 = 100;
+
+pub fn market_query(search: String) -> GemPerpetualMarketQuery {
+    GemPerpetualMarketQuery {
+        requires_volume: search.is_empty(),
+        search,
+        limit: MARKETS_LIMIT,
+    }
 }
 
 pub fn market_sections(counts: &GemPerpetualMarketCounts, is_searching: bool, is_query_empty: bool) -> Vec<GemPerpetualMarketSection> {
