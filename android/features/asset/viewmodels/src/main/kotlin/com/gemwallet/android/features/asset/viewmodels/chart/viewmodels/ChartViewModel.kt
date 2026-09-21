@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemChartPhase
-import uniffi.gemstone.GemChartService
 import uniffi.gemstone.GemChartServiceInterface
 import uniffi.gemstone.GemRefreshKind
 import uniffi.gemstone.GemServiceException
@@ -110,7 +109,7 @@ class ChartViewModel internal constructor(
     @Inject
     constructor(
         getCurrentCurrency: GetCurrentCurrency,
-        chartService: GemChartService,
+        chartService: GemChartServiceInterface,
         savedStateHandle: SavedStateHandle,
         connectionStatusObserver: ConnectionStatusObserver,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
