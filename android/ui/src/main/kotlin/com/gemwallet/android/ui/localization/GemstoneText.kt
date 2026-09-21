@@ -25,6 +25,7 @@ import com.wallet.core.primitives.Resource
 import com.wallet.core.primitives.ScanReceiveMode
 import com.wallet.core.primitives.TpslType
 import com.wallet.core.primitives.TransactionState
+import uniffi.gemstone.AutocloseValidation
 import uniffi.gemstone.DelegationState
 import uniffi.gemstone.FeeOption
 import uniffi.gemstone.FeeUnitType
@@ -88,6 +89,14 @@ fun GemTransactionTitle.string(context: Context): String = when (this) {
     is GemTransactionTitle.PerpetualOpen -> perpetualTitle(context, direction, R.string.perpetual_open_direction, R.string.perpetual_position)
     is GemTransactionTitle.PerpetualClose -> perpetualTitle(context, direction, R.string.perpetual_close_direction, R.string.perpetual_close_position)
     GemTransactionTitle.PerpetualModify -> context.getString(R.string.perpetual_modify)
+}
+
+@StringRes
+fun AutocloseValidation.stringRes(): Int? = when (this) {
+    AutocloseValidation.VALID -> null
+    AutocloseValidation.INVALID_AMOUNT -> R.string.errors_invalid_amount
+    AutocloseValidation.TRIGGER_MUST_BE_HIGHER -> R.string.errors_perpetual_trigger_price_higher
+    AutocloseValidation.TRIGGER_MUST_BE_LOWER -> R.string.errors_perpetual_trigger_price_lower
 }
 
 @StringRes

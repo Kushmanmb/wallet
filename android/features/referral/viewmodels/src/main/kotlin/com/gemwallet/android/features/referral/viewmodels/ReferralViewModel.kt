@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.wallet.cases.GetWallets
-import com.gemwallet.android.domains.referral.values.ReferralError
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
@@ -147,7 +146,6 @@ class ReferralViewModel @Inject constructor(
         val wallet = currentWallet.value ?: return
         viewModelScope.launch(ioDispatcher) {
             try {
-                if (!redemption.canRedeem) throw ReferralError.InsufficientPoints
                 service.redeem(wallet.toGem(), redemption.option.id)
                 sync()
                 withContext(Dispatchers.Main) {

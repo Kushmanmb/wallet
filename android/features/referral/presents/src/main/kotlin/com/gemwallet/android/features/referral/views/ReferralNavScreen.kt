@@ -22,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gemwallet.android.domains.referral.values.ReferralError
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.features.referral.viewmodels.ReferralViewModel
 import com.gemwallet.android.ui.R
@@ -39,10 +38,12 @@ fun ReferralNavScreen(onClose: () -> Unit, viewModel: ReferralViewModel = hiltVi
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val loadingMessage = stringResource(R.string.common_loading)
+    val insufficientPointsMessage = stringResource(R.string.rewards_insufficient_points)
     val doneMessage = stringResource(R.string.common_done)
 
     var isShowSelectWallets by remember { mutableStateOf(false) }
     var showErrorDialog by remember { mutableStateOf<Throwable?>(null) }
+    var showMessageDialog by remember { mutableStateOf<String?>(null) }
 
     val availableWallets by viewModel.availableWallets.collectAsStateWithLifecycle()
     val availableWalletRows by viewModel.availableWalletRows.collectAsStateWithLifecycle()
@@ -69,6 +70,10 @@ fun ReferralNavScreen(onClose: () -> Unit, viewModel: ReferralViewModel = hiltVi
         onRefresh = viewModel::sync,
         onWallet = { isShowSelectWallets = true },
         onRedeem = {
+            if (!it.redemption.canRedeem) {
+                showMessageDialog = insufficientPointsMessage
+                return@ReferralScene
+            }
             scope.launch { snackbar.showSnackbar(loadingMessage, R.drawable.ic_refresh) }
             viewModel.redeem(it.redemption) { err ->
                 if (err == null) {
@@ -102,11 +107,19 @@ fun ReferralNavScreen(onClose: () -> Unit, viewModel: ReferralViewModel = hiltVi
         }
     }
 
+    if (showMessageDialog != null) {
+        AlertDialog(
+            containerColor = MaterialTheme.colorScheme.background,
+            onDismissRequest = { showMessageDialog = null },
+            text = { Text(showMessageDialog.orEmpty()) },
+            confirmButton = {
+                Button({ showMessageDialog = null }) { Text(stringResource(R.string.common_cancel)) }
+            },
+        )
+    }
+
     if (showErrorDialog != null) {
-        val message = when (showErrorDialog) {
-            is ReferralError.InsufficientPoints -> stringResource(R.string.rewards_insufficient_points)
-            else -> showErrorDialog?.errorText()?.text() ?: stringResource(R.string.transaction_status_failed)
-        }
+        val message = showErrorDialog?.errorText()?.text() ?: stringResource(R.string.transaction_status_failed)
         AlertDialog(
             containerColor = MaterialTheme.colorScheme.background,
             onDismissRequest = { showErrorDialog = null },

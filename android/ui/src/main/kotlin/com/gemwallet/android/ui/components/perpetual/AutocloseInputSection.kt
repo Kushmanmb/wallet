@@ -23,21 +23,13 @@ import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.sectionHeaderHorizontalPadding
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.localization.autocloseRes
+import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.perpetual.autoclose.AutocloseUIModel
 import com.gemwallet.android.ui.style.color
 import com.gemwallet.android.ui.theme.compactIconSize
 import com.gemwallet.android.ui.theme.space4
 import com.wallet.core.primitives.TpslType
-import uniffi.gemstone.AutocloseValidation
-
-@StringRes
-private fun AutocloseValidation.toStringRes(): Int? = when (this) {
-    AutocloseValidation.VALID -> null
-    AutocloseValidation.INVALID_AMOUNT -> R.string.errors_invalid_amount
-    AutocloseValidation.TRIGGER_MUST_BE_HIGHER -> R.string.errors_perpetual_trigger_price_higher
-    AutocloseValidation.TRIGGER_MUST_BE_LOWER -> R.string.errors_perpetual_trigger_price_lower
-}
 
 @Composable
 fun AutocloseInputSection(field: AutocloseUIModel.Field, text: String, onTextChanged: (String) -> Unit, onFocusChanged: (Boolean) -> Unit) {
@@ -49,7 +41,7 @@ fun AutocloseInputSection(field: AutocloseUIModel.Field, text: String, onTextCha
         value = text,
         onValueChange = onTextChanged,
         label = stringResource(R.string.asset_price),
-        error = field.validation.toStringRes()?.let { stringResource(it) }.orEmpty(),
+        error = field.validation.stringRes()?.let { stringResource(it) }.orEmpty(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         listPosition = ListPosition.Single,
         errorDivider = true,

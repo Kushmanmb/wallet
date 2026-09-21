@@ -1,5 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.AutocloseValidation
+import Foundation
 import enum Gemstone.GemCandleTooltipRow
 import enum Gemstone.GemPerpetualButton
 import enum Gemstone.GemPerpetualChartLineKind
@@ -7,6 +9,17 @@ import enum Gemstone.GemPerpetualMarketSection
 import enum Gemstone.GemPerpetualSection
 import Localization
 import Primitives
+
+extension AutocloseValidation: @retroactive LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .valid: nil
+        case .invalidAmount: Localized.Errors.invalidAmount
+        case .triggerMustBeHigher: Localized.Errors.Perpetual.triggerPriceHigher
+        case .triggerMustBeLower: Localized.Errors.Perpetual.triggerPriceLower
+        }
+    }
+}
 
 extension TpslType {
     var autocloseTitle: String {
