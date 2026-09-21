@@ -301,7 +301,7 @@ struct ServicesFactory {
         )
         let toastPresenter = ToastPresenter()
         let pushNotificationService = Gemstone.GemPushNotificationService()
-        let navigationHandler = NavigationHandler(
+        let navigationRouter = NavigationRouter(
             navigationState: navigation,
             presenter: navigationPresenter,
             assetsService: assetsService,
@@ -439,7 +439,7 @@ struct ServicesFactory {
             connectionStatusObserver: connectionStatusObserver,
             devicePlatform: devicePlatform,
             deviceService: deviceService,
-            navigationHandler: navigationHandler,
+            navigationRouter: navigationRouter,
             navigationPresenter: navigationPresenter,
             streamObserverService: streamObserverService,
             transactionStateService: transactionStateService,

@@ -22,7 +22,7 @@ extension AppResolver {
         let connectionStatusObserver: ConnectionStatusObserver
         let devicePlatform: GemstoneDevicePlatform
         let deviceService: any GemDeviceServiceProtocol
-        let navigationHandler: NavigationHandler
+        let navigationRouter: NavigationRouter
         let navigationPresenter: NavigationPresenter
         let streamObserverService: StreamObserverService
         let transactionStateService: any GemTransactionStateServiceProtocol

@@ -25,7 +25,7 @@ final class RootSceneViewModel {
     private let appStartService: any GemAppStartServiceProtocol
     private let pushNotificationEnablerService: PushNotificationEnablerService
     private let appLifecycleService: AppLifecycleService
-    private let navigationHandler: NavigationHandler
+    private let navigationRouter: NavigationRouter
     private let appUpdateService: any GemAppUpdateServiceProtocol
     private let rateService: RateService
     private let toastPresenter: ToastPresenter
@@ -79,7 +79,7 @@ final class RootSceneViewModel {
         appStartService: any GemAppStartServiceProtocol,
         pushNotificationEnablerService: PushNotificationEnablerService,
         appLifecycleService: AppLifecycleService,
-        navigationHandler: NavigationHandler,
+        navigationRouter: NavigationRouter,
         lockWindowManager: any LockWindowPresentable,
         viewModelFactory: ViewModelFactory,
         walletSessionService: any GemWalletSessionServiceProtocol,
@@ -94,7 +94,7 @@ final class RootSceneViewModel {
         self.appStartService = appStartService
         self.pushNotificationEnablerService = pushNotificationEnablerService
         self.appLifecycleService = appLifecycleService
-        self.navigationHandler = navigationHandler
+        self.navigationRouter = navigationRouter
         lockWindow = lockWindowManager
         self.viewModelFactory = viewModelFactory
         self.walletSessionService = walletSessionService
@@ -136,12 +136,12 @@ extension RootSceneViewModel {
             Task { await appLifecycleService.updateWalletConnections() }
             return
         }
-        navigationHandler.resetNavigation()
+        navigationRouter.resetNavigation()
         setup(wallet: currentWallet)
     }
 
     func handleOpenUrl(_ url: URL) async {
-        await navigationHandler.handle(url: url)
+        await navigationRouter.open(url: url)
     }
 
     func createWalletModel() -> CreateWalletModel {

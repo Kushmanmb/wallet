@@ -18,7 +18,7 @@ import Transfer
 import WalletTab
 
 struct WalletNavigationView: View {
-    @Environment(\.navigationHandler) private var navigationHandler
+    @Environment(\.navigationRouter) private var navigationRouter
     @Environment(\.navigationState) private var navigationState
     @Environment(\.navigationPresenter) private var presenter
     @Environment(\.viewModelFactory) private var viewModelFactory
@@ -236,6 +236,6 @@ struct WalletNavigationView: View {
 
 extension WalletNavigationView {
     private func onScan(_ code: String) {
-        Task { await navigationHandler.handle(code: code) }
+        Task { await navigationRouter.open(code: code) }
     }
 }

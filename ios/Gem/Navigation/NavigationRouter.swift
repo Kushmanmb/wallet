@@ -25,7 +25,7 @@ import WalletConnector
 import WalletConnectorService
 
 @Observable
-final class NavigationHandler: Sendable {
+final class NavigationRouter: Sendable {
     private let navigationState: NavigationStateManager
     private let presenter: NavigationPresenter
 
@@ -72,7 +72,7 @@ final class NavigationHandler: Sendable {
     }
 
     @MainActor
-    func handlePush(_ userInfo: [AnyHashable: Any]) async {
+    func openNotification(userInfo: [AnyHashable: Any]) async {
         guard
             let notificationType = userInfo["type"] as? String,
             let notification = pushNotificationService.parse(
@@ -83,9 +83,9 @@ final class NavigationHandler: Sendable {
             return
         }
         do {
-            try await handle(notification)
+            try await open(notification: notification)
         } catch {
-            debugLog("NavigationHandler push error: \(error)")
+            debugLog("NavigationRouter push error: \(error)")
         }
     }
 
@@ -95,22 +95,22 @@ final class NavigationHandler: Sendable {
     }
 
     @MainActor
-    func handle(url: URL) async {
-        await handle(code: url.absoluteString)
+    func open(url: URL) async {
+        await open(code: url.absoluteString)
     }
 
     @MainActor
-    func handle(code: String) async {
+    func open(code: String) async {
         guard let action = deeplinkService.urlAction(url: code) else {
             return showError(AnyError(Localized.Errors.notSupported))
         }
-        await handle(action)
+        await open(action: action)
     }
 
     @MainActor
-    func handle(_ action: UrlAction) async {
+    func open(action: UrlAction) async {
         do {
-            try await handleURLAction(action)
+            try await openURLAction(action)
         } catch {
             toastPresenter.toastMessage = nil
             showError(error)
@@ -118,9 +118,9 @@ final class NavigationHandler: Sendable {
     }
 
     @MainActor
-    func open(url: URL) -> Bool {
+    func openInApp(url: URL) -> Bool {
         guard let action = deeplinkService.urlAction(url: url.absoluteString) else { return false }
-        Task { await handle(action) }
+        Task { await open(action: action) }
         return true
     }
 }
@@ -128,16 +128,16 @@ final class NavigationHandler: Sendable {
 // MARK: - UrlAction
 
 @MainActor
-extension NavigationHandler {
-    private func handleURLAction(_ action: UrlAction) async throws {
+extension NavigationRouter {
+    private func openURLAction(_ action: UrlAction) async throws {
         switch action {
-        case let .deeplink(deeplink): try await handleDeepLink(deeplink)
-        case let .payment(payment): try await handlePayment(payment)
-        case let .walletConnect(link): await handleWalletConnect(link)
+        case let .deeplink(deeplink): try await openDeeplink(deeplink)
+        case let .payment(payment): try await openPayment(payment)
+        case let .walletConnect(link): await openWalletConnect(link)
         }
     }
 
-    private func handleDeepLink(_ deeplink: Deeplink) async throws {
+    private func openDeeplink(_ deeplink: Deeplink) async throws {
         switch deeplink {
         case let .asset(assetId):
             try await navigateToAsset(AssetId(id: assetId))
@@ -168,8 +168,8 @@ extension NavigationHandler {
 // MARK: - Payment
 
 @MainActor
-extension NavigationHandler {
-    private func handlePayment(_ payment: Gemstone.Payment) async throws {
+extension NavigationRouter {
+    private func openPayment(_ payment: Gemstone.Payment) async throws {
         guard let wallet = await walletSessionService.currentWallet else { return }
         switch payment {
         case let .request(request):
@@ -189,8 +189,8 @@ extension NavigationHandler {
 // MARK: - WalletConnect
 
 @MainActor
-extension NavigationHandler {
-    private func handleWalletConnect(_ link: WalletConnectLink) async {
+extension NavigationRouter {
+    private func openWalletConnect(_ link: WalletConnectLink) async {
         walletConnectorPresenter.isPresentingConnectionBar = true
 
         do {
@@ -203,7 +203,7 @@ extension NavigationHandler {
                 walletConnector.updateSessions()
             }
         } catch {
-            debugLog("NavigationHandler walletConnect error: \(error)")
+            debugLog("NavigationRouter walletConnect error: \(error)")
             walletConnectorPresenter.isPresentingError = error.localizedDescription
         }
     }
@@ -212,8 +212,8 @@ extension NavigationHandler {
 // MARK: - PushNotification
 
 @MainActor
-extension NavigationHandler {
-    private func handle(_ notification: GemPushNotification) async throws {
+extension NavigationRouter {
+    private func open(notification: GemPushNotification) async throws {
         switch notification {
         case let .asset(assetId), let .priceAlert(assetId):
             try await navigateToAsset(Primitives.AssetId(id: assetId))
@@ -243,9 +243,9 @@ extension NavigationHandler {
 // MARK: - Private
 
 @MainActor
-extension NavigationHandler {
+extension NavigationRouter {
     private func showError(_ error: any Error) {
-        debugLog("NavigationHandler error: \(error)")
+        debugLog("NavigationRouter error: \(error)")
         toastPresenter.toastMessage = .error(error.localizedDescription)
     }
 
