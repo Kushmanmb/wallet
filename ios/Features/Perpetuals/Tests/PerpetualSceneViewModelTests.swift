@@ -158,7 +158,9 @@ struct PerpetualSceneViewModelTests {
         let model = PerpetualSceneViewModel.mock(service: service, asset: asset)
 
         model.onScenePhaseChange(.background, .active)
-        try? await Task.sleep(for: .milliseconds(50))
+        for _ in 0 ..< 200 where service.syncPositionsCount == 0 {
+            try? await Task.sleep(for: .milliseconds(20))
+        }
 
         #expect(service.syncPositionsCount == 1, "a position closed while the app was away shows on return")
         #expect(service.syncedTransactionAssetIds == [asset.id.identifier])

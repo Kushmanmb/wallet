@@ -251,6 +251,8 @@ public extension AssetSceneViewModel {
             Task {
                 do {
                     try await service.closeBanner(key: action.banner.gemKey)
+                } catch let error as GemServiceError {
+                    isPresentingToastMessage = .error(error.text().text)
                 } catch {
                     isPresentingToastMessage = .error(Localized.Errors.errorOccurred)
                 }

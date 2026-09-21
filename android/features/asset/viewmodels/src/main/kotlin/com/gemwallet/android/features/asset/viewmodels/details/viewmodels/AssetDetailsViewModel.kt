@@ -215,7 +215,7 @@ class AssetDetailsViewModel @Inject constructor(
 
     fun closeBanner(banner: Banner) = viewModelScope.launch(ioDispatcher) {
         runCatchingCancellable { assetDetailsService.closeBanner(banner.toGemKey()) }
-            .onFailure { Log.e(TAG, "banner ${banner.event} close failed", it) }
+            .onFailure { errorState.value = it.errorText().text(context) }
     }
 
     fun enablePerpetuals() {
