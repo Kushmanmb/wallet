@@ -14,8 +14,8 @@ use strum::IntoEnumIterator;
 
 use super::model::{
     GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualBalanceHeader, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput,
-    GemPerpetualConfirmDetails, GemPerpetualConfirmDetailsSummary, GemPerpetualDetails, GemPerpetualMarketCounts, GemPerpetualMarketQuery, GemPerpetualMarketRow, GemPerpetualMarketSection, GemPerpetualOrderAction, GemPerpetualOrderInput,
-    GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
+    GemPerpetualConfirmDetails, GemPerpetualConfirmDetailsSummary, GemPerpetualDetails, GemPerpetualMarketCounts, GemPerpetualMarketQuery, GemPerpetualMarketRow, GemPerpetualMarketSection, GemPerpetualOpenRow, GemPerpetualOrderAction,
+    GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::custom_types::GemBigInt;
@@ -717,6 +717,17 @@ pub fn market_row(perpetual: &Perpetual, asset: &Asset) -> GemPerpetualMarketRow
     }
 }
 
+pub fn open_row(direction: PerpetualDirection, leverage: u8, size: f64) -> GemPerpetualOpenRow {
+    GemPerpetualOpenRow {
+        position: GemLocalizedText::Position {
+            leverage: crate::perpetual::leverage_text(leverage),
+            direction: direction.clone(),
+        },
+        direction_tone: direction_tone(&direction),
+        size: (size > 0.0).then(|| GemFormattedNumber::currency(size, Currency::USD, GemCurrencyStyle::Currency)),
+    }
+}
+
 pub fn position_row(perpetual: &Perpetual, asset: &Asset, position: &PerpetualPosition) -> GemPerpetualPositionRow {
     let leverage = crate::perpetual::leverage_text(position.leverage);
     let (pnl, pnl_tone) = pnl_text(position.pnl, position.margin_amount);
@@ -1285,6 +1296,22 @@ mod tests {
         assert_eq!(row(0.0013).funding_apr.notation, crate::formatted_number::GemNumberNotation::Signed);
         assert!((row(0.0013).funding_apr.value - 11.388).abs() < 0.001);
         assert!((row(-0.0004).funding_apr.value + 3.504).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_an_opening_position_reads_the_same_way_a_held_one_does() {
+        let opening = open_row(PerpetualDirection::Short, 5, 1_000.0);
+        let held = PerpetualPosition {
+            leverage: 5,
+            direction: PerpetualDirection::Short,
+            ..PerpetualPosition::mock()
+        };
+        let holding = position_row(&Perpetual::mock(), &Asset::from_chain(Chain::HyperCore), &held);
+
+        assert_eq!(opening.position, holding.position, "a position about to open is labelled like one already open");
+        assert_eq!(opening.direction_tone, holding.direction_tone);
+        assert_eq!(opening.size.expect("a sized order shows its size").value, 1_000.0);
+        assert_eq!(open_row(PerpetualDirection::Long, 1, 0.0).size, None, "an order with no size yet shows none");
     }
 
     #[test]

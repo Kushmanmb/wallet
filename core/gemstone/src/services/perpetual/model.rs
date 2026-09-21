@@ -95,6 +95,18 @@ pub struct GemPerpetualPositionRow {
     pub pnl_tone: GemValueTone,
 }
 
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemPerpetualOpenRow {
+    pub position: GemLocalizedText,
+    pub direction_tone: GemValueTone,
+    pub size: Option<GemFormattedNumber>,
+}
+
+#[uniffi::export]
+pub fn perpetual_open_row(direction: PerpetualDirection, leverage: u8, size: f64) -> GemPerpetualOpenRow {
+    rules::open_row(direction, leverage, size)
+}
+
 #[uniffi::export]
 pub fn perpetual_position_row(perpetual: Perpetual, asset: Asset, position: PerpetualPosition) -> GemPerpetualPositionRow {
     rules::position_row(&perpetual, &asset, &position)
