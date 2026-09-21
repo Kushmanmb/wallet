@@ -6,7 +6,6 @@ import com.gemwallet.android.model.CryptoFiatConverter
 import com.gemwallet.android.model.ValueFormatter
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Currency
-import com.wallet.core.primitives.DelegationBase
 import uniffi.gemstone.GemValueStyle
 import java.math.BigInteger
 
@@ -28,11 +27,3 @@ class RewardsInfoUIModel(assetInfo: AssetInfo, balance: BigInteger) :
     ) {
     override val cryptoFormatted: String by lazy { ValueFormatter(style = GemValueStyle.AUTO).string(balance, asset) }
 }
-
-class DelegationBalanceInfoUIModel(assetInfo: AssetInfo, delegation: DelegationBase) :
-    BalanceInfoUIModel(
-        asset = assetInfo.asset,
-        balance = delegation.balance,
-        price = assetInfo.price?.price?.price,
-        currency = assetInfo.price?.currency ?: Currency.USD,
-    )

@@ -5,15 +5,15 @@ use crate::services::collections::{stale, unique};
 use num_bigint::{BigInt, BigUint};
 use primitives::AddressName;
 use primitives::{
-    AddressFormatStyle, AddressFormatter, AddressType, Asset, Chain, Delegation, DelegationBase, DelegationState, DelegationValidator, EarnType, RedelegateData, Resource, StakeChain, StakeProviderType, StakeType, VerificationStatus,
-    WalletType, YieldProvider,
+    AddressFormatStyle, AddressFormatter, AddressType, Asset, Chain, Currency, Delegation, DelegationBase, DelegationState, DelegationValidator, EarnType, RedelegateData, Resource, StakeChain, StakeProviderType, StakeType,
+    VerificationStatus, WalletType, YieldProvider,
 };
 use rand::seq::IndexedRandom;
 use std::str::FromStr;
 
 use super::model::{
-    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationStatus, GemEarnActions, GemStakeAction, GemStakeActionItem, GemStakeAmountInput, GemStakeSection,
-    GemStakeValidatorSelection, GemValidatorRow,
+    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationListRow, GemDelegationStatus, GemEarnActions, GemStakeAction, GemStakeActionItem, GemStakeAmountInput,
+    GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
 };
 use crate::config::image::GemImage;
 use crate::config::stake::EARN_OFFERED;
@@ -187,6 +187,22 @@ fn completion_title(delegation: &Delegation) -> Option<GemListRowTitle> {
             DelegationState::Pending | DelegationState::Deactivating | DelegationState::AwaitingWithdrawal => Some(GemListRowTitle::AvailableIn),
             DelegationState::Active | DelegationState::Inactive => None,
         },
+    }
+}
+
+pub fn delegation_list_row(delegation: &Delegation, asset: &Asset, price: Option<f64>, currency: Currency) -> GemDelegationListRow {
+    let amount = |value: &BigUint| GemFormattedNumber::asset_amount(&BigInt::from(value.clone()), asset, GemValueStyle::Short);
+    let fiat = |value: &BigUint| crate::services::assets::rules::fiat_amount_of(asset, value, price, currency.clone());
+    let shows_rewards = shows_rewards(&delegation.base);
+
+    GemDelegationListRow {
+        validator: validator_row(&delegation.validator),
+        status: delegation_status(delegation),
+        balance: amount(&delegation.base.balance),
+        fiat: fiat(&delegation.base.balance),
+        rewards: shows_rewards.then(|| amount(&delegation.base.rewards)),
+        rewards_fiat: shows_rewards.then(|| fiat(&delegation.base.rewards)).flatten(),
+        has_balance: delegation.base.balance > BigUint::ZERO,
     }
 }
 
@@ -632,6 +648,32 @@ mod tests {
     use crate::services::transfer::GemTransferData;
     use chrono::Duration;
     use primitives::Resource;
+
+    #[test]
+    fn test_a_delegation_row_greys_an_empty_stake_and_shows_rewards_only_when_there_are_some() {
+        let asset = Asset::from_chain(Chain::Cosmos);
+        let row = |balance: u64, rewards: u64, state| {
+            let mut delegation = Delegation::mock();
+            delegation.base.balance = BigUint::from(balance);
+            delegation.base.rewards = BigUint::from(rewards);
+            delegation.base.state = state;
+            delegation_list_row(&delegation, &asset, Some(2.0), Currency::USD)
+        };
+
+        let held = row(2_000_000, 500_000, DelegationState::Active);
+        assert!(held.has_balance);
+        assert_eq!(held.balance.value, 2.0);
+        assert_eq!(held.fiat.expect("a priced stake is worth something").value, 4.0);
+        assert_eq!(held.rewards.expect("active rewards are shown").value, 0.5);
+        assert_eq!(held.rewards_fiat.expect("and are worth something").value, 1.0);
+
+        let empty = row(0, 0, DelegationState::Active);
+        assert!(!empty.has_balance, "an empty stake greys on both apps");
+        assert_eq!(empty.fiat, None, "and is worth nothing the row can name");
+        assert_eq!(empty.rewards, None);
+
+        assert_eq!(row(2_000_000, 500_000, DelegationState::Pending).rewards, None, "only an active delegation is earning");
+    }
 
     #[test]
     fn test_validator_display_name() {

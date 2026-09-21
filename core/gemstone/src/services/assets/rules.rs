@@ -465,6 +465,10 @@ pub fn fiat_value(asset: &Asset, balance: &GemAssetBalance, price: Option<f64>, 
     fiat_amount(asset, &balance.total(), price, currency)
 }
 
+pub fn fiat_amount_of(asset: &Asset, value: &num_bigint::BigUint, price: Option<f64>, currency: Currency) -> Option<GemFormattedNumber> {
+    fiat_amount(asset, &GemBigUint::from(value.clone()), price, currency)
+}
+
 fn fiat_amount(asset: &Asset, value: &GemBigUint, price: Option<f64>, currency: Currency) -> Option<GemFormattedNumber> {
     let value: f64 = CryptoFiatConverter::to_fiat(&value.to_string(), asset.decimals as u32, price?).ok()?.parse().ok()?;
     (value > 0.0).then(|| GemFormattedNumber::currency(value, currency, GemCurrencyStyle::Currency))

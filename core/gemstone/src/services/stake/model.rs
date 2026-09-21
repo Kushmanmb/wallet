@@ -5,7 +5,7 @@ use crate::services::amount::rules as amount_rules;
 use crate::services::error::GemServiceError;
 use crate::services::localization::GemLocalizedText;
 use crate::services::transfer::GemTransferData;
-use primitives::{Asset, Delegation, DelegationState, DelegationValidator, EarnType, Resource, StakeType, YieldProvider};
+use primitives::{Asset, Currency, Delegation, DelegationState, DelegationValidator, EarnType, Resource, StakeType, YieldProvider};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemStakeSection {
@@ -23,6 +23,22 @@ pub struct GemDelegationStatus {
 #[uniffi::export]
 pub fn delegation_status(delegation: Delegation) -> GemDelegationStatus {
     rules::delegation_status(&delegation)
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemDelegationListRow {
+    pub validator: GemValidatorRow,
+    pub status: GemDelegationStatus,
+    pub balance: GemFormattedNumber,
+    pub fiat: Option<GemFormattedNumber>,
+    pub rewards: Option<GemFormattedNumber>,
+    pub rewards_fiat: Option<GemFormattedNumber>,
+    pub has_balance: bool,
+}
+
+#[uniffi::export]
+pub fn delegation_list_row(delegation: Delegation, asset: Asset, price: Option<f64>, currency: Currency) -> GemDelegationListRow {
+    rules::delegation_list_row(&delegation, &asset, price, currency)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

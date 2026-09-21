@@ -47,9 +47,9 @@ struct DelegationSceneViewModelTests {
     }
 
     @Test
-    func rewardsRowOnlyWhenCoreShowsRewards() {
-        let shown = DelegationSceneViewModel.mock(rewards: 500_000, stakeService: GemStakeServiceMock(rewardsShown: true))
-        let hidden = DelegationSceneViewModel.mock(rewards: 500_000, stakeService: GemStakeServiceMock(rewardsShown: false))
+    func rewardsRowOnlyWhenThereAreRewards() {
+        let shown = DelegationSceneViewModel.mock(rewards: 500_000)
+        let hidden = DelegationSceneViewModel.mock(rewards: 0)
 
         #expect(shown.rewardsItem?.title == Localized.Stake.rewards)
         #expect(shown.rewardsItem?.subtitle == "0.5 ATOM")
