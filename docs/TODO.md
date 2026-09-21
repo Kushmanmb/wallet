@@ -43,7 +43,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | S82, D67, R91/R92/R129, U15, D55 |
 | Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | U18, R105/R121/R127, P90, F62 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | S83, R106/R120/R122, D50/D64, U15, S80 |
-| Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | D66, R98/R112, K14/K19, U24, O59 |
+| Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | D66, R98/R112, K14/K19, O59 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73/S81, R96/R128, F61/F62 |
 | Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | S75, R97, V91, K14 |
 | Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | R100/R101/R118; preserve exact atomic values |
