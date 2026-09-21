@@ -30,8 +30,8 @@ This map routes work to current owners. It groups existing ids rather than creat
 |---|---|---|
 | Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | C53, D43, R124, X172 |
 | Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | B79, R107, K17, X172 |
-| Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | R95, R111–R113, R133, U25, D46, D56, O59 |
-| Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | R111/R133, D56, B76/B80, K18 |
+| Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | R95, R111–R113, R133, U25, D46, O59 |
+| Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | R111/R133, B76/B80, K18 |
 | Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | R102, R132, B76/B80, U30 |
 | Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | S74, R94, D70, O59, F61/F62 |
 | Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | S72, R128, D70, B76, F61/F62 |
@@ -213,7 +213,6 @@ Rows, headers, screen state and flows that an app still assembles from Core ingr
 
 The same product rule on both apps with a difference, each read on both sides on 2026-09-19.
 
-- **D56** **S** Wallet search: Android's empty state counts only some sections and draws "no assets" over matching lists, iOS `showAddToken` bypasses `flow.shows_add_token`, and pinned perpetuals vanish from iOS asset-list results. A Core search state from the full counts; both apps honour `shows_add_token`; one perpetual split.
 - **D58** **S** A support message interrupted by an app kill is failed on resume on Android (`failPendingSupportMessages`, outside the `GemSupportStore` trait) and spins "sending" forever on iOS, and Android restates Core's no-retry-for-images twice. `GemSupportStore::fail_pending_messages` from a Core entry point and message rows with a status outcome. Run interrupted-send recovery from the existing startup/resume lifecycle after identifying abandoned work; do not fail actively sending rows on every refresh. Reuse existing message status and retry rules.
 - **P90** **S** The token-approval header is image-only on iOS but drawn as the symbol on Android transaction details (`GetTransactionDetailsImpl.kt:99-100`) and confirm (`ConfirmHeaderUIModel.kt:53`), merging Core's `AssetImage` into `Symbol`. Close the confirm half with C51 and the detail half with U18; do not add a third header mapping.
 - **D66** **S** Perpetual market membership differs: iOS takes the top 100 by volume and derives pins from that capped set (`PerpetualsRequest.swift:8,28`); Android excludes zero volume except on priority search (`PerpetualDao.kt:34`, `PerpetualStore.kt:84-99`). Define listed/tradable eligibility in Core and a consistent query contract, read pins independently of the result cap, and retain native indexed search/order. Keep delisted metadata needed for held positions/history; do not delete markets just to hide them from discovery. Test pinned-outside-cap, zero-volume search and a held delisted position.
