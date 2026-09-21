@@ -8,9 +8,9 @@ use primitives::{
 };
 
 use super::model::{
-    AssetList, GemAssetAction, GemAssetDetailRow, GemAssetDetailSection, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput, GemAssetNetworkDestination, GemAssetRowStyle, GemAssetSectionIds,
-    GemAssetSubtitleStyle, GemAssetText, GemAssetTitleStyle, GemAssetTrailingStyle, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow, GemSelectAssetScope, GemSelectAssetSection, GemSelectAssetTitle,
-    GemSelectAssetType, GemSelectRowAction, GemWalletSearchCounts, GemWalletSearchLimits, GemWalletSearchPhase, GemWalletSearchState,
+    AssetList, GemAssetAction, GemAssetDetailRow, GemAssetDetailSection, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput, GemAssetNetworkDestination, GemAssetRowStyle, GemAssetRowText,
+    GemAssetSectionIds, GemAssetSubtitleStyle, GemAssetText, GemAssetTitleStyle, GemAssetTrailingStyle, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow, GemSelectAssetScope, GemSelectAssetSection,
+    GemSelectAssetTitle, GemSelectAssetType, GemSelectRowAction, GemWalletSearchCounts, GemWalletSearchLimits, GemWalletSearchPhase, GemWalletSearchState,
 };
 use crate::config::search_config::{ASSETS_INITIAL_LIMIT, ASSETS_SEARCH_LIMIT, NFTS_PREVIEW_LIMIT, PERPETUALS_PREVIEW_LIMIT, RESULTS_LIMIT};
 use crate::config::stake::EARN_OFFERED;
@@ -183,6 +183,23 @@ pub fn asset_text(asset: &Asset) -> GemAssetText {
             false => format!("{} ({})", network_name, asset.asset_type.as_ref()),
         },
         network_name,
+    }
+}
+
+pub fn asset_row_text(asset: &Asset, style: GemAssetRowStyle) -> GemAssetRowText {
+    let chain_asset = ChainAsset::from_chain(asset.chain());
+    let title = match style.title {
+        GemAssetTitleStyle::Asset => asset.name.clone(),
+        GemAssetTitleStyle::CanonicalAsset => match asset.id.is_native() {
+            true => chain_asset.asset.name.clone(),
+            false => asset.name.clone(),
+        },
+        GemAssetTitleStyle::Network => chain_asset.network_name.clone(),
+    };
+    GemAssetRowText {
+        symbol: (style.shows_symbol && title != asset.symbol).then(|| asset.symbol.clone()),
+        network: (style.subtitle == GemAssetSubtitleStyle::Network && !asset.id.is_native()).then(|| chain_asset.network_name.clone()),
+        title,
     }
 }
 
@@ -614,6 +631,61 @@ mod tests {
         assert_eq!(usdc.title, "USDC", "a name that already is the symbol is not repeated");
         assert_eq!(usdc.subtitle_symbol, None);
         assert_eq!(usdc.network_full_name, "Ethereum (ERC20)");
+    }
+
+    #[test]
+    fn test_a_row_titled_by_its_network_reads_the_network_not_the_coin() {
+        let style = |title| GemAssetRowStyle {
+            title,
+            shows_symbol: true,
+            subtitle: GemAssetSubtitleStyle::Network,
+            trailing: GemAssetTrailingStyle::Balance,
+        };
+        let ton = Asset::from_chain(Chain::Ton);
+
+        assert_eq!(asset_row_text(&ton, style(GemAssetTitleStyle::Network)).title, "TON");
+        assert_eq!(asset_row_text(&ton, style(GemAssetTitleStyle::Asset)).title, "Gram");
+        assert_eq!(asset_row_text(&ton, style(GemAssetTitleStyle::CanonicalAsset)).title, "Gram");
+    }
+
+    #[test]
+    fn test_a_row_shows_the_symbol_only_when_it_adds_to_the_title_it_shows() {
+        let style = |shows_symbol, title| GemAssetRowStyle {
+            title,
+            shows_symbol,
+            subtitle: GemAssetSubtitleStyle::Network,
+            trailing: GemAssetTrailingStyle::Balance,
+        };
+        let usdc = Asset::new(AssetId::from_token(Chain::Ethereum, "0xusdc"), "USDC".into(), "USDC".into(), 6, primitives::AssetType::ERC20);
+        let ethereum = Asset::from_chain(Chain::Ethereum);
+
+        assert_eq!(asset_row_text(&usdc, style(true, GemAssetTitleStyle::Asset)).symbol, None, "a name that already is the symbol is not repeated");
+        assert_eq!(asset_row_text(&ethereum, style(true, GemAssetTitleStyle::Asset)).symbol.as_deref(), Some("ETH"));
+        assert_eq!(asset_row_text(&ethereum, style(false, GemAssetTitleStyle::Asset)).symbol, None);
+        assert_eq!(
+            asset_row_text(&usdc, style(true, GemAssetTitleStyle::Network)).symbol.as_deref(),
+            Some("USDC"),
+            "the title the row shows is what the symbol would repeat"
+        );
+    }
+
+    #[test]
+    fn test_a_row_names_its_network_underneath_only_for_a_token() {
+        let style = |subtitle| GemAssetRowStyle {
+            title: GemAssetTitleStyle::Asset,
+            shows_symbol: false,
+            subtitle,
+            trailing: GemAssetTrailingStyle::Balance,
+        };
+        let usdc = Asset::new(AssetId::from_token(Chain::Ethereum, "0xusdc"), "USDC".into(), "USDC".into(), 6, primitives::AssetType::ERC20);
+
+        assert_eq!(asset_row_text(&usdc, style(GemAssetSubtitleStyle::Network)).network.as_deref(), Some("Ethereum"));
+        assert_eq!(asset_row_text(&usdc, style(GemAssetSubtitleStyle::Price)).network, None);
+        assert_eq!(
+            asset_row_text(&Asset::from_chain(Chain::Ethereum), style(GemAssetSubtitleStyle::Network)).network,
+            None,
+            "a coin's row already names its network"
+        );
     }
 
     #[test]

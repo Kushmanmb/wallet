@@ -62,7 +62,6 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAssetAction
 import uniffi.gemstone.GemAssetSearchStep
 import uniffi.gemstone.GemAssetSelectionServiceInterface
-import uniffi.gemstone.GemAssetTitleStyle
 import uniffi.gemstone.GemSelectAssetState
 import uniffi.gemstone.GemSelectAssetType
 
@@ -132,7 +131,7 @@ open class BaseAssetSelectViewModel(
             .map { item ->
                 val owner = item.owner ?: wallet?.getAccount(item.asset.id.chain)
                 val assetInfo = if (item.owner == owner) item else item.copy(owner = owner)
-                assetInfo.toAssetInfoDataAggregate(GemAssetTitleStyle.CANONICAL_ASSET, formatters = formatters)
+                assetInfo.toAssetInfoDataAggregate(flow.rowStyle, formatters = formatters)
             }
     }
         .flowOn(ioDispatcher)

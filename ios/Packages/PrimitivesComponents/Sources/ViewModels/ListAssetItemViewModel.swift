@@ -3,7 +3,9 @@
 import Components
 import Formatters
 import Foundation
+import func Gemstone.assetRowText
 import struct Gemstone.GemAssetRowStyle
+import struct Gemstone.GemAssetRowText
 import GemstonePrimitives
 import Primitives
 import Style
@@ -12,6 +14,7 @@ import SwiftUI
 public struct ListAssetItemViewModel: ListAssetItemViewable {
     let assetDataModel: AssetDataViewModel
     let rowStyle: GemAssetRowStyle
+    private let text: GemAssetRowText
 
     public let showBalancePrivacy: Binding<Bool>
     public var action: ((ListAssetItemAction) -> Void)?
@@ -26,6 +29,7 @@ public struct ListAssetItemViewModel: ListAssetItemViewable {
         self.assetDataModel = assetDataModel
         self.rowStyle = rowStyle
         self.action = action
+        text = assetRowText(asset: assetDataModel.asset.toGem(), style: rowStyle)
     }
 
     public init(
@@ -49,16 +53,11 @@ public struct ListAssetItemViewModel: ListAssetItemViewable {
     }
 
     public var name: String {
-        switch rowStyle.title {
-        case .asset: assetDataModel.name
-        case .canonicalAsset: assetDataModel.asset.id.type == .native ? assetDataModel.asset.chain.asset.name : assetDataModel.name
-        case .network: assetDataModel.asset.chain.networkName
-        }
+        text.title
     }
 
     public var symbol: String? {
-        guard rowStyle.showsSymbol, name != assetDataModel.symbol else { return .none }
-        return assetDataModel.symbol
+        text.symbol
     }
 
     public var subtitleView: ListAssetItemSubtitleView {
@@ -75,17 +74,7 @@ public struct ListAssetItemViewModel: ListAssetItemViewable {
                 ),
             )
         case .network:
-            switch assetDataModel.asset.id.type {
-            case .native:
-                .none
-            case .token:
-                .type(
-                    TextValue(
-                        text: assetDataModel.asset.chain.networkName,
-                        style: .calloutSecondary,
-                    ),
-                )
-            }
+            text.network.map { .type(TextValue(text: $0, style: .calloutSecondary)) } ?? .none
         }
     }
 

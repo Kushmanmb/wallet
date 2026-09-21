@@ -15,12 +15,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import uniffi.gemstone.GemAssetRowStyle
-import uniffi.gemstone.GemAssetTitleStyle
 import java.util.Locale
 
 class GetActiveAssetsInfoImpl(getWalletAssets: GetWalletAssets, userConfig: UserConfig, rowStyle: GemAssetRowStyle, scope: CoroutineScope = CoroutineScope(Dispatchers.Default)) : GetActiveAssetsInfo {
 
-    private val rows = AssetRows(rowStyle.title)
+    private val rows = AssetRows(rowStyle)
 
     private val assetsInfo: StateFlow<List<AssetInfoDataAggregate>> =
         combine(getWalletAssets(), userConfig.isHideBalances()) { items, hideBalance ->
@@ -32,7 +31,7 @@ class GetActiveAssetsInfoImpl(getWalletAssets: GetWalletAssets, userConfig: User
     override fun assetsInfo(): StateFlow<List<AssetInfoDataAggregate>> = assetsInfo
 }
 
-internal class AssetRows(private val naming: GemAssetTitleStyle) {
+internal class AssetRows(private val style: GemAssetRowStyle) {
 
     private data class Presentation(val hideBalance: Boolean, val locale: Locale)
 
@@ -47,7 +46,7 @@ internal class AssetRows(private val naming: GemAssetTitleStyle) {
             emptyMap()
         } else {
             val formatters = RowFormatters()
-            missing.associateWith { it.toAssetInfoDataAggregate(naming = naming, hideBalance = hideBalance, formatters = formatters) }
+            missing.associateWith { it.toAssetInfoDataAggregate(style = style, hideBalance = hideBalance, formatters = formatters) }
         }
         val aggregates = items.map { reused[it] ?: built.getValue(it) }
         this.presentation = presentation

@@ -7,6 +7,8 @@ fun mockAssetInfoDataAggregate(asset: Asset = mockAsset(), pinned: Boolean = fal
     id = asset.id,
     asset = asset,
     title = asset.name,
+    symbol = null,
+    network = null,
     balance = "1.0 ${asset.symbol}",
     balanceEquivalent = "$1.00",
     isZeroBalance = false,

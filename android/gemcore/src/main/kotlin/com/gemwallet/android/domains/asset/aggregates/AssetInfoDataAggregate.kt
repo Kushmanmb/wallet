@@ -1,16 +1,14 @@
 package com.gemwallet.android.domains.asset.aggregates
 
 import androidx.compose.runtime.Immutable
-import com.gemwallet.android.domains.asset.chain
-import com.gemwallet.android.domains.asset.subtype
 import com.gemwallet.android.domains.price.values.PriceValue
 import com.gemwallet.android.domains.price.values.RowFormatters
-import com.gemwallet.android.ext.asset
+import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.model.AssetInfo
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
-import com.wallet.core.primitives.AssetSubtype
-import uniffi.gemstone.GemAssetTitleStyle
+import uniffi.gemstone.GemAssetRowStyle
+import uniffi.gemstone.assetRowText
 import java.math.BigDecimal
 
 @Immutable
@@ -18,6 +16,8 @@ data class AssetInfoDataAggregate(
     val id: AssetId,
     val asset: Asset,
     val title: String,
+    val symbol: String?,
+    val network: String?,
     val balance: String,
     val balanceEquivalent: String,
     val isZeroBalance: Boolean,
@@ -27,17 +27,12 @@ data class AssetInfoDataAggregate(
     val accountAddress: String,
 )
 
-fun List<AssetInfo>.toAssetInfoDataAggregates(naming: GemAssetTitleStyle = GemAssetTitleStyle.ASSET, hideBalance: Boolean = false): List<AssetInfoDataAggregate> {
+fun List<AssetInfo>.toAssetInfoDataAggregates(style: GemAssetRowStyle, hideBalance: Boolean = false): List<AssetInfoDataAggregate> {
     val formatters = RowFormatters()
-    return map { it.toAssetInfoDataAggregate(naming = naming, hideBalance = hideBalance, formatters = formatters) }
+    return map { it.toAssetInfoDataAggregate(style = style, hideBalance = hideBalance, formatters = formatters) }
 }
 
-fun AssetInfo.toAssetInfoDataAggregate(
-    naming: GemAssetTitleStyle = GemAssetTitleStyle.ASSET,
-    hideBalance: Boolean = false,
-    displayedAmount: Double = balance.totalAmount,
-    formatters: RowFormatters = RowFormatters(),
-): AssetInfoDataAggregate {
+fun AssetInfo.toAssetInfoDataAggregate(style: GemAssetRowStyle, hideBalance: Boolean = false, displayedAmount: Double = balance.totalAmount, formatters: RowFormatters = RowFormatters()): AssetInfoDataAggregate {
     val assetPrice = price?.price
     val priceValue = assetPrice?.price?.takeIf(Double::isFinite)
     val changePercentage = assetPrice?.priceChangePercentage24h?.takeIf(Double::isFinite)
@@ -56,10 +51,14 @@ fun AssetInfo.toAssetInfoDataAggregate(
         }.orEmpty()
     }
 
+    val text = assetRowText(asset.toGem(), style)
+
     return AssetInfoDataAggregate(
         id = asset.id,
         asset = asset,
-        title = title(naming),
+        title = text.title,
+        symbol = text.symbol,
+        network = text.network,
         balance = formattedBalance,
         balanceEquivalent = balanceEquivalent,
         isZeroBalance = displayedAmount == 0.0,
@@ -68,15 +67,4 @@ fun AssetInfo.toAssetInfoDataAggregate(
         balanceEnabled = metadata.isBalanceEnabled,
         accountAddress = owner?.address.orEmpty(),
     )
-}
-
-private fun AssetInfo.title(naming: GemAssetTitleStyle): String = when (naming) {
-    GemAssetTitleStyle.ASSET -> asset.name
-
-    GemAssetTitleStyle.CANONICAL_ASSET -> when (asset.subtype) {
-        AssetSubtype.NATIVE -> asset.chain.asset().name
-        AssetSubtype.TOKEN -> asset.name
-    }
-
-    GemAssetTitleStyle.NETWORK -> asset.id.chain.asset().name
 }

@@ -95,6 +95,18 @@ pub fn asset_text(asset: Asset) -> GemAssetText {
     super::rules::asset_text(&asset)
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct GemAssetRowText {
+    pub title: String,
+    pub symbol: Option<String>,
+    pub network: Option<String>,
+}
+
+#[uniffi::export]
+pub fn asset_row_text(asset: Asset, style: GemAssetRowStyle) -> GemAssetRowText {
+    super::rules::asset_row_text(&asset, style)
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
 pub struct GemAssetRowStyle {
     pub title: GemAssetTitleStyle,

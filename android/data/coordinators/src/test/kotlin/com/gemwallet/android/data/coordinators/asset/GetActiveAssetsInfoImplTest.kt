@@ -65,7 +65,7 @@ class GetActiveAssetsInfoImplTest {
     fun emitsFormattedRowsForEveryWalletAsset() = runTest {
         val rows = subject(hideBalance = false, scope = backgroundScope).assetsInfo().first { it.isNotEmpty() }
 
-        assertEquals(assets.toAssetInfoDataAggregates(naming = rowStyle.title, hideBalance = false), rows)
+        assertEquals(assets.toAssetInfoDataAggregates(style = rowStyle, hideBalance = false), rows)
         assertEquals("\$50,000.00", rows.first().price?.valueFormatted)
         assertEquals("+2.50%", rows.first().price?.changePercentageFormatted)
     }
@@ -115,7 +115,7 @@ class GetActiveAssetsInfoImplTest {
     fun hidesBalancesWhenAsked() = runTest {
         val rows = subject(hideBalance = true, scope = backgroundScope).assetsInfo().first { it.isNotEmpty() }
 
-        assertEquals(assets.toAssetInfoDataAggregates(naming = rowStyle.title, hideBalance = true), rows)
+        assertEquals(assets.toAssetInfoDataAggregates(style = rowStyle, hideBalance = true), rows)
         assertEquals(listOf("*****", "*****", "*****"), rows.map { it.balance })
     }
 }
