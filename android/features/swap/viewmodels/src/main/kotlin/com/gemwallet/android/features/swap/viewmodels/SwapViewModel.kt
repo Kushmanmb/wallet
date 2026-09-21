@@ -107,7 +107,7 @@ class SwapViewModel @Inject constructor(
 
     fun slippageState(bps: UInt?, isAuto: Boolean): SlippageStateUIModel = swapQuoteService.newSlippageSession(if (isAuto) GemSlippageSelection.Auto else GemSlippageSelection.Manual(bps ?: 0u))
         .viewState()
-        .uiModel(context, ::slippageText)
+        .uiModel(context)
 
     fun slippageBps(percent: Double): UInt? = swapQuoteService.slippageBpsFromPercent(percent)
 

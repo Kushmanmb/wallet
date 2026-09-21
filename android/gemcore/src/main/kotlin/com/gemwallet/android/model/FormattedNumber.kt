@@ -67,11 +67,11 @@ private fun percentText(value: BigDecimal, precision: GemPrecision, showsSign: B
             }
         }
         roundingMode = rounding
+        val minus = decimalFormatSymbols.minusSign.toString()
         if (showsSign) {
-            positivePrefix = "+"
+            positivePrefix = "+" + positivePrefix
         } else {
-            positivePrefix = ""
-            negativePrefix = ""
+            negativePrefix = negativePrefix.replace(minus, "")
         }
     }
     val amount = value.movePointLeft(2)

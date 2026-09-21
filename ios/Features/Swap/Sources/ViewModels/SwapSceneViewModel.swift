@@ -5,6 +5,7 @@ import Components
 import Formatters
 import Foundation
 import class Gemstone.Config
+import func Gemstone.formattedPercentage
 import enum Gemstone.GemSwapButtonAction
 import enum Gemstone.GemSwapErrorDisplay
 import struct Gemstone.GemSwapPairSelection
@@ -29,7 +30,9 @@ import Style
 @MainActor
 @Observable
 public final class SwapSceneViewModel {
-    static let inputPercentSuggestions = Config.shared.swapConfig().amountPercentPresets.map { PercentageSuggestion(value: Int($0)) }
+    static let inputPercentSuggestions = Config.shared.swapConfig().amountPercentPresets.map {
+        PercentageSuggestion(number: formattedPercentage(value: Double($0), style: .unsignedCompact))
+    }
 
     public let wallet: Wallet
 
