@@ -628,6 +628,9 @@ public extension GemListSectionFooter {
 public extension GemListRowTitle {
     var text: String {
         switch self {
+        case .api: "API"
+        case .stream: "Stream"
+        case .gemWalletNode: Localized.Nodes.gemWalletNode
         case .name: Localized.Asset.name
         case .network: Localized.Transfer.network
         case .address: Localized.Common.address

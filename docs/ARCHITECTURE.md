@@ -1744,6 +1744,7 @@ The table locates the existing owners and consumers; it is not proof that a scre
 | `GemRecentActivityService` | — | `RecentsSceneViewModel`, and `RecentAssetsModel` vended by `SelectAssetViewModel` and `PerpetualsSceneViewModel` | `RecentsSheetViewModel` |
 | `GemRecipientService` | — | `RecipientSceneViewModel` (+ `nameService`) | `RecipientViewModel` (+ `GemNameServiceInterface`) |
 | `GemRewardsService` | — | `RewardsViewModel`, `CreateRewardsCodeViewModel`, `RedeemRewardsCodeViewModel` | `ReferralViewModel` |
+| `GemServiceStatus` | — | `ServiceStatusViewModel` | `ServiceStatusViewModel` |
 | `GemSettingsService` | — | `SettingsViewModel`, `PreferencesViewModel`, `SecurityViewModel` | `SettingsViewModel`, `PreferencesViewModel`, `SecurityViewModel` |
 | `GemSignMessageService` | — | `SignMessageSceneViewModel` | `WCRequestViewModel` |
 | `GemStakeService` | — | `StakeSceneViewModel`, `DelegationSceneViewModel`, `EarnSceneViewModel` | `StakeViewModel`, `DelegationViewModel`, `EarnViewModel` |
@@ -1829,6 +1830,7 @@ These choices explain apparent parity gaps. They do not authorize copying shared
 | Hidden features | Earn exists on both apps behind `EARN_OFFERED` in [`config/stake.rs`](../core/gemstone/src/config/stake.rs). Its flag-disabled screens and services remain live code. |
 | Compatibility cleanup | Keep Android's config-store auth fallback in `TinkGemPreferences` and the dated iOS `FileMigrator` moves until install-base evidence allows removal. The singular devices transaction route is dated after 2026-11-15; the bare `zh` locale supports installed clients. A date alone is not proof that removal is safe. |
 | Build and styling exceptions | iOS styles swap-again only on iOS 26; its Gemstone package retains Swift 5 language mode until `GemstoneFFI` is Swift 6 clean. Android disables selected lint tasks for UniFFI-generated Kotlin. |
+| Stream diagnostics | Status sections, concurrent endpoint checks and latency outcomes come from `GemServiceStatus`. The existing `GemStreamConnection` port supplies iOS ping/pong timing and Android’s latest WebSocket upgrade timing (updated on reconnect); native apps render shared latency rows. |
 | Provider limitation | The TON verified-collection allowlist stays hardcoded until an authoritative source is available. |
 
 Different export usage is not evidence of duplicated policy. Android already gets fee assets and swap quotes from Core records, observes the current wallet through its session store and checks releases through `check`. iOS receives rejection errors from `process_request`, projects `AssetBasic` from an existing `AssetFull`, and reads connection status through its component extension; only Android needs `chain_from_caip2`. Check the actual path before adding calls for symmetry.

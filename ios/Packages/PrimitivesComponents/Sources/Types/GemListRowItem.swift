@@ -42,6 +42,8 @@ enum GemListRowItem {
 extension GemListRow {
     func item(onInfo: ((GemInfoTopic) -> Void)?) -> GemListRowItem {
         switch self {
+        case let .latency(title, titleSuffix, host, status):
+            .listItem(status.listItem(title: title.text + titleSuffix, titleExtra: host))
         case let .notice(title, message, kind):
             .notice(title: title.text, message: message?.text, kind: kind)
         case let .text(title, value):

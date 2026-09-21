@@ -15,7 +15,6 @@ import com.gemwallet.android.ui.localization.infoDescriptionRes
 import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.localization.text
-import com.gemwallet.android.ui.localization.titleRes
 import com.gemwallet.android.ui.style.badgeIconRes
 import com.gemwallet.android.ui.style.textStyle
 import com.wallet.core.primitives.Asset
@@ -23,6 +22,7 @@ import com.wallet.core.primitives.Chain
 import uniffi.gemstone.GemCopy
 import uniffi.gemstone.GemCopyKind
 import uniffi.gemstone.GemInfoTopic
+import uniffi.gemstone.GemLatencyStatus
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowIcon
 import uniffi.gemstone.GemListRowTitle
@@ -52,6 +52,8 @@ internal sealed interface GemListRowMenuItem {
 }
 
 internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemListRowUIModel = when (this) {
+    is GemListRow.Latency -> GemListRowUIModel.Item(status.listItemModel(context, title.text(context) + titleSuffix, host))
+
     is GemListRow.Notice -> GemListRowUIModel.Notice(title = title.text(context), message = message?.string(context), kind = kind)
 
     is GemListRow.Text -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = value))
@@ -163,11 +165,6 @@ private fun GemCopyKind.copyTitleRes(): Int = when (this) {
     GemCopyKind.Plain, GemCopyKind.SecretPhrase, GemCopyKind.PrivateKey -> R.string.common_copy
 }
 
-private fun GemListRowTitle.text(context: Context): String = when (this) {
-    GemListRowTitle.STAKE_APR -> context.getString(titleRes(), "")
-    else -> context.getString(titleRes())
-}
-
 private fun GemValueTone.subtitleStyle(): ListItemTextStyle = when (this) {
     GemValueTone.PLAIN -> ListItemTextStyle.Secondary
     GemValueTone.NEUTRAL, GemValueTone.POSITIVE, GemValueTone.WARNING, GemValueTone.NEGATIVE -> textStyle()
@@ -228,3 +225,15 @@ private fun GemInfoTopic.infoSheet(icon: Any?): InfoSheetEntity = when (this) {
 }
 
 fun GemListRow.listItemModel(context: Context, infoIcon: Any? = null): ListItemModel? = (uiModel(context, infoIcon) as? GemListRowUIModel.Item)?.model
+
+fun GemLatencyStatus.listItemModel(context: Context, title: String, titleExtra: String?): ListItemModel = ListItemModel(
+    title = title,
+    titleTag = text(context),
+    titleTagStyle = tone().textStyle(),
+    titleTagType = when (this) {
+        GemLatencyStatus.Loading -> ListItemTagType.Progress
+        GemLatencyStatus.Error, is GemLatencyStatus.Result -> ListItemTagType.None
+    },
+    titleExtra = titleExtra,
+    titleExtraStyle = ListItemTextStyle.Body,
+)

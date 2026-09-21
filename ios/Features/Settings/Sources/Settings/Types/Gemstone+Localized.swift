@@ -3,7 +3,6 @@
 import enum Gemstone.GemCurrencySectionKind
 import enum Gemstone.GemNodeCheckRow
 import enum Gemstone.GemNodeSubtitle
-import enum Gemstone.GemServiceEndpointType
 import GemstonePrimitives
 import enum GemstoneServices.KeystoreAuthentication
 import Localization
@@ -15,15 +14,6 @@ public extension Appearance {
         case .system: Localized.Settings.appearanceSystem
         case .light: Localized.Settings.appearanceLight
         case .dark: Localized.Settings.appearanceDark
-        }
-    }
-}
-
-extension GemServiceEndpointType {
-    var name: String {
-        switch self {
-        case .api: "API"
-        case .gemNode: Localized.Nodes.gemWalletNode
         }
     }
 }

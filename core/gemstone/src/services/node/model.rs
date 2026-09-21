@@ -4,7 +4,7 @@ use super::rules;
 use crate::formatted_number::GemFormattedNumber;
 use crate::gateway::GatewayError;
 use crate::models::placeholder::text_or_placeholder;
-use crate::service_status::GemLatencyStatus;
+use crate::services::service_status::GemLatencyStatus;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemNodeStatusState {

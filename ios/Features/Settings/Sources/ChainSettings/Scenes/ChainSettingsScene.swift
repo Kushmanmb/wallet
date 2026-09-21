@@ -62,18 +62,9 @@ public struct ChainSettingsScene: View {
         switch section.kind {
         case .nodes:
             ForEach(model.nodesModels) { nodeModel in
-                ListItemSelectionView(
-                    title: nodeModel.title,
-                    titleExtra: nodeModel.titleExtra,
-                    titleTag: nodeModel.titleTag,
-                    titleTagType: nodeModel.titleTagType,
-                    titleTagStyle: nodeModel.titleTagStyle,
-                    subtitle: .none,
-                    subtitleExtra: .none,
-                    value: nodeModel.url,
-                    selection: nodeModel.selection,
-                    action: model.onSelectNode,
-                )
+                SelectionView(value: nodeModel.url, selection: nodeModel.selection, action: model.onSelectNode) {
+                    ListItemView(model: nodeModel.listItem)
+                }
                 .contextMenu(
                     .copy(value: nodeModel.url),
                 )

@@ -33,6 +33,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.open
 import com.gemwallet.android.ui.style.color
 import com.gemwallet.android.ui.style.icon
+import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.smallIconSize
@@ -41,9 +42,12 @@ import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSection
 
 fun LazyListScope.gemListSections(sections: List<GemListSection>) {
-    sections.forEach { section ->
-        section.title.titleRes()?.let { title ->
-            item(key = "section:$title") { SubheaderItem(title) }
+    sections.forEachIndexed { index, section ->
+        val title = section.title.titleRes()
+        if (title != null) {
+            item(key = "section:$index") { SubheaderItem(title) }
+        } else if (index > 0) {
+            item(key = "section:$index") { Spacer16() }
         }
         itemsPositioned(section.rows) { position, row -> GemListRowView(row = row, listPosition = position) }
     }

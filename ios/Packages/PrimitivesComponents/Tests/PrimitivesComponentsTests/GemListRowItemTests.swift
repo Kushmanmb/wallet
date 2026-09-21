@@ -17,6 +17,35 @@ import Testing
 
 struct GemListRowItemTests {
     @Test
+    func latencyRowsRenderMeasurementsLoadingAndErrors() {
+        let row = GemListRow.latency(title: .stream, titleSuffix: "", host: "api.gemwallet.com", status: .result(latency: .init(latencyType: .fast, value: 125)))
+        guard case let .listItem(model) = row.item(onInfo: nil) else {
+            Issue.record("Expected a latency row")
+            return
+        }
+        #expect(model.title == "Stream")
+        #expect(model.titleExtra == "api.gemwallet.com")
+        #expect(model.titleTag == Localized.Common.latencyInMs(125))
+        #expect(model.titleTagStyle.color == Colors.green)
+
+        guard case let .listItem(loading) = GemListRow.latency(title: .api, titleSuffix: "", host: "api.gemwallet.com", status: .loading).item(onInfo: nil),
+              case .progressView = loading.titleTagType
+        else {
+            Issue.record("Expected a loading badge")
+            return
+        }
+        #expect(loading.title == "API")
+
+        guard case let .listItem(error) = GemListRow.latency(title: .gemWalletNode, titleSuffix: " 🇺🇸", host: "gemnodes.com", status: .error).item(onInfo: nil) else {
+            Issue.record("Expected an error badge")
+            return
+        }
+        #expect(error.title == Localized.Nodes.gemWalletNode + " 🇺🇸")
+        #expect(error.titleTag == Localized.Errors.error)
+        #expect(error.titleTagStyle.color == Colors.red)
+    }
+
+    @Test
     func aPendingStatusSpinsInItsTone() {
         let row = GemListRow.label(title: .status, text: .transactionState(state: .pending), tone: .warning, info: nil, progress: true)
         guard case let .listItem(model) = row.item(onInfo: nil), case .progressView = model.subtitleTagType else {

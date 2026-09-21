@@ -55,6 +55,27 @@ public actor WebSocketConnection: WebSocketConnectable {
         continuation = nil
     }
 
+    public func ping() async throws -> TimeInterval {
+        guard state == .connected, let task, let connectionId else { throw WebSocketError.notConnected }
+        let start = DispatchTime.now().uptimeNanoseconds
+        do {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
+                task.sendPing { error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume()
+                    }
+                }
+            }
+            guard self.connectionId == connectionId else { throw WebSocketError.notConnected }
+            return Double(DispatchTime.now().uptimeNanoseconds - start) / 1_000_000_000
+        } catch {
+            handleError(error, connectionId: connectionId)
+            throw error
+        }
+    }
+
     public func send(_ data: Data) async throws {
         try await send(message: .data(data))
     }
@@ -117,16 +138,8 @@ public actor WebSocketConnection: WebSocketConnectable {
             while !Task.isCancelled {
                 try? await Task.sleep(for: .milliseconds(interval))
                 guard !Task.isCancelled else { return }
-                await self?.sendPing()
+                _ = try? await self?.ping()
             }
-        }
-    }
-
-    private func sendPing() {
-        guard state == .connected, let task, let connectionId else { return }
-        task.sendPing { [weak self] error in
-            guard let error else { return }
-            Task { await self?.handleError(error, connectionId: connectionId) }
         }
     }
 

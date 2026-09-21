@@ -45,6 +45,7 @@ pub mod rewards;
 pub mod scan;
 pub mod search;
 pub mod security;
+pub mod service_status;
 pub mod settings;
 pub mod simulation;
 pub mod stake;

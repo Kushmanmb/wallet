@@ -6,6 +6,8 @@ import com.gemwallet.android.data.password.TinkGemPreferences
 import com.gemwallet.android.data.services.gemstone.stores.GemstoneKeystorePassword
 import com.gemwallet.android.data.services.gemstone.stores.GemstonePerpetualStore
 import com.gemwallet.android.data.services.gemstone.stores.GemstonePreferencesStore
+import com.gemwallet.android.data.services.gemstone.stream.GemstoneStreamConnection
+import com.gemwallet.android.data.services.gemstone.stream.WebSocketConnectable
 import com.gemwallet.android.data.services.nativeprovider.NativeProvider
 import com.gemwallet.android.domains.gemConfig
 import com.gemwallet.android.math.fromHex
@@ -207,11 +209,11 @@ object GatewayModule {
 
     @Provides
     @Singleton
-    fun provideGemServiceStatus(okHttpClient: OkHttpClient): GemServiceStatusInterface {
+    fun provideGemServiceStatus(okHttpClient: OkHttpClient, connection: WebSocketConnectable): GemServiceStatusInterface {
         val httpClient = okHttpClient.newBuilder()
             .callTimeout(serviceStatusTimeout())
             .build()
-        return GemServiceStatus(NativeProvider(httpClient = httpClient))
+        return GemServiceStatus(NativeProvider(httpClient = httpClient), GemstoneStreamConnection(connection))
     }
 
     @Provides

@@ -14,14 +14,8 @@ public struct ServiceStatusScene: View {
     }
 
     public var body: some View {
-        List {
-            Section {
-                ForEach(model.itemModels) { item in
-                    ListItemView(model: item.listItem)
-                }
-
-                ListItemView(model: model.streamListItem(isConnected: isStreamConnected))
-            }
+        ListSectionView(provider: model) { row in
+            GemListRowView(row: row)
         }
         .listRowInsets(.assetListRowInsets)
         .listSectionSpacing(.compact)
@@ -29,8 +23,8 @@ public struct ServiceStatusScene: View {
         .refreshable {
             await model.load()
         }
-        .taskOnce {
-            Task { await model.load() }
+        .task(id: isStreamConnected) {
+            await model.load()
         }
         .navigationTitle(model.title)
         .navigationBarTitleDisplayMode(.inline)

@@ -43,6 +43,7 @@ import uniffi.gemstone.GemEmptyStateText
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemFiatTransactionBadge
 import uniffi.gemstone.GemHeaderButtonKind
+import uniffi.gemstone.GemLatencyStatus
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSectionTitle
 import uniffi.gemstone.GemLocalizedText
@@ -507,95 +508,97 @@ fun GemListSectionTitle.titleRes(): Int? = when (this) {
     GemListSectionTitle.RESOURCES -> R.string.asset_resources
 }
 
-@StringRes
-fun GemListRowTitle.titleRes(): Int = when (this) {
-    GemListRowTitle.NAME -> R.string.asset_name
-    GemListRowTitle.NETWORK -> R.string.transfer_network
-    GemListRowTitle.ADDRESS -> R.string.common_address
-    GemListRowTitle.AVAILABLE -> R.string.asset_balances_available
-    GemListRowTitle.STAKE -> R.string.wallet_stake
-    GemListRowTitle.EARN -> R.string.common_earn
-    GemListRowTitle.PENDING_UNCONFIRMED -> R.string.stake_pending
-    GemListRowTitle.RESERVED -> R.string.asset_balances_reserved
-    GemListRowTitle.ERROR -> R.string.errors_error_occurred
-    GemListRowTitle.TERMS_OF_SERVICE -> R.string.settings_terms_of_services
-    GemListRowTitle.PRIVACY_POLICY -> R.string.settings_privacy_policy
-    GemListRowTitle.WEBSITE -> R.string.settings_website
-    GemListRowTitle.VERSION -> R.string.settings_version
-    GemListRowTitle.UPDATE_APP -> R.string.update_app_title
-    GemListRowTitle.WALLETS -> R.string.wallets_title
-    GemListRowTitle.SECURITY -> R.string.settings_security
-    GemListRowTitle.NOTIFICATIONS -> R.string.settings_notifications_title
-    GemListRowTitle.PREFERENCES -> R.string.settings_preferences_title
-    GemListRowTitle.WALLET_CONNECT -> R.string.wallet_connect_title
-    GemListRowTitle.SUPPORT -> R.string.settings_support
-    GemListRowTitle.REWARDS -> R.string.rewards_title
-    GemListRowTitle.ABOUT_US -> R.string.settings_aboutus
-    GemListRowTitle.DEVELOPER -> R.string.settings_developer
-    GemListRowTitle.AUTHENTICATION -> R.string.settings_enable_passcode
-    GemListRowTitle.LOCK_PERIOD -> R.string.lock_require_authentication
-    GemListRowTitle.PRIVACY_LOCK -> R.string.lock_privacy_lock
-    GemListRowTitle.HIDE_BALANCE -> R.string.settings_hide_balance
-    GemListRowTitle.CURRENCY -> R.string.settings_currency
-    GemListRowTitle.LANGUAGE -> R.string.settings_language
-    GemListRowTitle.APPEARANCE -> R.string.settings_appearance_title
-    GemListRowTitle.NETWORKS -> R.string.settings_networks_title
-    GemListRowTitle.CONTACTS -> R.string.contacts_title
-    GemListRowTitle.PERPETUALS -> R.string.perpetuals_title
-    GemListRowTitle.PERPETUAL_LEVERAGE -> R.string.settings_preferences_perpetual_default_leverage
-    GemListRowTitle.PERPETUAL_TAKE_PROFIT -> R.string.settings_preferences_perpetual_default_take_profit
-    GemListRowTitle.PERPETUAL_STOP_LOSS -> R.string.settings_preferences_perpetual_default_stop_loss
-    GemListRowTitle.DAILY_VOLUME -> R.string.markets_daily_volume
-    GemListRowTitle.OPEN_INTEREST -> R.string.info_perpetual_open_interest_title
-    GemListRowTitle.FUNDING_APR -> R.string.info_perpetual_funding_apr_title
-    GemListRowTitle.STAKE_APR -> R.string.stake_apr
-    GemListRowTitle.LOCK_TIME -> R.string.stake_lock_time
-    GemListRowTitle.MINIMUM_AMOUNT -> R.string.stake_minimum_amount
-    GemListRowTitle.VALIDATOR -> R.string.stake_validator
-    GemListRowTitle.PROVIDER -> R.string.common_provider
-    GemListRowTitle.STATUS -> R.string.transaction_status
-    GemListRowTitle.ACTIVE_IN -> R.string.stake_active_in
-    GemListRowTitle.AVAILABLE_IN -> R.string.stake_available_in
-    GemListRowTitle.DATE -> R.string.transaction_date
-    GemListRowTitle.RESOURCE -> R.string.stake_resource
-    GemListRowTitle.REWARDS_UNVERIFIED -> R.string.rewards_unverified_title
-    GemListRowTitle.REWARDS_PENDING -> R.string.rewards_pending_title
-    GemListRowTitle.WARNING -> R.string.common_warning
-    GemListRowTitle.UNLIMITED_APPROVAL -> R.string.simulation_warning_unlimited_token_approval_title
-    GemListRowTitle.NFT_COLLECTION_APPROVAL -> R.string.simulation_warning_nft_collection_approval_title
-    GemListRowTitle.SYMBOL -> R.string.asset_symbol
-    GemListRowTitle.DECIMALS -> R.string.asset_decimals
-    GemListRowTitle.TYPE -> R.string.common_type
-    GemListRowTitle.AUTO_CLOSE -> R.string.perpetual_auto_close
-    GemListRowTitle.SIZE -> R.string.perpetual_size
-    GemListRowTitle.POSITION -> R.string.perpetual_position
-    GemListRowTitle.DETAILS -> R.string.common_details
-    GemListRowTitle.SLIPPAGE -> R.string.swap_slippage
-    GemListRowTitle.MARKET_PRICE -> R.string.perpetual_market_price
-    GemListRowTitle.ENTRY_PRICE -> R.string.perpetual_entry_price
-    GemListRowTitle.LIQUIDATION_PRICE -> R.string.info_perpetual_liquidation_price_title
-    GemListRowTitle.MARGIN -> R.string.perpetual_margin
-    GemListRowTitle.FUNDING_PAYMENTS -> R.string.info_perpetual_funding_payments_title
-    GemListRowTitle.MARKET_CAP -> R.string.asset_market_cap
-    GemListRowTitle.FULLY_DILUTED_VALUATION -> R.string.info_fully_diluted_valuation_title
-    GemListRowTitle.TRADING_VOLUME -> R.string.asset_trading_volume
-    GemListRowTitle.CIRCULATING_SUPPLY -> R.string.asset_circulating_supply
-    GemListRowTitle.TOTAL_SUPPLY -> R.string.asset_total_supply
-    GemListRowTitle.MAX_SUPPLY -> R.string.info_max_supply_title
-    GemListRowTitle.ALL_TIME_HIGH -> R.string.asset_all_time_high
-    GemListRowTitle.ALL_TIME_LOW -> R.string.asset_all_time_low
-    GemListRowTitle.WALLET -> R.string.common_wallet
-    GemListRowTitle.CONTRACT -> R.string.asset_contract
-    GemListRowTitle.TOKEN_ID -> R.string.asset_token_id
-    GemListRowTitle.COLLECTION -> R.string.nft_collection
-    GemListRowTitle.PRICE -> R.string.asset_price
-    GemListRowTitle.PNL -> R.string.perpetual_pnl
-    GemListRowTitle.PIN -> R.string.common_pin
-    GemListRowTitle.UNPIN -> R.string.common_unpin
-    GemListRowTitle.ADD_TO_WALLET -> R.string.asset_add_to_wallet
-    GemListRowTitle.PRICE_ALERTS -> R.string.settings_price_alerts_title
-    GemListRowTitle.ENERGY -> R.string.stake_resource_energy
-    GemListRowTitle.BANDWIDTH -> R.string.stake_resource_bandwidth
+fun GemListRowTitle.text(context: Context): String = when (this) {
+    GemListRowTitle.API -> "API"
+    GemListRowTitle.STREAM -> "Stream"
+    GemListRowTitle.GEM_WALLET_NODE -> context.getString(R.string.nodes_gem_wallet_node)
+    GemListRowTitle.NAME -> context.getString(R.string.asset_name)
+    GemListRowTitle.NETWORK -> context.getString(R.string.transfer_network)
+    GemListRowTitle.ADDRESS -> context.getString(R.string.common_address)
+    GemListRowTitle.AVAILABLE -> context.getString(R.string.asset_balances_available)
+    GemListRowTitle.STAKE -> context.getString(R.string.wallet_stake)
+    GemListRowTitle.EARN -> context.getString(R.string.common_earn)
+    GemListRowTitle.PENDING_UNCONFIRMED -> context.getString(R.string.stake_pending)
+    GemListRowTitle.RESERVED -> context.getString(R.string.asset_balances_reserved)
+    GemListRowTitle.ERROR -> context.getString(R.string.errors_error_occurred)
+    GemListRowTitle.TERMS_OF_SERVICE -> context.getString(R.string.settings_terms_of_services)
+    GemListRowTitle.PRIVACY_POLICY -> context.getString(R.string.settings_privacy_policy)
+    GemListRowTitle.WEBSITE -> context.getString(R.string.settings_website)
+    GemListRowTitle.VERSION -> context.getString(R.string.settings_version)
+    GemListRowTitle.UPDATE_APP -> context.getString(R.string.update_app_title)
+    GemListRowTitle.WALLETS -> context.getString(R.string.wallets_title)
+    GemListRowTitle.SECURITY -> context.getString(R.string.settings_security)
+    GemListRowTitle.NOTIFICATIONS -> context.getString(R.string.settings_notifications_title)
+    GemListRowTitle.PREFERENCES -> context.getString(R.string.settings_preferences_title)
+    GemListRowTitle.WALLET_CONNECT -> context.getString(R.string.wallet_connect_title)
+    GemListRowTitle.SUPPORT -> context.getString(R.string.settings_support)
+    GemListRowTitle.REWARDS -> context.getString(R.string.rewards_title)
+    GemListRowTitle.ABOUT_US -> context.getString(R.string.settings_aboutus)
+    GemListRowTitle.DEVELOPER -> context.getString(R.string.settings_developer)
+    GemListRowTitle.AUTHENTICATION -> context.getString(R.string.settings_enable_passcode)
+    GemListRowTitle.LOCK_PERIOD -> context.getString(R.string.lock_require_authentication)
+    GemListRowTitle.PRIVACY_LOCK -> context.getString(R.string.lock_privacy_lock)
+    GemListRowTitle.HIDE_BALANCE -> context.getString(R.string.settings_hide_balance)
+    GemListRowTitle.CURRENCY -> context.getString(R.string.settings_currency)
+    GemListRowTitle.LANGUAGE -> context.getString(R.string.settings_language)
+    GemListRowTitle.APPEARANCE -> context.getString(R.string.settings_appearance_title)
+    GemListRowTitle.NETWORKS -> context.getString(R.string.settings_networks_title)
+    GemListRowTitle.CONTACTS -> context.getString(R.string.contacts_title)
+    GemListRowTitle.PERPETUALS -> context.getString(R.string.perpetuals_title)
+    GemListRowTitle.PERPETUAL_LEVERAGE -> context.getString(R.string.settings_preferences_perpetual_default_leverage)
+    GemListRowTitle.PERPETUAL_TAKE_PROFIT -> context.getString(R.string.settings_preferences_perpetual_default_take_profit)
+    GemListRowTitle.PERPETUAL_STOP_LOSS -> context.getString(R.string.settings_preferences_perpetual_default_stop_loss)
+    GemListRowTitle.DAILY_VOLUME -> context.getString(R.string.markets_daily_volume)
+    GemListRowTitle.OPEN_INTEREST -> context.getString(R.string.info_perpetual_open_interest_title)
+    GemListRowTitle.FUNDING_APR -> context.getString(R.string.info_perpetual_funding_apr_title)
+    GemListRowTitle.STAKE_APR -> context.getString(R.string.stake_apr, "")
+    GemListRowTitle.LOCK_TIME -> context.getString(R.string.stake_lock_time)
+    GemListRowTitle.MINIMUM_AMOUNT -> context.getString(R.string.stake_minimum_amount)
+    GemListRowTitle.VALIDATOR -> context.getString(R.string.stake_validator)
+    GemListRowTitle.PROVIDER -> context.getString(R.string.common_provider)
+    GemListRowTitle.STATUS -> context.getString(R.string.transaction_status)
+    GemListRowTitle.ACTIVE_IN -> context.getString(R.string.stake_active_in)
+    GemListRowTitle.AVAILABLE_IN -> context.getString(R.string.stake_available_in)
+    GemListRowTitle.DATE -> context.getString(R.string.transaction_date)
+    GemListRowTitle.RESOURCE -> context.getString(R.string.stake_resource)
+    GemListRowTitle.REWARDS_UNVERIFIED -> context.getString(R.string.rewards_unverified_title)
+    GemListRowTitle.REWARDS_PENDING -> context.getString(R.string.rewards_pending_title)
+    GemListRowTitle.WARNING -> context.getString(R.string.common_warning)
+    GemListRowTitle.UNLIMITED_APPROVAL -> context.getString(R.string.simulation_warning_unlimited_token_approval_title)
+    GemListRowTitle.NFT_COLLECTION_APPROVAL -> context.getString(R.string.simulation_warning_nft_collection_approval_title)
+    GemListRowTitle.SYMBOL -> context.getString(R.string.asset_symbol)
+    GemListRowTitle.DECIMALS -> context.getString(R.string.asset_decimals)
+    GemListRowTitle.TYPE -> context.getString(R.string.common_type)
+    GemListRowTitle.AUTO_CLOSE -> context.getString(R.string.perpetual_auto_close)
+    GemListRowTitle.SIZE -> context.getString(R.string.perpetual_size)
+    GemListRowTitle.POSITION -> context.getString(R.string.perpetual_position)
+    GemListRowTitle.DETAILS -> context.getString(R.string.common_details)
+    GemListRowTitle.SLIPPAGE -> context.getString(R.string.swap_slippage)
+    GemListRowTitle.MARKET_PRICE -> context.getString(R.string.perpetual_market_price)
+    GemListRowTitle.ENTRY_PRICE -> context.getString(R.string.perpetual_entry_price)
+    GemListRowTitle.LIQUIDATION_PRICE -> context.getString(R.string.info_perpetual_liquidation_price_title)
+    GemListRowTitle.MARGIN -> context.getString(R.string.perpetual_margin)
+    GemListRowTitle.FUNDING_PAYMENTS -> context.getString(R.string.info_perpetual_funding_payments_title)
+    GemListRowTitle.MARKET_CAP -> context.getString(R.string.asset_market_cap)
+    GemListRowTitle.FULLY_DILUTED_VALUATION -> context.getString(R.string.info_fully_diluted_valuation_title)
+    GemListRowTitle.TRADING_VOLUME -> context.getString(R.string.asset_trading_volume)
+    GemListRowTitle.CIRCULATING_SUPPLY -> context.getString(R.string.asset_circulating_supply)
+    GemListRowTitle.TOTAL_SUPPLY -> context.getString(R.string.asset_total_supply)
+    GemListRowTitle.MAX_SUPPLY -> context.getString(R.string.info_max_supply_title)
+    GemListRowTitle.ALL_TIME_HIGH -> context.getString(R.string.asset_all_time_high)
+    GemListRowTitle.ALL_TIME_LOW -> context.getString(R.string.asset_all_time_low)
+    GemListRowTitle.WALLET -> context.getString(R.string.common_wallet)
+    GemListRowTitle.CONTRACT -> context.getString(R.string.asset_contract)
+    GemListRowTitle.TOKEN_ID -> context.getString(R.string.asset_token_id)
+    GemListRowTitle.COLLECTION -> context.getString(R.string.nft_collection)
+    GemListRowTitle.PRICE -> context.getString(R.string.asset_price)
+    GemListRowTitle.PNL -> context.getString(R.string.perpetual_pnl)
+    GemListRowTitle.PIN -> context.getString(R.string.common_pin)
+    GemListRowTitle.UNPIN -> context.getString(R.string.common_unpin)
+    GemListRowTitle.ADD_TO_WALLET -> context.getString(R.string.asset_add_to_wallet)
+    GemListRowTitle.PRICE_ALERTS -> context.getString(R.string.settings_price_alerts_title)
+    GemListRowTitle.ENERGY -> context.getString(R.string.stake_resource_energy)
+    GemListRowTitle.BANDWIDTH -> context.getString(R.string.stake_resource_bandwidth)
 }
 
 fun GemSlippageCheck.footerText(context: Context, minimumText: String, maximumText: String): String? = when (this) {
@@ -615,4 +618,10 @@ fun GemTriggerOrder.stringRes(): Int = when (this) {
 fun PerpetualMarginType.stringRes(): Int = when (this) {
     PerpetualMarginType.CROSS -> R.string.perpetual_margin_cross
     PerpetualMarginType.ISOLATED -> R.string.perpetual_margin_isolated
+}
+
+fun GemLatencyStatus.text(context: Context): String = when (this) {
+    is GemLatencyStatus.Loading -> ""
+    is GemLatencyStatus.Error -> context.getString(R.string.errors_error)
+    is GemLatencyStatus.Result -> context.getString(R.string.common_latency_in_ms, latency.value.toLong())
 }

@@ -84,10 +84,12 @@ struct ServicesFactory {
         )
         let paymentService = Gemstone.GemPaymentService(provider: nativeProvider)
         let transactionSimulationService = GemSimulationService(provider: nativeProvider, nodes: nodeService)
+        let webSocket = Self.makeWebSocket(deviceKeyService: deviceKeyService, reconnection: connectionService)
         let serviceStatusConfiguration = URLSessionConfiguration.default
         serviceStatusConfiguration.timeoutIntervalForRequest = serviceStatusTimeout()
         let serviceStatusService = Gemstone.GemServiceStatus(
             provider: NativeProvider(session: URLSession(configuration: serviceStatusConfiguration)),
+            stream: GemstoneStreamConnection(webSocket: webSocket),
         )
         let recentAssetsService = GemRecentActivityService(store: GemstoneRecentActivityStore(store: stores.recentActivityStore), session: walletSessionService)
         let explorerService = Gemstone.GemExplorerService(preferences: preferencesService)
@@ -104,7 +106,6 @@ struct ServicesFactory {
             addresses: gemstoneAddressStore,
             avatar: avatarService,
         )
-        let webSocket = Self.makeWebSocket(deviceKeyService: deviceKeyService, reconnection: connectionService)
         let gemstonePriceAlertStore = GemstonePriceAlertStore(store: stores.priceAlertStore)
         let gemstoneBalanceStore = GemstoneBalanceStore(store: stores.balanceStore)
         let streamSubscriptionService = Gemstone.GemStreamSubscriptionService(

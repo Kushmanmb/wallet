@@ -3,9 +3,8 @@
 import Components
 import struct Gemstone.GemNodeRow
 import struct Gemstone.GemNodeSelection
-import GemstonePrimitives
 import Localization
-import Style
+import PrimitivesComponents
 
 struct ChainNodeViewModel {
     let row: GemNodeRow
@@ -26,28 +25,11 @@ struct ChainNodeViewModel {
         row.node.isSelected ? row.node.url : .none
     }
 
-    var title: String {
-        row.title.text(gemNodeLabel: Localized.Nodes.gemWalletNode)
-    }
-
-    var titleExtra: String? {
-        row.subtitle.text
-    }
-
-    var titleTag: String? {
-        statusTag.text
-    }
-
-    var titleTagType: TitleTagType {
-        statusTag.type
-    }
-
-    var titleTagStyle: TextStyle {
-        statusTag.style
-    }
-
-    private var statusTag: LatencyStatusViewModel {
-        LatencyStatusViewModel(status: row.latencyStatus)
+    var listItem: ListItemModel {
+        row.latencyStatus.listItem(
+            title: row.title.text(gemNodeLabel: Localized.Nodes.gemWalletNode),
+            titleExtra: row.subtitle.text,
+        )
     }
 }
 

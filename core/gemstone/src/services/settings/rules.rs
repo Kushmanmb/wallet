@@ -367,7 +367,8 @@ mod tests {
 
     fn row_title(row: &GemListRow) -> Option<GemListRowTitle> {
         match row {
-            GemListRow::Notice { title, .. }
+            GemListRow::Latency { title, .. }
+            | GemListRow::Notice { title, .. }
             | GemListRow::Link { title, .. }
             | GemListRow::Text { title, .. }
             | GemListRow::Amount { title, .. }

@@ -30,6 +30,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import uniffi.gemstone.GemStreamEvent
 import uniffi.gemstone.GemStreamServiceInterface
+import java.time.Duration
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class StreamObserverServiceTest {
@@ -318,6 +319,8 @@ class StreamObserverServiceTest {
             private set
         var activeConnections = 0
             private set
+
+        override val connectionLatency: Duration? = null
 
         override val isConnected: Boolean
             get() = activeConnections > 0

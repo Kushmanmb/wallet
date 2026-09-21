@@ -91,7 +91,7 @@ class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private va
             type = row.viewType(),
             url = (row as? GemBalanceRow.Reserved)?.url,
             model = ListItemModel(
-                title = context.getString(row.title().titleRes()),
+                title = row.title().text(context),
                 subtitle = item.value.text(context),
                 info = InfoSheetEntity.PendingUnconfirmedBalanceInfo.takeIf { row is GemBalanceRow.PendingUnconfirmed },
             ),

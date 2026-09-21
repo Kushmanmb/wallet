@@ -7,6 +7,7 @@ use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::copy::GemCopy;
 use crate::services::error::GemServiceError;
 use crate::services::localization::GemLocalizedText;
+use crate::services::service_status::GemLatencyStatus;
 use crate::services::transactions::GemTransactionStateTone;
 use crate::services::wallet::model::GemWalletRow;
 
@@ -21,6 +22,9 @@ pub enum GemListSectionTitle {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemListRowTitle {
+    Api,
+    Stream,
+    GemWalletNode,
     Name,
     Network,
     Address,
@@ -171,6 +175,12 @@ pub enum GemListRowIcon {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemListRow {
+    Latency {
+        title: GemListRowTitle,
+        title_suffix: String,
+        host: String,
+        status: GemLatencyStatus,
+    },
     Notice {
         title: GemListRowTitle,
         message: Option<GemLocalizedText>,

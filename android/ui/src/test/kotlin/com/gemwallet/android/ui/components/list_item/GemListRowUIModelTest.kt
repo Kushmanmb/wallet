@@ -16,13 +16,38 @@ import uniffi.gemstone.BlockExplorerLink
 import uniffi.gemstone.GemCopy
 import uniffi.gemstone.GemCopyKind
 import uniffi.gemstone.GemInfoTopic
+import uniffi.gemstone.GemLatencyStatus
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemNumberUnit
 import uniffi.gemstone.GemValueTone
+import uniffi.gemstone.Latency
+import uniffi.gemstone.LatencyType
 
 class GemListRowUIModelTest {
+    @Test
+    fun `latency rows render measurements loading and errors`() {
+        every { context.getString(R.string.common_latency_in_ms, *anyVararg()) } returns "125 ms"
+        every { context.getString(R.string.errors_error) } returns "Error"
+        every { context.getString(R.string.nodes_gem_wallet_node) } returns "Gem Wallet Node"
+        val row = GemListRow.Latency(GemListRowTitle.STREAM, "", "api.gemwallet.com", GemLatencyStatus.Result(Latency(LatencyType.FAST, 125.0)))
+        val model = (row.uiModel(context) as GemListRowUIModel.Item).model
+        assertEquals("Stream", model.title)
+        assertEquals("api.gemwallet.com", model.titleExtra)
+        assertEquals("125 ms", model.titleTag)
+        assertEquals(ListItemTextStyle.Positive, model.titleTagStyle)
+
+        val loading = (GemListRow.Latency(GemListRowTitle.API, "", "api.gemwallet.com", GemLatencyStatus.Loading).uiModel(context) as GemListRowUIModel.Item).model
+        assertEquals("API", loading.title)
+        assertEquals(ListItemTagType.Progress, loading.titleTagType)
+
+        val error = (GemListRow.Latency(GemListRowTitle.GEM_WALLET_NODE, " 🇺🇸", "gemnodes.com", GemLatencyStatus.Error).uiModel(context) as GemListRowUIModel.Item).model
+        assertEquals("Gem Wallet Node 🇺🇸", error.title)
+        assertEquals("Error", error.titleTag)
+        assertEquals(ListItemTextStyle.Negative, error.titleTagStyle)
+    }
+
     private val context = mockk<Context>(relaxed = true) {
         every { getString(R.string.settings_website) } returns "Visit Website"
         every { getString(R.string.wallet_copy_address) } returns "Copy Address"

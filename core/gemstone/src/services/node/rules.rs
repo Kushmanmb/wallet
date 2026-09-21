@@ -1,8 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
 use super::model::{GemNodeSelection, GemNodeStatusState};
-use crate::service_status::GemLatencyStatus;
 use crate::services::collections::unique_by;
+use crate::services::service_status::GemLatencyStatus;
 use primitives::Chain;
 use primitives::Latency;
 use primitives::node::{Node, NodeState};

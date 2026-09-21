@@ -4,11 +4,9 @@ import android.content.Context
 import androidx.annotation.StringRes
 import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
-import uniffi.gemstone.GemLatencyStatus
 import uniffi.gemstone.GemNodeCheckRow
 import uniffi.gemstone.GemNodeRowTitle
 import uniffi.gemstone.GemNodeSubtitle
-import uniffi.gemstone.GemServiceEndpointType
 
 @StringRes
 internal fun GemNodeCheckRow.stringRes(): Int = when (this) {
@@ -29,15 +27,4 @@ internal fun GemNodeRowTitle.string(context: Context): String = text(context.get
 
 internal fun GemNodeSubtitle.text(context: Context): String = when (this) {
     is GemNodeSubtitle.LatestBlock -> text(context.getString(R.string.nodes_import_node_latest_block), value?.text())
-}
-
-internal fun GemServiceEndpointType.string(context: Context): String = when (this) {
-    GemServiceEndpointType.API -> "API"
-    GemServiceEndpointType.GEM_NODE -> context.getString(R.string.nodes_gem_wallet_node)
-}
-
-internal fun GemLatencyStatus.text(context: Context): String = when (this) {
-    is GemLatencyStatus.Loading -> ""
-    is GemLatencyStatus.Error -> context.getString(R.string.errors_error)
-    is GemLatencyStatus.Result -> context.getString(R.string.common_latency_in_ms, latency.value.toLong())
 }

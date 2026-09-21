@@ -14,8 +14,8 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import uniffi.gemstone.GemConnectionService
 import uniffi.gemstone.GemConnectionServiceInterface
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
@@ -29,6 +29,7 @@ sealed interface WebSocketEvent {
 
 interface WebSocketConnectable {
     val isConnected: Boolean
+    val connectionLatency: Duration?
 
     fun connect(): Flow<WebSocketEvent>
     suspend fun send(message: String): Boolean
@@ -42,6 +43,9 @@ class WebSocketConnection(private val requestProvider: suspend () -> WebSocketRe
 
     override val isConnected: Boolean
         get() = activeSession.get()?.webSocket?.get() != null
+
+    override val connectionLatency: Duration?
+        get() = activeSession.get()?.connectionLatency?.get()
 
     override fun connect(): Flow<WebSocketEvent> = channelFlow {
         var reconnectAttempt = 0
@@ -71,6 +75,10 @@ class WebSocketConnection(private val requestProvider: suspend () -> WebSocketRe
                         webSocket.cancel()
                         return
                     }
+                    session.connectionLatency.set(
+                        (response.receivedResponseAtMillis - response.sentRequestAtMillis)
+                            .takeIf { it >= 0 }?.let(Duration::ofMillis),
+                    )
                     session.webSocket.set(webSocket)
                     if (trySend(WebSocketEvent.Connected).isFailure) {
                         activeSession.compareAndSet(session, null)
@@ -112,6 +120,7 @@ class WebSocketConnection(private val requestProvider: suspend () -> WebSocketRe
 
     private class WebSocketSession {
         val webSocket = AtomicReference<WebSocket?>()
+        val connectionLatency = AtomicReference<Duration?>()
     }
 
     companion object {

@@ -1,5 +1,6 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 use async_trait::async_trait;
 use futures::channel::oneshot;
@@ -39,6 +40,7 @@ pub fn asset_ids(chains: &[Chain]) -> Vec<AssetId> {
 #[derive(Default)]
 pub struct MemoryStreamConnection {
     pub connected: AtomicBool,
+    pub latency: Mutex<Option<Duration>>,
     pub fail_next_send: AtomicBool,
     pause: Mutex<Option<oneshot::Receiver<()>>>,
     sent: Mutex<Vec<String>>,
@@ -71,6 +73,10 @@ impl MemoryStreamConnection {
 
 #[async_trait]
 impl GemStreamConnection for MemoryStreamConnection {
+    async fn latency(&self) -> Option<Duration> {
+        *self.latency.lock().unwrap()
+    }
+
     async fn is_connected(&self) -> bool {
         self.connected.load(Ordering::SeqCst)
     }
