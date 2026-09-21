@@ -16,7 +16,6 @@ import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.PriceChangeFormatter
-import com.wallet.core.primitives.BannerEvent
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.Wallet
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +31,7 @@ import uniffi.gemstone.GemHeaderActions
 import uniffi.gemstone.GemPercentageStyle
 import uniffi.gemstone.GemWalletHomeServiceInterface
 import uniffi.gemstone.GemWalletRow
+import uniffi.gemstone.walletBannerEvents
 import uniffi.gemstone.walletRow
 import java.math.BigDecimal
 import uniffi.gemstone.TotalFiatValue as GemTotalFiatValue
@@ -53,7 +53,7 @@ class GetWalletSummaryImpl(
         combine(
             assetStore.observeAssetFiatValues(wallet.id.id),
             getPerpetualBalance.getCollateral(),
-            bannerStore.observeWalletBanners(wallet.id.id, listOf(BannerEvent.AccountBlockedMultiSignature, BannerEvent.Onboarding)),
+            bannerStore.observeWalletBanners(wallet.id.id, walletBannerEvents().map { it.toPrimitives() }),
             userConfig.isHideBalances(),
         ) { balances, perpetualBalance, banners, hideBalances ->
             val state = walletHomeService.viewState(

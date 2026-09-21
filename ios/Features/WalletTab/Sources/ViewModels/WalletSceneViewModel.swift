@@ -6,6 +6,7 @@ import Foundation
 import enum Gemstone.GemHeaderButtonKind
 import struct Gemstone.GemPerpetualCollateral
 import protocol Gemstone.GemWalletHomeServiceProtocol
+import func Gemstone.walletBannerEvents
 import func Gemstone.walletRow
 import GemstonePrimitives
 import GemstoneServices
@@ -70,7 +71,10 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
             initialValue: nil,
         )
         assetsQuery = ObservableQuery(AssetsRequest(walletId: wallet.id, filters: [.enabledBalance]), initialValue: [])
-        bannersQuery = ObservableQuery(BannersRequest(walletId: wallet.id, assetId: .none, events: [.accountBlockedMultiSignature, .onboarding]), initialValue: [])
+        bannersQuery = ObservableQuery(
+            BannersRequest(walletId: wallet.id, assetId: .none, events: walletBannerEvents().map { $0.toPrimitives() }),
+            initialValue: [],
+        )
         self.isPresentingSelectedAssetInput = isPresentingSelectedAssetInput
         self.isPresentingWallets = isPresentingWallets
     }

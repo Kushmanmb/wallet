@@ -24,6 +24,11 @@ impl GemBannerContext {
 }
 
 #[uniffi::export]
+pub fn wallet_banner_events() -> Vec<BannerEvent> {
+    super::rules::wallet_banner_events()
+}
+
+#[uniffi::export]
 pub fn asset_banner_context(wallet: Option<Wallet>, asset: Asset, metadata: AssetMetaData, balance: GemAssetBalance) -> GemBannerContext {
     GemBannerContext::asset(wallet, asset, &metadata, &balance)
 }
@@ -76,27 +81,32 @@ pub struct GemBannerItem {
     pub asset_id: Option<AssetId>,
 }
 
-enum BannerScope {
+#[derive(PartialEq)]
+pub(super) enum BannerScope {
     Asset,
     Chain,
     Wallet,
 }
 
-impl GemBannerItem {
-    fn scope(&self) -> BannerScope {
-        match self.event {
-            BannerEvent::AccountBlockedMultiSignature => BannerScope::Chain,
-            BannerEvent::Onboarding => BannerScope::Wallet,
-            BannerEvent::Stake | BannerEvent::AccountActivation | BannerEvent::ActivateAsset | BannerEvent::SuspiciousAsset | BannerEvent::TradePerpetuals => BannerScope::Asset,
-        }
+pub(super) fn banner_scope(event: BannerEvent) -> BannerScope {
+    match event {
+        BannerEvent::AccountBlockedMultiSignature => BannerScope::Chain,
+        BannerEvent::Onboarding => BannerScope::Wallet,
+        BannerEvent::Stake | BannerEvent::AccountActivation | BannerEvent::ActivateAsset | BannerEvent::SuspiciousAsset | BannerEvent::TradePerpetuals => BannerScope::Asset,
     }
+}
 
+impl GemBannerItem {
     pub(super) fn applies_to_asset(&self, asset_id: &AssetId) -> bool {
-        match self.scope() {
+        match banner_scope(self.event) {
             BannerScope::Asset => self.asset_id.as_ref() == Some(asset_id),
             BannerScope::Chain => self.asset_id.as_ref().is_some_and(|id| id.chain == asset_id.chain),
             BannerScope::Wallet => false,
         }
+    }
+
+    pub(super) fn applies_to_wallet(&self) -> bool {
+        banner_scope(self.event) != BannerScope::Asset
     }
 }
 

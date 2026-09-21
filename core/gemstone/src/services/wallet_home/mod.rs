@@ -69,14 +69,16 @@ impl GemWalletHomeService {
 
     pub fn view_state(&self, wallet: Wallet, balances: Vec<AssetFiatValue>, perpetual: Option<GemPerpetualCollateral>, banners: Vec<Banner>) -> GemWalletHomeViewState {
         let chains = wallet.chains();
+        let wallet_type = wallet.wallet_type;
         let is_wallet_empty = balances.iter().all(|balance| balance.amount == 0.0);
         let total_value = self.total_fiat_value(wallet.id.clone(), balances, perpetual);
+        let visible_banners = GemBannerContext::wallet(wallet, is_wallet_empty).visible_banners(banners);
         GemWalletHomeViewState {
             shows_pnl: balance_rules::shows_pnl(&total_value),
-            header_actions: rules::header_actions(wallet.wallet_type, &chains, rules::header_buttons_enabled(&banners)),
-            show_collections: self.preferences.show_collections(wallet.wallet_type, chains.clone()),
-            shows_perpetuals: self.preferences.show_perpetuals(wallet.wallet_type, chains),
-            visible_banners: GemBannerContext::wallet(wallet, is_wallet_empty).visible_banners(banners),
+            header_actions: rules::header_actions(wallet_type, &chains, rules::header_buttons_enabled(&visible_banners)),
+            show_collections: self.preferences.show_collections(wallet_type, chains.clone()),
+            shows_perpetuals: self.preferences.show_perpetuals(wallet_type, chains),
+            visible_banners,
             total_value,
         }
     }
@@ -130,6 +132,7 @@ mod tests {
     use primitives::{AssetId, Chain};
 
     use super::testkit::WalletHomeTestkit;
+    use crate::services::assets::model::GemHeaderActions;
     use crate::services::wallet_preferences::GemDiscoveryStep;
     use primitives::{AssetFiatValue, Banner, BannerEvent, BannerState, Wallet};
 
@@ -144,6 +147,19 @@ mod tests {
             testkit.preferences.show_perpetuals(Wallet::mock().wallet_type, Wallet::mock().chains()),
             "the screen reads the flag from the state instead of asking a second service"
         );
+    }
+
+    #[test]
+    fn test_the_header_buttons_follow_the_banners_the_screen_shows() {
+        let testkit = WalletHomeTestkit::with_status(200);
+        let warning = |state| Banner::mock(BannerEvent::AccountBlockedMultiSignature, state);
+        let buttons_enabled = |banners: Vec<Banner>| match testkit.service.view_state(Wallet::mock(), vec![], None, banners).header_actions {
+            GemHeaderActions::Buttons { buttons } => buttons.iter().all(|button| button.is_enabled),
+            GemHeaderActions::WatchOnly => true,
+        };
+
+        assert!(!buttons_enabled(vec![warning(BannerState::AlwaysActive)]));
+        assert!(buttons_enabled(vec![warning(BannerState::Cancelled)]), "a warning the screen does not show cannot block the buttons");
     }
 
     #[test]

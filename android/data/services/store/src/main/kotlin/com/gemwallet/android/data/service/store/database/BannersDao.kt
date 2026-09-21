@@ -37,7 +37,8 @@ interface BannersDao {
         SELECT * FROM
             banners
         WHERE
-            wallet_id = :walletId AND event IN (:events)
+            (wallet_id IS NULL OR wallet_id = :walletId)
+            AND event IN (:events)
     """,
     )
     fun observeWalletBanners(walletId: String, events: List<BannerEvent>): Flow<List<DbBannerWithAsset>>

@@ -1,7 +1,10 @@
 use crate::models::custom_types::GemBigInt;
 use primitives::{Asset, AssetId, Banner, BannerEvent, BannerState, Chain, ChainAsset, VerificationStatus, Wallet, WalletSource, WalletType};
 
-use super::model::{GemBannerAmount, GemBannerContent, GemBannerContext, GemBannerDescription, GemBannerDestination, GemBannerIcon, GemBannerItem, GemBannerKey, GemBannerLink, GemBannerTitle};
+use super::model::{
+    BannerScope, GemBannerAmount, GemBannerContent, GemBannerContext, GemBannerDescription, GemBannerDestination, GemBannerIcon, GemBannerItem, GemBannerKey, GemBannerLink, GemBannerTitle,
+    banner_scope,
+};
 use crate::config::chain::account_activation_fee_url;
 use crate::config::docs::DocsUrl;
 use crate::services::transfer::rules as transfer_rules;
@@ -147,11 +150,19 @@ fn network_name(chain: Chain) -> String {
     ChainAsset::from_chain(chain).network_name
 }
 
+pub fn wallet_banner_events() -> Vec<BannerEvent> {
+    BannerEvent::all().into_iter().filter(|event| banner_scope(*event) != BannerScope::Asset).collect()
+}
+
 pub(super) fn visible_banners(stored: Vec<Banner>, context: &GemBannerContext) -> Vec<Banner> {
     let asset_id = context.asset_id();
     let mut banners: Vec<GemBannerItem> = Vec::new();
     for item in stored.iter().map(banner_item).chain(extra_banners(asset_id.clone())) {
-        if asset_id.as_ref().is_some_and(|asset_id| !item.applies_to_asset(asset_id)) {
+        let applies = match &asset_id {
+            Some(asset_id) => item.applies_to_asset(asset_id),
+            None => item.applies_to_wallet(),
+        };
+        if !applies {
             continue;
         }
         if banners.iter().any(|existing| existing.event == item.event) {
@@ -307,6 +318,36 @@ mod tests {
 
         assert_eq!(events(&visible_banners(stored, &context)), vec![BannerEvent::AccountBlockedMultiSignature, BannerEvent::SuspiciousAsset]);
         assert_eq!(events(&visible_banners(vec![], &context)), vec![BannerEvent::SuspiciousAsset]);
+    }
+
+    #[test]
+    fn test_the_wallet_screen_reads_only_the_banners_no_asset_owns() {
+        let context = GemBannerContext {
+            asset: None,
+            is_wallet_empty: true,
+            ..GemBannerContext::mock()
+        };
+        let stored = vec![
+            Banner {
+                asset: Some(Asset::from_chain(Chain::Ethereum)),
+                ..Banner::mock(BannerEvent::Stake, BannerState::Active)
+            },
+            Banner {
+                asset: Some(Asset::from_chain(Chain::Ethereum)),
+                ..Banner::mock(BannerEvent::AccountActivation, BannerState::Active)
+            },
+            Banner {
+                asset: Some(Asset::from_chain(Chain::Tron)),
+                ..Banner::mock(BannerEvent::AccountBlockedMultiSignature, BannerState::AlwaysActive)
+            },
+            Banner {
+                asset: None,
+                ..Banner::mock(BannerEvent::Onboarding, BannerState::Active)
+            },
+        ];
+
+        assert_eq!(events(&visible_banners(stored, &context)), vec![BannerEvent::AccountBlockedMultiSignature, BannerEvent::Onboarding]);
+        assert_eq!(wallet_banner_events(), vec![BannerEvent::AccountBlockedMultiSignature, BannerEvent::Onboarding], "the apps ask their stores for these");
     }
 
     #[test]
