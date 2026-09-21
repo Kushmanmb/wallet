@@ -11,8 +11,6 @@ import com.gemwallet.android.application.pricealerts.cases.GetPriceAlerts
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
 import com.gemwallet.android.domains.pricealerts.aggregates.PriceAlertDataAggregate
 import com.gemwallet.android.ext.toGem
-import com.gemwallet.android.features.asset.viewmodels.chart.models.AssetMarketUIModelFactory
-import com.gemwallet.android.features.asset.viewmodels.chart.models.ChartSectionUIModel
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.testkit.mockAssetInfo
 import com.gemwallet.android.testkit.mockAssetLink
@@ -40,13 +38,15 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import uniffi.gemstone.GemChartSection
 import uniffi.gemstone.GemChartServiceInterface
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
+import uniffi.gemstone.GemListSection
+import uniffi.gemstone.GemListSectionFooter
+import uniffi.gemstone.GemListSectionTitle
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AssetChartViewModelTest {
@@ -93,13 +93,12 @@ class AssetChartViewModelTest {
     fun `a stored asset gives the scene its sections and title before any flow emits`() = runTest(testDispatcher) {
         walletAssetsFlow.value = listOf(mockAssetInfo(asset))
         every { chartService.sections(asset.toGem(), any(), null, any(), any()) } returns listOf(
-            GemChartSection.Market(rows = listOf(GemListRow.Text(GemListRowTitle.TYPE, "SPL"))),
+            section(listOf(GemListRow.Text(GemListRowTitle.TYPE, "SPL"))),
         )
 
         val viewModel = createViewModel()
 
-        val uiModel = requireNotNull(viewModel.marketUIModel.value)
-        assertEquals(1, uiModel.sections.size)
+        assertEquals(1, viewModel.sections.value.size)
         assertEquals(asset.name, viewModel.title.value)
     }
 
@@ -107,7 +106,7 @@ class AssetChartViewModelTest {
     fun `an asset the wallet does not hold leaves the scene empty until it loads`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
-        assertNull(viewModel.marketUIModel.value)
+        assertTrue(viewModel.sections.value.isEmpty())
         assertEquals("", viewModel.title.value)
         assertEquals(asset.name, viewModel.title.first { it.isNotBlank() })
     }
@@ -120,19 +119,17 @@ class AssetChartViewModelTest {
         val market = mockAssetMarket(marketCap = 1234.0)
         val link = mockAssetLink()
         every { chartService.sections(asset.toGem(), any(), market.toGem(), any(), listOf(link.toGem())) } returns listOf(
-            GemChartSection.Market(rows = listOf(GemListRow.Amount(GemListRowTitle.MARKET_CAP, mockFormattedNumber(1234.0), null))),
-            GemChartSection.Links(links = listOf(mockGemSocialLink())),
+            section(listOf(GemListRow.Amount(GemListRowTitle.MARKET_CAP, mockFormattedNumber(1234.0), null))),
+            section(listOf(GemListRow.Social(listOf(mockGemSocialLink()))), GemListSectionTitle.SOCIAL_LINKS),
         )
         linksFlow.value = listOf(link)
         marketFlow.value = market
         currencyFlow.value = Currency.EUR
 
-        val uiModel = viewModel.marketUIModel.first { it?.sections?.size == 2 }!!
+        val sections = viewModel.sections.first { it.size == 2 }
 
-        assertEquals(
-            listOf(GemListRow.Amount(GemListRowTitle.MARKET_CAP, mockFormattedNumber(1234.0), null)),
-            (uiModel.sections.first() as ChartSectionUIModel.Market).rows,
-        )
+        assertEquals(listOf(GemListRow.Amount(GemListRowTitle.MARKET_CAP, mockFormattedNumber(1234.0), null)), sections.first().rows)
+        assertEquals(GemListSectionTitle.SOCIAL_LINKS, sections.last().title)
     }
 
     @Test
@@ -155,8 +152,9 @@ class AssetChartViewModelTest {
         chartService = chartService,
         getPriceAlerts = getPriceAlerts,
         getCurrentCurrency = getCurrentCurrency,
-        marketUIModelFactory = AssetMarketUIModelFactory(mockk<Context> { every { getString(any()) } answers { firstArg<Int>().toString() } }),
         ioDispatcher = testDispatcher,
         assetId = asset.id,
     ).also(viewModels::add)
+
+    private fun section(rows: List<GemListRow>, title: GemListSectionTitle = GemListSectionTitle.NONE) = GemListSection(title, GemListSectionFooter.NONE, rows)
 }

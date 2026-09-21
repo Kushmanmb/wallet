@@ -11,13 +11,14 @@ use primitives::currency::Currency;
 use primitives::{Asset, AssetId, AssetLink, AssetMarket, ChartDateValue, ChartPeriod, PriceAlert};
 
 use crate::api::{GemApiClient, GemApiError};
+use crate::models::list::GemListSection;
 use crate::services::error::GemServiceError;
 use crate::services::explorer::GemExplorerService;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::price::GemPriceService;
 use session::GemChartSession;
 
-pub use model::{GemChartBounds, GemChartData, GemChartHeader, GemChartSection, GemChartValueType};
+pub use model::{GemChartBounds, GemChartData, GemChartHeader, GemChartValueType};
 
 #[uniffi::export]
 pub fn candlestick_header(base: f64, value: f64) -> GemChartHeader {
@@ -61,7 +62,7 @@ impl GemChartService {
         Self { api, price, preferences, explorer }
     }
 
-    pub fn sections(&self, asset: Asset, price: Option<f64>, market: Option<AssetMarket>, price_alerts: Vec<PriceAlert>, links: Vec<AssetLink>) -> Vec<GemChartSection> {
+    pub fn sections(&self, asset: Asset, price: Option<f64>, market: Option<AssetMarket>, price_alerts: Vec<PriceAlert>, links: Vec<AssetLink>) -> Vec<GemListSection> {
         let contract_explorer = asset.id.token_id.clone().and_then(|token_id| self.explorer.get_token_url(asset.id.chain, token_id));
         rules::chart_sections(&asset, self.preferences.get_currency(), price, market.as_ref(), price_alerts, links, contract_explorer)
     }

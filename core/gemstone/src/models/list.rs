@@ -18,6 +18,7 @@ pub enum GemListSectionTitle {
     Community,
     Manage,
     Resources,
+    SocialLinks,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -84,6 +85,7 @@ pub enum GemListRowTitle {
     Unpin,
     AddToWallet,
     PriceAlerts,
+    SetPriceAlert,
     Energy,
     Bandwidth,
     RewardsUnverified,

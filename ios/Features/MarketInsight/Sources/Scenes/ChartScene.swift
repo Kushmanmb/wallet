@@ -18,32 +18,22 @@ public struct ChartScene: View {
 
     public var body: some View {
         ChartListView(model: model) {
-            ForEach(model.sections, id: \.self) { section in
-                switch section {
-                case .priceAlerts:
-                    Section {
-                        NavigationLink(
-                            value: Scenes.AssetPriceAlert(asset: model.asset),
-                            label: {
-                                ListItemView(model: model.listItem(for: section))
-                            },
-                        )
-                    }
-                case .setPriceAlert:
-                    Section {
-                        NavigationCustomLink(with: ListItemView(model: model.listItem(for: section))) {
-                            model.onSelectSetPriceAlerts()
+            ForEach(model.sections.listSections) { section in
+                Section(section.title ?? "") {
+                    ForEach(section.values) { item in
+                        switch item.row {
+                        case .link(.priceAlerts, _, _):
+                            NavigationLink(
+                                value: Scenes.AssetPriceAlert(asset: model.asset),
+                                label: { GemListRowView(row: item.row) },
+                            )
+                        case .link(.setPriceAlert, _, _):
+                            NavigationCustomLink(with: GemListRowView(row: item.row)) {
+                                model.onSelectSetPriceAlerts()
+                            }
+                        default:
+                            GemListRowView(row: item.row, onInfo: model.onInfo)
                         }
-                    }
-                case let .market(rows):
-                    Section {
-                        ForEach(rows, id: \.self) { row in
-                            GemListRowView(row: row, onInfo: model.onInfo)
-                        }
-                    }
-                case let .links(links):
-                    Section(section.title ?? "") {
-                        SocialLinksView(model: SocialLinksViewModel(links: links))
                     }
                 }
             }

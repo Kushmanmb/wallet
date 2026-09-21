@@ -513,6 +513,7 @@ fun GemListSectionTitle.titleRes(): Int? = when (this) {
     GemListSectionTitle.COMMUNITY -> R.string.settings_community
     GemListSectionTitle.MANAGE -> R.string.common_manage
     GemListSectionTitle.RESOURCES -> R.string.asset_resources
+    GemListSectionTitle.SOCIAL_LINKS -> R.string.social_links
 }
 
 fun GemListRowTitle.text(context: Context): String = when (this) {
@@ -608,6 +609,7 @@ fun GemListRowTitle.text(context: Context): String = when (this) {
     GemListRowTitle.UNPIN -> context.getString(R.string.common_unpin)
     GemListRowTitle.ADD_TO_WALLET -> context.getString(R.string.asset_add_to_wallet)
     GemListRowTitle.PRICE_ALERTS -> context.getString(R.string.settings_price_alerts_title)
+    GemListRowTitle.SET_PRICE_ALERT -> context.getString(R.string.price_alerts_set_alert_title)
     GemListRowTitle.ENERGY -> context.getString(R.string.stake_resource_energy)
     GemListRowTitle.BANDWIDTH -> context.getString(R.string.stake_resource_bandwidth)
 }

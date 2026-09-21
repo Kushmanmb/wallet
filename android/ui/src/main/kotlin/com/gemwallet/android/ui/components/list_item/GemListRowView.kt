@@ -40,7 +40,7 @@ import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSection
 
-fun LazyListScope.gemListSections(sections: List<GemListSection>) {
+fun LazyListScope.gemListSections(sections: List<GemListSection>, onSelect: ((GemListRowTitle) -> Unit)? = null) {
     sections.forEachIndexed { index, section ->
         val title = section.title.titleRes()
         if (title != null) {
@@ -48,7 +48,7 @@ fun LazyListScope.gemListSections(sections: List<GemListSection>) {
         } else if (index > 0) {
             item(key = "section:$index") { Spacer16() }
         }
-        itemsPositioned(section.rows) { position, row -> GemListRowView(row = row, listPosition = position) }
+        itemsPositioned(section.rows) { position, row -> GemListRowView(row = row, listPosition = position, onSelect = onSelect) }
     }
 }
 

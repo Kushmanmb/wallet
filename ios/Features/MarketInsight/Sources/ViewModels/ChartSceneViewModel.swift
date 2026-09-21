@@ -5,7 +5,7 @@ import Formatters
 import Foundation
 import struct Gemstone.GemChart
 import enum Gemstone.GemChartPhase
-import enum Gemstone.GemChartSection
+import struct Gemstone.GemListSection
 import protocol Gemstone.GemChartServiceProtocol
 import struct Gemstone.GemChartSession
 import enum Gemstone.GemInfoTopic
@@ -66,7 +66,7 @@ public final class ChartSceneViewModel: ChartListViewable {
         }
     }
 
-    var sections: [GemChartSection] {
+    var sections: [GemListSection] {
         guard let priceData else { return [] }
         return service.sections(
             asset: priceData.asset.toGem(),
@@ -89,13 +89,6 @@ public final class ChartSceneViewModel: ChartListViewable {
         session = service.newSession()
         priceQuery = ObservableQuery(PriceRequest(assetId: assetModel.asset.id), initialValue: .with(asset: assetModel.asset))
         self.onSetPriceAlert = onSetPriceAlert
-    }
-
-    func listItem(for section: GemChartSection) -> ListItemModel {
-        switch section {
-        case let .priceAlerts(count): ListItemModel(title: section.title ?? "", subtitle: "\(count)")
-        case .setPriceAlert, .market, .links: ListItemModel(title: section.title ?? "")
-        }
     }
 }
 
