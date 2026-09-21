@@ -1,5 +1,6 @@
 use super::rules;
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
+use crate::models::list::GemListRow;
 use crate::services::amount::model::GemAmountType;
 use crate::services::amount::rules as amount_rules;
 use crate::services::error::GemServiceError;
@@ -25,6 +26,17 @@ pub fn delegation_status(delegation: Delegation) -> GemDelegationStatus {
     rules::delegation_status(&delegation)
 }
 
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct GemDelegationDetails {
+    pub title: GemLocalizedText,
+    pub balance: GemFormattedNumber,
+    pub fiat: Option<GemFormattedNumber>,
+    pub rewards: Option<GemFormattedNumber>,
+    pub rewards_fiat: Option<GemFormattedNumber>,
+    pub rows: Vec<GemListRow>,
+    pub claim: Option<GemTransferData>,
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemDelegationListRow {
     pub validator: GemValidatorRow,
@@ -34,6 +46,11 @@ pub struct GemDelegationListRow {
     pub rewards: Option<GemFormattedNumber>,
     pub rewards_fiat: Option<GemFormattedNumber>,
     pub has_balance: bool,
+}
+
+#[uniffi::export]
+pub fn delegation_details(delegation: Delegation, asset: Asset, price: Option<f64>, currency: Currency) -> GemDelegationDetails {
+    rules::delegation_details(&delegation, &asset, price, currency, Vec::new())
 }
 
 #[uniffi::export]

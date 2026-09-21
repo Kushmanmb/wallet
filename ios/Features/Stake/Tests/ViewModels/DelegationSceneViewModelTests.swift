@@ -15,6 +15,7 @@ struct DelegationSceneViewModelTests {
     func claimingRewardsNavigatesToConfirm() {
         var route: StakeRoute?
         let model = DelegationSceneViewModel.mock(
+            rewards: 500_000,
             stakeService: GemStakeServiceMock(claimable: true),
             onNavigate: { route = $0 },
         )
@@ -25,6 +26,16 @@ struct DelegationSceneViewModelTests {
             Issue.record("expected a confirm route, got \(String(describing: route))")
             return
         }
+    }
+
+    @Test
+    func claimingNothingIsNotATransfer() {
+        var route: StakeRoute?
+        let model = DelegationSceneViewModel.mock(rewards: 0, onNavigate: { route = $0 })
+
+        model.onClaimRewards()
+
+        #expect(route == nil, "there is nothing to claim, so there is no transfer to confirm")
     }
 
     @Test

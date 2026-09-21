@@ -1,4 +1,4 @@
-use primitives::{Chain, DelegationState, FeeUnitType, PerpetualDirection, PerpetualMarginType, Resource, TransactionState};
+use primitives::{Chain, DelegationState, FeeUnitType, PerpetualDirection, PerpetualMarginType, Resource, StakeProviderType, TransactionState};
 
 use crate::duration_formatter::GemDurationPart;
 use crate::formatted_number::GemFormattedNumber;
@@ -32,6 +32,7 @@ pub enum GemLocalizedText {
     Apr { value: Option<GemFormattedNumber> },
     PriceImpactWarning { percent: GemFormattedNumber, symbol: String },
     Balance { amount: GemFormattedNumber },
+    StakeProvider { provider: StakeProviderType },
     PositionChange { change: GemPositionChange, direction: PerpetualDirection },
 }
 

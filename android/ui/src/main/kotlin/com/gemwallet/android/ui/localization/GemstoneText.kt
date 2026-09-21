@@ -66,6 +66,7 @@ import uniffi.gemstone.GemWalletSubtitle
 import uniffi.gemstone.LinkType
 import uniffi.gemstone.PerpetualMarginType
 import uniffi.gemstone.PerpetualProvider
+import uniffi.gemstone.StakeProviderType
 import uniffi.gemstone.WalletConnectionVerificationStatus
 import uniffi.gemstone.verificationLevel
 import uniffi.gemstone.PriceChangeCalculator as GemPriceChangeCalculator
@@ -201,6 +202,11 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
     is GemLocalizedText.PriceImpactWarning -> context.getString(R.string.swap_price_impact_warning_description, percent.text(), symbol)
 
     is GemLocalizedText.Balance -> context.getString(R.string.transfer_balance, amount.text())
+
+    is GemLocalizedText.StakeProvider -> when (provider) {
+        StakeProviderType.STAKE -> context.getString(R.string.transfer_stake_title)
+        StakeProviderType.EARN -> context.getString(R.string.common_earn)
+    }
 
     is GemLocalizedText.PositionChange -> when (change) {
         GemPositionChange.INCREASE -> context.getString(R.string.perpetual_increase_direction, context.getString(direction.toPrimitives().stringRes()))

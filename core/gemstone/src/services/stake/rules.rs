@@ -12,8 +12,8 @@ use rand::seq::IndexedRandom;
 use std::str::FromStr;
 
 use super::model::{
-    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationListRow, GemDelegationStatus, GemEarnActions, GemStakeAction, GemStakeActionItem, GemStakeAmountInput,
-    GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
+    GemClaimRewards, GemClaimRewardsDestination, GemDelegationAction, GemDelegationAmountInput, GemDelegationDestination, GemDelegationDetails, GemDelegationListRow, GemDelegationStatus, GemEarnActions, GemStakeAction, GemStakeActionItem,
+    GemStakeAmountInput, GemStakeSection, GemStakeValidatorSelection, GemValidatorRow,
 };
 use crate::config::image::GemImage;
 use crate::config::stake::EARN_OFFERED;
@@ -187,6 +187,31 @@ fn completion_title(delegation: &Delegation) -> Option<GemListRowTitle> {
             DelegationState::Pending | DelegationState::Deactivating | DelegationState::AwaitingWithdrawal => Some(GemListRowTitle::AvailableIn),
             DelegationState::Active | DelegationState::Inactive => None,
         },
+    }
+}
+
+pub fn delegation_details(delegation: &Delegation, asset: &Asset, price: Option<f64>, currency: Currency, rows: Vec<GemListRow>) -> GemDelegationDetails {
+    let amount = |value: &BigUint| GemFormattedNumber::asset_amount(&BigInt::from(value.clone()), asset, GemValueStyle::Auto);
+    let fiat = |value: &BigUint| crate::services::assets::rules::fiat_amount_of(asset, value, price, currency.clone());
+    let shows_rewards = shows_rewards(&delegation.base);
+
+    GemDelegationDetails {
+        title: GemLocalizedText::StakeProvider {
+            provider: delegation.validator.provider_type,
+        },
+        balance: amount(&delegation.base.balance),
+        fiat: fiat(&delegation.base.balance),
+        rewards: shows_rewards.then(|| amount(&delegation.base.rewards)),
+        rewards_fiat: shows_rewards.then(|| fiat(&delegation.base.rewards)).flatten(),
+        claim: shows_rewards.then(|| {
+            crate::services::transfer::rules::stake_transfer_data(
+                asset.clone(),
+                StakeType::Rewards(vec![delegation.validator.clone()]),
+                crate::models::custom_types::GemBigInt::from(BigInt::from(delegation.base.rewards.clone())),
+                false,
+            )
+        }),
+        rows,
     }
 }
 
@@ -648,6 +673,36 @@ mod tests {
     use crate::services::transfer::GemTransferData;
     use chrono::Duration;
     use primitives::Resource;
+
+    #[test]
+    fn test_delegation_details_title_follows_the_provider_and_the_header_keeps_its_precision() {
+        let asset = Asset::from_chain(Chain::Cosmos);
+        let details = |provider, rewards: u64| {
+            let mut delegation = Delegation::mock();
+            delegation.validator.provider_type = provider;
+            delegation.base.balance = BigUint::from(838u64);
+            delegation.base.rewards = BigUint::from(rewards);
+            delegation.base.state = DelegationState::Active;
+            delegation_details(&delegation, &asset, Some(2.0), Currency::USD, vec![])
+        };
+
+        assert_eq!(
+            details(StakeProviderType::Earn, 0).title,
+            GemLocalizedText::StakeProvider { provider: StakeProviderType::Earn },
+            "an earn position is not titled Stake"
+        );
+        assert_eq!(details(StakeProviderType::Stake, 0).title, GemLocalizedText::StakeProvider { provider: StakeProviderType::Stake });
+
+        let earning = details(StakeProviderType::Stake, 500_000);
+        assert_eq!(
+            earning.balance.display,
+            GemFormattedNumber::asset_amount(&BigInt::from(838u64), &asset, GemValueStyle::Auto).display,
+            "the details header keeps the auto precision, not the list row's short one"
+        );
+        assert_ne!(earning.balance.display, GemFormattedNumber::asset_amount(&BigInt::from(838u64), &asset, GemValueStyle::Short).display);
+        assert!(earning.claim.is_some(), "rewards worth claiming come with the transfer that claims them");
+        assert!(details(StakeProviderType::Stake, 0).claim.is_none(), "nothing to claim is no transfer");
+    }
 
     #[test]
     fn test_a_delegation_row_greys_an_empty_stake_and_shows_rewards_only_when_there_are_some() {
