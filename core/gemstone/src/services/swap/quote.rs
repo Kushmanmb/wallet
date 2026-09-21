@@ -113,17 +113,17 @@ impl GemSwapQuoteService {
     }
 
     pub async fn get_quotes(&self, from_asset: Asset, to_asset: Asset, value: GemBigUint, use_max_amount: bool, slippage_bps: Option<u32>) -> Result<Vec<Quote>, SwapperError> {
-        let wallet = self.session.current_wallet().await.map_err(|error| SwapperError::ComputeQuoteError(error.to_string()))?;
+        let wallet = self.session.require_current_wallet().await.map_err(|error| SwapperError::ComputeQuoteError(error.to_string()))?;
         self.swap.get_quotes(wallet, from_asset, to_asset, value, use_max_amount, slippage_bps).await
     }
 
     pub async fn suggest_pair(&self, pay_asset_id: Option<AssetId>) -> Option<GemSwapPairSuggestion> {
-        let Ok(wallet) = self.session.current_wallet().await else { return None };
+        let Ok(wallet) = self.session.require_current_wallet().await else { return None };
         self.swap.suggest_pair(wallet, pay_asset_id).await.ok().flatten()
     }
 
     pub async fn get_transfer(&self, quote: Quote) -> Result<GemSwapTransfer, SwapperError> {
-        let wallet = self.session.current_wallet().await.map_err(|error| SwapperError::TransactionError(error.to_string()))?;
+        let wallet = self.session.require_current_wallet().await.map_err(|error| SwapperError::TransactionError(error.to_string()))?;
         self.swap.get_transfer(wallet, quote).await
     }
 

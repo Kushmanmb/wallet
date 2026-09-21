@@ -212,7 +212,7 @@ impl GemStakeService {
     }
 
     async fn current_account(&self, chain: Chain) -> Result<(WalletId, String), GemServiceError> {
-        let wallet = self.session.current_wallet().await?;
+        let wallet = self.session.require_current_wallet().await?;
         let account = required_account(&wallet, chain)?;
         Ok((wallet.id.clone(), account.address.clone()))
     }
