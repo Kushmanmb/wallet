@@ -16,10 +16,22 @@ pub struct GemBannerContext {
     pub is_wallet_empty: bool,
 }
 
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct GemBannerRow {
+    pub banner: Banner,
+    pub content: GemBannerContent,
+}
+
 #[uniffi::export]
 impl GemBannerContext {
-    pub fn visible_banners(&self, stored: Vec<Banner>) -> Vec<Banner> {
+    pub fn visible_banners(&self, stored: Vec<Banner>) -> Vec<GemBannerRow> {
         super::rules::visible_banners(stored, self)
+            .into_iter()
+            .map(|banner| GemBannerRow {
+                content: super::rules::banner_content(banner.event, banner.asset.as_ref()),
+                banner,
+            })
+            .collect()
     }
 }
 

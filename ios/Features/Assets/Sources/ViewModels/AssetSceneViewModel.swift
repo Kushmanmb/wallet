@@ -8,6 +8,7 @@ import struct Gemstone.GemAssetDetails
 import struct Gemstone.GemAssetDetailsInput
 import protocol Gemstone.GemAssetDetailsServiceProtocol
 import struct Gemstone.GemBannerContext
+import struct Gemstone.GemBannerRow
 import struct Gemstone.GemFormattedNumber
 import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemListRowTitle
@@ -112,7 +113,7 @@ public final class AssetSceneViewModel: Sendable {
                 balance: stakeBalance,
                 price: assetData.price?.price,
                 currency: preferences.currency.toGem(),
-                bannerEvents: visibleBanners.map { $0.event.toGem() },
+                bannerEvents: visibleBanners.map(\.banner.event),
                 priceAlerts: assetData.priceAlerts.map { $0.toGem() },
                 feeBalanceMetadata: chainAssetData.feeAssetData.balance.metadata?.toGem(),
             ),
@@ -156,12 +157,12 @@ public final class AssetSceneViewModel: Sendable {
         )
     }
 
-    var visibleBanners: [Banner] {
-        bannerContext.visibleBanners(stored: banners.map { $0.toGem() }).map { $0.toPrimitives() }
+    var visibleBanners: [GemBannerRow] {
+        bannerContext.visibleBanners(stored: banners.map { $0.toGem() })
     }
 
-    func bannerModel(for banner: Banner) -> BannerViewModel {
-        BannerViewModel(banner: banner, content: service.bannerContent(event: banner.event.toGem(), asset: banner.asset?.toGem()))
+    func bannerModel(for row: GemBannerRow) -> BannerViewModel {
+        BannerViewModel(row: row)
     }
 
     private var bannerContext: GemBannerContext {

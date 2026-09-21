@@ -22,7 +22,6 @@ import com.gemwallet.android.testkit.mockGemAssetDetailsState
 import com.gemwallet.android.testkit.mockPriceAlert
 import com.gemwallet.android.testkit.mockSession
 import com.gemwallet.android.ui.models.navigation.RouteArgument
-import com.wallet.core.primitives.Banner
 import com.wallet.core.primitives.PriceAlert
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -49,6 +48,7 @@ import org.junit.Test
 import uniffi.gemstone.GemAssetDetailsInput
 import uniffi.gemstone.GemAssetDetailsServiceInterface
 import uniffi.gemstone.GemAssetRefresh
+import uniffi.gemstone.GemBannerRow
 import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemPriceAlertToggle
 
@@ -62,7 +62,7 @@ class AssetDetailsViewModelTest {
         mockChainAssetInfo(mockAssetInfo(asset)),
     )
     private val sessionFlow = MutableStateFlow<Session?>(mockSession())
-    private val banners = MutableSharedFlow<List<Banner>>(replay = 1)
+    private val banners = MutableSharedFlow<List<GemBannerRow>>(replay = 1)
     private val priceAlerts = MutableSharedFlow<List<PriceAlert>>(replay = 1)
 
     private val getChainAssetInfo = mockk<GetChainAssetInfo>(relaxed = true)

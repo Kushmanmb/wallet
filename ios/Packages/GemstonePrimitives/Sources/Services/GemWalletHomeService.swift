@@ -29,10 +29,6 @@ public extension GemWalletHomeServiceProtocol {
         try await setAssetPinned(assetId: assetId.identifier, pinned: pinned)
     }
 
-    func content(for banner: Banner) -> GemBannerContent {
-        bannerContent(event: banner.event.toGem(), asset: banner.asset?.toGem())
-    }
-
     func close(_ banner: Banner) async throws {
         try await closeBanner(key: banner.gemKey)
     }

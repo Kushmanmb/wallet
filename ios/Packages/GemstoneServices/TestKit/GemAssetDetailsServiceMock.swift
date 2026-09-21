@@ -32,10 +32,6 @@ public final class GemAssetDetailsServiceMock: GemAssetDetailsServiceProtocol, @
 
     public func setAssetsEnabled(assetIds _: [AssetId], enabled _: Bool) async throws {}
 
-    public func bannerContent(event _: BannerEvent, asset _: Asset?) -> GemBannerContent {
-        GemBannerContent(icon: .none, title: .none, description: .none, destination: .none)
-    }
-
     public func closeBanner(key _: GemBannerKey) async throws {}
 
     public func details(input: GemAssetDetailsInput) -> GemAssetDetails {

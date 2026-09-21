@@ -143,7 +143,6 @@ Surveyed on 2026-09-21. Each item names what was counted and where; confirm the 
 
 - **N7** **L** **Android restates Core records as aggregates.** `android/data/coordinators` holds seven `*AggregateImpl` classes — transaction data and details, wallet summary and details, perpetual details and position details, price alert — that unpack a Core record field by field. U15 showed the cost: `TransactionDetailsValue.SwapProgress` renamed `etaSeconds` to `etaInSeconds` on the way through, so the two drifted silently. Hold the record and read through it, as `WalletDetailsAggregateImpl` now does. U18 covers the transaction one; this is the rest.
 - **N8** **M** **Rows assembled app-side that Core already decides.** R104 found the rewards stats list built twice with different contents. Sweep the remaining `*UIModel` builders (44 files under `android/features`) and the iOS `*ListItem`/`*ViewModel` row getters for lists Core could return as `GemListRow`, and file the ones that differ between apps. Start where a list is built on both sides: settings sections, asset detail rows, perpetual position rows.
-- **N9** **S** **`toGem()`/`toPrimitives()` round trips inside a screen.** 260 `toGem()` calls sit in `ios/Features` and 118 `toPrimitives()`; some convert a value to Core and straight back within one getter. Find the round trips (`toGem` and `toPrimitives` in the same expression or adjacent lines) and keep the value in one shape for the life of the screen.
 
 ### Sessions
 

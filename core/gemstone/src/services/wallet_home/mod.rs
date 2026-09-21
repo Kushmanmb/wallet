@@ -4,28 +4,28 @@ pub(crate) mod testkit;
 
 use std::sync::Arc;
 
-use primitives::{Asset, AssetFiatValue, AssetId, Banner, BannerEvent, Currency, TotalFiatValue, Wallet, WalletId};
+use primitives::{AssetFiatValue, AssetId, Banner, Currency, TotalFiatValue, Wallet, WalletId};
 
 use crate::services::asset_discovery::GemAssetDiscoveryService;
 use crate::services::assets::model::{GemAssetRowStyle, GemHeaderActions};
 use crate::services::assets::rules as asset_rules;
 use crate::services::balance::GemBalanceService;
 use crate::services::balance::rules as balance_rules;
-use crate::services::banner::{GemBannerContent, GemBannerContext, GemBannerKey, GemBannerService};
+use crate::services::banner::{GemBannerContext, GemBannerKey, GemBannerRow, GemBannerService};
 use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_preferences::{GemDiscoveryStep, GemWalletPreferencesService};
 use crate::services::wallet_session::GemWalletSessionService;
 pub use rules::GemPerpetualCollateral;
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct GemWalletHomeViewState {
     pub total_value: TotalFiatValue,
     pub shows_pnl: bool,
     pub header_actions: GemHeaderActions,
     pub show_collections: bool,
     pub shows_perpetuals: bool,
-    pub visible_banners: Vec<Banner>,
+    pub visible_banners: Vec<GemBannerRow>,
 }
 
 #[derive(uniffi::Object)]
@@ -108,10 +108,6 @@ impl GemWalletHomeService {
 
     pub async fn set_assets_enabled(&self, asset_ids: Vec<AssetId>, enabled: bool) -> Result<(), GemServiceError> {
         self.balances.set_assets_enabled(self.session.current_wallet_id()?, asset_ids, enabled).await
-    }
-
-    pub fn banner_content(&self, event: BannerEvent, asset: Option<Asset>) -> GemBannerContent {
-        self.banners.banner_content(event, asset)
     }
 
     pub async fn close_banner(&self, key: GemBannerKey) -> Result<(), GemServiceError> {

@@ -1,4 +1,6 @@
-use primitives::{AssetFiatValue, Banner, BannerEvent, Chain, PerpetualBalance, WalletType};
+use primitives::{AssetFiatValue, BannerEvent, Chain, PerpetualBalance, WalletType};
+
+use crate::services::banner::GemBannerRow;
 
 use crate::services::assets::model::{GemHeaderActions, GemHeaderButton, GemHeaderButtonKind};
 
@@ -23,8 +25,8 @@ pub fn wallet_balances(balances: Vec<AssetFiatValue>, collateral: Option<GemPerp
         .collect()
 }
 
-pub fn header_buttons_enabled(banners: &[Banner]) -> bool {
-    !banners.iter().any(|banner| banner.event == BannerEvent::AccountBlockedMultiSignature)
+pub fn header_buttons_enabled(banners: &[GemBannerRow]) -> bool {
+    !banners.iter().any(|row| row.banner.event == BannerEvent::AccountBlockedMultiSignature)
 }
 
 pub fn header_actions(wallet_type: WalletType, chains: &[Chain], is_enabled: bool) -> GemHeaderActions {
@@ -118,13 +120,19 @@ mod tests {
 
     #[test]
     fn test_a_blocked_multi_signature_account_disables_the_header_buttons() {
-        use primitives::BannerState;
+        use crate::services::banner::rules::banner_content;
+        use primitives::{Banner, BannerState};
+        let row = |event| {
+            let banner = Banner::mock(event, BannerState::Active);
+            GemBannerRow {
+                content: banner_content(banner.event, banner.asset.as_ref()),
+                banner,
+            }
+        };
+
         assert!(header_buttons_enabled(&[]));
-        assert!(header_buttons_enabled(&[Banner::mock(BannerEvent::Onboarding, BannerState::Active)]));
-        assert!(!header_buttons_enabled(&[
-            Banner::mock(BannerEvent::Onboarding, BannerState::Active),
-            Banner::mock(BannerEvent::AccountBlockedMultiSignature, BannerState::Active)
-        ]));
+        assert!(header_buttons_enabled(&[row(BannerEvent::Onboarding)]));
+        assert!(!header_buttons_enabled(&[row(BannerEvent::Onboarding), row(BannerEvent::AccountBlockedMultiSignature)]));
     }
 
     #[test]

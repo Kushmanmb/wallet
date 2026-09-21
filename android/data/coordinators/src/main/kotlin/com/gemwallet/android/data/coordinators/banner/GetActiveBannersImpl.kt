@@ -9,19 +9,19 @@ import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.toGem
 import com.wallet.core.primitives.Asset
-import com.wallet.core.primitives.Banner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
+import uniffi.gemstone.GemBannerRow
 import uniffi.gemstone.assetBannerContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetActiveBannersImpl(private val getSession: GetSession, private val getAssetInfo: GetAssetInfo, private val bannerStore: GemstoneBannerStore) : GetActiveBanners {
 
-    override fun invoke(asset: Asset): Flow<List<Banner>> = getSession()
+    override fun invoke(asset: Asset): Flow<List<GemBannerRow>> = getSession()
         .flatMapLatest { session ->
             val wallet = session?.wallet
             combine(
@@ -31,7 +31,6 @@ class GetActiveBannersImpl(private val getSession: GetSession, private val getAs
                 assetInfo?.let {
                     assetBannerContext(wallet?.toGem(), it.asset.toGem(), it.metadata.toGem(), it.balance.toGem())
                         .visibleBanners(stored = records.map { record -> record.toDTO().toGem() })
-                        .map { banner -> banner.toPrimitives() }
                 }.orEmpty()
             }
         }

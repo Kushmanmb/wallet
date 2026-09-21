@@ -3,6 +3,7 @@
 import Components
 import Formatters
 import Foundation
+import struct Gemstone.GemBannerRow
 import enum Gemstone.GemHeaderButtonKind
 import struct Gemstone.GemPerpetualCollateral
 import protocol Gemstone.GemWalletHomeServiceProtocol
@@ -138,12 +139,12 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
             currency: currency,
             showPerpetuals: viewState.showsPerpetuals,
             showCollections: viewState.showCollections,
-            visibleBanners: viewState.visibleBanners.map { $0.toPrimitives() },
+            visibleBanners: viewState.visibleBanners,
         )
     }
 
-    func bannerModel(for banner: Banner) -> BannerViewModel {
-        BannerViewModel(banner: banner, content: service.content(for: banner))
+    func bannerModel(for row: GemBannerRow) -> BannerViewModel {
+        BannerViewModel(row: row)
     }
 }
 

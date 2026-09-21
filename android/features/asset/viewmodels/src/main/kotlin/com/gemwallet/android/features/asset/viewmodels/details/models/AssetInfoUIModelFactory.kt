@@ -2,7 +2,6 @@ package com.gemwallet.android.features.asset.viewmodels.details.models
 
 import android.content.Context
 import com.gemwallet.android.domains.asset.chain
-import com.gemwallet.android.domains.banner.BannerRow
 import com.gemwallet.android.domains.percentage.formatAsPercentage
 import com.gemwallet.android.domains.price.tone
 import com.gemwallet.android.ext.asset
@@ -26,12 +25,13 @@ import uniffi.gemstone.GemAssetBalanceRow
 import uniffi.gemstone.GemAssetDetailRow
 import uniffi.gemstone.GemAssetDetails
 import uniffi.gemstone.GemBalanceRow
+import uniffi.gemstone.GemBannerRow
 import uniffi.gemstone.GemValueStyle
 import javax.inject.Inject
 
 class AssetInfoUIModelFactory @Inject constructor(@ApplicationContext private val context: Context) {
 
-    fun create(chainAssetInfo: ChainAssetInfo, details: GemAssetDetails, banners: List<BannerRow>): AssetInfoUIModel {
+    fun create(chainAssetInfo: ChainAssetInfo, details: GemAssetDetails, banners: List<GemBannerRow>): AssetInfoUIModel {
         val assetInfo = chainAssetInfo.assetInfo
         val asset = assetInfo.asset
         val balances = assetInfo.balance

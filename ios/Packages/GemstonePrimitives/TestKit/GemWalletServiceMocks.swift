@@ -256,10 +256,6 @@ public final class GemWalletHomeServiceMock: GemWalletHomeServiceProtocol, @unch
         enabled.append((assetIds, isEnabled))
     }
 
-    public func bannerContent(event _: Gemstone.BannerEvent, asset _: Gemstone.Asset?) -> GemBannerContent {
-        GemBannerContent(icon: .none, title: .none, description: .none, destination: .none)
-    }
-
     public func closeBanner(key: GemBannerKey) async throws {
         closedKeys.append(key)
     }

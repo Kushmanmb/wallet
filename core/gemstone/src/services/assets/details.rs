@@ -1,13 +1,13 @@
 use futures::TryFutureExt;
 use std::sync::Arc;
 
-use primitives::{Asset, AssetId, BannerEvent, Deeplink};
+use primitives::{AssetId, Deeplink};
 
 use crate::deeplink::GemDeeplinkService;
 use crate::models::custom_types::GemBigUint;
 use crate::models::state::GemLoadState;
 use crate::services::balance::GemBalanceService;
-use crate::services::banner::{GemBannerContent, GemBannerKey, GemBannerService};
+use crate::services::banner::{GemBannerKey, GemBannerService};
 use crate::services::error::GemServiceError;
 use crate::services::explorer::GemExplorerService;
 use crate::services::price_alert::GemPriceAlertService;
@@ -121,10 +121,6 @@ impl GemAssetDetailsService {
 
     pub async fn set_assets_enabled(&self, asset_ids: Vec<AssetId>, enabled: bool) -> Result<(), GemServiceError> {
         self.balances.set_assets_enabled(self.session.current_wallet_id()?, asset_ids, enabled).await
-    }
-
-    pub fn banner_content(&self, event: BannerEvent, asset: Option<Asset>) -> GemBannerContent {
-        self.banners.banner_content(event, asset)
     }
 
     pub async fn close_banner(&self, key: GemBannerKey) -> Result<(), GemServiceError> {

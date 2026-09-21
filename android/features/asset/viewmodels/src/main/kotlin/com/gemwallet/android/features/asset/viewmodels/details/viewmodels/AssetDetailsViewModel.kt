@@ -15,7 +15,6 @@ import com.gemwallet.android.application.transactions.cases.GetTransactions
 import com.gemwallet.android.application.transactions.cases.TransactionsRequestFilter
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
 import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusObserver
-import com.gemwallet.android.domains.banner.BannerRow
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
@@ -60,6 +59,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemAssetDetailsInput
 import uniffi.gemstone.GemAssetDetailsServiceInterface
+import uniffi.gemstone.GemBannerRow
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemLoadState
@@ -130,9 +130,7 @@ class AssetDetailsViewModel @Inject constructor(
         .map { it.assetInfo.asset }
         .distinctUntilChanged()
         .flatMapLatest { asset ->
-            getActiveBanners(asset).map { banners ->
-                banners.map { banner -> BannerRow(banner, assetDetailsService.bannerContent(banner.event.toGem(), banner.asset?.toGem())) }
-            }
+            getActiveBanners(asset)
         }
 
     private val priceAlerts = getPriceAlerts.assetPriceAlerts(assetId)
@@ -141,7 +139,7 @@ class AssetDetailsViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private fun uiModel(chainInfo: ChainAssetInfo?, session: Session?, banners: List<BannerRow>, priceAlerts: List<PriceAlert>): AssetInfoUIModel? {
+    private fun uiModel(chainInfo: ChainAssetInfo?, session: Session?, banners: List<GemBannerRow>, priceAlerts: List<PriceAlert>): AssetInfoUIModel? {
         session ?: return null
         val wallet = session.wallet
         val assetInfo = chainInfo?.assetInfo ?: return null
@@ -154,7 +152,7 @@ class AssetDetailsViewModel @Inject constructor(
                 balance = assetInfo.balance.toGem(),
                 price = assetInfo.price?.price?.price,
                 currency = session.currency.toGem(),
-                bannerEvents = banners.map { row -> row.banner.event.toGem() },
+                bannerEvents = banners.map { row -> row.banner.event },
                 priceAlerts = priceAlerts.map { alert -> alert.toGem() },
                 feeBalanceMetadata = chainInfo.feeAssetInfo.balance.metadata?.toGem(),
             ),
