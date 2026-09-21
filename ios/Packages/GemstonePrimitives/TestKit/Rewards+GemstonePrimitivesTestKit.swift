@@ -84,12 +84,10 @@ public extension GemRewardsState {
         statusNotice: GemListRow? = nil,
         showsPendingActivation: Bool = false,
         canActivatePendingReferral: Bool = false,
-        inviteRewardPointsText: String = "100",
+        inviteRewardPoints: GemFormattedNumber = .mock(value: 100, display: .number(precision: .fraction(min: 0, max: 0)), notation: .plain),
         referralCode: String? = "test123",
         referralLink: String? = "https://gemwallet.com/join?code=test123",
         usedReferralCode: String? = nil,
-        referralCountText: String = "5",
-        pointsText: String = "0",
         redemptions: [GemRewardsRedemption] = [],
     ) -> GemRewardsState {
         GemRewardsState(
@@ -101,12 +99,10 @@ public extension GemRewardsState {
             statusNotice: statusNotice,
             showsPendingActivation: showsPendingActivation,
             canActivatePendingReferral: canActivatePendingReferral,
-            inviteRewardPointsText: inviteRewardPointsText,
+            inviteRewardPoints: inviteRewardPoints,
             referralCode: referralCode,
             referralLink: referralLink,
             usedReferralCode: usedReferralCode,
-            referralCountText: referralCountText,
-            pointsText: pointsText,
             infoRows: [],
             redemptions: redemptions,
         )
@@ -117,9 +113,9 @@ public extension GemRewardsRedemption {
     static func mock(
         option: RewardRedemptionOption = .mock(),
         canRedeem: Bool = true,
-        pointsText: String = "100",
+        points: GemFormattedNumber = .mock(value: 100, display: .number(precision: .fraction(min: 0, max: 0)), notation: .plain),
         value: GemFormattedNumber = .mock(),
     ) -> GemRewardsRedemption {
-        GemRewardsRedemption(option: option, canRedeem: canRedeem, pointsText: pointsText, value: value)
+        GemRewardsRedemption(option: option, canRedeem: canRedeem, points: points, value: value)
     }
 }

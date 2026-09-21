@@ -1,11 +1,16 @@
 package com.gemwallet.android.features.referral.views
 
+import uniffi.gemstone.GemFormattedNumber
+import uniffi.gemstone.GemNumberDisplay
+import uniffi.gemstone.GemNumberNotation
+import uniffi.gemstone.GemNumberRounding
+import uniffi.gemstone.GemNumberUnit
+import uniffi.gemstone.GemPrecision
 import uniffi.gemstone.GemRewardsState
+import uniffi.gemstone.GemValueTone
 
 internal fun previewRewardsState(
     referralCode: String? = null,
-    referralCountText: String = "0",
-    pointsText: String = "0",
     hasReferralCode: Boolean = false,
     canInvite: Boolean = false,
     canUseReferralCode: Boolean = false,
@@ -21,12 +26,17 @@ internal fun previewRewardsState(
     statusNotice = null,
     showsPendingActivation = false,
     canActivatePendingReferral = canActivatePendingReferral,
-    inviteRewardPointsText = "100",
+    inviteRewardPoints = GemFormattedNumber(
+        value = 100.0,
+        unit = GemNumberUnit.Plain,
+        display = GemNumberDisplay.Number(GemPrecision.Fraction(0u, 0u)),
+        notation = GemNumberNotation.PLAIN,
+        tone = GemValueTone.PLAIN,
+        rounding = GemNumberRounding.TO_NEAREST,
+    ),
     referralCode = referralCode,
     referralLink = null,
     usedReferralCode = usedReferralCode,
-    referralCountText = referralCountText,
-    pointsText = pointsText,
     infoRows = emptyList(),
     redemptions = emptyList(),
 )

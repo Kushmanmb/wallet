@@ -82,7 +82,7 @@ public final class RewardsViewModel: Sendable {
     }
 
     var createCodeDescription: String {
-        Localized.Rewards.InviteFriends.description(rewardsState.inviteRewardPointsText.boldMarkdown())
+        Localized.Rewards.InviteFriends.description(rewardsState.inviteRewardPoints.text().boldMarkdown())
     }
 
     var activateCodeFooterTitle: String {
@@ -133,14 +133,6 @@ public final class RewardsViewModel: Sendable {
 
     var infoRows: [GemListRow] {
         rewardsState.infoRows
-    }
-
-    var referralCountText: String {
-        rewardsState.referralCountText
-    }
-
-    var pointsText: String {
-        rewardsState.pointsText
     }
 
     var invitedBy: String? {

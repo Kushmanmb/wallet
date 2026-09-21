@@ -23,9 +23,9 @@ internal fun GemRewardsRedemption.uiModel(context: Context): RewardRedemptionUIM
         redemption = this,
         model = ListItemModel(
             title = context.getString(R.string.rewards_ways_spend_asset_title, value.text()),
-            subtitle = pointsText,
+            subtitle = points.text(),
             image = ListItemImage.Asset(asset.toPrimitives().id),
         ),
-        confirmationMessage = context.getString(R.string.rewards_confirm_redeem, value.text(), pointsText),
+        confirmationMessage = context.getString(R.string.rewards_confirm_redeem, value.text(), points.text()),
     )
 }

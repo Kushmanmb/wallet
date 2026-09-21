@@ -37,6 +37,7 @@ import com.gemwallet.android.features.referral.views.components.referralHead
 import com.gemwallet.android.features.referral.views.components.referralInfo
 import com.gemwallet.android.features.referral.views.dialogs.GetStartedDialog
 import com.gemwallet.android.features.referral.views.dialogs.ReferralCodeDialog
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.buttons.mainActionButtonColors
@@ -145,7 +146,7 @@ fun ReferralScene(
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 referralHead(
-                    joinPointsCost = uiState.inviteRewardPointsText,
+                    joinPointsCost = uiState.inviteRewardPoints.text(),
                     canInvite = uiState.canInvite,
                     hasCode = uiState.hasReferralCode,
                     onGetStarted = { getStartedDialogShow = true },
@@ -237,8 +238,6 @@ private fun ReferralScenePreview() {
                 canInvite = true,
                 showsInfo = true,
                 referralCode = "testuser",
-                referralCountText = "5",
-                pointsText = "1000 \uD83D\uDC8E",
             ),
             infoRows = emptyList(),
             redemptions = emptyList(),

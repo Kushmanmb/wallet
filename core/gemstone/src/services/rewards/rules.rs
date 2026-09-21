@@ -1,5 +1,4 @@
 use crate::duration_formatter::countdown_parts;
-use crate::formatted_number::GemFormattedNumber;
 use crate::precision::GemValueStyle;
 use chrono::{DateTime, Utc};
 use number_formatter::BigNumberFormatter;
@@ -7,13 +6,14 @@ use primitives::{CoreEmoji, RewardRedemptionOption, RewardStatus, Rewards};
 
 use super::model::{GemRewardsRedemption, GemRewardsState};
 use crate::config::rewards::get_referral_url;
+use crate::formatted_number::{GemFormattedNumber, GemNumberUnit};
 use crate::models::list::{GemListRow, GemListRowTitle, GemNoticeKind};
 use crate::services::localization::GemLocalizedText;
 
 pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
     let Some(rewards) = rewards else {
         return GemRewardsState {
-            invite_reward_points_text: Rewards::default().invite_reward_points.to_string(),
+            invite_reward_points: points_number(Rewards::default().invite_reward_points),
             ..GemRewardsState::default()
         };
     };
@@ -36,13 +36,11 @@ pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
         status_notice: status_notice(is_unverified, has_pending_referral, can_activate_pending_referral, rewards, now),
         shows_pending_activation: has_pending_referral && !is_unverified,
         can_activate_pending_referral,
-        invite_reward_points_text: rewards.invite_reward_points.to_string(),
+        invite_reward_points: points_number(rewards.invite_reward_points),
         referral_code: referral_code.clone(),
         referral_link: referral_code.as_deref().map(get_referral_url),
         used_referral_code: rewards.used_referral_code.clone().filter(|code| !code.is_empty()),
-        referral_count_text: rewards.referral_count.to_string(),
-        points_text: points_text(rewards.points),
-        info_rows: info_rows(referral_code.as_deref(), &rewards.referral_count.to_string(), &points_text(rewards.points), rewards.used_referral_code.as_deref()),
+        info_rows: info_rows(referral_code.as_deref(), rewards.referral_count, rewards.points, rewards.used_referral_code.as_deref()),
         redemptions: redemptions(rewards),
     }
 }
@@ -72,8 +70,11 @@ fn status_notice(is_unverified: bool, has_pending_referral: bool, can_activate: 
     Some(notice(GemListRowTitle::RewardsPending, message))
 }
 
-fn points_text(points: i32) -> String {
-    format!("{points} {}", CoreEmoji::Gem.glyph())
+fn points_number(points: i32) -> GemFormattedNumber {
+    GemFormattedNumber {
+        unit: GemNumberUnit::Symbol { symbol: CoreEmoji::Gem.glyph().to_string() },
+        ..GemFormattedNumber::count(points.max(0) as u64)
+    }
 }
 
 fn redemptions(rewards: &Rewards) -> Vec<GemRewardsRedemption> {
@@ -84,7 +85,7 @@ fn redemptions(rewards: &Rewards) -> Vec<GemRewardsRedemption> {
             let asset = option.asset.as_ref()?;
             let value = BigNumberFormatter::f64_value(&option.value, asset.decimals as u32);
             Some(GemRewardsRedemption {
-                points_text: points_text(option.points),
+                points: points_number(option.points),
                 value: GemFormattedNumber::amount(value, Some(asset.symbol.clone()), GemValueStyle::Short),
                 option: option.clone(),
                 can_redeem: can_redeem(rewards, option),
@@ -93,13 +94,14 @@ fn redemptions(rewards: &Rewards) -> Vec<GemRewardsRedemption> {
         .collect()
 }
 
-fn info_rows(referral_code: Option<&str>, referral_count_text: &str, points_text: &str, used_referral_code: Option<&str>) -> Vec<GemListRow> {
+fn info_rows(referral_code: Option<&str>, referral_count: i32, points: i32, used_referral_code: Option<&str>) -> Vec<GemListRow> {
     let text = |title: GemListRowTitle, value: &str| GemListRow::Text { title, value: value.to_string() };
     let optional = |title: GemListRowTitle, value: Option<&str>| value.filter(|value| !value.is_empty()).map(|value| text(title, value));
+    let amount = |title: GemListRowTitle, amount: GemFormattedNumber| GemListRow::Amount { title, amount, info: None };
     [
         optional(GemListRowTitle::MyReferralCode, referral_code),
-        Some(text(GemListRowTitle::Referrals, referral_count_text)),
-        Some(text(GemListRowTitle::Points, points_text)),
+        Some(amount(GemListRowTitle::Referrals, GemFormattedNumber::count(referral_count.max(0) as u64))),
+        Some(amount(GemListRowTitle::Points, points_number(points))),
         optional(GemListRowTitle::InvitedBy, used_referral_code),
     ]
     .into_iter()
@@ -133,7 +135,8 @@ mod tests {
                 .into_iter()
                 .map(|row| match row {
                     GemListRow::Text { title, value } => (title, value),
-                    _ => panic!("an info row is plain text"),
+                    GemListRow::Amount { title, amount, .. } => (title, amount.value.to_string()),
+                    _ => panic!("an info row is text or an amount"),
                 })
                 .collect::<Vec<_>>()
         };
@@ -143,7 +146,7 @@ mod tests {
             vec![
                 (GemListRowTitle::MyReferralCode, "GEM123".to_string()),
                 (GemListRowTitle::Referrals, "4".to_string()),
-                (GemListRowTitle::Points, points_text(invited.points)),
+                (GemListRowTitle::Points, invited.points.to_string()),
                 (GemListRowTitle::InvitedBy, "FRIEND".to_string()),
             ],
         );
@@ -177,7 +180,9 @@ mod tests {
 
     #[test]
     fn test_points_read_with_the_gem_glyph() {
-        assert_eq!(points_text(250), "250 \u{1f48e}");
+        let points = points_number(250);
+        assert_eq!(points.value, 250.0);
+        assert_eq!(points.unit, GemNumberUnit::Symbol { symbol: "\u{1f48e}".to_string() }, "the glyph is the number's unit, so each app groups the digits itself");
     }
 
     use super::*;
@@ -260,7 +265,7 @@ mod tests {
         assert_eq!(
             state,
             GemRewardsState {
-                invite_reward_points_text: "100".to_string(),
+                invite_reward_points: points_number(100),
                 ..GemRewardsState::default()
             },
             "a wallet whose rewards failed to load still reads the invite pitch"
@@ -283,9 +288,18 @@ mod tests {
 
         assert_eq!(state.referral_code.as_deref(), Some("gem"));
         assert_eq!(state.used_referral_code.as_deref(), Some("friend"));
-        assert_eq!(state.referral_count_text, "5");
-        assert_eq!(state.points_text, "250 \u{1f48e}");
-        assert_eq!(state.invite_reward_points_text, "150");
+        assert_eq!(
+            state
+                .info_rows
+                .iter()
+                .filter_map(|row| match row {
+                    GemListRow::Amount { title, amount, .. } => Some((title.clone(), amount.value)),
+                    _ => None,
+                })
+                .collect::<Vec<_>>(),
+            vec![(GemListRowTitle::Referrals, 5.0), (GemListRowTitle::Points, 250.0)]
+        );
+        assert_eq!(state.invite_reward_points.value, 150.0);
         assert_eq!(
             state.error_notice,
             Some(GemListRow::Notice {
