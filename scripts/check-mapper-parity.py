@@ -52,7 +52,7 @@ def swift_mappings(paths):
             continue
         current = None
         for line in path.read_text().split("\n"):
-            opened = re.search(r"^extension (?:Gemstone\.)?(\w+)", line.strip())
+            opened = re.search(r"^(?:public |internal |private |fileprivate )?extension (?:Gemstone\.)?(\w+)", line.strip())
             if opened:
                 current = opened.group(1)
             arm = re.match(r"case (?:let )?([^:]+):\s*(Localized\.[\w.]+)", line.strip())
