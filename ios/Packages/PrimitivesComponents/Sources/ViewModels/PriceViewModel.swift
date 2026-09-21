@@ -64,7 +64,6 @@ public struct PriceViewModel: Sendable {
 
     public func fiatValueText(value: BigInt, decimals: Int) -> String? {
         guard let price, price.price != 0, value > 0 else { return nil }
-        let amount = CryptoFiatConverter().toFiat(value: value, decimals: UInt32(decimals), price: price.price)
-        return currencyFormatter.string(Double(amount) ?? .zero)
+        return currencyFormatter.string(CryptoFiatConverter().toFiat(value: value, decimals: UInt32(decimals), price: price.price))
     }
 }
