@@ -16,6 +16,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import uniffi.gemstone.GemAssetBalanceScope
 import uniffi.gemstone.GemAssetSubtitleStyle
 import uniffi.gemstone.GemAssetTitleStyle
 import uniffi.gemstone.GemValueTone
@@ -162,6 +163,17 @@ class AssetInfoDataAggregateTest {
 
         assertEquals("", aggregate.balanceEquivalent)
         assertEquals("", aggregate.price?.valueFormatted)
+    }
+
+    @Test
+    fun assetInfoDataAggregate_availableScope_showsWhatIsSpendable() {
+        val assetInfo = mockAssetInfo(
+            asset = btcAsset,
+            balance = AssetBalance.create(btcAsset, available = BigInteger("100000000"), staked = BigInteger("200000000")),
+        )
+
+        assertEquals("3 BTC", assetInfo.toAssetInfoDataAggregate(mockGemAssetRowStyle()).balance)
+        assertEquals("1 BTC", assetInfo.toAssetInfoDataAggregate(mockGemAssetRowStyle(), scope = GemAssetBalanceScope.AVAILABLE).balance)
     }
 
     @Test

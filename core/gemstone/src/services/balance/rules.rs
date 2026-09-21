@@ -15,8 +15,12 @@ use number_formatter::BigNumberFormatter;
 use primitives::currency::Currency;
 
 pub fn balance_amount(value: &BigUint, asset: &Asset) -> GemFormattedNumber {
+    balance_amount_styled(value, asset, GemValueStyle::Auto)
+}
+
+pub fn balance_amount_styled(value: &BigUint, asset: &Asset, style: GemValueStyle) -> GemFormattedNumber {
     let value = BigNumberFormatter::f64_value(value, asset.decimals.unsigned_abs());
-    GemFormattedNumber::amount(value, Some(asset.symbol.clone()), GemValueStyle::Auto)
+    GemFormattedNumber::amount(value, Some(asset.symbol.clone()), style)
 }
 
 #[uniffi::export]

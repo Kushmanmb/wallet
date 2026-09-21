@@ -5,11 +5,15 @@ import com.gemwallet.android.domains.price.values.PriceValue
 import com.gemwallet.android.domains.price.values.RowFormatters
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.model.AssetInfo
+import com.gemwallet.android.model.text
+import com.gemwallet.android.model.toGem
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
+import com.wallet.core.primitives.Currency
+import uniffi.gemstone.GemAssetBalanceScope
+import uniffi.gemstone.GemAssetListRowInput
 import uniffi.gemstone.GemAssetRowStyle
-import uniffi.gemstone.assetRowText
-import java.math.BigDecimal
+import uniffi.gemstone.assetListRow
 
 @Immutable
 data class AssetInfoDataAggregate(
@@ -32,36 +36,32 @@ fun List<AssetInfo>.toAssetInfoDataAggregates(style: GemAssetRowStyle, hideBalan
     return map { it.toAssetInfoDataAggregate(style = style, hideBalance = hideBalance, formatters = formatters) }
 }
 
-fun AssetInfo.toAssetInfoDataAggregate(style: GemAssetRowStyle, hideBalance: Boolean = false, displayedAmount: Double = balance.totalAmount, formatters: RowFormatters = RowFormatters()): AssetInfoDataAggregate {
+private const val HIDDEN_BALANCE = "*****"
+
+fun AssetInfo.toAssetInfoDataAggregate(style: GemAssetRowStyle, hideBalance: Boolean = false, scope: GemAssetBalanceScope = GemAssetBalanceScope.TOTAL, formatters: RowFormatters = RowFormatters()): AssetInfoDataAggregate {
     val assetPrice = price?.price
     val priceValue = assetPrice?.price?.takeIf(Double::isFinite)
     val changePercentage = assetPrice?.priceChangePercentage24h?.takeIf(Double::isFinite)
-    val formattedBalance = if (hideBalance) {
-        "*****"
-    } else {
-        formatters.value.string(BigDecimal.valueOf(displayedAmount), asset.symbol)
-    }
-    val balanceEquivalent = if (hideBalance) {
-        "*****"
-    } else {
-        price?.let { info ->
-            priceValue
-                ?.takeUnless { it == 0.0 }
-                ?.let { formatters.currency(info.currency).string(displayedAmount * it) }
-        }.orEmpty()
-    }
-
-    val text = assetRowText(asset.toGem(), style)
+    val row = assetListRow(
+        GemAssetListRowInput(
+            asset = asset.toGem(),
+            balance = balance.toGem(),
+            scope = scope,
+            price = priceValue,
+            currency = (price?.currency ?: Currency.USD).toGem(),
+            style = style,
+        ),
+    )
 
     return AssetInfoDataAggregate(
         id = asset.id,
         asset = asset,
-        title = text.title,
-        symbol = text.symbol,
-        network = text.network,
-        balance = formattedBalance,
-        balanceEquivalent = balanceEquivalent,
-        isZeroBalance = displayedAmount == 0.0,
+        title = row.text.title,
+        symbol = row.text.symbol,
+        network = row.text.network,
+        balance = if (hideBalance) HIDDEN_BALANCE else row.amount.text(),
+        balanceEquivalent = if (hideBalance) HIDDEN_BALANCE else row.fiat?.text().orEmpty(),
+        isZeroBalance = !row.hasBalance,
         price = price?.let { formatters.price(it.currency, priceValue, changePercentage) },
         pinned = metadata.isPinned,
         balanceEnabled = metadata.isBalanceEnabled,

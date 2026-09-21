@@ -107,6 +107,35 @@ pub fn asset_row_text(asset: Asset, style: GemAssetRowStyle) -> GemAssetRowText 
     super::rules::asset_row_text(&asset, style)
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemAssetBalanceScope {
+    Total,
+    Available,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAssetListRowInput {
+    pub asset: Asset,
+    pub balance: GemAssetBalance,
+    pub scope: GemAssetBalanceScope,
+    pub price: Option<f64>,
+    pub currency: Currency,
+    pub style: GemAssetRowStyle,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAssetListRow {
+    pub text: GemAssetRowText,
+    pub amount: GemFormattedNumber,
+    pub fiat: Option<GemFormattedNumber>,
+    pub has_balance: bool,
+}
+
+#[uniffi::export]
+pub fn asset_list_row(input: GemAssetListRowInput) -> GemAssetListRow {
+    super::rules::asset_list_row(input)
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
 pub struct GemAssetRowStyle {
     pub title: GemAssetTitleStyle,

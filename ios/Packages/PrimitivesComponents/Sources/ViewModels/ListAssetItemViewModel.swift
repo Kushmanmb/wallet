@@ -3,9 +3,12 @@
 import Components
 import Formatters
 import Foundation
-import func Gemstone.assetRowText
+import func Gemstone.assetListRow
+import struct Gemstone.GemAssetBalance
+import enum Gemstone.GemAssetBalanceScope
+import struct Gemstone.GemAssetListRow
+import struct Gemstone.GemAssetListRowInput
 import struct Gemstone.GemAssetRowStyle
-import struct Gemstone.GemAssetRowText
 import GemstonePrimitives
 import Primitives
 import Style
@@ -14,7 +17,7 @@ import SwiftUI
 public struct ListAssetItemViewModel: ListAssetItemViewable {
     let assetDataModel: AssetDataViewModel
     let rowStyle: GemAssetRowStyle
-    private let text: GemAssetRowText
+    private let row: GemAssetListRow
 
     public let showBalancePrivacy: Binding<Bool>
     public var action: ((ListAssetItemAction) -> Void)?
@@ -29,7 +32,16 @@ public struct ListAssetItemViewModel: ListAssetItemViewable {
         self.assetDataModel = assetDataModel
         self.rowStyle = rowStyle
         self.action = action
-        text = assetRowText(asset: assetDataModel.asset.toGem(), style: rowStyle)
+        row = assetListRow(
+            input: GemAssetListRowInput(
+                asset: assetDataModel.asset.toGem(),
+                balance: GemAssetBalance(assetDataModel.assetData.balance, assetId: assetDataModel.asset.id, isActive: assetDataModel.assetData.metadata.isActive),
+                scope: .total,
+                price: assetDataModel.assetData.price?.price,
+                currency: assetDataModel.currency.toGem(),
+                style: rowStyle,
+            ),
+        )
     }
 
     public init(
@@ -53,11 +65,11 @@ public struct ListAssetItemViewModel: ListAssetItemViewable {
     }
 
     public var name: String {
-        text.title
+        row.text.title
     }
 
     public var symbol: String? {
-        text.symbol
+        row.text.symbol
     }
 
     public var subtitleView: ListAssetItemSubtitleView {
@@ -74,7 +86,7 @@ public struct ListAssetItemViewModel: ListAssetItemViewable {
                 ),
             )
         case .network:
-            text.network.map { .type(TextValue(text: $0, style: .calloutSecondary)) } ?? .none
+            row.text.network.map { .type(TextValue(text: $0, style: .calloutSecondary)) } ?? .none
         }
     }
 
@@ -83,11 +95,11 @@ public struct ListAssetItemViewModel: ListAssetItemViewable {
         case .balance:
             .balance(
                 balance: TextValue(
-                    text: assetDataModel.totalBalanceTextWithSymbol,
-                    style: TextStyle(font: .callout, color: assetDataModel.balanceTextColor, fontWeight: .semibold),
+                    text: row.amount.text(),
+                    style: TextStyle(font: .callout, color: row.hasBalance ? Colors.black : Colors.gray, fontWeight: .semibold),
                 ),
                 totalFiat: TextValue(
-                    text: assetDataModel.fiatBalanceText,
+                    text: row.fiat?.text() ?? .empty,
                     style: TextStyle(font: .footnote, color: Colors.gray),
                 ),
             )

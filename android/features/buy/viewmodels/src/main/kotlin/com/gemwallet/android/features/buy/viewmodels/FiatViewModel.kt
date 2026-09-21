@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemAssetBalanceScope
 import uniffi.gemstone.GemFiatQuoteRequest
 import uniffi.gemstone.GemFiatQuoteServiceInterface
 import uniffi.gemstone.GemFiatQuotesResult
@@ -101,7 +102,7 @@ class FiatViewModel @Inject constructor(
             val assetInfo = it.toAssetInfo()
             assetInfo.toAssetInfoDataAggregate(
                 style = GemSelectAssetType.Buy.flow().rowStyle,
-                displayedAmount = assetInfo.balance.balanceAmount.available,
+                scope = GemAssetBalanceScope.AVAILABLE,
             )
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)

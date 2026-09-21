@@ -8,9 +8,9 @@ use primitives::{
 };
 
 use super::model::{
-    AssetList, GemAssetAction, GemAssetDetailRow, GemAssetDetailSection, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetMenuAction, GemAssetMenuInput, GemAssetNetworkDestination, GemAssetRowStyle, GemAssetRowText,
-    GemAssetSectionIds, GemAssetSubtitleStyle, GemAssetText, GemAssetTitleStyle, GemAssetTrailingStyle, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind, GemSelectAssetFlow, GemSelectAssetScope, GemSelectAssetSection,
-    GemSelectAssetTitle, GemSelectAssetType, GemSelectRowAction, GemWalletSearchCounts, GemWalletSearchLimits, GemWalletSearchPhase, GemWalletSearchState,
+    AssetList, GemAssetAction, GemAssetBalanceScope, GemAssetDetailRow, GemAssetDetailSection, GemAssetDetailsState, GemAssetEmptyAction, GemAssetFilter, GemAssetListRow, GemAssetListRowInput, GemAssetMenuAction, GemAssetMenuInput,
+    GemAssetNetworkDestination, GemAssetRowStyle, GemAssetRowText, GemAssetSectionIds, GemAssetSubtitleStyle, GemAssetText, GemAssetTitleStyle, GemAssetTrailingStyle, GemHeaderActions, GemHeaderButton, GemHeaderButtonKind,
+    GemSelectAssetFlow, GemSelectAssetScope, GemSelectAssetSection, GemSelectAssetTitle, GemSelectAssetType, GemSelectRowAction, GemWalletSearchCounts, GemWalletSearchLimits, GemWalletSearchPhase, GemWalletSearchState,
 };
 use crate::config::search_config::{ASSETS_INITIAL_LIMIT, ASSETS_SEARCH_LIMIT, NFTS_PREVIEW_LIMIT, PERPETUALS_PREVIEW_LIMIT, RESULTS_LIMIT};
 use crate::config::stake::EARN_OFFERED;
@@ -200,6 +200,27 @@ pub fn asset_row_text(asset: &Asset, style: GemAssetRowStyle) -> GemAssetRowText
         symbol: (style.shows_symbol && title != asset.symbol).then(|| asset.symbol.clone()),
         network: (style.subtitle == GemAssetSubtitleStyle::Network && !asset.id.is_native()).then(|| chain_asset.network_name.clone()),
         title,
+    }
+}
+
+pub fn asset_list_row(input: GemAssetListRowInput) -> GemAssetListRow {
+    let GemAssetListRowInput {
+        asset,
+        balance,
+        scope,
+        price,
+        currency,
+        style,
+    } = input;
+    let value = match scope {
+        GemAssetBalanceScope::Total => balance.total(),
+        GemAssetBalanceScope::Available => balance.available,
+    };
+    GemAssetListRow {
+        text: asset_row_text(&asset, style),
+        amount: crate::services::balance::rules::balance_amount_styled(&value, &asset, crate::precision::GemValueStyle::Short),
+        fiat: fiat_amount(&asset, &value, price, currency),
+        has_balance: value > GemBigUint::ZERO,
     }
 }
 
@@ -439,7 +460,11 @@ pub fn asset_title(asset: &Asset) -> String {
 }
 
 pub fn fiat_value(asset: &Asset, balance: &GemAssetBalance, price: Option<f64>, currency: Currency) -> Option<GemFormattedNumber> {
-    let value: f64 = CryptoFiatConverter::to_fiat(&balance.total().to_string(), asset.decimals as u32, price?).ok()?.parse().ok()?;
+    fiat_amount(asset, &balance.total(), price, currency)
+}
+
+fn fiat_amount(asset: &Asset, value: &GemBigUint, price: Option<f64>, currency: Currency) -> Option<GemFormattedNumber> {
+    let value: f64 = CryptoFiatConverter::to_fiat(&value.to_string(), asset.decimals as u32, price?).ok()?.parse().ok()?;
     (value > 0.0).then(|| GemFormattedNumber::currency(value, currency, GemCurrencyStyle::Currency))
 }
 
@@ -631,6 +656,40 @@ mod tests {
         assert_eq!(usdc.title, "USDC", "a name that already is the symbol is not repeated");
         assert_eq!(usdc.subtitle_symbol, None);
         assert_eq!(usdc.network_full_name, "Ethereum (ERC20)");
+    }
+
+    #[test]
+    fn test_a_list_row_carries_the_balance_its_fiat_and_whether_there_is_any() {
+        let usdc = Asset::mock_ethereum_usdc();
+        let row = |balance: GemAssetBalance, scope, price| {
+            asset_list_row(GemAssetListRowInput {
+                asset: usdc.clone(),
+                balance,
+                scope,
+                price,
+                currency: Currency::USD,
+                style: wallet_asset_row_style(),
+            })
+        };
+        let held = GemAssetBalance {
+            staked: GemBigUint::from(2_000_000u32),
+            ..GemAssetBalance::mock_with_available(1_000_000)
+        };
+
+        let total = row(held.clone(), GemAssetBalanceScope::Total, Some(1.0));
+        assert_eq!(total.amount.value, 3.0);
+        assert_eq!(total.amount.unit, crate::formatted_number::GemNumberUnit::Symbol { symbol: usdc.symbol.clone() });
+        assert_eq!(total.fiat.expect("a priced balance is worth something").value, 3.0);
+        assert!(total.has_balance);
+
+        let available = row(held.clone(), GemAssetBalanceScope::Available, Some(1.0));
+        assert_eq!(available.amount.value, 1.0, "the buy screen spends what is available, not what is staked");
+
+        assert_eq!(row(held, GemAssetBalanceScope::Total, None).fiat, None, "an unpriced asset is worth nothing the row can name");
+
+        let empty = row(GemAssetBalance::mock(), GemAssetBalanceScope::Total, Some(1.0));
+        assert!(!empty.has_balance, "an empty balance greys the row on both apps");
+        assert_eq!(empty.fiat, None);
     }
 
     #[test]
