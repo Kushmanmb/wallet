@@ -42,6 +42,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -57,6 +58,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemPerpetualDetailsServiceInterface
@@ -90,10 +92,16 @@ class PerpetualDetailsViewModel @Inject constructor(
         TransactionsRequestFilter.Types(service.activityTypes().map { it.toPrimitives() }),
     )
 
-    private val transactionSync = flow {
-        runCatchingCancellable { service.syncTransactions(assetId.toIdentifier()) }
-        emit(Unit)
-    }
+    private val refreshTrigger = MutableStateFlow(0L)
+    private val storedRefreshRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    private val storedSync = storedRefreshRequests
+        .transformLatest { _ ->
+            runCatchingCancellable { service.refresh(assetId.toIdentifier()) }
+                .getOrNull()
+                ?.forEach { Log.e(TAG, "perpetual refresh failed at ${it.step}: ${it.message}") }
+            emit(Unit)
+        }
         .onStart { emit(Unit) }
         .flowOn(ioDispatcher)
 
@@ -122,14 +130,13 @@ class PerpetualDetailsViewModel @Inject constructor(
 
     val transactions = combine(
         getTransactions.getTransactions(transactionFilters),
-        transactionSync,
+        storedSync,
     ) { transactions, _ -> transactions }
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, getTransactions.stored(transactionFilters))
 
     val period = MutableStateFlow(service.chartPeriod().toPrimitives())
 
-    private val refreshTrigger = MutableStateFlow(0L)
     private val refreshState = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = refreshState.asStateFlow()
 
@@ -214,10 +221,7 @@ class PerpetualDetailsViewModel @Inject constructor(
 
     fun fetch() {
         refreshTrigger.update { it + 1 }
-        viewModelScope.launch(ioDispatcher) {
-            runCatchingCancellable { service.syncPositions() }
-                .onFailure { Log.e(TAG, "perpetual positions sync failed", it) }
-        }
+        storedRefreshRequests.tryEmit(Unit)
     }
 
     fun refresh() {

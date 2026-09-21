@@ -112,17 +112,23 @@ class PerpetualDetailsViewModelTest {
     }
 
     @Test
-    fun `refreshing shows the spinner and asks Core to sync the positions`() = runTest(dispatcher) {
+    fun `refreshing shows the spinner and asks Core for the stored data again`() = runTest(dispatcher) {
         val service: GemPerpetualDetailsServiceInterface = mockk(relaxed = true) {
             every { chartPeriod() } returns uniffi.gemstone.ChartPeriod.DAY
         }
         val model = viewModel(service = service)
+        advanceUntilIdle()
+        coVerify(exactly = 0) { service.refresh(any()) }
 
         model.refresh()
 
         assertTrue(model.isRefreshing.value)
         advanceUntilIdle()
-        coVerify { service.syncPositions() }
+        coVerify(exactly = 1) { service.refresh(asset.id.toIdentifier()) }
+
+        model.fetch()
+        advanceUntilIdle()
+        coVerify(exactly = 2) { service.refresh(asset.id.toIdentifier()) }
     }
 
     @Test

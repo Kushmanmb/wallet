@@ -193,6 +193,7 @@ pub enum GemMarketsRefreshTrigger {
 pub enum GemPerpetualRefreshStep {
     Positions,
     Markets,
+    Transactions,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
