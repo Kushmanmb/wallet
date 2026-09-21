@@ -111,7 +111,9 @@ public struct AmountScene: View {
 
             case let .earn(earn):
                 Section(earn.providerTitle) {
-                    ValidatorView(model: ValidatorViewModel(row: earn.providerRow))
+                    if let row = earn.providerRow {
+                        ValidatorView(model: ValidatorViewModel(row: row))
+                    }
                 }
 
             case .transfer:

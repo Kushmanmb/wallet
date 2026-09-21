@@ -13,6 +13,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.features.transfer_amount.presents.dialogs.AmountAutocloseSheet
 import com.gemwallet.android.features.transfer_amount.presents.dialogs.SelectLeverageDialog
 import com.gemwallet.android.features.transfer_amount.viewmodels.providers.AmountDataProvider
+import com.gemwallet.android.features.transfer_amount.viewmodels.providers.AmountEarnProvider
 import com.gemwallet.android.features.transfer_amount.viewmodels.providers.AmountPerpetualProvider
 import com.gemwallet.android.features.transfer_amount.viewmodels.providers.AmountStakeProvider
 import com.gemwallet.android.features.transfer_amount.viewmodels.providers.AmountTransferProvider
@@ -28,6 +29,7 @@ import com.gemwallet.android.ui.components.list_item.uiModel
 import com.gemwallet.android.ui.localization.stringRes
 import com.gemwallet.android.ui.models.ListPosition
 import com.wallet.core.primitives.Resource
+import uniffi.gemstone.GemAmountType
 
 @Composable
 fun ProviderExtras(provider: AmountDataProvider, amount: String, onPickValidator: () -> Unit) {
@@ -41,6 +43,8 @@ fun ProviderExtras(provider: AmountDataProvider, amount: String, onPickValidator
                     PerpetualAutocloseSection(provider, amount)
                 }
             }
+
+            is AmountEarnProvider -> EarnProviderSection(provider)
 
             is AmountTransferProvider -> Unit
         }
@@ -58,6 +62,18 @@ private fun StakeProviderSection(provider: AmountStakeProvider, onPickValidator:
         is AmountParams.Stake.Withdraw,
         is AmountParams.Stake.Rewards,
         -> StakeValidatorSection(provider, onPickValidator)
+    }
+}
+
+@Composable
+private fun EarnProviderSection(provider: AmountEarnProvider) {
+    val amountType by provider.amountType.collectAsStateWithLifecycle()
+    (amountType as? GemAmountType.Earn)?.let { earn ->
+        SubheaderItem(R.string.common_provider)
+        PropertyValidatorItem(
+            validator = earn.provider.uiModel(),
+            listPosition = ListPosition.Single,
+        )
     }
 }
 

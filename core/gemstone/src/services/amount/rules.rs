@@ -164,11 +164,13 @@ pub fn stake_amount_type(input: &GemStakeAmountInput) -> GemAmountType {
 }
 
 pub fn earn_amount_type(earn_type: EarnType) -> GemAmountType {
+    let (earn_type, validator) = match earn_type {
+        EarnType::Deposit(validator) => (GemAmountEarnType::Deposit, validator),
+        EarnType::Withdraw(delegation) => (GemAmountEarnType::Withdraw { delegation: delegation.clone() }, delegation.validator),
+    };
     GemAmountType::Earn {
-        earn_type: match earn_type {
-            EarnType::Deposit(_) => GemAmountEarnType::Deposit,
-            EarnType::Withdraw(delegation) => GemAmountEarnType::Withdraw { delegation },
-        },
+        earn_type,
+        provider: stake_rules::validator_row(&validator),
     }
 }
 
@@ -186,7 +188,7 @@ pub fn amount_title(amount_type: &GemAmountType) -> GemAmountTitle {
             GemAmountStakeType::Freeze { .. } => GemAmountTitle::Freeze,
             GemAmountStakeType::Unfreeze { .. } => GemAmountTitle::Unfreeze,
         },
-        GemAmountType::Earn { earn_type } => match earn_type {
+        GemAmountType::Earn { earn_type, .. } => match earn_type {
             GemAmountEarnType::Deposit => GemAmountTitle::Deposit,
             GemAmountEarnType::Withdraw { .. } => GemAmountTitle::Withdraw,
         },
@@ -251,7 +253,7 @@ impl GemAmountType {
                 GemAmountStakeType::Rewards { delegations } => BigInt::from(delegations.iter().map(|delegation| delegation.base.rewards.clone()).sum::<BigUint>()),
                 GemAmountStakeType::Unfreeze { resource } => transfer_rules::unfreeze_available(resource, balance),
             },
-            Self::Earn { earn_type } => match earn_type {
+            Self::Earn { earn_type, .. } => match earn_type {
                 GemAmountEarnType::Deposit => BigInt::from(balance.available.clone()),
                 GemAmountEarnType::Withdraw { delegation } => BigInt::from(delegation.base.balance.clone()),
             },
@@ -495,9 +497,7 @@ mod tests {
     fn test_the_amount_screen_title_follows_the_amount_type() {
         assert_eq!(amount_title(&GemAmountType::Transfer), GemAmountTitle::Send);
         assert_eq!(
-            amount_title(&GemAmountType::Earn {
-                earn_type: GemAmountEarnType::Withdraw { delegation: primitives::Delegation::mock() }
-            }),
+            amount_title(&earn_amount_type(EarnType::Withdraw(primitives::Delegation::mock()))),
             GemAmountTitle::Withdraw,
             "earning and staking withdrawals share the wallet's withdraw title"
         );
@@ -862,16 +862,11 @@ mod tests {
     fn test_earn_perpetual_and_deposit_sources() {
         let ethereum = Asset::from_chain(Chain::Ethereum);
         assert_eq!(
-            GemAmountType::Earn { earn_type: GemAmountEarnType::Deposit }.available_value(&ethereum, &GemAssetBalance::mock_with_available(11)),
+            earn_amount_type(EarnType::Deposit(DelegationValidator::mock())).available_value(&ethereum, &GemAssetBalance::mock_with_available(11)),
             BigInt::from(11)
         );
         assert_eq!(
-            GemAmountType::Earn {
-                earn_type: GemAmountEarnType::Withdraw {
-                    delegation: Delegation::mock_base(DelegationBase::mock_with_balance(33, 0))
-                }
-            }
-            .available_value(&ethereum, &GemAssetBalance::mock_with_available(11)),
+            earn_amount_type(EarnType::Withdraw(Delegation::mock_base(DelegationBase::mock_with_balance(33, 0)))).available_value(&ethereum, &GemAssetBalance::mock_with_available(11)),
             BigInt::from(33)
         );
         assert_eq!(GemAmountType::Deposit.available_value(&Asset::mock_hypercore_usdc(), &GemAssetBalance::mock_with_available(5)), BigInt::from(5));
@@ -1294,15 +1289,24 @@ mod tests {
     }
 
     #[test]
-    fn test_earn_amount_type_keeps_the_withdrawn_delegation() {
+    fn test_earn_amount_type_keeps_the_withdrawn_delegation_and_names_its_provider() {
         let delegation = Delegation::mock_base(DelegationBase::mock_with_balance(100, 0));
+        let provider = stake_rules::validator_row(&delegation.validator);
 
-        assert_eq!(earn_amount_type(EarnType::Deposit(delegation.validator.clone())), GemAmountType::Earn { earn_type: GemAmountEarnType::Deposit });
+        assert_eq!(
+            earn_amount_type(EarnType::Deposit(delegation.validator.clone())),
+            GemAmountType::Earn {
+                earn_type: GemAmountEarnType::Deposit,
+                provider: provider.clone()
+            }
+        );
         assert_eq!(
             earn_amount_type(EarnType::Withdraw(delegation.clone())),
             GemAmountType::Earn {
-                earn_type: GemAmountEarnType::Withdraw { delegation }
-            }
+                earn_type: GemAmountEarnType::Withdraw { delegation },
+                provider
+            },
+            "a withdrawal names the validator it is leaving"
         );
     }
 

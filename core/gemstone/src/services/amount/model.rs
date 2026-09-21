@@ -2,8 +2,10 @@ use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::{GemBigInt, GemBigUint};
 use crate::payment::GemPaymentRecipient;
 use crate::services::balance::GemBalanceRequirement;
+use crate::services::stake::model::GemValidatorRow;
 use primitives::{Asset, Delegation, PerpetualDirection, Resource};
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemAmountType {
     Transfer,
@@ -14,6 +16,7 @@ pub enum GemAmountType {
     },
     Earn {
         earn_type: GemAmountEarnType,
+        provider: GemValidatorRow,
     },
     Perpetual {
         position: GemAmountPerpetualPosition,
