@@ -20,7 +20,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 2. **Establish consistency:** MIG6. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, and C53 wallet creation/import. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
-5. **Close the boundary:** finish B76, U9, U18, U33, N12, F56/F61 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
+5. **Close the boundary:** finish U9, U18, U33, N12, F56/F61 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
 
 ## Screen coverage and existing infrastructure
 
@@ -31,10 +31,10 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | C53, X172 |
 | Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | N7, X172 |
 | Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | U25, O59, AUD23, AUD25, AUD26, AUD27, AUD28 |
-| Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | B76, AUD20, AUD43, AUD44, U26 |
-| Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | B76, AUD36 |
+| Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | AUD20, AUD43, AUD44, U26 |
+| Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | AUD36 |
 | Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | S74, O59, F61 |
-| Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | AUD14, B76, F61 |
+| Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | AUD14, F61 |
 | Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | AUD44; retain existing native QR/share adapters |
 | Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | U19, C52, F56 |
 | Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | Keep debounce/observation native |
@@ -193,7 +193,6 @@ The same product rule on both apps with a difference, each read on both sides on
 
 [ARCHITECTURE.md § 5](ARCHITECTURE.md#a-view-never-names-a-core-type): feature views consume prepared UI values and do not call Core, choose localized wording from domain cases or reconstruct domain decisions. Shared row renderers and opaque row-key dispatch are intentional exceptions. Move interpretation into the model/mapper; do not add a wrapper solely to hide a generated type name. B67 records an earlier census; inspect each current hit for the actual behavior described below.
 
-- **B76** **M** Asset and chart screens decide from Core types again: `AssetScene.swift:97-174` switches `GemAssetDetailRow`/`GemAssetNetworkDestination`/`GemAssetBalanceRow` (added by b15426c878), `ChartScene.swift:21-48` switches `GemChartSection`, and Android `AssetDetailRowItem.kt:76-81`, `AssetDetailsScene.kt:52-76` (routes on `GemListRowTitle` and picks toasts), `AssetSelectScreen.kt:54-87` with `AssetSelectFlowUIModel.kt:9-23`, `AssetInfoUIModel.kt:35-38`, `BannerItem.kt:17` and `GemLineChart.kt:82`. The B67 shapes.
 
 ## 4. App-side twins and outcomes the app invents
 
@@ -237,7 +236,7 @@ The retained items came from the earlier two reviews on 2026-09-19. This archite
 
 **Pass two ran five lenses over the whole codebase:** Core internals and the FFI surface; persistence, networking and scheduling rules; the screens pass one did not cover (scan, add token, networks, contacts, markets, lock, notifications, widget, recents, update, receive, wallet details, support); user-visible text and numbers composed in app code; and screen state machines, swallowed failures and tests that restate a Core rule.
 
-**The completion contract above is the definition of done.** Structural censuses over fixed file sets are useful review leads, not proof of every architectural rule. Today `just check-mappers` and `just check-docs` are the checked-in checks; MIG5 adds the broader regression gate. Historical census scripts were scoped ad hoc audits. "A view never names a Core type" read zero on 2026-09-17 and had regressed by 2026-09-19 (B76–B79), so rerun the checks after every batch of row or screen migrations, not only at the end; the census recipe is in the B67 ledger entry.
+**The completion contract above is the definition of done.** Structural censuses over fixed file sets are useful review leads, not proof of every architectural rule. Today `just check-mappers` and `just check-docs` are the checked-in checks; MIG5 adds the broader regression gate. Historical census scripts were scoped ad hoc audits. "A view never names a Core type" read zero on 2026-09-17 and had regressed by 2026-09-19 (B76–B80), so rerun the checks after every batch of row or screen migrations, not only at the end; the census recipe is in the B67 ledger entry.
 
 ### Final migration coverage check
 
@@ -311,7 +310,7 @@ What each earlier sweep closed as correct, kept so the same lead is not re-raise
 
 **Consistency review (2026-09-17).** Dismissed as platform-owned: the app-update rule (Play in-app update vs App Store release check), the keystore flows (`setup_chains` vs `migrate_to_shared_password`), CAIP-2 (both through Core by different entry points), the sign-message preview (`payload_preview` is Android's one-click-auth flow), and the auth prompt outcome read by halves (iOS needs `is_cancelled`, Android `retry_delay_milliseconds`; both are Core rules). One-sided enum mappings that pick an icon or translate enum to enum are not label choices; `just check-mappers` is the label check.
 
-**B67 (2026-09-17).** The historical view-boundary census (a lead generator, not a blanket prohibition on shared renderer inputs): collect `pub struct|enum|trait Gem*` under `core/gemstone/src` plus the public types in `Gemstone.swift`, then list `ios/**/Scenes`, `ios/**/Views`, `*Scene.swift`, `*View.swift` and every Android file containing `@Composable` (tests, generated, the mapper files and previews excluded) that names one. It read 0 and 0 on 2026-09-17; B76 is what it finds now.
+**B67 (2026-09-17).** The historical view-boundary census (a lead generator, not a blanket prohibition on shared renderer inputs): collect `pub struct|enum|trait Gem*` under `core/gemstone/src` plus the public types in `Gemstone.swift`, then list `ios/**/Scenes`, `ios/**/Views`, `*Scene.swift`, `*View.swift` and every Android file containing `@Composable` (tests, generated, the mapper files and previews excluded) that names one. It read 0 and 0 on 2026-09-17, regressed into B76–B80, and those have since landed. Shared row renderers keep taking `GemListRow` and `GemChartBounds`, and a payload that only crosses to another screen keeps its generated type; both are the documented exceptions, not new hits.
 
 **Contract checks (2026-09-16).** Kept as correct: a UI state class may carry `NameResolveIndicatorUIModel` from the shared field; the dependency-free rule objects and the Hilt providers that construct concrete services are the only concrete-class holders; view models with several `show*` members read Core sections and rules; navigation values are app types (`ConfirmTransferInput`, `ImportType`, `WalletSecretInput`); a screen flag that is a computed projection of the session phase is not a second state; a row model may carry the edit input and pre-formatted texts the record cannot; an application case with branches that only plumb a flow is a narrow read.
 

@@ -1,4 +1,4 @@
-package com.gemwallet.android.features.asset.presents.details
+package com.gemwallet.android.features.asset.viewmodels.details.models
 
 import com.gemwallet.android.domains.confirm.ConfirmTransferInput
 import com.wallet.core.primitives.AssetId
