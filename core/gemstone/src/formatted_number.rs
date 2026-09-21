@@ -220,6 +220,11 @@ pub fn formatted_currency(value: f64, code: String, style: GemCurrencyStyle) -> 
 }
 
 #[uniffi::export]
+pub fn formatted_signed_currency(value: f64, code: String, style: GemCurrencyStyle) -> GemFormattedNumber {
+    GemFormattedNumber::currency_code(value, code, style).signed()
+}
+
+#[uniffi::export]
 pub fn formatted_amount(value: f64, symbol: Option<String>, style: GemValueStyle) -> GemFormattedNumber {
     GemFormattedNumber::amount(value, symbol, style)
 }
