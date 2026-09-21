@@ -1,12 +1,25 @@
 use crate::formatted_number::GemFormattedNumber;
 use crate::models::list::GemListRow;
-use crate::models::state::GemLoadState;
-use primitives::{RewardRedemptionOption, WalletId};
+use crate::services::error::GemServiceError;
+use primitives::{RewardRedemptionOption, Rewards, WalletId};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
-pub struct GemRewardsLoad {
-    pub wallet_id: Option<WalletId>,
-    pub state: GemLoadState,
+pub struct GemRewardsResult {
+    pub wallet_id: WalletId,
+    pub rewards: Option<Rewards>,
+    pub error: Option<GemServiceError>,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemRewardsPhase {
+    Loading,
+    Data,
+    Failed { error: GemServiceError },
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemRewardsViewState {
+    pub phase: GemRewardsPhase,
     pub rewards: GemRewardsState,
 }
 

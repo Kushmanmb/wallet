@@ -1,5 +1,6 @@
 pub mod model;
 pub mod rules;
+pub mod session;
 pub mod store;
 
 use std::sync::Arc;
@@ -17,6 +18,7 @@ use crate::services::price::GemPriceService;
 use crate::services::stream::rules::hyperliquid_account;
 
 pub use model::GemPortfolioValues;
+pub use session::{GemPortfolioRequest, GemPortfolioResult, GemPortfolioSession, GemPortfolioViewState};
 pub use store::GemPortfolioStore;
 
 #[uniffi::export]
@@ -47,6 +49,13 @@ impl GemPortfolioService {
 
     pub fn currency(&self, portfolio_type: PortfolioType) -> Currency {
         rules::portfolio_currency(portfolio_type, self.preferences.get_currency())
+    }
+
+    pub async fn refresh(&self, wallet: Wallet, request: GemPortfolioRequest) -> GemPortfolioResult {
+        match self.portfolio_data(wallet, request.portfolio_type, request.period).await {
+            Ok(data) => GemPortfolioResult { request, data: Some(data), error: None },
+            Err(error) => GemPortfolioResult { request, data: None, error: Some(error) },
+        }
     }
 
     pub async fn portfolio_data(&self, wallet: Wallet, portfolio_type: PortfolioType, period: ChartPeriod) -> Result<PortfolioData, GemServiceError> {

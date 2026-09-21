@@ -608,7 +608,16 @@ This is as far as a view model should move into Core, and the limits are the poi
 
 Core has no observation primitive and no lifecycle, which is why the reactive half stays in the app. The view model owns the task, the debounce, the cancellation and the navigation; the session owns the answers.
 
-**Async outcomes identify the request that produced them.** Core validates whether the request still applies before changing domain state, including failures. Native cancellation saves work but does not establish freshness. Reuse the owning request/input type; introduce a generation only if overlapping identical inputs require it. [Fiat result acceptance](../core/gemstone/src/services/fiat/session.rs) and [swap result acceptance](../core/gemstone/src/services/swap/session.rs) are the existing examples. [Performance](PERFORMANCE.md) requires rejecting obsolete wallet, asset and quote results. S72–S74 cover request identity for chart migrations.
+**Async outcomes identify the request that produced them.** Core validates whether the request still applies before changing domain state, including failures. Native cancellation saves work but does not establish freshness. Reuse the owning request/input type; introduce a generation only if overlapping identical inputs require it. [Fiat result acceptance](../core/gemstone/src/services/fiat/session.rs) and [swap result acceptance](../core/gemstone/src/services/swap/session.rs) are the existing examples. The shape a service-backed load takes: the service returns a result carrying the request it answers — [`GemPortfolioResult`](../core/gemstone/src/services/portfolio/session.rs), [`GemRewardsResult`](../core/gemstone/src/services/rewards/model.rs) — and the session folds it with `on_result`, which drops an answer for a selection the screen has moved past. The view model is then two lines and holds no cancellation flag of its own:
+
+```swift
+func refresh() async {
+    let result = await service.refresh(walletId: selectedWallet.id.id)
+    session = session.onResult(result: result)
+}
+```
+
+Never pre-assign a freshly loading record and pass it back in as the shown state: that throws away the rows a failed refresh is supposed to keep. [Performance](PERFORMANCE.md) requires rejecting obsolete wallet, asset and quote results. S72 covers request identity for the remaining chart migration.
 
 ### A screen's state is one phase enum, never a bag of flags
 

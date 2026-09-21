@@ -27,7 +27,14 @@ fn converted_percentage(value: ChartValuePercentage, rate: f64) -> ChartValuePer
     }
 }
 
-fn wallet_periods() -> Vec<ChartPeriod> {
+pub fn fallback_period(period: ChartPeriod, offered: &[ChartPeriod]) -> Option<ChartPeriod> {
+    match offered.is_empty() || offered.contains(&period) {
+        true => None,
+        false => offered.first().copied(),
+    }
+}
+
+pub fn wallet_periods() -> Vec<ChartPeriod> {
     vec![ChartPeriod::Day, ChartPeriod::Week, ChartPeriod::Month, ChartPeriod::Year, ChartPeriod::All]
 }
 

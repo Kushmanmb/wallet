@@ -1,8 +1,8 @@
 package com.gemwallet.android.testkit
 
-import uniffi.gemstone.GemLoadState
-import uniffi.gemstone.GemRewardsLoad
+import uniffi.gemstone.GemRewardsResult
 import uniffi.gemstone.GemRewardsState
+import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.ReferralAllowance
 import uniffi.gemstone.ReferralQuota
 import uniffi.gemstone.RewardStatus
@@ -39,8 +39,8 @@ fun mockGemRewardsState(referralCode: String? = null, usedReferralCode: String? 
     redemptions = emptyList(),
 )
 
-fun mockGemRewardsLoad(walletId: String? = null, state: GemLoadState = GemLoadState.Data, rewards: GemRewardsState = mockGemRewardsState()) = GemRewardsLoad(
+fun mockGemRewardsResult(walletId: String, rewards: Rewards? = mockRewards(), error: GemServiceException? = null) = GemRewardsResult(
     walletId = walletId,
-    state = state,
     rewards = rewards,
+    error = error,
 )

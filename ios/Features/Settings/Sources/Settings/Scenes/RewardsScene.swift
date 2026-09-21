@@ -17,10 +17,10 @@ public struct RewardsScene: View {
 
     public var body: some View {
         List {
-            switch model.load.state {
+            switch model.viewState.phase {
             case .loading:
                 CenterLoadingView()
-            case let .error(error):
+            case let .failed(error):
                 stateErrorView(error: error)
             case .data:
                 inviteFriendsSection
@@ -36,8 +36,6 @@ public struct RewardsScene: View {
                 if model.redemptionOptions.isNotEmpty {
                     redemptionOptionsSection(options: model.redemptionOptions)
                 }
-            case .noData:
-                inviteFriendsSection
             }
         }
         .refreshable { await model.refresh() }

@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use chrono::Utc;
 use primitives::rewards::{RedemptionRequest, RedemptionResult};
 use primitives::{AuthenticatedRequest, ReferralCode, Rewards, Wallet, WalletId};
 
@@ -12,29 +11,16 @@ use crate::services::wallet_session::rules as session_rules;
 
 pub mod model;
 pub mod rules;
+pub mod session;
 #[cfg(test)]
 pub(crate) mod testkit;
 
-pub use model::{GemIncomingCode, GemRewardsLoad, GemRewardsState};
+pub use model::{GemIncomingCode, GemRewardsPhase, GemRewardsResult, GemRewardsState, GemRewardsViewState};
+pub use session::GemRewardsSession;
 
 #[uniffi::export]
 pub fn incoming_referral_code(code: Option<String>, wallets: Vec<Wallet>) -> Option<GemIncomingCode> {
     rules::incoming_code(code.as_deref(), &session_rules::rewards_wallets(wallets))
-}
-
-#[uniffi::export]
-pub fn rewards_loading(wallet_id: Option<WalletId>) -> GemRewardsLoad {
-    rules::loading(wallet_id, Utc::now())
-}
-
-#[uniffi::export]
-pub fn rewards_updated(shown: GemRewardsLoad, rewards: Rewards) -> GemRewardsLoad {
-    rules::updated(&shown, rewards, Utc::now())
-}
-
-#[uniffi::export]
-pub fn rewards_accepted(shown: GemRewardsLoad, loaded: GemRewardsLoad) -> GemRewardsLoad {
-    rules::accepted(shown, loaded)
 }
 
 #[derive(uniffi::Object)]
@@ -59,9 +45,19 @@ impl GemRewardsService {
         session_rules::rewards_wallet(current, &self.wallets(wallets))
     }
 
-    pub async fn refresh(&self, wallet_id: WalletId, shown: GemRewardsLoad) -> GemRewardsLoad {
-        let rewards = self.get_rewards(wallet_id.clone()).await;
-        rules::loaded(&shown, wallet_id, rewards, Utc::now())
+    pub async fn refresh(&self, wallet_id: WalletId) -> GemRewardsResult {
+        match self.get_rewards(wallet_id.clone()).await {
+            Ok(rewards) => GemRewardsResult {
+                wallet_id,
+                rewards: Some(rewards),
+                error: None,
+            },
+            Err(error) => GemRewardsResult {
+                wallet_id,
+                rewards: None,
+                error: Some(error),
+            },
+        }
     }
 
     pub async fn create_referral(&self, wallet: Wallet, code: String) -> Result<Rewards, GemServiceError> {

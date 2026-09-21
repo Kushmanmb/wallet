@@ -178,23 +178,40 @@ public final class GemStreamServiceMock: GemStreamServiceProtocol, @unchecked Se
 }
 
 public final class GemPortfolioServiceMock: GemPortfolioServiceProtocol, @unchecked Sendable {
-    private let allTimeHigh: Primitives.ChartValuePercentage?
-    private let allTimeLow: Primitives.ChartValuePercentage?
+    public var dataForType: (Gemstone.PortfolioType) -> Gemstone.PortfolioData
+    public var error: GemServiceError?
 
-    public init(allTimeHigh: Primitives.ChartValuePercentage? = nil, allTimeLow: Primitives.ChartValuePercentage? = nil) {
-        self.allTimeHigh = allTimeHigh
-        self.allTimeLow = allTimeLow
+    public private(set) var requests: [GemPortfolioRequest] = []
+
+    public init() {
+        dataForType = { type in
+            switch type {
+            case .wallet: .mockWallet()
+            case .perpetuals: .mockPerpetual()
+            }
+        }
     }
 
     public func currency(portfolioType _: Gemstone.PortfolioType) -> Gemstone.Currency {
         Primitives.Currency.usd.toGem()
     }
 
-    public func portfolioData(wallet _: Gemstone.Wallet, portfolioType _: Gemstone.PortfolioType, period _: Gemstone.ChartPeriod) async throws -> Gemstone.PortfolioData {
-        Gemstone.PortfolioData(
-            charts: [Gemstone.PortfolioChartData(chartType: .value, values: [])],
-            statistics: [allTimeHigh.map { .allTimeHigh(value: $0.toGem()) }, allTimeLow.map { .allTimeLow(value: $0.toGem()) }].compactMap(\.self),
-            availablePeriods: [.day, .week, .month, .year, .all],
+    public func portfolioData(wallet _: Gemstone.Wallet, portfolioType: Gemstone.PortfolioType, period _: Gemstone.ChartPeriod) async throws -> Gemstone.PortfolioData {
+        if let error {
+            throw error
+        }
+        return dataForType(portfolioType)
+    }
+
+    public func refresh(wallet: Gemstone.Wallet, request: GemPortfolioRequest) async -> GemPortfolioResult {
+        requests.append(request)
+        if let error {
+            return GemPortfolioResult(request: request, data: nil, error: error)
+        }
+        return await GemPortfolioResult(
+            request: request,
+            data: try? portfolioData(wallet: wallet, portfolioType: request.portfolioType, period: request.period),
+            error: nil,
         )
     }
 }
