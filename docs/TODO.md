@@ -20,7 +20,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 2. **Establish consistency:** MIG6. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, and C53 wallet creation/import. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
-5. **Close the boundary:** finish B76–B79, U9, U18, U33, N12, F56/F61/F62 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
+5. **Close the boundary:** finish B76–B79, U9, U18, U33, N12, F56/F61 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
 
 ## Screen coverage and existing infrastructure
 
@@ -33,18 +33,18 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | U25, O59, AUD23, AUD25, AUD26, AUD27, AUD28 |
 | Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | B76, AUD20, AUD43, AUD44, U26 |
 | Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | B76, AUD36 |
-| Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | S74, O59, F61/F62 |
-| Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | S72, AUD14, B76, F61/F62 |
+| Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | S74, O59, F61 |
+| Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | S72, AUD14, B76, F61 |
 | Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | AUD44; retain existing native QR/share adapters |
 | Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | U19, C52, F56 |
 | Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | Keep debounce/observation native |
 | Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | B78 |
 | Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | C51, AUD5, AUD42, AUD45, P90, D73 |
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | U33 |
-| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | U18, AUD29, AUD33, AUD34, N7, P90, F62 |
+| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | U18, AUD29, AUD33, AUD34, N7, P90 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | S80, U33 |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | K14/K19, O59, AUD38, AUD40 |
-| Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73, F61/F62, AUD15, AUD41 |
+| Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73, F61, AUD15, AUD41 |
 | Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | S75, AUD46, K14, N11 |
 | Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | Preserve exact atomic values |
 | Earn list, provider and deposit amount | Existing stake/earn owner and amount extras | Preserve the existing feature gate |
@@ -58,7 +58,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | D48, S80, B77, AUD32 |
 | WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | AUD17, D72/D73; retain Android-only one-click auth |
 | About, app update, developer/service status | Existing settings/update/developer services and native store adapters | R131, B77; platform delivery channels remain distinct |
-| Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | U9/U17, K19, F61/F62; retain native widget scheduling |
+| Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | U9/U17, K19, F61; retain native widget scheduling |
 
 An id belongs in this table only while its bullet exists below. MIG5, MIG6, K13, K21, N8, N10, N12, AUD35, and the decision and upstream items stay in their own sections.
 
@@ -206,7 +206,6 @@ The same product rule on both apps with a difference, each read on both sides on
 
 - **F56** **M** Android turns errors into text through two classifiers (`errorText()` for five Core types plus the raw message, `toGemErrorText()` for the confirm broadcast only), re-implements Core's `payment_error_text` in `GemPaymentException.userMessage` (so `NoPaymentOptions` shows the generic scan error where iOS shows Core's text), and wraps foreign exceptions into Core variants (`ChartViewModel.kt:61`, `SwapQuotesResult.kt:23`). Core `alien_error_text`/`payment_error_text` become `text()` methods; one Android classifier covering iOS `Errors.swift`'s set.
 - **F61** **S** The shared abbreviated parity fixture is still missing. Android's abbreviated path uses `android.icu.text.CompactDecimalFormat`, a framework class absent from plain JVM unit tests, so a test of it throws `NullPointerException` in `:gemcore:testDebugUnitTest`; it needs Robolectric or instrumentation (X172, AUD35). iOS covers both rounding modes in [FormattedNumberTests](../ios/Packages/GemstonePrimitives/Tests/GemstonePrimitivesTests/FormattedNumberTests.swift). The rounding itself is fixed: `AbbreviatedFormatter` takes the record's rule instead of always truncating, and Android's `percentText` honours `rounding` and handles `Significant` instead of force-casting to `Fraction`. `BelowThreshold` signing was fixed with K19.
-- **F62** **S** The shared row renderers print dates differently: the `AllTime` date is Today/Yesterday-or-long on iOS and `DateFormat.MEDIUM` on Android, and the `Date` row is "Today, 3:45 PM" on iOS and "Today 3:45 PM" through `DateUtils` (not `GemDayBoundaries`) on Android; iOS keeps a second `RelativeDateFormatter`. One row-date renderer per app over `GemDayBoundaries`. Typed-data timestamps in signing and simulation payloads go through the same two renderers (`SimulationPayloadFieldViewModel.swift:40`, `SimulationPayloadFieldsContent.kt:44-46`, which also prints "" for 0).
 
 ## 5. Forwarders and façades
 
