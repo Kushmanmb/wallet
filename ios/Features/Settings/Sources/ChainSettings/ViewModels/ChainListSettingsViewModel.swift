@@ -2,7 +2,7 @@
 
 import Components
 import Foundation
-import protocol Gemstone.GemChainServiceProtocol
+import protocol Gemstone.GemChainSettingsServiceProtocol
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -12,9 +12,9 @@ import Style
 @Observable
 @MainActor
 public final class ChainListSettingsViewModel {
-    private let service: any GemChainServiceProtocol
+    private let service: any GemChainSettingsServiceProtocol
 
-    public init(service: any GemChainServiceProtocol) {
+    public init(service: any GemChainSettingsServiceProtocol) {
         self.service = service
     }
 
@@ -23,7 +23,7 @@ public final class ChainListSettingsViewModel {
     }
 
     func filterChains(for query: String) -> [Chain] {
-        service.getChains(query: query).map { Chain(core: $0) }
+        service.chains(query: query).map { Chain(core: $0) }
     }
 
     var serviceStatusListItem: ListItemModel {

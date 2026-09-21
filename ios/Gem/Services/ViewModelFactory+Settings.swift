@@ -64,7 +64,7 @@ public extension ViewModelFactory {
 
     @MainActor
     func chainListSettingsScene() -> ChainListSettingsViewModel {
-        ChainListSettingsViewModel(service: chainService)
+        ChainListSettingsViewModel(service: gatewayService.chainSettingsService(nodes: nodeService, explorer: explorerService))
     }
 
     @MainActor

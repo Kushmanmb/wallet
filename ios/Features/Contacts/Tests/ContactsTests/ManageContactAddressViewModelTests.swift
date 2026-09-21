@@ -2,6 +2,7 @@
 
 @testable import Contacts
 import ContactsTestKit
+import class Gemstone.GemChainService
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
 import Primitives
@@ -59,5 +60,14 @@ struct ManageContactAddressViewModelTests {
 
         model.onSelectChain(.bitcoin)
         #expect(model.addressInputModel.nameRecordViewModel.state == .none)
+    }
+
+    @Test
+    func theNetworkPickerFollowsCoreChainOrder() {
+        let model = ManageContactAddressViewModel.mock()
+        let chains = GemChainService.shared.getChains(query: .empty).map { Chain(core: $0) }
+
+        #expect(model.networkSelectorModel.state.value?.items == chains)
+        #expect(chains != Chain.allCases)
     }
 }

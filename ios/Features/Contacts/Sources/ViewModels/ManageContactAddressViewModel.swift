@@ -3,6 +3,7 @@
 import Components
 import Foundation
 import func Gemstone.contactAddressFields
+import class Gemstone.GemChainService
 import enum Gemstone.GemContactAddressField
 import struct Gemstone.GemContactAddressInput
 import protocol Gemstone.GemManageContactServiceProtocol
@@ -38,6 +39,7 @@ public final class ManageContactAddressViewModel {
 
     private let contactId: String
     private let mode: Mode
+    private let chains: [Chain]
     private let service: any GemManageContactServiceProtocol
     private let onComplete: (GemContactAddressInput) -> Void
 
@@ -54,6 +56,7 @@ public final class ManageContactAddressViewModel {
     ) {
         self.contactId = contactId
         self.mode = mode
+        chains = GemChainService.shared.getChains(query: .empty).map { Chain(core: $0) }
         self.service = service
         self.onComplete = onComplete
         title = Localized.Common.address
@@ -100,7 +103,7 @@ public final class ManageContactAddressViewModel {
 
     var networkSelectorModel: NetworkSelectorViewModel {
         NetworkSelectorViewModel(
-            state: .data(.plain(Chain.allCases)),
+            state: .data(.plain(chains)),
             selectedItems: [chain],
             selectionType: .checkmark,
             title: GemContactAddressField.network.title,

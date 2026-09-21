@@ -56,7 +56,6 @@ import SwiftUI
 public struct ViewModelFactory: Sendable {
     let apiClient: GemApiClient
     let assetConfig: GemAssetConfigService
-    let chainService: GemChainService
     let assetDiscoveryService: GemAssetDiscoveryService
     let assetsService: GemAssetsService
     let avatarService: GemAvatarService
