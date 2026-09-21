@@ -72,9 +72,11 @@ private fun GemConfirmErrorDisplay.infoSheet(
     }
 
     is GemConfirmErrorDisplay.NetworkFeeMissing -> {
+        val feeTitle = title
         val asset = asset.toPrimitives()
         NetworkFeeRequiredInfo(
             chain = asset.chain,
+            title = feeTitle,
             actionLabel = acquireFlow(asset).actionLabel(context, asset.symbol),
             action = { onAcquire(asset, networkFeeBuyAmount) },
         )

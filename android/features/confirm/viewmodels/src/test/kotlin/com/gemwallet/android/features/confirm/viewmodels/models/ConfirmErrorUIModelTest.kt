@@ -60,6 +60,7 @@ class ConfirmErrorUIModelTest {
     fun aGasSizedNetworkFeeKeepsEveryDigitThatMatters() {
         val display = GemConfirmErrorDisplay.NetworkFeeRequired(
             asset.toGem(),
+            "Ethereum (ETH)",
             requirement(
                 required = "630000000000000",
                 available = "500000000000000",

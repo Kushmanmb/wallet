@@ -15,9 +15,6 @@ val AssetInfo.symbol: String
 val AssetInfo.decimals: Int
     get() = asset.decimals
 
-val AssetInfo.title: String
-    get() = asset.title
-
 val AssetInfo.chain: Chain
     get() = asset.chain
 

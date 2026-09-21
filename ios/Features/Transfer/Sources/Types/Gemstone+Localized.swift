@@ -106,15 +106,15 @@ extension GemConfirmErrorDisplay: @retroactive LocalizedError {
                 Self.amount(requirement.available, asset: asset).boldMarkdown(),
                 Self.amount(requirement.shortfall, asset: asset).boldMarkdown(),
             )
-        case let .networkFeeRequired(asset, requirement):
+        case let .networkFeeRequired(asset, _, requirement):
             Localized.Info.InsufficientNetworkFeeBalance.description(
                 Self.amount(requirement.required, asset: asset).boldMarkdown(),
                 asset.toPrimitives().chain.networkName.boldMarkdown(),
                 Self.amount(requirement.available, asset: asset).boldMarkdown(),
                 Self.amount(requirement.shortfall, asset: asset).boldMarkdown(),
             )
-        case let .networkFeeMissing(asset):
-            Localized.Transfer.insufficientNetworkFeeBalance(Self.title(asset: asset))
+        case let .networkFeeMissing(_, title):
+            Localized.Transfer.insufficientNetworkFeeBalance(title.boldMarkdown())
         case let .minimumAccountBalance(asset, required):
             Localized.Transfer.minimumAccountBalance(Self.amount(required, asset: asset).boldMarkdown())
         case let .swapMinimum(asset, _, providerName, requirement):
@@ -132,11 +132,6 @@ extension GemConfirmErrorDisplay: @retroactive LocalizedError {
 
     private static func amount(_ value: BigInt, asset: Gemstone.Asset) -> String {
         ValueFormatter(style: .auto).string(value, asset: asset.toPrimitives())
-    }
-
-    private static func title(asset: Gemstone.Asset) -> String {
-        let title = asset.name == asset.symbol ? asset.name : String(format: "%@ (%@)", asset.name, asset.symbol)
-        return title.boldMarkdown()
     }
 }
 

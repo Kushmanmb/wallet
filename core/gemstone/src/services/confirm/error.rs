@@ -108,10 +108,12 @@ pub enum GemConfirmErrorDisplay {
     },
     NetworkFeeRequired {
         asset: Asset,
+        title: String,
         requirement: GemBalanceRequirement,
     },
     NetworkFeeMissing {
         asset: Asset,
+        title: String,
     },
     MinimumAccountBalance {
         asset: Asset,
@@ -149,10 +151,14 @@ impl GemConfirmError {
             },
             Self::InsufficientNetworkFee { asset, requirement } => match requirement {
                 Some(requirement) => GemConfirmErrorDisplay::NetworkFeeRequired {
+                    title: asset.display_title(),
                     asset: asset.clone(),
                     requirement: requirement.clone(),
                 },
-                None => GemConfirmErrorDisplay::NetworkFeeMissing { asset: asset.clone() },
+                None => GemConfirmErrorDisplay::NetworkFeeMissing {
+                    title: asset.display_title(),
+                    asset: asset.clone(),
+                },
             },
             Self::MinimumAccountBalanceTooLow { asset, requirement } => GemConfirmErrorDisplay::MinimumAccountBalance {
                 asset: asset.clone(),
@@ -286,7 +292,10 @@ mod tests {
         };
         let without = GemConfirmError::InsufficientNetworkFee { asset: asset.clone(), requirement: None };
         assert!(matches!(with_requirement.display(), GemConfirmErrorDisplay::NetworkFeeRequired { .. }));
-        assert!(matches!(without.display(), GemConfirmErrorDisplay::NetworkFeeMissing { .. }));
+        assert!(matches!(
+            without.display(),
+            GemConfirmErrorDisplay::NetworkFeeMissing { ref title, .. } if *title == asset.display_title()
+        ));
 
         let dust = GemConfirmError::Sign {
             error: GemSignerError::DustThreshold,

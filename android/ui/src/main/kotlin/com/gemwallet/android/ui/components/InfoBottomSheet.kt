@@ -23,7 +23,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.gemwallet.android.AppUrl
-import com.gemwallet.android.domains.asset.title
 import com.gemwallet.android.ext.asset
 import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.ui.R
@@ -81,7 +80,7 @@ sealed class InfoSheetEntity(
             descriptionArgs = listOf("**$required**", "**${chain.networkName()}**", "**$available**", "**$shortfall**"),
         )
 
-    class NetworkFeeRequiredInfo(chain: Chain, actionLabel: String, action: () -> Unit) :
+    class NetworkFeeRequiredInfo(chain: Chain, title: String, actionLabel: String, action: () -> Unit) :
         InfoSheetEntity(
             icon = chain.asset().iconModel(),
             title = R.string.info_balance_required_title,
@@ -90,7 +89,7 @@ sealed class InfoSheetEntity(
             action = action,
             actionLabel = actionLabel,
             titleArgs = listOf(chain.asset().symbol),
-            descriptionArgs = listOf("**${chain.asset().title}**"),
+            descriptionArgs = listOf("**$title**"),
         )
 
     class BalanceRequiredInfo(asset: Asset, required: String, available: String, shortfall: String, actionLabel: String, action: () -> Unit) :

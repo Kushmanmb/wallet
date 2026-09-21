@@ -531,7 +531,7 @@ struct ConfirmTransferSceneViewModelTests {
         let required = BigInt(21_000_000_000_000)
         model.onSelectListError(error: .confirm(.InsufficientNetworkFee(asset: Asset.mockEthereum().toGem(), requirement: GemBalanceRequirement(required: required, available: 0, shortfall: required))))
 
-        guard case let .info(.insufficientNetworkFee(_, _, sheetRequirement, _, _, _)) = model.isPresentingSheet else {
+        guard case let .info(.insufficientNetworkFee(_, _, _, sheetRequirement, _, _, _)) = model.isPresentingSheet else {
             Issue.record("Expected insufficientNetworkFee sheet")
             return
         }
@@ -543,7 +543,7 @@ struct ConfirmTransferSceneViewModelTests {
         let model = ConfirmTransferSceneViewModel.mock()
         model.onSelectListError(error: .confirm(.InsufficientNetworkFee(asset: Asset.mockEthereum().toGem(), requirement: nil)))
 
-        guard case let .info(.insufficientNetworkFee(_, _, _, _, _, .action(_, action))) = model.isPresentingSheet else {
+        guard case let .info(.insufficientNetworkFee(_, _, _, _, _, _, .action(_, action))) = model.isPresentingSheet else {
             Issue.record("Expected insufficientNetworkFee sheet")
             return
         }
@@ -644,12 +644,12 @@ struct ConfirmTransferSceneViewModelTests {
         let required = BigInt(2_000_000_000_000_000)
 
         let withPrice = InfoSheetModelFactory.create(from: .insufficientNetworkFee(
-            asset, image: image, requirement: BalanceRequirement(required: required, available: .zero, shortfall: required),
+            asset, title: asset.name, image: image, requirement: BalanceRequirement(required: required, available: .zero, shortfall: required),
             price: .mock(price: 2000),
             currency: "USD", button: .action(title: "", action: {}),
         ))
         let withoutPrice = InfoSheetModelFactory.create(from: .insufficientNetworkFee(
-            asset, image: image, requirement: BalanceRequirement(required: required, available: .zero, shortfall: required),
+            asset, title: asset.name, image: image, requirement: BalanceRequirement(required: required, available: .zero, shortfall: required),
             price: nil, currency: "USD", button: .action(title: "", action: {}),
         ))
 
@@ -673,7 +673,7 @@ struct ConfirmTransferSceneViewModelTests {
         model.onSelectListError(error: .confirm(.InsufficientNetworkFee(asset: Asset.mockTron().toGem(), requirement: nil)))
 
         guard case let .info(sheet) = model.isPresentingSheet,
-              case let .insufficientNetworkFee(asset, _, _, _, _, .action(_, action)) = sheet
+              case let .insufficientNetworkFee(asset, _, _, _, _, _, .action(_, action)) = sheet
         else {
             Issue.record("Expected insufficientNetworkFee sheet")
             return

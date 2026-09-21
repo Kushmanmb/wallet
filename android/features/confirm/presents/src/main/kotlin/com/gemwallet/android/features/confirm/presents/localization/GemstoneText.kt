@@ -2,7 +2,6 @@ package com.gemwallet.android.features.confirm.presents.localization
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.gemwallet.android.domains.asset.title
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.perpetual.title

@@ -2,7 +2,6 @@ package com.gemwallet.android.features.confirm.viewmodels.localization
 
 import android.content.Context
 import androidx.annotation.StringRes
-import com.gemwallet.android.domains.asset.title
 import com.gemwallet.android.ext.boldMarkdown
 import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.ext.toGemErrorText
@@ -58,7 +57,7 @@ fun GemConfirmErrorDisplay.text(context: Context): String = when (this) {
     }
 
     is GemConfirmErrorDisplay.NetworkFeeMissing ->
-        context.getString(R.string.transfer_insufficient_network_fee_balance, asset.toPrimitives().title.boldMarkdown())
+        context.getString(R.string.transfer_insufficient_network_fee_balance, title.boldMarkdown())
 
     is GemConfirmErrorDisplay.MinimumAccountBalance ->
         context.getString(R.string.transfer_minimum_account_balance, amount(required, asset.toPrimitives()).boldMarkdown())
