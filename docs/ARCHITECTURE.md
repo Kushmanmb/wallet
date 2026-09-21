@@ -17,7 +17,7 @@ Read the contract and the named implementation, then the actual owner and caller
 | REST or JSON-RPC client | [§ 12](#12-a-clients-requests-are-one-enum-the-client-only-sends) | [`AptosClient`](../core/crates/gem_aptos/src/rpc/client.rs) for direct sends, [`TronGridClient`](../core/crates/gem_tron/src/rpc/trongrid/client.rs) for shared credentials, [`SolanaRpc`](../core/crates/gem_solana/src/jsonrpc.rs) for RPC |
 | Tests and fixtures | [§ 10](#10-tests) and the platform testing guide | The owner's existing tests, [`primitives/src/testkit/asset_mock.rs`](../core/crates/primitives/src/testkit/asset_mock.rs) for fixtures, [`gem_client/testkit.rs`](../core/crates/gem_client/src/testkit.rs) for wire behavior |
 | Async result freshness | [Session contract](#a-screen-whose-state-changes-is-a-session), [Performance](PERFORMANCE.md) | [Fiat session](../core/gemstone/src/services/fiat/session.rs), [retained confirmation](../core/gemstone/src/services/confirm/confirmation.rs) |
-| Atomic writes and retries | [Store contract](#atomic-changes-concurrent-publication-and-query-contracts), [command outcomes](#a-command-names-its-commit-and-recovery-behavior) | [Native balance update](../ios/Packages/Store/Sources/Stores/BalanceStore.swift), [Android transaction runner](../android/data/services/gemstone/src/main/kotlin/com/gemwallet/android/data/services/gemstone/stores/PerpetualStore.kt); MIG2–MIG4 name current gaps |
+| Atomic writes and retries | [Store contract](#atomic-changes-concurrent-publication-and-query-contracts), [command outcomes](#a-command-names-its-commit-and-recovery-behavior) | [Native balance update](../ios/Packages/Store/Sources/Stores/BalanceStore.swift), [Android transaction runner](../android/data/services/gemstone/src/main/kotlin/com/gemwallet/android/data/services/gemstone/stores/PerpetualStore.kt); MIG6 names the remaining paired-adapter tests |
 | Choose and complete a migration item | [Working one item](TODO.md#working-one-item), [screen coverage](TODO.md#screen-coverage-and-existing-infrastructure) | [Service map](#screen-services), [closing checks](../skills/quality-checks.md#closing-matrix) |
 
 For a service change, follow the price-alert example through [Core](#service-example-price-alerts), [store adapters](#store-adapter-example-price-alerts), [construction](#construction-example-price-alerts) and [screen calls](#direct-service-calls-and-observed-reads). Use the [service map](#service-map) to find existing owners and callers. Read [§ 13](#13-shapes-that-were-tried-and-reverted) only for rejected-design rationale; subsystem contracts remain in their own documents.
@@ -104,7 +104,6 @@ pub struct GemConfirmService {
     ...
 }
 
-#[uniffi::export]
 impl GemConfirmService {
     pub async fn fee_assets(&self, wallet_id: WalletId, chain: Chain) -> Result<Vec<GemFeeAsset>, GemConfirmError> {
         let fee_asset_ids = chain_fee_asset_ids(chain);
@@ -121,9 +120,9 @@ impl GemConfirmService {
 }
 ```
 
-`GemConfirmError` implements `From<GemServiceError>` once in `error.rs` (see [§ 9](#9-errors)), so the three reads use `?` without repeating the same `Load` conversion.
+`GemConfirmError` implements `From<GemServiceError>` once in `error.rs` (see [§ 9](#9-errors)), so the three reads use `?` and keep `Cancelled` and `Offline` instead of folding every failure into `Load`.
 
-The method is thin: gather inputs, call the rule, return. Product or domain-decision branching belongs in `rules.rs`; I/O sequencing, error propagation and empty-work short circuits may remain in the service.
+The method is thin: gather inputs, call the rule, return. It stays on the plain `impl` because the confirm screen reads fees through `GemConfirmTransferService`. Product or domain-decision branching belongs in `rules.rs`; I/O sequencing, error propagation and empty-work short circuits may remain in the service.
 
 **Sync reads require an already-held value.** `GemWalletSessionStore.get_current_wallet_id` and preferences are synchronous. `GemWalletStore.get_wallet` and `get_wallets` stay async because Room must read off main, even though GRDB can read synchronously. Await database reads through their owner; reuse observed values for rendering. Never add a blocking DAO query or `runBlocking` to make the platforms look alike.
 
@@ -137,7 +136,6 @@ pub struct GemPriceAlertService {
     api: Arc<GemDeviceApiClient>,
     preferences: Arc<GemPreferencesService>,
     store: Arc<dyn GemPriceAlertStore>,
-    device: Arc<GemDeviceService>,
     permissions: Arc<dyn GemNotificationPermissions>,
 }
 ```
@@ -394,9 +392,9 @@ A row that acts carries what the act needs, and Core decides it: `Url` says whet
 | Validator | [`GemValidatorRow`](../core/gemstone/src/services/stake/model.rs) | stake, earn, delegation |
 | Balance | [`GemBalanceRow`](../core/gemstone/src/services/balance/model.rs) | asset details, address details |
 
-A shared rich row lives with the service that owns its domain, not in `models/list.rs`, because its payload is that domain's type (`Asset`, `TransactionId`). It does **not** nest a `GemListRow`: a plain row's title is a case of `GemListRowTitle`, while an asset or transaction row's title is data the row carries, so the two do not compose. What a rich row does reuse is the smaller shared pieces — `GemFormattedNumber` for an amount, `GemCopy` for a copyable value, `GemListRowTitle` for a labelled sub-field, `GemLoadState` for its list's state.
+A shared rich row lives with the service that owns its domain, not in `models/list.rs`, because its payload is that domain's type (`Asset`, `TransactionId`). The rich record does not contain a `GemListRow`: a plain row's title is a case of `GemListRowTitle`, while an asset or transaction row's title is data the row carries. A plain section can still hold one rich row, which is what `GemListRow::Wallet` does on confirm and sign-message. What a rich row reuses is the smaller shared pieces — `GemFormattedNumber` for an amount, `GemCopy` for a copyable value, `GemListRowTitle` for a labelled sub-field, `GemLoadState` for its list's state.
 
-A `Gem…Row` record carries **one row's data**. Which fields a shared row shows on a given screen is a different decision and a different type, named `…Style` and never `Row`: [`GemAssetRowStyle`](../core/gemstone/src/services/assets/model.rs) says whether the asset row titles itself with the asset, its canonical name or its network, whether it repeats the symbol, and what its subtitle and trailing hold, while the asset row's data stays app-side (`AssetDataViewModel` on iOS, `AssetInfoDataAggregate` on Android) because it is assembled from the local asset store, not fetched. A screen reads the style from the flow it is in (`GemSelectAssetFlow.row_style`, `GemWalletHomeService::asset_row_style()`) and passes it to the one row view; it never re-declares the style enums app-side.
+A `Gem…Row` record carries **one row's data**. Which fields a shared row shows on a given screen is a different decision and a different type, named `…Style` and never `Row`: [`GemAssetRowStyle`](../core/gemstone/src/services/assets/model.rs) says whether the asset row titles itself with the asset, its canonical name or its network, whether it repeats the symbol, and what its subtitle and trailing hold. The app keeps the store record (`AssetData` on iOS, `AssetInfo` on Android) and projects it through `asset_list_row`, which returns the title, symbol, network, amount, fiat and price as [`GemAssetListRow`](../core/gemstone/src/services/assets/model.rs). Pin, balance privacy and the account address stay on the app record. A screen reads the style from the flow it is in (`GemSelectAssetFlow.row_style`, `GemWalletHomeService::asset_row_style()`) and passes it to the one row view; it never re-declares the style enums app-side.
 
 **3. Per-screen rich rows — one screen, one layout.** The transaction header, swap progress and the confirm recipient row are drawn one way on one screen, so the record stays with that screen ([a row that a screen only ever draws one way](#a-row-that-a-screen-only-ever-draws-one-way-keeps-its-shape-app-side)). If a second screen starts drawing it, it has become family 2 and moves.
 
@@ -610,7 +608,7 @@ This is as far as a view model should move into Core, and the limits are the poi
 
 Core has no observation primitive and no lifecycle, which is why the reactive half stays in the app. The view model owns the task, the debounce, the cancellation and the navigation; the session owns the answers.
 
-**Async outcomes identify the request that produced them.** Core validates whether the request still applies before changing domain state, including failures. Native cancellation saves work but does not establish freshness. Reuse the owning request/input type; introduce a generation only if overlapping identical inputs require it. [Fiat result acceptance](../core/gemstone/src/services/fiat/session.rs) is the existing example; MIG3 tracks moving swap's duplicated app guards into Core. [Performance](PERFORMANCE.md) requires rejecting obsolete wallet, asset and quote results. S72–S74 cover request identity for chart migrations.
+**Async outcomes identify the request that produced them.** Core validates whether the request still applies before changing domain state, including failures. Native cancellation saves work but does not establish freshness. Reuse the owning request/input type; introduce a generation only if overlapping identical inputs require it. [Fiat result acceptance](../core/gemstone/src/services/fiat/session.rs) and [swap result acceptance](../core/gemstone/src/services/swap/session.rs) are the existing examples. [Performance](PERFORMANCE.md) requires rejecting obsolete wallet, asset and quote results. S72–S74 cover request identity for chart migrations.
 
 ### A screen's state is one phase enum, never a bag of flags
 
@@ -626,10 +624,10 @@ pub enum GemChartPhase {
 }
 
 impl GemChartSession {
-    pub fn view_state(&self) -> GemChartViewState {
+    pub fn view_state(&self, price: Option<AssetPrice>) -> GemChartViewState {
         GemChartViewState {
             period: self.period,
-            phase: self.phase(),
+            phase: self.phase(price),
             is_refreshing: self.is_refreshing,
         }
     }
@@ -638,7 +636,7 @@ impl GemChartSession {
 
 ```swift
 var chartState: StateViewType<ChartValuesViewModel> {
-    switch session.viewState().phase {
+    switch session.viewState(price: currentPrice).phase {
     case .loading: .loading
     case let .data(data): .data(ChartValuesViewModel(period: selectedPeriod, chartData: data))
     case .noData: .noData
@@ -648,7 +646,7 @@ var chartState: StateViewType<ChartValuesViewModel> {
 ```
 
 ```kotlin
-val chartUIState = loaded.map { state ->
+val chartUIState = combine(loaded, price) { session, price -> session.viewState(price) }.map { state ->
     ChartUIModel.State(
         period = state.period.toPrimitives(),
         chart = when (val phase = state.phase) {
@@ -668,7 +666,7 @@ Four rules keep the collapse honest:
 - **The phase has one source of truth.** A chart session derives its phase from the canonical loaded chart, last error and loading facts. A session that stores a canonical phase instead must not also store equivalent independent flags. Do not add a second representation of the same state.
 - **Empty is not a failure.** `NoData` is its own variant, so a series with one point renders the empty state instead of an error, and neither app has to guess from an `Option`.
 - **A progress flag that coexists with content is a field, not a variant.** A refresh happens *while* data is on screen, so `is_refreshing` sits beside the phase; anything that replaces the screen is a variant.
-- **Everything the phase needs is inside the session.** The chart session carries its display currency because the phase cannot be computed without it — so no caller has to supply a value, and nobody can supply the wrong one. A `view_state` that takes what the screen already asked Core for is a parameter the session should own.
+- **Everything the phase needs is inside the session.** The chart session carries its display currency because the phase cannot be computed without it, so no caller supplies a currency. The observed spot price is the one `view_state` argument: the session cannot read the store, and a price older than the last chart point leaves the header where it is. A `view_state` that takes what the screen already asked Core for is a parameter the session should own.
 
 The app switches and stops. No `if isLoading` ahead of the switch, no `default:` inside it: the exhaustiveness is what makes a new variant a compile error on both platforms instead of a blank screen on one.
 
@@ -761,7 +759,7 @@ A row or view state carries `GemFormattedNumber`, never a bare `f64`. The adapti
 
 **Exact quantities retain exact transport.** `GemFormattedNumber` uses `f64`; it is suitable for approximate display quantities, not full-precision balances, approval limits or transaction-critical atomic amounts. Those remain `GemBigInt`/`GemBigUint` with decimals and the existing display policy, as R86 records. Do not introduce precision loss just to reuse a shared row. Counts, indices, timestamps and timeout inputs need a display wrapper only when they are actually rendered.
 
-Currency symbols and placement come from the platform's locale renderer. Shared templates such as `GemAssetRate::text` take locale-rendered pieces and labels. Storage/input values (`GemPriceUpdate`, `GemAssetDetailsInput.price`) do not need display wrappers; existing finished text is not precedent for locale-sensitive quantities. R122 and R123 track remaining fiat-suggestion and rewards-count work.
+Currency symbols and placement come from the platform's locale renderer. Shared templates such as `GemAssetRate::text` take locale-rendered pieces and labels. Storage/input values (`GemPriceUpdate`, `GemAssetDetailsInput.price`) do not need display wrappers; existing finished text is not precedent for locale-sensitive quantities. Fiat suggestions and rewards counts already cross as `GemFormattedNumber`.
 
 ### An app row model holds the Core record; it does not restate its fields
 
@@ -976,9 +974,9 @@ Both implement the same conflict, missing-row and changed-only write semantics. 
 
 Core computes a complete domain change; one feature-store operation commits related fields and rows in a native transaction. Moving policy out of an adapter must preserve its existing atomicity. A conditional update carries its condition or expected state into the write, so another writer cannot invalidate a Core pre-read. Use focused store operations and the existing transaction runners, not a generic unit-of-work framework.
 
-The existing hide/unpin adapters are the atomic-write example: [iOS balance updates](../ios/Packages/Store/Sources/Stores/BalanceStore.swift) and [Android asset configuration](../android/data/services/store/src/main/kotlin/com/gemwallet/android/data/service/store/database/AssetsDao.kt) update both fields together. U23 moves the policy into Core while preserving one write; separate hide and unpin calls would weaken the contract. U22 preserves conditional address-name precedence and U24 preserves transactional perpetual clearing.
+The existing hide/unpin adapters are the atomic-write example: [iOS balance updates](../ios/Packages/Store/Sources/Stores/BalanceStore.swift) and [Android asset configuration](../android/data/services/store/src/main/kotlin/com/gemwallet/android/data/service/store/database/AssetsDao.kt) update both fields together. Core sends one asset-configuration patch, so separate hide and unpin calls would weaken the contract. Address-name replacement stays conditional, and perpetual collateral clearing stays one transaction.
 
-Atomicity of one batch does not order overlapping operations. The owning service must define how stale responses and different balance-kind updates publish without overwriting newer data. Preserve explicit wallet/asset identity and independent requests; a global lock is not a default solution. The [balance publication contract](#publish-a-multi-source-refresh-as-one-batch) records the current gap, tracked as MIG2.
+Atomicity of one batch does not order overlapping operations. The [balance publication contract](#publish-a-multi-source-refresh-as-one-batch) is how stale responses and different balance-kind updates publish without overwriting newer data. Preserve explicit wallet/asset identity and independent requests; a global lock is not a default solution.
 
 Observed queries stay native. Their product contract specifies wallet scope, inclusion, ordering, limits and missing rows; paired adapter/query fixtures verify those semantics. Do not solve query parity by copying an unbounded wallet across FFI and sorting it on every emission. MIG6 adds focused contract tests through the real GRDB/Room adapters.
 
@@ -1329,7 +1327,7 @@ fun togglePriceAlerts(enable: Boolean) = viewModelScope.launch(ioDispatcher) {
 }
 ```
 
-[`GetPriceAlertsImpl`](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/pricealerts/GetPriceAlertsImpl.kt) separately observes through `GemstonePriceAlertStore`; it does not wrap commands. Domain classification still belongs to Core (D68 tracks the remaining SQL-based auto-alert classification).
+[`GetPriceAlertsImpl`](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/pricealerts/GetPriceAlertsImpl.kt) separately observes through `GemstonePriceAlertStore`; it does not wrap commands. Core classifies each alert through `alert_kind` and `PriceAlertFormatter`; this observer selects and groups the stored rows.
 
 For a real platform-only concern, iOS uses a feature service in `Features/<Feature>/Sources/Services/`, constructed by the app and injected. Android uses a case in `gemcore` `application/<area>/cases/`, implemented in `data/coordinators/<area>/`. Neither path bypasses a Core persistence owner. Recent activity commands belong to `GemRecentActivityService`; the native stores supply persistence and observation.
 
@@ -1412,12 +1410,11 @@ Prefer the [generated abstraction](#depend-on-the-generated-abstraction-not-the-
 The shared owner is constructed in [`ServicesFactory.swift`](../ios/Gem/Services/ServicesFactory.swift) and passed through [`ViewModelFactory.swift`](../ios/Gem/Services/ViewModelFactory.swift):
 
 ```swift
-let gemstonePriceAlertStore = GemstonePriceAlertStore(store: storeManager.priceAlertStore)
+let gemstonePriceAlertStore = GemstonePriceAlertStore(store: stores.priceAlertStore)
 let priceAlertService = Gemstone.GemPriceAlertService(
     api: deviceApiClient,
     preferences: preferencesService,
     store: gemstonePriceAlertStore,
-    device: deviceService,
     permissions: notificationPermissions,
 )
 ```
@@ -1433,7 +1430,17 @@ fun provideGemstonePriceAlertStore(priceAlertsDao: PriceAlertsDao, priceAlertFor
 fun provideGemPriceAlertStore(store: GemstonePriceAlertStore): GemPriceAlertStore = store
 
 @Singleton @Provides
-fun provideGemPriceAlertService(...): GemPriceAlertService = GemPriceAlertService(api, preferences, store, device, permissions)
+fun provideGemPriceAlertService(
+    apiClient: GemDeviceApiClient,
+    preferencesService: GemPreferencesService,
+    store: GemPriceAlertStore,
+    notificationPermissions: GemNotificationPermissions,
+): GemPriceAlertService = GemPriceAlertService(
+    api = apiClient,
+    preferences = preferencesService,
+    store = store,
+    permissions = notificationPermissions,
+)
 
 @Provides
 fun provideGemPriceAlertServiceInterface(service: GemPriceAlertService): GemPriceAlertServiceInterface = service
@@ -1459,6 +1466,7 @@ impl From<GemServiceError> for GemConfirmError {
     fn from(error: GemServiceError) -> Self {
         match error {
             GemServiceError::Cancelled => Self::Cancelled,
+            GemServiceError::Offline => Self::Offline,
             error => Self::Load { msg: error.to_string() },
         }
     }
@@ -1475,7 +1483,7 @@ State what has been saved when a later step fails, whether the action can be ret
 
 Wallet price requests use USD. `GemPriceService` applies the selected fiat rate once and preserves the USD price for later conversion; never pass server-converted prices into that path. The independent widget pricing path may request its display currency directly.
 
-[Price updates](../core/gemstone/src/services/price/mod.rs) use one `GemPriceStore.save_rates(rates, conversion)` transaction: Core selects the optional current-currency conversion, and each adapter commits it with the changed rates. A failed repricing rolls back the rates so an identical-rate retry still applies. [Price-alert enabling](../core/gemstone/src/services/price_alert/mod.rs) remains a recovery gap: it saves the preference before device synchronization, then a retry returns early (MIG4). Add a durable queue only if the actual recovery requirement needs it.
+[Price updates](../core/gemstone/src/services/price/mod.rs) use one `GemPriceStore.save_rates(rates, conversion)` transaction: Core selects the optional current-currency conversion, and each adapter commits it with the changed rates. A failed repricing rolls back the rates so an identical-rate retry still applies. [Price-alert commands](../core/gemstone/src/services/price_alert/mod.rs) write locally first: an API refusal rolls the added or deleted row back, and `set_enabled` only stores the preference. Device registration reads that preference when it looks for changes, so an identical toggle has no unfinished device effect to retry. Add a durable queue only if a later recovery requirement needs it.
 
 Cancellation after an irreversible effect does not prove that the effect did not happen. Security exceptions, including scanner fail-open, remain explicit subsystem policy rather than incidental error handling.
 
@@ -1752,7 +1760,7 @@ The table locates the existing owners and consumers; it is not proof that a scre
 | `GemTransactionsService` | — | `TransactionsViewModel` | `TransactionsViewModel` |
 | `GemWalletConnectService` | — | `WalletConnectorService`, `ConnectionsViewModel` | `WCRequestViewModel`, `ProposalSceneViewModel`, `WCAuthViewModel`, `ConnectionsViewModel`, `ConnectionViewModel` |
 | `GemWalletHomeService` | — | `WalletSceneViewModel`, `NetworkAssetsSceneViewModel` | `AssetsViewModel`, `NetworkAssetsViewModel` |
-| `GemWalletService` | — | onboarding and manage-wallet view models, and `WalletImageViewModel` for the avatar (`WalletIDetailViewModel` exports the secret through `export_secret`) | `CreateWalletViewModel`, `ImportViewModel`, `WalletsViewModel`, `WalletViewModel` / `SetupWalletViewModel` (`rename`), `WalletSecretDataViewModel` (`export_secret`), `WalletAvatarService`, wallet cases |
+| `GemWalletService` | — | onboarding and manage-wallet view models, and `WalletImageViewModel` for the avatar (`WalletDetailViewModel` exports the secret through `export_secret`) | `CreateWalletViewModel`, `ImportViewModel`, `WalletsViewModel`, `WalletViewModel` / `SetupWalletViewModel` (`rename`), `WalletSecretDataViewModel` (`export_secret`), `WalletImageViewModel`, wallet cases |
 | `GemWalletSessionService` | — | `RootSceneViewModel`, `NavigationRouter` | `SessionCoordinator` (+ the services it composes) |
 | `GemWidgetService` | — | `WidgetPriceService` (the price widget) | `WidgetCoinUIModel` and `WidgetPriceSyncWorker` through `WidgetEntryPoint` |
 
@@ -1819,7 +1827,7 @@ These choices explain apparent parity gaps. They do not authorize copying shared
 | Area | Contract |
 |---|---|
 | Authentication | Privacy lock is iOS-only; WalletConnect one-click auth is Android-only. Android gates secret reads at each call site, while iOS gates the secret read itself. A new Android caller must request authentication. Wallet auth uses the Ethereum signature scheme (`AUTH_CHAIN`) on every chain; rejecting other schemes is intentional. |
-| Autoclose | One app enables confirmation on a pending change and displays validation after tapping; the other enables only a buildable change. Both must consume the same Core outcome. The Android open-position sheet's remaining migration is tracked in TODO. |
+| Autoclose | One app enables confirmation on a pending change and displays validation after tapping; the other enables only a buildable change. Both must consume the same Core outcome. The Android open-position sheet's remaining migration is S75. |
 | Refresh | Wallet home receives socket prices and refreshes on pull; it intentionally has no interval timer. Socket reconnect delay is capped at 30 seconds. `debugLog` and stream diagnostic logging compile out in release. |
 | One-sided features | iOS support-image previews use `image_file`; Android uses notification-prompt tracking, post-search `sync_assets`, and invalid-mnemonic highlighting. Developer tools may differ (`deeplink_url` on iOS, `platform_store` on Android). Add the counterpart only when the feature is required. |
 | Equivalent integration | Both apps choose the collectible receive network through `GemSelectAssetType::ReceiveCollection`. Payment prefills reach iOS through `GemAmountTransfer::prefilled_amount` and Android through Core-built `GemRecipientNext::Amount` carried in navigation. Perpetual banners use native navigation on each app; both observable preference adapters call `GemPreferencesService.set_perpetual_enabled`. |
