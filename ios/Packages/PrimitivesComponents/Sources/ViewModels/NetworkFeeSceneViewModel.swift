@@ -6,6 +6,7 @@ import enum Gemstone.GemConfirmFeeSelection
 import struct Gemstone.GemFeeOptionItem
 import struct Gemstone.GemFeeRateRow
 import struct Gemstone.GemFeeRateRows
+import func Gemstone.showsFeeAssets
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -70,7 +71,7 @@ public struct NetworkFeeSceneViewModel {
     }
 
     var showFeeAssets: Bool {
-        onSelectFeeAsset != nil && feeAssets.contains { $0.asset.id != feeAsset.id }
+        onSelectFeeAsset != nil && showsFeeAssets(feeAssetIds: feeAssets.map(\.asset.id.identifier), selected: feeAsset.id.identifier)
     }
 
     var selectedFeeAssetItem: FeeAssetItem {

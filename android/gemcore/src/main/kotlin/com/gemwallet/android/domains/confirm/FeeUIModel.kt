@@ -13,7 +13,7 @@ import java.math.BigInteger
 
 sealed interface FeeUIModel {
     data object Calculating : FeeUIModel
-    data object Error : FeeUIModel
+    data class Unavailable(val text: String) : FeeUIModel
     class FeeInfo(val amount: BigInteger, val feeAsset: Asset, val price: Double?, val currency: Currency, val priority: FeePriority, additionalFees: List<GemFeeOptionItem> = emptyList()) : FeeUIModel {
         val feeItems: List<Pair<FeeOption, FeeInfo>> by lazy {
             additionalFees.map { it.option to FeeInfo(it.value, feeAsset, price, currency, priority) }

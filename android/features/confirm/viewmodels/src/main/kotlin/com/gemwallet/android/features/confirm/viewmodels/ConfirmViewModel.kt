@@ -24,6 +24,7 @@ import com.gemwallet.android.domains.confirm.toFeeAssetUIModel
 import com.gemwallet.android.domains.confirm.unpackTransferData
 import com.gemwallet.android.ext.toAssetPriceValue
 import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.confirm.models.ConfirmDetailElement
 import com.gemwallet.android.features.confirm.viewmodels.localization.broadcastLabel
@@ -103,6 +104,7 @@ import uniffi.gemstone.PerpetualType
 import uniffi.gemstone.SimulationResult
 import uniffi.gemstone.TransactionInputType
 import uniffi.gemstone.perpetualDetails
+import uniffi.gemstone.showsFeeAssets
 import uniffi.gemstone.swapQuoteSummary
 import java.math.BigInteger
 import javax.inject.Inject
@@ -264,12 +266,12 @@ class ConfirmViewModel @Inject constructor(
 
     val feeUIModel = combine(content, screen) { content, screen ->
         val confirmData = content?.confirmData
-        when (screen.feeRow()) {
-            GemConfirmFeeRow.LOADING -> FeeUIModel.Calculating
+        when (val feeRow = screen.feeRow()) {
+            GemConfirmFeeRow.Loading -> FeeUIModel.Calculating
 
-            GemConfirmFeeRow.UNAVAILABLE -> FeeUIModel.Error
+            is GemConfirmFeeRow.Unavailable -> FeeUIModel.Unavailable(feeRow.text)
 
-            GemConfirmFeeRow.READY -> if (content == null || confirmData == null) {
+            GemConfirmFeeRow.Ready -> if (content == null || confirmData == null) {
                 FeeUIModel.Calculating
             } else {
                 FeeUIModel.FeeInfo(
@@ -332,7 +334,7 @@ class ConfirmViewModel @Inject constructor(
     }
 
     val feeListItem: StateFlow<ListItemModel?> = combine(feeUIModel, feeAsset, feeAssets) { fee, asset, assets ->
-        fee?.listItem(context, asset?.asset, showsFeeAssetSymbol = assets.any { it.asset.id != asset?.asset?.id })
+        fee?.listItem(context, asset?.asset, showsFeeAssetSymbol = showsFeeAssets(assets.map { it.asset.id.toIdentifier() }, asset?.asset?.id?.toIdentifier()))
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

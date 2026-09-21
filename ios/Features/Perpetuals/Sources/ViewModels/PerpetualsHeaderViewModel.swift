@@ -13,10 +13,6 @@ import SwiftUI
 
 struct PerpetualsHeaderViewModel {
     let header: GemPerpetualBalanceHeader
-
-    init(header: GemPerpetualBalanceHeader) {
-        self.header = header
-    }
 }
 
 extension PerpetualsHeaderViewModel: ValueHeaderViewModel {

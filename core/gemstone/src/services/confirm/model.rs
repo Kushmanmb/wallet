@@ -278,11 +278,16 @@ pub struct GemConfirmButton {
     pub state: GemConfirmButtonState,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, uniffi::Enum)]
+#[uniffi::export]
+pub fn shows_fee_assets(fee_asset_ids: Vec<AssetId>, selected: Option<AssetId>) -> bool {
+    super::rules::shows_fee_assets(&fee_asset_ids, selected.as_ref())
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemConfirmFeeRow {
     Loading,
     Ready,
-    Unavailable,
+    Unavailable { text: String },
 }
 
 #[cfg(test)]

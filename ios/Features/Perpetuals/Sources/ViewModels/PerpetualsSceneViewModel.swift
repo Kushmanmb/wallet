@@ -4,8 +4,8 @@ import Components
 import Foundation
 import enum Gemstone.GemHeaderButtonKind
 import enum Gemstone.GemMarketsRefreshTrigger
-import struct Gemstone.GemPerpetualMarketCounts
 import struct Gemstone.GemPerpetualBalanceHeader
+import struct Gemstone.GemPerpetualMarketCounts
 import enum Gemstone.GemPerpetualMarketSection
 import struct Gemstone.GemPerpetualMarketSession
 import protocol Gemstone.GemPerpetualServiceProtocol

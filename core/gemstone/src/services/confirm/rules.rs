@@ -251,6 +251,10 @@ pub fn balance_change_sign(value: &BigInt) -> GemAmountSign {
     }
 }
 
+pub fn shows_fee_assets(fee_asset_ids: &[AssetId], selected: Option<&AssetId>) -> bool {
+    fee_asset_ids.iter().any(|asset_id| Some(asset_id) != selected)
+}
+
 pub fn selectable_fee_assets(assets: Vec<Asset>, balances: Vec<GemAssetBalance>, prices: Vec<AssetPrice>) -> Vec<GemFeeAsset> {
     balances
         .into_iter()
@@ -1524,5 +1528,16 @@ mod tests {
             content,
             GemConfirmRowContent::Row { row: GemListRow::App { website_url: Some(url), .. } } if url == "https://example.com"
         )));
+    }
+
+    #[test]
+    fn test_the_fee_asset_picker_shows_only_with_another_asset_to_pick() {
+        let ethereum = AssetId::from_chain(Chain::Ethereum);
+        let usdc = Asset::mock_ethereum_usdc().id;
+
+        assert!(!shows_fee_assets(&[ethereum.clone()], Some(&ethereum)));
+        assert!(shows_fee_assets(&[ethereum.clone(), usdc], Some(&ethereum)));
+        assert!(!shows_fee_assets(&[], Some(&ethereum)));
+        assert!(shows_fee_assets(&[ethereum], None), "with nothing selected yet, another asset is still offered");
     }
 }

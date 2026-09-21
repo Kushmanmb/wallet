@@ -41,7 +41,9 @@ impl GemConfirmScreen {
     pub fn fee_row(&self) -> GemConfirmFeeRow {
         match self.phase {
             GemConfirmPhase::Loading => GemConfirmFeeRow::Loading,
-            GemConfirmPhase::Failed => GemConfirmFeeRow::Unavailable,
+            GemConfirmPhase::Failed => GemConfirmFeeRow::Unavailable {
+                text: crate::models::placeholder::EMPTY_VALUE.to_string(),
+            },
             GemConfirmPhase::Ready | GemConfirmPhase::Confirming => GemConfirmFeeRow::Ready,
         }
     }
@@ -214,7 +216,13 @@ mod tests {
             .fee_row(),
             GemConfirmFeeRow::Ready
         );
-        assert_eq!(GemConfirmScreen { phase: GemConfirmPhase::Failed, ..loading }.fee_row(), GemConfirmFeeRow::Unavailable);
+        assert_eq!(
+            GemConfirmScreen { phase: GemConfirmPhase::Failed, ..loading }.fee_row(),
+            GemConfirmFeeRow::Unavailable {
+                text: crate::models::placeholder::EMPTY_VALUE.to_string()
+            },
+            "a fee the screen could not load reads as the placeholder both apps use"
+        );
     }
 
     #[test]

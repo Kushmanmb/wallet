@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.Dp
 import com.gemwallet.android.domains.confirm.FeeAssetUIModel
 import com.gemwallet.android.domains.confirm.FeeDetailsModel
 import com.gemwallet.android.domains.confirm.FeeUIModel
+import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.features.confirm.presents.localization.suffix
 import com.gemwallet.android.features.confirm.viewmodels.models.FeeRateRowUIModel
 import com.gemwallet.android.features.confirm.viewmodels.models.FeeSelectionUIModel
@@ -72,6 +73,7 @@ import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.FeePriority
 import com.wallet.core.primitives.FeeUnitType
 import uniffi.gemstone.GemCustomFeeCheck
+import uniffi.gemstone.showsFeeAssets
 import java.math.BigInteger
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,7 +101,7 @@ fun FeeDetails(
     val unitSymbol = feeUnitSuffix(model.feeUnitType, feeAsset.asset.symbol)
 
     val selectedCustomRate = selection.customRate
-    val showFeeAssets = feeAssets.any { it.asset.id != currentFee.feeAsset.id }
+    val showFeeAssets = showsFeeAssets(feeAssets.map { it.asset.id.toIdentifier() }, currentFee.feeAsset.id.toIdentifier())
     var page by remember(isVisible) { mutableStateOf(FeeDetailsPage.Details) }
     val customModel = remember(page, model, selection) {
         NetworkFeeCustomViewModel(model, selectedCustomRate)

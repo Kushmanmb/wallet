@@ -82,7 +82,7 @@ fun FeeUIModel.listItem(context: Context, feeAsset: Asset?, showsFeeAssetSymbol:
     return when (this) {
         FeeUIModel.Calculating -> ListItemModel(title = title, subtitleTagType = ListItemTagType.Progress, info = info)
 
-        FeeUIModel.Error -> ListItemModel(title = title, subtitle = "~", info = info)
+        is FeeUIModel.Unavailable -> ListItemModel(title = title, subtitle = text, info = info)
 
         is FeeUIModel.FeeInfo -> ListItemModel(
             title = title,
