@@ -15,16 +15,17 @@ struct PreferencesViewModelTests {
     @Test
     func theDefaultsComeFromCore() {
         let settings = GemSettingsServiceMock()
-        settings.perpetualDefaultsValue = GemPerpetualDefaults(leverage: 10, takeProfitPercent: 30, stopLossPercent: 15)
+        settings.perpetualDefaultsValue = GemPerpetualDefaults(leverage: 10, takeProfitPercent: 25, stopLossPercent: 5)
         let model = PreferencesViewModel.mock(settings: settings)
 
         _ = model.sections
 
         #expect(model.perpetualLeverage.value == 10)
-        #expect(model.perpetualTakeProfit.value == 30)
-        #expect(model.perpetualStopLoss.value == 15)
-        #expect(settings.preferencesInputs.last?.perpetualLeverage == "10x")
-        #expect(settings.preferencesInputs.last?.perpetualTakeProfit == model.perpetualTakeProfit.displayText)
+        #expect(model.perpetualTakeProfit.value == 25)
+        #expect(model.perpetualStopLoss.value == 5)
+        #expect(settings.preferencesInputs.last?.perpetualDefaults == settings.perpetualDefaultsValue)
+        #expect(model.perpetualLeverage.displayText == "10x")
+        #expect(model.perpetualTakeProfit.displayText == "25%")
     }
 
     @Test
@@ -33,7 +34,7 @@ struct PreferencesViewModelTests {
         settings.perpetualDefaultsValue = GemPerpetualDefaults(leverage: 3, takeProfitPercent: 25, stopLossPercent: 10)
         let model = PreferencesViewModel.mock(settings: settings)
 
-        model.perpetualLeverage = LeverageOption(value: 20)
+        model.perpetualLeverage = GemPickerOption(value: 20, label: .number(number: .mock(value: 20)))
 
         #expect(settings.storedDefaults.count == 1)
         #expect(settings.storedDefaults.last?.leverage == 20)
@@ -46,8 +47,8 @@ struct PreferencesViewModelTests {
         let settings = GemSettingsServiceMock()
         let model = PreferencesViewModel.mock(settings: settings)
 
-        model.perpetualTakeProfit = AutocloseOption(value: 50)
-        model.perpetualStopLoss = AutocloseOption(value: 20)
+        model.perpetualTakeProfit = GemPickerOption(value: 50, label: .number(number: .mock(value: 50)))
+        model.perpetualStopLoss = GemPickerOption(value: 20, label: .number(number: .mock(value: 20)))
 
         #expect(settings.storedDefaults.map(\.takeProfitPercent) == [50, 50])
         #expect(settings.storedDefaults.last?.stopLossPercent == 20)
@@ -59,7 +60,7 @@ struct PreferencesViewModelTests {
         settings.setDefaultsError = AnyError("preferences are read only")
         let model = PreferencesViewModel.mock(settings: settings)
 
-        model.perpetualLeverage = LeverageOption(value: 20)
+        model.perpetualLeverage = GemPickerOption(value: 20, label: .number(number: .mock(value: 20)))
 
         #expect(model.perpetualLeverage.value == 20)
         #expect(settings.storedDefaults.isEmpty)

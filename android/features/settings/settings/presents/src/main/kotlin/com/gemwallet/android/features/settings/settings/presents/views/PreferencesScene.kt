@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.features.settings.settings.viewmodels.PreferencesViewModel
 import com.gemwallet.android.features.settings.settings.viewmodels.localization.stringRes
 import com.gemwallet.android.features.settings.settings.viewmodels.models.PreferencesRowAction
+import com.gemwallet.android.features.settings.settings.viewmodels.models.of
 import com.gemwallet.android.features.settings.settings.viewmodels.models.preferencesAction
 import com.gemwallet.android.features.settings.settings.viewmodels.models.value
 import com.gemwallet.android.ui.R
@@ -37,6 +38,7 @@ import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.icons.AppIcons
+import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.actions.PreferencesAction
 import com.gemwallet.android.ui.theme.Spacer4
@@ -102,8 +104,8 @@ fun PreferencesScene(onAction: (PreferencesAction) -> Unit, viewModel: Preferenc
                                 row = row,
                                 listPosition = position,
                                 current = perpetualDefaults.value(action.setting),
-                                options = options.map { it.value },
-                                label = { value -> options.first { it.value == value }.label },
+                                options = options.map { it.value.toInt() },
+                                label = { value -> options.first { it.value.toInt() == value }.label.string(LocalContext.current) },
                                 onSelect = { viewModel.setPerpetualOption(action.setting, it) },
                             )
                         }

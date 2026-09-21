@@ -32,7 +32,10 @@ import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSection
 import uniffi.gemstone.GemListSectionFooter
 import uniffi.gemstone.GemListSectionTitle
+import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemPerpetualDefaults
+import uniffi.gemstone.GemPerpetualPickers
+import uniffi.gemstone.GemPickerOption
 import uniffi.gemstone.GemPreferencesInput
 import uniffi.gemstone.GemSettingsServiceInterface
 
@@ -51,6 +54,11 @@ class PreferencesViewModelTest {
         override fun getCurrency() = currency
     }
     private val settingsService = mockk<GemSettingsServiceInterface>(relaxed = true) {
+        every { perpetualPickers() } returns GemPerpetualPickers(
+            leverage = listOf(GemPickerOption(1u, GemLocalizedText.Text("1x")), GemPickerOption(20u, GemLocalizedText.Text("20x"))),
+            takeProfit = listOf(GemPickerOption(0u, GemLocalizedText.None), GemPickerOption(25u, GemLocalizedText.Text("25%"))),
+            stopLoss = listOf(GemPickerOption(0u, GemLocalizedText.None), GemPickerOption(10u, GemLocalizedText.Text("10%"))),
+        )
         every { perpetualDefaults() } returns GemPerpetualDefaults(leverage = 2u, takeProfitPercent = 25u, stopLossPercent = 10u)
         every { preferencesSections(any()) } answers {
             val input = firstArg<GemPreferencesInput>()
@@ -101,10 +109,10 @@ class PreferencesViewModelTest {
         viewModel.sections.first { it.isNotEmpty() }
         val leverage = viewModel.perpetualOptions.leverage.last()
 
-        viewModel.setPerpetualOption(PerpetualSetting.Leverage, leverage.value).join()
+        viewModel.setPerpetualOption(PerpetualSetting.Leverage, leverage.value.toInt()).join()
         advanceUntilIdle()
 
-        verify { settingsService.setPerpetualDefaults(GemPerpetualDefaults(leverage = leverage.value.toUByte(), takeProfitPercent = 25u, stopLossPercent = 10u)) }
-        assertEquals(leverage.label, inputs.last().perpetualLeverage)
+        verify { settingsService.setPerpetualDefaults(GemPerpetualDefaults(leverage = leverage.value, takeProfitPercent = 25u, stopLossPercent = 10u)) }
+        assertEquals(leverage.value, inputs.last().perpetualDefaults.leverage)
     }
 }

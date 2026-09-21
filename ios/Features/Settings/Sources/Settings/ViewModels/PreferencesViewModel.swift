@@ -4,6 +4,8 @@ import Components
 import Foundation
 import enum Gemstone.GemListRowTitle
 import struct Gemstone.GemPerpetualDefaults
+import struct Gemstone.GemPerpetualPickers
+import struct Gemstone.GemPickerOption
 import struct Gemstone.GemPreferencesInput
 import protocol Gemstone.GemSettingsServiceProtocol
 import GemstonePrimitives
@@ -19,6 +21,7 @@ import SwiftUI
 public final class PreferencesViewModel {
     private let preferences: ObservablePreferences
     private let settings: any GemSettingsServiceProtocol
+    private let pickers: GemPerpetualPickers
 
     var isPresentingLeveragePicker = false
     var isPresentingTakeProfitPicker = false
@@ -31,9 +34,10 @@ public final class PreferencesViewModel {
         self.settings = settings
         self.preferences = preferences
         let defaults = settings.perpetualDefaults()
-        perpetualLeverage = LeverageOption(value: defaults.leverage)
-        perpetualTakeProfit = AutocloseOption(value: defaults.takeProfitPercent)
-        perpetualStopLoss = AutocloseOption(value: defaults.stopLossPercent)
+        pickers = settings.perpetualPickers()
+        perpetualLeverage = Self.option(pickers.leverage, defaults.leverage)
+        perpetualTakeProfit = Self.option(pickers.takeProfit, defaults.takeProfitPercent)
+        perpetualStopLoss = Self.option(pickers.stopLoss, defaults.stopLossPercent)
     }
 
     var title: String {
@@ -68,19 +72,19 @@ public final class PreferencesViewModel {
         set { preferences.isPerpetualEnabled = newValue }
     }
 
-    var perpetualLeverage: LeverageOption {
+    var perpetualLeverage: GemPickerOption {
         didSet { persistPerpetualDefaults() }
     }
 
-    var leverageOptions: [LeverageOption] {
-        LeverageOption.allOptions
+    var leverageOptions: [GemPickerOption] {
+        pickers.leverage
     }
 
-    var perpetualTakeProfit: AutocloseOption {
+    var perpetualTakeProfit: GemPickerOption {
         didSet { persistPerpetualDefaults() }
     }
 
-    var perpetualStopLoss: AutocloseOption {
+    var perpetualStopLoss: GemPickerOption {
         didSet { persistPerpetualDefaults() }
     }
 
@@ -98,12 +102,16 @@ public final class PreferencesViewModel {
         }
     }
 
-    var takeProfitOptions: [AutocloseOption] {
-        AutocloseOption.takeProfitOptions
+    var takeProfitOptions: [GemPickerOption] {
+        pickers.takeProfit
     }
 
-    var stopLossOptions: [AutocloseOption] {
-        AutocloseOption.stopLossOptions
+    var stopLossOptions: [GemPickerOption] {
+        pickers.stopLoss
+    }
+
+    private static func option(_ options: [GemPickerOption], _ value: UInt8) -> GemPickerOption {
+        options.first { $0.value == value } ?? GemPickerOption(value: value, label: .none)
     }
 }
 
@@ -117,9 +125,11 @@ extension PreferencesViewModel: ListSectionProvideable {
                 language: languageValue,
                 appearance: appearanceValue,
                 perpetualsEnabled: isPerpetualEnabled,
-                perpetualLeverage: perpetualLeverage.displayText,
-                perpetualTakeProfit: perpetualTakeProfit.displayText,
-                perpetualStopLoss: perpetualStopLoss.displayText,
+                perpetualDefaults: GemPerpetualDefaults(
+                    leverage: perpetualLeverage.value,
+                    takeProfitPercent: perpetualTakeProfit.value,
+                    stopLossPercent: perpetualStopLoss.value,
+                ),
             ),
         ).listSections
     }

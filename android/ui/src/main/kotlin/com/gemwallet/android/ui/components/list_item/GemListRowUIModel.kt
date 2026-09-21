@@ -144,7 +144,7 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
 
     is GemListRow.Toggle -> GemListRowUIModel.Toggle(listItemModel(context, title, null, icon), title, isOn)
 
-    is GemListRow.Picker -> GemListRowUIModel.Picker(listItemModel(context, title, value, icon), title)
+    is GemListRow.Picker -> GemListRowUIModel.Picker(listItemModel(context, title, value.string(context), icon), title)
 
     is GemListRow.Social -> GemListRowUIModel.Social(links)
 

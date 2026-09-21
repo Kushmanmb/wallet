@@ -11,7 +11,7 @@ use crate::services::error::GemServiceError;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_session;
 
-pub use rules::{GemPerpetualDefaults, GemPreferencesInput, GemSecurityInput};
+pub use rules::{GemPerpetualDefaults, GemPerpetualPickers, GemPickerOption, GemPreferencesInput, GemSecurityInput};
 
 #[derive(uniffi::Object)]
 pub struct GemSettingsService {
@@ -27,6 +27,10 @@ impl GemSettingsService {
 
     pub fn preferences_sections(&self, input: GemPreferencesInput) -> Vec<GemListSection> {
         rules::preferences_sections(input)
+    }
+
+    pub fn perpetual_pickers(&self) -> GemPerpetualPickers {
+        rules::perpetual_pickers()
     }
 
     pub fn perpetual_defaults(&self) -> GemPerpetualDefaults {

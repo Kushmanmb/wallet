@@ -108,7 +108,7 @@ extension GemListRow {
         case let .link(title, value, icon):
             .listItem(listItem(title: title, value: value, icon: icon))
         case let .picker(title, value, icon):
-            .picker(listItem(title: title, value: value, icon: icon), title: title)
+            .picker(listItem(title: title, value: value.text, icon: icon), title: title)
         case let .toggle(title, value, icon, isOn):
             .toggle(label: toggleLabel(title: title, value: value), title: title, isOn: isOn, imageStyle: icon.imageStyle)
         case let .url(title, value, icon, url, target):

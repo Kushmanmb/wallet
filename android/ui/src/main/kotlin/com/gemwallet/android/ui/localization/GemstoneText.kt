@@ -166,6 +166,10 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
 
     is GemLocalizedText.Text -> text
 
+    is GemLocalizedText.Number -> number.text()
+
+    GemLocalizedText.None -> context.getString(R.string.common_none)
+
     GemLocalizedText.RewardsUnverified -> context.getString(R.string.rewards_unverified_description)
 
     is GemLocalizedText.RewardsPending -> context.getString(R.string.rewards_pending_description, countdown.formatDuration())

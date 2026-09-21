@@ -3,7 +3,7 @@ use primitives::contract_constants::HYPERLIQUID_ARBITRUM_DEPOSIT_ADDRESS;
 use primitives::known_assets::ARBITRUM_USDC;
 use primitives::{Asset, AutocloseEstimator as Estimator, AutocloseValidation, AutocloseValidator as Validator, PerpetualConfirmData, PerpetualDirection, PerpetualProvider, PerpetualType, TpslType};
 
-use crate::config::perpetual_config::{LEVERAGE_OPTIONS, STOP_LOSS_PERCENT_OPTIONS, TAKE_PROFIT_PERCENT_OPTIONS, leverage_options};
+use crate::config::perpetual_config::{LEVERAGE_OPTIONS, leverage_options};
 use crate::models::GemAsset;
 use crate::models::custom_types::GemBigInt;
 use crate::models::perpetual::GemPerpetualSubscription;
@@ -61,23 +61,11 @@ impl GemPerpetual {
         leverage_text(value)
     }
 
-    pub fn autoclose_percent(&self, value: u8) -> Option<u8> {
-        (value != 0).then_some(value)
-    }
-
     pub fn leverage_options(&self, max_leverage: Option<u8>) -> Vec<u8> {
         match max_leverage {
             Some(max_leverage) => leverage_options(max_leverage),
             None => LEVERAGE_OPTIONS.to_vec(),
         }
-    }
-
-    pub fn take_profit_options(&self) -> Vec<u8> {
-        TAKE_PROFIT_PERCENT_OPTIONS.to_vec()
-    }
-
-    pub fn stop_loss_options(&self) -> Vec<u8> {
-        STOP_LOSS_PERCENT_OPTIONS.to_vec()
     }
 }
 
@@ -260,11 +248,8 @@ mod option_tests {
     use super::*;
 
     #[test]
-    fn test_no_autoclose_percent_stands_for_none_and_leverage_carries_its_suffix() {
-        let perpetual = GemPerpetual::new(PerpetualProvider::Hypercore);
-        assert_eq!(perpetual.autoclose_percent(0), None);
-        assert_eq!(perpetual.autoclose_percent(25), Some(25));
-        assert_eq!(perpetual.leverage_text(40), "40x");
+    fn test_leverage_carries_its_suffix() {
+        assert_eq!(GemPerpetual::new(PerpetualProvider::Hypercore).leverage_text(40), "40x");
     }
 
     #[test]

@@ -1,9 +1,14 @@
 use primitives::{Currency, PlatformStore, Release};
 
+use crate::config::perpetual_config;
 use crate::config::public::PublicUrl;
 use crate::config::social::community_links;
+use crate::formatted_number::{GemFormattedNumber, GemNumberDisplay};
 use crate::models::list::{GemListRow, GemListRowIcon, GemListRowTitle, GemListSection, GemListSectionFooter, GemListSectionTitle, GemUrlTarget};
+use crate::percentage::GemPercentageStyle;
+use crate::precision::GemPrecision;
 use crate::services::currency;
+use crate::services::localization::GemLocalizedText;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
 pub struct GemPerpetualDefaults {
@@ -12,15 +17,66 @@ pub struct GemPerpetualDefaults {
     pub stop_loss_percent: u8,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemPreferencesInput {
     pub currency: Currency,
     pub language: Option<String>,
     pub appearance: String,
     pub perpetuals_enabled: bool,
-    pub perpetual_leverage: String,
-    pub perpetual_take_profit: String,
-    pub perpetual_stop_loss: String,
+    pub perpetual_defaults: GemPerpetualDefaults,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemPickerOption {
+    pub value: u8,
+    pub label: GemLocalizedText,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemPerpetualPickers {
+    pub leverage: Vec<GemPickerOption>,
+    pub take_profit: Vec<GemPickerOption>,
+    pub stop_loss: Vec<GemPickerOption>,
+}
+
+pub fn perpetual_pickers() -> GemPerpetualPickers {
+    GemPerpetualPickers {
+        leverage: perpetual_config::LEVERAGE_OPTIONS
+            .iter()
+            .map(|value| GemPickerOption {
+                value: *value,
+                label: GemLocalizedText::Number {
+                    number: GemFormattedNumber {
+                        display: GemNumberDisplay::Number {
+                            precision: GemPrecision::Fraction { min: 0, max: 2 },
+                        },
+                        ..GemFormattedNumber::leverage(*value as f64)
+                    },
+                },
+            })
+            .collect(),
+        take_profit: autoclose_options(perpetual_config::TAKE_PROFIT_PERCENT_OPTIONS),
+        stop_loss: autoclose_options(perpetual_config::STOP_LOSS_PERCENT_OPTIONS),
+    }
+}
+
+fn autoclose_options(values: &[u8]) -> Vec<GemPickerOption> {
+    values
+        .iter()
+        .map(|value| GemPickerOption {
+            value: *value,
+            label: autoclose_label(*value),
+        })
+        .collect()
+}
+
+fn autoclose_label(percent: u8) -> GemLocalizedText {
+    match percent {
+        0 => GemLocalizedText::None,
+        percent => GemLocalizedText::Number {
+            number: GemFormattedNumber::percentage(percent as f64, GemPercentageStyle::UnsignedCompact),
+        },
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
@@ -35,7 +91,9 @@ pub struct GemSecurityInput {
 
 pub fn preferences_sections(input: GemPreferencesInput) -> Vec<GemListSection> {
     let link = |title: GemListRowTitle, value: Option<String>, icon: GemListRowIcon| GemListRow::Link { title, value, icon };
-    let picker = |title: GemListRowTitle, value: String| GemListRow::Picker { title, value, icon: GemListRowIcon::None };
+    let picker = |title: GemListRowTitle, value: GemLocalizedText| GemListRow::Picker { title, value, icon: GemListRowIcon::None };
+    let pickers = perpetual_pickers();
+    let label = |options: &[GemPickerOption], value: u8| options.iter().find(|option| option.value == value).map(|option| option.label.clone()).unwrap_or(GemLocalizedText::None);
     let section = |rows: Vec<GemListRow>| GemListSection {
         title: GemListSectionTitle::None,
         footer: GemListSectionFooter::None,
@@ -62,9 +120,13 @@ pub fn preferences_sections(input: GemPreferencesInput) -> Vec<GemListSection> {
                     icon: GemListRowIcon::Perpetuals,
                     is_on: input.perpetuals_enabled,
                 }),
-                input.perpetuals_enabled.then(|| picker(GemListRowTitle::PerpetualLeverage, input.perpetual_leverage)),
-                input.perpetuals_enabled.then(|| picker(GemListRowTitle::PerpetualTakeProfit, input.perpetual_take_profit)),
-                input.perpetuals_enabled.then(|| picker(GemListRowTitle::PerpetualStopLoss, input.perpetual_stop_loss)),
+                input.perpetuals_enabled.then(|| picker(GemListRowTitle::PerpetualLeverage, label(&pickers.leverage, input.perpetual_defaults.leverage))),
+                input
+                    .perpetuals_enabled
+                    .then(|| picker(GemListRowTitle::PerpetualTakeProfit, label(&pickers.take_profit, input.perpetual_defaults.take_profit_percent))),
+                input
+                    .perpetuals_enabled
+                    .then(|| picker(GemListRowTitle::PerpetualStopLoss, label(&pickers.stop_loss, input.perpetual_defaults.stop_loss_percent))),
             ]
             .into_iter()
             .flatten()
@@ -93,7 +155,7 @@ pub fn security_sections(input: GemSecurityInput) -> Vec<GemListSection> {
                 }),
                 input.authentication_enabled.then_some(GemListRow::Picker {
                     title: GemListRowTitle::LockPeriod,
-                    value: input.lock_period,
+                    value: GemLocalizedText::Text { text: input.lock_period },
                     icon: GemListRowIcon::None,
                 }),
                 (input.authentication_enabled && input.privacy_lock_supported).then(|| toggle(GemListRowTitle::PrivacyLock, input.privacy_lock_enabled)),
@@ -216,9 +278,11 @@ mod tests {
             language: language.map(str::to_string),
             appearance: "System".to_string(),
             perpetuals_enabled,
-            perpetual_leverage: "5x".to_string(),
-            perpetual_take_profit: "25%".to_string(),
-            perpetual_stop_loss: "None".to_string(),
+            perpetual_defaults: GemPerpetualDefaults {
+                leverage: 5,
+                take_profit_percent: 25,
+                stop_loss_percent: 0,
+            },
         }
     }
 
@@ -238,6 +302,29 @@ mod tests {
                 .last()
                 .map(|section| section.rows.iter().filter_map(row_title).collect::<Vec<_>>()),
             Some(vec![GemListRowTitle::Perpetuals, GemListRowTitle::PerpetualLeverage, GemListRowTitle::PerpetualTakeProfit, GemListRowTitle::PerpetualStopLoss])
+        );
+    }
+
+    #[test]
+    fn test_the_perpetual_pickers_name_every_option_and_the_rows_show_the_saved_one() {
+        let pickers = perpetual_pickers();
+
+        assert_eq!(pickers.leverage.first().map(|option| option.value), Some(1));
+        assert!(
+            pickers
+                .leverage
+                .iter()
+                .all(|option| matches!(option.label, GemLocalizedText::Number { ref number } if number.unit == crate::formatted_number::GemNumberUnit::Multiplier))
+        );
+        assert_eq!(pickers.take_profit.first().map(|option| option.label.clone()), Some(GemLocalizedText::None), "no take profit reads as none");
+        assert_eq!(
+            preferences_sections(preferences_input(true, None)).last().map(|section| section.rows.clone()).unwrap_or_default()[3],
+            GemListRow::Picker {
+                title: GemListRowTitle::PerpetualStopLoss,
+                value: GemLocalizedText::None,
+                icon: GemListRowIcon::None,
+            },
+            "the saved value reads through the same option label"
         );
     }
 

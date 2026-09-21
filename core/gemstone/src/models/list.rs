@@ -269,7 +269,7 @@ pub enum GemListRow {
     },
     Picker {
         title: GemListRowTitle,
-        value: String,
+        value: GemLocalizedText,
         icon: GemListRowIcon,
     },
     Social {

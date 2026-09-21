@@ -9,15 +9,11 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
 import com.gemwallet.android.data.services.gemstone.config.UserConfig
-import com.gemwallet.android.domains.perpetual.formatLeverage
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.settings.settings.viewmodels.localization.stringRes
-import com.gemwallet.android.features.settings.settings.viewmodels.models.PerpetualOptions
 import com.gemwallet.android.features.settings.settings.viewmodels.models.PerpetualSetting
-import com.gemwallet.android.features.settings.settings.viewmodels.models.PickerOption
 import com.gemwallet.android.features.settings.settings.viewmodels.models.value
-import com.gemwallet.android.math.toUnsignedInts
 import com.gemwallet.android.ui.R
 import com.wallet.core.primitives.Appearance
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,10 +24,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import uniffi.gemstone.GemPerpetual
 import uniffi.gemstone.GemPreferencesInput
 import uniffi.gemstone.GemSettingsServiceInterface
-import uniffi.gemstone.PerpetualProvider
 import java.util.Locale
 import javax.inject.Inject
 
@@ -56,13 +50,7 @@ class PreferencesViewModel @Inject constructor(
 
     val perpetualDefaults = MutableStateFlow(settingsService.perpetualDefaults())
 
-    val perpetualOptions = GemPerpetual(PerpetualProvider.HYPERCORE).use { perpetual ->
-        PerpetualOptions(
-            leverage = perpetual.leverageOptions(null).toUnsignedInts().map { PickerOption(it, it.formatLeverage()) },
-            takeProfit = perpetual.takeProfitOptions().toUnsignedInts().map { PickerOption(it, autocloseLabel(perpetual.autoclosePercent(it.toUByte()))) },
-            stopLoss = perpetual.stopLossOptions().toUnsignedInts().map { PickerOption(it, autocloseLabel(perpetual.autoclosePercent(it.toUByte()))) },
-        )
-    }
+    val perpetualOptions = settingsService.perpetualPickers()
 
     val sections = combine(currency, isPerpetualEnabled, appearance, perpetualDefaults, language) { currency, perpetualsEnabled, appearance, defaults, language ->
         settingsService.preferencesSections(
@@ -71,9 +59,7 @@ class PreferencesViewModel @Inject constructor(
                 language = language,
                 appearance = context.getString(appearance.stringRes()),
                 perpetualsEnabled = perpetualsEnabled,
-                perpetualLeverage = optionLabel(PerpetualSetting.Leverage, defaults.value(PerpetualSetting.Leverage)),
-                perpetualTakeProfit = optionLabel(PerpetualSetting.TakeProfit, defaults.value(PerpetualSetting.TakeProfit)),
-                perpetualStopLoss = optionLabel(PerpetualSetting.StopLoss, defaults.value(PerpetualSetting.StopLoss)),
+                perpetualDefaults = defaults,
             ),
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -101,10 +87,6 @@ class PreferencesViewModel @Inject constructor(
             .onSuccess { perpetualDefaults.value = updated }
             .onFailure { Log.e(TAG, "saving the perpetual defaults failed", it) }
     }
-
-    private fun optionLabel(setting: PerpetualSetting, value: Int): String = perpetualOptions.of(setting).firstOrNull { it.value == value }?.label.orEmpty()
-
-    private fun autocloseLabel(percent: UByte?): String = percent?.let { "$it%" } ?: context.getString(R.string.common_none)
 
     private fun languageText(configuration: () -> Configuration): String? = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> configuration().locales.get(0).displayLanguage.replaceFirstChar {

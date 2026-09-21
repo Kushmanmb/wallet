@@ -25,6 +25,7 @@ import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSection
 import uniffi.gemstone.GemListSectionFooter
 import uniffi.gemstone.GemListSectionTitle
+import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemSecurityInput
 import uniffi.gemstone.GemSettingsServiceInterface
 
@@ -52,7 +53,7 @@ class SecurityViewModelTest {
                 section(
                     listOfNotNull(
                         GemListRow.Toggle(GemListRowTitle.AUTHENTICATION, null, GemListRowIcon.NONE, input.authenticationEnabled),
-                        GemListRow.Picker(GemListRowTitle.LOCK_PERIOD, input.lockPeriod, GemListRowIcon.NONE).takeIf { input.authenticationEnabled },
+                        GemListRow.Picker(GemListRowTitle.LOCK_PERIOD, GemLocalizedText.Text(input.lockPeriod), GemListRowIcon.NONE).takeIf { input.authenticationEnabled },
                     ),
                 ),
                 section(listOf(GemListRow.Toggle(GemListRowTitle.HIDE_BALANCE, null, GemListRowIcon.NONE, input.hideBalanceEnabled))),
@@ -77,7 +78,7 @@ class SecurityViewModelTest {
 
         val rows = model.sections.value.flatMap { it.rows }
         assertEquals(true, (rows[0] as GemListRow.Toggle).isOn)
-        assertEquals(R.string.lock_five_minutes.toString(), (rows[1] as GemListRow.Picker).value)
+        assertEquals(GemLocalizedText.Text(R.string.lock_five_minutes.toString()), (rows[1] as GemListRow.Picker).value)
         assertEquals(true, (rows[2] as GemListRow.Toggle).isOn)
         assertEquals(listOf(5), model.lockPeriods.filter { it.minutes == 5 }.map { it.minutes })
     }

@@ -79,6 +79,10 @@ public extension GemLocalizedText {
             }
         case let .text(text):
             text
+        case let .number(number):
+            number.text()
+        case .none:
+            Localized.Common.none
         case .rewardsUnverified:
             Localized.Rewards.Unverified.description
         case let .rewardsPending(countdown):

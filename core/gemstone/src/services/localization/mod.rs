@@ -14,6 +14,8 @@ pub enum GemLocalizedText {
     Resource { resource: Resource },
     FeeRate { rate: GemFormattedNumber, unit: FeeUnitType },
     Text { text: String },
+    Number { number: GemFormattedNumber },
+    None,
     RewardsUnverified,
     RewardsPending { countdown: Vec<GemDurationPart> },
     RewardsPendingReady,

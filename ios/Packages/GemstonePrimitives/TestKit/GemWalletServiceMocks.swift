@@ -295,6 +295,7 @@ public final class GemSettingsServiceMock: GemSettingsServiceProtocol, @unchecke
     public var securitySectionsValue: [GemListSection] = []
     public var perpetualDefaultsValue = GemPerpetualDefaults(leverage: 3, takeProfitPercent: 25, stopLossPercent: 10)
     public var preferencesSectionsValue: [GemListSection] = []
+    public var pickersValue = GemSettingsService(preferences: GemPreferencesService(store: GemPreferencesStoreMock())).perpetualPickers()
     public var setDefaultsError: Error?
 
     public private(set) var storedDefaults: [GemPerpetualDefaults] = []
@@ -310,6 +311,10 @@ public final class GemSettingsServiceMock: GemSettingsServiceProtocol, @unchecke
 
     public func perpetualDefaults() -> GemPerpetualDefaults {
         perpetualDefaultsValue
+    }
+
+    public func perpetualPickers() -> GemPerpetualPickers {
+        pickersValue
     }
 
     public func sections(wallets _: [Gemstone.Wallet], notificationsAvailable _: Bool, walletConnectAvailable _: Bool) -> [GemListSection] {

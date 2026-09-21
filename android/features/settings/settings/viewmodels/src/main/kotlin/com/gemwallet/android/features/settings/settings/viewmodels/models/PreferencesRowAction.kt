@@ -4,6 +4,8 @@ import com.gemwallet.android.ui.models.actions.PreferencesAction
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemPerpetualDefaults
+import uniffi.gemstone.GemPerpetualPickers
+import uniffi.gemstone.GemPickerOption
 
 sealed interface PreferencesRowAction {
     data class Open(val action: PreferencesAction) : PreferencesRowAction
@@ -15,14 +17,10 @@ sealed interface PreferencesRowAction {
 
 enum class PerpetualSetting { Leverage, TakeProfit, StopLoss }
 
-data class PickerOption(val value: Int, val label: String)
-
-data class PerpetualOptions(val leverage: List<PickerOption>, val takeProfit: List<PickerOption>, val stopLoss: List<PickerOption>) {
-    fun of(setting: PerpetualSetting): List<PickerOption> = when (setting) {
-        PerpetualSetting.Leverage -> leverage
-        PerpetualSetting.TakeProfit -> takeProfit
-        PerpetualSetting.StopLoss -> stopLoss
-    }
+fun GemPerpetualPickers.of(setting: PerpetualSetting): List<GemPickerOption> = when (setting) {
+    PerpetualSetting.Leverage -> leverage
+    PerpetualSetting.TakeProfit -> takeProfit
+    PerpetualSetting.StopLoss -> stopLoss
 }
 
 fun GemPerpetualDefaults.value(setting: PerpetualSetting): Int = when (setting) {
