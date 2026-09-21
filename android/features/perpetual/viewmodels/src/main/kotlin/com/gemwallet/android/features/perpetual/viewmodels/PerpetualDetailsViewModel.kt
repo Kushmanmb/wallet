@@ -26,6 +26,7 @@ import com.gemwallet.android.ui.components.chart.CandlestickTooltipUIModel
 import com.gemwallet.android.ui.components.chart.uiModel
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.perpetual.listItem
+import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.models.StateViewType
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.ConfirmTransactionAction
@@ -58,7 +59,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemPerpetualDetailsServiceInterface
 import uniffi.gemstone.GemPerpetualPositionKind
 import uniffi.gemstone.candleTooltip
@@ -209,8 +209,8 @@ class PerpetualDetailsViewModel @Inject constructor(
         this.period.update { period }
     }
 
-    private val errorState = MutableStateFlow<GemErrorText?>(null)
-    val error: StateFlow<GemErrorText?> = errorState.asStateFlow()
+    private val errorState = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = errorState.asStateFlow()
 
     fun fetch() {
         refreshTrigger.update { it + 1 }
@@ -233,13 +233,16 @@ class PerpetualDetailsViewModel @Inject constructor(
 
     private fun position(kind: GemPerpetualPositionKind, amountAction: AmountTransactionAction) {
         val data = perpetual.value ?: return
-        val action = service.positionAction(data.perpetual.toGem(), data.asset.toGem(), details.value?.position, kind)
-        amountAction(AmountParams.Perpetual(assetId = data.asset.id, perpetualId = data.perpetual.id, positionAction = action))
+        runCatching { service.positionAction(data.perpetual.toGem(), data.asset.toGem(), details.value?.position, kind) }
+            .onSuccess { action -> amountAction(AmountParams.Perpetual(assetId = data.asset.id, perpetualId = data.perpetual.id, positionAction = action)) }
+            .onFailure { errorState.value = it.errorText().text(context) }
     }
 
     fun closePosition(confirmAction: ConfirmTransactionAction) {
         val data = perpetual.value ?: return
-        confirmAction(ConfirmTransferInput(service.closeTransfer(data.perpetual.toGem(), data.asset.toGem(), details.value?.position)))
+        runCatching { service.closeTransfer(data.perpetual.toGem(), data.asset.toGem(), details.value?.position) }
+            .onSuccess { confirmAction(ConfirmTransferInput(it)) }
+            .onFailure { errorState.value = it.errorText().text(context) }
     }
 
     fun clearError() = errorState.update { null }

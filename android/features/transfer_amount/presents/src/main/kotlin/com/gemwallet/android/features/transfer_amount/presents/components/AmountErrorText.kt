@@ -14,7 +14,7 @@ import uniffi.gemstone.GemAmountException
 fun amountErrorText(error: Throwable?): String = when (error) {
     null -> ""
     is GemAmountException -> error.display().text()
-    else -> error.errorText().text()
+    else -> error.errorText().text(LocalContext.current)
 }
 
 @Composable

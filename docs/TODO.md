@@ -20,7 +20,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 2. **Establish consistency:** MIG6. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, and C53 wallet creation/import. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
-5. **Close the boundary:** finish B76–B80, U9, U18, U33, N12, F56/F61/F62 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
+5. **Close the boundary:** finish B76–B79, U9, U18, U33, N12, F56/F61/F62 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
 
 ## Screen coverage and existing infrastructure
 
@@ -31,8 +31,8 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | C53, X172 |
 | Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | B79, N7, X172 |
 | Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | U25, O59, AUD23, AUD25, AUD26, AUD27, AUD28 |
-| Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | B76/B80, AUD20, AUD43, AUD44, U26 |
-| Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | B76/B80, AUD36 |
+| Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | B76, AUD20, AUD43, AUD44, U26 |
+| Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | B76, AUD36 |
 | Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | S74, O59, F61/F62 |
 | Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | S72, AUD14, B76, F61/F62 |
 | Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | AUD44; retain existing native QR/share adapters |
@@ -49,13 +49,13 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | Preserve exact atomic values |
 | Earn list, provider and deposit amount | Existing stake/earn owner and amount extras | Preserve the existing feature gate |
 | NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | S80, AUD22 |
-| Price-alert list/target/auto-alert controls | `GemPriceAlertService`, alert session and existing notification port | P97, S80, B80, U33 |
+| Price-alert list/target/auto-alert controls | `GemPriceAlertService`, alert session and existing notification port | P97, S80, U33 |
 | Rewards/create/use/redeem referral | `GemRewardsService`, rewards state, shared load and list records | S79, B77 |
 | Contacts/list/editor/address picker | `GemContactService`, `GemManageContactService`, contact session/name component | N14 |
 | Networks/node list/add/check | `GemChainSettingsService`, node sessions, shared rows | R131, AUD20, AUD31 |
 | Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | B77, O59, AUD13, AUD30; retain native locale/theme application |
 | Security/lock/biometry/recovery | `GemSecurityService`, existing keystore/auth ports and settings sections | D72, B77, X172, AUD37; retain platform-only privacy lock |
-| Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | P97, D48, S80, B77/B80, AUD32 |
+| Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | P97, D48, S80, B77, AUD32 |
 | WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | F57, AUD17, D72/D73; retain Android-only one-click auth |
 | About, app update, developer/service status | Existing settings/update/developer services and native store adapters | R131, B77; platform delivery channels remain distinct |
 | Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | U9/U17, K19, F61/F62; retain native widget scheduling |
@@ -202,7 +202,6 @@ The same product rule on both apps with a difference, each read on both sides on
 - **B77** **M** Settings, referral and support views name Core types: `ReferralScene.kt` takes `GemRewardsState` and branches on eight flags (7f4d7b0741), `SecurityScene.kt:57-58`, `PreferencesScene.kt:45,119,130`, `AboutUsScreen.kt` calls `aboutSections` in the composable with no view model,. A referral UI state, a `securityAction()` mapper and an About view model. The About view model is also what Android needs to reach the developer preference, so the toggle can move off the Settings About Us row (`SettingsScene.kt:83-105`, `opensDeveloperMenu()`) onto the About version row where iOS keeps it. The support bubble is not one of these: its link row renders a title, a subtitle and a url with no decision in it, and [ARCHITECTURE.md § 5](ARCHITECTURE.md#a-view-never-names-a-core-type) says not to wrap a generated type only to hide its name.
 - **B78** **M** The Android amount screen has no UI state: `AmountScreen.kt:74,76` calls Core in the composable, `ProviderExtras.kt:32-128` receives the provider and branches on `AmountStakeProvider`/`AmountParams.Stake.*`, and `AmountErrorText.kt:9-14` checks `GemAmountException` in a composable. `AmountUiState`.
 - **B79** **M** Android's wallet screens hand `GemWalletRow` to composables through two app aggregates (`WalletDataAggregate`, `WalletDetailsAggregate`, the latter restating `GemWalletDetails`), and the composables map and decide from it: `item.row.uiModel(LocalContext.current)`, the pin label from `row.isPinned`, the pinned split and `row.placeholder.iconModel()` (`WalletItemsList.kt:38-56`, `WalletsScreen.kt:84`, `WalletScene.kt:120-131`); the census missed them because no Core type is named. The cases return the records and the view models emit row UI models; iOS already vends the `ListItemModel`.
-- **B80** **S** Eight Android view models expose `GemErrorText` and composables translate it through a `@Composable GemErrorText.text()` (`ui/localization/GemstoneText.kt:367`): add asset, support chat, wallet image, price alerts, asset details, perpetual position and setup wallet. Translate in the view model with `@ApplicationContext`, as networks and contacts do, and delete the composable overload.
 
 ## 4. App-side twins and outcomes the app invents
 

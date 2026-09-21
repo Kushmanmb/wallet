@@ -3,7 +3,6 @@ package com.gemwallet.android.ui.localization
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.domains.duration.formatDuration
 import com.gemwallet.android.ext.asset
@@ -427,9 +426,6 @@ fun GemErrorText.text(context: Context): String = when (this) {
     GemErrorText.Unknown -> context.getString(R.string.errors_unknown)
     is GemErrorText.Message -> text
 }
-
-@Composable
-fun GemErrorText.text(): String = text(LocalContext.current)
 
 @StringRes
 fun GemHeaderButtonKind.stringRes(): Int = when (this) {
