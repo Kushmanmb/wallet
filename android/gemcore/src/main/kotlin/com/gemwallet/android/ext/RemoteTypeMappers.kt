@@ -770,6 +770,22 @@ fun com.wallet.core.primitives.RecentActivityType.toGem(): uniffi.gemstone.Recen
     com.wallet.core.primitives.RecentActivityType.Perpetual -> uniffi.gemstone.RecentActivityType.PERPETUAL
 }
 
+fun uniffi.gemstone.ReportReason.toPrimitives(): com.wallet.core.primitives.ReportReason = when (this) {
+    uniffi.gemstone.ReportReason.SPAM -> com.wallet.core.primitives.ReportReason.Spam
+    uniffi.gemstone.ReportReason.MALICIOUS -> com.wallet.core.primitives.ReportReason.Malicious
+    uniffi.gemstone.ReportReason.INAPPROPRIATE -> com.wallet.core.primitives.ReportReason.Inappropriate
+    uniffi.gemstone.ReportReason.COPYRIGHT -> com.wallet.core.primitives.ReportReason.Copyright
+    uniffi.gemstone.ReportReason.OTHER -> com.wallet.core.primitives.ReportReason.Other
+}
+
+fun com.wallet.core.primitives.ReportReason.toGem(): uniffi.gemstone.ReportReason = when (this) {
+    com.wallet.core.primitives.ReportReason.Spam -> uniffi.gemstone.ReportReason.SPAM
+    com.wallet.core.primitives.ReportReason.Malicious -> uniffi.gemstone.ReportReason.MALICIOUS
+    com.wallet.core.primitives.ReportReason.Inappropriate -> uniffi.gemstone.ReportReason.INAPPROPRIATE
+    com.wallet.core.primitives.ReportReason.Copyright -> uniffi.gemstone.ReportReason.COPYRIGHT
+    com.wallet.core.primitives.ReportReason.Other -> uniffi.gemstone.ReportReason.OTHER
+}
+
 fun uniffi.gemstone.Resource.toPrimitives(): com.wallet.core.primitives.Resource = when (this) {
     uniffi.gemstone.Resource.BANDWIDTH -> com.wallet.core.primitives.Resource.Bandwidth
     uniffi.gemstone.Resource.ENERGY -> com.wallet.core.primitives.Resource.Energy

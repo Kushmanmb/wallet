@@ -61,13 +61,7 @@ class NftDetailsViewModel @Inject constructor(
     }
 
     suspend fun report(reason: ReportReason): Boolean = withContext(ioDispatcher) {
-        val asset = details.value ?: return@withContext false
-        val report = ReportNft(
-            collectionId = asset.collection.id.toIdentifier(),
-            assetId = nftAssetId.toIdentifier(),
-            reason = reason.string,
-        )
-        runCatchingCancellable { service.report(report.toGem()) }.isSuccess
+        runCatchingCancellable { service.report(nftAssetId.toIdentifier(), reason.toGem()) }.isSuccess
     }
 }
 

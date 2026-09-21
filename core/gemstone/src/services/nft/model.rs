@@ -41,7 +41,16 @@ pub fn nft_rows(items: Vec<GemNftItem>) -> Vec<GemNftRow> {
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemCollectibleDetails {
     pub can_send: bool,
+    pub actions: Vec<GemCollectibleAction>,
     pub sections: Vec<GemCollectibleSection>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemCollectibleAction {
+    SaveImage,
+    SetAvatar,
+    Refresh,
+    Report,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]

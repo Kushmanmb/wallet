@@ -1108,6 +1108,30 @@ public extension Primitives.RecentActivityType {
     }
 }
 
+public extension Gemstone.ReportReason {
+    func toPrimitives() -> Primitives.ReportReason {
+        switch self {
+        case .spam: .spam
+        case .malicious: .malicious
+        case .inappropriate: .inappropriate
+        case .copyright: .copyright
+        case .other: .other
+        }
+    }
+}
+
+public extension Primitives.ReportReason {
+    func toGem() -> Gemstone.ReportReason {
+        switch self {
+        case .spam: .spam
+        case .malicious: .malicious
+        case .inappropriate: .inappropriate
+        case .copyright: .copyright
+        case .other: .other
+        }
+    }
+}
+
 public extension Gemstone.Resource {
     func toPrimitives() -> Primitives.Resource {
         switch self {

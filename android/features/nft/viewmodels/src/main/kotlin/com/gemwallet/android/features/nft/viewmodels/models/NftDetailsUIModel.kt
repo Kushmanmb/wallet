@@ -9,13 +9,14 @@ import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.wallet.core.primitives.NFTAsset
 import com.wallet.core.primitives.ReportReason
 import com.wallet.core.primitives.VerificationStatus
+import uniffi.gemstone.GemCollectibleAction
 import uniffi.gemstone.GemCollectibleAttributeValue
 import uniffi.gemstone.GemCollectibleSection
 import uniffi.gemstone.GemListRow
 import java.text.DateFormat
 import java.util.Date
 
-data class NftDetailsUIModel(val asset: NFTAsset, val isVerified: Boolean, val canSend: Boolean, val sections: List<NftSectionUIModel>)
+data class NftDetailsUIModel(val asset: NFTAsset, val isVerified: Boolean, val canSend: Boolean, val actions: List<GemCollectibleAction>, val sections: List<NftSectionUIModel>)
 
 sealed interface NftSectionUIModel {
     data class Status(val status: VerificationStatus) : NftSectionUIModel
@@ -30,6 +31,7 @@ internal fun NftAssetDetailsData.uiModel(context: Context): NftDetailsUIModel = 
     asset = asset,
     isVerified = collection.status == VerificationStatus.Verified,
     canSend = details.canSend,
+    actions = details.actions,
     sections = details.sections.mapNotNull { it.uiModel(context) },
 )
 

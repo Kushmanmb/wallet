@@ -37,14 +37,10 @@ public final class ReportNftViewModel {
         Localized.Common.loading
     }
 
-    func submitReport(reason: String) async {
+    func submitReport(reason: ReportReason) async {
         state = .loading
         do {
-            try await service.report(report: ReportNft(
-                collectionId: assetData.collection.id.identifier,
-                assetId: assetData.asset.id.identifier,
-                reason: reason,
-            ).toGem())
+            try await service.report(assetId: assetData.asset.id.identifier, reason: reason.toGem())
             state = .data(true)
             onComplete?()
         } catch {

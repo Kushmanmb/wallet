@@ -157,6 +157,7 @@ remote:
   - PriceAlertData
   - PriceAlertDirection
   - PriceAlertNotificationType
+  - ReportReason
   - ReportNft
   - TotalFiatValue
   - TransactionState

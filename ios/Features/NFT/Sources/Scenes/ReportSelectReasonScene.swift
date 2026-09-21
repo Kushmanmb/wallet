@@ -31,6 +31,6 @@ struct ReportSelectReasonScene: View {
 
 extension ReportSelectReasonScene {
     private func onSelectReason(_ reason: ReportReason) {
-        Task { await model.submitReport(reason: reason.rawValue) }
+        Task { await model.submitReport(reason: reason) }
     }
 }

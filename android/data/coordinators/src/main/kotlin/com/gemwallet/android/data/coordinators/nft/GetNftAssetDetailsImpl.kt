@@ -31,7 +31,7 @@ class GetNftAssetDetailsImpl(private val getSession: GetSession, private val get
                         NftAssetDetailsData(
                             collection = nftData.collection,
                             asset = asset,
-                            details = collectibleService.details(session.wallet.type.toGem(), assetData.toGem(), isOwned),
+                            details = collectibleService.details(session.wallet.type.toGem(), assetData.toGem(), isOwned, canSaveImage = false),
                         )
                     }
             }

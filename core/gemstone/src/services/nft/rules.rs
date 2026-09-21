@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use primitives::{AddressFormatStyle, Asset, BlockExplorerLink, Chain, NFTAssetData, NFTAttribute, NFTAttributeType, NFTData, VerificationStatus, WalletType};
 
-use super::model::{GemCollectibleAttribute, GemCollectibleAttributeValue, GemCollectibleDetails, GemCollectibleSection, GemNftItem, GemNftList, GemNftRow, GemNftUnverifiedRow};
+use super::model::{GemCollectibleAction, GemCollectibleAttribute, GemCollectibleAttributeValue, GemCollectibleDetails, GemCollectibleSection, GemNftItem, GemNftList, GemNftRow, GemNftUnverifiedRow};
 use crate::address_formatter::format_address;
 use crate::config::chain::supports_nft_transfer;
 use crate::config::social::social_links;
@@ -110,7 +110,7 @@ pub fn can_send(wallet_type: &WalletType, chain: Chain, is_owned: bool) -> bool 
     *wallet_type != WalletType::View && supports_nft_transfer(chain) && is_owned
 }
 
-pub fn collectible_details(wallet_type: &WalletType, data: &NFTAssetData, is_owned: bool, contract_explorer: Option<BlockExplorerLink>, token_explorer: Option<BlockExplorerLink>) -> GemCollectibleDetails {
+pub fn collectible_details(wallet_type: &WalletType, data: &NFTAssetData, is_owned: bool, contract_explorer: Option<BlockExplorerLink>, token_explorer: Option<BlockExplorerLink>, can_save_image: bool) -> GemCollectibleDetails {
     let status = (data.collection.status != VerificationStatus::Verified).then_some(GemCollectibleSection::Status { status: data.collection.status });
     let info = GemCollectibleSection::Info {
         rows: info_rows(data, contract_explorer, token_explorer),
@@ -121,8 +121,21 @@ pub fn collectible_details(wallet_type: &WalletType, data: &NFTAssetData, is_own
     let links = Some(social_links(data.collection.links.clone())).filter(|links| !links.is_empty()).map(|links| GemCollectibleSection::Links { links });
     GemCollectibleDetails {
         can_send: can_send(wallet_type, data.asset.chain, is_owned),
+        actions: collectible_actions(can_save_image),
         sections: [status, Some(info), attributes, links].into_iter().flatten().collect(),
     }
+}
+
+fn collectible_actions(can_save_image: bool) -> Vec<GemCollectibleAction> {
+    [
+        can_save_image.then_some(GemCollectibleAction::SaveImage),
+        Some(GemCollectibleAction::SetAvatar),
+        Some(GemCollectibleAction::Refresh),
+        Some(GemCollectibleAction::Report),
+    ]
+    .into_iter()
+    .flatten()
+    .collect()
 }
 
 fn info_rows(data: &NFTAssetData, contract_explorer: Option<BlockExplorerLink>, token_explorer: Option<BlockExplorerLink>) -> Vec<GemListRow> {
@@ -298,17 +311,28 @@ mod tests {
         suspicious.collection.links = vec![AssetLink::new("https://example.com", LinkType::Website)];
         suspicious.asset.attributes = vec![NFTAttribute::new("Color", "Blue", NFTAttributeType::String)];
 
-        assert_eq!(section_names(&collectible_details(&WalletType::Multicoin, &verified, true, None, None)), vec!["info"]);
-        assert_eq!(section_names(&collectible_details(&WalletType::Multicoin, &suspicious, true, None, None)), vec!["status", "info", "attributes", "links"]);
+        assert_eq!(section_names(&collectible_details(&WalletType::Multicoin, &verified, true, None, None, false)), vec!["info"]);
+        assert_eq!(section_names(&collectible_details(&WalletType::Multicoin, &suspicious, true, None, None, false)), vec!["status", "info", "attributes", "links"]);
+    }
+
+    #[test]
+    fn test_the_collectible_menu_only_offers_saving_an_image_where_the_app_can() {
+        let data = NFTAssetData::mock();
+
+        assert_eq!(
+            collectible_details(&WalletType::Multicoin, &data, true, None, None, false).actions,
+            vec![GemCollectibleAction::SetAvatar, GemCollectibleAction::Refresh, GemCollectibleAction::Report]
+        );
+        assert_eq!(collectible_details(&WalletType::Multicoin, &data, true, None, None, true).actions.first(), Some(&GemCollectibleAction::SaveImage));
     }
 
     #[test]
     fn test_collectible_details_can_send_follows_the_wallet_and_ownership() {
         let data = NFTAssetData::mock();
 
-        assert!(collectible_details(&WalletType::Multicoin, &data, true, None, None).can_send);
-        assert!(!collectible_details(&WalletType::Multicoin, &data, false, None, None).can_send);
-        assert!(!collectible_details(&WalletType::View, &data, true, None, None).can_send);
+        assert!(collectible_details(&WalletType::Multicoin, &data, true, None, None, false).can_send);
+        assert!(!collectible_details(&WalletType::Multicoin, &data, false, None, None, false).can_send);
+        assert!(!collectible_details(&WalletType::View, &data, true, None, None, false).can_send);
     }
 
     #[test]

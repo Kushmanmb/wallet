@@ -94,6 +94,7 @@ fun NFTDetailsScene(cancelAction: CancelAction, onRecipient: (NFTAsset) -> Unit)
                 ) {
                     NftHeaderActions(
                         canSend = model.canSend,
+                        actions = model.actions,
                         onSend = { onRecipient(model.asset) },
                         onRefresh = {
                             scope.launch {

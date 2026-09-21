@@ -3,6 +3,7 @@
 import Components
 import Formatters
 import Foundation
+import enum Gemstone.GemCollectibleAction
 import struct Gemstone.GemCollectibleAttribute
 import enum Gemstone.GemCollectibleAttributeValue
 import struct Gemstone.GemCollectibleDetails
@@ -80,7 +81,7 @@ public final class CollectibleViewModel {
     }
 
     var details: GemCollectibleDetails {
-        service.details(walletType: wallet.type.toGem(), assetData: assetData.toGem(), isOwned: query.value.isOwned)
+        service.details(walletType: wallet.type.toGem(), assetData: assetData.toGem(), isOwned: query.value.isOwned, canSaveImage: true)
     }
 
     var sections: [GemCollectibleSection] {
@@ -101,16 +102,20 @@ public final class CollectibleViewModel {
                 type: .more,
                 viewType: .menuButton(
                     title: title,
-                    items: [
-                        .button(title: Localized.Nft.saveToPhotos, systemImage: SystemImage.gallery, action: onSelectSaveToGallery),
-                        .button(title: Localized.Nft.setAsAvatar, systemImage: SystemImage.emoji, action: onSelectSetAsAvatar),
-                        .button(title: Localized.Common.refresh, systemImage: SystemImage.refresh, action: onSelectRefresh),
-                        .button(title: Localized.Nft.Report.reportButtonTitle, role: .destructive, action: onSelectReport),
-                    ],
+                    items: details.actions.map(menuItem),
                 ),
                 isEnabled: true,
             ),
         ]
+    }
+
+    private func menuItem(_ action: GemCollectibleAction) -> ActionMenuItemType {
+        switch action {
+        case .saveImage: .button(title: Localized.Nft.saveToPhotos, systemImage: SystemImage.gallery, action: onSelectSaveToGallery)
+        case .setAvatar: .button(title: Localized.Nft.setAsAvatar, systemImage: SystemImage.emoji, action: onSelectSetAsAvatar)
+        case .refresh: .button(title: Localized.Common.refresh, systemImage: SystemImage.refresh, action: onSelectRefresh)
+        case .report: .button(title: Localized.Nft.Report.reportButtonTitle, role: .destructive, action: onSelectReport)
+        }
     }
 
     func attributeListItem(_ attribute: GemCollectibleAttribute) -> ListItemModel {
@@ -139,7 +144,7 @@ extension CollectibleViewModel {
                 assetData: .with(asset: account.chain.asset, account: account),
             )
         case .buy, .receive, .swap, .more, .deposit, .withdraw:
-            fatalError()
+            break
         }
     }
 
