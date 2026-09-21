@@ -137,7 +137,7 @@ public final class SwapDetailsViewModel {
     }
 
     var priceImpactValue: String? {
-        priceImpactModel.value?.value
+        priceImpactModel.priceImpactText
     }
 }
 

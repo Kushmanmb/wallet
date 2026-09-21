@@ -38,12 +38,13 @@ import com.gemwallet.android.ui.components.screen.ModalBottomSheet
 import com.gemwallet.android.ui.components.screen.SheetExpansion
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModel
-import com.gemwallet.android.ui.models.swap.SwapPriceImpactUIModel
+import com.gemwallet.android.ui.style.color
 import com.gemwallet.android.ui.style.textStyle
 import com.gemwallet.android.ui.theme.listItemIconSize
 import com.gemwallet.android.ui.theme.pendingColor
+import uniffi.gemstone.GemSwapPriceImpactRow
 import uniffi.gemstone.GemSwapProviderRow
-import uniffi.gemstone.SwapPriceImpactType
+import uniffi.gemstone.GemValueTone
 import uniffi.gemstone.SwapProvider
 
 @Composable
@@ -197,14 +198,4 @@ private fun SwapDetailsUIModel.inlineProviders(isSelectionEnabled: Boolean): Lis
 }
 
 @Composable
-private fun SwapPriceImpactUIModel?.getColor() = when (this?.type) {
-    SwapPriceImpactType.POSITIVE -> MaterialTheme.colorScheme.tertiary
-
-    SwapPriceImpactType.MEDIUM -> pendingColor
-
-    SwapPriceImpactType.HIGH -> MaterialTheme.colorScheme.error
-
-    SwapPriceImpactType.LOW,
-    null,
-    -> MaterialTheme.colorScheme.secondary
-}
+private fun GemSwapPriceImpactRow?.getColor() = (this?.value?.tone ?: GemValueTone.NEUTRAL).color()

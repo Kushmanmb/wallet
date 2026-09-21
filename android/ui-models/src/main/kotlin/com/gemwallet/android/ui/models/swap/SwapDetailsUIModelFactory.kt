@@ -10,6 +10,7 @@ import uniffi.gemstone.GemSwapProviderRow
 import uniffi.gemstone.GemSwapQuoteSummary
 import uniffi.gemstone.GemValueStyle
 import uniffi.gemstone.SwapPriceImpact
+import uniffi.gemstone.swapPriceImpactRow
 import java.math.BigInteger
 
 data class SwapDetailsUIModelInput(
@@ -31,15 +32,7 @@ object SwapDetailsUIModelFactory {
         val rate = input.summary.rate?.let(rateFormatter::format) ?: return null
 
         val slippagePercent = input.summary.slippagePercent()
-        val priceImpact = input.priceImpact?.let {
-            SwapPriceImpactUIModel(
-                type = it.impactType,
-                displayText = it.percentage.formatAsPercentage(),
-                warningText = it.percentage.formatAsPercentage(style = GemPercentageStyle.UNSIGNED),
-                isHigh = it.isHigh,
-                showsInSummary = it.showsInSummary,
-            )
-        }
+        val priceImpact = input.priceImpact?.let { swapPriceImpactRow(it, input.payAsset.asset.symbol) }
 
         val minReceiveAtomic = input.summary.minReceiveValue
         val minimumReceive = ValueFormatter(style = GemValueStyle.AUTO).string(minReceiveAtomic, input.receiveAsset.asset)

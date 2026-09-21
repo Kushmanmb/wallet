@@ -2,18 +2,44 @@ use crate::formatted_number::GemFormattedNumber;
 use num_bigint::BigInt;
 use num_bigint::BigUint;
 use number_formatter::BigNumberFormatter;
-use primitives::swap::{SwapProviderData, SwapQuote, SwapQuoteData};
+use primitives::swap::{SwapPriceImpact, SwapPriceImpactType, SwapProviderData, SwapQuote, SwapQuoteData};
 use primitives::{Asset, AssetId, Chain, Wallet};
 use swapper::permit2_data::{Permit2Detail, PermitSingle};
 use swapper::{AssetList, Options, Permit2ApprovalData, Quote, QuoteRequest, SwapperError, SwapperProvider, SwapperQuoteAsset, SwapperSlippage, SwapperSlippageMode};
 
 use crate::config::swap_config::{SwapConfig, get_default_slippage};
+use crate::formatted_number::GemValueTone;
 use crate::models::swap::GemSlippageCheck;
+use crate::percentage::GemPercentageStyle;
 use crate::services::amount::model::GemNumberFormat;
 use crate::services::amount::rules::value_from_input;
-use crate::services::swap::model::{GemAssetRate, GemSwapButtonAction, GemSwapButtonInput, GemSwapPair, GemSwapPairSelection, GemSwapPairSuggestion, GemSwapRate, GemSwapSide, GemSwapTransfer};
+use crate::services::localization::GemLocalizedText;
+use crate::services::swap::model::{GemAssetRate, GemSwapButtonAction, GemSwapButtonInput, GemSwapPair, GemSwapPairSelection, GemSwapPairSuggestion, GemSwapPriceImpactRow, GemSwapRate, GemSwapSide, GemSwapTransfer};
 use crate::services::swap::session::{GemSwapQuoteInput, GemSwapRequest};
 use std::collections::HashMap;
+
+pub fn price_impact_row(impact: SwapPriceImpact, pay_symbol: String) -> GemSwapPriceImpactRow {
+    GemSwapPriceImpactRow {
+        value: GemFormattedNumber {
+            tone: price_impact_tone(impact.impact_type),
+            ..GemFormattedNumber::percentage(impact.percentage, GemPercentageStyle::Signed)
+        },
+        shows_in_summary: impact.shows_in_summary,
+        warning: impact.is_high.then(|| GemLocalizedText::PriceImpactWarning {
+            percent: GemFormattedNumber::percentage(impact.percentage.abs(), GemPercentageStyle::Unsigned),
+            symbol: pay_symbol,
+        }),
+    }
+}
+
+fn price_impact_tone(impact_type: SwapPriceImpactType) -> GemValueTone {
+    match impact_type {
+        SwapPriceImpactType::Positive => GemValueTone::Positive,
+        SwapPriceImpactType::Low => GemValueTone::Neutral,
+        SwapPriceImpactType::Medium => GemValueTone::Warning,
+        SwapPriceImpactType::High => GemValueTone::Negative,
+    }
+}
 
 pub fn quote_request(wallet: &Wallet, from_asset: &Asset, to_asset: &Asset, value: BigUint, use_max_amount: bool, slippage_bps: Option<u32>) -> Result<QuoteRequest, SwapperError> {
     let wallet_address = account_address(wallet, from_asset.chain())?;
@@ -300,6 +326,33 @@ pub fn pair_for_asset(asset_id: AssetId, has_balance: bool) -> GemSwapPairSugges
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn test_a_price_impact_row_tones_by_how_bad_it_is_and_warns_only_when_high() {
+        let impact = |percentage: f64, impact_type, is_high| SwapPriceImpact {
+            percentage,
+            impact_type,
+            is_high,
+            shows_in_summary: matches!(impact_type, SwapPriceImpactType::Medium | SwapPriceImpactType::High),
+        };
+        let row = |percentage, impact_type, is_high| price_impact_row(impact(percentage, impact_type, is_high), "ETH".to_string());
+
+        assert_eq!(row(1.0, SwapPriceImpactType::Positive, false).value.tone, GemValueTone::Positive);
+        assert_eq!(row(-0.5, SwapPriceImpactType::Low, false).value.tone, GemValueTone::Neutral);
+        assert_eq!(row(-3.0, SwapPriceImpactType::Medium, false).value.tone, GemValueTone::Warning);
+        assert_eq!(row(-9.0, SwapPriceImpactType::High, true).value.tone, GemValueTone::Negative);
+
+        assert_eq!(row(-0.5, SwapPriceImpactType::Low, false).warning, None, "a small impact needs no warning");
+        assert_eq!(
+            row(-9.0, SwapPriceImpactType::High, true).warning,
+            Some(GemLocalizedText::PriceImpactWarning {
+                percent: GemFormattedNumber::percentage(9.0, GemPercentageStyle::Unsigned),
+                symbol: "ETH".to_string()
+            }),
+            "the warning reads the loss as a plain size, not as a negative change"
+        );
+        assert!(row(-3.0, SwapPriceImpactType::Medium, false).shows_in_summary);
+    }
+
     #[test]
     fn test_quote_input_parses_the_typed_value_and_flags_a_full_spend() {
         let pay = Asset::from_chain(Chain::Ethereum);

@@ -42,6 +42,18 @@ pub struct GemSwapQuoteSummary {
     pub rate: Option<GemSwapRate>,
 }
 
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemSwapPriceImpactRow {
+    pub value: GemFormattedNumber,
+    pub shows_in_summary: bool,
+    pub warning: Option<GemLocalizedText>,
+}
+
+#[uniffi::export]
+pub fn swap_price_impact_row(impact: SwapPriceImpact, pay_symbol: String) -> GemSwapPriceImpactRow {
+    rules::price_impact_row(impact, pay_symbol)
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemSwapDetailRow {
     Provider,

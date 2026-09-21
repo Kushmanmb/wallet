@@ -111,6 +111,8 @@ public extension GemLocalizedText {
             GemPerpetual(provider: .hypercore).positionText(directionName: direction.toPrimitives().title, formattedLeverage: leverage)
         case let .apr(value):
             Localized.Stake.apr(value?.text() ?? .empty)
+        case let .priceImpactWarning(percent, symbol):
+            Localized.Swap.PriceImpactWarning.description(percent.text(), symbol)
         case let .positionChange(change, direction):
             switch change {
             case .increase: Localized.Perpetual.increaseDirection(direction.toPrimitives().title)
