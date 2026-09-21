@@ -202,6 +202,10 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
 
     is GemLocalizedText.Balance -> context.getString(R.string.transfer_balance, amount.text())
 
+    GemLocalizedText.NftCollections -> context.getString(R.string.nft_collections)
+
+    GemLocalizedText.NftUnverified -> context.getString(R.string.asset_verification_unverified)
+
     is GemLocalizedText.StakeProvider -> when (provider) {
         StakeProviderType.STAKE -> context.getString(R.string.transfer_stake_title)
         StakeProviderType.EARN -> context.getString(R.string.common_earn)

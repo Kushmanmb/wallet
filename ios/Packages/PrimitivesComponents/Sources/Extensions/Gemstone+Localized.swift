@@ -114,6 +114,10 @@ public extension GemLocalizedText {
             Localized.Swap.PriceImpactWarning.description(percent.text(), symbol)
         case let .balance(amount):
             Localized.Transfer.balance(amount.text())
+        case .nftCollections:
+            Localized.Nft.collections
+        case .nftUnverified:
+            Localized.Asset.Verification.unverified
         case let .stakeProvider(provider):
             switch provider {
             case .stake: Localized.Transfer.Stake.title
