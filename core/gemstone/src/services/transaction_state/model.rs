@@ -9,6 +9,7 @@ pub struct GemTransactionStateUpdate {
     pub block_number: Option<String>,
     pub metadata: Option<String>,
     pub confirmation_eta_seconds: Option<u32>,
+    pub asset_ids: Option<Vec<AssetId>>,
 }
 
 impl GemTransactionStateUpdate {
@@ -19,6 +20,7 @@ impl GemTransactionStateUpdate {
             block_number: None,
             metadata: None,
             confirmation_eta_seconds: None,
+            asset_ids: None,
         }
     }
 

@@ -40,7 +40,7 @@ public final class GemstoneTransactionStateStore: GemTransactionStateStore, @unc
     }
 
     public func addTransactions(walletId: String, transactions: [Gemstone.Transaction]) async throws {
-        try store.addTransactions(walletId: WalletId.from(id: walletId), transactions: transactions.map { $0.toPrimitives() })
+        try store.addTransactions(walletId: WalletId.from(id: walletId), transactions: transactions.map(\.transactionAssets))
     }
 
     public func getState(walletId: String, transactionId: Gemstone.TransactionId) async throws -> Gemstone.TransactionState? {
@@ -68,6 +68,7 @@ public final class GemstoneTransactionStateStore: GemTransactionStateStore, @unc
             blockNumber: update.blockNumber.flatMap { Int($0) },
             metadata: update.metadata,
             confirmationEtaSeconds: update.confirmationEtaSeconds,
+            assetIds: update.assetIds?.map { Primitives.AssetId(core: $0) },
         ) > 0
     }
 }

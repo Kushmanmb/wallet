@@ -16,7 +16,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 
 ## Execution order
 
-1. **Protect correctness:** K15; resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
+1. **Protect correctness:** resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
 2. **Establish consistency:** MIG6; apply the atomic-write contract to U22–U24. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, C53 wallet creation/import with D43/R124, and the device observers. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
@@ -41,7 +41,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | B78, R119/R120, D55, U10, V91 |
 | Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | C51, R89/R90/R93, U30, D51/D55, F58, P90, D73 |
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | S82, D67, R91/R92/R129, U15, D55 |
-| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | K15, U18, R105/R121/R127, P90, F62 |
+| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | U18, R105/R121/R127, P90, F62 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | S83, R106/R120/R122, D50/D64, U15, S80 |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | D66, R98/R112, K14/K19, U24, O59 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73/S81, R96/R128, F61/F62 |
@@ -161,7 +161,6 @@ Surveyed on 2026-09-21. Each item names what was counted and where; confirm the 
 Found on 2026-09-19 and verified in the code: transaction-critical input, parsing that changes a shown amount, crashes, and regressions the earlier row migrations introduced. Work these before anything below.
 
 
-- **K15** **S** iOS keeps its own copy of `Transaction::asset_ids()` ([`Transaction+Primitives.swift`](../ios/Packages/Primitives/Sources/Extensions/Transaction+Primitives.swift)) and writes the association index from it (`TransactionStore.swift:140-155`); the copy omits the NEAR multi-token transfers Core includes, so those transactions never list under the assets they moved. `Store` depends only on `Primitives` and GRDB, so the ids have to arrive from `GemstoneServices`, which already adapts both write paths. `addTransactions` can take them per transaction and `updateTransactionHash` keeps the same ids, so it should re-point the existing association rows instead of recomputing; `updateTransaction` changes the metadata and therefore the ids, and is the one that needs a decision — either `GemTransactionStateUpdate` carries them or Core exports the rule for a metadata value. Android's decode is gone; `transaction_swap_pair` owns that answer now.
 - **X172** **M** `GemKeystore` exports four raw secret operations production never calls (`preview_import`, `create_store`, `export_recovery_phrase`, `export_private_key`; `keystore/keystore.rs:36,55,80,90`); production goes through `GemWalletService::import_wallet`/`export_secret`, yet both apps hand the keystore object around (`LocalKeystore.swift:6` public, Android Hilt `WalletsModule.kt:39`). Move the four into the plain `impl` block and point the test kits at the service. The test kits lean on the four: iOS `LocalKeystore+Keystore.swift` and `LocalKeystore+Export.swift`, Android `GemstoneTestKeys.kt`, and the keystore concurrency, benchmark and migration instrumentation tests, so each moves to the service or a Core test first.
 
 ## 0. Duplicated code to delete first

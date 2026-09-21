@@ -409,6 +409,23 @@ mod tests {
     }
 
     #[test]
+    fn test_asset_ids_include_the_transfers_the_metadata_carries() {
+        let transaction = Transaction {
+            metadata: Some(serde_json::json!({
+                "assetTransfers": [
+                    { "assetId": "solana", "from": "0xfrom", "to": "0xto", "value": "1" }
+                ]
+            })),
+            ..Transaction::mock()
+        };
+
+        let asset_ids = transaction.asset_ids();
+
+        assert_eq!(asset_ids.len(), 2, "a multi-token transfer lists under every asset it moved");
+        assert!(asset_ids.contains(&AssetId::from_chain(Chain::Solana)));
+    }
+
+    #[test]
     fn test_assets_addresses_transfer() {
         // Without fee
         assert_eq!(Transaction::mock().assets_addresses().len(), 2);

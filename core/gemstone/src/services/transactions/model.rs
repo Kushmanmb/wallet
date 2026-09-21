@@ -3,7 +3,7 @@ use crate::models::custom_types::GemBigUint;
 use crate::models::list::GemListRow;
 use crate::services::swap::model::GemSwapRate;
 use chrono::{DateTime, Utc};
-use primitives::{AddressName, Asset, AssetId, AssetPrice, Chain, ChainAsset, NFTAssetId, PerpetualDirection, Resource, TransactionDirection, TransactionExtended, TransactionId, TransactionState, TransactionType};
+use primitives::{AddressName, Asset, AssetId, AssetPrice, Chain, ChainAsset, NFTAssetId, PerpetualDirection, Resource, Transaction, TransactionDirection, TransactionExtended, TransactionId, TransactionState, TransactionType};
 
 use super::rules;
 use primitives::BlockExplorerLink;
@@ -40,6 +40,11 @@ pub struct GemActivityFilters {
 #[uniffi::export]
 pub fn activity_filters(chains: Vec<Chain>, filters: Vec<GemTransactionFilter>) -> GemActivityFilters {
     rules::activity_filters(chains, filters)
+}
+
+#[uniffi::export]
+pub fn transaction_asset_ids(transaction: Transaction) -> Vec<AssetId> {
+    transaction.asset_ids()
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
