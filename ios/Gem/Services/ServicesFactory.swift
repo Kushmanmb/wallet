@@ -267,6 +267,7 @@ struct ServicesFactory {
             ),
             wallet: walletService,
             device: deviceService,
+            support: supportService,
         )
 
         let onStartService = OnstartService(

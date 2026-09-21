@@ -41,6 +41,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
+import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.settings.settings.viewmodels.SupportChatLink
 import com.gemwallet.android.features.settings.settings.viewmodels.SupportChatMessage
 import com.gemwallet.android.ui.R
@@ -63,6 +64,8 @@ import com.wallet.core.primitives.SupportMessage
 import com.wallet.core.primitives.SupportMessageImage
 import com.wallet.core.primitives.SupportMessageSender
 import com.wallet.core.primitives.SupportMessageStatus
+import uniffi.gemstone.GemSupportMessageOutcome
+import uniffi.gemstone.supportMessageOutcome
 import java.text.DateFormat
 import java.util.Date
 
@@ -275,14 +278,14 @@ private fun MessageMeta(message: SupportMessage, time: String, color: Color, onR
             color = color,
             modifier = Modifier.alpha(if (message.status == SupportMessageStatus.Sent) 1f else 0f),
         )
-        when (message.status) {
-            SupportMessageStatus.Sending -> CircularProgressIndicator(
+        when (val outcome = supportMessageOutcome(message.toGem())) {
+            GemSupportMessageOutcome.Sending -> CircularProgressIndicator(
                 modifier = Modifier.size(space10),
                 strokeWidth = progressStrokeWidth,
                 color = color,
             )
 
-            SupportMessageStatus.Failed -> if (message.sender is SupportMessageSender.User && message.images.isEmpty()) {
+            is GemSupportMessageOutcome.Failed -> if (outcome.canRetry) {
                 Icon(
                     imageVector = AppIcons.Refresh,
                     contentDescription = null,
@@ -298,7 +301,7 @@ private fun MessageMeta(message: SupportMessage, time: String, color: Color, onR
                 )
             }
 
-            SupportMessageStatus.Sent -> Unit
+            GemSupportMessageOutcome.Sent -> Unit
         }
     }
 }
