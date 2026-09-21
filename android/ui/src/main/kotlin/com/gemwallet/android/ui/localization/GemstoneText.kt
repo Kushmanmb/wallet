@@ -380,6 +380,7 @@ fun GemEmptyStateText.text(context: Context, symbol: String): String = when (thi
     GemEmptyStateText.STAKE_DESCRIPTION -> context.getString(R.string.stake_state_empty_description, symbol)
     GemEmptyStateText.EARN_TITLE -> context.getString(R.string.earn_state_empty_title)
     GemEmptyStateText.EARN_DESCRIPTION -> context.getString(R.string.earn_state_empty_description, symbol)
+    GemEmptyStateText.VALIDATORS_TITLE -> context.getString(R.string.stake_state_empty_validators_title)
     GemEmptyStateText.WALLET_CONNECT_TITLE -> context.getString(R.string.wallet_connect_no_active_connections)
     GemEmptyStateText.WALLET_CONNECT_DESCRIPTION -> context.getString(R.string.wallet_connect_state_empty_description)
     GemEmptyStateText.RECENTS_TITLE -> context.getString(R.string.recent_activity_state_empty_title)
@@ -533,7 +534,7 @@ fun GemListSectionTitle.titleRes(): Int? = when (this) {
 
 fun GemListRowTitle.text(context: Context): String = when (this) {
     GemListRowTitle.API -> "API"
-    GemListRowTitle.STREAM -> "Stream"
+    GemListRowTitle.STREAM -> context.getString(R.string.nodes_stream)
     GemListRowTitle.GEM_WALLET_NODE -> context.getString(R.string.nodes_gem_wallet_node)
     GemListRowTitle.NAME -> context.getString(R.string.asset_name)
     GemListRowTitle.NETWORK -> context.getString(R.string.transfer_network)

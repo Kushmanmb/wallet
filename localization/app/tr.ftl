@@ -392,6 +392,7 @@ stake_active_in = Şunda aktif olur
 stake_minimum_amount = Minimum miktar
 stake_state_empty_title = Stake'leriniz burada görünecek
 stake_state_empty_description = İlk %@ stake'inizi yapın
+stake_state_empty_validators_title = Hiçbir doğrulayıcı bulunamadı
 stake_resource = Kaynak
 stake_resource_energy = Enerji
 stake_resource_bandwidth = Bant genişliği
@@ -448,6 +449,7 @@ nodes_import_node_in_sync = Senkronize
 nodes_import_node_latest_block = Son Blok
 nodes_import_node_latency = Gecikme
 nodes_gem_wallet_node = Gem Wallet Düğümü
+nodes_stream = Akış
 nodes_import_node_warning_message = Özel düğümler kötü amaçlı olabilir ve işlem verilerinizi ifşa edebilir veya yanlış bilgi sağlayabilir.
 
 # Library

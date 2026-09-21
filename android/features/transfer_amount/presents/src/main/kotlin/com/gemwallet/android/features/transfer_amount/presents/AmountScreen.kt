@@ -39,7 +39,7 @@ fun AmountScreen(onCancel: () -> Unit, onConfirm: (ConfirmTransferInput) -> Unit
     ) { showingPicker ->
         if (showingPicker && validatorPicker != null) {
             validatorPicker?.let { picker ->
-                ValidatorsScreen(
+                ValidatorsScene(
                     selection = picker.rows,
                     selectedValidatorId = picker.selectedId,
                     onCancel = { isSelectValidator = false },
