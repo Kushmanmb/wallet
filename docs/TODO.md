@@ -134,7 +134,6 @@ Surveyed on 2026-09-21. Each item names what was counted and where; confirm the 
 ### Names
 
 - **N14** **M** **The contact editor is named `ManageContact` end to end.** Core exports `GemManageContactService` from `services/manage_contact/`, and both apps follow: iOS `ManageContactViewModel` with `manageContactModel(mode:)`, `manageContact(for:)` and `manageContactScene(mode:)`, Android `ManageContactViewModel` and `ManageContactNavScreen`. `manage` is one of the verbs [Engineering Principles](../skills/engineering-principles.md) rejects, and the screen adds or edits one contact. Rename the Core service and module with both apps' types in one commit, so the three app functions can say what they build; a half-rename leaves the apps and Core disagreeing.
-- **N3** **S** **Abbreviations in names.** The same rules require full domain terms (`transaction`, not `tx`) except where an external protocol, column or URL fixes the spelling. Audit `tx`, `addr`, `amt`, `cfg` and `msg` in both apps, keeping the ones that name a database column or a wire field.
 
 ### Services
 
