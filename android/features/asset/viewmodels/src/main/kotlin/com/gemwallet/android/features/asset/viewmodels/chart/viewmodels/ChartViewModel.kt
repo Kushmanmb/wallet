@@ -23,14 +23,18 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.gemstone.AssetPrice
 import uniffi.gemstone.GemChartPhase
@@ -50,12 +54,11 @@ class ChartViewModel internal constructor(
     private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
     private val selectedPeriod = MutableStateFlow(chartService.chartPeriod())
-    private val refreshController = ChartRefreshController()
+    private val session = MutableStateFlow(chartService.newSession())
+    private val refreshRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     val refreshIntervalMillis = connectionStatusObserver.refreshIntervalMillis(GemRefreshKind.CHART)
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0L)
-
-    val isRefreshing = refreshController.isRefreshing
 
     private val price = getAssetTokenInfo(assetId)
         .map { info ->
@@ -70,31 +73,36 @@ class ChartViewModel internal constructor(
         }
         .distinctUntilChanged()
 
-    private val loaded = combine(
+    private val loads = combine(
         selectedPeriod,
         getCurrentCurrency.getCurrency(),
-        refreshController.trigger,
-    ) { period, _, _ -> period }
-        .transformLatest { period ->
-            val loading = chartService.newSession().onSelectPeriod(period)
-            emit(loading)
-            val next = try {
-                loading.onLoaded(chartService.syncCharts(assetId.toIdentifier(), period), period)
+        refreshRequests.onStart { emit(Unit) },
+    ) { period, currency, _ -> period to currency }
+        .transformLatest { (period, currency) ->
+            session.update { held ->
+                val kept = if (held.currency == currency.toGem()) held else chartService.newSession()
+                kept.onSelectPeriod(period).onRefresh()
+            }
+            emit(Unit)
+            try {
+                val chart = chartService.syncCharts(assetId.toIdentifier(), period)
+                session.update { held -> held.onLoaded(chart, period) }
             } catch (e: Exception) {
                 currentCoroutineContext().ensureActive()
-                loading.onFailed(e as? GemServiceException ?: GemServiceException.Core(e.message.orEmpty()), period)
+                session.update { held -> held.onFailed(e as? GemServiceException ?: GemServiceException.Core(e.message.orEmpty()), period) }
             }
-            refreshController.stopRefreshing()
-            emit(next)
+            emit(Unit)
         }
         .flowOn(ioDispatcher)
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(StopTimeoutMillis),
-            chartService.newSession(),
-        )
 
-    val chartUIState = combine(loaded, price) { session, price -> session.viewState(price) }.map { state ->
+    private val viewState = combine(session, price, loads) { session, price, _ -> session.viewState(price) }
+        .flowOn(ioDispatcher)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(StopTimeoutMillis), session.value.viewState(null))
+
+    val isRefreshing: StateFlow<Boolean> = viewState.map { it.isRefreshing }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(StopTimeoutMillis), false)
+
+    val chartUIState = viewState.map { state ->
         ChartUIModel.State(
             period = state.period.toPrimitives(),
             chart = when (val phase = state.phase) {
@@ -105,7 +113,6 @@ class ChartViewModel internal constructor(
             },
         )
     }
-        .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(StopTimeoutMillis), ChartUIModel.State())
 
     fun setPeriod(period: ChartPeriod) {
@@ -120,7 +127,7 @@ class ChartViewModel internal constructor(
     }
 
     fun refresh() {
-        refreshController.startRefreshing()
+        refreshRequests.tryEmit(Unit)
     }
 
     @Inject
