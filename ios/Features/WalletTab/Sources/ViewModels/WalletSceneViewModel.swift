@@ -132,7 +132,7 @@ public final class WalletSceneViewModel: Sendable, AssetActions {
                 actions: viewState.headerActions,
             ),
             currency: currency,
-            showPerpetuals: observablePreferences.showPerpetuals(for: wallet),
+            showPerpetuals: viewState.showsPerpetuals,
             showCollections: viewState.showCollections,
             visibleBanners: viewState.visibleBanners.map { $0.toPrimitives() },
         )

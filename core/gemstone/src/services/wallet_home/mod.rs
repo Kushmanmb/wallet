@@ -24,6 +24,7 @@ pub struct GemWalletHomeViewState {
     pub shows_pnl: bool,
     pub header_actions: GemHeaderActions,
     pub show_collections: bool,
+    pub shows_perpetuals: bool,
     pub visible_banners: Vec<Banner>,
 }
 
@@ -73,7 +74,8 @@ impl GemWalletHomeService {
         GemWalletHomeViewState {
             shows_pnl: balance_rules::shows_pnl(&total_value),
             header_actions: rules::header_actions(wallet.wallet_type, &chains, rules::header_buttons_enabled(&banners)),
-            show_collections: self.preferences.show_collections(wallet.wallet_type, chains),
+            show_collections: self.preferences.show_collections(wallet.wallet_type, chains.clone()),
+            shows_perpetuals: self.preferences.show_perpetuals(wallet.wallet_type, chains),
             visible_banners: GemBannerContext::wallet(wallet, is_wallet_empty).visible_banners(banners),
             total_value,
         }
@@ -130,6 +132,19 @@ mod tests {
     use super::testkit::WalletHomeTestkit;
     use crate::services::wallet_preferences::GemDiscoveryStep;
     use primitives::{AssetFiatValue, Banner, BannerEvent, BannerState, Wallet};
+
+    #[test]
+    fn test_the_home_state_answers_whether_perpetuals_show() {
+        let testkit = WalletHomeTestkit::with_status(200);
+
+        let state = testkit.service.view_state(Wallet::mock(), vec![], None, vec![]);
+
+        assert_eq!(
+            state.shows_perpetuals,
+            testkit.preferences.show_perpetuals(Wallet::mock().wallet_type, Wallet::mock().chains()),
+            "the screen reads the flag from the state instead of asking a second service"
+        );
+    }
 
     #[test]
     fn test_the_onboarding_banner_shows_only_while_every_balance_is_zero() {

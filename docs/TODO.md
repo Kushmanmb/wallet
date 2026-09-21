@@ -265,7 +265,7 @@ The same product rule on both apps with a difference, each read on both sides on
 
 [ARCHITECTURE.md § 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android): a case that only forwards a Core call is migration debt, and one answer has one route.
 
-- **O59** **S** "Show perpetuals" reaches the apps through three exports (`GemPreferencesService`, `GemAssetSelectionService`, `GemPerpetualService::should_connect_perpetuals`), the portfolio segment reads it around its own service on both apps, and `GemWalletHomeViewState` lacks it, so both apps fetch it separately. `shows_perpetuals` on the home view state and the portfolio session.
+- **O59** **S** "Show perpetuals" still reaches the apps through more paths than the home state: iOS [PortfolioSceneViewModel](../ios/Features/WalletTab/Sources/ViewModels/PortfolioSceneViewModel.swift) and `AssetsResultsSceneViewModel` ask their own services, and Android has three — `WalletSearchViewModel` and `AssetsResultsViewModel` call `GemAssetSelectionService.showPerpetuals`, while the home preview has a fourth path, [PerpetualsPreviewViewModel](../android/features/perpetual/viewmodels/src/main/kotlin/com/gemwallet/android/features/perpetual/viewmodels/PerpetualsPreviewViewModel.kt) reading `userConfig.showPerpetuals`. That one is a self-contained composable with its own view model, so Android's home cannot read the state field without changing the preview section's API; decide whether the section takes the flag or keeps its own. Put the search and results readers on the portfolio session, then un-export the paths that are left. `GemWalletHomeViewState.shows_perpetuals` exists now and iOS's home reads it instead of fetching alongside the view state.
 
 ## 6. Core shapes that block an app move
 
