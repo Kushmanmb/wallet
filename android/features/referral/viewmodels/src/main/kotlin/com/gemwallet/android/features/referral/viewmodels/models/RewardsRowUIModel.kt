@@ -6,16 +6,16 @@ import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.localization.text
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemRewardsRedemption
 import uniffi.gemstone.GemRewardsState
 
 data class RewardRedemptionUIModel(val redemption: GemRewardsRedemption, val model: ListItemModel, val confirmationMessage: String)
 
-internal fun GemRewardsState.infoRows(context: Context): List<ListItemModel> = listOfNotNull(
-    referralCode?.let { ListItemModel(title = context.getString(R.string.rewards_my_referral_code), subtitle = it) },
-    ListItemModel(title = context.getString(R.string.rewards_referrals), subtitle = referralCountText),
-    ListItemModel(title = context.getString(R.string.rewards_points), subtitle = pointsText),
-)
+internal fun GemRewardsState.infoRows(context: Context): List<ListItemModel> = infoRows.mapNotNull { row ->
+    (row as? GemListRow.Text)?.let { ListItemModel(title = it.title.text(context), subtitle = it.value) }
+}
 
 internal fun GemRewardsRedemption.uiModel(context: Context): RewardRedemptionUIModel? {
     val asset = option.asset ?: return null

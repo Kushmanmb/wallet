@@ -18,6 +18,7 @@ pub struct GemRewardsState {
     pub used_referral_code: Option<String>,
     pub referral_count_text: String,
     pub points_text: String,
+    pub info_rows: Vec<GemListRow>,
     pub redemptions: Vec<GemRewardsRedemption>,
 }
 

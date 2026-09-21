@@ -203,14 +203,13 @@ public struct RewardsScene: View {
 
     private var infoSection: some View {
         Section {
-            if let item = model.referralCodeListItem {
-                ListItemView(model: item)
-                    .contextMenu(model.referralLink.map { [.copy(value: $0)] } ?? [])
-            }
-            ListItemView(model: model.referralCountListItem)
-            ListItemView(model: model.pointsListItem)
-            if let item = model.invitedByListItem {
-                ListItemView(model: item)
+            ForEach(Array(model.infoRows.enumerated()), id: \.offset) { _, row in
+                if case let .text(title, _) = row, title == .myReferralCode {
+                    GemListRowView(row: row)
+                        .contextMenu(model.referralLink.map { [.copy(value: $0)] } ?? [])
+                } else {
+                    GemListRowView(row: row)
+                }
             }
         } header: {
             Text(model.statsSectionTitle)

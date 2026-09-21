@@ -27,5 +27,6 @@ internal fun previewRewardsState(
     usedReferralCode = usedReferralCode,
     referralCountText = referralCountText,
     pointsText = pointsText,
+    infoRows = emptyList(),
     redemptions = emptyList(),
 )

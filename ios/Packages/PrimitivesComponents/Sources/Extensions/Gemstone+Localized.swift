@@ -652,6 +652,10 @@ public extension GemListRowTitle {
         case .walletConnect: Localized.WalletConnect.title
         case .support: Localized.Settings.support
         case .rewards: Localized.Rewards.title
+        case .myReferralCode: Localized.Rewards.myReferralCode
+        case .referrals: Localized.Rewards.referrals
+        case .points: Localized.Rewards.points
+        case .invitedBy: Localized.Rewards.invitedBy
         case .aboutUs: Localized.Settings.aboutus
         case .developer: Localized.Settings.developer
         case .authentication: Localized.Settings.enablePasscode

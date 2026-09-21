@@ -107,6 +107,7 @@ public extension GemRewardsState {
             usedReferralCode: usedReferralCode,
             referralCountText: referralCountText,
             pointsText: pointsText,
+            infoRows: [],
             redemptions: redemptions,
         )
     }

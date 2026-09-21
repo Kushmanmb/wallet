@@ -42,6 +42,7 @@ pub fn state(rewards: Option<&Rewards>, now: DateTime<Utc>) -> GemRewardsState {
         used_referral_code: rewards.used_referral_code.clone().filter(|code| !code.is_empty()),
         referral_count_text: rewards.referral_count.to_string(),
         points_text: points_text(rewards.points),
+        info_rows: info_rows(referral_code.as_deref(), &rewards.referral_count.to_string(), &points_text(rewards.points), rewards.used_referral_code.as_deref()),
         redemptions: redemptions(rewards),
     }
 }
@@ -92,6 +93,20 @@ fn redemptions(rewards: &Rewards) -> Vec<GemRewardsRedemption> {
         .collect()
 }
 
+fn info_rows(referral_code: Option<&str>, referral_count_text: &str, points_text: &str, used_referral_code: Option<&str>) -> Vec<GemListRow> {
+    let text = |title: GemListRowTitle, value: &str| GemListRow::Text { title, value: value.to_string() };
+    let optional = |title: GemListRowTitle, value: Option<&str>| value.filter(|value| !value.is_empty()).map(|value| text(title, value));
+    [
+        optional(GemListRowTitle::MyReferralCode, referral_code),
+        Some(text(GemListRowTitle::Referrals, referral_count_text)),
+        Some(text(GemListRowTitle::Points, points_text)),
+        optional(GemListRowTitle::InvitedBy, used_referral_code),
+    ]
+    .into_iter()
+    .flatten()
+    .collect()
+}
+
 fn can_redeem(rewards: &Rewards, option: &RewardRedemptionOption) -> bool {
     rewards.points >= option.points && option.remaining.is_none_or(|remaining| remaining > 0)
 }
@@ -102,6 +117,48 @@ fn has_value(code: Option<&str>) -> bool {
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn test_the_info_rows_hold_every_value_the_screen_shows_and_skip_the_absent_ones() {
+        let invited = Rewards {
+            code: Some("GEM123".to_string()),
+            used_referral_code: Some("FRIEND".to_string()),
+            referral_count: 4,
+            ..Rewards::mock(None, RewardStatus::Verified)
+        };
+
+        let titles = |rewards: &Rewards| {
+            state(Some(rewards), now())
+                .info_rows
+                .into_iter()
+                .map(|row| match row {
+                    GemListRow::Text { title, value } => (title, value),
+                    _ => panic!("an info row is plain text"),
+                })
+                .collect::<Vec<_>>()
+        };
+
+        assert_eq!(
+            titles(&invited),
+            vec![
+                (GemListRowTitle::MyReferralCode, "GEM123".to_string()),
+                (GemListRowTitle::Referrals, "4".to_string()),
+                (GemListRowTitle::Points, points_text(invited.points)),
+                (GemListRowTitle::InvitedBy, "FRIEND".to_string()),
+            ],
+        );
+
+        let alone = Rewards {
+            code: None,
+            used_referral_code: None,
+            ..Rewards::mock(None, RewardStatus::Verified)
+        };
+        assert_eq!(
+            titles(&alone).into_iter().map(|(title, _)| title).collect::<Vec<_>>(),
+            vec![GemListRowTitle::Referrals, GemListRowTitle::Points],
+            "a wallet with no code of its own and no inviter shows neither row",
+        );
+    }
 
     #[test]
     fn test_state_carries_the_referral_link() {

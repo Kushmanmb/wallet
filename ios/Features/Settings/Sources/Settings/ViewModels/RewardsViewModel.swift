@@ -2,6 +2,7 @@
 
 import Components
 import Foundation
+import enum Gemstone.GemListRow
 import struct Gemstone.GemRewardsRedemption
 import protocol Gemstone.GemRewardsServiceProtocol
 import struct Gemstone.GemRewardsState
@@ -130,20 +131,8 @@ public final class RewardsViewModel: Sendable {
         rewardsState.referralCode
     }
 
-    var referralCodeListItem: ListItemModel? {
-        referralCode.map { ListItemModel(title: myReferralCodeTitle, subtitle: $0) }
-    }
-
-    var referralCountListItem: ListItemModel {
-        ListItemModel(title: referralCountTitle, subtitle: referralCountText)
-    }
-
-    var pointsListItem: ListItemModel {
-        ListItemModel(title: pointsTitle, subtitle: pointsText)
-    }
-
-    var invitedByListItem: ListItemModel? {
-        invitedBy.map { ListItemModel(title: invitedByTitle, subtitle: $0) }
+    var infoRows: [GemListRow] {
+        rewardsState.infoRows
     }
 
     var referralCountText: String {
