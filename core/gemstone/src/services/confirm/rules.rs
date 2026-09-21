@@ -1,4 +1,5 @@
-use super::model::GemConfirmRowContent;
+use super::model::{GemAvatar, GemConfirmRowContent};
+use crate::address_formatter::GemAddressService;
 use crate::application::GemApplicationMetadataService;
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::copy::address_copy;
@@ -7,8 +8,10 @@ use crate::models::list::{GemListRow, GemListRowTitle};
 use crate::models::placeholder::text_or_placeholder;
 use crate::precision::GemValueStyle;
 use crate::services::assets::rules::asset_text;
+use crate::services::contact::model::contact_initials;
 use crate::services::transfer::model::{GemConfirmRow, GemTransferData};
 use crate::services::wallet::model::wallet_row;
+use primitives::AddressType;
 use primitives::currency::Currency;
 use primitives::{AddressName, BlockExplorerLink};
 use primitives::{
@@ -330,6 +333,14 @@ pub fn error_info(display: &GemConfirmErrorDisplay, prices: &[AssetPrice], curre
     }
 }
 
+fn contact_avatar(address_name: Option<&AddressName>, name: Option<&str>) -> Option<GemAvatar> {
+    let address_name = address_name.filter(|address_name| address_name.address_type == AddressType::Contact)?;
+    Some(GemAvatar {
+        image_url: address_name.image_url.clone().filter(|url| !url.is_empty()),
+        initials: contact_initials(name.unwrap_or(&address_name.name).to_string()),
+    })
+}
+
 pub fn acquire_asset_flow(chain: Chain) -> GemAcquireAssetFlow {
     match chain {
         Chain::Tron => GemAcquireAssetFlow::Options,
@@ -554,12 +565,20 @@ pub fn confirm_row_contents(transfer: &GemTransferData, wallet: Wallet, address_
                     explorer: address_url(chain, account.address.clone()),
                 },
             }),
-            GemConfirmRow::Recipient => transfer.destination().map(|destination| GemConfirmRowContent::Recipient {
-                destination: destination.with_address_name(address_name.clone()),
-                address_name: address_name.clone(),
-                memo: transfer.recipient.memo.clone(),
-                chain,
-                link: address_url(chain, transfer.recipient.address.clone()),
+            GemConfirmRow::Recipient => transfer.destination().map(|destination| {
+                let destination = destination.with_address_name(address_name.clone());
+                let avatar = contact_avatar(address_name.as_ref(), destination.name().as_deref());
+                let address = destination.address();
+                GemConfirmRowContent::Recipient {
+                    name: GemAddressService::new().name_text(destination.name(), address.clone(), avatar.is_some()),
+                    is_selectable: !address.is_empty(),
+                    address,
+                    destination,
+                    avatar,
+                    memo: transfer.recipient.memo.clone(),
+                    chain,
+                    link: address_url(chain, transfer.recipient.address.clone()),
+                }
             }),
             GemConfirmRow::Network => {
                 let text = asset_text(&asset);
@@ -1608,6 +1627,50 @@ mod tests {
             }),
         );
         assert_eq!(resimulated.simulation.warnings.len(), 1);
+    }
+
+    #[test]
+    fn test_a_recipient_row_is_finished_before_it_leaves_core() {
+        let link = |chain: Chain, address: String| BlockExplorerLink { name: chain.to_string(), link: address };
+        let transfer = GemTransferData::mock(TransactionInputType::Transfer { asset: Asset::from_chain(Chain::Ethereum) });
+        let contact = AddressName::mock("recipient", "John Smith", AddressType::Contact, VerificationStatus::Verified);
+        let recipient = |address_name: Option<AddressName>| {
+            confirm_row_contents(&transfer, Wallet::mock(), address_name, link)
+                .into_iter()
+                .find_map(|content| match content {
+                    GemConfirmRowContent::Recipient { name, address, avatar, is_selectable, .. } => Some((name, address, avatar, is_selectable)),
+                    _ => None,
+                })
+                .unwrap()
+        };
+
+        let (name, address, avatar, is_selectable) = recipient(Some(contact));
+        assert_eq!(avatar.as_ref().map(|avatar| avatar.initials.clone()), Some("JO".to_string()), "a contact reads as the initials Core writes everywhere else");
+        assert_eq!(name, Some("John Smith".to_string()), "a contact with a picture needs no address beside its name");
+        assert_eq!(address, "recipient");
+        assert!(is_selectable);
+
+        let (nameless, _, no_avatar, _) = recipient(None);
+        assert_eq!(no_avatar, None, "an address nobody named shows no avatar");
+        assert_eq!(nameless, None, "an unnamed address has no name text");
+    }
+
+    #[test]
+    fn test_a_known_contract_is_named_like_a_known_recipient() {
+        use crate::services::transfer::model::GemConfirmDestination;
+        let contract = GemConfirmDestination::Contract {
+            name: None,
+            address: "0xcontract".to_string(),
+        };
+        let named = contract.with_address_name(Some(AddressName::mock("0xcontract", "Uniswap", AddressType::Contract, VerificationStatus::Verified)));
+
+        assert_eq!(named.name(), Some("Uniswap".to_string()));
+        assert_eq!(contract.with_address_name(None).name(), None);
+        assert_eq!(
+            contract.with_address_name(Some(AddressName::mock("0xcontract", "", AddressType::Contract, VerificationStatus::Verified))).name(),
+            None,
+            "an empty name is no name"
+        );
     }
 
     #[test]

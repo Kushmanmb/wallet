@@ -18,7 +18,7 @@ extension GemConfirmErrorInfo {
     }
 }
 
-extension Optional where Wrapped == GemFormattedNumber {
+extension GemFormattedNumber? {
     var boldText: String {
         self?.text().boldMarkdown() ?? .empty
     }
