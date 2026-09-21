@@ -1,6 +1,7 @@
 package com.gemwallet.android.domains.asset.aggregates
 
 import androidx.compose.runtime.Immutable
+import com.gemwallet.android.domains.balance.HIDDEN_BALANCE
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.text
@@ -31,8 +32,6 @@ data class AssetInfoDataAggregate(
 )
 
 fun List<AssetInfo>.toAssetInfoDataAggregates(style: GemAssetRowStyle, hideBalance: Boolean = false): List<AssetInfoDataAggregate> = map { it.toAssetInfoDataAggregate(style = style, hideBalance = hideBalance) }
-
-private const val HIDDEN_BALANCE = "*****"
 
 fun AssetInfo.toAssetInfoDataAggregate(style: GemAssetRowStyle, hideBalance: Boolean = false, scope: GemAssetBalanceScope = GemAssetBalanceScope.TOTAL): AssetInfoDataAggregate {
     val assetPrice = price?.price
