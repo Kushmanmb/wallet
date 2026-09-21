@@ -57,7 +57,7 @@ extension FiatScene {
                 secondary: {
                     HStack(spacing: .space10) {
                         ForEach(model.suggestedAmounts, id: \.amount) { suggestion in
-                            Button(suggestion.text) {
+                            Button(suggestion.value.text()) {
                                 model.onSelect(amount: Int(suggestion.amount))
                             }
                             .font(.subheadline.weight(.semibold))

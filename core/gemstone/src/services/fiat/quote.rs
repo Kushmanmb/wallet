@@ -7,6 +7,7 @@ use primitives::{AssetId, FiatQuote, FiatQuoteType, FiatQuoteUrl};
 use super::session::GemFiatSession;
 use super::{GemFiatService, rules};
 use crate::config::fiat_config::get_fiat_config;
+use crate::formatted_number::GemFormattedNumber;
 use crate::services::balance::GemBalanceService;
 use crate::services::error::GemServiceError;
 use crate::services::wallet_session::GemWalletSessionService;
@@ -31,13 +32,13 @@ impl GemFiatQuoteService {
         CURRENCY
     }
 
-    pub fn suggested_amounts(&self, currency_symbol: String) -> Vec<GemFiatSuggestedAmount> {
+    pub fn suggested_amounts(&self) -> Vec<GemFiatSuggestedAmount> {
         get_fiat_config()
             .suggested_amounts
             .into_iter()
             .map(|amount| GemFiatSuggestedAmount {
                 amount: amount.unsigned_abs(),
-                text: format!("{currency_symbol}{amount}"),
+                value: GemFormattedNumber::whole_currency(f64::from(amount), CURRENCY),
             })
             .collect()
     }

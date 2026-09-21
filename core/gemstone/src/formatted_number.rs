@@ -166,6 +166,15 @@ impl GemFormattedNumber {
         }
     }
 
+    pub fn whole_currency(value: f64, currency: Currency) -> Self {
+        Self {
+            display: GemNumberDisplay::Number {
+                precision: GemPrecision::Fraction { min: 0, max: 0 },
+            },
+            ..Self::currency(value, currency, GemCurrencyStyle::Currency)
+        }
+    }
+
     pub fn count(value: u64) -> Self {
         Self {
             value: value as f64,

@@ -14,7 +14,7 @@ pub enum GemFiatAmountCheck {
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemFiatSuggestedAmount {
     pub amount: u32,
-    pub text: String,
+    pub value: GemFormattedNumber,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]

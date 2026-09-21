@@ -17,6 +17,7 @@ import com.gemwallet.android.testkit.mockAssetData
 import com.gemwallet.android.testkit.mockAssetMetaData
 import com.gemwallet.android.testkit.mockAssetPriceInfo
 import com.gemwallet.android.testkit.mockFiatQuote
+import com.gemwallet.android.testkit.mockFormattedNumber
 import com.gemwallet.android.testkit.mockGemFiatSession
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.ButtonState
@@ -75,7 +76,7 @@ class FiatViewModelTest {
     }
     private val service = mockk<GemFiatQuoteServiceInterface> {
         every { getCurrency() } returns Currency.USD.toGem()
-        every { suggestedAmounts(any()) } returns listOf(GemFiatSuggestedAmount(100u, "$100"), GemFiatSuggestedAmount(250u, "$250"))
+        every { suggestedAmounts() } returns listOf(GemFiatSuggestedAmount(100u, mockFormattedNumber(100.0)), GemFiatSuggestedAmount(250u, mockFormattedNumber(250.0)))
         every { newSession(any(), any()) } answers { mockGemFiatSession(firstArg(), secondArg()) }
         every { randomAmount() } returns 500u
         every { quoteDebounceMilliseconds() } returns 250uL

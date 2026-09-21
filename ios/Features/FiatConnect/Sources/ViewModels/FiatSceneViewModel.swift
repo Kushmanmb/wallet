@@ -184,7 +184,7 @@ public final class FiatSceneViewModel {
     }
 
     var suggestedAmounts: [GemFiatSuggestedAmount] {
-        service.suggestedAmounts(currencySymbol: currencyFormatter.symbol)
+        service.suggestedAmounts()
     }
 
     var showFiatTypePicker: Bool {

@@ -21,6 +21,7 @@ import com.gemwallet.android.features.buy.viewmodels.models.FiatUiState
 import com.gemwallet.android.features.buy.viewmodels.models.createFiatUiState
 import com.gemwallet.android.features.buy.viewmodels.models.toProviderUIModel
 import com.gemwallet.android.model.AssetData
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.navigation.RouteArgument
@@ -68,7 +69,6 @@ class FiatViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val currency = service.getCurrency().toPrimitives()
-    private val currencySymbol = java.util.Currency.getInstance(currency.name).symbol
     private val assetId: AssetId = savedStateHandle.requireAssetId(RouteArgument.AssetId)
 
     private val session = MutableStateFlow(
@@ -113,8 +113,8 @@ class FiatViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val suggestedAmounts = type.mapLatest {
-        service.suggestedAmounts(currencySymbol).map {
-            FiatSuggestion.SuggestionAmount(it.text, it.amount.toDouble())
+        service.suggestedAmounts().map {
+            FiatSuggestion.SuggestionAmount(it.value.text(), it.amount.toDouble())
         } + FiatSuggestion.RandomAmount
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
