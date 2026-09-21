@@ -168,7 +168,7 @@ public final class GemStreamServiceMock: GemStreamServiceProtocol, @unchecked Se
         await onDisconnected()
     }
 
-    public func handle(event: String) async throws -> GemStreamEvent {
+    public func decodeEvent(event: String) async throws -> GemStreamEvent {
         try await onEvent(event)
     }
 

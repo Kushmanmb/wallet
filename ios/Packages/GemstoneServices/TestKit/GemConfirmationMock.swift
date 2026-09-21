@@ -10,9 +10,9 @@ public import struct Gemstone.GemConfirmLoad
 public import struct Gemstone.GemConfirmLoadOptions
 public import enum Gemstone.GemConfirmRowContent
 public import struct Gemstone.GemConfirmScreen
-public import enum Gemstone.GemExecuteResult
 public import enum Gemstone.GemKeystoreAuthentication
 public import enum Gemstone.GemListRow
+public import enum Gemstone.GemSubmitResult
 public import typealias Gemstone.PerpetualModifyConfirmData
 import GemstonePrimitivesTestKit
 import Primitives
@@ -20,7 +20,7 @@ import Primitives
 public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Sendable {
     private let initialState: GemConfirmLoad
     private let loadResult: Result<GemConfirmLoad, any Error>
-    private let executeResult: Result<GemExecuteResult, any Error>
+    private let executeResult: Result<GemSubmitResult, any Error>
     private let authenticationValue: GemKeystoreAuthentication
     private let rows: (Gemstone.AddressName?) -> [GemConfirmRowContent]
     private let acquireFlow: GemAcquireAssetFlow
@@ -30,7 +30,7 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
     public init(
         state: GemConfirmLoad = .mock(),
         load: Result<GemConfirmLoad, any Error> = .success(.mock()),
-        execute: Result<GemExecuteResult, any Error> = .success(.signed(data: [])),
+        execute: Result<GemSubmitResult, any Error> = .success(.signed(data: [])),
         authentication: GemKeystoreAuthentication = .none,
         rows: @escaping (Gemstone.AddressName?) -> [GemConfirmRowContent] = { _ in [] },
         acquireFlow: GemAcquireAssetFlow = .fiat,
@@ -57,7 +57,7 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
         return try loadResult.get()
     }
 
-    public func execute() async throws -> GemExecuteResult {
+    public func submit() async throws -> GemSubmitResult {
         try executeResult.get()
     }
 

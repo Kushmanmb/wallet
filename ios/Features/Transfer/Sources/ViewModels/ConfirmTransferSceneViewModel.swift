@@ -10,11 +10,11 @@ import enum Gemstone.GemConfirmFeeSelection
 import struct Gemstone.GemConfirmLoadOptions
 import enum Gemstone.GemConfirmRowContent
 import struct Gemstone.GemConfirmSimulationState
-import enum Gemstone.GemExecuteResult
 import struct Gemstone.GemFeeRateRows
 import enum Gemstone.GemListRow
 import protocol Gemstone.GemPreferencesServiceProtocol
 import struct Gemstone.GemSimulationPayloadRow
+import enum Gemstone.GemSubmitResult
 import enum Gemstone.GemTransferAmountResult
 import struct Gemstone.GemTransferData
 import struct Gemstone.SimulationResult
@@ -361,9 +361,9 @@ extension ConfirmTransferSceneViewModel {
     }
 
     func submit(request: ConfirmTransferRequest) async throws {
-        let result: GemExecuteResult
+        let result: GemSubmitResult
         do {
-            result = try await confirmation.execute()
+            result = try await confirmation.submit()
         } catch let GemConfirmError.Broadcast(hashes, msg) {
             hashes.forEach { request.delegate?(.success($0)) }
             throw GemConfirmError.Broadcast(hashes: hashes, msg: msg)

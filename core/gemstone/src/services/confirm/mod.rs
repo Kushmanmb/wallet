@@ -187,7 +187,7 @@ impl GemConfirmService {
 }
 
 impl GemConfirmService {
-    pub async fn execute(&self, input: SendInput, signer: Arc<dyn GemTransactionSigner>) -> Result<GemExecuteResult, GemConfirmError> {
+    pub async fn submit(&self, input: SendInput, signer: Arc<dyn GemTransactionSigner>) -> Result<GemSubmitResult, GemConfirmError> {
         let signer_input = input.signer_input()?;
         let chain = input.confirm.input.transfer.input_type.get_asset().chain();
         let transactions = signer.sign(input.wallet.clone(), signer_input).await.map_err(|error| error::sign_error(chain, error))?;
@@ -200,10 +200,10 @@ impl GemConfirmService {
         }
         input.confirm.input.transfer.input_type.validate_approvals(&transactions)?;
         match input.confirm.input.transfer.input_type.output().output_action {
-            TransferDataOutputAction::Sign => Ok(GemExecuteResult::Signed {
+            TransferDataOutputAction::Sign => Ok(GemSubmitResult::Signed {
                 data: transactions.into_iter().map(|transaction| transaction.data).collect(),
             }),
-            TransferDataOutputAction::Send => Ok(GemExecuteResult::Sent {
+            TransferDataOutputAction::Send => Ok(GemSubmitResult::Sent {
                 hashes: self.send(input, transactions).await?,
             }),
         }

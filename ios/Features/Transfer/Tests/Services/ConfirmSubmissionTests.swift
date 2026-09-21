@@ -3,10 +3,10 @@
 import BigInt
 import Foundation
 import enum Gemstone.GemConfirmError
-import enum Gemstone.GemExecuteResult
 import struct Gemstone.GemSimulationBalanceChange
 import struct Gemstone.GemSimulationPayloadRow
 import struct Gemstone.GemSimulationValue
+import enum Gemstone.GemSubmitResult
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
 import GemstoneServices

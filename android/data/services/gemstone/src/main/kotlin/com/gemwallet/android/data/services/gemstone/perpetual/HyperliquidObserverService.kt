@@ -97,9 +97,9 @@ class HyperliquidObserverService(
     }
 
     private suspend fun onMessage(walletId: WalletId, mode: PerpetualAccountMode, text: String) {
-        runCatchingCancellable { streamService.handle(walletId.id, mode.toGem(), text.encodeToByteArray()) }
+        runCatchingCancellable { streamService.candleUpdate(walletId.id, mode.toGem(), text.encodeToByteArray()) }
             .onSuccess { candle -> candle?.toPrimitives()?.let { chartFlow.emit(it) } }
-            .onFailure { Log.e(TAG, "Handle message error: ${text.take(MESSAGE_LOG_LIMIT)}", it) }
+            .onFailure { Log.e(TAG, "Socket message error: ${text.take(MESSAGE_LOG_LIMIT)}", it) }
     }
 
     private suspend fun send(request: suspend () -> Unit) {

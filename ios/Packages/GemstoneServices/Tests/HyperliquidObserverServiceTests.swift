@@ -25,7 +25,7 @@ private final class PerpetualStreamServiceStub: GemPerpetualStreamServiceProtoco
 
     func disconnected() async {}
 
-    func handle(walletId _: WalletId, mode _: PerpetualAccountMode, data _: Data) async throws -> ChartCandleUpdate? {
+    func candleUpdate(walletId _: WalletId, mode _: PerpetualAccountMode, data _: Data) async throws -> ChartCandleUpdate? {
         nil
     }
 

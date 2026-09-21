@@ -10,8 +10,8 @@ use crate::models::list::GemListRow;
 use crate::services::assets::config::GemAssetConfigService;
 use crate::services::confirm::rules::{confirm_row_contents, is_insufficient_network_fee};
 use crate::services::confirm::{
-    GemAcquireAssetFlow, GemConfirmData, GemConfirmError, GemConfirmFeeLoad, GemConfirmInput, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmService, GemConfirmSimulationState, GemConfirmation, GemExecuteResult,
-    GemFeeAsset, GemTransactionSigner, SendInput,
+    GemAcquireAssetFlow, GemConfirmData, GemConfirmError, GemConfirmFeeLoad, GemConfirmInput, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmService, GemConfirmSimulationState, GemConfirmation, GemFeeAsset,
+    GemSubmitResult, GemTransactionSigner, SendInput,
 };
 use crate::services::explorer::GemExplorerService;
 use crate::services::name::GemNameService;
@@ -75,10 +75,10 @@ fn simulation_seed(chain: Chain, simulation: Option<SimulationResult>) -> GemCon
     }
 }
 
-fn is_broadcast(result: &GemExecuteResult) -> bool {
+fn is_broadcast(result: &GemSubmitResult) -> bool {
     match result {
-        GemExecuteResult::Sent { .. } => true,
-        GemExecuteResult::Signed { .. } => false,
+        GemSubmitResult::Sent { .. } => true,
+        GemSubmitResult::Signed { .. } => false,
     }
 }
 
@@ -107,7 +107,7 @@ impl GemConfirmTransferService {
         get_fiat_config().insufficient_network_fee_buy_amount
     }
 
-    pub(super) async fn execute(&self, wallet: Wallet, confirm: GemConfirmData, value: GemBigInt, network_fee: GemBigInt, simulation: Option<SimulationResult>) -> Result<GemExecuteResult, GemConfirmError> {
+    pub(super) async fn submit(&self, wallet: Wallet, confirm: GemConfirmData, value: GemBigInt, network_fee: GemBigInt, simulation: Option<SimulationResult>) -> Result<GemSubmitResult, GemConfirmError> {
         let wallet_id = wallet.id.clone();
         let input_type = confirm.input.transfer.input_type.clone();
         let input = SendInput {
@@ -117,7 +117,7 @@ impl GemConfirmTransferService {
             network_fee,
             simulation,
         };
-        let result = self.confirm.execute(input, self.signer.clone()).await?;
+        let result = self.confirm.submit(input, self.signer.clone()).await?;
         if is_broadcast(&result) {
             let _ = self.recent_activity.add(input_type, wallet_id).await;
         }
@@ -195,8 +195,8 @@ mod tests {
 
     #[test]
     fn test_only_a_broadcast_send_records_recent_activity() {
-        let sent = GemExecuteResult::Sent { hashes: vec!["0xhash".to_string()] };
-        let signed = GemExecuteResult::Signed { data: vec!["0xsigned".to_string()] };
+        let sent = GemSubmitResult::Sent { hashes: vec!["0xhash".to_string()] };
+        let signed = GemSubmitResult::Signed { data: vec!["0xsigned".to_string()] };
 
         assert!(is_broadcast(&sent));
         assert!(!is_broadcast(&signed));

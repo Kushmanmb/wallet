@@ -104,9 +104,9 @@ impl GemStreamService {
         self.subscriptions.reset().await;
     }
 
-    pub async fn handle(&self, event: String) -> Result<GemStreamEvent, GemServiceError> {
+    pub async fn decode_event(&self, event: String) -> Result<GemStreamEvent, GemServiceError> {
         let event = serde_json::from_str(&event).map_err(|error| GemServiceError::InvalidInput { msg: error.to_string() })?;
-        self.handle_event(event).await
+        self.stream_event(event).await
     }
 
     pub async fn sync(&self, event: GemStreamEvent) -> Result<(), GemServiceError> {
@@ -134,7 +134,7 @@ impl GemStreamService {
 }
 
 impl GemStreamService {
-    async fn handle_event(&self, event: StreamEvent) -> Result<GemStreamEvent, GemServiceError> {
+    async fn stream_event(&self, event: StreamEvent) -> Result<GemStreamEvent, GemServiceError> {
         match event {
             StreamEvent::Prices(payload) => {
                 let handled = GemStreamEvent::Prices {

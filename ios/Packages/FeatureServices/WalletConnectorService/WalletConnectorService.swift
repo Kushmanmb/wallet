@@ -164,7 +164,7 @@ extension WalletConnectorService {
                 continue
             }
 
-            let outcome = await service.processRequest(request: GemWalletConnectSessionRequest(
+            let outcome = await service.requestOutcome(request: GemWalletConnectSessionRequest(
                 topic: request.topic,
                 requestId: request.id.string,
                 method: request.method,

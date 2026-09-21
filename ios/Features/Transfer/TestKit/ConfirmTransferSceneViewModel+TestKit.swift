@@ -5,7 +5,7 @@ import struct Gemstone.AddressName
 import enum Gemstone.GemAcquireAssetFlow
 import struct Gemstone.GemConfirmLoad
 import enum Gemstone.GemConfirmRowContent
-import enum Gemstone.GemExecuteResult
+import enum Gemstone.GemSubmitResult
 import struct Gemstone.GemTransferData
 import struct Gemstone.SimulationResult
 import func Gemstone.walletRow
@@ -22,7 +22,7 @@ public extension ConfirmTransferSceneViewModel {
         data: GemTransferData = .mock(),
         simulation: SimulationResult? = nil,
         load: Result<GemConfirmLoad, any Error> = .success(.mock()),
-        execute: Result<GemExecuteResult, any Error> = .success(.signed(data: [])),
+        execute: Result<GemSubmitResult, any Error> = .success(.signed(data: [])),
         rows: ((Gemstone.AddressName?) -> [GemConfirmRowContent])? = nil,
         acquireFlow: GemAcquireAssetFlow = .fiat,
         confirmation: GemConfirmationMock? = nil,

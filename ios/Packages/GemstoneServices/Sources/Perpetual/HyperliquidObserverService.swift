@@ -109,7 +109,7 @@ public actor HyperliquidObserverService: PerpetualObservable {
 
     private func onMessage(_ data: Data, walletId: WalletId, mode: PerpetualAccountMode) async {
         do {
-            guard let candle = try await streamService.handle(walletId: walletId.id, mode: mode.toGem(), data: data) else { return }
+            guard let candle = try await streamService.candleUpdate(walletId: walletId.id, mode: mode.toGem(), data: data) else { return }
             await chartService.yield(candle.toPrimitives())
         } catch {
             debugLog("HyperliquidObserver: handle message failed: \(error)")

@@ -93,7 +93,7 @@ class WCRequestViewModel @Inject constructor(
         state.update { RequestViewModelState(sessionRequest = sessionRequest) }
         val job = viewModelScope.launch {
             val outcome = withContext(ioDispatcher) {
-                service.processRequest(
+                service.requestOutcome(
                     GemWalletConnectSessionRequest(
                         topic = sessionRequest.topic,
                         requestId = sessionRequest.request.id.toString(),

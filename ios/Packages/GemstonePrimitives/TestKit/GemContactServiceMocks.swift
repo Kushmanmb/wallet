@@ -131,7 +131,7 @@ public final class GemWalletConnectServiceMock: GemWalletConnectServiceProtocol,
         )
     }
 
-    public func processRequest(request: GemWalletConnectSessionRequest) async -> GemWalletConnectOutcome {
+    public func requestOutcome(request: GemWalletConnectSessionRequest) async -> GemWalletConnectOutcome {
         processedRequests.append(request)
         return GemWalletConnectOutcome(response: nil, failure: nil)
     }

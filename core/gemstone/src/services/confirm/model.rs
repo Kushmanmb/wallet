@@ -65,7 +65,7 @@ pub struct GemConfirmData {
 }
 
 #[derive(Debug, Clone, uniffi::Enum)]
-pub enum GemExecuteResult {
+pub enum GemSubmitResult {
     Signed { data: Vec<String> },
     Sent { hashes: Vec<String> },
 }

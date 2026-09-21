@@ -88,7 +88,7 @@ public actor StreamObserverService: Sendable {
                 health.report(isHealthy: true)
                 try await service.connected()
             case let .message(data):
-                let event = try await service.handle(event: String(decoding: data, as: UTF8.self))
+                let event = try await service.decodeEvent(event: String(decoding: data, as: UTF8.self))
                 debugLog("stream event: \(event)")
                 Task { [service] in
                     do {

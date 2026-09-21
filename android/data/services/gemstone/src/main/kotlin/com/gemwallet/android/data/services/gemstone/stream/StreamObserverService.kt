@@ -71,7 +71,7 @@ class StreamObserverService(
                         }
 
                         is WebSocketEvent.Message -> {
-                            val handled = service.handle(event.text)
+                            val handled = service.decodeEvent(event.text)
                             scope.launch {
                                 runCatchingCancellable { service.sync(handled) }
                                     .onFailure { Log.e(TAG, "Stream sync error", it) }

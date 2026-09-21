@@ -77,7 +77,7 @@ class WCRequestViewModelTest {
 
     private fun service(onProcess: suspend (GemWalletConnectSessionRequest) -> GemWalletConnectOutcome = { idle }): GemWalletConnectServiceInterface = mockk(relaxed = true) {
         every { userRejectedError() } returns GemWalletConnectRpcError(code = 4001, message = "User rejected")
-        coEvery { processRequest(any()) } coAnswers { onProcess(firstArg()) }
+        coEvery { requestOutcome(any()) } coAnswers { onProcess(firstArg()) }
     }
 
     private fun signMessageService(hasCriticalWarning: Boolean = false): GemSignMessageServiceInterface = mockk(relaxed = true) {

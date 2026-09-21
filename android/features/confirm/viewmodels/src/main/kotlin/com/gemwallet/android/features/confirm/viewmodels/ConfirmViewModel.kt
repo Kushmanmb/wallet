@@ -93,9 +93,9 @@ import uniffi.gemstone.GemConfirmScreen
 import uniffi.gemstone.GemConfirmStage
 import uniffi.gemstone.GemConfirmTransferServiceInterface
 import uniffi.gemstone.GemConfirmation
-import uniffi.gemstone.GemExecuteResult
 import uniffi.gemstone.GemPerpetual
 import uniffi.gemstone.GemRefreshKind
+import uniffi.gemstone.GemSubmitResult
 import uniffi.gemstone.GemTransferAmountResult
 import uniffi.gemstone.GemTransferData
 import uniffi.gemstone.PerpetualProvider
@@ -406,9 +406,9 @@ class ConfirmViewModel @Inject constructor(
         val session = confirmation.value ?: return@launch
 
         try {
-            val transactionHash = when (val result = withContext(ioDispatcher) { session.execute() }) {
-                is GemExecuteResult.Signed -> result.data.first()
-                is GemExecuteResult.Sent -> result.hashes.last()
+            val transactionHash = when (val result = withContext(ioDispatcher) { session.submit() }) {
+                is GemSubmitResult.Signed -> result.data.first()
+                is GemSubmitResult.Sent -> result.hashes.last()
             }
             finishAction(transactionHash)
         } catch (error: CancellationException) {

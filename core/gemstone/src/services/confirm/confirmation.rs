@@ -6,7 +6,7 @@ use primitives::currency::Currency;
 use primitives::{AddressName, BlockExplorerLink, Chain, PerpetualModifyConfirmData, SimulationResult, Wallet};
 
 use super::rules::preload_simulation;
-use super::{GemAcquireAssetFlow, GemConfirmError, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemExecuteResult, GemTransferAmountResult};
+use super::{GemAcquireAssetFlow, GemConfirmError, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemSubmitResult, GemTransferAmountResult};
 use crate::models::list::GemListRow;
 use crate::services::transfer::GemTransferData;
 use crate::services::wallet::GemKeystoreAuthentication;
@@ -96,7 +96,7 @@ impl GemConfirmation {
         self.service.autoclose_row(data)
     }
 
-    pub async fn execute(&self) -> Result<GemExecuteResult, GemConfirmError> {
+    pub async fn submit(&self) -> Result<GemSubmitResult, GemConfirmError> {
         let screen = self.screen.lock().await.clone();
         let preload = screen.as_ref().and_then(|screen| screen.preload.clone()).ok_or_else(|| GemConfirmError::Load {
             msg: "confirm input is not loaded".to_string(),
@@ -106,7 +106,7 @@ impl GemConfirmation {
             GemTransferAmountResult::Error { error } => return Err(error),
         };
         let simulation = screen.and_then(|screen| screen.simulation.result);
-        self.service.execute(self.wallet.clone(), preload.confirm_data, amount.value, amount.network_fee, simulation).await
+        self.service.submit(self.wallet.clone(), preload.confirm_data, amount.value, amount.network_fee, simulation).await
     }
 
     pub async fn state(&self) -> Result<GemConfirmLoad, GemConfirmError> {
@@ -216,9 +216,9 @@ mod tests {
             };
             let confirmation = testkit.service.confirmation(wallet, transfer, None);
 
-            assert!(matches!(confirmation.execute().await, Err(GemConfirmError::Load { .. })));
+            assert!(matches!(confirmation.submit().await, Err(GemConfirmError::Load { .. })));
             confirmation.state().await.unwrap();
-            assert!(matches!(confirmation.execute().await, Err(GemConfirmError::Load { .. })));
+            assert!(matches!(confirmation.submit().await, Err(GemConfirmError::Load { .. })));
         });
     }
 
