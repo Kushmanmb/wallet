@@ -129,41 +129,13 @@ interface AssetsDao {
     @Query(
         """
         UPDATE balances SET
-            is_pinned = :isPinned,
-            is_visible = :isVisible,
-            list_position = :listPosition
-        WHERE wallet_id = :walletId AND asset_id = :assetId
+            is_visible = COALESCE(:isVisible, is_visible),
+            is_pinned = COALESCE(:isPinned, is_pinned)
+        WHERE wallet_id = :walletId AND asset_id IN (:assetIds)
+            AND (is_visible IS NOT COALESCE(:isVisible, is_visible) OR is_pinned IS NOT COALESCE(:isPinned, is_pinned))
     """,
     )
-    suspend fun setBalanceConfig(walletId: String, assetId: String, isPinned: Boolean, isVisible: Boolean, listPosition: Int)
-
-    @Transaction
-    suspend fun setWalletAssetsVisibility(walletId: String, assetIds: List<String>, isVisible: Boolean) {
-        assetIds.forEach { setWalletAssetVisibility(walletId, it, isVisible) }
-    }
-
-    @Transaction
-    suspend fun setWalletAssetVisibility(walletId: String, assetId: String, isVisible: Boolean) {
-        val balance = getBalance(walletId, assetId)
-        if (balance == null) {
-            insertBalance(
-                DbBalance(
-                    assetId = assetId,
-                    walletId = walletId,
-                    isVisible = isVisible,
-                    updatedAt = null,
-                ),
-            )
-            return
-        }
-        setBalanceConfig(
-            walletId = walletId,
-            assetId = balance.assetId,
-            isPinned = balance.isPinned && balance.isVisible && isVisible,
-            isVisible = isVisible,
-            listPosition = balance.listPosition,
-        )
-    }
+    suspend fun setAssetConfiguration(walletId: String, assetIds: List<String>, isVisible: Boolean?, isPinned: Boolean?)
 
     @Update(entity = DbAsset::class)
     suspend fun updateBasicAssets(assets: List<DbAssetBasicUpdate>)

@@ -60,7 +60,7 @@ struct AssetsRequestTests {
         let balanceStore = BalanceStore(db: db)
 
         let assetId = AssetId(chain: .bitcoin, tokenId: nil)
-        try balanceStore.pinAsset(walletId: .mock(), assetId: assetId, value: true)
+        try balanceStore.setConfiguration(walletId: .mock(), assetIds: [assetId], configuration: .pinned(true))
 
         try db.dbQueue.read { db in
             let assets = try AssetsRequest.mock().fetch(db)
@@ -76,7 +76,7 @@ struct AssetsRequestTests {
         let balanceStore = BalanceStore(db: db)
 
         let disabledId = AssetId(chain: .bitcoin)
-        try balanceStore.setIsEnabled(walletId: .mock(), assetIds: [disabledId], value: false)
+        try balanceStore.setConfiguration(walletId: .mock(), assetIds: [disabledId], configuration: .disabled)
 
         try db.dbQueue.read { db in
             let enabledAssets = try AssetsRequest.mock(filters: [.enabledBalance]).fetch(db)
@@ -224,7 +224,7 @@ struct AssetsRequestTests {
             #expect(assets.last?.asset.id == AssetId(chain: .ethereum, tokenId: "0xdAC17F958D2ee523a2206206994597C13D831ec7"))
         }
 
-        try balanceStore.pinAsset(walletId: .mock(), assetId: AssetId(chain: .bitcoin), value: true)
+        try balanceStore.setConfiguration(walletId: .mock(), assetIds: [AssetId(chain: .bitcoin)], configuration: .pinned(true))
         try db.dbQueue.read { db in
             let assets = try AssetsRequest.mock().fetch(db)
 

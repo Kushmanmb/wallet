@@ -81,7 +81,7 @@ public extension DB {
             for: .mock(),
         )
         // hypercoreUSDC is an internal asset and is always isEnabled=false so it stays out of the asset list UI.
-        try balanceStore.setIsEnabled(walletId: .mock(), assetIds: [bnb.id, perpetual.id], value: false)
+        try balanceStore.setConfiguration(walletId: .mock(), assetIds: [bnb.id, perpetual.id], configuration: .disabled)
 
         return db
     }

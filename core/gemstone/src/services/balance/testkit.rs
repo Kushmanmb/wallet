@@ -7,7 +7,7 @@ use std::task::{Context, Poll};
 use num_bigint::BigUint;
 use primitives::{AssetId, Chain, WalletId};
 
-use super::model::{GemBalanceRecord, GemBalanceUpdate, GemBalanceUpdateType};
+use super::model::{GemAssetConfiguration, GemBalanceRecord, GemBalanceUpdate, GemBalanceUpdateType};
 use super::store::GemBalanceStore;
 use super::{GemAssetBalance, GemBalanceService};
 use crate::api::GemApiClient;
@@ -71,7 +71,7 @@ pub struct MemoryBalanceStore {
     pub requests: Mutex<Vec<WalletId>>,
     pub balance_writes: Mutex<Vec<Vec<GemBalanceRecord>>>,
     pub enable_writes: Mutex<Vec<(Vec<AssetId>, bool)>>,
-    pub pin_writes: Mutex<Vec<(AssetId, bool)>>,
+    pub configuration_writes: Mutex<Vec<(Vec<AssetId>, GemAssetConfiguration)>>,
     pub yields_between_read_and_write: bool,
 }
 
@@ -118,7 +118,11 @@ impl GemBalanceStore for MemoryBalanceStore {
     async fn get_enabled_asset_ids(&self, wallet_id: WalletId) -> Result<Vec<AssetId>, GemServiceError> {
         Ok(self.enabled_asset_ids.lock().unwrap().get(&wallet_id).cloned().unwrap_or_default())
     }
-    async fn set_assets_enabled(&self, wallet_id: WalletId, asset_ids: Vec<AssetId>, enabled: bool) -> Result<(), GemServiceError> {
+    async fn set_asset_configuration(&self, wallet_id: WalletId, asset_ids: Vec<AssetId>, configuration: GemAssetConfiguration) -> Result<(), GemServiceError> {
+        self.configuration_writes.lock().unwrap().push((asset_ids.clone(), configuration));
+        let Some(enabled) = configuration.is_enabled else {
+            return Ok(());
+        };
         self.enable_writes.lock().unwrap().push((asset_ids.clone(), enabled));
         let mut wallets = self.enabled_asset_ids.lock().unwrap();
         let stored = wallets.entry(wallet_id).or_default();
@@ -127,10 +131,6 @@ impl GemBalanceStore for MemoryBalanceStore {
         } else {
             stored.retain(|asset_id| !asset_ids.contains(asset_id));
         }
-        Ok(())
-    }
-    async fn set_asset_pinned(&self, _: WalletId, asset_id: AssetId, pinned: bool) -> Result<(), GemServiceError> {
-        self.pin_writes.lock().unwrap().push((asset_id, pinned));
         Ok(())
     }
 }

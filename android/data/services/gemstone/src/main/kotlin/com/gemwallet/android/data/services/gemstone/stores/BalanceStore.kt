@@ -7,6 +7,7 @@ import com.gemwallet.android.ext.toPrimitives
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAssetBalance
+import uniffi.gemstone.GemAssetConfiguration
 import uniffi.gemstone.GemBalanceRecord
 import uniffi.gemstone.GemBalanceStore
 
@@ -18,12 +19,8 @@ class GemstoneBalanceStore(private val balancesDao: BalancesDao, private val ass
 
     override suspend fun getEnabledAssetIds(walletId: String): List<String> = balancesDao.getEnabledAssetIds(walletId)
 
-    override suspend fun setAssetsEnabled(walletId: String, assetIds: List<String>, enabled: Boolean) = assetsDao.setWalletAssetsVisibility(walletId, assetIds, enabled)
-
-    override suspend fun setAssetPinned(walletId: String, assetId: String, pinned: Boolean) {
-        val balance = assetsDao.getBalance(walletId, assetId) ?: return
-        assetsDao.setBalanceConfig(walletId, assetId, isPinned = pinned, isVisible = balance.isVisible, listPosition = balance.listPosition)
-    }
+    override suspend fun setAssetConfiguration(walletId: String, assetIds: List<String>, configuration: GemAssetConfiguration) =
+        assetsDao.setAssetConfiguration(walletId, assetIds, isVisible = configuration.isEnabled, isPinned = configuration.isPinned)
 
     override suspend fun updateBalances(walletId: String, balances: List<GemBalanceRecord>) = transactionRunner.run {
         val updatedAt = System.currentTimeMillis()

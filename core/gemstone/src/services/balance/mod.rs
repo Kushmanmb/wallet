@@ -70,7 +70,7 @@ impl GemBalanceService {
         }
         let enabled_ids = self.store.get_enabled_asset_ids(wallet_id.clone()).await?;
         self.add_missing_balances(wallet_id.clone(), asset_ids.clone()).await?;
-        self.store.set_assets_enabled(wallet_id.clone(), asset_ids.clone(), enabled).await?;
+        self.store.set_asset_configuration(wallet_id.clone(), asset_ids.clone(), rules::enabled_configuration(enabled)).await?;
         if enabled {
             self.refresh_enabled_assets(wallet_id, rules::missing_asset_ids(&asset_ids, &enabled_ids)).await;
         } else {
@@ -83,7 +83,7 @@ impl GemBalanceService {
         if pinned {
             self.set_assets_enabled(wallet_id.clone(), vec![asset_id.clone()], true).await?;
         }
-        self.store.set_asset_pinned(wallet_id, asset_id, pinned).await
+        self.store.set_asset_configuration(wallet_id, vec![asset_id], rules::pinned_configuration(pinned)).await
     }
 
     pub async fn update(&self, wallet_id: WalletId, asset_ids: Vec<AssetId>) -> Result<(), GemServiceError> {
@@ -227,12 +227,39 @@ impl GemBalanceService {
 
 #[cfg(test)]
 mod tests {
+    use super::model::GemAssetConfiguration;
     use super::*;
     use crate::services::assets::rules::{default_asset_basic, default_balances};
     use futures::executor::block_on;
     use num_bigint::BigUint;
     use primitives::Chain;
     use testkit::{BalanceTestkit, MemoryBalanceStore};
+
+    #[test]
+    fn test_hiding_an_asset_unpins_it_in_the_same_write() {
+        block_on(async {
+            let wallet = Wallet::mock_with_chains(&[Chain::Ethereum]);
+            let testkit = BalanceTestkit::new(MemoryBalanceStore::default());
+            let ethereum = AssetId::from_chain(Chain::Ethereum);
+            testkit.assets.save_assets(vec![default_asset_basic(Asset::from_chain(Chain::Ethereum))]).await.unwrap();
+
+            testkit.service.set_assets_enabled(wallet.id.clone(), vec![ethereum.clone()], false).await.unwrap();
+            testkit.service.set_asset_pinned(wallet.id.clone(), ethereum.clone(), false).await.unwrap();
+
+            let writes = testkit.balances.configuration_writes.lock().unwrap().clone();
+            assert_eq!(
+                writes.iter().map(|(_, configuration)| *configuration).collect::<Vec<_>>(),
+                vec![
+                    GemAssetConfiguration {
+                        is_enabled: Some(false),
+                        is_pinned: Some(false)
+                    },
+                    GemAssetConfiguration { is_enabled: None, is_pinned: Some(false) }
+                ],
+                "hiding an asset unpins it in one patch, and unpinning leaves it enabled"
+            );
+        })
+    }
 
     #[test]
     fn test_a_coin_and_a_stake_refresh_of_the_same_asset_keep_each_other() {

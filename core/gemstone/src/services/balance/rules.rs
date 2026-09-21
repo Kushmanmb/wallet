@@ -4,7 +4,7 @@ use crate::services::collections::{missing, unique};
 
 use primitives::{Account, Asset, AssetBalance, AssetFiatValue, AssetId, BalanceCalculator, BalanceMetadata, Chain, TotalFiatValue};
 
-use super::model::{GemAssetBalance, GemBalanceRecord, GemBalanceResource, GemBalanceResourceRow, GemBalanceUpdate, GemBalanceUpdateType};
+use super::model::{GemAssetBalance, GemAssetConfiguration, GemBalanceRecord, GemBalanceResource, GemBalanceResourceRow, GemBalanceUpdate, GemBalanceUpdateType};
 use crate::formatted_number::GemFormattedNumber;
 use crate::precision::GemValueStyle;
 use num_bigint::BigUint;
@@ -142,6 +142,17 @@ pub fn changed_balances(stored: Vec<GemAssetBalance>, updates: Vec<GemBalanceUpd
 pub fn balance_records(balances: Vec<GemAssetBalance>, assets: &[Asset]) -> Vec<GemBalanceRecord> {
     let decimals: HashMap<AssetId, u32> = assets.iter().map(|asset| (asset.id.clone(), asset.decimals.max(0) as u32)).collect();
     balances.into_iter().filter_map(|balance| Some(GemBalanceRecord::new(balance.clone(), *decimals.get(&balance.asset_id)?))).collect()
+}
+
+pub fn enabled_configuration(enabled: bool) -> GemAssetConfiguration {
+    GemAssetConfiguration {
+        is_enabled: Some(enabled),
+        is_pinned: (!enabled).then_some(false),
+    }
+}
+
+pub fn pinned_configuration(pinned: bool) -> GemAssetConfiguration {
+    GemAssetConfiguration { is_enabled: None, is_pinned: Some(pinned) }
 }
 
 pub fn missing_asset_ids(requested: &[AssetId], stored: &[AssetId]) -> Vec<AssetId> {

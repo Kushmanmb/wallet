@@ -358,3 +358,9 @@ pub struct GemBalanceResourceRow {
     pub resource: GemBalanceResource,
     pub text: String,
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, uniffi::Record)]
+pub struct GemAssetConfiguration {
+    pub is_enabled: Option<bool>,
+    pub is_pinned: Option<bool>,
+}
