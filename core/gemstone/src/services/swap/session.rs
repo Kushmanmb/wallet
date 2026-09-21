@@ -1,9 +1,12 @@
-use primitives::{Asset, AssetId};
+use number_formatter::BigNumberFormatter;
+use primitives::{Asset, AssetId, Currency};
 use swapper::{Quote as SwapperQuote, SwapperError, SwapperProvider};
 
 use super::model::{GemSwapButtonAction, GemSwapButtonInput};
 use super::rules;
+use crate::formatted_number::GemFormattedNumber;
 use crate::models::custom_types::{GemBigInt, GemBigUint};
+use crate::precision::{GemCurrencyStyle, GemValueStyle};
 use crate::services::amount::model::GemNumberFormat;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -150,8 +153,50 @@ pub struct GemSwapSession {
     pub input: Option<GemSwapQuoteInput>,
 }
 
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemSwapProviderRow {
+    pub provider: SwapperProvider,
+    pub title: String,
+    pub amount: GemFormattedNumber,
+    pub fiat: Option<GemFormattedNumber>,
+    pub is_selected: bool,
+}
+
+#[uniffi::export]
+pub fn swap_provider_row(provider: SwapperProvider, title: String, to_value: GemBigUint, receive_asset: Asset, receive_price: Option<f64>, currency: Currency, is_selected: bool) -> GemSwapProviderRow {
+    let value = BigNumberFormatter::f64_value(to_value.to_string(), receive_asset.decimals as u32);
+    GemSwapProviderRow {
+        provider,
+        title,
+        amount: GemFormattedNumber::amount(value, Some(receive_asset.symbol), GemValueStyle::Auto),
+        fiat: receive_price.map(|price| GemFormattedNumber::currency(value * price, currency, GemCurrencyStyle::Currency)),
+        is_selected,
+    }
+}
+
 #[uniffi::export]
 impl GemSwapSession {
+    pub fn provider_rows(&self, receive_asset: Asset, receive_price: Option<f64>, currency: Currency) -> Vec<GemSwapProviderRow> {
+        let selected = self.current_quote().map(|quote| quote.data.provider.id);
+        self.quotes
+            .as_ref()
+            .map(|quotes| quotes.quotes.clone())
+            .unwrap_or_default()
+            .iter()
+            .map(|quote| {
+                swap_provider_row(
+                    quote.data.provider.id,
+                    quote.data.provider.protocol.clone(),
+                    quote.to_value.clone(),
+                    receive_asset.clone(),
+                    receive_price,
+                    currency.clone(),
+                    Some(quote.data.provider.id) == selected,
+                )
+            })
+            .collect()
+    }
+
     pub fn on_input_changed(&self, amount: String, pay_asset: Option<Asset>, receive_asset: Option<Asset>, available_value: GemBigInt, slippage_bps: Option<u32>, format: GemNumberFormat) -> GemSwapSession {
         let input = match (pay_asset, receive_asset) {
             (Some(pay), Some(receive)) => rules::quote_input(&pay, &receive, &amount, &available_value, slippage_bps, &format),
@@ -463,6 +508,24 @@ mod tests {
 
         let empty = session.on_quote_results(GemSwapQuotesResult::mock(vec![]));
         assert_eq!(empty.quote_error(), Some(SwapperError::NoQuoteAvailable));
+    }
+
+    #[test]
+    fn test_every_quote_becomes_a_provider_row_and_the_chosen_one_is_marked() {
+        let session = GemSwapSession::mock_ready().on_quote_results(GemSwapQuotesResult::mock(vec![
+            SwapperQuote::mock_with_provider(SwapperProvider::Okx, "11"),
+            SwapperQuote::mock_with_provider(SwapperProvider::Jupiter, "9"),
+        ]));
+        let asset = Asset::mock_ethereum_usdc();
+
+        let rows = session.provider_rows(asset.clone(), Some(2.0), Currency::USD);
+
+        assert_eq!(rows.len(), 2, "no provider is dropped from the list");
+        assert!(rows[0].is_selected);
+        assert!(!rows[1].is_selected);
+        assert_eq!(rows[0].amount.unit, crate::formatted_number::GemNumberUnit::Symbol { symbol: asset.symbol });
+        assert_eq!(rows[0].fiat.as_ref().map(|fiat| fiat.value), Some(rows[0].amount.value * 2.0));
+        assert_eq!(session.provider_rows(Asset::mock_ethereum_usdc(), None, Currency::USD)[0].fiat, None);
     }
 
     #[test]

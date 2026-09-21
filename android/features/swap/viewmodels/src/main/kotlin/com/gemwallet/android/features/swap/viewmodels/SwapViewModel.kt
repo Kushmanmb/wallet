@@ -40,9 +40,9 @@ import com.gemwallet.android.ui.models.ButtonState
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelFactory
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelInput
-import com.gemwallet.android.ui.models.swap.SwapProviderUIModelFactory
 import com.gemwallet.android.ui.models.swap.SwapSlippage
 import com.wallet.core.primitives.AssetId
+import com.wallet.core.primitives.Currency
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -179,13 +179,7 @@ class SwapViewModel @Inject constructor(
 
     val providers = combine(session, quote) { quoteSession, current ->
         val receive = current?.receive ?: return@combine emptyList()
-        quoteSession.quotes?.quotes.orEmpty().map { item ->
-            SwapProviderUIModelFactory.create(
-                provider = item.data.provider,
-                receiveAsset = receive.toAssetPriceValue(),
-                toValue = item.toValue,
-            )
-        }
+        quoteSession.providerRows(receive.asset.toGem(), receive.price?.price?.price, (receive.price?.currency ?: Currency.USD).toGem())
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
@@ -205,14 +199,7 @@ class SwapViewModel @Inject constructor(
         }
         val summary = swapperQuoteSummary(quote.quote, quote.pay.asset.toGem(), quote.receive.asset.toGem())
 
-        val provider = providers.firstOrNull { item ->
-            item.id == quote.quote.data.provider.id &&
-                item.title == quote.quote.data.provider.protocol
-        } ?: SwapProviderUIModelFactory.create(
-            provider = quote.quote.data.provider,
-            receiveAsset = quote.receive.toAssetPriceValue(),
-            toValue = quote.quote.toValue,
-        )
+        val provider = providers.firstOrNull { it.isSelected } ?: return@combine null
 
         SwapDetailsUIModelFactory.create(
             SwapDetailsUIModelInput(

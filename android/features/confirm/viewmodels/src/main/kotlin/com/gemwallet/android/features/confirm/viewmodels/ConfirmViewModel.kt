@@ -51,7 +51,6 @@ import com.gemwallet.android.ui.models.actions.FinishConfirmAction
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelFactory
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelInput
-import com.gemwallet.android.ui.models.swap.SwapProviderUIModelFactory
 import com.wallet.core.primitives.ApplicationMetadataSource
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
@@ -106,6 +105,7 @@ import uniffi.gemstone.SimulationResult
 import uniffi.gemstone.TransactionInputType
 import uniffi.gemstone.perpetualConfirmDetails
 import uniffi.gemstone.showsFeeAssets
+import uniffi.gemstone.swapProviderRow
 import uniffi.gemstone.swapQuoteSummary
 import java.math.BigInteger
 import javax.inject.Inject
@@ -461,11 +461,14 @@ class ConfirmViewModel @Inject constructor(
         val toAsset = transfer.inputType.toAsset?.let(content::assetPrice) ?: return null
         val summary = swapQuoteSummary(swapData.quote, fromAsset.asset.toGem(), toAsset.asset.toGem())
 
-        val provider = SwapProviderUIModelFactory.create(
-            providerId = swapData.quote.providerData.provider,
+        val provider = swapProviderRow(
+            provider = swapData.quote.providerData.provider,
             title = swapData.quote.providerData.protocolName,
-            receiveAsset = toAsset,
             toValue = swapData.quote.toValue,
+            receiveAsset = toAsset.asset.toGem(),
+            receivePrice = toAsset.price?.price?.price,
+            currency = (toAsset.price?.currency ?: Currency.USD).toGem(),
+            isSelected = true,
         )
         val model = SwapDetailsUIModelFactory.create(
             SwapDetailsUIModelInput(

@@ -17,6 +17,7 @@ import com.gemwallet.android.testkit.mockAccount
 import com.gemwallet.android.testkit.mockAssetInfo
 import com.gemwallet.android.testkit.mockAssetSolana
 import com.gemwallet.android.testkit.mockAssetSolanaUSDC
+import com.gemwallet.android.testkit.mockFormattedNumber
 import com.gemwallet.android.testkit.mockGemSwapSession
 import com.gemwallet.android.testkit.mockGemSwapTransfer
 import com.gemwallet.android.testkit.mockSession
@@ -31,7 +32,6 @@ import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModel
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModelFactory
 import com.gemwallet.android.ui.models.swap.SwapPriceImpactUIModel
-import com.gemwallet.android.ui.models.swap.SwapProviderUIModel
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -67,6 +67,7 @@ import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GemSwapPairSelection
 import uniffi.gemstone.GemSwapPairSuggestion
+import uniffi.gemstone.GemSwapProviderRow
 import uniffi.gemstone.GemSwapQuoteServiceInterface
 import uniffi.gemstone.GemSwapRequest
 import uniffi.gemstone.GemTransferData
@@ -589,10 +590,12 @@ class SwapViewModelTest {
     fun `onPrimaryAction shows price impact warning before swap`() = runTest(testDispatcher) {
         every { SwapDetailsUIModelFactory.create(any()) } returns SwapDetailsUIModel(
             rows = emptyList(),
-            provider = SwapProviderUIModel(
-                id = SwapProvider.UNISWAP_V3,
+            provider = GemSwapProviderRow(
+                provider = SwapProvider.UNISWAP_V3,
                 title = "Uniswap v3",
-                icon = "",
+                amount = mockFormattedNumber(1.0),
+                fiat = null,
+                isSelected = true,
             ),
             rate = AssetRatePair(forward = "1 SOL = 2.5 USDC", reverse = "1 USDC = 0.4 SOL"),
             priceImpact = SwapPriceImpactUIModel(

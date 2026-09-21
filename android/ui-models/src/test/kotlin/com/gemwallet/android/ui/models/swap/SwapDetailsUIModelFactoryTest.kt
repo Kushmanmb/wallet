@@ -8,15 +8,18 @@ import com.gemwallet.android.testkit.mockAssetEthereum
 import com.gemwallet.android.testkit.mockAssetPriceInfo
 import com.gemwallet.android.testkit.mockAssetPriceValue
 import com.gemwallet.android.testkit.mockSwapQuote
+import com.wallet.core.primitives.Currency
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import uniffi.gemstone.GemSwapProviderRow
 import uniffi.gemstone.GemValueStyle
 import uniffi.gemstone.SwapPriceImpact
 import uniffi.gemstone.SwapPriceImpactType
 import uniffi.gemstone.SwapProvider
+import uniffi.gemstone.swapProviderRow
 import uniffi.gemstone.swapQuoteSummary
 import java.math.BigInteger
 
@@ -163,8 +166,8 @@ class SwapDetailsUIModelFactoryTest {
     private fun swapDetails(
         fromValue: String = DEFAULT_FROM_VALUE,
         toValue: String,
-        provider: SwapProviderUIModel = provider(toValue),
-        providers: List<SwapProviderUIModel> = emptyList(),
+        provider: GemSwapProviderRow = provider(toValue),
+        providers: List<GemSwapProviderRow> = emptyList(),
         slippageBps: UInt = DEFAULT_SLIPPAGE_BPS,
         etaInSeconds: UInt? = null,
         isProviderSelectable: Boolean = false,
@@ -192,11 +195,14 @@ class SwapDetailsUIModelFactoryTest {
         receiveAsset.asset.toGem(),
     )
 
-    private fun provider(toValue: String, receiveAsset: AssetPriceValue = this.receiveAsset) = SwapProviderUIModelFactory.create(
-        providerId = SwapProvider.OKX,
+    private fun provider(toValue: String, receiveAsset: AssetPriceValue = this.receiveAsset) = swapProviderRow(
+        provider = SwapProvider.OKX,
         title = "OKX (DEX)",
-        receiveAsset = receiveAsset,
         toValue = BigInteger(toValue),
+        receiveAsset = receiveAsset.asset.toGem(),
+        receivePrice = receiveAsset.price?.price?.price,
+        currency = Currency.USD.toGem(),
+        isSelected = true,
     )
 
     private fun formattedReceiveAmount(atomicValue: String) = ValueFormatter(style = GemValueStyle.AUTO)

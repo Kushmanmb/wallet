@@ -10,6 +10,7 @@ import struct Gemstone.GemSwapRate
 import struct Gemstone.SwapperQuote
 import struct Gemstone.SwapPriceImpact
 import struct Gemstone.SwapProviderData
+import func Gemstone.swapProviderRow
 import struct Gemstone.SwapQuote
 import GemstonePrimitives
 import Localization
@@ -31,6 +32,7 @@ public final class SwapDetailsViewModel {
     private let rate: GemSwapRate?
     private var isRateInverse = false
     private let priceViewModel: PriceViewModel
+    private let currency: String
     let allowSelectProvider: Bool
     private let swapPriceImpact: SwapPriceImpact?
     private let minReceiveValue: BigInt
@@ -57,6 +59,7 @@ public final class SwapDetailsViewModel {
         self.slippagePercent = slippagePercent
         rate = summary.rate
         priceViewModel = PriceViewModel(price: toAssetPrice.price, currencyCode: currency)
+        self.currency = currency
         self.allowSelectProvider = allowSelectProvider
         self.swapPriceImpact = swapPriceImpact
         minReceiveValue = BigInt(summary.minReceiveValue)
@@ -101,11 +104,15 @@ public final class SwapDetailsViewModel {
 
     var selectedProviderItem: SwapProviderItem {
         SwapProviderItem(
-            asset: toAssetPrice.asset,
-            swapQuote: selectedQuote,
-            selectedProvider: nil,
-            priceViewModel: priceViewModel,
-            valueFormatter: valueFormatter,
+            row: swapProviderRow(
+                provider: selectedQuote.providerData.provider,
+                title: selectedQuote.providerData.protocolName,
+                toValue: selectedQuote.toValue,
+                receiveAsset: toAssetPrice.asset.toGem(),
+                receivePrice: toAssetPrice.price?.price,
+                currency: Primitives.Currency(rawValue: currency)?.toGem() ?? Primitives.Currency.usd.toGem(),
+                isSelected: false,
+            ),
         )
     }
 

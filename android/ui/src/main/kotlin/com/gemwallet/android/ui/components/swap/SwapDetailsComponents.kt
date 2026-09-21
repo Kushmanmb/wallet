@@ -17,11 +17,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import com.gemwallet.android.domains.duration.formatEstimatedConfirmation
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.dialog.DialogBarDismissType
 import com.gemwallet.android.ui.components.image.AsyncImage
 import com.gemwallet.android.ui.components.image.IconWithBadge
+import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemSupportText
@@ -37,10 +39,10 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.swap.SwapDetailRowUIModel
 import com.gemwallet.android.ui.models.swap.SwapDetailsUIModel
 import com.gemwallet.android.ui.models.swap.SwapPriceImpactUIModel
-import com.gemwallet.android.ui.models.swap.SwapProviderUIModel
 import com.gemwallet.android.ui.style.textStyle
 import com.gemwallet.android.ui.theme.listItemIconSize
 import com.gemwallet.android.ui.theme.pendingColor
+import uniffi.gemstone.GemSwapProviderRow
 import uniffi.gemstone.SwapPriceImpactType
 import uniffi.gemstone.SwapProvider
 
@@ -115,7 +117,7 @@ fun SwapDetailsBottomSheet(
                     SwapProviderListItemView(
                         provider = provider,
                         listPosition = ListPosition.getPosition(index, providers.size),
-                        isSelected = provider.id == model.provider.id,
+                        isSelected = provider.isSelected,
                         onProviderSelect = { selected ->
                             onDismiss()
                             onProviderSelect(selected)
@@ -165,18 +167,18 @@ fun SwapDetailsBottomSheet(
 }
 
 @Composable
-private fun SwapProviderListItemView(provider: SwapProviderUIModel, listPosition: ListPosition, isSelected: Boolean, onProviderSelect: (SwapProvider) -> Unit) {
+private fun SwapProviderListItemView(provider: GemSwapProviderRow, listPosition: ListPosition, isSelected: Boolean, onProviderSelect: (SwapProvider) -> Unit) {
     ListItem(
-        modifier = Modifier.clickable { onProviderSelect(provider.id) },
+        modifier = Modifier.clickable { onProviderSelect(provider.provider) },
         leading = {
             if (isSelected) {
                 IconWithBadge(
-                    icon = provider.icon,
+                    icon = provider.provider.iconModel(),
                     size = listItemIconSize,
                     badge = { SelectionCheckmark() },
                 )
             } else {
-                SwapProviderIcon(provider.icon, listItemIconSize)
+                SwapProviderIcon(provider.provider.iconModel(), listItemIconSize)
             }
         },
         title = { ListItemTitleText(provider.title) },
@@ -186,9 +188,9 @@ private fun SwapProviderListItemView(provider: SwapProviderUIModel, listPosition
 }
 
 @Composable
-private fun SwapCurrentProviderRow(provider: SwapProviderUIModel) {
+private fun SwapCurrentProviderRow(provider: GemSwapProviderRow) {
     ListItem(
-        leading = { SwapProviderIcon(provider.icon, listItemIconSize) },
+        leading = { SwapProviderIcon(provider.provider.iconModel(), listItemIconSize) },
         title = {
             ListItemTitleText(provider.title)
         },
@@ -200,13 +202,11 @@ private fun SwapCurrentProviderRow(provider: SwapProviderUIModel) {
 }
 
 @Composable
-private fun SwapProviderAmounts(provider: SwapProviderUIModel) {
+private fun SwapProviderAmounts(provider: GemSwapProviderRow) {
     Column(horizontalAlignment = Alignment.End) {
-        provider.amount?.let {
-            ListItemTitleText(it)
-        }
+        ListItemTitleText(provider.amount.text())
         provider.fiat?.let {
-            ListItemSupportText(it)
+            ListItemSupportText(it.text())
         }
     }
 }
@@ -216,22 +216,10 @@ private fun SwapProviderIcon(icon: Any?, size: Dp) {
     AsyncImage(model = icon, size = size)
 }
 
-private fun SwapDetailsUIModel.inlineProviders(isSelectionEnabled: Boolean): List<SwapProviderUIModel> {
-    if (!isSelectionEnabled || !isProviderSelectable) {
-        return listOf(provider)
-    }
-
-    val topProviders = providers.take(MAX_INLINE_PROVIDERS).toMutableList()
-    if (topProviders.none { it.id == provider.id }) {
-        topProviders.add(0, provider)
-    }
-
-    return topProviders
-        .distinctBy { it.id }
-        .take(MAX_INLINE_PROVIDERS)
+private fun SwapDetailsUIModel.inlineProviders(isSelectionEnabled: Boolean): List<GemSwapProviderRow> = when {
+    isSelectionEnabled && isProviderSelectable -> providers
+    else -> listOf(provider)
 }
-
-private const val MAX_INLINE_PROVIDERS = 3
 
 @Composable
 private fun SwapPriceImpactUIModel?.getColor() = when (this?.type) {

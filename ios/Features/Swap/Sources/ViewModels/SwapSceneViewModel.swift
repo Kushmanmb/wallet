@@ -124,7 +124,7 @@ public final class SwapSceneViewModel {
         let fromAssetPrice = AssetPriceValue(asset: fromAsset.asset, price: fromAsset.price)
         let toAssetPrice = AssetPriceValue(asset: toAsset.asset, price: toAsset.price)
         return SwapDetailsViewModel(
-            state: quotesState.map { providerItems($0, selectedQuote: selectedQuote, toAssetPrice: toAssetPrice) },
+            state: quotesState.map { _ in providerItems(toAssetPrice: toAssetPrice) },
             fromAssetPrice: fromAssetPrice,
             toAssetPrice: toAssetPrice,
             summary: summary,
@@ -139,16 +139,14 @@ public final class SwapSceneViewModel {
         )
     }
 
-    private func providerItems(_ quotes: [SwapperQuote], selectedQuote: Gemstone.SwapQuote, toAssetPrice: AssetPriceValue) -> [SwapProviderItem] {
-        quotes.compactMap {
-            SwapProviderItem(
-                asset: toAssetPrice.asset,
-                swapperQuote: $0,
-                selectedProvider: selectedQuote.providerData.provider,
-                priceViewModel: PriceViewModel(price: toAssetPrice.price, currencyCode: service.currency.rawValue),
-                valueFormatter: ValueFormatter(style: .auto),
-            )
-        }
+    private func providerItems(toAssetPrice: AssetPriceValue) -> [SwapProviderItem] {
+        let quotes = session.quotes?.quotes ?? []
+        let rows = session.providerRows(
+            receiveAsset: toAssetPrice.asset.toGem(),
+            receivePrice: toAssetPrice.price?.price,
+            currency: service.currency.toGem(),
+        )
+        return zip(rows, quotes).map { SwapProviderItem(row: $0, swapperQuote: $1) }
     }
 
     var showsSlippageIndicator: Bool {
