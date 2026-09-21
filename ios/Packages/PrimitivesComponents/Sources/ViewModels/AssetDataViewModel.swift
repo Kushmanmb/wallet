@@ -57,24 +57,6 @@ public struct AssetDataViewModel: Sendable {
         assetData.asset.symbol
     }
 
-    // price
-
-    public var isPriceAvailable: Bool {
-        priceViewModel.isPriceAvailable
-    }
-
-    public var priceAmountText: String {
-        priceViewModel.priceAmountText
-    }
-
-    public var priceChangeText: String {
-        priceViewModel.priceChangeText
-    }
-
-    public var priceChangeTextColor: Color {
-        priceViewModel.priceChangeTextColor
-    }
-
     // balance
 
     public var balanceText: String {

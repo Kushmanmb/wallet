@@ -1,8 +1,6 @@
 package com.gemwallet.android.domains.asset.aggregates
 
 import androidx.compose.runtime.Immutable
-import com.gemwallet.android.domains.price.values.PriceValue
-import com.gemwallet.android.domains.price.values.RowFormatters
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.text
@@ -13,6 +11,7 @@ import com.wallet.core.primitives.Currency
 import uniffi.gemstone.GemAssetBalanceScope
 import uniffi.gemstone.GemAssetListRowInput
 import uniffi.gemstone.GemAssetRowStyle
+import uniffi.gemstone.GemPriceRow
 import uniffi.gemstone.assetListRow
 
 @Immutable
@@ -25,20 +24,17 @@ data class AssetInfoDataAggregate(
     val balance: String,
     val balanceEquivalent: String,
     val isZeroBalance: Boolean,
-    val price: PriceValue?,
+    val price: GemPriceRow,
     val pinned: Boolean,
     val balanceEnabled: Boolean,
     val accountAddress: String,
 )
 
-fun List<AssetInfo>.toAssetInfoDataAggregates(style: GemAssetRowStyle, hideBalance: Boolean = false): List<AssetInfoDataAggregate> {
-    val formatters = RowFormatters()
-    return map { it.toAssetInfoDataAggregate(style = style, hideBalance = hideBalance, formatters = formatters) }
-}
+fun List<AssetInfo>.toAssetInfoDataAggregates(style: GemAssetRowStyle, hideBalance: Boolean = false): List<AssetInfoDataAggregate> = map { it.toAssetInfoDataAggregate(style = style, hideBalance = hideBalance) }
 
 private const val HIDDEN_BALANCE = "*****"
 
-fun AssetInfo.toAssetInfoDataAggregate(style: GemAssetRowStyle, hideBalance: Boolean = false, scope: GemAssetBalanceScope = GemAssetBalanceScope.TOTAL, formatters: RowFormatters = RowFormatters()): AssetInfoDataAggregate {
+fun AssetInfo.toAssetInfoDataAggregate(style: GemAssetRowStyle, hideBalance: Boolean = false, scope: GemAssetBalanceScope = GemAssetBalanceScope.TOTAL): AssetInfoDataAggregate {
     val assetPrice = price?.price
     val priceValue = assetPrice?.price?.takeIf(Double::isFinite)
     val changePercentage = assetPrice?.priceChangePercentage24h?.takeIf(Double::isFinite)
@@ -48,6 +44,7 @@ fun AssetInfo.toAssetInfoDataAggregate(style: GemAssetRowStyle, hideBalance: Boo
             balance = balance.toGem(),
             scope = scope,
             price = priceValue,
+            change = changePercentage,
             currency = (price?.currency ?: Currency.USD).toGem(),
             style = style,
         ),
@@ -62,7 +59,7 @@ fun AssetInfo.toAssetInfoDataAggregate(style: GemAssetRowStyle, hideBalance: Boo
         balance = if (hideBalance) HIDDEN_BALANCE else row.amount.text(),
         balanceEquivalent = if (hideBalance) HIDDEN_BALANCE else row.fiat?.text().orEmpty(),
         isZeroBalance = !row.hasBalance,
-        price = price?.let { formatters.price(it.currency, priceValue, changePercentage) },
+        price = row.price,
         pinned = metadata.isPinned,
         balanceEnabled = metadata.isBalanceEnabled,
         accountAddress = owner?.address.orEmpty(),

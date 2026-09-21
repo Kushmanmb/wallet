@@ -31,6 +31,7 @@ import uniffi.gemstone.GemListRowIcon
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSectionTitle
 import uniffi.gemstone.GemNumberUnit
+import uniffi.gemstone.GemPriceRow
 import uniffi.gemstone.GemValueTone
 import java.math.BigInteger
 
@@ -105,8 +106,8 @@ class AssetInfoUIModelFactoryTest {
         val price = mockFormattedNumber(value = 1234.5, unit = GemNumberUnit.Currency(code = "USD"))
         val change = mockFormattedNumber(value = -2.5, unit = GemNumberUnit.Percent, tone = GemValueTone.NEGATIVE)
         val assetInfo = mockAssetInfo(asset = mockAsset(), owner = null)
-        val quoted = listOf(GemAssetDetailSection(GemListSectionTitle.NONE, listOf(GemAssetDetailRow.Price(price, change))))
-        val unquoted = listOf(GemAssetDetailSection(GemListSectionTitle.NONE, listOf(GemAssetDetailRow.Price(null, null))))
+        val quoted = listOf(GemAssetDetailSection(GemListSectionTitle.NONE, listOf(GemAssetDetailRow.Price(GemPriceRow(price, change)))))
+        val unquoted = listOf(GemAssetDetailSection(GemListSectionTitle.NONE, listOf(GemAssetDetailRow.Price(GemPriceRow(null, null)))))
 
         assertEquals(price.text(), model(assetInfo, sections = quoted).priceListItem.subtitle)
         assertEquals(change.text(), model(assetInfo, sections = quoted).priceDayChanges)
@@ -129,7 +130,7 @@ class AssetInfoUIModelFactoryTest {
             mockAssetInfo(asset = mockAsset(), owner = null),
             sections = listOf(
                 GemAssetDetailSection(GemListSectionTitle.MANAGE, listOf(GemAssetDetailRow.Row(link))),
-                GemAssetDetailSection(GemListSectionTitle.NONE, listOf(GemAssetDetailRow.Price(price = null, change = null), GemAssetDetailRow.Network("Ethereum (ERC20)"))),
+                GemAssetDetailSection(GemListSectionTitle.NONE, listOf(GemAssetDetailRow.Price(GemPriceRow(price = null, change = null)), GemAssetDetailRow.Network("Ethereum (ERC20)"))),
             ),
         ).sections
 

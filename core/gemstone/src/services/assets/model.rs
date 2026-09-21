@@ -119,13 +119,26 @@ pub struct GemAssetListRowInput {
     pub balance: GemAssetBalance,
     pub scope: GemAssetBalanceScope,
     pub price: Option<f64>,
+    pub change: Option<f64>,
     pub currency: Currency,
     pub style: GemAssetRowStyle,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemPriceRow {
+    pub price: Option<GemFormattedNumber>,
+    pub change: Option<GemFormattedNumber>,
+}
+
+#[uniffi::export]
+pub fn price_row(price: Option<f64>, change: Option<f64>, currency: Currency) -> GemPriceRow {
+    super::rules::price_row(price, change, currency)
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemAssetListRow {
     pub text: GemAssetRowText,
+    pub price: GemPriceRow,
     pub amount: GemFormattedNumber,
     pub fiat: Option<GemFormattedNumber>,
     pub has_balance: bool,
@@ -530,7 +543,7 @@ pub struct GemAssetDetailsState {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemAssetDetailRow {
-    Price { price: Option<GemFormattedNumber>, change: Option<GemFormattedNumber> },
+    Price { row: GemPriceRow },
     Network { name: String },
     Balance { row: GemAssetBalanceRow },
     Earn { row: GemListRow },

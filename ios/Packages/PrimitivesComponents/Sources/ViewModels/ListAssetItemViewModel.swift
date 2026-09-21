@@ -38,6 +38,7 @@ public struct ListAssetItemViewModel: ListAssetItemViewable {
                 balance: GemAssetBalance(assetDataModel.assetData.balance, assetId: assetDataModel.asset.id, isActive: assetDataModel.assetData.metadata.isActive),
                 scope: .total,
                 price: assetDataModel.assetData.price?.price,
+                change: assetDataModel.assetData.price?.priceChangePercentage24h,
                 currency: assetDataModel.currency.toGem(),
                 style: rowStyle,
             ),
@@ -77,12 +78,12 @@ public struct ListAssetItemViewModel: ListAssetItemViewable {
         case .price:
             .price(
                 price: TextValue(
-                    text: assetDataModel.priceAmountText,
+                    text: row.price.price?.text() ?? .empty,
                     style: TextStyle(font: .footnote, color: Colors.gray),
                 ),
                 priceChangePercentage24h: TextValue(
-                    text: assetDataModel.priceChangeText,
-                    style: TextStyle(font: .footnote, color: assetDataModel.priceChangeTextColor),
+                    text: row.price.change?.text() ?? .empty,
+                    style: TextStyle(font: .footnote, color: row.price.change?.tone.color ?? Colors.gray),
                 ),
             )
         case .network:

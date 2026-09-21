@@ -96,10 +96,10 @@ extension AssetScene {
     @ViewBuilder
     private func detailRow(_ row: GemAssetDetailRow, networkDestination: GemAssetNetworkDestination?) -> some View {
         switch row {
-        case let .price(price, change):
+        case let .price(row):
             NavigationLink(
                 value: Scenes.Price(asset: model.assetModel.asset),
-                label: { ListItemView(title: Localized.Asset.price, subtitle: price?.text(), subtitleExtra: change?.text(), subtitleStyleExtra: TextStyle(font: .subheadline, color: change?.tone.color ?? Colors.gray)) },
+                label: { ListItemView(title: Localized.Asset.price, subtitle: row.price?.text(), subtitleExtra: row.change?.text(), subtitleStyleExtra: TextStyle(font: .subheadline, color: row.change?.tone.color ?? Colors.gray)) },
             )
             .accessibilityIdentifier("price")
         case let .network(name):

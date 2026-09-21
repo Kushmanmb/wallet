@@ -1,6 +1,7 @@
 package com.gemwallet.android.domains.asset.aggregates
 
 import com.gemwallet.android.model.AssetBalance
+import com.gemwallet.android.model.text
 import com.gemwallet.android.testkit.mockAccount
 import com.gemwallet.android.testkit.mockAsset
 import com.gemwallet.android.testkit.mockAssetEthereum
@@ -19,6 +20,7 @@ import org.junit.Test
 import uniffi.gemstone.GemAssetBalanceScope
 import uniffi.gemstone.GemAssetSubtitleStyle
 import uniffi.gemstone.GemAssetTitleStyle
+import uniffi.gemstone.GemNumberUnit
 import uniffi.gemstone.GemValueTone
 import java.math.BigInteger
 
@@ -162,7 +164,7 @@ class AssetInfoDataAggregateTest {
         val aggregate = assetInfo.toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false)
 
         assertEquals("", aggregate.balanceEquivalent)
-        assertEquals("", aggregate.price?.valueFormatted)
+        assertNull("a price nobody quoted is no price", aggregate.price.price)
     }
 
     @Test
@@ -195,13 +197,11 @@ class AssetInfoDataAggregateTest {
         )
         val aggregate = assetInfo.toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false)
 
-        assertNotNull(aggregate.price)
-        assertEquals(Currency.USD, aggregate.price?.currency)
-        assertEquals(50000.0, aggregate.price?.value)
-        assertEquals("\$50,000.00", aggregate.price?.valueFormatted)
-        assertEquals(-5.000002, aggregate.price?.changePercentage)
-        assertEquals("-5.00%", aggregate.price?.changePercentageFormatted)
-        assertEquals(GemValueTone.NEGATIVE, aggregate.price?.state)
+        assertEquals(50000.0, aggregate.price.price?.value)
+        assertEquals("\$50,000.00", aggregate.price.price?.text())
+        assertEquals(-5.000002, aggregate.price.change?.value)
+        assertEquals("-5.00%", aggregate.price.change?.text())
+        assertEquals(GemValueTone.NEGATIVE, aggregate.price.change?.tone)
     }
 
     @Test
@@ -212,9 +212,9 @@ class AssetInfoDataAggregateTest {
         )
         val aggregate = assetInfo.toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false)
 
-        assertEquals(-0.000006, aggregate.price?.changePercentage)
-        assertEquals("-0.00%", aggregate.price?.changePercentageFormatted)
-        assertEquals(GemValueTone.NEGATIVE, aggregate.price?.state)
+        assertEquals(-0.000006, aggregate.price.change?.value)
+        assertEquals("-0.00%", aggregate.price.change?.text())
+        assertEquals(GemValueTone.NEGATIVE, aggregate.price.change?.tone)
     }
 
     @Test
@@ -225,9 +225,9 @@ class AssetInfoDataAggregateTest {
         )
         val aggregate = assetInfo.toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false)
 
-        assertEquals(0.000006, aggregate.price?.changePercentage)
-        assertEquals("+0.00%", aggregate.price?.changePercentageFormatted)
-        assertEquals(GemValueTone.POSITIVE, aggregate.price?.state)
+        assertEquals(0.000006, aggregate.price.change?.value)
+        assertEquals("+0.00%", aggregate.price.change?.text())
+        assertEquals(GemValueTone.POSITIVE, aggregate.price.change?.tone)
     }
 
     @Test
@@ -236,31 +236,31 @@ class AssetInfoDataAggregateTest {
             asset = btcAsset,
             price = mockAssetPriceInfo(price = 50000.0, priceChangePercentage24h = -0.06),
         ).toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false).let { aggregate ->
-            assertEquals("-0.06%", aggregate.price?.changePercentageFormatted)
-            assertEquals(GemValueTone.NEGATIVE, aggregate.price?.state)
+            assertEquals("-0.06%", aggregate.price.change?.text())
+            assertEquals(GemValueTone.NEGATIVE, aggregate.price.change?.tone)
         }
         mockAssetInfo(
             asset = btcAsset,
             price = mockAssetPriceInfo(price = 50000.0, priceChangePercentage24h = -0.02),
         ).toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false).let { aggregate ->
-            assertEquals("-0.02%", aggregate.price?.changePercentageFormatted)
-            assertEquals(GemValueTone.NEGATIVE, aggregate.price?.state)
+            assertEquals("-0.02%", aggregate.price.change?.text())
+            assertEquals(GemValueTone.NEGATIVE, aggregate.price.change?.tone)
         }
 
         mockAssetInfo(
             asset = btcAsset,
             price = mockAssetPriceInfo(price = 50000.0, priceChangePercentage24h = 0.06),
         ).toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false).let { aggregate ->
-            assertEquals("+0.06%", aggregate.price?.changePercentageFormatted)
-            assertEquals(GemValueTone.POSITIVE, aggregate.price?.state)
+            assertEquals("+0.06%", aggregate.price.change?.text())
+            assertEquals(GemValueTone.POSITIVE, aggregate.price.change?.tone)
         }
 
         mockAssetInfo(
             asset = btcAsset,
             price = mockAssetPriceInfo(price = 50000.0, priceChangePercentage24h = 0.02),
         ).toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false).let { aggregate ->
-            assertEquals("+0.02%", aggregate.price?.changePercentageFormatted)
-            assertEquals(GemValueTone.POSITIVE, aggregate.price?.state)
+            assertEquals("+0.02%", aggregate.price.change?.text())
+            assertEquals(GemValueTone.POSITIVE, aggregate.price.change?.tone)
         }
     }
 
@@ -272,7 +272,8 @@ class AssetInfoDataAggregateTest {
         )
         val aggregate = assetInfo.toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false)
 
-        assertNull(aggregate.price)
+        assertNull(aggregate.price.price)
+        assertNull(aggregate.price.change)
     }
 
     @Test
@@ -327,9 +328,8 @@ class AssetInfoDataAggregateTest {
         )
         val aggregate = assetInfo.toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false)
 
-        assertNotNull(aggregate.price)
-        assertEquals(Currency.EUR, aggregate.price?.currency)
-        assertEquals(3000.0, aggregate.price?.value)
+        assertEquals(GemNumberUnit.Currency(code = "EUR"), aggregate.price.price?.unit)
+        assertEquals(3000.0, aggregate.price.price?.value)
     }
 
     @Test
@@ -368,9 +368,9 @@ class AssetInfoDataAggregateTest {
         )
         val price = assetInfo.toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false).price
 
-        assertEquals("\$50,000.00", price?.valueFormatted)
-        assertEquals("+2.50%", price?.changePercentageFormatted)
-        assertEquals(GemValueTone.POSITIVE, price?.state)
+        assertEquals("\$50,000.00", price.price?.text())
+        assertEquals("+2.50%", price.change?.text())
+        assertEquals(GemValueTone.POSITIVE, price.change?.tone)
     }
 
     @Test
@@ -381,9 +381,9 @@ class AssetInfoDataAggregateTest {
         )
         val price = assetInfo.toAssetInfoDataAggregate(mockGemAssetRowStyle(), hideBalance = false).price
 
-        assertEquals("", price?.valueFormatted)
-        assertEquals("-5.20%", price?.changePercentageFormatted)
-        assertEquals(GemValueTone.NEGATIVE, price?.state)
+        assertNull("a price that is not a number is no price", price.price)
+        assertEquals("-5.20%", price.change?.text())
+        assertEquals(GemValueTone.NEGATIVE, price.change?.tone)
     }
 
     @Test
