@@ -41,6 +41,7 @@ use crate::services::explorer::GemExplorerService;
 use crate::services::file::GemFileStore;
 use crate::services::localization::GemLocalizedText;
 use crate::services::name::GemAddressStore;
+use crate::services::name::store::GemAddressNameWriter;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_preferences::GemWalletPreferencesService;
 use crate::services::wallet_session::GemWalletSessionService;
@@ -309,7 +310,7 @@ impl GemWalletService {
             msg: format!("wallet {} not found", wallet_id.id()),
         })?;
         self.store.set_name(wallet_id, name.clone()).await?;
-        self.addresses.save_address_names(rules::wallet_address_names(&Wallet { name, ..wallet })).await
+        self.addresses.save_names(rules::wallet_address_names(&Wallet { name, ..wallet })).await
     }
 
     pub fn sorted_wallets(&self, wallets: Vec<Wallet>) -> Vec<Wallet> {
@@ -367,7 +368,7 @@ impl GemWalletService {
 
     async fn store_wallet(&self, wallet: &Wallet) -> Result<(), GemServiceError> {
         self.store.add_wallet(wallet.clone()).await?;
-        self.addresses.save_address_names(rules::wallet_address_names(wallet)).await
+        self.addresses.save_names(rules::wallet_address_names(wallet)).await
     }
 
     async fn invalidate_subscriptions(&self) -> Result<(), GemServiceError> {

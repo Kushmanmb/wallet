@@ -6,7 +6,7 @@ use primitives::{AddressName, Chain, Wallet, WalletId};
 use super::GemWalletStore;
 use super::password::{GemKeystoreAuthentication, GemKeystorePassword};
 use crate::services::error::GemServiceError;
-use crate::services::name::GemAddressStore;
+use crate::services::name::{GemAddressNameUpdate, GemAddressStore};
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -115,10 +115,14 @@ impl GemAddressStore for MemoryAddressStore {
     async fn get_address_name(&self, chain: Chain, address: String) -> Result<Option<AddressName>, GemServiceError> {
         Ok(self.names.lock().unwrap().get(&(chain, address)).cloned())
     }
-    async fn save_address_names(&self, names: Vec<AddressName>) -> Result<(), GemServiceError> {
+    async fn save_address_names(&self, updates: Vec<GemAddressNameUpdate>) -> Result<(), GemServiceError> {
         let mut stored = self.names.lock().unwrap();
-        for name in names {
-            stored.insert((name.chain, name.address.clone()), name);
+        for update in updates {
+            let key = (update.name.chain, update.name.address.clone());
+            if stored.get(&key).is_some_and(|existing| !update.replaces_types.contains(&existing.address_type)) {
+                continue;
+            }
+            stored.insert(key, update.name);
         }
         Ok(())
     }

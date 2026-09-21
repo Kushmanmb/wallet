@@ -27,6 +27,7 @@ pub use store::GemStakeStore;
 use crate::services::balance::GemAssetBalance;
 use crate::services::explorer::GemExplorerService;
 use crate::services::name::GemAddressStore;
+use crate::services::name::store::GemAddressNameWriter;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::transfer::GemTransferData;
 use crate::services::transfer::rules as transfer_rules;
@@ -206,7 +207,7 @@ impl GemStakeService {
             if !stale_ids.is_empty() {
                 self.store.deactivate_validators(asset_id, stale_ids).await?;
             }
-            self.address_store.save_address_names(rules::validator_address_names(&validators)).await?;
+            self.address_store.save_names(rules::validator_address_names(&validators)).await?;
         }
         Ok(())
     }

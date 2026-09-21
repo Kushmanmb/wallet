@@ -15,6 +15,7 @@ use crate::models::payment::GemPayment;
 use crate::payment::GemPaymentService;
 use crate::services::file::{GemFileStore, IMAGE_EXTENSION};
 use crate::services::name::GemAddressStore;
+use crate::services::name::store::GemAddressNameWriter;
 
 pub use model::{GemContactAddressInput, GemContactAvatar, GemContactAvatarChoice, GemContactInput, GemContactRow, GemContactScannedAddress, GemContactSession, contact_initials, contact_row};
 pub use store::GemContactStore;
@@ -90,7 +91,7 @@ impl GemContactService {
     }
 
     async fn save_address_names(&self, contact: &Contact, addresses: &[ContactAddress]) -> Result<(), GemServiceError> {
-        self.address_store.save_address_names(rules::address_names(contact, addresses)).await
+        self.address_store.save_names(rules::address_names(contact, addresses)).await
     }
 }
 

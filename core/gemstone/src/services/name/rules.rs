@@ -1,13 +1,28 @@
 use primitives::name::NameRecord;
-use primitives::{Chain, ChainAddress};
+use primitives::{AddressName, AddressType, Chain, ChainAddress};
 
-use super::model::{GemNameInputStep, GemNameRecordState};
+use super::model::{GemAddressNameUpdate, GemNameInputStep, GemNameRecordState};
 use crate::services::collections::unique_by;
 
 const NAME_RECORD_DEBOUNCE_MILLISECONDS: u64 = 250;
 
 fn name_record_debounce_milliseconds() -> u64 {
     NAME_RECORD_DEBOUNCE_MILLISECONDS
+}
+
+pub fn address_name_update(name: AddressName) -> GemAddressNameUpdate {
+    let replacement = name.address_type.clone();
+    GemAddressNameUpdate {
+        replaces_types: AddressType::all().into_iter().filter(|stored| *stored == replacement || !names_the_user_owns(stored)).collect(),
+        name,
+    }
+}
+
+fn names_the_user_owns(address_type: &AddressType) -> bool {
+    match address_type {
+        AddressType::Contact | AddressType::InternalWallet => true,
+        AddressType::Address | AddressType::Contract | AddressType::Validator => false,
+    }
 }
 
 pub fn is_name_supported(name: &str) -> bool {
@@ -145,5 +160,28 @@ mod tests {
         assert_eq!(unique.len(), 2);
         assert_eq!(unique[0], ChainAddress::new(Chain::Ethereum, "0xa".to_string()));
         assert_eq!(unique[1], ChainAddress::new(Chain::Bitcoin, "0xa".to_string()));
+    }
+
+    #[test]
+    fn test_a_name_the_user_owns_is_only_replaced_by_its_own_kind() {
+        let update = |address_type: AddressType| {
+            address_name_update(AddressName {
+                chain: Chain::Ethereum,
+                address: "0xa".to_string(),
+                name: "name".to_string(),
+                address_type,
+                status: primitives::VerificationStatus::Unverified,
+                image_url: None,
+            })
+            .replaces_types
+        };
+
+        assert_eq!(update(AddressType::Address), vec![AddressType::Address, AddressType::Contract, AddressType::Validator]);
+        assert_eq!(
+            update(AddressType::Contact),
+            vec![AddressType::Address, AddressType::Contract, AddressType::Validator, AddressType::Contact],
+            "a contact replaces a remote name and its own, never the wallet's"
+        );
+        assert_eq!(update(AddressType::InternalWallet), vec![AddressType::Address, AddressType::Contract, AddressType::Validator, AddressType::InternalWallet]);
     }
 }

@@ -24,6 +24,7 @@ use crate::api::{GemApiError, GemDeviceApiClient};
 use crate::services::assets::GemAssetsService;
 use crate::services::chain::rules as chain_rules;
 use crate::services::name::GemAddressStore;
+use crate::services::name::store::GemAddressNameWriter;
 use crate::services::swap::GemSwapPair;
 use crate::services::transaction_state::GemTransactionStatusService;
 use crate::services::wallet_preferences::GemWalletPreferencesService;
@@ -101,7 +102,7 @@ impl GemTransactionsService {
         }
         let pending = rules::pending_transactions(&response.transactions);
         self.store.save_transactions(wallet_id.clone(), response.transactions).await?;
-        self.address_store.save_address_names(response.address_names).await?;
+        self.address_store.save_names(response.address_names).await?;
         self.wallet_preferences.set_transactions_timestamp(wallet_id.clone(), asset_id, timestamp)?;
         if !pending.is_empty() {
             self.transaction_status.track(wallet_id, pending);

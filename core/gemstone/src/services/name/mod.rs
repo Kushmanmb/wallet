@@ -8,9 +8,10 @@ use std::sync::Arc;
 use primitives::{AddressName, Chain, ChainAddress};
 
 use crate::api::{GemApiError, GemDeviceApiClient};
+use crate::services::name::store::GemAddressNameWriter;
 use crate::services::recipient::{GemRecipientValidation, rules as recipient_rules};
 
-pub use model::{GemNameInputStep, GemNameRecordState};
+pub use model::{GemAddressNameUpdate, GemNameInputStep, GemNameRecordState};
 pub use store::GemAddressStore;
 
 #[derive(uniffi::Object)]
@@ -75,7 +76,7 @@ impl GemNameService {
             Ok(names) => names,
             Err(_) => return Ok(cached),
         };
-        self.store.save_address_names(remote.clone()).await?;
+        self.store.save_names(remote.clone()).await?;
         cached.extend(remote);
         Ok(cached)
     }

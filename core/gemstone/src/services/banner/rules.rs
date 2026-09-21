@@ -1,10 +1,7 @@
 use crate::models::custom_types::GemBigInt;
 use primitives::{Asset, AssetId, Banner, BannerEvent, BannerState, Chain, ChainAsset, VerificationStatus, Wallet, WalletSource, WalletType};
 
-use super::model::{
-    BannerScope, GemBannerAmount, GemBannerContent, GemBannerContext, GemBannerDescription, GemBannerDestination, GemBannerIcon, GemBannerItem, GemBannerKey, GemBannerLink, GemBannerTitle,
-    banner_scope,
-};
+use super::model::{BannerScope, GemBannerAmount, GemBannerContent, GemBannerContext, GemBannerDescription, GemBannerDestination, GemBannerIcon, GemBannerItem, GemBannerKey, GemBannerLink, GemBannerTitle, banner_scope};
 use crate::config::chain::account_activation_fee_url;
 use crate::config::docs::DocsUrl;
 use crate::services::transfer::rules as transfer_rules;

@@ -1,5 +1,5 @@
-use primitives::Chain;
 use primitives::name::NameRecord;
+use primitives::{AddressName, AddressType, Chain};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemNameRecordState {
@@ -45,4 +45,10 @@ pub enum GemNameInputStep {
     Unchanged,
     Reset,
     Resolve { name: String, debounce_milliseconds: u64 },
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAddressNameUpdate {
+    pub name: AddressName,
+    pub replaces_types: Vec<AddressType>,
 }

@@ -97,7 +97,7 @@ public final class GemAddressStoreMock: GemAddressStore, @unchecked Sendable {
         nil
     }
 
-    public func saveAddressNames(names _: [Gemstone.AddressName]) async throws {}
+    public func saveAddressNames(updates _: [GemAddressNameUpdate]) async throws {}
 
     public func deleteAddressNames(names _: [Gemstone.AddressName]) async throws {}
 }
