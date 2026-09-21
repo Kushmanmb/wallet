@@ -242,7 +242,7 @@ class MainViewModel @Inject constructor(
             pairWalletConnect.pair(
                 uri = uri,
                 onSuccess = {},
-                onError = ::showWalletConnectError,
+                onError = { showWalletConnectError(it.text(context)) },
             )
         }
     }

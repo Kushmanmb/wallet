@@ -181,9 +181,9 @@ class WCAuthViewModel @Inject constructor(
                             finish(request)
                         }
                     },
-                    onError = { message ->
+                    onError = { error ->
                         if (authRequest?.id == request.id) {
-                            _state.update { AuthSceneState.Error(GemErrorText.Message(message).text(context)) }
+                            _state.update { AuthSceneState.Error(error.text(context)) }
                         }
                     },
                 )
