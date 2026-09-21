@@ -24,6 +24,7 @@ use super::{GemAssetDetails, GemAssetDetailsInput, GemAssetsService, rules};
 pub enum GemAssetRefreshStep {
     AddPrices,
     SyncAsset,
+    SyncPriceAlerts,
     UpdateBalances,
     SyncTransactions,
 }
@@ -106,7 +107,12 @@ impl GemAssetDetailsService {
 
         record(&mut failures, GemAssetRefreshStep::SyncAsset, self.assets.sync_asset_associations(asset_id.clone()).map_ok(|_| ())).await;
 
-        let (balances, transactions) = futures::join!(self.balances.update(wallet_id.clone(), vec![asset_id.clone()]), self.transactions.sync_wallet(wallet_id, Some(asset_id)));
+        let (balances, transactions, price_alerts) = futures::join!(
+            self.balances.update(wallet_id.clone(), vec![asset_id.clone()]),
+            self.transactions.sync_wallet(wallet_id, Some(asset_id.clone())),
+            self.price_alerts.sync(Some(asset_id))
+        );
+        record_result(&mut failures, GemAssetRefreshStep::SyncPriceAlerts, price_alerts);
         record_result(&mut failures, GemAssetRefreshStep::UpdateBalances, balances);
         record_result(&mut failures, GemAssetRefreshStep::SyncTransactions, transactions.clone());
         GemAssetRefresh {
@@ -169,10 +175,6 @@ impl GemAssetDetailsService {
         self.price_alerts.set_auto_alert(asset_id, enabled).await
     }
 
-    pub async fn sync_price_alerts(&self, asset_id: Option<AssetId>) -> Result<(), GemServiceError> {
-        self.price_alerts.sync(asset_id).await
-    }
-
     pub fn deeplink_gem_url(&self, deeplink: Deeplink) -> String {
         self.deeplinks.build_gem_url(deeplink)
     }
@@ -196,6 +198,7 @@ mod tests {
 
             let steps: Vec<GemAssetRefreshStep> = failures.iter().map(|failure| failure.step).collect();
             assert!(steps.contains(&GemAssetRefreshStep::SyncAsset), "{failures:?}");
+            assert!(steps.contains(&GemAssetRefreshStep::SyncPriceAlerts), "{failures:?}");
             assert!(steps.contains(&GemAssetRefreshStep::UpdateBalances), "{failures:?}");
             assert!(steps.contains(&GemAssetRefreshStep::SyncTransactions), "{failures:?}");
             assert!(matches!(refresh.transactions, GemLoadState::Error { .. }), "a failed sync with nothing stored shows the error");

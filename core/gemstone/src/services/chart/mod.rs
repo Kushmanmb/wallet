@@ -15,7 +15,6 @@ use crate::services::error::GemServiceError;
 use crate::services::explorer::GemExplorerService;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::price::GemPriceService;
-use crate::services::price_alert::GemPriceAlertService;
 use session::GemChartSession;
 
 pub use model::{GemChartBounds, GemChartData, GemChartHeader, GemChartSection, GemChartValueType};
@@ -52,21 +51,14 @@ pub struct GemChartService {
     api: Arc<GemApiClient>,
     price: Arc<GemPriceService>,
     preferences: Arc<GemPreferencesService>,
-    price_alerts: Arc<GemPriceAlertService>,
     explorer: Arc<GemExplorerService>,
 }
 
 #[uniffi::export]
 impl GemChartService {
     #[uniffi::constructor]
-    pub fn new(api: Arc<GemApiClient>, price: Arc<GemPriceService>, preferences: Arc<GemPreferencesService>, price_alerts: Arc<GemPriceAlertService>, explorer: Arc<GemExplorerService>) -> Self {
-        Self {
-            api,
-            price,
-            preferences,
-            price_alerts,
-            explorer,
-        }
+    pub fn new(api: Arc<GemApiClient>, price: Arc<GemPriceService>, preferences: Arc<GemPreferencesService>, explorer: Arc<GemExplorerService>) -> Self {
+        Self { api, price, preferences, explorer }
     }
 
     pub fn sections(&self, asset: Asset, price: Option<f64>, market: Option<AssetMarket>, price_alerts: Vec<PriceAlert>, links: Vec<AssetLink>) -> Vec<GemChartSection> {
@@ -104,9 +96,5 @@ impl GemChartService {
         let base_value = rules::base_value(&values);
         let current = rules::current_value(&values, latest, Utc::now(), period, base_value);
         Ok(GemChart { values, base_value, current })
-    }
-
-    pub async fn sync_price_alerts(&self, asset_id: AssetId) -> Result<(), GemServiceError> {
-        self.price_alerts.sync(Some(asset_id)).await
     }
 }

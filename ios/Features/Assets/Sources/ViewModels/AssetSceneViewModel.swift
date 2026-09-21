@@ -215,16 +215,7 @@ public final class AssetSceneViewModel: Sendable {
 public extension AssetSceneViewModel {
     internal func loadOnce() {
         Task {
-            await load()
-        }
-    }
-
-    internal func load() async {
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask { await self.refresh() }
-            if assetData.priceAlerts.isNotEmpty {
-                group.addTask { await self.updatePriceAlerts() }
-            }
+            await refresh()
         }
     }
 
@@ -377,19 +368,11 @@ extension AssetSceneViewModel {
         try await service.setPriceAlert(assetId: assetModel.asset.id.identifier, enabled: enabled)
     }
 
-    private func refresh() async {
+    func refresh() async {
         let refresh = await service.refresh(assetId: assetModel.asset.id.identifier, hasTransactions: showTransactions)
         transactionsState = refresh.transactions
         for failure in refresh.failures {
             debugLog("asset scene: refresh \(failure.step) failed: \(failure.message)")
-        }
-    }
-
-    private func updatePriceAlerts() async {
-        do {
-            try await service.syncPriceAlerts(assetId: asset.id.identifier)
-        } catch {
-            debugLog("asset scene: price alerts update error \(error)")
         }
     }
 }

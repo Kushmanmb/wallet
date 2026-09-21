@@ -32,9 +32,9 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | B79, R107, R116, K17, X172 |
 | Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | R95, R111–R113, R133, U25, D46, D56, O59 |
 | Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | R111/R133, D56, D64, B76/B80, K18 |
-| Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | R102, R132, D44, B76/B80, U30 |
+| Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | R102, R132, B76/B80, U30 |
 | Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | S74, R94, D70, O59, F61/F62 |
-| Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | S72, R103/R128, D44/D70, B76, F61/F62 |
+| Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | S72, R103/R128, D70, B76, F61/F62 |
 | Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | R132, D64; retain existing native QR/share adapters |
 | Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | U19, C52, D49, F56/F60 |
 | Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | V92, D65; keep debounce/observation native |
@@ -224,7 +224,6 @@ Rows, headers, screen state and flows that an app still assembles from Core ingr
 
 The same product rule on both apps with a difference, each read on both sides on 2026-09-19.
 
-- **D44** **S** An asset's price alerts sync only when stored alerts exist on iOS (asset screen and chart) and on every open and pull on Android, which never syncs from the chart; Core exports `sync_price_alerts` twice. A `GemAssetRefreshStep` with the rule in Core; remove both exports.
 - **D47** **S** An incoming referral code is activated directly with one wallet on iOS (`RewardsViewModel.swift:215-235`, toast and reload) and always confirmed on Android (`ReferralScene.kt:95`), which never refreshes after `useCode`. Core `incoming_code(code, wallets) -> Activate | Confirm`, and `use_referral_code` returns the new state (the gap S34 recorded).
 - **D51** **S** Acquiring a missing asset from confirm pre-fills the swap pay asset on iOS (`ConfirmTransferSceneViewModel.swift:339-341`) and leaves it empty on Android (`WalletNavigator.kt:257-288`). `GemConfirmation::acquire_swap_pair`.
 - **D55** **S** A below-minimum amount opens a minimum-amount sheet with Buy on iOS (`AmountSceneViewModel.swift:228-236`) and is text only on Android, and "only NoQuote has a sheet" is decided per app for swap. `info()` on `GemAmountErrorDisplay` and `GemSwapErrorDisplay`.

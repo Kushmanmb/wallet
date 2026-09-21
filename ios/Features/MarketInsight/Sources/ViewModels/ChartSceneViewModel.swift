@@ -108,15 +108,6 @@ public extension ChartSceneViewModel {
         do {
             let chart = try await service.syncCharts(assetId: assetModel.asset.id.identifier, period: period)
             session = session.onLoaded(chart: chart, period: period)
-            if priceData?.priceAlerts.isNotEmpty == true {
-                Task {
-                    do {
-                        try await service.syncPriceAlerts(assetId: assetModel.asset.id.identifier)
-                    } catch {
-                        debugLog("chart scene: price alerts update error \(error)")
-                    }
-                }
-            }
         } catch let error as GemServiceError {
             session = session.onFailed(error: error, period: period)
         } catch {

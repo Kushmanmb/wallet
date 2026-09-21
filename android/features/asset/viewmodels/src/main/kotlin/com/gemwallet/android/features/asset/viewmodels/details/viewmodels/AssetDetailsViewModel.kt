@@ -166,7 +166,6 @@ class AssetDetailsViewModel @Inject constructor(
         }
 
         isRefreshing.value = true
-        syncPriceAlerts()
         syncJob = viewModelScope.launch(ioDispatcher) {
             try {
                 syncAssetDetails()
@@ -179,16 +178,10 @@ class AssetDetailsViewModel @Inject constructor(
     private fun restartAssetSync() {
         val previousJob = syncJob
 
-        syncPriceAlerts()
         syncJob = viewModelScope.launch(ioDispatcher) {
             previousJob?.cancelAndJoin()
             syncAssetDetails()
         }
-    }
-
-    private fun syncPriceAlerts() = viewModelScope.launch(ioDispatcher) {
-        runCatchingCancellable { assetDetailsService.syncPriceAlerts(assetId.toIdentifier()) }
-            .onFailure { Log.e(TAG, "price alerts sync failed for ${assetId.toIdentifier()}", it) }
     }
 
     private suspend fun syncAssetDetails() {

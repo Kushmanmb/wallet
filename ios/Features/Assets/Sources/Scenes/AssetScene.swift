@@ -81,7 +81,7 @@ public struct AssetScene: View {
             }
         }
         .refreshableTimer(every: connectionStatus.refreshInterval(for: .wallet)) { _ in
-            await model.load()
+            await model.refresh()
         }
         .taskOnce(model.loadOnce)
         .listSectionSpacing(.compact)

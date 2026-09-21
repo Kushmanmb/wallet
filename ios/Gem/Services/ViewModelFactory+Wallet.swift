@@ -130,7 +130,6 @@ public extension ViewModelFactory {
                 api: apiClient,
                 price: priceService,
                 preferences: preferencesService,
-                priceAlerts: priceAlertService,
                 explorer: explorerService,
             ),
             assetModel: AssetViewModel(asset: asset),

@@ -58,8 +58,6 @@ public final class GemAssetDetailsServiceMock: GemAssetDetailsServiceProtocol, @
 
     public func setPriceAlert(assetId _: AssetId, enabled _: Bool) async throws {}
 
-    public func syncPriceAlerts(assetId _: AssetId?) async throws {}
-
     public func deeplinkUrl(deeplink _: Deeplink) -> String {
         "https://gemwallet.com"
     }
