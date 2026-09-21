@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import Foundation
 import Gemstone
 import GemstonePrimitivesTestKit
 import GemstoneServices
@@ -61,7 +62,7 @@ struct AboutUsViewModelTests {
 
         #expect(preferences.isDeveloperEnabled)
         #expect(model.contextDevTitle != offTitle)
-        #expect(model.contextMenuItems(for: .text(title: .version, value: model.versionText)).count == 2)
+        #expect(model.contextMenuItems(for: .text(title: .version, value: "1.0 (1)")).count == 2)
         #expect(model.contextMenuItems(for: .loading).isEmpty)
     }
 
@@ -69,12 +70,20 @@ struct AboutUsViewModelTests {
     func theVersionReadsAsVersionAndBuild() {
         let model = AboutUsViewModel.mock()
 
-        #expect(model.versionText.contains("("))
-        #expect(model.versionText.hasSuffix(")"))
+        #expect(model.versionRowValue == "\(Bundle.main.releaseVersionNumber) (\(Bundle.main.buildVersionNumber))")
     }
 }
 
 private extension AboutUsViewModel {
+    var versionRowValue: String? {
+        sections.flatMap(\.values).map(\.row).compactMap { row in
+            switch row {
+            case let .text(title, value) where title == .version: value
+            default: nil
+            }
+        }.first
+    }
+
     var updateVersion: String? {
         sections.flatMap(\.values).map(\.row).compactMap { row in
             switch row {

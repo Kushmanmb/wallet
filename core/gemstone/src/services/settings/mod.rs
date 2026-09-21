@@ -59,8 +59,8 @@ impl GemSettingsService {
 }
 
 #[uniffi::export]
-pub fn about_sections(version: String, update: Option<Release>) -> Vec<GemListSection> {
-    rules::about_sections(version, update)
+pub fn about_sections(version: String, build: String, update: Option<Release>) -> Vec<GemListSection> {
+    rules::about_sections(version, build, update)
 }
 
 #[cfg(test)]

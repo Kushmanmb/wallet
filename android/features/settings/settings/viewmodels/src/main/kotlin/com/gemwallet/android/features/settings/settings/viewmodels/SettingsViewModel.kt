@@ -18,6 +18,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -38,6 +39,7 @@ class SettingsViewModel @Inject constructor(
 
     private val wallets = getWallets()
     private val developerEnabled = MutableStateFlow(userConfig.developEnabled())
+    val isDeveloperEnabled = developerEnabled.asStateFlow()
     private val walletConnectAvailable = MutableStateFlow(true)
 
     val sections = combine(wallets, developerEnabled, walletConnectAvailable) { wallets, _, walletConnect ->
@@ -63,7 +65,7 @@ class SettingsViewModel @Inject constructor(
     val pushEnabled = getPushEnabled.getPushEnabled()
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    fun developEnable() {
+    fun toggleDeveloperMode() {
         userConfig.developEnabled(!userConfig.developEnabled())
         developerEnabled.value = userConfig.developEnabled()
     }

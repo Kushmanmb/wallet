@@ -46,6 +46,7 @@ fun SettingsScene(onAction: (SettingsSceneAction) -> Unit, walletConnectEnabled:
     val viewModel: SettingsViewModel = hiltViewModel()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val pushEnabled by viewModel.pushEnabled.collectAsStateWithLifecycle()
+    val isDeveloperEnabled by viewModel.isDeveloperEnabled.collectAsStateWithLifecycle()
     var isShowDevelopEnable by remember { mutableStateOf(false) }
     val notificationsAvailable = viewModel.notificationsAvailable
 
@@ -87,10 +88,17 @@ fun SettingsScene(onAction: (SettingsSceneAction) -> Unit, walletConnectEnabled:
                                 containerColor = MaterialTheme.colorScheme.background,
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Enable develop") },
+                                    text = {
+                                        Text(
+                                            stringResource(
+                                                if (isDeveloperEnabled) R.string.settings_disable_value else R.string.settings_enable_value,
+                                                stringResource(R.string.settings_developer),
+                                            ),
+                                        )
+                                    },
                                     onClick = {
                                         isShowDevelopEnable = false
-                                        viewModel.developEnable()
+                                        viewModel.toggleDeveloperMode()
                                     },
                                 )
                             }

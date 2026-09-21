@@ -32,17 +32,11 @@ public final class AboutUsViewModel: Sendable {
         Localized.Settings.aboutus
     }
 
-    var versionText: String {
-        let version = Bundle.main.releaseVersionNumber
-        let number = Bundle.main.buildVersionNumber
-        return "\(version) (\(number))"
-    }
-
     func contextMenuItems(for row: GemListRow) -> [ContextMenuItemType] {
         switch row {
-        case .text(.version, _):
+        case let .text(.version, value):
             [
-                .copy(value: versionText),
+                .copy(value: value),
                 .custom(
                     title: contextDevTitle,
                     systemImage: SystemImage.info,
@@ -64,7 +58,11 @@ public final class AboutUsViewModel: Sendable {
 
 extension AboutUsViewModel: ListSectionProvideable {
     public var sections: [ListSection<GemListSectionRow>] {
-        aboutSections(version: versionText, update: release?.toGem()).listSections
+        aboutSections(
+            version: Bundle.main.releaseVersionNumber,
+            build: String(Bundle.main.buildVersionNumber),
+            update: release?.toGem(),
+        ).listSections
     }
 }
 

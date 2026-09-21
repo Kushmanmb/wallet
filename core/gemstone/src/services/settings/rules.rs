@@ -110,7 +110,7 @@ pub fn security_sections(input: GemSecurityInput) -> Vec<GemListSection> {
     ]
 }
 
-pub fn about_sections(version: String, update: Option<Release>) -> Vec<GemListSection> {
+pub fn about_sections(version: String, build: String, update: Option<Release>) -> Vec<GemListSection> {
     let page = |title: GemListRowTitle, url: PublicUrl| GemListRow::Url {
         title,
         value: None,
@@ -139,7 +139,7 @@ pub fn about_sections(version: String, update: Option<Release>) -> Vec<GemListSe
             rows: [
                 Some(GemListRow::Text {
                     title: GemListRowTitle::Version,
-                    value: version,
+                    value: format!("{version} ({build})"),
                 }),
                 update.map(|release| GemListRow::Url {
                     title: GemListRowTitle::UpdateApp,
@@ -307,16 +307,17 @@ mod tests {
 
     #[test]
     fn test_the_about_screen_offers_the_update_only_when_a_release_is_newer() {
-        let plain = about_sections("1.2.3".to_string(), None);
+        let plain = about_sections("1.2.3".to_string(), "345".to_string(), None);
         assert_eq!(
             plain.last().map(|section| section.rows.clone()),
             Some(vec![GemListRow::Text {
                 title: GemListRowTitle::Version,
-                value: "1.2.3".to_string()
-            }])
+                value: "1.2.3 (345)".to_string()
+            }]),
+            "the row composes the version and the build here, so both apps read the same text"
         );
 
-        let update = about_sections("1.2.3".to_string(), Some(Release::new(PlatformStore::AppStore, "1.3.0".to_string(), false)));
+        let update = about_sections("1.2.3".to_string(), "345".to_string(), Some(Release::new(PlatformStore::AppStore, "1.3.0".to_string(), false)));
         assert_eq!(
             update.last().and_then(|section| section.rows.last().cloned()),
             Some(GemListRow::Url {
