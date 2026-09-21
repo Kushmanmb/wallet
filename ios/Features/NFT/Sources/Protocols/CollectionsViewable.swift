@@ -2,6 +2,7 @@
 
 import Components
 import Foundation
+import enum Gemstone.GemLoadState
 import struct Gemstone.GemNftListScreen
 import protocol Gemstone.GemNftServiceProtocol
 import GemstonePrimitives
@@ -16,6 +17,7 @@ public protocol CollectionsViewable: AnyObject, Observable {
     var wallet: Wallet { get }
     var screen: GemNftListScreen { get }
     var service: any GemNftServiceProtocol { get }
+    var loadState: GemLoadState { get set }
 
     var title: String { get }
     var columns: [GridItem] { get }
@@ -49,13 +51,13 @@ public extension CollectionsViewable {
         EmptyContentTypeViewModel(type: .nfts(action: onSelectReceive))
     }
 
+    var loadError: Error? {
+        guard content.isEmpty, case let .error(error) = loadState else { return nil }
+        return error
+    }
+
     func load() async {
-        do {
-            let count = try await service.sync()
-            debugLog("update nfts: \(count)")
-        } catch {
-            debugLog("update nfts error: \(error)")
-        }
+        loadState = await service.refresh(hasCollections: !content.isEmpty)
     }
 
     func onSelectReceive() {

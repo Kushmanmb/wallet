@@ -1,7 +1,6 @@
 package com.gemwallet.android.features.settings.in_app_notifications.viewmodels
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.notifications.cases.GetInAppNotifications
@@ -11,13 +10,18 @@ import com.gemwallet.android.features.settings.in_app_notifications.viewmodels.m
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemNotificationServiceInterface
 import javax.inject.Inject
 
@@ -30,6 +34,8 @@ class InAppNotificationsViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
+    private val loadState = MutableStateFlow<GemLoadState>(GemLoadState.Loading)
+
     val notifications: StateFlow<List<NotificationRowUIModel>> = getCurrentWallet.observe()
         .map { it?.id }
         .filterNotNull()
@@ -37,17 +43,13 @@ class InAppNotificationsViewModel @Inject constructor(
         .map { notifications -> notifications.map { it.uiModel(context) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    val errorRow: StateFlow<GemListRow?> = combine(loadState, notifications) { state, items ->
+        (state as? GemLoadState.Error)?.takeIf { items.isEmpty() }?.let { GemListRow.Error(it.error) }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     init {
         viewModelScope.launch {
-            try {
-                notificationService.open()
-            } catch (err: Throwable) {
-                Log.e(TAG, "Open notifications error", err)
-            }
+            loadState.update { notificationService.refresh(notifications.value.isNotEmpty()) }
         }
-    }
-
-    companion object {
-        private const val TAG = "InAppNotifications"
     }
 }

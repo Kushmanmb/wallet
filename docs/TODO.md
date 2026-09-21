@@ -42,20 +42,20 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | C51, AUD5, AUD42, AUD45, P90, D73 |
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | U33 |
 | Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD29, AUD33, AUD34, N7, P90 |
-| Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | S80, U33 |
+| Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | U33 |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | K14, O59, AUD38, AUD40 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73, F61, AUD15, AUD41 |
 | Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | S75, AUD46, K14, N11 |
 | Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | Preserve exact atomic values |
 | Earn list, provider and deposit amount | Existing stake/earn owner and amount extras | Preserve the existing feature gate |
-| NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | S80, AUD22 |
-| Price-alert list/target/auto-alert controls | `GemPriceAlertService`, alert session and existing notification port | S80, U33 |
+| NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | AUD22 |
+| Price-alert list/target/auto-alert controls | `GemPriceAlertService`, alert session and existing notification port | U33 |
 | Rewards/create/use/redeem referral | `GemRewardsService`, rewards state, shared load and list records | — |
 | Contacts/list/editor/address picker | `GemContactService`, `GemContactEditorService`, contact session/name component | — |
 | Networks/node list/add/check | `GemChainSettingsService`, node sessions, shared rows | AUD20, AUD31 |
 | Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | O59, AUD13, AUD30; retain native locale/theme application |
 | Security/lock/biometry/recovery | `GemSecurityService`, existing keystore/auth ports and settings sections | D72, X172, AUD37; retain platform-only privacy lock |
-| Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | D48, S80, AUD32 |
+| Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | D48, AUD32 |
 | WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | AUD17, D72/D73; retain Android-only one-click auth |
 | About, app update, developer/service status | Existing settings/update/developer services and native store adapters | —; platform delivery channels remain distinct |
 | Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | U9/U17, F61; retain native widget scheduling |
@@ -178,7 +178,6 @@ Rows, headers, screen state and flows that an app still assembles from Core ingr
 - **S73** **M** The perpetual candle chart's state is hand-built on both apps: iOS draws an empty series as data and replaces candles with an error, Android emits Loading on every resume and after each confirm and shows an error without text. A candle session on `GemPerpetualDetailsService` with the `GemChartSession` rules. Carry market/period/currency request identity and reject stale successes and failures; reuse the shared load policy and preserve displayed candles during refresh failures.
 - **S74** **M** The portfolio screen has no session: per-type state, period, chart type, "fall back to the first period" and the hardcoded period list live on both apps (`PortfolioSceneViewModel.swift:31-106`, `PortfolioChartViewModel.kt:74-130`, `WalletChartPeriods.kt`), and Android reloads on every tab switch and drops errors. `GemPortfolioSession`. Include wallet/type/period/currency in result identity and test delayed results after selection changes. Reuse shared load/number/list infrastructure; coordinate O59. The statistics rows already come from Core.
 - **S75** **M** Android's open-position autoclose sheet bypasses `GemAutocloseSession`: `AmountAutocloseSheet.kt:63-132` decides validity, confirm and the ROE target inside the composable, and is the last composable holding an `AmountPerpetualProvider` after B78, the provider shows size as amount × leverage ($1,000 where iOS shows the $100 margin at 10x) and validates against the live price where iOS uses the snapshot. A view model on the Core session.
-- **S80** **M** Five store-backed screens show their empty state when the first sync fails, logging Core's error on both apps: NFT collections, fiat transactions, price alerts, in-app notifications and support chat (`CollectionsViewModel.swift:45-52`/`NftListViewModels.kt:95-98`, `FiatTransactionsViewModel`, `PriceAlertsSceneViewModel.swift:66-72`/`PriceAlertViewModel.kt:108-124`, `InAppNotificationsViewModel`, `SupportChatSceneViewModel`). Each sync becomes `refresh(has_rows) -> GemLoadState`, the D40 shape.
 
 ## 2. Decisions still made twice
 

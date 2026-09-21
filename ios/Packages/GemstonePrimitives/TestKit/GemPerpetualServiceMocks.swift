@@ -42,7 +42,9 @@ public final class GemPriceAlertServiceMock: GemPriceAlertServiceProtocol, @unch
         lock.withLock { self.enabled = enabled }
     }
 
-    public func sync(assetId _: String?) async throws {}
+    public func refresh(assetId _: Gemstone.AssetId?, hasAlerts _: Bool) async -> GemLoadState {
+        .data
+    }
 
     public func enablePriceAlert(alert _: Gemstone.PriceAlert) async throws {
         lock.withLock { enabled = true }

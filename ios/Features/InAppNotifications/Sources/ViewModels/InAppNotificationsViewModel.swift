@@ -2,6 +2,7 @@
 
 import Components
 import Foundation
+import enum Gemstone.GemLoadState
 import enum Gemstone.GemNotificationDestination
 import protocol Gemstone.GemNotificationServiceProtocol
 import enum Gemstone.UrlAction
@@ -17,6 +18,8 @@ public final class InAppNotificationsViewModel {
     private let service: any GemNotificationServiceProtocol
     private let wallet: Wallet
     private let onOpenAction: ((UrlAction) -> Void)?
+
+    private var loadState: GemLoadState = .loading
 
     public let query: ObservableQuery<InAppNotificationsRequest>
     public var notifications: [Primitives.InAppNotification] {
@@ -38,6 +41,11 @@ public final class InAppNotificationsViewModel {
         Localized.Settings.Notifications.title
     }
 
+    public var loadError: Error? {
+        guard notifications.isEmpty, case let .error(error) = loadState else { return nil }
+        return error
+    }
+
     public var emptyContentModel: EmptyContentTypeViewModel {
         EmptyContentTypeViewModel(type: .notifications)
     }
@@ -55,11 +63,7 @@ public final class InAppNotificationsViewModel {
 
 public extension InAppNotificationsViewModel {
     func load() async {
-        do {
-            try await service.open()
-        } catch {
-            debugLog("load notifications error: \(error)")
-        }
+        loadState = await service.refresh(hasNotifications: notifications.isNotEmpty)
     }
 
     func open(destination: GemNotificationDestination) {

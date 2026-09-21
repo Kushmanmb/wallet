@@ -92,7 +92,9 @@ public final class GemFiatQuoteServiceMock: GemFiatQuoteServiceProtocol, @unchec
         300_000
     }
 
-    public func syncTransactions() async throws {}
+    public func refreshTransactions(hasTransactions _: Bool) async -> GemLoadState {
+        .data
+    }
 
     public func quotes(quoteType _: Gemstone.FiatQuoteType, assetId _: Gemstone.AssetId, amount _: Double) async throws -> [Gemstone.FiatQuote] {
         quotes

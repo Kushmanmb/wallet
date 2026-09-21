@@ -232,10 +232,11 @@ public final class GemSupportServiceMock: GemSupportServiceProtocol, @unchecked 
         .map { UInt64(max($0.createdAt.timeIntervalSince1970, 0)) } ?? 0
     }
 
-    public func syncMessages(fromTimestamp: UInt64) async throws {
+    public func refresh(fromTimestamp: UInt64, hasMessages: Bool) async -> GemLoadState {
         syncedTimestamps.append(fromTimestamp)
-        if let syncError {
-            throw syncError
+        guard let syncError else {
+            return .data
         }
+        return hasMessages ? .data : .error(error: .Api(msg: syncError.localizedDescription))
     }
 }

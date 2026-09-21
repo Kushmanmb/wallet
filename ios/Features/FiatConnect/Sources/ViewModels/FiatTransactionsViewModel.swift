@@ -3,6 +3,7 @@
 import Components
 import Foundation
 import protocol Gemstone.GemFiatQuoteServiceProtocol
+import enum Gemstone.GemLoadState
 import GemstoneServices
 import Localization
 import Primitives
@@ -16,6 +17,8 @@ public final class FiatTransactionsViewModel {
     let walletId: WalletId
 
     public let query: ObservableQuery<FiatTransactionsRequest>
+
+    private var loadState: GemLoadState = .loading
     var transactions: [FiatTransactionAssetData] {
         query.value
     }
@@ -34,15 +37,16 @@ public final class FiatTransactionsViewModel {
         Localized.Activity.title
     }
 
+    var loadError: Error? {
+        guard transactions.isEmpty, case let .error(error) = loadState else { return nil }
+        return error
+    }
+
     var emptyContentModel: EmptyContentTypeViewModel {
         EmptyContentTypeViewModel(type: .activity(isViewOnly: false))
     }
 
     func load() async {
-        do {
-            try await service.syncTransactions()
-        } catch {
-            debugLog("FiatTransactionsViewModel load error: \(error)")
-        }
+        loadState = await service.refreshTransactions(hasTransactions: transactions.isNotEmpty)
     }
 }

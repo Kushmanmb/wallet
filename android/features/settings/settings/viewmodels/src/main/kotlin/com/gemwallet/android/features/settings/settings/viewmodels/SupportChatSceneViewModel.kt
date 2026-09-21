@@ -23,12 +23,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemErrorText
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemSupportServiceInterface
 import javax.inject.Inject
 
@@ -61,11 +64,16 @@ class SupportChatSceneViewModel @Inject constructor(
     private val errorState = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = errorState.asStateFlow()
 
+    private val loadState = MutableStateFlow<GemLoadState>(GemLoadState.Loading)
+
+    val errorRow: StateFlow<GemListRow?> = combine(loadState, messages) { state, shown ->
+        (state as? GemLoadState.Error)?.takeIf { shown.isEmpty() }?.let { GemListRow.Error(it.error) }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     fun fetch() = viewModelScope.launch(ioDispatcher) {
-        runCatchingCancellable {
-            val fromTimestamp = supportService.syncFromTimestamp(messages.first().map { it.toGem() })
-            supportService.syncMessages(fromTimestamp)
-        }.onFailure { Log.e(TAG, "fetch error", it) }
+        val shown = messages.first()
+        val fromTimestamp = supportService.syncFromTimestamp(shown.map { it.toGem() })
+        loadState.update { supportService.refresh(fromTimestamp, shown.isNotEmpty()) }
     }
 
     fun sendText(content: String) = viewModelScope.launch(ioDispatcher) {

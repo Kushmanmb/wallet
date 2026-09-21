@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import enum Gemstone.GemLoadState
 import protocol Gemstone.GemPriceAlertServiceProtocol
 import enum Gemstone.GemServiceError
 import class Gemstone.PriceAlertFormatter
@@ -27,6 +28,13 @@ public final class AssetPriceAlertsViewModel: Sendable {
 
     var isPresentingSetPriceAlert: Bool = false
     var isPresentingToastMessage: ToastMessage?
+
+    private var loadState: GemLoadState = .loading
+
+    var loadError: Error? {
+        guard priceAlerts.isEmpty, case let .error(error) = loadState else { return nil }
+        return error
+    }
 
     public init(
         service: any GemPriceAlertServiceProtocol,
@@ -80,11 +88,7 @@ public final class AssetPriceAlertsViewModel: Sendable {
 
 extension AssetPriceAlertsViewModel {
     func load() async {
-        do {
-            try await service.sync(assetId: asset.id.identifier)
-        } catch {
-            debugLog("load error: \(error)")
-        }
+        loadState = await service.refresh(assetId: asset.id.identifier, hasAlerts: priceAlerts.isNotEmpty)
     }
 
     func toggleAutoAlert(enabled: Bool) async {

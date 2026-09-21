@@ -43,6 +43,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemPriceAlertSectionKind
 import uniffi.gemstone.GemPriceAlertServiceInterface
 import uniffi.gemstone.GemSelectAssetType
@@ -107,11 +109,16 @@ class PriceAlertViewModel @Inject constructor(
     private val errorState = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = errorState.asStateFlow()
 
+    private val loadState = MutableStateFlow<GemLoadState>(GemLoadState.Loading)
+
+    val errorRow: StateFlow<GemListRow?> = combine(loadState, sections) { state, shown ->
+        (state as? GemLoadState.Error)?.takeIf { shown.isEmpty() }?.let { GemListRow.Error(it.error) }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     init {
         val initialAssetId = savedStateHandle.get<String?>(RouteArgument.AssetId.key)?.toAssetId()
         viewModelScope.launch(ioDispatcher) {
-            runCatchingCancellable { service.sync(initialAssetId?.toIdentifier()) }
-                .onFailure { Log.e(TAG, "price alerts sync failed", it) }
+            sync(initialAssetId?.toIdentifier())
         }
     }
 
@@ -119,12 +126,15 @@ class PriceAlertViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             try {
                 refreshState.value = true
-                runCatchingCancellable { service.sync(assetId.value?.toIdentifier()) }
-                    .onFailure { Log.e(TAG, "price alerts refresh failed", it) }
+                sync(assetId.value?.toIdentifier())
             } finally {
                 refreshState.value = false
             }
         }
+    }
+
+    private suspend fun sync(assetId: String?) {
+        loadState.update { service.refresh(assetId, sections.value.isNotEmpty()) }
     }
 
     fun isAssetManage(): Boolean = assetId.value != null

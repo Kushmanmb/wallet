@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import enum Gemstone.GemLoadState
 import protocol Gemstone.GemPriceAlertServiceProtocol
 import class Gemstone.PriceAlertFormatter
 import GemstonePrimitives
@@ -24,6 +25,8 @@ public final class PriceAlertsSceneViewModel: Sendable {
     var isPriceAlertsEnabled: Bool
     var isPresentingAlertMessage: AlertMessage?
 
+    private var loadState: GemLoadState = .loading
+
     public init(
         service: any GemPriceAlertServiceProtocol,
     ) {
@@ -42,6 +45,11 @@ public final class PriceAlertsSceneViewModel: Sendable {
 
     var enableTitle: String {
         Localized.Settings.enableValue(Localized.Settings.PriceAlerts.title)
+    }
+
+    var loadError: Error? {
+        guard priceAlerts.isEmpty, case let .error(error) = loadState else { return nil }
+        return error
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
@@ -64,11 +72,7 @@ public final class PriceAlertsSceneViewModel: Sendable {
 
 extension PriceAlertsSceneViewModel {
     public func load() async {
-        do {
-            try await service.sync(assetId: nil)
-        } catch {
-            debugLog("getPriceAlerts error: \(error)")
-        }
+        loadState = await service.refresh(assetId: nil, hasAlerts: priceAlerts.isNotEmpty)
     }
 
     func deletePriceAlert(priceAlert: PriceAlert) async {
