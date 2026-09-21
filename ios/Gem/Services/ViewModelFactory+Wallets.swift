@@ -22,6 +22,7 @@ public extension ViewModelFactory {
             navigationPath: navigationPath,
             walletService: walletService,
             preferences: observablePreferences,
+            biometry: biometryService,
             isPresentingCreateWalletSheet: isPresentingCreateWalletSheet,
             isPresentingImportWalletSheet: isPresentingImportWalletSheet,
         )
@@ -34,6 +35,7 @@ public extension ViewModelFactory {
             wallet: wallet,
             service: walletService,
             preferences: observablePreferences,
+            biometry: biometryService,
         )
     }
 
