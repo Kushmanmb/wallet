@@ -380,6 +380,8 @@ pub struct GemPerpetualBalanceHeader {
     pub total: GemFormattedNumber,
     pub available: GemFormattedNumber,
     pub actions: GemHeaderActions,
+    pub deposit_asset: Asset,
+    pub withdraw_asset: Asset,
 }
 
 #[uniffi::export]
