@@ -450,14 +450,12 @@ fun GemBalanceResource.titleRes(): Int = when (this) {
     GemBalanceResource.BANDWIDTH -> R.string.stake_resource_bandwidth
 }
 
-private val usdFiatFormatter = CurrencyFormatter(type = CurrencyFormatter.Type.Fiat, currency = Currency.USD)
-
 fun GemTransactionRowSubtitle.text(context: Context): String? = when (this) {
     is GemTransactionRowSubtitle.ToAddress -> prefixed(context, prefixRes(), participant)
     is GemTransactionRowSubtitle.FromAddress -> prefixed(context, prefixRes(), participant)
     is GemTransactionRowSubtitle.ToResource -> prefixed(context, prefixRes(), context.getString(resource.toPrimitives().stringRes()))
     is GemTransactionRowSubtitle.FromResource -> prefixed(context, prefixRes(), context.getString(resource.toPrimitives().stringRes()))
-    is GemTransactionRowSubtitle.Price -> prefixRes()?.let { "${context.getString(it)}: ${usdFiatFormatter.string(value)}" }
+    is GemTransactionRowSubtitle.Price -> prefixRes()?.let { "${context.getString(it)}: ${price.text()}" }
     GemTransactionRowSubtitle.None -> null
 }
 

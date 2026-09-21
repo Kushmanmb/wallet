@@ -229,7 +229,7 @@ fn row_subtitle(extended: &TransactionExtended) -> GemTransactionRowSubtitle {
         },
         GemTransactionSubtitle::ToResource { resource } => GemTransactionRowSubtitle::ToResource { resource },
         GemTransactionSubtitle::FromResource { resource } => GemTransactionRowSubtitle::FromResource { resource },
-        GemTransactionSubtitle::Price { value } => GemTransactionRowSubtitle::Price { value },
+        GemTransactionSubtitle::Price { value } => GemTransactionRowSubtitle::Price { price: GemFormattedNumber::usd(value) },
     }
 }
 

@@ -137,8 +137,8 @@ public struct TransactionViewModel: Sendable, Identifiable, Equatable {
         let title: String? = switch row.subtitle {
         case let .toAddress(participant), let .fromAddress(participant): participantTitle(prefix: prefix, participant: participant)
         case let .toResource(resource), let .fromResource(resource): resourceTitle(prefix: prefix, resource: resource)
-        case let .price(value):
-            String(format: "%@: %@", prefix, AmountDisplay.currency(value: value, currencyCode: Currency.usd.rawValue, showSign: false).text)
+        case let .price(price):
+            String(format: "%@: %@", prefix, price.text())
         case .none: .none
         }
 

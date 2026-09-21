@@ -142,7 +142,7 @@ pub enum GemTransactionRowSubtitle {
     FromAddress { participant: String },
     ToResource { resource: Resource },
     FromResource { resource: Resource },
-    Price { value: f64 },
+    Price { price: GemFormattedNumber },
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
