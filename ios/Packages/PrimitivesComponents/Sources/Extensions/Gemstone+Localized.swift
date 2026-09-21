@@ -109,6 +109,8 @@ public extension GemLocalizedText {
             GemPerpetual(provider: .hypercore).marginText(formattedAmount: amount.text(), marginTypeName: marginType.toPrimitives().title)
         case let .position(direction, leverage):
             GemPerpetual(provider: .hypercore).positionText(directionName: direction.toPrimitives().title, formattedLeverage: leverage)
+        case let .apr(value):
+            Localized.Stake.apr(value?.text() ?? .empty)
         case let .positionChange(change, direction):
             switch change {
             case .increase: Localized.Perpetual.increaseDirection(direction.toPrimitives().title)

@@ -196,6 +196,8 @@ fun GemLocalizedText.string(context: Context): String = when (this) {
 
     is GemLocalizedText.Position -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.positionText(context.getString(direction.toPrimitives().stringRes()), leverage) }
 
+    is GemLocalizedText.Apr -> context.getString(R.string.stake_apr, value?.text().orEmpty())
+
     is GemLocalizedText.PositionChange -> when (change) {
         GemPositionChange.INCREASE -> context.getString(R.string.perpetual_increase_direction, context.getString(direction.toPrimitives().stringRes()))
         GemPositionChange.REDUCE -> context.getString(R.string.perpetual_reduce_direction, context.getString(direction.toPrimitives().stringRes()))

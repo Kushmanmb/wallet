@@ -3,6 +3,7 @@ use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::services::amount::model::GemAmountType;
 use crate::services::amount::rules as amount_rules;
 use crate::services::error::GemServiceError;
+use crate::services::localization::GemLocalizedText;
 use crate::services::transfer::GemTransferData;
 use primitives::{Asset, Delegation, DelegationState, DelegationValidator, EarnType, Resource, StakeType, YieldProvider};
 
@@ -152,5 +153,5 @@ pub struct GemValidatorRow {
     pub image_url: String,
     pub placeholder: String,
     pub provider: Option<YieldProvider>,
-    pub apr: Option<GemFormattedNumber>,
+    pub apr: GemLocalizedText,
 }

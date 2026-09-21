@@ -149,7 +149,9 @@ pub fn validator_row(validator: &DelegationValidator) -> GemValidatorRow {
         placeholder: name.chars().next().map(String::from).unwrap_or_default(),
         name,
         provider,
-        apr: (validator.apr > 0.0).then(|| GemFormattedNumber::percentage(validator.apr, GemPercentageStyle::Unsigned)),
+        apr: GemLocalizedText::Apr {
+            value: (validator.apr > 0.0).then(|| GemFormattedNumber::percentage(validator.apr, GemPercentageStyle::Unsigned)),
+        },
         validator: validator.clone(),
     }
 }
@@ -672,9 +674,15 @@ mod tests {
         assert_eq!(validator_row(&earn).provider, Some(YieldProvider::Yo));
 
         let paying = DelegationValidator { apr: 5.0, ..DelegationValidator::mock() };
-        assert_eq!(validator_row(&paying).apr, Some(GemFormattedNumber::percentage(5.0, GemPercentageStyle::Unsigned)));
+        assert_eq!(
+            validator_row(&paying).apr,
+            GemLocalizedText::Apr {
+                value: Some(GemFormattedNumber::percentage(5.0, GemPercentageStyle::Unsigned))
+            },
+            "the row says APR once, not a bare percent each app labels itself"
+        );
         let idle = DelegationValidator { apr: 0.0, ..DelegationValidator::mock() };
-        assert_eq!(validator_row(&idle).apr, None, "a validator paying nothing shows no rate");
+        assert_eq!(validator_row(&idle).apr, GemLocalizedText::Apr { value: None }, "a validator paying nothing shows no rate");
 
         let unknown = DelegationValidator {
             id: "not-a-provider".to_string(),

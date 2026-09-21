@@ -29,6 +29,7 @@ pub enum GemLocalizedText {
     Pnl { amount: GemFormattedNumber, percent: GemFormattedNumber },
     Margin { amount: GemFormattedNumber, margin_type: PerpetualMarginType },
     Position { direction: PerpetualDirection, leverage: String },
+    Apr { value: Option<GemFormattedNumber> },
     PositionChange { change: GemPositionChange, direction: PerpetualDirection },
 }
 
