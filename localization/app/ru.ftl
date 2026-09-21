@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Неподдерживаемый актив.
 errors_connections_no_supported_wallets = Поддерживаемые кошельки отсутствуют.
 errors_connections_unsupported_chain = Предоставленная цепочка не поддерживается.
 errors_swap_amount_too_small = Сумма слишком мала
-errors_required = %@ требуется
 errors_scan_transaction_malicious_description = Эту транзакцию невозможно завершить — адрес кошелька назначения связан с подозрительной или вредоносной активностью.
 errors_scan_transaction_memo_required = %@ адрес кошелька назначения требует тега назначения / заметки
 errors_scan_transaction_malicious_title = Подозрительная активность

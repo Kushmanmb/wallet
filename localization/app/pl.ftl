@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Nieobsługiwany zasób.
 errors_connections_no_supported_wallets = Brak obsługiwanych portfeli.
 errors_connections_unsupported_chain = Podany łańcuch nie jest obsługiwany.
 errors_swap_amount_too_small = Kwota jest za mała
-errors_required = %@ jest wymagane
 errors_scan_transaction_malicious_description = Nie można ukończyć tej transakcji — adres portfela docelowego jest powiązany z podejrzaną lub szkodliwą aktywnością.
 errors_scan_transaction_memo_required = %@ adres portfela docelowego wymaga znacznika/notatki docelowej
 errors_scan_transaction_malicious_title = Podejrzana aktywność

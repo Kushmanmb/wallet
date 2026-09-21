@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">لا تتوفر محافظ مدعومة.</string>
   <string name="errors_connections_unsupported_chain">السلسلة المقدمة غير مدعومة.</string>
   <string name="errors_swap_amount_too_small">المبلغ صغير جدًا</string>
-  <string name="errors_required">%1$s مطلوب</string>
   <string name="errors_scan_transaction_malicious_description">لا يمكن إكمال هذه المعاملة - عنوان المحفظة الوجهة مرتبط بنشاط مشبوه أو ضار.</string>
   <string name="errors_scan_transaction_memo_required">يتطلب عنوان محفظة الوجهة %1$s علامة وجهة/مذكرة</string>
   <string name="errors_scan_transaction_malicious_title">نشاط مشبوه</string>

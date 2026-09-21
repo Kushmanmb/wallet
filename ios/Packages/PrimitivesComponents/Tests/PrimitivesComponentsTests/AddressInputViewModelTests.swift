@@ -63,8 +63,8 @@ struct AddressInputViewModelTests {
         #expect(model.inputModel.error != nil)
 
         model.inputModel.text = ""
-        #expect(model.validate() == false)
-        #expect(model.inputModel.error != nil, "an empty field still reads as required")
+        #expect(model.validate())
+        #expect(model.inputModel.error == nil, "an empty field is silent, the way Core and Android treat it")
 
         model.inputModel.text = "0x5615e8ab93b9d695b6d4d6545f7792aa59e1069a"
         #expect(model.validate())

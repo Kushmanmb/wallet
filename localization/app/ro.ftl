@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Activ neacceptat.
 errors_connections_no_supported_wallets = Nu sunt disponibile portofele acceptate.
 errors_connections_unsupported_chain = Lanțul furnizat nu este acceptat.
 errors_swap_amount_too_small = Cantitate prea mică
-errors_required = %@ este obligatoriu
 errors_scan_transaction_malicious_description = Această tranzacție nu poate fi finalizată — adresa portofelului de destinație este legată de o activitate suspectă sau dăunătoare.
 errors_scan_transaction_memo_required = Adresa portofelului de destinație %@ necesită o etichetă/un memo de destinație
 errors_scan_transaction_malicious_title = Activitate suspectă

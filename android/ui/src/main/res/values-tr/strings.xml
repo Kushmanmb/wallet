@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">Desteklenen cüzdan yok.</string>
   <string name="errors_connections_unsupported_chain">Sağlanan zincir desteklenmiyor.</string>
   <string name="errors_swap_amount_too_small">Miktar çok küçük</string>
-  <string name="errors_required">%1$s gereklidir</string>
   <string name="errors_scan_transaction_malicious_description">Bu işlem tamamlanamıyor; hedef cüzdan adresi şüpheli veya zararlı bir etkinlikle bağlantılı.</string>
   <string name="errors_scan_transaction_memo_required">%1$s hedef cüzdan adresi bir hedef etiketi / notu gerektiriyor</string>
   <string name="errors_scan_transaction_malicious_title">Şüpheli Etkinlik</string>

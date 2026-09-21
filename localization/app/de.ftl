@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Nicht unterstütztes Asset.
 errors_connections_no_supported_wallets = Es sind keine unterstützten Wallets verfügbar.
 errors_connections_unsupported_chain = Die bereitgestellte Kette wird nicht unterstützt.
 errors_swap_amount_too_small = Menge zu gering
-errors_required = %@ ist erforderlich
 errors_scan_transaction_malicious_description = Diese Transaktion kann nicht abgeschlossen werden – die Ziel-Wallet-Adresse ist mit verdächtigen oder schädlichen Aktivitäten verknüpft.
 errors_scan_transaction_memo_required = %@ Für die Ziel-Wallet-Adresse wird ein Ziel-Tag/Memo benötigt.
 errors_scan_transaction_malicious_title = Verdächtige Aktivitäten

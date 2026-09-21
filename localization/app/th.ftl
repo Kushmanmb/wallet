@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = ไม่รองรับสินทรั�
 errors_connections_no_supported_wallets = ไม่มีกระเป๋าเงินที่รองรับ
 errors_connections_unsupported_chain = ไม่รองรับโซ่ที่ให้มา
 errors_swap_amount_too_small = จำนวนเงินน้อยเกินไป
-errors_required = %@ เป็นสิ่งจำเป็น
 errors_scan_transaction_malicious_description = ไม่สามารถทำธุรกรรมนี้ให้เสร็จสมบูรณ์ได้ — ที่อยู่กระเป๋าเงินปลายทางเชื่อมโยงกับกิจกรรมที่น่าสงสัยหรือเป็นอันตราย
 errors_scan_transaction_memo_required = ที่อยู่กระเป๋าเงินปลายทาง %@ ต้องมีแท็กปลายทาง / บันทึกช่วยจำ
 errors_scan_transaction_malicious_title = กิจกรรมที่น่าสงสัย

@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Ikke understøttet aktiv.
 errors_connections_no_supported_wallets = Ingen understøttede tegnebøger er tilgængelige.
 errors_connections_unsupported_chain = Den angivne kæde understøttes ikke.
 errors_swap_amount_too_small = Beløbet er for lille
-errors_required = %@ er påkrævet
 errors_scan_transaction_malicious_description = Denne transaktion kan ikke gennemføres — destinationsadressen på tegnebogen er knyttet til mistænkelig eller skadelig aktivitet.
 errors_scan_transaction_memo_required = %@ destinations-wallet-adresse kræver et destinationstag / en destinations-memo
 errors_scan_transaction_malicious_title = Mistænkelig aktivitet

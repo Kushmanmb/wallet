@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">Brak obsługiwanych portfeli.</string>
   <string name="errors_connections_unsupported_chain">Podany łańcuch nie jest obsługiwany.</string>
   <string name="errors_swap_amount_too_small">Kwota jest za mała</string>
-  <string name="errors_required">%1$s jest wymagane</string>
   <string name="errors_scan_transaction_malicious_description">Nie można ukończyć tej transakcji — adres portfela docelowego jest powiązany z podejrzaną lub szkodliwą aktywnością.</string>
   <string name="errors_scan_transaction_memo_required">%1$s adres portfela docelowego wymaga znacznika/notatki docelowej</string>
   <string name="errors_scan_transaction_malicious_title">Podejrzana aktywność</string>

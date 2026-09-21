@@ -126,7 +126,7 @@ extension AddressInputViewModel {
         }
     }
 
-    private static func validators(placeholder: String) -> [any TextValidator] {
-        [.required(requireName: placeholder)]
+    private static func validators(placeholder _: String) -> [any TextValidator] {
+        []
     }
 }

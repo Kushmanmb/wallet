@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = সমর্থিত সম্পদ নয�
 errors_connections_no_supported_wallets = কোনও সমর্থিত ওয়ালেট উপলব্ধ নেই।
 errors_connections_unsupported_chain = প্রদত্ত চেইনটি সমর্থিত নয়।
 errors_swap_amount_too_small = পরিমাণ খুব কম
-errors_required = %@ প্রয়োজন
 errors_scan_transaction_malicious_description = এই লেনদেনটি সম্পন্ন করা যাবে না — গন্তব্যস্থলের ওয়ালেট ঠিকানাটি সন্দেহজনক বা ক্ষতিকারক কার্যকলাপের সাথে যুক্ত।
 errors_scan_transaction_memo_required = %@ গন্তব্য ওয়ালেট ঠিকানার জন্য একটি গন্তব্য ট্যাগ / মেমো প্রয়োজন।
 errors_scan_transaction_malicious_title = সন্দেহজনক কার্যকলাপ

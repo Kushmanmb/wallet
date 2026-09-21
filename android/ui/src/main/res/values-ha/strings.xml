@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">Babu goyan bayan walat.</string>
   <string name="errors_connections_unsupported_chain">Ba a tallafawa sarkar da aka bayar.</string>
   <string name="errors_swap_amount_too_small">Adadin yayi ƙanƙanta</string>
-  <string name="errors_required">%1$s ana bukata</string>
   <string name="errors_scan_transaction_malicious_description">Ba za a iya kammala wannan ma\'amala ba - adireshin walat ɗin da ake nufi yana da alaƙa da ayyuka masu ban tsoro ko cutarwa.</string>
   <string name="errors_scan_transaction_memo_required">%1$s Adireshin walat ɗin manufa yana buƙatar alamar manufa / memo</string>
   <string name="errors_scan_transaction_malicious_title">Ayyukan tuhuma</string>

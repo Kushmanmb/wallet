@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">Não há carteiras suportadas disponíveis.</string>
   <string name="errors_connections_unsupported_chain">A cadeia fornecida não é suportada.</string>
   <string name="errors_swap_amount_too_small">Quantidade muito pequena</string>
-  <string name="errors_required">%1$s é necessário</string>
   <string name="errors_scan_transaction_malicious_description">Esta transação não pode ser concluída — o endereço da carteira de destino está vinculado a atividades suspeitas ou prejudiciais.</string>
   <string name="errors_scan_transaction_memo_required">%1$s O endereço da carteira de destino requer uma etiqueta/memorando de destino</string>
   <string name="errors_scan_transaction_malicious_title">Atividade suspeita</string>

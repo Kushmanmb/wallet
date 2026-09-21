@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">کوئی تعاون یافتہ بٹوے دستیاب نہیں ہیں۔</string>
   <string name="errors_connections_unsupported_chain">فراہم کردہ سلسلہ تعاون یافتہ نہیں ہے۔</string>
   <string name="errors_swap_amount_too_small">رقم بہت چھوٹی ہے۔</string>
-  <string name="errors_required">%1$s درکار ہے۔</string>
   <string name="errors_scan_transaction_malicious_description">یہ لین دین مکمل نہیں کیا جا سکتا — منزل مقصود والیٹ کا پتہ مشکوک یا نقصان دہ سرگرمی سے منسلک ہے۔</string>
   <string name="errors_scan_transaction_memo_required">%1$s منزل والے بٹوے کے پتے کے لیے منزل کا ٹیگ / میمو درکار ہے۔</string>
   <string name="errors_scan_transaction_malicious_title">مشکوک سرگرمی</string>

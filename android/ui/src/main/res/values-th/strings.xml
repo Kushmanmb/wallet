@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">ไม่มีกระเป๋าเงินที่รองรับ</string>
   <string name="errors_connections_unsupported_chain">ไม่รองรับโซ่ที่ให้มา</string>
   <string name="errors_swap_amount_too_small">จำนวนเงินน้อยเกินไป</string>
-  <string name="errors_required">%1$s เป็นสิ่งจำเป็น</string>
   <string name="errors_scan_transaction_malicious_description">ไม่สามารถทำธุรกรรมนี้ให้เสร็จสมบูรณ์ได้ — ที่อยู่กระเป๋าเงินปลายทางเชื่อมโยงกับกิจกรรมที่น่าสงสัยหรือเป็นอันตราย</string>
   <string name="errors_scan_transaction_memo_required">ที่อยู่กระเป๋าเงินปลายทาง %1$s ต้องมีแท็กปลายทาง / บันทึกช่วยจำ</string>
   <string name="errors_scan_transaction_malicious_title">กิจกรรมที่น่าสงสัย</string>

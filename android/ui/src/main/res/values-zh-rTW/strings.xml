@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">目前沒有支援的錢包可用。</string>
   <string name="errors_connections_unsupported_chain">不支援指定的區塊鏈。</string>
   <string name="errors_swap_amount_too_small">金額太小，請輸入更大的金額試試</string>
-  <string name="errors_required">%1$s 為必填欄位</string>
   <string name="errors_scan_transaction_malicious_description">無法完成此交易：收款錢包位址與可疑或惡意行為有關。</string>
   <string name="errors_scan_transaction_memo_required">%1$s目標錢包位址需要目標標籤/備註</string>
   <string name="errors_scan_transaction_malicious_title">可疑行為</string>

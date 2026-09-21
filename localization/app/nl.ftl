@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Niet-ondersteunde asset.
 errors_connections_no_supported_wallets = Er zijn geen ondersteunde wallets beschikbaar.
 errors_connections_unsupported_chain = De meegeleverde keten wordt niet ondersteund.
 errors_swap_amount_too_small = Bedrag te klein
-errors_required = %@ is vereist
 errors_scan_transaction_malicious_description = Deze transactie kan niet worden voltooid: het adres van de bestemmingswallet is gekoppeld aan verdachte of schadelijke activiteiten.
 errors_scan_transaction_memo_required = %@ bestemmingswalletadres vereist een bestemmingstag / memo
 errors_scan_transaction_malicious_title = Verdachte activiteit

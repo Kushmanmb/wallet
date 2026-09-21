@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = تعاون یافتہ اثاثہ نہیں ہے
 errors_connections_no_supported_wallets = کوئی تعاون یافتہ بٹوے دستیاب نہیں ہیں۔
 errors_connections_unsupported_chain = فراہم کردہ سلسلہ تعاون یافتہ نہیں ہے۔
 errors_swap_amount_too_small = رقم بہت چھوٹی ہے۔
-errors_required = %@ درکار ہے۔
 errors_scan_transaction_malicious_description = یہ لین دین مکمل نہیں کیا جا سکتا — منزل مقصود والیٹ کا پتہ مشکوک یا نقصان دہ سرگرمی سے منسلک ہے۔
 errors_scan_transaction_memo_required = %@ منزل والے بٹوے کے پتے کے لیے منزل کا ٹیگ / میمو درکار ہے۔
 errors_scan_transaction_malicious_title = مشکوک سرگرمی

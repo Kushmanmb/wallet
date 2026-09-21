@@ -48,10 +48,7 @@ public final class ManageContactViewModel {
         self.nameService = nameService
         self.mode = mode
 
-        nameInputModel = InputValidationViewModel(
-            mode: .onDemand,
-            validators: [.required(requireName: Localized.Wallet.name)],
-        )
+        nameInputModel = InputValidationViewModel(mode: .onDemand, validators: [])
 
         switch mode {
         case let .add(recipient, chain):

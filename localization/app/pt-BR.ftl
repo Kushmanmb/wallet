@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Ativo não suportado.
 errors_connections_no_supported_wallets = Não há carteiras suportadas disponíveis.
 errors_connections_unsupported_chain = A cadeia fornecida não é suportada.
 errors_swap_amount_too_small = Quantidade muito pequena
-errors_required = %@ é necessário
 errors_scan_transaction_malicious_description = Esta transação não pode ser concluída — o endereço da carteira de destino está vinculado a atividades suspeitas ou prejudiciais.
 errors_scan_transaction_memo_required = %@ O endereço da carteira de destino requer uma etiqueta/memorando de destino
 errors_scan_transaction_malicious_title = Atividade suspeita

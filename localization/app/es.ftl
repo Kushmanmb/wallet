@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Activo no admitido.
 errors_connections_no_supported_wallets = No hay billeteras compatibles disponibles.
 errors_connections_unsupported_chain = La cadena proporcionada no es compatible.
 errors_swap_amount_too_small = Cantidad demasiado pequeña
-errors_required = %@ es obligatorio
 errors_scan_transaction_malicious_description = Esta transacción no se puede completar: la dirección de la billetera de destino está vinculada a actividades sospechosas o dañinas.
 errors_scan_transaction_memo_required = %@ La dirección de la billetera de destino requiere una etiqueta/nota de destino.
 errors_scan_transaction_malicious_title = Actividad sospechosa

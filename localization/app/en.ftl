@@ -453,8 +453,6 @@ errors_connections_no_supported_wallets = No supported wallets are available.
 errors_connections_unsupported_chain = The provided chain is not supported.
 # Used in error cards and validation UI for the swap amount too small label.
 errors_swap_amount_too_small = Amount too small
-# Used in error cards and validation UI for the required label. Contains 1 string placeholder.
-errors_required = %@ is required
 # Used in error cards and validation UI for the scan transaction malicious description.
 errors_scan_transaction_malicious_description = This transaction cannot be completed — the destination wallet address is linked to suspicious or harmful activity.
 # Used in error cards and validation UI for the scan transaction memo required label. Contains 1 string placeholder.

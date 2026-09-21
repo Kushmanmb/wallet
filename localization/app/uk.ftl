@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Не підтримуваний актив.
 errors_connections_no_supported_wallets = Немає підтримуваних гаманців.
 errors_connections_unsupported_chain = Наданий ланцюжок не підтримується.
 errors_swap_amount_too_small = Сума занадто мала
-errors_required = %@ є обов'язковим
 errors_scan_transaction_malicious_description = Цю транзакцію неможливо завершити — адреса гаманця призначення пов'язана з підозрілою або шкідливою активністю.
 errors_scan_transaction_memo_required = %@ адреса гаманця призначення вимагає тегу / мемо призначення
 errors_scan_transaction_malicious_title = Підозріла активність

@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">Tidak ada dompet yang didukung tersedia.</string>
   <string name="errors_connections_unsupported_chain">Rantai yang disediakan tidak didukung.</string>
   <string name="errors_swap_amount_too_small">Jumlahnya terlalu kecil</string>
-  <string name="errors_required">%1$s diperlukan</string>
   <string name="errors_scan_transaction_malicious_description">Transaksi ini tidak dapat diselesaikan — alamat dompet tujuan terkait dengan aktivitas yang mencurigakan atau berbahaya.</string>
   <string name="errors_scan_transaction_memo_required">%1$s alamat dompet tujuan memerlukan tag / memo tujuan</string>
   <string name="errors_scan_transaction_malicious_title">Aktivitas Mencurigakan</string>

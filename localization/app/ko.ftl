@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = 지원되지 않는 자산입니다.
 errors_connections_no_supported_wallets = 지원되는 지갑이 없습니다.
 errors_connections_unsupported_chain = 제공된 체인은 지원되지 않습니다.
 errors_swap_amount_too_small = 금액이 너무 적습니다
-errors_required = %@ 가 필요합니다
 errors_scan_transaction_malicious_description = 이 거래를 완료할 수 없습니다. 대상 지갑 주소가 의심스럽거나 유해한 활동과 연결되어 있습니다.
 errors_scan_transaction_memo_required = %@ 대상 지갑 주소에는 대상 태그/메모가 필요합니다.
 errors_scan_transaction_malicious_title = 의심스러운 활동

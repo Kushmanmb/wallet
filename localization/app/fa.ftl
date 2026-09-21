@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = دارایی پشتیبانی نمی شود.
 errors_connections_no_supported_wallets = هیچ کیف پول پشتیبانی شده ای در دسترس نیست.
 errors_connections_unsupported_chain = زنجیره ارائه شده پشتیبانی نمی‌شود.
 errors_swap_amount_too_small = مقدار خیلی کم
-errors_required = %@ الزامی است
 errors_scan_transaction_malicious_description = این تراکنش قابل انجام نیست — آدرس کیف پول مقصد به فعالیت مشکوک یا مضر مرتبط است.
 errors_scan_transaction_memo_required = %@ آدرس کیف پول مقصد به یک برچسب / یادداشت مقصد نیاز دارد.
 errors_scan_transaction_malicious_title = فعالیت مشکوک

@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">Es sind keine unterstützten Wallets verfügbar.</string>
   <string name="errors_connections_unsupported_chain">Die bereitgestellte Kette wird nicht unterstützt.</string>
   <string name="errors_swap_amount_too_small">Menge zu gering</string>
-  <string name="errors_required">%1$s ist erforderlich</string>
   <string name="errors_scan_transaction_malicious_description">Diese Transaktion kann nicht abgeschlossen werden – die Ziel-Wallet-Adresse ist mit verdächtigen oder schädlichen Aktivitäten verknüpft.</string>
   <string name="errors_scan_transaction_memo_required">%1$s Für die Ziel-Wallet-Adresse wird ein Ziel-Tag/Memo benötigt.</string>
   <string name="errors_scan_transaction_malicious_title">Verdächtige Aktivitäten</string>

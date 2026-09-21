@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Nepodporované aktivum.
 errors_connections_no_supported_wallets = Nejsou k dispozici žádné podporované peněženky.
 errors_connections_unsupported_chain = Zadaný řetězec není podporován.
 errors_swap_amount_too_small = Příliš malé množství
-errors_required = %@ je vyžadováno
 errors_scan_transaction_malicious_description = Tuto transakci nelze dokončit – cílová adresa peněženky je spojena s podezřelou nebo škodlivou aktivitou.
 errors_scan_transaction_memo_required = Cílová adresa peněženky %@ vyžaduje cílovou značku / poznámku
 errors_scan_transaction_malicious_title = Podezřelá aktivita

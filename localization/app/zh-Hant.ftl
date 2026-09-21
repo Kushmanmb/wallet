@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = 不支援此資產。
 errors_connections_no_supported_wallets = 目前沒有支援的錢包可用。
 errors_connections_unsupported_chain = 不支援指定的區塊鏈。
 errors_swap_amount_too_small = 金額太小，請輸入更大的金額試試
-errors_required = %@ 為必填欄位
 errors_scan_transaction_malicious_description = 無法完成此交易：收款錢包位址與可疑或惡意行為有關。
 errors_scan_transaction_memo_required = %@目標錢包位址需要目標標籤/備註
 errors_scan_transaction_malicious_title = 可疑行為

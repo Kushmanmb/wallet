@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = أصل غير مدعوم.
 errors_connections_no_supported_wallets = لا تتوفر محافظ مدعومة.
 errors_connections_unsupported_chain = السلسلة المقدمة غير مدعومة.
 errors_swap_amount_too_small = المبلغ صغير جدًا
-errors_required = %@ مطلوب
 errors_scan_transaction_malicious_description = لا يمكن إكمال هذه المعاملة - عنوان المحفظة الوجهة مرتبط بنشاط مشبوه أو ضار.
 errors_scan_transaction_memo_required = يتطلب عنوان محفظة الوجهة %@ علامة وجهة/مذكرة
 errors_scan_transaction_malicious_title = نشاط مشبوه

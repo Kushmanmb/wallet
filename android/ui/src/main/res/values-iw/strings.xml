@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">אין ארנקים נתמכים זמינים.</string>
   <string name="errors_connections_unsupported_chain">השרשרת שסופקה אינה נתמכת.</string>
   <string name="errors_swap_amount_too_small">סכום קטן מדי</string>
-  <string name="errors_required">נדרש %1$s</string>
   <string name="errors_scan_transaction_malicious_description">לא ניתן להשלים עסקה זו - כתובת ארנק היעד מקושרת לפעילות חשודה או מזיקה.</string>
   <string name="errors_scan_transaction_memo_required">כתובת ארנק היעד %1$s דורשת תגית יעד / תזכיר</string>
   <string name="errors_scan_transaction_malicious_title">פעילות חשודה</string>

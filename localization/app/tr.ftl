@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Desteklenmeyen varlık.
 errors_connections_no_supported_wallets = Desteklenen cüzdan yok.
 errors_connections_unsupported_chain = Sağlanan zincir desteklenmiyor.
 errors_swap_amount_too_small = Miktar çok küçük
-errors_required = %@ gereklidir
 errors_scan_transaction_malicious_description = Bu işlem tamamlanamıyor; hedef cüzdan adresi şüpheli veya zararlı bir etkinlikle bağlantılı.
 errors_scan_transaction_memo_required = %@ hedef cüzdan adresi bir hedef etiketi / notu gerektiriyor
 errors_scan_transaction_malicious_title = Şüpheli Etkinlik

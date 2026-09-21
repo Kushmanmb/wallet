@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = समर्थित परिसंपत्
 errors_connections_no_supported_wallets = कोई समर्थित वॉलेट उपलब्ध नहीं है.
 errors_connections_unsupported_chain = प्रदान की गई श्रृंखला समर्थित नहीं है.
 errors_swap_amount_too_small = राशि बहुत छोटी है
-errors_required = %@ आवश्यक है
 errors_scan_transaction_malicious_description = यह लेनदेन पूरा नहीं किया जा सकता - गंतव्य वॉलेट पता संदिग्ध या हानिकारक गतिविधि से जुड़ा हुआ है।
 errors_scan_transaction_memo_required = %@ गंतव्य वॉलेट पते के लिए गंतव्य टैग / मेमो की आवश्यकता है
 errors_scan_transaction_malicious_title = संदिग्ध गतिविधि

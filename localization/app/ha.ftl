@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Ba a goyan bayan kadari.
 errors_connections_no_supported_wallets = Babu goyan bayan walat.
 errors_connections_unsupported_chain = Ba a tallafawa sarkar da aka bayar.
 errors_swap_amount_too_small = Adadin yayi ƙanƙanta
-errors_required = %@ ana bukata
 errors_scan_transaction_malicious_description = Ba za a iya kammala wannan ma'amala ba - adireshin walat ɗin da ake nufi yana da alaƙa da ayyuka masu ban tsoro ko cutarwa.
 errors_scan_transaction_memo_required = %@ Adireshin walat ɗin manufa yana buƙatar alamar manufa / memo
 errors_scan_transaction_malicious_title = Ayyukan tuhuma

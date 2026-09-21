@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = 暂不支持该资产。
 errors_connections_no_supported_wallets = 暂无可用钱包
 errors_connections_unsupported_chain = 暂不支持该区块链网络
 errors_swap_amount_too_small = 金额太小，请输入更大的数额试试
-errors_required = %@为必填项
 errors_scan_transaction_malicious_description = 无法完成此交易：目标钱包地址与可疑或恶意行为有关。
 errors_scan_transaction_memo_required = %@ 收款地址需要填写目标标签或备注
 errors_scan_transaction_malicious_title = 可疑行为

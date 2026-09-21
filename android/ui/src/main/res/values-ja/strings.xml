@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">サポートされているウォレットは利用できません。</string>
   <string name="errors_connections_unsupported_chain">選択されたチェーンはサポートされていません</string>
   <string name="errors_swap_amount_too_small">金額が小さすぎます</string>
-  <string name="errors_required">%1$sは必須です</string>
   <string name="errors_scan_transaction_malicious_description">この取引は完了できません。送信先アドレスが不審または悪意のある活動に関連しています。</string>
   <string name="errors_scan_transaction_memo_required">%1$s の送信先アドレスには、宛先タグまたはメモが必要です</string>
   <string name="errors_scan_transaction_malicious_title">不審な活動</string>

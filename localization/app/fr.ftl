@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Actif non pris en charge.
 errors_connections_no_supported_wallets = Aucun portefeuille pris en charge n'est disponible.
 errors_connections_unsupported_chain = La chaîne fournie n'est pas prise en charge.
 errors_swap_amount_too_small = Montant trop petit
-errors_required = %@ est requis
 errors_scan_transaction_malicious_description = Cette transaction ne peut être effectuée — l'adresse du portefeuille de destination est liée à une activité suspecte ou malveillante.
 errors_scan_transaction_memo_required = %@ L'adresse du portefeuille de destination nécessite une étiquette/un mémo de destination
 errors_scan_transaction_malicious_title = Activité suspecte

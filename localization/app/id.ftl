@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Aset yang tidak didukung.
 errors_connections_no_supported_wallets = Tidak ada dompet yang didukung tersedia.
 errors_connections_unsupported_chain = Rantai yang disediakan tidak didukung.
 errors_swap_amount_too_small = Jumlahnya terlalu kecil
-errors_required = %@ diperlukan
 errors_scan_transaction_malicious_description = Transaksi ini tidak dapat diselesaikan — alamat dompet tujuan terkait dengan aktivitas yang mencurigakan atau berbahaya.
 errors_scan_transaction_memo_required = %@ alamat dompet tujuan memerlukan tag / memo tujuan
 errors_scan_transaction_malicious_title = Aktivitas Mencurigakan

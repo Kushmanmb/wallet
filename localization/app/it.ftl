@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Attività non supportata.
 errors_connections_no_supported_wallets = Non sono disponibili portafogli supportati.
 errors_connections_unsupported_chain = La catena fornita non è supportata.
 errors_swap_amount_too_small = Importo troppo piccolo
-errors_required = %@ è obbligatorio
 errors_scan_transaction_malicious_description = Questa transazione non può essere completata: l'indirizzo del portafoglio di destinazione è collegato ad attività sospette o dannose.
 errors_scan_transaction_memo_required = %@ l'indirizzo del portafoglio di destinazione richiede un tag/memo di destinazione
 errors_scan_transaction_malicious_title = Attività sospetta

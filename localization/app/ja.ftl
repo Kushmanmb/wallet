@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = 未対応のアセットです。
 errors_connections_no_supported_wallets = サポートされているウォレットは利用できません。
 errors_connections_unsupported_chain = 選択されたチェーンはサポートされていません
 errors_swap_amount_too_small = 金額が小さすぎます
-errors_required = %@は必須です
 errors_scan_transaction_malicious_description = この取引は完了できません。送信先アドレスが不審または悪意のある活動に関連しています。
 errors_scan_transaction_memo_required = %@ の送信先アドレスには、宛先タグまたはメモが必要です
 errors_scan_transaction_malicious_title = 不審な活動

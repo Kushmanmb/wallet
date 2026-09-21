@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Hindi sinusuportahang asset.
 errors_connections_no_supported_wallets = Walang available na suportadong wallet.
 errors_connections_unsupported_chain = Ang ibinigay na chain ay hindi suportado.
 errors_swap_amount_too_small = Masyadong maliit ang halaga
-errors_required = %@ ay kinakailangan
 errors_scan_transaction_malicious_description = Ang transaksyong ito ay hindi makukumpleto — ang patutunguhang wallet address ay naka-link sa kahina-hinala o nakakapinsalang aktibidad.
 errors_scan_transaction_memo_required = Nangangailangan ang %@ destination wallet address ng destination tag / memo
 errors_scan_transaction_malicious_title = Kahina-hinalang Aktibidad

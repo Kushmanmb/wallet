@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Kipengee hakitumiki.
 errors_connections_no_supported_wallets = Hakuna pochi zinazotumika zinazopatikana.
 errors_connections_unsupported_chain = Msururu uliotolewa hautumiki.
 errors_swap_amount_too_small = Kiasi kidogo sana
-errors_required = %@ inahitajika
 errors_scan_transaction_malicious_description = Muamala huu hauwezi kukamilika - anwani ya pochi lengwa imeunganishwa na shughuli za kutiliwa shaka au hatari.
 errors_scan_transaction_memo_required = %@ anwani ya mkoba lengwa inahitaji lebo/memo lengwa
 errors_scan_transaction_malicious_title = Shughuli ya kutiliwa shaka

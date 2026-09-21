@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = Tài sản không được hỗ trợ.
 errors_connections_no_supported_wallets = Không có ví nào được hỗ trợ.
 errors_connections_unsupported_chain = Chuỗi được cung cấp không được hỗ trợ.
 errors_swap_amount_too_small = Số lượng quá nhỏ
-errors_required = %@ là bắt buộc
 errors_scan_transaction_malicious_description = Giao dịch này không thể hoàn tất — địa chỉ ví đích được liên kết với hoạt động đáng ngờ hoặc có hại.
 errors_scan_transaction_memo_required = %@ địa chỉ ví đích yêu cầu thẻ đích / ghi nhớ
 errors_scan_transaction_malicious_title = Hoạt động đáng ngờ

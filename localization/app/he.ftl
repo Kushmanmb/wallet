@@ -238,7 +238,6 @@ errors_swap_not_supported_asset = נכס לא נתמך.
 errors_connections_no_supported_wallets = אין ארנקים נתמכים זמינים.
 errors_connections_unsupported_chain = השרשרת שסופקה אינה נתמכת.
 errors_swap_amount_too_small = סכום קטן מדי
-errors_required = נדרש %@
 errors_scan_transaction_malicious_description = לא ניתן להשלים עסקה זו - כתובת ארנק היעד מקושרת לפעילות חשודה או מזיקה.
 errors_scan_transaction_memo_required = כתובת ארנק היעד %@ דורשת תגית יעד / תזכיר
 errors_scan_transaction_malicious_title = פעילות חשודה

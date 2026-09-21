@@ -208,7 +208,6 @@
   <string name="errors_connections_no_supported_wallets">Không có ví nào được hỗ trợ.</string>
   <string name="errors_connections_unsupported_chain">Chuỗi được cung cấp không được hỗ trợ.</string>
   <string name="errors_swap_amount_too_small">Số lượng quá nhỏ</string>
-  <string name="errors_required">%1$s là bắt buộc</string>
   <string name="errors_scan_transaction_malicious_description">Giao dịch này không thể hoàn tất — địa chỉ ví đích được liên kết với hoạt động đáng ngờ hoặc có hại.</string>
   <string name="errors_scan_transaction_memo_required">%1$s địa chỉ ví đích yêu cầu thẻ đích / ghi nhớ</string>
   <string name="errors_scan_transaction_malicious_title">Hoạt động đáng ngờ</string>
