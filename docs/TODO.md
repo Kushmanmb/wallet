@@ -29,7 +29,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Screens / entry points | Existing owner or infrastructure to extend | Open work |
 |---|---|---|
 | Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | C53, X172 |
-| Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | N7, X172 |
+| Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | X172 |
 | Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | U25, AUD23, AUD25, AUD26, AUD27, AUD28 |
 | Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | AUD20, AUD43, AUD44, U26 |
 | Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | AUD36, AUD48 |
@@ -41,7 +41,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | — |
 | Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | C51, AUD5, AUD42, AUD45, D73 |
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | U33, AUD50 |
-| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD29, AUD33, AUD34, AUD47, N7 |
+| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD29, AUD33, AUD34, AUD47 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | U33, AUD53 |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | AUD38, AUD40 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73, F61, AUD15, AUD41 |
@@ -149,7 +149,6 @@ Checked against [the three row families](ARCHITECTURE.md#three-row-families-and-
 
 The plain lists still outside the shared row are AUD51, AUD52 and AUD53. AUD47–AUD50 are taps on rows that already exist, not new row types.
 
-- **N7** **L** **Android restates Core records as aggregates.** `android/data/coordinators` holds six `*AggregateImpl` classes — transaction data, wallet summary and details, perpetual details and position details, price alert — that unpack a Core record field by field. U15 showed the cost: `TransactionDetailsValue.SwapProgress` renamed `etaSeconds` to `etaInSeconds` on the way through, so the two drifted silently. Hold the record and read through it, as `WalletDetailsAggregateImpl` now does and as U18 did for transaction details; this is the rest.
 
 ### Sessions
 
@@ -262,6 +261,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**N7 (2026-09-22).** Closed. `PerpetualDetailsDataAggregate` restated six fields of the `Perpetual` it already held, three of which nothing read; it is deleted and the two screens take `PerpetualData`, which is what the store returns. `WalletSummaryAggregateImpl` copied six fields out of `GemWalletHomeViewState` and now holds it, reading through. The position-details aggregate answered `perpetualId` from `position.perpetualId` while the aggregate it delegates to answered it from `perpetual.id` — the U15 shape, one question with two sources — and the position row's direction came from the position rather than the row Core built. Transaction data, wallet details and price alerts already held their record.
 
 **N13 (2026-09-22).** Closed. `GemRewardsState` had six booleans the two apps each rebuilt a screen from; it now hands over `actions: Vec<GemRewardsAction>` and `sections: Vec<GemListSection>`. The four buttons are the cases Core offers — create a code, share, use a referral code, activate the pending one with the code and whether the countdown has run out — which is [the action contract](ARCHITECTURE.md#sections-actions-and-destinations-are-records-too) the stake and fiat screens already use. The info rows travel as a titled section, so no screen decides whether to show them. Android's `ReferralUIState` is deleted with its six copied flags, and both heads render the one action Core picked instead of branching on `hasCode` and `canInvite` in different orders. The invite head and the redemption options stay per-screen rich rows, as the item allowed.
 

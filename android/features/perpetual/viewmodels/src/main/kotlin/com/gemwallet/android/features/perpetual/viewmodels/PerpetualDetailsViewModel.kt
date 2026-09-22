@@ -114,7 +114,7 @@ class PerpetualDetailsViewModel @Inject constructor(
         getSession().filterNotNull(),
     ) { perpetual, session -> perpetual to session.wallet.id }
         .flatMapLatest { (perpetual, walletId) ->
-            perpetual?.let { getPerpetualPosition.getPositionByPerpetual(walletId, it.id) } ?: flowOf(null)
+            perpetual?.let { getPerpetualPosition.getPositionByPerpetual(walletId, it.perpetual.id) } ?: flowOf(null)
         }
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)

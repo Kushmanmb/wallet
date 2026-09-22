@@ -3,10 +3,10 @@ package com.gemwallet.android.features.transfer_amount.viewmodels.providers
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.perpetual.cases.GetPerpetual
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
-import com.gemwallet.android.domains.perpetual.aggregates.PerpetualDetailsDataAggregate
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.testkit.mockAmountParamsPerpetual
 import com.gemwallet.android.testkit.mockGemPerpetualTransferData
+import com.gemwallet.android.testkit.mockPerpetualData
 import com.gemwallet.android.testkit.mockPerpetualPosition
 import com.wallet.core.primitives.PerpetualDirection
 import io.mockk.every
@@ -80,7 +80,7 @@ class AmountPerpetualProviderTest {
             every { perpetualAutoclose(any(), any(), any()) } returns GemPerpetualAutoclose(takeProfit = null, stopLoss = null)
             every { perpetualAutocloseRow(any(), any()) } returns GemListRow.Lines(GemListRowTitle.AUTO_CLOSE, emptyList(), null)
         }
-        val perpetualAggregate = mockk<PerpetualDetailsDataAggregate>(relaxed = true)
+        val perpetualAggregate = mockPerpetualData()
         val getPerpetual = mockk<GetPerpetual>(relaxed = true) {
             every { getPerpetual(any()) } returns flowOf(perpetualAggregate)
         }

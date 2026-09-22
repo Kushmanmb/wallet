@@ -7,15 +7,16 @@ import com.gemwallet.android.application.perpetual.cases.GetPerpetualPosition
 import com.gemwallet.android.application.perpetual.cases.PerpetualObserver
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.transactions.cases.GetTransactions
-import com.gemwallet.android.domains.perpetual.aggregates.PerpetualDetailsDataAggregate
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.testkit.mockAsset
 import com.gemwallet.android.testkit.mockPerpetual
+import com.gemwallet.android.testkit.mockPerpetualData
 import com.gemwallet.android.testkit.mockSession
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.ConfirmTransactionAction
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.ChartPeriod
+import com.wallet.core.primitives.PerpetualData
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -59,16 +60,13 @@ class PerpetualDetailsViewModelTest {
 
     private val asset = mockAsset()
 
-    private fun perpetualData(): PerpetualDetailsDataAggregate = mockk(relaxed = true) {
-        every { perpetual } returns mockPerpetual()
-        every { this@mockk.asset } returns this@PerpetualDetailsViewModelTest.asset
-    }
+    private fun perpetualData(): PerpetualData = mockPerpetualData(perpetual = mockPerpetual(), asset = asset)
 
     private fun viewModel(
         service: GemPerpetualDetailsServiceInterface = mockk(relaxed = true) {
             every { chartPeriod() } returns uniffi.gemstone.ChartPeriod.DAY
         },
-        data: PerpetualDetailsDataAggregate? = null,
+        data: PerpetualData? = null,
     ): PerpetualDetailsViewModel {
         val session: GetSession = mockk {
             every { this@mockk.invoke() } returns MutableStateFlow(mockSession())

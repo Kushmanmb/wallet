@@ -5,7 +5,6 @@ import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.perpetual.cases.GetPerpetual
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.domains.perpetual.LeverageState
-import com.gemwallet.android.domains.perpetual.aggregates.PerpetualDetailsDataAggregate
 import com.gemwallet.android.ext.HypercoreUSDC
 import com.gemwallet.android.ext.PerpetualFormatter
 import com.gemwallet.android.ext.toGem
@@ -29,6 +28,7 @@ import com.gemwallet.android.ui.models.perpetual.autoclose.AutocloseUIModel
 import com.gemwallet.android.ui.models.perpetual.autoclose.AutocloseUIModelFactory
 import com.gemwallet.android.ui.style.textStyle
 import com.wallet.core.primitives.Currency
+import com.wallet.core.primitives.PerpetualData
 import com.wallet.core.primitives.PerpetualDirection
 import com.wallet.core.primitives.TpslType
 import kotlinx.coroutines.CoroutineScope
@@ -69,7 +69,7 @@ class AmountPerpetualProvider(
     private val isOpenAction: Boolean =
         params.positionAction is GemPerpetualPositionAction.Open
 
-    val perpetual: StateFlow<PerpetualDetailsDataAggregate?> =
+    val perpetual: StateFlow<PerpetualData?> =
         getPerpetual.getPerpetual(params.perpetualId)
             .stateIn(scope, SharingStarted.Eagerly, null)
 
@@ -96,8 +96,8 @@ class AmountPerpetualProvider(
 
     val leverageState: StateFlow<LeverageState?> = if (isOpenAction) {
         combine(perpetual.filterNotNull(), userSelectedLeverage) { current, override ->
-            val options = service.perpetualLeverageOptions(current.maxLeverage.toUByte())
-            val selected = override ?: service.perpetualLeverage(current.maxLeverage.toUByte())
+            val options = service.perpetualLeverageOptions(current.perpetual.maxLeverage.toUByte())
+            val selected = override ?: service.perpetualLeverage(current.perpetual.maxLeverage.toUByte())
             options.firstOrNull { it.value == selected }?.let { option ->
                 LeverageState(current = option, options = options, direction = params.direction)
             }
@@ -110,9 +110,9 @@ class AmountPerpetualProvider(
         userSelectedLeverage.value = value
     }
 
-    fun autocloseSession(market: PerpetualDetailsDataAggregate): GemAutocloseSession = autocloseOpenSession(
+    fun autocloseSession(market: PerpetualData): GemAutocloseSession = autocloseOpenSession(
         direction = direction.toGem(),
-        marketPrice = market.price,
+        marketPrice = market.perpetual.price,
         decimals = market.asset.decimals,
         provider = PerpetualProvider.HYPERCORE,
     )
@@ -120,7 +120,7 @@ class AmountPerpetualProvider(
     fun autocloseField(field: GemAutocloseField, estimator: GemAutocloseEstimator, showErrors: Boolean): AutocloseUIModel.Field = AutocloseUIModelFactory.createField(field = field, estimator = estimator, showErrors = showErrors)
 
     fun estimatorFor(amount: String, marketPrice: Double): GemAutocloseEstimator {
-        val leverage = leverageState.value?.current?.value ?: perpetual.value?.maxLeverage?.toUByte() ?: 1u
+        val leverage = leverageState.value?.current?.value ?: perpetual.value?.perpetual?.maxLeverage?.toUByte() ?: 1u
         val usdAmount = amount.parseInputNumberOrNull()?.toDouble() ?: 0.0
         return GemAutocloseEstimator.forOpen(
             marketPrice = marketPrice,
@@ -132,7 +132,7 @@ class AmountPerpetualProvider(
 
     private val defaultAutoclose: StateFlow<GemPerpetualAutoclose?> = if (isOpenAction) {
         combine(perpetual.filterNotNull(), leverageState.filterNotNull()) { market, state ->
-            service.perpetualAutoclose(market.price, direction.toGem(), state.current.value)
+            service.perpetualAutoclose(market.perpetual.price, direction.toGem(), state.current.value)
         }.stateIn(scope, SharingStarted.Eagerly, null)
     } else {
         MutableStateFlow(null)
@@ -194,7 +194,7 @@ class AmountPerpetualProvider(
             if (isEdited) {
                 value
             } else {
-                default(autoclose)?.let { PerpetualFormatter.formatInputPrice(market.provider, it, market.asset.decimals) } ?: value
+                default(autoclose)?.let { PerpetualFormatter.formatInputPrice(market.perpetual.provider, it, market.asset.decimals) } ?: value
             }
         }.stateIn(scope, SharingStarted.Eagerly, null)
     }

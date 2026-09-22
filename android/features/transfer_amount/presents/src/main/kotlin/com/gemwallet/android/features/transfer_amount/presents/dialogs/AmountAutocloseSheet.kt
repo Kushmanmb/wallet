@@ -42,7 +42,7 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
     val storedStopLoss by provider.stopLoss.collectAsStateWithLifecycle()
 
     val assetDecimals = perpetual.asset.decimals
-    val perpetualProvider = perpetual.provider
+    val perpetualProvider = perpetual.perpetual.provider
 
     var takeProfitText by remember { mutableStateOf(storedTakeProfit.orEmpty()) }
     var stopLossText by remember { mutableStateOf(storedStopLoss.orEmpty()) }
