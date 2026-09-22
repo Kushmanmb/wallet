@@ -1,20 +1,27 @@
 package com.gemwallet.android.features.confirm.viewmodels
 
+import android.content.Context
+import com.gemwallet.android.ext.toGem
+import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.features.confirm.viewmodels.models.ConfirmHeaderUIModel
 import com.gemwallet.android.features.confirm.viewmodels.models.confirmHeader
-import com.gemwallet.android.features.confirm.viewmodels.models.placeholderHeader
-import com.gemwallet.android.testkit.mockAmountUIModel
-import com.gemwallet.android.testkit.mockAssetSolana
-import com.gemwallet.android.ui.components.list_head.SimulationHeaderUIModel
+import com.gemwallet.android.testkit.mockAsset
+import com.gemwallet.android.testkit.mockGemTransactionAmount
+import com.wallet.core.primitives.Currency
+import io.mockk.mockk
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemApprovalValue
+import uniffi.gemstone.GemConfirmHeader
+import uniffi.gemstone.GemSimulationValue
+import uniffi.gemstone.GemTransactionHeader
 import java.util.Locale
 
 class ConfirmHeaderUIModelTest {
     private var originalLocale: Locale = Locale.getDefault()
+    private val context: Context = mockk(relaxed = true)
 
     @Before
     fun setUp() {
@@ -28,52 +35,47 @@ class ConfirmHeaderUIModelTest {
     }
 
     @Test
-    fun anApprovalHeaderWaitsInPlaceInsteadOfShowingTheTransferAmount() {
-        val asset = mockAssetSolana()
-        val placeholder = placeholderHeader(isLoading = true, isPayment = false, headerAsset = asset, pendingHeaderAssetId = asset.id)
+    fun `an approval header reads the value Core resolved`() {
+        val asset = mockAsset()
+        val header = GemConfirmHeader.Value(GemSimulationValue(asset.toGem(), GemApprovalValue.Unlimited))
 
-        assertEquals(ConfirmHeaderUIModel.Placeholder(asset.id), placeholder)
-        assertEquals(
-            placeholder,
-            confirmHeader(amountModel = mockAmountUIModel(), simulationHeader = null, placeholder = placeholder, headerAsset = asset),
-        )
+        val model = confirmHeader(header, isLoading = false, isPayment = false, context = context, currency = Currency.USD)
+
+        assertEquals(ConfirmHeaderUIModel.Simulation::class, model::class)
     }
 
     @Test
-    fun aResolvedApprovalHeaderReplacesThePlaceholder() {
-        val asset = mockAssetSolana()
-        val simulationHeader = SimulationHeaderUIModel(asset, "20 USDC")
+    fun `a placeholder keeps the head in place until the value arrives`() {
+        val asset = mockAsset()
+        val header = GemConfirmHeader.Placeholder(asset.id.toIdentifier())
 
-        assertEquals(
-            ConfirmHeaderUIModel.Simulation(simulationHeader),
-            confirmHeader(
-                amountModel = mockAmountUIModel(),
-                simulationHeader = simulationHeader,
-                placeholder = ConfirmHeaderUIModel.Placeholder(asset.id),
-                headerAsset = asset,
-            ),
-        )
+        val model = confirmHeader(header, isLoading = false, isPayment = false, context = context, currency = Currency.USD)
+
+        assertEquals(ConfirmHeaderUIModel.Placeholder::class, model::class)
     }
 
     @Test
-    fun aPaymentHeaderReservesSpaceWithoutShowingTheIcon() {
-        val asset = mockAssetSolana()
+    fun `a payment request reserves the head's height without showing it`() {
+        val asset = mockAsset()
+        val header = GemConfirmHeader.Transaction(GemTransactionHeader.Amount(mockGemTransactionAmount(asset = asset), showsFiat = true))
 
         assertEquals(
             ConfirmHeaderUIModel.ReservedSpace(asset),
-            placeholderHeader(isLoading = true, isPayment = true, headerAsset = asset, pendingHeaderAssetId = asset.id),
+            confirmHeader(header, isLoading = true, isPayment = true, context = context, currency = Currency.USD),
+        )
+        assertEquals(
+            ConfirmHeaderUIModel.Amount::class,
+            confirmHeader(header, isLoading = true, isPayment = false, context = context, currency = Currency.USD)::class,
         )
     }
 
     @Test
-    fun aLoadedTransferKeepsItsAmountHeader() {
-        val asset = mockAssetSolana()
+    fun `a transaction header draws the amount Core carried`() {
+        val asset = mockAsset()
+        val header = GemConfirmHeader.Transaction(GemTransactionHeader.Amount(mockGemTransactionAmount(asset = asset), showsFiat = true))
 
-        assertNull(placeholderHeader(isLoading = false, isPayment = false, headerAsset = asset, pendingHeaderAssetId = asset.id))
+        val model = confirmHeader(header, isLoading = false, isPayment = false, context = context, currency = Currency.USD)
 
-        val header = confirmHeader(amountModel = mockAmountUIModel(), simulationHeader = null, placeholder = null, headerAsset = asset)
-
-        assertEquals("1 SOL", (header as ConfirmHeaderUIModel.Amount).amount)
-        assertEquals("", header.equivalent)
+        assertEquals(asset, (model as ConfirmHeaderUIModel.Amount).asset)
     }
 }

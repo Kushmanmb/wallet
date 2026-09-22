@@ -3,6 +3,7 @@
 import BigInt
 import Components
 import struct Gemstone.GemSimulationValue
+import struct Gemstone.GemTransactionAmount
 import GemstonePrimitives
 import GemstonePrimitivesTestKit
 @testable import Primitives
@@ -52,15 +53,12 @@ struct ConfirmHeaderViewModelTests {
     }
 
     @Test
-    func simulationHeaderDataResolvesAssetValue() {
-        let model = ConfirmHeaderViewModel(
-            request: .mock(),
-            state: .mock(simulation: .mock(headerData: GemSimulationValue(asset: Asset.mockEthereumUSDT().toGem(), value: .exact(value: BigUInt(1_000_000))))),
-            currency: .usd,
-        )
+    func aValueHeaderDrawsTheAssetAndWhatItApproves() {
+        let value = GemSimulationValue(asset: Asset.mockEthereumUSDT().toGem(), value: .exact(value: BigUInt(1_000_000)))
+        let model = ConfirmHeaderViewModel(header: .value(value: value), currency: .usd)
 
-        guard case let .header(item) = model.itemModel else { return }
-        guard case let .assetValue(header) = item.headerType,
+        guard case let .header(item) = model.itemModel,
+              case let .assetValue(header) = item.headerType,
               let data = header as? AssetValueHeaderViewModel
         else {
             Issue.record("Expected assetValue header")
@@ -72,46 +70,29 @@ struct ConfirmHeaderViewModelTests {
     }
 
     @Test
-    func tokenApproveResolvesAssetHeader() {
-        let model = ConfirmHeaderViewModel(
-            request: .mock(data: .mock(type: .tokenApprove(.mock(), .mock(isUnlimited: true)))),
-            state: .mock(),
-            currency: .usd,
-        )
+    func aPlaceholderKeepsTheHeadInPlaceUntilTheValueArrives() {
+        let model = ConfirmHeaderViewModel(header: .placeholder(assetId: Asset.mockEthereumUSDT().id.identifier), currency: .usd)
 
-        guard case let .header(item) = model.itemModel else { return }
-        guard case let .assetValue(header) = item.headerType,
-              let valueHeader = header as? AssetValueHeaderViewModel
+        guard case let .header(item) = model.itemModel,
+              case let .assetValue(header) = item.headerType
         else {
-            Issue.record("Expected asset value header")
+            Issue.record("Expected assetValue header")
             return
         }
-        #expect(valueHeader.data.value == .unlimited)
+        #expect(header is AssetValueHeaderPlaceholder)
         #expect(item.showClearHeader == true)
     }
 
     @Test
-    func genericApprovalKeepsTheAmountHeader() {
-        let request = ConfirmTransferRequest.mock(
-            data: .mock(type: .generic(asset: .mockEthereum(), metadata: .mock(), extra: .mock())),
-            simulation: .mock(header: .init(assetId: Asset.mockEthereumUSDT().id.identifier, value: nil, isUnlimited: true)),
-        )
-        let waiting = ConfirmHeaderViewModel(request: request, state: .mock(), currency: .usd)
-        let loaded = ConfirmHeaderViewModel(
-            request: request,
-            state: .mock(simulation: .mock(headerData: GemSimulationValue(asset: Asset.mockEthereumUSDT().toGem(), value: .unlimited))),
-            currency: .usd,
-        )
+    func aTransactionHeaderReadsThroughTheSharedMapper() {
+        let asset = Asset.mockEthereumUSDT()
+        let amount = GemTransactionAmount(asset: asset.toGem(), value: BigUInt(1_000_000), sign: .none, price: nil)
+        let model = ConfirmHeaderViewModel(header: .transaction(header: .amount(amount: amount, showsFiat: true)), currency: .usd)
 
-        guard case let .header(waitingItem) = waiting.itemModel,
-              case .assetValue = waitingItem.headerType,
-              case let .header(loadedItem) = loaded.itemModel,
-              case let .assetValue(model) = loadedItem.headerType,
-              let header = model as? AssetValueHeaderViewModel
-        else {
-            Issue.record("Expected the amount header before and after the value loads")
+        guard case let .header(item) = model.itemModel, case .amount = item.headerType else {
+            Issue.record("Expected the amount header")
             return
         }
-        #expect(header.data.value == .unlimited)
+        #expect(item.showClearHeader == true)
     }
 }

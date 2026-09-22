@@ -179,7 +179,7 @@ fun ConfirmScreen(
                         toEquivalentText = model.toEquivalentText,
                     )
 
-                    is ConfirmHeaderUIModel.Nft -> NftHead(model.nftAsset)
+                    is ConfirmHeaderUIModel.Nft -> NftHead(model.source)
 
                     is ConfirmHeaderUIModel.Symbol -> AmountListHead(amount = model.asset.symbol, icon = model.asset)
 

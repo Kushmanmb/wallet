@@ -8,7 +8,6 @@ import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusObserver
 import com.gemwallet.android.domains.asset.chain
-import com.gemwallet.android.domains.confirm.AmountUIModel
 import com.gemwallet.android.domains.confirm.FeeAssetUIModel
 import com.gemwallet.android.domains.confirm.FeeDetailsModel
 import com.gemwallet.android.domains.confirm.FeeUIModel
@@ -43,7 +42,6 @@ import com.gemwallet.android.features.confirm.viewmodels.models.confirmHeader
 import com.gemwallet.android.features.confirm.viewmodels.models.feeItems
 import com.gemwallet.android.features.confirm.viewmodels.models.infoSheet
 import com.gemwallet.android.features.confirm.viewmodels.models.listItem
-import com.gemwallet.android.features.confirm.viewmodels.models.placeholderHeader
 import com.gemwallet.android.features.confirm.viewmodels.models.uiModel
 import com.gemwallet.android.model.AssetPriceValue
 import com.gemwallet.android.model.Crypto
@@ -229,34 +227,6 @@ class ConfirmViewModel @Inject constructor(
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val amountUIModel = combine(request, content, transferAmount) { request, content, transferAmount ->
-        val inputType = request?.inputType ?: return@combine null
-        content ?: return@combine null
-
-        val amount = Crypto(transferAmount ?: request.value)
-
-        AmountUIModel(
-            headerKind = request.headerKind(),
-            amount = amount.atomicValue,
-            fromAsset = content.assetPrice(request.asset),
-            fromAmount = amount.atomicValue,
-            toAsset = inputType.toAsset?.let(content::assetPrice),
-            toAmount = inputType.swapData?.quote?.toValue,
-            nftAsset = inputType.nftAsset,
-            currency = content.currency,
-        )
-    }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-    val headerAsset = combine(request, amountUIModel) { request, amount ->
-        when (request?.inputType) {
-            is TransactionInputType.Withdrawal -> GemPerpetual(PerpetualProvider.HYPERCORE).use { it.depositAsset() }.toPrimitives()
-            else -> amount?.asset
-        }
-    }
-        .flowOn(ioDispatcher)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
     val detailElements = combine(request, content, ::buildDetailElements)
         .distinctUntilChanged()
         .flowOn(ioDispatcher)
@@ -368,12 +338,11 @@ class ConfirmViewModel @Inject constructor(
     val buttonState: StateFlow<ButtonState> = button.map { it.state.buttonState() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Loading)
 
-    private val pendingHeaderAssetId: Flow<AssetId?> = requestSimulation.map { it?.header?.assetId?.let(::AssetId) }
-
-    private val placeholderHeader = combine(isLoading, isPaymentRequest, headerAsset, pendingHeaderAssetId, ::placeholderHeader)
-
-    val header: StateFlow<ConfirmHeaderUIModel?> = combine(amountUIModel, simulation, placeholderHeader, headerAsset) { amount, simulation, placeholder, asset ->
-        confirmHeader(amount, simulation.header, placeholder, asset)
+    val header: StateFlow<ConfirmHeaderUIModel?> = combine(
+        combine(confirmation, load, currency.filterNotNull(), ::Triple),
+        combine(isLoading, isPaymentRequest, ::Pair),
+    ) { (confirmation, load, currency), (loading, isPayment) ->
+        confirmation?.let { confirmHeader(it.header(load), loading, isPayment, context, currency) }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val feeSelectionUIModel: StateFlow<FeeSelectionUIModel> = feeSelection.map { FeeSelectionUIModel(it.selectedPriority()?.toPrimitives(), it.customGasPrice()) }

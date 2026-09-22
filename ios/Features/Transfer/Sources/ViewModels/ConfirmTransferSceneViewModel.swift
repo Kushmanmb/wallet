@@ -175,7 +175,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
     public func itemModel(for item: ConfirmTransferItem) -> any ItemModelProvidable<ConfirmTransferItemModel> {
         switch item {
         case .header:
-            ConfirmHeaderViewModel(request: request, state: state, currency: confirmation.currency)
+            ConfirmHeaderViewModel(header: confirmation.header(load: state.load), currency: confirmation.currency)
         case .warnings:
             ConfirmTransferItemModel.warnings(simulationWarnings)
         case let .row(index):
