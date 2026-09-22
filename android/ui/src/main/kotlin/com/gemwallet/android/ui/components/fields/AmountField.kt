@@ -33,6 +33,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PlatformImeOptions
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.TransformedText
@@ -43,6 +44,13 @@ import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.theme.compactIconSize
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.secondaryFaded
+
+fun decimalKeyboardOptions(keyboardType: KeyboardType = KeyboardType.Decimal, imeAction: ImeAction = ImeAction.Default) = KeyboardOptions(
+    autoCorrectEnabled = false,
+    keyboardType = keyboardType,
+    imeAction = imeAction,
+    platformImeOptions = PlatformImeOptions(privateImeOptions = "disableToolbar=true"),
+)
 
 @Composable
 fun ColumnScope.AmountField(
@@ -79,7 +87,7 @@ fun ColumnScope.AmountField(
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface,
         ),
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Next),
+        keyboardOptions = decimalKeyboardOptions(keyboardType, ImeAction.Next),
         keyboardActions = KeyboardActions(
             onNext = { onNext() },
         ),
