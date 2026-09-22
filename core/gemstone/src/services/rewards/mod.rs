@@ -15,7 +15,7 @@ pub mod session;
 #[cfg(test)]
 pub(crate) mod testkit;
 
-pub use model::{GemIncomingCode, GemRewardsPhase, GemRewardsResult, GemRewardsState, GemRewardsViewState};
+pub use model::{GemIncomingCode, GemRewardsOutcome, GemRewardsPhase, GemRewardsResult, GemRewardsState, GemRewardsViewState};
 pub use session::GemRewardsSession;
 
 #[uniffi::export]
@@ -46,18 +46,11 @@ impl GemRewardsService {
     }
 
     pub async fn refresh(&self, wallet_id: WalletId) -> GemRewardsResult {
-        match self.get_rewards(wallet_id.clone()).await {
-            Ok(rewards) => GemRewardsResult {
-                wallet_id,
-                rewards: Some(rewards),
-                error: None,
-            },
-            Err(error) => GemRewardsResult {
-                wallet_id,
-                rewards: None,
-                error: Some(error),
-            },
-        }
+        let outcome = match self.get_rewards(wallet_id.clone()).await {
+            Ok(rewards) => GemRewardsOutcome::Loaded { rewards },
+            Err(error) => GemRewardsOutcome::Failed { error },
+        };
+        GemRewardsResult { wallet_id, outcome }
     }
 
     pub async fn create_referral(&self, wallet: Wallet, code: String) -> Result<Rewards, GemServiceError> {

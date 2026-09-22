@@ -3,11 +3,16 @@ use crate::models::list::GemListRow;
 use crate::services::error::GemServiceError;
 use primitives::{RewardRedemptionOption, Rewards, WalletId};
 
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemRewardsOutcome {
+    Loaded { rewards: Rewards },
+    Failed { error: GemServiceError },
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemRewardsResult {
     pub wallet_id: WalletId,
-    pub rewards: Option<Rewards>,
-    pub error: Option<GemServiceError>,
+    pub outcome: GemRewardsOutcome,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]

@@ -37,6 +37,7 @@ import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
+import uniffi.gemstone.GemPortfolioOutcome
 import uniffi.gemstone.GemPortfolioResult
 import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.PortfolioData
@@ -64,7 +65,7 @@ class PortfolioChartViewModelTest {
                     (type == null || request.portfolioType == type.toGem()) && (period == null || request.period == period.toGem())
                 },
             )
-        } answers { GemPortfolioResult(request = secondArg(), data = data, error = null) }
+        } answers { GemPortfolioResult(request = secondArg(), outcome = GemPortfolioOutcome.Loaded(data)) }
     }
 
     @Before
@@ -152,7 +153,7 @@ class PortfolioChartViewModelTest {
     @Test
     fun `shows error state when the portfolio request fails`() = runTest(testDispatcher) {
         coEvery { service.refresh(any(), any()) } answers {
-            GemPortfolioResult(request = secondArg(), data = null, error = GemServiceException.Core("network down"))
+            GemPortfolioResult(request = secondArg(), outcome = GemPortfolioOutcome.Failed(GemServiceException.Core("network down")))
         }
         val viewModel = createViewModel()
         backgroundScope.launch { viewModel.chartUIState.collect {} }

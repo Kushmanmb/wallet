@@ -34,6 +34,14 @@ impl<T: Clone + Default> GemLoad<T> {
     }
 }
 
+#[uniffi::export]
+pub fn load_error(state: GemLoadState, has_rows: bool) -> Option<GemServiceError> {
+    match state {
+        GemLoadState::Error { error } if !has_rows => Some(error),
+        _ => None,
+    }
+}
+
 impl GemLoadState {
     pub fn refreshed(synced: Result<(), GemServiceError>, shows_value: bool) -> Self {
         let shown = GemLoad {
@@ -71,6 +79,16 @@ mod tests {
                 value: Vec::new()
             }
         );
+    }
+
+    #[test]
+    fn test_only_a_screen_with_nothing_to_show_reports_its_failure() {
+        let error = GemServiceError::Gateway { msg: "offline".to_string() };
+
+        assert_eq!(load_error(GemLoadState::Error { error: error.clone() }, false), Some(error.clone()));
+        assert_eq!(load_error(GemLoadState::Error { error }, true), None, "rows on screen stand in for the error");
+        assert_eq!(load_error(GemLoadState::Loading, false), None);
+        assert_eq!(load_error(GemLoadState::Data, false), None);
     }
 
     #[test]

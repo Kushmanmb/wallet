@@ -1239,7 +1239,10 @@ mod tests {
             vec!["Date", "Status", "Rate", "Network", "Provider"],
             "a watch-only wallet cannot sign, so the confirmed swap offers no swap again"
         );
-        assert!(detail_rows(&confirmed, WalletType::Multicoin, None, explorer.clone(), Currency::USD).provider_contract.is_none(), "a deposit-address swap has no contract to open");
+        assert!(
+            detail_rows(&confirmed, WalletType::Multicoin, None, explorer.clone(), Currency::USD).provider_contract.is_none(),
+            "a deposit-address swap has no contract to open"
+        );
         let mut routed = confirmed.clone();
         routed.transaction.contract = Some("0xrouter".to_string());
         let routed_rows = detail_rows(&routed, WalletType::Multicoin, None, explorer.clone(), Currency::USD);

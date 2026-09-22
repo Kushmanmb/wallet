@@ -88,24 +88,14 @@ fun GemListRowView(
         )
 
         is GemListRowUIModel.Provider -> {
-            val contract = row.contract
-            if (contract != null && onSelectAddress != null) {
-                ListItem(
-                    model = row.model,
-                    listPosition = listPosition,
-                    modifier = modifier.clickable { onSelectAddress(contract) },
-                    minHeight = ListItemDefaults.plainMinHeight,
-                    accessory = { DataBadgeChevron() },
-                )
-            } else {
-                ListItem(
-                    model = row.model,
-                    listPosition = listPosition,
-                    modifier = modifier,
-                    minHeight = ListItemDefaults.plainMinHeight,
-                    accessory = accessory,
-                )
-            }
+            val openContract = row.contract?.let { contract -> onSelectAddress?.let { select -> { select(contract) } } }
+            ListItem(
+                model = row.model,
+                listPosition = listPosition,
+                modifier = modifier.then(openContract?.let { Modifier.clickable(onClick = it) } ?: Modifier),
+                minHeight = ListItemDefaults.plainMinHeight,
+                accessory = if (openContract == null) accessory else ({ DataBadgeChevron() }),
+            )
         }
 
         is GemListRowUIModel.Item -> GemListRowMenu(items = row.menu) { menuModifier ->

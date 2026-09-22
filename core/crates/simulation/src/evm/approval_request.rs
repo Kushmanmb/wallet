@@ -179,18 +179,8 @@ impl ApprovalRequest {
     fn payload(&self) -> Vec<SimulationPayloadField> {
         let mut payload = vec![
             SimulationPayloadField::standard(SimulationPayloadFieldKind::Method, self.method.to_string(), SimulationPayloadFieldType::Text, SimulationPayloadFieldDisplay::Primary),
-            SimulationPayloadField::standard(
-                SimulationPayloadFieldKind::Contract,
-                &self.contract_address,
-                SimulationPayloadFieldType::Address,
-                SimulationPayloadFieldDisplay::Primary,
-            ),
-            SimulationPayloadField::standard(
-                SimulationPayloadFieldKind::Spender,
-                &self.spender_address,
-                SimulationPayloadFieldType::Address,
-                SimulationPayloadFieldDisplay::Primary,
-            ),
+            SimulationPayloadField::standard(SimulationPayloadFieldKind::Contract, &self.contract_address, SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Primary),
+            SimulationPayloadField::standard(SimulationPayloadFieldKind::Spender, &self.spender_address, SimulationPayloadFieldType::Address, SimulationPayloadFieldDisplay::Primary),
         ];
 
         if let Some(token_address) = self.token_address.as_deref() {

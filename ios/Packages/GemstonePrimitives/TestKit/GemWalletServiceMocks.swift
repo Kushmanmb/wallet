@@ -204,16 +204,12 @@ public final class GemPortfolioServiceMock: GemPortfolioServiceProtocol, @unchec
         return dataForType(portfolioType)
     }
 
-    public func refresh(wallet: Gemstone.Wallet, request: GemPortfolioRequest) async -> GemPortfolioResult {
+    public func refresh(wallet _: Gemstone.Wallet, request: GemPortfolioRequest) async -> GemPortfolioResult {
         requests.append(request)
         if let error {
-            return GemPortfolioResult(request: request, data: nil, error: error)
+            return GemPortfolioResult(request: request, outcome: .failed(error: error))
         }
-        return await GemPortfolioResult(
-            request: request,
-            data: try? portfolioData(wallet: wallet, portfolioType: request.portfolioType, period: request.period),
-            error: nil,
-        )
+        return GemPortfolioResult(request: request, outcome: .loaded(data: dataForType(request.portfolioType)))
     }
 }
 

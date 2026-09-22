@@ -16,7 +16,7 @@ fun AssetListHead(asset: Asset, onClick: (() -> Unit)? = null) {
         modifier = Modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = paddingDefault, vertical = paddingDefault),
+            .padding(paddingDefault),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         HeaderIcon(asset)

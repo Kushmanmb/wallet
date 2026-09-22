@@ -17,6 +17,7 @@ import enum Gemstone.GemListRow
 import enum Gemstone.GemListRowTitle
 import enum Gemstone.GemLoadState
 import enum Gemstone.GemServiceError
+import func Gemstone.loadError
 import GemstonePrimitives
 import GemstoneServices
 import Localization
@@ -192,8 +193,7 @@ public final class AssetSceneViewModel: Sendable {
     }
 
     var transactionsError: Error? {
-        guard transactionSections.isEmpty, case let .error(error) = transactionsState else { return nil }
-        return error
+        Gemstone.loadError(state: transactionsState, hasRows: !transactionSections.isEmpty)
     }
 
     var showTransactions: Bool {

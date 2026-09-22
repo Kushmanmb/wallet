@@ -1451,7 +1451,9 @@ mod tests {
         assert_eq!(sections.iter().map(|section| section.title).collect::<Vec<_>>(), vec![GemListSectionTitle::None, GemListSectionTitle::Balances]);
         assert!(matches!(
             sections[0].rows[0],
-            GemAssetDetailRow::Row { row: GemListRow::Quote { title: GemListRowTitle::Price, .. } }
+            GemAssetDetailRow::Row {
+                row: GemListRow::Quote { title: GemListRowTitle::Price, .. }
+            }
         ));
         assert_eq!(
             sections[0].rows[1],
@@ -1603,10 +1605,14 @@ mod tests {
             ..GemAssetBalance::mock()
         };
         let offers_earn = |metadata: &AssetMetaData, balance: &GemAssetBalance| {
-            sections(&asset, metadata, balance, Some(1.0), &[])
-                .iter()
-                .flat_map(|section| section.rows.clone())
-                .any(|row| matches!(row, GemAssetDetailRow::Row { row: GemListRow::Amount { title: GemListRowTitle::StakeApr, .. } | GemListRow::Text { title: GemListRowTitle::StakeApr, .. } }))
+            sections(&asset, metadata, balance, Some(1.0), &[]).iter().flat_map(|section| section.rows.clone()).any(|row| {
+                matches!(
+                    row,
+                    GemAssetDetailRow::Row {
+                        row: GemListRow::Amount { title: GemListRowTitle::StakeApr, .. } | GemListRow::Text { title: GemListRowTitle::StakeApr, .. }
+                    }
+                )
+            })
         };
 
         assert_eq!(offers_earn(&earn_enabled, &GemAssetBalance::mock()), EARN_OFFERED);

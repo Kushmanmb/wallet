@@ -33,11 +33,16 @@ impl GemPortfolioLoad {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemPortfolioOutcome {
+    Loaded { data: PortfolioData },
+    Failed { error: GemServiceError },
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemPortfolioResult {
     pub request: GemPortfolioRequest,
-    pub data: Option<PortfolioData>,
-    pub error: Option<GemServiceError>,
+    pub outcome: GemPortfolioOutcome,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
@@ -104,10 +109,9 @@ impl GemPortfolioSession {
     }
 
     pub fn on_result(&self, result: GemPortfolioResult) -> Self {
-        match (result.data, result.error) {
-            (Some(data), _) => self.on_loaded(result.request, data),
-            (None, Some(error)) => self.on_failed(result.request, error),
-            (None, None) => self.clone(),
+        match result.outcome {
+            GemPortfolioOutcome::Loaded { data } => self.on_loaded(result.request, data),
+            GemPortfolioOutcome::Failed { error } => self.on_failed(result.request, error),
         }
     }
 

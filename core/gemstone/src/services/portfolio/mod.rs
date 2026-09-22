@@ -16,7 +16,7 @@ use crate::services::price::GemPriceService;
 use crate::services::stream::rules::hyperliquid_account;
 
 pub use model::GemPortfolioValues;
-pub use session::{GemPortfolioRequest, GemPortfolioResult, GemPortfolioSession, GemPortfolioViewState};
+pub use session::{GemPortfolioOutcome, GemPortfolioRequest, GemPortfolioResult, GemPortfolioSession, GemPortfolioViewState};
 pub use store::GemPortfolioStore;
 
 #[derive(uniffi::Object)]
@@ -40,10 +40,11 @@ impl GemPortfolioService {
     }
 
     pub async fn refresh(&self, wallet: Wallet, request: GemPortfolioRequest) -> GemPortfolioResult {
-        match self.portfolio_data(wallet, request.portfolio_type, request.period).await {
-            Ok(data) => GemPortfolioResult { request, data: Some(data), error: None },
-            Err(error) => GemPortfolioResult { request, data: None, error: Some(error) },
-        }
+        let outcome = match self.portfolio_data(wallet, request.portfolio_type, request.period).await {
+            Ok(data) => GemPortfolioOutcome::Loaded { data },
+            Err(error) => GemPortfolioOutcome::Failed { error },
+        };
+        GemPortfolioResult { request, outcome }
     }
 
     pub async fn portfolio_data(&self, wallet: Wallet, portfolio_type: PortfolioType, period: ChartPeriod) -> Result<PortfolioData, GemServiceError> {
