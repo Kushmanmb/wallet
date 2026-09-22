@@ -18,7 +18,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 
 1. **Protect correctness:** resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
 2. **Establish consistency:** MIG6. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
-3. **Move complete workflows:** C52 deep-link/push preparation and C53 wallet creation/import. Keep native routes and lifecycle executors.
+3. **Move complete workflows:** C53 wallet creation/import. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
 5. **Close the boundary:** finish U9, U33 and F61 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
 
@@ -36,7 +36,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | F61 |
 | Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | AUD14, F61 |
 | Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | AUD44; retain existing native QR/share adapters |
-| Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | C52 |
+| Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | — |
 | Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | Keep debounce/observation native |
 | Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | — |
 | Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | AUD5, AUD42, AUD45, D73 |
@@ -180,7 +180,6 @@ This bucket groups duplication found by the 2026-09-19 review; the execution ord
 
 Rows, headers, screen state and flows that an app still assembles from Core ingredients ([the record carries the finished value](ARCHITECTURE.md), [a plain list is Core sections of one shared row](ARCHITECTURE.md#a-plain-list-is-core-sections-of-one-shared-row-rendered-by-one-builder-per-app)). Where the two apps already differ, the item says how.
 
-- **C52** **L** Deep links and pushes prepare their target differently: iOS `NavigationRouter` runs `openAsset` for an asset link, `ensureAsset` for receive/buy/sell/swap, routes perpetual assets to the perpetual scene and passes `rewards("")` through; Android routes links with no Core call (`WebDeepLinks.kt:14-23`), buy/sell through `openAsset`, pushes through `openAsset`/`ensureAsset`, sends fiat and stake pushes to `AssetRoute` always, and turns a blank code into null. A Core `open(action) -> GemNavigationTarget` prepares the assets and switches the wallet once; the apps map the target to a route.
 - **C53** **M** Wallet import and create are orchestrated on both apps (default name, `import_name`, `import_request`, `import_wallet`, `set_current_wallet_id`, accept terms): Android computes the default name when the screen opens, so an import tapped before that finishes is named `""` (`ImportScreen.kt:183,194`), and makes a created wallet current before setup where iOS does it after. One Core import (and create) call that names, stores and activates the wallet.
 
 ## 2. Decisions still made twice
@@ -258,6 +257,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**C52 (2026-09-22).** Closed. `GemNavigationService::open_deeplink` and `open_notification` answer with one `GemNavigationTarget`, so neither app decides what a link or a push opens. Android routed deep links with no Core call at all — an unknown token opened a blank screen where iOS ensured it — and sent fiat and stake pushes to the asset screen even for a perpetual, where iOS opened the perpetual scene. A blank rewards code is no code on both apps now, where Android dropped it and iOS passed the empty string through. The apps map the target to their own routes and switch the wallet their own way, because the reload after a switch is platform work: iOS keeps `pendingWalletPath`, Android sets the current wallet. `WebDeepLinks.toRoute` and `AssetNavigation` are deleted, with iOS's five navigate/present helpers.
 
 **U19 (2026-09-22).** Closed. `GemPaymentService::prepare(payment, wallet)` runs the whole flow and hands back `GemPaymentTarget`, so neither app walks `load` → `transaction_asset_id` → `ensure_token_asset` → `transaction_transfer_data` by hand or resolves the confirm asset itself. The payable set is one set now: `GemAssetStore::get_wallet_assets` returns every asset the wallet holds, hidden included, which is what iOS passed and Android did not — a request for a hidden token used to confirm on iOS only. The builders are deleted: iOS's `PaymentDestinationBuilder` and Android's `PaymentDestination`, along with the app-side asset reads that fed them.
 
