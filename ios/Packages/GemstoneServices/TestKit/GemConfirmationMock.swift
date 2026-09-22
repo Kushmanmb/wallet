@@ -13,11 +13,11 @@ public import struct Gemstone.GemConfirmLoadOptions
 public import struct Gemstone.GemConfirmMetadata
 public import enum Gemstone.GemConfirmRowContent
 public import struct Gemstone.GemConfirmScreen
-public import struct Gemstone.GemTransferData
 public import enum Gemstone.GemKeystoreAuthentication
 public import enum Gemstone.GemListRow
 public import enum Gemstone.GemSubmitResult
 public import struct Gemstone.GemSwapPairSelection
+public import struct Gemstone.GemTransferData
 public import typealias Gemstone.PerpetualModifyConfirmData
 import func Gemstone.confirmErrorInfo
 import GemstonePrimitivesTestKit

@@ -22,7 +22,6 @@ import enum Gemstone.GemListSectionFooter
 import enum Gemstone.GemListSectionTitle
 import enum Gemstone.GemLocalizedText
 import class Gemstone.GemPerpetual
-import enum Gemstone.PaymentStatus
 import enum Gemstone.GemPriceAlertLabel
 import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemPriceAlertText
@@ -37,6 +36,7 @@ import enum Gemstone.GemTransactionTitle
 import enum Gemstone.GemTriggerOrder
 import enum Gemstone.GemWalletSubtitle
 import enum Gemstone.LinkType
+import enum Gemstone.PaymentStatus
 import enum Gemstone.PerpetualDirection
 import enum Gemstone.PerpetualType
 import class Gemstone.PriceChangeCalculator

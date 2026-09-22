@@ -62,6 +62,8 @@ impl GemSimulationService {
         Ok(simulation.prepend_warnings(validation_warnings))
     }
 
+    /// Fails open, the way the scanner does: a provider that cannot answer reaches the review as an
+    /// empty result rather than stopping a signature, and the validation warnings are unaffected.
     pub async fn simulate_send_transaction(&self, chain: Chain, transaction_type: WalletConnectTransactionType, data: String) -> Result<SimulationResult, GemstoneError> {
         let transaction_type: WcWalletConnectTransactionType = transaction_type.into();
         let validation_warnings = simulation::send_transaction_validation_warnings(&transaction_type, &data);

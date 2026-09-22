@@ -16,7 +16,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 
 ## Execution order
 
-1. **Protect correctness:** resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
+1. **Protect correctness:** preserve existing auth and transaction integrity contracts; the relock and simulation policies are settled (D72, D73).
 2. **Establish consistency:** MIG6. `just check-boundaries` prevents new boundary regressions while the remaining debt is reduced.
 3. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
 4. **Close the boundary:** finish F61 where its owner is ready. Re-run the coverage audit; a matching service field alone is not completion.
@@ -38,7 +38,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | — |
 | Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | Keep debounce/observation native |
 | Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | — |
-| Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | AUD5, AUD42, AUD45, D73 |
+| Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | AUD5, AUD42, AUD45 |
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | AUD50 |
 | Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD29, AUD33, AUD34, AUD47 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | AUD53 |
@@ -55,9 +55,9 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | AUD13, AUD30; retain native locale/theme application |
 | Security/lock/biometry/recovery | `GemSecurityService`, existing keystore/auth ports and settings sections | D72, X172, AUD37; retain platform-only privacy lock |
 | Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | D48, AUD32 |
-| WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | AUD17, D72/D73; retain Android-only one-click auth |
+| WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | AUD17; retain Android-only one-click auth |
 | About, app update, developer/service status | Existing settings/update/developer services and native store adapters | —; platform delivery channels remain distinct |
-| Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | U17, F61; retain native widget scheduling |
+| Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | F61; retain native widget scheduling |
 
 An id belongs in this table only while its bullet exists below. MIG6, K21, AUD35, and the decision and upstream items stay in their own sections.
 
@@ -168,7 +168,6 @@ Found on 2026-09-19 and verified in the code: transaction-critical input, parsin
 
 This bucket groups duplication found by the 2026-09-19 review; the execution order above prioritizes correctness and actual dependencies over line-count savings. The older families are in the ledger.
 
-- **U17** **S** The price widget decides the change tone itself and disagrees with the app on zero: [WidgetPriceService](../ios/GemPriceWidget/Services/WidgetPriceService.swift) and [PriceWidgetEntry](../ios/GemPriceWidget/Types/PriceWidgetEntry.swift) store `changeIsPositive: change >= 0`, so [CoinPriceRowViewModel](../ios/GemPriceWidget/ViewModels/CoinPriceRowViewModel.swift) paints a flat 0% change green while `GemValueTone::of(0.0)` is Neutral and the app paints it grey. Read Core's `valueTone(value:)` instead. The blocker is linkage, not code: the GemPriceWidget target's package dependencies are Style, Primitives, Formatters, Components, SwiftHTTPClient and WidgetLocalization, so it can reach neither `Gemstone` nor the `GemValueTone.color` map that lives in [PrimitivesComponents](../ios/Packages/PrimitivesComponents/Sources/Extensions/Gemstone+Style.swift). Adding one is a project-file change and pulls the Gemstone binary into a widget extension, which has its own memory budget, so weigh that before moving the colour map down. The earlier `valueTone(value:)` re-derivation and the private colour map this item described at `:52-67` are already gone.
 - **U25** **S** **iOS remainder: the per-row balance total.** [`Balance.total`](../ios/Packages/Primitives/Sources/Extensions/Balance+Primitives.swift) sums the seven components that make a total, beside Core's `GemAssetBalance::total`, and its only caller is `BalanceViewModel`, which is built per list row — so an FFI call for it is out, as this item has always said. Android's half is settled and was never production duplication: `AssetBalance.create` and `Balance<Double>.getTotalAmount` had no caller outside tests, so they are a `mockAssetBalance` fixture now and `:gemcore` main no longer carries a second total rule. The two SQL copies stay as the stored projection this item always allowed. What still blocks iOS is what it was: the stored total is a `Double` amount while `balanceText` needs the atomic sum, and the atomic components are TEXT columns, so no generated column derives it. Either an atomic total on `GemBalanceRecord` that both stores write (a schema change, so sequence it with K21) or a Core row that carries the finished balance text, which is where the asset-detail row migration is heading — and which deletes `BalanceViewModel` rather than feeding it.
 - **U26** **S** Dead app code, Android remainder: [`AssetsDao.getAssetsInfoByAllWallets`](../android/data/services/store/src/main/kotlin/com/gemwallet/android/data/service/store/database/AssetsDao.kt) takes a `walletId` its query never uses and is read only by [Migration_71_72Test](../android/data/services/store/src/androidTest/kotlin/com/gemwallet/android/service/store/Migration_71_72Test.kt), to assert another wallet's asset survives the migration with no balance row. Delete the query and keep that assertion, rewriting it as raw SQL beside the `balances` assertions the same test already makes. Do it when instrumented tests can actually run (X172, AUD35), so the rewritten assertion is verified rather than assumed. The iOS half of this item is done.
 
@@ -203,9 +202,7 @@ The same product rule on both apps with a difference, each read on both sides on
 
 ## 7. Decisions to make
 
-None of these is a code change until someone chooses; each is written so the choice is the only remaining step.
-
-- **D73** **S** WalletConnect transaction simulation failures are swallowed (`services/simulation.rs:67-80,109-111`, `unwrap_or_default`), so a failed simulation reaches the review as an empty result, indistinguishable from "this transaction changes nothing"; only the scanner's fail-open is documented. Decide the policy; if fail-open, carry a "simulation unavailable" warning through the existing warning rows.
+None of these is a code change until someone chooses; each is written so the choice is the only remaining step. Empty: D48, D72, D73 and U17 were decided on 2026-09-22 and are in the ledger.
 
 ## 8. Blocked upstream
 
@@ -248,6 +245,10 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**D73 (2026-09-22).** Closed, decided: keep it silent. A WalletConnect simulation fails open and stays that way — a provider that cannot answer reaches the review as an empty result, which looks the same as a request that changes nothing. Carrying a "simulation unavailable" warning through the existing rows was the alternative and was not taken, so an outage never blocks signing and never adds a row. The policy is written down now rather than implied by an `unwrap_or_default`: [ARCHITECTURE § "A staged load names what each stage waits for"](ARCHITECTURE.md#a-staged-load-names-what-each-stage-waits-for) records it beside the scanner's fail-open, and `simulate_send_transaction` says it on the function.
+
+**U17 (2026-09-22).** Closed, decided: match the app's rule in the widget. `WidgetValueTone` gives `GemPriceWidget` the same three-way answer Core's `valueTone` gives the app — a change of nothing is neutral, not a gain — so a flat 0% no longer reads green in the widget and grey in the app, and the colours come from the same `Colors` the app maps. It is a second copy of a Core rule, taken knowingly: the widget extension cannot link Gemstone without pulling the binary into a process with its own memory budget, which is the linkage problem this item always named. The copy is marked where it lives, so whoever moves the widget onto Core deletes it.
 
 **D48 (2026-09-22).** Closed, decided: support asks, on both apps. `GemNotificationsService::enable_for_support` is the rule — it asks only when the os permission is available and push is not already on, so opening support twice never prompts twice — and both apps call it when the row is tapped. Android's composable no longer decides: it read `notificationsAvailable && !pushEnabled` itself and called `enableNotifications()`, which is the condition Core now owns, reached through a `EnablePushForSupport` case on `DevicePushSettings`. iOS gained the prompt it never had, through `SettingsViewModel.openSupport()`. The permission port is the existing `GemNotificationPermissions`; nothing new crosses.
 

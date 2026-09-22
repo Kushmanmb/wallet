@@ -4,12 +4,12 @@ import BigInt
 import Foundation
 import struct Gemstone.GemRecipient
 import struct Gemstone.GemTransferData
+import struct Gemstone.PaymentInvoice
 import enum Gemstone.TransactionInputType
 import struct Gemstone.TransferDataExtra
 import GemstonePrimitives
 import Primitives
 import PrimitivesTestKit
-import struct Gemstone.PaymentInvoice
 
 public extension GemTransferData {
     static func mock(

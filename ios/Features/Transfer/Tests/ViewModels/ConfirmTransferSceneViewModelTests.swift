@@ -790,4 +790,3 @@ struct ConfirmTransferSceneViewModelTests {
         }
     }
 }
-

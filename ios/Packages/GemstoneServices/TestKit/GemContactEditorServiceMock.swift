@@ -5,11 +5,11 @@ import struct Gemstone.Contact
 import struct Gemstone.ContactAddress
 import enum Gemstone.GemAddressFormatStyle
 import class Gemstone.GemAddressService
+import class Gemstone.GemContactEditorService
+import protocol Gemstone.GemContactEditorServiceProtocol
 import struct Gemstone.GemContactInput
 import struct Gemstone.GemContactScannedAddress
 import struct Gemstone.GemContactSession
-import class Gemstone.GemContactEditorService
-import protocol Gemstone.GemContactEditorServiceProtocol
 import class Gemstone.GemPaymentService
 import GemstonePrimitivesTestKit
 
