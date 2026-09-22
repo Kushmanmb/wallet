@@ -13,7 +13,8 @@ import uniffi.gemstone.GemTransactionHeaderKind
 import java.math.BigInteger
 
 sealed interface ConfirmHeaderUIModel {
-    data class Placeholder(val icon: Any?, val visible: Boolean) : ConfirmHeaderUIModel
+    data class Placeholder(val icon: Any?) : ConfirmHeaderUIModel
+    data class ReservedSpace(val icon: Any?) : ConfirmHeaderUIModel
     data class Simulation(val header: SimulationHeaderUIModel) : ConfirmHeaderUIModel
     data class Swap(val fromAsset: AssetPriceValue, val fromValueText: String, val fromEquivalentText: String?, val toAsset: AssetPriceValue, val toValueText: String, val toEquivalentText: String?) : ConfirmHeaderUIModel
     data class Nft(val nftAsset: NFTAsset) : ConfirmHeaderUIModel
@@ -23,12 +24,17 @@ sealed interface ConfirmHeaderUIModel {
 
 data class FeeSelectionUIModel(val selectedPriority: FeePriority?, val customRate: BigInteger?)
 
-internal fun confirmHeader(amountModel: AmountUIModel?, simulationHeader: SimulationHeaderUIModel?, isPayment: Boolean, isLoading: Boolean, headerAsset: Asset?, pendingHeaderAssetId: AssetId?): ConfirmHeaderUIModel? = when {
+internal fun placeholderHeader(isLoading: Boolean, isPayment: Boolean, headerAsset: Asset?, pendingHeaderAssetId: AssetId?): ConfirmHeaderUIModel? = when {
+    !isLoading -> null
+    isPayment -> ConfirmHeaderUIModel.ReservedSpace(headerAsset)
+    pendingHeaderAssetId != null -> ConfirmHeaderUIModel.Placeholder(pendingHeaderAssetId)
+    else -> null
+}
+
+internal fun confirmHeader(amountModel: AmountUIModel?, simulationHeader: SimulationHeaderUIModel?, placeholder: ConfirmHeaderUIModel?, headerAsset: Asset?): ConfirmHeaderUIModel? = when {
     simulationHeader != null -> ConfirmHeaderUIModel.Simulation(simulationHeader)
 
-    isLoading && isPayment -> ConfirmHeaderUIModel.Placeholder(headerAsset, visible = false)
-
-    isLoading && pendingHeaderAssetId != null -> ConfirmHeaderUIModel.Placeholder(pendingHeaderAssetId, visible = true)
+    placeholder != null -> placeholder
 
     amountModel?.headerKind is GemTransactionHeaderKind.Swap -> ConfirmHeaderUIModel.Swap(
         fromAsset = amountModel.fromAsset,

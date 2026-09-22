@@ -43,6 +43,7 @@ import com.gemwallet.android.features.confirm.viewmodels.models.confirmHeader
 import com.gemwallet.android.features.confirm.viewmodels.models.feeItems
 import com.gemwallet.android.features.confirm.viewmodels.models.infoSheet
 import com.gemwallet.android.features.confirm.viewmodels.models.listItem
+import com.gemwallet.android.features.confirm.viewmodels.models.placeholderHeader
 import com.gemwallet.android.features.confirm.viewmodels.models.uiModel
 import com.gemwallet.android.model.AssetPriceValue
 import com.gemwallet.android.model.Crypto
@@ -65,6 +66,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -366,15 +368,12 @@ class ConfirmViewModel @Inject constructor(
     val buttonState: StateFlow<ButtonState> = button.map { it.state.buttonState() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Loading)
 
-    val header: StateFlow<ConfirmHeaderUIModel?> = combine(
-        combine(amountUIModel, simulation, isPaymentRequest) { amount, loaded, isPayment ->
-            ConfirmHeaderRequest(amount, loaded.header, isPayment)
-        },
-        combine(isLoading, headerAsset, requestSimulation) { loading, asset, requested ->
-            ConfirmHeaderPending(loading, asset, requested?.header?.assetId?.let { com.wallet.core.primitives.AssetId(it) })
-        },
-    ) { request, pending ->
-        confirmHeader(request.amount, request.header, request.isPayment, pending.isLoading, pending.asset, pending.assetId)
+    private val pendingHeaderAssetId: Flow<AssetId?> = requestSimulation.map { it?.header?.assetId?.let(::AssetId) }
+
+    private val placeholderHeader = combine(isLoading, isPaymentRequest, headerAsset, pendingHeaderAssetId, ::placeholderHeader)
+
+    val header: StateFlow<ConfirmHeaderUIModel?> = combine(amountUIModel, simulation, placeholderHeader, headerAsset) { amount, simulation, placeholder, asset ->
+        confirmHeader(amount, simulation.header, placeholder, asset)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val feeSelectionUIModel: StateFlow<FeeSelectionUIModel> = feeSelection.map { FeeSelectionUIModel(it.selectedPriority()?.toPrimitives(), it.customGasPrice()) }
@@ -435,10 +434,6 @@ class ConfirmViewModel @Inject constructor(
             screen.update { it.onExecuteFailed(err.toConfirmError()) }
         }
     }
-
-    private data class ConfirmHeaderRequest(val amount: AmountUIModel?, val header: com.gemwallet.android.ui.components.list_head.SimulationHeaderUIModel?, val isPayment: Boolean)
-
-    private data class ConfirmHeaderPending(val isLoading: Boolean, val asset: Asset?, val assetId: com.wallet.core.primitives.AssetId?)
 
     private data class ConfirmContent(val session: GemConfirmation, val currency: Currency, val load: GemConfirmLoad) {
         val confirmData: GemConfirmData? = load.preload?.confirmData

@@ -8,7 +8,7 @@ import SwiftUI
 public struct AssetValueHeaderPlaceholder: ValueHeaderViewModel {
     public let assetImage: AssetImage?
     public let isWatchWallet = false
-    public let title = "\u{00a0}" // keeps the amount line's height before the value is known
+    public let title = ""
     public let subtitle: String? = nil
     public let subtitleColor = Colors.gray
     public let buttons: [HeaderButton] = []

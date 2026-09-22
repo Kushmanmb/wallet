@@ -2,11 +2,13 @@ package com.gemwallet.android.features.confirm.viewmodels
 
 import com.gemwallet.android.features.confirm.viewmodels.models.ConfirmHeaderUIModel
 import com.gemwallet.android.features.confirm.viewmodels.models.confirmHeader
+import com.gemwallet.android.features.confirm.viewmodels.models.placeholderHeader
 import com.gemwallet.android.testkit.mockAmountUIModel
 import com.gemwallet.android.testkit.mockAssetSolana
 import com.gemwallet.android.ui.components.list_head.SimulationHeaderUIModel
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import java.util.Locale
@@ -28,19 +30,12 @@ class ConfirmHeaderUIModelTest {
     @Test
     fun anApprovalHeaderWaitsInPlaceInsteadOfShowingTheTransferAmount() {
         val asset = mockAssetSolana()
+        val placeholder = placeholderHeader(isLoading = true, isPayment = false, headerAsset = asset, pendingHeaderAssetId = asset.id)
 
-        val assetId = asset.id
-
+        assertEquals(ConfirmHeaderUIModel.Placeholder(asset.id), placeholder)
         assertEquals(
-            ConfirmHeaderUIModel.Placeholder(assetId, visible = true),
-            confirmHeader(
-                amountModel = mockAmountUIModel(),
-                simulationHeader = null,
-                isPayment = false,
-                isLoading = true,
-                headerAsset = asset,
-                pendingHeaderAssetId = assetId,
-            ),
+            placeholder,
+            confirmHeader(amountModel = mockAmountUIModel(), simulationHeader = null, placeholder = placeholder, headerAsset = asset),
         )
     }
 
@@ -54,39 +49,29 @@ class ConfirmHeaderUIModelTest {
             confirmHeader(
                 amountModel = mockAmountUIModel(),
                 simulationHeader = simulationHeader,
-                isPayment = false,
-                isLoading = true,
+                placeholder = ConfirmHeaderUIModel.Placeholder(asset.id),
                 headerAsset = asset,
-                pendingHeaderAssetId = asset.id,
             ),
         )
     }
 
     @Test
     fun aPaymentHeaderReservesSpaceWithoutShowingTheIcon() {
+        val asset = mockAssetSolana()
+
         assertEquals(
-            ConfirmHeaderUIModel.Placeholder(mockAssetSolana(), visible = false),
-            confirmHeader(
-                amountModel = null,
-                simulationHeader = null,
-                isPayment = true,
-                isLoading = true,
-                headerAsset = mockAssetSolana(),
-                pendingHeaderAssetId = mockAssetSolana().id,
-            ),
+            ConfirmHeaderUIModel.ReservedSpace(asset),
+            placeholderHeader(isLoading = true, isPayment = true, headerAsset = asset, pendingHeaderAssetId = asset.id),
         )
     }
 
     @Test
     fun aLoadedTransferKeepsItsAmountHeader() {
-        val header = confirmHeader(
-            amountModel = mockAmountUIModel(),
-            simulationHeader = null,
-            isPayment = false,
-            isLoading = false,
-            headerAsset = mockAssetSolana(),
-            pendingHeaderAssetId = null,
-        )
+        val asset = mockAssetSolana()
+
+        assertNull(placeholderHeader(isLoading = false, isPayment = false, headerAsset = asset, pendingHeaderAssetId = asset.id))
+
+        val header = confirmHeader(amountModel = mockAmountUIModel(), simulationHeader = null, placeholder = null, headerAsset = asset)
 
         assertEquals("1 SOL", (header as ConfirmHeaderUIModel.Amount).amount)
         assertEquals("", header.equivalent)

@@ -157,22 +157,15 @@ fun ConfirmScreen(
         ) {
             item {
                 when (val model = header) {
-                    is ConfirmHeaderUIModel.Placeholder -> {
-                        val head = @Composable {
-                            AmountListHead(amount = "", icon = model.icon)
-                        }
-                        if (model.visible) {
-                            head()
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .alpha(0f)
-                                    .clearAndSetSemantics { },
-                            ) {
-                                head()
-                            }
-                        }
+                    is ConfirmHeaderUIModel.Placeholder -> AmountListHead(amount = "", icon = model.icon)
+
+                    is ConfirmHeaderUIModel.ReservedSpace -> Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(0f)
+                            .clearAndSetSemantics { },
+                    ) {
+                        AmountListHead(amount = "", icon = model.icon)
                     }
 
                     is ConfirmHeaderUIModel.Simulation -> AssetValueListHead(model.header)
