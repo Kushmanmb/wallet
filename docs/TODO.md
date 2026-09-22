@@ -45,7 +45,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | U33 |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | K14, AUD38, AUD40 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73, F61, AUD15, AUD41 |
-| Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | AUD46, K14, N11 |
+| Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | AUD46, K14 |
 | Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | Preserve exact atomic values |
 | Earn list, provider and deposit amount | Existing stake/earn owner and amount extras | Preserve the existing feature gate |
 | NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | AUD22 |
@@ -144,7 +144,6 @@ Surveyed on 2026-09-21. Each item names what was counted and where; confirm the 
 ### Sessions
 
 - **N10** **M** **Screens with domain state and no session.** Core has 18 `Gem*Session` types; iOS references a session in 17 view models and Android in 39, so adoption is uneven rather than absent. Audit the screens that hold several mutable domain fields without one against [A screen whose state changes is a session](ARCHITECTURE.md#a-screen-whose-state-changes-is-a-session), and remember the exclusions: one text field, one selection, navigation state or a settings mirror does not need one. AUD45 and AUD46 are the two already confirmed; this is the sweep that finds the rest.
-- **N11** **S** **Sessions used on one platform only.** Where Core exposes a session, both apps should drive it. S75 landed the open-position autoclose sheet on `GemAutocloseSession`; check the other 18 for a platform that hand-rolls the same transitions, and file one item per session rather than a single sweep.
 
 ### Generated surface
 
@@ -246,6 +245,7 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **The app maps; Core decides.** A `switch` over a Core enum that picks an icon, a colour, a keyboard or a localized label is the mapper contract working, not a decision. A label that *interpolates* a Core value into an app-localized sentence is where the localization belongs. A value type that only projects Core records needs no service.
 - **A dash in the screen-service map means "not recorded", never "the other app decides this itself".** A coordinator or application case holding the service is the Android shape of holding it (§ 29).
 - **Count a holder by the services it calls.** A reference passed straight through to the child that decides with it is a constructor argument (§ 23).
+- **Every Core session is driven from both apps (N11, checked 2026-09-22).** Comparing each exported `on_*` and `view_state` call site per platform, the only differences left are equivalent routes, not hand-rolled transitions: Android reaches `GemAddAssetSession::on_chain` by passing the chain to `new_session` instead, and reads `is_transfer_loading()` as a cheap dedupe key where iOS reads the same field off the view state. A file-count comparison is not this check — it called four sessions one-sided that both apps drive.
 - **Retest a recorded build blocker before treating it as a boundary.** `GemTests` "cannot link", the widget "cannot call Core" and `Formatters` "cannot import Gemstone" were all one missing build setting, and each had other items closed on its authority (§ 36).
 - **A number crosses as a value and a style; a locale prints it.** Currency symbols, duration text, day grouping, dust and abbreviation thresholds rendered with the device locale are platform work once Core has decided the precision, the style and the tone (§ 17, § 19, § 21).
 - **Ordering that must live in a database query stays there.** Core cannot write either app's query, and sorting a thousand rows in memory per emission is the wrong trade (§ 20).
