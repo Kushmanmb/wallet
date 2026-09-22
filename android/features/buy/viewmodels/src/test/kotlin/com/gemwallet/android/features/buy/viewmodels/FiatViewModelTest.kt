@@ -13,6 +13,7 @@ import com.gemwallet.android.model.AssetBalance
 import com.gemwallet.android.model.AssetData
 import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.testkit.mockAsset
+import com.gemwallet.android.testkit.mockAssetBalance
 import com.gemwallet.android.testkit.mockAssetData
 import com.gemwallet.android.testkit.mockAssetMetaData
 import com.gemwallet.android.testkit.mockAssetPriceInfo
@@ -161,7 +162,7 @@ class FiatViewModelTest {
 
     @Test
     fun `type change requests target operation amount`() = runTest(testDispatcher) {
-        assetDataFlow.value = mockAssetData(balance = AssetBalance.create(asset, available = OneBitcoin), price = mockAssetPriceInfo(price = 100.0), metadata = mockAssetMetaData(isSellEnabled = true))
+        assetDataFlow.value = mockAssetData(balance = mockAssetBalance(asset, available = OneBitcoin), price = mockAssetPriceInfo(price = 100.0), metadata = mockAssetMetaData(isSellEnabled = true))
         val viewModel = createViewModel()
 
         try {
@@ -286,7 +287,7 @@ class FiatViewModelTest {
 
     @Test
     fun `fiat type picker requires sell enabled metadata`() = runTest(testDispatcher) {
-        assetDataFlow.value = mockAssetData(balance = AssetBalance.create(asset, available = OneBitcoin), price = mockAssetPriceInfo(price = 100.0), metadata = mockAssetMetaData(isSellEnabled = false))
+        assetDataFlow.value = mockAssetData(balance = mockAssetBalance(asset, available = OneBitcoin), price = mockAssetPriceInfo(price = 100.0), metadata = mockAssetMetaData(isSellEnabled = false))
         val viewModel = createViewModel()
 
         try {
@@ -294,7 +295,7 @@ class FiatViewModelTest {
             runCurrent()
             assertFalse(viewModel.showFiatTypePicker.value)
 
-            assetDataFlow.value = mockAssetData(balance = AssetBalance.create(asset, available = BigInteger("0")), price = mockAssetPriceInfo(price = 100.0), metadata = mockAssetMetaData(isSellEnabled = true))
+            assetDataFlow.value = mockAssetData(balance = mockAssetBalance(asset, available = BigInteger("0")), price = mockAssetPriceInfo(price = 100.0), metadata = mockAssetMetaData(isSellEnabled = true))
             advanceTimeBy(DebounceSettleMs)
             runCurrent()
             assertTrue(viewModel.showFiatTypePicker.value)
@@ -339,7 +340,7 @@ class FiatViewModelTest {
 
     @Test
     fun `asset info balance includes symbol`() = runTest(testDispatcher) {
-        assetDataFlow.value = mockAssetData(balance = AssetBalance.create(asset, available = OneBitcoin), price = mockAssetPriceInfo(price = 100.0))
+        assetDataFlow.value = mockAssetData(balance = mockAssetBalance(asset, available = OneBitcoin), price = mockAssetPriceInfo(price = 100.0))
         val viewModel = createViewModel()
 
         try {
@@ -363,7 +364,7 @@ class FiatViewModelTest {
             assertEquals(FiatQuoteType.Sell, viewModel.type.value)
             assertEquals("25", viewModel.amount.value)
 
-            assetDataFlow.value = mockAssetData(balance = AssetBalance.create(asset, available = OneBitcoin), price = mockAssetPriceInfo(price = 100.0), metadata = mockAssetMetaData(isSellEnabled = false))
+            assetDataFlow.value = mockAssetData(balance = mockAssetBalance(asset, available = OneBitcoin), price = mockAssetPriceInfo(price = 100.0), metadata = mockAssetMetaData(isSellEnabled = false))
             advanceTimeBy(DebounceSettleMs)
             runCurrent()
             assertFalse(viewModel.showFiatTypePicker.value)

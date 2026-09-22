@@ -14,6 +14,7 @@ import com.gemwallet.android.domains.swap.SwapItemType
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.model.AssetBalance
 import com.gemwallet.android.testkit.mockAccount
+import com.gemwallet.android.testkit.mockAssetBalance
 import com.gemwallet.android.testkit.mockAssetInfo
 import com.gemwallet.android.testkit.mockAssetSolana
 import com.gemwallet.android.testkit.mockAssetSolanaUSDC
@@ -87,7 +88,7 @@ class SwapViewModelTest {
     private val usdcAsset = mockAssetSolanaUSDC()
     private val solInfo = mockAssetInfo(
         asset = solAsset,
-        balance = AssetBalance.create(solAsset, available = BigInteger("1000000000")),
+        balance = mockAssetBalance(solAsset, available = BigInteger("1000000000")),
     )
     private val usdcInfo = mockAssetInfo(asset = usdcAsset)
 
