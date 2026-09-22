@@ -13,7 +13,7 @@ use std::sync::Arc;
 use primitives::WalletSource;
 use tempfile::TempDir;
 
-use super::{GemWalletImportResult, GemWalletImportType, GemWalletService, keystore_id_for_wallet};
+use super::{GemWalletImportType, GemWalletService, keystore_id_for_wallet};
 use crate::keystore::GemKeystore;
 use crate::keystore::decode_password;
 use crate::services::avatar::GemAvatarService;
@@ -188,10 +188,7 @@ impl WalletTestkit {
             words: words.iter().map(|word| word.to_string()).collect(),
             chains: vec![Chain::Ethereum],
         };
-        match self.service.import_wallet(name.to_string(), import, WalletSource::Import).await.unwrap() {
-            GemWalletImportResult::New { wallet } => wallet,
-            GemWalletImportResult::Existing { wallet } => wallet,
-        }
+        self.service.store_import(name.to_string(), import, WalletSource::Import).await.unwrap().wallet()
     }
 
     pub fn keystore_path(&self, wallet: &Wallet) -> PathBuf {

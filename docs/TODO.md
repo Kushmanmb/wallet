@@ -18,9 +18,8 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 
 1. **Protect correctness:** resolve D72/D73 before changing their security behavior. Preserve existing auth and transaction integrity contracts.
 2. **Establish consistency:** MIG6. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
-3. **Move complete workflows:** C53 wallet creation/import. Keep native routes and lifecycle executors.
-4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
-5. **Close the boundary:** finish U9, U33 and F61 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
+3. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
+4. **Close the boundary:** finish U9, U33 and F61 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
 
 ## Screen coverage and existing infrastructure
 
@@ -28,7 +27,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 
 | Screens / entry points | Existing owner or infrastructure to extend | Open work |
 |---|---|---|
-| Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | C53, X172 |
+| Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | X172 |
 | Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | X172 |
 | Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | U25, AUD23, AUD25, AUD26, AUD27, AUD28 |
 | Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | AUD20, AUD43, AUD44, U26 |
@@ -180,8 +179,6 @@ This bucket groups duplication found by the 2026-09-19 review; the execution ord
 
 Rows, headers, screen state and flows that an app still assembles from Core ingredients ([the record carries the finished value](ARCHITECTURE.md), [a plain list is Core sections of one shared row](ARCHITECTURE.md#a-plain-list-is-core-sections-of-one-shared-row-rendered-by-one-builder-per-app)). Where the two apps already differ, the item says how.
 
-- **C53** **M** Wallet import and create are orchestrated on both apps (default name, `import_name`, `import_request`, `import_wallet`, `set_current_wallet_id`, accept terms): Android computes the default name when the screen opens, so an import tapped before that finishes is named `""` (`ImportScreen.kt:183,194`), and makes a created wallet current before setup where iOS does it after. One Core import (and create) call that names, stores and activates the wallet.
-
 ## 2. Decisions still made twice
 
 The same product rule on both apps with a difference, each read on both sides on 2026-09-19.
@@ -257,6 +254,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**C53 (2026-09-22).** Closed. `GemWalletService::import_wallet(GemWalletImportRequest)` reads the input, names the wallet, stores it and makes it current in one call, so neither app chains `import_request` → `import_name` → `import_wallet` → `set_current_wallet_id`; the three intermediate exports are gone. Android resolved the default name when the screen opened, so an import tapped before it landed was stored under `""` — the name is resolved at the moment of the import on both apps now, and `import_name` trims what it is given so Core refuses to store a wallet under a blank name rather than writing one. A created wallet becomes current at creation on both apps, where iOS waited until the profile screen finished. `GemWalletImportResult` answers `has_existing_wallets`, the fact each app used to read off `GemWalletDefaultName` before the import, so that record is deleted and `default_wallet_name` returns the localized text it always was. Localizing that text stays app-side: it is a `GemLocalizedText` and the resolver lives in each app's UI layer, so one call per app resolves it and hands it to Core. iOS's `setupWalletComplete` and `GemWalletImportResult.wallet` extension are deleted. The four iOS `setupChains` tests built a multicoin wallet restricted to one chain, which the one-call API cannot express and the app never does; their rules are Core's and live there — the existing test already asserted the added chain, a new one asserts the keystore password is read only when a wallet can gain one — and the adapter fact the fourth covered, that an account needs its chain asset, is now a `WalletStore` test.
 
 **C52 (2026-09-22).** Closed. `GemNavigationService::open_deeplink` and `open_notification` answer with one `GemNavigationTarget`, so neither app decides what a link or a push opens. Android routed deep links with no Core call at all — an unknown token opened a blank screen where iOS ensured it — and sent fiat and stake pushes to the asset screen even for a perpetual, where iOS opened the perpetual scene. A blank rewards code is no code on both apps now, where Android dropped it and iOS passed the empty string through. The apps map the target to their own routes and switch the wallet their own way, because the reload after a switch is platform work: iOS keeps `pendingWalletPath`, Android sets the current wallet. `WebDeepLinks.toRoute` and `AssetNavigation` are deleted, with iOS's five navigate/present helpers.
 
