@@ -18,12 +18,10 @@ import com.gemwallet.android.ext.PerpetualFormatter
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.transfer_amount.viewmodels.providers.AmountPerpetualProvider
 import com.gemwallet.android.math.parseInputNumberOrNull
-import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.PercentSuggestionsBar
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.list_item.ListItem
-import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.perpetual.AutocloseInputSection
 import com.gemwallet.android.ui.components.screen.ModalBottomSheet
 import com.gemwallet.android.ui.components.screen.SheetExpansion
@@ -51,10 +49,11 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
     var submitAttempted by remember { mutableStateOf(false) }
     var focused: TpslType? by remember { mutableStateOf(null) }
 
-    val estimator = provider.estimatorFor(amount)
-    val viewState = provider.autocloseViewState.collectAsStateWithLifecycle().value ?: return
-    val takeProfitField = provider.autocloseField(TpslType.TakeProfit, amount, submitAttempted) ?: return
-    val stopLossField = provider.autocloseField(TpslType.StopLoss, amount, submitAttempted) ?: return
+    var session by remember { mutableStateOf(provider.autocloseSession(perpetual)) }
+    val viewState = session.viewState()
+    val estimator = remember(amount, session.prices.market) { provider.estimatorFor(amount, session.prices.market) }
+    val takeProfitField = provider.autocloseField(session.modify.takeProfit, estimator, submitAttempted)
+    val stopLossField = provider.autocloseField(session.modify.stopLoss, estimator, submitAttempted)
 
     val activeField = focused?.let {
         when (it) {
@@ -82,7 +81,7 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
         ) {
             provider.openPositionListItem(amount)?.let { ListItem(model = it, listPosition = ListPosition.Single) }
             Spacer16()
-            ListItem(model = ListItemModel(title = stringResource(R.string.perpetual_market_price), subtitle = viewState.marketPrice.text()), listPosition = ListPosition.Single)
+            ListItem(model = provider.marketPriceListItem(session.prices.market), listPosition = ListPosition.Single)
             Spacer16()
             AutocloseInputSection(
                 field = takeProfitField,
@@ -90,7 +89,7 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
                 onTextChanged = {
                     submitAttempted = false
                     takeProfitText = it
-                    provider.setAutoclosePrice(TpslType.TakeProfit, it.parseInputNumberOrNull()?.toDouble())
+                    session = session.onPrice(TpslType.TakeProfit.toGem(), it.parseInputNumberOrNull()?.toDouble())
                 },
                 onFocusChanged = { hasFocus ->
                     if (hasFocus) {
@@ -107,7 +106,7 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
                 onTextChanged = {
                     submitAttempted = false
                     stopLossText = it
-                    provider.setAutoclosePrice(TpslType.StopLoss, it.parseInputNumberOrNull()?.toDouble())
+                    session = session.onPrice(TpslType.StopLoss.toGem(), it.parseInputNumberOrNull()?.toDouble())
                 },
                 onFocusChanged = { hasFocus ->
                     if (hasFocus) {
@@ -133,7 +132,7 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
                             TpslType.TakeProfit -> takeProfitText = formatted
                             TpslType.StopLoss -> stopLossText = formatted
                         }
-                        provider.setAutoclosePrice(activeField.type, formatted.parseInputNumberOrNull()?.toDouble())
+                        session = session.onPrice(activeField.type.toGem(), formatted.parseInputNumberOrNull()?.toDouble())
                     },
                 )
             } else {

@@ -88,7 +88,6 @@ impl GemAssetSelectionService {
         nft_rules::search_collections(data, &query)
     }
 
-    /// The selection screens own this question, so they ask their own service rather than a second one.
     pub fn show_perpetuals(&self, wallet_type: WalletType, chains: Vec<Chain>) -> bool {
         self.preferences.show_perpetuals(wallet_type, chains)
     }
