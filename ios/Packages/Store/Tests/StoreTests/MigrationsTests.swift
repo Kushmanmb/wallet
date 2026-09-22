@@ -60,6 +60,7 @@ struct MigrationsTests {
             #expect(balanceColumns.contains(where: { $0.name == BalanceRecord.Columns.isActive.name }))
             #expect(balanceColumns.contains(where: { $0.name == BalanceRecord.Columns.earn.name }))
             #expect(balanceColumns.contains(where: { $0.name == BalanceRecord.Columns.earnAmount.name }))
+            #expect(!balanceColumns.contains(where: { $0.name == "lastUsedAt" }), "nothing reads the column, so it is gone")
 
             let assetColumns = try db.columns(in: AssetRecord.databaseTableName)
             #expect(assetColumns.contains(where: { $0.name == AssetRecord.Columns.isSellable.name }))

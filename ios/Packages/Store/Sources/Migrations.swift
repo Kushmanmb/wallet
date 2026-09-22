@@ -173,7 +173,7 @@ struct Migrations {
 
         migrator.registerMigration("Add lastUsedAt to \(BalanceRecord.databaseTableName)") { db in
             try? db.alter(table: BalanceRecord.databaseTableName) {
-                $0.add(column: BalanceRecord.Columns.lastUsedAt.name, .date)
+                $0.add(column: "lastUsedAt", .date)
             }
         }
 
@@ -568,6 +568,13 @@ struct Migrations {
                 for name in moved {
                     table.drop(column: name)
                 }
+            }
+        }
+
+        migrator.registerMigration("Drop the unread lastUsedAt column of \(BalanceRecord.databaseTableName)") { db in
+            guard try db.columns(in: BalanceRecord.databaseTableName).contains(where: { $0.name == "lastUsedAt" }) else { return }
+            try db.alter(table: BalanceRecord.databaseTableName) {
+                $0.drop(column: "lastUsedAt")
             }
         }
 
