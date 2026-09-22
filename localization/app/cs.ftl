@@ -158,6 +158,7 @@ transfer_activate_asset_title = Aktivujte aktivum
 transfer_recipient_my_wallets = Moje peněženky
 transfer_recipient_view_wallets = Zobrazit peněženky
 transfer_minimum_account_balance = Po uplynutí této doby musí zůstat minimální zůstatek %@, pokud nepoužíváte celý zůstatek.
+transfer_destination_account_activation = Cílová adresa vyžaduje minimum %@.
 transfer_smart_contract_title = Chytrá smlouva
 transfer_other_title = Ostatní
 transfer_maximum_amount = Maximální částka je %@

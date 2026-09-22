@@ -158,6 +158,7 @@ transfer_activate_asset_title = Активировать актив
 transfer_recipient_my_wallets = Мои кошельки
 transfer_recipient_view_wallets = Посмотреть кошельки
 transfer_minimum_account_balance = После этого должен оставаться минимальный баланс %@, если только вы не используете весь свой баланс.
+transfer_destination_account_activation = Адрес назначения требует минимум %@.
 transfer_smart_contract_title = Смарт-контракт
 transfer_other_title = Прочее
 transfer_maximum_amount = Максимальная сумма %@

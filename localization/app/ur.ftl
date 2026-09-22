@@ -158,6 +158,7 @@ transfer_activate_asset_title = اثاثہ کو چالو کریں۔
 transfer_recipient_my_wallets = میرے والیٹس
 transfer_recipient_view_wallets = بٹوے دیکھیں
 transfer_minimum_account_balance = اس کے بعد ایک کم از کم %@ بیلنس باقی رہنا چاہیے، جب تک کہ آپ اپنا پورا بیلنس استعمال نہ کر رہے ہوں۔
+transfer_destination_account_activation = منزل کے پتے کے لیے کم از کم %@ درکار ہے۔
 transfer_smart_contract_title = سمارٹ معاہدہ
 transfer_other_title = دیگر
 transfer_maximum_amount = زیادہ سے زیادہ رقم %@ ہے

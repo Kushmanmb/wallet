@@ -4031,6 +4031,7 @@ dependencies = [
  "bs58",
  "chain_traits",
  "chrono",
+ "futures",
  "gem_client",
  "gem_hash",
  "gem_jsonrpc",

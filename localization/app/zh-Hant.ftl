@@ -158,6 +158,7 @@ transfer_activate_asset_title = 啟用資產
 transfer_recipient_my_wallets = 我的錢包
 transfer_recipient_view_wallets = 查看錢包
 transfer_minimum_account_balance = 此後必須保留最低 %@ 餘額，除非使用全部餘額。
+transfer_destination_account_activation = 目標地址最低需要 %@。
 transfer_smart_contract_title = 智慧合約
 transfer_other_title = 其他
 transfer_maximum_amount = 最高金額為 %@

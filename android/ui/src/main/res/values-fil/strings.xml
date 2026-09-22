@@ -137,6 +137,7 @@
   <string name="transfer_recipient_my_wallets">Aking mga Wallets</string>
   <string name="transfer_recipient_view_wallets">Tingnan ang mga Wallet</string>
   <string name="transfer_minimum_account_balance">Ang isang minimum na balanse %1$s ay dapat manatili pagkatapos nito, maliban kung ginagamit mo ang iyong buong balanse.</string>
+  <string name="transfer_destination_account_activation">Ang patutunguhang address ay nangangailangan ng minimum na %1$s.</string>
   <string name="transfer_smart_contract_title">Matalinong Kontrata</string>
   <string name="transfer_other_title">Iba pa</string>
   <string name="transfer_maximum_amount">Ang Maximum na Halaga ay %1$s</string>

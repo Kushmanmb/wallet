@@ -158,6 +158,7 @@ transfer_activate_asset_title = تفعيل الأصول
 transfer_recipient_my_wallets = محفظتي
 transfer_recipient_view_wallets = عرض المحافظ
 transfer_minimum_account_balance = يجب أن يتبقى حد أدنى من الرصيد %@ بعد ذلك، ما لم تكن تستخدم رصيدك بالكامل.
+transfer_destination_account_activation = يتطلب عنوان الوجهة حداً أدنى قدره %@.
 transfer_smart_contract_title = العقد الذكي
 transfer_other_title = آخر
 transfer_maximum_amount = الحد الأقصى للمبلغ هو %@

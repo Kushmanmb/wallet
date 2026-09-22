@@ -137,6 +137,7 @@
   <string name="transfer_recipient_my_wallets">Pochi Zangu</string>
   <string name="transfer_recipient_view_wallets">Tazama Pochi</string>
   <string name="transfer_minimum_account_balance">Salio la chini la %1$s lazima lisalie baada ya hili, isipokuwa kama unatumia salio lako kamili.</string>
+  <string name="transfer_destination_account_activation">Anwani lengwa inahitaji kiwango cha chini cha %1$s.</string>
   <string name="transfer_smart_contract_title">Mkataba wa Smart</string>
   <string name="transfer_other_title">Nyingine</string>
   <string name="transfer_maximum_amount">Kiasi cha juu ni %1$s</string>

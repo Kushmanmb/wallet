@@ -137,6 +137,7 @@
   <string name="transfer_recipient_my_wallets">Mine tegnebøger</string>
   <string name="transfer_recipient_view_wallets">Se tegnebøger</string>
   <string name="transfer_minimum_account_balance">Der skal være en minimumsaldo på %1$s tilbage efter dette, medmindre du bruger din fulde saldo.</string>
+  <string name="transfer_destination_account_activation">Destinationsadressen kræver et minimum på %1$s.</string>
   <string name="transfer_smart_contract_title">Smart kontrakt</string>
   <string name="transfer_other_title">Andet</string>
   <string name="transfer_maximum_amount">Det maksimale beløb er %1$s</string>

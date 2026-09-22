@@ -158,6 +158,7 @@ transfer_activate_asset_title = دارایی را فعال کنید
 transfer_recipient_my_wallets = کیف پول‌های من
 transfer_recipient_view_wallets = مشاهده کیف پول‌ها
 transfer_minimum_account_balance = حداقل موجودی %@ باید بعد از این باقی بماند، مگر اینکه از موجودی کامل خود استفاده کنید.
+transfer_destination_account_activation = آدرس مقصد حداقل %@ نیاز دارد.
 transfer_smart_contract_title = قرارداد هوشمند
 transfer_other_title = دیگر
 transfer_maximum_amount = حداکثر مقدار %@ است

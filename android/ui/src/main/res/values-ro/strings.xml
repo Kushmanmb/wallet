@@ -137,6 +137,7 @@
   <string name="transfer_recipient_my_wallets">Portofelele mele</string>
   <string name="transfer_recipient_view_wallets">Vizualizați portofele</string>
   <string name="transfer_minimum_account_balance">După aceasta, trebuie să rămână un sold minim %1$s, cu excepția cazului în care utilizați soldul integral.</string>
+  <string name="transfer_destination_account_activation">Adresa de destinație necesită un minim de %1$s.</string>
   <string name="transfer_smart_contract_title">Contract inteligent</string>
   <string name="transfer_other_title">Altele</string>
   <string name="transfer_maximum_amount">Suma maximă este %1$s</string>

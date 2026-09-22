@@ -137,6 +137,7 @@
   <string name="transfer_recipient_my_wallets">กระเป๋าสตางค์ของฉัน</string>
   <string name="transfer_recipient_view_wallets">ดูกระเป๋าสตางค์</string>
   <string name="transfer_minimum_account_balance">ยอดคงเหลือขั้นต่ำ %1$s ต้องคงอยู่หลังจากนี้ เว้นแต่คุณจะใช้ยอดคงเหลือทั้งหมดของคุณ</string>
+  <string name="transfer_destination_account_activation">ที่อยู่ปลายทางต้องมีขั้นต่ำ %1$s</string>
   <string name="transfer_smart_contract_title">สัญญาอัจฉริยะ</string>
   <string name="transfer_other_title">อื่นๆ</string>
   <string name="transfer_maximum_amount">จำนวนเงินสูงสุดคือ %1$s</string>

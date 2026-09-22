@@ -299,6 +299,8 @@ transfer_recipient_my_wallets = My Wallets
 transfer_recipient_view_wallets = View Wallets
 # Used in Transfer, Send, Stake, and confirmation flows for the minimum account balance label. Contains 1 string placeholder.
 transfer_minimum_account_balance = A minimum %@ balance must remain after this, unless you're using your full balance.
+# Used in Transfer, Send, Stake, and confirmation flows when a native payment is below the amount required to create the destination address. Contains 1 string placeholder.
+transfer_destination_account_activation = The destination address requires a minimum of %@.
 # Used in Transfer, Send, Stake, and confirmation flows for the smart contract title.
 transfer_smart_contract_title = Smart Contract
 # Used in Transfer, Send, Stake, and confirmation flows for the other title.

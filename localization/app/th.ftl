@@ -158,6 +158,7 @@ transfer_activate_asset_title = เปิดใช้งานสินทรั
 transfer_recipient_my_wallets = กระเป๋าสตางค์ของฉัน
 transfer_recipient_view_wallets = ดูกระเป๋าสตางค์
 transfer_minimum_account_balance = ยอดคงเหลือขั้นต่ำ %@ ต้องคงอยู่หลังจากนี้ เว้นแต่คุณจะใช้ยอดคงเหลือทั้งหมดของคุณ
+transfer_destination_account_activation = ที่อยู่ปลายทางต้องมีขั้นต่ำ %@
 transfer_smart_contract_title = สัญญาอัจฉริยะ
 transfer_other_title = อื่นๆ
 transfer_maximum_amount = จำนวนเงินสูงสุดคือ %@

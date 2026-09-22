@@ -158,6 +158,7 @@ transfer_activate_asset_title = Kunna Kadari
 transfer_recipient_my_wallets = Wallets dina
 transfer_recipient_view_wallets = Duba Wallet
 transfer_minimum_account_balance = Mafi ƙarancin ma'auni %@ dole ne ya kasance bayan wannan, sai dai idan kuna amfani da cikakken ma'aunin ku.
+transfer_destination_account_activation = Adireshin makoma yana buƙatar mafi ƙarancin %@.
 transfer_smart_contract_title = Kwangilar Smart
 transfer_other_title = Sauran
 transfer_maximum_amount = Matsakaicin adadin shine %@

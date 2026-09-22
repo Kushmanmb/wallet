@@ -158,6 +158,7 @@ transfer_activate_asset_title = Activer l'actif
 transfer_recipient_my_wallets = Mes portefeuilles
 transfer_recipient_view_wallets = Voir les portefeuilles
 transfer_minimum_account_balance = Un solde minimum %@ doit rester après cela, à moins que vous n'utilisiez votre solde complet.
+transfer_destination_account_activation = L'adresse de destination requiert un minimum de %@.
 transfer_smart_contract_title = Contrat intelligent
 transfer_other_title = Autre
 transfer_maximum_amount = Le montant maximum est de %@

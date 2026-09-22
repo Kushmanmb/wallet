@@ -118,6 +118,8 @@ extension GemConfirmErrorDisplay: @retroactive LocalizedError {
             Localized.Transfer.insufficientNetworkFeeBalance(title.boldMarkdown())
         case let .minimumAccountBalance(asset, required):
             Localized.Transfer.minimumAccountBalance(Self.amount(required, asset: asset).boldMarkdown())
+        case let .destinationAccountActivation(asset, required):
+            Localized.Transfer.destinationAccountActivation(Self.amount(required, asset: asset).boldMarkdown())
         case let .swapMinimum(asset, _, providerName, requirement):
             Localized.Info.swapMinimumAmountDescription(
                 providerName.boldMarkdown(),

@@ -137,6 +137,7 @@
   <string name="transfer_recipient_my_wallets">Wallets dina</string>
   <string name="transfer_recipient_view_wallets">Duba Wallet</string>
   <string name="transfer_minimum_account_balance">Mafi ƙarancin ma\'auni %1$s dole ne ya kasance bayan wannan, sai dai idan kuna amfani da cikakken ma\'aunin ku.</string>
+  <string name="transfer_destination_account_activation">Adireshin makoma yana buƙatar mafi ƙarancin %1$s.</string>
   <string name="transfer_smart_contract_title">Kwangilar Smart</string>
   <string name="transfer_other_title">Sauran</string>
   <string name="transfer_maximum_amount">Matsakaicin adadin shine %1$s</string>

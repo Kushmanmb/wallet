@@ -158,6 +158,7 @@ transfer_activate_asset_title = アセットを有効化
 transfer_recipient_my_wallets = マイウォレット
 transfer_recipient_view_wallets = ウォレットを表示
 transfer_minimum_account_balance = 全額を使用する場合を除き、取引後も最低 %@ の残高を維持する必要があります。
+transfer_destination_account_activation = 宛先アドレスには最低 %@ が必要です。
 transfer_smart_contract_title = スマートコントラクト
 transfer_other_title = その他
 transfer_maximum_amount = 最大金額は %@ です

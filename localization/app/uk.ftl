@@ -158,6 +158,7 @@ transfer_activate_asset_title = Активувати актив
 transfer_recipient_my_wallets = Мої гаманці
 transfer_recipient_view_wallets = Переглянути гаманці
 transfer_minimum_account_balance = Після цього має залишитися мінімальний баланс %@, якщо ви не використовуєте весь баланс.
+transfer_destination_account_activation = Адреса призначення вимагає мінімум %@.
 transfer_smart_contract_title = Смартконтракт
 transfer_other_title = Інше
 transfer_maximum_amount = Максимальна сума %@

@@ -1466,6 +1466,10 @@ public enum Localized {
     }
     /// Confirm
     public static let confirm = Localized.tr("Localizable", "transfer.confirm", fallback: "Confirm")
+    /// The destination address requires a minimum of %@.
+    public static func destinationAccountActivation(_ p1: Any) -> String {
+      return Localized.tr("Localizable", "transfer.destination_account_activation", String(describing: p1), fallback: "The destination address requires a minimum of %@.")
+    }
     /// From
     public static let from = Localized.tr("Localizable", "transfer.from", fallback: "From")
     /// Insufficient %@ balance.

@@ -158,6 +158,7 @@ transfer_activate_asset_title = הפעל את הנכס
 transfer_recipient_my_wallets = הארנקים שלי
 transfer_recipient_view_wallets = הצג ארנקים
 transfer_minimum_account_balance = לאחר מכן חייבת להישאר יתרה מינימלית %@, אלא אם כן אתה משתמש ביתרה מלאה.
+transfer_destination_account_activation = כתובת היעד דורשת מינימום של %@.
 transfer_smart_contract_title = חוזה חכם
 transfer_other_title = אחר
 transfer_maximum_amount = הכמות המקסימלית היא %@

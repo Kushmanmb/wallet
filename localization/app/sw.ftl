@@ -158,6 +158,7 @@ transfer_activate_asset_title = Washa Kipengee
 transfer_recipient_my_wallets = Pochi Zangu
 transfer_recipient_view_wallets = Tazama Pochi
 transfer_minimum_account_balance = Salio la chini la %@ lazima lisalie baada ya hili, isipokuwa kama unatumia salio lako kamili.
+transfer_destination_account_activation = Anwani lengwa inahitaji kiwango cha chini cha %@.
 transfer_smart_contract_title = Mkataba wa Smart
 transfer_other_title = Nyingine
 transfer_maximum_amount = Kiasi cha juu ni %@

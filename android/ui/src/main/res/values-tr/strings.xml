@@ -137,6 +137,7 @@
   <string name="transfer_recipient_my_wallets">Cüzdanlarım</string>
   <string name="transfer_recipient_view_wallets">Cüzdanları Görüntüle</string>
   <string name="transfer_minimum_account_balance">Bakiyenizin tamamını kullanmadığınız sürece, bundan sonra minimum %1$s bakiye kalmalıdır.</string>
+  <string name="transfer_destination_account_activation">Hedef adres en az %1$s gerektirir.</string>
   <string name="transfer_smart_contract_title">Akıllı Sözleşme</string>
   <string name="transfer_other_title">Diğer</string>
   <string name="transfer_maximum_amount">Maksimum Tutar %1$s</string>

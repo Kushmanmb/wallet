@@ -128,6 +128,21 @@ impl GemConfirmService {
 
 The method is thin: gather inputs, call the rule, return. It stays on the plain `impl` because the confirm screen reads fees through `GemConfirmTransferService`. Product or domain-decision branching belongs in `rules.rs`; I/O sequencing, error propagation and empty-work short circuits may remain in the service.
 
+### Secure, fast, simple, powerful
+
+Judge a change against those four. **Secure:** a secret, a signature, and a confirmation stay explicit and fail closed. **Fast:** the user waits only for work that must happen in order. **Simple:** one owner, on the path that already exists. **Powerful:** the shared rule covers the next chain, not a one-off beside it.
+
+Independent reads are the usual way to stay fast. Two reads that do not use each other's result run together. Awaiting the first before starting the second only adds a round trip. Use `futures::try_join!` when each call returns `Result`, and `futures::join!` when a caller still matches a non-error outcome. The XRP preload is the small case: the sender account and whether the destination exists are separate calls, so [`get_transaction_preload`](../core/crates/gem_xrp/src/provider/preload.rs) starts both:
+
+```rust
+let (sender, destination_exists) = futures::try_join!(
+    self.get_account_info_full(&input.sender_address),
+    self.account_exists(destination),
+)?;
+```
+
+A later step that needs an earlier result stays sequential. That ordering is the [staged load](#a-staged-load-names-what-each-stage-waits-for). Do not overlap a write, a signature, or a step that must fail closed before the next one starts.
+
 **Sync reads require an already-held value.** `GemWalletSessionStore.get_current_wallet_id` and preferences are synchronous. `GemWalletStore.get_wallet` and `get_wallets` stay async because Room must read off main, even though GRDB can read synchronously. Await database reads through their owner; reuse observed values for rendering. Never add a blocking DAO query or `runBlocking` to make the platforms look alike.
 
 ### Service example: price alerts

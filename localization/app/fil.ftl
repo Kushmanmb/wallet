@@ -158,6 +158,7 @@ transfer_activate_asset_title = I-activate ang Asset
 transfer_recipient_my_wallets = Aking mga Wallets
 transfer_recipient_view_wallets = Tingnan ang mga Wallet
 transfer_minimum_account_balance = Ang isang minimum na balanse %@ ay dapat manatili pagkatapos nito, maliban kung ginagamit mo ang iyong buong balanse.
+transfer_destination_account_activation = Ang patutunguhang address ay nangangailangan ng minimum na %@.
 transfer_smart_contract_title = Matalinong Kontrata
 transfer_other_title = Iba pa
 transfer_maximum_amount = Ang Maximum na Halaga ay %@

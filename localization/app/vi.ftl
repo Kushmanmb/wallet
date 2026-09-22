@@ -158,6 +158,7 @@ transfer_activate_asset_title = Kích hoạt tài sản
 transfer_recipient_my_wallets = Ví của tôi
 transfer_recipient_view_wallets = Xem ví
 transfer_minimum_account_balance = Sau đó, bạn phải giữ lại số dư tối thiểu %@, trừ khi bạn sử dụng hết số dư.
+transfer_destination_account_activation = Địa chỉ đích yêu cầu tối thiểu %@.
 transfer_smart_contract_title = Hợp đồng thông minh
 transfer_other_title = Khác
 transfer_maximum_amount = Số tiền tối đa là %@

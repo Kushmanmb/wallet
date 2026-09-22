@@ -158,6 +158,7 @@ transfer_activate_asset_title = Activa activeren
 transfer_recipient_my_wallets = Mijn portemonnees
 transfer_recipient_view_wallets = Bekijk portemonnees
 transfer_minimum_account_balance = Hierna moet er minimaal %@ saldo overblijven, tenzij u uw volledige saldo gebruikt.
+transfer_destination_account_activation = Het bestemmingsadres vereist een minimum van %@.
 transfer_smart_contract_title = Slim contract
 transfer_other_title = Anders
 transfer_maximum_amount = Maximaal bedrag is %@

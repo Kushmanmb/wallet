@@ -158,6 +158,7 @@ transfer_activate_asset_title = Activați activul
 transfer_recipient_my_wallets = Portofelele mele
 transfer_recipient_view_wallets = Vizualizați portofele
 transfer_minimum_account_balance = După aceasta, trebuie să rămână un sold minim %@, cu excepția cazului în care utilizați soldul integral.
+transfer_destination_account_activation = Adresa de destinație necesită un minim de %@.
 transfer_smart_contract_title = Contract inteligent
 transfer_other_title = Altele
 transfer_maximum_amount = Suma maximă este %@

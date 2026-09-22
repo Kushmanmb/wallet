@@ -63,6 +63,9 @@ fun GemConfirmErrorDisplay.text(context: Context): String = when (this) {
     is GemConfirmErrorDisplay.MinimumAccountBalance ->
         context.getString(R.string.transfer_minimum_account_balance, amount(required, asset.toPrimitives()).boldMarkdown())
 
+    is GemConfirmErrorDisplay.DestinationAccountActivation ->
+        context.getString(R.string.transfer_destination_account_activation, amount(required, asset.toPrimitives()).boldMarkdown())
+
     is GemConfirmErrorDisplay.SwapMinimum -> {
         val asset = asset.toPrimitives()
         context.getString(

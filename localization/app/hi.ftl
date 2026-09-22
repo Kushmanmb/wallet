@@ -158,6 +158,7 @@ transfer_activate_asset_title = संपत्ति सक्रिय कर�
 transfer_recipient_my_wallets = मेरे बटुए
 transfer_recipient_view_wallets = वॉलेट देखें
 transfer_minimum_account_balance = इसके बाद न्यूनतम %@ शेष राशि बनी रहनी चाहिए, जब तक कि आप अपनी पूरी शेष राशि का उपयोग नहीं कर रहे हों।
+transfer_destination_account_activation = गंतव्य पते के लिए न्यूनतम %@ आवश्यक है।
 transfer_smart_contract_title = स्मार्ट कॉन्ट्रैक्ट
 transfer_other_title = अन्य
 transfer_maximum_amount = अधिकतम राशि %@ है

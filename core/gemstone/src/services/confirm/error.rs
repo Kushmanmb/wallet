@@ -48,6 +48,10 @@ pub enum GemConfirmError {
         asset: Asset,
         requirement: GemBalanceRequirement,
     },
+    DestinationAccountActivation {
+        asset: Asset,
+        required: GemBigInt,
+    },
     BelowSwapMinimum {
         asset: Asset,
         provider: SwapProvider,
@@ -88,6 +92,7 @@ impl GemConfirmError {
             | Self::InsufficientBalance { .. }
             | Self::InsufficientNetworkFee { .. }
             | Self::MinimumAccountBalanceTooLow { .. }
+            | Self::DestinationAccountActivation { .. }
             | Self::BelowSwapMinimum { .. }
             | Self::SenderMismatch { .. }
             | Self::Sign { .. }
@@ -123,6 +128,10 @@ pub enum GemConfirmErrorDisplay {
         title: String,
     },
     MinimumAccountBalance {
+        asset: Asset,
+        required: GemBigInt,
+    },
+    DestinationAccountActivation {
         asset: Asset,
         required: GemBigInt,
     },
@@ -204,6 +213,10 @@ impl GemConfirmError {
                 asset: asset.clone(),
                 required: requirement.required.clone(),
             },
+            Self::DestinationAccountActivation { asset, required } => GemConfirmErrorDisplay::DestinationAccountActivation {
+                asset: asset.clone(),
+                required: required.clone(),
+            },
             Self::BelowSwapMinimum { asset, provider, provider_name, requirement } => GemConfirmErrorDisplay::SwapMinimum {
                 asset: asset.clone(),
                 provider: *provider,
@@ -233,7 +246,7 @@ impl GemConfirmErrorDisplay {
             | Self::MinimumAccountBalance { .. }
             | Self::SwapMinimum { .. }
             | Self::DustThreshold { .. } => true,
-            Self::Offline | Self::FeeRatesMissing | Self::Cancelled | Self::AccountMissing | Self::Unknown | Self::InsufficientFunds | Self::Payment { .. } | Self::Message { .. } => false,
+            Self::Offline | Self::FeeRatesMissing | Self::Cancelled | Self::AccountMissing | Self::Unknown | Self::InsufficientFunds | Self::DestinationAccountActivation { .. } | Self::Payment { .. } | Self::Message { .. } => false,
         }
     }
 }
@@ -250,6 +263,7 @@ impl std::fmt::Display for GemConfirmError {
             Self::InsufficientBalance { asset, .. } => write!(f, "not enough {} balance", asset.symbol),
             Self::InsufficientNetworkFee { asset, .. } => write!(f, "not enough {} to pay the network fee", asset.symbol),
             Self::MinimumAccountBalanceTooLow { asset, requirement } => write!(f, "{} balance must stay above {}", asset.symbol, requirement.required),
+            Self::DestinationAccountActivation { asset, required } => write!(f, "{} destination activation requires {}", asset.symbol, required),
             Self::BelowSwapMinimum { asset, provider_name, requirement, .. } => {
                 write!(f, "{} amount is below the {} minimum {}", asset.symbol, provider_name, requirement.required)
             }

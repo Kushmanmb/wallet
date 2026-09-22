@@ -158,6 +158,7 @@ transfer_activate_asset_title = Asset aktivieren
 transfer_recipient_my_wallets = Meine Wallets
 transfer_recipient_view_wallets = Wallets anzeigen
 transfer_minimum_account_balance = Danach muss ein Mindestguthaben %@ übrig bleiben, es sei denn, Sie nutzen Ihr gesamtes Guthaben.
+transfer_destination_account_activation = Die Zieladresse erfordert ein Minimum von %@.
 transfer_smart_contract_title = Intelligenter Vertrag
 transfer_other_title = Andere
 transfer_maximum_amount = Der Höchstbetrag beträgt %@

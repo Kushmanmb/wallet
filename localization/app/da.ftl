@@ -158,6 +158,7 @@ transfer_activate_asset_title = Aktiver aktiv
 transfer_recipient_my_wallets = Mine tegnebøger
 transfer_recipient_view_wallets = Se tegnebøger
 transfer_minimum_account_balance = Der skal være en minimumsaldo på %@ tilbage efter dette, medmindre du bruger din fulde saldo.
+transfer_destination_account_activation = Destinationsadressen kræver et minimum på %@.
 transfer_smart_contract_title = Smart kontrakt
 transfer_other_title = Andet
 transfer_maximum_amount = Det maksimale beløb er %@

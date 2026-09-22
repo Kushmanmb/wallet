@@ -137,6 +137,7 @@
   <string name="transfer_recipient_my_wallets">我的錢包</string>
   <string name="transfer_recipient_view_wallets">查看錢包</string>
   <string name="transfer_minimum_account_balance">此後必須保留最低 %1$s 餘額，除非使用全部餘額。</string>
+  <string name="transfer_destination_account_activation">目標地址最低需要 %1$s。</string>
   <string name="transfer_smart_contract_title">智慧合約</string>
   <string name="transfer_other_title">其他</string>
   <string name="transfer_maximum_amount">最高金額為 %1$s</string>

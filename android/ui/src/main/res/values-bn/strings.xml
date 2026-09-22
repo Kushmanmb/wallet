@@ -137,6 +137,7 @@
   <string name="transfer_recipient_my_wallets">আমার ওয়ালেট</string>
   <string name="transfer_recipient_view_wallets">ওয়ালেট দেখুন</string>
   <string name="transfer_minimum_account_balance">এর পরেও ন্যূনতম %1$s ব্যালেন্স থাকতে হবে, যদি না আপনি আপনার সম্পূর্ণ ব্যালেন্স ব্যবহার করছেন।</string>
+  <string name="transfer_destination_account_activation">গন্তব্য ঠিকানার জন্য সর্বনিম্ন %1$s প্রয়োজন।</string>
   <string name="transfer_smart_contract_title">স্মার্ট চুক্তি</string>
   <string name="transfer_other_title">অন্যান্য</string>
   <string name="transfer_maximum_amount">সর্বাধিক পরিমাণ হল %1$s</string>

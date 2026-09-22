@@ -158,6 +158,7 @@ transfer_activate_asset_title = 자산 활성화
 transfer_recipient_my_wallets = 내 지갑
 transfer_recipient_view_wallets = 지갑 보기
 transfer_minimum_account_balance = 전체 잔액을 사용하지 않는 한, 이 후에는 최소 %@ 잔액이 남아 있어야 합니다.
+transfer_destination_account_activation = 받는 주소에는 최소 %@이(가) 필요합니다.
 transfer_smart_contract_title = 스마트 계약
 transfer_other_title = 기타
 transfer_maximum_amount = 최대 금액은 %@입니다.

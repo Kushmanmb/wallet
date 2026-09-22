@@ -158,6 +158,7 @@ transfer_activate_asset_title = অ্যাসেট সক্রিয় ক�
 transfer_recipient_my_wallets = আমার ওয়ালেট
 transfer_recipient_view_wallets = ওয়ালেট দেখুন
 transfer_minimum_account_balance = এর পরেও ন্যূনতম %@ ব্যালেন্স থাকতে হবে, যদি না আপনি আপনার সম্পূর্ণ ব্যালেন্স ব্যবহার করছেন।
+transfer_destination_account_activation = গন্তব্য ঠিকানার জন্য সর্বনিম্ন %@ প্রয়োজন।
 transfer_smart_contract_title = স্মার্ট চুক্তি
 transfer_other_title = অন্যান্য
 transfer_maximum_amount = সর্বাধিক পরিমাণ হল %@

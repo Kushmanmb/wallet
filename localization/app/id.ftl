@@ -158,6 +158,7 @@ transfer_activate_asset_title = Aktifkan Aset
 transfer_recipient_my_wallets = Dompetku
 transfer_recipient_view_wallets = Lihat Dompet
 transfer_minimum_account_balance = Saldo minimum %@ harus tetap ada setelah ini, kecuali Anda menggunakan saldo penuh.
+transfer_destination_account_activation = Alamat tujuan memerlukan minimum %@.
 transfer_smart_contract_title = Kontrak Cerdas
 transfer_other_title = Lainnya
 transfer_maximum_amount = Jumlah Maksimum adalah %@

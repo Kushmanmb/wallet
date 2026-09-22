@@ -198,6 +198,7 @@ impl GemConfirmData {
             fee_asset_balance: metadata.fee_asset_balance.available.clone().into(),
             fee: self.fee.fee.clone(),
             is_max_amount: transfer.use_max_amount,
+            destination_account_exists: self.metadata.get_is_destination_address_exist().ok(),
         };
         Ok(match input.calculate() {
             Ok(amount) => GemTransferAmountResult::Amount { amount },
@@ -223,6 +224,7 @@ fn amount_error(error: GemTransferAmountError, asset: &Asset, fee_asset: &Asset)
             asset: error_asset(&asset_id),
             requirement: GemBalanceRequirement::new(required, available),
         },
+        GemTransferAmountError::DestinationAccountActivation { asset_id, required, .. } => GemConfirmError::DestinationAccountActivation { asset: error_asset(&asset_id), required },
         GemTransferAmountError::BelowSwapMinimum { asset_id, provider, minimum, value } => GemConfirmError::BelowSwapMinimum {
             asset: error_asset(&asset_id),
             provider,
@@ -338,6 +340,7 @@ pub fn error_info(display: &GemConfirmErrorDisplay, prices: &[AssetPrice], curre
         | GemConfirmErrorDisplay::AccountMissing
         | GemConfirmErrorDisplay::Unknown
         | GemConfirmErrorDisplay::InsufficientFunds
+        | GemConfirmErrorDisplay::DestinationAccountActivation { .. }
         | GemConfirmErrorDisplay::Payment { .. }
         | GemConfirmErrorDisplay::Message { .. } => None,
     }

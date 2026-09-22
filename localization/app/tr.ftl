@@ -158,6 +158,7 @@ transfer_activate_asset_title = Varlığı Etkinleştir
 transfer_recipient_my_wallets = Cüzdanlarım
 transfer_recipient_view_wallets = Cüzdanları Görüntüle
 transfer_minimum_account_balance = Bakiyenizin tamamını kullanmadığınız sürece, bundan sonra minimum %@ bakiye kalmalıdır.
+transfer_destination_account_activation = Hedef adres en az %@ gerektirir.
 transfer_smart_contract_title = Akıllı Sözleşme
 transfer_other_title = Diğer
 transfer_maximum_amount = Maksimum Tutar %@
