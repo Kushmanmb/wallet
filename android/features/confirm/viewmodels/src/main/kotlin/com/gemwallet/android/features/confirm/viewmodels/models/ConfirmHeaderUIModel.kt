@@ -5,6 +5,7 @@ import com.gemwallet.android.model.AssetPriceValue
 import com.gemwallet.android.ui.components.list_head.SimulationHeaderUIModel
 import com.gemwallet.android.ui.models.ButtonState
 import com.wallet.core.primitives.Asset
+import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.FeePriority
 import com.wallet.core.primitives.NFTAsset
 import uniffi.gemstone.GemConfirmButtonState
@@ -12,7 +13,7 @@ import uniffi.gemstone.GemTransactionHeaderKind
 import java.math.BigInteger
 
 sealed interface ConfirmHeaderUIModel {
-    data class Placeholder(val asset: Asset?) : ConfirmHeaderUIModel
+    data class Placeholder(val icon: Any?, val visible: Boolean) : ConfirmHeaderUIModel
     data class Simulation(val header: SimulationHeaderUIModel) : ConfirmHeaderUIModel
     data class Swap(val fromAsset: AssetPriceValue, val fromValueText: String, val fromEquivalentText: String?, val toAsset: AssetPriceValue, val toValueText: String, val toEquivalentText: String?) : ConfirmHeaderUIModel
     data class Nft(val nftAsset: NFTAsset) : ConfirmHeaderUIModel
@@ -22,10 +23,12 @@ sealed interface ConfirmHeaderUIModel {
 
 data class FeeSelectionUIModel(val selectedPriority: FeePriority?, val customRate: BigInteger?)
 
-internal fun confirmHeader(amountModel: AmountUIModel?, simulationHeader: SimulationHeaderUIModel?, isPayment: Boolean, isLoading: Boolean, headerAsset: Asset?, awaitsApprovalHeader: Boolean): ConfirmHeaderUIModel? = when {
+internal fun confirmHeader(amountModel: AmountUIModel?, simulationHeader: SimulationHeaderUIModel?, isPayment: Boolean, isLoading: Boolean, headerAsset: Asset?, pendingHeaderAssetId: AssetId?): ConfirmHeaderUIModel? = when {
     simulationHeader != null -> ConfirmHeaderUIModel.Simulation(simulationHeader)
 
-    isLoading && (isPayment || awaitsApprovalHeader) -> ConfirmHeaderUIModel.Placeholder(headerAsset)
+    isLoading && isPayment -> ConfirmHeaderUIModel.Placeholder(headerAsset, visible = false)
+
+    isLoading && pendingHeaderAssetId != null -> ConfirmHeaderUIModel.Placeholder(pendingHeaderAssetId, visible = true)
 
     amountModel?.headerKind is GemTransactionHeaderKind.Swap -> ConfirmHeaderUIModel.Swap(
         fromAsset = amountModel.fromAsset,

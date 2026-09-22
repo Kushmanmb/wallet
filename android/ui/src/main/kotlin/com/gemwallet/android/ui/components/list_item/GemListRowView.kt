@@ -36,6 +36,7 @@ import com.gemwallet.android.ui.style.icon
 import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
+import com.gemwallet.android.ui.theme.smallIconSize
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemListSection
@@ -83,7 +84,7 @@ fun GemListRowView(
                 minHeight = ListItemDefaults.plainMinHeight,
                 accessory = when {
                     row.trailingImage != null -> {
-                        { DataBadgeChevron(isShowChevron = false) { ListItemImageView(image = row.trailingImage, style = ListItemImageStyle.Glyph) } }
+                        { DataBadgeChevron(isShowChevron = false) { ListItemImageView(image = row.trailingImage, size = smallIconSize) } }
                     }
 
                     row.url != null || row.opensAnotherScreen -> {

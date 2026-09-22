@@ -29,15 +29,17 @@ class ConfirmHeaderUIModelTest {
     fun anApprovalHeaderWaitsInPlaceInsteadOfShowingTheTransferAmount() {
         val asset = mockAssetSolana()
 
+        val assetId = asset.id
+
         assertEquals(
-            ConfirmHeaderUIModel.Placeholder(asset),
+            ConfirmHeaderUIModel.Placeholder(assetId, visible = true),
             confirmHeader(
                 amountModel = mockAmountUIModel(),
                 simulationHeader = null,
                 isPayment = false,
                 isLoading = true,
                 headerAsset = asset,
-                awaitsApprovalHeader = true,
+                pendingHeaderAssetId = assetId,
             ),
         )
     }
@@ -55,7 +57,22 @@ class ConfirmHeaderUIModelTest {
                 isPayment = false,
                 isLoading = true,
                 headerAsset = asset,
-                awaitsApprovalHeader = true,
+                pendingHeaderAssetId = asset.id,
+            ),
+        )
+    }
+
+    @Test
+    fun aPaymentHeaderReservesSpaceWithoutShowingTheIcon() {
+        assertEquals(
+            ConfirmHeaderUIModel.Placeholder(mockAssetSolana(), visible = false),
+            confirmHeader(
+                amountModel = null,
+                simulationHeader = null,
+                isPayment = true,
+                isLoading = true,
+                headerAsset = mockAssetSolana(),
+                pendingHeaderAssetId = mockAssetSolana().id,
             ),
         )
     }
@@ -68,7 +85,7 @@ class ConfirmHeaderUIModelTest {
             isPayment = false,
             isLoading = false,
             headerAsset = mockAssetSolana(),
-            awaitsApprovalHeader = false,
+            pendingHeaderAssetId = null,
         )
 
         assertEquals("1 SOL", (header as ConfirmHeaderUIModel.Amount).amount)

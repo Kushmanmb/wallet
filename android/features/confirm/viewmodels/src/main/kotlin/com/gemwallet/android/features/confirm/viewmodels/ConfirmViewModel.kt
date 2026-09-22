@@ -133,7 +133,7 @@ class ConfirmViewModel @Inject constructor(
     val isErrorSheetVisible = MutableStateFlow(false)
     val feeSelection = MutableStateFlow<GemConfirmFeeSelection>(GemConfirmFeeSelection.Priority(FeePriority.Normal.toGem()))
     private val feeAssetSelection = MutableStateFlow<FeeAssetSelection>(FeeAssetSelection.Automatic)
-    private var requestSimulation: SimulationResult? = null
+    private val requestSimulation = MutableStateFlow<SimulationResult?>(null)
     private val requestWallet = MutableStateFlow<Wallet?>(null)
 
     private val request = savedStateHandle.getStateFlow<String?>(RouteArgument.Params.key, null)
@@ -158,7 +158,7 @@ class ConfirmViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val confirmation = combine(request.filterNotNull(), wallet.filterNotNull()) { request, wallet ->
-        confirmService.confirmation(wallet.toGem(), request, requestSimulation).also { screen.value = it.screen() }
+        confirmService.confirmation(wallet.toGem(), request, requestSimulation.value).also { screen.value = it.screen() }
     }
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -318,7 +318,7 @@ class ConfirmViewModel @Inject constructor(
     fun dismissAcquire() = acquireRequestState.update { null }
 
     fun init(transfer: GemTransferData, simulationResult: SimulationResult? = null, wallet: Wallet? = null) {
-        requestSimulation = simulationResult
+        requestSimulation.value = simulationResult
         requestWallet.value = wallet
         viewModelScope.launch(ioDispatcher) {
             val pack = transfer.pack()
@@ -366,8 +366,15 @@ class ConfirmViewModel @Inject constructor(
     val buttonState: StateFlow<ButtonState> = button.map { it.state.buttonState() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Loading)
 
-    val header: StateFlow<ConfirmHeaderUIModel?> = combine(amountUIModel, simulation, isPaymentRequest, isLoading, headerAsset) { amount, simulation, isPayment, isLoading, headerAsset ->
-        confirmHeader(amount, simulation.header, isPayment, isLoading, headerAsset, requestSimulation?.header != null)
+    val header: StateFlow<ConfirmHeaderUIModel?> = combine(
+        combine(amountUIModel, simulation, isPaymentRequest) { amount, loaded, isPayment ->
+            ConfirmHeaderRequest(amount, loaded.header, isPayment)
+        },
+        combine(isLoading, headerAsset, requestSimulation) { loading, asset, requested ->
+            ConfirmHeaderPending(loading, asset, requested?.header?.assetId?.let { com.wallet.core.primitives.AssetId(it) })
+        },
+    ) { request, pending ->
+        confirmHeader(request.amount, request.header, request.isPayment, pending.isLoading, pending.asset, pending.assetId)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val feeSelectionUIModel: StateFlow<FeeSelectionUIModel> = feeSelection.map { FeeSelectionUIModel(it.selectedPriority()?.toPrimitives(), it.customGasPrice()) }
@@ -428,6 +435,10 @@ class ConfirmViewModel @Inject constructor(
             screen.update { it.onExecuteFailed(err.toConfirmError()) }
         }
     }
+
+    private data class ConfirmHeaderRequest(val amount: AmountUIModel?, val header: com.gemwallet.android.ui.components.list_head.SimulationHeaderUIModel?, val isPayment: Boolean)
+
+    private data class ConfirmHeaderPending(val isLoading: Boolean, val asset: Asset?, val assetId: com.wallet.core.primitives.AssetId?)
 
     private data class ConfirmContent(val session: GemConfirmation, val currency: Currency, val load: GemConfirmLoad) {
         val confirmData: GemConfirmData? = load.preload?.confirmData
