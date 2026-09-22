@@ -460,6 +460,7 @@ mod tests {
             | GemListRow::Link { title, .. }
             | GemListRow::Text { title, .. }
             | GemListRow::Amount { title, .. }
+            | GemListRow::Quote { title, .. }
             | GemListRow::Ranked { title, .. }
             | GemListRow::AllTime { title, .. }
             | GemListRow::Identifier { title, .. }
@@ -471,7 +472,8 @@ mod tests {
             | GemListRow::Toggle { title, .. }
             | GemListRow::Picker { title, .. }
             | GemListRow::Lines { title, .. } => Some(*title),
-            GemListRow::App { .. }
+            GemListRow::Provider { .. }
+            | GemListRow::App { .. }
             | GemListRow::Wallet { .. }
             | GemListRow::Memo { .. }
             | GemListRow::Social { .. }

@@ -35,10 +35,11 @@ import com.gemwallet.android.ui.models.ListSection
 import com.gemwallet.android.ui.open
 import com.gemwallet.android.ui.theme.padding16
 import com.gemwallet.android.ui.theme.paddingSmall
+import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.ChainAddress
 
 @Composable
-internal fun TransactionDetailsScene(title: String, sections: List<ListSection<TransactionDetailsRowUIModel>>, headerTarget: TransactionHeaderTarget?, onAction: (TransactionDetailsAction) -> Unit) {
+internal fun TransactionDetailsScene(title: String, sections: List<ListSection<TransactionDetailsRowUIModel>>, headerTarget: TransactionHeaderTarget?, chain: Chain, onAction: (TransactionDetailsAction) -> Unit) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     Scene(
@@ -78,7 +79,12 @@ internal fun TransactionDetailsScene(title: String, sections: List<ListSection<T
 
                     is TransactionDetailsRowUIModel.SwapProgress -> SwapProgressItem(row.model)
 
-                    is TransactionDetailsRowUIModel.Row -> GemListRowView(row = row.row, listPosition = position, infoIcon = row.infoIcon)
+                    is TransactionDetailsRowUIModel.Row -> GemListRowView(
+                        row = row.row,
+                        listPosition = position,
+                        infoIcon = row.infoIcon,
+                        onSelectAddress = { address -> onAction(TransactionDetailsAction.OpenAddress(ChainAddress(chain, address))) },
+                    )
 
                     is TransactionDetailsRowUIModel.NftHead -> NftHead(
                         metadata = row.metadata,

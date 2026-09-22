@@ -49,6 +49,8 @@ sealed interface TransactionDetailsRowUIModel {
     data class SwapAgain(val fromAssetId: AssetId, val toAssetId: AssetId) : TransactionDetailsRowUIModel
 }
 
+fun GemTransactionDetailRows.chain(): Chain = asset.toPrimitives().chain
+
 internal fun GemTransactionDetailRows.uiModel(row: GemTransactionDetailRow, context: Context, currency: Currency): TransactionDetailsRowUIModel {
     val asset = asset.toPrimitives()
     return when (row) {

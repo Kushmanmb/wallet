@@ -211,10 +211,19 @@ pub enum GemListRow {
         title: GemListRowTitle,
         value: String,
     },
+    Provider {
+        name: String,
+        contract: Option<String>,
+    },
     Amount {
         title: GemListRowTitle,
         amount: GemFormattedNumber,
         info: Option<GemInfoTopic>,
+    },
+    Quote {
+        title: GemListRowTitle,
+        value: Option<GemFormattedNumber>,
+        change: Option<GemFormattedNumber>,
     },
     Ranked {
         title: GemListRowTitle,

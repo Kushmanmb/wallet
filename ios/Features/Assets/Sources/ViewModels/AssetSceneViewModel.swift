@@ -105,22 +105,6 @@ public final class AssetSceneViewModel: Sendable {
 
     private func detailRowItem(_ row: GemAssetDetailRow, id: String, networkDestination: GemAssetNetworkDestination?) -> AssetDetailRowItem {
         switch row {
-        case let .price(price):
-            AssetDetailRowItem(
-                id: id,
-                content: .item(
-                    ListItemModel(
-                        title: Localized.Asset.price,
-                        subtitle: price.price?.text(),
-                        subtitleExtra: price.change?.text(),
-                        subtitleStyleExtra: TextStyle(font: .subheadline, color: price.change?.tone.color ?? Colors.gray),
-                    ),
-                ),
-                action: .price,
-                accessibilityIdentifier: "price",
-            )
-        case let .network(name):
-            AssetDetailRowItem(id: id, content: .network(name: name), action: networkAction(networkDestination))
         case let .balance(item):
             AssetDetailRowItem(
                 id: id,
@@ -128,10 +112,13 @@ public final class AssetSceneViewModel: Sendable {
                 action: balanceAction(item),
                 accessibilityIdentifier: balanceAccessibilityIdentifier(item),
             )
-        case let .earn(row):
-            AssetDetailRowItem(id: id, content: .row(row), action: .earn)
         case let .row(row):
-            AssetDetailRowItem(id: id, content: .row(row), action: rowAction(row))
+            AssetDetailRowItem(
+                id: id,
+                content: .row(row),
+                action: rowAction(row, networkDestination: networkDestination),
+                accessibilityIdentifier: accessibilityIdentifier(row),
+            )
         }
     }
 
@@ -160,11 +147,21 @@ public final class AssetSceneViewModel: Sendable {
         }
     }
 
-    private func rowAction(_ row: GemListRow) -> AssetDetailRowAction? {
+    private func rowAction(_ row: GemListRow, networkDestination: GemAssetNetworkDestination?) -> AssetDetailRowAction? {
         switch row {
+        case .quote: .price
+        case .network: networkAction(networkDestination)
+        case .amount(.stakeApr, _, _), .text(.stakeApr, _): .earn
         case .link(.priceAlerts, _, _): .priceAlerts
         case .link(.pin, _, _), .link(.unpin, _, _): .pin
         case .link(.addToWallet, _, _): .enable
+        default: nil
+        }
+    }
+
+    private func accessibilityIdentifier(_ row: GemListRow) -> String? {
+        switch row {
+        case .quote: "price"
         default: nil
         }
     }
@@ -201,10 +198,6 @@ public final class AssetSceneViewModel: Sendable {
 
     var showTransactions: Bool {
         transactionSections.isNotEmpty
-    }
-
-    var networkAssetImage: AssetImage {
-        AssetIdViewModel(assetId: assetModel.asset.chain.assetId).networkAssetImage
     }
 
     func emptyContentModel(_ details: GemAssetDetails) -> EmptyContentTypeViewModel {

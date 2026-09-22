@@ -538,10 +538,7 @@ pub struct GemAssetDetailsState {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemAssetDetailRow {
-    Price { row: GemPriceRow },
-    Network { name: String },
     Balance { row: GemAssetBalanceRow },
-    Earn { row: GemListRow },
     Row { row: GemListRow },
 }
 

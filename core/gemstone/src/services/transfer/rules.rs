@@ -1,7 +1,7 @@
 use chrono::Utc;
 use num_bigint::BigInt;
 use primitives::SwapProvider;
-use primitives::swap::ApprovalData;
+use primitives::swap::{ApprovalData, SwapQuoteDataType};
 use primitives::{
     AccountDataType, AddressName, ApplicationMetadataSource, Asset, AssetId, AssetType, Chain, ContractCallData, DelegationValidator, EarnType, FeePriority, PerpetualType, RecentActivityType, StakeType, Transaction, TransactionDirection,
     TransactionInputType, TransactionNFTTransferMetadata, TransactionPerpetualMetadata, TransactionResourceTypeMetadata, TransactionState, TransactionSwapMetadata, TransactionType, TransactionWalletConnectMetadata,
@@ -516,6 +516,10 @@ impl GemPendingTransactionInput {
             .or_else(|| approval.as_ref().map(|approval| AssetId::from(chain, Some(approval.token.clone()))))
             .unwrap_or_else(|| transfer.input_type.transaction_asset().id);
         let direction = if self.sender == recipient { TransactionDirection::SelfTransfer } else { TransactionDirection::Outgoing };
+        let contract = match (&transfer.input_type, &self.transaction_type) {
+            (TransactionInputType::Swap { swap_data, .. }, TransactionType::Swap) if swap_data.data.data_type == SwapQuoteDataType::Contract => Some(swap_data.data.to.clone()).filter(|contract| !contract.is_empty()),
+            _ => None,
+        };
         let metadata = match transfer.input_type {
             TransactionInputType::Swap { .. } | TransactionInputType::Earn { .. } if approval.is_some() => None,
             _ => transfer.input_type.metadata().map_err(|error| error.to_string())?,
@@ -525,7 +529,7 @@ impl GemPendingTransactionInput {
             asset_id,
             self.sender,
             recipient,
-            None,
+            contract,
             self.transaction_type,
             TransactionState::Pending,
             self.network_fee.to_biguint().ok_or_else(|| "negative network fee".to_string())?,
@@ -1096,6 +1100,7 @@ mod tests {
         };
         let transaction = GemPendingTransactionInput::mock(swap, TransactionType::Swap, "0xhash", 0, 1).pending_transaction().unwrap().unwrap();
         assert_eq!(transaction.to, "0xrouter");
+        assert_eq!(transaction.contract.as_deref(), Some("0xrouter"), "a contract swap keeps the router so the provider row can open it");
         assert_eq!(transaction.value, BigUint::from(99u64));
         assert_eq!(transaction.memo, None, "a swap carries no memo, which is absence and not an empty one");
         assert_eq!(transaction.direction, TransactionDirection::Outgoing);
@@ -1120,8 +1125,18 @@ mod tests {
         };
         let transaction = GemPendingTransactionInput::mock(approval_leg, TransactionType::TokenApproval, "0xhash", 0, 2).pending_transaction().unwrap().unwrap();
         assert_eq!(transaction.to, "0xspender");
+        assert_eq!(transaction.contract, None, "the approval leg is the token spender, not the swap contract");
         assert_eq!(transaction.asset_id, AssetId::from(Chain::Ethereum, Some("0xusdc".into())));
         assert!(transaction.metadata.is_none());
+
+        let deposit = TransactionInputType::Swap {
+            from_asset: Asset::from_chain(Chain::Near),
+            to_asset: Asset::from_chain(Chain::Ethereum),
+            swap_data: SwapData::mock_transfer(SwapProvider::NearIntents, "100", "90", "deposit.near"),
+        };
+        let transaction = GemPendingTransactionInput::mock(deposit, TransactionType::Swap, "near-hash", 0, 1).pending_transaction().unwrap().unwrap();
+        assert_eq!(transaction.to, "deposit.near");
+        assert_eq!(transaction.contract, None, "a deposit-address swap such as NEAR Intents has no contract to open");
 
         let generic = TransactionInputType::Generic {
             asset: Asset::from_chain(Chain::Solana),
