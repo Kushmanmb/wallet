@@ -16,6 +16,7 @@ use crate::services::wallet::model::GemWalletRow;
 pub enum GemListSectionTitle {
     None,
     Balances,
+    Info,
     Community,
     Manage,
     Resources,

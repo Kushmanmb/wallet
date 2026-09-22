@@ -629,6 +629,7 @@ public extension GemListSectionTitle {
         switch self {
         case .none: nil
         case .balances: Localized.Asset.balances
+        case .info: Localized.Common.info
         case .community: Localized.Settings.community
         case .manage: Localized.Common.manage
         case .resources: Localized.Asset.resources

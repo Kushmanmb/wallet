@@ -1,5 +1,5 @@
 use crate::formatted_number::GemFormattedNumber;
-use crate::models::list::GemListRow;
+use crate::models::list::{GemListRow, GemListSection};
 use crate::models::state::GemLoadState;
 use primitives::{RewardRedemptionOption, Rewards, WalletId};
 
@@ -16,21 +16,24 @@ pub struct GemRewardsViewState {
     pub rewards: GemRewardsState,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
+pub enum GemRewardsAction {
+    CreateCode,
+    Share,
+    UseReferralCode,
+    ActivatePendingReferral { code: String, is_enabled: bool },
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemRewardsState {
-    pub has_referral_code: bool,
-    pub can_invite: bool,
-    pub can_use_referral_code: bool,
-    pub shows_info: bool,
+    pub actions: Vec<GemRewardsAction>,
     pub error_notice: Option<GemListRow>,
     pub status_notice: Option<GemListRow>,
-    pub shows_pending_activation: bool,
-    pub can_activate_pending_referral: bool,
+    pub sections: Vec<GemListSection>,
     pub invite_reward_points: GemFormattedNumber,
     pub referral_code: Option<String>,
     pub referral_link: Option<String>,
     pub used_referral_code: Option<String>,
-    pub info_rows: Vec<GemListRow>,
     pub redemptions: Vec<GemRewardsRedemption>,
 }
 
@@ -51,19 +54,14 @@ pub struct GemRewardsRedemption {
 impl Default for GemRewardsState {
     fn default() -> Self {
         Self {
-            has_referral_code: false,
-            can_invite: false,
-            can_use_referral_code: false,
-            shows_info: false,
+            actions: Vec::new(),
             error_notice: None,
             status_notice: None,
-            shows_pending_activation: false,
-            can_activate_pending_referral: false,
+            sections: Vec::new(),
             invite_reward_points: GemFormattedNumber::count(0),
             referral_code: None,
             referral_link: None,
             used_referral_code: None,
-            info_rows: Vec::new(),
             redemptions: Vec::new(),
         }
     }

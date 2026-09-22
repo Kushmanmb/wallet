@@ -11,11 +11,11 @@ import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.referral.viewmodels.models.IncomingCodeUIModel
-import com.gemwallet.android.features.referral.viewmodels.models.ReferralUIState
 import com.gemwallet.android.features.referral.viewmodels.models.RewardRedemptionUIModel
-import com.gemwallet.android.features.referral.viewmodels.models.infoRows
+import com.gemwallet.android.features.referral.viewmodels.models.RewardsSectionUIModel
+import com.gemwallet.android.features.referral.viewmodels.models.sectionModels
 import com.gemwallet.android.features.referral.viewmodels.models.uiModel
-import com.gemwallet.android.features.referral.viewmodels.models.uiState
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Wallet
@@ -38,6 +38,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemIncomingCode
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemRewardsAction
 import uniffi.gemstone.GemRewardsRedemption
 import uniffi.gemstone.GemRewardsServiceInterface
 import uniffi.gemstone.GemServiceException
@@ -74,10 +76,16 @@ class ReferralViewModel @Inject constructor(
     private val rewardsState = viewState.map { it.rewards }
         .stateIn(viewModelScope, SharingStarted.Eagerly, viewState.value.rewards)
 
-    val uiState: StateFlow<ReferralUIState> = rewardsState.map { it.uiState() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, rewardsState.value.uiState())
+    val actions: StateFlow<List<GemRewardsAction>> = rewardsState.map { it.actions }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, rewardsState.value.actions)
 
-    val infoRows: StateFlow<List<ListItemModel>> = rewardsState.map { it.infoRows(context) }
+    val notices: StateFlow<List<GemListRow>> = rewardsState.map { listOfNotNull(it.errorNotice, it.statusNotice) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val inviteRewardPoints: StateFlow<String> = rewardsState.map { it.inviteRewardPoints.text() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, rewardsState.value.inviteRewardPoints.text())
+
+    val sections: StateFlow<List<RewardsSectionUIModel>> = rewardsState.map { it.sectionModels(context) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val redemptions: StateFlow<List<RewardRedemptionUIModel>> = rewardsState.map { state -> state.redemptions.mapNotNull { it.uiModel(context) } }

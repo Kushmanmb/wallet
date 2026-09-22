@@ -4,6 +4,7 @@ import Components
 import Foundation
 import enum Gemstone.GemIncomingCode
 import enum Gemstone.GemListRow
+import enum Gemstone.GemRewardsAction
 import struct Gemstone.GemRewardsRedemption
 import protocol Gemstone.GemRewardsServiceProtocol
 import struct Gemstone.GemRewardsSession
@@ -136,8 +137,19 @@ public final class RewardsViewModel: Sendable {
         rewardsState.referralCode
     }
 
-    var infoRows: [GemListRow] {
-        rewardsState.infoRows
+    var sections: [ListSection<GemListSectionRow>] {
+        rewardsState.sections.listSections
+    }
+
+    func action(_ action: GemRewardsAction) -> Bool {
+        rewardsState.actions.contains(action)
+    }
+
+    var pendingReferral: (code: String, isEnabled: Bool)? {
+        rewardsState.actions.compactMap { action in
+            guard case let .activatePendingReferral(code, isEnabled) = action else { return nil }
+            return (code, isEnabled)
+        }.first
     }
 
     var invitedBy: String? {
@@ -149,7 +161,7 @@ public final class RewardsViewModel: Sendable {
     }
 
     var activatePendingButtonType: ButtonType {
-        rewardsState.canActivatePendingReferral ? .primary() : .primary(.disabled)
+        pendingReferral?.isEnabled == true ? .primary() : .primary(.disabled)
     }
 
     var selectedWalletRow: GemWalletRow {
@@ -211,7 +223,7 @@ public final class RewardsViewModel: Sendable {
     }
 
     func activatePendingReferral() async {
-        guard let code = rewardsState.usedReferralCode else { return }
+        guard let code = pendingReferral?.code else { return }
         await useReferralCode(code)
     }
 

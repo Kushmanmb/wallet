@@ -116,7 +116,7 @@ mod tests {
         let unreachable = session.on_result(failed());
 
         assert!(matches!(unreachable.view_state(now()).state, GemLoadState::Error { .. }), "a wallet with a code must not be offered the create-code screen");
-        assert!(!unreachable.view_state(now()).rewards.can_invite);
+        assert!(unreachable.view_state(now()).rewards.actions.is_empty(), "a failed wallet is offered nothing to do");
     }
 
     #[test]

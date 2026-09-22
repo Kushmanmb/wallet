@@ -526,6 +526,7 @@ fun GemRecipientErrorDisplay.string(context: Context): String = when (this) {
 fun GemListSectionTitle.titleRes(): Int? = when (this) {
     GemListSectionTitle.NONE -> null
     GemListSectionTitle.BALANCES -> R.string.asset_balances
+    GemListSectionTitle.INFO -> R.string.common_info
     GemListSectionTitle.COMMUNITY -> R.string.settings_community
     GemListSectionTitle.MANAGE -> R.string.common_manage
     GemListSectionTitle.RESOURCES -> R.string.asset_resources

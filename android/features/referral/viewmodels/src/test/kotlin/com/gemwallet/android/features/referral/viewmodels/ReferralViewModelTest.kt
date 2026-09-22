@@ -32,6 +32,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemRewardsAction
 import uniffi.gemstone.GemRewardsServiceInterface
 import uniffi.gemstone.GemServiceException
 
@@ -77,12 +78,12 @@ class ReferralViewModelTest {
 
         try {
             runCurrent()
-            assertNull(viewModel.uiState.value.pendingCode)
+            assertNull(pendingCode(viewModel))
 
             viewModel.useCode("friend") {}
             runCurrent()
 
-            assertEquals("friend", viewModel.uiState.value.pendingCode)
+            assertEquals("friend", pendingCode(viewModel))
         } finally {
             viewModel.viewModelScope.cancel()
         }
@@ -165,7 +166,7 @@ class ReferralViewModelTest {
         try {
             runCurrent()
 
-            val rows = viewModel.infoRows.value
+            val rows = viewModel.sections.value.flatMap { it.rows }
             assertEquals(
                 listOf(R.string.rewards_my_referral_code, R.string.rewards_referrals, R.string.rewards_points, R.string.rewards_invited_by).map { "string:$it" },
                 rows.map { it.title },
@@ -177,6 +178,8 @@ class ReferralViewModelTest {
             viewModel.viewModelScope.cancel()
         }
     }
+
+    private fun pendingCode(viewModel: ReferralViewModel): String? = viewModel.actions.value.filterIsInstance<GemRewardsAction.ActivatePendingReferral>().firstOrNull()?.code
 
     private fun createViewModel(code: String? = null): ReferralViewModel {
         val arguments = mutableMapOf<String, Any>()
