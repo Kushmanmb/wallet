@@ -263,8 +263,10 @@ private fun SubtitleTag(model: ListItemModel) {
 private fun TitleTag(text: String, style: ListItemTextStyle, type: ListItemTagType) {
     when (type) {
         ListItemTagType.Progress -> {
-            Spacer6()
-            CircularProgressIndicator14()
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Spacer6()
+                CircularProgressIndicator14()
+            }
             return
         }
 
