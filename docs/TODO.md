@@ -45,7 +45,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | U33 |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | K14, AUD38, AUD40 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73, F61, AUD15, AUD41 |
-| Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | S75, AUD46, K14, N11 |
+| Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | AUD46, K14, N11 |
 | Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | Preserve exact atomic values |
 | Earn list, provider and deposit amount | Existing stake/earn owner and amount extras | Preserve the existing feature gate |
 | NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | AUD22 |
@@ -144,7 +144,7 @@ Surveyed on 2026-09-21. Each item names what was counted and where; confirm the 
 ### Sessions
 
 - **N10** **M** **Screens with domain state and no session.** Core has 18 `Gem*Session` types; iOS references a session in 17 view models and Android in 39, so adoption is uneven rather than absent. Audit the screens that hold several mutable domain fields without one against [A screen whose state changes is a session](ARCHITECTURE.md#a-screen-whose-state-changes-is-a-session), and remember the exclusions: one text field, one selection, navigation state or a settings mirror does not need one. AUD45 and AUD46 are the two already confirmed; this is the sweep that finds the rest.
-- **N11** **S** **Sessions used on one platform only.** Where Core exposes a session, both apps should drive it. S75 records the open-position autoclose sheet bypassing `GemAutocloseSession` on Android; check the other 18 for a platform that hand-rolls the same transitions, and file one item per session rather than a single sweep.
+- **N11** **S** **Sessions used on one platform only.** Where Core exposes a session, both apps should drive it. S75 landed the open-position autoclose sheet on `GemAutocloseSession`; check the other 18 for a platform that hand-rolls the same transitions, and file one item per session rather than a single sweep.
 
 ### Generated surface
 
@@ -179,7 +179,6 @@ Rows, headers, screen state and flows that an app still assembles from Core ingr
 - **C52** **L** Deep links and pushes prepare their target differently: iOS `NavigationRouter` runs `openAsset` for an asset link, `ensureAsset` for receive/buy/sell/swap, routes perpetual assets to the perpetual scene and passes `rewards("")` through; Android routes links with no Core call (`WebDeepLinks.kt:14-23`), buy/sell through `openAsset`, pushes through `openAsset`/`ensureAsset`, sends fiat and stake pushes to `AssetRoute` always, and turns a blank code into null. A Core `open(action) -> GemNavigationTarget` prepares the assets and switches the wallet once; the apps map the target to a route.
 - **C53** **M** Wallet import and create are orchestrated on both apps (default name, `import_name`, `import_request`, `import_wallet`, `set_current_wallet_id`, accept terms): Android computes the default name when the screen opens, so an import tapped before that finishes is named `""` (`ImportScreen.kt:183,194`), and makes a created wallet current before setup where iOS does it after. One Core import (and create) call that names, stores and activates the wallet.
 - **S73** **M** The perpetual candle chart's state is hand-built on both apps: iOS draws an empty series as data and replaces candles with an error, Android emits Loading on every resume and after each confirm and shows an error without text. A candle session on `GemPerpetualDetailsService` with the `GemChartSession` rules. Carry market/period/currency request identity and reject stale successes and failures; reuse the shared load policy and preserve displayed candles during refresh failures.
-- **S75** **M** Android's open-position autoclose sheet bypasses `GemAutocloseSession`: `AmountAutocloseSheet.kt:63-132` decides validity, confirm and the ROE target inside the composable, and is the last composable holding an `AmountPerpetualProvider` after B78, the provider shows size as amount × leverage ($1,000 where iOS shows the $100 margin at 10x) and validates against the live price where iOS uses the snapshot. A view model on the Core session.
 
 ## 2. Decisions still made twice
 

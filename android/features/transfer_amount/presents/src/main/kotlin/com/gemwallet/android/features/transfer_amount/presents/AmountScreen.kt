@@ -82,7 +82,10 @@ fun AmountScreen(onCancel: () -> Unit, onConfirm: (ConfirmTransferInput) -> Unit
                         onPickValidator = { isSelectValidator = true },
                         onSelectResource = viewModel::selectResource,
                         onSelectLeverage = viewModel::selectLeverage,
-                        onOpenAutoclose = { showsAutoclose = true },
+                        onOpenAutoclose = {
+                            viewModel.perpetualProvider?.openAutoclose()
+                            showsAutoclose = true
+                        },
                     )
                 },
             )

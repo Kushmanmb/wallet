@@ -18,11 +18,12 @@ import com.gemwallet.android.ext.PerpetualFormatter
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.transfer_amount.viewmodels.providers.AmountPerpetualProvider
 import com.gemwallet.android.math.parseInputNumberOrNull
-import com.gemwallet.android.model.CurrencyFormatter
+import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.PercentSuggestionsBar
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.list_item.ListItem
+import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.perpetual.AutocloseInputSection
 import com.gemwallet.android.ui.components.screen.ModalBottomSheet
 import com.gemwallet.android.ui.components.screen.SheetExpansion
@@ -30,9 +31,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.buttonState
 import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.paddingDefault
-import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.TpslType
-import uniffi.gemstone.AutocloseValidation
 
 @Composable
 internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualProvider, amount: String, onDismiss: () -> Unit) {
@@ -43,7 +42,6 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
     }
     val storedTakeProfit by provider.takeProfit.collectAsStateWithLifecycle()
     val storedStopLoss by provider.stopLoss.collectAsStateWithLifecycle()
-    val marketPriceListItem by provider.marketPriceListItem.collectAsStateWithLifecycle()
 
     val assetDecimals = perpetual.asset.decimals
     val perpetualProvider = perpetual.provider
@@ -54,10 +52,9 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
     var focused: TpslType? by remember { mutableStateOf(null) }
 
     val estimator = provider.estimatorFor(amount)
-    val takeProfitPrice = takeProfitText.parseInputNumberOrNull()?.toDouble()
-    val stopLossPrice = stopLossText.parseInputNumberOrNull()?.toDouble()
-    val takeProfitField = provider.autocloseField(TpslType.TakeProfit, amount, takeProfitPrice, submitAttempted)
-    val stopLossField = provider.autocloseField(TpslType.StopLoss, amount, stopLossPrice, submitAttempted)
+    val viewState = provider.autocloseViewState.collectAsStateWithLifecycle().value ?: return
+    val takeProfitField = provider.autocloseField(TpslType.TakeProfit, amount, submitAttempted) ?: return
+    val stopLossField = provider.autocloseField(TpslType.StopLoss, amount, submitAttempted) ?: return
 
     val activeField = focused?.let {
         when (it) {
@@ -70,12 +67,6 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
         TpslType.StopLoss -> stopLossText
         null -> ""
     }
-    val isTakeProfitValid = takeProfitText.isEmpty() || takeProfitField.validation == AutocloseValidation.VALID
-    val isStopLossValid = stopLossText.isEmpty() || stopLossField.validation == AutocloseValidation.VALID
-    val hasInput = takeProfitPrice != null || stopLossPrice != null ||
-        (takeProfitText.isEmpty() && stopLossText.isEmpty())
-    val confirmEnabled = if (submitAttempted) isTakeProfitValid && isStopLossValid else hasInput
-
     ModalBottomSheet(
         isVisible = isVisible,
         onDismissRequest = onDismiss,
@@ -91,7 +82,7 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
         ) {
             provider.openPositionListItem(amount)?.let { ListItem(model = it, listPosition = ListPosition.Single) }
             Spacer16()
-            marketPriceListItem?.let { ListItem(model = it, listPosition = ListPosition.Single) }
+            ListItem(model = ListItemModel(title = stringResource(R.string.perpetual_market_price), subtitle = viewState.marketPrice.text()), listPosition = ListPosition.Single)
             Spacer16()
             AutocloseInputSection(
                 field = takeProfitField,
@@ -99,6 +90,7 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
                 onTextChanged = {
                     submitAttempted = false
                     takeProfitText = it
+                    provider.setAutoclosePrice(TpslType.TakeProfit, it.parseInputNumberOrNull()?.toDouble())
                 },
                 onFocusChanged = { hasFocus ->
                     if (hasFocus) {
@@ -115,6 +107,7 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
                 onTextChanged = {
                     submitAttempted = false
                     stopLossText = it
+                    provider.setAutoclosePrice(TpslType.StopLoss, it.parseInputNumberOrNull()?.toDouble())
                 },
                 onFocusChanged = { hasFocus ->
                     if (hasFocus) {
@@ -140,15 +133,16 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
                             TpslType.TakeProfit -> takeProfitText = formatted
                             TpslType.StopLoss -> stopLossText = formatted
                         }
+                        provider.setAutoclosePrice(activeField.type, formatted.parseInputNumberOrNull()?.toDouble())
                     },
                 )
             } else {
                 MainActionButton(
                     title = stringResource(R.string.common_done),
-                    state = buttonState(enabled = confirmEnabled),
+                    state = buttonState(enabled = viewState.confirmEnabled),
                     onClick = {
                         submitAttempted = true
-                        if (isTakeProfitValid && isStopLossValid) {
+                        if (viewState.confirmEnabled) {
                             provider.setTakeProfit(takeProfitText.takeIf { it.isNotEmpty() })
                             provider.setStopLoss(stopLossText.takeIf { it.isNotEmpty() })
                             onDismiss()
@@ -160,5 +154,3 @@ internal fun AmountAutocloseSheet(isVisible: Boolean, provider: AmountPerpetualP
         }
     }
 }
-
-private val usdFormatter = CurrencyFormatter(type = CurrencyFormatter.Type.Currency, currency = Currency.USD)
