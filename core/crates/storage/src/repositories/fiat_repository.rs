@@ -4,14 +4,14 @@ use primitives::currency::Currency;
 use primitives::{AssetId, FiatProviderCountry, FiatProviderName, FiatRate, FiatTransaction};
 
 use crate::DatabaseClient;
-use crate::database::fiat::{FiatAssetFilter, FiatProviderCountryFilter, FiatStore};
+use crate::database::fiat::{FiatAssetFilter, FiatAssetUpdate, FiatProviderCountryFilter, FiatProviderCountryUpdate, FiatStore};
 
 pub trait FiatRepository {
     fn add_fiat_assets(&mut self, values: Vec<crate::models::FiatAssetRow>) -> Result<usize, DatabaseError>;
-    fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetFilter>) -> Result<usize, DatabaseError>;
+    fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetUpdate>) -> Result<usize, DatabaseError>;
     fn add_fiat_providers(&mut self, values: Vec<crate::models::FiatProviderRow>) -> Result<usize, DatabaseError>;
     fn add_fiat_providers_countries(&mut self, values: Vec<crate::models::FiatProviderCountryRow>) -> Result<usize, DatabaseError>;
-    fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryFilter>) -> Result<usize, DatabaseError>;
+    fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryUpdate>) -> Result<usize, DatabaseError>;
     fn get_fiat_providers_countries(&mut self) -> Result<Vec<FiatProviderCountry>, DatabaseError>;
     fn get_fiat_providers_countries_by_filter(&mut self, filters: Vec<FiatProviderCountryFilter>) -> Result<Vec<crate::models::FiatProviderCountryRow>, DatabaseError>;
     fn get_fiat_transactions_by_device_id(&mut self, device_id: i32) -> Result<Vec<FiatTransaction>, DatabaseError>;
@@ -32,7 +32,7 @@ impl FiatRepository for DatabaseClient {
         Ok(FiatStore::add_fiat_assets(self, values)?)
     }
 
-    fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetFilter>) -> Result<usize, DatabaseError> {
+    fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetUpdate>) -> Result<usize, DatabaseError> {
         Ok(FiatStore::update_fiat_assets(self, asset_ids, updates)?)
     }
 
@@ -44,7 +44,7 @@ impl FiatRepository for DatabaseClient {
         Ok(FiatStore::add_fiat_providers_countries(self, values)?)
     }
 
-    fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryFilter>) -> Result<usize, DatabaseError> {
+    fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryUpdate>) -> Result<usize, DatabaseError> {
         Ok(FiatStore::update_fiat_providers_countries(self, country_ids, updates)?)
     }
 

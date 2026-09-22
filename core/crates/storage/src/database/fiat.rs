@@ -22,18 +22,31 @@ pub enum FiatAssetFilter {
     ProviderSellEnabled(bool),
 }
 
+#[derive(Debug, Clone)]
+pub enum FiatAssetUpdate {
+    IsEnabled(bool),
+    IsEnabledByProvider(bool),
+    IsBuyEnabled(bool),
+    IsSellEnabled(bool),
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FiatProviderCountryFilter {
     Provider(FiatProviderName),
     IsAllowed(bool),
 }
 
+#[derive(Debug, Clone)]
+pub enum FiatProviderCountryUpdate {
+    IsAllowed(bool),
+}
+
 pub(crate) trait FiatStore {
     fn add_fiat_assets(&mut self, values: Vec<FiatAssetRow>) -> Result<usize, diesel::result::Error>;
-    fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetFilter>) -> Result<usize, diesel::result::Error>;
+    fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetUpdate>) -> Result<usize, diesel::result::Error>;
     fn add_fiat_providers(&mut self, values: Vec<FiatProviderRow>) -> Result<usize, diesel::result::Error>;
     fn add_fiat_providers_countries(&mut self, values: Vec<FiatProviderCountryRow>) -> Result<usize, diesel::result::Error>;
-    fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryFilter>) -> Result<usize, diesel::result::Error>;
+    fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryUpdate>) -> Result<usize, diesel::result::Error>;
     fn get_fiat_providers_countries(&mut self) -> Result<Vec<FiatProviderCountryRow>, diesel::result::Error>;
     fn get_fiat_providers_countries_by_filter(&mut self, filters: Vec<FiatProviderCountryFilter>) -> Result<Vec<FiatProviderCountryRow>, diesel::result::Error>;
     fn update_fiat_transaction(&mut self, provider: FiatProviderName, update: FiatTransactionUpdate) -> Result<FiatTransactionRow, diesel::result::Error>;
@@ -74,7 +87,7 @@ impl FiatStore for DatabaseClient {
             .execute(&mut self.connection)
     }
 
-    fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetFilter>) -> Result<usize, diesel::result::Error> {
+    fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetUpdate>) -> Result<usize, diesel::result::Error> {
         if asset_ids.is_empty() || updates.is_empty() {
             return Ok(0);
         }
@@ -82,11 +95,10 @@ impl FiatStore for DatabaseClient {
         updates.into_iter().try_fold(0, |total, update| {
             let target = fiat_assets.filter(id.eq_any(&asset_ids));
             let updated = match update {
-                FiatAssetFilter::IsEnabled(value) => diesel::update(target).set(is_enabled.eq(value)).execute(&mut self.connection)?,
-                FiatAssetFilter::IsEnabledByProvider(value) => diesel::update(target).set(is_enabled_by_provider.eq(value)).execute(&mut self.connection)?,
-                FiatAssetFilter::IsBuyEnabled(value) => diesel::update(target).set(is_buy_enabled.eq(value)).execute(&mut self.connection)?,
-                FiatAssetFilter::IsSellEnabled(value) => diesel::update(target).set(is_sell_enabled.eq(value)).execute(&mut self.connection)?,
-                FiatAssetFilter::HasAssetId | FiatAssetFilter::Provider(_) | FiatAssetFilter::ProviderEnabled(_) | FiatAssetFilter::ProviderBuyEnabled(_) | FiatAssetFilter::ProviderSellEnabled(_) => 0,
+                FiatAssetUpdate::IsEnabled(value) => diesel::update(target).set(is_enabled.eq(value)).execute(&mut self.connection)?,
+                FiatAssetUpdate::IsEnabledByProvider(value) => diesel::update(target).set(is_enabled_by_provider.eq(value)).execute(&mut self.connection)?,
+                FiatAssetUpdate::IsBuyEnabled(value) => diesel::update(target).set(is_buy_enabled.eq(value)).execute(&mut self.connection)?,
+                FiatAssetUpdate::IsSellEnabled(value) => diesel::update(target).set(is_sell_enabled.eq(value)).execute(&mut self.connection)?,
             };
             Ok(total + updated)
         })
@@ -107,7 +119,7 @@ impl FiatStore for DatabaseClient {
             .execute(&mut self.connection)
     }
 
-    fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryFilter>) -> Result<usize, diesel::result::Error> {
+    fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryUpdate>) -> Result<usize, diesel::result::Error> {
         if country_ids.is_empty() || updates.is_empty() {
             return Ok(0);
         }
@@ -115,8 +127,7 @@ impl FiatStore for DatabaseClient {
         updates.into_iter().try_fold(0, |total, update| {
             let target = fiat_providers_countries.filter(id.eq_any(&country_ids));
             let updated = match update {
-                FiatProviderCountryFilter::IsAllowed(value) => diesel::update(target).set(is_allowed.eq(value)).execute(&mut self.connection)?,
-                FiatProviderCountryFilter::Provider(_) => 0,
+                FiatProviderCountryUpdate::IsAllowed(value) => diesel::update(target).set(is_allowed.eq(value)).execute(&mut self.connection)?,
             };
             Ok(total + updated)
         })
@@ -338,11 +349,11 @@ impl DatabaseClient {
         FiatStore::add_fiat_assets(self, values)
     }
 
-    pub fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetFilter>) -> Result<usize, diesel::result::Error> {
+    pub fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetUpdate>) -> Result<usize, diesel::result::Error> {
         FiatStore::update_fiat_assets(self, asset_ids, updates)
     }
 
-    pub fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryFilter>) -> Result<usize, diesel::result::Error> {
+    pub fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryUpdate>) -> Result<usize, diesel::result::Error> {
         FiatStore::update_fiat_providers_countries(self, country_ids, updates)
     }
 

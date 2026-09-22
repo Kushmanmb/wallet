@@ -2,7 +2,7 @@ use chrono::{Duration, Utc};
 use fiat::{FiatProvider, model::FiatProviderAsset};
 use gem_tracing::info_with_fields;
 use primitives::{AssetId, AssetTag, Diff, FiatProviderName, currency::Currency};
-use storage::{AssetFilter, AssetUpdate, FiatAssetFilter, FiatAssetRowsExt, FiatProviderCountryFilter};
+use storage::{AssetFilter, AssetUpdate, FiatAssetFilter, FiatAssetRowsExt, FiatAssetUpdate, FiatProviderCountryFilter, FiatProviderCountryUpdate};
 use storage::{AssetsRepository, Database, TagRepository};
 
 #[derive(Clone, Copy)]
@@ -124,7 +124,7 @@ impl FiatAssetsUpdater {
                 .map(|asset| asset.id)
                 .collect();
             let result = Diff::compare(current_ids, ids);
-            self.database.fiat()?.update_fiat_assets(result.different, vec![FiatAssetFilter::IsEnabledByProvider(false)])?
+            self.database.fiat()?.update_fiat_assets(result.different, vec![FiatAssetUpdate::IsEnabledByProvider(false)])?
         };
 
         info_with_fields!("fiat update assets", provider = provider_name.id(), assets = asset_count, disabled = disabled);
@@ -152,7 +152,7 @@ impl FiatAssetsUpdater {
                 .map(|country| country.id)
                 .collect();
             let result = Diff::compare(current_ids, ids);
-            self.database.fiat()?.update_fiat_providers_countries(result.different, vec![FiatProviderCountryFilter::IsAllowed(false)])?
+            self.database.fiat()?.update_fiat_providers_countries(result.different, vec![FiatProviderCountryUpdate::IsAllowed(false)])?
         };
         info_with_fields!("fiat update countries", provider = provider_name.id(), countries = country_count, disabled = disabled);
         Ok(country_count)
