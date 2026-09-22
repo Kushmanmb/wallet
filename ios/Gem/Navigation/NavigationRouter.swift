@@ -5,6 +5,7 @@ import Foundation
 import enum Gemstone.Deeplink
 import protocol Gemstone.GemAssetsServiceProtocol
 import protocol Gemstone.GemDeeplinkServiceProtocol
+import enum Gemstone.GemPaymentTarget
 import protocol Gemstone.GemPaymentServiceProtocol
 import enum Gemstone.GemPushNotification
 import protocol Gemstone.GemPushNotificationServiceProtocol
@@ -170,18 +171,35 @@ extension NavigationRouter {
 @MainActor
 extension NavigationRouter {
     private func openPayment(_ payment: Gemstone.Payment) async throws {
-        let wallet = try await walletSessionService.requireCurrentWallet().toPrimitives()
-        switch payment {
-        case let .request(request):
-            let assets = try assetStore.getAssetsData(walletId: wallet.id, filters: [])
-            presenter.isPresentingPayment.wrappedValue = try PaymentDestinationBuilder.build(payment: request, assets: assets, paymentService: paymentService)
-        case let .link(link):
+        let wallet = try await walletSessionService.requireCurrentWallet()
+        if case .link = payment {
             toastPresenter.toastMessage = ToastMessage(title: Localized.Common.loading, image: SystemImage.network)
-            let addresses = wallet.accounts.map { ChainAddress(chain: $0.chain, address: $0.address).toGem() }
-            let transaction = try await paymentService.load(link: link, addresses: addresses)
-            let asset = try await assetsService.ensureTokenAsset(for: Primitives.AssetId(core: paymentService.transactionAssetId(transaction: transaction)))
-            toastPresenter.toastMessage = nil
-            presenter.isPresentingPayment.wrappedValue = PaymentDestinationBuilder.build(transaction: transaction, asset: asset, paymentService: paymentService)
+        }
+        let target = try await paymentService.prepare(payment: payment, wallet: wallet)
+        toastPresenter.toastMessage = nil
+        presenter.isPresentingPayment.wrappedValue = try paymentDestination(target, wallet: wallet.toPrimitives())
+    }
+
+    private func paymentDestination(_ target: GemPaymentTarget, wallet: Primitives.Wallet) throws -> PaymentDestination {
+        switch target {
+        case let .confirm(transfer):
+            return .confirm(transfer)
+        case let .recipient(asset, payment):
+            let asset = asset.toPrimitives()
+            guard let assetData = try assetStore.getAssetsData(walletId: wallet.id, filters: [.chainsOrAssets([], [asset.id.identifier])]).first else {
+                throw AnyError(Localized.Errors.notSupported)
+            }
+            return .recipient(
+                SelectedAssetInput(
+                    type: .send(.asset(asset: asset.toGem())),
+                    assetData: assetData,
+                    recipient: payment,
+                ),
+            )
+        case let .selectAsset(payment, chains):
+            return .selectAsset(.send(payment), chains: chains.compactMap { Primitives.Chain(rawValue: $0) })
+        case .unsupported:
+            throw AnyError(Localized.Errors.notSupported)
         }
     }
 }
