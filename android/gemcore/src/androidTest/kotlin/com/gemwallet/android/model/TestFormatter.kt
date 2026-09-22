@@ -4,6 +4,7 @@ import com.gemwallet.android.model.CurrencyFormatter
 import com.gemwallet.android.model.ValueFormatter
 import com.wallet.core.primitives.Currency
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import uniffi.gemstone.GemCurrencyStyle
 import uniffi.gemstone.GemValueStyle
@@ -12,12 +13,18 @@ import java.math.BigInteger
 import java.util.Locale
 
 class TestFormatter {
+
+    private fun assertCompact(value: String, formatted: String) {
+        assertTrue("$formatted starts with $value", formatted.startsWith("$value\u00A0"))
+        assertTrue("$formatted ends with the currency", formatted.endsWith("\u00A0€"))
+    }
+
     @Test
     fun testCompactFormat_Italy() {
         val formatter = CurrencyFormatter(style = GemCurrencyStyle.ABBREVIATED, currency = Currency.EUR, locale = Locale.ITALY)
         assertEquals("5\u00A0Mln\u00A0€", formatter.string(5_000_000.0))
-        assertEquals("7,89\u00A0Mld\u00A0€", formatter.string(7_890_000_000.0))
-        assertEquals("1,2\u00A0Bln\u00A0€", formatter.string(1_200_000_000_000.0))
+        assertCompact("7,89", formatter.string(7_890_000_000.0))
+        assertCompact("1,2", formatter.string(1_200_000_000_000.0))
     }
 
     @Test

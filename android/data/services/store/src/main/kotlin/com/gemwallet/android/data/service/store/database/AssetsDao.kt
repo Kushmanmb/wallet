@@ -209,16 +209,6 @@ interface AssetsDao {
     @Query(
         """
         SELECT asset_info.*
-        FROM $ASSET_INFO
-        WHERE id IN (:ids)
-        ORDER BY balanceFiatTotalAmount DESC, assetRank DESC
-    """,
-    )
-    fun getAssetsInfoByAllWallets(walletId: String, ids: List<String>): Flow<List<DbAssetInfo>>
-
-    @Query(
-        """
-        SELECT asset_info.*
         FROM $ASSET_INFO WHERE
             asset_info.id NOT IN (:exclude)
             AND chain IN (SELECT chain FROM accounts WHERE wallet_id = :walletId)

@@ -19,7 +19,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 1. **Protect correctness:** preserve existing auth and transaction integrity contracts; the relock and simulation policies are settled (D72, D73).
 2. **Establish consistency:** MIG6. `just check-boundaries` prevents new boundary regressions while the remaining debt is reduced.
 3. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
-4. **Close the boundary:** finish F61 where its owner is ready. Re-run the coverage audit; a matching service field alone is not completion.
+4. **Close the boundary:** re-run the coverage audit after a batch; a matching service field alone is not completion.
 
 ## Screen coverage and existing infrastructure
 
@@ -30,10 +30,10 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | X172 |
 | Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | X172 |
 | Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | U25, AUD23, AUD25, AUD26, AUD27, AUD28 |
-| Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | AUD20, AUD43, AUD44, U26 |
+| Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | AUD20, AUD43, AUD44 |
 | Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | AUD36, AUD48 |
-| Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | F61 |
-| Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | AUD14, F61 |
+| Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | — |
+| Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | AUD14 |
 | Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | AUD44; retain existing native QR/share adapters |
 | Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | — |
 | Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | Keep debounce/observation native |
@@ -43,7 +43,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD29, AUD33, AUD34, AUD47 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | AUD53 |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | AUD38, AUD40 |
-| Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | F61, AUD15, AUD41 |
+| Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | AUD15, AUD41 |
 | Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | AUD46, AUD52 |
 | Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | AUD49, AUD51; preserve exact atomic values |
 | Earn list, provider and deposit amount | Existing stake/earn owner and amount extras | AUD49; preserve the existing feature gate |
@@ -57,7 +57,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | D48, AUD32 |
 | WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | AUD17; retain Android-only one-click auth |
 | About, app update, developer/service status | Existing settings/update/developer services and native store adapters | —; platform delivery channels remain distinct |
-| Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | F61; retain native widget scheduling |
+| Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | retain native widget scheduling |
 
 An id belongs in this table only while its bullet exists below. MIG6, K21, AUD35, and the decision and upstream items stay in their own sections.
 
@@ -169,7 +169,6 @@ Found on 2026-09-19 and verified in the code: transaction-critical input, parsin
 This bucket groups duplication found by the 2026-09-19 review; the execution order above prioritizes correctness and actual dependencies over line-count savings. The older families are in the ledger.
 
 - **U25** **S** **iOS remainder: the per-row balance total.** [`Balance.total`](../ios/Packages/Primitives/Sources/Extensions/Balance+Primitives.swift) sums the seven components that make a total, beside Core's `GemAssetBalance::total`, and its only caller is `BalanceViewModel`, which is built per list row — so an FFI call for it is out, as this item has always said. Android's half is settled and was never production duplication: `AssetBalance.create` and `Balance<Double>.getTotalAmount` had no caller outside tests, so they are a `mockAssetBalance` fixture now and `:gemcore` main no longer carries a second total rule. The two SQL copies stay as the stored projection this item always allowed. What still blocks iOS is what it was: the stored total is a `Double` amount while `balanceText` needs the atomic sum, and the atomic components are TEXT columns, so no generated column derives it. Either an atomic total on `GemBalanceRecord` that both stores write (a schema change, so sequence it with K21) or a Core row that carries the finished balance text, which is where the asset-detail row migration is heading — and which deletes `BalanceViewModel` rather than feeding it.
-- **U26** **S** Dead app code, Android remainder: [`AssetsDao.getAssetsInfoByAllWallets`](../android/data/services/store/src/main/kotlin/com/gemwallet/android/data/service/store/database/AssetsDao.kt) takes a `walletId` its query never uses and is read only by [Migration_71_72Test](../android/data/services/store/src/androidTest/kotlin/com/gemwallet/android/service/store/Migration_71_72Test.kt), to assert another wallet's asset survives the migration with no balance row. Delete the query and keep that assertion, rewriting it as raw SQL beside the `balances` assertions the same test already makes. Do it when instrumented tests can actually run (X172, AUD35), so the rewritten assertion is verified rather than assumed. The iOS half of this item is done.
 
 ## 1. Surfaces still outside Gemstone
 
@@ -189,7 +188,6 @@ The same product rule on both apps with a difference, each read on both sides on
 
 [No hand-written twins](ARCHITECTURE.md): a type that only crosses the FFI is used as the uniffi type, and an error is Core's error localized directly.
 
-- **F61** **S** The shared abbreviated parity fixture is still missing. Android's abbreviated path uses `android.icu.text.CompactDecimalFormat`, a framework class absent from plain JVM unit tests, so a test of it throws `NullPointerException` in `:gemcore:testDebugUnitTest`; it needs Robolectric or instrumentation (X172, AUD35). iOS covers both rounding modes in [FormattedNumberTests](../ios/Packages/GemstonePrimitives/Tests/GemstonePrimitivesTests/FormattedNumberTests.swift). The rounding itself is fixed: `AbbreviatedFormatter` takes the record's rule instead of always truncating, and Android's `percentText` honours `rounding` and handles `Significant` instead of force-casting to `Fraction`. `BelowThreshold` and `Abbreviated` signing were fixed with K19, and the abbreviated half of that fix is the part Android still cannot cover.
 
 ## 5. Forwarders and façades
 
@@ -245,6 +243,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**F61 and U26 (2026-09-22).** Closed, on a device. `:gemcore` declared `androidx.test.runner.AndroidJUnitRunner` but never depended on it, so its instrumented APK had no runner class and `TestFormatter` had **never executed** — the run died with `ClassNotFoundException` before a single test. With the dependency added, four tests ran for the first time and one was stale: Italian CLDR abbreviates a billion `Mrd`, not `Mld`, so that assertion now checks the value, the decimal comma and the currency placement — which are ours — and leaves the scale word to ICU, which owns it and changes it by platform version. The same run confirmed U9's one blind expectation: `$19,876,725` reads `$19.88M`. F61's missing fixture is `AbbreviatedNumberTest`, mirroring iOS's `FormattedNumberTests` case for case — both rounding modes and all three sign cases. U26's `AssetsDao.getAssetsInfoByAllWallets` is deleted; `Migration_71_72Test` keeps the assertion as raw SQL beside the `balances` ones, so another wallet's asset is still proved to survive the migration with no balance row. Twenty-six store tests and six `:gemcore` tests pass on API 35 arm64.
 
 **D73 (2026-09-22).** Closed, decided: keep it silent. A WalletConnect simulation fails open and stays that way — a provider that cannot answer reaches the review as an empty result, which looks the same as a request that changes nothing. Carrying a "simulation unavailable" warning through the existing rows was the alternative and was not taken, so an outage never blocks signing and never adds a row. The policy is written down now rather than implied by an `unwrap_or_default`: [ARCHITECTURE § "A staged load names what each stage waits for"](ARCHITECTURE.md#a-staged-load-names-what-each-stage-waits-for) records it beside the scanner's fail-open, and `simulate_send_transaction` says it on the function.
 
