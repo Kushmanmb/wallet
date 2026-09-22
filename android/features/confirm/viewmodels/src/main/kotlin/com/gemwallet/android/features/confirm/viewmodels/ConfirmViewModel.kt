@@ -367,7 +367,7 @@ class ConfirmViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Loading)
 
     val header: StateFlow<ConfirmHeaderUIModel?> = combine(amountUIModel, simulation, isPaymentRequest, isLoading, headerAsset) { amount, simulation, isPayment, isLoading, headerAsset ->
-        confirmHeader(amount, simulation.header, isPayment, isLoading, headerAsset)
+        confirmHeader(amount, simulation.header, isPayment, isLoading, headerAsset, requestSimulation?.header != null)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val feeSelectionUIModel: StateFlow<FeeSelectionUIModel> = feeSelection.map { FeeSelectionUIModel(it.selectedPriority()?.toPrimitives(), it.customGasPrice()) }

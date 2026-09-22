@@ -1,6 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import enum Gemstone.GemApprovalValue
+import struct Gemstone.GemSimulationValue
 import Primitives
 import PrimitivesComponents
 
@@ -50,14 +52,15 @@ private extension ConfirmHeaderViewModel {
             return .assetValue(AssetValueHeaderViewModel(data: headerData))
         }
 
-        if case let .tokenApprove(asset, _) = request.data.inputType {
-            return .asset(image: AssetViewModel(asset: asset.toPrimitives()).assetImage)
+        if case let .tokenApprove(asset, approval) = request.data.inputType {
+            let value: GemApprovalValue = approval.isUnlimited ? .unlimited : .exact(value: approval.value)
+            return .assetValue(AssetValueHeaderViewModel(data: GemSimulationValue(asset: asset, value: value)))
         }
 
         if case .generic = request.data.inputType,
            let header = request.simulation?.header
         {
-            return .asset(image: AssetIdViewModel(assetId: AssetId(core: header.assetId)).assetImage)
+            return .assetValue(AssetValueHeaderPlaceholder(assetImage: AssetIdViewModel(assetId: AssetId(core: header.assetId)).assetImage))
         }
 
         return TransactionInputViewModel(

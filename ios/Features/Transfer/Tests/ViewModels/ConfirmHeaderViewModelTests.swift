@@ -4,6 +4,7 @@ import BigInt
 import Components
 import struct Gemstone.GemSimulationValue
 import GemstonePrimitives
+import GemstonePrimitivesTestKit
 @testable import Primitives
 import PrimitivesComponents
 import PrimitivesComponentsTestKit
@@ -59,7 +60,9 @@ struct ConfirmHeaderViewModelTests {
         )
 
         guard case let .header(item) = model.itemModel else { return }
-        guard case let .assetValue(data) = item.headerType else {
+        guard case let .assetValue(header) = item.headerType,
+              let data = header as? AssetValueHeaderViewModel
+        else {
             Issue.record("Expected assetValue header")
             return
         }
@@ -71,16 +74,44 @@ struct ConfirmHeaderViewModelTests {
     @Test
     func tokenApproveResolvesAssetHeader() {
         let model = ConfirmHeaderViewModel(
-            request: .mock(data: .mock(type: .tokenApprove(.mock(), .mock()))),
+            request: .mock(data: .mock(type: .tokenApprove(.mock(), .mock(isUnlimited: true)))),
             state: .mock(),
             currency: .usd,
         )
 
         guard case let .header(item) = model.itemModel else { return }
-        guard case .asset = item.headerType else {
-            Issue.record("Expected asset header")
+        guard case let .assetValue(header) = item.headerType,
+              let valueHeader = header as? AssetValueHeaderViewModel
+        else {
+            Issue.record("Expected asset value header")
             return
         }
+        #expect(valueHeader.data.value == .unlimited)
         #expect(item.showClearHeader == true)
+    }
+
+    @Test
+    func genericApprovalKeepsTheAmountHeader() {
+        let request = ConfirmTransferRequest.mock(
+            data: .mock(type: .generic(asset: .mockEthereum(), metadata: .mock(), extra: .mock())),
+            simulation: .mock(header: .init(assetId: Asset.mockEthereumUSDT().id.identifier, value: nil, isUnlimited: true)),
+        )
+        let waiting = ConfirmHeaderViewModel(request: request, state: .mock(), currency: .usd)
+        let loaded = ConfirmHeaderViewModel(
+            request: request,
+            state: .mock(simulation: .mock(headerData: GemSimulationValue(asset: Asset.mockEthereumUSDT().toGem(), value: .unlimited))),
+            currency: .usd,
+        )
+
+        guard case let .header(waitingItem) = waiting.itemModel,
+              case .assetValue = waitingItem.headerType,
+              case let .header(loadedItem) = loaded.itemModel,
+              case let .assetValue(model) = loadedItem.headerType,
+              let header = model as? AssetValueHeaderViewModel
+        else {
+            Issue.record("Expected the amount header before and after the value loads")
+            return
+        }
+        #expect(header.data.value == .unlimited)
     }
 }

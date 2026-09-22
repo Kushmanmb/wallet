@@ -22,10 +22,10 @@ sealed interface ConfirmHeaderUIModel {
 
 data class FeeSelectionUIModel(val selectedPriority: FeePriority?, val customRate: BigInteger?)
 
-internal fun confirmHeader(amountModel: AmountUIModel?, simulationHeader: SimulationHeaderUIModel?, isPayment: Boolean, isLoading: Boolean, headerAsset: Asset?): ConfirmHeaderUIModel? = when {
-    isPayment && simulationHeader == null && isLoading -> ConfirmHeaderUIModel.Placeholder(headerAsset)
-
+internal fun confirmHeader(amountModel: AmountUIModel?, simulationHeader: SimulationHeaderUIModel?, isPayment: Boolean, isLoading: Boolean, headerAsset: Asset?, awaitsApprovalHeader: Boolean): ConfirmHeaderUIModel? = when {
     simulationHeader != null -> ConfirmHeaderUIModel.Simulation(simulationHeader)
+
+    isLoading && (isPayment || awaitsApprovalHeader) -> ConfirmHeaderUIModel.Placeholder(headerAsset)
 
     amountModel?.headerKind is GemTransactionHeaderKind.Swap -> ConfirmHeaderUIModel.Swap(
         fromAsset = amountModel.fromAsset,

@@ -403,8 +403,9 @@ mod tests {
                         })
                     );
                     assert_eq!(request.simulation.header.as_ref().unwrap().asset_id.to_string(), "tron_TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t");
-                    assert_eq!(request.simulation.payload[0].value, spender);
+                    assert_eq!(request.simulation.payload[0].value, "approve");
                     assert_eq!(request.simulation.payload[1].value, contract);
+                    assert_eq!(request.simulation.payload[2].value, spender);
                     assert_eq!(request.simulation.header.as_ref().unwrap().is_unlimited, is_unlimited);
                     assert_eq!(request.simulation.warnings.len(), 1);
                 }

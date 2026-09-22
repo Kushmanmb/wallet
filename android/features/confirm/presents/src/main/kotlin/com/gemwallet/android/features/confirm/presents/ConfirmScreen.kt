@@ -114,6 +114,12 @@ fun ConfirmScreen(
     var showSimulationDetails by remember { mutableStateOf(false) }
     var selectedDetailElement by remember(input) { mutableStateOf<ConfirmDetailElement?>(null) }
     var selectedAddress by remember(input) { mutableStateOf<ChainAddress?>(null) }
+    val openPayloadAddress = simulation.chain?.let { chain ->
+        { address: String ->
+            showSimulationDetails = false
+            selectedAddress = ChainAddress(chain, address)
+        }
+    }
     var isShowedBroadcastError by remember(executeErrorText) { mutableStateOf(executeErrorText != null) }
     val isShowBottomSheetInfo by viewModel.isErrorSheetVisible.collectAsStateWithLifecycle()
 
@@ -215,6 +221,7 @@ fun ConfirmScreen(
             itemsPositioned(simulation.warnings) { position, row -> GemListRowView(row = row, listPosition = position) }
             simulationPayloadFieldsContent(
                 fields = simulation.primaryPayloadFields,
+                onAddressClick = openPayloadAddress,
                 onDetailsClick = simulation.secondaryPayloadFields
                     .takeIf { it.isNotEmpty() }
                     ?.let { { showSimulationDetails = true } },
@@ -273,6 +280,7 @@ fun ConfirmScreen(
                 simulationPayloadDetailsContent(
                     primaryFields = simulation.primaryPayloadFields,
                     secondaryFields = simulation.secondaryPayloadFields,
+                    onAddressClick = openPayloadAddress,
                 )
             }
         }
