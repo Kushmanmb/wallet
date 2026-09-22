@@ -4,6 +4,7 @@ use primitives::rewards::{RedemptionRequest, RedemptionResult};
 use primitives::{AuthenticatedRequest, ReferralCode, Rewards, Wallet, WalletId};
 
 use crate::api::{GemApiError, GemDeviceApiClient};
+use crate::models::state::GemLoadState;
 use crate::services::auth::GemAuthService;
 use crate::services::balance::GemBalanceService;
 use crate::services::error::GemServiceError;
@@ -15,7 +16,7 @@ pub mod session;
 #[cfg(test)]
 pub(crate) mod testkit;
 
-pub use model::{GemIncomingCode, GemRewardsOutcome, GemRewardsPhase, GemRewardsResult, GemRewardsState, GemRewardsViewState};
+pub use model::{GemIncomingCode, GemRewardsResult, GemRewardsState, GemRewardsViewState};
 pub use session::GemRewardsSession;
 
 #[uniffi::export]
@@ -46,11 +47,12 @@ impl GemRewardsService {
     }
 
     pub async fn refresh(&self, wallet_id: WalletId) -> GemRewardsResult {
-        let outcome = match self.get_rewards(wallet_id.clone()).await {
-            Ok(rewards) => GemRewardsOutcome::Loaded { rewards },
-            Err(error) => GemRewardsOutcome::Failed { error },
-        };
-        GemRewardsResult { wallet_id, outcome }
+        let rewards = self.get_rewards(wallet_id.clone()).await;
+        GemRewardsResult {
+            wallet_id,
+            state: GemLoadState::of(&rewards),
+            rewards: rewards.ok(),
+        }
     }
 
     pub async fn create_referral(&self, wallet: Wallet, code: String) -> Result<Rewards, GemServiceError> {

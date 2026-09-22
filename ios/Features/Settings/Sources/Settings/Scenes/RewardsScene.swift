@@ -17,12 +17,12 @@ public struct RewardsScene: View {
 
     public var body: some View {
         List {
-            switch model.viewState.phase {
+            switch model.viewState.state {
             case .loading:
                 CenterLoadingView()
-            case let .failed(error):
+            case let .error(error):
                 stateErrorView(error: error)
-            case .data:
+            case .data, .noData:
                 inviteFriendsSection
                 if let notice = model.rewardsState.errorNotice {
                     Section {

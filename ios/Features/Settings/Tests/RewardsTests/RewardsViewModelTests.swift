@@ -57,7 +57,7 @@ struct RewardsViewModelTests {
 
         await model.refresh()
 
-        guard case .failed = model.viewState.phase else {
+        guard case .error = model.viewState.state else {
             Issue.record("a failed load must not read as a wallet without a code")
             return
         }

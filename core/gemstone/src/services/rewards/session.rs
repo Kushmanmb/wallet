@@ -1,16 +1,15 @@
 use chrono::{DateTime, Utc};
 use primitives::{Rewards, WalletId};
 
-use super::model::{GemRewardsOutcome, GemRewardsPhase, GemRewardsResult, GemRewardsViewState};
+use super::model::{GemRewardsResult, GemRewardsViewState};
 use super::rules;
-use crate::services::error::GemServiceError;
+use crate::models::state::{GemLoad, GemLoadState};
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemRewardsSession {
     pub wallet_id: Option<WalletId>,
+    pub state: GemLoadState,
     pub rewards: Option<Rewards>,
-    pub error: Option<GemServiceError>,
-    pub is_loading: bool,
 }
 
 #[uniffi::export]
@@ -21,9 +20,8 @@ impl GemRewardsSession {
         }
         Self {
             wallet_id: Some(wallet_id),
+            state: GemLoadState::Loading,
             rewards: None,
-            error: None,
-            is_loading: true,
         }
     }
 
@@ -31,21 +29,18 @@ impl GemRewardsSession {
         if self.wallet_id.as_ref() != Some(&result.wallet_id) {
             return self.clone();
         }
-        match result.outcome {
-            GemRewardsOutcome::Loaded { rewards } => self.on_rewards(rewards),
-            GemRewardsOutcome::Failed { error } => Self {
-                error: self.rewards.is_none().then_some(error),
-                is_loading: false,
-                ..self.clone()
-            },
+        let shown = self.shown().data(result.state.into_result(result.rewards));
+        Self {
+            wallet_id: self.wallet_id.clone(),
+            state: shown.state,
+            rewards: shown.value,
         }
     }
 
     pub fn on_rewards(&self, rewards: Rewards) -> Self {
         Self {
+            state: GemLoadState::Data,
             rewards: Some(rewards),
-            error: None,
-            is_loading: false,
             ..self.clone()
         }
     }
@@ -56,18 +51,17 @@ impl GemRewardsSession {
 
     pub fn view_state(&self, now: DateTime<Utc>) -> GemRewardsViewState {
         GemRewardsViewState {
-            phase: self.phase(),
+            state: self.state.clone(),
             rewards: rules::state(self.rewards.as_ref(), now),
         }
     }
 }
 
 impl GemRewardsSession {
-    fn phase(&self) -> GemRewardsPhase {
-        match (self.is_loading, &self.error) {
-            (true, _) => GemRewardsPhase::Loading,
-            (false, Some(error)) => GemRewardsPhase::Failed { error: error.clone() },
-            (false, None) => GemRewardsPhase::Data,
+    fn shown(&self) -> GemLoad<Option<Rewards>> {
+        GemLoad {
+            state: self.state.clone(),
+            value: self.rewards.clone(),
         }
     }
 }
@@ -76,9 +70,8 @@ impl GemRewardsSession {
 pub fn rewards_session() -> GemRewardsSession {
     GemRewardsSession {
         wallet_id: None,
+        state: GemLoadState::Loading,
         rewards: None,
-        error: None,
-        is_loading: true,
     }
 }
 
@@ -87,6 +80,15 @@ mod tests {
     use primitives::RewardStatus;
 
     use super::*;
+    use crate::services::error::GemServiceError;
+
+    fn failed() -> GemRewardsResult {
+        GemRewardsResult {
+            wallet_id: wallet(),
+            state: GemLoadState::Error { error: offline() },
+            rewards: None,
+        }
+    }
 
     fn now() -> DateTime<Utc> {
         DateTime::from_timestamp(1_700_000_000, 0).unwrap()
@@ -111,25 +113,19 @@ mod tests {
     fn test_a_failed_load_reads_as_a_failure_instead_of_a_wallet_without_a_code() {
         let session = rewards_session().on_select_wallet(wallet());
 
-        let failed = session.on_result(GemRewardsResult {
-            wallet_id: wallet(),
-            outcome: GemRewardsOutcome::Failed { error: offline() },
-        });
+        let unreachable = session.on_result(failed());
 
-        assert!(matches!(failed.view_state(now()).phase, GemRewardsPhase::Failed { .. }), "a wallet with a code must not be offered the create-code screen");
-        assert!(!failed.view_state(now()).rewards.can_invite);
+        assert!(matches!(unreachable.view_state(now()).state, GemLoadState::Error { .. }), "a wallet with a code must not be offered the create-code screen");
+        assert!(!unreachable.view_state(now()).rewards.can_invite);
     }
 
     #[test]
     fn test_a_failed_refresh_keeps_the_code_already_on_screen() {
         let shown = rewards_session().on_select_wallet(wallet()).on_rewards(invited());
 
-        let kept = shown.on_result(GemRewardsResult {
-            wallet_id: wallet(),
-            outcome: GemRewardsOutcome::Failed { error: offline() },
-        });
+        let kept = shown.on_result(failed());
 
-        assert_eq!(kept.view_state(now()).phase, GemRewardsPhase::Data);
+        assert_eq!(kept.view_state(now()).state, GemLoadState::Data);
         assert_eq!(kept.view_state(now()).rewards, shown.view_state(now()).rewards);
     }
 
@@ -139,7 +135,8 @@ mod tests {
         let shown = rewards_session().on_select_wallet(second);
         let late = GemRewardsResult {
             wallet_id: wallet(),
-            outcome: GemRewardsOutcome::Loaded { rewards: invited() },
+            state: GemLoadState::Data,
+            rewards: Some(invited()),
         };
 
         assert_eq!(shown.on_result(late), shown, "the wallet moved on before the answer arrived");
@@ -151,7 +148,7 @@ mod tests {
 
         assert_eq!(shown.on_select_wallet(wallet()), shown);
         let switched = shown.on_select_wallet(WalletId::Multicoin("0x2".to_string()));
-        assert_eq!(switched.view_state(now()).phase, GemRewardsPhase::Loading);
+        assert_eq!(switched.view_state(now()).state, GemLoadState::Loading);
         assert_eq!(switched.request(), Some(WalletId::Multicoin("0x2".to_string())));
     }
 }

@@ -43,6 +43,20 @@ pub fn load_error(state: GemLoadState, has_rows: bool) -> Option<GemServiceError
 }
 
 impl GemLoadState {
+    pub fn of<T>(value: &Result<T, GemServiceError>) -> Self {
+        match value {
+            Ok(_) => Self::Data,
+            Err(error) => Self::Error { error: error.clone() },
+        }
+    }
+
+    pub fn into_result<T>(self, value: T) -> Result<T, GemServiceError> {
+        match self {
+            Self::Error { error } => Err(error),
+            Self::NoData | Self::Loading | Self::Data => Ok(value),
+        }
+    }
+
     pub fn refreshed(synced: Result<(), GemServiceError>, shows_value: bool) -> Self {
         let shown = GemLoad {
             state: match shows_value {

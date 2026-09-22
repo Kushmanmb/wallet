@@ -23,9 +23,9 @@ public final class GemRewardsServiceMock: GemRewardsServiceProtocol, @unchecked 
     public func refresh(walletId: WalletId) async -> GemRewardsResult {
         rewardsCalls.append(walletId)
         guard let rewards = try? rewardsResult.get() else {
-            return GemRewardsResult(walletId: walletId, outcome: .failed(error: .Api(msg: "offline")))
+            return GemRewardsResult(walletId: walletId, state: .error(error: .Api(msg: "offline")), rewards: nil)
         }
-        return GemRewardsResult(walletId: walletId, outcome: .loaded(rewards: rewards))
+        return GemRewardsResult(walletId: walletId, state: .data, rewards: rewards)
     }
 
     public func redeem(wallet _: Wallet, redemptionId: String) async throws -> RedemptionResult {

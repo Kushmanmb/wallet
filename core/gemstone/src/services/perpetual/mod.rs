@@ -17,7 +17,7 @@ use gem_hypercore::models::websocket::HyperliquidSocketMessage;
 use gem_hypercore::provider::websocket_mapper::{diff_clearinghouse_positions, diff_open_orders_positions, parse_websocket_data};
 use primitives::perpetual::PerpetualBalance;
 use primitives::portfolio::PerpetualPortfolio;
-use primitives::{Asset, AssetId, Chain, ChartPeriod, PerpetualAccountMode, PerpetualProvider, Wallet, WalletId};
+use primitives::{Asset, AssetId, Chain, ChartPeriod, PerpetualAccountMode, PerpetualProvider, Wallet, WalletId, WalletType};
 use std::collections::HashMap;
 
 use crate::config::perpetual_config::PRICES_UPDATE_INTERVAL_SECONDS;
@@ -102,8 +102,12 @@ impl GemPerpetualService {
         Ok(self.should_connect_perpetuals(wallet))
     }
 
+    pub fn show_perpetuals(&self, wallet_type: WalletType, chains: Vec<Chain>) -> bool {
+        self.preferences.show_perpetuals(wallet_type, chains)
+    }
+
     pub fn should_connect_perpetuals(&self, wallet: Option<Wallet>) -> bool {
-        wallet.is_some_and(|wallet| rules::show_perpetuals(self.preferences.is_perpetual_enabled(), wallet.wallet_type, &wallet.chains()))
+        wallet.is_some_and(|wallet| self.show_perpetuals(wallet.wallet_type, wallet.chains()))
     }
 
     pub async fn set_pinned(&self, perpetual_id: String, pinned: bool) -> Result<(), GemServiceError> {

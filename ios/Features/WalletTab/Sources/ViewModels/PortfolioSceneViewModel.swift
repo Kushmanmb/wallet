@@ -67,7 +67,7 @@ public final class PortfolioSceneViewModel: ChartListViewable {
     }
 
     var showSegmentedControl: Bool {
-        preferences.showPerpetuals(for: wallet)
+        preferences.isPerpetualEnabled && service.showPerpetuals(walletType: wallet.type.toGem(), chains: wallet.chains.map(\.rawValue))
     }
 
     var navigationTitle: String {

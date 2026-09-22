@@ -6,9 +6,10 @@ pub mod store;
 use std::sync::Arc;
 
 use primitives::currency::Currency;
-use primitives::{Chain, ChartPeriod, PortfolioAssets, PortfolioAssetsRequest, PortfolioData, PortfolioType, Wallet, WalletId};
+use primitives::{Chain, ChartPeriod, PortfolioAssets, PortfolioAssetsRequest, PortfolioData, PortfolioType, Wallet, WalletId, WalletType};
 
 use crate::api::{GemApiError, GemDeviceApiClient};
+use crate::models::state::GemLoadState;
 use crate::services::error::GemServiceError;
 use crate::services::perpetual::GemPerpetualService;
 use crate::services::preferences::GemPreferencesService;
@@ -16,7 +17,7 @@ use crate::services::price::GemPriceService;
 use crate::services::stream::rules::hyperliquid_account;
 
 pub use model::GemPortfolioValues;
-pub use session::{GemPortfolioOutcome, GemPortfolioRequest, GemPortfolioResult, GemPortfolioSession, GemPortfolioViewState};
+pub use session::{GemPortfolioRequest, GemPortfolioResult, GemPortfolioSession, GemPortfolioViewState};
 pub use store::GemPortfolioStore;
 
 #[derive(uniffi::Object)]
@@ -39,12 +40,17 @@ impl GemPortfolioService {
         rules::portfolio_currency(portfolio_type, self.preferences.get_currency())
     }
 
+    pub fn show_perpetuals(&self, wallet_type: WalletType, chains: Vec<Chain>) -> bool {
+        self.preferences.show_perpetuals(wallet_type, chains)
+    }
+
     pub async fn refresh(&self, wallet: Wallet, request: GemPortfolioRequest) -> GemPortfolioResult {
-        let outcome = match self.portfolio_data(wallet, request.portfolio_type, request.period).await {
-            Ok(data) => GemPortfolioOutcome::Loaded { data },
-            Err(error) => GemPortfolioOutcome::Failed { error },
-        };
-        GemPortfolioResult { request, outcome }
+        let data = self.portfolio_data(wallet, request.portfolio_type, request.period).await;
+        GemPortfolioResult {
+            request,
+            state: GemLoadState::of(&data),
+            data: data.ok(),
+        }
     }
 
     pub async fn portfolio_data(&self, wallet: Wallet, portfolio_type: PortfolioType, period: ChartPeriod) -> Result<PortfolioData, GemServiceError> {

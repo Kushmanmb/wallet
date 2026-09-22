@@ -14,8 +14,13 @@ import WalletTabTestKit
 struct PortfolioSceneViewModelTests {
     @Test
     func testShowSegmentedControl() {
-        #expect(PortfolioSceneViewModel.mock(preferences: .mock(isPerpetualEnabled: false)).showSegmentedControl == false)
-        #expect(PortfolioSceneViewModel.mock(preferences: .mock(isPerpetualEnabled: true)).showSegmentedControl == false)
+        let service = GemPortfolioServiceMock()
+        #expect(PortfolioSceneViewModel.mock(service: service, preferences: .mock(isPerpetualEnabled: false)).showSegmentedControl == false)
+        #expect(PortfolioSceneViewModel.mock(service: service, preferences: .mock(isPerpetualEnabled: true)).showSegmentedControl == false, "a wallet without a perpetual chain has one portfolio")
+
+        service.perpetualsShown = true
+        #expect(PortfolioSceneViewModel.mock(service: service, preferences: .mock(isPerpetualEnabled: true)).showSegmentedControl)
+        #expect(PortfolioSceneViewModel.mock(service: service, preferences: .mock(isPerpetualEnabled: false)).showSegmentedControl == false, "the setting still hides it")
     }
 
     @Test

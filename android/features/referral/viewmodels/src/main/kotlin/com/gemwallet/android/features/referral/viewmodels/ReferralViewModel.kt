@@ -38,11 +38,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemIncomingCode
-import uniffi.gemstone.GemRewardsPhase
 import uniffi.gemstone.GemRewardsRedemption
 import uniffi.gemstone.GemRewardsServiceInterface
 import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.incomingReferralCode
+import uniffi.gemstone.loadError
 import uniffi.gemstone.rewardsSession
 import uniffi.gemstone.walletRows
 import javax.inject.Inject
@@ -68,7 +68,7 @@ class ReferralViewModel @Inject constructor(
     private val viewState = session.map { it.viewState(System.currentTimeMillis() / 1000) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, session.value.viewState(System.currentTimeMillis() / 1000))
 
-    val loadError: StateFlow<GemServiceException?> = viewState.map { (it.phase as? GemRewardsPhase.Failed)?.error }
+    val loadError: StateFlow<GemServiceException?> = viewState.map { loadError(it.state, hasRows = false) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val rewardsState = viewState.map { it.rewards }

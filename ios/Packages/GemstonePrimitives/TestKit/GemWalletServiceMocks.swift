@@ -181,6 +181,7 @@ public final class GemStreamServiceMock: GemStreamServiceProtocol, @unchecked Se
 public final class GemPortfolioServiceMock: GemPortfolioServiceProtocol, @unchecked Sendable {
     public var dataForType: (Gemstone.PortfolioType) -> Gemstone.PortfolioData
     public var error: GemServiceError?
+    public var perpetualsShown = false
 
     public private(set) var requests: [GemPortfolioRequest] = []
 
@@ -197,6 +198,10 @@ public final class GemPortfolioServiceMock: GemPortfolioServiceProtocol, @unchec
         Primitives.Currency.usd.toGem()
     }
 
+    public func showPerpetuals(walletType _: Gemstone.WalletType, chains _: [Gemstone.Chain]) -> Bool {
+        perpetualsShown
+    }
+
     public func portfolioData(wallet _: Gemstone.Wallet, portfolioType: Gemstone.PortfolioType, period _: Gemstone.ChartPeriod) async throws -> Gemstone.PortfolioData {
         if let error {
             throw error
@@ -207,9 +212,9 @@ public final class GemPortfolioServiceMock: GemPortfolioServiceProtocol, @unchec
     public func refresh(wallet _: Gemstone.Wallet, request: GemPortfolioRequest) async -> GemPortfolioResult {
         requests.append(request)
         if let error {
-            return GemPortfolioResult(request: request, outcome: .failed(error: error))
+            return GemPortfolioResult(request: request, state: .error(error: error), data: nil)
         }
-        return GemPortfolioResult(request: request, outcome: .loaded(data: dataForType(request.portfolioType)))
+        return GemPortfolioResult(request: request, state: .data, data: dataForType(request.portfolioType))
     }
 }
 

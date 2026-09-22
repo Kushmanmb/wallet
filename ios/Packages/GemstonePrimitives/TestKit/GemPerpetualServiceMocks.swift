@@ -95,6 +95,10 @@ public final class GemPerpetualServiceMock: GemPerpetualServiceProtocol, @unchec
         isPerpetualEnabled && connects
     }
 
+    public func showPerpetuals(walletType _: Gemstone.WalletType, chains _: [Gemstone.Chain]) -> Bool {
+        isPerpetualEnabled && connects
+    }
+
     private func syncMarketsIfNeeded(chain: Gemstone.Chain, trigger: Gemstone.GemMarketsRefreshTrigger) async throws -> Bool {
         if trigger == .scheduled, updatedAt != nil {
             return false
