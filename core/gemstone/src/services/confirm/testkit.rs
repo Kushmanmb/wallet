@@ -71,21 +71,14 @@ impl ConfirmTestkit {
                 })
                 .collect(),
         ));
-        let balance = Arc::new(GemBalanceService::new(
-            gateway.clone(),
-            wallets,
-            asset_store,
-            balances.clone(),
-            assets.clone(),
-            Arc::new(SubscriptionTestkit::new(&[], &[]).service),
-        ));
+        let balance = Arc::new(GemBalanceService::new(gateway.clone(), balances.clone(), assets.clone(), session.clone(), Arc::new(SubscriptionTestkit::new(&[], &[]).service)));
         let explorer = Arc::new(GemExplorerService::new(preferences.clone()));
-        let addresses = Arc::new(MemoryAddressStore::default());
+        let names = Arc::new(GemNameService::new(device_api.clone(), Arc::new(MemoryAddressStore::default())));
         let stake = Arc::new(GemStakeService::new(
             gateway.clone(),
             Arc::new(GemStaticApiClient::new(provider.clone())),
             Arc::new(UnusedStakeStore),
-            addresses.clone(),
+            names.clone(),
             explorer.clone(),
             preferences.clone(),
             session.clone(),
@@ -105,7 +98,7 @@ impl ConfirmTestkit {
         let service = Arc::new(GemConfirmTransferService::new(
             confirm.clone(),
             explorer,
-            Arc::new(GemNameService::new(device_api, addresses)),
+            names,
             Arc::new(GemAssetConfigService::new()),
             Arc::new(UnusedSigner),
             Arc::new(MemoryKeystorePassword::default()),

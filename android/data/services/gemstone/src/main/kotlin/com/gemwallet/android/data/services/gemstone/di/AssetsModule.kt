@@ -48,6 +48,7 @@ import uniffi.gemstone.GemNameService
 import uniffi.gemstone.GemNavigationService
 import uniffi.gemstone.GemNavigationServiceInterface
 import uniffi.gemstone.GemNftService
+import uniffi.gemstone.GemNotificationService
 import uniffi.gemstone.GemNotificationStore
 import uniffi.gemstone.GemPerpetualService
 import uniffi.gemstone.GemPortfolioStore
@@ -61,6 +62,7 @@ import uniffi.gemstone.GemRecentActivityService
 import uniffi.gemstone.GemStreamService
 import uniffi.gemstone.GemStreamServiceInterface
 import uniffi.gemstone.GemStreamSubscriptionService
+import uniffi.gemstone.GemSupportService
 import uniffi.gemstone.GemSupportStore
 import uniffi.gemstone.GemSwapService
 import uniffi.gemstone.GemSwapServiceInterface
@@ -80,17 +82,15 @@ object AssetsModule {
     @Singleton
     fun provideGemBalanceService(
         gateway: GemGateway,
-        walletStore: GemstoneWalletStore,
-        assetStore: GemAssetStore,
         balanceStore: GemBalanceStore,
         assetsService: GemAssetsService,
+        walletSessionService: GemWalletSessionService,
         streamSubscriptionService: GemStreamSubscriptionService,
     ): GemBalanceService = GemBalanceService(
         gateway,
-        walletStore,
-        assetStore,
         balanceStore,
         assetsService,
+        walletSessionService,
         streamSubscriptionService,
     )
 
@@ -104,8 +104,8 @@ object AssetsModule {
         nftService: GemNftService,
         perpetualService: GemPerpetualService,
         fiatService: GemFiatService,
-        notificationStore: GemNotificationStore,
-        supportStore: GemSupportStore,
+        notificationService: GemNotificationService,
+        supportService: GemSupportService,
         subscriptions: GemStreamSubscriptionService,
         preferences: GemPreferencesService,
         session: GemWalletSessionService,
@@ -118,8 +118,8 @@ object AssetsModule {
         nftService,
         perpetualService,
         fiatService,
-        notificationStore,
-        supportStore,
+        notificationService,
+        supportService,
         subscriptions,
         preferences,
         session,
@@ -145,9 +145,9 @@ object AssetsModule {
 
     @Provides
     @Singleton
-    fun provideStreamSubscriptionService(balanceStore: GemBalanceStore, priceAlertStore: GemPriceAlertStore, connection: WebSocketConnectable): GemStreamSubscriptionService = GemStreamSubscriptionService(
+    fun provideStreamSubscriptionService(balanceStore: GemBalanceStore, priceAlertService: GemPriceAlertService, connection: WebSocketConnectable): GemStreamSubscriptionService = GemStreamSubscriptionService(
         balances = balanceStore,
-        alerts = priceAlertStore,
+        alerts = priceAlertService,
         connection = GemstoneStreamConnection(connection),
     )
 

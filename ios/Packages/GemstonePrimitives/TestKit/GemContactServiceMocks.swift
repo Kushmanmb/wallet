@@ -13,7 +13,7 @@ public extension GemContactService {
     static func mock() -> GemContactService {
         GemContactService(
             store: GemContactStoreMock(),
-            addressStore: GemAddressStoreMock(),
+            names: .mock(),
             files: GemFileStoreMock(),
         )
     }

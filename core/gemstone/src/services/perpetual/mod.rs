@@ -16,7 +16,7 @@ use std::sync::Arc;
 use chrono::Utc;
 use gem_hypercore::models::websocket::HyperliquidSocketMessage;
 use gem_hypercore::provider::websocket_mapper::{diff_clearinghouse_positions, diff_open_orders_positions, parse_websocket_data};
-use primitives::perpetual::PerpetualBalance;
+use primitives::perpetual::{PerpetualBalance, PerpetualData};
 use primitives::portfolio::PerpetualPortfolio;
 use primitives::{Asset, AssetId, Chain, ChartPeriod, PerpetualAccountMode, PerpetualProvider, Wallet, WalletId, WalletType};
 use std::collections::HashMap;
@@ -150,12 +150,16 @@ impl GemPerpetualService {
     pub async fn sync_markets(&self, chain: Chain) -> Result<(), GemServiceError> {
         let currency = self.preferences.get_currency();
         let data = self.gateway.get_perpetuals_data(chain).await?;
-        self.assets.save_assets(rules::perpetual_asset_basics(&data)).await?;
-        self.store.save_perpetuals(data).await?;
+        self.save_markets(data).await?;
         if let Some(price) = rules::collateral_price(chain) {
             self.price.update_prices(vec![price], currency).await?;
         }
         self.preferences.set_perpetual_markets_updated_at(Some(Utc::now().timestamp()))
+    }
+
+    pub async fn save_markets(&self, data: Vec<PerpetualData>) -> Result<(), GemServiceError> {
+        self.assets.save_assets(rules::perpetual_asset_basics(&data)).await?;
+        self.store.save_perpetuals(data).await
     }
 
     pub async fn get_portfolio(&self, chain: Chain, address: String) -> Result<PerpetualPortfolio, GemServiceError> {

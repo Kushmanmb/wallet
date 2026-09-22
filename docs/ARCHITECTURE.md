@@ -93,6 +93,10 @@ A service composes rules with I/O. It may hold its own feature store and narrow 
 
 Inspect the dependency graph before replacing a foreign-domain store with its service. Never introduce an `Arc` cycle to satisfy this rule; split out a narrow query service, invert the dependency, or redesign the ownership boundary first. `GemWalletService` already depends on `GemWalletSessionService`, so making the session service depend back on the wallet service would be worse than the store debt it replaces.
 
+`GemWalletSessionService` is the narrow query service for wallets: it answers `get_wallets`, `get_wallet` and `require_wallet` and depends on nothing but its two stores, so balance, subscription, device and asset discovery read wallets through it rather than holding `GemWalletStore`. Three holdings are kept, each because the owner already depends on the holder: `GemWalletSessionService` and `GemAvatarService` hold `GemWalletStore` (`GemWalletService` holds both), and `GemStreamSubscriptionService` holds `GemBalanceStore` (`GemBalanceService` holds the subscription service). A kept holding is a named exception, not a precedent — record why it is kept where it is declared.
+
+A store that is a platform port rather than a domain — `GemFileStore`, `GemWalletSessionStore`, `GemDevicePlatform`, `GemNotificationPermissions` — is not a foreign-domain store and several services may hold it.
+
 ```rust
 // services/confirm/mod.rs
 #[derive(uniffi::Object)]

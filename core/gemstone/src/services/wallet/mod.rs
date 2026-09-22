@@ -40,8 +40,7 @@ use crate::services::error::GemServiceError;
 use crate::services::explorer::GemExplorerService;
 use crate::services::file::GemFileStore;
 use crate::services::localization::GemLocalizedText;
-use crate::services::name::GemAddressStore;
-use crate::services::name::store::GemAddressNameWriter;
+use crate::services::name::GemNameService;
 use crate::services::nft::model::{GemNftItem, GemNftList};
 use crate::services::nft::rules as nft_rules;
 use crate::services::preferences::GemPreferencesService;
@@ -73,7 +72,7 @@ pub struct GemWalletService {
     files: Arc<dyn GemFileStore>,
     preferences: Arc<GemWalletPreferencesService>,
     explorer: Arc<GemExplorerService>,
-    addresses: Arc<dyn GemAddressStore>,
+    names: Arc<GemNameService>,
     avatar: Arc<GemAvatarService>,
 }
 
@@ -89,7 +88,7 @@ impl GemWalletService {
         files: Arc<dyn GemFileStore>,
         preferences: Arc<GemWalletPreferencesService>,
         explorer: Arc<GemExplorerService>,
-        addresses: Arc<dyn GemAddressStore>,
+        names: Arc<GemNameService>,
         avatar: Arc<GemAvatarService>,
     ) -> Self {
         Self {
@@ -101,7 +100,7 @@ impl GemWalletService {
             files,
             preferences,
             explorer,
-            addresses,
+            names,
             avatar,
         }
     }
@@ -165,7 +164,7 @@ impl GemWalletService {
             self.keystore.delete_wallet_secrets(wallet.id.id(), rules::legacy_keystore_id(&wallet))?;
         }
         self.store.delete_wallet(wallet.id.clone()).await?;
-        self.addresses.delete_address_names(rules::wallet_address_names(&wallet)).await?;
+        self.names.delete_names(rules::wallet_address_names(&wallet)).await?;
         if let Some(image_url) = wallet.image_url.clone() {
             self.files.remove(image_url)?;
         }
@@ -265,7 +264,7 @@ impl GemWalletService {
             msg: format!("wallet {} not found", wallet_id.id()),
         })?;
         self.store.set_name(wallet_id, name.clone()).await?;
-        self.addresses.save_names(rules::wallet_address_names(&Wallet { name, ..wallet })).await
+        self.names.save_names(rules::wallet_address_names(&Wallet { name, ..wallet })).await
     }
 
     pub fn sorted_wallets(&self, wallets: Vec<Wallet>) -> Vec<Wallet> {
@@ -380,7 +379,7 @@ impl GemWalletService {
 
     async fn store_wallet(&self, wallet: &Wallet) -> Result<(), GemServiceError> {
         self.store.add_wallet(wallet.clone()).await?;
-        self.addresses.save_names(rules::wallet_address_names(wallet)).await
+        self.names.save_names(rules::wallet_address_names(wallet)).await
     }
 
     async fn invalidate_subscriptions(&self) -> Result<(), GemServiceError> {
@@ -460,7 +459,7 @@ mod tests {
             let context = WalletTestkit::new();
             let wallet = context.import("Savings", PHRASE).await;
             let account = wallet.accounts[0].clone();
-            let name = async |context: &WalletTestkit| context.addresses.get_address_name(account.chain, account.address.clone()).await.unwrap();
+            let name = async |context: &WalletTestkit| context.service.names.address_name(account.chain, account.address.clone()).await.unwrap();
 
             let stored = name(&context).await.unwrap();
             assert_eq!((stored.name.as_str(), stored.address_type), ("Savings", AddressType::InternalWallet));
