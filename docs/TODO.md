@@ -205,7 +205,6 @@ The same product rule on both apps with a difference, each read on both sides on
 
 None of these is a code change until someone chooses; each is written so the choice is the only remaining step.
 
-- **D48** **S** Opening Support turns push notifications on first on Android (`SettingsScene.kt:60-68`, permission, `enableNotifications()`, device sync) and simply opens on iOS. Decide whether support should ask; if yes, Core answers it through the permission port on both apps, otherwise delete the Android branch.
 - **D73** **S** WalletConnect transaction simulation failures are swallowed (`services/simulation.rs:67-80,109-111`, `unwrap_or_default`), so a failed simulation reaches the review as an empty result, indistinguishable from "this transaction changes nothing"; only the scanner's fail-open is documented. Decide the policy; if fail-open, carry a "simulation unavailable" warning through the existing warning rows.
 
 ## 8. Blocked upstream
@@ -249,6 +248,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**D48 (2026-09-22).** Closed, decided: support asks, on both apps. `GemNotificationsService::enable_for_support` is the rule — it asks only when the os permission is available and push is not already on, so opening support twice never prompts twice — and both apps call it when the row is tapped. Android's composable no longer decides: it read `notificationsAvailable && !pushEnabled` itself and called `enableNotifications()`, which is the condition Core now owns, reached through a `EnablePushForSupport` case on `DevicePushSettings`. iOS gained the prompt it never had, through `SettingsViewModel.openSupport()`. The permission port is the existing `GemNotificationPermissions`; nothing new crosses.
 
 **D72 (2026-09-22).** Closed, decided: always relock. `should_relock` no longer takes `has_pending_request`, so an open WalletConnect request cannot hold the lock off however long the app was away — which is what it did on Android, where `LockTimer` fed the flag, while iOS always passed `false`. `LockTimer` loses its `ActiveWalletConnectRequest` dependency and its two tests for the hold-off become one that asserts the opposite, and Core's rule test gains the case that an unbounded absence relocks.
 

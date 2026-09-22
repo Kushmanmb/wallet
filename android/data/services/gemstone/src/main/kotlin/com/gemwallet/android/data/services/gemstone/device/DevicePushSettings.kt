@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
+import com.gemwallet.android.application.device.cases.EnablePushForSupport
 import com.gemwallet.android.application.device.cases.GetPushEnabled
 import com.gemwallet.android.application.device.cases.GetPushToken
 import com.gemwallet.android.application.device.cases.SetPushToken
@@ -41,6 +42,7 @@ class DevicePushSettings(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + ioDispatcher),
 ) : SwitchPushEnabled,
+    EnablePushForSupport,
     GetPushEnabled,
     GetPushToken,
     SetPushToken {
@@ -48,6 +50,13 @@ class DevicePushSettings(
     private val Context.dataStore by preferencesDataStore(name = "device_config")
 
     private val pushEnabledState = MutableStateFlow(false)
+
+    override suspend fun enablePushForSupport(): GemPushState? = withContext(ioDispatcher) {
+        notificationsService.get().enableForSupport()?.also { state ->
+            userConfig.stopAskNotifications()
+            pushEnabledState.value = state.isEnabled
+        }
+    }
 
     override suspend fun switchPushEnabled(enabled: Boolean): GemPushState = withContext(ioDispatcher) {
         val state = notificationsService.get().setEnabled(enabled)

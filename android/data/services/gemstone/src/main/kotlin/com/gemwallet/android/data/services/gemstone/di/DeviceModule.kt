@@ -1,6 +1,7 @@
 package com.gemwallet.android.data.services.gemstone.di
 
 import android.content.Context
+import com.gemwallet.android.application.device.cases.EnablePushForSupport
 import com.gemwallet.android.application.device.cases.GetPushEnabled
 import com.gemwallet.android.application.device.cases.GetPushToken
 import com.gemwallet.android.application.device.cases.SetPushToken
@@ -97,6 +98,9 @@ object DeviceModule {
 
     @Provides
     fun provideSwitchPushEnabledCase(pushSettings: DevicePushSettings): SwitchPushEnabled = pushSettings
+
+    @Provides
+    fun provideEnablePushForSupportCase(pushSettings: DevicePushSettings): EnablePushForSupport = pushSettings
 
     @Provides
     fun provideGetPushEnabledCase(pushSettings: DevicePushSettings): GetPushEnabled = pushSettings
