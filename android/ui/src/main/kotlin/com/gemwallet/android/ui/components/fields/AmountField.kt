@@ -19,8 +19,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
@@ -121,7 +123,10 @@ fun ColumnScope.AmountField(
         ) {
             errorInfo?.let { onInfo ->
                 Icon(
-                    modifier = Modifier.size(compactIconSize).clickable(onClick = onInfo),
+                    modifier = Modifier
+                        .size(compactIconSize)
+                        .clip(CircleShape)
+                        .clickable(onClick = onInfo),
                     imageVector = AppIcons.InfoOutlined,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.secondaryFaded,
