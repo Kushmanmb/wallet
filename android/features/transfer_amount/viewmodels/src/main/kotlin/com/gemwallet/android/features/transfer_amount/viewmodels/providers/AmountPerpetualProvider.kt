@@ -6,7 +6,6 @@ import com.gemwallet.android.application.perpetual.cases.GetPerpetual
 import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.domains.perpetual.LeverageState
 import com.gemwallet.android.domains.perpetual.aggregates.PerpetualDetailsDataAggregate
-import com.gemwallet.android.domains.perpetual.formatLeverage
 import com.gemwallet.android.ext.HypercoreUSDC
 import com.gemwallet.android.ext.PerpetualFormatter
 import com.gemwallet.android.ext.toGem
@@ -49,7 +48,6 @@ import uniffi.gemstone.GemAssetBalance
 import uniffi.gemstone.GemAutocloseEstimator
 import uniffi.gemstone.GemAutocloseField
 import uniffi.gemstone.GemAutocloseSession
-import uniffi.gemstone.GemPerpetual
 import uniffi.gemstone.GemPerpetualAutoclose
 import uniffi.gemstone.GemPerpetualPositionAction
 import uniffi.gemstone.GemTransferData
@@ -94,21 +92,21 @@ class AmountPerpetualProvider(
 
     val showsAutoclose: Boolean = params.positionAction.showsAutoclose()
 
-    private val userSelectedLeverage = MutableStateFlow<Int?>(null)
+    private val userSelectedLeverage = MutableStateFlow<UByte?>(null)
 
     val leverageState: StateFlow<LeverageState?> = if (isOpenAction) {
         combine(perpetual.filterNotNull(), userSelectedLeverage) { current, override ->
-            LeverageState(
-                current = override ?: service.perpetualLeverage(current.maxLeverage.toUByte()).toInt(),
-                options = GemPerpetual(PerpetualProvider.HYPERCORE).use { it.leverageOptions(current.maxLeverage.toUByte()) }.toUnsignedInts(),
-                direction = params.direction,
-            )
+            val options = service.perpetualLeverageOptions(current.maxLeverage.toUByte())
+            val selected = override ?: service.perpetualLeverage(current.maxLeverage.toUByte())
+            options.firstOrNull { it.value == selected }?.let { option ->
+                LeverageState(current = option, options = options, direction = params.direction)
+            }
         }.stateIn(scope, SharingStarted.Eagerly, null)
     } else {
         MutableStateFlow(null)
     }
 
-    fun setLeverage(value: Int) {
+    fun setLeverage(value: UByte) {
         userSelectedLeverage.value = value
     }
 
@@ -122,19 +120,19 @@ class AmountPerpetualProvider(
     fun autocloseField(field: GemAutocloseField, estimator: GemAutocloseEstimator, showErrors: Boolean): AutocloseUIModel.Field = AutocloseUIModelFactory.createField(field = field, estimator = estimator, showErrors = showErrors)
 
     fun estimatorFor(amount: String, marketPrice: Double): GemAutocloseEstimator {
-        val leverage = (leverageState.value?.current ?: perpetual.value?.maxLeverage ?: 1).coerceAtLeast(1)
+        val leverage = leverageState.value?.current?.value ?: perpetual.value?.maxLeverage?.toUByte() ?: 1u
         val usdAmount = amount.parseInputNumberOrNull()?.toDouble() ?: 0.0
         return GemAutocloseEstimator.forOpen(
             marketPrice = marketPrice,
             size = usdAmount,
-            leverage = leverage.toUByte(),
+            leverage = leverage,
             direction = direction.toGem(),
         )
     }
 
     private val defaultAutoclose: StateFlow<GemPerpetualAutoclose?> = if (isOpenAction) {
         combine(perpetual.filterNotNull(), leverageState.filterNotNull()) { market, state ->
-            service.perpetualAutoclose(market.price, direction.toGem(), state.current.toUByte())
+            service.perpetualAutoclose(market.price, direction.toGem(), state.current.value)
         }.stateIn(scope, SharingStarted.Eagerly, null)
     } else {
         MutableStateFlow(null)
@@ -149,7 +147,7 @@ class AmountPerpetualProvider(
         state?.let {
             ListItemModel(
                 title = context.getString(R.string.perpetual_leverage),
-                subtitle = it.current.formatLeverage(),
+                subtitle = it.current.label.string(context),
                 subtitleStyle = it.direction.textStyle(),
             )
         }
@@ -162,7 +160,7 @@ class AmountPerpetualProvider(
         AmountExtrasUIModel.Perpetual(
             leverage = leverage,
             leverages = state?.options.orEmpty(),
-            selectedLeverage = state?.current ?: 0,
+            selectedLeverage = state?.current,
             autoclose = autoclose.takeIf { showsAutoclose },
         )
     }.stateIn(scope, SharingStarted.Eagerly, AmountExtrasUIModel.None)
@@ -171,10 +169,9 @@ class AmountPerpetualProvider(
 
     fun openPositionListItem(amount: String): ListItemModel? {
         val market = perpetual.value ?: return null
-        val leverage = leverageState.value?.current ?: 1
         val row = perpetualOpenRow(
             direction = direction.toGem(),
-            leverage = leverage.toUByte(),
+            leverage = leverageState.value?.current?.value ?: 1u,
             size = amount.parseInputNumberOrNull()?.toDouble() ?: 0.0,
         )
         return ListItemModel(
@@ -206,7 +203,7 @@ class AmountPerpetualProvider(
         perpetual.filterNotNull(),
         leverageState,
     ) { _, state ->
-        service.perpetualAmountType(params.positionAction, (state?.current ?: params.positionAction.transferData().leverage.toInt()).toUByte())
+        service.perpetualAmountType(params.positionAction, state?.current?.value ?: params.positionAction.transferData().leverage)
     }.stateIn(scope, SharingStarted.Eagerly, null)
 
     override val assetInfo: StateFlow<AssetInfo?> = perpetual.filterNotNull()
@@ -224,7 +221,7 @@ class AmountPerpetualProvider(
         action = params.positionAction,
         value = amount.atomicValue,
         useMaxAmount = isMax,
-        leverage = leverageState.value?.current?.toUByte() ?: params.positionAction.transferData().leverage,
+        leverage = leverageState.value?.current?.value ?: params.positionAction.transferData().leverage,
         takeProfit = trigger(takeProfit.value),
         stopLoss = trigger(stopLoss.value),
     )

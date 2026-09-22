@@ -292,7 +292,7 @@ pub fn select_asset_flow(select_type: GemSelectAssetType, swap_receive_assets: O
         popular_section: false,
         balance_filter: false,
         add_custom_token: false,
-        deposit_asset_display: false,
+        display_asset: None,
     };
     match select_type {
         GemSelectAssetType::Send => GemSelectAssetFlow {
@@ -369,7 +369,7 @@ pub fn select_asset_flow(select_type: GemSelectAssetType, swap_receive_assets: O
         ),
         GemSelectAssetType::Withdraw => with_filter(
             GemSelectAssetFlow {
-                deposit_asset_display: true,
+                display_asset: Some(GemPerpetual::new(PerpetualProvider::Hypercore).deposit_asset()),
                 ..flow(GemSelectRowAction::Navigate, None)
             },
             Some(GemAssetFilter::asset_ids(vec![HYPERCORE_PERPETUAL_USDC.id.clone()])),
@@ -862,7 +862,7 @@ mod tests {
                 ("popular_section", flow.popular_section),
                 ("balance_filter", flow.balance_filter),
                 ("add_custom_token", flow.add_custom_token),
-                ("deposit_asset_display", flow.deposit_asset_display),
+                ("display_asset", flow.display_asset.is_some()),
                 ("enables_price_alert", flow.enables_price_alert),
             ]
             .into_iter()
@@ -878,7 +878,7 @@ mod tests {
         assert_eq!(enabled(GemSelectAssetType::Manage), ["network_search", "chain_filter", "balance_filter", "add_custom_token"]);
         assert_eq!(enabled(GemSelectAssetType::PriceAlert), ["network_search", "chain_filter", "popular_section", "enables_price_alert"]);
         assert!(enabled(GemSelectAssetType::Deposit).is_empty());
-        assert_eq!(enabled(GemSelectAssetType::Withdraw), ["deposit_asset_display"]);
+        assert_eq!(enabled(GemSelectAssetType::Withdraw), ["display_asset"]);
         assert_eq!(enabled(GemSelectAssetType::WalletSearch), ["network_search", "recents", "add_custom_token"]);
         assert!(enabled(GemSelectAssetType::WalletSearchResults).is_empty());
     }

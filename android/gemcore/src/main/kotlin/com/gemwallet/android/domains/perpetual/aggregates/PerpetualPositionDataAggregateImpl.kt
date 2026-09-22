@@ -22,7 +22,6 @@ class PerpetualPositionDataAggregateImpl(private val data: PerpetualPositionData
 
     override val title: String = row.title
     override val direction: PerpetualDirection = data.position.direction
-    override val leverage: String = row.leverage
     override val positionLabel: GemLocalizedText = row.position
     override val marginAmount: String = row.margin.text()
     override val pnl: GemLocalizedText = row.pnl

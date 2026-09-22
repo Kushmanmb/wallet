@@ -29,8 +29,10 @@ import uniffi.gemstone.GemAmountTitle
 import uniffi.gemstone.GemAmountType
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
+import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemPerpetualAutoclose
 import uniffi.gemstone.GemPerpetualPositionAction
+import uniffi.gemstone.GemPickerOption
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AmountPerpetualProviderTest {
@@ -74,6 +76,7 @@ class AmountPerpetualProviderTest {
                 GemAmountType.Perpetual(position = GemAmountPerpetualPosition.Open, direction = direction.toGem(), price = 0.0, leverage = 1u, sizeDecimals = 0)
             }
             every { perpetualLeverage(any()) } returns 5u
+            every { perpetualLeverageOptions(any()) } returns listOf(GemPickerOption(value = 5u, label = GemLocalizedText.Text("5x")))
             every { perpetualAutoclose(any(), any(), any()) } returns GemPerpetualAutoclose(takeProfit = null, stopLoss = null)
             every { perpetualAutocloseRow(any(), any()) } returns GemListRow.Lines(GemListRowTitle.AUTO_CLOSE, emptyList(), null)
         }

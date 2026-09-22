@@ -173,7 +173,7 @@ pub enum GemSelectAssetSection {
     Networks,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemSelectAssetFlow {
     pub title: GemSelectAssetTitle,
     pub assets_section: GemSelectAssetSection,
@@ -189,7 +189,7 @@ pub struct GemSelectAssetFlow {
     pub popular_section: bool,
     pub balance_filter: bool,
     pub add_custom_token: bool,
-    pub deposit_asset_display: bool,
+    pub display_asset: Option<Asset>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]

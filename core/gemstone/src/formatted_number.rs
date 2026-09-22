@@ -169,7 +169,7 @@ impl GemFormattedNumber {
             rounding: GemNumberRounding::ToNearest,
             unit: GemNumberUnit::Multiplier,
             display: GemNumberDisplay::Number {
-                precision: number_formatter::Precision::TWO_PLACES.into(),
+                precision: number_formatter::Precision::UP_TO_TWO_PLACES.into(),
             },
         }
     }
@@ -324,8 +324,9 @@ mod tests {
         assert_eq!(
             leverage.display,
             GemNumberDisplay::Number {
-                precision: number_formatter::Precision::TWO_PLACES.into()
-            }
+                precision: number_formatter::Precision::UP_TO_TWO_PLACES.into()
+            },
+            "a whole leverage reads 5x, not 5.00x"
         );
         assert_eq!(leverage.notation, GemNumberNotation::Plain);
     }
