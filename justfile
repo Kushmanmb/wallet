@@ -83,5 +83,8 @@ check-docs:
 check-ffi:
     @python3 ./scripts/check-ffi-surface.py
 
+check-boundaries:
+    @python3 ./scripts/check-boundaries.py
+
 bump TARGET="patch":
     @bash ./scripts/bump.sh {{TARGET}}

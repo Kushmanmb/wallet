@@ -26,3 +26,6 @@ jobs:
 
       - name: Check FFI surface
         run: python3 ./scripts/check-ffi-surface.py
+
+      - name: Check boundary rules
+        run: python3 ./scripts/check-boundaries.py
