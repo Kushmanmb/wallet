@@ -83,6 +83,7 @@ public extension ViewModelFactory {
         WalletSearchSceneViewModel(
             wallet: wallet,
             service: assetSelectionService(),
+            preferences: observablePreferences,
             recentModel: RecentAssetsModel(walletId: wallet.id, types: RecentActivityType.allCases, service: recentAssetsService),
             onDismissSearch: onDismissSearch,
             onSelectAssetAction: onSelectAssetAction,
@@ -178,6 +179,7 @@ public extension ViewModelFactory {
         AssetsResultsSceneViewModel(
             wallet: wallet,
             service: assetSelectionService(),
+            preferences: observablePreferences,
             request: request,
             title: title,
             onSelectAsset: onSelectAsset,

@@ -20,6 +20,7 @@ import SwiftUI
 @MainActor
 public final class AssetsResultsSceneViewModel: AssetActions, PerpetualPinActions {
     private let service: any GemAssetSelectionServiceProtocol
+    private let preferences: ObservablePreferences
     let wallet: Wallet
 
     let title: String
@@ -36,12 +37,14 @@ public final class AssetsResultsSceneViewModel: AssetActions, PerpetualPinAction
     public init(
         wallet: Wallet,
         service: any GemAssetSelectionServiceProtocol,
+        preferences: ObservablePreferences,
         request: WalletSearchRequest,
         title: String,
         onSelectAsset: @escaping (Asset) -> Void,
     ) {
         self.wallet = wallet
         self.service = service
+        self.preferences = preferences
         self.title = title
         var request = request
         request.searchKey = service.searchKey(query: request.searchBy, scope: request.scope.gemScope)
@@ -79,7 +82,7 @@ public final class AssetsResultsSceneViewModel: AssetActions, PerpetualPinAction
     }
 
     private var listsPerpetuals: Bool {
-        searchQuery.request.scope.isList && service.showPerpetuals(walletType: wallet.type.toGem(), chains: wallet.chains.map(\.rawValue))
+        searchQuery.request.scope.isList && preferences.showPerpetuals(for: wallet)
     }
 
     private var state: GemWalletSearchState {

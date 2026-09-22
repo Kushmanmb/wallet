@@ -1,6 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import GemstonePrimitives
+import GemstonePrimitivesTestKit
+import GemstoneServices
 import GemstoneServicesTestKit
 import NFT
 import Primitives
@@ -52,10 +54,10 @@ struct WalletSearchSceneViewModelTests {
     }
 
     @Test
-    func hidesPerpetualsWhenTheServiceSaysSo() {
-        let service = GemAssetSelectionServiceMock()
-        service.perpetualsShown = false
-        let model = WalletSearchSceneViewModel.mock(service: service)
+    func hidesPerpetualsWhenThePreferenceSaysSo() {
+        let model = WalletSearchSceneViewModel.mock(
+            preferences: .mock(preferencesService: GemPreferencesServiceMock(perpetualEnabled: false), isPerpetualEnabled: false),
+        )
         model.searchQuery.value = .mock(
             perpetuals: [
                 .mock(metadata: .mock(isPinned: false)),

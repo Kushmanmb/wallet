@@ -537,10 +537,7 @@ mod tests {
             to: "0x0D9DAB1A248f63B0a48965bA8435e4de7497a3dC".to_string(),
             ..Transaction::mock()
         };
-        assert_eq!(
-            sweep.finalize(vec!["0x0d9dab1a248f63b0a48965ba8435e4de7497a3dc".to_string()]).direction,
-            TransactionDirection::Incoming
-        );
+        assert_eq!(sweep.finalize(vec!["0x0d9dab1a248f63b0a48965ba8435e4de7497a3dc".to_string()]).direction, TransactionDirection::Incoming);
     }
 
     #[test]

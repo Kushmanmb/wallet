@@ -234,11 +234,6 @@ pub fn formatted_percentage(value: f64, style: GemPercentageStyle) -> GemFormatt
     GemFormattedNumber::percentage(value, style)
 }
 
-#[uniffi::export]
-pub fn leverage_number(value: f64) -> GemFormattedNumber {
-    GemFormattedNumber::leverage(value)
-}
-
 fn value_display(value: f64, style: GemValueStyle) -> GemNumberDisplay {
     if style.abbreviates(value) {
         return GemNumberDisplay::Abbreviated;

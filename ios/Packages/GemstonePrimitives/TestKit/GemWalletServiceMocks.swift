@@ -33,8 +33,9 @@ public final class GemPreferencesServiceMock: GemPreferencesServiceProtocol, @un
     private var priceAlertsEnabled: Bool
     private var skippedAppVersion: String?
 
-    public init(priceAlertsEnabled: Bool = false) {
+    public init(priceAlertsEnabled: Bool = false, perpetualEnabled: Bool = false) {
         self.priceAlertsEnabled = priceAlertsEnabled
+        self.perpetualEnabled = perpetualEnabled
     }
 
     public func setPriceAlertsEnabled(enabled: Bool) throws {
@@ -57,7 +58,7 @@ public final class GemPreferencesServiceMock: GemPreferencesServiceProtocol, @un
 
     public func setPushNotificationsEnabled(enabled _: Bool) throws {}
 
-    private var perpetualEnabled = false
+    private var perpetualEnabled: Bool
     private var hideBalanceEnabled = false
     private var developerEnabled = false
     private var acceptTermsCompleted = false

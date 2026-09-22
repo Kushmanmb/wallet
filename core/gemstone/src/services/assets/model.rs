@@ -102,11 +102,6 @@ pub struct GemAssetRowText {
     pub network: Option<String>,
 }
 
-#[uniffi::export]
-pub fn asset_row_text(asset: Asset, style: GemAssetRowStyle) -> GemAssetRowText {
-    super::rules::asset_row_text(&asset, style)
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemAssetBalanceScope {
     Total,

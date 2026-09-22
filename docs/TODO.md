@@ -20,7 +20,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 2. **Establish consistency:** MIG6. Use MIG5 to prevent new boundary regressions while the remaining debt is reduced.
 3. **Move complete workflows:** U19 payments, C52 deep-link/push preparation, and C53 wallet creation/import. Keep native routes and lifecycle executors.
 4. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
-5. **Close the boundary:** finish U9, U33, N12, F61 and O59 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
+5. **Close the boundary:** finish U9, U33 and F61 where their owners are ready. Re-run the coverage audit; a matching service field alone is not completion.
 
 ## Screen coverage and existing infrastructure
 
@@ -30,10 +30,10 @@ This map routes work to current owners. It groups existing ids rather than creat
 |---|---|---|
 | Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | C53, X172 |
 | Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | N7, X172 |
-| Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | U25, O59, AUD23, AUD25, AUD26, AUD27, AUD28 |
+| Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | U25, AUD23, AUD25, AUD26, AUD27, AUD28 |
 | Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | AUD20, AUD43, AUD44, U26 |
 | Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | AUD36 |
-| Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | O59, F61 |
+| Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | F61 |
 | Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | AUD14, F61 |
 | Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | AUD44; retain existing native QR/share adapters |
 | Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | U19, C52 |
@@ -43,7 +43,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | U33 |
 | Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD29, AUD33, AUD34, N7, P90 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | U33 |
-| Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | K14, O59, AUD38, AUD40 |
+| Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | K14, AUD38, AUD40 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | S73, F61, AUD15, AUD41 |
 | Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | S75, AUD46, K14, N11 |
 | Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | Preserve exact atomic values |
@@ -53,14 +53,14 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Rewards/create/use/redeem referral | `GemRewardsService`, rewards state, shared load and list records | — |
 | Contacts/list/editor/address picker | `GemContactService`, `GemContactEditorService`, contact session/name component | — |
 | Networks/node list/add/check | `GemChainSettingsService`, node sessions, shared rows | AUD20, AUD31 |
-| Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | O59, AUD13, AUD30; retain native locale/theme application |
+| Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | AUD13, AUD30; retain native locale/theme application |
 | Security/lock/biometry/recovery | `GemSecurityService`, existing keystore/auth ports and settings sections | D72, X172, AUD37; retain platform-only privacy lock |
 | Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | D48, AUD32 |
 | WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | AUD17, D72/D73; retain Android-only one-click auth |
 | About, app update, developer/service status | Existing settings/update/developer services and native store adapters | —; platform delivery channels remain distinct |
 | Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | U9/U17, F61; retain native widget scheduling |
 
-An id belongs in this table only while its bullet exists below. MIG5, MIG6, K13, K21, N8, N10, N12, AUD35, and the decision and upstream items stay in their own sections.
+An id belongs in this table only while its bullet exists below. MIG5, MIG6, K13, K21, N8, N10, AUD35, and the decision and upstream items stay in their own sections.
 
 ## Completion contract for every item
 
@@ -74,7 +74,7 @@ An id belongs in this table only while its bullet exists below. MIG5, MIG6, K13,
 
 These are additional tasks from the architecture review. MIG ids are a new namespace; the implementations described below are proposed.
 
-- **MIG5** **M** Most documented boundary censuses are not checked-in gates: Repo Checks runs mapper parity and doc links, the mapper checker only compares variants found on both sides, and no other documented rule has a check. Add small reproducible checks through the existing script/`just` infrastructure, starting with one reliably detectable regression such as misplaced localization mapping or service construction. Expand to feature-view Core calls and direct writes only where the check can distinguish the allowed paths without a new analysis framework. For reliable checks, record current debt by path/rule with its TODO id, reject new violations and stale exceptions, and run them in the existing appropriate checks/CI. Keep ambiguous semantic findings advisory. Exempt generated code, native ports/DAOs, DI providers, shared row renderers and legitimate child dependencies explicitly. Treat ambiguous matches as review leads; do not generate wrapper classes just to satisfy a regex.
+- **MIG5** **M** Most documented boundary censuses are not checked-in gates: Repo Checks runs mapper parity, doc links and the FFI surface sweep (`check-ffi`, landed with N12), the mapper checker only compares variants found on both sides, and no other documented rule has a check. Add small reproducible checks through the existing script/`just` infrastructure, starting with one reliably detectable regression such as misplaced localization mapping or service construction. Expand to feature-view Core calls and direct writes only where the check can distinguish the allowed paths without a new analysis framework. For reliable checks, record current debt by path/rule with its TODO id, reject new violations and stale exceptions, and run them in the existing appropriate checks/CI. Keep ambiguous semantic findings advisory. Exempt generated code, native ports/DAOs, DI providers, shared row renderers and legitimate child dependencies explicitly. Treat ambiguous matches as review leads; do not generate wrapper classes just to satisfy a regex.
 - **MIG6** **M** Add paired persistence-contract cases using the existing GRDB/Room test infrastructure and Core store testkits for the operations changed by the balance publication lane: rollback, conditional conflict handling, missing rows, wallet isolation, unchanged writes and observer-visible batches. Use equivalent fixtures and expected results on both platforms; test the real adapters and transaction runner. Keep sequencing/failure/retry assertions in Core and mapping/query assertions native. Land the relevant tests with each behavior change, not as a later verification phase. This closes the verification gap without introducing a generic persistence framework or duplicating domain-rule tests.
 
 ## Follow-up correctness and consolidation review
@@ -148,7 +148,6 @@ Surveyed on 2026-09-21. Each item names what was counted and where; confirm the 
 
 ### Generated surface
 
-- **N12** **S** **Keep the FFI surface swept.** U36 removed 26 types that reached no exported signature, cutting 2,186 lines of generated Swift. The surface grows back: after adding an export, check with `cargo build` that removing its derive fails, and re-run the U36 sweep each release rather than letting it accumulate.
 
 - **N13** **M** **The rewards screen is a bag of flags where the contract asks for sections of rows.** [`GemRewardsState`](../core/gemstone/src/services/rewards/model.rs) hands the apps `has_referral_code`, `can_invite`, `can_use_referral_code`, `shows_info`, `shows_pending_activation` and `can_activate_pending_referral`, and each app rebuilds a screen from them — Android's [`ReferralUIState`](../android/features/referral/viewmodels/src/main/kotlin/com/gemwallet/android/features/referral/viewmodels/models/ReferralUIState.kt) copies all six into its own record and [`ReferralScene`](../android/features/referral/presents/src/main/kotlin/com/gemwallet/android/features/referral/views/ReferralScene.kt) branches on each, while iOS's `RewardsScene` branches on the same flags. [ARCHITECTURE § a plain list is Core sections of one shared row](ARCHITECTURE.md#a-plain-list-is-core-sections-of-one-shared-row-rendered-by-one-builder-per-app) and [§ one phase enum](ARCHITECTURE.md#a-screens-state-is-one-phase-enum-never-a-bag-of-flags) both say otherwise: `info_rows` is already `Vec<GemListRow>`, so the rest of the screen should join it as `Vec<GemListSection>`, with the invite head and the redemption options staying per-screen rich rows. Delete `ReferralUIState` with the flags. `GemRewardsSession` and its phase landed with S79.
 
@@ -203,7 +202,6 @@ The same product rule on both apps with a difference, each read on both sides on
 
 [ARCHITECTURE.md § 7](ARCHITECTURE.md#7-at-most-one-core-service-on-ios-narrow-cases-on-android): a case that only forwards a Core call is migration debt, and one answer has one route.
 
-- **O59** **S** "Show perpetuals" still reaches the apps through more paths than the home state: iOS [PortfolioSceneViewModel](../ios/Features/WalletTab/Sources/ViewModels/PortfolioSceneViewModel.swift) and `AssetsResultsSceneViewModel` ask their own services, and Android has three — `WalletSearchViewModel` and `AssetsResultsViewModel` call `GemAssetSelectionService.showPerpetuals`, while the home preview has a fourth path, [PerpetualsPreviewViewModel](../android/features/perpetual/viewmodels/src/main/kotlin/com/gemwallet/android/features/perpetual/viewmodels/PerpetualsPreviewViewModel.kt) reading `userConfig.showPerpetuals`. That one is a self-contained composable with its own view model, so Android's home cannot read the state field without changing the preview section's API; decide whether the section takes the flag or keeps its own. Put the search and results readers on the portfolio session, then un-export the paths that are left. `GemWalletHomeViewState.shows_perpetuals` exists now and iOS's home reads it instead of fetching alongside the view state.
 
 ## 6. Core shapes that block an app move
 
