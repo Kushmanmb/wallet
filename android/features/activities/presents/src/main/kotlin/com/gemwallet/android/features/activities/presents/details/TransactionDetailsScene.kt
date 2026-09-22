@@ -18,6 +18,7 @@ import com.gemwallet.android.features.activities.viewmodels.models.TransactionHe
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.list_head.AmountListHead
+import com.gemwallet.android.ui.components.list_head.AssetListHead
 import com.gemwallet.android.ui.components.list_head.NftHead
 import com.gemwallet.android.ui.components.list_head.SwapListHead
 import com.gemwallet.android.ui.components.list_item.GemListRowView
@@ -88,6 +89,11 @@ internal fun TransactionDetailsScene(title: String, sections: List<ListSection<T
                         icon = row.asset,
                         amount = row.amount,
                         equivalent = row.equivalent,
+                        onClick = headerTarget?.let { target -> { onAction(target.navigation()) } },
+                    )
+
+                    is TransactionDetailsRowUIModel.AssetHead -> AssetListHead(
+                        asset = row.asset,
                         onClick = headerTarget?.let { target -> { onAction(target.navigation()) } },
                     )
 

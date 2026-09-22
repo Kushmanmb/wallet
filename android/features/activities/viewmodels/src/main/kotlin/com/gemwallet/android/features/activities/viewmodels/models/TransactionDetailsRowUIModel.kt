@@ -42,6 +42,7 @@ sealed interface TransactionDetailsRowUIModel {
     data class Row(val row: GemListRow, val infoIcon: Any?) : TransactionDetailsRowUIModel
     data class NftHead(val metadata: TransactionNFTTransferMetadata) : TransactionDetailsRowUIModel
     data class AmountHead(val asset: Asset, val amount: String, val equivalent: String?) : TransactionDetailsRowUIModel
+    data class AssetHead(val asset: Asset) : TransactionDetailsRowUIModel
     data class SwapHead(val fromAsset: AssetPriceValue, val fromValueText: String, val fromEquivalentText: String?, val toAsset: AssetPriceValue, val toValueText: String, val toEquivalentText: String?) : TransactionDetailsRowUIModel
 
     data class Rate(val rate: AssetRatePair) : TransactionDetailsRowUIModel
@@ -102,7 +103,7 @@ private fun GemTransactionHeader.head(currency: Currency): TransactionDetailsRow
 
     is GemTransactionHeader.Symbol -> asset.toPrimitives().let { TransactionDetailsRowUIModel.AmountHead(it, it.symbol, null) }
 
-    is GemTransactionHeader.AssetImage -> asset.toPrimitives().let { TransactionDetailsRowUIModel.AmountHead(it, it.symbol, null) }
+    is GemTransactionHeader.AssetImage -> TransactionDetailsRowUIModel.AssetHead(asset.toPrimitives())
 }
 
 private fun GemTransactionAmount.head(currency: Currency, showsFiat: Boolean): TransactionDetailsRowUIModel.AmountHead {
