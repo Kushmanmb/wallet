@@ -73,10 +73,10 @@ build-ios-lib targets=IOS_RUST_TARGETS:
         echo "note: Building Gemstone Rust library for $rust_target ($profile)"
         case "$rust_target" in
             aarch64-apple-ios | aarch64-apple-ios-sim)
-                IPHONEOS_DEPLOYMENT_TARGET=17.0 cargo build --target "$rust_target" --lib ${build_flag}
+                IPHONEOS_DEPLOYMENT_TARGET=17.0 cargo rustc --target "$rust_target" --lib ${build_flag} --crate-type staticlib
                 ;;
             aarch64-apple-ios-macabi | aarch64-apple-darwin)
-                env -u IPHONEOS_DEPLOYMENT_TARGET cargo build --target "$rust_target" --lib ${build_flag}
+                env -u IPHONEOS_DEPLOYMENT_TARGET cargo rustc --target "$rust_target" --lib ${build_flag} --crate-type staticlib
                 ;;
             *)
                 echo "error: unsupported Gemstone iOS Rust target: $rust_target" >&2
@@ -104,7 +104,7 @@ bindgen-swift:
     if [ "${BUILD_MODE}" == "release" ]; then \
         export RUSTFLAGS="${RUSTFLAGS:-} -C strip=none"; \
     fi
-    cargo build {{CARGO_BUILD_FLAG}}
+    cargo rustc {{CARGO_BUILD_FLAG}} --lib --crate-type cdylib
     if [ ! -f "${LIB_OUTPUT_PATH}" ]; then \
         echo "Failed to locate ${DY_LIB_NAME} at ${LIB_OUTPUT_PATH} (mode ${BUILD_MODE})"; \
         exit 1; \
@@ -126,7 +126,7 @@ bindgen-kotlin:
     if [ "${BUILD_MODE}" == "release" ]; then \
         export RUSTFLAGS="${RUSTFLAGS:-} -C strip=none"; \
     fi
-    cargo build {{CARGO_BUILD_FLAG}}
+    cargo rustc {{CARGO_BUILD_FLAG}} --lib --crate-type cdylib
     if [ ! -f "${LIB_OUTPUT_PATH}" ]; then \
         echo "Failed to locate ${DY_LIB_NAME} at ${LIB_OUTPUT_PATH} (mode ${BUILD_MODE})"; \
         exit 1; \
