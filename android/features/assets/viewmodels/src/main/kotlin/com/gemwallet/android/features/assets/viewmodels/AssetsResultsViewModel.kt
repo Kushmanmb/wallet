@@ -10,8 +10,6 @@ import com.gemwallet.android.application.perpetual.cases.GetPerpetuals
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.data.services.gemstone.assets.AssetsSearchService
 import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
-import com.gemwallet.android.data.services.gemstone.config.UserConfig
-import com.gemwallet.android.data.services.gemstone.config.showPerpetuals
 import com.gemwallet.android.domains.perpetual.aggregates.PerpetualDataAggregate
 import com.gemwallet.android.domains.search.WalletSearchTag
 import com.gemwallet.android.domains.search.toGem
@@ -55,7 +53,6 @@ class AssetsResultsViewModel @Inject constructor(
     recentAssetsService: RecentAssetsService,
     service: GemAssetSelectionServiceInterface,
     getPerpetuals: GetPerpetuals,
-    userConfig: UserConfig,
     @IoDispatcher ioDispatcher: CoroutineDispatcher,
     @ApplicationContext context: Context,
     savedStateHandle: SavedStateHandle,
@@ -82,7 +79,7 @@ class AssetsResultsViewModel @Inject constructor(
         is WalletSearchTag.List ->
             combine(
                 getPerpetuals.getPerpetuals(searchKey),
-                userConfig.showPerpetuals(getSession()),
+                getSession().map { session -> session?.wallet?.let { service.showPerpetuals(it.type.toGem(), it.chainIds) } ?: false },
             ) { items, show ->
                 if (show) items.take(resultsLimit()) else emptyList()
             }

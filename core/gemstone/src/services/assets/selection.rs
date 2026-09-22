@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use primitives::currency::Currency;
-use primitives::{Asset, AssetBasic, AssetId, Chain, NFTData, Wallet};
+use primitives::{Asset, AssetBasic, AssetId, Chain, NFTData, Wallet, WalletType};
 
 use super::model::{GemAssetAction, GemSelectAssetFlow, GemSelectAssetType, GemWalletSearchLimits};
 use super::rules;
@@ -86,6 +86,11 @@ impl GemAssetSelectionService {
 
     pub fn search_collections(&self, data: Vec<NFTData>, query: String) -> Vec<GemNftItem> {
         nft_rules::search_collections(data, &query)
+    }
+
+    /// The selection screens own this question, so they ask their own service rather than a second one.
+    pub fn show_perpetuals(&self, wallet_type: WalletType, chains: Vec<Chain>) -> bool {
+        self.preferences.show_perpetuals(wallet_type, chains)
     }
 
     pub async fn search_assets(&self, query: String) -> Result<Vec<AssetBasic>, GemServiceError> {

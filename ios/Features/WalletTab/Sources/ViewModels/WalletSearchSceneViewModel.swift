@@ -25,7 +25,6 @@ import SwiftUI
 @MainActor
 public final class WalletSearchSceneViewModel: Sendable, AssetActions, PerpetualPinActions {
     private let service: any GemAssetSelectionServiceProtocol
-    private let preferences: ObservablePreferences
 
     let wallet: Wallet
     private let onDismissSearch: VoidAction
@@ -52,7 +51,6 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
     public init(
         wallet: Wallet,
         service: any GemAssetSelectionServiceProtocol,
-        preferences: ObservablePreferences,
         recentModel: RecentAssetsModel,
         onDismissSearch: VoidAction,
         onSelectAssetAction: AssetAction,
@@ -60,7 +58,6 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
     ) {
         self.wallet = wallet
         self.service = service
-        self.preferences = preferences
         self.recentModel = recentModel
         self.onDismissSearch = onDismissSearch
         self.onSelectAssetAction = onSelectAssetAction
@@ -146,7 +143,7 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
     }
 
     private var showsPerpetuals: Bool {
-        preferences.showPerpetuals(for: wallet)
+        service.showPerpetuals(walletType: wallet.type.toGem(), chains: wallet.chains.map(\.rawValue))
     }
 
     var showRecents: Bool {

@@ -2,8 +2,6 @@
 
 import Components
 import GemstonePrimitives
-import GemstonePrimitivesTestKit
-import GemstoneServices
 import GemstoneServicesTestKit
 import Primitives
 import PrimitivesComponents
@@ -70,15 +68,14 @@ struct AssetsResultsSceneViewModelTests {
 
     @Test
     func perpetualsAreOfferedOnlyInAListScopeAndOnlyWhenCoreAllowsThem() {
-        let listRequest = WalletSearchRequest(walletId: .mock(), scope: .list("trending"), types: [.perpetual])
-        let listModel = AssetsResultsSceneViewModel.mock(preferences: .mock(preferencesService: GemPreferencesServiceMock(perpetualEnabled: true), isPerpetualEnabled: true), request: listRequest)
+        let service = GemAssetSelectionServiceMock()
+        let listModel = AssetsResultsSceneViewModel.mock(service: service, request: WalletSearchRequest(walletId: .mock(), scope: .list("trending"), types: [.perpetual]))
         listModel.searchQuery.value = .mock(perpetuals: [PerpetualData.mock()])
 
         #expect(listModel.showPerpetuals)
 
-        let disabledModel = AssetsResultsSceneViewModel.mock(preferences: .mock(preferencesService: GemPreferencesServiceMock(perpetualEnabled: false), isPerpetualEnabled: false), request: listRequest)
-        disabledModel.searchQuery.value = .mock(perpetuals: [PerpetualData.mock()])
-        #expect(disabledModel.showPerpetuals == false)
+        service.perpetualsShown = false
+        #expect(listModel.showPerpetuals == false)
 
         let allModel = AssetsResultsSceneViewModel.mock()
         allModel.searchQuery.value = .mock(perpetuals: [PerpetualData.mock()])
