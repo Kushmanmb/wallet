@@ -17,7 +17,7 @@ Use [Task Workflow](../skills/task-workflow.md) for execution and [Quality Check
 ## Execution order
 
 1. **Protect correctness:** preserve existing auth and transaction integrity contracts; the relock and simulation policies are settled (D72, D73).
-2. **Establish consistency:** MIG6. `just check-boundaries` prevents new boundary regressions while the remaining debt is reduced.
+2. **Establish consistency:** `just check-boundaries` prevents new boundary regressions while the remaining debt is reduced.
 3. **Migrate screen families:** follow the coverage map below. Within each family settle state and actions before rows, then remove app branches, duplicate models, formatters and exports in the same change. Dependencies are not permission to bundle unrelated families.
 4. **Close the boundary:** re-run the coverage audit after a batch; a matching service field alone is not completion.
 
@@ -59,7 +59,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | About, app update, developer/service status | Existing settings/update/developer services and native store adapters | —; platform delivery channels remain distinct |
 | Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | retain native widget scheduling |
 
-An id belongs in this table only while its bullet exists below. MIG6, K21, AUD35, and the decision and upstream items stay in their own sections.
+An id belongs in this table only while its bullet exists below. AUD35 and the upstream items stay in their own sections.
 
 ## Completion contract for every item
 
@@ -73,7 +73,6 @@ An id belongs in this table only while its bullet exists below. MIG6, K21, AUD35
 
 These are additional tasks from the architecture review. MIG ids are a new namespace; the implementations described below are proposed.
 
-- **MIG6** **S** **Android remainder: the balance lane's adapter cases.** Core's half is covered by its own store testkit — sequencing (`test_a_response_that_arrives_after_a_newer_one_is_dropped`), a chain that fails without holding back the others, the conditional write that unpins as it hides, an unchanged setup that writes nothing and an update that creates only the rows it lacks. iOS's half is now [BalanceStoreTests](../ios/Packages/Store/Tests/StoreTests/BalanceStoreTests.swift): six cases against the real GRDB store — a second add keeps the published row and its configuration, an update with no row writes nothing, one wallet never sees another's row, a configuration that changes nothing reports no write, only the missing balances are added, a batch that fails part way rolls back whole, and a batch of updates reaches an observer as one change. Android needs the same six against `GemstoneBalanceStore`, `BalancesDao` and `RoomStoreTransactionRunner`, with equivalent fixtures; `BannersDaoTest` is the pattern. Room needs `MigrationTestHelper`-style instrumentation for an in-memory database, so these are `androidTest` and cannot be run or verified from a development machine — land them with a device run (X172, AUD35). While writing them, check the divergence the adapters already carry: iOS's `updateBalances` leaves the stored metadata alone when the record has none, Android's writes five zeros over it (K21).
 
 ## Follow-up correctness and consolidation review
 
@@ -242,6 +241,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**MIG6 (2026-09-22).** Closed, on a device. `BalancesDaoTest` is the paired half of iOS's `BalanceStoreTests`: the same contract cases against the real DAO and the real `RoomStoreTransactionRunner` — a second add keeps the stored row and its configuration, an update with no row writes nothing, one wallet never sees another's, a configuration that changes nothing leaves `updated_at` alone, only the rows asked for come back, a batch that fails part way rolls back whole, and a batch reaches an observer whole or not at all. Core's half was already covered by its store testkit: sequencing, a chain that fails without holding back the others, the conditional write that unpins as it hides, an unchanged setup and an update that creates only the rows it lacks. Thirty-four store tests pass on API 35 arm64.
 
 **K21 (2026-09-22).** Closed, on a device. `balances` now stores `BalanceMetadata` the same way on both apps: one nullable JSON `metadata` column, which is the shape Core's `Option<BalanceMetadata>` has and which needs no migration when the record gains a field. Android's five flat columns are migrated into it and dropped with `list_position`, which nothing read. The divergence this closes is real: a balance with nothing to carry read back as `nil` on iOS and as metadata with five zeros on Android, because the flat columns defaulted to `0` and the mapper always built a record. `Migration_95_96Test` proves the round-trip field by field, proves an empty balance ends with no metadata, proves the six columns are gone and checks the foreign keys — twenty-seven store tests pass on API 35 arm64. The `prices` half landed earlier: iOS moved its market columns into an `asset_market` table, the shape Android already had.
 
