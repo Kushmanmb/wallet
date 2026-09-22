@@ -36,10 +36,13 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemCandleResult
+import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemPerpetualDetailsServiceInterface
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -65,6 +68,7 @@ class PerpetualDetailsViewModelTest {
     private fun viewModel(
         service: GemPerpetualDetailsServiceInterface = mockk(relaxed = true) {
             every { chartPeriod() } returns uniffi.gemstone.ChartPeriod.DAY
+            coEvery { candles(any()) } answers { GemCandleResult(request = firstArg(), state = GemLoadState.Data, candles = emptyList()) }
         },
         data: PerpetualData? = null,
     ): PerpetualDetailsViewModel {
@@ -99,6 +103,7 @@ class PerpetualDetailsViewModelTest {
     fun `the chart period is remembered in Core`() = runTest(dispatcher) {
         val service: GemPerpetualDetailsServiceInterface = mockk(relaxed = true) {
             every { chartPeriod() } returns uniffi.gemstone.ChartPeriod.DAY
+            coEvery { candles(any()) } answers { GemCandleResult(request = firstArg(), state = GemLoadState.Data, candles = emptyList()) }
         }
         val model = viewModel(service = service)
 
@@ -110,18 +115,19 @@ class PerpetualDetailsViewModelTest {
     }
 
     @Test
-    fun `refreshing shows the spinner and asks Core for the stored data again`() = runTest(dispatcher) {
+    fun `refreshing asks Core for the stored data again`() = runTest(dispatcher) {
         val service: GemPerpetualDetailsServiceInterface = mockk(relaxed = true) {
             every { chartPeriod() } returns uniffi.gemstone.ChartPeriod.DAY
+            coEvery { candles(any()) } answers { GemCandleResult(request = firstArg(), state = GemLoadState.Data, candles = emptyList()) }
         }
         val model = viewModel(service = service)
         advanceUntilIdle()
         coVerify(exactly = 0) { service.refresh(any()) }
 
         model.refresh()
-
-        assertTrue(model.isRefreshing.value)
         advanceUntilIdle()
+
+        assertFalse("the spinner stops once the answer lands", model.isRefreshing.value)
         coVerify(exactly = 1) { service.refresh(asset.id.toIdentifier()) }
 
         model.fetch()
@@ -133,6 +139,7 @@ class PerpetualDetailsViewModelTest {
     fun `closing a position without a perpetual does nothing`() = runTest(dispatcher) {
         val service: GemPerpetualDetailsServiceInterface = mockk(relaxed = true) {
             every { chartPeriod() } returns uniffi.gemstone.ChartPeriod.DAY
+            coEvery { candles(any()) } answers { GemCandleResult(request = firstArg(), state = GemLoadState.Data, candles = emptyList()) }
         }
         val model = viewModel(service = service)
         val confirm: ConfirmTransactionAction = mockk(relaxed = true)

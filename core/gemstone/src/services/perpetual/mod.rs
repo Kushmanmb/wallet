@@ -1,4 +1,5 @@
 pub mod autoclose;
+pub mod candles;
 pub mod details;
 pub mod model;
 pub mod rules;
@@ -24,6 +25,7 @@ use crate::config::perpetual_config::PRICES_UPDATE_INTERVAL_SECONDS;
 use crate::services::preferences::GemPreferencesService;
 
 pub use autoclose::{GemAutocloseField, GemAutocloseModify};
+pub use candles::{GemCandleRequest, GemCandleResult, GemCandleSession, GemCandleViewState};
 pub use details::GemPerpetualDetailsService;
 pub use model::{
     GemMarketsRefreshTrigger, GemPerpetualButton, GemPerpetualDetails, GemPerpetualMarketCounts, GemPerpetualPositionAction, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualSection, GemPerpetualSocketUpdate,

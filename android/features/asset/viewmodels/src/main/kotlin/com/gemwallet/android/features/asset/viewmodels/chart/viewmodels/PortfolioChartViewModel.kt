@@ -127,7 +127,7 @@ class PortfolioChartViewModel internal constructor(
         GemPortfolioPhase.Loading -> StateViewType.Loading
         is GemPortfolioPhase.Data -> StateViewType.Data(ChartUIModel(chart = chart))
         GemPortfolioPhase.NoData -> StateViewType.NoData
-        is GemPortfolioPhase.Failed -> StateViewType.Error
+        is GemPortfolioPhase.Failed -> StateViewType.Error()
     }
 
     @Inject

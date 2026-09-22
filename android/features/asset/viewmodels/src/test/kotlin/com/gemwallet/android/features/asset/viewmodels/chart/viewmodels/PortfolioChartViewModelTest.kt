@@ -160,7 +160,7 @@ class PortfolioChartViewModelTest {
 
         val state = viewModel.chartUIState.first { it.chart != StateViewType.Loading }
 
-        assertEquals(StateViewType.Error, state.chart)
+        assertEquals(StateViewType.Error(), state.chart)
     }
 
     @Test
