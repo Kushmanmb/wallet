@@ -13,6 +13,7 @@ public import struct Gemstone.GemConfirmLoadOptions
 public import struct Gemstone.GemConfirmMetadata
 public import enum Gemstone.GemConfirmRowContent
 public import struct Gemstone.GemConfirmScreen
+public import struct Gemstone.GemTransferData
 public import enum Gemstone.GemKeystoreAuthentication
 public import enum Gemstone.GemListRow
 public import enum Gemstone.GemSubmitResult
@@ -29,16 +30,20 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
     private let authenticationValue: GemKeystoreAuthentication
     private let rows: (Gemstone.AddressName?) -> [GemConfirmRowContent]
     private let acquireFlow: GemAcquireAssetFlow
+    private let selection: GemTransferData?
     private var loaded: GemConfirmLoad?
+    private var selected: GemTransferData?
+    public private(set) var loadOptions: [GemConfirmLoadOptions] = []
     public var onLoad: (@MainActor () -> Void)?
 
     public init(
         state: GemConfirmLoad = .mock(),
         load: Result<GemConfirmLoad, any Error> = .success(.mock()),
-        execute: Result<GemSubmitResult, any Error> = .success(.signed(data: [])),
+        execute: Result<GemSubmitResult, any Error> = .success(.signed(data: [], warning: nil)),
         authentication: GemKeystoreAuthentication = .none,
         rows: @escaping (Gemstone.AddressName?) -> [GemConfirmRowContent] = { _ in [] },
         acquireFlow: GemAcquireAssetFlow = .fiat,
+        selection: GemTransferData? = nil,
     ) {
         initialState = state
         loadResult = load
@@ -46,6 +51,7 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
         authenticationValue = authentication
         self.rows = rows
         self.acquireFlow = acquireFlow
+        self.selection = selection
     }
 
     public var headerValue: GemConfirmHeader = .transaction(header: .symbol(asset: Asset.mock().toGem()))
@@ -58,12 +64,20 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
         headerValue
     }
 
+    public func transfer() -> GemTransferData {
+        selected ?? (loaded ?? initialState).transfer
+    }
+
     public func state() async throws -> GemConfirmLoad {
         loaded ?? initialState
     }
 
-    public func load(options _: GemConfirmLoadOptions) async throws -> GemConfirmLoad {
+    public func load(options: GemConfirmLoadOptions) async throws -> GemConfirmLoad {
+        loadOptions.append(options)
         await onLoad?()
+        if options.assetId != nil {
+            selected = selection
+        }
         loaded = try loadResult.get()
         return try loadResult.get()
     }

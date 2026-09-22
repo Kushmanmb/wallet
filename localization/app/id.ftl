@@ -131,6 +131,8 @@ buy_no_results = Tidak ada penawaran tersedia
 # Transfer
 
 transfer_network_fee = Biaya Jaringan
+transfer_pay_with = Bayar dengan
+transfer_payment_title = Pembayaran
 transfer_memo = Memo
 transfer_confirm = Konfirmasi
 transfer_from = Dari
@@ -253,6 +255,7 @@ errors_network_offline = Koneksi internet tampaknya sedang offline.
 errors_no_internet_connection = Tidak ada koneksi internet
 errors_no_service_connection = Tidak ada koneksi layanan
 errors_balances_activity_outdated = Saldo dan aktivitas mungkin tidak terbaru.
+errors_payment_status = Pembayaran: %@
 
 # Activity
 
@@ -289,6 +292,7 @@ transaction_swap_again = Tukar Lagi
 transaction_status_completed = Selesai
 transaction_status_inprogress = Sedang Berlangsung
 transaction_status_refunded = Dikembalikan
+transaction_status_expired = Kedaluwarsa
 
 # Asset
 
@@ -541,6 +545,8 @@ sell_title = Jual %@
 info_network_fee_title = Biaya Jaringan
 info_watch_wallet_title = Dompet Pantau
 info_watch_wallet_description = Dompet yang tidak dapat Anda akses, tetapi Anda dapat memantau transaksi dan pergerakannya.
+info_payment_verification_title = Verifikasi Pembayaran
+info_payment_verification_description = Merchant memerlukan informasi tambahan sebelum pembayaran.
 info_network_fee_description = Setiap transaksi di jaringan %@ memerlukan biaya sebesar %@ yang dibayarkan kepada penambang untuk memproses transaksi Anda, bukan Gem Wallet. Biaya jaringan bervariasi berdasarkan penggunaan jaringan.
 info_transaction_error_description = Transaksi tidak dapat diselesaikan karena kesalahan, seperti dana tidak mencukupi, input tidak valid, atau penolakan oleh jaringan. Harap tinjau detailnya dan coba lagi.
 info_transaction_pending_description = Transaksi telah dikirimkan dan sedang menunggu konfirmasi di jaringan. Waktu pemrosesan dapat bervariasi. Silakan periksa kembali untuk pembaruan.

@@ -40,6 +40,7 @@ pub enum GemSelectAssetType {
     Buy,
     SwapPay,
     SwapReceive { pay_asset_id: Option<AssetId> },
+    Payment { asset_ids: Vec<AssetId> },
     Manage,
     PriceAlert,
     Deposit,
@@ -155,6 +156,7 @@ pub struct GemAssetRowStyle {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemSelectAssetTitle {
     Send,
+    PayWith,
     Receive,
     ReceiveCollection,
     Buy,

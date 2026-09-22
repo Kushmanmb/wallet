@@ -131,6 +131,8 @@ buy_no_results = Ingen tilbud tilgængelige
 # Transfer
 
 transfer_network_fee = Netværksgebyr
+transfer_pay_with = Betal med
+transfer_payment_title = Betaling
 transfer_memo = Memo
 transfer_confirm = Bekræft
 transfer_from = Fra
@@ -253,6 +255,7 @@ errors_network_offline = Internetforbindelsen ser ud til at være offline.
 errors_no_internet_connection = Ingen internetforbindelse
 errors_no_service_connection = Ingen serviceforbindelse
 errors_balances_activity_outdated = Saldi og aktivitet kan være forældede.
+errors_payment_status = Betaling: %@
 
 # Activity
 
@@ -289,6 +292,7 @@ transaction_swap_again = Byt igen
 transaction_status_completed = Afsluttet
 transaction_status_inprogress = Igangværende
 transaction_status_refunded = Refunderet
+transaction_status_expired = Udløbet
 
 # Asset
 
@@ -541,6 +545,8 @@ sell_title = Sælg %@
 info_network_fee_title = Netværksgebyr
 info_watch_wallet_title = Overvågningstegnebog
 info_watch_wallet_description = En tegnebog, som du ikke har adgang til, men du kan se dens transaktioner og bevægelser.
+info_payment_verification_title = Betalingsverificering
+info_payment_verification_description = Forhandleren kræver yderligere oplysninger før betalingen.
 info_network_fee_description = Hver transaktion på %@ netværket kræver et gebyr i %@ betalt til minearbejdere for at behandle din transaktion, ikke Gem Wallet. Netværksgebyrer varierer afhængigt af netværksbrug.
 info_transaction_error_description = Transaktionen kunne ikke gennemføres på grund af en fejl, såsom utilstrækkelige midler, ugyldigt input eller afvisning af netværket. Gennemgå venligst detaljerne og prøv igen.
 info_transaction_pending_description = Transaktionen er blevet indsendt og afventer bekræftelse på netværket. Behandlingstiderne kan variere. Kom venligst tilbage for opdateringer.

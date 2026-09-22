@@ -131,6 +131,8 @@ buy_no_results = کوئی اقتباسات دستیاب نہیں ہیں۔
 # Transfer
 
 transfer_network_fee = نیٹ ورک فیس
+transfer_pay_with = اس سے ادائیگی کریں
+transfer_payment_title = ادائیگی
 transfer_memo = میمو
 transfer_confirm = تصدیق کریں۔
 transfer_from = سے
@@ -253,6 +255,7 @@ errors_network_offline = انٹرنیٹ کنکشن آف لائن معلوم ہو
 errors_no_internet_connection = انٹرنیٹ کنکشن نہیں ہے
 errors_no_service_connection = سروس کنکشن نہیں ہے
 errors_balances_activity_outdated = بیلنس اور سرگرمی پرانی ہو سکتی ہے۔
+errors_payment_status = ادائیگی: %@
 
 # Activity
 
@@ -289,6 +292,7 @@ transaction_swap_again = دوبارہ تبدیل کریں۔
 transaction_status_completed = مکمل
 transaction_status_inprogress = جاری ہے۔
 transaction_status_refunded = رقم کی واپسی
+transaction_status_expired = میعاد ختم
 
 # Asset
 
@@ -541,6 +545,8 @@ sell_title = فروخت کریں %@
 info_network_fee_title = نیٹ ورک فیس
 info_watch_wallet_title = والیٹ دیکھیں
 info_watch_wallet_description = ایک والیٹ جس تک آپ کی رسائی نہیں ہے، لیکن آپ اس کے لین دین اور نقل و حرکت دیکھ سکتے ہیں۔
+info_payment_verification_title = ادائیگی کی تصدیق
+info_payment_verification_description = تاجر کو ادائیگی سے پہلے اضافی معلومات درکار ہیں۔
 info_network_fee_description = %@ نیٹ ورک پر ہر ٹرانزیکشن کے لیے %@ میں فیس کی ضرورت ہوتی ہے جو کان کنوں کو آپ کے لین دین پر کارروائی کرنے کے لیے ادا کی جاتی ہے، Gem Wallet کی نہیں۔ نیٹ ورک فیس نیٹ ورک کے استعمال کی بنیاد پر مختلف ہوتی ہے۔
 info_transaction_error_description = لین دین ایک خرابی کی وجہ سے مکمل نہیں ہو سکا، جیسے کہ ناکافی فنڈز، غلط ان پٹ، یا نیٹ ورک کی طرف سے مسترد۔ براہ کرم تفصیلات کا جائزہ لیں اور دوبارہ کوشش کریں۔
 info_transaction_pending_description = لین دین جمع کر دیا گیا ہے اور نیٹ ورک پر تصدیق کا انتظار کر رہا ہے۔ پروسیسنگ کے اوقات مختلف ہو سکتے ہیں۔ براہ کرم اپ ڈیٹس کے لیے دوبارہ چیک کریں۔

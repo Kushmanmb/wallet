@@ -4,30 +4,51 @@ use crate::GemstoneError;
 use crate::address::{checksum_address, validate_address};
 use crate::alien::{AlienProvider, AlienProviderWrapper};
 use crate::config::chain::is_memo_supported;
+use crate::config::wallet_connect::get_wallet_connect_config;
 use crate::models::custom_types::GemBigUint;
-use crate::models::payment::{GemPayment, GemPaymentAmount, GemPaymentLink, GemPaymentRequest, GemPaymentTransaction};
+use crate::models::payment::{GemPayment, GemPaymentAmount, GemPaymentInvoice, GemPaymentLink, GemPaymentRequest};
 use crate::services::assets::GemAssetsService;
 use crate::services::error::GemServiceError;
 use crate::services::transfer::model::{GemRecipient, GemTransferData};
-use num_bigint::BigUint;
+use num_bigint::{BigInt, BigUint};
 use number_formatter::BigNumberFormatter;
-use payment::PaymentService as CorePaymentService;
-use payment::PaymentURLDecoder;
+use payment::{PaymentLoad, PaymentService, PaymentTransaction, PaymentURLDecoder, PaymentUpdate, WalletConnectPayAuth};
 use primitives::TransactionInputType;
-use primitives::{Asset, AssetId, Chain, ChainAddress, ChainType, TransferDataExtra, TransferDataOutputAction, TransferDataOutputType, Wallet, hex};
+use primitives::{
+    Asset, AssetId, Chain, ChainAddress, ChainType, PaymentInvoice, PaymentLink, PaymentQuote, PaymentStatus, PaymentVerification, TransactionChange, TransactionState, TransactionType, TransactionUpdate, TransferDataExtra,
+    TransferDataOutputAction, TransferDataOutputType, Wallet, hex,
+};
+use uuid::Uuid;
 
 pub type GemPaymentError = payment::PaymentError;
 
 #[uniffi::remote(Enum)]
 pub enum GemPaymentError {
     NoPaymentOptions,
+    Status { status: PaymentStatus },
     InvalidRequest { reason: String },
     Network { reason: String },
 }
 
+impl From<GemServiceError> for GemPaymentError {
+    fn from(error: GemServiceError) -> Self {
+        match error {
+            GemServiceError::InvalidInput { msg } | GemServiceError::NotFound { msg } | GemServiceError::Unsupported { msg } => Self::invalid_request(msg),
+            error => Self::Network { reason: error.to_string() },
+        }
+    }
+}
+
+#[allow(clippy::large_enum_variant)]
+#[derive(Debug, Clone, uniffi::Enum)]
+pub enum GemPaymentLoad {
+    Sign { transfer: GemTransferData },
+    Verify { invoice: GemPaymentInvoice, asset_id: AssetId, url: String },
+}
+
 #[derive(uniffi::Object)]
 pub struct GemPaymentService {
-    service: CorePaymentService,
+    payments: PaymentService,
     assets: Arc<GemAssetsService>,
 }
 
@@ -35,8 +56,12 @@ pub struct GemPaymentService {
 impl GemPaymentService {
     #[uniffi::constructor]
     pub fn new(provider: Arc<dyn AlienProvider>, assets: Arc<GemAssetsService>) -> Self {
+        let auth = WalletConnectPayAuth {
+            app_id: get_wallet_connect_config().project_id,
+            client_id: Uuid::new_v4().to_string(),
+        };
         Self {
-            service: CorePaymentService::new(Arc::new(AlienProviderWrapper::new(provider))),
+            payments: PaymentService::new(Arc::new(AlienProviderWrapper::new(provider)), auth),
             assets,
         }
     }
@@ -48,8 +73,8 @@ impl GemPaymentService {
         }
     }
 
-    pub async fn load(&self, link: GemPaymentLink, addresses: Vec<ChainAddress>) -> Result<GemPaymentTransaction, GemPaymentError> {
-        self.service.load(&link, &addresses).await
+    pub async fn load(&self, link: GemPaymentLink, addresses: Vec<ChainAddress>) -> Result<GemPaymentLoad, GemPaymentError> {
+        self.payment_load(self.payments.load(&link, &addresses).await?).await
     }
 
     pub fn decode_url(&self, string: String) -> Result<GemPayment, GemstoneError> {
@@ -67,56 +92,165 @@ impl GemPaymentService {
     pub fn transfer_data(&self, transfer: GemPaymentConfirmTransfer, asset: Asset) -> GemTransferData {
         transfer_data(&transfer, asset)
     }
+}
 
-    pub fn transaction_asset_id(&self, transaction: GemPaymentTransaction) -> AssetId {
-        payment_asset_id(&transaction)
+impl GemPaymentService {
+    async fn prepare_request(&self, request: GemPaymentRequest, wallet: Wallet) -> Result<GemPaymentTarget, GemServiceError> {
+        let assets = self.assets.wallet_assets(wallet.id.clone()).await?;
+        let payable = assets
+            .iter()
+            .map(|asset| GemPaymentWalletAsset {
+                asset_id: asset.id.clone(),
+                decimals: asset.decimals,
+            })
+            .collect();
+        Ok(match payment_destination(&request, payable) {
+            GemPaymentDestination::Confirm { transfer } => match assets.iter().find(|asset| asset.id == transfer.asset_id) {
+                Some(asset) => GemPaymentTarget::Confirm {
+                    transfer: transfer_data(&transfer, asset.clone()),
+                },
+                None => GemPaymentTarget::Unsupported,
+            },
+            GemPaymentDestination::Recipient { asset_id, payment } => match assets.into_iter().find(|asset| asset.id == asset_id) {
+                Some(asset) => GemPaymentTarget::Recipient { asset, payment },
+                None => GemPaymentTarget::Unsupported,
+            },
+            GemPaymentDestination::SelectAsset { payment, chains } => GemPaymentTarget::SelectAsset { payment, chains },
+            GemPaymentDestination::Unsupported => GemPaymentTarget::Unsupported,
+        })
     }
 
-    pub fn transaction_transfer_data(&self, transaction: GemPaymentTransaction, asset: Asset) -> GemTransferData {
-        transaction_transfer_data(transaction, asset)
+    async fn prepare_link(&self, link: GemPaymentLink, wallet: Wallet) -> Result<GemPaymentTarget, GemServiceError> {
+        let addresses = wallet.accounts.iter().map(|account| ChainAddress::new(account.chain, account.address.clone())).collect();
+        Ok(match self.load(link, addresses).await.map_err(|error| GemServiceError::Gateway { msg: error.to_string() })? {
+            GemPaymentLoad::Sign { transfer } => GemPaymentTarget::Confirm { transfer },
+            GemPaymentLoad::Verify { invoice, url, .. } => GemPaymentTarget::Verify { url, link: invoice.link },
+        })
+    }
+
+    pub(crate) async fn select_asset(&self, link: &PaymentLink, addresses: Vec<ChainAddress>, asset_id: AssetId) -> Result<GemPaymentLoad, GemPaymentError> {
+        self.payment_load(self.payments.select_asset(link, &addresses, asset_id).await?).await
+    }
+
+    pub(crate) async fn transaction_update(&self, hash: &str, link: &PaymentLink) -> Result<TransactionUpdate, GemPaymentError> {
+        Ok(payment_transaction_update(hash, self.payments.status(link).await?))
+    }
+
+    pub(crate) fn record_hash(&self, input_type: &TransactionInputType) -> Option<String> {
+        payment_quote(input_type).and_then(|(invoice, _)| payment_record_hash(&invoice.link))
+    }
+
+    pub(crate) async fn confirm(&self, input_type: &TransactionInputType, action_results: Vec<String>) -> Result<(), GemPaymentError> {
+        let Some((invoice, quote)) = payment_quote(input_type) else {
+            return Ok(());
+        };
+        self.payments.confirm(&invoice.link, &quote.id, action_results).await
+    }
+
+    pub(crate) async fn quote_transfer_data(&self, invoice: GemPaymentInvoice, asset_id: AssetId, verification: PaymentVerification) -> Result<GemTransferData, GemPaymentError> {
+        let asset = self.assets.ensure_token_asset(asset_id).await?;
+        quote_transfer_data(invoice, asset, verification)
+    }
+
+    async fn payment_load(&self, load: PaymentLoad) -> Result<GemPaymentLoad, GemPaymentError> {
+        match load {
+            PaymentLoad::Sign { transaction } => {
+                let asset = self.assets.ensure_token_asset(payment_asset_id(&transaction)).await?;
+                Ok(GemPaymentLoad::Sign {
+                    transfer: transaction_transfer_data(transaction, asset),
+                })
+            }
+            PaymentLoad::Verify { invoice, asset_id, url } => Ok(GemPaymentLoad::Verify { invoice, asset_id, url }),
+        }
     }
 }
 
-pub(crate) fn transaction_transfer_data(transaction: GemPaymentTransaction, asset: Asset) -> GemTransferData {
-    {
-        let wallet_asset = GemPaymentWalletAsset {
-            asset_id: asset.id.clone(),
-            decimals: asset.decimals,
-        };
-        let transfer = transaction
-            .request
-            .as_ref()
-            .and_then(|request| payment_decoded_transfer(request, wallet_asset))
-            .map(|transfer| transfer_data(&transfer, asset.clone()));
-        let recipient = match &transfer {
-            Some(transfer) => transfer.recipient.clone(),
-            None => GemRecipient {
-                address: String::new(),
-                name: None,
-                memo: transaction.memo.clone(),
-                references: Vec::new(),
+fn quote_transfer_data(invoice: GemPaymentInvoice, asset: Asset, verification: PaymentVerification) -> Result<GemTransferData, GemPaymentError> {
+    let value = invoice
+        .quotes
+        .iter()
+        .find(|quote| quote.asset_id == asset.id)
+        .map(|quote| quote.value.clone())
+        .ok_or(GemPaymentError::invalid_request("Payment has no quote for the asset"))?;
+    Ok(GemTransferData {
+        input_type: TransactionInputType::Payment {
+            asset,
+            invoice: GemPaymentInvoice { verification: Some(verification), ..invoice },
+            extra: TransferDataExtra {
+                transaction_type: TransactionType::Transfer,
+                ..Default::default()
             },
-        };
-        GemTransferData {
-            input_type: TransactionInputType::Generic {
-                asset,
-                metadata: transaction.merchant,
-                extra: TransferDataExtra {
-                    to: recipient.address.clone(),
-                    gas_limit: None,
-                    gas_price: None,
-                    data: Some(transaction_data(&transaction.transaction)),
-                    output_type: TransferDataOutputType::EncodedTransaction,
-                    output_action: TransferDataOutputAction::Send,
-                    transaction_type: transaction.transaction_type,
-                    approval: None,
+        },
+        recipient: GemRecipient::address(String::new()),
+        value: BigInt::from(value),
+        use_max_amount: false,
+    })
+}
+
+fn transaction_transfer_data(transaction: PaymentTransaction, asset: Asset) -> GemTransferData {
+    let wallet_asset = GemPaymentWalletAsset {
+        asset_id: asset.id.clone(),
+        decimals: asset.decimals,
+    };
+    let transfer = transaction
+        .request
+        .as_ref()
+        .and_then(|request| payment_decoded_transfer(request, wallet_asset))
+        .map(|transfer| transfer_data(&transfer, asset.clone()));
+    let recipient = match &transfer {
+        Some(transfer) => transfer.recipient.clone(),
+        None => GemRecipient {
+            address: String::new(),
+            name: None,
+            memo: transaction.memo.clone(),
+            references: Vec::new(),
+        },
+    };
+    GemTransferData {
+        input_type: TransactionInputType::Payment {
+            asset,
+            invoice: transaction.invoice,
+            extra: TransferDataExtra {
+                to: recipient.address.clone(),
+                gas_limit: None,
+                gas_price: None,
+                data: Some(transaction_data(&transaction.transaction)),
+                output_action: match transaction.output_type {
+                    TransferDataOutputType::EncodedTransaction => TransferDataOutputAction::Send,
+                    TransferDataOutputType::Signature => TransferDataOutputAction::Sign,
                 },
+                output_type: transaction.output_type,
+                transaction_type: transaction.transaction_type,
+                approval: transaction.approval,
             },
-            recipient,
-            value: transfer.map(|transfer| transfer.value).unwrap_or_default(),
-            use_max_amount: false,
-        }
+        },
+        recipient,
+        value: transfer.map(|transfer| transfer.value).unwrap_or_default(),
+        use_max_amount: false,
     }
+}
+
+pub(crate) fn payment_record_hash(link: &PaymentLink) -> Option<String> {
+    match link {
+        PaymentLink::WalletConnectPay { payment_id } => Some(payment_id.clone()),
+        PaymentLink::SolanaPay { .. } => None,
+    }
+}
+
+fn payment_transaction_update(hash: &str, update: PaymentUpdate) -> TransactionUpdate {
+    match update.status {
+        PaymentStatus::Succeeded => TransactionUpdate::new(TransactionState::Confirmed, update.transaction_id.map(|new| TransactionChange::HashChange { old: hash.to_string(), new }).into_iter().collect()),
+        PaymentStatus::Failed | PaymentStatus::Expired | PaymentStatus::Cancelled => TransactionUpdate::new_state(TransactionState::Failed),
+        PaymentStatus::RequiresAction | PaymentStatus::Processing => TransactionUpdate::new_state(TransactionState::Pending),
+    }
+}
+
+fn payment_quote(input_type: &TransactionInputType) -> Option<(&PaymentInvoice, &PaymentQuote)> {
+    let TransactionInputType::Payment { asset, invoice, .. } = input_type else {
+        return None;
+    };
+    let quote = invoice.quotes.iter().find(|quote| quote.asset_id == asset.id)?;
+    Some((invoice, quote))
 }
 
 fn transaction_data(transaction: &str) -> Vec<u8> {
@@ -166,6 +300,7 @@ pub struct GemPaymentRecipient {
 #[allow(clippy::large_enum_variant)]
 pub enum GemPaymentTarget {
     Confirm { transfer: GemTransferData },
+    Verify { url: String, link: PaymentLink },
     Recipient { asset: Asset, payment: GemPaymentRecipient },
     SelectAsset { payment: GemPaymentRecipient, chains: Vec<Chain> },
     Unsupported,
@@ -179,43 +314,7 @@ pub enum GemPaymentDestination {
     Unsupported,
 }
 
-impl GemPaymentService {
-    async fn prepare_request(&self, request: GemPaymentRequest, wallet: Wallet) -> Result<GemPaymentTarget, GemServiceError> {
-        let assets = self.assets.wallet_assets(wallet.id.clone()).await?;
-        let payable = assets
-            .iter()
-            .map(|asset| GemPaymentWalletAsset {
-                asset_id: asset.id.clone(),
-                decimals: asset.decimals,
-            })
-            .collect();
-        Ok(match payment_destination(&request, payable) {
-            GemPaymentDestination::Confirm { transfer } => match assets.iter().find(|asset| asset.id == transfer.asset_id) {
-                Some(asset) => GemPaymentTarget::Confirm {
-                    transfer: transfer_data(&transfer, asset.clone()),
-                },
-                None => GemPaymentTarget::Unsupported,
-            },
-            GemPaymentDestination::Recipient { asset_id, payment } => match assets.into_iter().find(|asset| asset.id == asset_id) {
-                Some(asset) => GemPaymentTarget::Recipient { asset, payment },
-                None => GemPaymentTarget::Unsupported,
-            },
-            GemPaymentDestination::SelectAsset { payment, chains } => GemPaymentTarget::SelectAsset { payment, chains },
-            GemPaymentDestination::Unsupported => GemPaymentTarget::Unsupported,
-        })
-    }
-
-    async fn prepare_link(&self, link: GemPaymentLink, wallet: Wallet) -> Result<GemPaymentTarget, GemServiceError> {
-        let addresses = wallet.accounts.iter().map(|account| ChainAddress::new(account.chain, account.address.clone())).collect::<Vec<_>>();
-        let transaction = self.service.load(&link, &addresses).await.map_err(|error| GemServiceError::Gateway { msg: error.to_string() })?;
-        let asset = self.assets.ensure_token_asset(payment_asset_id(&transaction)).await?;
-        Ok(GemPaymentTarget::Confirm {
-            transfer: self.transaction_transfer_data(transaction, asset),
-        })
-    }
-}
-
-fn payment_asset_id(transaction: &GemPaymentTransaction) -> AssetId {
+fn payment_asset_id(transaction: &PaymentTransaction) -> AssetId {
     transaction.request.as_ref().and_then(|request| request.asset_id.clone()).unwrap_or_else(|| AssetId::from_chain(transaction.account.chain))
 }
 
@@ -334,7 +433,7 @@ mod tests {
     use crate::testkit::TestAlienProvider;
     use crate::testkit::mock_payment_transaction;
     use futures::executor::block_on;
-    use primitives::{AssetBasic, AssetProperties, AssetScore};
+    use primitives::{Asset, AssetBasic, AssetId, AssetProperties, AssetScore, AssetType, Chain, PaymentInvoice};
     use std::sync::Arc;
 
     fn service_with(assets: &[Asset]) -> GemPaymentService {
@@ -358,9 +457,7 @@ mod tests {
             asset_id: Some(token.id.clone()),
             ..GemPaymentRequest::mock()
         };
-
         let target = block_on(service_with(std::slice::from_ref(&token)).prepare(GemPayment::Request { request }, Wallet::mock())).unwrap();
-
         let GemPaymentTarget::Confirm { transfer } = target else {
             panic!("a token the wallet holds is payable whether or not the screen shows it")
         };
@@ -375,11 +472,63 @@ mod tests {
             asset_id: Some(AssetId::from(Chain::Ethereum, Some("0xmissing".to_string()))),
             ..GemPaymentRequest::mock()
         };
-
-        assert!(matches!(block_on(service_with(&[]).prepare(GemPayment::Request { request }, Wallet::mock())).unwrap(), GemPaymentTarget::Unsupported));
+        let GemPaymentTarget::Unsupported = block_on(service_with(&[]).prepare(GemPayment::Request { request }, Wallet::mock())).unwrap() else {
+            panic!("a token the wallet does not hold is not payable")
+        };
     }
 
-    use primitives::{Asset, AssetId, AssetType, Chain};
+    #[test]
+    fn test_payment_transaction_update() {
+        let update = |status, transaction_id: Option<&str>| {
+            payment_transaction_update(
+                "pay_1",
+                PaymentUpdate {
+                    status,
+                    transaction_id: transaction_id.map(str::to_string),
+                },
+            )
+        };
+
+        assert_eq!(
+            update(PaymentStatus::Succeeded, Some("0xrelayed")),
+            TransactionUpdate::new(
+                TransactionState::Confirmed,
+                vec![TransactionChange::HashChange {
+                    old: "pay_1".to_string(),
+                    new: "0xrelayed".to_string()
+                }]
+            )
+        );
+        assert_eq!(update(PaymentStatus::Succeeded, None), TransactionUpdate::new_state(TransactionState::Confirmed));
+        assert_eq!(update(PaymentStatus::Processing, None), TransactionUpdate::new_state(TransactionState::Pending));
+        assert_eq!(update(PaymentStatus::RequiresAction, None), TransactionUpdate::new_state(TransactionState::Pending));
+        assert_eq!(update(PaymentStatus::Failed, None), TransactionUpdate::new_state(TransactionState::Failed));
+        assert_eq!(update(PaymentStatus::Expired, None), TransactionUpdate::new_state(TransactionState::Failed));
+        assert_eq!(update(PaymentStatus::Cancelled, None), TransactionUpdate::new_state(TransactionState::Failed));
+    }
+
+    #[test]
+    fn test_confirm() {
+        let solana_pay = TransactionInputType::Payment {
+            asset: Asset::mock_sol(),
+            invoice: PaymentInvoice {
+                link: PaymentLink::SolanaPay {
+                    url: "https://merchant.example/pay".to_string(),
+                },
+                quotes: vec![],
+                ..PaymentInvoice::mock()
+            },
+            extra: TransferDataExtra::mock(),
+        };
+
+        assert_eq!(block_on(GemPaymentService::mock().confirm(&solana_pay, vec!["0xhash".to_string()])), Ok(()), "a rail without quotes has nothing to confirm");
+    }
+
+    #[test]
+    fn test_payment_record_hash() {
+        assert_eq!(payment_record_hash(&PaymentLink::WalletConnectPay { payment_id: "pay_1".to_string() }).as_deref(), Some("pay_1"));
+        assert_eq!(payment_record_hash(&PaymentLink::SolanaPay { url: "solana:pay".to_string() }), None, "only a relayed payment is recorded by its id");
+    }
 
     const BITCOIN_ADDRESS: &str = "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4";
     const ETHEREUM_ADDRESS: &str = "0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326";
@@ -614,7 +763,7 @@ mod tests {
         };
 
         assert_eq!(
-            payment_asset_id(&GemPaymentTransaction {
+            payment_asset_id(&PaymentTransaction {
                 request: Some(GemPaymentRequest {
                     asset_id: Some(usdc.clone()),
                     ..request.clone()
@@ -624,7 +773,7 @@ mod tests {
             usdc
         );
         assert_eq!(
-            payment_asset_id(&GemPaymentTransaction {
+            payment_asset_id(&PaymentTransaction {
                 request: Some(request),
                 ..mock_payment_transaction()
             }),
@@ -637,12 +786,13 @@ mod tests {
     fn test_transaction_transfer_data() {
         let solana_usdc = AssetId::from_token(Chain::Solana, USDC_MINT);
         let asset = Asset::new(solana_usdc.clone(), "USD Coin".to_string(), "USDC".to_string(), 6, AssetType::SPL);
-        let transaction = GemPaymentTransaction {
+        let transaction = PaymentTransaction {
             memo: Some("order 7".to_string()),
             ..mock_payment_transaction()
         };
+
         let decoded = transaction_transfer_data(
-            GemPaymentTransaction {
+            PaymentTransaction {
                 request: Some(GemPaymentRequest {
                     address: SOLANA_ADDRESS.to_string(),
                     amount: Some(GemPaymentAmount::AtomicValue { value: 19_000_000u32.into() }),
@@ -656,21 +806,31 @@ mod tests {
         assert_eq!(decoded.recipient.address, SOLANA_ADDRESS);
         assert_eq!(decoded.value, 19_000_000.into());
         match &decoded.input_type {
-            TransactionInputType::Generic { extra, .. } => {
+            TransactionInputType::Payment { invoice, extra, .. } => {
+                assert_eq!(invoice, &PaymentInvoice::mock());
                 assert_eq!(extra.to, SOLANA_ADDRESS);
                 assert_eq!(extra.data.as_deref(), Some(b"encoded".as_slice()));
                 assert_eq!(extra.output_type, TransferDataOutputType::EncodedTransaction);
             }
-            input_type => panic!("expected a generic input type, got {input_type:?}"),
+            input_type => panic!("expected a payment input type, got {input_type:?}"),
         }
 
-        let hex_encoded = GemPaymentTransaction {
+        let signature = PaymentTransaction {
+            output_type: TransferDataOutputType::Signature,
+            ..transaction.clone()
+        };
+        match &transaction_transfer_data(signature, asset.clone()).input_type {
+            TransactionInputType::Payment { extra, .. } => assert_eq!(extra.output_action, TransferDataOutputAction::Sign),
+            input_type => panic!("expected a payment input type, got {input_type:?}"),
+        }
+
+        let hex_encoded = PaymentTransaction {
             transaction: "0x0a0b".to_string(),
             ..transaction.clone()
         };
         match &transaction_transfer_data(hex_encoded, asset.clone()).input_type {
-            TransactionInputType::Generic { extra, .. } => assert_eq!(extra.data.as_deref(), Some([0x0a, 0x0b].as_slice())),
-            input_type => panic!("expected a generic input type, got {input_type:?}"),
+            TransactionInputType::Payment { extra, .. } => assert_eq!(extra.data.as_deref(), Some([0x0a, 0x0b].as_slice())),
+            input_type => panic!("expected a payment input type, got {input_type:?}"),
         }
 
         let undecodable = transaction_transfer_data(transaction, asset);
@@ -681,7 +841,7 @@ mod tests {
 
     #[test]
     fn test_request() {
-        let decode_url = |url: &str| PaymentURLDecoder::decode(url).map_err(GemstoneError::from);
+        let decode_url = |url: &str| PaymentURLDecoder::decode(url);
         assert_eq!(
             decode_url("solana:3u3ta6yXYgpheLGc2GVF3QkLHAUwBrvX71Eg8XXjJHGw?amount=0.42301").unwrap(),
             GemPayment::Request {
@@ -699,7 +859,7 @@ mod tests {
 
     #[test]
     fn test_link() {
-        let decode_url = |url: &str| PaymentURLDecoder::decode(url).map_err(GemstoneError::from);
+        let decode_url = |url: &str| PaymentURLDecoder::decode(url);
         const CONSTANT_K: &str = "https://www.constant-k.com/ck-txreq/?tok=MjYyfG9wZXJhdG9yfGFubnVhbHx8MTc4NzUyOTMxOXw3M2FiNDFhZmIwNTAxZWNjNjE2Y2E4NmIxZGE5N2FlOWZjM2Y1OGMzZWZhMGYxMjNiOGI4ZGYzZmU2YzQ3ZmM4";
 
         assert_eq!(
@@ -716,6 +876,11 @@ mod tests {
                 link: GemPaymentLink::SolanaPay { url: CONSTANT_K.to_string() }
             }
         );
-        assert!(decode_url("https://pay.walletconnect.com/?pid=pay_123").is_err());
+        assert_eq!(
+            decode_url("https://pay.walletconnect.com/?pid=pay_123").unwrap(),
+            GemPayment::Link {
+                link: GemPaymentLink::WalletConnectPay { payment_id: "pay_123".to_string() },
+            }
+        );
     }
 }

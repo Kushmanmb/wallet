@@ -144,6 +144,7 @@ struct ServicesFactory {
             balance: balanceService,
             stake: stakeService,
             nft: nftService,
+            payments: paymentService,
         )
         transactionStateService.setStatus(status: GemstoneTransactionStatusService(service: transactionStateService))
         let transactionsService = Gemstone.GemTransactionsService(

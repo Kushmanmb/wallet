@@ -20,6 +20,7 @@ import uniffi.gemstone.GemDeviceApiClient
 import uniffi.gemstone.GemGateway
 import uniffi.gemstone.GemNameService
 import uniffi.gemstone.GemNftService
+import uniffi.gemstone.GemPaymentService
 import uniffi.gemstone.GemStakeService
 import uniffi.gemstone.GemTransactionStateService
 import uniffi.gemstone.GemTransactionStateServiceInterface
@@ -71,7 +72,8 @@ object TransactionsModule {
         balanceService: GemBalanceService,
         stakeService: GemStakeService,
         nftService: GemNftService,
-    ): GemTransactionStateService = GemTransactionStateService(gateway, store, assetsService, balanceService, stakeService, nftService)
+        paymentService: GemPaymentService,
+    ): GemTransactionStateService = GemTransactionStateService(gateway, store, assetsService, balanceService, stakeService, nftService, paymentService)
 
     @Singleton
     @Provides

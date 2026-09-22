@@ -24,6 +24,7 @@ import PrimitivesComponents
 import Store
 import Style
 import SwiftUI
+import Transfer
 import WalletConnector
 import WalletConnectorService
 
@@ -203,6 +204,11 @@ extension NavigationRouter {
         switch target {
         case let .confirm(transfer):
             return .confirm(transfer)
+        case let .verify(url, link):
+            guard let url = URL(string: url) else {
+                throw AnyError(Localized.Errors.notSupported)
+            }
+            return .verify(url, link: link)
         case let .recipient(asset, payment):
             let asset = asset.toPrimitives()
             guard let assetData = try assetStore.getAssetsData(walletId: wallet.id, filters: [.chainsOrAssets([], [asset.id.identifier])]).first else {

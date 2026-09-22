@@ -6,6 +6,7 @@ use super::GemAssetDiscoveryService;
 use crate::api::GemStaticApiClient;
 use crate::api::{GemApiClient, GemDeviceApiClient};
 use crate::gateway::GemGateway;
+use crate::payment::GemPaymentService;
 use crate::services::assets::GemAssetsService;
 use crate::services::assets::testkit::MemoryAssetStore;
 use crate::services::balance::GemBalanceService;
@@ -110,6 +111,7 @@ impl DiscoveryTestkit {
                 session.clone(),
             )),
             nft.clone(),
+            Arc::new(GemPaymentService::new(provider.clone(), assets.clone())),
         ));
         state.set_status(status.clone());
         let discovery = Arc::new(GemAssetDiscoveryService::new(device_api.clone(), balance.clone(), transactions.clone(), nft, session.clone(), wallet_preferences.clone()));

@@ -243,6 +243,7 @@ fn select_asset_title(select_type: &GemSelectAssetType) -> GemSelectAssetTitle {
         GemSelectAssetType::Buy => GemSelectAssetTitle::Buy,
         GemSelectAssetType::SwapPay => GemSelectAssetTitle::SwapPay,
         GemSelectAssetType::SwapReceive { .. } => GemSelectAssetTitle::SwapReceive,
+        GemSelectAssetType::Payment { .. } => GemSelectAssetTitle::PayWith,
         GemSelectAssetType::Manage => GemSelectAssetTitle::ManageTokenList,
         GemSelectAssetType::PriceAlert => GemSelectAssetTitle::SelectAsset,
         GemSelectAssetType::Deposit => GemSelectAssetTitle::Deposit,
@@ -259,6 +260,7 @@ fn select_asset_section(select_type: &GemSelectAssetType) -> GemSelectAssetSecti
         | GemSelectAssetType::Buy
         | GemSelectAssetType::SwapPay
         | GemSelectAssetType::SwapReceive { .. }
+        | GemSelectAssetType::Payment { .. }
         | GemSelectAssetType::Manage
         | GemSelectAssetType::PriceAlert
         | GemSelectAssetType::Deposit
@@ -340,6 +342,7 @@ pub fn select_asset_flow(select_type: GemSelectAssetType, swap_receive_assets: O
             },
             swap_receive_assets.map(GemAssetFilter::from),
         ),
+        GemSelectAssetType::Payment { asset_ids } => with_filter(flow(GemSelectRowAction::Select, None), Some(GemAssetFilter::asset_ids(asset_ids))),
         GemSelectAssetType::Manage => with_filter(
             GemSelectAssetFlow {
                 row_style: style(true, GemAssetSubtitleStyle::Network, GemAssetTrailingStyle::Toggle),
@@ -809,6 +812,7 @@ mod tests {
         assert_eq!(row(GemSelectAssetType::Buy), (GemSelectRowAction::Navigate, Some(GemAssetAction::Buy)));
         assert_eq!(row(GemSelectAssetType::SwapPay), (GemSelectRowAction::Select, Some(GemAssetAction::SwapPay)));
         assert_eq!(row(GemSelectAssetType::SwapReceive { pay_asset_id: None }), (GemSelectRowAction::Select, Some(GemAssetAction::SwapReceive)));
+        assert_eq!(row(GemSelectAssetType::Payment { asset_ids: vec![] }), (GemSelectRowAction::Select, None));
         assert_eq!(row(GemSelectAssetType::Manage), (GemSelectRowAction::Toggle, None));
         assert_eq!(row(GemSelectAssetType::PriceAlert), (GemSelectRowAction::Select, None));
         assert_eq!(row(GemSelectAssetType::Deposit), (GemSelectRowAction::Navigate, None));
@@ -875,6 +879,7 @@ mod tests {
         assert_eq!(enabled(GemSelectAssetType::Buy), ["network_search", "chain_filter", "recents", "popular_section"]);
         assert_eq!(enabled(GemSelectAssetType::SwapPay), ["chain_filter", "recents"]);
         assert_eq!(enabled(GemSelectAssetType::SwapReceive { pay_asset_id: None }), ["network_search", "chain_filter", "recents"]);
+        assert!(enabled(GemSelectAssetType::Payment { asset_ids: vec![] }).is_empty());
         assert_eq!(enabled(GemSelectAssetType::Manage), ["network_search", "chain_filter", "balance_filter", "add_custom_token"]);
         assert_eq!(enabled(GemSelectAssetType::PriceAlert), ["network_search", "chain_filter", "popular_section", "enables_price_alert"]);
         assert!(enabled(GemSelectAssetType::Deposit).is_empty());

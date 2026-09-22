@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 @testable import Contacts
+import GemstoneServicesTestKit
 import ContactsTestKit
 import class Gemstone.GemChainService
 import GemstonePrimitives

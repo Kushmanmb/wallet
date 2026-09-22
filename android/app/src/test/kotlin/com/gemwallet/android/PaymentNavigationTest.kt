@@ -7,6 +7,7 @@ import com.gemwallet.android.testkit.mockAssetSolanaUSDC
 import com.gemwallet.android.testkit.mockGemTransferData
 import com.gemwallet.android.testkit.mockSession
 import com.gemwallet.android.ui.navigation.routes.ConfirmRoute
+import com.gemwallet.android.ui.navigation.routes.PaymentVerificationRoute
 import com.gemwallet.android.ui.navigation.routes.RecipientInputRoute
 import com.gemwallet.android.ui.navigation.routes.SendSelectRoute
 import com.wallet.core.primitives.Chain
@@ -62,6 +63,13 @@ class PaymentNavigationTest {
         val route = navigation(GemPaymentTarget.SelectAsset(recipient(), listOf(Chain.Solana.string, Chain.Ethereum.string))).routes(payment).single()
 
         assertEquals(listOf(Chain.Solana, Chain.Ethereum), (route as SendSelectRoute).chains)
+    }
+
+    @Test
+    fun `a payment that needs identity data opens its form`() = runTest {
+        val link = PaymentLink.WalletConnectPay("pay_1")
+        val route = navigation(GemPaymentTarget.Verify("https://pay.walletconnect.com/collect", link)).routes(Payment.Link(link)).single()
+        assertEquals(PaymentVerificationRoute("https://pay.walletconnect.com/collect", link), route)
     }
 
     @Test

@@ -131,6 +131,8 @@ buy_no_results = Babu abin da ake so
 # Transfer
 
 transfer_network_fee = Kudin hanyar sadarwa
+transfer_pay_with = Biya da
+transfer_payment_title = Biyan kuɗi
 transfer_memo = Memo
 transfer_confirm = Tabbatar
 transfer_from = Daga
@@ -253,6 +255,7 @@ errors_network_offline = Da alama haɗin intanet ɗin ya katse.
 errors_no_internet_connection = Babu haɗin intanet
 errors_no_service_connection = Babu haɗin sabis
 errors_balances_activity_outdated = Ma'aunai da ayyuka na iya zama tsofaffi.
+errors_payment_status = Biyan kuɗi: %@
 
 # Activity
 
@@ -289,6 +292,7 @@ transaction_swap_again = Sake Musanya
 transaction_status_completed = An kammala
 transaction_status_inprogress = Ana ci gaba
 transaction_status_refunded = An mayar da kuɗi
+transaction_status_expired = Ya ƙare
 
 # Asset
 
@@ -541,6 +545,8 @@ sell_title = Saya %@
 info_network_fee_title = Kudin hanyar sadarwa
 info_watch_wallet_title = Kalli Wallet
 info_watch_wallet_description = Wallet wanda ba ku da damar yin amfani da shi, amma kuna iya kallon ma'amaloli da motsinsa.
+info_payment_verification_title = Tabbatar da biyan kuɗi
+info_payment_verification_description = Ɗan kasuwa yana buƙatar ƙarin bayani kafin biyan kuɗi.
 info_network_fee_description = Kowace ciniki akan hanyar sadarwar %@ tana buƙatar kuɗi a cikin %@ da aka biya ga masu hakar ma'adinai don aiwatar da kasuwancin ku, ba Gem Wallet ba. Kudaden hanyar sadarwa sun bambanta dangane da amfani da hanyar sadarwa.
 info_transaction_error_description = Ba za a iya kammala cinikin ba saboda kuskure, kamar rashin isassun kuɗi, shigarwa mara inganci, ko kin amincewa da hanyar sadarwa. Da fatan za a sake nazarin cikakkun bayanai kuma a sake gwadawa.
 info_transaction_pending_description = An ƙaddamar da ma'amala kuma yana jiran tabbaci akan hanyar sadarwar. Lokutan sarrafawa na iya bambanta. Da fatan za a duba baya don sabuntawa.

@@ -21,6 +21,8 @@ import enum Gemstone.GemListRowTitle
 import enum Gemstone.GemListSectionFooter
 import enum Gemstone.GemListSectionTitle
 import enum Gemstone.GemLocalizedText
+import class Gemstone.GemPerpetual
+import enum Gemstone.PaymentStatus
 import enum Gemstone.GemPriceAlertLabel
 import struct Gemstone.GemPriceAlertRow
 import enum Gemstone.GemPriceAlertText
@@ -526,6 +528,7 @@ public extension GemErrorText {
         case .unsupportedChain: Localized.Errors.Connections.unsupportedChain
         case .maliciousOrigin: Localized.Errors.Connections.maliciousOrigin
         case .noSupportedWallets: Localized.Errors.Connections.noSupportedWallets
+        case let .payment(status): status.errorText
         case .invalidSecretPhrase: Localized.Errors.Import.invalidSecretPhrase
         case let .invalidSecretPhraseWords(words): Localized.Errors.Import.invalidSecretPhraseWord(words.joined(separator: ", "))
         case .invalidPrivateKey: Localized.Errors.Import.invalidPrivateKey
@@ -537,10 +540,27 @@ public extension GemErrorText {
     }
 }
 
+extension PaymentStatus {
+    public var errorText: String {
+        Localized.Errors.paymentStatus(text)
+    }
+
+    var text: String {
+        switch self {
+        case .requiresAction, .failed: Localized.Transaction.Status.failed
+        case .processing: Localized.Transaction.Status.inprogress
+        case .succeeded: Localized.Transaction.Status.completed
+        case .expired: Localized.Transaction.Status.expired
+        case .cancelled: Localized.Errors.cancelled
+        }
+    }
+}
+
 public extension GemSelectAssetTitle {
     var text: String {
         switch self {
         case .send: Localized.Wallet.send
+        case .payWith: Localized.Transfer.payWith
         case .receive: Localized.Wallet.receive
         case .receiveCollection: Localized.Wallet.receiveCollection
         case .buy: Localized.Wallet.buy

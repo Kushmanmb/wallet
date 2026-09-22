@@ -7,6 +7,7 @@ import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.toAssetId
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ui.navigation.routes.ConfirmRoute
+import com.gemwallet.android.ui.navigation.routes.PaymentVerificationRoute
 import com.gemwallet.android.ui.navigation.routes.RecipientInputRoute
 import com.gemwallet.android.ui.navigation.routes.SendSelectRoute
 import kotlinx.coroutines.flow.first
@@ -21,6 +22,8 @@ class PaymentNavigation @Inject constructor(private val getSession: GetSession, 
         val wallet = getSession().first()?.wallet ?: return emptyList()
         return when (val target = paymentService.prepare(payment, wallet.toGem())) {
             is GemPaymentTarget.Confirm -> listOfNotNull(target.transfer.pack()?.let(::ConfirmRoute))
+
+            is GemPaymentTarget.Verify -> listOf(PaymentVerificationRoute(target.url, target.link))
 
             is GemPaymentTarget.Recipient -> listOfNotNull(
                 target.asset.id.toAssetId()?.let { RecipientInputRoute(it, payment = target.payment) },

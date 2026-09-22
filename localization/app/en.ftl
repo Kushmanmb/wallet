@@ -245,6 +245,10 @@ buy_no_results = No quotes available
 
 # Used in Transfer, Send, Stake, and confirmation flows for the network fee label.
 transfer_network_fee = Network Fee
+# Used in the payment confirmation for the row that picks the asset to pay with.
+transfer_pay_with = Pay with
+# Used as the title of the payment confirmation.
+transfer_payment_title = Payment
 # Used in Transfer, Send, Stake, and confirmation flows for the memo label.
 transfer_memo = Memo
 # Used in Transfer, Send, Stake, and confirmation flows for the confirm label.
@@ -484,6 +488,8 @@ errors_no_internet_connection = No internet connection
 # Used in the connection status banner when app services are unreachable.
 errors_no_service_connection = No service connection
 errors_balances_activity_outdated = Balances and activity may be outdated.
+# Used as the error when a scanned payment cannot be paid; %@ is the payment status.
+errors_payment_status = Payment: %@
 
 # Activity
 
@@ -547,6 +553,8 @@ transaction_status_completed = Completed
 transaction_status_inprogress = In Progress
 # Used in transaction status and detail screens for the status refunded label.
 transaction_status_refunded = Refunded
+# Used in transaction status and detail screens for the status expired label.
+transaction_status_expired = Expired
 
 # Asset
 
@@ -988,6 +996,10 @@ info_network_fee_title = Network Fee
 info_watch_wallet_title = Watch Wallet
 # Used in Info bottom sheets for the watch wallet description.
 info_watch_wallet_description = A wallet that you do not have access to, but you can watch its transactions and movements.
+# Used as the identity form title and in its Info bottom sheet for a WalletConnect Pay payment.
+info_payment_verification_title = Payment Verification
+# Used in Info bottom sheets for the payment verification description.
+info_payment_verification_description = The merchant requires additional information before the payment.
 # Used in Info bottom sheets for the network fee description. Contains 2 string placeholders.
 info_network_fee_description = Every transaction on the %@ network requires a fee in %@ paid to miners to process your transaction, not Gem Wallet. Network fees varies based on network usage.
 # Used in Info bottom sheets for the transaction error description.

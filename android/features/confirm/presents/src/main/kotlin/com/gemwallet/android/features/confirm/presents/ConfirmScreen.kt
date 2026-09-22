@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,7 +43,10 @@ import com.gemwallet.android.features.confirm.viewmodels.models.ConfirmHeaderUIM
 import com.gemwallet.android.features.confirm.viewmodels.models.ConfirmRowUIModel
 import com.gemwallet.android.model.AuthRequest
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.InfoBottomSheet
+import com.gemwallet.android.ui.components.InfoSheetEntity
 import com.gemwallet.android.ui.components.RefreshOnTimer
+import com.gemwallet.android.ui.components.WebView
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.list_head.AmountListHead
 import com.gemwallet.android.ui.components.list_head.AssetValueListHead
@@ -61,6 +66,7 @@ import com.gemwallet.android.ui.components.simulation.simulationPayloadDetailsCo
 import com.gemwallet.android.ui.components.simulation.simulationPayloadFieldsContent
 import com.gemwallet.android.ui.components.swap.SwapDetailsBottomSheet
 import com.gemwallet.android.ui.components.swap.SwapDetailsSummaryItem
+import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.actions.CancelAction
@@ -80,6 +86,9 @@ fun ConfirmScreen(
     finishAction: FinishConfirmAction,
     cancelAction: CancelAction,
     onAcquireAsset: (AcquireAssetAction, AssetId) -> Unit,
+    paymentAsset: AssetId? = null,
+    onPaymentAssetConsumed: () -> Unit = {},
+    onSelectPaymentAsset: (List<AssetId>) -> Unit = {},
     handleSystemBack: Boolean = false,
     viewModel: ConfirmViewModel = hiltViewModel(),
 ) {
@@ -109,9 +118,13 @@ fun ConfirmScreen(
     val detailElements by viewModel.detailElements.collectAsStateWithLifecycle()
     val title by viewModel.title.collectAsStateWithLifecycle()
     val isExternalRequest by viewModel.isExternalRequest.collectAsStateWithLifecycle()
+    val paymentAssetIds by viewModel.paymentAssetIds.collectAsStateWithLifecycle()
+    val verification by viewModel.verification.collectAsStateWithLifecycle()
+    val isVerificationVisible by viewModel.isVerificationVisible.collectAsStateWithLifecycle()
 
     var showSelectTxSpeed by remember { mutableStateOf(false) }
     var showSimulationDetails by remember { mutableStateOf(false) }
+    var isVerificationInfoVisible by remember { mutableStateOf(false) }
     var selectedDetailElement by remember(input) { mutableStateOf<ConfirmDetailElement?>(null) }
     var selectedAddress by remember(input) { mutableStateOf<ChainAddress?>(null) }
     val openPayloadAddress = simulation.chain?.let { chain ->
@@ -129,6 +142,12 @@ fun ConfirmScreen(
             return@LaunchedEffect
         }
         viewModel.init(input.data, simulationResult, input.wallet)
+    }
+
+    LaunchedEffect(paymentAsset) {
+        val assetId = paymentAsset ?: return@LaunchedEffect
+        viewModel.changePaymentAsset(assetId)
+        onPaymentAssetConsumed()
     }
 
     BackHandler(handleSystemBack) {
@@ -210,6 +229,17 @@ fun ConfirmScreen(
                         listPosition = listPosition,
                         onClick = { selectedAddress = ChainAddress(row.chain, row.address) },
                     )
+
+                    is ConfirmRowUIModel.PaymentAsset -> ListItem(
+                        model = row.model,
+                        listPosition = listPosition,
+                        modifier = if (row.selectable) Modifier.clickable { onSelectPaymentAsset(paymentAssetIds) } else Modifier,
+                        accessory = if (row.selectable) {
+                            { DataBadgeChevron() }
+                        } else {
+                            null
+                        },
+                    )
                 }
             }
             itemsIndexed(detailElements) { index, item ->
@@ -231,12 +261,20 @@ fun ConfirmScreen(
             confirmBalanceChangesContent(balanceChangeRows)
             item {
                 feeListItem?.let {
-                    val canSelectFee = feeModel is FeeUIModel.FeeInfo
+                    val onSelect: (() -> Unit)? = when {
+                        verification != null -> viewModel::showVerification
+
+                        feeModel is FeeUIModel.FeeInfo -> {
+                            { showSelectTxSpeed = true }
+                        }
+
+                        else -> null
+                    }
                     ListItem(
                         model = it,
                         listPosition = ListPosition.Single,
-                        modifier = if (canSelectFee) Modifier.clickable { showSelectTxSpeed = true } else Modifier,
-                        accessory = if (canSelectFee) {
+                        modifier = if (onSelect != null) Modifier.clickable(onClick = onSelect) else Modifier,
+                        accessory = if (onSelect != null) {
                             { DataBadgeChevron() }
                         } else {
                             null
@@ -290,6 +328,31 @@ fun ConfirmScreen(
         ConfirmDetailElementBottomSheet(
             item = selectedDetailElement,
             onDismiss = { selectedDetailElement = null },
+        )
+
+        ModalBottomSheet(
+            isVisible = isVerificationVisible,
+            onDismissRequest = viewModel::dismissVerification,
+            expansion = SheetExpansion.Full,
+            title = stringResource(R.string.info_payment_verification_title),
+            actions = {
+                IconButton(onClick = { isVerificationInfoVisible = true }) {
+                    Icon(AppIcons.InfoOutlined, contentDescription = null)
+                }
+            },
+        ) {
+            verification?.let {
+                WebView(
+                    url = it.url,
+                    bridge = viewModel.verificationBridge,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+
+        InfoBottomSheet(
+            item = InfoSheetEntity.PaymentVerificationInfo.takeIf { isVerificationInfoVisible },
+            onClose = { isVerificationInfoVisible = false },
         )
 
         AddressDetailsSheet(
