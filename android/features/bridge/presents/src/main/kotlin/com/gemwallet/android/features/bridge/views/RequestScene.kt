@@ -22,9 +22,10 @@ import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.LoadingScene
 import com.wallet.core.primitives.AssetId
+import com.wallet.core.primitives.ChainAddress
 
 @Composable
-fun RequestScene(request: WalletConnectSessionRequest, verifyContext: WalletConnectVerifyContext, onAcquireAsset: (AcquireAssetAction, AssetId) -> Unit, onError: (String) -> Unit) {
+fun RequestScene(request: WalletConnectSessionRequest, verifyContext: WalletConnectVerifyContext, onAcquireAsset: (AcquireAssetAction, AssetId) -> Unit, onOpenAddress: (ChainAddress) -> Unit, onError: (String) -> Unit) {
     val viewModel: WCRequestViewModel = hiltViewModel()
     BackHandler(onBack = viewModel::onReject)
     val context = LocalContext.current
@@ -61,6 +62,7 @@ fun RequestScene(request: WalletConnectSessionRequest, verifyContext: WalletConn
                     details = { itemsPositioned(request.rows) { position, row -> GemListRowView(row = row, listPosition = position) } },
                     onApprove = { viewModel.onSign(reportError) },
                     onReject = viewModel::onReject,
+                    onOpenAddress = onOpenAddress,
                 )
 
                 is WCRequest.Transaction -> ConfirmScreen(
@@ -68,6 +70,7 @@ fun RequestScene(request: WalletConnectSessionRequest, verifyContext: WalletConn
                     simulationResult = request.simulation,
                     finishAction = { hash, _ -> viewModel.onTransactionResult(hash) },
                     onAcquireAsset = onAcquireAsset,
+                    onOpenAddress = onOpenAddress,
                     cancelAction = viewModel::onReject,
                     handleSystemBack = true,
                 )

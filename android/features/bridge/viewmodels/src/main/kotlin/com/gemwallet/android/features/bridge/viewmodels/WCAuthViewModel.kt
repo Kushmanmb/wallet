@@ -74,6 +74,9 @@ class WCAuthViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Enabled)
 
     fun onRequest(request: WalletConnectAuthenticationRequest, verifyContext: WalletConnectVerifyContext, onNotify: (String) -> Unit) {
+        if (authRequest?.id == request.id) {
+            return
+        }
         authRequest = request
         hasResponded = false
         _state.update { AuthSceneState.Loading }

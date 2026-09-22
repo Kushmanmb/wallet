@@ -158,6 +158,19 @@ class WCAuthViewModelTest {
     }
 
     @Test
+    fun `the same authentication request keeps the selected wallet`() = runTest(dispatcher) {
+        val model = viewModel(service { walletId -> listOf(mockGemWalletConnectAuthAccount(if (walletId == "multicoin_0xdef") "0xdef" else "0xabc")) })
+
+        model.onRequest(request, verifyContext) {}
+        model.awaitContent()
+        model.onWalletSelected(secondary.id)
+        model.onRequest(request, verifyContext) {}
+
+        val content = model.state.value as AuthSceneState.Content
+        assertEquals(secondary, content.selectedWallet)
+    }
+
+    @Test
     fun `selecting a wallet rebuilds the approval for its account`() = runTest(dispatcher) {
         val model = viewModel(service { walletId -> listOf(mockGemWalletConnectAuthAccount(if (walletId == "multicoin_0xdef") "0xdef" else "0xabc")) })
 

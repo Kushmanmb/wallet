@@ -30,7 +30,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.domains.confirm.ConfirmTransferInput
 import com.gemwallet.android.domains.confirm.FeeUIModel
 import com.gemwallet.android.ext.asset
-import com.gemwallet.android.features.asset.presents.address.AddressDetailsSheet
 import com.gemwallet.android.features.confirm.models.ConfirmDetailElement
 import com.gemwallet.android.features.confirm.presents.components.AddressRow
 import com.gemwallet.android.features.confirm.presents.components.ConfirmErrorInfo
@@ -89,6 +88,7 @@ fun ConfirmScreen(
     paymentAsset: AssetId? = null,
     onPaymentAssetConsumed: () -> Unit = {},
     onSelectPaymentAsset: (List<AssetId>) -> Unit = {},
+    onOpenAddress: (ChainAddress) -> Unit,
     handleSystemBack: Boolean = false,
     viewModel: ConfirmViewModel = hiltViewModel(),
 ) {
@@ -126,11 +126,10 @@ fun ConfirmScreen(
     var showSimulationDetails by remember { mutableStateOf(false) }
     var isVerificationInfoVisible by remember { mutableStateOf(false) }
     var selectedDetailElement by remember(input) { mutableStateOf<ConfirmDetailElement?>(null) }
-    var selectedAddress by remember(input) { mutableStateOf<ChainAddress?>(null) }
     val openPayloadAddress = simulation.chain?.let { chain ->
         { address: String ->
             showSimulationDetails = false
-            selectedAddress = ChainAddress(chain, address)
+            onOpenAddress(ChainAddress(chain, address))
         }
     }
     var isShowedBroadcastError by remember(executeErrorText) { mutableStateOf(executeErrorText != null) }
@@ -218,7 +217,7 @@ fun ConfirmScreen(
                     is ConfirmRowUIModel.Address -> AddressRow(
                         row = row,
                         listPosition = listPosition,
-                        onClick = { selectedAddress = ChainAddress(row.chain, row.address) },
+                        onClick = { onOpenAddress(ChainAddress(row.chain, row.address)) },
                     )
 
                     is ConfirmRowUIModel.Validator -> AddressPropertyItem(
@@ -227,7 +226,7 @@ fun ConfirmScreen(
                         copyValue = row.address,
                         explorerLink = row.explorerLink,
                         listPosition = listPosition,
-                        onClick = { selectedAddress = ChainAddress(row.chain, row.address) },
+                        onClick = { onOpenAddress(ChainAddress(row.chain, row.address)) },
                     )
 
                     is ConfirmRowUIModel.PaymentAsset -> ListItem(
@@ -353,11 +352,6 @@ fun ConfirmScreen(
         InfoBottomSheet(
             item = InfoSheetEntity.PaymentVerificationInfo.takeIf { isVerificationInfoVisible },
             onClose = { isVerificationInfoVisible = false },
-        )
-
-        AddressDetailsSheet(
-            chainAddress = selectedAddress,
-            onDismiss = { selectedAddress = null },
         )
     }
 

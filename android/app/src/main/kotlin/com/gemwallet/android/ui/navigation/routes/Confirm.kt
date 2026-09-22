@@ -42,6 +42,7 @@ fun EntryProviderScope<NavKey>.confirm(navigator: WalletNavigator, finishAction:
             paymentAsset = navigator.paymentSelection(key),
             onPaymentAssetConsumed = { navigator.clearPaymentSelection(key) },
             onSelectPaymentAsset = navigator::openPaymentSelect,
+            onOpenAddress = navigator::openAddress,
             finishAction = finishAction,
         )
     }

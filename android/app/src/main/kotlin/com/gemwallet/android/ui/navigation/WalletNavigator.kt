@@ -30,6 +30,7 @@ import com.gemwallet.android.ui.navigation.routes.AboutusRoute
 import com.gemwallet.android.ui.navigation.routes.AddAssetRoute
 import com.gemwallet.android.ui.navigation.routes.AddContactRoute
 import com.gemwallet.android.ui.navigation.routes.AddPriceAlertTargetRoute
+import com.gemwallet.android.ui.navigation.routes.AddressDetailsRoute
 import com.gemwallet.android.ui.navigation.routes.AmountRoute
 import com.gemwallet.android.ui.navigation.routes.AssetChartRoute
 import com.gemwallet.android.ui.navigation.routes.AssetPriceAlertsRoute
@@ -86,6 +87,7 @@ import com.gemwallet.android.ui.navigation.routes.WalletsRoute
 import com.gemwallet.android.ui.navigation.routes.assetsRoute
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Chain
+import com.wallet.core.primitives.ChainAddress
 import com.wallet.core.primitives.FiatQuoteType
 import com.wallet.core.primitives.NFTAsset
 import com.wallet.core.primitives.NFTAssetId
@@ -217,6 +219,7 @@ class WalletNavigator(
     fun openAssetChart(assetId: AssetId) = push(AssetChartRoute(assetId))
     fun openPortfolioChart(type: PortfolioType = PortfolioType.Wallet) = push(PortfolioChartRoute(type))
     fun openTransaction(transactionId: TransactionId) = push(TransactionDetailsRoute(transactionId))
+    fun openAddress(chainAddress: ChainAddress) = push(AddressDetailsRoute(chainAddress))
     fun openBridgeConnections() = push(BridgeConnectionsRoute)
     fun openBridgeConnectionDetails(connectionId: String) = push(BridgeConnectionDetailsRoute(connectionId))
     fun openCurrencies() = push(CurrenciesRoute)

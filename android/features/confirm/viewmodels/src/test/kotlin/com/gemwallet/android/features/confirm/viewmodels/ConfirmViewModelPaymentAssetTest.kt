@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.session.cases.GetSession
+import com.gemwallet.android.domains.confirm.asset
 import com.gemwallet.android.domains.confirm.pack
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.features.confirm.viewmodels.models.ConfirmHeaderUIModel
-import com.gemwallet.android.domains.confirm.asset
 import com.gemwallet.android.testkit.mockAccount
 import com.gemwallet.android.testkit.mockAssetEthereum
 import com.gemwallet.android.testkit.mockAssetEthereumUSDT
@@ -23,6 +23,7 @@ import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.Currency
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -88,6 +89,21 @@ class ConfirmViewModelPaymentAssetTest {
 
         coVerify { confirmation.load(match<GemConfirmLoadOptions> { it.assetId == usdt.id.toIdentifier() }) }
         assertEquals(usdt, viewModel.header.first { (it as? ConfirmHeaderUIModel.Symbol)?.asset == usdt }.let { (it as ConfirmHeaderUIModel.Symbol).asset })
+    }
+
+    @Test
+    fun returningToTheSameTransferKeepsTheSelectedPaymentAsset() = runTest(testDispatcher) {
+        val transfer = payment(ethereum)
+        val viewModel = viewModel(transfer).also { model = it }
+        viewModel.headerAsset()
+        viewModel.changePaymentAsset(usdt.id)
+        advanceUntilIdle()
+
+        clearMocks(confirmation, answers = false)
+        viewModel.init(transfer)
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { confirmation.load(any()) }
     }
 
     @Test

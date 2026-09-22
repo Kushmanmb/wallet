@@ -12,7 +12,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import com.gemwallet.android.features.asset.presents.address.AddressDetailsSheet
 import com.gemwallet.android.features.bridge.localization.string
 import com.gemwallet.android.features.bridge.viewmodels.model.WalletConnectReviewModel
 import com.gemwallet.android.model.AuthRequest
@@ -31,13 +30,12 @@ import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.ChainAddress
 
 @Composable
-internal fun WalletConnectReviewScene(model: WalletConnectReviewModel, buttonState: ButtonState, details: LazyListScope.() -> Unit, onApprove: () -> Unit, onReject: () -> Unit) {
+internal fun WalletConnectReviewScene(model: WalletConnectReviewModel, buttonState: ButtonState, details: LazyListScope.() -> Unit, onApprove: () -> Unit, onReject: () -> Unit, onOpenAddress: (ChainAddress) -> Unit) {
     val context = LocalContext.current
     var sheetType by remember { mutableStateOf<WalletConnectReviewSheetType?>(null) }
-    var selectedAddress by remember { mutableStateOf<ChainAddress?>(null) }
     val openAddress = { address: String ->
         sheetType = null
-        selectedAddress = ChainAddress(model.chain, address)
+        onOpenAddress(ChainAddress(model.chain, address))
     }
 
     Scene(
@@ -98,10 +96,6 @@ internal fun WalletConnectReviewScene(model: WalletConnectReviewModel, buttonSta
         onViewFullMessage = { sheetType = WalletConnectReviewSheetType.FullMessage },
         onDismissRequest = { sheetType = null },
         viewFullMessageListItem = model.viewFullMessageListItem,
-    )
-    AddressDetailsSheet(
-        chainAddress = selectedAddress,
-        onDismiss = { selectedAddress = null },
     )
     WalletConnectFullMessageSheet(
         isVisible = sheetType == WalletConnectReviewSheetType.FullMessage,
