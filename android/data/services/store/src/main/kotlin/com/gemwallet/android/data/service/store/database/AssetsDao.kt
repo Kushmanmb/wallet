@@ -74,11 +74,7 @@ private const val ASSET_INFO_COLUMNS = """
     balances.total_amount AS balanceTotalAmount,
     (balances.total_amount * COALESCE(prices.value, 0)) AS balanceFiatTotalAmount,
     balances.is_active AS assetIsActive,
-    balances.votes AS votes,
-    balances.energy_available AS energyAvailable,
-    balances.energy_total AS energyTotal,
-    balances.bandwidth_available AS bandwidthAvailable,
-    balances.bandwidth_total AS bandwidthTotal
+    balances.metadata AS balanceMetadata
 """
 
 private const val ASSET_INFO_SOURCE = """
