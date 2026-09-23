@@ -15,8 +15,7 @@ use primitives::AddressType;
 use primitives::currency::Currency;
 use primitives::{AddressName, BlockExplorerLink, PaymentVerification};
 use primitives::{
-    Asset, AssetId, Chain, ChainType, EVMChain, FeePriority, FeeUnitType, GasPriceType, ScanAddressTarget, ScanTransaction, ScanTransactionPayload, SimulationResult, SimulationWarningType, Transaction, TransactionPreloadInput,
-    TransactionType, TransferDataOutputAction, TransferDataOutputType, Wallet,
+    Asset, AssetId, Chain, ChainType, EVMChain, FeePriority, FeeUnitType, GasPriceType, ScanTransaction, SimulationResult, SimulationWarningType, Transaction, TransactionType, TransferDataOutputAction, TransferDataOutputType, Wallet,
 };
 
 use super::error::{GemConfirmError, GemConfirmErrorDisplay, GemConfirmErrorInfo, GemConfirmErrorSheet};
@@ -27,7 +26,7 @@ use super::model::{
 use crate::config::chain::custom_fee_enabled;
 use crate::fee::fee_rate_text;
 use crate::models::custom_types::GemBigUint;
-use crate::models::gateway::{GemBroadcastOptions, GemFeeRate, GemTransactionPreloadInput};
+use crate::models::gateway::{GemBroadcastOptions, GemFeeRate};
 use crate::models::transaction::{GemSignedTransaction, GemSignerInput, GemTransactionLoadFee, GemTransactionLoadInput};
 use crate::services::balance::GemAssetBalance;
 use crate::services::balance::GemBalanceRequirement;
@@ -83,7 +82,6 @@ pub fn metadata_asset_ids(asset_id: &AssetId, fee_asset_id: &AssetId, extra_asse
 }
 
 pub(super) trait ConfirmInput {
-    fn requires_scan(&self) -> bool;
     fn approval_value(&self) -> Option<(AssetId, GemApprovalValue)>;
     fn validate_approvals(&self, transactions: &[GemSignedTransaction]) -> Result<(), GemConfirmError>;
     fn simulation_payload(&self) -> Option<String>;
@@ -92,13 +90,6 @@ pub(super) trait ConfirmInput {
 }
 
 impl ConfirmInput for TransactionInputType {
-    fn requires_scan(&self) -> bool {
-        match self {
-            Self::Transfer { .. } | Self::Swap { .. } | Self::TokenApprove { .. } | Self::Generic { .. } | Self::Payment { .. } => true,
-            Self::Deposit { .. } | Self::Withdrawal { .. } | Self::Stake { .. } | Self::TransferNft { .. } | Self::Account { .. } | Self::Perpetual { .. } | Self::Earn { .. } => false,
-        }
-    }
-
     fn approval_value(&self) -> Option<(AssetId, GemApprovalValue)> {
         match self {
             Self::TokenApprove { asset, approval_data } => Some((asset.id.clone(), approval_value_from(Some(&approval_data.value), approval_data.is_unlimited))),
@@ -457,37 +448,6 @@ pub(super) fn validate_scan(scan: Option<&ScanTransaction>, memo: Option<&str>, 
     Ok(())
 }
 
-pub(super) fn scan_payload(input: GemTransactionPreloadInput) -> Option<ScanTransactionPayload> {
-    if !input.input_type.requires_scan() {
-        return None;
-    }
-    let input: TransactionPreloadInput = input.into();
-    Some(ScanTransactionPayload {
-        origin: ScanAddressTarget {
-            asset_id: input.input_type.get_asset().id.clone(),
-            address: input.sender_address.clone(),
-        },
-        target: scan_target(&input),
-        website: input.get_website(),
-        transaction_type: input.input_type.transaction_type(),
-    })
-}
-
-fn scan_target(input: &TransactionPreloadInput) -> ScanAddressTarget {
-    if let TransactionInputType::Swap { from_asset, swap_data, .. } = &input.input_type
-        && !swap_data.data.to.is_empty()
-    {
-        return ScanAddressTarget {
-            asset_id: from_asset.id.clone(),
-            address: swap_data.data.to.clone(),
-        };
-    }
-    ScanAddressTarget {
-        asset_id: input.input_type.get_recipient_asset().id.clone(),
-        address: input.destination_address.clone(),
-    }
-}
-
 fn fee_rate_rows(chain: Chain, fee_asset: &Asset, rates: &[GemFeeRate], selection: &GemConfirmFeeSelection, loaded_fee: &GemTransactionLoadFee) -> GemFeeRateRows {
     let unit_value = |rate: &GemFeeRate| rate.gas_price_type.clone().total_fee();
     let rate_total = |priority: FeePriority| rates.iter().find(|rate| rate.priority == priority).map(unit_value);
@@ -668,9 +628,9 @@ mod tests {
     use primitives::FeeOption;
     use primitives::{
         Account, ApplicationMetadata, Asset, PerpetualConfirmData, PerpetualDirection, PerpetualType, SimulationWarning, StakeType, SwapProvider, TransactionType, TransferDataExtra, TransferDataOutputAction,
-        swap::{ApprovalData, SwapData, SwapQuoteData},
+        swap::{ApprovalData, SwapData},
     };
-    use primitives::{AccountDataType, AddressName, AddressType, ContractCallData, Delegation, DelegationValidator, EarnType, NFTAsset, VerificationStatus};
+    use primitives::{AddressName, AddressType, Delegation, DelegationValidator, VerificationStatus};
     use std::collections::HashMap;
 
     #[test]
@@ -1075,162 +1035,6 @@ mod tests {
         assert_eq!(broadcast_delay_milliseconds(Chain::Solana), 500);
         assert_eq!(broadcast_delay_milliseconds(Chain::Bitcoin), 500);
         assert_eq!(broadcast_delay_milliseconds(Chain::Polygon), 0);
-    }
-
-    #[test]
-    fn test_a_swap_scans_the_contract_that_receives_the_funds() {
-        let swap = GemTransactionPreloadInput {
-            input_type: TransactionInputType::Swap {
-                from_asset: Asset::mock_eth(),
-                to_asset: Asset::mock_spl_token(),
-                swap_data: SwapData {
-                    data: SwapQuoteData {
-                        to: "0xrouter".to_string(),
-                        ..SwapQuoteData::mock()
-                    },
-                    ..SwapData::mock()
-                },
-            },
-            sender_address: "sender".to_string(),
-            destination_address: "own-solana-address".to_string(),
-            references: vec![],
-        };
-
-        let target = scan_payload(swap.clone()).unwrap().target;
-        assert_eq!(target.address, "0xrouter", "the scan asks about the contract, not the address the user already owns");
-        assert_eq!(target.asset_id, Asset::mock_eth().id, "the contract is on the chain the funds leave");
-
-        let without_contract = scan_payload(GemTransactionPreloadInput {
-            input_type: TransactionInputType::Swap {
-                from_asset: Asset::mock_eth(),
-                to_asset: Asset::mock_spl_token(),
-                swap_data: SwapData {
-                    data: SwapQuoteData { to: String::new(), ..SwapQuoteData::mock() },
-                    ..SwapData::mock()
-                },
-            },
-            destination_address: "recipient".to_string(),
-            ..swap
-        })
-        .unwrap()
-        .target;
-        assert_eq!(without_contract.address, "recipient", "a swap with no contract falls back to the recipient");
-    }
-
-    #[test]
-    fn test_scan_payload_covers_every_input_type() {
-        let swap = GemTransactionPreloadInput {
-            input_type: TransactionInputType::Swap {
-                from_asset: Asset::mock_sol(),
-                to_asset: Asset::mock_spl_token(),
-                swap_data: SwapData::mock(),
-            },
-            sender_address: "sender".to_string(),
-            destination_address: "router".to_string(),
-            references: vec![],
-        };
-        let payload = scan_payload(swap).unwrap();
-        assert_eq!(payload.transaction_type, TransactionType::Swap);
-        assert_eq!(payload.origin.asset_id, Asset::mock_sol().id);
-        assert_eq!(payload.website, None);
-
-        let generic = GemTransactionPreloadInput {
-            input_type: TransactionInputType::Generic {
-                asset: Asset::mock_sol(),
-                metadata: ApplicationMetadata::mock(),
-                extra: TransferDataExtra::mock(),
-            },
-            sender_address: "sender".to_string(),
-            destination_address: "contract".to_string(),
-            references: vec![],
-        };
-        let payload = scan_payload(generic).unwrap();
-        assert_eq!(payload.transaction_type, TransferDataExtra::mock().transaction_type);
-        assert_eq!(payload.website, Some(ApplicationMetadata::mock().url));
-    }
-
-    #[test]
-    fn test_requires_scan() {
-        for (input_type, should_scan) in [
-            (TransactionInputType::Deposit { asset: Asset::mock_erc20() }, false),
-            (
-                TransactionInputType::Earn {
-                    asset: Asset::mock_erc20(),
-                    earn_type: EarnType::Deposit(DelegationValidator::mock()),
-                    data: ContractCallData::mock(),
-                },
-                false,
-            ),
-            (TransactionInputType::Transfer { asset: Asset::mock_erc20() }, true),
-            (TransactionInputType::mock_payment(Asset::mock_erc20(), TransferDataExtra::mock()), true),
-            (TransactionInputType::Withdrawal { asset: Asset::mock_erc20() }, false),
-            (
-                TransactionInputType::Earn {
-                    asset: Asset::mock_erc20(),
-                    earn_type: EarnType::Withdraw(Delegation::mock()),
-                    data: ContractCallData::mock(),
-                },
-                false,
-            ),
-            (
-                TransactionInputType::Account {
-                    asset: Asset::mock_erc20(),
-                    account_type: AccountDataType::Activate,
-                },
-                false,
-            ),
-            (
-                TransactionInputType::Stake {
-                    asset: Asset::mock_sol(),
-                    stake_type: StakeType::Rewards(vec![]),
-                },
-                false,
-            ),
-            (
-                TransactionInputType::TransferNft {
-                    asset: Asset::mock_eth(),
-                    nft_asset: NFTAsset::mock(),
-                },
-                false,
-            ),
-            (
-                TransactionInputType::Perpetual {
-                    asset: Asset::mock_erc20(),
-                    perpetual_type: PerpetualType::Open {
-                        data: PerpetualConfirmData::mock(PerpetualDirection::Long, 0, None, None),
-                    },
-                },
-                false,
-            ),
-            (
-                TransactionInputType::Swap {
-                    from_asset: Asset::mock_eth(),
-                    to_asset: Asset::mock_erc20(),
-                    swap_data: SwapData::mock(),
-                },
-                true,
-            ),
-            (
-                TransactionInputType::TokenApprove {
-                    asset: Asset::mock_erc20(),
-                    approval_data: ApprovalData::mock(),
-                },
-                true,
-            ),
-            (
-                TransactionInputType::Generic {
-                    asset: Asset::mock_erc20(),
-                    metadata: ApplicationMetadata::mock(),
-                    extra: TransferDataExtra {
-                        transaction_type: TransactionType::EarnDeposit,
-                        ..TransferDataExtra::mock()
-                    },
-                },
-                true,
-            ),
-        ] {
-            assert_eq!(input_type.requires_scan(), should_scan);
-        }
     }
 
     #[test]

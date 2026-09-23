@@ -31,6 +31,7 @@ use crate::services::balance::GemBalanceService;
 use crate::services::clock::sleep;
 use crate::services::confirm::rules::ConfirmInput;
 use crate::services::price::GemPriceService;
+use crate::services::scan::rules as scan_rules;
 use crate::services::simulation::payload_rows;
 use crate::services::simulation::{GemSimulationFormatter, GemSimulationService};
 use crate::services::transaction_state::{GemTransactionStateService, GemTransactionStatusService};
@@ -100,10 +101,9 @@ impl GemConfirmService {
             references: transfer.recipient.references.clone(),
         };
 
-        // A scanner outage fails open by design: the send continues without a verdict.
         let scan_future = async {
-            let payload = rules::scan_payload(preload_input.clone())?;
-            self.scanner.scan_transaction(payload).await.ok()
+            let payload = scan_rules::transaction_payload(preload_input.clone())?;
+            self.scanner.scan(payload).await
         };
         let (metadata, fee_rates, scan, simulation) = futures::join!(
             self.gateway.get_transaction_preload(chain, preload_input.clone()),
