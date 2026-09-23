@@ -4,6 +4,7 @@ import com.gemwallet.android.application.session.cases.GetCurrentWalletId
 import com.gemwallet.android.data.service.store.database.AssetListDao
 import com.gemwallet.android.data.service.store.database.AssetsDao
 import com.gemwallet.android.data.service.store.database.SearchDao
+import com.gemwallet.android.data.service.store.database.entities.DbAssetInfo
 import com.gemwallet.android.data.service.store.database.entities.toAssetInfoModel
 import com.gemwallet.android.data.service.store.database.entities.toDTO
 import com.gemwallet.android.model.AssetFilter
@@ -32,42 +33,8 @@ class AssetsSearchService @Inject constructor(private val assetsDao: AssetsDao, 
             searchDao.hasAssetPriorities(query).map { it > 0 }.distinctUntilChanged().flatMapLatest { hasPriority ->
                 when {
                     byAllWallets && hasPriority -> assetsDao.searchByAllWalletsWithPriority(walletId, query, limit)
-
                     byAllWallets -> assetsDao.searchByAllWallets(walletId, query, limit)
-
-                    hasPriority -> assetsDao.searchWithPriority(
-                        walletId = walletId,
-                        query = query,
-                        limit = limit,
-                        enabled = AssetFilter.Enabled in filters,
-                        buyable = AssetFilter.Buyable in filters,
-                        sellable = AssetFilter.Sellable in filters,
-                        swappable = AssetFilter.Swappable in filters,
-                        hasBalance = AssetFilter.HasBalance in filters,
-                        hasAvailableBalance = AssetFilter.HasAvailableBalance in filters,
-                        byChainsOrAssetIds = filters.chainsOrAssetIds() != null,
-                        chains = filters.chainsOrAssetIds()?.chains.orEmpty(),
-                        assetIds = filters.chainsOrAssetIds()?.ids.orEmpty(),
-                        byChains = filters.chains().isNotEmpty(),
-                        selectedChains = filters.chains(),
-                    )
-
-                    else -> assetsDao.search(
-                        walletId = walletId,
-                        query = query,
-                        limit = limit,
-                        enabled = AssetFilter.Enabled in filters,
-                        buyable = AssetFilter.Buyable in filters,
-                        sellable = AssetFilter.Sellable in filters,
-                        swappable = AssetFilter.Swappable in filters,
-                        hasBalance = AssetFilter.HasBalance in filters,
-                        hasAvailableBalance = AssetFilter.HasAvailableBalance in filters,
-                        byChainsOrAssetIds = filters.chainsOrAssetIds() != null,
-                        chains = filters.chainsOrAssetIds()?.chains.orEmpty(),
-                        assetIds = filters.chainsOrAssetIds()?.ids.orEmpty(),
-                        byChains = filters.chains().isNotEmpty(),
-                        selectedChains = filters.chains(),
-                    )
+                    else -> assetsDao.filteredSearch(walletId, query, limit, filters, hasPriority)
                 }
             }
         }
@@ -83,25 +50,33 @@ class AssetsSearchService @Inject constructor(private val assetsDao: AssetsDao, 
         val walletId = wallet.id
         searchDao.hasAssetPriorities(searchKey).map { it > 0 }.distinctUntilChanged().flatMapLatest { hasPriority ->
             if (hasPriority) {
-                assetsDao.searchWithPriority(
-                    walletId = walletId,
-                    query = searchKey,
-                    limit = limit,
-                    enabled = AssetFilter.Enabled in filters,
-                    buyable = AssetFilter.Buyable in filters,
-                    sellable = AssetFilter.Sellable in filters,
-                    swappable = AssetFilter.Swappable in filters,
-                    hasBalance = AssetFilter.HasBalance in filters,
-                    hasAvailableBalance = AssetFilter.HasAvailableBalance in filters,
-                    byChainsOrAssetIds = filters.chainsOrAssetIds() != null,
-                    chains = filters.chainsOrAssetIds()?.chains.orEmpty(),
-                    assetIds = filters.chainsOrAssetIds()?.ids.orEmpty(),
-                    byChains = filters.chains().isNotEmpty(),
-                    selectedChains = filters.chains(),
-                ).toAssetInfoModel()
+                assetsDao.filteredSearch(walletId, searchKey, limit, filters, withPriority = true).toAssetInfoModel()
             } else {
                 flowOf(emptyList<AssetInfo>())
             }
         }
     }
+}
+
+private fun AssetsDao.filteredSearch(walletId: String, query: String, limit: Int, filters: Set<AssetFilter>, withPriority: Boolean): Flow<List<DbAssetInfo>> {
+    val scope = filters.chainsOrAssetIds()
+    val selectedChains = filters.chains()
+    val search = if (withPriority) ::searchWithPriority else ::search
+    return search(
+        walletId,
+        query,
+        limit,
+        emptyList(),
+        AssetFilter.Enabled in filters,
+        AssetFilter.Buyable in filters,
+        AssetFilter.Sellable in filters,
+        AssetFilter.Swappable in filters,
+        AssetFilter.HasBalance in filters,
+        AssetFilter.HasAvailableBalance in filters,
+        scope != null,
+        scope?.chains.orEmpty(),
+        scope?.ids.orEmpty(),
+        selectedChains.isNotEmpty(),
+        selectedChains,
+    )
 }

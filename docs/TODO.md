@@ -236,7 +236,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 - **VM79** **S** **The root scene stops reading the wallet store.** iOS [`RootSceneViewModel`](../ios/Gem/ViewModels/RootSceneViewModel.swift) reads `stores.walletStore.getWallet` directly; the session service answers the current wallet.
 - **VM85** **S** **App start owns its preference steps.** `setupCurrency(locale)` and `incrementLaunchesCount` run from unrelated places — iOS `OnstartService`, Android `SessionCoordinator` and `UserConfig`.
 - **VM86** **M** **Core preference changes are observable.** Both apps mirror Core preferences in observable objects and reload them by hand after the last wallet is deleted (Android `UserConfig`, iOS `ObservablePreferences.reload(after:)`).
-- **VM87** **S** **Android search maps filters once.** [`AssetsSearchService`](../android/data/services/gemstone/src/main/kotlin/com/gemwallet/android/data/services/gemstone/assets/AssetsSearchService.kt) repeats the same 14-argument filter mapping three times.
 - **VM88** **M** **Info sheets come from Core.** Around 25 topics are written twice: iOS [`InfoSheetModelFactory`](../ios/Features/InfoSheet/Sources/Factory/InfoSheetModelFactory.swift) (252 lines) and Android `InfoBottomSheet` (414 lines) each choose title, description, image and docs link; Core has `GemInfoTopic` but no sheet content.
 - **VM89** **S** **Docs links come with the screen.** Screens pick docs URLs themselves (`StakeSceneViewModel` `.staking(chain)`, `ConnectionsViewModel` `.walletConnect`).
 
@@ -322,6 +321,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM87 (2026-09-23).** Closed. Android `AssetsSearchService` wrote the same fourteen-argument filter mapping three times, once per DAO query; `AssetsDao.filteredSearch` maps the filter set once, reads `chainsOrAssetIds()` and `chains()` once, and picks `searchWithPriority` or `search`.
 
 **VM82, VM83, VM84 (2026-09-23).** Closed without code: each app is already mapping a Core answer or showing fixed copy, and the two apps agree. The NFT unverified row is Core's `unverified_row`, which decides whether it shows and carries its count; both apps only give it the localized "Unverified" title (VM83). The wallet detail secret row is Core's `secret_kind`, which decides whether it shows; "Show {kind}" is a localization template both apps fill the same way (VM84). The WalletConnect proposal's two permission rows are the same fixed strings on both apps with no rule behind them (VM82). Moving any of them would add an enum and a mapper per app without moving a decision.
 
