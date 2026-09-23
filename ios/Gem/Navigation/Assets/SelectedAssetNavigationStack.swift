@@ -15,6 +15,7 @@ struct SelectedAssetNavigationStack: View {
     @Environment(\.navigationPresenter) private var presenter
 
     @State private var navigationPath = NavigationPath()
+    @State private var isPresentingAddressDetails: ChainAddress?
 
     private let input: SelectedAssetInput
     private let wallet: Wallet
@@ -123,8 +124,18 @@ struct SelectedAssetNavigationStack: View {
                         asset: input.delegation.base.assetId.chain.asset,
                         validators: input.validators,
                         onNavigate: navigate,
+                        onSelectAddress: { isPresentingAddressDetails = $0 },
                     ),
                 )
+            }
+        }
+        .sheet(isPresented: Binding(get: { isPresentingAddressDetails != nil }, set: {
+            if !$0 {
+                isPresentingAddressDetails = nil
+            }
+        })) {
+            if let isPresentingAddressDetails {
+                AddressDetailsDestination(chainAddress: isPresentingAddressDetails)
             }
         }
     }

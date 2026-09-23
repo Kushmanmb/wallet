@@ -65,7 +65,7 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
     is GemListRow.Text -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = value))
 
     is GemListRow.Provider -> GemListRowUIModel.Provider(
-        ListItemModel(title = GemListRowTitle.PROVIDER.text(context), subtitle = name),
+        ListItemModel(title = title.text(context), subtitle = name),
         contract = contract,
     )
 

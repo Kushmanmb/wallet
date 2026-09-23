@@ -23,6 +23,7 @@ public struct DelegationSceneViewModel {
     private let wallet: Wallet
     private let asset: Asset
     private let service: any GemStakeServiceProtocol
+    private let onSelectAddress: (@MainActor @Sendable (ChainAddress) -> Void)?
 
     public init(
         wallet: Wallet,
@@ -31,6 +32,7 @@ public struct DelegationSceneViewModel {
         service: any GemStakeServiceProtocol,
         validators: [DelegationValidator],
         onNavigate: StakeRouteAction,
+        onSelectAddress: (@MainActor @Sendable (ChainAddress) -> Void)? = nil,
     ) {
         self.wallet = wallet
         self.delegation = delegation
@@ -38,6 +40,14 @@ public struct DelegationSceneViewModel {
         self.service = service
         self.validators = validators
         self.onNavigate = onNavigate
+        self.onSelectAddress = onSelectAddress
+    }
+
+    @MainActor
+    var onSelectProvider: ((String) -> Void)? {
+        guard let onSelectAddress else { return nil }
+        let chain = delegation.validator.chain
+        return { onSelectAddress(ChainAddress(chain: chain, address: $0)) }
     }
 
     public var model: DelegationViewModel {

@@ -174,8 +174,7 @@ impl GemStakeService {
     }
 
     pub fn delegation_rows(&self, delegation: Delegation) -> Vec<GemListRow> {
-        let validator_url = self.validator_url(delegation.validator.clone());
-        rules::delegation_rows(&delegation, validator_url, Utc::now())
+        rules::delegation_rows(&delegation, Utc::now())
     }
 
     pub async fn sync(&self, chain: Chain) -> Result<(), GemServiceError> {

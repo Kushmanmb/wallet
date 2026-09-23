@@ -97,6 +97,14 @@ class GemListRowUIModelTest {
     }
 
     @Test
+    fun `a validator provider row keeps the address it opens`() {
+        val row = GemListRow.Provider(title = GemListRowTitle.VALIDATOR, name = "Validator", contract = "cosmosvaloper1").uiModel(context) as GemListRowUIModel.Provider
+
+        assertEquals("cosmosvaloper1", row.contract)
+        assertEquals("Validator", row.model.subtitle)
+    }
+
+    @Test
     fun `a memo row copies only a real memo`() {
         assertEquals(listOf(GemListRowMenuItem.Copy("Copy", "12345")), GemListRow.Memo(value = "12345", copy = "12345").menu())
         assertEquals(emptyList<GemListRowMenuItem>(), GemListRow.Memo(value = "-", copy = null).menu())

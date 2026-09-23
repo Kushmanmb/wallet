@@ -215,6 +215,7 @@ pub enum GemListRow {
         value: String,
     },
     Provider {
+        title: GemListRowTitle,
         name: String,
         contract: Option<String>,
     },

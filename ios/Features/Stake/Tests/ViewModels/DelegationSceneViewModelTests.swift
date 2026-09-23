@@ -66,4 +66,15 @@ struct DelegationSceneViewModelTests {
         #expect(shown.rewardsItem?.subtitle == "0.5 ATOM")
         #expect(hidden.rewardsItem == nil)
     }
+
+    @Test @MainActor
+    func theValidatorRowOpensAddressDetailsOnItsChain() {
+        var selected: ChainAddress?
+        let model = DelegationSceneViewModel.mock(chain: .cosmos, onSelectAddress: { selected = $0 })
+
+        model.onSelectProvider?("cosmosvaloper1")
+
+        #expect(selected == ChainAddress(chain: .cosmos, address: "cosmosvaloper1"))
+        #expect(DelegationSceneViewModel.mock().onSelectProvider == nil)
+    }
 }

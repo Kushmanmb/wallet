@@ -27,7 +27,7 @@ public struct DelegationScene: View {
 
             Section {
                 ForEach(model.rows, id: \.self) { row in
-                    GemListRowView(row: row)
+                    GemListRowView(row: row, onSelectAddress: model.onSelectProvider)
                 }
             }
 

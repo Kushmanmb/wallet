@@ -20,7 +20,7 @@ use crate::config::stake::EARN_OFFERED;
 use crate::duration_formatter::{GemDurationPart, countdown_parts, day_parts};
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::custom_types::GemBigUint;
-use crate::models::list::{GemInfoTopic, GemListRow, GemListRowIcon, GemListRowTitle, GemUrlTarget};
+use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
 use crate::percentage::GemPercentageStyle;
 use crate::precision::{GemCurrencyStyle, GemValueStyle};
 use crate::services::balance::{GemAssetBalance, GemBalanceRow};
@@ -29,7 +29,6 @@ use crate::services::localization::GemLocalizedText;
 use crate::services::transfer::rules as transfer_rules;
 use chrono::{DateTime, Utc};
 use number_formatter::BigNumberFormatter;
-use primitives::BlockExplorerLink;
 
 use crate::config::chain::account_activation_fee_url;
 use crate::config::stake::{StakeChainConfig, get_stake_config};
@@ -287,11 +286,11 @@ pub fn stake_info_rows(asset: &Asset, staking_apr: Option<f64>) -> Vec<GemListRo
     .collect()
 }
 
-pub fn delegation_rows(delegation: &Delegation, validator_url: Option<BlockExplorerLink>, now: DateTime<Utc>) -> Vec<GemListRow> {
+pub fn delegation_rows(delegation: &Delegation, now: DateTime<Utc>) -> Vec<GemListRow> {
     let validator = &delegation.validator;
     let status = delegation_status(delegation);
     [
-        Some(provider_row(validator, validator_url)),
+        Some(provider_row(validator)),
         (validator.apr != 0.0).then(|| {
             let apr = GemFormattedNumber::percentage(validator.apr, GemPercentageStyle::Unsigned);
             GemListRow::Amount {
@@ -318,21 +317,15 @@ pub fn delegation_rows(delegation: &Delegation, validator_url: Option<BlockExplo
     .collect()
 }
 
-fn provider_row(validator: &DelegationValidator, validator_url: Option<BlockExplorerLink>) -> GemListRow {
+fn provider_row(validator: &DelegationValidator) -> GemListRow {
     let title = match validator.provider_type {
         StakeProviderType::Stake => GemListRowTitle::Validator,
         StakeProviderType::Earn => GemListRowTitle::Provider,
     };
-    let name = validator_display_name(validator);
-    match validator_url {
-        Some(link) => GemListRow::Url {
-            title,
-            value: Some(name),
-            icon: GemListRowIcon::None,
-            url: link.link,
-            target: GemUrlTarget::InApp,
-        },
-        None => GemListRow::Text { title, value: name },
+    GemListRow::Provider {
+        title,
+        name: validator_display_name(validator),
+        contract: (!validator.id.is_empty() && !DelegationValidator::is_system_id(&validator.id)).then(|| validator.id.clone()),
     }
 }
 
@@ -933,19 +926,13 @@ mod tests {
     fn test_a_delegation_shows_its_finished_rows() {
         let now = Utc::now();
         let active = Delegation::mock_with(Chain::Cosmos, StakeProviderType::Stake, DelegationState::Active, 100);
-        let link = BlockExplorerLink {
-            name: "Mintscan".to_string(),
-            link: "https://mintscan.io/validator1".to_string(),
-        };
         assert_eq!(
-            delegation_rows(&active, Some(link), now),
+            delegation_rows(&active, now),
             vec![
-                GemListRow::Url {
+                GemListRow::Provider {
                     title: GemListRowTitle::Validator,
-                    value: Some("Test Validator".to_string()),
-                    icon: GemListRowIcon::None,
-                    url: "https://mintscan.io/validator1".to_string(),
-                    target: GemUrlTarget::InApp,
+                    name: "Test Validator".to_string(),
+                    contract: Some(active.validator.id.clone()),
                 },
                 GemListRow::Amount {
                     title: GemListRowTitle::StakeApr,
@@ -964,14 +951,15 @@ mod tests {
 
         let mut pending = Delegation::mock_with(Chain::Cosmos, StakeProviderType::Stake, DelegationState::Deactivating, 0);
         pending.base.completion_date = Some(now + Duration::days(2));
-        let rows = delegation_rows(&pending, None, now);
+        let rows = delegation_rows(&pending, now);
         assert_eq!(
             rows.first(),
-            Some(&GemListRow::Text {
+            Some(&GemListRow::Provider {
                 title: GemListRowTitle::Validator,
-                value: "Test Validator".to_string()
+                name: "Test Validator".to_string(),
+                contract: Some(pending.validator.id.clone()),
             }),
-            "a validator without an explorer page is plain text"
+            "a validator opens its address details"
         );
         assert!(matches!(
             rows.last(),
@@ -981,7 +969,7 @@ mod tests {
         let mut inactive_validator = active.clone();
         inactive_validator.validator.is_active = false;
         assert!(
-            delegation_rows(&inactive_validator, None, now).contains(&GemListRow::Amount {
+            delegation_rows(&inactive_validator, now).contains(&GemListRow::Amount {
                 title: GemListRowTitle::StakeApr,
                 amount: GemFormattedNumber::percentage(0.08, GemPercentageStyle::Unsigned),
                 info: None,
@@ -993,12 +981,27 @@ mod tests {
             validator: DelegationValidator { apr: 0.0, ..active.validator.clone() },
             ..active.clone()
         };
-        assert!(!delegation_rows(&no_apr, None, now).iter().any(|row| matches!(row, GemListRow::Amount { .. })));
+        assert!(!delegation_rows(&no_apr, now).iter().any(|row| matches!(row, GemListRow::Amount { .. })));
 
         let earn = Delegation::mock_with(Chain::Ethereum, StakeProviderType::Earn, DelegationState::Pending, 0);
-        let rows = delegation_rows(&earn, None, now);
-        assert!(matches!(rows.first(), Some(GemListRow::Text { title: GemListRowTitle::Provider, .. })));
+        let rows = delegation_rows(&earn, now);
+        assert!(matches!(
+            rows.first(),
+            Some(GemListRow::Provider {
+                title: GemListRowTitle::Provider,
+                contract: Some(_),
+                ..
+            })
+        ));
         assert!(!rows.iter().any(|row| matches!(row, GemListRow::Duration { .. })), "earn positions have no completion countdown");
+    }
+
+    #[test]
+    fn test_the_system_unstaking_validator_opens_nothing() {
+        let mut delegation = Delegation::mock_with(Chain::Cosmos, StakeProviderType::Stake, DelegationState::Active, 100);
+        delegation.validator = DelegationValidator::mock_cosmos(DelegationValidator::SYSTEM_ID);
+
+        assert!(matches!(delegation_rows(&delegation, Utc::now()).first(), Some(GemListRow::Provider { contract: None, .. })));
     }
 
     #[test]

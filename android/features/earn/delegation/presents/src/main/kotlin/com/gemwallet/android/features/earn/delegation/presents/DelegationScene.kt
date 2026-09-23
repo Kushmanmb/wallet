@@ -24,9 +24,10 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.localization.string
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.ConfirmTransactionAction
+import com.wallet.core.primitives.ChainAddress
 
 @Composable
-fun DelegationScene(onAmount: AmountTransactionAction, onConfirm: ConfirmTransactionAction, onCancel: () -> Unit, viewModel: DelegationViewModel = hiltViewModel()) {
+fun DelegationScene(onAmount: AmountTransactionAction, onConfirm: ConfirmTransactionAction, onOpenAddress: (ChainAddress) -> Unit, onCancel: () -> Unit, viewModel: DelegationViewModel = hiltViewModel()) {
     val delegationInfo by viewModel.delegationInfo.collectAsStateWithLifecycle()
     val properties by viewModel.properties.collectAsStateWithLifecycle()
     val actions by viewModel.actions.collectAsStateWithLifecycle()
@@ -54,7 +55,11 @@ fun DelegationScene(onAmount: AmountTransactionAction, onConfirm: ConfirmTransac
             properties?.let { properties ->
                 itemsPositioned(properties.rows) { position, row ->
                     when (row) {
-                        is DelegationRowUIModel.Row -> GemListRowView(row = row.row, listPosition = position)
+                        is DelegationRowUIModel.Row -> GemListRowView(
+                            row = row.row,
+                            listPosition = position,
+                            onSelectAddress = { onOpenAddress(ChainAddress(properties.asset.id.chain, it)) },
+                        )
 
                         DelegationRowUIModel.Rewards -> PropertyAssetBalanceItem(
                             asset = properties.asset,

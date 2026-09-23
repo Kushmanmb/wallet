@@ -467,9 +467,9 @@ mod tests {
             | GemListRow::Url { title, .. }
             | GemListRow::Toggle { title, .. }
             | GemListRow::Picker { title, .. }
-            | GemListRow::Lines { title, .. } => Some(*title),
-            GemListRow::Provider { .. }
-            | GemListRow::App { .. }
+            | GemListRow::Lines { title, .. }
+            | GemListRow::Provider { title, .. } => Some(*title),
+            GemListRow::App { .. }
             | GemListRow::Wallet { .. }
             | GemListRow::Memo { .. }
             | GemListRow::Social { .. }

@@ -195,6 +195,7 @@ public extension ViewModelFactory {
         asset: Asset,
         validators: [DelegationValidator],
         onNavigate: StakeRouteAction,
+        onSelectAddress: @escaping @MainActor @Sendable (ChainAddress) -> Void,
     ) -> DelegationSceneViewModel {
         DelegationSceneViewModel(
             wallet: wallet,
@@ -203,6 +204,7 @@ public extension ViewModelFactory {
             service: stakeService,
             validators: validators,
             onNavigate: onNavigate,
+            onSelectAddress: onSelectAddress,
         )
     }
 

@@ -17,6 +17,7 @@ public extension DelegationSceneViewModel {
         validators: [DelegationValidator] = [],
         stakeService: any GemStakeServiceProtocol = GemStakeServiceMock(),
         onNavigate: StakeRouteAction = nil,
+        onSelectAddress: (@MainActor @Sendable (ChainAddress) -> Void)? = nil,
     ) -> DelegationSceneViewModel {
         let validator = DelegationValidator.mock(chain, providerType: providerType)
         let base = DelegationBase.mock(state: state, assetId: .mock(chain), rewards: rewards)
@@ -28,6 +29,7 @@ public extension DelegationSceneViewModel {
             service: stakeService,
             validators: validators,
             onNavigate: onNavigate,
+            onSelectAddress: onSelectAddress,
         )
     }
 }

@@ -220,6 +220,7 @@ fun WalletNavGraph(
                 onAmount = navigator::openAmount,
                 onConfirm = navigator::openConfirm,
                 onDelegation = navigator::openDelegation,
+                onOpenAddress = navigator::openAddress,
                 onCancel = onCancel,
             )
 

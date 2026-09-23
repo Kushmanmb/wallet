@@ -206,6 +206,7 @@ pub fn detail_sections(rows: &GemTransactionDetailRows) -> Vec<GemTransactionDet
         })),
         rows.provider_name.clone().map(|name| {
             list(GemListRow::Provider {
+                title: GemListRowTitle::Provider,
                 name,
                 contract: rows.provider_contract.clone(),
             })
