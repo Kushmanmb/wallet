@@ -4,8 +4,9 @@ import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.wallet.core.primitives.SupportMessage
 import com.wallet.core.primitives.SupportMessageSender
+import uniffi.gemstone.GemSupportMessageOutcome
+import uniffi.gemstone.GemSupportMessageRow
 import uniffi.gemstone.SupportMessageLink
-import uniffi.gemstone.parseSupportMessageDisplayContent
 import uniffi.gemstone.supportChatGroups
 import java.time.Instant
 import java.time.LocalDate
@@ -15,17 +16,12 @@ data class SupportChatDay(val id: String, val date: LocalDate, val groups: List<
 
 data class SupportChatGroup(val sender: SupportMessageSender, val messages: List<SupportChatMessage>)
 
-data class SupportChatMessage(val message: SupportMessage, val text: String, val links: List<SupportMessageLink>) {
+class SupportChatMessage(row: GemSupportMessageRow) {
+    val message: SupportMessage = row.message.toPrimitives()
+    val text: String = row.content.text
+    val links: List<SupportMessageLink> = row.content.links
+    val outcome: GemSupportMessageOutcome = row.outcome
     val id: String get() = message.id
-}
-
-private fun SupportMessage.chatMessage(): SupportChatMessage {
-    val content = parseSupportMessageDisplayContent(content)
-    return SupportChatMessage(
-        message = this,
-        text = content.text,
-        links = content.links,
-    )
 }
 
 fun buildSupportChatDays(messages: List<SupportMessage>): List<SupportChatDay> {
@@ -35,7 +31,7 @@ fun buildSupportChatDays(messages: List<SupportMessage>): List<SupportChatDay> {
         .toSortedMap()
         .map { (date, dayMessages) ->
             val groups = supportChatGroups(dayMessages.map { it.toGem() }).map { group ->
-                SupportChatGroup(sender = group.sender.toPrimitives(), messages = group.messages.map { it.toPrimitives().chatMessage() })
+                SupportChatGroup(sender = group.sender.toPrimitives(), messages = group.rows.map(::SupportChatMessage))
             }
             SupportChatDay(id = date.toString(), date = date, groups = groups)
         }

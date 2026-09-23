@@ -2,10 +2,10 @@
 
 import Components
 import Foundation
+import struct Gemstone.GemWalletRow
 import protocol Gemstone.GemWalletServiceProtocol
 import func Gemstone.nftRows
 import func Gemstone.walletAvatarEmojis
-import struct Gemstone.GemWalletRow
 import func Gemstone.walletRow
 import Localization
 import Primitives

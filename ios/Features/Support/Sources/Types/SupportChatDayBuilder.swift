@@ -33,7 +33,7 @@ private extension SupportChatDayBuilder {
         supportChatGroups(messages: messages.map { $0.toGem() }).map { group in
             SupportChatGroup(
                 sender: group.sender.toPrimitives(),
-                messages: group.messages.map { SupportMessageBubbleViewModel(message: $0.toPrimitives(), retryAction: retryAction, imageAction: imageAction) },
+                messages: group.rows.map { SupportMessageBubbleViewModel(row: $0, retryAction: retryAction, imageAction: imageAction) },
             )
         }
     }

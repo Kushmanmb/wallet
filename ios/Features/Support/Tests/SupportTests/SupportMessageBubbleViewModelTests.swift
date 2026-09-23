@@ -44,12 +44,8 @@ struct SupportMessageBubbleViewModelTests {
     }
 
     @Test
-    func theStatusCarriesTheTimeOnlyWhenSent() {
-        guard case let .sent(time) = SupportMessageBubbleViewModel.mock(message: .mock(status: .sent)).status else {
-            Issue.record("expected a sent status")
-            return
-        }
-        #expect(time.isNotEmpty)
+    func theOutcomeFollowsTheMessageStatus() {
+        #expect(SupportMessageBubbleViewModel.mock(message: .mock(status: .sent)).outcome == .sent)
 
         #expect(SupportMessageBubbleViewModel.mock(message: .mock(status: .sending)).isSending)
         #expect(SupportMessageBubbleViewModel.mock(message: .mock(status: .failed)).isFailed)
@@ -57,19 +53,19 @@ struct SupportMessageBubbleViewModelTests {
 
     @Test
     func onlyAFailedTextTheUserSentOffersARetry() {
-        guard case let .failed(canRetry) = SupportMessageBubbleViewModel.mock(message: .mock(sender: .user, status: .failed)).status else {
+        guard case let .failed(canRetry) = SupportMessageBubbleViewModel.mock(message: .mock(sender: .user, status: .failed)).outcome else {
             Issue.record("expected a failed status")
             return
         }
         #expect(canRetry)
 
-        guard case let .failed(withImage) = SupportMessageBubbleViewModel.mock(message: .mock(sender: .user, status: .failed, images: [.mock(id: "img")])).status else {
+        guard case let .failed(withImage) = SupportMessageBubbleViewModel.mock(message: .mock(sender: .user, status: .failed, images: [.mock(id: "img")])).outcome else {
             Issue.record("expected a failed status")
             return
         }
         #expect(withImage == false)
 
-        guard case let .failed(fromAgent) = SupportMessageBubbleViewModel.mock(message: .mock(sender: .agent(.mock()), status: .failed)).status else {
+        guard case let .failed(fromAgent) = SupportMessageBubbleViewModel.mock(message: .mock(sender: .agent(.mock()), status: .failed)).outcome else {
             Issue.record("expected a failed status")
             return
         }

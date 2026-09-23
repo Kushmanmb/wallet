@@ -207,7 +207,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 #### Rows projected once per list
 
-- **VM54** **S** **Support messages come as rows.** Both apps call `parseSupportMessageDisplayContent` and `supportMessageOutcome` per message; iOS re-reads the outcome for each of `isSending`, `isFailed` and `status`, and Android calls it inside the `SupportMessageBubble` composable. iOS `Status` copies `GemSupportMessageOutcome`.
 
 #### Numbers and text the apps still format
 
@@ -344,6 +343,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM54 (2026-09-23).** Closed. Both apps parsed each support message's markdown and asked Core for its outcome per message — iOS once per `isSending`, `isFailed` and `status` read, Android inside the `MessageMeta` composable. `support_chat_groups` now returns `GemSupportMessageRow`s carrying the message, its parsed content and its outcome, so `parse_support_message_display_content` and `support_message_outcome` are no longer exported. iOS `SupportMessageBubbleViewModel` takes the row and its copied `Status` enum is gone; Android `SupportChatMessage` wraps the row and the bubble, meta and failed-warning read its outcome instead of the raw status.
 
 **VM55 (2026-09-23).** Closed. The wallets list asked Core for one `walletRow` per wallet from the view; `WalletsSceneViewModel` now pairs each wallet with its list item from one `wallet_rows` call per section. The avatar scene read `walletRow` twice per render through `hasAvatar` and `avatarAssetImage`; it now reads the view model's `row` once, and the rewards wallet bar reads its row once. Single-wallet screens keep `wallet_row`.
 

@@ -1,4 +1,5 @@
-use super::model::{GemSupportChatGroup, GemSupportMessageOutcome};
+use super::model::{GemSupportChatGroup, GemSupportMessageOutcome, GemSupportMessageRow};
+use crate::support::parse_support_message_display_content;
 use chrono::{DateTime, Utc};
 use primitives::{SupportMessage, SupportMessageImage, SupportMessageSender, SupportMessageStatus};
 
@@ -47,15 +48,24 @@ pub fn with_status(message: SupportMessage, status: SupportMessageStatus) -> Sup
 
 pub fn chat_groups(messages: Vec<SupportMessage>) -> Vec<GemSupportChatGroup> {
     messages.into_iter().fold(Vec::new(), |mut groups: Vec<GemSupportChatGroup>, message| {
+        let row = message_row(message);
         match groups.last_mut() {
-            Some(group) if group.sender == message.sender => group.messages.push(message),
+            Some(group) if group.sender == row.message.sender => group.rows.push(row),
             _ => groups.push(GemSupportChatGroup {
-                sender: message.sender.clone(),
-                messages: vec![message],
+                sender: row.message.sender.clone(),
+                rows: vec![row],
             }),
         }
         groups
     })
+}
+
+fn message_row(message: SupportMessage) -> GemSupportMessageRow {
+    GemSupportMessageRow {
+        content: parse_support_message_display_content(&message.content),
+        outcome: message_outcome(&message),
+        message,
+    }
 }
 
 pub fn image_file_name(url: &str) -> String {
@@ -129,12 +139,27 @@ mod tests {
                 ..SupportMessage::mock("g", 0)
             },
         ]);
-        let ids: Vec<Vec<&str>> = groups.iter().map(|group| group.messages.iter().map(|message| message.id.as_str()).collect()).collect();
+        let ids: Vec<Vec<&str>> = groups.iter().map(|group| group.rows.iter().map(|row| row.message.id.as_str()).collect()).collect();
 
         assert_eq!(ids, vec![vec!["a", "b"], vec!["c"], vec!["d", "e"], vec!["f"], vec!["g"]]);
         assert_eq!(groups[0].sender, SupportMessageSender::User);
         assert_eq!(groups[2].sender, SupportMessageSender::mock_agent("Radmir"));
         assert!(chat_groups(vec![]).is_empty());
+    }
+
+    #[test]
+    fn test_chat_rows_carry_their_parsed_content_and_outcome() {
+        let message = SupportMessage {
+            content: "Read [the docs](https://gemwallet.com/docs)".into(),
+            ..with_status(SupportMessage::mock("a", 0), SupportMessageStatus::Sending)
+        };
+
+        let row = chat_groups(vec![message.clone()]).remove(0).rows.remove(0);
+
+        assert_eq!(row.content, parse_support_message_display_content(&message.content));
+        assert_eq!(row.content.links.len(), 1);
+        assert_eq!(row.outcome, GemSupportMessageOutcome::Sending);
+        assert_eq!(row.message, message);
     }
 
     #[test]

@@ -192,13 +192,13 @@ struct SupportMessageBubble: View {
 
     @ViewBuilder
     private var statusView: some View {
-        switch model.status {
+        switch model.outcome {
         case .sending:
             ProgressView()
                 .controlSize(.small)
                 .tint(model.palette.secondary)
-        case let .sent(time):
-            Text(time)
+        case .sent:
+            Text(model.time)
                 .font(.caption2)
                 .foregroundStyle(model.palette.secondary)
         case let .failed(canRetry):

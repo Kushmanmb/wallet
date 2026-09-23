@@ -13,7 +13,6 @@ pub struct SupportMessageLink {
     pub subtitle: Option<String>,
 }
 
-#[uniffi::export]
 pub fn parse_support_message_display_content(markdown: &str) -> SupportMessageDisplayContent {
     parse_core_support_message_display_content(markdown).into()
 }

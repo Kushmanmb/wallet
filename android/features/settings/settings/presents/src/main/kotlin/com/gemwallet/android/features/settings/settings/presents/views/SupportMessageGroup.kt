@@ -15,7 +15,7 @@ import com.gemwallet.android.ui.theme.paddingHalfSmall
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.wallet.core.primitives.SupportMessage
 import com.wallet.core.primitives.SupportMessageSender
-import com.wallet.core.primitives.SupportMessageStatus
+import uniffi.gemstone.GemSupportMessageOutcome
 
 @Composable
 internal fun SupportMessageGroup(group: SupportChatGroup, onImageClick: (String) -> Unit, onRetry: (SupportMessage) -> Unit) {
@@ -30,7 +30,7 @@ internal fun SupportMessageGroup(group: SupportChatGroup, onImageClick: (String)
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(paddingSmall),
                 ) {
-                    if (item.message.status == SupportMessageStatus.Failed) {
+                    if (item.outcome is GemSupportMessageOutcome.Failed) {
                         Icon(
                             imageVector = AppIcons.Warning,
                             contentDescription = null,

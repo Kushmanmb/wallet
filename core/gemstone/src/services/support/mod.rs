@@ -18,7 +18,7 @@ use crate::alien::AlienProvider;
 use crate::api::{GemApiError, GemDeviceApiClient};
 use crate::services::file::{GemFileStore, download};
 
-pub use model::{GemSupportChatGroup, GemSupportMessageOutcome};
+pub use model::{GemSupportChatGroup, GemSupportMessageOutcome, GemSupportMessageRow};
 pub use store::GemSupportStore;
 
 #[derive(uniffi::Object)]

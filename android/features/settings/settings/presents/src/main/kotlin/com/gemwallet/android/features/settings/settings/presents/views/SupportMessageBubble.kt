@@ -41,7 +41,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
-import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.settings.settings.viewmodels.SupportChatMessage
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.clipboard.clipboardManager
@@ -62,10 +61,8 @@ import com.gemwallet.android.ui.theme.tinyIconSize
 import com.wallet.core.primitives.SupportMessage
 import com.wallet.core.primitives.SupportMessageImage
 import com.wallet.core.primitives.SupportMessageSender
-import com.wallet.core.primitives.SupportMessageStatus
 import uniffi.gemstone.GemSupportMessageOutcome
 import uniffi.gemstone.SupportMessageLink
-import uniffi.gemstone.supportMessageOutcome
 import java.text.DateFormat
 import java.util.Date
 
@@ -97,7 +94,7 @@ internal fun SupportMessageBubble(item: SupportChatMessage, onImageClick: (Strin
             MessageImage(
                 image = image,
                 time = time,
-                sending = message.status == SupportMessageStatus.Sending,
+                sending = item.outcome == GemSupportMessageOutcome.Sending,
                 onClick = onImageClick,
             )
         }
@@ -138,7 +135,7 @@ internal fun SupportMessageBubble(item: SupportChatMessage, onImageClick: (Strin
                                     textColor = textColor,
                                     linkColor = linkColor,
                                     metaColor = metaColor,
-                                    message = message,
+                                    item = item,
                                     time = time,
                                     onRetry = onRetry,
                                 )
@@ -160,7 +157,7 @@ internal fun SupportMessageBubble(item: SupportChatMessage, onImageClick: (Strin
                                         contentAlignment = Alignment.CenterEnd,
                                     ) {
                                         MessageMeta(
-                                            message = message,
+                                            item = item,
                                             time = time,
                                             color = metaColor,
                                             onRetry = onRetry,
@@ -177,7 +174,7 @@ internal fun SupportMessageBubble(item: SupportChatMessage, onImageClick: (Strin
 }
 
 @Composable
-private fun MessageText(text: String, textColor: Color, linkColor: Color, metaColor: Color, message: SupportMessage, time: String, onRetry: (SupportMessage) -> Unit) {
+private fun MessageText(text: String, textColor: Color, linkColor: Color, metaColor: Color, item: SupportChatMessage, time: String, onRetry: (SupportMessage) -> Unit) {
     val markdown = parseMarkdownToAnnotatedString(text, linkColor = linkColor)
     val textWithTime = buildAnnotatedString {
         append(markdown)
@@ -194,7 +191,7 @@ private fun MessageText(text: String, textColor: Color, linkColor: Color, metaCo
             style = MaterialTheme.typography.bodyLarge,
         )
         MessageMeta(
-            message = message,
+            item = item,
             time = time,
             color = metaColor,
             onRetry = onRetry,
@@ -270,15 +267,15 @@ private fun SupportMessageLinkRow(link: SupportMessageLink, linkColor: Color, me
 }
 
 @Composable
-private fun MessageMeta(message: SupportMessage, time: String, color: Color, onRetry: (SupportMessage) -> Unit, modifier: Modifier = Modifier) {
+private fun MessageMeta(item: SupportChatMessage, time: String, color: Color, onRetry: (SupportMessage) -> Unit, modifier: Modifier = Modifier) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Text(
             text = time,
             style = MaterialTheme.typography.labelSmall,
             color = color,
-            modifier = Modifier.alpha(if (message.status == SupportMessageStatus.Sent) 1f else 0f),
+            modifier = Modifier.alpha(if (item.outcome == GemSupportMessageOutcome.Sent) 1f else 0f),
         )
-        when (val outcome = supportMessageOutcome(message.toGem())) {
+        when (val outcome = item.outcome) {
             GemSupportMessageOutcome.Sending -> CircularProgressIndicator(
                 modifier = Modifier.size(space10),
                 strokeWidth = progressStrokeWidth,
@@ -293,7 +290,7 @@ private fun MessageMeta(message: SupportMessage, time: String, color: Color, onR
                     modifier = Modifier
                         .size(statusIconSize)
                         .clip(CircleShape)
-                        .clickable { onRetry(message) },
+                        .clickable { onRetry(item.message) },
                 )
             } else {
                 Icon(

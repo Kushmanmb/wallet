@@ -2,36 +2,34 @@
 
 import Foundation
 import enum Gemstone.GemSupportMessageOutcome
-import func Gemstone.parseSupportMessageDisplayContent
-import struct Gemstone.SupportMessageDisplayContent
+import struct Gemstone.GemSupportMessageRow
 import struct Gemstone.SupportMessageLink
-import func Gemstone.supportMessageOutcome
 import GemstonePrimitives
 import Primitives
 import Style
 import SwiftUI
 
 struct SupportMessageBubbleViewModel: Identifiable {
+    private let row: GemSupportMessageRow
     private let message: SupportMessage
-    private let displayContent: SupportMessageDisplayContent
     private let retryAction: (SupportMessage) -> Void
     private let imageAction: (SupportMessageImage) -> Void
 
     init(
-        message: SupportMessage,
+        row: GemSupportMessageRow,
         retryAction: @escaping (SupportMessage) -> Void,
         imageAction: @escaping (SupportMessageImage) -> Void,
     ) {
-        self.message = message
-        displayContent = parseSupportMessageDisplayContent(markdown: message.content)
+        self.row = row
+        message = row.message.toPrimitives()
         self.retryAction = retryAction
         self.imageAction = imageAction
     }
 
     var id: String { message.id }
     var content: String { message.content.trim() }
-    var displayText: String { displayContent.text }
-    var links: [SupportMessageLink] { displayContent.links }
+    var displayText: String { row.content.text }
+    var links: [SupportMessageLink] { row.content.links }
     var hasContent: Bool { hasDisplayText || hasLinks }
     var hasDisplayText: Bool { displayText.isNotEmpty }
     var hasLinks: Bool { links.isNotEmpty }
@@ -62,16 +60,8 @@ struct SupportMessageBubbleViewModel: Identifiable {
 
     var time: String { message.createdAt.formatted(date: .omitted, time: .shortened) }
 
-    private var outcome: GemSupportMessageOutcome {
-        supportMessageOutcome(message: message.toGem())
-    }
-
-    var status: Status {
-        switch outcome {
-        case .sending: .sending
-        case .sent: .sent(time: time)
-        case let .failed(canRetry): .failed(canRetry: canRetry)
-        }
+    var outcome: GemSupportMessageOutcome {
+        row.outcome
     }
 
     func retry() {
@@ -95,11 +85,5 @@ extension SupportMessageBubbleViewModel {
         let background: Color
         let secondary: Color
         let link: Color
-    }
-
-    enum Status {
-        case sending
-        case sent(time: String)
-        case failed(canRetry: Bool)
     }
 }

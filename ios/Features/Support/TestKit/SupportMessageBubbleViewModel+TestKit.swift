@@ -10,6 +10,6 @@ extension SupportMessageBubbleViewModel {
         retryAction: @escaping (SupportMessage) -> Void = { _ in },
         imageAction: @escaping (SupportMessageImage) -> Void = { _ in },
     ) -> SupportMessageBubbleViewModel {
-        SupportMessageBubbleViewModel(message: message, retryAction: retryAction, imageAction: imageAction)
+        SupportChatDayBuilder(messages: [message], retryAction: retryAction, imageAction: imageAction).build()[0].groups[0].messages[0]
     }
 }
