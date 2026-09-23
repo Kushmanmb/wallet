@@ -9,7 +9,6 @@ mod validator_scanner;
 use std::error::Error;
 use std::sync::Arc;
 
-use api_connector::StaticAssetsClient;
 use asset_rank_updater::AssetRankUpdater;
 use assets_has_price_updater::AssetsHasPriceUpdater;
 use assets_images_updater::AssetsImagesUpdater;
@@ -17,6 +16,7 @@ use config_keys::ConfigKey;
 use job_runner::{JobHandle, ShutdownReceiver};
 use perpetual_updater::PerpetualUpdater;
 use primitives::Chain;
+use services::StaticAssetsClient;
 use settings::service_user_agent;
 use staking_apy_updater::StakeApyUpdater;
 use usage_rank_updater::{UsageRankUpdater, UsageRankUpdaterConfig};

@@ -1,10 +1,10 @@
 use std::error::Error;
 
-use api_connector::PusherClient;
 use cacher::{CacherClient, GLOBAL_RATE_LIMIT_SCOPE, RateLimiter};
 use config_keys::{ConfigKey, RateLimitKey, RateLimitWindow};
 use primitives::rewards::{RewardRedemptionOption, RewardStatus};
 use primitives::{Localize, NaiveDateTimeExt, Platform, ReferralLeaderboard, RewardEvent, Rewards, WalletId, now};
+use pusher::PusherClient;
 use rewards::{IpSecurityClient, ReferralError, RewardsError, RiskScoreConfig, RiskScoringInput, UsernameError, evaluate_risk};
 use storage::models::DeviceRow;
 use storage::{ConfigCacher, Database, NewWalletRow, ReferralValidationError, RewardsRedemptionsRepository, RewardsRepository, RiskSignalsRepository, WalletSource, WalletType, WalletsRepository};

@@ -506,7 +506,6 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 name = "api"
 version = "2.114.44"
 dependencies = [
- "api_connector",
  "cacher",
  "chain_providers",
  "chrono",
@@ -530,6 +529,7 @@ dependencies = [
  "prices",
  "primitives",
  "push_notification",
+ "pusher",
  "redis",
  "reqwest 0.13.4",
  "rewards",
@@ -547,16 +547,6 @@ dependencies = [
  "support",
  "swapper",
  "tokio",
-]
-
-[[package]]
-name = "api_connector"
-version = "2.114.44"
-dependencies = [
- "gem_client",
- "primitives",
- "push_notification",
- "serde",
 ]
 
 [[package]]
@@ -2312,7 +2302,6 @@ dependencies = [
 name = "daemon"
 version = "2.114.44"
 dependencies = [
- "api_connector",
  "async-trait",
  "cacher",
  "chain_providers",
@@ -2339,6 +2328,7 @@ dependencies = [
  "primitives",
  "prometheus-client",
  "push_notification",
+ "pusher",
  "reqwest 0.13.4",
  "rewards",
  "rocket",
@@ -6540,6 +6530,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "pusher"
+version = "2.114.44"
+dependencies = [
+ "gem_client",
+ "primitives",
+ "push_notification",
+ "serde",
+]
+
+[[package]]
 name = "pxfm"
 version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7882,12 +7882,14 @@ dependencies = [
 name = "services"
 version = "2.114.44"
 dependencies = [
- "api_connector",
  "cacher",
  "chain_providers",
  "config_keys",
+ "gem_client",
  "primitives",
+ "pusher",
  "search_index",
+ "serde",
  "settings",
  "storage",
  "streamer",

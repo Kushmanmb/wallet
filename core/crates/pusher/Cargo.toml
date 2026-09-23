@@ -1,5 +1,5 @@
 [package]
-name = "api_connector"
+name = "pusher"
 edition = { workspace = true }
 version = { workspace = true }
 

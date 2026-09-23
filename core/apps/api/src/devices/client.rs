@@ -1,7 +1,7 @@
 use crate::admin::model::AdminDevice;
-use api_connector::PusherClient;
 use primitives::Device;
 use push_notification::{GorushNotification, PushNotification, PushNotificationTypes};
+use pusher::PusherClient;
 use std::error::Error;
 use storage::{Database, DatabaseError, DevicesRepository, PriceAlertsRepository, models::UpdateDeviceRow};
 

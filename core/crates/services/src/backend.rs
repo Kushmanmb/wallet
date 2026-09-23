@@ -1,11 +1,11 @@
 use std::error::Error;
 use std::sync::Arc;
 
-use api_connector::PusherClient;
 use cacher::CacherClient;
 use chain_providers::ChainProviders;
 use config_keys::ConfigKey;
 use primitives::Chain;
+use pusher::PusherClient;
 use search_index::{SearchIndexClient, SearchIndexConfig};
 use settings::Settings;
 use storage::{ConfigCacher, Database, DatabaseError};

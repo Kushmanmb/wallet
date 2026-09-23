@@ -6,7 +6,7 @@ use primitives::{AddressFormatStyle, AddressFormatter, Asset, AssetVecExt, Chain
 use push_notification::{GorushNotification, PushNotification, PushNotificationTransaction, PushNotificationTypes};
 use storage::{Database, DatabaseError, ScanAddressesRepository};
 
-use api_connector::pusher::model::Message;
+use pusher::Message;
 
 pub struct Pusher {
     database: Database,

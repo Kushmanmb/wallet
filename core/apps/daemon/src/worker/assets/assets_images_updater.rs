@@ -1,5 +1,5 @@
-use api_connector::StaticAssetsClient;
 use primitives::{AssetId, Chain};
+use services::StaticAssetsClient;
 use std::collections::HashSet;
 use std::error::Error;
 use storage::{AssetFilter, AssetUpdate, AssetsRepository, Database, DatabaseError};

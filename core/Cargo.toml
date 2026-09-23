@@ -32,7 +32,7 @@ members = [
     "crates/fiat",
     "crates/cacher",
     "crates/name_resolver",
-    "crates/api_connector",
+    "crates/pusher",
     "crates/lists",
     "crates/settings",
     "crates/chain_providers",

@@ -75,7 +75,7 @@ Individual `gem_*` crates for each blockchain with unified RPC client patterns:
 - `fiat/`: Fiat on-ramp/off-ramp providers (MoonPay, Transak, Mercuryo, Paybis, Flashnet)
 - `name_resolver/`: Blockchain naming service integrations (ENS, SNS, etc.)
 - `security/`: Security and fraud detection provider integrations
-- `api_connector/`: Backend API connector utilities
+- `pusher/`: Gorush push gateway client
 - `gem_hypercore/`: Perpetuals (perps) trading support via Hyperliquid integration
 
 ### Utilities & Support

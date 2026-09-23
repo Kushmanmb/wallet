@@ -1,8 +1,8 @@
 use std::error::Error;
 
-use api_connector::PusherClient;
 use async_trait::async_trait;
 use gem_tracing::info_with_fields;
+use pusher::PusherClient;
 use streamer::{NotificationsFailedPayload, NotificationsPayload, StreamProducer, StreamProducerQueue, consumer::MessageConsumer};
 
 pub struct NotificationsConsumer {

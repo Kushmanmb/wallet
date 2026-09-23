@@ -20,7 +20,7 @@ metrics = { path = "../../crates/metrics" }
 gem_tracing = { path = "../../crates/gem_tracing" }
 settings = { path = "../../crates/settings" }
 storage = { path = "../../crates/storage" }
-api_connector = { path = "../../crates/api_connector" }
+pusher = { path = "../../crates/pusher" }
 coingecko = { path = "../../crates/coingecko" }
 lists = { path = "../../crates/lists" }
 pricer = { path = "../../crates/pricer" }

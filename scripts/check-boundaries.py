@@ -91,11 +91,11 @@ def the_keystore_stays_in_its_layer():
 
 
 BACKEND = ROOT / "core"
-INFRA_CRATES = {"storage", "cacher", "streamer", "search_index", "api_connector"}
+INFRA_CRATES = {"storage", "cacher", "streamer", "search_index", "pusher"}
 INFRA_DEPENDENTS = {
     "services": INFRA_CRATES,
-    "api": {"api_connector", "cacher", "search_index", "storage", "streamer"},
-    "daemon": {"api_connector", "cacher", "search_index", "storage", "streamer"},
+    "api": {"cacher", "pusher", "search_index", "storage", "streamer"},
+    "daemon": {"cacher", "pusher", "search_index", "storage", "streamer"},
     "defi": {"storage"},
     "fiat": {"cacher", "storage", "streamer"},
     "gem_auth": {"cacher"},

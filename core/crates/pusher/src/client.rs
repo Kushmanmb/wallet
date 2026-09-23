@@ -1,5 +1,5 @@
-use super::model::{PushResult, Response};
-use super::target::PusherTarget;
+use crate::model::{PushResult, Response};
+use crate::target::PusherTarget;
 use gem_client::{ClientError, ClientExt, ReqwestClient};
 use push_notification::{GorushNotification, GorushNotifications};
 
