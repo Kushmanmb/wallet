@@ -524,7 +524,6 @@ dependencies = [
  "nft",
  "num-bigint 0.5.1",
  "number_formatter",
- "portfolio",
  "pricer",
  "prices",
  "primitives",
@@ -6268,16 +6267,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d20d5497ef88037a52ff98267d066e7f11fcc5e99bbfbd58a42336193aacec3"
 
 [[package]]
-name = "portfolio"
-version = "2.114.44"
-dependencies = [
- "chrono",
- "number_formatter",
- "primitives",
- "storage",
-]
-
-[[package]]
 name = "potential_utf"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7884,8 +7873,10 @@ version = "2.114.44"
 dependencies = [
  "cacher",
  "chain_providers",
+ "chrono",
  "config_keys",
  "gem_client",
+ "number_formatter",
  "primitives",
  "pusher",
  "search_index",

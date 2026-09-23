@@ -35,7 +35,6 @@ localizer = { path = "../../crates/localizer" }
 config_keys = { path = "../../crates/config_keys" }
 primitives = { path = "../../crates/primitives" }
 push_notification = { path = "../../crates/push_notification" }
-portfolio = { path = "../../crates/portfolio" }
 pusher = { path = "../../crates/pusher" }
 search_index = { path = "../../crates/search_index" }
 services = { path = "../../crates/services" }

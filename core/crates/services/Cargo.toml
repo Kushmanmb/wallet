@@ -4,10 +4,12 @@ edition = { workspace = true }
 version = { workspace = true }
 
 [dependencies]
+chrono = { workspace = true }
 cacher = { path = "../cacher" }
 chain_providers = { path = "../chain_providers" }
 config_keys = { path = "../config_keys" }
 gem_client = { path = "../gem_client", features = ["reqwest"] }
+number_formatter = { path = "../number_formatter" }
 primitives = { path = "../primitives" }
 pusher = { path = "../pusher" }
 search_index = { path = "../search_index" }

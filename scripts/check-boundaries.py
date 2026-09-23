@@ -102,7 +102,6 @@ INFRA_DEPENDENTS = {
     "rewards": {"cacher", "storage"},
     "lists": {"storage"},
     "nft": {"storage"},
-    "portfolio": {"storage"},
     "pricer": {"cacher", "storage"},
     "support": {"cacher", "storage", "streamer"},
 }

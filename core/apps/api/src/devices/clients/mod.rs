@@ -1,7 +1,6 @@
 mod address_names;
 mod fiat;
 mod notifications;
-mod portfolio;
 mod rewards;
 mod rewards_redemption;
 mod scan;
@@ -12,7 +11,7 @@ mod wallets;
 pub use address_names::AddressNamesClient;
 pub use fiat::FiatQuotesClient;
 pub use notifications::NotificationsClient;
-pub use portfolio::PortfolioClient;
+pub use services::prices::PortfolioClient;
 pub use rewards::RewardsClient;
 pub use rewards_redemption::RewardsRedemptionClient;
 pub use scan::{ScanClient, TransactionScanConfig, scan_providers};
