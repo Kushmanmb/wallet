@@ -17,19 +17,6 @@ data class AssetBalance(
     val isActive: Boolean = true,
 )
 
-internal fun Balance<BigInteger>.createAmount(decimals: Int) = Balance(
-    available = Crypto(available).value(decimals).stripTrailingZeros().toDouble(),
-    frozen = Crypto(frozen).value(decimals).stripTrailingZeros().toDouble(),
-    locked = Crypto(locked).value(decimals).stripTrailingZeros().toDouble(),
-    staked = Crypto(staked).value(decimals).stripTrailingZeros().toDouble(),
-    pending = Crypto(pending).value(decimals).stripTrailingZeros().toDouble(),
-    rewards = Crypto(rewards).value(decimals).stripTrailingZeros().toDouble(),
-    reserved = Crypto(reserved).value(decimals).stripTrailingZeros().toDouble(),
-    withdrawable = Crypto(withdrawable).value(decimals).stripTrailingZeros().toDouble(),
-    pendingUnconfirmed = Crypto(pendingUnconfirmed).value(decimals).stripTrailingZeros().toDouble(),
-    earn = Crypto(earn).value(decimals).stripTrailingZeros().toDouble(),
-)
-
 fun AssetBalance.toGem() = GemAssetBalance(
     assetId = asset.id.toIdentifier(),
     available = balance.available,

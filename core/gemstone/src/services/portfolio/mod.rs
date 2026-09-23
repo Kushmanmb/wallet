@@ -52,7 +52,9 @@ impl GemPortfolioService {
             data: data.ok(),
         }
     }
+}
 
+impl GemPortfolioService {
     pub async fn portfolio_data(&self, wallet: Wallet, portfolio_type: PortfolioType, period: ChartPeriod) -> Result<PortfolioData, GemServiceError> {
         match portfolio_type {
             PortfolioType::Wallet => Ok(rules::wallet_portfolio_data(self.sync_wallet_values(wallet.id, period, self.preferences.get_currency()).await?)),
@@ -64,9 +66,7 @@ impl GemPortfolioService {
             }
         }
     }
-}
 
-impl GemPortfolioService {
     async fn sync_wallet_values(&self, wallet_id: WalletId, period: ChartPeriod, currency: Currency) -> Result<GemPortfolioValues, GemServiceError> {
         let portfolio = self.get_wallet_assets(wallet_id, period).await?;
         let rate = self.price.rate(currency.clone()).await?.ok_or(GemServiceError::InvalidInput {

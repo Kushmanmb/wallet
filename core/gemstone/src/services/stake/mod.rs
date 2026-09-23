@@ -104,11 +104,6 @@ impl GemStakeService {
         rules::earn_actions(wallet_type, providers)
     }
 
-    pub async fn sync_earn(&self, asset_id: AssetId) -> Result<(), GemServiceError> {
-        let (wallet_id, address) = self.current_account(asset_id.chain).await?;
-        self.sync_earn_wallet(wallet_id, asset_id, address).await
-    }
-
     pub fn delegation_actions(&self, wallet_type: WalletType, delegation: Delegation) -> Vec<GemDelegationAction> {
         rules::delegation_actions(wallet_type, &delegation)
     }
@@ -153,11 +148,6 @@ impl GemStakeService {
         rules::stake_info_rows(&asset, staking_apr)
     }
 
-    pub fn delegation_rows(&self, delegation: Delegation) -> Vec<GemListRow> {
-        let validator_url = self.validator_url(delegation.validator.clone());
-        rules::delegation_rows(&delegation, validator_url, Utc::now())
-    }
-
     pub fn delegation_details(&self, delegation: Delegation, asset: Asset, price: Option<f64>, currency: Currency) -> GemDelegationDetails {
         let rows = self.delegation_rows(delegation.clone());
         rules::delegation_details(&delegation, &asset, price, currency, rows)
@@ -178,6 +168,16 @@ pub fn validator_row(validator: DelegationValidator) -> GemValidatorRow {
 }
 
 impl GemStakeService {
+    pub async fn sync_earn(&self, asset_id: AssetId) -> Result<(), GemServiceError> {
+        let (wallet_id, address) = self.current_account(asset_id.chain).await?;
+        self.sync_earn_wallet(wallet_id, asset_id, address).await
+    }
+
+    pub fn delegation_rows(&self, delegation: Delegation) -> Vec<GemListRow> {
+        let validator_url = self.validator_url(delegation.validator.clone());
+        rules::delegation_rows(&delegation, validator_url, Utc::now())
+    }
+
     pub async fn sync(&self, chain: Chain) -> Result<(), GemServiceError> {
         let (wallet_id, address) = self.current_account(chain).await?;
         self.sync_wallet(wallet_id, chain, address).await

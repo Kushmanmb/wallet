@@ -4,7 +4,6 @@ import Foundation
 import struct Gemstone.GemFormattedNumber
 import enum Gemstone.GemSlippageCheck
 import enum Gemstone.GemSwapButtonAction
-import enum Gemstone.GemSwapDetailRow
 import enum Gemstone.GemSwapErrorDisplay
 import GemstonePrimitives
 import Localization
@@ -17,19 +16,6 @@ extension GemSwapButtonAction {
         case .insufficientBalance: Localized.Transfer.insufficientBalance(symbol)
         case .useMinimumAmount: Localized.Swap.useMinimumAmount
         case .swap: Localized.Wallet.swap
-        }
-    }
-}
-
-extension GemSwapDetailRow {
-    var title: String {
-        switch self {
-        case .provider: Localized.Common.provider
-        case .rate: Localized.Buy.rate
-        case .estimatedTime: Localized.Swap.EstimatedTime.title
-        case .priceImpact: Localized.Swap.priceImpact
-        case .minimumReceive: Localized.Swap.minReceive
-        case .slippage: Localized.Swap.slippage
         }
     }
 }

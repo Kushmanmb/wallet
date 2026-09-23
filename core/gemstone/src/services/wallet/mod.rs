@@ -46,7 +46,6 @@ use crate::services::nft::rules as nft_rules;
 use crate::services::preferences::GemPreferencesService;
 use crate::services::wallet_preferences::GemWalletPreferencesService;
 use crate::services::wallet_session::GemWalletSessionService;
-use primitives::BlockExplorerLink;
 
 pub use error::GemWalletImportError;
 pub use model::{GemWalletDeletion, GemWalletDetails, GemWalletImportKind, GemWalletImportRequest, GemWalletImportResult, GemWalletImportScreen, GemWalletImportSession, GemWalletImportType, GemWalletSecret};
@@ -119,10 +118,6 @@ impl GemWalletService {
             address_explorer: details.address.as_ref().map(|address| self.explorer.get_address_url(address.chain, address.address.clone())),
             ..details
         }
-    }
-
-    pub fn address_url(&self, chain: Chain, address: String) -> BlockExplorerLink {
-        self.explorer.get_address_url(chain, address)
     }
 
     pub fn create_wallet(&self) -> Result<Vec<String>, GemServiceError> {

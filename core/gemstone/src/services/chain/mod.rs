@@ -2,7 +2,7 @@ pub mod rules;
 
 use primitives::Chain;
 
-use crate::wallet_connect::{wallet_connect_chain, wallet_connect_namespace, wallet_connect_reference};
+use crate::wallet_connect::{wallet_connect_namespace, wallet_connect_reference};
 
 #[derive(Default, uniffi::Object)]
 pub struct GemChainService {}
@@ -28,9 +28,5 @@ impl GemChainService {
 
     pub fn caip2_reference(&self, chain: Chain) -> Option<String> {
         wallet_connect_reference(chain)
-    }
-
-    pub fn chain_from_caip2(&self, chain_id: String) -> Option<Chain> {
-        wallet_connect_chain(chain_id)
     }
 }

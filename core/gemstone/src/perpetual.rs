@@ -153,20 +153,12 @@ impl GemAutocloseEstimator {
         }
     }
 
-    pub fn has_size(&self) -> bool {
-        self.inner.has_size()
-    }
-
     pub fn percent_suggestions(&self) -> Vec<u8> {
         crate::config::perpetual_config::get_autoclose_suggestions(self.inner.leverage)
     }
 
     pub fn pnl(&self, price: f64) -> f64 {
         self.inner.pnl(price)
-    }
-
-    pub fn roe(&self, price: f64) -> f64 {
-        self.inner.roe(price)
     }
 
     pub fn is_profit(&self, price: Option<f64>, tpsl_type: TpslType) -> bool {
@@ -178,6 +170,16 @@ impl GemAutocloseEstimator {
 
     pub fn target_price_from_roe(&self, roe_percent: i32, trigger_type: TpslType) -> f64 {
         self.inner.target_price_from_roe(roe_percent, trigger_type)
+    }
+}
+
+impl GemAutocloseEstimator {
+    pub fn roe(&self, price: f64) -> f64 {
+        self.inner.roe(price)
+    }
+
+    pub fn has_size(&self) -> bool {
+        self.inner.has_size()
     }
 }
 

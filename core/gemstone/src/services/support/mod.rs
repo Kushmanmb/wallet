@@ -43,11 +43,6 @@ impl GemSupportService {
         }
     }
 
-    pub async fn recover_interrupted_messages(&self) -> Result<(), GemServiceError> {
-        let sending = self.sending.lock().expect("support sending ids").iter().cloned().collect();
-        self.store.fail_pending_messages(sending).await
-    }
-
     pub async fn image_file(&self, url: String) -> Result<String, GemServiceError> {
         let file_name = rules::image_file_name(&url);
         if self.files.exists(file_name.clone()) {
@@ -91,6 +86,11 @@ impl GemSupportService {
 }
 
 impl GemSupportService {
+    pub async fn recover_interrupted_messages(&self) -> Result<(), GemServiceError> {
+        let sending = self.sending.lock().expect("support sending ids").iter().cloned().collect();
+        self.store.fail_pending_messages(sending).await
+    }
+
     pub async fn save_messages(&self, messages: Vec<SupportMessage>) -> Result<(), GemServiceError> {
         self.store.save_messages(messages).await
     }
