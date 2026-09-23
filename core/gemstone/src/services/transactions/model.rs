@@ -43,6 +43,54 @@ pub fn activity_filters(chains: Vec<Chain>, filters: Vec<GemTransactionFilter>) 
     rules::activity_filters(chains, filters)
 }
 
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemChainsFilterSummary {
+    All,
+    Chain { chain: Chain },
+    Count { count: u32 },
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Enum)]
+pub enum GemTransactionsFilterSummary {
+    All,
+    Filter { filter: GemTransactionFilter },
+    Count { count: u32 },
+}
+
+#[uniffi::export]
+pub fn chains_filter_summary(chains: Vec<Chain>) -> GemChainsFilterSummary {
+    match chains.as_slice() {
+        [] => GemChainsFilterSummary::All,
+        [chain] => GemChainsFilterSummary::Chain { chain: *chain },
+        selected => GemChainsFilterSummary::Count { count: selected.len() as u32 },
+    }
+}
+
+#[uniffi::export]
+pub fn transactions_filter_summary(filters: Vec<GemTransactionFilter>) -> GemTransactionsFilterSummary {
+    match filters.as_slice() {
+        [] => GemTransactionsFilterSummary::All,
+        [filter] => GemTransactionsFilterSummary::Filter { filter: *filter },
+        selected => GemTransactionsFilterSummary::Count { count: selected.len() as u32 },
+    }
+}
+
+#[cfg(test)]
+mod filter_summary_tests {
+    use super::*;
+
+    #[test]
+    fn test_a_filter_reads_as_all_its_one_choice_or_a_count() {
+        assert_eq!(chains_filter_summary(vec![]), GemChainsFilterSummary::All);
+        assert_eq!(chains_filter_summary(vec![Chain::Ethereum]), GemChainsFilterSummary::Chain { chain: Chain::Ethereum });
+        assert_eq!(chains_filter_summary(vec![Chain::Ethereum, Chain::Bitcoin, Chain::Solana]), GemChainsFilterSummary::Count { count: 3 });
+
+        assert_eq!(transactions_filter_summary(vec![]), GemTransactionsFilterSummary::All);
+        assert_eq!(transactions_filter_summary(vec![GemTransactionFilter::Swaps]), GemTransactionsFilterSummary::Filter { filter: GemTransactionFilter::Swaps });
+        assert_eq!(transactions_filter_summary(vec![GemTransactionFilter::Swaps, GemTransactionFilter::Stake]), GemTransactionsFilterSummary::Count { count: 2 });
+    }
+}
+
 #[uniffi::export]
 pub fn transaction_asset_ids(transaction: Transaction) -> Vec<AssetId> {
     transaction.asset_ids()

@@ -12,19 +12,9 @@ pub struct GemDurationPart {
     pub unit: GemDurationUnit,
 }
 
-#[derive(Default, uniffi::Object)]
-pub struct DurationFormatter {}
-
 #[uniffi::export]
-impl DurationFormatter {
-    #[uniffi::constructor]
-    pub fn new() -> Self {
-        Self {}
-    }
-
-    pub fn estimate_parts(&self, seconds: i64) -> Vec<GemDurationPart> {
-        estimate_parts(seconds)
-    }
+pub fn estimated_duration_parts(seconds: i64) -> Vec<GemDurationPart> {
+    estimate_parts(seconds)
 }
 
 const MINUTE_SECONDS: i64 = 60;

@@ -1,7 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
-import class Gemstone.DurationFormatter
+import func Gemstone.estimatedDurationParts
 import struct Gemstone.GemDurationPart
 import enum Gemstone.GemDurationUnit
 
@@ -13,7 +13,7 @@ public struct EstimatedConfirmationFormatter {
     }
 
     public func string(seconds: UInt32) -> String {
-        guard let duration = DurationFormatter().estimateParts(seconds: Int64(seconds)).string(style: .short, calendar: calendar) else {
+        guard let duration = estimatedDurationParts(seconds: Int64(seconds)).string(style: .short, calendar: calendar) else {
             return ""
         }
         return "≈ \(duration)"

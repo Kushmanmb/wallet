@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.domains.transaction.aggregates.TransactionDataAggregate
+import com.gemwallet.android.features.activities.viewmodels.TransactionsFilterSummaryUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.empty.EmptyContentType
 import com.gemwallet.android.ui.components.empty.EmptyContentView
@@ -46,6 +47,7 @@ internal fun TransactionsScene(
     chainsFilter: List<Chain>,
     typeFilter: List<TransactionFilterUIModel>,
     typeFilterOptions: List<TransactionFilterUIModel>,
+    filterSummary: TransactionsFilterSummaryUIModel,
     showsNoResults: Boolean,
     listState: LazyListState = rememberLazyListState(),
     showBuyAction: Boolean,
@@ -115,6 +117,8 @@ internal fun TransactionsScene(
         chainsFilter = chainsFilter,
         typesFilter = typeFilter,
         typeOptions = typeFilterOptions,
+        chainsSummary = filterSummary.chains,
+        typesSummary = filterSummary.types,
         onDismissRequest = { showFilters = false },
         onSelectChainsFilter = { onAction(TransactionsListAction.SelectChainsFilter(it)) },
         onSelectTypesFilter = { onAction(TransactionsListAction.SelectTypesFilter(it)) },

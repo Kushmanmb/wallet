@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import func Gemstone.chainsFilterSummary
 import Primitives
 
 public struct ChainsFilterViewModel: Sendable, Equatable {
@@ -12,9 +13,7 @@ public struct ChainsFilterViewModel: Sendable, Equatable {
     }
 
     public var typeModel: ChainsFilterTypeViewModel {
-        ChainsFilterTypeViewModel(
-            type: ChainsFilterType(selectedChains: selectedChains),
-        )
+        ChainsFilterTypeViewModel(summary: chainsFilterSummary(chains: selectedChains.map(\.rawValue)))
     }
 
     public var isAnySelected: Bool {

@@ -15,16 +15,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.gemwallet.android.ext.networkName
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.SearchBar
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.filters.model.FilterType
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemImage
+import com.gemwallet.android.ui.components.list_item.ListItemImageStyle
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemSymbol
-import com.gemwallet.android.ui.components.list_item.ListItemImageStyle
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.screen.SheetExpansion
 import com.gemwallet.android.ui.models.ListPosition
@@ -37,6 +36,8 @@ fun TransactionsFilter(
     chainsFilter: List<Chain>,
     typesFilter: List<TransactionFilterUIModel>,
     typeOptions: List<TransactionFilterUIModel>,
+    chainsSummary: String,
+    typesSummary: String,
     onDismissRequest: () -> Unit,
     onSelectChainsFilter: (List<Chain>) -> Unit,
     onSelectTypesFilter: (List<TransactionFilterUIModel>) -> Unit,
@@ -59,11 +60,7 @@ fun TransactionsFilter(
                 ListItem(
                     model = ListItemModel(
                         title = stringResource(R.string.settings_networks_title),
-                        subtitle = when {
-                            chainsFilter.isEmpty() -> stringResource(R.string.common_all)
-                            chainsFilter.size == 1 -> chainsFilter.firstOrNull()?.networkName() ?: ""
-                            else -> "${chainsFilter.size}"
-                        },
+                        subtitle = chainsSummary,
                         image = ListItemImage.Drawable(R.drawable.settings_networks),
                     ),
                     listPosition = ListPosition.First,
@@ -75,11 +72,7 @@ fun TransactionsFilter(
                 ListItem(
                     model = ListItemModel(
                         title = stringResource(R.string.filter_types),
-                        subtitle = when {
-                            typesFilter.isEmpty() -> stringResource(R.string.common_all)
-                            typesFilter.size == 1 -> typesFilter.firstOrNull()?.title ?: ""
-                            else -> "${typesFilter.size}"
-                        },
+                        subtitle = typesSummary,
                         image = ListItemImage.Symbol(ListItemSymbol.Article, style = ListItemImageStyle.Settings),
                     ),
                     listPosition = ListPosition.Last,

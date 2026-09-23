@@ -203,7 +203,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 - **VM44** **S** **Swap quotes carry their load state.** iOS `SwapSceneViewModel.quotesState` rebuilds loading/error/data from `isQuoteLoading`, `quoteError` and `session.quotes`; a `GemLoadState` on the view state answers it.
 - **VM45** **S** **Confirm decides section visibility app-side.** iOS [`ConfirmTransferSceneViewModel`](../ios/Features/Transfer/Sources/ViewModels/ConfirmTransferSceneViewModel.swift) shows the warnings, payload and balance-change sections by testing each for emptiness; land with AUD45 and VM4.
 - **VM46** **M** **Asset price alerts come as rows.** iOS [`AssetPriceAlertsViewModel`](../ios/Features/PriceAlerts/Sources/ViewModels/AssetPriceAlertsViewModel.swift) filters alerts with `alertKind(...).groupsByAsset()` per alert, then `displayedAlerts` re-joins Core's ids, and derives the auto toggle from `contains(type == .auto)`; `[PriceAlert].displayedAlerts` does the same join elsewhere.
-- **VM47** **S** **Recents return rows, not ids.** iOS [`RecentsSceneViewModel`](../ios/Features/Recents/Sources/ViewModels/RecentsSceneViewModel.swift) filters its list against `viewState.matchingAssetIds`.
 
 #### Rows projected once per list
 
@@ -220,15 +219,11 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 - **VM63** **S** **Fee asset equivalent comes from Core.** Android `FeeAssetUIModel` and iOS `FeeAssetItem` convert the fee asset's value to fiat app-side.
 - **VM64** **S** **Delete Android's fiat helpers once unused.** Android gemcore `AssetPriceValue.calculateFiat`, `CryptoFiatConverter.kt` and `AssetInfoExt.calculateFiat` wrap Core's converter per value; they go when the swap and fee items land.
 - **VM65** **S** **Align the two `ValueFormatter` renderers.** iOS renders with `dustThreshold`/`dustThresholdPlaces`, Android with `adaptivePrecision`, so the same amount can read differently.
-- **VM66** **S** **Estimated confirmation arrives as duration parts.** Both apps call `DurationFormatter().estimateParts(seconds)` and prepend `≈` themselves.
 - **VM67** **M** **Price-alert confirmation text comes from Core.** Both apps build "added for …" by choosing a title from type and direction and lowercasing a localized string, which is locale-unsafe (iOS `SetPriceAlertViewModel`, Android `PriceAlertTargetNavScreen`).
-- **VM68** **S** **Filter summaries come from Core.** Both apps choose the filter chip label (all, the single title, or a count): iOS `TransactionsFilterTypeViewModel` and `ChainsFilterType`, Android `ActivitiesFilter.kt`; Android also shows the chain search only above one chain.
 - **VM69** **S** **Token standard labels are not raw values.** iOS `ChainViewModel` shows `assetType.rawValue` as user-facing text.
 
 #### Screens and composables that call Core directly
 
-- **VM76** **S** **iOS `ValueHeaderView` stops formatting.** The shared component calls `formattedCurrency`, `formattedPercentage` and `formattedSignedCurrency` in the view.
-- **VM77** **S** **iOS import resolves names from one source.** [`ImportWalletSceneViewModel`](../ios/Features/Onboarding/Sources/ViewModels/ImportWalletSceneViewModel.swift) creates the name resolver by wallet type while lookups are gated on Core's `resolvesNames()`.
 
 #### Services, stores and composition
 
@@ -321,6 +316,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM47, VM66, VM68, VM76, VM77 (2026-09-23).** Closed. Core's `chains_filter_summary` and `transactions_filter_summary` decide whether a filter chip reads as all, its one choice, or a count; iOS drops `ChainsFilterType` and `TransactionsFilterType`, and Android's `TransactionsViewModel.filterSummary` hands `TransactionsFilter` finished labels instead of the composable counting (VM68). The stateless `DurationFormatter` object becomes the exported `estimated_duration_parts`, following VM80; each app keeps one helper that renders the parts and marks them as an estimate (VM66). iOS import creates its `NameRecordViewModel` for every wallet type and gates the lookup, the row and the record passed to import on Core's `resolvesNames()` alone, so a name resolved as an address never rides along with another import kind (VM77). No change was needed for VM47 or VM76: recents are app records (asset plus local timestamp) Core has no type for, so matching ids is the right answer to hand back, and `ValueHeaderView` formats only in its preview.
 
 **VM87 (2026-09-23).** Closed. Android `AssetsSearchService` wrote the same fourteen-argument filter mapping three times, once per DAO query; `AssetsDao.filteredSearch` maps the filter set once, reads `chainsOrAssetIds()` and `chains()` once, and picks `searchWithPriority` or `search`.
 

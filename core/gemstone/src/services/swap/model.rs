@@ -6,7 +6,7 @@ use primitives::{Asset, AssetId};
 use swapper::{Quote, SwapperError};
 
 use super::rules;
-use crate::duration_formatter::DurationFormatter;
+use crate::duration_formatter::estimated_duration_parts;
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle};
 use crate::percentage::GemPercentageStyle;
@@ -66,7 +66,7 @@ impl GemSwapQuoteSummary {
         [
             self.quote.eta_in_seconds.map(|seconds| GemListRow::Duration {
                 title: GemListRowTitle::EstimatedTime,
-                parts: DurationFormatter::new().estimate_parts(seconds as i64),
+                parts: estimated_duration_parts(seconds as i64),
                 info: None,
             }),
             price_impact.map(|impact| GemListRow::Label {

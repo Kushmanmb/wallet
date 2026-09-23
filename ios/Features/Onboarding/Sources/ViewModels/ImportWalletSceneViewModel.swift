@@ -21,7 +21,7 @@ final class ImportWalletSceneViewModel {
     let type: ImportWalletType
 
     private(set) var session = GemWalletImportSession(kind: .phrase, text: "", cursor: nil, isImporting: false)
-    let nameRecordViewModel: NameRecordViewModel?
+    let nameRecordViewModel: NameRecordViewModel
 
     var isPresentingScanner = false
     var isPresentingAlertMessage: AlertMessage?
@@ -40,10 +40,7 @@ final class ImportWalletSceneViewModel {
         self.preferences = preferences
         self.type = type
         self.onComplete = onComplete
-        nameRecordViewModel = switch type {
-        case .multicoin: nil
-        case .chain: NameRecordViewModel(nameService: nameService)
-        }
+        nameRecordViewModel = NameRecordViewModel(nameService: nameService)
     }
 
     var title: String {
@@ -123,16 +120,20 @@ final class ImportWalletSceneViewModel {
     var shouldProtectInput: Bool {
         importType.protectsInput()
     }
+
+    var showsNameRecord: Bool {
+        importType.resolvesNames()
+    }
 }
 
 // MARK: - Business Logic
 
 extension ImportWalletSceneViewModel {
     func onChangeInput(_: String, newValue: String) {
-        if importType.resolvesNames(), let chain {
-            nameRecordViewModel?.getNameRecord(name: newValue, chain: chain)
+        if showsNameRecord, let chain {
+            nameRecordViewModel.getNameRecord(name: newValue, chain: chain)
         } else {
-            nameRecordViewModel?.reset()
+            nameRecordViewModel.reset()
         }
     }
 
@@ -184,7 +185,7 @@ extension ImportWalletSceneViewModel {
             kind: importType,
             chain: chain,
             input: input,
-            nameRecord: nameRecordViewModel?.state.record(),
+            nameRecord: showsNameRecord ? nameRecordViewModel.state.record() : nil,
             source: .import,
         )
         session = session.onImporting(isImporting: false)

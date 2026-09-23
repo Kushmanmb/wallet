@@ -50,8 +50,8 @@ struct ImportWalletScene: View {
                         .focused($focusedField, equals: .input)
                         .padding(.top, .space12)
 
-                        if let nameRecordViewModel = model.nameRecordViewModel, model.importType == .address {
-                            NameRecordView(model: nameRecordViewModel)
+                        if model.showsNameRecord {
+                            NameRecordView(model: model.nameRecordViewModel)
                         }
                     }
 

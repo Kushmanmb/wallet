@@ -2,6 +2,7 @@
 
 import enum Gemstone.GemTransactionFilter
 import func Gemstone.transactionFilters
+import func Gemstone.transactionsFilterSummary
 import Primitives
 
 public struct TransactionTypesFilterViewModel: Equatable {
@@ -14,9 +15,7 @@ public struct TransactionTypesFilterViewModel: Equatable {
     }
 
     public var typeModel: TransactionsFilterTypeViewModel {
-        TransactionsFilterTypeViewModel(
-            type: TransactionsFilterType(selectedTypes: selectedTypes),
-        )
+        TransactionsFilterTypeViewModel(summary: transactionsFilterSummary(filters: selectedTypes))
     }
 
     public var isAnySelected: Bool {
