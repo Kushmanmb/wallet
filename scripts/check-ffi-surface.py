@@ -22,6 +22,7 @@ SKIP = [
     "--exclude-dir=.build",
     "--exclude-dir=generated",
     "--exclude-dir=Submodules",
+    "--exclude-dir=.gradle",
     "--exclude=Gemstone.swift",
     "--exclude=gemstone.kt",
 ]
