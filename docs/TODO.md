@@ -40,7 +40,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | — |
 | Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | VM3, VM4, AUD5, AUD45 |
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | VM3, AUD50 |
-| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD34, AUD47 |
+| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD47 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | — |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | AUD38 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | — |
@@ -92,7 +92,6 @@ Reviewed at `855fef5ccfba98458b9bfaa0efdea01ef23c0a07` on 2026-09-19. These are 
 
 ### Consolidation and regression coverage
 
-- **AUD34** **M** **Consolidation — bound and share activity observation.** [GetTransactionsImpl](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/transaction/GetTransactionsImpl.kt) retains two maps for every visited filter, merges all historical maps per emission and starts a permanent default collector while screens collect additional cold queries. Its injected transaction service is unused. Consolidate ownership here, evict inactive filter state and share active observation. Preserve the three consumers' initial cached rows and row identity; test retained-state bounds and subscription counts after repeated asset/filter navigation.
 - **AUD35** **S** **Verification — execute existing Room contract tests in CI.** [Android CI](../.github/workflows/android-ci.yml) only builds the app and runs JVM unit tests; [the existing integration command](../android/justfile) is separate. The real Room rollback/retry tests added for atomic pricing therefore have no CI execution path. Add a focused emulator job using existing instrumentation infrastructure, including persistence-contract tests as they land. Verify it executes nonzero tests and fails on broken transaction boundaries; MIG6 covers test content, not running it.
 
 
@@ -283,6 +282,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**AUD34 (2026-09-23).** Closed. Android `GetTransactionsImpl` keeps one shared observation per filter (`shareIn` while subscribed, with no replay once the last screen leaves), so screens on the same filter share one query and the activity screen shares the app-start collector's query. `TransactionRows` holds each filter's rows, their wallet and the row identity map in one bounded recent-filter map: at most eight filters, and the activity defaults are never evicted. `stored` reads that map for the session's wallet, so the activity, asset and perpetual screens keep their initial cached rows for recently visited filters. The unused transactions service parameter is gone. Tests cover shared subscriptions for one filter and for the activity defaults, the wallet check on stored rows, and the bound after visiting sixteen filters.
 
 **AUD27 (2026-09-23).** Closed. Android `WebSocketConnection` no longer drops a message silently when its buffer is full: a failed `trySend` on an open channel ends the session with an overflow error, cancels the socket, and falls into the existing reconnect loop, whose `Disconnected` and `Connected` events make Core reset and resubscribe. A send on an already closed channel is still ignored. Delivery stays bounded and ordered with no task per message. A test suspends consumption, overflows the buffer, and checks that the socket is cancelled and a new one is opened after the backoff.
 
