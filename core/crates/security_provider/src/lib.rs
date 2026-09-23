@@ -8,6 +8,7 @@ mod config;
 mod factory;
 pub mod model;
 pub mod providers;
+pub mod transaction_scan;
 
 pub use config::{AddressScanProviderConfig, ScanProviderRemoteConfig, TokenScanProviderConfig};
 pub use factory::ScanProviderFactory;

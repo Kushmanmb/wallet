@@ -12,6 +12,8 @@ hex = { workspace = true }
 sha1 = { workspace = true }
 gem_client = { path = "../gem_client", features = ["reqwest"] }
 jupiter = { path = "../jupiter" }
+gem_tracing = { path = "../tracing" }
+url = { workspace = true }
 
 [features]
 security_integration_tests = []
@@ -19,3 +21,4 @@ security_integration_tests = []
 [dev-dependencies]
 gem_client = { path = "../gem_client", features = ["testkit"] }
 tokio = { workspace = true }
+primitives = { path = "../primitives", features = ["testkit"] }

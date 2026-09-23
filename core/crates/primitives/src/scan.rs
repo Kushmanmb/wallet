@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator};
+use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator, IntoStaticStr};
 use typeshare::typeshare;
 
 use crate::{AssetId, Chain, ChainAddress, TransactionType};
@@ -26,7 +26,7 @@ impl ScanProvider {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, AsRefStr, EnumIter, EnumString)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, AsRefStr, IntoStaticStr, EnumIter, EnumString)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum ScanType {
@@ -109,6 +109,10 @@ pub struct ScanAddress {
 }
 
 impl ScanAddress {
+    pub fn is_verified_for(&self, chain: Chain, address: &str) -> bool {
+        self.chain == chain && self.address == address && self.is_verified == Some(true) && self.is_malicious != Some(true)
+    }
+
     pub fn contract(chain: Chain, address: impl Into<String>, name: impl Into<String>) -> Self {
         Self {
             chain,
@@ -122,11 +126,58 @@ impl ScanAddress {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ScanVerdict {
+    pub scan_type: ScanType,
+    pub chain: Option<Chain>,
+    pub target: String,
+    pub provider: ScanProvider,
+    pub reason: Option<String>,
+}
+
+impl ScanVerdict {
+    pub fn matches(&self, scan_type: ScanType, chain: Option<Chain>, target: &str) -> bool {
+        self.scan_type == scan_type && self.chain == chain && self.target == target
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use serde_json::Value;
 
-    use super::ScanTransactionPayload;
+    use super::{Chain, ScanAddress, ScanProvider, ScanTransactionPayload, ScanType, ScanVerdict};
+
+    #[test]
+    fn test_scan_address_is_verified_for() {
+        let mut address = ScanAddress::contract(Chain::Arbitrum, "0xAbC", "Router");
+        assert!(address.is_verified_for(Chain::Arbitrum, "0xAbC"));
+        assert!(!address.is_verified_for(Chain::Arbitrum, "0xabc"));
+        assert!(!address.is_verified_for(Chain::Ethereum, "0xAbC"));
+
+        address.is_malicious = Some(true);
+        assert!(!address.is_verified_for(Chain::Arbitrum, "0xAbC"));
+
+        address.is_malicious = Some(false);
+        address.is_verified = Some(false);
+        assert!(!address.is_verified_for(Chain::Arbitrum, "0xAbC"));
+    }
+
+    #[test]
+    fn test_scan_verdict_matches() {
+        let verdict = ScanVerdict {
+            scan_type: ScanType::Address,
+            chain: Some(Chain::SmartChain),
+            target: "0x123".to_string(),
+            provider: ScanProvider::HashDit,
+            reason: None,
+        };
+
+        assert!(verdict.matches(ScanType::Address, Some(Chain::SmartChain), "0x123"));
+        assert!(!verdict.matches(ScanType::AddressPoisoning, Some(Chain::SmartChain), "0x123"));
+        assert!(!verdict.matches(ScanType::Address, Some(Chain::Ethereum), "0x123"));
+        assert!(!verdict.matches(ScanType::Address, None, "0x123"));
+        assert!(!verdict.matches(ScanType::Address, Some(Chain::SmartChain), "0x456"));
+    }
 
     #[test]
     fn test_scan_transaction_payload_optional_website() {

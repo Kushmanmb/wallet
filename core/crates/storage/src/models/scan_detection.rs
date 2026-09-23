@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use primitives::{Chain, ScanProvider, ScanType};
+use primitives::ScanVerdict;
 use serde::{Deserialize, Serialize};
 
 use crate::sql_types::{ChainRow, ScanProviderRow, ScanTypeRow};
@@ -19,8 +19,14 @@ pub struct ScanDetectionRow {
 }
 
 impl ScanDetectionRow {
-    pub fn matches(&self, scan_type: ScanType, chain: Option<Chain>, target: &str) -> bool {
-        self.scan_type.0 == scan_type && self.chain.as_ref().map(|chain| chain.0) == chain && self.target == target
+    pub fn as_primitive(self) -> ScanVerdict {
+        ScanVerdict {
+            scan_type: self.scan_type.0,
+            chain: self.chain.map(|chain| chain.0),
+            target: self.target,
+            provider: self.provider.0,
+            reason: self.reason,
+        }
     }
 }
 
@@ -36,40 +42,13 @@ pub struct NewScanDetectionRow {
 }
 
 impl NewScanDetectionRow {
-    pub fn new(scan_type: ScanType, chain: Option<Chain>, target: String, provider: ScanProvider, reason: Option<String>) -> Self {
+    pub fn from_primitive(verdict: ScanVerdict) -> Self {
         Self {
-            scan_type: scan_type.into(),
-            chain: chain.map(ChainRow::from),
-            target,
-            provider: provider.into(),
-            reason,
+            scan_type: verdict.scan_type.into(),
+            chain: verdict.chain.map(ChainRow::from),
+            target: verdict.target,
+            provider: verdict.provider.into(),
+            reason: verdict.reason,
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use chrono::DateTime;
-
-    use super::*;
-
-    #[test]
-    fn test_matches() {
-        let row = ScanDetectionRow {
-            id: 1,
-            scan_type: ScanType::Address.into(),
-            chain: Some(Chain::SmartChain.into()),
-            target: "0x123".to_string(),
-            provider: ScanProvider::HashDit.into(),
-            reason: None,
-            updated_at: DateTime::UNIX_EPOCH.naive_utc(),
-            created_at: DateTime::UNIX_EPOCH.naive_utc(),
-        };
-
-        assert!(row.matches(ScanType::Address, Some(Chain::SmartChain), "0x123"));
-        assert!(!row.matches(ScanType::AddressPoisoning, Some(Chain::SmartChain), "0x123"));
-        assert!(!row.matches(ScanType::Address, Some(Chain::Ethereum), "0x123"));
-        assert!(!row.matches(ScanType::Address, None, "0x123"));
-        assert!(!row.matches(ScanType::Address, Some(Chain::SmartChain), "0x456"));
     }
 }

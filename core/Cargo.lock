@@ -7654,6 +7654,7 @@ version = "2.114.44"
 dependencies = [
  "async-trait",
  "gem_client",
+ "gem_tracing",
  "hex",
  "jupiter",
  "primitives",
@@ -7661,6 +7662,7 @@ dependencies = [
  "serde_json",
  "sha1 0.11.0",
  "tokio",
+ "url",
 ]
 
 [[package]]
