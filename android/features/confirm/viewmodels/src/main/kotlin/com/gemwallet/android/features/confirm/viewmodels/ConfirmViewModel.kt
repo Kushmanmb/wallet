@@ -229,6 +229,9 @@ class ConfirmViewModel @Inject constructor(
     val feeAssets = content.map { it?.feeAssets.orEmpty() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    val showsFeeAssets = combine(feeAsset, feeAssets) { asset, assets -> showsFeeAssets(assets.map { it.asset.id.toIdentifier() }, asset?.asset?.id?.toIdentifier()) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     private val assetPrice = combine(transfer, content) { transfer, content -> transfer?.asset?.let { content?.assetPrice(it) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -338,8 +341,8 @@ class ConfirmViewModel @Inject constructor(
         isErrorSheetVisible.value = error.toConfirmError().display().hasInfoSheet()
     }
 
-    val feeListItem: StateFlow<ListItemModel?> = combine(feeUIModel, feeAsset, feeAssets, verification) { fee, asset, assets, verification ->
-        verification?.let { verificationListItem(context) } ?: fee?.listItem(context, asset?.asset, showsFeeAssetSymbol = showsFeeAssets(assets.map { it.asset.id.toIdentifier() }, asset?.asset?.id?.toIdentifier()))
+    val feeListItem: StateFlow<ListItemModel?> = combine(feeUIModel, feeAsset, showsFeeAssets, verification) { fee, asset, showsFeeAssets, verification ->
+        verification?.let { verificationListItem(context) } ?: fee?.listItem(context, asset?.asset, showsFeeAssetSymbol = showsFeeAssets)
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

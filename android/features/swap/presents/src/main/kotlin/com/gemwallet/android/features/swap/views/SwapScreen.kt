@@ -37,6 +37,8 @@ fun SwapScreen(
     val receive by viewModel.receiveAsset.collectAsStateWithLifecycle()
     val fromEquivalent by viewModel.payEquivalentFormatted.collectAsStateWithLifecycle()
     val toEquivalent by viewModel.toEquivalentFormatted.collectAsStateWithLifecycle()
+    val payBalance by viewModel.payBalance.collectAsStateWithLifecycle()
+    val receiveBalance by viewModel.receiveBalance.collectAsStateWithLifecycle()
     val swapState by viewModel.uiState.collectAsStateWithLifecycle()
     val swapDetails by viewModel.swapDetails.collectAsStateWithLifecycle()
     val selectedSlippage by viewModel.selectedSlippage.collectAsStateWithLifecycle()
@@ -69,6 +71,8 @@ fun SwapScreen(
         swapDetails = swapDetails,
         payEquivalent = fromEquivalent,
         receiveEquivalent = toEquivalent,
+        payBalance = payBalance,
+        receiveBalance = receiveBalance,
         payValue = viewModel.payValue,
         receiveValue = viewModel.receiveValue,
         showsSlippageIndicator = selectedSlippage != null,

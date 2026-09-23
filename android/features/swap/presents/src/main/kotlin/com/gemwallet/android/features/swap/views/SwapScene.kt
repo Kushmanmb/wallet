@@ -41,6 +41,7 @@ import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.sceneContentPadding
 import com.gemwallet.android.ui.theme.space0
+import uniffi.gemstone.GemLocalizedText
 
 @Composable
 internal fun SwapScene(
@@ -49,6 +50,8 @@ internal fun SwapScene(
     receive: AssetInfo?,
     payEquivalent: String,
     receiveEquivalent: String,
+    payBalance: GemLocalizedText?,
+    receiveBalance: GemLocalizedText?,
     swapDetails: SwapDetailsUIModel?,
     payValue: TextFieldState,
     receiveValue: TextFieldState,
@@ -110,6 +113,7 @@ internal fun SwapScene(
             item {
                 SwapItem(
                     item = pay,
+                    balance = payBalance,
                     equivalent = payEquivalent,
                     state = payValue,
                     interaction = swapState.payItemInteraction,
@@ -132,6 +136,7 @@ internal fun SwapScene(
             item {
                 SwapItem(
                     item = receive,
+                    balance = receiveBalance,
                     equivalent = receiveEquivalent,
                     state = receiveValue,
                     calculating = swapState.isReceiveLoading,

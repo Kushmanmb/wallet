@@ -227,12 +227,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 #### Screens and composables that call Core directly
 
-- **VM70** **S** **Android confirm fee details stop calling Core.** The `FeeDetails` composable calls `showsFeeAssets`.
-- **VM71** **S** **Android perpetual chart stops calling Core.** `PerpetualChartSection` calls `candlestickHeader` and `chartDateStyle`.
-- **VM72** **S** **Android perpetual market views stop calling Core.** `PerpetualItem` and `PerpetualMarketScene` call `priceRow` and `perpetualBalanceHeader`.
-- **VM73** **S** **Android swap item stops calling Core.** `SwapItem` calls `availableBalanceText`.
-- **VM74** **S** **Android copy and phrase views stop projecting.** `AssetSelectScreen` (`addressCopy`), `CreateWalletScreen` (`secretPhraseCopy`) and `PhraseWord` (`secretPhraseRows`) call Core from composables.
-- **VM75** **S** **Android `:ui` components stop calling Core.** `AssetContextMenuUIModel` (`assetMenuActions`, `addressCopy`), `ValidatorRowUIModel` (`formattedPercentage`), `TransactionFilterUIModel` (`transactionFilters`), `EmptyStateUIModel` (`emptyState`) and `AvatarEmoji` (`walletAvatarEmojis`).
 - **VM76** **S** **iOS `ValueHeaderView` stops formatting.** The shared component calls `formattedCurrency`, `formattedPercentage` and `formattedSignedCurrency` in the view.
 - **VM77** **S** **iOS import resolves names from one source.** [`ImportWalletSceneViewModel`](../ios/Features/Onboarding/Sources/ViewModels/ImportWalletSceneViewModel.swift) creates the name resolver by wallet type while lookups are gated on Core's `resolvesNames()`.
 
@@ -343,6 +337,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM70–VM75 (2026-09-23).** Closed. Android feature composables no longer call Core. `ConfirmViewModel.showsFeeAssets` answers both the fee row and `FeeDetails` (VM70). `PerpetualChartUIModel` gains `header` and `dateText`, matching the asset `ChartUIModel`, so `PerpetualChartSection` stops calling `candlestickHeader` and `chartDateStyle` (VM71). `SwapViewModel` exposes `payBalance` and `receiveBalance`, so `SwapItem` stops calling `availableBalanceText` (VM73). `BaseAssetSelectViewModel.addressCopy`, `CreateWalletViewModel.phraseRows`/`verifiedRows`/`phraseCopy` and `WalletSecretContentUIModel.Words.rows` take the copy payloads and phrase rows out of `AssetSelectScreen`, `CreateWalletScreen`, `CheckPhrase` and `WalletSecretDataNavScreen` (VM74). VM72 and VM75 needed no change: the perpetual `priceRow` and `perpetualBalanceHeader` calls are preview sample data, and the shared `:ui` helpers run from view models (`transactionFilterOptions`), once per process (`AvatarEmoji`), inside `remember` in a shared component the way iOS component view models do (`EmptyStateUIModel`, `rememberAssetContextMenuItems`), or in previews (`aprText`).
 
 **VM54 (2026-09-23).** Closed. Both apps parsed each support message's markdown and asked Core for its outcome per message — iOS once per `isSending`, `isFailed` and `status` read, Android inside the `MessageMeta` composable. `support_chat_groups` now returns `GemSupportMessageRow`s carrying the message, its parsed content and its outcome, so `parse_support_message_display_content` and `support_message_outcome` are no longer exported. iOS `SupportMessageBubbleViewModel` takes the row and its copied `Status` enum is gone; Android `SupportChatMessage` wraps the row and the bubble, meta and failed-warning read its outcome instead of the raw status.
 

@@ -29,7 +29,6 @@ import com.gemwallet.android.ui.theme.iconSize
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
 import kotlinx.collections.immutable.toImmutableList
-import uniffi.gemstone.addressCopy
 
 @Composable
 fun AssetSelectScreen(
@@ -67,7 +66,7 @@ fun AssetSelectScreen(
 
         AssetRowTrailing.Copy -> { item ->
             IconButton(
-                onClick = { clipboardManager.setCopy(context, addressCopy(item.asset.id.chain.string, item.accountAddress)) },
+                onClick = { clipboardManager.setCopy(context, viewModel.addressCopy(item)) },
                 modifier = Modifier.size(iconSize),
             ) {
                 Icon(

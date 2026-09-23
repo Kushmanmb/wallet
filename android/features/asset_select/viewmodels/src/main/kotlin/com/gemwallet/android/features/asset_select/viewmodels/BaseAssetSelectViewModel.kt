@@ -61,8 +61,10 @@ import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAssetAction
 import uniffi.gemstone.GemAssetSearchStep
 import uniffi.gemstone.GemAssetSelectionServiceInterface
+import uniffi.gemstone.GemCopy
 import uniffi.gemstone.GemSelectAssetState
 import uniffi.gemstone.GemSelectAssetType
+import uniffi.gemstone.addressCopy
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 open class BaseAssetSelectViewModel(
@@ -216,6 +218,8 @@ open class BaseAssetSelectViewModel(
             }
         }
     }
+
+    fun addressCopy(item: AssetInfoDataAggregate): GemCopy = addressCopy(item.asset.id.chain.string, item.accountAddress)
 
     fun onChangeVisibility(assetId: AssetId, visible: Boolean) = viewModelScope.launch {
         setVisibility(assetId, visible)

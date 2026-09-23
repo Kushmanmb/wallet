@@ -113,6 +113,7 @@ fun ConfirmScreen(
     val header by viewModel.header.collectAsStateWithLifecycle()
     val feeSelectionUIModel by viewModel.feeSelectionUIModel.collectAsStateWithLifecycle()
     val feeAssets by viewModel.feeAssets.collectAsStateWithLifecycle()
+    val showsFeeAssets by viewModel.showsFeeAssets.collectAsStateWithLifecycle()
     val feeAsset by viewModel.feeAsset.collectAsStateWithLifecycle()
     val simulation by viewModel.simulation.collectAsStateWithLifecycle()
     val detailElements by viewModel.detailElements.collectAsStateWithLifecycle()
@@ -303,6 +304,7 @@ fun ConfirmScreen(
             feeDetailsModel = viewModel::feeDetailsModel,
             feeAsset = feeAsset,
             feeAssets = feeAssets,
+            showFeeAssets = showsFeeAssets,
             onSelectPriority = viewModel::changeFeePriority,
             onSelectCustom = viewModel::changeCustomFee,
             onSelectFeeAsset = viewModel::changeFeeAsset,

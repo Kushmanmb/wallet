@@ -19,8 +19,8 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.CenteredDescriptionText
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.screen.PhraseLayout
+import com.gemwallet.android.ui.components.screen.PhraseRow
 import com.gemwallet.android.ui.components.screen.Scene
-import com.gemwallet.android.ui.components.screen.phraseRows
 import com.gemwallet.android.ui.models.buttonState
 import com.gemwallet.android.ui.theme.SceneSizing
 import com.gemwallet.android.ui.theme.Spacer16
@@ -37,7 +37,7 @@ private const val verifyGroupCount = 3
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun CheckPhrase(state: GemVerifyPhraseViewState, loading: Boolean, onPick: (Int) -> Boolean, onDone: () -> Unit, onCancel: () -> Unit) {
+internal fun CheckPhrase(state: GemVerifyPhraseViewState, rows: List<PhraseRow>, loading: Boolean, onPick: (Int) -> Boolean, onDone: () -> Unit, onCancel: () -> Unit) {
     val isSmallScreen = isCompactDimension(WindowDimension.Height)
     val progress = state.nextIndex?.toInt() ?: state.verified.size
     val choices = state.choices.withIndex().toList()
@@ -62,7 +62,7 @@ internal fun CheckPhrase(state: GemVerifyPhraseViewState, loading: Boolean, onPi
             CenteredDescriptionText(stringResource(R.string.secret_phrase_confirm_quick_test_title))
             Spacer16()
             PhraseLayout(
-                rows = phraseRows(state.verified),
+                rows = rows,
                 modifier = Modifier.widthIn(max = SceneSizing.contentMaxWidth),
                 highlightIndex = state.nextIndex?.toInt(),
             )

@@ -1,5 +1,7 @@
 package com.gemwallet.android.features.wallet.viewmodels.models
 
+import com.gemwallet.android.ui.components.screen.PhraseRow
+import com.gemwallet.android.ui.components.screen.phraseRows
 import uniffi.gemstone.GemCopy
 import uniffi.gemstone.GemWalletSecret
 import uniffi.gemstone.privateKeyCopy
@@ -12,7 +14,9 @@ sealed interface WalletSecretContentUIModel {
         override fun copy(): GemCopy = privateKeyCopy(key)
     }
 
-    class Words(val words: List<String>) : WalletSecretContentUIModel {
+    class Words(private val words: List<String>) : WalletSecretContentUIModel {
+        val rows: List<PhraseRow> = phraseRows(words)
+
         override fun copy(): GemCopy = secretPhraseCopy(words)
     }
 }

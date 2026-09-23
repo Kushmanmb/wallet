@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.perpetual.viewmodels.models.PerpetualChartUIModel
 import com.gemwallet.android.ui.components.chart.CandlestickTooltip
 import com.gemwallet.android.ui.components.chart.CandlestickTooltipUIModel
@@ -26,10 +25,6 @@ import com.gemwallet.android.ui.models.dataOrNull
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.wallet.core.primitives.ChartCandleStick
 import com.wallet.core.primitives.ChartPeriod
-import uniffi.gemstone.candlestickHeader
-import uniffi.gemstone.chartDateStyle
-import java.time.ZoneId
-import java.util.Locale
 
 private val TooltipRightSafeArea = 96.dp
 
@@ -40,20 +35,12 @@ internal fun PerpetualChartSection(state: StateViewType<PerpetualChartUIModel>, 
     var selectedIndex by remember(period) { mutableStateOf<Int?>(null) }
     val safeSelectedIndex = selectedIndex?.takeIf { it in data.indices }
     val selectedCandle = safeSelectedIndex?.let { data[it] }
-    val baseCandle = data.firstOrNull()
-    val lastCandle = data.lastOrNull()
     val isSelectedRightHalf = safeSelectedIndex?.let { it.toFloat() / data.size.toFloat() > 0.5f } ?: false
 
     val chartUIModel = model?.chart
-    val header = remember(selectedCandle, baseCandle, lastCandle) {
-        val target = selectedCandle ?: lastCandle ?: return@remember null
-        val base = baseCandle ?: return@remember null
-        candlestickHeader(base.close, target.close)
-    }
+    val header = remember(model, safeSelectedIndex) { model?.header(safeSelectedIndex) }
     val dateFormatter = LocalContext.current.rowDateFormatter()
-    val headerDate = remember(selectedCandle, period) {
-        selectedCandle?.let { dateFormatter.chartDate(it.date, chartDateStyle(period.toGem()), ZoneId.systemDefault(), Locale.getDefault()) }
-    }
+    val headerDate = remember(model, safeSelectedIndex, period) { model?.dateText(safeSelectedIndex, period, dateFormatter) }
     val tooltipModel = remember(selectedCandle) { selectedCandle?.let(tooltip) }
 
     ChartStateView(

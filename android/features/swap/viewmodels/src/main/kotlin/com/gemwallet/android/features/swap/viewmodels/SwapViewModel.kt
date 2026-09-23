@@ -33,7 +33,9 @@ import com.gemwallet.android.features.swap.viewmodels.models.formattedToAmount
 import com.gemwallet.android.features.swap.viewmodels.models.receiveEquivalent
 import com.gemwallet.android.math.numberFormat
 import com.gemwallet.android.math.parseInputNumberOrNull
+import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.toAssetPriceValue
+import com.gemwallet.android.model.toGem
 import com.gemwallet.android.ui.components.swap.SlippageStateUIModel
 import com.gemwallet.android.ui.components.swap.uiModel
 import com.gemwallet.android.ui.models.ButtonState
@@ -67,6 +69,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemPercentageStyle
 import uniffi.gemstone.GemSlippageSelection
 import uniffi.gemstone.GemSwapButtonAction
@@ -76,6 +79,7 @@ import uniffi.gemstone.GemSwapQuoteServiceInterface
 import uniffi.gemstone.GemSwapRequest
 import uniffi.gemstone.SwapProvider
 import uniffi.gemstone.SwapperException
+import uniffi.gemstone.availableBalanceText
 import uniffi.gemstone.formattedPercentage
 import uniffi.gemstone.swapperQuoteSummary
 import java.math.BigDecimal
@@ -136,6 +140,12 @@ class SwapViewModel @Inject constructor(
 
     val receiveAsset = receiveAssetIdFlow
         .flatMapLatest { assetId -> assetId?.let { getAssetInfo(it) } ?: flow { emit(null) } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val payBalance: StateFlow<GemLocalizedText?> = payAsset.map { it?.availableBalance() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val receiveBalance: StateFlow<GemLocalizedText?> = receiveAsset.map { it?.availableBalance() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val quoteInput: StateFlow<GemSwapQuoteInput?> = session.map { it.input }
@@ -389,3 +399,5 @@ class SwapViewModel @Inject constructor(
 }
 
 private const val TAG = "Swap"
+
+private fun AssetInfo.availableBalance(): GemLocalizedText = availableBalanceText(asset.toGem(), balance.toGem())

@@ -7,6 +7,8 @@ import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ui.R
+import com.gemwallet.android.ui.components.screen.PhraseRow
+import com.gemwallet.android.ui.components.screen.phraseRows
 import com.gemwallet.android.ui.importWallet
 import com.gemwallet.android.ui.localization.text
 import com.wallet.core.primitives.WalletSource
@@ -24,11 +26,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemCopy
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemVerifyPhraseSession
 import uniffi.gemstone.GemVerifyPhraseViewState
 import uniffi.gemstone.GemWalletImportKind
 import uniffi.gemstone.GemWalletServiceInterface
+import uniffi.gemstone.secretPhraseCopy
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,6 +48,14 @@ class CreateWalletViewModel @Inject constructor(private val service: GemWalletSe
 
     val verificationState: StateFlow<GemVerifyPhraseViewState?> = verification.map { it?.viewState() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val phraseRows: StateFlow<List<PhraseRow>> = state.map { phraseRows(it.data) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val verifiedRows: StateFlow<List<PhraseRow>> = verificationState.map { phraseRows(it?.verified.orEmpty()) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    fun phraseCopy(): GemCopy = secretPhraseCopy(state.value.data)
 
     fun onPickWord(choice: Int): Boolean {
         val current = verification.value ?: return false
