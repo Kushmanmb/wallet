@@ -31,9 +31,6 @@ use strum::IntoEnumIterator;
 use ::defi::{DefiProviderClient, DefiProviderConfig};
 use ::nft::{NFTProviderClient, NFTProviderConfig};
 use chain_providers::ProviderFactory;
-use config::ConfigClient;
-use config_keys::ConfigKey;
-use devices::{ScanClient, TransactionScanConfig, scan_providers};
 use model::APIService;
 use name_resolver::{NameClient, NameConfig, NameProviderFactory};
 use rocket::{Build, Rocket, catchers, routes};
@@ -42,9 +39,8 @@ use settings::Settings;
 use swap::SwapClient;
 use swapper::okx::{OkxClientConfig, OkxProviderProxy};
 use swapper::swapper::GemSwapper;
-use webhooks::WebhooksClient;
 
-use crate::support::{SupportApiClient, SupportImageUploadConfig};
+use crate::support::SupportImageUploadConfig;
 
 fn mount_routes(rocket: Rocket<Build>, admin_enabled: bool) -> Rocket<Build> {
     let rocket = rocket
@@ -180,12 +176,11 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let services = Services::new(Arc::new(settings.clone()))?;
     let database = services.database();
     let cacher_client = services.cacher().await?;
-    let config_cacher = services.config();
     let price_config = services.price_config().await?;
 
     let price_client = services.prices(cacher_client.clone());
     let charts_client = services.charts(price_config);
-    let config_client = ConfigClient::new(database.clone());
+    let config_client = services.app_config();
     let price_alert_client = services.price_alerts();
     let name_config = NameConfig {
         max_name_length: settings_clone.name.max_name_length,
@@ -193,8 +188,8 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let name_client = NameClient::new(NameProviderFactory::new_providers(settings_clone.name.clone()), name_config);
 
     let user_agent = settings::service_user_agent("api", None);
-    let chain_client = chain::ChainClient::new(services.chain_providers(&user_agent));
-    let nodes_status_client = chain::node::NodesStatusClient::default();
+    let chain_client = services.chain(&user_agent);
+    let nodes_status_client = services.nodes_status();
     let portfolio_client = services.portfolio(price_config);
     let endpoints = ProviderFactory::get_chain_endpoints(&settings);
     let native_provider = Arc::new(swapper::NativeProvider::new_with_endpoints(endpoints));
@@ -206,21 +201,13 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let stream_producer = services.stream_producer("api", streamer::no_shutdown()).await.unwrap();
     let wallets_client = services.wallets(stream_producer.clone());
 
-    let providers = scan_providers(&settings_clone, cacher_client.clone(), config_cacher.get_duration(ConfigKey::ScanTimeout).await?)?;
+    let providers = services.scan_providers(cacher_client.clone()).await?;
     let metrics = Arc::new(metrics::Metrics::new(&providers));
-    let scan_client = ScanClient::new(
-        database.clone(),
-        config_cacher.clone(),
-        cacher_client.clone(),
-        TransactionScanConfig {
-            providers,
-            required_successes: config_cacher.get_usize(ConfigKey::ScanRequiredSuccesses).await?,
-        },
-        metrics.clone(),
-    );
+    let scan_client = services.scan(providers, cacher_client.clone(), metrics.clone()).await?;
     let wallet_configuration_client = services.wallet_configuration(cacher_client.clone(), &user_agent);
     let assets_client = services.assets(price_config);
     let search_client = services.search(price_client.clone()).await?;
+    let fee_estimates_client = services.fee_estimates(assets_client.clone(), price_client.clone(), cacher_client.clone(), &user_agent);
     let swap_client = SwapClient::new(database.clone());
     let fiat_client = services.fiat(stream_producer.clone()).await?;
     let nft_config = NFTProviderConfig::from_settings(&settings);
@@ -230,12 +217,14 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let defi_provider_client = DefiProviderClient::new(DefiProviderConfig::from_settings(&settings));
     let auth_client = services.auth().await?;
     let markets_client = services.markets(cacher_client.clone());
-    let webhooks_client = WebhooksClient::new(stream_producer.clone(), settings.support.webhook.key.secret.clone());
+    let webhooks_client = services.webhooks(stream_producer.clone());
+    let indexer_client = services.indexer(cacher_client.clone(), stream_producer.clone());
+    let access_client = services.access();
     let ip_security_client = services.ip_security().await?;
     let rewards_client = services.rewards(cacher_client.clone(), stream_producer.clone(), ip_security_client);
     let redemption_client = services.rewards_redemption(stream_producer.clone());
     let notifications_client = services.notifications();
-    let support_client = SupportApiClient::new(settings.support.url.clone(), settings.support.widget.ios.clone(), settings.support.widget.android.clone(), database.clone());
+    let support_client = services.support_api();
     let support_image_upload_config = SupportImageUploadConfig::new(&settings.support.types.images)?;
     let near_intents_client = swap::NearIntentsProxyClient::new(settings.swap.nearintents.url.clone(), cacher_client.clone());
     let swaps_xyz_client = swap::SwapsXyzProxyClient::new(settings.swap.swapsxyz.url.clone(), cacher_client.clone());
@@ -257,7 +246,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let rocket = rocket::build()
         .manage(metrics)
         .manage(auth_config)
-        .manage(database)
+        .manage(access_client)
         .manage(fiat_client)
         .manage(price_client)
         .manage(charts_client)
@@ -277,10 +266,12 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
         .manage(defi_provider_client)
         .manage(price_alert_client)
         .manage(chain_client)
+        .manage(fee_estimates_client)
         .manage(nodes_status_client)
         .manage(swapper)
         .manage(markets_client)
         .manage(webhooks_client)
+        .manage(indexer_client)
         .manage(rewards_client)
         .manage(redemption_client)
         .manage(wallets_client)
@@ -291,9 +282,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
         .manage(swaps_xyz_client)
         .manage(okx_provider)
         .manage(portfolio_client)
-        .manage(auth_client)
-        .manage(cacher_client)
-        .manage(stream_producer);
+        .manage(auth_client);
 
     Ok(mount_routes(rocket, settings.api.admin.enabled))
 }
@@ -301,13 +290,10 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
 async fn rocket_ws_stream(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error + Send + Sync>> {
     let services = Services::new(Arc::new(settings.clone()))?;
     let cacher_client = services.cacher().await?;
-    let config_cacher = services.config();
     let price_client = services.prices(cacher_client.clone());
     let stream_observer_config = websocket_stream::StreamObserverConfig {
         redis_url: settings.redis.url.clone(),
-        cacher_client,
-        retention: config_cacher.get_duration(config_keys::ConfigKey::DeviceStreamRetention).await?,
-        history_limit: config_cacher.get_usize(config_keys::ConfigKey::DeviceStreamHistoryLimit).await?,
+        device_stream: services.device_stream(cacher_client).await?,
     };
 
     let jwt_config = devices::auth_config::JwtConfig {

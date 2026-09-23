@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use chain_providers::{ChainProviders, TransactionFeeEstimates, TransactionIdRequest, TransactionsRequest};
-use primitives::{Asset, AssetBalance, Chain, ChainAddress, Transaction, TransactionStateRequest, TransactionUpdate};
+use primitives::{Asset, AssetBalance, Chain, ChainAddress, StakeValidator, Transaction, TransactionStateRequest, TransactionUpdate};
 
 pub struct ChainClient {
     providers: ChainProviders,
@@ -39,7 +39,7 @@ impl ChainClient {
             .collect())
     }
 
-    pub async fn get_validators(&self, chain: Chain) -> Result<Vec<primitives::StakeValidator>, Box<dyn Error + Send + Sync>> {
+    pub async fn get_validators(&self, chain: Chain) -> Result<Vec<StakeValidator>, Box<dyn Error + Send + Sync>> {
         self.providers.get_validators(chain).await
     }
 
@@ -70,16 +70,16 @@ impl ChainClient {
             .get_block_transactions(chain, block_number as u64)
             .await?
             .into_iter()
-            .map(|x| x.finalize(addresses.clone()))
+            .map(|transaction| transaction.finalize(addresses.clone()))
             .collect::<Vec<Transaction>>();
         Ok(self.filter_transactions(transactions, transaction_type))
     }
 
     fn filter_transactions(&self, transactions: Vec<Transaction>, transaction_type: Option<&str>) -> Vec<Transaction> {
-        if let Some(transaction_type) = transaction_type {
-            return transactions.into_iter().filter(|x| x.transaction_type.as_ref() == transaction_type).collect::<Vec<Transaction>>();
+        match transaction_type {
+            Some(transaction_type) => transactions.into_iter().filter(|transaction| transaction.transaction_type.as_ref() == transaction_type).collect(),
+            None => transactions,
         }
-        transactions
     }
 
     pub async fn get_latest_block(&self, chain: Chain) -> Result<i64, Box<dyn Error + Send + Sync>> {

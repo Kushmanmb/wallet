@@ -18,25 +18,34 @@ use primitives::{AccessTokenCacher, Chain, ChainType, EVMChain, FiatProviderName
 use pusher::PusherClient;
 use rewards::{AbuseIPDBClient, EvmClientProvider, IpApiClient, IpCheckProvider, TransferRedemptionService, WalletConfig};
 use search_index::{SearchIndexClient, SearchIndexConfig};
+use security::TransactionScanProviders;
 use settings::Settings;
 use storage::{Database, DatabaseError};
 use streamer::{Retry, ShutdownReceiver, StreamProducer, StreamProducerConfig};
 
+use crate::access::AccessClient;
+use crate::app::ConfigClient;
 use crate::assets::ListsClient;
 use crate::assets::{AssetsClient, SearchClient};
 use crate::auth::AuthClient;
+use crate::chain::{ChainClient, FeeEstimatesClient, NodesStatusClient};
 use crate::config::ConfigCacher;
 use crate::defi::DefiClient;
+use crate::devices::DeviceStreamClient;
 use crate::devices::{DevicesClient, WalletConfigurationClient, WalletsClient};
 use crate::fiat::FiatClient;
+use crate::indexer::IndexerClient;
 use crate::nft::NFTClient;
 use crate::notifications::NotificationsClient;
 use crate::prices::PortfolioClient;
 use crate::prices::{ChartClient, MarketsClient, PriceAlertClient, PriceClient};
 use crate::rewards::IpSecurityClient;
 use crate::rewards::{RewardsClient, RewardsRedemptionClient};
+use crate::security::{ScanClient, ScanMetrics, TransactionScanConfig, scan_providers};
+use crate::support::SupportApiClient;
 use crate::support::SupportClient;
 use crate::transactions::{AddressNamesClient, TransactionsClient};
+use crate::webhooks::WebhooksClient;
 
 #[derive(Clone)]
 pub struct Services {
@@ -227,6 +236,60 @@ impl Services {
 
     pub fn address_names(&self) -> AddressNamesClient {
         AddressNamesClient::new(self.database())
+    }
+
+    pub fn indexer(&self, cacher: CacherClient, stream_producer: StreamProducer) -> IndexerClient {
+        IndexerClient::new(self.database(), cacher, stream_producer)
+    }
+
+    pub fn access(&self) -> AccessClient {
+        AccessClient::new(self.database())
+    }
+
+    pub fn webhooks(&self, stream_producer: StreamProducer) -> WebhooksClient {
+        WebhooksClient::new(stream_producer, self.settings.support.webhook.key.secret.clone())
+    }
+
+    pub fn app_config(&self) -> ConfigClient {
+        ConfigClient::new(self.database())
+    }
+
+    pub fn chain(&self, user_agent: &str) -> ChainClient {
+        ChainClient::new(self.chain_providers(user_agent))
+    }
+
+    pub fn fee_estimates(&self, assets: AssetsClient, prices: PriceClient, cacher: CacherClient, user_agent: &str) -> FeeEstimatesClient {
+        FeeEstimatesClient::new(self.chain(user_agent), assets, prices, cacher)
+    }
+
+    pub fn nodes_status(&self) -> NodesStatusClient {
+        NodesStatusClient::default()
+    }
+
+    pub async fn scan_providers(&self, cacher: CacherClient) -> Result<TransactionScanProviders, Box<dyn Error + Send + Sync>> {
+        scan_providers(&self.settings, cacher, self.config().get_duration(ConfigKey::ScanTimeout).await?)
+    }
+
+    pub async fn scan(&self, providers: TransactionScanProviders, cacher: CacherClient, metrics: Arc<dyn ScanMetrics>) -> Result<ScanClient, Box<dyn Error + Send + Sync>> {
+        let config = TransactionScanConfig {
+            providers,
+            required_successes: self.config().get_usize(ConfigKey::ScanRequiredSuccesses).await?,
+        };
+        Ok(ScanClient::new(self.database(), self.config(), cacher, config, metrics))
+    }
+
+    pub fn support_api(&self) -> SupportApiClient {
+        let support = &self.settings.support;
+        SupportApiClient::new(support.url.clone(), support.widget.ios.clone(), support.widget.android.clone(), self.database())
+    }
+
+    pub async fn device_stream(&self, cacher: CacherClient) -> Result<DeviceStreamClient, Box<dyn Error + Send + Sync>> {
+        let config = self.config();
+        Ok(DeviceStreamClient::new(
+            cacher,
+            config.get_duration(ConfigKey::DeviceStreamRetention).await?,
+            config.get_usize(ConfigKey::DeviceStreamHistoryLimit).await?,
+        ))
     }
 }
 

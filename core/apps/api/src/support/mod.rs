@@ -1,11 +1,10 @@
-mod client;
 mod image_upload;
 
-pub use client::SupportApiClient;
 pub use image_upload::SupportImageUploadConfig;
 use image_upload::{MAX_SUPPORT_IMAGE_BYTES, validate_support_image_upload};
 use primitives::{SupportAction, SupportMessage, SupportMessageInput};
 use rocket::{State, get, http::ContentType, post};
+use services::support::SupportApiClient;
 
 use crate::{
     devices::{

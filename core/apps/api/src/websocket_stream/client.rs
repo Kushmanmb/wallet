@@ -1,7 +1,5 @@
 use std::error::Error;
-use std::time::Duration;
 
-use cacher::CacherClient;
 use gem_tracing::info_with_fields;
 use primitives::{AssetPrice, StreamEvent, StreamMessage, Version, device_stream_channel};
 use redis::PushInfo;
@@ -10,6 +8,7 @@ use rocket::futures::SinkExt;
 use rocket::serde::json::serde_json;
 use rocket_ws::Message;
 use rocket_ws::stream::DuplexStream;
+use services::devices::DeviceStreamClient;
 use services::prices::PriceClient;
 
 use super::price_handler::PriceHandler;
@@ -17,9 +16,7 @@ use crate::websocket::decode_push_message;
 
 pub struct StreamObserverConfig {
     pub redis_url: String,
-    pub cacher_client: CacherClient,
-    pub retention: Duration,
-    pub history_limit: usize,
+    pub device_stream: DeviceStreamClient,
 }
 
 pub struct StreamObserverClient {

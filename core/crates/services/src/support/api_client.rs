@@ -1,8 +1,11 @@
+use std::error::Error;
+use std::future::Future;
+
 use primitives::{Device, Platform, SupportAction, SupportMessage, SupportMessageInput};
-use std::{error::Error, future::Future};
 use storage::{Database, DeviceRecord, SupportSessionsRepository};
 
-use services::support::{ChatwootClient, ChatwootSession};
+use super::chatwoot::ChatwootClient;
+use super::model::ChatwootSession;
 
 pub struct SupportApiClient {
     chatwoot_ios: ChatwootClient,

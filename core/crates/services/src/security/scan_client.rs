@@ -6,19 +6,22 @@ use std::time::{Duration, Instant};
 
 use cacher::{AccessTokenCacherClient, CacheKey, CacherClient};
 use config_keys::{ConfigKey, ConfigParamKey};
+use futures::future;
 use gem_client::ReqwestClient;
 use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::{ScanOutcome, ScanProvider, ScanTransaction, ScanTransactionPayload, ScanType};
-use rocket::futures::future;
 use security::providers::goplus::GoPlusProvider;
 use security::transaction_scan::{ProviderCheck, ScanSubject, ScanTargets, TransactionScanInput, TransactionScanResult, evaluate_transaction_scan, plan_transaction_scan, scan_subjects, token_asset_ids, website_host};
 use security::{ScanProviderConfig, ScanProviderFactory, ScanResult, TransactionScanProviders};
 use serde_json::json;
-use services::ConfigCacher;
 use settings::Settings;
 use storage::{AssetsRepository, Database, DatabaseError, ScanAddressesRepository, ScanDetectionsRepository};
 
-use crate::metrics::Metrics;
+use crate::ConfigCacher;
+
+pub trait ScanMetrics: Send + Sync {
+    fn record_scan(&self, provider: ScanProvider, scan_type: ScanType, outcome: ScanOutcome, latency: Duration);
+}
 
 pub fn scan_providers(settings: &Settings, cacher: CacherClient, timeout: Duration) -> Result<TransactionScanProviders, Box<dyn Error + Send + Sync>> {
     let config = ScanProviderConfig::new(&settings.security, timeout);
@@ -48,11 +51,11 @@ pub struct ScanClient {
     config_cacher: Arc<ConfigCacher>,
     cacher: CacherClient,
     config: TransactionScanConfig,
-    metrics: Arc<Metrics>,
+    metrics: Arc<dyn ScanMetrics>,
 }
 
 impl ScanClient {
-    pub fn new(database: Database, config_cacher: Arc<ConfigCacher>, cacher: CacherClient, config: TransactionScanConfig, metrics: Arc<Metrics>) -> Self {
+    pub fn new(database: Database, config_cacher: Arc<ConfigCacher>, cacher: CacherClient, config: TransactionScanConfig, metrics: Arc<dyn ScanMetrics>) -> Self {
         Self {
             database,
             config_cacher,

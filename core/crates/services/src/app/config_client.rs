@@ -1,5 +1,6 @@
-use primitives::{AssetBasic, ConfigResponse, ConfigVersions, FiatAssets, SwapConfig, SwapProvider};
 use std::error::Error;
+
+use primitives::{AssetBasic, ConfigResponse, ConfigVersions, FiatAssets, SwapConfig, SwapProvider};
 use storage::{AssetFilter, AssetsRepository, Database, DatabaseError, ReleasesRepository};
 
 #[derive(Clone)]
@@ -33,13 +34,13 @@ impl ConfigClient {
                 swap_assets: FiatAssets::version(&swap_assets) as i32,
             },
             swap: SwapConfig {
-                enabled_providers: SwapProvider::all().iter().map(|x| x.as_ref().to_string()).collect(),
+                enabled_providers: SwapProvider::all().iter().map(|provider| provider.as_ref().to_string()).collect(),
             },
         };
         Ok(response)
     }
 
     fn version(assets: Vec<AssetBasic>) -> i32 {
-        FiatAssets::version(&assets.into_iter().map(|x| x.asset.id.to_string()).collect::<Vec<String>>()) as i32
+        FiatAssets::version(&assets.into_iter().map(|asset| asset.asset.id.to_string()).collect::<Vec<String>>()) as i32
     }
 }

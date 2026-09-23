@@ -3,7 +3,7 @@ use rocket::Request;
 use rocket::http::Status;
 use rocket::outcome::Outcome::{Error, Success};
 use rocket::request::{FromRequest, Outcome};
-use storage::{ApiClientResource, ApiClientScope, ApiClientsRepository, Database};
+use services::access::{AccessClient, ApiClientScope};
 
 use crate::responders::cache_error;
 
@@ -37,12 +37,11 @@ async fn authorize_api_client(req: &Request<'_>, scope: ApiClientScope) -> Outco
         Err(outcome) => return outcome,
     };
 
-    let Success(database) = req.guard::<&rocket::State<Database>>().await else {
+    let Success(access) = req.guard::<&rocket::State<AccessClient>>().await else {
         return error_outcome(req, Status::InternalServerError, "Database not available");
     };
 
-    let secret = secret.to_string();
-    let exists = match database.run(move |client| client.has_enabled_api_client(&secret, scope, ApiClientResource::Global)).await {
+    let exists = match access.is_api_client_allowed(secret, scope).await {
         Ok(exists) => exists,
         Err(_) => return error_outcome(req, Status::InternalServerError, "Failed to load API client"),
     };

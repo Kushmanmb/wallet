@@ -1,18 +1,26 @@
+pub mod access;
+pub mod app;
 pub mod assets;
 pub mod auth;
 mod backend;
+pub mod chain;
 mod config;
 pub mod defi;
 pub mod devices;
 pub mod fiat;
+pub mod indexer;
 pub mod nft;
 pub mod notifications;
 pub mod prices;
 pub mod rewards;
+pub mod security;
 mod static_assets;
 pub mod support;
 pub mod transactions;
+pub mod webhooks;
 
 pub use backend::Services;
+pub use cacher::CacheError;
 pub use config::ConfigCacher;
 pub use static_assets::StaticAssetsClient;
+pub use storage::DatabaseError;

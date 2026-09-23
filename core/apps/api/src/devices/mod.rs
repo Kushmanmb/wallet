@@ -1,16 +1,13 @@
 pub mod auth_config;
 pub(crate) mod body;
-pub mod clients;
 pub mod constants;
 pub mod error;
 pub mod guard;
 pub mod signature;
 use crate::params::{AssetIdParam, ChainParam, ChartPeriodParam, CurrencyParam, FiatProviderIdParam, FiatQuoteTypeParam, NftAssetIdParam, QueryLimitParam, TransactionIdParam, UserAgent};
 use crate::responders::{ApiError, ApiResponse};
-use crate::support::SupportApiClient;
 use auth_config::AuthConfig;
 use body::DeviceJson;
-pub use clients::{ScanClient, TransactionScanConfig, scan_providers};
 use gem_auth::create_device_token;
 use guard::{AuthenticatedDevice, AuthenticatedDeviceWallet, VerifiedDeviceId};
 use name_resolver::NameClient;
@@ -29,12 +26,14 @@ use services::auth::AuthClient;
 use services::defi::DefiClient;
 use services::devices::{DevicesClient, WalletConfigurationClient, WalletsClient};
 use services::fiat::FiatClient;
+use services::indexer::IndexerClient;
 use services::nft::NFTClient;
 use services::notifications::NotificationsClient;
 use services::prices::{PortfolioClient, PriceAlertClient};
 use services::rewards::{RewardsClient, RewardsRedemptionClient};
+use services::security::ScanClient;
+use services::support::SupportApiClient;
 use services::transactions::{AddressNamesClient, TransactionsClient};
-use streamer::{StreamProducer, StreamProducerQueue};
 
 use crate::auth::WalletSigned;
 
@@ -119,8 +118,8 @@ pub async fn get_device_nft_asset_v2(_device: AuthenticatedDevice, asset_id: Nft
 }
 
 #[post("/devices/nft_assets/<asset_id>/refresh")]
-pub async fn refresh_device_nft_asset_v2(_device: AuthenticatedDeviceWallet, asset_id: NftAssetIdParam, stream_producer: &State<StreamProducer>) -> Result<ApiResponse<bool>, ApiError> {
-    Ok(stream_producer.publish_fetch_nft_asset(asset_id.0).await?.into())
+pub async fn refresh_device_nft_asset_v2(_device: AuthenticatedDeviceWallet, asset_id: NftAssetIdParam, client: &State<IndexerClient>) -> Result<ApiResponse<bool>, ApiError> {
+    Ok(client.fetch_nft_asset(asset_id.0).await?.into())
 }
 
 #[get("/devices/defi/positions")]

@@ -1,4 +1,3 @@
-use cacher::CacheError;
 use fiat::error::FiatQuoteError;
 use gem_auth::JwtError;
 use gem_client::ClientError;
@@ -8,7 +7,7 @@ use rocket::response::{Responder, Response};
 use rocket::serde::json::Json;
 use rocket::{Request, http::Status};
 use serde::Serialize;
-use storage::DatabaseError;
+use services::{CacheError, DatabaseError};
 use strum::ParseError;
 
 pub struct ErrorContext(pub String);
@@ -181,11 +180,10 @@ impl<'r, T: Serialize> Responder<'r, 'static> for ApiResponse<T> {
 #[cfg(test)]
 mod tests {
     use super::ApiError;
-    use cacher::CacheError;
     use gem_client::ClientError;
     use primitives::RequestError;
     use rewards::{RewardsError, RewardsRedemptionError};
-    use storage::DatabaseError;
+    use services::{CacheError, DatabaseError};
 
     #[test]
     fn test_cache_not_found_maps_to_public_not_found() {

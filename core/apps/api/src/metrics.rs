@@ -10,6 +10,7 @@ use prometheus_client::metrics::histogram::{Histogram, exponential_buckets};
 use rocket::response::content::RawText;
 use rocket::{State, get};
 use security::TransactionScanProviders;
+use services::security::ScanMetrics;
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 struct ScanLabels {
@@ -51,8 +52,10 @@ impl Metrics {
         registry.registry_mut().register("security_scan_latency_milliseconds", "Security provider request latency", scan_latency.clone());
         Self { registry, scan_latency }
     }
+}
 
-    pub fn record_scan(&self, provider: ScanProvider, scan_type: ScanType, outcome: ScanOutcome, latency: Duration) {
+impl ScanMetrics for Metrics {
+    fn record_scan(&self, provider: ScanProvider, scan_type: ScanType, outcome: ScanOutcome, latency: Duration) {
         self.scan_latency
             .get_or_create(&ScanLabels {
                 provider: provider.as_ref().to_string(),
