@@ -7,10 +7,15 @@ use primitives::rewards::{RewardRedemptionOption, RewardStatus};
 use primitives::{Localize, NaiveDateTimeExt, Platform, ReferralLeaderboard, RewardEvent, Rewards, WalletId, WalletSource, WalletType, now};
 use pusher::PusherClient;
 use rewards::{ReferralError, ReferralValidationError, RewardsError, RiskScoreConfig, RiskScoringInput, UsernameError};
-use services::ConfigCacher;
-use services::rewards::{IpSecurityClient, ReferralVerificationConfig, RiskAssessment, assess_referral_risk, create_username, referral_use_facts, rewards_by_wallet_id, use_or_verify_referral, username_rules};
 use storage::{Database, DatabaseError, DeviceRecord, NewWallet, RewardsRedemptionsRepository, RewardsRepository, WalletsRepository};
 use streamer::{RewardsNotificationPayload, StreamProducer, StreamProducerQueue};
+
+use super::ip_security_client::IpSecurityClient;
+use super::referral::{ReferralVerificationConfig, referral_use_facts, use_or_verify_referral};
+use super::risk::{RiskAssessment, assess_referral_risk};
+use super::summary::rewards_by_wallet_id;
+use super::username::{create_username, username_rules};
+use crate::ConfigCacher;
 
 enum ReferralCodeUse {
     Applied(Vec<RewardEvent>),
@@ -28,7 +33,7 @@ struct ReferralSecurityConfig {
     ineligible_countries: Vec<String>,
 }
 
-async fn referrer_multiplier(config: &ConfigCacher, status: &RewardStatus) -> Result<i64, storage::DatabaseError> {
+async fn referrer_multiplier(config: &ConfigCacher, status: &RewardStatus) -> Result<i64, DatabaseError> {
     if *status == RewardStatus::Trusted {
         config.get_i64(ConfigKey::ReferralTrustedMultiplier).await
     } else {
@@ -68,9 +73,9 @@ impl RewardsClient {
     pub async fn get_rewards_by_wallet_id(&self, wallet_id: i32) -> Result<Rewards, Box<dyn Error + Send + Sync>> {
         let rules = username_rules(&self.config).await?;
         match self.db.run(move |client| rewards_by_wallet_id(client, wallet_id, &rules)).await {
-            Ok(r) => Ok(r),
+            Ok(rewards) => Ok(rewards),
             Err(error) if error.is_not_found() => Ok(Rewards::default()),
-            Err(e) => Err(e.into()),
+            Err(error) => Err(error.into()),
         }
     }
 
@@ -91,13 +96,13 @@ impl RewardsClient {
         let wallet_identifier = wallet_identifier.to_string();
         let wallet = self.db.run(move |client| client.get_wallet(&wallet_identifier)).await?;
 
-        self.consume_username_creation_limits(ip_address, device_id).await.map_err(|e| self.map_username_error(e, locale))?;
+        self.consume_username_creation_limits(ip_address, device_id).await.map_err(|error| self.map_username_error(error, locale))?;
 
         let ip_result = self.ip_security_client.check_ip(ip_address).await?;
 
         self.consume_username_creation_limit(RateLimitKey::UsernameCreationPerCountryLimit, &ip_result.country_code)
             .await
-            .map_err(|e| self.map_username_error(e, locale))?;
+            .map_err(|error| self.map_username_error(error, locale))?;
 
         let username = code.to_string();
         let rules = username_rules(&self.config).await?;
@@ -206,7 +211,7 @@ impl RewardsClient {
     async fn validate_and_score_referral(&self, device: &DeviceRecord, wallet_id: i32, referrer_username: &str, ip_address: &str, user_agent: &str) -> ReferralProcessResult {
         match self.validate_and_score_referral_inner(device, wallet_id, referrer_username, ip_address, user_agent).await {
             Ok(result) => result,
-            Err(e) => ReferralProcessResult::Failed(e),
+            Err(error) => ReferralProcessResult::Failed(error),
         }
     }
 
@@ -258,7 +263,7 @@ impl RewardsClient {
             match self.pusher.is_device_token_valid(&device.device.token, device.device.platform.as_i32()).await {
                 Ok(true) => {}
                 Ok(false) => return Err(ReferralError::InvalidDeviceToken("token_not_registered".to_string())),
-                Err(e) => return Err(ReferralError::InvalidDeviceToken(e.to_string())),
+                Err(error) => return Err(ReferralError::InvalidDeviceToken(error.to_string())),
             }
         }
 
@@ -313,14 +318,14 @@ impl RewardsClient {
         self.rate_limiter.consume(key, scope, self.config.get_rate_limit(key).await?).await
     }
 
-    async fn load_referral_security_config(&self) -> Result<ReferralSecurityConfig, storage::DatabaseError> {
+    async fn load_referral_security_config(&self) -> Result<ReferralSecurityConfig, DatabaseError> {
         Ok(ReferralSecurityConfig {
             tor_allowed: self.config.get_bool(ConfigKey::ReferralIpTorAllowed).await?,
             ineligible_countries: self.config.get_vec_string(ConfigKey::ReferralIneligibleCountries).await?,
         })
     }
 
-    async fn load_risk_score_config(&self) -> Result<RiskScoreConfig, storage::DatabaseError> {
+    async fn load_risk_score_config(&self) -> Result<RiskScoreConfig, DatabaseError> {
         Ok(RiskScoreConfig {
             fingerprint_match_penalty_per_referrer: self.config.get_i64(ConfigKey::ReferralRiskScoreFingerprintMatchPerReferrer).await?,
             fingerprint_match_max_penalty: self.config.get_i64(ConfigKey::ReferralRiskScoreFingerprintMatchMaxPenalty).await?,

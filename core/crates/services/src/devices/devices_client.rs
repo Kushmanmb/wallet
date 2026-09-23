@@ -1,11 +1,19 @@
-use crate::admin::model::AdminDevice;
+use std::error::Error;
+
 use primitives::Device;
 use push_notification::{GorushNotification, PushNotification, PushNotificationTypes};
 use pusher::PusherClient;
-use std::error::Error;
-use storage::{Database, DatabaseError, DevicesRepository, PriceAlertsRepository};
+use storage::{Database, DatabaseError, DeviceRecord, DevicesRepository, PriceAlertsRepository, WalletRecord, WalletsRepository};
 
-use super::clients::WalletsClient;
+use super::admin_device::AdminDevice;
+use super::wallets_client::WalletsClient;
+
+pub enum DeviceWalletLookup {
+    Found(DeviceRecord, WalletRecord),
+    DeviceNotFound,
+    WalletNotFound,
+    WalletUnavailable,
+}
 
 #[derive(Clone)]
 pub struct DevicesClient {
@@ -67,5 +75,27 @@ impl DevicesClient {
     pub async fn is_device_registered(&self, device_id: &str) -> Result<bool, Box<dyn Error + Send + Sync>> {
         let device_id = device_id.to_string();
         Ok(self.database.run(move |client| client.get_device_exist(&device_id)).await?)
+    }
+
+    pub async fn find_device_record(&self, device_id: &str) -> Result<Option<DeviceRecord>, DatabaseError> {
+        let device_id = device_id.to_string();
+        self.database.run(move |client| Ok(client.get_device_record(&device_id).ok())).await
+    }
+
+    pub async fn find_device_wallet(&self, device_id: &str, wallet_id: &str) -> Result<DeviceWalletLookup, DatabaseError> {
+        let device_id = device_id.to_string();
+        let wallet_id = wallet_id.to_string();
+        self.database
+            .run(move |client| {
+                let Ok(device) = client.get_device_record(&device_id) else {
+                    return Ok(DeviceWalletLookup::DeviceNotFound);
+                };
+                Ok(match client.get_wallet_by_device_and_identifier(device.id, &wallet_id) {
+                    Ok(wallet) => DeviceWalletLookup::Found(device, wallet),
+                    Err(error) if error.is_not_found() => DeviceWalletLookup::WalletNotFound,
+                    Err(_) => DeviceWalletLookup::WalletUnavailable,
+                })
+            })
+            .await
     }
 }

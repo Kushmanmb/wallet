@@ -1,6 +1,5 @@
 pub mod auth_config;
 pub(crate) mod body;
-pub mod client;
 pub mod clients;
 pub mod constants;
 pub mod error;
@@ -11,10 +10,7 @@ use crate::responders::{ApiError, ApiResponse};
 use crate::support::SupportApiClient;
 use auth_config::AuthConfig;
 use body::DeviceJson;
-pub use client::DevicesClient;
-pub use clients::{
-    AddressNamesClient, FiatQuotesClient, NotificationsClient, PortfolioClient, RewardsClient, RewardsRedemptionClient, ScanClient, TransactionScanConfig, TransactionsClient, WalletConfigurationClient, WalletsClient, scan_providers,
-};
+pub use clients::{AddressNamesClient, ScanClient, TransactionScanConfig, TransactionsClient, scan_providers};
 use gem_auth::create_device_token;
 use guard::{AuthenticatedDevice, AuthenticatedDeviceWallet, VerifiedDeviceId};
 use name_resolver::NameClient;
@@ -31,8 +27,12 @@ use rocket::{FromForm, State, delete, get, post, put};
 use services::assets::AssetsClient;
 use services::auth::AuthClient;
 use services::defi::DefiClient;
+use services::devices::{DevicesClient, WalletConfigurationClient, WalletsClient};
+use services::fiat::FiatClient;
 use services::nft::NFTClient;
-use services::prices::PriceAlertClient;
+use services::notifications::NotificationsClient;
+use services::prices::{PortfolioClient, PriceAlertClient};
+use services::rewards::{RewardsClient, RewardsRedemptionClient};
 use streamer::{StreamProducer, StreamProducerQueue};
 
 use crate::auth::WalletSigned;
@@ -260,18 +260,18 @@ pub async fn delete_device_price_alerts_v2(device: AuthenticatedDevice, price_al
 }
 
 #[get("/devices/fiat/transactions")]
-pub async fn get_device_fiat_transactions_v2(device: AuthenticatedDeviceWallet, client: &State<FiatQuotesClient>) -> Result<ApiResponse<Vec<primitives::FiatTransactionData>>, ApiError> {
+pub async fn get_device_fiat_transactions_v2(device: AuthenticatedDeviceWallet, client: &State<FiatClient>) -> Result<ApiResponse<Vec<primitives::FiatTransactionData>>, ApiError> {
     Ok(client.get_transactions_by_device_wallet_id(device.record.id, device.wallet_id).await?.into())
 }
 
 #[get("/fiat/assets/<quote_type>")]
-pub async fn get_fiat_assets(quote_type: FiatQuoteTypeParam, client: &State<FiatQuotesClient>) -> Result<ApiResponse<FiatAssets>, ApiError> {
-    Ok(client.get_assets(quote_type.0).await?.into())
+pub async fn get_fiat_assets(quote_type: FiatQuoteTypeParam, client: &State<FiatClient>) -> Result<ApiResponse<FiatAssets>, ApiError> {
+    Ok(client.get_quote_assets(quote_type.0).await?.into())
 }
 
 #[get("/devices/fiat/assets/<quote_type>")]
-pub async fn get_device_fiat_assets_v2(_device: AuthenticatedDevice, quote_type: FiatQuoteTypeParam, client: &State<FiatQuotesClient>) -> Result<ApiResponse<FiatAssets>, ApiError> {
-    Ok(client.get_assets(quote_type.0).await?.into())
+pub async fn get_device_fiat_assets_v2(_device: AuthenticatedDevice, quote_type: FiatQuoteTypeParam, client: &State<FiatClient>) -> Result<ApiResponse<FiatAssets>, ApiError> {
+    Ok(client.get_quote_assets(quote_type.0).await?.into())
 }
 
 #[get("/devices/fiat/quotes/<quote_type>/<asset_id>?<amount>&<currency>&<provider>")]
@@ -283,7 +283,7 @@ pub async fn get_fiat_quotes_v2(
     currency: CurrencyParam,
     provider: Option<FiatProviderIdParam>,
     ip: std::net::IpAddr,
-    client: &State<FiatQuotesClient>,
+    client: &State<FiatClient>,
 ) -> Result<ApiResponse<FiatQuotes>, ApiError> {
     let ip_address = ip.to_string();
     let quote_request = FiatQuoteRequest {
@@ -300,7 +300,7 @@ pub async fn get_fiat_quotes_v2(
 }
 
 #[get("/devices/fiat/quotes/<quote_id>/url")]
-pub async fn get_fiat_quote_url_v2(device: AuthenticatedDeviceWallet, quote_id: &str, ip: std::net::IpAddr, client: &State<FiatQuotesClient>) -> Result<ApiResponse<FiatQuoteUrl>, ApiError> {
+pub async fn get_fiat_quote_url_v2(device: AuthenticatedDeviceWallet, quote_id: &str, ip: std::net::IpAddr, client: &State<FiatClient>) -> Result<ApiResponse<FiatQuoteUrl>, ApiError> {
     let locale = device.record.device.locale.as_ref();
     let ip_address = ip.to_string();
     let context = fiat::FiatDeviceContext::new(device.record.id, device.wallet_id, device.wallet_type, ip_address);

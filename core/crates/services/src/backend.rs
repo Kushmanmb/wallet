@@ -27,10 +27,14 @@ use crate::assets::{AssetsClient, SearchClient};
 use crate::auth::AuthClient;
 use crate::config::ConfigCacher;
 use crate::defi::DefiClient;
+use crate::devices::{DevicesClient, WalletConfigurationClient, WalletsClient};
 use crate::fiat::FiatClient;
 use crate::nft::NFTClient;
+use crate::notifications::NotificationsClient;
+use crate::prices::PortfolioClient;
 use crate::prices::{ChartClient, MarketsClient, PriceAlertClient, PriceClient};
 use crate::rewards::IpSecurityClient;
+use crate::rewards::{RewardsClient, RewardsRedemptionClient};
 use crate::support::SupportClient;
 
 #[derive(Clone)]
@@ -186,6 +190,34 @@ impl Services {
 
     pub async fn search(&self, price_client: PriceClient) -> Result<SearchClient, Box<dyn Error + Send + Sync>> {
         Ok(SearchClient::new(self.search_index().await?, price_client))
+    }
+
+    pub fn devices(&self) -> DevicesClient {
+        DevicesClient::new(self.database(), self.pusher())
+    }
+
+    pub fn wallets(&self, stream_producer: StreamProducer) -> WalletsClient {
+        WalletsClient::new(self.database(), stream_producer)
+    }
+
+    pub fn wallet_configuration(&self, cacher: CacherClient, user_agent: &str) -> WalletConfigurationClient {
+        WalletConfigurationClient::new(self.database(), self.chain_providers(user_agent), cacher)
+    }
+
+    pub fn notifications(&self) -> NotificationsClient {
+        NotificationsClient::new(self.database())
+    }
+
+    pub fn rewards(&self, cacher: CacherClient, stream_producer: StreamProducer, ip_security: IpSecurityClient) -> RewardsClient {
+        RewardsClient::new(self.database(), self.config(), cacher, stream_producer, ip_security, self.pusher())
+    }
+
+    pub fn rewards_redemption(&self, stream_producer: StreamProducer) -> RewardsRedemptionClient {
+        RewardsRedemptionClient::new(self.database(), self.config(), stream_producer)
+    }
+
+    pub fn portfolio(&self, config: PriceConfig) -> PortfolioClient {
+        PortfolioClient::new(self.database(), config)
     }
 }
 

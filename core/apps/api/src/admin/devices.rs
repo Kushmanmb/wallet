@@ -1,9 +1,10 @@
-use crate::admin::model::AdminDevice;
 use primitives::{FiatTransactionData, TransactionsResponse, WalletSubscription};
 use rocket::{State, get};
+use services::devices::{AdminDevice, DevicesClient, WalletsClient};
+use services::fiat::FiatClient;
 
 use crate::api_clients::{PermissionDeviceRead, PermissionDeviceSubscriptionsRead, PermissionDeviceTransactionsRead, PermissionFiatTransactionsRead};
-use crate::devices::{DevicesClient, FiatQuotesClient, TransactionsClient, WalletsClient};
+use crate::devices::TransactionsClient;
 use crate::responders::{ApiError, ApiResponse};
 
 #[get("/devices/<device_id>")]
@@ -27,6 +28,6 @@ pub async fn get_device_transactions(_permission: PermissionDeviceTransactionsRe
 }
 
 #[get("/devices/<device_id>/fiat/transactions")]
-pub async fn get_device_fiat_transactions(_permission: PermissionFiatTransactionsRead, device_id: &str, client: &State<FiatQuotesClient>) -> Result<ApiResponse<Vec<FiatTransactionData>>, ApiError> {
+pub async fn get_device_fiat_transactions(_permission: PermissionFiatTransactionsRead, device_id: &str, client: &State<FiatClient>) -> Result<ApiResponse<Vec<FiatTransactionData>>, ApiError> {
     Ok(client.get_transactions_by_device_id(device_id).await?.into())
 }

@@ -1,10 +1,11 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::error::Error;
 
-use crate::admin::model::AdminWalletOverview;
 use primitives::{AddressChains, Chain, WalletId, WalletSource, WalletSubscription, WalletSubscriptionChains};
 use storage::{Database, DatabaseError, DevicesRepository, FiatRepository, NewWallet, NftRepository, RewardsRepository, TransactionsRepository, WalletsRepository};
 use streamer::{ChainAddressPayload, StreamProducer, StreamProducerQueue};
+
+use super::admin_device::AdminWalletOverview;
 
 #[derive(Clone)]
 pub struct WalletsClient {

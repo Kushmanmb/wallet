@@ -11,9 +11,10 @@ use fiat::{FiatDeviceContext, FiatProvider, FiatWebhookRequest, IPAddressInfo, I
 use futures::future::join_all;
 use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::{
-    Asset, AssetId, Chain, FiatAsset, FiatAssetSymbol, FiatAssets, FiatQuoteError as ProviderQuoteError, FiatQuoteRequest, FiatQuoteType, FiatQuoteUrl, FiatQuoteUrlData, FiatQuotes, FiatTransaction, FiatWebhook, RequestError,
+    Asset, AssetId, Chain, FiatAsset, FiatAssetSymbol, FiatAssets, FiatQuoteError as ProviderQuoteError, FiatQuoteRequest, FiatQuoteType, FiatQuoteUrl, FiatQuoteUrlData, FiatQuotes, FiatTransaction, FiatTransactionData, FiatWebhook,
+    RequestError,
 };
-use storage::{AssetFilter, AssetsRepository, Database, DatabaseError, FiatRepository, WalletAddress, WalletsRepository};
+use storage::{AssetFilter, AssetsRepository, Database, DatabaseError, DevicesRepository, FiatRepository, WalletAddress, WalletsRepository};
 use streamer::{FiatWebhookPayload, QueueName, StreamProducer};
 
 use super::fiat_cacher_client::{CachedFiatQuote, FiatCacherClient};
@@ -50,6 +51,30 @@ impl FiatClient {
 
     pub async fn get_off_ramp_assets(&self) -> Result<FiatAssets, Box<dyn Error + Send + Sync>> {
         self.get_assets(AssetFilter::IsSellable(true)).await
+    }
+
+    pub async fn get_quote_assets(&self, quote_type: FiatQuoteType) -> Result<FiatAssets, Box<dyn Error + Send + Sync>> {
+        match quote_type {
+            FiatQuoteType::Buy => self.get_on_ramp_assets().await,
+            FiatQuoteType::Sell => self.get_off_ramp_assets().await,
+        }
+    }
+
+    pub async fn get_transactions_by_device_wallet_id(&self, device_row_id: i32, wallet_id: i32) -> Result<Vec<FiatTransactionData>, Box<dyn Error + Send + Sync>> {
+        let transactions = self.database.run(move |client| client.get_fiat_transactions_by_device_and_wallet_id(device_row_id, wallet_id)).await?;
+        Ok(transactions.into_iter().map(fiat::fiat_transaction_info).collect())
+    }
+
+    pub async fn get_transactions_by_device_id(&self, device_id: &str) -> Result<Vec<FiatTransactionData>, Box<dyn Error + Send + Sync>> {
+        let device_id = device_id.to_string();
+        let transactions = self
+            .database
+            .run(move |client| -> Result<_, DatabaseError> {
+                let device_row_id = client.get_device_row_id(&device_id)?;
+                client.get_fiat_transactions_by_device_id(device_row_id)
+            })
+            .await?;
+        Ok(transactions.into_iter().map(fiat::fiat_transaction_info).collect())
     }
 
     pub async fn process_and_publish_webhook(&self, request: FiatWebhookRequest, provider_name: &str) -> Result<FiatWebhookPayload, Box<dyn Error + Send + Sync>> {

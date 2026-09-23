@@ -5,10 +5,13 @@ use config_keys::{ConfigKey, RateLimitKey, RateLimitWindow};
 use primitives::rewards::{RedemptionResult, Rewards};
 use primitives::{NaiveDateTimeExt, now};
 use rewards::RewardsRedemptionError;
-use services::ConfigCacher;
-use services::rewards::{redeem_points, rewards_by_wallet_id, username_rules};
 use storage::{Database, RewardsRedemptionsRepository, RewardsRepository};
 use streamer::{RewardsRedemptionPayload, StreamProducer, StreamProducerQueue};
+
+use super::redemption::redeem_points;
+use super::summary::rewards_by_wallet_id;
+use super::username::username_rules;
+use crate::ConfigCacher;
 
 pub struct RewardsRedemptionClient {
     database: Database,

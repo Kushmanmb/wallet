@@ -1,7 +1,7 @@
 use rocket::Request;
 use rocket::outcome::Outcome::Success;
 use rocket::request::{FromRequest, Outcome};
-use storage::DeviceRecord;
+use services::devices::DeviceRecord;
 
 use super::auth::{authenticate, lookup_device};
 

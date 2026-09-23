@@ -2,7 +2,7 @@ use primitives::{WalletId, WalletType};
 use rocket::Request;
 use rocket::outcome::Outcome::Success;
 use rocket::request::{FromRequest, Outcome};
-use storage::DeviceRecord;
+use services::devices::DeviceRecord;
 
 use super::auth::{auth_error_outcome, authenticate, lookup_device_wallet};
 use crate::devices::error::DeviceError;

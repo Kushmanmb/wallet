@@ -1,8 +1,9 @@
+use std::error::Error;
+
 use chrono::{DateTime, Utc};
 use in_app_notifications::map_notification;
 use localizer::LanguageLocalizer;
 use primitives::InAppNotification;
-use std::error::Error;
 use storage::{Database, DatabaseError, DevicesRepository, NotificationsRepository};
 
 #[derive(Clone)]
@@ -27,7 +28,7 @@ impl NotificationsClient {
             })
             .await?;
         let localizer = LanguageLocalizer::new_with_language(device.locale.as_ref());
-        Ok(notifications.into_iter().filter_map(|n| map_notification(n, &localizer)).collect())
+        Ok(notifications.into_iter().filter_map(|notification| map_notification(notification, &localizer)).collect())
     }
 
     pub async fn mark_all_as_read(&self, device_id: &str) -> Result<usize, Box<dyn Error + Send + Sync>> {

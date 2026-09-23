@@ -7847,6 +7847,7 @@ dependencies = [
  "gem_tracing",
  "hex",
  "hmac 0.13.0",
+ "in_app_notifications",
  "lists",
  "localizer",
  "nft",

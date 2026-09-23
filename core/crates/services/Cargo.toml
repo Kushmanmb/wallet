@@ -18,6 +18,7 @@ gem_jsonrpc = { path = "../gem_jsonrpc", features = ["client", "reqwest"] }
 gem_tracing = { path = "../gem_tracing" }
 hex = { workspace = true }
 hmac = { workspace = true }
+in_app_notifications = { path = "../in_app_notifications" }
 lists = { path = "../lists" }
 localizer = { path = "../localizer" }
 nft = { path = "../nft" }
