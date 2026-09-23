@@ -65,6 +65,7 @@ object DataModule {
 
     @Provides
     fun provideGemAssetSelectionService(
+        assetsService: GemAssetsService,
         searchService: GemSearchService,
         balanceService: GemBalanceService,
         priceAlertService: GemPriceAlertService,
@@ -74,6 +75,7 @@ object DataModule {
         walletSessionService: GemWalletSessionService,
         swapService: GemSwapService,
     ): GemAssetSelectionServiceInterface = GemAssetSelectionService(
+        assetsService,
         searchService,
         balanceService,
         priceAlertService,

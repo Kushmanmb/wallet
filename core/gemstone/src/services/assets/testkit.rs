@@ -46,6 +46,7 @@ fn as_stored(basic: AssetBasic) -> AssetBasic {
 #[derive(Default)]
 pub struct MemoryAssetStore {
     pub assets: Mutex<Vec<AssetBasic>>,
+    pub id_reads: Mutex<usize>,
     pub asset_writes: Mutex<Vec<Vec<AssetBasic>>>,
     pub added_balances: Mutex<Vec<(WalletId, Vec<AssetId>, bool)>>,
     pub buyable_writes: Mutex<Vec<Vec<AssetId>>>,
@@ -57,6 +58,7 @@ pub struct MemoryAssetStore {
 #[async_trait]
 impl GemAssetStore for MemoryAssetStore {
     async fn get_asset_ids(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, GemServiceError> {
+        *self.id_reads.lock().unwrap() += 1;
         Ok(self.get_assets(asset_ids).await?.into_iter().map(|asset| asset.id).collect())
     }
     async fn get_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<Asset>, GemServiceError> {

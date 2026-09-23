@@ -110,6 +110,7 @@ public extension ViewModelFactory {
 
     private func assetSelectionService() -> GemAssetSelectionService {
         GemAssetSelectionService(
+            assets: assetsService,
             search: searchService,
             balances: balanceService,
             priceAlerts: priceAlertService,

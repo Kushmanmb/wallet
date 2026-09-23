@@ -101,7 +101,7 @@ private final class InvalidationObserver: NSObject, URLSessionWebSocketDelegate,
         self.onInvalid = onInvalid
     }
 
-    func urlSession(_ session: URLSession, didBecomeInvalidWithError _: Error?) {
+    func urlSession(_: URLSession, didBecomeInvalidWithError _: Error?) {
         onInvalid()
     }
 

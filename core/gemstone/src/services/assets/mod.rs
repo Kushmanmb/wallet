@@ -131,13 +131,24 @@ impl GemAssetsService {
         Ok(associations)
     }
 
+    pub(crate) async fn prepare_for_action(&self, action: GemAssetAction, asset_id: AssetId) -> Result<(), GemServiceError> {
+        match action {
+            GemAssetAction::Receive => self.sync_asset_associations(asset_id).await.map(|_| ()),
+            GemAssetAction::Open | GemAssetAction::Send | GemAssetAction::Buy | GemAssetAction::Sell | GemAssetAction::SwapPay | GemAssetAction::SwapReceive => Ok(()),
+        }
+    }
+
     pub async fn sync_missing_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, GemServiceError> {
         let existing = self.store.get_asset_ids(asset_ids.clone()).await?;
         let missing = rules::missing_asset_ids(asset_ids, existing);
         if missing.is_empty() {
             return Ok(vec![]);
         }
-        let assets = self.api.client.get_assets(missing, None).await.map_err(GemApiError::from)?;
+        self.save_backend_assets(missing).await
+    }
+
+    async fn save_backend_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, GemServiceError> {
+        let assets = self.api.client.get_assets(asset_ids, None).await.map_err(GemApiError::from)?;
         let asset_ids = assets.iter().map(|asset| asset.asset.id.clone()).collect();
         self.store.save_assets(assets).await?;
         Ok(asset_ids)
@@ -149,7 +160,7 @@ impl GemAssetsService {
         if missing.is_empty() {
             return self.assets(asset_ids).await;
         }
-        let synced = self.sync_missing_assets(missing.clone()).await.unwrap_or_default();
+        let synced = self.save_backend_assets(missing.clone()).await.unwrap_or_default();
         for asset_id in rules::missing_asset_ids(missing, synced) {
             if self.node_token_asset(asset_id).await.is_err() {
                 continue;
@@ -329,6 +340,39 @@ mod tests {
 
             assert_eq!(assets, vec![ethereum]);
             assert!(store.asset_writes.lock().unwrap().is_empty(), "an unreadable token is not stored");
+        })
+    }
+
+    #[test]
+    fn test_only_a_receive_pick_prefetches_the_asset_associations() {
+        block_on(async {
+            let token = AssetId::from_token(Chain::Ethereum, "0xdAC17F958D2ee523a2206206994597C13D831ec7");
+
+            let sent = Arc::new(TestAlienProvider::offline());
+            let service = GemAssetsService::mock(sent.clone(), Arc::new(MemoryAssetStore::default()));
+            service.prepare_for_action(GemAssetAction::Send, token.clone()).await.unwrap();
+            assert!(sent.requested_paths().is_empty(), "sending needs no associations");
+
+            let received = Arc::new(TestAlienProvider::offline());
+            let service = GemAssetsService::mock(received.clone(), Arc::new(MemoryAssetStore::default()));
+            let _ = service.prepare_for_action(GemAssetAction::Receive, token).await;
+            assert!(!received.requested_paths().is_empty(), "receiving asks for the asset and its associations");
+        })
+    }
+
+    #[test]
+    fn test_a_simulation_token_is_checked_once_and_asked_for_once() {
+        block_on(async {
+            let provider = Arc::new(TestAlienProvider::with_json(200, USDT_RESPONSE));
+            let store = Arc::new(MemoryAssetStore::default());
+            let service = GemAssetsService::mock(provider.clone(), store.clone());
+            let usdt = AssetId::from_token(Chain::Ethereum, "0xdAC17F958D2ee523a2206206994597C13D831ec7");
+
+            let assets = service.ensure_simulation_assets(vec![usdt.clone()]).await.unwrap();
+
+            assert_eq!(assets.iter().map(|asset| asset.id.clone()).collect::<Vec<_>>(), vec![usdt]);
+            assert_eq!(*store.id_reads.lock().unwrap(), 1, "the existence read is not repeated");
+            assert_eq!(provider.requested_paths().len(), 1, "one backend request covers the missing token");
         })
     }
 
