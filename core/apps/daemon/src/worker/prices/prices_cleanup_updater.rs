@@ -5,8 +5,7 @@ use primitives::PriceProvider;
 use std::error::Error;
 use std::sync::Arc;
 use storage::ConfigCacher;
-use storage::database::prices::PriceFilter;
-use storage::{Database, DatabaseError, PricesRepository};
+use storage::{Database, DatabaseError, PriceFilter, PricesRepository};
 
 pub struct PricesCleanupUpdater {
     database: Database,

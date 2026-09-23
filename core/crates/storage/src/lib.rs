@@ -14,48 +14,37 @@ pub use config_cacher::ConfigCacher;
 
 diesel::allow_columns_to_appear_in_same_group_by_clause!(schema::transactions_addresses::address, schema::transactions::chain,);
 
-pub use self::database::{
-    DatabaseClient,
-    assets::{AssetFilter, AssetUpdate},
-    charts::ChartFilter,
-    fiat::{FiatAssetFilter, FiatAssetUpdate, FiatProviderCountryFilter, FiatProviderCountryUpdate},
-    nft::{NftAssetFilter, NftCollectionFilter},
-    prices::{AssetsWithPricesFilter, PriceUpdate},
-    referrals::{AbusePatterns, ReferralUpdate},
-    rewards::{RewardsFilter, RewardsUpdate},
-    rewards_redemptions::RedemptionUpdate,
-    transactions::{TransactionFilter, TransactionUpdate},
-};
+pub use self::database::DatabaseClient;
 pub use self::error::{DatabaseError, DieselResultExt, ReferralValidationError, UsernameValidationError};
 pub use self::models::{ApiClientGrant, ApiClientResource, ApiClientRow, ApiClientScope, AssetUsageRankRow, FiatAssetRowsExt, NewNotificationRow, NewSupportSessionRow, NewWalletRow, RewardRedemptionOptionRow};
 pub use self::repositories::{
     api_clients_repository::ApiClientsRepository,
     assets_addresses_repository::AssetsAddressesRepository,
     assets_links_repository::AssetsLinksRepository,
-    assets_repository::AssetsRepository,
+    assets_repository::{AssetFilter, AssetUpdate, AssetsRepository},
     assets_usage_ranks_repository::AssetsUsageRanksRepository,
     chains_repository::ChainsRepository,
-    charts_repository::ChartsRepository,
+    charts_repository::{ChartFilter, ChartsRepository},
     config_repository::ConfigRepository,
-    devices_repository::DevicesRepository,
-    fiat_repository::FiatRepository,
+    devices_repository::{DeviceFieldUpdate, DevicesRepository},
+    fiat_repository::{FiatAssetFilter, FiatAssetUpdate, FiatProviderCountryFilter, FiatProviderCountryUpdate, FiatRepository},
     migrations_repository::MigrationsRepository,
-    nft_repository::NftRepository,
+    nft_repository::{NftAssetFilter, NftCollectionFilter, NftRepository},
     notifications_repository::NotificationsRepository,
     parser_state_repository::ParserStateRepository,
     perpetuals_repository::PerpetualsRepository,
     price_alerts_repository::PriceAlertsRepository,
     prices_providers_repository::PricesProvidersRepository,
-    prices_repository::PricesRepository,
+    prices_repository::{AssetsWithPricesFilter, PriceFilter, PriceUpdate, PricesRepository},
     releases_repository::ReleasesRepository,
-    rewards_redemptions_repository::RewardsRedemptionsRepository,
-    rewards_repository::{ReferrerInfo, RewardsEligibilityConfig, RewardsRepository},
-    risk_signals_repository::RiskSignalsRepository,
+    rewards_redemptions_repository::{RedemptionUpdate, RewardsRedemptionsRepository},
+    rewards_repository::{ReferralUpdate, ReferrerInfo, RewardsEligibilityConfig, RewardsFilter, RewardsRepository, RewardsUpdate},
+    risk_signals_repository::{AbusePatterns, RiskSignalsRepository},
     scan_addresses_repository::ScanAddressesRepository,
     scan_detections_repository::ScanDetectionsRepository,
     support_sessions_repository::SupportSessionsRepository,
     tag_repository::TagRepository,
-    transactions_repository::TransactionsRepository,
+    transactions_repository::{TransactionFilter, TransactionUpdate, TransactionsRepository},
     wallets_repository::WalletsRepository,
 };
 pub use self::sql_types::{NotificationType, TransactionState, TransactionType, WalletSource, WalletType};
@@ -104,24 +93,24 @@ mod database_integration_tests {
         database
             .run(|client| -> Result<_, DatabaseError> {
                 client.add_chains(vec![Chain::Ethereum])?;
-                ParserStateRepository::add_parser_state(client, Chain::Ethereum, 12_000)
+                client.add_parser_state(Chain::Ethereum, 12_000)
             })
             .await
             .unwrap();
-        let initial = database.run(|client| ParserStateRepository::get_parser_state(client, Chain::Ethereum)).await.unwrap().current_block;
+        let initial = database.run(|client| client.get_parser_state(Chain::Ethereum)).await.unwrap().current_block;
 
         let rolled_back: Result<(), DatabaseError> = database
             .transaction(move |client| {
-                ParserStateRepository::set_parser_state_current_block(client, Chain::Ethereum, initial + 100)?;
+                client.set_parser_state_current_block(Chain::Ethereum, initial + 100)?;
                 Err(DatabaseError::Error("rollback".to_string()))
             })
             .await;
 
         assert!(rolled_back.is_err());
-        assert_eq!(database.run(|client| ParserStateRepository::get_parser_state(client, Chain::Ethereum)).await.unwrap().current_block, initial);
+        assert_eq!(database.run(|client| client.get_parser_state(Chain::Ethereum)).await.unwrap().current_block, initial);
 
-        database.transaction(move |client| ParserStateRepository::set_parser_state_current_block(client, Chain::Ethereum, initial + 100)).await.unwrap();
+        database.transaction(move |client| client.set_parser_state_current_block(Chain::Ethereum, initial + 100)).await.unwrap();
 
-        assert_eq!(database.run(|client| ParserStateRepository::get_parser_state(client, Chain::Ethereum)).await.unwrap().current_block, initial + 100);
+        assert_eq!(database.run(|client| client.get_parser_state(Chain::Ethereum)).await.unwrap().current_block, initial + 100);
     }
 }

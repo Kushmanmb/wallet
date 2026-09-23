@@ -26,7 +26,7 @@ impl AssetsIndexUpdater {
         let sync = self.sync_client.for_key(ConfigKey::SearchAssetsLastUpdatedAt).await?;
         let filters = sync.since().map(AssetsWithPricesFilter::UpdatedSince).into_iter().collect();
         let primary_price_max_age = self.primary_price_max_age;
-        let prices = self.database.run(move |client| PricesRepository::get_assets_with_prices(client, filters, primary_price_max_age)).await?;
+        let prices = self.database.run(move |client| client.get_assets_with_prices(filters, primary_price_max_age)).await?;
 
         if prices.is_empty() {
             return sync.write(ASSETS_INDEX_NAME, Vec::<AssetDocument>::new()).await;

@@ -3,10 +3,8 @@ use std::error::Error;
 
 use primitives::nft::NFTAssetData;
 use primitives::{AssetId, Chain, ImageFormatter, NFTAsset, NFTAssetId, NFTCollection, NFTCollectionId, NFTData};
-use storage::database::devices::DevicesStore;
-use storage::database::nft::{NftAssetFilter, NftCollectionFilter};
 use storage::models::{NewNftAssetRow, NewNftCollectionRow, NewNftReportRow, NftCollectionRow, NftLinkRow};
-use storage::{Database, DatabaseClient, DatabaseError, NftRepository, WalletsRepository};
+use storage::{Database, DatabaseClient, DatabaseError, DevicesRepository, NftAssetFilter, NftCollectionFilter, NftRepository, WalletsRepository};
 
 use crate::NFTProviderConfig;
 use crate::mapper::map_nft_data;
@@ -310,7 +308,7 @@ impl NFTClient {
         let device_id = device_id.to_string();
         self.database
             .run(move |client| -> Result<(), Box<dyn Error + Send + Sync>> {
-                let device = DevicesStore::get_device(client, &device_id)?;
+                let device = client.get_device_row(&device_id)?;
                 let collection_pk = client.get_nft_collection(&collection_id)?.id;
                 let asset_pk = asset_id.and_then(|id| client.get_nft_asset(&id.to_string()).ok().map(|row| row.id));
 

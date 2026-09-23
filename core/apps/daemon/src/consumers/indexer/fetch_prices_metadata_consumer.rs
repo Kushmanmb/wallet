@@ -6,8 +6,7 @@ use config_keys::{ConfigKey, ConfigParamKey};
 use gem_tracing::info_with_fields;
 use prices::{AssetPriceMapping, PriceProviders};
 use primitives::PriceId;
-use storage::database::assets::AssetFilter;
-use storage::{AssetUpdate, AssetsLinksRepository, AssetsRepository, ConfigCacher, Database, DatabaseError, PricesProvidersRepository, PricesRepository};
+use storage::{AssetFilter, AssetUpdate, AssetsLinksRepository, AssetsRepository, ConfigCacher, Database, DatabaseError, PricesProvidersRepository, PricesRepository};
 use streamer::consumer::MessageConsumer;
 
 pub struct FetchPricesMetadataConsumer {

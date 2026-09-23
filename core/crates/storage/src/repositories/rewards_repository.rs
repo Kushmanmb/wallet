@@ -1,21 +1,235 @@
-use crate::database::referrals::{ReferralUpdate, ReferralsStore};
-use crate::database::rewards::{RewardsFilter, RewardsStore, RewardsUpdate};
-use crate::database::transactions::{TransactionFilter, TransactionsStore};
-use crate::database::usernames::{UsernameLookup, UsernamesStore};
-use crate::database::wallets::WalletsStore;
-use crate::models::{NewRewardEventRow, NewRewardReferralRow, NewRewardsRow, NewUsernameRow, ReferralAttemptRow, RewardEventRow, RewardReferralRow, RewardsRow, UsernameRow, WalletRow};
-use crate::repositories::config_repository::ConfigRepository;
-use crate::repositories::rewards_redemptions_repository::RewardsRedemptionsRepository;
-use crate::sql_types::ChainRow;
-use crate::sql_types::{RewardEventType, RewardRedemptionType, RewardStatus, TransactionState, UsernameStatus};
-use crate::{DatabaseClient, DatabaseError, DieselResultExt, ReferralValidationError, UsernameValidationError};
 use chrono::NaiveDateTime;
 use config_keys::ConfigKey;
+use diesel::prelude::*;
+use diesel::result::Error as DieselError;
+use diesel::sql_types::Text;
 use primitives::rewards::RewardStatus as PrimitiveRewardStatus;
 use primitives::{Chain, NaiveDateTimeExt, ReferralLeader, ReferralLeaderboard, RewardEvent, Rewards, WalletId, now};
 
+use crate::models::{NewRewardEventRow, NewRewardReferralRow, NewRewardsRow, NewUsernameRow, ReferralAttemptRow, RewardEventRow, RewardReferralRow, RewardsRow, UsernameRow, WalletRow};
+use crate::repositories::config_repository::ConfigRepository;
+use crate::repositories::rewards_redemptions_repository::RewardsRedemptionsRepository;
+use crate::repositories::transactions_repository::{TransactionFilter, transactions_by_wallet_since};
+use crate::repositories::wallets_repository::{WalletsRepository, device_addresses, first_subscription_date_by_wallet_id, wallet_row};
+use crate::sql_types::ChainRow;
+use crate::sql_types::{RewardEventType, RewardRedemptionType, RewardStatus, TransactionState, UsernameStatus};
+use crate::{DatabaseClient, DatabaseError, DieselResultExt, ReferralValidationError, UsernameValidationError};
+
+#[derive(Debug, Clone)]
+pub enum ReferralUpdate {
+    VerifiedAt(NaiveDateTime),
+}
+
+#[derive(Debug, Clone)]
+pub enum RewardsUpdate {
+    Status(RewardStatus),
+    VerifyAfter(NaiveDateTime),
+    ClearVerifyAfter,
+}
+
+#[derive(Debug, Clone)]
+pub enum RewardsFilter {
+    Username(String),
+    Statuses(Vec<PrimitiveRewardStatus>),
+    Limit(i64),
+}
+
+diesel::define_sql_function!(fn lower(x: Text) -> Text);
+
+pub enum UsernameLookup<'a> {
+    Username(&'a str),
+    WalletId(i32),
+}
+
+fn add_referral(client: &mut DatabaseClient, referral: NewRewardReferralRow) -> Result<(), DieselError> {
+    use crate::schema::{rewards, rewards_referrals};
+    use diesel::Connection;
+
+    client.connection.transaction(|conn| {
+        diesel::insert_into(rewards_referrals::table).values(&referral).execute(conn)?;
+
+        diesel::update(rewards::table.filter(rewards::username.eq(&referral.referred_username)))
+            .set(rewards::referrer_username.eq(&referral.referrer_username))
+            .execute(conn)?;
+
+        diesel::update(rewards::table.filter(rewards::username.eq(&referral.referrer_username)))
+            .set(rewards::referral_count.eq(rewards::referral_count + 1))
+            .execute(conn)?;
+
+        Ok(())
+    })
+}
+
+fn get_referral_by_referred_device_id(client: &mut DatabaseClient, referred_device_id: i32) -> Result<Option<RewardReferralRow>, DieselError> {
+    use crate::schema::rewards_referrals::dsl;
+    dsl::rewards_referrals
+        .filter(dsl::referred_device_id.eq(referred_device_id))
+        .select(RewardReferralRow::as_select())
+        .first(&mut client.connection)
+        .optional()
+}
+
+fn get_referral_by_username(client: &mut DatabaseClient, username: &str) -> Result<Option<RewardReferralRow>, DieselError> {
+    use crate::schema::rewards_referrals::dsl;
+    dsl::rewards_referrals.filter(dsl::referred_username.eq(username)).first(&mut client.connection).optional()
+}
+
+fn update_referral(client: &mut DatabaseClient, referral_id: i32, update: ReferralUpdate) -> Result<(), DieselError> {
+    use crate::schema::rewards_referrals::dsl;
+    match update {
+        ReferralUpdate::VerifiedAt(timestamp) => {
+            diesel::update(dsl::rewards_referrals.find(referral_id)).set(dsl::verified_at.eq(timestamp)).execute(&mut client.connection)?;
+        }
+    }
+    Ok(())
+}
+
+fn add_referral_attempt(client: &mut DatabaseClient, attempt: ReferralAttemptRow) -> Result<(), DieselError> {
+    use crate::schema::rewards_referral_attempts::dsl;
+    diesel::insert_into(dsl::rewards_referral_attempts).values(&attempt).execute(&mut client.connection)?;
+    Ok(())
+}
+
+fn count_referrals_since(client: &mut DatabaseClient, referrer_username: &str, since: NaiveDateTime) -> Result<i64, DieselError> {
+    use crate::schema::rewards_referrals::dsl;
+    dsl::rewards_referrals
+        .filter(dsl::referrer_username.eq(referrer_username))
+        .filter(dsl::created_at.ge(since))
+        .count()
+        .get_result(&mut client.connection)
+}
+
+fn get_username(client: &mut DatabaseClient, lookup: UsernameLookup) -> Result<UsernameRow, diesel::result::Error> {
+    use crate::schema::usernames::dsl;
+    match lookup {
+        UsernameLookup::Username(username) => dsl::usernames.filter(lower(dsl::username).eq(username.to_lowercase())).select(UsernameRow::as_select()).first(&mut client.connection),
+        UsernameLookup::WalletId(wallet_id) => dsl::usernames.filter(dsl::wallet_id.eq(wallet_id)).select(UsernameRow::as_select()).first(&mut client.connection),
+    }
+}
+
+fn create_username(client: &mut DatabaseClient, username: NewUsernameRow) -> Result<UsernameRow, diesel::result::Error> {
+    use crate::schema::usernames::dsl;
+    diesel::insert_into(dsl::usernames).values(&username).returning(UsernameRow::as_returning()).get_result(&mut client.connection)
+}
+
+fn update_username(client: &mut DatabaseClient, wallet_id: i32, new_username: &str) -> Result<UsernameRow, diesel::result::Error> {
+    use crate::schema::usernames::dsl;
+    diesel::update(dsl::usernames.filter(dsl::wallet_id.eq(wallet_id)))
+        .set(dsl::username.eq(new_username))
+        .returning(UsernameRow::as_returning())
+        .get_result(&mut client.connection)
+}
+
+pub(crate) fn get_rewards_by_filter(client: &mut DatabaseClient, filters: Vec<RewardsFilter>) -> Result<Vec<RewardsRow>, DieselError> {
+    use crate::schema::rewards::dsl;
+    let mut query = dsl::rewards.into_boxed();
+
+    for filter in filters {
+        match filter {
+            RewardsFilter::Username(username) => {
+                query = query.filter(dsl::username.eq(username));
+            }
+            RewardsFilter::Statuses(statuses) => {
+                query = query.filter(dsl::status.eq_any(statuses.into_iter().map(RewardStatus::from).collect::<Vec<_>>()));
+            }
+            RewardsFilter::Limit(limit) => {
+                query = query.limit(limit);
+            }
+        }
+    }
+
+    query.select(RewardsRow::as_select()).load(&mut client.connection)
+}
+
+fn create_rewards(client: &mut DatabaseClient, rewards: NewRewardsRow) -> Result<RewardsRow, DieselError> {
+    use crate::schema::rewards::dsl;
+    diesel::insert_into(dsl::rewards).values(&rewards).returning(RewardsRow::as_returning()).get_result(&mut client.connection)
+}
+
+fn update_rewards(client: &mut DatabaseClient, username: &str, update: RewardsUpdate) -> Result<usize, DieselError> {
+    use crate::schema::rewards::dsl;
+    let target = dsl::rewards.filter(dsl::username.eq(username));
+    match update {
+        RewardsUpdate::Status(status) => diesel::update(target).set(dsl::status.eq(status)).execute(&mut client.connection),
+        RewardsUpdate::VerifyAfter(dt) => diesel::update(target).set(dsl::verify_after.eq(dt)).execute(&mut client.connection),
+        RewardsUpdate::ClearVerifyAfter => diesel::update(target).set(dsl::verify_after.eq(None::<NaiveDateTime>)).execute(&mut client.connection),
+    }
+}
+
+fn add_event(client: &mut DatabaseClient, new_event: NewRewardEventRow, points: i32) -> Result<RewardEventRow, DieselError> {
+    use crate::schema::{rewards, rewards_events};
+    use diesel::Connection;
+
+    if points < 0 {
+        return Err(DieselError::RollbackTransaction);
+    }
+
+    client.connection.transaction(|conn| {
+        let event = diesel::insert_into(rewards_events::table).values(&new_event).returning(RewardEventRow::as_returning()).get_result(conn)?;
+
+        diesel::update(rewards::table.filter(rewards::username.eq(&new_event.username)))
+            .set(rewards::points.eq(rewards::points + points))
+            .returning(rewards::username)
+            .get_result::<String>(conn)?;
+
+        Ok(event)
+    })
+}
+
+fn get_event(client: &mut DatabaseClient, event_id: i32) -> Result<RewardEventRow, DieselError> {
+    use crate::schema::rewards_events::dsl;
+    dsl::rewards_events.filter(dsl::id.eq(event_id)).select(RewardEventRow::as_select()).first(&mut client.connection)
+}
+
+fn get_events(client: &mut DatabaseClient, username: &str) -> Result<Vec<RewardEventRow>, DieselError> {
+    use crate::schema::rewards_events::dsl;
+    dsl::rewards_events
+        .filter(dsl::username.eq(username))
+        .order(dsl::created_at.desc())
+        .select(RewardEventRow::as_select())
+        .load(&mut client.connection)
+}
+
+fn get_top_referrers_since(client: &mut DatabaseClient, event_types: &[RewardEventType], since: NaiveDateTime, limit: i64) -> Result<Vec<(String, i64)>, DieselError> {
+    use crate::schema::{rewards, rewards_events};
+    use diesel::dsl::count_star;
+
+    rewards_events::table
+        .inner_join(rewards::table.on(rewards_events::username.eq(rewards::username)))
+        .filter(rewards::status.ne(RewardStatus::Attribution))
+        .filter(rewards::status.ne(RewardStatus::Disabled))
+        .filter(rewards_events::event_type.eq_any(event_types))
+        .filter(rewards_events::created_at.ge(since))
+        .group_by(rewards_events::username)
+        .select((rewards_events::username, count_star()))
+        .order_by(count_star().desc())
+        .limit(limit)
+        .load(&mut client.connection)
+}
+
+fn disable_rewards(client: &mut DatabaseClient, username: &str, reason: &str, comment: &str) -> Result<i32, DieselError> {
+    use crate::schema::{rewards, rewards_events};
+    use diesel::Connection;
+
+    client.connection.transaction(|conn| {
+        diesel::update(rewards::table.filter(rewards::username.eq(username)))
+            .set((rewards::status.eq(RewardStatus::Disabled), rewards::disable_reason.eq(reason), rewards::comment.eq(comment)))
+            .execute(conn)?;
+
+        let event_id = diesel::insert_into(rewards_events::table)
+            .values(NewRewardEventRow {
+                username: username.to_string(),
+                event_type: RewardEventType::Disabled,
+            })
+            .returning(rewards_events::id)
+            .get_result(conn)?;
+
+        Ok(event_id)
+    })
+}
+
 fn create_username_and_rewards(client: &mut DatabaseClient, wallet_id: i32, address: &str, device_id: i32) -> Result<RewardsRow, DatabaseError> {
-    UsernamesStore::create_username(
+    create_username(
         client,
         NewUsernameRow {
             username: address.to_string(),
@@ -23,7 +237,7 @@ fn create_username_and_rewards(client: &mut DatabaseClient, wallet_id: i32, addr
             status: UsernameStatus::Unverified,
         },
     )?;
-    Ok(RewardsStore::create_rewards(client, NewRewardsRow::new(address.to_string(), device_id))?)
+    Ok(create_rewards(client, NewRewardsRow::new(address.to_string(), device_id))?)
 }
 
 fn validate_username(username: &str) -> Result<(), UsernameValidationError> {
@@ -41,7 +255,7 @@ fn validate_username(username: &str) -> Result<(), UsernameValidationError> {
 }
 
 fn find_username(client: &mut DatabaseClient, lookup: UsernameLookup<'_>) -> Result<Option<UsernameRow>, DatabaseError> {
-    match UsernamesStore::get_username(client, lookup) {
+    match get_username(client, lookup) {
         Ok(username) => Ok(Some(username)),
         Err(diesel::result::Error::NotFound) => Ok(None),
         Err(error) => Err(error.into()),
@@ -50,24 +264,24 @@ fn find_username(client: &mut DatabaseClient, lookup: UsernameLookup<'_>) -> Res
 
 fn require_username(client: &mut DatabaseClient, lookup: UsernameLookup<'_>) -> Result<UsernameRow, DatabaseError> {
     match lookup {
-        UsernameLookup::Username(username) => UsernamesStore::get_username(client, lookup).or_not_found(username.to_string()),
-        UsernameLookup::WalletId(wallet_id) => UsernamesStore::get_username(client, lookup).or_not_found_internal(wallet_id.to_string()),
+        UsernameLookup::Username(username) => get_username(client, lookup).or_not_found(username.to_string()),
+        UsernameLookup::WalletId(wallet_id) => get_username(client, lookup).or_not_found_internal(wallet_id.to_string()),
     }
 }
 
 fn require_rewards(client: &mut DatabaseClient, username: &str) -> Result<RewardsRow, DatabaseError> {
-    RewardsStore::get_rewards_by_filter(client, vec![RewardsFilter::Username(username.to_string())])?
+    get_rewards_by_filter(client, vec![RewardsFilter::Username(username.to_string())])?
         .into_iter()
         .next()
         .ok_or_else(|| DatabaseError::not_found("Rewards", username.to_string()))
 }
 
 fn require_reward_event(client: &mut DatabaseClient, event_id: i32) -> Result<RewardEventRow, DatabaseError> {
-    RewardsStore::get_event(client, event_id).or_not_found_internal(event_id.to_string())
+    get_event(client, event_id).or_not_found_internal(event_id.to_string())
 }
 
 fn find_wallet(client: &mut DatabaseClient, identifier: &str) -> Result<Option<WalletRow>, DatabaseError> {
-    match WalletsStore::get_wallet(client, identifier) {
+    match wallet_row(client, identifier) {
         Ok(wallet) => Ok(Some(wallet)),
         Err(diesel::result::Error::NotFound) => Ok(None),
         Err(error) => Err(error.into()),
@@ -75,7 +289,7 @@ fn find_wallet(client: &mut DatabaseClient, identifier: &str) -> Result<Option<W
 }
 
 fn require_wallet_by_id(client: &mut DatabaseClient, wallet_id: i32) -> Result<WalletRow, DatabaseError> {
-    WalletsStore::get_wallet_by_id(client, wallet_id).or_not_found_internal(wallet_id.to_string())
+    client.get_wallet_by_id(wallet_id)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -120,7 +334,8 @@ fn is_matching_pending_referral_confirmation(referral: &RewardReferralRow, refer
 }
 
 fn latest_wallet_device_id(client: &mut DatabaseClient, wallet_id: i32) -> Result<i32, DatabaseError> {
-    WalletsStore::get_devices_by_wallet_id(client, wallet_id)?
+    client
+        .get_devices_by_wallet_id(wallet_id)?
         .into_iter()
         .max_by_key(|device| device.updated_at)
         .map(|device| device.id)
@@ -143,7 +358,7 @@ fn ensure_wallet_reward_identity(client: &mut DatabaseClient, wallet_id: i32) ->
     match find_username(client, UsernameLookup::WalletId(wallet_id))? {
         Some(username) => {
             if require_rewards(client, &username.username).is_err() {
-                RewardsStore::create_rewards(client, NewRewardsRow::new(username.username.clone(), device_id))?;
+                create_rewards(client, NewRewardsRow::new(username.username.clone(), device_id))?;
             }
             Ok(username)
         }
@@ -159,7 +374,7 @@ fn ensure_wallet_reward_identity(client: &mut DatabaseClient, wallet_id: i32) ->
 fn add_referral_verified_event_rows(client: &mut DatabaseClient, referrer_username: &str, referrer_status: &PrimitiveRewardStatus, referred_username: &str) -> Result<Vec<RewardEventRow>, DatabaseError> {
     let mut events = Vec::new();
     if *referrer_status != PrimitiveRewardStatus::Attribution {
-        events.push(RewardsStore::add_event(
+        events.push(add_event(
             client,
             NewRewardEventRow {
                 username: referrer_username.to_string(),
@@ -169,7 +384,7 @@ fn add_referral_verified_event_rows(client: &mut DatabaseClient, referrer_userna
         )?);
     }
 
-    let referred_event = RewardsStore::add_event(
+    let referred_event = add_event(
         client,
         NewRewardEventRow {
             username: referred_username.to_string(),
@@ -193,7 +408,7 @@ fn add_referral_pending_events(client: &mut DatabaseClient, referrer_username: &
     if *referrer_status == PrimitiveRewardStatus::Attribution {
         return Ok(vec![]);
     }
-    let event = RewardsStore::add_event(
+    let event = add_event(
         client,
         NewRewardEventRow {
             username: referrer_username.to_string(),
@@ -213,7 +428,7 @@ fn add_referral_with_events(
     verified_at: Option<NaiveDateTime>,
     referrer_status: &PrimitiveRewardStatus,
 ) -> Result<Vec<RewardEvent>, DatabaseError> {
-    ReferralsStore::add_referral(
+    add_referral(
         client,
         NewRewardReferralRow {
             referrer_username: referrer_username.to_string(),
@@ -232,7 +447,7 @@ fn add_referral_with_events(
 }
 
 fn complete_referral(client: &mut DatabaseClient, referred_username: &str) -> Result<Vec<i32>, DatabaseError> {
-    let Some(referral) = ReferralsStore::get_referral_by_username(client, referred_username)? else {
+    let Some(referral) = get_referral_by_username(client, referred_username)? else {
         return Ok(vec![]);
     };
 
@@ -240,7 +455,7 @@ fn complete_referral(client: &mut DatabaseClient, referred_username: &str) -> Re
         return Ok(vec![]);
     }
 
-    ReferralsStore::update_referral(client, referral.id, ReferralUpdate::VerifiedAt(now()))?;
+    update_referral(client, referral.id, ReferralUpdate::VerifiedAt(now()))?;
     let referrer_status = *require_rewards(client, &referral.referrer_username)?.status;
     Ok(add_referral_verified_event_rows(client, &referral.referrer_username, &referrer_status, referred_username)?
         .into_iter()
@@ -285,10 +500,7 @@ impl RewardsRepository for DatabaseClient {
             vec![]
         } else {
             let types = [RewardRedemptionType::Asset];
-            RewardsRedemptionsRepository::get_redemption_options(self, &types)?
-                .into_iter()
-                .filter(|option| option.remaining.unwrap_or_default() > 0)
-                .collect()
+            self.get_redemption_options(&types)?.into_iter().filter(|option| option.remaining.unwrap_or_default() > 0).collect()
         };
 
         Ok(Rewards {
@@ -312,7 +524,7 @@ impl RewardsRepository for DatabaseClient {
 
     fn get_reward_events_by_wallet_id(&mut self, wallet_id: i32) -> Result<Vec<RewardEvent>, DatabaseError> {
         let username = ensure_wallet_reward_identity(self, wallet_id)?;
-        let events = RewardsStore::get_events(self, &username.username)?;
+        let events = get_events(self, &username.username)?;
         Ok(events.iter().map(|e| e.as_primitive()).collect())
     }
 
@@ -333,9 +545,9 @@ impl RewardsRepository for DatabaseClient {
             return Err(UsernameValidationError::Invalid("Wallet already has a username".into()));
         }
 
-        UsernamesStore::update_username(self, wallet_id, username).or_not_found_internal(wallet_id.to_string())?;
+        update_username(self, wallet_id, username).or_not_found_internal(wallet_id.to_string())?;
 
-        let event = RewardsStore::add_event(
+        let event = add_event(
             self,
             NewRewardEventRow {
                 username: username.to_string(),
@@ -371,7 +583,7 @@ impl RewardsRepository for DatabaseClient {
         if *rewards.status != PrimitiveRewardStatus::Pending {
             return Ok(false);
         }
-        match ReferralsStore::get_referral_by_referred_device_id(self, device_id)? {
+        match get_referral_by_referred_device_id(self, device_id)? {
             Some(referral) => Ok(is_matching_pending_referral_confirmation(&referral, referrer_username, &referred_name)),
             None => Ok(false),
         }
@@ -384,19 +596,19 @@ impl RewardsRepository for DatabaseClient {
                 return Err(ReferralValidationError::EligibilityExpired(eligibility_days));
             }
 
-            if let Some(first_subscription_at) = WalletsStore::get_first_subscription_date_by_wallet_id(self, wallet_id)?
+            if let Some(first_subscription_at) = first_subscription_date_by_wallet_id(self, wallet_id)?
                 && first_subscription_at.is_older_than_days(eligibility_days)
             {
                 return Err(ReferralValidationError::EligibilityExpired(eligibility_days));
             }
         }
 
-        for address in WalletsStore::get_device_addresses(self, device_id, ChainRow::from(Chain::Ethereum))? {
+        for address in device_addresses(self, device_id, ChainRow::from(Chain::Ethereum))? {
             let Some(wallet) = find_wallet(self, &WalletId::Multicoin(address).id())? else {
                 continue;
             };
             if let Some(eligibility_days) = eligibility_days
-                && let Some(first_subscription_at) = WalletsStore::get_first_subscription_date_by_wallet_id(self, wallet.id)?
+                && let Some(first_subscription_at) = first_subscription_date_by_wallet_id(self, wallet.id)?
                 && first_subscription_at.is_older_than_days(eligibility_days)
             {
                 return Err(ReferralValidationError::EligibilityExpired(eligibility_days));
@@ -406,7 +618,7 @@ impl RewardsRepository for DatabaseClient {
             }
         }
 
-        if let Some(referral) = ReferralsStore::get_referral_by_referred_device_id(self, device_id)? {
+        if let Some(referral) = get_referral_by_referred_device_id(self, device_id)? {
             let referred_name = referred_username(self, wallet_id)?;
             if !is_matching_pending_referral_confirmation(&referral, referrer_username, &referred_name) {
                 return Err(ReferralValidationError::DeviceAlreadyUsed);
@@ -417,7 +629,7 @@ impl RewardsRepository for DatabaseClient {
     }
 
     fn add_referral_attempt(&mut self, referrer_username: &str, wallet_id: i32, device_id: i32, risk_signal_id: Option<i32>, reason: &str) -> Result<(), DatabaseError> {
-        ReferralsStore::add_referral_attempt(
+        add_referral_attempt(
             self,
             ReferralAttemptRow {
                 referrer_username: referrer_username.to_string(),
@@ -431,7 +643,7 @@ impl RewardsRepository for DatabaseClient {
     }
 
     fn get_first_subscription_date_by_wallet_id(&mut self, wallet_id: i32) -> Result<Option<NaiveDateTime>, DatabaseError> {
-        Ok(WalletsStore::get_first_subscription_date_by_wallet_id(self, wallet_id)?)
+        Ok(first_subscription_date_by_wallet_id(self, wallet_id)?)
     }
 
     fn get_wallet_id_by_username(&mut self, username: &str) -> Result<i32, DatabaseError> {
@@ -440,7 +652,7 @@ impl RewardsRepository for DatabaseClient {
     }
 
     fn get_referrer_username(&mut self, referred_username: &str) -> Result<Option<String>, DatabaseError> {
-        let referral = ReferralsStore::get_referral_by_username(self, referred_username)?;
+        let referral = get_referral_by_username(self, referred_username)?;
         Ok(referral.map(|r| r.referrer_username))
     }
 
@@ -456,7 +668,7 @@ impl RewardsRepository for DatabaseClient {
     }
 
     fn count_referrals_since(&mut self, referrer_username: &str, since: NaiveDateTime) -> Result<i64, DatabaseError> {
-        Ok(ReferralsStore::count_referrals_since(self, referrer_username, since)?)
+        Ok(count_referrals_since(self, referrer_username, since)?)
     }
 
     fn get_rewards_leaderboard(&mut self) -> Result<ReferralLeaderboard, DatabaseError> {
@@ -471,21 +683,21 @@ impl RewardsRepository for DatabaseClient {
             points: (referrals * points_per_referral) as i32,
         };
 
-        let daily = RewardsStore::get_top_referrers_since(self, &invite_types, current.days_ago(1), limit)?.into_iter().map(map_entry).collect();
+        let daily = get_top_referrers_since(self, &invite_types, current.days_ago(1), limit)?.into_iter().map(map_entry).collect();
 
-        let weekly = RewardsStore::get_top_referrers_since(self, &invite_types, current.days_ago(7), limit)?.into_iter().map(map_entry).collect();
+        let weekly = get_top_referrers_since(self, &invite_types, current.days_ago(7), limit)?.into_iter().map(map_entry).collect();
 
-        let monthly = RewardsStore::get_top_referrers_since(self, &invite_types, current.days_ago(30), limit)?.into_iter().map(map_entry).collect();
+        let monthly = get_top_referrers_since(self, &invite_types, current.days_ago(30), limit)?.into_iter().map(map_entry).collect();
 
         Ok(ReferralLeaderboard { daily, weekly, monthly })
     }
 
     fn disable_rewards(&mut self, username: &str, reason: &str, comment: &str) -> Result<i32, DatabaseError> {
-        Ok(RewardsStore::disable_rewards(self, username, reason, comment)?)
+        Ok(disable_rewards(self, username, reason, comment)?)
     }
 
     fn get_rewards_by_filter(&mut self, filters: Vec<RewardsFilter>) -> Result<Vec<RewardsRow>, DatabaseError> {
-        Ok(RewardsStore::get_rewards_by_filter(self, filters)?)
+        Ok(get_rewards_by_filter(self, filters)?)
     }
 
     fn check_eligibility(&mut self, username: &str, eligibility: RewardsEligibilityConfig) -> Result<Option<i32>, DatabaseError> {
@@ -500,7 +712,7 @@ impl RewardsRepository for DatabaseClient {
             return Ok(None);
         }
 
-        let Some(first_subscription_at) = WalletsStore::get_first_subscription_date_by_wallet_id(self, username_row.wallet_id)? else {
+        let Some(first_subscription_at) = first_subscription_date_by_wallet_id(self, username_row.wallet_id)? else {
             return Ok(None);
         };
 
@@ -508,7 +720,7 @@ impl RewardsRepository for DatabaseClient {
             return Ok(None);
         }
 
-        let Some(latest_activity_at) = WalletsStore::get_devices_by_wallet_id(self, username_row.wallet_id)?.into_iter().map(|device| device.updated_at).max() else {
+        let Some(latest_activity_at) = self.get_devices_by_wallet_id(username_row.wallet_id)?.into_iter().map(|device| device.updated_at).max() else {
             return Ok(None);
         };
 
@@ -516,7 +728,7 @@ impl RewardsRepository for DatabaseClient {
             return Ok(None);
         }
 
-        let transactions_current = TransactionsStore::get_transactions_by_wallet_since(self, username_row.wallet_id, first_subscription_at, vec![TransactionFilter::States(vec![TransactionState::Confirmed])])?.len() as i64;
+        let transactions_current = transactions_by_wallet_since(self, username_row.wallet_id, first_subscription_at, vec![TransactionFilter::States(vec![TransactionState::Confirmed])])?.len() as i64;
 
         if transactions_current < eligibility.transactions_required {
             return Ok(None);
@@ -526,9 +738,9 @@ impl RewardsRepository for DatabaseClient {
     }
 
     fn promote_to_verified(&mut self, username: &str) -> Result<Vec<i32>, DatabaseError> {
-        RewardsStore::update_rewards(self, username, RewardsUpdate::Status(RewardStatus::Verified))?;
+        update_rewards(self, username, RewardsUpdate::Status(RewardStatus::Verified))?;
 
-        let enabled_event = RewardsStore::add_event(
+        let enabled_event = add_event(
             self,
             NewRewardEventRow {
                 username: username.to_string(),
@@ -548,11 +760,11 @@ impl RewardsRepository for DatabaseClient {
         let can_verify = can_verify_referral(&referred_rewards.status, referred_rewards.verify_after);
 
         if can_verify && !referred_rewards.status.is_verified() {
-            RewardsStore::update_rewards(self, &referred_username, RewardsUpdate::Status(RewardStatus::Unverified))?;
-            RewardsStore::update_rewards(self, &referred_username, RewardsUpdate::ClearVerifyAfter)?;
+            update_rewards(self, &referred_username, RewardsUpdate::Status(RewardStatus::Unverified))?;
+            update_rewards(self, &referred_username, RewardsUpdate::ClearVerifyAfter)?;
         }
 
-        match ReferralsStore::get_referral_by_username(self, &referred_username)? {
+        match get_referral_by_username(self, &referred_username)? {
             Some(referral) if referral.verified_at.is_none() => self.confirm_pending_referral(referral, referrer_username, referrer_status, &referred_username, device_id, can_verify),
             Some(_) => Err(DatabaseError::Error("Referral already verified".to_string())),
             None => self.create_new_referral(referrer_username, &referred_username, device_id, risk_signal_id, can_verify, referrer_status),
@@ -577,7 +789,7 @@ impl DatabaseClient {
             return Err(DatabaseError::Error("Must verify from same device".to_string()));
         }
         if can_verify {
-            ReferralsStore::update_referral(self, referral.id, ReferralUpdate::VerifiedAt(now()))?;
+            update_referral(self, referral.id, ReferralUpdate::VerifiedAt(now()))?;
             add_referral_verified_events(self, &referral.referrer_username, referrer_status, referred_username)
         } else {
             Ok(vec![])
@@ -589,8 +801,8 @@ impl DatabaseClient {
 
         if !can_verify && let Some(delay) = delay {
             let verify_after = now() + chrono::Duration::seconds(delay.as_secs() as i64);
-            RewardsStore::update_rewards(self, referred_username, RewardsUpdate::VerifyAfter(verify_after))?;
-            RewardsStore::update_rewards(self, referred_username, RewardsUpdate::Status(RewardStatus::Pending))?;
+            update_rewards(self, referred_username, RewardsUpdate::VerifyAfter(verify_after))?;
+            update_rewards(self, referred_username, RewardsUpdate::Status(RewardStatus::Pending))?;
         }
 
         let skip_delay = can_verify || delay.is_none();

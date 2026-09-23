@@ -101,9 +101,7 @@ impl FiatAssetsUpdater {
 
         let payment_methods = provider.payment_methods().await;
         let payment_methods_json = serde_json::to_value(&payment_methods)?;
-        self.database
-            .run(move |client| -> Result<usize, DatabaseError> { Ok(client.update_fiat_provider_payment_methods(provider_name, payment_methods_json)?) })
-            .await?;
+        self.database.run(move |client| client.update_fiat_provider_payment_methods(provider_name, payment_methods_json)).await?;
 
         let assets = provider.get_assets().await?;
         let asset_count = assets.len();
@@ -136,7 +134,7 @@ impl FiatAssetsUpdater {
                     .map(|asset| asset.id)
                     .collect();
                 let result = Diff::compare(current_ids, ids);
-                Ok(client.update_fiat_assets(result.different, vec![FiatAssetUpdate::IsEnabledByProvider(false)])?)
+                client.update_fiat_assets(result.different, vec![FiatAssetUpdate::IsEnabledByProvider(false)])
             })
             .await?;
 
@@ -166,7 +164,7 @@ impl FiatAssetsUpdater {
                     .map(|country| country.id)
                     .collect();
                 let result = Diff::compare(current_ids, ids);
-                Ok(client.update_fiat_providers_countries(result.different, vec![FiatProviderCountryUpdate::IsAllowed(false)])?)
+                client.update_fiat_providers_countries(result.different, vec![FiatProviderCountryUpdate::IsAllowed(false)])
             })
             .await?;
         info_with_fields!("fiat update countries", provider = provider_name.id(), countries = country_count, disabled = disabled);

@@ -2,8 +2,7 @@ use chrono::{Duration, Utc};
 use primitives::PriceProvider;
 use std::collections::HashMap;
 use std::error::Error;
-use storage::database::prices::PriceFilter;
-use storage::{ChartFilter, ChartsRepository, Database, DatabaseError, PriceUpdate, PricesRepository};
+use storage::{ChartFilter, ChartsRepository, Database, DatabaseError, PriceFilter, PriceUpdate, PricesRepository};
 
 pub struct PricesMetricsUpdater {
     database: Database,

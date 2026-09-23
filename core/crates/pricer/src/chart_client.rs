@@ -1,6 +1,6 @@
 use primitives::{AssetId, ChartPeriod, ChartValue, PriceConfig, currency::Currency};
 use std::error::Error;
-use storage::{ChartsRepository, Database, PricesRepository};
+use storage::{ChartsRepository, Database, FiatRepository, PricesRepository};
 
 #[derive(Clone)]
 pub struct ChartClient {
@@ -20,8 +20,8 @@ impl ChartClient {
         let (rate_multiplier, charts) = self
             .database
             .run(move |client| -> Result<_, Box<dyn Error + Send + Sync>> {
-                let base_rate = client.get_fiat_rate(&Currency::USD)?.as_primitive();
-                let rate = client.get_fiat_rate(&currency)?.as_primitive();
+                let base_rate = client.get_fiat_rate(&Currency::USD)?;
+                let rate = client.get_fiat_rate(&currency)?;
                 let key = client.get_primary_price_key(&asset_id, primary_price_max_age)?;
                 Ok((rate.multiplier(base_rate.rate), client.get_charts(&key.id(), &period)?))
             })

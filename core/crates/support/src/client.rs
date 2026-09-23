@@ -8,8 +8,7 @@ use localizer::LanguageLocalizer;
 use primitives::{Device, StreamEvent, SupportMessage, SupportStreamEvent, SupportTypingStatus, device_stream_channel};
 use push_notification::{GorushNotification, PushNotification, PushNotificationSupport, PushNotificationTypes};
 use std::error::Error;
-use storage::database::devices::DevicesStore;
-use storage::{Database, DatabaseError, OptionalExtension};
+use storage::{Database, DevicesRepository};
 use streamer::{NotificationsPayload, StreamProducer, StreamProducerQueue};
 
 #[derive(Debug, Default)]
@@ -31,8 +30,14 @@ impl SupportClient {
 
     pub async fn get_device(&self, device_id: &str) -> Result<Option<Device>, Box<dyn Error + Send + Sync>> {
         let device_id = device_id.to_string();
-        let device = self.database.run(move |client| -> Result<_, DatabaseError> { Ok(DevicesStore::get_device(client, &device_id).optional()?) }).await?;
-        Ok(device.map(|device| device.as_primitive()))
+        Ok(self
+            .database
+            .run(move |client| match client.get_device(&device_id) {
+                Ok(device) => Ok(Some(device)),
+                Err(error) if error.is_not_found() => Ok(None),
+                Err(error) => Err(error),
+            })
+            .await?)
     }
 
     pub async fn process_webhook(&self, device: &Device, payload: &ChatwootWebhookPayload) -> Result<SupportWebhookResult, Box<dyn Error + Send + Sync>> {

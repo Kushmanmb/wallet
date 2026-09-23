@@ -1,35 +1,3 @@
-pub mod api_clients;
-pub mod assets;
-pub mod assets_addresses;
-pub mod assets_associations;
-pub mod assets_links;
-pub mod assets_usage_ranks;
-
-pub mod chains;
-pub mod charts;
-pub mod config;
-pub mod devices;
-pub mod fiat;
-pub mod migrations;
-pub mod nft;
-pub mod notifications;
-pub mod parser_state;
-pub mod perpetuals;
-pub mod price_alerts;
-pub mod prices;
-pub mod prices_providers;
-pub mod referrals;
-pub mod releases;
-pub mod rewards;
-pub mod rewards_redemptions;
-pub mod scan_addresses;
-pub mod scan_detections;
-pub mod support_sessions;
-pub mod tag;
-pub mod transactions;
-pub mod usernames;
-pub mod wallets;
-
 use diesel::connection::{AnsiTransactionManager, TransactionManager};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
@@ -50,7 +18,7 @@ pub fn create_pool(database_url: &str, pool_size: u32) -> Result<PgPool, Databas
 }
 
 pub struct DatabaseClient {
-    connection: PgPooledConnection,
+    pub(crate) connection: PgPooledConnection,
 }
 
 impl DatabaseClient {

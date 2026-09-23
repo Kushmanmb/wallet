@@ -29,8 +29,7 @@ use prices_metrics_updater::PricesMetricsUpdater;
 use prices_updater::PricesUpdater;
 use primitives::ChartTimeframe;
 use settings::Settings;
-use storage::repositories::prices_providers_repository::PricesProvidersRepository;
-use storage::{ConfigCacher, Database};
+use storage::{ConfigCacher, Database, PricesProvidersRepository};
 use streamer::StreamProducer;
 
 pub type AssetsProviders = Arc<PriceProviders>;

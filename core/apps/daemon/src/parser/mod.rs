@@ -24,7 +24,7 @@ use streamer::{StreamProducer, StreamProducerQueue, TransactionsPayload};
 
 use crate::shutdown::{self, ShutdownReceiver};
 use plan::{BlockPlan, BlockPlanKind, plan_next_block, should_reload_catchup, timeout_for_state};
-use storage::{Database, DatabaseError, models::ParserStateRow};
+use storage::{Database, ParserStateRepository, models::ParserStateRow};
 
 pub struct Parser {
     chain: Chain,
@@ -217,12 +217,7 @@ pub async fn run(settings: Settings, chain: Option<Chain>, health_state: Arc<Hea
     let chains: Vec<Chain> = if let Some(chain) = chain {
         vec![chain]
     } else {
-        database
-            .run(|client| -> Result<_, DatabaseError> { Ok(client.get_parser_states()?) })
-            .await?
-            .into_iter()
-            .flat_map(|x| Chain::from_str(x.chain.as_ref()))
-            .collect()
+        database.run(|client| client.get_parser_states()).await?.into_iter().flat_map(|x| Chain::from_str(x.chain.as_ref())).collect()
     };
 
     let chain_names = chains.iter().map(Chain::as_ref).collect::<Vec<_>>().join(",");

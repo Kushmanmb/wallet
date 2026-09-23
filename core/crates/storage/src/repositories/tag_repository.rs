@@ -1,9 +1,8 @@
-use crate::DatabaseError;
-
-use crate::DatabaseClient;
-use crate::database::tag::TagStore;
-use crate::models::{AssetTagRow, PerpetualTagRow, TagRow};
+use diesel::prelude::*;
 use primitives::{AssetId, ListId};
+
+use crate::models::{AssetTagRow, NewListTagRow, PerpetualTagRow, TagRow};
+use crate::{DatabaseClient, DatabaseError};
 
 pub trait TagRepository {
     fn add_tags(&mut self, values: Vec<TagRow>) -> Result<usize, DatabaseError>;
@@ -22,50 +21,75 @@ pub trait TagRepository {
 
 impl TagRepository for DatabaseClient {
     fn add_tags(&mut self, values: Vec<TagRow>) -> Result<usize, DatabaseError> {
-        Ok(TagStore::add_tags(self, values)?)
+        use crate::schema::tags::dsl::*;
+        Ok(diesel::insert_into(tags).values(values).on_conflict_do_nothing().execute(&mut self.connection)?)
     }
 
     fn add_list_tag(&mut self, _tag_id: &str, _name: &str, _list_id: ListId) -> Result<usize, DatabaseError> {
-        Ok(TagStore::add_list_tag(self, _tag_id, _name, _list_id)?)
+        use crate::schema::tags::dsl::*;
+        Ok(diesel::insert_into(tags).values(NewListTagRow::new(_tag_id, _name, _list_id)).on_conflict_do_nothing().execute(&mut self.connection)?)
     }
 
     fn get_tag(&mut self, _tag_id: &str) -> Result<Option<TagRow>, DatabaseError> {
-        Ok(TagStore::get_tag(self, _tag_id)?)
+        use crate::schema::tags::dsl::*;
+        Ok(tags.find(_tag_id).select(TagRow::as_select()).first(&mut self.connection).optional()?)
     }
 
     fn get_list_tags(&mut self) -> Result<Vec<TagRow>, DatabaseError> {
-        Ok(TagStore::get_list_tags(self)?)
+        use crate::schema::tags::dsl::*;
+        Ok(tags.filter(list_id.is_not_null()).order(id.asc()).select(TagRow::as_select()).load(&mut self.connection)?)
     }
 
     fn add_assets_tags(&mut self, values: Vec<AssetTagRow>) -> Result<usize, DatabaseError> {
-        Ok(TagStore::add_assets_tags(self, values)?)
+        use crate::schema::assets_tags::dsl::*;
+        Ok(diesel::insert_into(assets_tags).values(values).on_conflict_do_nothing().execute(&mut self.connection)?)
     }
 
     fn get_asset_list_tags(&mut self) -> Result<Vec<TagRow>, DatabaseError> {
-        Ok(TagStore::get_asset_list_tags(self)?)
+        use crate::schema::{assets_tags, tags};
+        Ok(tags::table.inner_join(assets_tags::table).select(TagRow::as_select()).distinct().order(tags::id.asc()).load(&mut self.connection)?)
     }
 
     fn get_perpetual_list_tags(&mut self) -> Result<Vec<TagRow>, DatabaseError> {
-        Ok(TagStore::get_perpetual_list_tags(self)?)
+        use crate::schema::{perpetuals_tags, tags};
+        Ok(tags::table.inner_join(perpetuals_tags::table).select(TagRow::as_select()).distinct().order(tags::id.asc()).load(&mut self.connection)?)
     }
 
     fn get_assets_tags(&mut self) -> Result<Vec<AssetTagRow>, DatabaseError> {
-        Ok(TagStore::get_assets_tags(self)?)
+        use crate::schema::assets_tags::dsl::*;
+        Ok(assets_tags.select(AssetTagRow::as_select()).load(&mut self.connection)?)
     }
 
     fn get_perpetuals_tags(&mut self) -> Result<Vec<PerpetualTagRow>, DatabaseError> {
-        Ok(TagStore::get_perpetuals_tags(self)?)
+        use crate::schema::perpetuals_tags::dsl::*;
+        Ok(perpetuals_tags.select(PerpetualTagRow::as_select()).load(&mut self.connection)?)
     }
 
     fn get_assets_tags_for_tag(&mut self, _tag_id: &str) -> Result<Vec<AssetTagRow>, DatabaseError> {
-        Ok(TagStore::get_assets_tags_for_tag(self, _tag_id)?)
+        use crate::schema::assets_tags::dsl::*;
+        Ok(assets_tags.filter(tag_id.eq(_tag_id)).order(order.asc()).select(AssetTagRow::as_select()).load(&mut self.connection)?)
     }
 
     fn set_assets_tags_for_tag(&mut self, _tag_id: &str, asset_ids: Vec<AssetId>) -> Result<usize, DatabaseError> {
-        Ok(TagStore::set_assets_tags_for_tag(self, _tag_id, asset_ids)?)
+        use crate::schema::assets_tags::dsl::*;
+        let values = asset_ids
+            .into_iter()
+            .enumerate()
+            .map(|(index, current_asset_id)| AssetTagRow {
+                asset_id: current_asset_id.into(),
+                tag_id: _tag_id.to_string(),
+                order: Some(index as i32),
+            })
+            .collect::<Vec<_>>();
+
+        Ok(self.connection.transaction::<_, diesel::result::Error, _>(|conn| {
+            let deleted_count = diesel::delete(assets_tags.filter(tag_id.eq(_tag_id))).execute(conn)?;
+            if values.is_empty() { Ok(deleted_count) } else { diesel::insert_into(assets_tags).values(values).execute(conn) }
+        })?)
     }
 
     fn get_assets_tags_for_asset(&mut self, _asset_id: &AssetId) -> Result<Vec<AssetTagRow>, DatabaseError> {
-        Ok(TagStore::get_assets_tags_for_asset(self, &_asset_id.to_string())?)
+        use crate::schema::assets_tags::dsl::*;
+        Ok(assets_tags.filter(asset_id.eq(_asset_id.to_string())).select(AssetTagRow::as_select()).load(&mut self.connection)?)
     }
 }

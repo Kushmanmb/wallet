@@ -8,7 +8,7 @@ use push_notification::{GorushNotification, PushNotification, PushNotificationAs
 use std::collections::HashSet;
 use std::error::Error;
 use std::time::Duration as StdDuration;
-use storage::{AssetsRepository, Database, DatabaseClient, DatabaseError, PriceAlertsRepository};
+use storage::{AssetsRepository, Database, DatabaseClient, FiatRepository, PriceAlertsRepository};
 
 const DEFAULT_RANK: i32 = 1000;
 
@@ -124,7 +124,7 @@ impl PriceAlertClient {
                 let cooldown = Duration::seconds(rules.notification_cooldown.as_secs() as i64);
                 let after_notified_at = now - cooldown;
                 let price_alerts = client.get_price_alerts(after_notified_at.naive_utc(), max_age)?;
-                let rates = Self::fiat_rates(client)?;
+                let rates = client.get_fiat_rates()?;
 
                 let mut results: Vec<PriceAlertNotification> = Vec::new();
                 let mut price_alert_ids: HashSet<String> = HashSet::new();
@@ -141,10 +141,6 @@ impl PriceAlertClient {
                 Ok(results)
             })
             .await
-    }
-
-    fn fiat_rates(client: &mut DatabaseClient) -> Result<Vec<FiatRate>, DatabaseError> {
-        Ok(client.get_fiat_rates()?.into_iter().map(|row| row.as_primitive()).collect())
     }
 
     fn get_price_alert_type(price_alert: &PriceAlert, price_data: &PriceData, rates: &[FiatRate], rules: &PriceAlertRules) -> Option<AlertResult> {

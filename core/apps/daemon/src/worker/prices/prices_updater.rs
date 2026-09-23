@@ -8,9 +8,8 @@ use gem_tracing::info_with_fields;
 use pricer::PriceClient;
 use prices::{AssetPriceFull, AssetPriceMapping, PriceAssetsProvider, PriceProviderAsset};
 use primitives::{AssetId, PriceData, PriceId};
-use storage::database::{assets::AssetFilter, prices::PriceFilter};
 use storage::models::{AssetRow, PriceRow};
-use storage::{AssetUpdate, AssetsRepository, ConfigCacher, Database, DatabaseClient, DatabaseError, PricesRepository};
+use storage::{AssetFilter, AssetUpdate, AssetsRepository, ConfigCacher, Database, DatabaseClient, DatabaseError, PriceFilter, PricesRepository};
 use streamer::{PricesPayload, QueueName, StreamProducer, StreamProducerQueue};
 
 const BATCH_SIZE: usize = 1000;

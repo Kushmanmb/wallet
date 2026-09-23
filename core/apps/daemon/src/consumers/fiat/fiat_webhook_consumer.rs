@@ -10,7 +10,7 @@ use primitives::{AccessTokenCacher, Device, FiatTransactionStatus, TransactionId
 use push_notification::{GorushNotification, PushNotification};
 use settings::Settings;
 use storage::models::FiatTransactionRow;
-use storage::{AssetsRepository, Database, DatabaseError, WalletsRepository};
+use storage::{AssetsRepository, Database, DatabaseError, FiatRepository, WalletsRepository};
 use streamer::consumer::MessageConsumer;
 use streamer::{FiatWebhook, FiatWebhookPayload, NotificationsPayload, QueueName, StreamProducer, StreamProducerQueue, WalletStreamEvent, WalletStreamPayload};
 

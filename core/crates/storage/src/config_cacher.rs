@@ -7,8 +7,7 @@ use config_keys::{ConfigKey, ConfigParamKey, RateLimit, RateLimitKey, RateLimitW
 use serde::de::DeserializeOwned;
 use std::hash::Hash;
 
-use crate::database::config::ConfigStore;
-use crate::repositories::config_repository::ConfigRepository;
+use crate::repositories::config_repository::{ConfigRepository, config_row};
 use crate::{Database, DatabaseError};
 
 const DEFAULT_TTL_SECONDS: u64 = 60;
@@ -146,7 +145,7 @@ impl ConfigCacher {
     pub async fn set(&self, key: ConfigKey, value: &str) -> Result<usize, DatabaseError> {
         self.invalidate(&key);
         let value = value.to_string();
-        self.database.run(move |client| ConfigRepository::set_config(client, key, &value)).await
+        self.database.run(move |client| client.set_config(key, &value)).await
     }
 
     pub fn invalidate(&self, key: &ConfigKey) {
@@ -161,7 +160,7 @@ impl ConfigCacher {
             return value;
         }
         let lookup = key.clone();
-        let row = self.database.run(move |client| Ok::<_, DatabaseError>(ConfigStore::get_config_key(client, &lookup).ok())).await.ok().flatten();
+        let row = self.database.run(move |client| Ok::<_, DatabaseError>(config_row(client, &lookup).ok())).await.ok().flatten();
         let value = row.map_or_else(|| param.default_value(), |row| row.value);
         self.set_cached(key, value.clone());
         value

@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use async_trait::async_trait;
-use storage::{Database, DevicesRepository, database::devices::DeviceFieldUpdate};
+use storage::{Database, DeviceFieldUpdate, DevicesRepository};
 use streamer::{NotificationsFailedPayload, consumer::MessageConsumer};
 
 pub struct NotificationsFailedConsumer {

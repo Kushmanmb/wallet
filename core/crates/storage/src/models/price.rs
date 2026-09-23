@@ -4,8 +4,8 @@ use primitives::{AssetId as PrimitiveAssetId, AssetMarket, AssetPriceInfo, Chart
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
 
-use crate::database::prices::PriceUpdate;
 use crate::models::min_max::MinMax;
+use crate::repositories::prices_repository::PriceUpdate;
 
 use crate::sql_types::{AssetId, PriceId, PriceProviderRow};
 

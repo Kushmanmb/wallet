@@ -250,7 +250,7 @@ impl FiatClient {
         let pending_transaction = FiatTransaction::new_pending(&data, country, url.provider_transaction_id.clone());
         let pending_transaction_row = NewFiatTransactionRow::new(pending_transaction, context.device_id, context.wallet_id, wallet_address_row.id);
 
-        self.database.run(move |client| -> Result<_, DatabaseError> { Ok(client.add_fiat_transaction(pending_transaction_row)?) }).await?;
+        self.database.run(move |client| client.add_fiat_transaction(pending_transaction_row)).await?;
         self.fiat_cacher.set_quote_url(context, quote_id, &url).await?;
 
         Ok(url)

@@ -22,8 +22,8 @@ use settings::Settings;
 use storage::models::{ChartRow, FiatAssetRow, FiatProviderCountryRow, FiatRateRow, NewFiatTransactionRow, PriceAssetRow, UpdateDeviceRow, price::NewPriceRow};
 use storage::sql_types::{Platform, PlatformStore};
 use storage::{
-    ApiClientsRepository, AssetsRepository, ChartsRepository, DatabaseClient, DevicesRepository, NewNotificationRow, NewWalletRow, NotificationsRepository, PriceAlertsRepository, PricesRepository, RewardsRepository, WalletSource,
-    WalletType, WalletsRepository,
+    ApiClientsRepository, AssetsRepository, ChartsRepository, DatabaseClient, DevicesRepository, FiatRepository, NewNotificationRow, NewWalletRow, NotificationsRepository, PriceAlertsRepository, PricesRepository, RewardsRepository,
+    WalletSource, WalletType, WalletsRepository,
 };
 
 pub async fn run_setup_dev(settings: Settings) -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -137,10 +137,10 @@ fn setup_dev_devices(client: &mut DatabaseClient) -> Result<(), Box<dyn Error + 
         (wallet.id, Chain::Solana, solana_address.to_string()),
     ];
 
-    let result = WalletsRepository::add_subscriptions(client, ios_device_row_id, subscriptions.clone())?;
+    let result = client.add_subscriptions(ios_device_row_id, subscriptions.clone())?;
     info_with_fields!("setup_dev", step = "ios wallet subscription added", count = result);
 
-    let result = WalletsRepository::add_subscriptions(client, android_device_row_id, subscriptions)?;
+    let result = client.add_subscriptions(android_device_row_id, subscriptions)?;
     info_with_fields!("setup_dev", step = "android wallet subscription added", count = result);
 
     setup_dev_fiat_transactions(client, ios_device_row_id, wallet.id)?;

@@ -10,7 +10,7 @@ use settings::Settings;
 use std::collections::HashSet;
 use std::sync::Arc;
 use storage::models::ConfigRow;
-use storage::{ApiClientsRepository, AssetsRepository, ChainsRepository, ConfigRepository, Database, DatabaseError, PricesProvidersRepository, ReleasesRepository, TagRepository};
+use storage::{ApiClientsRepository, AssetsRepository, ChainsRepository, ConfigRepository, Database, DatabaseError, FiatRepository, ParserStateRepository, PricesProvidersRepository, ReleasesRepository, TagRepository};
 use streamer::{ExchangeKind, ExchangeName, QueueName};
 
 pub async fn run_setup(settings: Settings) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {

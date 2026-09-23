@@ -1,9 +1,11 @@
-use crate::database::scan_addresses::ScanAddressesStore;
+use std::collections::{HashMap, HashSet};
+
+use diesel::prelude::*;
+use primitives::{Chain, ScanAddress};
+
 use crate::models::{NewScanAddressRow, ScanAddressRow};
 use crate::sql_types::ChainRow;
 use crate::{DatabaseClient, DatabaseError};
-use primitives::{Chain, ScanAddress};
-use std::collections::{HashMap, HashSet};
 
 pub trait ScanAddressesRepository {
     fn get_scan_address(&mut self, _chain: Chain, value: &str) -> Result<ScanAddressRow, DatabaseError>;
@@ -14,24 +16,30 @@ pub trait ScanAddressesRepository {
 
 impl ScanAddressesRepository for DatabaseClient {
     fn get_scan_address(&mut self, chain: Chain, value: &str) -> Result<ScanAddressRow, DatabaseError> {
-        let rows = ScanAddressesStore::get_scan_addresses_by_addresses(self, vec![value.to_string()])?;
+        let rows = self.get_scan_addresses_by_addresses(vec![value.to_string()])?;
         select_scan_address(chain, value, rows).ok_or_else(|| DatabaseError::not_found("ScanAddress", format!("{}/{}", chain.as_ref(), value)))
     }
 
     fn get_scan_addresses(&mut self, queries: &[(Chain, &str)]) -> Result<Vec<ScanAddressRow>, DatabaseError> {
         let addresses = queries.iter().map(|(_, address)| (*address).to_string()).collect::<HashSet<_>>().into_iter().collect();
-        let rows = ScanAddressesStore::get_scan_addresses_by_addresses(self, addresses)?;
+        let rows = self.get_scan_addresses_by_addresses(addresses)?;
 
         Ok(select_scan_addresses(queries, rows))
     }
 
     fn get_scan_addresses_by_addresses(&mut self, addresses: Vec<String>) -> Result<Vec<ScanAddressRow>, DatabaseError> {
-        Ok(ScanAddressesStore::get_scan_addresses_by_addresses(self, addresses)?)
+        use crate::schema::scan_addresses::dsl::*;
+        Ok(scan_addresses
+            .filter(address.eq_any(addresses))
+            .order((address.asc(), id.asc()))
+            .select(ScanAddressRow::as_select())
+            .load(&mut self.connection)?)
     }
 
     fn add_scan_addresses(&mut self, values: Vec<ScanAddress>) -> Result<usize, DatabaseError> {
-        let new_addresses = values.into_iter().map(NewScanAddressRow::from_primitive).collect();
-        Ok(ScanAddressesStore::add_scan_addresses(self, new_addresses)?)
+        let new_addresses = values.into_iter().map(NewScanAddressRow::from_primitive).collect::<Vec<_>>();
+        use crate::schema::scan_addresses::dsl::*;
+        Ok(diesel::insert_into(scan_addresses).values(new_addresses).on_conflict_do_nothing().execute(&mut self.connection)?)
     }
 }
 

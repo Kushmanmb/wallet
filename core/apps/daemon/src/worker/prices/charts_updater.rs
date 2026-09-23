@@ -9,9 +9,8 @@ use gem_tracing::info_with_fields;
 use pricer::PriceClient;
 use prices::PriceAssetsProvider;
 use primitives::{ChartTimeframe, ChartValue, SECONDS_PER_DAY, SECONDS_PER_HOUR};
-use storage::database::prices::PriceFilter;
 use storage::models::{ChartRow, PriceRow};
-use storage::{ChartsRepository, Database, PricesRepository};
+use storage::{ChartsRepository, Database, PriceFilter, PricesRepository};
 
 #[derive(Clone)]
 pub struct ChartsUpdater {

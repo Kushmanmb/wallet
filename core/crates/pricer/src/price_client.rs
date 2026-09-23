@@ -7,9 +7,8 @@ use gem_tracing::error_with_fields;
 use prices::{AssetPriceFull, AssetPriceMapping, PriceAssetsProvider, PriceProviders};
 use primitives::currency::Currency;
 use primitives::{AssetId, AssetMarketPrice, AssetPriceInfo, AssetPrices, ChartTimeframe, FiatRate, FiatRateProvider, PriceData, PriceId, PriceProvider};
-use storage::database::assets::AssetFilter;
 use storage::models::{FiatRateRow, NewPriceRow, PriceAssetRow};
-use storage::{AssetsRepository, ChartsRepository, ConfigRepository, Database, DatabaseClient, DatabaseError, PricesRepository};
+use storage::{AssetFilter, AssetsRepository, ChartsRepository, ConfigRepository, Database, DatabaseError, FiatRepository, PricesRepository};
 
 #[derive(Clone)]
 pub struct PriceClient {
@@ -24,7 +23,7 @@ impl PriceClient {
 
     pub async fn set_fiat_rates(&self, provider: FiatRateProvider, rates: Vec<FiatRate>) -> Result<usize, Box<dyn Error + Send + Sync>> {
         let rows = rates.into_iter().map(|rate| FiatRateRow::from_primitive(rate, provider)).collect();
-        let (count, rates) = self.database.run(move |client| -> Result<_, DatabaseError> { Ok((client.set_fiat_rates(rows)?, Self::fiat_rates(client)?)) }).await?;
+        let (count, rates) = self.database.run(move |client| -> Result<_, DatabaseError> { Ok((client.set_fiat_rates(rows)?, client.get_fiat_rates()?)) }).await?;
 
         self.set_cache_fiat_rates(rates).await?;
 
@@ -32,17 +31,12 @@ impl PriceClient {
     }
 
     pub async fn get_fiat_rates(&self) -> Result<Vec<FiatRate>, Box<dyn Error + Send + Sync>> {
-        Ok(self.database.run(Self::fiat_rates).await?)
-    }
-
-    fn fiat_rates(client: &mut DatabaseClient) -> Result<Vec<FiatRate>, DatabaseError> {
-        Ok(client.get_fiat_rates()?.into_iter().map(|row| row.as_primitive()).collect())
+        Ok(self.database.run(|client| client.get_fiat_rates()).await?)
     }
 
     pub async fn get_fiat_rate(&self, currency: &Currency) -> Result<FiatRate, Box<dyn Error + Send + Sync>> {
         let currency = currency.clone();
-        let rate = self.database.run(move |client| -> Result<_, Box<dyn Error + Send + Sync>> { Ok(client.get_fiat_rate(&currency)?) }).await?;
-        Ok(rate.as_primitive())
+        Ok(self.database.run(move |client| client.get_fiat_rate(&currency)).await?)
     }
 
     pub async fn get_asset_price(&self, asset_id: &AssetId, currency: &Currency) -> Result<AssetMarketPrice, Box<dyn Error + Send + Sync>> {
