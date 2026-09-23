@@ -1,10 +1,8 @@
 use std::error::Error;
 
-use crate::params::MAX_QUERY_LIMIT;
-use primitives::{AssetId, Transaction, TransactionId, TransactionsResponse};
-use storage::{Database, DatabaseError, DevicesRepository, ScanAddressesRepository, TransactionsRepository, WalletsRepository};
-
 use chrono::{DateTime, Utc};
+use primitives::{AssetId, MAX_QUERY_LIMIT, Transaction, TransactionId, TransactionsResponse};
+use storage::{Database, DatabaseError, DevicesRepository, ScanAddressesRepository, TransactionsRepository, WalletsRepository};
 
 pub struct TransactionsClient {
     database: Database,
@@ -26,7 +24,7 @@ impl TransactionsClient {
         offset: usize,
     ) -> Result<TransactionsResponse, Box<dyn Error + Send + Sync>> {
         let device_id = device_id.to_string();
-        let from_datetime = from_timestamp.and_then(|ts| DateTime::<Utc>::from_timestamp(ts as i64, 0).map(|dt| dt.naive_utc()));
+        let from_datetime = from_timestamp.and_then(|timestamp| DateTime::<Utc>::from_timestamp(timestamp as i64, 0).map(|datetime| datetime.naive_utc()));
         Ok(self
             .database
             .run(move |client| {
@@ -87,7 +85,7 @@ fn transactions_response(client: &mut impl ScanAddressesRepository, transactions
     let transactions = transactions.into_iter().map(|transaction| transaction.finalize(addresses.clone())).collect::<Vec<_>>();
 
     let address_names = client
-        .get_scan_addresses_by_addresses(transactions.iter().flat_map(|x| x.addresses()).collect())?
+        .get_scan_addresses_by_addresses(transactions.iter().flat_map(|transaction| transaction.addresses()).collect())?
         .into_iter()
         .filter_map(|scan_address| scan_address.address_name())
         .collect();

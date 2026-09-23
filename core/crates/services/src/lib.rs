@@ -11,6 +11,7 @@ pub mod prices;
 pub mod rewards;
 mod static_assets;
 pub mod support;
+pub mod transactions;
 
 pub use backend::Services;
 pub use config::ConfigCacher;

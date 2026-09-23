@@ -36,6 +36,7 @@ use crate::prices::{ChartClient, MarketsClient, PriceAlertClient, PriceClient};
 use crate::rewards::IpSecurityClient;
 use crate::rewards::{RewardsClient, RewardsRedemptionClient};
 use crate::support::SupportClient;
+use crate::transactions::{AddressNamesClient, TransactionsClient};
 
 #[derive(Clone)]
 pub struct Services {
@@ -218,6 +219,14 @@ impl Services {
 
     pub fn portfolio(&self, config: PriceConfig) -> PortfolioClient {
         PortfolioClient::new(self.database(), config)
+    }
+
+    pub fn transactions(&self) -> TransactionsClient {
+        TransactionsClient::new(self.database())
+    }
+
+    pub fn address_names(&self) -> AddressNamesClient {
+        AddressNamesClient::new(self.database())
     }
 }
 

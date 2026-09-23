@@ -2,9 +2,9 @@ use primitives::{FiatTransactionData, TransactionsResponse, WalletSubscription};
 use rocket::{State, get};
 use services::devices::{AdminDevice, DevicesClient, WalletsClient};
 use services::fiat::FiatClient;
+use services::transactions::TransactionsClient;
 
 use crate::api_clients::{PermissionDeviceRead, PermissionDeviceSubscriptionsRead, PermissionDeviceTransactionsRead, PermissionFiatTransactionsRead};
-use crate::devices::TransactionsClient;
 use crate::responders::{ApiError, ApiResponse};
 
 #[get("/devices/<device_id>")]

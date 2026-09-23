@@ -2,10 +2,10 @@ use cacher::{CacheKey, CacherClient};
 use primitives::{Transaction, TransactionId};
 use rocket::serde::json::Json;
 use rocket::{State, get, post};
+use services::transactions::TransactionsClient;
 use streamer::{StreamProducer, StreamProducerQueue};
 
 use crate::api_clients::{PermissionAdminWrite, PermissionDeviceTransactionsRead};
-use crate::devices::TransactionsClient;
 use crate::responders::{ApiError, ApiResponse};
 
 #[get("/transactions/<hash>")]

@@ -33,7 +33,7 @@ use ::nft::{NFTProviderClient, NFTProviderConfig};
 use chain_providers::ProviderFactory;
 use config::ConfigClient;
 use config_keys::ConfigKey;
-use devices::{AddressNamesClient, ScanClient, TransactionScanConfig, TransactionsClient, scan_providers};
+use devices::{ScanClient, TransactionScanConfig, scan_providers};
 use model::APIService;
 use name_resolver::{NameClient, NameConfig, NameProviderFactory};
 use rocket::{Build, Rocket, catchers, routes};
@@ -201,8 +201,8 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let swapper = GemSwapper::new(native_provider.clone());
 
     let devices_client = services.devices();
-    let transactions_client = TransactionsClient::new(database.clone());
-    let address_names_client = AddressNamesClient::new(database.clone());
+    let transactions_client = services.transactions();
+    let address_names_client = services.address_names();
     let stream_producer = services.stream_producer("api", streamer::no_shutdown()).await.unwrap();
     let wallets_client = services.wallets(stream_producer.clone());
 

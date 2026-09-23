@@ -10,7 +10,7 @@ use crate::responders::{ApiError, ApiResponse};
 use crate::support::SupportApiClient;
 use auth_config::AuthConfig;
 use body::DeviceJson;
-pub use clients::{AddressNamesClient, ScanClient, TransactionScanConfig, TransactionsClient, scan_providers};
+pub use clients::{ScanClient, TransactionScanConfig, scan_providers};
 use gem_auth::create_device_token;
 use guard::{AuthenticatedDevice, AuthenticatedDeviceWallet, VerifiedDeviceId};
 use name_resolver::NameClient;
@@ -33,6 +33,7 @@ use services::nft::NFTClient;
 use services::notifications::NotificationsClient;
 use services::prices::{PortfolioClient, PriceAlertClient};
 use services::rewards::{RewardsClient, RewardsRedemptionClient};
+use services::transactions::{AddressNamesClient, TransactionsClient};
 use streamer::{StreamProducer, StreamProducerQueue};
 
 use crate::auth::WalletSigned;
