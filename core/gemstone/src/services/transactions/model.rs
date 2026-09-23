@@ -36,6 +36,7 @@ pub struct GemActivityFilters {
     pub asset_rank_greater_than: i32,
     pub chains: Vec<Chain>,
     pub transaction_types: Vec<TransactionType>,
+    pub pending_states: Vec<TransactionState>,
 }
 
 #[uniffi::export]

@@ -59,10 +59,8 @@ public struct TransactionsRequest: DatabaseQueryable {
         type: TransactionsRequestType,
         filters: [TransactionsRequestFilter],
     ) -> QueryInterfaceRequest<TransactionRecord> {
-        let states = states(type: type)
         var request = TransactionRecord
             .filter(TransactionRecord.Columns.walletId == walletId.id)
-            .filter(states.contains(TransactionRecord.Columns.state))
             .distinct()
 
         switch type {
@@ -70,7 +68,7 @@ public struct TransactionsRequest: DatabaseQueryable {
             request = request.joining(required: TransactionRecord.assetsAssociation.filter(TransactionAssetAssociationRecord.Columns.assetId == assetId.identifier))
         case let .transaction(id):
             request = request.filter(TransactionRecord.Columns.transactionId == id)
-        case .all, .pending:
+        case .all:
             break
         }
 
@@ -95,15 +93,8 @@ extension TransactionsRequest {
             return request.filter(types.contains(TransactionRecord.Columns.type))
         case let .assetRankGreaterThan(rank):
             return request.joining(required: TransactionRecord.asset.filter(AssetRecord.Columns.rank > rank))
-        }
-    }
-
-    private static func states(type: TransactionsRequestType) -> [String] {
-        switch type {
-        case .pending:
-            [TransactionState.pending, TransactionState.inTransit].map(\.rawValue)
-        case .all, .asset, .transaction:
-            TransactionState.allCases.map(\.rawValue)
+        case let .states(states):
+            return request.filter(states.contains(TransactionRecord.Columns.state))
         }
     }
 }

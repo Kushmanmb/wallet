@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, EnumIter, EnumString};
+use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator};
 use typeshare::typeshare;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, AsRefStr, EnumIter, EnumString)]
@@ -16,6 +16,10 @@ pub enum TransactionState {
 }
 
 impl TransactionState {
+    pub fn pending() -> Vec<Self> {
+        Self::iter().filter(|state| !state.is_completed()).collect()
+    }
+
     pub fn is_completed(&self) -> bool {
         match self {
             Self::Confirmed | Self::Failed | Self::Reverted | Self::Refunded => true,
@@ -40,5 +44,10 @@ mod tests {
         assert!(TransactionState::Refunded.is_completed());
         assert!(!TransactionState::Pending.is_completed());
         assert!(!TransactionState::InTransit.is_completed());
+    }
+
+    #[test]
+    fn test_pending_states_are_the_ones_not_completed() {
+        assert_eq!(TransactionState::pending(), vec![TransactionState::Pending, TransactionState::InTransit]);
     }
 }

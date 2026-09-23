@@ -669,6 +669,7 @@ pub fn activity_filters(chains: Vec<Chain>, filters: Vec<GemTransactionFilter>) 
         asset_rank_greater_than: crate::models::asset::default_token_rank(),
         chains,
         transaction_types,
+        pending_states: TransactionState::pending(),
     }
 }
 

@@ -21,6 +21,8 @@ sealed interface TransactionsRequestFilter {
         fun activity(chains: List<Chain>, filters: List<GemTransactionFilter>): List<TransactionsRequestFilter> = activityFilters(chains.map { it.string }, filters).toRequestFilters()
 
         fun activityDefaults(): List<TransactionsRequestFilter> = activity(emptyList(), emptyList())
+
+        fun pendingActivity(): List<TransactionsRequestFilter> = activityFilters(emptyList(), emptyList()).let { it.toRequestFilters() + States(it.pendingStates.map { state -> state.toPrimitives() }) }
     }
 }
 

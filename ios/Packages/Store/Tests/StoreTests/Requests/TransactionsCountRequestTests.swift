@@ -23,11 +23,11 @@ struct TransactionsCountRequestTests {
             .mock(.mock(id: TransactionId(chain: .smartChain, hash: "4"), state: .pending, assetId: AssetId(chain: .smartChain))),
         ])
 
-        let filters: [TransactionsRequestFilter] = [.assetRankGreaterThan(15)]
+        let filters: [TransactionsRequestFilter] = [.assetRankGreaterThan(15), .states([TransactionState.pending, .inTransit].map(\.rawValue))]
         let (count, listed) = try db.dbQueue.read { db in
             try (
-                TransactionsCountRequest(walletId: walletId, type: .pending, filters: filters).fetch(db),
-                TransactionsRequest.fetch(db, type: .pending, filters: filters, walletId: walletId),
+                TransactionsCountRequest(walletId: walletId, type: .all, filters: filters).fetch(db),
+                TransactionsRequest.fetch(db, type: .all, filters: filters, walletId: walletId),
             )
         }
 

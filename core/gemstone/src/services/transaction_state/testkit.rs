@@ -38,7 +38,7 @@ impl MemoryTransactionStateStore {
 
 #[async_trait::async_trait]
 impl GemTransactionStateStore for MemoryTransactionStateStore {
-    async fn get_pending_transactions(&self) -> Result<Vec<GemPendingTransaction>, GemServiceError> {
+    async fn get_pending_transactions(&self, _states: Vec<TransactionState>) -> Result<Vec<GemPendingTransaction>, GemServiceError> {
         Ok(self.pending.lock().unwrap().clone())
     }
 

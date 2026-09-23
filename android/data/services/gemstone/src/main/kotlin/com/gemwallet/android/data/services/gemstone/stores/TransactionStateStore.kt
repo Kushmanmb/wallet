@@ -17,8 +17,8 @@ import uniffi.gemstone.GemTransactionStateStore
 import uniffi.gemstone.GemTransactionStateUpdate
 
 class GemstoneTransactionStateStore(private val transactionsDao: TransactionsDao, private val walletStore: GemstoneWalletStore, private val transactionRunner: StoreTransactionRunner) : GemTransactionStateStore {
-    override suspend fun getPendingTransactions(): List<GemPendingTransaction> {
-        val records = transactionsDao.getTransactionsByStates(listOf(TransactionState.Pending, TransactionState.InTransit))
+    override suspend fun getPendingTransactions(states: List<uniffi.gemstone.TransactionState>): List<GemPendingTransaction> {
+        val records = transactionsDao.getTransactionsByStates(states.map { it.toPrimitives() })
         if (records.isEmpty()) {
             return emptyList()
         }

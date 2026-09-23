@@ -20,9 +20,9 @@ public final class GemstoneTransactionStateStore: GemTransactionStateStore, @unc
         self.walletStore = walletStore
     }
 
-    public func getPendingTransactions() async throws -> [GemPendingTransaction] {
+    public func getPendingTransactions(states: [Gemstone.TransactionState]) async throws -> [GemPendingTransaction] {
         let wallets = try Dictionary(uniqueKeysWithValues: walletStore.getWallets().map { ($0.id, $0) })
-        return try store.getTransactions(states: [.pending, .inTransit]).flatMap { walletId, transactions -> [GemPendingTransaction] in
+        return try store.getTransactions(states: states.map { $0.toPrimitives() }).flatMap { walletId, transactions -> [GemPendingTransaction] in
             guard let wallet = wallets[walletId] else { return [] }
             return transactions.map { GemPendingTransaction(wallet: wallet.toGem(), transaction: $0.toGem()) }
         }
