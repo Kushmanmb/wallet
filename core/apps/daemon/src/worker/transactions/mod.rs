@@ -15,10 +15,10 @@ use swapper::NativeProvider;
 use swapper::swapper::GemSwapper;
 use vault_addresses_updater::VaultAddressesUpdater;
 
-use crate::client::SwapVaultAddressClient;
 use crate::model::WorkerService;
 use crate::worker::context::WorkerContext;
 use crate::worker::jobs::WorkerJob;
+use services::transactions::SwapVaultAddressClient;
 
 pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<Vec<JobHandle>, Box<dyn Error + Send + Sync>> {
     let services = ctx.services();

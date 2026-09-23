@@ -1,5 +1,5 @@
+use crate::prices::PriceClient;
 use async_trait::async_trait;
-use services::prices::PriceClient;
 use std::error::Error;
 use std::time::Duration;
 use storage::{Database, DatabaseError, PricesRepository};

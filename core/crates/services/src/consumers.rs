@@ -7,13 +7,16 @@ use gem_client::ReqwestClient;
 use primitives::{Chain, PriceProvider};
 use security::providers::goplus::GoPlusProvider;
 use security::{ScanProviderConfig, ScanProviderFactory, TokenScanProviders};
-use streamer::StreamProducer;
+use streamer::{ShutdownReceiver, StreamProducer};
 
 use crate::Services;
 use crate::assets::{AssetClassificationRules, FetchAssetAssociationsConsumer, FetchAssetStatusConsumer, FetchAssetsConsumer, FetchCoinAddressesConsumer, FetchListConsumer, FetchTokenAddressesConsumer};
 use crate::nft::{FetchNftAssetConsumer, FetchNftAssetsAddressesConsumer};
-use crate::prices::{FetchPricesConsumer, FetchPricesMetadataConsumer};
-use crate::transactions::{FetchAddressTransactionsConsumer, FetchBlocksConsumer, FetchTransactionConsumer};
+use crate::notifications::Pusher;
+use crate::prices::{FetchPricesConsumer, FetchPricesMetadataConsumer, StorePricesConsumer, StorePricesConsumerConfig};
+use crate::transactions::{
+    FetchAddressTransactionsConsumer, FetchBlocksConsumer, FetchTransactionConsumer, StorePendingTransactionsConsumer, StoreTransactionsConsumer, StoreTransactionsConsumerConfig, SwapVaultAddressClient, WalletStreamConsumer,
+};
 
 impl Services {
     pub fn fetch_asset_associations_consumer(&self) -> FetchAssetAssociationsConsumer {
@@ -92,6 +95,48 @@ impl Services {
 
     pub async fn fetch_transaction_consumer(&self, chain: Chain, user_agent: &str, stream_producer: StreamProducer) -> Result<FetchTransactionConsumer, Box<dyn Error + Send + Sync>> {
         Ok(FetchTransactionConsumer::new(self.chain_providers_for(chain, user_agent), stream_producer, self.cacher().await?))
+    }
+
+    pub async fn store_transactions_consumer(&self, name: &str, shutdown_rx: ShutdownReceiver) -> Result<StoreTransactionsConsumer, Box<dyn Error + Send + Sync>> {
+        let config = self.config();
+        Ok(StoreTransactionsConsumer {
+            database: self.database(),
+            stream_producer: self.stream_producer(name, shutdown_rx).await?,
+            pusher: Pusher::new(self.database()),
+            config: StoreTransactionsConsumerConfig {
+                swap_outdated_timeout: config.get_duration(ConfigKey::TransactionSwapOutdatedTimeout).await?,
+                outdated_block_count: config.get_i64(ConfigKey::TransactionsOutdatedBlockCount).await? as u64,
+                outdated_min_timeout: config.get_duration(ConfigKey::TransactionsOutdatedMinTimeout).await?,
+                max_asset_transfer_count: config.get_usize(ConfigKey::TransactionsMaxAssetTransferCount).await?,
+                min_amount_usd: config.get_f64(ConfigKey::TransactionsMinAmountUsd).await?,
+                primary_price_max_age: config.get_duration(ConfigKey::PricePrimaryMaxAge).await?,
+            },
+            vault_client: SwapVaultAddressClient::new(self.cacher().await?),
+        })
+    }
+
+    pub async fn store_prices_consumer(&self) -> Result<StorePricesConsumer, Box<dyn Error + Send + Sync>> {
+        let config = self.config();
+        Ok(StorePricesConsumer::new(
+            self.database(),
+            self.prices(self.cacher().await?),
+            StorePricesConsumerConfig {
+                ttl_seconds: config.get_duration(ConfigKey::PriceOutdated).await?.as_secs() as i64,
+                primary_price_max_age: config.get_duration(ConfigKey::PricePrimaryMaxAge).await?,
+            },
+        ))
+    }
+
+    pub async fn wallet_stream_consumer(&self) -> Result<WalletStreamConsumer, Box<dyn Error + Send + Sync>> {
+        Ok(WalletStreamConsumer {
+            database: self.database(),
+            cacher_client: self.cacher().await?,
+            retention: self.config().get_duration(ConfigKey::DeviceStreamRetention).await?,
+        })
+    }
+
+    pub async fn store_pending_transactions_consumer(&self) -> Result<StorePendingTransactionsConsumer, Box<dyn Error + Send + Sync>> {
+        Ok(StorePendingTransactionsConsumer::new(self.cacher().await?))
     }
 
     async fn token_scan_providers(&self) -> Result<TokenScanProviders, Box<dyn Error + Send + Sync>> {

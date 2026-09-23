@@ -41,9 +41,10 @@ storage = { path = "../storage" }
 streamer = { path = "../streamer" }
 strum = { workspace = true }
 support = { path = "../support" }
-swapper = { path = "../swapper" }
+swapper = { path = "../swapper", features = ["reqwest_provider"] }
 tokio = { workspace = true, features = ["sync"] }
 uuid = { workspace = true }
 
 [dev-dependencies]
+gem_solana = { path = "../gem_solana", features = ["rpc"] }
 primitives = { path = "../primitives", features = ["testkit"] }

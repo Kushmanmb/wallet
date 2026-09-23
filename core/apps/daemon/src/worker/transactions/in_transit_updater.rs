@@ -12,7 +12,7 @@ use streamer::{StreamProducer, StreamProducerQueue, TransactionsPayload};
 use swapper::cross_chain::{self, DepositAddressMap};
 use swapper::swapper::GemSwapper;
 
-use crate::client::SwapVaultAddressClient;
+use services::transactions::SwapVaultAddressClient;
 
 #[derive(Clone, Copy)]
 pub struct InTransitConfig {

@@ -10,7 +10,7 @@ use storage::{AssetsRepository, Database, DatabaseError, FiatRepository, FiatTra
 use streamer::consumer::MessageConsumer;
 use streamer::{FiatWebhookPayload, NotificationsPayload, QueueName, StreamProducer, StreamProducerQueue, WalletStreamEvent, WalletStreamPayload};
 
-use crate::pusher::Pusher;
+use services::notifications::Pusher;
 
 pub struct FiatWebhookConsumer {
     pub database: Database,

@@ -1,10 +1,8 @@
-mod client;
 mod consumers;
 mod health;
 mod metrics;
 mod model;
 mod parser;
-mod pusher;
 mod reporters;
 mod setup;
 mod shutdown;

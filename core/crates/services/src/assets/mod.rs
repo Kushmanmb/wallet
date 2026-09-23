@@ -13,6 +13,7 @@ mod search_client;
 mod search_filter;
 mod search_request;
 
+pub use addresses::add_transaction_addresses;
 pub use assets_client::AssetsClient;
 pub use classification::AssetClassificationRules;
 pub use fetch_asset_associations_consumer::FetchAssetAssociationsConsumer;

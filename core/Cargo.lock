@@ -7833,6 +7833,7 @@ dependencies = [
  "gem_client",
  "gem_evm",
  "gem_jsonrpc",
+ "gem_solana",
  "gem_tracing",
  "hex",
  "hmac 0.13.0",

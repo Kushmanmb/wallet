@@ -4,13 +4,14 @@ use std::{collections::HashMap, error::Error};
 use async_trait::async_trait;
 use futures::{StreamExt, stream};
 use primitives::{AssetIdVecExt, Chain, DeviceSubscription, NFTAssetId, NFTChain, Transaction, TransactionId, TransactionState, TransactionType};
-use storage::{AssetFilter, AssetsAddressesRepository, AssetsRepository, Database, DatabaseError, NftRepository, TransactionsRepository, WalletsRepository};
+use storage::{AssetFilter, AssetsRepository, Database, DatabaseError, NftRepository, TransactionsRepository, WalletsRepository};
 use streamer::{AssetId, NotificationsPayload, StreamProducer, StreamProducerQueue, TransactionNotificationType, TransactionsPayload, WalletStreamEvent, WalletStreamPayload, consumer::MessageConsumer};
 use swapper::cross_chain::{self, DepositAddressMap, SendAddressMap};
 
-use crate::client::SwapVaultAddressClient;
-use crate::consumers::store::StoreTransactionsConsumerConfig;
-use crate::pusher::Pusher;
+use super::StoreTransactionsConsumerConfig;
+use super::SwapVaultAddressClient;
+use crate::assets::add_transaction_addresses;
+use crate::notifications::Pusher;
 
 const TRANSACTION_BATCH_SIZE: usize = 100;
 
@@ -155,7 +156,7 @@ impl MessageConsumer<TransactionsPayload, usize> for StoreTransactionsConsumer {
             .collect();
 
         let assets_addresses: Vec<_> = assets_addresses.into_iter().collect();
-        self.database.run(move |client| client.add_assets_addresses(assets_addresses)).await?;
+        self.database.run(move |client| add_transaction_addresses(client, assets_addresses)).await?;
         let _ = self.stream_producer.publish_notifications_transactions(notifications).await;
         let _ = self.stream_producer.publish_wallet_stream_events(wallet_events).await;
 
@@ -269,7 +270,7 @@ mod tests {
 
     #[test]
     fn test_relay_lookup_table_deposit_enters_cross_chain_processing() {
-        let response: JsonRpcResult<SingleTransaction> = serde_json::from_str(include_str!("../../../../../crates/gem_solana/testdata/relay_deposit_token_lookup_table.json")).unwrap();
+        let response: JsonRpcResult<SingleTransaction> = serde_json::from_str(include_str!("../../../gem_solana/testdata/relay_deposit_token_lookup_table.json")).unwrap();
         let source = BlockTransaction {
             meta: response.result.meta,
             transaction: response.result.transaction,

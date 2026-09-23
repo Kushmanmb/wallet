@@ -1,0 +1,1 @@
+pub mod store_transactions_consumer_config_mock;

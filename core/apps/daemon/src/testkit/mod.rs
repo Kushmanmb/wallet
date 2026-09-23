@@ -1,3 +1,2 @@
 pub mod abuse_detection_config_mock;
 pub mod perpetual_position_classifier_config_mock;
-pub mod store_transactions_consumer_config_mock;

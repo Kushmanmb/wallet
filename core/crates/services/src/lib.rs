@@ -18,6 +18,8 @@ pub mod security;
 mod static_assets;
 pub mod support;
 pub mod swap;
+#[cfg(test)]
+mod testkit;
 pub mod transactions;
 pub mod webhooks;
 

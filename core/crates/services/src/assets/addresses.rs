@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use primitives::{AssetBalance, AssetId, AssetVecExt, ChainAddress};
+use primitives::{AssetAddress, AssetBalance, AssetId, AssetVecExt, ChainAddress};
 use storage::{AssetsAddressesRepository, AssetsRepository, DatabaseClient, DatabaseError};
 
 use super::address_changes::AssetAddressChanges;
@@ -31,4 +31,8 @@ pub(crate) fn update_token_addresses(client: &mut DatabaseClient, chain_address:
         added,
         unknown_asset_ids: unknown_addresses.into_iter().map(|address| address.asset_id).collect(),
     })
+}
+
+pub fn add_transaction_addresses(client: &mut DatabaseClient, addresses: Vec<AssetAddress>) -> Result<usize, DatabaseError> {
+    client.add_assets_addresses(addresses)
 }

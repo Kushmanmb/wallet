@@ -7,6 +7,7 @@ mod price_alert_client;
 mod price_channel;
 mod price_client;
 mod providers;
+mod store_prices_consumer;
 
 pub use chart_client::ChartClient;
 pub use fetch_prices_consumer::FetchPricesConsumer;
@@ -16,3 +17,4 @@ pub use portfolio::PortfolioClient;
 pub use price_alert_client::PriceAlertClient;
 pub use price_channel::price_channel;
 pub use price_client::PriceClient;
+pub use store_prices_consumer::{StorePricesConsumer, StorePricesConsumerConfig};

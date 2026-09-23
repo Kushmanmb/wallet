@@ -1,6 +1,6 @@
 use primitives::{DAY, HOUR, MINUTE};
 
-use crate::consumers::store::StoreTransactionsConsumerConfig;
+use crate::transactions::StoreTransactionsConsumerConfig;
 
 impl StoreTransactionsConsumerConfig {
     pub fn mock() -> Self {
