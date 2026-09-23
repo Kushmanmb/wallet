@@ -1,12 +1,9 @@
 use std::error::Error;
-use std::time::Duration;
 
 use cacher::{CacheKey, CacherClient};
 use chrono::Utc;
-use primitives::{AuthNonce, DeviceToken};
+use primitives::AuthNonce;
 use uuid::Uuid;
-
-use crate::jwt;
 
 pub struct AuthClient {
     cacher: CacherClient,
@@ -15,11 +12,6 @@ pub struct AuthClient {
 impl AuthClient {
     pub fn new(cacher: CacherClient) -> Self {
         Self { cacher }
-    }
-
-    pub fn create_device_token(&self, device_id: &str, secret: &str, expiry: Duration) -> Result<DeviceToken, Box<dyn Error + Send + Sync>> {
-        let (token, expires_at) = jwt::create_device_token(device_id, secret, expiry)?;
-        Ok(DeviceToken { token, expires_at })
     }
 
     pub async fn get_nonce(&self, device_id: &str) -> Result<AuthNonce, Box<dyn Error + Send + Sync>> {

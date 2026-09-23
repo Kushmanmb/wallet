@@ -16,6 +16,7 @@ use storage::{ConfigCacher, Database, DatabaseError};
 use streamer::{Retry, ShutdownReceiver, StreamProducer, StreamProducerConfig};
 
 use crate::assets::ListsClient;
+use crate::auth::AuthClient;
 use crate::defi::DefiClient;
 use crate::nft::NFTClient;
 
@@ -45,6 +46,10 @@ impl Services {
 
     pub async fn cacher(&self) -> Result<CacherClient, Box<dyn Error + Send + Sync>> {
         CacherClient::new(&self.settings.redis.url).await
+    }
+
+    pub async fn auth(&self) -> Result<AuthClient, Box<dyn Error + Send + Sync>> {
+        Ok(AuthClient::new(self.cacher().await?))
     }
 
     pub async fn stream_producer(&self, name: &str, shutdown_rx: ShutdownReceiver) -> Result<StreamProducer, Box<dyn Error + Send + Sync>> {

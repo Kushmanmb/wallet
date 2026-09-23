@@ -16,7 +16,7 @@ pub use client::DevicesClient;
 pub use clients::{
     AddressNamesClient, FiatQuotesClient, NotificationsClient, PortfolioClient, RewardsClient, RewardsRedemptionClient, ScanClient, TransactionScanConfig, TransactionsClient, WalletConfigurationClient, WalletsClient, scan_providers,
 };
-use gem_auth::AuthClient;
+use gem_auth::create_device_token;
 use guard::{AuthenticatedDevice, AuthenticatedDeviceWallet, VerifiedDeviceId};
 use name_resolver::NameClient;
 use primitives::DeviceToken;
@@ -29,6 +29,7 @@ use primitives::{
     ScanTransaction, ScanTransactionPayload, Transaction, TransactionsResponse, WalletConfigurationResult, WalletId, WalletSubscription, WalletSubscriptionChains,
 };
 use rocket::{FromForm, State, delete, get, post, put};
+use services::auth::AuthClient;
 use services::defi::DefiClient;
 use services::nft::NFTClient;
 use streamer::{StreamProducer, StreamProducerQueue};
@@ -238,8 +239,8 @@ pub async fn get_auth_nonce_v2(device: AuthenticatedDevice, client: &State<AuthC
 }
 
 #[get("/devices/token")]
-pub async fn get_device_token_v2(device: AuthenticatedDevice, config: &State<AuthConfig>, client: &State<AuthClient>) -> Result<ApiResponse<DeviceToken>, ApiError> {
-    Ok(client.create_device_token(&device.device_row.device_id, &config.jwt.secret, config.jwt.expiry)?.into())
+pub async fn get_device_token_v2(device: AuthenticatedDevice, config: &State<AuthConfig>) -> Result<ApiResponse<DeviceToken>, ApiError> {
+    Ok(create_device_token(&device.device_row.device_id, &config.jwt.secret, config.jwt.expiry)?.into())
 }
 
 #[get("/devices/price_alerts?<asset_id>")]

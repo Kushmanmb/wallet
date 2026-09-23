@@ -1,4 +1,5 @@
 pub mod assets;
+pub mod auth;
 mod backend;
 pub mod defi;
 pub mod nft;

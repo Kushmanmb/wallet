@@ -19,6 +19,8 @@ primitives = { path = "../primitives" }
 pusher = { path = "../pusher" }
 search_index = { path = "../search_index" }
 serde = { workspace = true }
+serde_json = { workspace = true }
 settings = { path = "../settings" }
 storage = { path = "../storage" }
 streamer = { path = "../streamer" }
+uuid = { workspace = true }

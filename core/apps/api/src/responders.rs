@@ -1,5 +1,6 @@
 use cacher::CacheError;
 use fiat::error::FiatQuoteError;
+use gem_auth::JwtError;
 use gem_client::ClientError;
 use primitives::{RequestError, ResponseResult};
 use rewards::{RewardsError, RewardsRedemptionError, UsernameError};
@@ -61,6 +62,12 @@ impl From<CacheError> for ApiError {
             CacheError::NotFound { .. } | CacheError::ResourceNotFound(_) => ApiError::NotFound(error.to_string()),
             CacheError::KeyNotFound(_) => ApiError::InternalServerError("Unexpected cache miss".to_string()),
         }
+    }
+}
+
+impl From<JwtError> for ApiError {
+    fn from(error: JwtError) -> Self {
+        ApiError::InternalServerError(format!("{}", error))
     }
 }
 

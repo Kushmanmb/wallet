@@ -3487,8 +3487,6 @@ name = "gem_auth"
 version = "2.114.44"
 dependencies = [
  "alloy-primitives",
- "cacher",
- "chrono",
  "ed25519-dalek",
  "gem_encoding",
  "gem_hash",
@@ -3497,7 +3495,6 @@ dependencies = [
  "serde",
  "serde_json",
  "signer",
- "uuid",
  "zeroize",
 ]
 
@@ -7881,9 +7878,11 @@ dependencies = [
  "pusher",
  "search_index",
  "serde",
+ "serde_json",
  "settings",
  "storage",
  "streamer",
+ "uuid",
 ]
 
 [[package]]

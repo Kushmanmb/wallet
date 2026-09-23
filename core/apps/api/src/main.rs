@@ -41,7 +41,6 @@ use devices::DevicesClient;
 use devices::{
     AddressNamesClient, FiatQuotesClient, NotificationsClient, PortfolioClient, RewardsClient, RewardsRedemptionClient, ScanClient, TransactionScanConfig, TransactionsClient, WalletConfigurationClient, WalletsClient, scan_providers,
 };
-use gem_auth::AuthClient;
 use model::APIService;
 use name_resolver::{NameClient, NameConfig, NameProviderFactory};
 use pricer::{ChartClient, MarketsClient, PriceAlertClient, PriceClient};
@@ -245,7 +244,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let nft_provider_client = NFTProviderClient::new(nft_config);
     let defi_client = services.defi();
     let defi_provider_client = DefiProviderClient::new(DefiProviderConfig::from_settings(&settings));
-    let auth_client = AuthClient::new(cacher_client.clone());
+    let auth_client = services.auth().await?;
     let markets_client = MarketsClient::new(database.clone(), cacher_client.clone());
     let webhooks_client = WebhooksClient::new(stream_producer.clone(), settings.support.webhook.key.secret.clone());
     let ip_check_providers: Vec<Arc<dyn IpCheckProvider>> = vec![
