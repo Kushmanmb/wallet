@@ -3,7 +3,8 @@ use std::error::Error;
 use config_keys::{ConfigKey, RateLimitKey, RateLimitWindow};
 use primitives::rewards::{RedemptionResult, Rewards};
 use primitives::{NaiveDateTimeExt, now};
-use rewards::{RewardsRedemptionError, redeem_points};
+use rewards::RewardsRedemptionError;
+use services::rewards::{redeem_points, rewards_by_wallet_id, username_rules};
 use storage::{ConfigCacher, Database, RewardsRedemptionsRepository, RewardsRepository};
 use streamer::{RewardsRedemptionPayload, StreamProducer, StreamProducerQueue};
 
@@ -20,7 +21,8 @@ impl RewardsRedemptionClient {
     }
 
     pub async fn redeem_by_wallet_id(&self, wallet_id: i32, id: &str, device_id: i32) -> Result<RedemptionResult, Box<dyn Error + Send + Sync>> {
-        let rewards = self.database.run(move |client| client.get_reward_by_wallet_id(wallet_id)).await?;
+        let rules = username_rules(&self.config).await?;
+        let rewards = self.database.run(move |client| rewards_by_wallet_id(client, wallet_id, &rules)).await?;
 
         if !rewards.status.is_verified() {
             return Err(RewardsRedemptionError::NotEligible("Not eligible for rewards".to_string()).into());

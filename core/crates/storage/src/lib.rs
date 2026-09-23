@@ -38,7 +38,7 @@ pub use self::repositories::{
     prices_repository::{AssetsWithPricesFilter, PriceFilter, PriceUpdate, PricesRepository},
     releases_repository::ReleasesRepository,
     rewards_redemptions_repository::{RedemptionUpdate, RewardsRedemptionsRepository},
-    rewards_repository::{ReferralRecord, ReferralUpdate, ReferrerInfo, RewardsEligibilityConfig, RewardsFilter, RewardsRepository, RewardsUpdate, RewardsVerification},
+    rewards_repository::{ReferralRecord, ReferralUpdate, ReferrerInfo, RewardIdentityRecord, RewardsEligibilityConfig, RewardsFilter, RewardsRecord, RewardsRepository, RewardsUpdate, RewardsVerification},
     risk_signals_repository::{AbusePatterns, RiskSignalsRepository},
     scan_addresses_repository::ScanAddressesRepository,
     scan_detections_repository::ScanDetectionsRepository,

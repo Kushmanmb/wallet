@@ -1,16 +1,22 @@
+use std::collections::HashMap;
 use std::error::Error;
+use std::str::FromStr;
 use std::sync::Arc;
 
 use cacher::{AccessTokenCacherClient, CacherClient};
-use chain_providers::ChainProviders;
+use chain_providers::{ChainProviders, ProviderFactory};
 use coingecko::CoinGeckoClient;
 use config_keys::ConfigKey;
 use defi::{DefiProviderClient, DefiProviderConfig};
 use fiat::{FiatProvider, FiatProviderFactory};
+use gem_client::ReqwestClient;
+use gem_evm::rpc::{EthereumClient, EthereumProvider};
+use gem_jsonrpc::JsonRpcClient;
 use lists::CoinGeckoListProvider;
 use nft::NFTProviderConfig;
-use primitives::{AccessTokenCacher, Chain, FiatProviderName, PriceConfig};
+use primitives::{AccessTokenCacher, Chain, ChainType, EVMChain, FiatProviderName, PriceConfig};
 use pusher::PusherClient;
+use rewards::{AbuseIPDBClient, EvmClientProvider, IpApiClient, IpCheckProvider, TransferRedemptionService, WalletConfig};
 use search_index::{SearchIndexClient, SearchIndexConfig};
 use settings::Settings;
 use storage::{ConfigCacher, Database, DatabaseError};
@@ -22,6 +28,7 @@ use crate::defi::DefiClient;
 use crate::fiat::FiatClient;
 use crate::nft::NFTClient;
 use crate::prices::{ChartClient, MarketsClient, PriceAlertClient, PriceClient};
+use crate::rewards::IpSecurityClient;
 use crate::support::SupportClient;
 
 #[derive(Clone)]
@@ -115,6 +122,40 @@ impl Services {
 
     pub fn price_alerts(&self) -> PriceAlertClient {
         PriceAlertClient::new(self.database())
+    }
+
+    pub async fn ip_security(&self) -> Result<IpSecurityClient, Box<dyn Error + Send + Sync>> {
+        let security = &self.settings.security;
+        let providers: Vec<Arc<dyn IpCheckProvider>> = vec![
+            Arc::new(AbuseIPDBClient::new(security.abuseipdb.url.clone(), security.abuseipdb.key.secret.clone())),
+            Arc::new(IpApiClient::new(security.ipapi.url.clone(), security.ipapi.key.secret.clone())),
+        ];
+        Ok(IpSecurityClient::new(providers, self.cacher().await?))
+    }
+
+    pub fn redemption_service(&self) -> Result<TransferRedemptionService, Box<dyn Error + Send + Sync>> {
+        let wallets = self
+            .settings
+            .rewards
+            .wallets
+            .iter()
+            .map(|(chain_type, wallet)| {
+                let chain_type = ChainType::from_str(chain_type).map_err(|_| format!("Invalid chain type: {chain_type}"))?;
+                Ok((
+                    chain_type,
+                    WalletConfig {
+                        key: wallet.key.clone(),
+                        address: wallet.address.clone(),
+                    },
+                ))
+            })
+            .collect::<Result<HashMap<_, _>, String>>()?;
+        let settings = self.settings.clone();
+        let client_provider: EvmClientProvider = Arc::new(move |chain: EVMChain| {
+            let client = ReqwestClient::new(ProviderFactory::get_chain_url(chain.to_chain(), &settings), gem_client::builder().build().ok()?);
+            Some(EthereumProvider::new_rpc_only(EthereumClient::new(JsonRpcClient::new(client), chain)))
+        });
+        Ok(TransferRedemptionService::new(wallets, client_provider))
     }
 
     pub fn pusher(&self) -> PusherClient {

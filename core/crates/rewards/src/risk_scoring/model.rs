@@ -1,7 +1,10 @@
+use std::time::Duration;
+
+use chrono::NaiveDateTime;
 use gem_hash::sha2::sha256;
 use primitives::rewards::RewardStatus;
 use primitives::{IpUsageType, MINUTE, MONTH, Platform, PlatformStore};
-use std::time::Duration;
+use serde_json::Value;
 
 #[derive(Debug, Clone)]
 pub struct RiskScoreConfig {
@@ -212,8 +215,8 @@ fn is_zero(value: &i64) -> bool {
 }
 
 impl RiskScoreBreakdown {
-    pub fn to_metadata_json(&self) -> serde_json::Value {
-        serde_json::to_value(self).unwrap_or(serde_json::Value::Null)
+    pub fn to_metadata_json(&self) -> Value {
+        serde_json::to_value(self).unwrap_or(Value::Null)
     }
 }
 
@@ -226,4 +229,37 @@ mod tests {
         let input = RiskSignalInput::mock();
         assert_eq!(input.generate_fingerprint().len(), 64);
     }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RiskSignal {
+    pub fingerprint: String,
+    pub referrer_username: String,
+    pub device_id: i32,
+    pub device_platform: Platform,
+    pub device_model: String,
+    pub ip_address: String,
+    pub ip_isp: String,
+    pub created_at: NaiveDateTime,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NewRiskSignal {
+    pub fingerprint: String,
+    pub referrer_username: String,
+    pub device_id: i32,
+    pub device_platform: Platform,
+    pub device_platform_store: PlatformStore,
+    pub device_os: String,
+    pub device_model: String,
+    pub device_locale: String,
+    pub device_currency: String,
+    pub ip_address: String,
+    pub ip_country_code: String,
+    pub ip_usage_type: IpUsageType,
+    pub ip_isp: String,
+    pub ip_abuse_score: i32,
+    pub risk_score: i32,
+    pub user_agent: String,
+    pub metadata: Value,
 }

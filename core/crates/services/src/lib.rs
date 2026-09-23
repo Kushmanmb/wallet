@@ -5,6 +5,7 @@ pub mod defi;
 pub mod fiat;
 pub mod nft;
 pub mod prices;
+pub mod rewards;
 mod static_assets;
 pub mod support;
 

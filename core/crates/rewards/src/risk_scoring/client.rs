@@ -1,9 +1,8 @@
 use crate::model::IpCheckResult;
 use primitives::rewards::RewardStatus;
 use primitives::{Platform, PlatformStore};
-use storage::models::{NewRiskSignalRow, RiskSignalRow};
 
-use super::model::{RiskScore, RiskScoreConfig, RiskSignalInput};
+use super::model::{NewRiskSignal, RiskScore, RiskScoreConfig, RiskSignal, RiskSignalInput};
 use super::scoring::calculate_risk_score;
 
 #[derive(Debug, Clone)]
@@ -47,12 +46,12 @@ impl RiskScoringInput {
 
 pub struct RiskResult {
     pub score: RiskScore,
-    pub signal: NewRiskSignalRow,
+    pub signal: NewRiskSignal,
 }
 
 pub fn evaluate_risk(
     input: &RiskScoringInput,
-    existing_signals: &[RiskSignalRow],
+    existing_signals: &[RiskSignal],
     device_model_ring_count: i64,
     ip_abuser_count: i64,
     cross_referrer_fingerprint_count: i64,
@@ -72,24 +71,24 @@ pub fn evaluate_risk(
         config,
     );
 
-    let signal = NewRiskSignalRow {
+    let signal = NewRiskSignal {
         fingerprint: score.fingerprint.clone(),
         referrer_username: signal_input.username,
         device_id: signal_input.device_id,
-        device_platform: signal_input.device_platform.into(),
-        device_platform_store: signal_input.device_platform_store.into(),
+        device_platform: signal_input.device_platform,
+        device_platform_store: signal_input.device_platform_store,
         device_os: signal_input.device_os,
         device_model: signal_input.device_model,
         device_locale: signal_input.device_locale,
         device_currency: signal_input.device_currency,
         ip_address: signal_input.ip_address,
         ip_country_code: signal_input.ip_country_code,
-        ip_usage_type: signal_input.ip_usage_type.into(),
+        ip_usage_type: signal_input.ip_usage_type,
         ip_isp: signal_input.ip_isp,
         ip_abuse_score: signal_input.ip_abuse_score as i32,
         risk_score: score.score as i32,
         user_agent: signal_input.user_agent,
-        metadata: Some(score.breakdown.to_metadata_json()),
+        metadata: score.breakdown.to_metadata_json(),
     };
 
     RiskResult { score, signal }
@@ -130,7 +129,7 @@ mod tests {
 
         assert_eq!(result.signal.ip_address, "192.168.1.1");
         assert_eq!(result.signal.ip_isp, "Comcast");
-        assert_eq!(*result.signal.device_platform, Platform::IOS);
+        assert_eq!(result.signal.device_platform, Platform::IOS);
         assert!(!result.signal.fingerprint.is_empty());
     }
 }

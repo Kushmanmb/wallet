@@ -2,14 +2,13 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use diesel::result::Error as DieselError;
 use diesel::sql_types::Text;
-use primitives::rewards::{RewardStatus as PrimitiveRewardStatus, is_custom_username};
-use primitives::{NaiveDateTimeExt, ReferralLeader, ReferralLeaderboard, RewardEvent, Rewards, now};
+use primitives::rewards::RewardStatus as PrimitiveRewardStatus;
+use primitives::{NaiveDateTimeExt, ReferralLeader, ReferralLeaderboard, RewardEvent, now};
 
 use crate::models::{NewRewardEventRow, NewRewardReferralRow, NewRewardsRow, NewUsernameRow, ReferralAttemptRow, RewardEventRow, RewardReferralRow, RewardsRow, UsernameRow, WalletRow};
-use crate::repositories::rewards_redemptions_repository::RewardsRedemptionsRepository;
 use crate::repositories::transactions_repository::{TransactionFilter, transactions_by_wallet_since};
 use crate::repositories::wallets_repository::{WalletsRepository, first_subscription_date_by_wallet_id};
-use crate::sql_types::{RewardEventType, RewardRedemptionType, RewardStatus, TransactionState, UsernameStatus};
+use crate::sql_types::{RewardEventType, RewardStatus, TransactionState, UsernameStatus};
 use crate::{DatabaseClient, DatabaseError, DieselResultExt};
 
 #[derive(Debug, Clone)]
@@ -307,6 +306,37 @@ pub struct RewardsVerification {
     pub verify_after: Option<NaiveDateTime>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct RewardIdentityRecord {
+    pub username: String,
+    pub wallet_address: String,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RewardsRecord {
+    pub status: PrimitiveRewardStatus,
+    pub points: i32,
+    pub referral_count: i32,
+    pub referrer_username: Option<String>,
+    pub disable_reason: Option<String>,
+    pub verify_after: Option<NaiveDateTime>,
+    pub created_at: NaiveDateTime,
+}
+
+impl From<RewardsRow> for RewardsRecord {
+    fn from(row: RewardsRow) -> Self {
+        Self {
+            status: *row.status,
+            points: row.points,
+            referral_count: row.referral_count,
+            referrer_username: row.referrer_username,
+            disable_reason: row.disable_reason,
+            verify_after: row.verify_after,
+            created_at: row.created_at,
+        }
+    }
+}
+
 fn latest_wallet_device_id(client: &mut DatabaseClient, wallet_id: i32) -> Result<i32, DatabaseError> {
     client
         .get_devices_by_wallet_id(wallet_id)?
@@ -326,23 +356,23 @@ fn referred_username(client: &mut DatabaseClient, wallet_id: i32) -> Result<Stri
     }
 }
 
-fn ensure_wallet_reward_identity(client: &mut DatabaseClient, wallet_id: i32) -> Result<UsernameRow, DatabaseError> {
+fn ensure_wallet_reward_identity(client: &mut DatabaseClient, wallet_id: i32) -> Result<RewardIdentityRecord, DatabaseError> {
     let device_id = latest_wallet_device_id(client, wallet_id)?;
+    let wallet_address = require_wallet_by_id(client, wallet_id)?.wallet_id.address().to_string();
 
-    match find_username(client, UsernameLookup::WalletId(wallet_id))? {
+    let username = match find_username(client, UsernameLookup::WalletId(wallet_id))? {
         Some(username) => {
             if require_rewards(client, &username.username).is_err() {
                 create_rewards(client, NewRewardsRow::new(username.username.clone(), device_id))?;
             }
-            Ok(username)
+            username.username
         }
         None => {
-            let wallet = require_wallet_by_id(client, wallet_id)?;
-            let address = wallet.wallet_id.address().to_string();
-            create_username_and_rewards(client, wallet_id, &address, device_id)?;
-            require_username(client, UsernameLookup::WalletId(wallet_id))
+            create_username_and_rewards(client, wallet_id, &wallet_address, device_id)?;
+            require_username(client, UsernameLookup::WalletId(wallet_id))?.username
         }
-    }
+    };
+    Ok(RewardIdentityRecord { username, wallet_address })
 }
 
 fn add_referral_verified_event_rows(client: &mut DatabaseClient, referrer_username: &str, referrer_status: &PrimitiveRewardStatus, referred_username: &str) -> Result<Vec<RewardEventRow>, DatabaseError> {
@@ -438,12 +468,12 @@ fn complete_referral(client: &mut DatabaseClient, referred_username: &str) -> Re
 }
 
 pub trait RewardsRepository {
-    fn get_reward_by_wallet_id(&mut self, wallet_id: i32) -> Result<Rewards, DatabaseError>;
+    fn get_rewards_record(&mut self, username: &str) -> Result<RewardsRecord, DatabaseError>;
     fn get_username_by_wallet_id(&mut self, wallet_id: i32) -> Result<Option<String>, DatabaseError>;
     fn get_reward_events_by_wallet_id(&mut self, wallet_id: i32) -> Result<Vec<RewardEvent>, DatabaseError>;
     fn get_reward_event(&mut self, event_id: i32) -> Result<RewardEvent, DatabaseError>;
-    fn ensure_reward_identity(&mut self, wallet_id: i32) -> Result<String, DatabaseError>;
-    fn set_username(&mut self, wallet_id: i32, username: &str) -> Result<(Rewards, i32), DatabaseError>;
+    fn ensure_reward_identity(&mut self, wallet_id: i32) -> Result<RewardIdentityRecord, DatabaseError>;
+    fn set_username(&mut self, wallet_id: i32, username: &str) -> Result<i32, DatabaseError>;
     fn get_referral_code(&mut self, code: &str) -> Result<Option<String>, DatabaseError>;
     fn get_referrer_info(&mut self, username: &str) -> Result<ReferrerInfo, DatabaseError>;
     fn get_referred_username(&mut self, wallet_id: i32) -> Result<String, DatabaseError>;
@@ -477,32 +507,8 @@ pub trait RewardsRepository {
 }
 
 impl RewardsRepository for DatabaseClient {
-    fn get_reward_by_wallet_id(&mut self, wallet_id: i32) -> Result<Rewards, DatabaseError> {
-        let username = ensure_wallet_reward_identity(self, wallet_id)?;
-        let rewards = require_rewards(self, &username.username)?;
-        let code = is_custom_username(&username.username).then(|| username.username.clone());
-        let status = *rewards.status;
-        let is_attribution = status == PrimitiveRewardStatus::Attribution;
-        let redemption_options = if is_attribution {
-            vec![]
-        } else {
-            let types = [RewardRedemptionType::Asset];
-            self.get_redemption_options(&types)?.into_iter().filter(|option| option.remaining.unwrap_or_default() > 0).collect()
-        };
-
-        Ok(Rewards {
-            code,
-            invite_reward_points: if is_attribution { 0 } else { RewardEventType::InviteNew.points() },
-            referral_count: rewards.referral_count,
-            points: rewards.points,
-            used_referral_code: rewards.referrer_username,
-            status,
-            created_at: rewards.created_at,
-            verify_after: rewards.verify_after.map(|dt| dt.and_utc()),
-            redemption_options,
-            disable_reason: rewards.disable_reason.clone(),
-            referral_allowance: Default::default(),
-        })
+    fn get_rewards_record(&mut self, username: &str) -> Result<RewardsRecord, DatabaseError> {
+        Ok(require_rewards(self, username)?.into())
     }
 
     fn get_username_by_wallet_id(&mut self, wallet_id: i32) -> Result<Option<String>, DatabaseError> {
@@ -520,11 +526,11 @@ impl RewardsRepository for DatabaseClient {
         Ok(event.as_primitive())
     }
 
-    fn ensure_reward_identity(&mut self, wallet_id: i32) -> Result<String, DatabaseError> {
-        Ok(ensure_wallet_reward_identity(self, wallet_id)?.username)
+    fn ensure_reward_identity(&mut self, wallet_id: i32) -> Result<RewardIdentityRecord, DatabaseError> {
+        ensure_wallet_reward_identity(self, wallet_id)
     }
 
-    fn set_username(&mut self, wallet_id: i32, username: &str) -> Result<(Rewards, i32), DatabaseError> {
+    fn set_username(&mut self, wallet_id: i32, username: &str) -> Result<i32, DatabaseError> {
         update_username(self, wallet_id, username).or_not_found_internal(wallet_id.to_string())?;
 
         let event = add_event(
@@ -535,9 +541,7 @@ impl RewardsRepository for DatabaseClient {
             },
             RewardEventType::CreateUsername.points(),
         )?;
-
-        let rewards = self.get_reward_by_wallet_id(wallet_id)?;
-        Ok((rewards, event.id))
+        Ok(event.id)
     }
 
     fn get_referral_code(&mut self, code: &str) -> Result<Option<String>, DatabaseError> {

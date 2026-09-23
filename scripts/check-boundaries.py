@@ -96,7 +96,6 @@ INFRA_DEPENDENTS = {
     "services": INFRA_CRATES,
     "api": {"cacher", "pusher", "search_index", "storage", "streamer"},
     "daemon": {"cacher", "pusher", "search_index", "storage", "streamer"},
-    "rewards": {"cacher", "storage"},
 }
 CARGO_SECTION = re.compile(r"^\[(.+)\]\s*$")
 CARGO_KEY = re.compile(r"^([A-Za-z0-9_-]+)\s*=\s*(.*)$")

@@ -3,9 +3,7 @@ use std::sync::Arc;
 
 use cacher::{CacheKey, CacherClient};
 use primitives::try_in_order;
-
-use crate::ip_check_provider::IpCheckProvider;
-use crate::model::IpCheckResult;
+use rewards::{IpCheckProvider, IpCheckResult};
 
 pub struct IpSecurityClient {
     providers: Vec<Arc<dyn IpCheckProvider>>,

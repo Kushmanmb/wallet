@@ -2310,7 +2310,6 @@ dependencies = [
  "futures",
  "gem_client",
  "gem_evm",
- "gem_jsonrpc",
  "gem_solana",
  "gem_tracing",
  "job_runner",
@@ -6931,7 +6930,6 @@ version = "2.114.44"
 dependencies = [
  "alloy-primitives",
  "async-trait",
- "cacher",
  "chain_traits",
  "chrono",
  "config_keys",
@@ -6946,7 +6944,6 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "storage",
 ]
 
 [[package]]
@@ -7846,6 +7843,8 @@ dependencies = [
  "fiat",
  "futures",
  "gem_client",
+ "gem_evm",
+ "gem_jsonrpc",
  "gem_tracing",
  "hex",
  "hmac 0.13.0",
@@ -7857,6 +7856,7 @@ dependencies = [
  "primitives",
  "push_notification",
  "pusher",
+ "rewards",
  "search_index",
  "serde",
  "serde_json",

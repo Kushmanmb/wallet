@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use diesel::result::Error as DieselError;
-use primitives::rewards::{RewardRedemption, RewardRedemptionOption};
+use primitives::rewards::{RewardRedemption, RewardRedemptionOption, RewardRedemptionType as PrimitiveRewardRedemptionType};
 
 use crate::models::{AssetRow, NewRewardRedemptionRow, RedemptionOptionFull, RewardRedemptionOptionRow, RewardRedemptionRow};
 use crate::repositories::rewards_repository::{RewardsFilter, get_rewards_by_filter};
@@ -19,7 +19,7 @@ pub trait RewardsRedemptionsRepository {
     fn add_redemption(&mut self, username: &str, option_id: &str, device_id: i32, wallet_id: i32) -> Result<RewardRedemption, DatabaseError>;
     fn get_redemption(&mut self, redemption_id: i32) -> Result<RewardRedemptionRow, DatabaseError>;
     fn update_redemption(&mut self, redemption_id: i32, updates: Vec<RedemptionUpdate>) -> Result<(), DatabaseError>;
-    fn get_redemption_options(&mut self, types: &[RewardRedemptionType]) -> Result<Vec<RewardRedemptionOption>, DatabaseError>;
+    fn get_redemption_options(&mut self, types: &[PrimitiveRewardRedemptionType]) -> Result<Vec<RewardRedemptionOption>, DatabaseError>;
     fn get_redemption_option(&mut self, id: &str) -> Result<RewardRedemptionOption, DatabaseError>;
     fn count_redemptions_since(&mut self, username: &str, since: NaiveDateTime) -> Result<i64, DatabaseError>;
 }
@@ -130,8 +130,9 @@ impl RewardsRedemptionsRepository for DatabaseClient {
         Ok(())
     }
 
-    fn get_redemption_options(&mut self, types: &[RewardRedemptionType]) -> Result<Vec<RewardRedemptionOption>, DatabaseError> {
+    fn get_redemption_options(&mut self, types: &[PrimitiveRewardRedemptionType]) -> Result<Vec<RewardRedemptionOption>, DatabaseError> {
         use crate::schema::{assets, rewards_redemption_options};
+        let types: Vec<RewardRedemptionType> = types.iter().copied().map(RewardRedemptionType::from).collect();
         let results: Vec<(RewardRedemptionOptionRow, Option<AssetRow>)> = rewards_redemption_options::table
             .filter(rewards_redemption_options::redemption_type.eq_any(types))
             .left_join(assets::table.on(rewards_redemption_options::asset_id.eq(assets::id.nullable())))

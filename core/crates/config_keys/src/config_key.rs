@@ -12,6 +12,10 @@ pub enum ConfigKey {
     ReferralVerificationDelay,
     ReferralEligibility,
 
+    // Username
+    UsernameMinLength,
+    UsernameMaxLength,
+
     // Redemption
     RedemptionMinAccountAge,
     RedemptionCooldownAfterReferral,
@@ -236,6 +240,8 @@ impl ConfigKey {
             Self::ReferralIneligibleCountries => "[]",
             Self::ReferralVerificationDelay => "24h",
             Self::ReferralEligibility => "7d",
+            Self::UsernameMinLength => "4",
+            Self::UsernameMaxLength => "16",
             Self::RedemptionMinAccountAge => "1h",
             Self::RedemptionCooldownAfterReferral => "1m",
             Self::RedemptionRetryMaxRetries => "1",

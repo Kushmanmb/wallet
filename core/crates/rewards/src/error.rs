@@ -4,7 +4,6 @@ use std::fmt;
 use config_keys::RateLimitKey;
 use localizer::LanguageLocalizer;
 use primitives::Localize;
-use storage::DatabaseError;
 
 #[derive(Debug)]
 pub enum RewardsError {
@@ -92,7 +91,7 @@ pub enum ReferralError {
     IpCountryIneligible(String),
     LimitReached,
     InvalidDeviceToken(String),
-    Database(DatabaseError),
+    Internal(String),
 }
 
 impl fmt::Display for ReferralError {
@@ -106,7 +105,7 @@ impl fmt::Display for ReferralError {
             ReferralError::IpCountryIneligible(country) => write!(f, "ip_country_ineligible: {}", country),
             ReferralError::LimitReached => write!(f, "limit_reached"),
             ReferralError::InvalidDeviceToken(reason) => write!(f, "invalid_device_token: {}", reason),
-            ReferralError::Database(e) => write!(f, "{}", e),
+            ReferralError::Internal(message) => write!(f, "{}", message),
         }
     }
 }
@@ -125,7 +124,7 @@ impl Localize for ReferralError {
             Self::ReferrerLimitReached => localizer.rewards_error_referral_referrer_limit_reached(),
             Self::IpCountryIneligible(country) => localizer.rewards_error_referral_country_ineligible(country),
             Self::RiskScoreExceeded { .. } | Self::DuplicateAttempt | Self::IpTorNotAllowed | Self::LimitReached | Self::InvalidDeviceToken(_) => localizer.rewards_error_referral_limit_reached(),
-            Self::Database(_) => localizer.errors_generic(),
+            Self::Internal(_) => localizer.errors_generic(),
         }
     }
 }
@@ -136,15 +135,15 @@ impl From<ReferralValidationError> for ReferralError {
     }
 }
 
-impl From<DatabaseError> for ReferralError {
-    fn from(error: DatabaseError) -> Self {
-        ReferralError::Database(error)
+impl ReferralError {
+    pub fn internal(error: impl fmt::Display) -> Self {
+        Self::Internal(error.to_string())
     }
 }
 
-impl From<Box<dyn std::error::Error + Send + Sync>> for ReferralError {
-    fn from(error: Box<dyn std::error::Error + Send + Sync>) -> Self {
-        ReferralError::Database(DatabaseError::Error(error.to_string()))
+impl From<Box<dyn Error + Send + Sync>> for ReferralError {
+    fn from(error: Box<dyn Error + Send + Sync>) -> Self {
+        Self::internal(error)
     }
 }
 
@@ -179,7 +178,7 @@ impl Error for RewardsRedemptionError {}
 pub enum UsernameError {
     LimitReached(RateLimitKey),
     Validation(UsernameValidationError),
-    Database(DatabaseError),
+    Internal(String),
 }
 
 impl fmt::Display for UsernameError {
@@ -187,7 +186,7 @@ impl fmt::Display for UsernameError {
         match self {
             UsernameError::LimitReached(key) => write!(f, "Username creation limit reached: {}", key.as_ref()),
             UsernameError::Validation(e) => write!(f, "{}", e),
-            UsernameError::Database(e) => write!(f, "{}", e),
+            UsernameError::Internal(message) => write!(f, "{}", message),
         }
     }
 }
@@ -200,7 +199,7 @@ impl Localize for UsernameError {
         match self {
             Self::LimitReached(_) => localizer.rewards_error_username_daily_limit_reached(),
             Self::Validation(e) => e.to_string(),
-            Self::Database(e) => e.to_string(),
+            Self::Internal(message) => message.clone(),
         }
     }
 }
@@ -211,8 +210,8 @@ impl From<UsernameValidationError> for UsernameError {
     }
 }
 
-impl From<DatabaseError> for UsernameError {
-    fn from(error: DatabaseError) -> Self {
-        UsernameError::Database(error)
+impl UsernameError {
+    pub fn internal(error: impl fmt::Display) -> Self {
+        Self::Internal(error.to_string())
     }
 }

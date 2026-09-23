@@ -13,6 +13,8 @@ defi = { path = "../defi" }
 fiat = { path = "../fiat" }
 futures = { workspace = true }
 gem_client = { path = "../gem_client", features = ["reqwest"] }
+gem_evm = { path = "../gem_evm", features = ["rpc", "reqwest"] }
+gem_jsonrpc = { path = "../gem_jsonrpc", features = ["client", "reqwest"] }
 gem_tracing = { path = "../gem_tracing" }
 hex = { workspace = true }
 hmac = { workspace = true }
@@ -24,6 +26,7 @@ prices = { path = "../prices" }
 primitives = { path = "../primitives" }
 push_notification = { path = "../push_notification" }
 pusher = { path = "../pusher" }
+rewards = { path = "../rewards" }
 search_index = { path = "../search_index" }
 serde = { workspace = true }
 serde_json = { workspace = true }

@@ -27,7 +27,7 @@ User1 (Verified/Trusted/Attribution): shares code
 
 ## Validation Pipeline
 
-Rules live in the `rewards` crate as pure functions over facts that storage returns (`ReferralUseFacts`, `Referral`, `ReferredRewards`, the username rules); storage only reads and writes. Two paths depending on whether the referred user is confirming a pending referral:
+Rules live in the `rewards` crate as pure functions over facts (`ReferralUseFacts`, `Referral`, `ReferredRewards`, `RewardIdentity`, `UsernameRules`); `services::rewards` gathers those facts from storage and applies the rules, and storage only reads and writes. Two paths depending on whether the referred user is confirming a pending referral:
 
 **Pending confirmation path** (user already redeemed, delay passed, calling again):
 1. `ReferralUseFacts::is_pending_referral` — checks Pending status, matching referrer+device+unverified referral
@@ -46,6 +46,10 @@ Rules live in the `rewards` crate as pure functions over facts that storage retu
 9. Global rate limits — daily total, per-device, per-IP (daily + weekly), per-country
 10. Risk scoring — fingerprint, abuse patterns, device model rings
 11. Signal storage + threshold check
+
+## Usernames
+
+A wallet's reward identity starts as its wallet address. A username is custom — and doubles as the referral code in `Rewards.code` — when it differs from that address (case-insensitively) and satisfies the username rules: letters and digits, length between `UsernameMinLength` and `UsernameMaxLength`. The address comparison keeps default identities from ever counting as codes, whatever the configured length. A wallet that already has a custom username cannot set another.
 
 ## Statuses
 
@@ -85,3 +89,5 @@ Rules live in the `rewards` crate as pure functions over facts that storage retu
 | `ReferralVerificationDelay` | Base delay before referral confirmation |
 | `ReferralVerifiedMultiplier` | Divides delay for Verified referrers (also scales rate limits) |
 | `ReferralTrustedMultiplier` | Scales rate limits for Trusted referrers (delay = 0) |
+| `UsernameMinLength` | Minimum username length (default 4) |
+| `UsernameMaxLength` | Maximum username length (default 16) |
