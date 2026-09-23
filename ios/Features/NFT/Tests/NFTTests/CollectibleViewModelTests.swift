@@ -90,4 +90,16 @@ struct CollectibleViewModelTests {
 
         #expect(model.sections.count == 1)
     }
+
+    @Test
+    func theContractRowOpensAddressDetailsOnTheCollectionChain() {
+        var selected: ChainAddress?
+        let assetData = NFTAssetData.mock()
+        let model = CollectibleViewModel.mock(assetData: assetData, onSelectAddress: { selected = $0 })
+
+        model.onSelectContract?("0xcontract")
+
+        #expect(selected == ChainAddress(chain: assetData.asset.chain, address: "0xcontract"))
+        #expect(CollectibleViewModel.mock().onSelectContract == nil)
+    }
 }

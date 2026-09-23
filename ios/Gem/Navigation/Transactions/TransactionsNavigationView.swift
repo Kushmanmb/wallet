@@ -59,7 +59,14 @@ struct TransactionsNavigationView: View {
                 )
             }
             .navigationDestination(for: Scenes.Collectible.self) {
-                CollectibleScene(model: viewModelFactory.collectibleScene(wallet: model.wallet, assetData: $0.assetData, isPresentingSelectedAssetInput: presenter.isPresentingAssetInput))
+                CollectibleScene(
+                    model: viewModelFactory.collectibleScene(
+                        wallet: model.wallet,
+                        assetData: $0.assetData,
+                        isPresentingSelectedAssetInput: presenter.isPresentingAssetInput,
+                        onSelectAddress: { model.isPresentingSheet = .addressDetails($0) },
+                    ),
+                )
             }
             .toast(message: $model.isPresentingToastMessage)
             .sheet(item: $model.isPresentingSheet) { type in

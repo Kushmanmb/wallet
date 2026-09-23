@@ -121,7 +121,14 @@ struct WalletNavigationView: View {
             )
         }
         .navigationDestination(for: Scenes.Collectible.self) {
-            CollectibleScene(model: viewModelFactory.collectibleScene(wallet: model.wallet, assetData: $0.assetData, isPresentingSelectedAssetInput: model.isPresentingSelectedAssetInput))
+            CollectibleScene(
+                model: viewModelFactory.collectibleScene(
+                    wallet: model.wallet,
+                    assetData: $0.assetData,
+                    isPresentingSelectedAssetInput: model.isPresentingSelectedAssetInput,
+                    onSelectAddress: { model.isPresentingSheet = .addressDetails($0) },
+                ),
+            )
         }
         .navigationDestination(for: Scenes.Collections.self) { _ in
             CollectionsSceneNavigationView(
@@ -144,6 +151,7 @@ struct WalletNavigationView: View {
                     asset: $0.asset,
                     walletId: model.wallet.id,
                     onSetPriceAlert: { presenter.isPresentingPriceAlert.wrappedValue = $0 },
+                    onSelectAddress: { model.isPresentingSheet = .addressDetails($0) },
                 ),
             )
         }

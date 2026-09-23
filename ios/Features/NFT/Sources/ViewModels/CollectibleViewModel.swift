@@ -27,6 +27,7 @@ public final class CollectibleViewModel {
     private let wallet: Wallet
     private let service: any GemCollectibleServiceProtocol
     private let gallery: any ImageGallerySaving
+    private let onSelectAddress: (@MainActor @Sendable (ChainAddress) -> Void)?
 
     public let query: ObservableQuery<NFTAssetRequest>
 
@@ -43,8 +44,10 @@ public final class CollectibleViewModel {
         service: any GemCollectibleServiceProtocol,
         gallery: any ImageGallerySaving = ImageGalleryService(),
         isPresentingSelectedAssetInput: Binding<SelectedAssetInput?>,
+        onSelectAddress: (@MainActor @Sendable (ChainAddress) -> Void)? = nil,
     ) {
         self.wallet = wallet
+        self.onSelectAddress = onSelectAddress
         self.service = service
         self.gallery = gallery
         self.isPresentingSelectedAssetInput = isPresentingSelectedAssetInput
@@ -194,6 +197,12 @@ extension CollectibleViewModel {
                 isPresentingAlertMessage = AlertMessage(error: error)
             }
         }
+    }
+
+    var onSelectContract: ((String) -> Void)? {
+        guard let onSelectAddress else { return nil }
+        let chain = assetData.asset.chain
+        return { onSelectAddress(ChainAddress(chain: chain, address: $0)) }
     }
 
     func onSelectReport() {

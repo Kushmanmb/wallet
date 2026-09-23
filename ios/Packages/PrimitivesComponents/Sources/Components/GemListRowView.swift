@@ -40,6 +40,17 @@ public struct GemListRowView: View {
 
     @ViewBuilder
     private var content: some View {
+        if case let .identifier(.contract, copy, _) = row, let onSelectAddress {
+            NavigationCustomLink(with: ListItemView(model: ListItemModel(title: GemListRowTitle.contract.text, subtitle: copy.display))) {
+                onSelectAddress(copy.value)
+            }
+        } else {
+            itemContent
+        }
+    }
+
+    @ViewBuilder
+    private var itemContent: some View {
         switch row.item(onInfo: onInfo) {
         case let .notice(title, message, kind):
             switch kind {

@@ -8,6 +8,7 @@ import com.gemwallet.android.features.asset.viewmodels.details.models.AssetDetai
 import com.gemwallet.android.ui.navigation.assetIdArgument
 import com.gemwallet.android.ui.navigation.routeArguments
 import com.wallet.core.primitives.AssetId
+import com.wallet.core.primitives.ChainAddress
 import kotlinx.serialization.Serializable
 
 const val assetsRoute = "assets"
@@ -26,13 +27,21 @@ fun EntryProviderScope<NavKey>.assetScreen(onAction: (AssetDetailsAction.Navigat
     }
 }
 
-fun EntryProviderScope<NavKey>.assetChartScreen(onPriceAlerts: (AssetId) -> Unit, onAddPriceAlertTarget: (AssetId) -> Unit, toastMessage: (AssetChartRoute) -> String?, onToastShown: (AssetChartRoute) -> Unit, onCancel: () -> Unit) {
+fun EntryProviderScope<NavKey>.assetChartScreen(
+    onPriceAlerts: (AssetId) -> Unit,
+    onAddPriceAlertTarget: (AssetId) -> Unit,
+    onOpenAddress: (ChainAddress) -> Unit,
+    toastMessage: (AssetChartRoute) -> String?,
+    onToastShown: (AssetChartRoute) -> Unit,
+    onCancel: () -> Unit,
+) {
     entry<AssetChartRoute>(
         metadata = { key -> routeArguments(assetIdArgument(key.assetId)) },
     ) { key ->
         AssetChartScene(
             onPriceAlerts = onPriceAlerts,
             onAddPriceAlertTarget = onAddPriceAlertTarget,
+            onOpenAddress = onOpenAddress,
             toastMessage = toastMessage(key),
             onToastShown = { onToastShown(key) },
             onCancel = onCancel,

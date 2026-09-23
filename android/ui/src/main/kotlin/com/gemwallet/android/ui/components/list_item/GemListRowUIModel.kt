@@ -38,7 +38,8 @@ import java.util.Locale
 
 internal sealed interface GemListRowUIModel {
     data class Notice(val title: String, val message: String?, val kind: GemNoticeKind) : GemListRowUIModel
-    data class Item(val model: ListItemModel, val url: String? = null, val opensAnotherScreen: Boolean = false, val trailingImage: ListItemImage? = null, val menu: List<GemListRowMenuItem> = emptyList()) : GemListRowUIModel
+    data class Item(val model: ListItemModel, val url: String? = null, val opensAnotherScreen: Boolean = false, val trailingImage: ListItemImage? = null, val menu: List<GemListRowMenuItem> = emptyList(), val address: String? = null) :
+        GemListRowUIModel
     data class Provider(val model: ListItemModel, val contract: String?) : GemListRowUIModel
     data class Icon(val asset: Asset) : GemListRowUIModel
     data class Network(val chain: Chain, val name: String) : GemListRowUIModel
@@ -151,6 +152,7 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
             GemListRowMenuItem.Copy(context.getString(copy.kind.copyTitleRes()), copy.value),
             explorer?.let { GemListRowMenuItem.Open(context.getString(R.string.transaction_view_on, it.name), it.link) },
         ),
+        address = copy.value.takeIf { title == GemListRowTitle.CONTRACT },
     )
 
     is GemListRow.Explorer -> GemListRowUIModel.Item(ListItemModel(title = context.getString(R.string.transaction_view_on, name)), url = url)

@@ -22,6 +22,7 @@ struct SettingsNavigationView: View {
     @Environment(\.navigationPresenter) private var presenter
 
     @State private var currencyModel: CurrencySceneViewModel
+    @State private var isPresentingAddressDetails: ChainAddress?
 
     let walletId: WalletId
     @Binding var isPresentingSupport: Bool
@@ -67,6 +68,7 @@ struct SettingsNavigationView: View {
                     asset: scene.asset,
                     walletId: walletId,
                     onSetPriceAlert: { presenter.isPresentingPriceAlert.wrappedValue = $0 },
+                    onSelectAddress: { isPresentingAddressDetails = $0 },
                 ),
             )
         }
@@ -121,6 +123,15 @@ struct SettingsNavigationView: View {
         }
         .navigationDestination(for: Scenes.Contacts.self) { _ in
             ContactsNavigationView(model: viewModelFactory.contactsScene())
+        }
+        .sheet(isPresented: Binding(get: { isPresentingAddressDetails != nil }, set: {
+            if !$0 {
+                isPresentingAddressDetails = nil
+            }
+        })) {
+            if let isPresentingAddressDetails {
+                AddressDetailsDestination(chainAddress: isPresentingAddressDetails)
+            }
         }
         .sheet(isPresented: $isPresentingSupport) {
             NavigationStack {

@@ -87,6 +87,16 @@ class GemListRowUIModelTest {
     }
 
     @Test
+    fun `only a contract identifier opens its address`() {
+        val copy = GemCopy(kind = GemCopyKind.Address("ethereum"), value = "0xcontract", display = "0xcont...ract")
+        val contract = GemListRow.Identifier(title = GemListRowTitle.CONTRACT, copy = copy, explorer = null).uiModel(context) as GemListRowUIModel.Item
+        val tokenId = GemListRow.Identifier(title = GemListRowTitle.TOKEN_ID, copy = copy, explorer = null).uiModel(context) as GemListRowUIModel.Item
+
+        assertEquals("0xcontract", contract.address)
+        assertEquals(null, tokenId.address)
+    }
+
+    @Test
     fun `a memo row copies only a real memo`() {
         assertEquals(listOf(GemListRowMenuItem.Copy("Copy", "12345")), GemListRow.Memo(value = "12345", copy = "12345").menu())
         assertEquals(emptyList<GemListRowMenuItem>(), GemListRow.Memo(value = "-", copy = null).menu())

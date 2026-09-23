@@ -50,7 +50,7 @@ private fun GemListRow.actionTitle(): GemListRowTitle? = when (this) {
     else -> null
 }
 
-fun LazyListScope.gemListSections(sections: List<GemListSection>, onSelect: ((GemListRowTitle) -> Unit)? = null) {
+fun LazyListScope.gemListSections(sections: List<GemListSection>, onSelectAddress: ((String) -> Unit)? = null, onSelect: ((GemListRowTitle) -> Unit)? = null) {
     sections.forEachIndexed { index, section ->
         val title = section.title.titleRes()
         if (title != null) {
@@ -58,7 +58,7 @@ fun LazyListScope.gemListSections(sections: List<GemListSection>, onSelect: ((Ge
         } else if (index > 0) {
             item(key = "section:$index") { Spacer16() }
         }
-        itemsPositioned(section.rows) { position, row -> GemListRowView(row = row, listPosition = position, onSelect = onSelect) }
+        itemsPositioned(section.rows) { position, row -> GemListRowView(row = row, listPosition = position, onSelect = onSelect, onSelectAddress = onSelectAddress) }
     }
 }
 
@@ -100,11 +100,13 @@ fun GemListRowView(
 
         is GemListRowUIModel.Item -> GemListRowMenu(items = row.menu) { menuModifier ->
             val selects = onSelect != null && actionTitle != null && row.url == null
+            val openAddress = row.address?.let { address -> onSelectAddress?.let { select -> { select(address) } } }
             ListItem(
                 model = row.model,
                 listPosition = listPosition,
                 modifier = modifier.then(menuModifier).then(
                     when {
+                        openAddress != null -> Modifier.clickable(onClick = openAddress)
                         row.url != null -> Modifier.clickable { uriHandler.open(context, row.url) }
                         selects -> Modifier.clickable { onSelect(actionTitle) }
                         else -> Modifier
@@ -116,7 +118,7 @@ fun GemListRowView(
                         { DataBadgeChevron(isShowChevron = false) { ListItemImageView(image = row.trailingImage, size = smallIconSize) } }
                     }
 
-                    row.url != null || row.opensAnotherScreen || selects -> {
+                    openAddress != null || row.url != null || row.opensAnotherScreen || selects -> {
                         {
                             DataBadgeChevron()
                             if (accessory != null) accessory()

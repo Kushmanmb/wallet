@@ -127,6 +127,7 @@ public extension ViewModelFactory {
         asset: Asset,
         walletId: WalletId,
         onSetPriceAlert: @escaping (Asset) -> Void,
+        onSelectAddress: @escaping @MainActor @Sendable (ChainAddress) -> Void,
     ) -> ChartSceneViewModel {
         ChartSceneViewModel(
             service: Gemstone.GemChartService(
@@ -138,6 +139,7 @@ public extension ViewModelFactory {
             assetModel: AssetViewModel(asset: asset),
             walletId: walletId,
             onSetPriceAlert: onSetPriceAlert,
+            onSelectAddress: onSelectAddress,
         )
     }
 

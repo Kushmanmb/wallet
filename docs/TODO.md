@@ -31,7 +31,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | — |
 | Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | VM5 |
 | Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | — |
-| Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | VM5, AUD48 |
+| Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | VM5 |
 | Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | — |
 | Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | AUD14 |
 | Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | Retain existing native QR/share adapters |
@@ -47,7 +47,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | — |
 | Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | AUD49; preserve exact atomic values |
 | Earn list, provider and deposit amount | Existing stake/earn owner and amount extras | AUD49; preserve the existing feature gate |
-| NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | AUD48 |
+| NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | — |
 | Price-alert list/target/auto-alert controls | `GemPriceAlertService`, alert session and existing notification port | — |
 | Rewards/create/use/redeem referral | `GemRewardsService`, rewards state, shared load and list records | — |
 | Contacts/list/editor/address picker | `GemContactService`, `GemContactEditorService`, contact session/name component | — |
@@ -100,7 +100,6 @@ Reviewed at `855fef5ccfba98458b9bfaa0efdea01ef23c0a07` on 2026-09-19. These are 
 Reviewed at `46be74e99ddf9f1983f5ec079981e5b67832b0aa` on 2026-09-19. These are concrete repeated operations, not estimates of measured latency. Verify request, subscription, mapping or write counts for the named trigger, plus cancellation and failure behavior. Reuse data within the owning operation or screen; preserve independent work and later intentional refreshes.
 
 - **AUD45** **M** **Consolidation — give confirm-transfer one view state instead of four stored records.** [ConfirmTransferSceneViewModel](../ios/Features/Transfer/Sources/ViewModels/ConfirmTransferSceneViewModel.swift) stores `button`, `feeRow`, `feeRates` and `rowContents` and re-derives all four at two sites, with a `didSet` re-deriving `feeRates` on its own. That is the second writable view state [A screen's state is one phase enum](ARCHITECTURE.md#a-screens-state-is-one-phase-enum-never-a-bag-of-flags) and [One `view_state` call returning one record](ARCHITECTURE.md#a-screen-whose-state-changes-is-a-session) forbid: four fields that can disagree after a partial refresh. Return one record from the existing confirm screen owner and derive it once per change, following the fiat session's `view_state`. Mirror the same single record on Android. Test that a fee-rate change and a refresh each produce one consistent state with no intermediate combination.
-- **AUD48** **S** **Open address details from the asset and NFT contract rows.** The asset contract row ([`contract_row`](../core/gemstone/src/services/chart/rules.rs)) and the collectible contract row ([`info_rows`](../core/gemstone/src/services/nft/rules.rs)) are `GemListRow::Identifier` with copy and an explorer link, and both apps open the explorer. The value is the token or collection contract on that chain. Tap opens the same address-details sheet the swap provider uses, and copy and the explorer stay on that sheet. The identifier already carries the address in `copy.value`; do not add a row type. A wallet's own address keeps its expand and explorer behavior.
 - **AUD49** **S** **Open address details from a delegation's validator or earn provider.** [`provider_row`](../core/gemstone/src/services/stake/rules.rs) is an in-app explorer URL when a link exists, otherwise plain text. Confirm already opens address details for the validator being staked to. The delegation and earn position screens should do the same for `DelegationValidator.id` on `DelegationValidator.chain`, and skip the system unstaking id. Keep the explorer on the address-details sheet.
 - **AUD50** **S** **Open address details from the swap quote provider when the quote calls a contract.** Swap details shows only the provider name ([`SwapDetailsView`](../ios/Features/Swap/Sources/Views/SwapDetailsView.swift), [`SwapCurrentProviderRow`](../android/ui/src/main/kotlin/com/gemwallet/android/ui/components/swap/SwapDetailsComponents.kt)). The selected quote already distinguishes the two cases: `SwapQuoteDataType::Contract` with `data.to` as the router, and `Transfer` as a deposit address. Tap the existing provider row only for a contract quote, on the quote's from-asset chain. A transfer quote, including NEAR Intents, stays plain. Reuse `GemListRow::Provider` rather than a second name row; the provider and rate stay the rich rows `GemSwapQuoteSummary::detail_rows` already leaves to the apps.
 
@@ -115,7 +114,7 @@ Surveyed on 2026-09-21. Each item names what was counted and where; confirm the 
 
 Checked against [the three row families](ARCHITECTURE.md#three-row-families-and-which-one-a-list-belongs-to) on 2026-09-22. A plain title-and-value list that is still assembled in the apps is an open item below. A list that already returns `GemListRow` or `GemListSection`, and a rich row the architecture keeps (asset, wallet, transaction, validator, delegation, balance, contact, NFT grid, support chat, fiat transaction, swap provider, swap rate, node, currency selection, price alert, notification, collectible attribute, simulation payload with a custom label, secret-phrase grid, developer tools), is not open work. The ledger entry records that pass.
 
-AUD51, AUD52 and AUD53 moved the last plain lists onto the shared row. AUD48–AUD50 are taps on rows that already exist, not new row types.
+AUD51, AUD52 and AUD53 moved the last plain lists onto the shared row. AUD49 and AUD50 are taps on rows that already exist, not new row types.
 
 
 ### Sessions
@@ -279,6 +278,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**AUD48 (2026-09-23).** Closed. The shared row renderers open address details from a `GemListRow::Identifier` titled Contract whenever the screen passes an address handler. Without a handler the row keeps its copy menu and explorer link, and a token-id identifier is never tappable. iOS `ChartSceneViewModel` and `CollectibleViewModel` take `onSelectAddress` and build the `ChainAddress` on the asset or collection chain. The wallet and activity hosts present their existing address-details sheet, and settings, which reaches the chart from price alerts, gets its own. Android's asset chart and NFT details screens take `onOpenAddress` and route to `WalletNavigator.openAddress`; `GemListRowUIModel.Item` carries the contract address for a Contract identifier. Copy and the explorer stay on the address-details sheet. Tests cover the iOS collectible handler on the collection chain and the Android mapping for contract versus token-id identifiers.
 
 **AUD47 (2026-09-23).** Closed. Indexed swaps keep the contract they called, so the transaction-details provider row still opens address details after the indexed copy replaces the local pending one. TRON `map_swap` takes the triggered contract, and Aptos takes the module address of the payload function. Sui takes the primary move-call package, the same one its contract-call rows already use. TON takes the destination of the root message's single outgoing message, bounceable, which is the address the STON.fi quote sends to. Transfers and deposit-address swaps are unchanged. The existing swap parser tests now assert the contract.
 

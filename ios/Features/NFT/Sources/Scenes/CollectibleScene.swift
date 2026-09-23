@@ -29,7 +29,7 @@ public struct CollectibleScene: View {
                 case let .info(rows):
                     Section {
                         ForEach(rows, id: \.self) { row in
-                            GemListRowView(row: row)
+                            GemListRowView(row: row, onSelectAddress: model.onSelectContract)
                         }
                     }
                 case let .attributes(attributes):

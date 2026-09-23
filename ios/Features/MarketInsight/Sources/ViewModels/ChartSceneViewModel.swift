@@ -49,6 +49,7 @@ public final class ChartSceneViewModel: ChartListViewable {
 
     var isPresentingInfoSheet: InfoSheetType?
     private let onSetPriceAlert: (Asset) -> Void
+    private let onSelectAddress: (@MainActor @Sendable (ChainAddress) -> Void)?
 
     var title: String {
         assetModel.name
@@ -103,6 +104,7 @@ public final class ChartSceneViewModel: ChartListViewable {
         assetModel: AssetViewModel,
         walletId: WalletId,
         onSetPriceAlert: @escaping (Asset) -> Void,
+        onSelectAddress: (@MainActor @Sendable (ChainAddress) -> Void)? = nil,
     ) {
         self.service = service
         self.assetModel = assetModel
@@ -110,6 +112,7 @@ public final class ChartSceneViewModel: ChartListViewable {
         session = service.newSession()
         priceQuery = ObservableQuery(PriceRequest(assetId: assetModel.asset.id), initialValue: .with(asset: assetModel.asset))
         self.onSetPriceAlert = onSetPriceAlert
+        self.onSelectAddress = onSelectAddress
     }
 }
 
@@ -131,6 +134,12 @@ public extension ChartSceneViewModel {
 
     func onSelectSetPriceAlerts() {
         onSetPriceAlert(assetModel.asset)
+    }
+
+    var onSelectContract: ((String) -> Void)? {
+        guard let onSelectAddress else { return nil }
+        let chain = asset.chain
+        return { onSelectAddress(ChainAddress(chain: chain, address: $0)) }
     }
 
     internal func onInfo(_ topic: GemInfoTopic) {

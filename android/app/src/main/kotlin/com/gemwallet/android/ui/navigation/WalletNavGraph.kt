@@ -140,6 +140,7 @@ fun WalletNavGraph(
             assetChartScreen(
                 onPriceAlerts = navigator::openPriceAlerts,
                 onAddPriceAlertTarget = navigator::openAddPriceAlertTarget,
+                onOpenAddress = navigator::openAddress,
                 toastMessage = navigator::toastMessage,
                 onToastShown = navigator::clearToastMessage,
                 onCancel = onCancel,
@@ -184,6 +185,7 @@ fun WalletNavGraph(
                 onRecipient = navigator::openNftRecipient,
                 onReceive = navigator::openReceiveCollection,
                 onUnverified = navigator::openNftUnverifiedCollections,
+                onOpenAddress = navigator::openAddress,
             )
 
             fiatScreen(

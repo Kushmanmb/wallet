@@ -32,7 +32,7 @@ public struct ChartScene: View {
                                 model.onSelectSetPriceAlerts()
                             }
                         default:
-                            GemListRowView(row: item.row, onInfo: model.onInfo)
+                            GemListRowView(row: item.row, onSelectAddress: model.onSelectContract, onInfo: model.onInfo)
                         }
                     }
                 } header: {

@@ -14,6 +14,7 @@ public extension CollectibleViewModel {
         wallet: Wallet = .mock(),
         assetData: NFTAssetData = .mock(),
         gallery: any ImageGallerySaving = ImageGallerySaverMock(),
+        onSelectAddress: (@MainActor @Sendable (ChainAddress) -> Void)? = nil,
     ) -> CollectibleViewModel {
         CollectibleViewModel(
             wallet: wallet,
@@ -21,6 +22,7 @@ public extension CollectibleViewModel {
             service: GemCollectibleService.mock(),
             gallery: gallery,
             isPresentingSelectedAssetInput: .constant(.none),
+            onSelectAddress: onSelectAddress,
         )
     }
 }

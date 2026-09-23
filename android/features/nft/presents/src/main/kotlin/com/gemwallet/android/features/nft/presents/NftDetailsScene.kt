@@ -45,12 +45,13 @@ import com.gemwallet.android.ui.theme.compactIconSize
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.sceneContentPadding
+import com.wallet.core.primitives.ChainAddress
 import com.wallet.core.primitives.NFTAsset
 import com.wallet.core.primitives.ReportReason
 import kotlinx.coroutines.launch
 
 @Composable
-fun NFTDetailsScene(cancelAction: CancelAction, onRecipient: (NFTAsset) -> Unit) {
+fun NFTDetailsScene(cancelAction: CancelAction, onRecipient: (NFTAsset) -> Unit, onOpenAddress: (ChainAddress) -> Unit) {
     val viewModel: NftDetailsViewModel = hiltViewModel()
     val assetData by viewModel.nftAsset.collectAsStateWithLifecycle()
 
@@ -122,7 +123,9 @@ fun NFTDetailsScene(cancelAction: CancelAction, onRecipient: (NFTAsset) -> Unit)
                 when (section) {
                     is NftSectionUIModel.Status -> verificationStatusItem(section.status)
 
-                    is NftSectionUIModel.Info -> itemsPositioned(section.rows) { position, row -> GemListRowView(row = row, listPosition = position) }
+                    is NftSectionUIModel.Info -> itemsPositioned(section.rows) { position, row ->
+                        GemListRowView(row = row, listPosition = position, onSelectAddress = { onOpenAddress(ChainAddress(model.asset.chain, it)) })
+                    }
 
                     is NftSectionUIModel.Attributes -> {
                         item { SubheaderItem(section.title) }

@@ -27,12 +27,18 @@ public extension ViewModelFactory {
     }
 
     @MainActor
-    func collectibleScene(wallet: Wallet, assetData: NFTAssetData, isPresentingSelectedAssetInput: Binding<SelectedAssetInput?>) -> CollectibleViewModel {
+    func collectibleScene(
+        wallet: Wallet,
+        assetData: NFTAssetData,
+        isPresentingSelectedAssetInput: Binding<SelectedAssetInput?>,
+        onSelectAddress: @escaping @MainActor @Sendable (ChainAddress) -> Void,
+    ) -> CollectibleViewModel {
         CollectibleViewModel(
             wallet: wallet,
             assetData: assetData,
             service: GemCollectibleService(nfts: nftService, avatars: avatarService, explorer: explorerService),
             isPresentingSelectedAssetInput: isPresentingSelectedAssetInput,
+            onSelectAddress: onSelectAddress,
         )
     }
 }

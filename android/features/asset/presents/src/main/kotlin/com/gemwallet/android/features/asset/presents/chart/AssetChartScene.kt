@@ -18,6 +18,7 @@ import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 import com.wallet.core.primitives.AssetId
+import com.wallet.core.primitives.ChainAddress
 import uniffi.gemstone.GemListRowTitle
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,6 +27,7 @@ fun AssetChartScene(
     onCancel: () -> Unit,
     onPriceAlerts: (AssetId) -> Unit,
     onAddPriceAlertTarget: (AssetId) -> Unit,
+    onOpenAddress: (ChainAddress) -> Unit,
     toastMessage: String? = null,
     onToastShown: () -> Unit = {},
     viewModel: AssetChartViewModel = hiltViewModel(),
@@ -57,7 +59,7 @@ fun AssetChartScene(
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 item { Chart(chartViewModel) }
-                gemListSections(sections) { title ->
+                gemListSections(sections, onSelectAddress = { onOpenAddress(ChainAddress(viewModel.assetId.chain, it)) }) { title ->
                     when (title) {
                         GemListRowTitle.PRICE_ALERTS -> onPriceAlerts(viewModel.assetId)
                         GemListRowTitle.SET_PRICE_ALERT -> onAddPriceAlertTarget(viewModel.assetId)
