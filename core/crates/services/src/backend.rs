@@ -44,6 +44,7 @@ use crate::rewards::{RewardsClient, RewardsRedemptionClient};
 use crate::security::{ScanClient, ScanMetrics, TransactionScanConfig, scan_providers};
 use crate::support::SupportApiClient;
 use crate::support::SupportClient;
+use crate::swap::{NearIntentsProxyClient, SwapClient, SwapsXyzProxyClient};
 use crate::transactions::{AddressNamesClient, TransactionsClient};
 use crate::webhooks::WebhooksClient;
 
@@ -290,6 +291,18 @@ impl Services {
             config.get_duration(ConfigKey::DeviceStreamRetention).await?,
             config.get_usize(ConfigKey::DeviceStreamHistoryLimit).await?,
         ))
+    }
+
+    pub fn swap(&self) -> SwapClient {
+        SwapClient::new(self.database())
+    }
+
+    pub fn near_intents(&self, cacher: CacherClient) -> NearIntentsProxyClient {
+        NearIntentsProxyClient::new(self.settings.swap.nearintents.url.clone(), cacher)
+    }
+
+    pub fn swaps_xyz(&self, cacher: CacherClient) -> SwapsXyzProxyClient {
+        SwapsXyzProxyClient::new(self.settings.swap.swapsxyz.url.clone(), cacher)
     }
 }
 

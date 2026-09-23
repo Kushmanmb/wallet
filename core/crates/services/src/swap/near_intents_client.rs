@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use cacher::{CacheKey, CacherClient};
 use gem_client::{ClientExt, ReqwestClient, Target};
 use primitives::SwapProvider;
@@ -28,10 +30,10 @@ impl NearIntentsProxyClient {
         }
     }
 
-    pub async fn quote(&self, body: serde_json::Value) -> Result<serde_json::Value, Box<dyn std::error::Error + Send + Sync>> {
+    pub async fn quote(&self, body: serde_json::Value) -> Result<serde_json::Value, Box<dyn Error + Send + Sync>> {
         let response: serde_json::Value = self.client.post(NearIntentsProxyTarget::Quote, &body).await?;
 
-        if let Some(address) = response.pointer("/quote/depositAddress").and_then(|v| v.as_str())
+        if let Some(address) = response.pointer("/quote/depositAddress").and_then(|value| value.as_str())
             && !address.is_empty()
         {
             let _ = self.cacher.add_to_set_cached(CacheKey::SwapDepositAddresses(SwapProvider::NearIntents.as_ref()), &[address.to_string()]).await;

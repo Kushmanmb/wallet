@@ -1,15 +1,9 @@
-pub mod client;
-pub mod near_intents;
 pub mod okx;
-pub mod swaps_xyz;
-
-pub use client::SwapClient;
-pub use near_intents::NearIntentsProxyClient;
-pub use swaps_xyz::SwapsXyzProxyClient;
 
 use crate::responders::{ApiError, ApiResponse};
 use primitives::FiatAssets;
 use rocket::{State, get, post, serde::json::Json};
+use services::swap::{NearIntentsProxyClient, SwapClient, SwapsXyzProxyClient};
 use swapper::swaps_xyz::{ActionRequest, ActionResponse};
 
 #[get("/swap/assets")]

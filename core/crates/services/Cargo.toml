@@ -39,6 +39,7 @@ storage = { path = "../storage" }
 streamer = { path = "../streamer" }
 strum = { workspace = true }
 support = { path = "../support" }
+swapper = { path = "../swapper" }
 tokio = { workspace = true }
 uuid = { workspace = true }
 

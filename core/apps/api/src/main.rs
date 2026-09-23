@@ -36,7 +36,6 @@ use name_resolver::{NameClient, NameConfig, NameProviderFactory};
 use rocket::{Build, Rocket, catchers, routes};
 use services::Services;
 use settings::Settings;
-use swap::SwapClient;
 use swapper::okx::{OkxClientConfig, OkxProviderProxy};
 use swapper::swapper::GemSwapper;
 
@@ -174,7 +173,6 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let settings_clone = settings.clone();
 
     let services = Services::new(Arc::new(settings.clone()))?;
-    let database = services.database();
     let cacher_client = services.cacher().await?;
     let price_config = services.price_config().await?;
 
@@ -198,7 +196,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let devices_client = services.devices();
     let transactions_client = services.transactions();
     let address_names_client = services.address_names();
-    let stream_producer = services.stream_producer("api", streamer::no_shutdown()).await.unwrap();
+    let stream_producer = services.stream_producer("api", services::no_shutdown()).await?;
     let wallets_client = services.wallets(stream_producer.clone());
 
     let providers = services.scan_providers(cacher_client.clone()).await?;
@@ -208,7 +206,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let assets_client = services.assets(price_config);
     let search_client = services.search(price_client.clone()).await?;
     let fee_estimates_client = services.fee_estimates(assets_client.clone(), price_client.clone(), cacher_client.clone(), &user_agent);
-    let swap_client = SwapClient::new(database.clone());
+    let swap_client = services.swap();
     let fiat_client = services.fiat(stream_producer.clone()).await?;
     let nft_config = NFTProviderConfig::from_settings(&settings);
     let nft_client = services.nft();
@@ -226,8 +224,8 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let notifications_client = services.notifications();
     let support_client = services.support_api();
     let support_image_upload_config = SupportImageUploadConfig::new(&settings.support.types.images)?;
-    let near_intents_client = swap::NearIntentsProxyClient::new(settings.swap.nearintents.url.clone(), cacher_client.clone());
-    let swaps_xyz_client = swap::SwapsXyzProxyClient::new(settings.swap.swapsxyz.url.clone(), cacher_client.clone());
+    let near_intents_client = services.near_intents(cacher_client.clone());
+    let swaps_xyz_client = services.swaps_xyz(cacher_client.clone());
     let okx_provider = OkxProviderProxy::new(
         settings.swap.okx.url.clone(),
         OkxClientConfig {

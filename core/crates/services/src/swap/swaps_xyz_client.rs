@@ -1,4 +1,5 @@
-use std::{error::Error, slice};
+use std::error::Error;
+use std::slice;
 
 use cacher::{CacheKey, CacherClient};
 use gem_client::build_request_url;

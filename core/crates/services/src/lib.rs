@@ -16,6 +16,7 @@ pub mod rewards;
 pub mod security;
 mod static_assets;
 pub mod support;
+pub mod swap;
 pub mod transactions;
 pub mod webhooks;
 
@@ -24,3 +25,4 @@ pub use cacher::CacheError;
 pub use config::ConfigCacher;
 pub use static_assets::StaticAssetsClient;
 pub use storage::DatabaseError;
+pub use streamer::no_shutdown;
