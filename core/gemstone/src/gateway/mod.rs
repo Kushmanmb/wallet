@@ -15,7 +15,7 @@ use crate::services::preferences::{GemPreferencesStore, GemSecureStore};
 use crate::alien::{AlienProvider, AlienRpcProvider, coalescing_provider};
 use crate::models::*;
 use crate::transaction_state::StatusProvider;
-use chain_traits::{AccountBalances, ChainTraits};
+use chain_traits::ChainTraits;
 use std::future::Future;
 use std::sync::Arc;
 use swapper::swapper::GemSwapper as Swapper;
@@ -51,8 +51,12 @@ impl GemGateway {
         self.with_provider(chain, |provider| async move { provider.get_balance_coin(address).await }).await
     }
 
-    pub async fn get_account_balances(&self, chain: Chain, address: String, coin: bool, token_ids: Vec<String>) -> Result<AccountBalances, GatewayError> {
-        self.with_provider(chain, |provider| async move { provider.get_account_balances(address, coin, token_ids).await }).await
+    pub async fn get_balance_tokens(&self, chain: Chain, address: String, token_ids: Vec<String>) -> Result<Vec<AssetBalance>, GatewayError> {
+        self.with_provider(chain, |provider| async move { provider.get_balance_tokens(address, token_ids).await }).await
+    }
+
+    pub async fn get_balance_staking(&self, chain: Chain, address: String) -> Result<Option<AssetBalance>, GatewayError> {
+        self.with_provider(chain, |provider| async move { provider.get_balance_staking(address).await }).await
     }
 
     pub async fn get_balance_earn(&self, chain: Chain, address: String, token_ids: Vec<String>) -> Result<Vec<AssetBalance>, GatewayError> {
