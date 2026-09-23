@@ -11,7 +11,8 @@ pub enum ScanSource {
     Remote,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, AsRefStr, EnumIter)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, AsRefStr, EnumIter, EnumString)]
+#[serde(rename_all = "lowercase")]
 #[strum(serialize_all = "lowercase")]
 pub enum ScanProvider {
     GoPlus,
@@ -23,6 +24,30 @@ impl ScanProvider {
     pub fn all() -> Vec<Self> {
         Self::iter().collect()
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, AsRefStr, EnumIter, EnumString)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
+pub enum ScanType {
+    Address,
+    AddressPoisoning,
+    Website,
+    Asset,
+}
+
+impl ScanType {
+    pub fn all() -> Vec<Self> {
+        Self::iter().collect()
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, AsRefStr, EnumString)]
+#[strum(serialize_all = "snake_case")]
+pub enum ScanMode {
+    On,
+    DryRun,
+    Off,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -51,19 +76,6 @@ pub struct ScanTransaction {
     pub malicious_assets: Option<Vec<AssetId>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub malicious_website: Option<String>,
-}
-
-impl ScanTransaction {
-    pub fn disabled() -> Self {
-        Self {
-            is_malicious: Some(false),
-            is_memo_required: None,
-            is_scan_complete: false,
-            malicious_addresses: None,
-            malicious_assets: None,
-            malicious_website: None,
-        }
-    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -120,9 +132,19 @@ impl ScanAddress {
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     use serde_json::Value;
 
-    use super::ScanTransactionPayload;
+    use super::{ScanMode, ScanTransactionPayload, ScanType};
+
+    #[test]
+    fn test_scan_mode_and_type_strings() {
+        assert_eq!(ScanMode::from_str("dry_run").unwrap(), ScanMode::DryRun);
+        assert_eq!(ScanMode::from_str("on").unwrap(), ScanMode::On);
+        assert!(ScanMode::from_str("true").is_err());
+        assert_eq!(ScanType::AddressPoisoning.as_ref(), "address_poisoning");
+    }
 
     #[test]
     fn test_scan_transaction_payload_optional_website() {

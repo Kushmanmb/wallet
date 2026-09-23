@@ -23,6 +23,7 @@ pub mod price_provider;
 pub mod release;
 pub mod reward;
 pub mod scan_addresses;
+pub mod scan_detection;
 pub mod subscription_address_exclude;
 pub mod support_session;
 pub mod tag;
@@ -58,6 +59,7 @@ pub use self::reward::{
     RiskSignalRow,
 };
 pub use self::scan_addresses::{NewScanAddressRow, ScanAddressRow};
+pub use self::scan_detection::{NewScanDetectionRow, ScanDetectionRow};
 pub use self::subscription_address_exclude::SubscriptionAddressExcludeRow;
 pub use self::support_session::{NewSupportSessionRow, SupportSessionRow};
 pub use self::tag::{AssetTagRow, NewListTagRow, PerpetualTagRow, TagRow};

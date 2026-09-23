@@ -23,6 +23,7 @@ pub mod releases;
 pub mod rewards;
 pub mod rewards_redemptions;
 pub mod scan_addresses;
+pub mod scan_detections;
 pub mod support_sessions;
 pub mod tag;
 pub mod transactions;

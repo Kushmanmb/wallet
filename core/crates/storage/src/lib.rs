@@ -52,6 +52,7 @@ pub use self::repositories::{
     rewards_repository::{ReferrerInfo, RewardsEligibilityConfig, RewardsRepository},
     risk_signals_repository::RiskSignalsRepository,
     scan_addresses_repository::ScanAddressesRepository,
+    scan_detections_repository::ScanDetectionsRepository,
     support_sessions_repository::SupportSessionsRepository,
     tag_repository::TagRepository,
     transactions_repository::TransactionsRepository,
@@ -155,6 +156,10 @@ impl Database {
     }
 
     pub fn scan_addresses(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
+        self.client()
+    }
+
+    pub fn scan_detections(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
         self.client()
     }
 

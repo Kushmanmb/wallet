@@ -1,5 +1,6 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::error::Error;
+use std::str::FromStr;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -7,7 +8,7 @@ use cacher::{AccessTokenCacherClient, CacherClient};
 use config_keys::{ConfigKey, ConfigParamKey};
 use gem_client::ReqwestClient;
 use gem_tracing::{DurationMs, info_with_fields};
-use primitives::{AssetId, ChainAddress, ScanProvider, ScanSource, ScanTransaction, ScanTransactionPayload, TransactionType, asset_score::AssetRank};
+use primitives::{AssetId, ChainAddress, ScanMode, ScanProvider, ScanSource, ScanTransaction, ScanTransactionPayload, ScanType, TransactionType, asset_score::AssetRank};
 use reqwest::Url;
 use rocket::futures::future;
 use security_provider::providers::goplus::GoPlusProvider;
@@ -15,7 +16,8 @@ use security_provider::{AddressPoisoningTarget, AddressScanProviderConfig, Addre
 use serde::Serialize;
 use serde_json::json;
 use settings::Settings;
-use storage::{AssetsRepository, ConfigRepository, Database, ScanAddressesRepository};
+use storage::models::NewScanDetectionRow;
+use storage::{AssetsRepository, ConfigRepository, Database, ScanAddressesRepository, ScanDetectionsRepository};
 
 use crate::metrics::Metrics;
 
@@ -65,6 +67,44 @@ impl ScanCheck {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+enum ScanFinding {
+    Address(ChainAddress),
+    Asset(AssetId),
+    Website(String),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+struct ScanDetection {
+    scan_type: ScanType,
+    finding: ScanFinding,
+    is_enforced: bool,
+}
+
+impl ScanDetection {
+    fn new(scan_type: ScanType, finding: ScanFinding, mode: ScanMode) -> Self {
+        Self {
+            scan_type,
+            finding,
+            is_enforced: mode == ScanMode::On,
+        }
+    }
+}
+
+struct LocalScan {
+    detections: Vec<ScanDetection>,
+    is_memo_required: bool,
+    is_target_verified: bool,
+}
+
+struct ScanModes(HashMap<ScanType, ScanMode>);
+
+impl ScanModes {
+    fn get(&self, scan_type: ScanType) -> ScanMode {
+        self.0.get(&scan_type).copied().unwrap_or(ScanMode::Off)
+    }
+}
+
 #[derive(Clone)]
 pub struct ScanClient {
     database: Database,
@@ -78,126 +118,197 @@ impl ScanClient {
     }
 
     pub async fn get_scan_transaction(&self, payload: ScanTransactionPayload) -> Result<ScanTransaction, Box<dyn Error + Send + Sync>> {
-        let is_enabled = self.database.client()?.get_config_bool(ConfigKey::ScanEnable)?;
-        if !is_enabled {
-            return Ok(ScanTransaction::disabled());
-        }
-        let dry_run = self.database.client()?.get_config_bool(ConfigKey::ScanDryRun)?;
-        let (local_scan, is_target_verified) = self.get_scan_transaction_local(&payload)?;
-        if local_scan.is_malicious == Some(true) || is_target_verified {
-            return Ok(Self::scan_transaction_response(&payload, local_scan, ScanSource::Local, dry_run, &BTreeMap::new()));
+        let modes = self.get_scan_modes()?;
+        let website_host = payload.website.as_deref().and_then(Self::website_host);
+        let local = self.get_scan_transaction_local(&payload, &modes)?;
+        let cached = self.get_cached_detections(&payload, website_host.as_deref(), &modes, local.is_target_verified)?;
+        let mut detections = [local.detections, cached.clone()].concat();
+        if detections.iter().any(|detection| detection.is_enforced) || local.is_target_verified {
+            let scan = Self::scan_transaction(&detections, local.is_memo_required, true);
+            return Ok(Self::scan_transaction_response(&payload, scan, &detections, ScanSource::Local, &BTreeMap::new()));
         }
 
         let Some((address_target, poisoning_target, website_target)) = Self::provider_targets(&payload) else {
-            return Ok(Self::scan_transaction_response(&payload, local_scan, ScanSource::Local, dry_run, &BTreeMap::new()));
+            let scan = Self::scan_transaction(&detections, local.is_memo_required, true);
+            return Ok(Self::scan_transaction_response(&payload, scan, &detections, ScanSource::Local, &BTreeMap::new()));
         };
-        let enabled = {
-            let mut database = self.database.client()?;
-            let mut enabled = Vec::new();
-            for provider in ScanProvider::all() {
-                if database.get_config_param_bool(ConfigParamKey::ScanProviderEnable(provider))? {
-                    enabled.push(provider);
-                }
-            }
-            enabled
-        };
-        let providers = self.config.providers.filter_enabled(&enabled);
+        let is_scanned = |scan_type: ScanType| modes.get(scan_type) != ScanMode::Off && !cached.iter().any(|detection| detection.scan_type == scan_type);
+        let providers = self.config.providers.filter_enabled(&self.get_enabled_providers()?);
         let (address_scans, poisoning_scans, website_scans) = future::join3(
-            self.scan_address_providers(&providers, address_target.clone()),
-            self.scan_address_poisoning_providers(&providers, poisoning_target),
-            self.scan_website_providers(&providers, website_target.clone()),
+            self.scan_address_providers(&providers, is_scanned(ScanType::Address).then(|| address_target.clone())),
+            self.scan_address_poisoning_providers(&providers, poisoning_target.filter(|_| is_scanned(ScanType::AddressPoisoning))),
+            self.scan_website_providers(&providers, website_target.filter(|_| is_scanned(ScanType::Website))),
         )
         .await;
+        let scans = [(ScanType::Address, &address_scans), (ScanType::AddressPoisoning, &poisoning_scans), (ScanType::Website, &website_scans)];
 
-        let is_malicious_address = address_scans.iter().chain(&poisoning_scans).any(|(_, scan)| scan.malicious == Some(true));
-        let malicious_addresses = is_malicious_address.then_some(ChainAddress::new(address_target.chain, address_target.address)).into_iter().collect::<Vec<_>>();
-        let is_malicious_website = website_scans.iter().any(|(_, scan)| scan.malicious == Some(true));
-        let malicious_website = website_target.filter(|_| is_malicious_website).map(|target| target.website);
-        let completed_scans = address_scans.iter().chain(&poisoning_scans).chain(&website_scans).map(|(_, scan)| scan.malicious.is_some()).collect::<Vec<_>>();
-        let is_scan_complete = Self::is_scan_complete(self.config.required_successes, &completed_scans);
+        let mut new_detections = Vec::new();
+        for (scan_type, checks) in scans {
+            let Some((provider, check)) = checks.iter().find(|(_, check)| check.malicious == Some(true)) else {
+                continue;
+            };
+            let (finding, chain, target) = match scan_type {
+                ScanType::Website => {
+                    let (Some(website), Some(host)) = (payload.website.clone(), website_host.clone()) else {
+                        continue;
+                    };
+                    (ScanFinding::Website(website), None, host)
+                }
+                _ => (
+                    ScanFinding::Address(ChainAddress::new(address_target.chain, address_target.address.clone())),
+                    Some(address_target.chain),
+                    address_target.address.clone(),
+                ),
+            };
+            let mode = modes.get(scan_type);
+            if mode == ScanMode::On {
+                new_detections.push(NewScanDetectionRow::new(scan_type, chain, target, *provider, check.reason.clone()));
+            }
+            detections.push(ScanDetection::new(scan_type, finding, mode));
+        }
+        self.database.scan_detections()?.add_scan_detections(new_detections)?;
 
-        let scan = ScanTransaction {
-            is_malicious: Some(!malicious_addresses.is_empty() || malicious_website.is_some()),
-            is_memo_required: local_scan.is_memo_required,
-            is_scan_complete,
-            malicious_addresses: Some(malicious_addresses),
-            malicious_assets: local_scan.malicious_assets,
-            malicious_website,
-        };
-        let source = if address_scans.is_empty() && poisoning_scans.is_empty() && website_scans.is_empty() {
-            ScanSource::Local
-        } else {
-            ScanSource::Remote
-        };
+        let completed_scans = scans
+            .iter()
+            .filter(|(scan_type, _)| modes.get(*scan_type) == ScanMode::On)
+            .flat_map(|(_, checks)| checks.iter().map(|(_, check)| check.malicious.is_some()))
+            .collect::<Vec<_>>();
+        let scan = Self::scan_transaction(&detections, local.is_memo_required, Self::is_scan_complete(self.config.required_successes, &completed_scans));
+        let source = if scans.iter().all(|(_, checks)| checks.is_empty()) { ScanSource::Local } else { ScanSource::Remote };
         let mut providers: BTreeMap<&str, BTreeMap<&str, &ScanCheck>> = BTreeMap::new();
-        for (kind, checks) in [("address", &address_scans), ("address_poisoning", &poisoning_scans), ("website", &website_scans)] {
-            for (provider, check) in checks {
-                providers.entry(provider.as_ref()).or_default().insert(kind, check);
+        for (scan_type, checks) in &scans {
+            for (provider, check) in checks.iter() {
+                providers.entry(provider.as_ref()).or_default().insert(scan_type.as_ref(), check);
             }
         }
-        Ok(Self::scan_transaction_response(&payload, scan, source, dry_run, &providers))
+        Ok(Self::scan_transaction_response(&payload, scan, &detections, source, &providers))
     }
 
-    fn scan_transaction_response(payload: &ScanTransactionPayload, scan: ScanTransaction, source: ScanSource, dry_run: bool, providers: &BTreeMap<&str, BTreeMap<&str, &ScanCheck>>) -> ScanTransaction {
-        let response = if dry_run { ScanTransaction::disabled() } else { scan.clone() };
-        let scan = ScanTransaction {
+    fn get_scan_modes(&self) -> Result<ScanModes, Box<dyn Error + Send + Sync>> {
+        let mut database = self.database.client()?;
+        let mut modes = HashMap::new();
+        for scan_type in ScanType::all() {
+            modes.insert(scan_type, ScanMode::from_str(&database.get_config_param(ConfigParamKey::ScanTypeMode(scan_type))?)?);
+        }
+        Ok(ScanModes(modes))
+    }
+
+    fn get_enabled_providers(&self) -> Result<Vec<ScanProvider>, Box<dyn Error + Send + Sync>> {
+        let mut database = self.database.client()?;
+        let mut enabled = Vec::new();
+        for provider in ScanProvider::all() {
+            if database.get_config_param_bool(ConfigParamKey::ScanProviderEnable(provider))? {
+                enabled.push(provider);
+            }
+        }
+        Ok(enabled)
+    }
+
+    fn scan_transaction(detections: &[ScanDetection], is_memo_required: bool, is_scan_complete: bool) -> ScanTransaction {
+        let mut malicious_addresses = Vec::new();
+        let mut malicious_assets = Vec::new();
+        let mut malicious_website = None;
+        for detection in detections.iter().filter(|detection| detection.is_enforced) {
+            match &detection.finding {
+                ScanFinding::Address(address) if !malicious_addresses.contains(address) => malicious_addresses.push(address.clone()),
+                ScanFinding::Asset(asset_id) if !malicious_assets.contains(asset_id) => malicious_assets.push(asset_id.clone()),
+                ScanFinding::Website(website) => malicious_website = Some(website.clone()),
+                ScanFinding::Address(_) | ScanFinding::Asset(_) => {}
+            }
+        }
+        ScanTransaction {
+            is_malicious: Some(!malicious_addresses.is_empty() || !malicious_assets.is_empty() || malicious_website.is_some()),
+            is_memo_required: Some(is_memo_required),
+            is_scan_complete,
+            malicious_addresses: Some(malicious_addresses),
+            malicious_assets: Some(malicious_assets),
+            malicious_website,
+        }
+    }
+
+    fn scan_transaction_response(payload: &ScanTransactionPayload, scan: ScanTransaction, detections: &[ScanDetection], source: ScanSource, providers: &BTreeMap<&str, BTreeMap<&str, &ScanCheck>>) -> ScanTransaction {
+        let logged_scan = ScanTransaction {
             malicious_website: scan.malicious_website.as_deref().and_then(Self::website_host),
-            ..scan
+            ..scan.clone()
         };
-        let message = if dry_run {
-            "security transaction dry run"
-        } else if scan.is_malicious == Some(true) {
-            "security transaction blocked"
-        } else {
-            "security transaction result"
-        };
+        let dry_run = detections.iter().filter(|detection| !detection.is_enforced).map(|detection| detection.scan_type).collect::<BTreeSet<_>>();
+        let message = if scan.is_malicious == Some(true) { "security transaction blocked" } else { "security transaction result" };
         info_with_fields!(
             message,
             transaction_type = payload.transaction_type.as_ref(),
             chain = payload.target.asset_id.chain.as_ref(),
             source = source.as_ref(),
-            dry_run = dry_run,
             malicious = scan.is_malicious == Some(true),
+            dry_run_malicious = !dry_run.is_empty(),
             provider_errors = providers.values().flat_map(|checks| checks.values()).filter(|check| check.error.is_some()).count(),
             origin_asset_id = payload.origin.asset_id,
             target_asset_id = payload.target.asset_id,
             address = format!("{:?}", payload.target.address),
             website_host = json!(payload.website.as_deref().and_then(Self::website_host)),
-            scan = json!(scan),
+            scan = json!(logged_scan),
+            dry_run = json!(dry_run),
             providers = json!(providers)
         );
-        response
+        scan
     }
 
     fn website_host(website: &str) -> Option<String> {
         Url::parse(website).ok()?.host_str().map(str::to_string)
     }
 
-    fn get_scan_transaction_local(&self, payload: &ScanTransactionPayload) -> Result<(ScanTransaction, bool), Box<dyn Error + Send + Sync>> {
+    fn get_scan_transaction_local(&self, payload: &ScanTransactionPayload, modes: &ScanModes) -> Result<LocalScan, Box<dyn Error + Send + Sync>> {
         let queries = [(payload.origin.asset_id.chain, payload.origin.address.as_str()), (payload.target.asset_id.chain, payload.target.address.as_str())];
         let addresses = self.database.scan_addresses()?.get_scan_addresses(&queries)?;
-        let token_asset_ids = Self::token_asset_ids(payload);
-        let token_assets = self.database.assets()?.get_assets_basic(token_asset_ids)?;
-        let malicious_addresses = addresses
+        let mut detections = addresses
             .iter()
             .filter(|address| address.is_fraudulent)
-            .map(|address| ChainAddress::new(address.chain.0, address.address.clone()))
+            .map(|address| ScanDetection::new(ScanType::Address, ScanFinding::Address(ChainAddress::new(address.chain.0, address.address.clone())), ScanMode::On))
             .collect::<Vec<_>>();
-        let is_memo_required = addresses.iter().any(|address| address.is_memo_required);
-        let is_target_verified = addresses.iter().any(|address| address.is_verified_for(payload.target.asset_id.chain, &payload.target.address));
-        let malicious_assets = token_assets.into_iter().filter(|asset| Self::is_malicious_asset_rank(asset.score.rank)).map(|asset| asset.asset.id).collect::<Vec<_>>();
+        let asset_mode = modes.get(ScanType::Asset);
+        if asset_mode != ScanMode::Off {
+            let token_assets = self.database.assets()?.get_assets_basic(Self::token_asset_ids(payload))?;
+            detections.extend(
+                token_assets
+                    .into_iter()
+                    .filter(|asset| Self::is_malicious_asset_rank(asset.score.rank))
+                    .map(|asset| ScanDetection::new(ScanType::Asset, ScanFinding::Asset(asset.asset.id), asset_mode)),
+            );
+        }
 
-        Ok((
-            ScanTransaction {
-                is_malicious: Some(!malicious_addresses.is_empty() || !malicious_assets.is_empty()),
-                is_memo_required: Some(is_memo_required),
-                is_scan_complete: true,
-                malicious_addresses: Some(malicious_addresses),
-                malicious_assets: Some(malicious_assets),
-                malicious_website: None,
-            },
-            is_target_verified,
-        ))
+        Ok(LocalScan {
+            detections,
+            is_memo_required: addresses.iter().any(|address| address.is_memo_required),
+            is_target_verified: addresses.iter().any(|address| address.is_verified_for(payload.target.asset_id.chain, &payload.target.address)),
+        })
+    }
+
+    fn get_cached_detections(&self, payload: &ScanTransactionPayload, website_host: Option<&str>, modes: &ScanModes, is_target_verified: bool) -> Result<Vec<ScanDetection>, Box<dyn Error + Send + Sync>> {
+        let chain = payload.target.asset_id.chain;
+        let address = payload.target.address.as_str();
+        let address_types = if is_target_verified { vec![] } else { vec![ScanType::Address, ScanType::AddressPoisoning] };
+        let targets = address_types
+            .into_iter()
+            .map(|scan_type| (scan_type, Some(chain), address))
+            .chain(website_host.map(|host| (ScanType::Website, None, host)))
+            .filter(|(scan_type, _, _)| modes.get(*scan_type) != ScanMode::Off)
+            .collect::<Vec<_>>();
+        if targets.is_empty() {
+            return Ok(Vec::new());
+        }
+        let max_age = self.database.client()?.get_config_duration(ConfigKey::ScanDetectionMaxAge)?;
+        let rows = self.database.scan_detections()?.get_scan_detections(targets.iter().map(|(_, _, target)| target.to_string()).collect(), max_age)?;
+
+        Ok(targets
+            .into_iter()
+            .filter(|(scan_type, chain, target)| rows.iter().any(|row| row.matches(*scan_type, *chain, target)))
+            .filter_map(|(scan_type, _, _)| {
+                let finding = match scan_type {
+                    ScanType::Website => ScanFinding::Website(payload.website.clone()?),
+                    _ => ScanFinding::Address(ChainAddress::new(chain, address.to_string())),
+                };
+                Some(ScanDetection::new(scan_type, finding, modes.get(scan_type)))
+            })
+            .collect())
     }
 
     fn provider_targets(payload: &ScanTransactionPayload) -> Option<(AddressTarget, Option<AddressPoisoningTarget>, Option<WebsiteTarget>)> {
@@ -252,7 +363,10 @@ impl ScanClient {
         targets
     }
 
-    async fn scan_address_providers(&self, providers: &TransactionScanProviders, target: AddressTarget) -> Vec<(ScanProvider, ScanCheck)> {
+    async fn scan_address_providers(&self, providers: &TransactionScanProviders, target: Option<AddressTarget>) -> Vec<(ScanProvider, ScanCheck)> {
+        let Some(target) = target else {
+            return Vec::new();
+        };
         future::join_all(providers.addresses.iter().filter(|provider| provider.supports_chain(target.chain)).map(|provider| async {
             let start = Instant::now();
             let result = provider.scan_address(&target).await;
@@ -301,6 +415,44 @@ mod tests {
     fn test_website_host_excludes_credentials_and_query_values() {
         assert_eq!(ScanClient::website_host("https://user:password@example.com/path?token=secret#fragment"), Some("example.com".into()));
         assert_eq!(ScanClient::website_host("invalid website"), None);
+    }
+
+    #[test]
+    fn test_scan_transaction_excludes_dry_run_detections() {
+        let address = ChainAddress::new(Chain::SmartChain, "0x123".to_string());
+        let detections = vec![
+            ScanDetection::new(ScanType::Address, ScanFinding::Address(address.clone()), ScanMode::On),
+            ScanDetection::new(ScanType::AddressPoisoning, ScanFinding::Address(address.clone()), ScanMode::On),
+            ScanDetection::new(ScanType::Website, ScanFinding::Website("https://example.com".to_string()), ScanMode::DryRun),
+            ScanDetection::new(ScanType::Asset, ScanFinding::Asset(AssetId::from_token(Chain::SmartChain, "0x456")), ScanMode::DryRun),
+        ];
+
+        let scan = ScanClient::scan_transaction(&detections, true, true);
+
+        assert_eq!(scan.is_malicious, Some(true));
+        assert_eq!(scan.is_memo_required, Some(true));
+        assert_eq!(scan.malicious_addresses, Some(vec![address]));
+        assert_eq!(scan.malicious_assets, Some(vec![]));
+        assert_eq!(scan.malicious_website, None);
+    }
+
+    #[test]
+    fn test_scan_transaction_dry_run_only_is_not_malicious() {
+        let detections = vec![ScanDetection::new(ScanType::Website, ScanFinding::Website("https://example.com".to_string()), ScanMode::DryRun)];
+
+        let scan = ScanClient::scan_transaction(&detections, false, true);
+
+        assert_eq!(scan.is_malicious, Some(false));
+        assert_eq!(scan.malicious_addresses, Some(vec![]));
+        assert_eq!(scan.malicious_website, None);
+    }
+
+    #[test]
+    fn test_scan_modes_default_to_off() {
+        let modes = ScanModes(HashMap::from([(ScanType::Website, ScanMode::DryRun)]));
+
+        assert_eq!(modes.get(ScanType::Website), ScanMode::DryRun);
+        assert_eq!(modes.get(ScanType::Address), ScanMode::Off);
     }
 
     #[test]

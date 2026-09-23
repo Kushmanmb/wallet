@@ -10,6 +10,7 @@ pub trait ConfigRepository {
     fn get_config(&mut self, key: ConfigKey) -> Result<String, DatabaseError>;
     fn get_config_i64(&mut self, key: ConfigKey) -> Result<i64, DatabaseError>;
     fn get_config_bool(&mut self, key: ConfigKey) -> Result<bool, DatabaseError>;
+    fn get_config_param(&mut self, key: ConfigParamKey) -> Result<String, DatabaseError>;
     fn get_config_param_bool(&mut self, key: ConfigParamKey) -> Result<bool, DatabaseError>;
     fn get_config_duration(&mut self, key: ConfigKey) -> Result<Duration, DatabaseError>;
     fn get_config_keys(&mut self) -> Result<Vec<String>, DatabaseError>;
@@ -33,10 +34,14 @@ impl ConfigRepository for DatabaseClient {
         Ok(self.get_config(key)?.parse()?)
     }
 
-    fn get_config_param_bool(&mut self, key: ConfigParamKey) -> Result<bool, DatabaseError> {
+    fn get_config_param(&mut self, key: ConfigParamKey) -> Result<String, DatabaseError> {
         let key = key.key();
         let result = ConfigStore::get_config_key(self, &key).or_not_found(key)?;
-        Ok(result.value.parse()?)
+        Ok(result.value)
+    }
+
+    fn get_config_param_bool(&mut self, key: ConfigParamKey) -> Result<bool, DatabaseError> {
+        Ok(self.get_config_param(key)?.parse()?)
     }
 
     fn get_config_duration(&mut self, key: ConfigKey) -> Result<Duration, DatabaseError> {
