@@ -48,12 +48,27 @@ public final class SetPriceAlertViewModel {
         assetQuery = ObservableQuery(AssetRequest(walletId: walletId, assetId: asset.id), initialValue: .with(asset: asset))
     }
 
-    func percentageSuggestions(for price: Primitives.Price?) -> [PriceSuggestion] {
-        viewState(price: price).percentageSuggestions.map { PriceSuggestion(title: $0.text(), value: $0.value) }
+    var viewState: GemPriceAlertViewState {
+        session.viewState()
     }
 
-    func priceSuggestions(for price: Primitives.Price?) -> [PriceSuggestion] {
-        viewState(price: price).priceSuggestions.map { PriceSuggestion(title: $0.text(), value: $0.value) }
+    func suggestions(_ viewState: GemPriceAlertViewState) -> [PriceSuggestion] {
+        let values = switch state.type {
+        case .price: viewState.priceSuggestions
+        case .percentage: viewState.percentageSuggestions
+        }
+        return values.map { PriceSuggestion(title: $0.text(), value: $0.value) }
+    }
+
+    func directionTitle(_ viewState: GemPriceAlertViewState) -> String {
+        viewState.prompt.title
+    }
+
+    func confirmButtonState(_ viewState: GemPriceAlertViewState) -> ButtonState {
+        if isSaving {
+            return .loading(showProgress: true)
+        }
+        return viewState.canConfirm ? .normal : .disabled
     }
 
     func onSelectSuggestion(_ suggestion: some SuggestionViewable) {
@@ -67,29 +82,6 @@ public final class SetPriceAlertViewModel {
             .onInput(input: amountValue)
             .onPrice(currentPrice: assetData.price?.price)
             .onSaving(isSaving: isSaving)
-    }
-
-    private func viewState(price: Primitives.Price?) -> GemPriceAlertViewState {
-        session.onPrice(currentPrice: price?.price).viewState()
-    }
-
-    var alertDirection: Primitives.PriceAlertDirection? {
-        session.viewState().direction.map { $0.toPrimitives() }
-    }
-
-    var alertDirectionTitle: String {
-        session.viewState().prompt.title
-    }
-
-    var isEnabledConfirmButton: Bool {
-        session.viewState().canConfirm
-    }
-
-    var confirmButtonState: ButtonState {
-        if isSaving {
-            return .loading(showProgress: true)
-        }
-        return isEnabledConfirmButton ? .normal : .disabled
     }
 
     func currencyInputConfig(for assetData: AssetData) -> any CurrencyInputConfigurable {
@@ -125,8 +117,9 @@ public final class SetPriceAlertViewModel {
     }
 
     private var completeMessage: String {
-        guard let savedValue = session.viewState().savedValue else { return .empty }
-        let message = [alertDirectionTitle.lowercased(), savedValue.text()].joined(separator: " ")
+        let viewState = viewState
+        guard let savedValue = viewState.savedValue else { return .empty }
+        let message = [directionTitle(viewState).lowercased(), savedValue.text()].joined(separator: " ")
         return Localized.PriceAlerts.addedFor(message)
     }
 

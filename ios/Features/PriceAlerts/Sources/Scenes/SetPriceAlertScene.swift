@@ -2,6 +2,7 @@
 
 import Components
 import Foundation
+import struct Gemstone.GemPriceAlertViewState
 import Localization
 import Primitives
 import PrimitivesComponents
@@ -19,10 +20,11 @@ struct SetPriceAlertScene: View {
     }
 
     var body: some View {
-        List {
+        let viewState = model.viewState
+        return List {
             Section {
                 VStack(spacing: .small) {
-                    Text(model.alertDirectionTitle)
+                    Text(model.directionTitle(viewState))
                         .textStyle(.subHeadline)
 
                     CurrencyInputView(
@@ -40,7 +42,7 @@ struct SetPriceAlertScene: View {
         }
         .bindQuery(model.assetQuery)
         .safeAreaView {
-            safeAreaContent
+            inputAccessoryView(viewState)
         }
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -69,31 +71,17 @@ extension SetPriceAlertScene {
         .fixedSize()
     }
 
-    var confirmButton: StateButton {
-        StateButton(
-            text: Localized.Transfer.confirm,
-            type: .primary(model.confirmButtonState),
-            action: confirm,
-        )
-    }
-
-    @ViewBuilder
-    var safeAreaContent: some View {
-        switch model.state.type {
-        case .price:
-            inputAccessoryView(model.priceSuggestions(for: model.assetData.price))
-        case .percentage:
-            inputAccessoryView(model.percentageSuggestions(for: model.assetData.price))
-        }
-    }
-
-    private func inputAccessoryView(_ suggestions: [some SuggestionViewable]) -> some View {
+    private func inputAccessoryView(_ viewState: GemPriceAlertViewState) -> some View {
         InputAccessoryView(
             isEditing: focusedField && model.state.amount.isEmpty,
-            suggestions: suggestions,
+            suggestions: model.suggestions(viewState),
             onSelect: onSelectSuggestion,
             onDone: { focusedField = false },
-            button: confirmButton,
+            button: StateButton(
+                text: Localized.Transfer.confirm,
+                type: .primary(model.confirmButtonState(viewState)),
+                action: confirm,
+            ),
         )
     }
 }

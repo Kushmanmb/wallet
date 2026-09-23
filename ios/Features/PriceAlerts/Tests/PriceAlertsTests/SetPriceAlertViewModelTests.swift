@@ -12,16 +12,17 @@ struct SetPriceAlertViewModelTests {
     @Test
     func theSuggestionsComeFromCoreAndAreFormattedForTheCurrency() {
         let viewModel = SetPriceAlertViewModel.mock()
-        let price = Price.mock(price: 2000)
+        #expect(viewModel.suggestions(viewModel.viewState).isEmpty)
 
-        let percentages = viewModel.percentageSuggestions(for: price)
-        let prices = viewModel.priceSuggestions(for: price)
+        viewModel.assetQuery.value = .mock(price: .mock(price: 2000))
+        let prices = viewModel.suggestions(viewModel.viewState)
+        viewModel.state.type = .percentage
+        let percentages = viewModel.suggestions(viewModel.viewState)
 
         #expect(percentages.isNotEmpty)
         #expect(prices.isNotEmpty)
         #expect(prices.allSatisfy { $0.title.contains("$") })
         #expect(percentages.allSatisfy { $0.title.contains("%") })
-        #expect(viewModel.priceSuggestions(for: nil).isEmpty)
     }
 
     @Test
@@ -37,12 +38,12 @@ struct SetPriceAlertViewModelTests {
     func theConfirmButtonFollowsWhetherTheAlertCanBeSaved() {
         let viewModel = SetPriceAlertViewModel.mock()
 
-        #expect(viewModel.confirmButtonState == .disabled)
+        #expect(viewModel.confirmButtonState(viewModel.viewState) == .disabled)
 
         viewModel.assetQuery.value = .mock(price: .mock(price: 2000))
         viewModel.state.amount = "2500"
 
-        #expect(viewModel.confirmButtonState == .normal)
+        #expect(viewModel.confirmButtonState(viewModel.viewState) == .normal)
     }
 
     @Test
