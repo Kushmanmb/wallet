@@ -3,12 +3,12 @@ use std::error::Error;
 use std::sync::Arc;
 use std::time::Duration;
 
+use crate::prices::PriceClient;
 use cacher::{CacheKey, CacherClient};
 use chrono::{DateTime, Utc};
 use gem_tracing::info_with_fields;
 use prices::PriceAssetsProvider;
 use primitives::{ChartTimeframe, ChartValue, PriceData, SECONDS_PER_DAY, SECONDS_PER_HOUR};
-use services::prices::PriceClient;
 use storage::{ChartPoint, ChartsRepository, Database, PriceFilter, PricesRepository};
 
 #[derive(Clone)]

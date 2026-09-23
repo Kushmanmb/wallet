@@ -2,14 +2,14 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::time::Duration;
 
+use crate::prices::PriceClient;
 use cacher::{CacheKey, CacherClient};
 use prices::AssetPriceMapping;
 use primitives::{AssetId, PriceProvider};
-use services::prices::PriceClient;
 use storage::{Database, PricesRepository};
 use streamer::StreamProducer;
 
-use crate::worker::prices::{AssetsProviders, prices_updater::PricesUpdater};
+use super::{AssetsProviders, PricesUpdater};
 
 #[derive(Clone, Copy)]
 pub struct ObservedPricesConfig {

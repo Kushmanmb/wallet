@@ -1,7 +1,7 @@
 use std::{error::Error, sync::Arc};
 
+use crate::prices::PriceClient;
 use prices::FiatRatesProvider;
-use services::prices::PriceClient;
 
 pub struct FiatRatesUpdater {
     provider: Arc<dyn FiatRatesProvider>,

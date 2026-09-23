@@ -1,8 +1,8 @@
+use crate::ConfigCacher;
 use chrono::{NaiveDateTime, Utc};
 use config_keys::ConfigKey;
 use search_index::SearchIndexClient;
 use serde::Serialize;
-use services::ConfigCacher;
 use std::error::Error;
 use std::fmt;
 use std::sync::Arc;

@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use super::sync::{SearchSyncClient, SearchSyncResult};
+use crate::ConfigCacher;
 use config_keys::ConfigKey;
 use primitives::NFTCollection;
 use search_index::{NFTDocument, NFTS_INDEX_NAME, SearchIndexClient};
-use services::ConfigCacher;
 use storage::{Database, NftCollectionFilter, NftRepository};
 
 pub struct NftsIndexUpdater {

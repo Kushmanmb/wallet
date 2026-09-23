@@ -1,6 +1,6 @@
 use primitives::{MINUTE, WEEK};
 
-use crate::worker::rewards::rewards_abuse_checker::AbuseDetectionConfig;
+use crate::rewards::AbuseDetectionConfig;
 
 impl AbuseDetectionConfig {
     pub fn mock() -> Self {

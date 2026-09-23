@@ -2,13 +2,13 @@ use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::sync::Arc;
 
+use crate::ConfigCacher;
+use crate::prices::PriceClient;
 use cacher::{CacheKey, CacherClient};
 use config_keys::ConfigKey;
 use gem_tracing::info_with_fields;
 use prices::{AssetPriceFull, AssetPriceMapping, PriceAssetsProvider, PriceProviderAsset};
 use primitives::{AssetId, PriceData, PriceId};
-use services::ConfigCacher;
-use services::prices::PriceClient;
 use storage::{AssetFilter, AssetSupply, AssetUpdate, AssetsRepository, Database, DatabaseClient, DatabaseError, PriceFilter, PricesRepository};
 use streamer::{PricesPayload, QueueName, StreamProducer, StreamProducerQueue};
 

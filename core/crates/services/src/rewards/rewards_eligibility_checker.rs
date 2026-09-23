@@ -1,10 +1,10 @@
 use std::error::Error;
 use std::sync::Arc;
 
+use crate::ConfigCacher;
 use config_keys::ConfigKey;
 use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::{NaiveDateTimeExt, RewardStatus, now};
-use services::ConfigCacher;
 use storage::{Database, DatabaseError, RewardsEligibilityConfig, RewardsFilter, RewardsRepository};
 use streamer::{RewardsNotificationPayload, StreamProducer, StreamProducerQueue};
 

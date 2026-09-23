@@ -2,10 +2,10 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use super::sync::{SearchSyncClient, SearchSyncResult};
+use crate::ConfigCacher;
 use config_keys::ConfigKey;
 use primitives::{Asset, Perpetual};
 use search_index::{PERPETUALS_INDEX_NAME, PerpetualDocument, SearchIndexClient, sanitize_index_primary_id};
-use services::ConfigCacher;
 use storage::{AssetsRepository, Database, DatabaseError, PerpetualsRepository, TagRepository};
 
 pub struct PerpetualsIndexUpdater {

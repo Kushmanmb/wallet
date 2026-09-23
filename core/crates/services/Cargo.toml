@@ -8,6 +8,7 @@ async-trait = { workspace = true }
 chrono = { workspace = true }
 cacher = { path = "../cacher" }
 chain_providers = { path = "../chain_providers" }
+chain_traits = { path = "../chain_traits" }
 coingecko = { path = "../coingecko" }
 config_keys = { path = "../config_keys" }
 defi = { path = "../defi" }
@@ -28,8 +29,8 @@ number_formatter = { path = "../number_formatter" }
 prices = { path = "../prices" }
 primitives = { path = "../primitives" }
 push_notification = { path = "../push_notification" }
-pusher = { path = "../pusher" }
 reqwest = { workspace = true }
+pusher = { path = "../pusher" }
 rewards = { path = "../rewards" }
 search_index = { path = "../search_index" }
 security = { path = "../security" }
@@ -46,5 +47,6 @@ tokio = { workspace = true, features = ["sync"] }
 uuid = { workspace = true }
 
 [dev-dependencies]
+storage = { path = "../storage", features = ["testkit"] }
 gem_solana = { path = "../gem_solana", features = ["rpc"] }
 primitives = { path = "../primitives", features = ["testkit"] }

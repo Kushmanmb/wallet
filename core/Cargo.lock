@@ -7824,6 +7824,7 @@ dependencies = [
  "async-trait",
  "cacher",
  "chain_providers",
+ "chain_traits",
  "chrono",
  "coingecko",
  "config_keys",

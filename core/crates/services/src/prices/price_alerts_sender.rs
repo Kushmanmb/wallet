@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
+use crate::ConfigCacher;
+use crate::prices::PriceAlertClient;
 use config_keys::ConfigKey;
 use prices::PriceAlertRules;
-use services::ConfigCacher;
-use services::prices::PriceAlertClient;
 use streamer::{NotificationsPayload, StreamProducer, StreamProducerQueue};
 
 pub struct PriceAlertSender {

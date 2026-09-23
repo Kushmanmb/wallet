@@ -1,8 +1,8 @@
+use crate::ConfigCacher;
 use cacher::{CacheKey, CacherClient};
 use chrono::Utc;
 use config_keys::ConfigKey;
 use primitives::PriceProvider;
-use services::ConfigCacher;
 use std::error::Error;
 use std::sync::Arc;
 use storage::{Database, DatabaseError, PriceFilter, PricesRepository};

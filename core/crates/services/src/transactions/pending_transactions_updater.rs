@@ -3,12 +3,12 @@ use std::error::Error;
 use std::sync::Arc;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
+use crate::ConfigCacher;
 use cacher::{CacheKey, CacherClient};
 use chain_providers::{ChainProviders, TransactionIdRequest};
 use config_keys::ConfigParamKey;
 use gem_tracing::{DurationMs, error_with_fields, info_with_fields};
 use primitives::{Chain, TransactionId, chain_transaction_timeout};
-use services::ConfigCacher;
 use storage::{Database, DatabaseError, TransactionsRepository};
 use streamer::{StreamProducer, StreamProducerQueue, TransactionsPayload};
 

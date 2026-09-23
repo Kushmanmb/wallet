@@ -1,4 +1,4 @@
-use crate::worker::perpetuals::perpetual_classifier::PerpetualPositionClassifierConfig;
+use crate::perpetuals::PerpetualPositionClassifierConfig;
 
 impl PerpetualPositionClassifierConfig {
     pub fn mock() -> Self {

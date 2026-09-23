@@ -3,9 +3,9 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use super::sync::{SearchSyncClient, SearchSyncResult};
+use crate::ConfigCacher;
 use config_keys::ConfigKey;
 use search_index::{ASSETS_INDEX_NAME, AssetDocument, SearchIndexClient, sanitize_index_primary_id};
-use services::ConfigCacher;
 use storage::{AssetTagLink, AssetWithMarket, AssetsUsageRanksRepository, AssetsWithPricesFilter, Database, DatabaseError, PricesRepository, TagRepository};
 
 pub struct AssetsIndexUpdater {
