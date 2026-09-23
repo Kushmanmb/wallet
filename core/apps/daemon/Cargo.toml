@@ -22,7 +22,6 @@ settings = { path = "../../crates/settings" }
 storage = { path = "../../crates/storage" }
 pusher = { path = "../../crates/pusher" }
 coingecko = { path = "../../crates/coingecko" }
-pricer = { path = "../../crates/pricer" }
 prices = { path = "../../crates/prices" }
 config_keys = { path = "../../crates/config_keys" }
 primitives = { path = "../../crates/primitives" }

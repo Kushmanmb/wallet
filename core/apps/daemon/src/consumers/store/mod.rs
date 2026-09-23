@@ -12,7 +12,6 @@ use std::sync::Arc;
 
 use crate::client::SwapVaultAddressClient;
 use config_keys::ConfigKey;
-use pricer::PriceClient;
 use primitives::TransactionId;
 use services::Services;
 use settings::Settings;
@@ -70,7 +69,7 @@ async fn run_store_prices(services: Services, shutdown_rx: ShutdownReceiver, rep
     let queue = QueueName::StorePrices;
     let (name, stream_reader) = reader_for_queue(&settings, &queue, &shutdown_rx).await?;
     let cacher_client = services.cacher().await?;
-    let price_client = PriceClient::new(database.clone(), cacher_client);
+    let price_client = services.prices(cacher_client);
     let config = services.config();
     let ttl_seconds = config.get_duration(ConfigKey::PriceOutdated).await?.as_secs() as i64;
     let consumer = StorePricesConsumer::new(

@@ -8,7 +8,7 @@ use config_keys::ConfigKey;
 use defi::{DefiProviderClient, DefiProviderConfig};
 use lists::CoinGeckoListProvider;
 use nft::NFTProviderConfig;
-use primitives::Chain;
+use primitives::{Chain, PriceConfig};
 use pusher::PusherClient;
 use search_index::{SearchIndexClient, SearchIndexConfig};
 use settings::Settings;
@@ -19,6 +19,7 @@ use crate::assets::ListsClient;
 use crate::auth::AuthClient;
 use crate::defi::DefiClient;
 use crate::nft::NFTClient;
+use crate::prices::{ChartClient, MarketsClient, PriceAlertClient, PriceClient};
 use crate::support::SupportClient;
 
 #[derive(Clone)]
@@ -82,6 +83,22 @@ impl Services {
 
     pub fn nft(&self) -> NFTClient {
         NFTClient::from_config(self.database(), NFTProviderConfig::from_settings(&self.settings), self.settings.nft.url.clone())
+    }
+
+    pub fn prices(&self, cacher: CacherClient) -> PriceClient {
+        PriceClient::new(self.database(), cacher)
+    }
+
+    pub fn charts(&self, config: PriceConfig) -> ChartClient {
+        ChartClient::new(self.database(), config)
+    }
+
+    pub fn markets(&self, cacher: CacherClient) -> MarketsClient {
+        MarketsClient::new(self.database(), cacher)
+    }
+
+    pub fn price_alerts(&self) -> PriceAlertClient {
+        PriceAlertClient::new(self.database())
     }
 
     pub fn pusher(&self) -> PusherClient {

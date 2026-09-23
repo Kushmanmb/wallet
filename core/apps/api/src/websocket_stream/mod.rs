@@ -1,6 +1,6 @@
-use pricer::PriceClient;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
+use services::prices::PriceClient;
 
 use crate::devices::auth_config::AuthConfig;
 use crate::devices::guard::{AuthenticatedDevice, VersionParam};

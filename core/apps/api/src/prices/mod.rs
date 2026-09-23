@@ -1,7 +1,7 @@
-use pricer::{ChartClient, PriceClient};
 use primitives::currency::Currency;
 use primitives::{AssetMarketPrice, AssetPrices, AssetPricesRequest, ChartPeriod, Charts, FiatRate};
 use rocket::{State, get, post, serde::json::Json};
+use services::prices::{ChartClient, PriceClient};
 
 use crate::params::{AssetIdParam, ChartPeriodParam, CurrencyParam};
 use crate::responders::{ApiError, ApiResponse};

@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use std::error::Error;
 
 use cacher::{CacheError, CacheKey, CacherClient};
+use chrono::NaiveDateTime;
 use config_keys::ConfigKey;
 use gem_tracing::error_with_fields;
 use prices::{AssetPriceFull, AssetPriceMapping, PriceAssetsProvider, PriceProviders};
@@ -98,7 +99,7 @@ impl PriceClient {
         Ok(self.database.run(move |client| client.aggregate_charts(timeframe)).await?)
     }
 
-    pub async fn delete_charts(&self, timeframe: ChartTimeframe, before: chrono::NaiveDateTime) -> Result<usize, Box<dyn Error + Send + Sync>> {
+    pub async fn delete_charts(&self, timeframe: ChartTimeframe, before: NaiveDateTime) -> Result<usize, Box<dyn Error + Send + Sync>> {
         Ok(self.database.run(move |client| client.delete_charts(timeframe, before)).await?)
     }
 

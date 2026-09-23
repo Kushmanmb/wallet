@@ -1,7 +1,7 @@
 use cacher::CacheKey;
-use pricer::PriceClient;
 use primitives::{AssetId, AssetPrice, AssetPriceInfo, StreamEvent, StreamMessage, StreamMessagePrices, Version, WebSocketPricePayload};
 use redis::aio::MultiplexedConnection;
+use services::prices::PriceClient;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
 

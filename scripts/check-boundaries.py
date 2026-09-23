@@ -98,7 +98,6 @@ INFRA_DEPENDENTS = {
     "daemon": {"cacher", "pusher", "search_index", "storage", "streamer"},
     "fiat": {"cacher", "storage", "streamer"},
     "rewards": {"cacher", "storage"},
-    "pricer": {"cacher", "storage"},
 }
 CARGO_SECTION = re.compile(r"^\[(.+)\]\s*$")
 CARGO_KEY = re.compile(r"^([A-Za-z0-9_-]+)\s*=\s*(.*)$")

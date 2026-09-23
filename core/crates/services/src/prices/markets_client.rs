@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::error::Error;
 
 use cacher::{CacheError, CacheKey, CacherClient};
@@ -30,7 +31,7 @@ impl MarketsClient {
         let price_ids: Vec<String> = provider_price_ids.iter().map(|id| PriceId::id_for(provider, id)).collect();
         let lookup_price_ids = price_ids.clone();
         let assets = self.database.run(move |client| client.get_prices_assets_for_price_ids(lookup_price_ids)).await?;
-        let asset_map: std::collections::HashMap<_, _> = assets.into_iter().map(|x| (x.price_id.to_string(), x.asset_id)).collect();
+        let asset_map: HashMap<_, _> = assets.into_iter().map(|row| (row.price_id.to_string(), row.asset_id)).collect();
         Ok(price_ids.into_iter().filter_map(|price_id| asset_map.get(&price_id).map(|asset_id| asset_id.0.clone())).collect())
     }
 

@@ -1,8 +1,8 @@
 use std::{error::Error, vec};
 
 use coingecko::{CoinGeckoClient, model::Global};
-use pricer::MarketsClient;
 use primitives::{AssetTag, Chain, MarketDominance, Markets, PriceProvider};
+use services::prices::MarketsClient;
 
 pub struct MarketsUpdater {
     markets_client: MarketsClient,

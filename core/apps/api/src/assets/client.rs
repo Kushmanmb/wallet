@@ -4,10 +4,10 @@ use std::error::Error;
 use super::filter::{build_assets_filters, build_filter, build_perpetuals_filters};
 use super::model::SearchRequest;
 use chrono::{DateTime, Utc};
-use pricer::PriceClient;
 use primitives::asset_score::AssetRank;
 use primitives::{Asset, AssetBasic, AssetFull, AssetId, AssetList, ChainAddress, NFTCollection, PerpetualSearchData, PriceConfig};
 use search_index::{ASSET_LISTS_INDEX_NAME, ASSETS_INDEX_NAME, AssetListDocument, NFTDocument, NFTS_INDEX_NAME, PERPETUALS_INDEX_NAME, PerpetualDocument, SearchIndexClient};
+use services::prices::PriceClient;
 use storage::{AssetFilter, AssetsAddressesRepository, AssetsRepository, Database, DatabaseError, WalletsRepository};
 
 #[derive(Clone)]

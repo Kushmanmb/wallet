@@ -20,7 +20,6 @@ use std::time::Duration;
 use cacher::{AccessTokenCacherClient, CacherClient};
 use futures::future;
 use gem_client::ReqwestClient;
-use pricer::PriceClient;
 use primitives::{AssetId, Chain, NFTChain, PriceId, PriceProvider, TransactionIdRequest};
 use security::providers::goplus::GoPlusProvider;
 use security::{ScanProviderConfig, ScanProviderFactory, TokenScanProviders};
@@ -196,14 +195,13 @@ async fn run_fetch_prices_metadata(services: Services, shutdown_rx: ShutdownRece
 
 async fn run_fetch_prices(services: Services, shutdown_rx: ShutdownReceiver, reporter: Arc<dyn ConsumerStatusReporter>) -> Result<(), Box<dyn Error + Send + Sync>> {
     let settings = services.settings();
-    let database = services.database();
     let queue = QueueName::FetchPrices;
     let name = queue.to_string();
     let connection = StreamConnection::new(&settings.rabbitmq.url, name.clone()).await?;
     let config = reader_config(&settings.rabbitmq, name.clone());
     let stream_reader = StreamReader::from_connection(&connection, config).await?;
     let cacher = services.cacher().await?;
-    let price_client = PriceClient::new(database, cacher);
+    let price_client = services.prices(cacher);
     let providers = crate::worker::prices::price_providers(&settings, PriceProvider::all());
     let consumer = FetchPricesConsumer { price_client, providers };
     run_consumer::<FetchPricesPayload, FetchPricesConsumer, usize>(&name, stream_reader, queue, None, consumer, consumer_config(&settings.consumer), shutdown_rx, reporter).await

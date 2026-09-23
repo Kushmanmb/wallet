@@ -6,9 +6,9 @@ use std::time::Duration;
 use cacher::{CacheKey, CacherClient};
 use chrono::{DateTime, Utc};
 use gem_tracing::info_with_fields;
-use pricer::PriceClient;
 use prices::PriceAssetsProvider;
 use primitives::{ChartTimeframe, ChartValue, SECONDS_PER_DAY, SECONDS_PER_HOUR};
+use services::prices::PriceClient;
 use storage::models::{ChartRow, PriceRow};
 use storage::{ChartsRepository, Database, PriceFilter, PricesRepository};
 

@@ -524,7 +524,6 @@ dependencies = [
  "nft",
  "num-bigint 0.5.1",
  "number_formatter",
- "pricer",
  "prices",
  "primitives",
  "push_notification",
@@ -2319,7 +2318,6 @@ dependencies = [
  "metrics",
  "num-bigint 0.5.1",
  "number_formatter",
- "pricer",
  "prices",
  "primitives",
  "prometheus-client",
@@ -6317,23 +6315,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pricer"
-version = "2.114.44"
-dependencies = [
- "cacher",
- "chrono",
- "config_keys",
- "gem_tracing",
- "localizer",
- "number_formatter",
- "prices",
- "primitives",
- "push_notification",
- "serde_json",
- "storage",
-]
-
-[[package]]
 name = "prices"
 version = "2.114.44"
 dependencies = [
@@ -7869,12 +7850,14 @@ dependencies = [
  "defi",
  "futures",
  "gem_client",
+ "gem_tracing",
  "hex",
  "hmac 0.13.0",
  "lists",
  "localizer",
  "nft",
  "number_formatter",
+ "prices",
  "primitives",
  "push_notification",
  "pusher",

@@ -32,6 +32,7 @@ use rocket::{FromForm, State, delete, get, post, put};
 use services::auth::AuthClient;
 use services::defi::DefiClient;
 use services::nft::NFTClient;
+use services::prices::PriceAlertClient;
 use streamer::{StreamProducer, StreamProducerQueue};
 
 use crate::auth::WalletSigned;
@@ -244,17 +245,17 @@ pub async fn get_device_token_v2(device: AuthenticatedDevice, config: &State<Aut
 }
 
 #[get("/devices/price_alerts?<asset_id>")]
-pub async fn get_device_price_alerts_v2(device: AuthenticatedDevice, asset_id: Option<AssetIdParam>, client: &State<pricer::PriceAlertClient>) -> Result<ApiResponse<PriceAlerts>, ApiError> {
+pub async fn get_device_price_alerts_v2(device: AuthenticatedDevice, asset_id: Option<AssetIdParam>, client: &State<PriceAlertClient>) -> Result<ApiResponse<PriceAlerts>, ApiError> {
     Ok(client.get_price_alerts(&device.device_row.device_id, asset_id.as_ref().map(|x| &x.0)).await?.into())
 }
 
 #[post("/devices/price_alerts", format = "json", data = "<price_alerts>")]
-pub async fn add_device_price_alerts_v2(device: AuthenticatedDevice, price_alerts: DeviceJson<PriceAlerts>, client: &State<pricer::PriceAlertClient>) -> Result<ApiResponse<usize>, ApiError> {
+pub async fn add_device_price_alerts_v2(device: AuthenticatedDevice, price_alerts: DeviceJson<PriceAlerts>, client: &State<PriceAlertClient>) -> Result<ApiResponse<usize>, ApiError> {
     Ok(client.add_price_alerts(&device.device_row.device_id, price_alerts.into_inner()).await?.into())
 }
 
 #[delete("/devices/price_alerts", format = "json", data = "<price_alerts>")]
-pub async fn delete_device_price_alerts_v2(device: AuthenticatedDevice, price_alerts: DeviceJson<PriceAlerts>, client: &State<pricer::PriceAlertClient>) -> Result<ApiResponse<usize>, ApiError> {
+pub async fn delete_device_price_alerts_v2(device: AuthenticatedDevice, price_alerts: DeviceJson<PriceAlerts>, client: &State<PriceAlertClient>) -> Result<ApiResponse<usize>, ApiError> {
     Ok(client.delete_price_alerts(&device.device_row.device_id, price_alerts.into_inner()).await?.into())
 }
 

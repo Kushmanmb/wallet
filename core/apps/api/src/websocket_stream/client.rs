@@ -3,7 +3,6 @@ use std::time::Duration;
 
 use cacher::CacherClient;
 use gem_tracing::info_with_fields;
-use pricer::PriceClient;
 use primitives::{AssetPrice, StreamEvent, StreamMessage, Version, device_stream_channel};
 use redis::PushInfo;
 use redis::aio::MultiplexedConnection;
@@ -11,6 +10,7 @@ use rocket::futures::SinkExt;
 use rocket::serde::json::serde_json;
 use rocket_ws::Message;
 use rocket_ws::stream::DuplexStream;
+use services::prices::PriceClient;
 
 use super::price_handler::PriceHandler;
 use crate::websocket::decode_push_message;

@@ -43,7 +43,6 @@ use devices::{
 };
 use model::APIService;
 use name_resolver::{NameClient, NameConfig, NameProviderFactory};
-use pricer::{ChartClient, MarketsClient, PriceAlertClient, PriceClient};
 use primitives::{FiatProviderName, PriceConfig};
 use rewards::{AbuseIPDBClient, IpApiClient, IpCheckProvider, IpSecurityClient};
 use rocket::{Build, Rocket, catchers, routes};
@@ -195,10 +194,10 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
         primary_price_max_age: config_cacher.get_duration(config_keys::ConfigKey::PricePrimaryMaxAge).await?,
     };
 
-    let price_client = PriceClient::new(database.clone(), cacher_client.clone());
-    let charts_client = ChartClient::new(database.clone(), price_config);
+    let price_client = services.prices(cacher_client.clone());
+    let charts_client = services.charts(price_config);
     let config_client = ConfigClient::new(database.clone());
-    let price_alert_client = PriceAlertClient::new(database.clone());
+    let price_alert_client = services.price_alerts();
     let name_config = NameConfig {
         max_name_length: settings_clone.name.max_name_length,
     };
@@ -245,7 +244,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let defi_client = services.defi();
     let defi_provider_client = DefiProviderClient::new(DefiProviderConfig::from_settings(&settings));
     let auth_client = services.auth().await?;
-    let markets_client = MarketsClient::new(database.clone(), cacher_client.clone());
+    let markets_client = services.markets(cacher_client.clone());
     let webhooks_client = WebhooksClient::new(stream_producer.clone(), settings.support.webhook.key.secret.clone());
     let ip_check_providers: Vec<Arc<dyn IpCheckProvider>> = vec![
         Arc::new(AbuseIPDBClient::new(settings.security.abuseipdb.url.clone(), settings.security.abuseipdb.key.secret.clone())),
@@ -323,7 +322,7 @@ async fn rocket_ws_stream(settings: Settings) -> Result<Rocket<Build>, Box<dyn E
     let cacher_client = services.cacher().await?;
     let database = services.database();
     let config_cacher = services.config();
-    let price_client = PriceClient::new(database.clone(), cacher_client.clone());
+    let price_client = services.prices(cacher_client.clone());
     let stream_observer_config = websocket_stream::StreamObserverConfig {
         redis_url: settings.redis.url.clone(),
         cacher_client,

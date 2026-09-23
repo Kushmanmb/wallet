@@ -6,7 +6,6 @@ use fiat::FiatProviderFactory;
 use fiat_assets_updater::FiatAssetsUpdater;
 use fiat_rates_updater::FiatRatesUpdater;
 use job_runner::{JobHandle, ShutdownReceiver};
-use pricer::PriceClient;
 use prices::{FiatRatesProviderConfig, build_fiat_rates_providers};
 use primitives::FiatProviderName;
 use std::{error::Error, sync::Arc};
@@ -30,7 +29,7 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     ctx.plan_builder(WorkerService::Fiat, &config, shutdown_rx)
         .jobs(WorkerJob::UpdateFiatRates, providers.keys().copied(), |provider, _| {
             let provider = providers[&provider].clone();
-            let price_client = PriceClient::new(database.clone(), cacher_client.clone());
+            let price_client = services.prices(cacher_client.clone());
             move |_| {
                 let updater = FiatRatesUpdater::new(provider.clone(), price_client.clone());
                 async move { updater.update().await }

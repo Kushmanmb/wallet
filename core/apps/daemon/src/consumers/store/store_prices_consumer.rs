@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use pricer::PriceClient;
+use services::prices::PriceClient;
 use std::collections::HashMap;
 use std::error::Error;
 use std::time::Duration;

@@ -7,7 +7,6 @@ use std::sync::Arc;
 use config_keys::ConfigKey;
 use job_runner::{JobHandle, ShutdownReceiver};
 use price_alerts_sender::PriceAlertSender;
-use pricer::PriceAlertClient;
 use primitives::Chain;
 use settings::service_user_agent;
 use staking_rewards_notifier::{StakeRewardsConfig, StakingRewardsNotifier};
@@ -31,14 +30,13 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     ctx.plan_builder(WorkerService::Alerter, &config, shutdown_rx)
         .job(WorkerJob::AlertPriceAlerts, {
             let database = database.clone();
+            let price_alert_client = services.price_alerts();
             let stream_producer = stream_producer.clone();
             move |_| {
                 let database = database.clone();
+                let price_alert_client = price_alert_client.clone();
                 let stream_producer = stream_producer.clone();
-                async move {
-                    let price_alert_client = PriceAlertClient::new(database.clone());
-                    PriceAlertSender::new(database, price_alert_client, stream_producer).run_observer().await
-                }
+                async move { PriceAlertSender::new(database, price_alert_client, stream_producer).run_observer().await }
             }
         })
         .jobs(WorkerJob::AlertStakeRewards, Chain::stakeable(), |chain, _| {

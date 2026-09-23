@@ -7,9 +7,9 @@ use crate::responders::{ApiError, ApiResponse};
 pub use client::{AssetsClient, SearchClient};
 use model::SearchParams;
 pub use model::SearchRequest;
-use pricer::PriceClient;
 use primitives::{AssetBasic, AssetFull, AssetId, SearchResponse};
 use rocket::{State, get, post, serde::json::Json};
+use services::prices::PriceClient;
 
 #[get("/assets/<asset_id>?<currency>")]
 pub async fn get_asset(asset_id: AssetIdParam, currency: CurrencyParam, client: &State<AssetsClient>, price_client: &State<PriceClient>) -> Result<ApiResponse<AssetFull>, ApiError> {

@@ -63,8 +63,7 @@ Individual `gem_*` crates for each blockchain with unified RPC client patterns:
 - `cacher/`: Caching layer for improved performance
 
 ### Pricing & Market Data
-- `pricer/`: Asset pricing aggregation and management
-- `prices/`: Price provider implementations (CoinGecko, DefiLlama, Jupiter) behind one `PriceProvider` contract
+- `prices/`: Price provider implementations (CoinGecko, DefiLlama, Jupiter) behind one `PriceProvider` contract, and the price alert rules
 - `coingecko/`: CoinGecko API client
 
 ### NFT & Digital Assets
@@ -106,7 +105,7 @@ gem_* chain crates (gem_evm, gem_solana, ...)
 apps/ (api, daemon, dynode)
   ├── services/    ← backend orchestration and infra construction
   ├── storage/     ← Diesel ORM + PostgreSQL
-  ├── pricer/      ← pricing aggregation
+  ├── prices/      ← price providers and alert rules
   ├── gem_client/  ← ReqwestClient for backend HTTP
   └── primitives/  ← shared models
 ```

@@ -22,12 +22,12 @@ use job_runner::{JobHandle, ShutdownReceiver};
 use markets_updater::MarketsUpdater;
 use missing_prices_publisher::MissingPricesPublisher;
 use observed_prices_updater::{ObservedPricesConfig, ObservedPricesUpdater};
-use pricer::{MarketsClient, PriceClient};
 use prices::{PriceAssetsProvider, PriceProvider, PriceProviderConfig, PriceProviders, build_price_providers};
 use prices_cleanup_updater::PricesCleanupUpdater;
 use prices_metrics_updater::PricesMetricsUpdater;
 use prices_updater::PricesUpdater;
 use primitives::ChartTimeframe;
+use services::prices::{MarketsClient, PriceClient};
 use settings::Settings;
 use storage::{ConfigCacher, Database, PricesProvidersRepository};
 use streamer::StreamProducer;
@@ -44,7 +44,8 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     let producer_prices = services.stream_producer("prices_provider_prices", streamer::no_shutdown()).await?;
     let enabled_providers: Vec<PriceProvider> = database.run(|client| client.get_prices_providers()).await?.into_iter().filter(|p| p.enabled).map(|p| p.id.0).collect();
     let assets_providers: AssetsProviders = Arc::new(price_providers(&settings, enabled_providers.iter().copied()));
-    let price_client = PriceClient::new(database.clone(), cacher_client.clone());
+    let price_client = services.prices(cacher_client.clone());
+    let markets_client = services.markets(cacher_client.clone());
 
     let builder = ctx.plan_builder(WorkerService::Prices, config.as_ref(), shutdown_rx);
     let mut builder = add_platform_jobs(builder, &database, &cacher_client, &price_client, &config, &assets_providers, producer_prices.clone())?;
@@ -54,6 +55,7 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
             &database,
             &cacher_client,
             &price_client,
+            &markets_client,
             &settings,
             &config,
             provider,
@@ -77,10 +79,10 @@ fn add_platform_jobs<'a>(
     producer: StreamProducer,
 ) -> Result<JobPlanBuilder<'a>, Box<dyn Error + Send + Sync>> {
     Ok(builder
-        .job(WorkerJob::AggregateHourlyCharts, charts_job(database, cacher_client, config, ChartsAction::Aggregate(ChartTimeframe::Hourly)))
-        .job(WorkerJob::AggregateDailyCharts, charts_job(database, cacher_client, config, ChartsAction::Aggregate(ChartTimeframe::Daily)))
-        .job(WorkerJob::CleanupChartsRaw, charts_job(database, cacher_client, config, ChartsAction::Delete(ChartTimeframe::Raw)))
-        .job(WorkerJob::CleanupChartsHourly, charts_job(database, cacher_client, config, ChartsAction::Delete(ChartTimeframe::Hourly)))
+        .job(WorkerJob::AggregateHourlyCharts, charts_job(price_client, config, ChartsAction::Aggregate(ChartTimeframe::Hourly)))
+        .job(WorkerJob::AggregateDailyCharts, charts_job(price_client, config, ChartsAction::Aggregate(ChartTimeframe::Daily)))
+        .job(WorkerJob::CleanupChartsRaw, charts_job(price_client, config, ChartsAction::Delete(ChartTimeframe::Raw)))
+        .job(WorkerJob::CleanupChartsHourly, charts_job(price_client, config, ChartsAction::Delete(ChartTimeframe::Hourly)))
         .job(WorkerJob::UpdateObservedPrices, {
             let cacher_client = cacher_client.clone();
             let database = database.clone();
@@ -122,6 +124,7 @@ async fn add_provider_jobs<'a>(
     database: &Database,
     cacher_client: &CacherClient,
     price_client: &PriceClient,
+    markets_client: &MarketsClient,
     settings: &Settings,
     config: &Arc<ConfigCacher>,
     kind: PriceProvider,
@@ -219,7 +222,7 @@ async fn add_provider_jobs<'a>(
             )
             .job(WorkerJob::UpdateMarkets, {
                 let coingecko = CoinGeckoClient::new(settings.prices.coingecko.remote_provider_config());
-                let markets_client = MarketsClient::new(database.clone(), cacher_client.clone());
+                let markets_client = markets_client.clone();
                 move |_| {
                     let updater = MarketsUpdater::new(markets_client.clone(), coingecko.clone());
                     Box::pin(async move { updater.update_markets().await })
@@ -325,12 +328,11 @@ enum ChartsAction {
 }
 
 fn charts_job(
-    database: &Database,
-    cacher: &CacherClient,
+    price_client: &PriceClient,
     config: &Arc<ConfigCacher>,
     action: ChartsAction,
 ) -> impl Fn(job_runner::JobContext) -> futures::future::BoxFuture<'static, Result<usize, Box<dyn std::error::Error + Send + Sync>>> + Clone + Send + Sync + 'static {
-    let updater = ChartsUpdater::new(PriceClient::new(database.clone(), cacher.clone()));
+    let updater = ChartsUpdater::new(price_client.clone());
     let config = config.clone();
     move |_| {
         let updater = updater.clone();

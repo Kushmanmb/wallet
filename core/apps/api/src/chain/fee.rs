@@ -4,10 +4,10 @@ use std::error::Error;
 use cacher::{CacheKey, CacherClient};
 use chain_providers::{TransactionFeeEstimate, TransactionFeeEstimates};
 use number_formatter::{BigNumberFormatter, CryptoFiatConverter};
-use pricer::PriceClient;
 use primitives::{Asset, Chain, FeePriority, FeeUnitType};
 use rocket::{State, get};
 use serde::{Deserialize, Serialize};
+use services::prices::PriceClient;
 use strum::IntoEnumIterator;
 
 use crate::api_clients::PermissionChainRead;
