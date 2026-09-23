@@ -121,7 +121,7 @@ public final class StakeSceneViewModel {
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .stake(symbol: assetModel.symbol))
+        EmptyContentTypeViewModel(type: EmptyContentType(.stake, symbol: assetModel.symbol))
     }
 
     func route(delegation: DelegationViewModel) -> StakeRoute {

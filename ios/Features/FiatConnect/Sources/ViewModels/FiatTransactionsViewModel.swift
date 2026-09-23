@@ -43,7 +43,7 @@ public final class FiatTransactionsViewModel {
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .activity(isViewOnly: false))
+        EmptyContentTypeViewModel(type: EmptyContentType(.activity))
     }
 
     func load() async {

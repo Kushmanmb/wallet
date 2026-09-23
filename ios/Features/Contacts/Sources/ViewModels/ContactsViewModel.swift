@@ -94,7 +94,7 @@ public final class ContactsViewModel {
     }
 
     var emptyContent: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .contacts)
+        EmptyContentTypeViewModel(type: EmptyContentType(.contacts))
     }
 
     func listItemModel(for contact: ContactData) -> ListItemModel {

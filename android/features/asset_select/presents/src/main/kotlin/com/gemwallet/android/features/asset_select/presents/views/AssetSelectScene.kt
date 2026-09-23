@@ -69,6 +69,8 @@ import com.wallet.core.primitives.Chain
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.drop
+import uniffi.gemstone.GemEmptyStateAction
+import uniffi.gemstone.GemEmptyStateKind
 
 @Composable
 fun AssetSelectScene(
@@ -370,8 +372,9 @@ fun LazyListScope.searchState(state: UIState, isAddAvailable: Boolean = false, t
 
         UIState.Empty -> item {
             EmptyContentView(
-                type = EmptyContentType.SearchAssets(
-                    onAddCustomToken = if (isAddAvailable) onAddAsset else null,
+                type = EmptyContentType(
+                    GemEmptyStateKind.SEARCH_ASSETS,
+                    actions = mapOf(GemEmptyStateAction.ADD_CUSTOM_TOKEN to if (isAddAvailable) onAddAsset else null),
                 ),
                 modifier = Modifier
                     .animateItem()

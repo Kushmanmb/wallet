@@ -49,7 +49,7 @@ public extension CollectionsViewable {
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .nfts(action: onSelectReceive))
+        EmptyContentTypeViewModel(type: EmptyContentType(.nfts, actions: [.receive: onSelectReceive]))
     }
 
     var loadError: Error? {

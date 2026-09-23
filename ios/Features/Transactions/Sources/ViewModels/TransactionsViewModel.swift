@@ -65,9 +65,9 @@ public final class TransactionsViewModel {
             filters: filterModel.transactionTypesFilter.selectedTypes,
         ) {
         case .noActivity:
-            EmptyContentTypeViewModel(type: .activity(receive: onSelectReceive, buy: onSelectBuy, isViewOnly: wallet.isViewOnly))
+            EmptyContentTypeViewModel(type: EmptyContentType(.activity, isViewOnly: wallet.isViewOnly, actions: [.buy: onSelectBuy, .receive: onSelectReceive]))
         case .noResults:
-            EmptyContentTypeViewModel(type: .search(type: .activity, action: onSelectCleanFilters))
+            EmptyContentTypeViewModel(type: EmptyContentType(.searchActivity, actions: [.clearFilters: onSelectCleanFilters]))
         }
     }
 }

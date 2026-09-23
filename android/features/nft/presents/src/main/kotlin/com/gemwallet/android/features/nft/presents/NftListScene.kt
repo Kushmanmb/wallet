@@ -42,6 +42,8 @@ import com.gemwallet.android.ui.models.actions.NftAssetIdAction
 import com.gemwallet.android.ui.models.actions.NftCollectionIdAction
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
+import uniffi.gemstone.GemEmptyStateAction
+import uniffi.gemstone.GemEmptyStateKind
 import uniffi.gemstone.GemListRow
 
 private val collectibleCellMinSize = 150.dp
@@ -180,12 +182,12 @@ internal fun NftListScene(
     }
 }
 
-private fun nftEmptyContentType(showReceiveAction: Boolean, onAction: (NftListAction) -> Unit): EmptyContentType.Nft {
+private fun nftEmptyContentType(showReceiveAction: Boolean, onAction: (NftListAction) -> Unit): EmptyContentType {
     val onReceive: (() -> Unit)? = if (showReceiveAction) {
         { onAction(NftListAction.Receive) }
     } else {
         null
     }
 
-    return EmptyContentType.Nft(onReceive = onReceive)
+    return EmptyContentType(GemEmptyStateKind.NFTS, actions = mapOf(GemEmptyStateAction.RECEIVE to onReceive))
 }

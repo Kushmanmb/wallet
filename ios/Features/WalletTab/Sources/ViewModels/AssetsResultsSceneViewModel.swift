@@ -101,7 +101,7 @@ public final class AssetsResultsSceneViewModel: AssetActions, PerpetualPinAction
         switch state.phase {
         case .results: .results
         case .loading: .loading
-        case .empty: .empty(.search(type: .assets))
+        case .empty: .empty(EmptyContentType(.searchAssets))
         }
     }
 

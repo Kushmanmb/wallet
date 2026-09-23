@@ -93,7 +93,7 @@ public final class EarnSceneViewModel {
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .earn(symbol: asset.symbol))
+        EmptyContentTypeViewModel(type: EmptyContentType(.earn, symbol: asset.symbol))
     }
 
     var positionModels: [DelegationViewModel] {

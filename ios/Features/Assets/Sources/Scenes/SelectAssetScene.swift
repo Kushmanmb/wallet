@@ -34,9 +34,9 @@ public struct SelectAssetScene: View {
                 } else if model.showEmpty {
                     EmptyContentView(
                         model: EmptyContentTypeViewModel(
-                            type: .search(
-                                type: .assets,
-                                action: model.showAddToken ? { model.onSelectAddCustomToken() } : nil,
+                            type: EmptyContentType(
+                                .searchAssets,
+                                actions: [.addCustomToken: model.showAddToken ? { model.onSelectAddCustomToken() } : nil],
                             ),
                         ),
                     )

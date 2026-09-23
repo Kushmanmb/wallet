@@ -19,7 +19,7 @@ public final class ChainListSettingsViewModel {
     }
 
     var emptyContent: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .search(type: .networks))
+        EmptyContentTypeViewModel(type: EmptyContentType(.searchNetworks))
     }
 
     func filterChains(for query: String) -> [Chain] {

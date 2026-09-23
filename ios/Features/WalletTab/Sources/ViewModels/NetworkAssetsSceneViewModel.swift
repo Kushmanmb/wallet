@@ -110,7 +110,7 @@ public final class NetworkAssetsSceneViewModel: AssetActions {
     }
 
     var emptyModel: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .networkAssets(action: onManageAssetsAction))
+        EmptyContentTypeViewModel(type: EmptyContentType(.networkAssets, actions: [.manageTokenList: onManageAssetsAction]))
     }
 
     var assetIds: [AssetId] {

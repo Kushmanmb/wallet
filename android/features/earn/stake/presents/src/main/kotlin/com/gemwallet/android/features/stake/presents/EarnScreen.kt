@@ -36,6 +36,7 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.theme.paddingLarge
+import uniffi.gemstone.GemEmptyStateKind
 import uniffi.gemstone.GemListRow
 
 @Composable
@@ -89,7 +90,7 @@ fun EarnScreen(amountAction: AmountTransactionAction, onDelegation: (String, Str
                         item {
                             Spacer(modifier = Modifier.height(paddingLarge))
                             when (val error = loadError) {
-                                null -> EmptyContentView(type = EmptyContentType.Earn(symbol = earnAssetInfo.asset.symbol))
+                                null -> EmptyContentView(type = EmptyContentType(GemEmptyStateKind.EARN, symbol = earnAssetInfo.asset.symbol))
                                 else -> GemListRowView(row = GemListRow.Error(error), listPosition = ListPosition.Single)
                             }
                         }

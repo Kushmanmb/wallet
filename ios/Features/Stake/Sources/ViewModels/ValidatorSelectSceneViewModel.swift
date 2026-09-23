@@ -49,7 +49,7 @@ public final class ValidatorSelectSceneViewModel {
     }
 
     public var emptyContent: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .validators)
+        EmptyContentTypeViewModel(type: EmptyContentType(.validators))
     }
 
     public var list: [ListItemValueSection<DelegationValidator>] {

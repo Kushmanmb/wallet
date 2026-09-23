@@ -92,7 +92,7 @@ public final class PerpetualsSceneViewModel {
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .search(type: .perpetuals))
+        EmptyContentTypeViewModel(type: EmptyContentType(.searchPerpetuals))
     }
 
     var pinImage: Image {

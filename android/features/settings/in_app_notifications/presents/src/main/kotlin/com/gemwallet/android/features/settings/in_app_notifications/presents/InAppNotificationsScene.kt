@@ -20,6 +20,7 @@ import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.rememberDateSections
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.ListPosition
+import uniffi.gemstone.GemEmptyStateKind
 
 @Composable
 fun InAppNotificationsScene(onAction: (InAppNotificationsAction) -> Unit, viewModel: InAppNotificationsViewModel = hiltViewModel()) {
@@ -34,7 +35,7 @@ fun InAppNotificationsScene(onAction: (InAppNotificationsAction) -> Unit, viewMo
         if (notifications.isEmpty()) {
             when (val row = errorRow) {
                 null -> EmptyContentView(
-                    type = EmptyContentType.Notifications,
+                    type = EmptyContentType(GemEmptyStateKind.NOTIFICATIONS),
                     modifier = Modifier.fillMaxSize(),
                 )
 

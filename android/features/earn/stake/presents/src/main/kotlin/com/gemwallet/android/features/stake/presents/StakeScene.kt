@@ -39,6 +39,7 @@ import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.open
 import com.gemwallet.android.ui.theme.paddingLarge
+import uniffi.gemstone.GemEmptyStateKind
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemServiceException
 
@@ -111,7 +112,7 @@ internal fun StakeScene(
                     item {
                         Spacer(modifier = Modifier.height(paddingLarge))
                         when (loadError) {
-                            null -> EmptyContentView(type = EmptyContentType.Stake(symbol = assetInfo.asset.symbol))
+                            null -> EmptyContentView(type = EmptyContentType(GemEmptyStateKind.STAKE, symbol = assetInfo.asset.symbol))
                             else -> GemListRowView(row = GemListRow.Error(loadError), listPosition = ListPosition.Single)
                         }
                     }

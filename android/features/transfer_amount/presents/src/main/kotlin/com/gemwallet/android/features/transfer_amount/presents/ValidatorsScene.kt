@@ -16,6 +16,7 @@ import com.gemwallet.android.ui.components.list_item.aprText
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.theme.WalletTheme
+import uniffi.gemstone.GemEmptyStateKind
 
 @Composable
 fun ValidatorsScene(selection: ValidatorsUIModel, selectedValidatorId: String, onSelect: (String) -> Unit, onCancel: () -> Unit) {
@@ -26,7 +27,7 @@ fun ValidatorsScene(selection: ValidatorsUIModel, selectedValidatorId: String, o
         LazyColumn {
             if (selection.recommended.isEmpty() && selection.options.isEmpty()) {
                 item {
-                    EmptyContentView(type = EmptyContentType.Validators, modifier = Modifier.fillParentMaxSize())
+                    EmptyContentView(type = EmptyContentType(GemEmptyStateKind.VALIDATORS), modifier = Modifier.fillParentMaxSize())
                 }
             }
             if (selection.recommended.isNotEmpty()) {

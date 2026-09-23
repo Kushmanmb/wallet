@@ -65,7 +65,7 @@ public final class ConnectionsViewModel {
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .walletConnect)
+        EmptyContentTypeViewModel(type: EmptyContentType(.walletConnect))
     }
 
     func connectionSceneModel(connection: WalletConnection) -> ConnectionSceneViewModel {

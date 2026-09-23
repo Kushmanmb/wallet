@@ -17,6 +17,7 @@ import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.open
+import uniffi.gemstone.GemEmptyStateKind
 import uniffi.gemstone.GemListRow
 
 @Composable
@@ -36,7 +37,7 @@ fun FiatTransactionsScene(transactions: List<FiatTransactionRowUIModel>, errorRo
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item {
                         if (errorRow == null) {
-                            EmptyContentView(type = EmptyContentType.Activity(), modifier = Modifier.fillParentMaxSize())
+                            EmptyContentView(type = EmptyContentType(GemEmptyStateKind.ACTIVITY), modifier = Modifier.fillParentMaxSize())
                         } else {
                             GemListRowView(row = errorRow, listPosition = ListPosition.Single)
                         }

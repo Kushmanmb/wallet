@@ -32,6 +32,8 @@ import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.ListPosition
 import com.gemwallet.android.ui.theme.space0
 import com.wallet.core.primitives.Chain
+import uniffi.gemstone.GemEmptyStateAction
+import uniffi.gemstone.GemEmptyStateKind
 import uniffi.gemstone.GemListRow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -123,10 +125,15 @@ internal fun TransactionsScene(
 
 private fun transactionsEmptyContentType(hasFilters: Boolean, showBuyAction: Boolean, showReceiveAction: Boolean, onAction: (TransactionsListAction) -> Unit): EmptyContentType {
     if (hasFilters) {
-        return EmptyContentType.SearchActivity {
-            onAction(TransactionsListAction.ClearChainsFilter)
-            onAction(TransactionsListAction.ClearTypesFilter)
-        }
+        return EmptyContentType(
+            GemEmptyStateKind.SEARCH_ACTIVITY,
+            actions = mapOf(
+                GemEmptyStateAction.CLEAR_FILTERS to {
+                    onAction(TransactionsListAction.ClearChainsFilter)
+                    onAction(TransactionsListAction.ClearTypesFilter)
+                },
+            ),
+        )
     }
 
     val onBuy: (() -> Unit)? = if (showBuyAction) {
@@ -140,8 +147,5 @@ private fun transactionsEmptyContentType(hasFilters: Boolean, showBuyAction: Boo
         null
     }
 
-    return EmptyContentType.Activity(
-        onBuy = onBuy,
-        onReceive = onReceive,
-    )
+    return EmptyContentType(GemEmptyStateKind.ACTIVITY, actions = mapOf(GemEmptyStateAction.BUY to onBuy, GemEmptyStateAction.RECEIVE to onReceive))
 }

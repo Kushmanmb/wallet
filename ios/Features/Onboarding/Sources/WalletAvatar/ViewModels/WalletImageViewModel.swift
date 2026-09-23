@@ -52,7 +52,7 @@ public final class WalletImageViewModel: Sendable {
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .nfts(action: nil))
+        EmptyContentTypeViewModel(type: EmptyContentType(.nfts))
     }
 
     var hasAvatar: Bool {

@@ -116,9 +116,9 @@ public final class WalletSearchSceneViewModel: Sendable, AssetActions, Perpetual
         case .loading:
             .loading
         case .empty:
-            .empty(.search(
-                type: .assets,
-                action: showAddToken ? { [weak self] in self?.onSelectAddCustomToken() } : nil,
+            .empty(EmptyContentType(
+                .searchAssets,
+                actions: [.addCustomToken: showAddToken ? { [weak self] in self?.onSelectAddCustomToken() } : nil],
             ))
         }
     }

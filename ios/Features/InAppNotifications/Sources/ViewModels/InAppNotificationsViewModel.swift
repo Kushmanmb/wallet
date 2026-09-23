@@ -47,7 +47,7 @@ public final class InAppNotificationsViewModel {
     }
 
     public var emptyContentModel: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .notifications)
+        EmptyContentTypeViewModel(type: EmptyContentType(.notifications))
     }
 
     public var sections: [ListSection<InAppNotificationListItemViewModel>] {

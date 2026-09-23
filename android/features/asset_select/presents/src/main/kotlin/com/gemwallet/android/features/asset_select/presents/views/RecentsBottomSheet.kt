@@ -35,6 +35,7 @@ import com.gemwallet.android.ui.theme.SheetSizing
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
+import uniffi.gemstone.GemEmptyStateKind
 
 @Composable
 fun RecentsBottomSheet(isVisible: Boolean, uiModel: RecentsSheetUIModel, query: TextFieldState, onDismissRequest: () -> Unit, onClear: () -> Unit, onSelect: (Asset) -> Unit) {
@@ -103,8 +104,8 @@ fun RecentsBottomSheet(isVisible: Boolean, uiModel: RecentsSheetUIModel, query: 
 @Composable
 private fun RecentsEmptyStateView(state: RecentsEmptyState) {
     val type = when (state) {
-        RecentsEmptyState.NoRecents -> EmptyContentType.Recents
-        RecentsEmptyState.NoSearchResults -> EmptyContentType.SearchAssets()
+        RecentsEmptyState.NoRecents -> EmptyContentType(GemEmptyStateKind.RECENTS)
+        RecentsEmptyState.NoSearchResults -> EmptyContentType(GemEmptyStateKind.SEARCH_ASSETS)
     }
     EmptyContentView(type = type, modifier = Modifier.fillMaxSize())
 }

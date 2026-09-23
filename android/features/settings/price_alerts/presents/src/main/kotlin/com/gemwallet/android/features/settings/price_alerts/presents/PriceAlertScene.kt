@@ -54,6 +54,7 @@ import com.gemwallet.android.ui.theme.paddingLarge
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.space0
 import com.wallet.core.primitives.AssetId
+import uniffi.gemstone.GemEmptyStateKind
 import uniffi.gemstone.GemListRow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -154,7 +155,7 @@ private fun LazyListScope.emptyAlertingAssets(empty: Boolean) {
     }
     item {
         EmptyContentView(
-            type = EmptyContentType.PriceAlerts,
+            type = EmptyContentType(GemEmptyStateKind.PRICE_ALERTS),
             modifier = Modifier.fillParentMaxHeight(0.5f),
         )
     }

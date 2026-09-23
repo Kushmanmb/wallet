@@ -17,6 +17,7 @@ import com.gemwallet.android.ui.components.empty.EmptyContentView
 import com.gemwallet.android.ui.components.list_item.ChainItem
 import com.gemwallet.android.ui.models.ListPosition
 import com.wallet.core.primitives.Chain
+import uniffi.gemstone.GemEmptyStateKind
 
 @Composable
 fun SelectChain(
@@ -41,7 +42,7 @@ fun SelectChain(
             if (chains.isEmpty()) {
                 item {
                     EmptyContentView(
-                        type = EmptyContentType.SearchNetworks,
+                        type = EmptyContentType(GemEmptyStateKind.SEARCH_NETWORKS),
                         modifier = Modifier.fillParentMaxSize(),
                     )
                 }

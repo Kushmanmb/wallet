@@ -28,6 +28,7 @@ import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.components.screen.rememberSnackbarState
 import com.gemwallet.android.ui.icons.AppIcons
+import uniffi.gemstone.GemEmptyStateKind
 
 @Composable
 fun ContactsNavScreen(onAction: (ContactsAction) -> Unit, viewModel: ContactsViewModel = hiltViewModel()) {
@@ -48,7 +49,7 @@ fun ContactsNavScreen(onAction: (ContactsAction) -> Unit, viewModel: ContactsVie
     ) {
         if (contacts.isEmpty()) {
             EmptyContentView(
-                type = EmptyContentType.Contacts,
+                type = EmptyContentType(GemEmptyStateKind.CONTACTS),
                 modifier = Modifier.fillMaxSize(),
             )
         } else {

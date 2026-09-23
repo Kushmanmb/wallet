@@ -43,6 +43,7 @@ import com.wallet.core.primitives.QRScanType
 import kotlinx.coroutines.launch
 import uniffi.gemstone.DocsUrl
 import uniffi.gemstone.GemConnection
+import uniffi.gemstone.GemEmptyStateKind
 
 @Composable
 fun ConnectionsScene(onConnection: (String) -> Unit, onCancel: () -> Unit, viewModel: ConnectionsViewModel = hiltViewModel()) {
@@ -88,7 +89,7 @@ fun ConnectionsScene(onConnection: (String) -> Unit, onCancel: () -> Unit, viewM
             }
             if (sections.isEmpty()) {
                 item {
-                    EmptyContentView(type = EmptyContentType.WalletConnect, modifier = Modifier.fillParentMaxHeight(0.7f))
+                    EmptyContentView(type = EmptyContentType(GemEmptyStateKind.WALLET_CONNECT), modifier = Modifier.fillParentMaxHeight(0.7f))
                 }
             } else {
                 listSections(sections) { position, item ->

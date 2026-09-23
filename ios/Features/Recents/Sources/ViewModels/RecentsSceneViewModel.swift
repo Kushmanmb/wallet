@@ -79,7 +79,7 @@ public final class RecentsSceneViewModel {
     }
 
     var emptyModel: any EmptyContentViewable {
-        recentsSections.showsNoResults ? EmptyContentTypeViewModel(type: .search(type: .assets)) : EmptyContentTypeViewModel(type: .recents)
+        EmptyContentTypeViewModel(type: EmptyContentType(recentsSections.showsNoResults ? .searchAssets : .recents))
     }
 
     private var filteredAssets: [RecentAsset] {

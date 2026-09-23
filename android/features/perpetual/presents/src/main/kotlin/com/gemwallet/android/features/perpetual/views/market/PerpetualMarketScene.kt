@@ -66,10 +66,11 @@ import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PerpetualId
 import com.wallet.core.primitives.PerpetualProvider
 import com.wallet.core.primitives.WalletType
+import uniffi.gemstone.GemCurrencyStyle
+import uniffi.gemstone.GemEmptyStateKind
 import uniffi.gemstone.GemPerpetualBalanceHeader
 import uniffi.gemstone.PerpetualBalance
 import uniffi.gemstone.perpetualBalanceHeader
-import uniffi.gemstone.GemCurrencyStyle
 import uniffi.gemstone.priceRow
 
 @Composable
@@ -194,7 +195,7 @@ internal fun PerpetualMarketScene(
 
                         PerpetualMarketSectionUIModel.Empty -> item {
                             EmptyContentView(
-                                type = EmptyContentType.SearchPerpetuals,
+                                type = EmptyContentType(GemEmptyStateKind.SEARCH_PERPETUALS),
                                 modifier = Modifier
                                     .animateItem()
                                     .fillParentMaxSize(),

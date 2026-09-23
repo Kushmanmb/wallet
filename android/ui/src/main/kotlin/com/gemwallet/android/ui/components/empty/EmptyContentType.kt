@@ -1,21 +1,8 @@
 package com.gemwallet.android.ui.components.empty
 
-sealed interface EmptyContentType {
-    data class Nft(val onReceive: (() -> Unit)? = null) : EmptyContentType
-    data class Asset(val symbol: String, val onBuy: (() -> Unit)? = null, val onSwap: (() -> Unit)? = null, val isViewOnly: Boolean = false) : EmptyContentType
-    data class Activity(val onReceive: (() -> Unit)? = null, val onBuy: (() -> Unit)? = null, val isViewOnly: Boolean = false) : EmptyContentType
-    data class SearchAssets(val onAddCustomToken: (() -> Unit)? = null) : EmptyContentType
-    data class NetworkAssets(val onManageAssets: (() -> Unit)? = null) : EmptyContentType
-    data class SearchActivity(val onClearFilters: (() -> Unit)? = null) : EmptyContentType
-    data object SearchNetworks : EmptyContentType
-    data object SearchPerpetuals : EmptyContentType
+import uniffi.gemstone.GemEmptyStateAction
+import uniffi.gemstone.GemEmptyStateKind
 
-    data class Stake(val symbol: String) : EmptyContentType
-    data class Earn(val symbol: String) : EmptyContentType
-    data object Validators : EmptyContentType
-    data object PriceAlerts : EmptyContentType
-    data object Contacts : EmptyContentType
-    data object WalletConnect : EmptyContentType
-    data object Recents : EmptyContentType
-    data object Notifications : EmptyContentType
+class EmptyContentType(val kind: GemEmptyStateKind, val symbol: String = "", val isViewOnly: Boolean = false, actions: Map<GemEmptyStateAction, (() -> Unit)?> = emptyMap()) {
+    val actions: Map<GemEmptyStateAction, () -> Unit> = actions.mapNotNull { (action, onClick) -> onClick?.let { action to it } }.toMap()
 }

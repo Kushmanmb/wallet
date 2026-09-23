@@ -205,7 +205,7 @@ public final class AssetSceneViewModel: Sendable {
         let buy: (() -> Void)? = state.emptyTransactionsAction == .buy ? { self.onSelectBuy() } : nil
         let swap: (() -> Void)? = state.emptyTransactionsAction == .swap ? { self.onSelectSwap() } : nil
         return EmptyContentTypeViewModel(
-            type: .asset(symbol: assetModel.symbol, buy: buy, swap: swap, isViewOnly: state.isViewOnly),
+            type: EmptyContentType(.asset, symbol: assetModel.symbol, isViewOnly: state.isViewOnly, actions: [.buy: buy, .swap: swap]),
         )
     }
 

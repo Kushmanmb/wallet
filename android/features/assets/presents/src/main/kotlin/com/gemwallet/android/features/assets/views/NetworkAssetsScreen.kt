@@ -28,6 +28,8 @@ import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.AssetsGroupType
 import com.wallet.core.primitives.AssetId
+import uniffi.gemstone.GemEmptyStateAction
+import uniffi.gemstone.GemEmptyStateKind
 
 @Composable
 fun NetworkAssetsScreen(onSelectAsset: (AssetId) -> Unit, onManageAssets: () -> Unit, onCancel: () -> Unit, viewModel: NetworkAssetsViewModel = hiltViewModel()) {
@@ -65,7 +67,7 @@ fun NetworkAssetsScreen(onSelectAsset: (AssetId) -> Unit, onManageAssets: () -> 
             if (sections.showsEmpty) {
                 item {
                     EmptyContentView(
-                        type = EmptyContentType.NetworkAssets(onManageAssets = onManageAssets),
+                        type = EmptyContentType(GemEmptyStateKind.NETWORK_ASSETS, actions = mapOf(GemEmptyStateAction.MANAGE_TOKEN_LIST to onManageAssets)),
                         modifier = Modifier.fillParentMaxSize(),
                     )
                 }

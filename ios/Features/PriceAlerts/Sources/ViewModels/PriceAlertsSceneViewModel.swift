@@ -53,7 +53,7 @@ public final class PriceAlertsSceneViewModel: Sendable {
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
-        EmptyContentTypeViewModel(type: .priceAlerts)
+        EmptyContentTypeViewModel(type: EmptyContentType(.priceAlerts))
     }
 
     var sections: [ListItemValueSection<PriceAlertData>] {

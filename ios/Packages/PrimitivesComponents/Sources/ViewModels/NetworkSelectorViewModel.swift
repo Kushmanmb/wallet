@@ -31,7 +31,7 @@ public struct NetworkSelectorViewModel: SelectableSheetViewable {
         self.title = title
         search = ListSearch(
             filter: filter(chain:query:),
-            emptyContent: EmptyContentTypeViewModel(type: .search(type: EmptyContentType.SearchType.networks)),
+            emptyContent: EmptyContentTypeViewModel(type: EmptyContentType(.searchNetworks)),
         )
     }
 
