@@ -455,6 +455,7 @@ mod tests {
             | GemListRow::Link { title, .. }
             | GemListRow::Text { title, .. }
             | GemListRow::Amount { title, .. }
+            | GemListRow::Rate { title, .. }
             | GemListRow::Quote { title, .. }
             | GemListRow::Ranked { title, .. }
             | GemListRow::AllTime { title, .. }

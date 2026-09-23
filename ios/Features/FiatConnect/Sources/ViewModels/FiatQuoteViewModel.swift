@@ -32,11 +32,6 @@ struct FiatQuoteViewModel {
     var amountText: String {
         row.cryptoAmount.text(locale: locale)
     }
-
-    var rateText: String {
-        guard let rate = row.rate else { return "" }
-        return rate.text(formattedValue: rate.value.text(locale: locale))
-    }
 }
 
 extension FiatQuoteViewModel: Identifiable {

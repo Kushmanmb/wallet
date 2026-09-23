@@ -56,6 +56,7 @@ import uniffi.gemstone.GemFiatQuoteRequest
 import uniffi.gemstone.GemFiatQuoteServiceInterface
 import uniffi.gemstone.GemFiatQuotesResult
 import uniffi.gemstone.GemFiatViewState
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemSelectAssetType
 import uniffi.gemstone.GemServiceException
 import javax.inject.Inject
@@ -143,9 +144,8 @@ class FiatViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val rateListItem: StateFlow<ListItemModel?> = selectedProvider.map { provider ->
-        provider?.let { ListItemModel(title = context.getString(R.string.buy_rate), subtitle = it.rate) }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val rateRow: StateFlow<GemListRow?> = viewState.map { it.rateRow }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val refreshEnabled = MutableStateFlow(false)
     private val ticker = combine(refreshEnabled, session) { isEnabled, quoteSession -> quoteSession.refreshesQuotes(isEnabled) }

@@ -23,26 +23,4 @@ struct FiatQuoteViewModelTests {
         #expect(FiatQuoteViewModel.mock(row: .mock(fiatAmount: 48.8)).subtitleExtra == "$48.80")
         #expect(FiatQuoteViewModel.mock(row: .mock(fiatAmount: 100)).subtitleExtra == "$100.00")
     }
-
-    @Test
-    func rateTextIsEmptyWithoutARate() {
-        #expect(FiatQuoteViewModel.mock(row: .mock(rate: nil)).rateText == "")
-    }
-
-    @Test
-    func rateTextNamesTheAssetAndFollowsTheLocale() {
-        #expect(FiatQuoteViewModel.mock(row: .mock(rate: 0.669510582)).rateText == "1 BTC ≈ $0.6695")
-        #expect(FiatQuoteViewModel.mock(row: .mock(rate: 27777.7777778)).rateText == "1 BTC ≈ $27,777.78")
-
-        #expect(FiatQuoteViewModel.mock(row: .mock(rate: 0.669510582), locale: .UK).rateText == "1 BTC ≈ US$0.6695")
-        #expect(FiatQuoteViewModel.mock(row: .mock(rate: 27777.7777778), locale: .UK).rateText == "1 BTC ≈ US$27,777.78")
-
-        #expect(FiatQuoteViewModel.mock(row: .mock(rate: 0.669510582), locale: .UA).rateText == "1 BTC ≈ 0,6695 $")
-        #expect(FiatQuoteViewModel.mock(row: .mock(rate: 27777.7777778), locale: .UA).rateText == "1 BTC ≈ 27 777,78 $")
-
-        #expect(FiatQuoteViewModel.mock(row: .mock(rate: 0.669510582), locale: .FR).rateText == "1 BTC ≈ 0,6695 $ US")
-        #expect(FiatQuoteViewModel.mock(row: .mock(rate: 27777.7777778), locale: .FR).rateText == "1 BTC ≈ 27 777,78 $ US")
-
-        #expect(FiatQuoteViewModel.mock(row: .mock(rate: 0.000000123456), locale: .FR).rateText == "1 BTC ≈ 0,0000001235 $ US")
-    }
 }

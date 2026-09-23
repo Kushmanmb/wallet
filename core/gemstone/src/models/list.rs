@@ -9,6 +9,7 @@ use crate::models::custom_types::GemBigInt;
 use crate::services::error::GemServiceError;
 use crate::services::localization::GemLocalizedText;
 use crate::services::service_status::GemLatencyStatus;
+use crate::services::swap::GemAssetRate;
 use crate::services::transactions::GemTransactionStateTone;
 use crate::services::wallet::model::GemWalletRow;
 
@@ -108,6 +109,7 @@ pub enum GemListRowTitle {
     MinimumReceive,
     EstimatedTime,
     MarketPrice,
+    Rate,
     EntryPrice,
     LiquidationPrice,
     Margin,
@@ -220,6 +222,10 @@ pub enum GemListRow {
         title: GemListRowTitle,
         amount: GemFormattedNumber,
         info: Option<GemInfoTopic>,
+    },
+    Rate {
+        title: GemListRowTitle,
+        rate: GemAssetRate,
     },
     Quote {
         title: GemListRowTitle,

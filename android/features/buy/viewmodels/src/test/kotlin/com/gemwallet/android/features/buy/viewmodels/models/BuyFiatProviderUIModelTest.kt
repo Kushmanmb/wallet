@@ -7,9 +7,7 @@ import com.wallet.core.primitives.Currency
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
-import uniffi.gemstone.GemAssetRate
 import uniffi.gemstone.GemCurrencyStyle
-import uniffi.gemstone.formattedCurrency
 
 class BuyFiatProviderUIModelTest {
 
@@ -21,13 +19,6 @@ class BuyFiatProviderUIModelTest {
         val model = mockFiatQuoteRow(fiatAmount = 48.8).toProviderUIModel(testAsset)
 
         assertEquals(formatter.string(48.8), model.fiatFormatted)
-    }
-
-    @Test
-    fun `a rate reads as one unit of the asset and is empty without one`() {
-        val rate = GemAssetRate(baseSymbol = testAsset.symbol, value = formattedCurrency(102500.0, Currency.USD.string, GemCurrencyStyle.CURRENCY))
-        assertEquals("1 ${testAsset.symbol} ≈ ${formatter.string(102500.0)}", mockFiatQuoteRow(rate = rate).toProviderUIModel(testAsset).rate)
-        assertEquals("", mockFiatQuoteRow(rate = null).toProviderUIModel(testAsset).rate)
     }
 
     @Test

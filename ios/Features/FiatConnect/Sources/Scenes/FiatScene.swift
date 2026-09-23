@@ -102,7 +102,9 @@ extension FiatScene {
                     } else {
                         view
                     }
-                    ListItemView(model: model.rateListItem)
+                    if let rateRow = provider.rateRow {
+                        GemListRowView(row: rateRow)
+                    }
                 }
             case let .error(error):
                 ListItemErrorView(errorTitle: model.errorTitle, error: error)

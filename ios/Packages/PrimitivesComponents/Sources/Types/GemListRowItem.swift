@@ -53,6 +53,8 @@ extension GemListRow {
             .provider(ListItemModel(title: GemListRowTitle.provider.text, subtitle: name), contract: contract)
         case let .amount(title, amount, info):
             .listItem(ListItemModel(title: title.text, subtitle: amount.text(), subtitleStyle: subtitleStyle(amount.tone), infoAction: infoAction(info, onInfo: onInfo)))
+        case let .rate(title, rate):
+            .listItem(ListItemModel(title: title.text, subtitle: rate.text(formattedValue: rate.value.text())))
         case let .quote(title, value, change):
             .listItem(
                 ListItemModel(

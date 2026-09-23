@@ -72,6 +72,8 @@ internal fun GemListRow.uiModel(context: Context, infoIcon: Any? = null): GemLis
         ListItemModel(title = title.text(context), subtitle = amount.text(), subtitleStyle = amount.tone.subtitleStyle(), info = info?.infoSheet(context, infoIcon)),
     )
 
+    is GemListRow.Rate -> GemListRowUIModel.Item(ListItemModel(title = title.text(context), subtitle = rate.text(rate.value.text())))
+
     is GemListRow.Quote -> GemListRowUIModel.Item(
         ListItemModel(
             title = title.text(context),

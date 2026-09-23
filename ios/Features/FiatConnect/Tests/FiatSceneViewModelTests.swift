@@ -116,11 +116,15 @@ final class FiatSceneViewModelTests {
     }
 
     @Test
-    func testRateValue() {
+    func rateValue() {
         let model = FiatSceneViewModel.mock()
         model.session = model.session.onQuoteResults(results: .mock(quotes: [.mock(fiatAmount: 1200, cryptoAmount: 2.0)]))
 
-        #expect(model.rateValue == "1 \(model.asset.symbol) ≈ $600.00")
+        guard case let .rate(_, rate) = model.viewState.rateRow else {
+            Issue.record("a selected quote shows its rate")
+            return
+        }
+        #expect(rate.text(formattedValue: rate.value.text()) == "1 \(model.asset.symbol) ≈ $600.00")
         #expect(model.cryptoAmountValue == "≈ 2 BTC")
     }
 

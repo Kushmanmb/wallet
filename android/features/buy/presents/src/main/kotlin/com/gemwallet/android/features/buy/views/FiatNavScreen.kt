@@ -53,7 +53,7 @@ fun FiatNavScreen(cancelAction: CancelAction, onFiatTransactions: () -> Unit, vi
     val providers by viewModel.providers.collectAsStateWithLifecycle()
     val selectedProvider by viewModel.selectedProvider.collectAsStateWithLifecycle()
     val providerListItem by viewModel.providerListItem.collectAsStateWithLifecycle()
-    val rateListItem by viewModel.rateListItem.collectAsStateWithLifecycle()
+    val rateRow by viewModel.rateRow.collectAsStateWithLifecycle()
     val showFiatTypePicker by viewModel.showFiatTypePicker.collectAsStateWithLifecycle()
 
     ObserveStartedState(viewModel::setRefreshEnabled)
@@ -75,7 +75,7 @@ fun FiatNavScreen(cancelAction: CancelAction, onFiatTransactions: () -> Unit, vi
         providers = providers,
         selectedProvider = selectedProvider,
         providerListItem = providerListItem,
-        rateListItem = rateListItem,
+        rateRow = rateRow,
         cancelAction = cancelAction,
         fiatAmount = amount,
         suggestedAmounts = suggestedAmounts,

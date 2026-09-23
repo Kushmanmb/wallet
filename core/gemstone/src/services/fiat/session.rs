@@ -4,6 +4,7 @@ use super::model::{GemFiatAmountCheck, GemFiatQuoteRow};
 use super::rules;
 use crate::config::fiat_config::get_fiat_config;
 use crate::models::custom_types::GemBigUint;
+use crate::models::list::{GemListRow, GemListRowTitle};
 use crate::services::error::GemServiceError;
 use crate::services::error_text::GemErrorText;
 
@@ -67,6 +68,7 @@ pub struct GemFiatViewState {
     pub phase: GemFiatQuotePhase,
     pub quote_rows: Vec<GemFiatQuoteRow>,
     pub selected_quote_row: Option<GemFiatQuoteRow>,
+    pub rate_row: Option<GemListRow>,
     pub can_select_provider: bool,
     pub amount_check: GemFiatAmountCheck,
     pub button_action: GemFiatButtonAction,
@@ -128,12 +130,14 @@ impl GemFiatViewState {
 impl GemFiatSession {
     pub fn view_state(&self, asset_price: Option<f64>, is_url_loading: bool) -> GemFiatViewState {
         let operation = self.current();
+        let selected_quote_row = self.selected_quote_row(asset_price);
         GemFiatViewState {
             quote_type: operation.quote_type,
             amount: operation.amount.clone(),
             phase: operation.phase.clone(),
             quote_rows: self.quote_rows(asset_price),
-            selected_quote_row: self.selected_quote_row(asset_price),
+            rate_row: selected_quote_row.as_ref().and_then(|row| row.rate.clone()).map(|rate| GemListRow::Rate { title: GemListRowTitle::Rate, rate }),
+            selected_quote_row,
             can_select_provider: self.can_select_provider(),
             amount_check: self.amount_check(),
             button_action: self.button_action(),
@@ -567,6 +571,12 @@ mod tests {
         assert_eq!(state.amount, "100");
         assert_eq!(state.phase, GemFiatQuotePhase::Ready);
         assert_eq!(state.quote_rows.len(), 2);
+        assert_eq!(
+            state.rate_row,
+            state.selected_quote_row.as_ref().and_then(|row| row.rate.clone()).map(|rate| GemListRow::Rate { title: GemListRowTitle::Rate, rate }),
+            "the selected quote's rate is drawn as the shared row"
+        );
+        assert!(state.rate_row.is_some());
         assert_eq!(state.selected_quote_row.map(|row| row.provider), session.selected_quote().map(|quote| quote.provider.id));
         assert!(state.can_select_provider);
         assert_eq!(state.button_action, GemFiatButtonAction::Continue);
@@ -582,6 +592,7 @@ mod tests {
             phase,
             quote_rows: Vec::new(),
             selected_quote_row: None,
+            rate_row: None,
             can_select_provider: false,
             amount_check: GemFiatAmountCheck::Valid,
             button_action: GemFiatButtonAction::Continue,

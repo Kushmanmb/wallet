@@ -101,6 +101,7 @@ public final class FiatSceneViewModel {
             emptyTitle: emptyTitle(viewState),
             selectedQuote: selectedQuote(viewState),
             allowSelectProvider: allowSelectProvider(viewState),
+            rateRow: viewState.rateRow,
         )
     }
 
@@ -149,14 +150,6 @@ public final class FiatSceneViewModel {
 
     var providerTitle: String {
         Localized.Common.provider
-    }
-
-    var rateListItem: ListItemModel {
-        ListItemModel(title: rateTitle, subtitle: rateValue)
-    }
-
-    var rateTitle: String {
-        Localized.Buy.rate
     }
 
     var errorTitle: String {
@@ -215,10 +208,6 @@ public final class FiatSceneViewModel {
     var cryptoAmountValue: String {
         guard let selectedQuoteViewModel else { return " " }
         return selectedQuoteViewModel.row.cryptoEstimateText(formattedValue: selectedQuoteViewModel.amountText)
-    }
-
-    var rateValue: String {
-        selectedQuoteViewModel?.rateText ?? ""
     }
 
     func providerAssetImage(_ provider: Gemstone.FiatProviderName) -> AssetImage? {

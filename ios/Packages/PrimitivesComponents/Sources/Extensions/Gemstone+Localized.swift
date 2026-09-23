@@ -755,6 +755,7 @@ public extension GemListRowTitle {
         case .autoClose: Localized.Perpetual.autoClose
         case .size: Localized.Perpetual.size
         case .entryPrice: Localized.Perpetual.entryPrice
+        case .rate: Localized.Buy.rate
         case .liquidationPrice: Localized.Info.Perpetual.LiquidationPrice.title
         case .margin: Localized.Perpetual.margin
         case .position: Localized.Perpetual.position

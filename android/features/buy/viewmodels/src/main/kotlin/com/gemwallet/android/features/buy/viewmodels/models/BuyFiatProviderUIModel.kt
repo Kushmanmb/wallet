@@ -22,10 +22,6 @@ data class BuyFiatProviderUIModel(val row: GemFiatQuoteRow, override val asset: 
     val cryptoText: String by lazy { row.cryptoAmount.text() }
 
     val fiatFormatted: String by lazy { row.fiatAmount.text() }
-
-    val rate: String by lazy {
-        row.rate?.let { it.text(it.value.text()) }.orEmpty()
-    }
 }
 
 fun GemFiatQuoteRow.toProviderUIModel(asset: Asset): BuyFiatProviderUIModel = BuyFiatProviderUIModel(row = this, asset = asset)

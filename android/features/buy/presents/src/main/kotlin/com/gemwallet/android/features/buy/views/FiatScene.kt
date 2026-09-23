@@ -35,6 +35,7 @@ import com.gemwallet.android.ui.components.fields.AmountSymbolPlacement
 import com.gemwallet.android.ui.components.fields.AmountSymbolUIModel
 import com.gemwallet.android.ui.components.image.iconModel
 import com.gemwallet.android.ui.components.list_item.AssetListItem
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.list_item.ListItemSupportText
@@ -53,6 +54,7 @@ import com.gemwallet.android.ui.theme.space1
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.FiatProviderName
 import com.wallet.core.primitives.FiatQuoteType
+import uniffi.gemstone.GemListRow
 
 private val loadingIndicatorSize = 30.dp
 private val quotesMessagePadding = 20.dp
@@ -67,7 +69,7 @@ fun BuyScene(
     providers: List<BuyFiatProviderUIModel>,
     selectedProvider: BuyFiatProviderUIModel?,
     providerListItem: ListItemModel?,
-    rateListItem: ListItemModel?,
+    rateRow: GemListRow?,
     fiatAmount: String,
     suggestedAmounts: List<FiatSuggestion>,
     cancelAction: CancelAction,
@@ -176,7 +178,7 @@ fun BuyScene(
                         },
                     )
                 }
-                rateListItem?.let { ListItem(model = it, listPosition = ListPosition.Last) }
+                rateRow?.let { GemListRowView(row = it, listPosition = ListPosition.Last) }
             }
         }
     }
