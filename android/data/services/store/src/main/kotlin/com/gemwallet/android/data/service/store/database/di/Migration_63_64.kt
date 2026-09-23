@@ -5,17 +5,15 @@ import android.util.Log
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.gemwallet.android.application.PasswordStore
-import com.gemwallet.android.application.wallet.cases.WalletIdGenerator
 import com.wallet.core.primitives.Account
 import com.wallet.core.primitives.Chain
+import com.wallet.core.primitives.WalletId
 import com.wallet.core.primitives.WalletType
 import java.io.File
 
 class Migration_63_64(context: Context, private val passwordStore: PasswordStore) : Migration(63, 64) {
 
     val keysDir = context.dataDir
-
-    val walletIdGenerator = object : WalletIdGenerator {}
 
     override fun migrate(db: SupportSQLiteDatabase) {
         db.setForeignKeyConstraintsEnabled(false)
@@ -53,8 +51,8 @@ class Migration_63_64(context: Context, private val passwordStore: PasswordStore
             val oldWalletId = walletEntry.key
             val accounts = walletEntry.value
             val walletType = walletIds[oldWalletId] ?: continue
-            val account = walletIdGenerator.getPriorityAccount(accounts) ?: continue
-            val newWalletId = walletIdGenerator.generateWalletId(walletType, account.chain, account.address).id
+            val account = priorityAccount(accounts) ?: continue
+            val newWalletId = migratedWalletId(walletType, account.chain, account.address).id
             if (newWalletIds.contains(newWalletId)) {
                 walletIdsToDelete.add(oldWalletId)
                 if (walletType != WalletType.View) {
@@ -114,4 +112,22 @@ class Migration_63_64(context: Context, private val passwordStore: PasswordStore
             db.execSQL("DELETE FROM transactions WHERE walletId = ?", arrayOf(walletId))
         }
     }
+}
+
+internal fun migratedWalletId(type: WalletType, priorityChain: Chain, priorityAddress: String): WalletId {
+    require(priorityAddress.isNotEmpty()) { "Account address cannot be empty" }
+    val id = when (type) {
+        WalletType.Multicoin -> "${type.string}_$priorityAddress"
+
+        WalletType.Single,
+        WalletType.PrivateKey,
+        WalletType.View,
+        -> "${type.string}_${priorityChain.string}_$priorityAddress"
+    }
+    return WalletId(id)
+}
+
+internal fun priorityAccount(accounts: List<Account>): Account? {
+    require(accounts.isNotEmpty()) { "Accounts list cannot be empty" }
+    return accounts.firstOrNull { it.chain == Chain.Ethereum } ?: accounts.firstOrNull()
 }
