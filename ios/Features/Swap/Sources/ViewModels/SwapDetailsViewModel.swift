@@ -7,8 +7,8 @@ import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemListRow
 import struct Gemstone.GemSwapQuoteSummary
 import struct Gemstone.GemSwapRate
-import struct Gemstone.SwapperQuote
 import struct Gemstone.SwapPriceImpact
+import enum Gemstone.SwapProvider
 import struct Gemstone.SwapProviderData
 import func Gemstone.swapProviderRow
 import struct Gemstone.SwapQuote
@@ -36,7 +36,7 @@ public final class SwapDetailsViewModel {
     private let swapPriceImpact: SwapPriceImpact?
     private let minReceiveValue: BigInt
     private let etaSeconds: UInt32?
-    private let swapProviderSelectAction: ((SwapperQuote) -> Void)?
+    private let swapProviderSelectAction: ((SwapProvider) -> Void)?
 
     public init(
         state: StateViewType<[SwapProviderItem]> = .data([]),
@@ -47,7 +47,7 @@ public final class SwapDetailsViewModel {
         currency: String,
         allowSelectProvider: Bool = true,
         swapPriceImpact: SwapPriceImpact?,
-        swapProviderSelectAction: ((SwapperQuote) -> Void)? = nil,
+        swapProviderSelectAction: ((SwapProvider) -> Void)? = nil,
     ) {
         self.state = state
         self.fromAssetPrice = fromAssetPrice
@@ -147,7 +147,7 @@ extension SwapDetailsViewModel {
     }
 
     func onFinishSwapProviderSelection(item: [SwapProviderItem]) {
-        guard let quote = item.first?.swapperQuote else { return }
-        swapProviderSelectAction?(quote)
+        guard let provider = item.first?.row.provider else { return }
+        swapProviderSelectAction?(provider)
     }
 }

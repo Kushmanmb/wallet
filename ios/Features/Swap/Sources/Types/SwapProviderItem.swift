@@ -3,7 +3,6 @@
 import Components
 import Foundation
 import struct Gemstone.GemSwapProviderRow
-import struct Gemstone.SwapperQuote
 import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
@@ -11,11 +10,9 @@ import Style
 
 public struct SwapProviderItem: Sendable {
     public let row: GemSwapProviderRow
-    public let swapperQuote: SwapperQuote?
 
-    public init(row: GemSwapProviderRow, swapperQuote: SwapperQuote? = nil) {
+    public init(row: GemSwapProviderRow) {
         self.row = row
-        self.swapperQuote = swapperQuote
     }
 }
 
@@ -58,7 +55,7 @@ extension SwapProviderItem: SimpleListItemViewable {
 
 extension SwapProviderItem: Identifiable {
     public var id: String {
-        [row.provider.toPrimitives().rawValue, row.title, row.amount.value.description].joined(separator: "_")
+        row.provider.toPrimitives().rawValue
     }
 }
 

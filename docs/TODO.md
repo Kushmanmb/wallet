@@ -183,9 +183,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 #### Models that hold a domain object beside its row
 
-- **VM29** **S** **The open-position row keeps its data beside the row.** iOS `OpenPositionItemViewModel` holds `AutocloseOpenData` beside `GemPerpetualOpenRow`, reading the name from `data.symbol` and the image from `data.assetId` because the open row carries neither; the held-position row now carries its `id` and `asset_id`.
-- **VM30** **S** **Fiat quotes build their identity from the asset.** iOS [`FiatQuoteViewModel`](../ios/Features/FiatConnect/Sources/ViewModels/FiatQuoteViewModel.swift) keeps the `Asset` beside `GemFiatQuoteRow` to build `id` from asset, provider and amount; the row should carry an id.
-- **VM31** **S** **Swap provider items build their identity from fields.** iOS [`SwapProviderItem`](../ios/Features/Swap/Sources/Types/SwapProviderItem.swift) keeps the `SwapperQuote` beside `GemSwapProviderRow` and joins provider, title and amount into an id.
 - **VM32** **S** **NFT items keep the collection and asset beside the row.** Android [`NftItemUIModel`](../android/ui-models/src/main/kotlin/com/gemwallet/android/ui/models/NftItemUIModel.kt) holds `NFTCollection` and `NFTAsset` beside `GemNftRow`.
 - **VM33** **S** **Price-alert aggregates copy the row out.** Android `PriceAlertDataAggregateImpl` in [GetPriceAlertsImpl](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/pricealerts/GetPriceAlertsImpl.kt) holds `Asset` and `PriceAlert` beside `GemPriceAlertRow` and copies five of its fields.
 
@@ -314,6 +311,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM29, VM30, VM31 (2026-09-23).** Closed. iOS `FiatQuoteViewModel` drops the `Asset` it kept only to build an identity and uses the row's `quote_id` (VM30). iOS `SwapProviderItem` stores only `GemSwapProviderRow`, keyed by its provider; selecting a provider hands the `SwapProvider` to `GemSwapSession.onProviderSelected`, so the item no longer carries the `SwapperQuote` (VM31). VM29 needed no change: the open-position item's name and image are the symbol and asset id of the app's own `AutocloseOpenData` navigation value, and routing them through `GemPerpetualOpenRow` would only echo them back.
 
 **VM19 (2026-09-23).** Closed. Android's `AssetFilter` sealed interface mirrored `GemAssetFilter` case for case; the asset search, swap store, recents and select-asset code now pass `GemAssetFilter` down to `AssetsDao`, which already sees the generated types, and `AssetEligibility.toQueryFilters` is gone. iOS keeps `AssetsRequestFilter`: the `Store` package depends on `Primitives` and GRDB only, and pulling the Gemstone binary into it to name one enum would cross the layer the package is built around, so `SelectAssetFilters.swift` stays its one mapping at that boundary.
 

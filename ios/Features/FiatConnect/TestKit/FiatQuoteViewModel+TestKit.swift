@@ -12,6 +12,6 @@ extension FiatQuoteViewModel {
         row: GemFiatQuoteRow = .mock(),
         locale: Locale = .US,
     ) -> FiatQuoteViewModel {
-        FiatQuoteViewModel(asset: .mock(), row: row, locale: locale)
+        FiatQuoteViewModel(row: row, locale: locale)
     }
 }

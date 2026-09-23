@@ -154,7 +154,7 @@ final class FiatSceneViewModelTests {
         #expect(model.amountError == nil)
         #expect(model.actionButtonState(model.viewState) == .normal)
 
-        model.onSelectQuotes([FiatQuoteViewModel(asset: model.asset, row: .mock(provider: .transak))])
+        model.onSelectQuotes([FiatQuoteViewModel(row: .mock(provider: .transak))])
 
         #expect(model.selectedQuote(model.viewState)?.quoteId == unaffordable.id)
         #expect(model.amountError?.localizedDescription == Localized.Transfer.insufficientBalance("**\(model.asset.name) (\(model.asset.symbol))**"))
@@ -352,7 +352,7 @@ final class FiatSceneViewModelTests {
         model.onAssetDataChange(.mock(), .mock(balance: .mock(available: BigInt(500_000_000))))
         #expect(model.loadTrigger == trigger)
 
-        model.onSelectQuotes([FiatQuoteViewModel(asset: model.asset, row: .mock(provider: .transak))])
+        model.onSelectQuotes([FiatQuoteViewModel(row: .mock(provider: .transak))])
         #expect(model.loadTrigger == trigger)
     }
 

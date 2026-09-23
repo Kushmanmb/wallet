@@ -204,7 +204,6 @@ public final class FiatSceneViewModel {
         return FiatProvidersViewModel(state: quotesState(viewState).map { items in
             .plain(items.map {
                 FiatQuoteViewModel(
-                    asset: asset,
                     row: $0,
                     isSelected: $0.provider == selected?.provider,
                     locale: locale,
@@ -306,7 +305,7 @@ extension FiatSceneViewModel {
 
     private var selectedQuoteViewModel: FiatQuoteViewModel? {
         guard let quote = selectedQuote(viewState) else { return nil }
-        return FiatQuoteViewModel(asset: asset, row: quote, locale: locale)
+        return FiatQuoteViewModel(row: quote, locale: locale)
     }
 
     private func applyAmount(_ text: String, isImmediate: Bool) {

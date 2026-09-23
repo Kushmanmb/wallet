@@ -138,7 +138,7 @@ struct SwapSceneViewModelTests {
         model.session = model.session.failedTransfer(.TransactionError("nonce"))
         #expect(model.session.error() != nil)
 
-        model.onFinishSwapProviderSelection(.mock())
+        model.onFinishSwapProviderSelection(SwapperQuote.mock().data.provider.id)
         #expect(model.session.error() == nil)
 
         model.session = try #require(model.session.startTransfer())
@@ -284,7 +284,7 @@ struct SwapSceneViewModelTests {
         )
         let model = SwapSceneViewModel.mock(service: service)
 
-        model.onFinishSwapProviderSelection(.mock(toValue: 249_000_000_000, provider: .thorchain))
+        model.onFinishSwapProviderSelection(.thorchain)
         await model.load()
 
         #expect(model.selectedSwapQuote?.data.provider.id == .thorchain)
@@ -304,7 +304,7 @@ struct SwapSceneViewModelTests {
 
         #expect(model.selectedSwapQuote?.data.provider.id == .uniswapV3)
 
-        model.onFinishSwapProviderSelection(.mock(toValue: 250_000_000_000, provider: .thorchain))
+        model.onFinishSwapProviderSelection(.thorchain)
 
         #expect(model.selectedSwapQuote?.data.provider.id == .thorchain)
     }
@@ -351,7 +351,7 @@ struct SwapSceneViewModelTests {
         let service = GemSwapQuoteServiceMock(quotes: [.mock(toValue: 260_000_000_000, provider: .uniswapV3)])
         let model = SwapSceneViewModel.mock(service: service)
 
-        model.onFinishSwapProviderSelection(.mock(toValue: 249_000_000_000, provider: .thorchain))
+        model.onFinishSwapProviderSelection(.thorchain)
         await model.load()
 
         #expect(model.selectedSwapQuote?.data.provider.id == .uniswapV3)
@@ -367,7 +367,7 @@ struct SwapSceneViewModelTests {
         )
         let model = SwapSceneViewModel.mock(service: service)
 
-        model.onFinishSwapProviderSelection(.mock(toValue: 249_000_000_000, provider: .thorchain))
+        model.onFinishSwapProviderSelection(.thorchain)
         model.toAssetQuery.value = .mock(asset: .mockSolana())
         model.onChangeToAsset(old: .mock(asset: .mockEthereumUSDT()), new: .mock(asset: .mockSolana()))
         await model.load()

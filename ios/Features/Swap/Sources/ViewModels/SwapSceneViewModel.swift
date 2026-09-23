@@ -19,6 +19,7 @@ import struct Gemstone.GemSwapViewState
 import enum Gemstone.SwapperError
 import struct Gemstone.SwapperQuote
 import func Gemstone.swapperQuoteSummary
+import enum Gemstone.SwapProvider
 import struct Gemstone.SwapQuote
 import GemstonePrimitives
 import InfoSheet
@@ -138,20 +139,19 @@ public final class SwapSceneViewModel {
             allowSelectProvider: viewState.allowsProviderSelection,
             swapPriceImpact: fromAssetPrice.swapValue(selectedQuote.fromValue)
                 .priceImpact(receive: toAssetPrice.swapValue(selectedQuote.toValue)),
-            swapProviderSelectAction: { [weak self] quote in
-                self?.onFinishSwapProviderSelection(quote)
+            swapProviderSelectAction: { [weak self] provider in
+                self?.onFinishSwapProviderSelection(provider)
             },
         )
     }
 
     private func providerItems(toAssetPrice: AssetPriceValue) -> [SwapProviderItem] {
-        let quotes = session.quotes?.quotes ?? []
         let rows = session.providerRows(
             receiveAsset: toAssetPrice.asset.toGem(),
             receivePrice: toAssetPrice.price?.price,
             currency: service.currency.toGem(),
         )
-        return zip(rows, quotes).map { SwapProviderItem(row: $0, swapperQuote: $1) }
+        return rows.map(SwapProviderItem.init(row:))
     }
 
     var showsSlippageIndicator: Bool {
@@ -336,8 +336,8 @@ extension SwapSceneViewModel {
         isPresentingInfoSheet = .swapDetails
     }
 
-    func onFinishSwapProviderSelection(_ quote: SwapperQuote) {
-        session = session.onProviderSelected(provider: quote.data.provider.id)
+    func onFinishSwapProviderSelection(_ provider: SwapProvider) {
+        session = session.onProviderSelected(provider: provider)
     }
 
     func onSelectSlippage(_ slippage: GemSlippageSelection) {

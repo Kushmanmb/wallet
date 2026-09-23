@@ -13,16 +13,13 @@ struct FiatQuoteViewModel {
     let row: GemFiatQuoteRow
     let isSelected: Bool
 
-    private let asset: Asset
     private let locale: Locale
 
     init(
-        asset: Asset,
         row: GemFiatQuoteRow,
         isSelected: Bool = false,
         locale: Locale = .current,
     ) {
-        self.asset = asset
         self.row = row
         self.isSelected = isSelected
         self.locale = locale
@@ -44,7 +41,7 @@ struct FiatQuoteViewModel {
 
 extension FiatQuoteViewModel: Identifiable {
     var id: String {
-        "\(asset.id.identifier)\(row.provider.toPrimitives().rawValue)\(row.cryptoAmount.value)"
+        row.quoteId
     }
 }
 
