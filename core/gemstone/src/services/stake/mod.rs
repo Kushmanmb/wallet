@@ -205,7 +205,10 @@ impl GemStakeService {
     pub async fn sync_earn_wallet(&self, wallet_id: WalletId, asset_id: AssetId, address: String) -> Result<(), GemServiceError> {
         let apr = self.store.get_apr(asset_id.clone(), StakeProviderType::Earn).await?.unwrap_or_default();
         let providers = rules::earn_validators(self.gateway.get_earn_providers(asset_id.clone()), apr);
-        self.store.save_validators(providers).await?;
+        let changed = rules::changed_validators(providers, &self.store.get_validators(asset_id.clone(), StakeProviderType::Earn).await?);
+        if !changed.is_empty() {
+            self.store.save_validators(changed).await?;
+        }
         let positions = self.gateway.get_earn_positions(address, asset_id.clone()).await?;
         let existing_ids = self.store.get_delegation_ids(wallet_id.clone(), asset_id, StakeProviderType::Earn).await?;
         let delete_ids = rules::stale_delegation_ids(existing_ids, &positions);
@@ -220,8 +223,12 @@ impl GemStakeService {
     async fn save_validators(&self, chain: Chain, validators: Vec<DelegationValidator>) -> Result<(), GemServiceError> {
         if !validators.is_empty() {
             let asset_id = AssetId::from_chain(chain);
-            let stale_ids = rules::stale_validator_ids(self.store.get_validators(asset_id.clone(), StakeProviderType::Stake).await?, &validators);
-            self.store.save_validators(validators.clone()).await?;
+            let stored = self.store.get_validators(asset_id.clone(), StakeProviderType::Stake).await?;
+            let changed = rules::changed_validators(validators.clone(), &stored);
+            let stale_ids = rules::stale_validator_ids(stored, &validators);
+            if !changed.is_empty() {
+                self.store.save_validators(changed).await?;
+            }
             if !stale_ids.is_empty() {
                 self.store.deactivate_validators(asset_id, stale_ids).await?;
             }

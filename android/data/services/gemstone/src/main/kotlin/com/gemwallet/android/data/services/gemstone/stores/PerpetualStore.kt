@@ -42,6 +42,8 @@ class GemstonePerpetualStore(
     private val transactionRunner: StoreTransactionRunner,
 ) : GemPerpetualStore {
 
+    override suspend fun getPerpetuals(names: List<String>): List<uniffi.gemstone.Perpetual> = perpetualDao.getPerpetualsByNames(names).map { it.toDTO().toGem() }
+
     override suspend fun savePerpetuals(data: List<uniffi.gemstone.PerpetualData>) = perpetualDao.upsert(data.map { it.perpetual.toPrimitives().toDB() })
 
     override suspend fun setPinned(perpetualIds: List<String>, pinned: Boolean) = perpetualDao.setPinned(perpetualIds, pinned)

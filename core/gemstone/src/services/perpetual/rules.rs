@@ -6,7 +6,7 @@ use primitives::PriceChangeCalculator;
 use primitives::chart::{ChartCandleStick, ChartCandleUpdate};
 use primitives::currency::Currency;
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
-use primitives::perpetual::{PerpetualBalance, PerpetualData};
+use primitives::perpetual::{PerpetualBalance, PerpetualData, PerpetualMarketData};
 use primitives::{
     Asset, AssetBasic, AssetId, AssetPrice, AssetProperties, AssetScore, AssetType, Chain, ChartPeriod, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, WalletType,
 };
@@ -29,7 +29,7 @@ use crate::services::transfer::GemTransferData;
 use num_bigint::BigUint;
 use primitives::{PerpetualConfirmData, PerpetualModifyConfirmData, PerpetualModifyPositionType, PerpetualReduceData, PerpetualType};
 use std::cmp::Ordering;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use crate::models::asset::wallet_default_assets;
 use crate::services::balance::{GemBalanceUpdate, GemBalanceUpdateType};
@@ -870,6 +870,25 @@ fn button_tone(button: &GemPerpetualButton) -> GemValueTone {
         GemPerpetualButton::Short | GemPerpetualButton::Close | GemPerpetualButton::Reduce => GemValueTone::Negative,
         GemPerpetualButton::Modify | GemPerpetualButton::Increase => GemValueTone::Neutral,
     }
+}
+
+pub fn changed_perpetuals(data: Vec<PerpetualData>, stored: &[Perpetual]) -> Vec<PerpetualData> {
+    data.into_iter().filter(|data| !stored.contains(&data.perpetual)).collect()
+}
+
+pub fn market_changed(market: &PerpetualMarketData, stored: &[Perpetual]) -> bool {
+    !stored.iter().any(|perpetual| {
+        perpetual.name == market.coin
+            && perpetual.price == market.price
+            && perpetual.price_percent_change_24h == market.price_percent_change_24h
+            && perpetual.open_interest == market.open_interest
+            && perpetual.volume_24h == market.volume_24h
+            && perpetual.funding == market.funding
+    })
+}
+
+pub fn changed_perpetual_prices(prices: HashMap<String, f64>, stored: &[Perpetual]) -> HashMap<String, f64> {
+    prices.into_iter().filter(|(name, price)| !stored.iter().any(|perpetual| perpetual.name == *name && perpetual.price == *price)).collect()
 }
 
 #[cfg(test)]

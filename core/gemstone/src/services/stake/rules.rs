@@ -607,6 +607,10 @@ pub fn with_resource(input: &GemStakeAmountInput, resource: Resource) -> GemStak
     }
 }
 
+pub fn changed_validators(validators: Vec<DelegationValidator>, stored: &[DelegationValidator]) -> Vec<DelegationValidator> {
+    validators.into_iter().filter(|validator| !stored.contains(validator)).collect()
+}
+
 pub fn validator_names(validators: Vec<DelegationValidator>) -> HashMap<String, String> {
     validators.into_iter().filter(|validator| !validator.name.is_empty()).map(|validator| (validator.id, validator.name)).collect()
 }

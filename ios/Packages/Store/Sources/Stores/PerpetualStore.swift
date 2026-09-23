@@ -11,6 +11,15 @@ public struct PerpetualStore: Sendable {
         self.db = db.dbQueue
     }
 
+    public func getPerpetuals(names: [String]) throws -> [Perpetual] {
+        try db.read { db in
+            try PerpetualRecord
+                .filter(names.contains(PerpetualRecord.Columns.name))
+                .fetchAll(db)
+                .map { $0.mapToPerpetual() }
+        }
+    }
+
     public func upsertPerpetuals(_ perpetuals: [Perpetual]) throws {
         try db.write { db in
             for perpetual in perpetuals {

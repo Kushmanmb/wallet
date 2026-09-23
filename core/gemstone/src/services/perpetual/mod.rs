@@ -158,7 +158,12 @@ impl GemPerpetualService {
 
     pub async fn save_markets(&self, data: Vec<PerpetualData>) -> Result<(), GemServiceError> {
         self.assets.save_assets(rules::perpetual_asset_basics(&data)).await?;
-        self.store.save_perpetuals(data).await
+        let stored = self.store.get_perpetuals(data.iter().map(|data| data.perpetual.name.clone()).collect()).await?;
+        let changed = rules::changed_perpetuals(data, &stored);
+        if changed.is_empty() {
+            return Ok(());
+        }
+        self.store.save_perpetuals(changed).await
     }
 
     pub async fn get_portfolio(&self, chain: Chain, address: String) -> Result<PerpetualPortfolio, GemServiceError> {
@@ -189,7 +194,10 @@ impl GemPerpetualService {
             }
             HyperliquidSocketMessage::Candle { candle } => Ok(GemPerpetualSocketUpdate::Candle { candle }),
             HyperliquidSocketMessage::MarketData { market } => {
-                self.store.update_market(market).await?;
+                let stored = self.store.get_perpetuals(vec![market.coin.clone()]).await?;
+                if rules::market_changed(&market, &stored) {
+                    self.store.update_market(market).await?;
+                }
                 Ok(GemPerpetualSocketUpdate::Applied)
             }
             HyperliquidSocketMessage::MarketPrices { prices } => {
@@ -255,7 +263,11 @@ impl GemPerpetualService {
         if !rules::prices_outdated(self.preferences.get_perpetual_prices_updated_at()?, now, PRICES_UPDATE_INTERVAL_SECONDS) {
             return Ok(());
         }
-        self.store.update_prices(prices).await?;
+        let stored = self.store.get_perpetuals(prices.keys().cloned().collect()).await?;
+        let changed = rules::changed_perpetual_prices(prices, &stored);
+        if !changed.is_empty() {
+            self.store.update_prices(changed).await?;
+        }
         self.preferences.set_perpetual_prices_updated_at(Some(now))
     }
 }
@@ -294,6 +306,57 @@ mod tests {
         assert_eq!(writes.len(), 1, "a second message inside the interval is dropped, not written again");
         assert_eq!(writes[0].get("BTC"), Some(&104_633.0));
         assert!(testkit.preferences.get_perpetual_prices_updated_at().unwrap().is_some());
+    }
+
+    #[test]
+    fn test_an_unchanged_market_tick_writes_nothing() {
+        let testkit = PerpetualTestkit::new();
+        let tick = include_str!("../../../../crates/gem_hypercore/testdata/ws_active_asset_ctx.json");
+
+        message(&testkit, tick);
+        let written = testkit.store.markets.lock().unwrap()[0].clone();
+        *testkit.store.stored.lock().unwrap() = vec![primitives::perpetual::Perpetual {
+            name: written.coin.clone(),
+            price: written.price,
+            price_percent_change_24h: written.price_percent_change_24h,
+            open_interest: written.open_interest,
+            volume_24h: written.volume_24h,
+            funding: written.funding,
+            ..primitives::perpetual::Perpetual::mock()
+        }];
+        message(&testkit, tick);
+
+        assert_eq!(testkit.store.markets.lock().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn test_a_price_tick_writes_only_the_prices_that_moved() {
+        let testkit = PerpetualTestkit::new();
+        *testkit.store.stored.lock().unwrap() = vec![primitives::perpetual::Perpetual {
+            name: "BTC".to_string(),
+            price: 104_633.0,
+            ..primitives::perpetual::Perpetual::mock()
+        }];
+
+        message(&testkit, ALL_MIDS);
+
+        let writes = testkit.store.price_writes.lock().unwrap();
+        assert_eq!(writes[0].keys().collect::<Vec<_>>(), vec!["ETH"]);
+    }
+
+    #[test]
+    fn test_an_unchanged_market_list_writes_no_perpetuals() {
+        let testkit = PerpetualTestkit::new();
+        let data = primitives::perpetual::PerpetualData {
+            perpetual: primitives::perpetual::Perpetual::mock(),
+            asset: primitives::Asset::from_chain(Chain::HyperCore),
+            metadata: primitives::perpetual::PerpetualMetadata { is_pinned: false },
+        };
+        *testkit.store.stored.lock().unwrap() = vec![data.perpetual.clone()];
+
+        block_on(testkit.service.save_markets(vec![data])).unwrap();
+
+        assert!(testkit.store.perpetual_writes.lock().unwrap().is_empty());
     }
 
     #[test]

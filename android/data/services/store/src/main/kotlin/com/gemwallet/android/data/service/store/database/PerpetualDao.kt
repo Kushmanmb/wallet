@@ -62,6 +62,9 @@ interface PerpetualDao {
     )
     fun searchWithPriority(query: String, limit: Int): Flow<List<DbPerpetualData>>
 
+    @Query("SELECT * FROM perpetuals WHERE name IN (:names)")
+    suspend fun getPerpetualsByNames(names: List<String>): List<DbPerpetual>
+
     @Transaction
     @Query("SELECT * FROM perpetuals WHERE id = :perpetualId")
     fun getPerpetual(perpetualId: String): Flow<DbPerpetualData?>

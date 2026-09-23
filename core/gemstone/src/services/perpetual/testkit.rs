@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 use num_bigint::BigInt;
 use primitives::known_assets::HYPERCORE_PERPETUAL_USDC;
-use primitives::perpetual::PerpetualData;
+use primitives::perpetual::{Perpetual, PerpetualData};
 use primitives::{Asset, AssetBasic, AssetId, AssetProperties, AssetScore, AutocloseValidation, PerpetualDirection, PerpetualMarginType, PerpetualMarketData, PerpetualPosition, PerpetualProvider, TpslType, Wallet, WalletId};
 
 use super::details::GemPerpetualDetailsService;
@@ -47,10 +47,14 @@ pub struct MemoryPerpetualStore {
     pub cleared_collateral: Mutex<Vec<Vec<AssetId>>>,
     pub perpetual_writes: Mutex<Vec<Vec<PerpetualData>>>,
     pub pin_writes: Mutex<Vec<(Vec<String>, bool)>>,
+    pub stored: Mutex<Vec<Perpetual>>,
 }
 
 #[async_trait]
 impl GemPerpetualStore for MemoryPerpetualStore {
+    async fn get_perpetuals(&self, names: Vec<String>) -> Result<Vec<Perpetual>, GemServiceError> {
+        Ok(self.stored.lock().unwrap().iter().filter(|perpetual| names.contains(&perpetual.name)).cloned().collect())
+    }
     async fn save_perpetuals(&self, perpetuals: Vec<PerpetualData>) -> Result<(), GemServiceError> {
         self.perpetual_writes.lock().unwrap().push(perpetuals);
         Ok(())

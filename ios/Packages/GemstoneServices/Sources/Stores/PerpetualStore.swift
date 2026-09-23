@@ -3,6 +3,7 @@
 import Foundation
 import typealias Gemstone.AssetId
 import protocol Gemstone.GemPerpetualStore
+import struct Gemstone.Perpetual
 import struct Gemstone.PerpetualData
 import struct Gemstone.PerpetualMarketData
 import struct Gemstone.PerpetualPosition
@@ -16,6 +17,10 @@ public final class GemstonePerpetualStore: GemPerpetualStore, @unchecked Sendabl
 
     public init(store: PerpetualStore) {
         self.store = store
+    }
+
+    public func getPerpetuals(names: [String]) async throws -> [Gemstone.Perpetual] {
+        try store.getPerpetuals(names: names).map { $0.toGem() }
     }
 
     public func savePerpetuals(data: [Gemstone.PerpetualData]) async throws {
