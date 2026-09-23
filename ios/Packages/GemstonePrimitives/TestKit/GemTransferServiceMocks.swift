@@ -48,8 +48,10 @@ public final class GemAmountServiceMock: GemAmountServiceProtocol, @unchecked Se
         try await builder.transferData(asset: asset, transfer: transfer, value: value, useMaxAmount: useMaxAmount)
     }
 
-    public func perpetualAutoclose(price _: Double, direction _: Gemstone.PerpetualDirection, leverage _: UInt8) -> GemPerpetualAutoclose {
-        GemPerpetualAutoclose(takeProfit: nil, stopLoss: nil)
+    public var perpetualAutocloseValue: @Sendable (UInt8) -> GemPerpetualAutoclose = { _ in GemPerpetualAutoclose(takeProfit: nil, stopLoss: nil) }
+
+    public func perpetualAutoclose(price _: Double, direction _: Gemstone.PerpetualDirection, leverage: UInt8) -> GemPerpetualAutoclose {
+        perpetualAutocloseValue(leverage)
     }
 
     public func perpetualAutocloseRow(takeProfit: Double?, stopLoss: Double?) -> GemListRow {

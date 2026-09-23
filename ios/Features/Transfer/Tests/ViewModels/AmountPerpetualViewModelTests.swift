@@ -1,5 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import class Gemstone.GemAmountService
+import struct Gemstone.GemPerpetualAutoclose
 import GemstonePrimitivesTestKit
 import Primitives
 import PrimitivesTestKit
@@ -65,18 +67,34 @@ struct AmountPerpetualViewModelTests {
         #expect(model.autocloseListItem?.subtitle == "-")
         #expect(model.autocloseListItem?.subtitleExtra == nil)
 
-        model.takeProfit = "100"
+        model.updateAutoclose(takeProfit: "100", stopLoss: nil)
         #expect(model.autocloseListItem?.subtitle == "TP: $100.00")
 
-        model.stopLoss = "50"
+        model.updateAutoclose(takeProfit: "100", stopLoss: "50")
         #expect(model.autocloseListItem?.subtitleExtra == "SL: $50.00")
+    }
+
+    @Test
+    func aLeverageChangeRefreshesUntouchedDefaultsAndKeepsEditedPrices() throws {
+        let service = GemAmountServiceMock(builder: GemAmountService.mock())
+        service.perpetualAutocloseValue = { leverage in GemPerpetualAutoclose(takeProfit: 100 + Double(leverage), stopLoss: 50 - Double(leverage)) }
+        let model = AmountPerpetualViewModel.mock(action: .open(data: .mock(leverage: 10)), service: service)
+        let selection = try #require(model.leverageSelection)
+        let other = try #require(selection.options.first { $0 != selection.selected })
+
+        model.updateAutoclose(takeProfit: "150", stopLoss: model.stopLoss)
+        let untouchedStopLoss = model.stopLoss
+        selection.selected = other
+        model.onChangeLeverage()
+
+        #expect(model.takeProfit == "150")
+        #expect(model.stopLoss != untouchedStopLoss)
     }
 
     @Test
     func makeAutocloseData() {
         let model = AmountPerpetualViewModel.mock(action: .open(data: .mock(direction: .long)))
-        model.takeProfit = "100"
-        model.stopLoss = "50"
+        model.updateAutoclose(takeProfit: "100", stopLoss: "50")
 
         let data = model.makeAutocloseData(size: 1000)
 

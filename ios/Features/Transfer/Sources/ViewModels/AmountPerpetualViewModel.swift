@@ -4,8 +4,10 @@ import BigInt
 import Components
 import Formatters
 import Foundation
+import func Gemstone.autocloseDraft
 import protocol Gemstone.GemAmountServiceProtocol
 import enum Gemstone.GemAmountType
+import struct Gemstone.GemAutocloseDraft
 import enum Gemstone.GemPerpetualPositionAction
 import struct Gemstone.GemPerpetualTransferData
 import struct Gemstone.GemTransferData
@@ -25,10 +27,7 @@ public final class AmountPerpetualViewModel: AmountDataProvidable {
     let currencyFormatter: CurrencyFormatter
     private let service: any GemAmountServiceProtocol
 
-    var takeProfit: String?
-    var stopLoss: String?
-
-    private var isAutocloseEdited = false
+    private var draft: GemAutocloseDraft
 
     init(asset: Asset, action: GemPerpetualPositionAction, service: any GemAmountServiceProtocol) {
         self.asset = asset
@@ -36,7 +35,16 @@ public final class AmountPerpetualViewModel: AmountDataProvidable {
         self.service = service
         currencyFormatter = CurrencyFormatter(type: .currency, currencyCode: service.getCurrency().toPrimitives().rawValue)
         (leverageSelection, leverageTextStyle) = Self.makeLeverageSelection(action: action, service: service)
-        (takeProfit, stopLoss) = Self.makeDefaultAutoclose(action: action, leverage: leverageSelection?.selected.value ?? action.transferData().leverage, service: service)
+        let defaults = Self.makeDefaultAutoclose(action: action, leverage: leverageSelection?.selected.value ?? action.transferData().leverage, service: service)
+        draft = autocloseDraft(takeProfit: defaults.takeProfit, stopLoss: defaults.stopLoss)
+    }
+
+    var takeProfit: String? {
+        draft.takeProfit.value
+    }
+
+    var stopLoss: String? {
+        draft.stopLoss.value
     }
 
     var leverageListItem: ListItemModel? {
@@ -100,14 +108,14 @@ public final class AmountPerpetualViewModel: AmountDataProvidable {
     }
 
     func onChangeLeverage() {
-        guard !isAutocloseEdited else { return }
-        (takeProfit, stopLoss) = Self.makeDefaultAutoclose(action: action, leverage: leverage, service: service)
+        let defaults = Self.makeDefaultAutoclose(action: action, leverage: leverage, service: service)
+        draft = draft.onDefaults(takeProfit: defaults.takeProfit, stopLoss: defaults.stopLoss)
     }
 
     func updateAutoclose(takeProfit: String?, stopLoss: String?) {
-        isAutocloseEdited = true
-        self.takeProfit = takeProfit
-        self.stopLoss = stopLoss
+        draft = draft
+            .onEdited(tpslType: .takeProfit, value: takeProfit)
+            .onEdited(tpslType: .stopLoss, value: stopLoss)
     }
 
     private static func makeLeverageSelection(

@@ -318,6 +318,66 @@ pub fn autoclose_open_session(direction: PerpetualDirection, market_price: f64, 
     )
 }
 
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAutocloseDraftField {
+    pub value: Option<String>,
+    pub is_edited: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemAutocloseDraft {
+    pub take_profit: GemAutocloseDraftField,
+    pub stop_loss: GemAutocloseDraftField,
+}
+
+#[uniffi::export]
+pub fn autoclose_draft(take_profit: Option<String>, stop_loss: Option<String>) -> GemAutocloseDraft {
+    GemAutocloseDraft {
+        take_profit: GemAutocloseDraftField { value: take_profit, is_edited: false },
+        stop_loss: GemAutocloseDraftField { value: stop_loss, is_edited: false },
+    }
+}
+
+#[uniffi::export]
+impl GemAutocloseDraft {
+    pub fn on_defaults(&self, take_profit: Option<String>, stop_loss: Option<String>) -> GemAutocloseDraft {
+        GemAutocloseDraft {
+            take_profit: self.take_profit.on_default(take_profit),
+            stop_loss: self.stop_loss.on_default(stop_loss),
+        }
+    }
+
+    pub fn on_edited(&self, tpsl_type: TpslType, value: Option<String>) -> GemAutocloseDraft {
+        match tpsl_type {
+            TpslType::TakeProfit => GemAutocloseDraft {
+                take_profit: self.take_profit.on_edited(value),
+                ..self.clone()
+            },
+            TpslType::StopLoss => GemAutocloseDraft {
+                stop_loss: self.stop_loss.on_edited(value),
+                ..self.clone()
+            },
+        }
+    }
+}
+
+impl GemAutocloseDraftField {
+    fn on_default(&self, value: Option<String>) -> GemAutocloseDraftField {
+        match self.is_edited {
+            true => self.clone(),
+            false => GemAutocloseDraftField { value, is_edited: false },
+        }
+    }
+
+    fn on_edited(&self, value: Option<String>) -> GemAutocloseDraftField {
+        let value = value.filter(|text| !text.trim().is_empty());
+        match value == self.value {
+            true => self.clone(),
+            false => GemAutocloseDraftField { value, is_edited: true },
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -364,6 +424,19 @@ mod tests {
         );
         assert!(android.view_state().confirm_enabled, "a pending change is enough before a submit");
         assert_eq!(android.on_submit_attempt().view_state().confirm_enabled, android.modify.can_build());
+    }
+
+    #[test]
+    fn test_a_leverage_change_refreshes_untouched_defaults_and_keeps_edited_prices() {
+        let draft = autoclose_draft(Some("110".to_string()), Some("90".to_string()));
+
+        let edited = draft.on_edited(TpslType::TakeProfit, Some("120".to_string()));
+        let refreshed = edited.on_defaults(Some("130".to_string()), Some("80".to_string()));
+
+        assert_eq!(refreshed.take_profit.value.as_deref(), Some("120"), "an edited price survives a leverage change");
+        assert_eq!(refreshed.stop_loss.value.as_deref(), Some("80"), "an untouched default follows the leverage");
+        assert_eq!(draft.on_edited(TpslType::StopLoss, Some("90".to_string())), draft, "confirming the same price is not an edit");
+        assert_eq!(draft.on_edited(TpslType::StopLoss, Some(" ".to_string())).stop_loss, GemAutocloseDraftField { value: None, is_edited: true });
     }
 
     #[test]

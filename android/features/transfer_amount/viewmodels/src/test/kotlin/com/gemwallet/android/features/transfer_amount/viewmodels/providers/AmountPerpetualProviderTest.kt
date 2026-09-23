@@ -56,6 +56,18 @@ class AmountPerpetualProviderTest {
     }
 
     @Test
+    fun `a leverage change refreshes untouched defaults and keeps an edited price`() = runTest {
+        val provider = makeProvider(autoclose = { leverage -> GemPerpetualAutoclose(takeProfit = 60000.0 + leverage.toDouble(), stopLoss = 40000.0 - leverage.toDouble()) })
+        val defaultStopLoss = provider.stopLoss.value
+
+        provider.setTakeProfit("99999")
+        provider.setLeverage(10u)
+
+        assertEquals("99999", provider.takeProfit.value)
+        assertTrue(provider.stopLoss.value != null && provider.stopLoss.value != defaultStopLoss)
+    }
+
+    @Test
     fun `showsAutoclose is true for Open and false for Reduce`() {
         assertTrue(makeProvider().showsAutoclose)
         val reduce = makeProvider(positionAction = GemPerpetualPositionAction.Reduce(mockGemPerpetualTransferData(direction = PerpetualDirection.Long), mockPerpetualPosition().toGem()))
@@ -66,6 +78,7 @@ class AmountPerpetualProviderTest {
         direction: PerpetualDirection = PerpetualDirection.Long,
         positionAction: GemPerpetualPositionAction = GemPerpetualPositionAction.Open(mockGemPerpetualTransferData(direction = direction)),
         scope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob()),
+        autoclose: (UByte) -> GemPerpetualAutoclose = { GemPerpetualAutoclose(takeProfit = null, stopLoss = null) },
     ): AmountPerpetualProvider {
         val getAssetInfo = mockk<GetAssetInfo>(relaxed = true) {
             every { this@mockk.invoke(any()) } returns flowOf(null)
@@ -75,8 +88,11 @@ class AmountPerpetualProviderTest {
                 GemAmountType.Perpetual(position = GemAmountPerpetualPosition.Open, direction = direction.toGem(), price = 0.0, leverage = 1u, sizeDecimals = 0)
             }
             every { perpetualLeverage(any()) } returns 5u
-            every { perpetualLeverageOptions(any()) } returns listOf(GemPickerOption(value = 5u, label = GemLocalizedText.Text("5x")))
-            every { perpetualAutoclose(any(), any(), any()) } returns GemPerpetualAutoclose(takeProfit = null, stopLoss = null)
+            every { perpetualLeverageOptions(any()) } returns listOf(
+                GemPickerOption(value = 5u, label = GemLocalizedText.Text("5x")),
+                GemPickerOption(value = 10u, label = GemLocalizedText.Text("10x")),
+            )
+            every { perpetualAutoclose(any(), any(), any()) } answers { autoclose(thirdArg<Byte>().toUByte()) }
             every { perpetualAutocloseRow(any(), any()) } returns GemListRow.Lines(GemListRowTitle.AUTO_CLOSE, emptyList(), null)
         }
         val perpetualAggregate = mockPerpetualData()

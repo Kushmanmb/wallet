@@ -29,33 +29,33 @@ This map routes work to current owners. It groups existing ids rather than creat
 |---|---|---|
 | Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | — |
 | Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | — |
-| Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | VM5, AUD23, AUD25, AUD26, AUD27, AUD28 |
-| Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | AUD20, AUD43, AUD44 |
-| Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | VM5, AUD36, AUD48 |
+| Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | VM5, AUD27 |
+| Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | — |
+| Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | VM5, AUD48 |
 | Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | — |
 | Asset chart/market/alerts sections | `GemChartService`, `GemChartSession`, shared list renderer | AUD14 |
-| Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | AUD44; retain existing native QR/share adapters |
+| Receive, QR display, address details | `GemReceiveService`, `GemAddressDetailsService`, `GemCopy`, payment encoding | Retain existing native QR/share adapters |
 | Scanner, payment links, deep links and pushes | Existing payment decoder, `GemPaymentService`, push/navigation preparation | — |
 | Recipient/address/name input | `GemRecipientSession`, `GemNameService`, existing input component | Keep debounce/observation native |
 | Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | — |
-| Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | VM3, VM4, AUD5, AUD42, AUD45 |
+| Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | VM3, VM4, AUD5, AUD45 |
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | VM3, AUD50 |
-| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD29, AUD33, AUD34, AUD47 |
-| Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | AUD53 |
-| Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | AUD38, AUD40 |
-| Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | AUD15, AUD41 |
-| Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | AUD46, AUD52 |
-| Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | AUD49, AUD51; preserve exact atomic values |
+| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD29, AUD34, AUD47 |
+| Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | — |
+| Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | AUD38 |
+| Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | — |
+| Perpetual open/modify/autoclose forms | Existing amount flow and `GemAutocloseSession` | — |
+| Stake, validators, delegation and claim | `GemStakeService`, validator/delegation records, generated transfer input | AUD49; preserve exact atomic values |
 | Earn list, provider and deposit amount | Existing stake/earn owner and amount extras | AUD49; preserve the existing feature gate |
-| NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | AUD22, AUD48 |
+| NFT root/collection/unverified, detail/report/avatar | `GemNftService`, `GemCollectibleService`, shared rich rows and avatar flow | AUD48 |
 | Price-alert list/target/auto-alert controls | `GemPriceAlertService`, alert session and existing notification port | — |
 | Rewards/create/use/redeem referral | `GemRewardsService`, rewards state, shared load and list records | — |
 | Contacts/list/editor/address picker | `GemContactService`, `GemContactEditorService`, contact session/name component | — |
-| Networks/node list/add/check | `GemChainSettingsService`, node sessions, shared rows | AUD20, AUD31 |
-| Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | AUD13, AUD30; retain native locale/theme application |
-| Security/lock/biometry/recovery | `GemSecurityService`, existing keystore/auth ports and settings sections | AUD37; retain platform-only privacy lock |
-| Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | AUD32 |
-| WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | AUD17; retain Android-only one-click auth |
+| Networks/node list/add/check | `GemChainSettingsService`, node sessions, shared rows | — |
+| Settings/preferences/currency/language/appearance | `GemSettingsService`, `GemCurrencyService`, preference observation | AUD13; retain native locale/theme application |
+| Security/lock/biometry/recovery | `GemSecurityService`, existing keystore/auth ports and settings sections | Retain platform-only privacy lock |
+| Push settings, in-app notifications, support chat | Notification services, `GemSupportService`, permission and lifecycle ports | — |
+| WalletConnect list/detail/proposal/request/signing | `GemWalletConnectService`, `GemSignMessageService`, Reown adapters | Retain Android-only one-click auth |
 | About, app update, developer/service status | Existing settings/update/developer services and native store adapters | —; platform delivery channels remain distinct |
 | Widgets and shared display components | `GemWidgetService`, `GemFormattedNumber`, shared rich/plain renderers | retain native widget scheduling |
 
@@ -105,7 +105,6 @@ Reviewed at `46be74e99ddf9f1983f5ec079981e5b67832b0aa` on 2026-09-19. These are 
 - **AUD38** **M** **Consolidation — reuse the mode fetched for a perpetual refresh.** [`sync_positions`](../core/gemstone/src/services/perpetual/mod.rs) requests account mode alongside positions, while [HyperCore positions](../core/crates/gem_hypercore/src/provider/perpetual.rs) fetches the same `userAbstraction` again internally. Normal refresh and connection preparation therefore request the same address's mode twice and can use different snapshots for subscriptions and balance interpretation. Return the provider's mode with its positions result and reuse it in the service; retain the existing failure/fallback behavior explicitly. Verify one mode request per successful operation and consistent unified-mode output.
 - **AUD39** **M** **Consolidation — share provider snapshots within one balance refresh.** [`chain_balances`](../core/gemstone/src/services/balance/mod.rs) launches separate component calls that repeat the same RPC: [Tron](../core/crates/gem_tron/src/provider/balances.rs) fetches the account for coin and staking; [Cosmos](../core/crates/gem_cosmos/src/provider/balances.rs) fetches bank balances for coin and tokens; [Stellar](../core/crates/gem_stellar/src/provider/balances.rs) fetches the account for coin and tokens. Extend the existing gateway/provider operation to fetch each shared snapshot once and derive the requested components, keeping independent calls concurrent. Test RPC counts, exact values and partial failures for these providers; preserve the balance publication lane's ordering contract. No global response cache.
 - **AUD45** **M** **Consolidation — give confirm-transfer one view state instead of four stored records.** [ConfirmTransferSceneViewModel](../ios/Features/Transfer/Sources/ViewModels/ConfirmTransferSceneViewModel.swift) stores `button`, `feeRow`, `feeRates` and `rowContents` and re-derives all four at two sites, with a `didSet` re-deriving `feeRates` on its own. That is the second writable view state [A screen's state is one phase enum](ARCHITECTURE.md#a-screens-state-is-one-phase-enum-never-a-bag-of-flags) and [One `view_state` call returning one record](ARCHITECTURE.md#a-screen-whose-state-changes-is-a-session) forbid: four fields that can disagree after a partial refresh. Return one record from the existing confirm screen owner and derive it once per change, following the fiat session's `view_state`. Mirror the same single record on Android. Test that a fee-rate change and a refresh each produce one consistent state with no intermediate combination.
-- **AUD46** **S** **Consolidation — move the autoclose default-vs-edited rule to its session.** [AmountPerpetualViewModel](../ios/Features/Transfer/Sources/ViewModels/AmountPerpetualViewModel.swift) keeps `takeProfit`, `stopLoss` and a private `isAutocloseEdited` flag, and uses that flag to decide whether a leverage change may overwrite the user's prices. [`GemAutocloseSession`](../core/gemstone/src/services/perpetual/autoclose.rs) already models autoclose fields, validation and submission for the edit screen. Let the open-position screen carry the same session so the rule lives once; keep the defaults projection where it is if the session would otherwise need a service. Test that a leverage change refreshes untouched defaults and preserves edited prices on both apps.
 - **AUD47** **M** **Keep the swap contract when a chain indexes the transaction.** Transaction details already opens address details from `GemListRow::Provider` when `Transaction.contract` is set, and a local pending contract swap stores `SwapQuoteData.to`. EVM [`make_swap_transaction`](../core/crates/gem_evm/src/rpc/parsers/mod.rs) and Solana [`get_swap_provider`](../core/crates/gem_solana/src/provider/transaction_mapper.rs) write that router or program. [TON](../core/crates/gem_ton/src/provider/transactions_mapper.rs), [TRON `map_swap`](../core/crates/gem_tron/src/provider/transactions_mapper.rs), [Sui](../core/crates/gem_sui/src/provider/transactions_mapper.rs), and [Aptos](../core/crates/gem_aptos/src/provider/transactions_mapper.rs) pass `None`, so the indexed copy replaces the local contract and the provider row stops opening. Set the contract in those parsers when the swap called a contract or program. Leave it empty for a deposit-address transfer such as NEAR Intents or Thorchain `new_transfer`. Extend the existing parser fixtures. No app change: the row already reads `transaction.contract`.
 - **AUD48** **S** **Open address details from the asset and NFT contract rows.** The asset contract row ([`contract_row`](../core/gemstone/src/services/chart/rules.rs)) and the collectible contract row ([`info_rows`](../core/gemstone/src/services/nft/rules.rs)) are `GemListRow::Identifier` with copy and an explorer link, and both apps open the explorer. The value is the token or collection contract on that chain. Tap opens the same address-details sheet the swap provider uses, and copy and the explorer stay on that sheet. The identifier already carries the address in `copy.value`; do not add a row type. A wallet's own address keeps its expand and explorer behavior.
 - **AUD49** **S** **Open address details from a delegation's validator or earn provider.** [`provider_row`](../core/gemstone/src/services/stake/rules.rs) is an in-app explorer URL when a link exists, otherwise plain text. Confirm already opens address details for the validator being staked to. The delegation and earn position screens should do the same for `DelegationValidator.id` on `DelegationValidator.chain`, and skip the system unstaking id. Keep the explorer on the address-details sheet.
@@ -122,12 +121,12 @@ Surveyed on 2026-09-21. Each item names what was counted and where; confirm the 
 
 Checked against [the three row families](ARCHITECTURE.md#three-row-families-and-which-one-a-list-belongs-to) on 2026-09-22. A plain title-and-value list that is still assembled in the apps is an open item below. A list that already returns `GemListRow` or `GemListSection`, and a rich row the architecture keeps (asset, wallet, transaction, validator, delegation, balance, contact, NFT grid, support chat, fiat transaction, swap provider, swap rate, node, currency selection, price alert, notification, collectible attribute, simulation payload with a custom label, secret-phrase grid, developer tools), is not open work. The ledger entry records that pass.
 
-The plain lists still outside the shared row are AUD51, AUD52 and AUD53. AUD47–AUD50 are taps on rows that already exist, not new row types.
+AUD51, AUD52 and AUD53 moved the last plain lists onto the shared row. AUD47–AUD50 are taps on rows that already exist, not new row types.
 
 
 ### Sessions
 
-Checked against [a screen whose state changes is a session](ARCHITECTURE.md#a-screen-whose-state-changes-is-a-session) on 2026-09-22. The sessions that remain are AUD45 (confirm's four stored records) and AUD46 (the autoclose edited-versus-default flag). No other screen holds several shared domain events without a session or a closed exception: one text field, one selection, navigation, a settings mirror, a clock, or a form whose rules already cross stays app-side. Service ownership is settled: no service holds another domain's store except the three cycle cases named in [ARCHITECTURE § 2](ARCHITECTURE.md#2-the-service-orchestrates-it-owns-its-store-and-depends-on-services). N4 still covers a parent that only passes a second service to its child.
+Checked against [a screen whose state changes is a session](ARCHITECTURE.md#a-screen-whose-state-changes-is-a-session) on 2026-09-22. The session that remains is AUD45 (confirm's four stored records); AUD46 has landed. No other screen holds several shared domain events without a session or a closed exception: one text field, one selection, navigation, a settings mirror, a clock, or a form whose rules already cross stays app-side. Service ownership is settled: no service holds another domain's store except the three cycle cases named in [ARCHITECTURE § 2](ARCHITECTURE.md#2-the-service-orchestrates-it-owns-its-store-and-depends-on-services). N4 still covers a parent that only passes a second service to its child.
 
 
 ### Generated surface
@@ -286,6 +285,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**AUD46 (2026-09-23).** Closed. Core `GemAutocloseDraft` holds the open-position form's take profit and stop loss, each with its edited flag: `on_defaults` replaces only the prices the user has not touched, and `on_edited` records an edit only when the value changes and treats empty input as no price. iOS `AmountPerpetualViewModel` and Android `AmountPerpetualProvider` keep one draft in place of their own values and the `isAutocloseEdited` flag or trigger, and the defaults projection stays in `GemAmountService`. Core, iOS and Android tests cover a leverage change that refreshes untouched defaults and keeps an edited price.
 
 **AUD53 (2026-09-23).** Closed. `GemListRow` gains a `Rate { title, rate: GemAssetRate }` variant and `GemListRowTitle::Rate`, and `GemFiatViewState.rate_row` carries the selected quote's rate as that row. Both shared row renderers draw it (title plus `1 SYMBOL ≈ value`), so iOS `rateListItem`/`rateTitle`/`rateValue` with `FiatQuoteViewModel.rateText`, and Android `rateListItem` with `BuyFiatProviderUIModel.rate`, are gone along with their app-side tests; the Core fiat test asserts the row.
 

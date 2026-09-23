@@ -11,7 +11,8 @@ import PrimitivesTestKit
 public extension AmountPerpetualViewModel {
     static func mock(
         action: GemPerpetualPositionAction = .open(data: .mock()),
+        service: GemAmountServiceMock = GemAmountServiceMock(builder: GemAmountService.mock()),
     ) -> AmountPerpetualViewModel {
-        AmountPerpetualViewModel(asset: .mock(), action: action, service: GemAmountServiceMock(builder: GemAmountService.mock()))
+        AmountPerpetualViewModel(asset: .mock(), action: action, service: service)
     }
 }

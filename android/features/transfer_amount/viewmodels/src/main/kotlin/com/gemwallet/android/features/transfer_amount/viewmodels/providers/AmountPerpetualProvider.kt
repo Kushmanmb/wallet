@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import uniffi.gemstone.GemAmountServiceInterface
 import uniffi.gemstone.GemAmountType
 import uniffi.gemstone.GemAssetBalance
@@ -51,6 +52,7 @@ import uniffi.gemstone.GemPerpetualAutoclose
 import uniffi.gemstone.GemPerpetualPositionAction
 import uniffi.gemstone.GemTransferData
 import uniffi.gemstone.PerpetualProvider
+import uniffi.gemstone.autocloseDraft
 import uniffi.gemstone.autocloseOpenSession
 import uniffi.gemstone.perpetualOpenRow
 
@@ -73,19 +75,14 @@ class AmountPerpetualProvider(
 
     val direction: PerpetualDirection = params.direction
 
-    private val takeProfitInput = MutableStateFlow<String?>(null)
-    private val stopLossInput = MutableStateFlow<String?>(null)
-    private val takeProfitEdited = MutableStateFlow(false)
-    private val stopLossEdited = MutableStateFlow(false)
+    private val draft = MutableStateFlow(autocloseDraft(null, null))
 
     fun setTakeProfit(value: String?) {
-        takeProfitEdited.value = true
-        takeProfitInput.value = value?.takeIf { it.isNotEmpty() }
+        draft.update { it.onEdited(TpslType.TakeProfit.toGem(), value) }
     }
 
     fun setStopLoss(value: String?) {
-        stopLossEdited.value = true
-        stopLossInput.value = value?.takeIf { it.isNotEmpty() }
+        draft.update { it.onEdited(TpslType.StopLoss.toGem(), value) }
     }
 
     val showsAutoclose: Boolean = params.positionAction.showsAutoclose()
@@ -136,8 +133,17 @@ class AmountPerpetualProvider(
         MutableStateFlow(null)
     }
 
-    val takeProfit: StateFlow<String?> = autocloseTrigger(takeProfitInput, takeProfitEdited) { it.takeProfit }
-    val stopLoss: StateFlow<String?> = autocloseTrigger(stopLossInput, stopLossEdited) { it.stopLoss }
+    init {
+        scope.launch {
+            combine(defaultAutoclose.filterNotNull(), perpetual.filterNotNull()) { autoclose, market ->
+                val format = { price: Double -> PerpetualFormatter.formatInputPrice(market.perpetual.provider, price, market.asset.decimals) }
+                autoclose.takeProfit?.let(format) to autoclose.stopLoss?.let(format)
+            }.collect { (takeProfit, stopLoss) -> draft.update { it.onDefaults(takeProfit, stopLoss) } }
+        }
+    }
+
+    val takeProfit: StateFlow<String?> = draft.map { it.takeProfit.value }.stateIn(scope, SharingStarted.Eagerly, null)
+    val stopLoss: StateFlow<String?> = draft.map { it.stopLoss.value }.stateIn(scope, SharingStarted.Eagerly, null)
 
     private val usdFormatter = CurrencyFormatter(currency = Currency.USD)
 
@@ -185,17 +191,6 @@ class AmountPerpetualProvider(
     private fun autocloseListItem(takeProfit: String?, stopLoss: String?): ListItemModel? = service
         .perpetualAutocloseRow(takeProfit?.parseInputNumberOrNull()?.toDouble(), stopLoss?.parseInputNumberOrNull()?.toDouble())
         .listItemModel(context)
-
-    private fun autocloseTrigger(input: StateFlow<String?>, edited: StateFlow<Boolean>, default: (GemPerpetualAutoclose) -> Double?): StateFlow<String?> {
-        if (!isOpenAction) return input
-        return combine(input, edited, defaultAutoclose.filterNotNull(), perpetual.filterNotNull()) { value, isEdited, autoclose, market ->
-            if (isEdited) {
-                value
-            } else {
-                default(autoclose)?.let { PerpetualFormatter.formatInputPrice(market.perpetual.provider, it, market.asset.decimals) } ?: value
-            }
-        }.stateIn(scope, SharingStarted.Eagerly, null)
-    }
 
     override val amountType: StateFlow<GemAmountType?> = combine(
         perpetual.filterNotNull(),
