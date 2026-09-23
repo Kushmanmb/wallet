@@ -2,8 +2,10 @@ use config_keys::{ConfigKey, RateLimitKey, RateLimitWindow};
 use gem_tracing::info_with_fields;
 use primitives::rewards::RewardStatus;
 use primitives::{NaiveDateTimeExt, now};
+use services::ConfigCacher;
 use std::error::Error;
-use storage::{AbusePatterns, ConfigCacher, Database, DatabaseClient, DatabaseError, RewardsRepository, RiskSignalsRepository};
+use std::sync::Arc;
+use storage::{AbusePatterns, Database, DatabaseClient, DatabaseError, RewardsRepository, RiskSignalsRepository};
 use streamer::{RewardsNotificationPayload, StreamProducer, StreamProducerQueue};
 
 pub(crate) struct AbuseDetectionConfig {
@@ -66,13 +68,12 @@ impl PatternPenaltyBreakdown {
 
 pub struct RewardsAbuseChecker {
     database: Database,
-    config: ConfigCacher,
+    config: Arc<ConfigCacher>,
     stream_producer: StreamProducer,
 }
 
 impl RewardsAbuseChecker {
-    pub fn new(database: Database, stream_producer: StreamProducer) -> Self {
-        let config = ConfigCacher::new(database.clone());
+    pub fn new(database: Database, config: Arc<ConfigCacher>, stream_producer: StreamProducer) -> Self {
         Self { database, config, stream_producer }
     }
 

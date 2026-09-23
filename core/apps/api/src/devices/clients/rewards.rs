@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::sync::Arc;
 
 use cacher::{CacherClient, GLOBAL_RATE_LIMIT_SCOPE, RateLimiter};
 use config_keys::{ConfigKey, RateLimitKey, RateLimitWindow};
@@ -6,9 +7,10 @@ use primitives::rewards::{RewardRedemptionOption, RewardStatus};
 use primitives::{Localize, NaiveDateTimeExt, Platform, ReferralLeaderboard, RewardEvent, Rewards, WalletId, now};
 use pusher::PusherClient;
 use rewards::{ReferralError, ReferralValidationError, RewardsError, RiskScoreConfig, RiskScoringInput, UsernameError};
-use services::rewards::{IpSecurityClient, RiskAssessment, assess_referral_risk, create_username, referral_use_facts, rewards_by_wallet_id, use_or_verify_referral, username_rules};
+use services::ConfigCacher;
+use services::rewards::{IpSecurityClient, ReferralVerificationConfig, RiskAssessment, assess_referral_risk, create_username, referral_use_facts, rewards_by_wallet_id, use_or_verify_referral, username_rules};
 use storage::models::DeviceRow;
-use storage::{ConfigCacher, Database, DatabaseError, NewWalletRow, RewardsRedemptionsRepository, RewardsRepository, WalletSource, WalletType, WalletsRepository};
+use storage::{Database, DatabaseError, NewWalletRow, RewardsRedemptionsRepository, RewardsRepository, WalletSource, WalletType, WalletsRepository};
 use streamer::{RewardsNotificationPayload, StreamProducer, StreamProducerQueue};
 
 enum ReferralCodeUse {
@@ -37,7 +39,7 @@ async fn referrer_multiplier(config: &ConfigCacher, status: &RewardStatus) -> Re
 
 pub struct RewardsClient {
     db: Database,
-    config: ConfigCacher,
+    config: Arc<ConfigCacher>,
     stream_producer: StreamProducer,
     ip_security_client: IpSecurityClient,
     rate_limiter: RateLimiter,
@@ -45,8 +47,7 @@ pub struct RewardsClient {
 }
 
 impl RewardsClient {
-    pub fn new(database: Database, cacher: CacherClient, stream_producer: StreamProducer, ip_security_client: IpSecurityClient, pusher: PusherClient) -> Self {
-        let config = ConfigCacher::new(database.clone());
+    pub fn new(database: Database, config: Arc<ConfigCacher>, cacher: CacherClient, stream_producer: StreamProducer, ip_security_client: IpSecurityClient, pusher: PusherClient) -> Self {
         Self {
             db: database,
             config,
@@ -147,6 +148,7 @@ impl RewardsClient {
         let device_created_at = device.created_at;
         let code = code.to_string();
         let referral_locale = locale.to_string();
+        let verification_config = ReferralVerificationConfig::from_config(&self.config).await?;
         let referral = self
             .db
             .run(move |client| -> Result<_, Box<dyn Error + Send + Sync>> {
@@ -161,7 +163,7 @@ impl RewardsClient {
                     if !referrer_info.status.is_verified() && referrer_info.status != RewardStatus::Attribution {
                         return Err(RewardsError::Referral(ReferralError::from(ReferralValidationError::RewardsNotEnabled(referrer_username.clone())).localize(&referral_locale)).into());
                     }
-                    let events = use_or_verify_referral(client, &referrer_username, referrer_info.status, wallet_id, device_id, None)?;
+                    let events = use_or_verify_referral(client, &referrer_username, referrer_info.status, wallet_id, device_id, None, verification_config)?;
                     return Ok(ReferralCodeUse::Applied(events));
                 }
 
@@ -169,7 +171,7 @@ impl RewardsClient {
                     facts
                         .validate_use(&referrer_username, referrer_info.wallet_id, device_created_at, None, now())
                         .map_err(|error| RewardsError::Referral(ReferralError::from(error).localize(&referral_locale)))?;
-                    let events = use_or_verify_referral(client, &referrer_username, referrer_info.status, wallet_id, device_id, None)?;
+                    let events = use_or_verify_referral(client, &referrer_username, referrer_info.status, wallet_id, device_id, None, verification_config)?;
                     return Ok(ReferralCodeUse::Applied(events));
                 }
                 Ok(ReferralCodeUse::NeedsScoring(referrer_username))
@@ -185,7 +187,7 @@ impl RewardsClient {
             ReferralProcessResult::Success { risk_signal_id, referrer_status } => {
                 let events = self
                     .db
-                    .run(move |client| use_or_verify_referral(client, &referrer_username, referrer_status, wallet_id, device_id, Some(risk_signal_id)))
+                    .run(move |client| use_or_verify_referral(client, &referrer_username, referrer_status, wallet_id, device_id, Some(risk_signal_id), verification_config))
                     .await?;
                 Ok(events)
             }

@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::error::Error;
+use std::sync::Arc;
 
 use cacher::{CacheError, CacheKey, CacherClient};
 use chrono::NaiveDateTime;
@@ -9,17 +10,20 @@ use prices::{AssetPriceFull, AssetPriceMapping, PriceAssetsProvider, PriceProvid
 use primitives::currency::Currency;
 use primitives::{AssetId, AssetMarketPrice, AssetPriceInfo, AssetPrices, ChartTimeframe, FiatRate, FiatRateProvider, PriceData, PriceId, PriceProvider};
 use storage::models::{FiatRateRow, NewPriceRow, PriceAssetRow};
-use storage::{AssetFilter, AssetsRepository, ChartsRepository, ConfigRepository, Database, DatabaseError, FiatRepository, PricesRepository};
+use storage::{AssetFilter, AssetsRepository, ChartsRepository, Database, DatabaseError, FiatRepository, PricesRepository};
+
+use crate::ConfigCacher;
 
 #[derive(Clone)]
 pub struct PriceClient {
     database: Database,
+    config: Arc<ConfigCacher>,
     cacher_client: CacherClient,
 }
 
 impl PriceClient {
-    pub fn new(database: Database, cacher_client: CacherClient) -> Self {
-        Self { database, cacher_client }
+    pub fn new(database: Database, config: Arc<ConfigCacher>, cacher_client: CacherClient) -> Self {
+        Self { database, config, cacher_client }
     }
 
     pub async fn set_fiat_rates(&self, provider: FiatRateProvider, rates: Vec<FiatRate>) -> Result<usize, Box<dyn Error + Send + Sync>> {
@@ -125,7 +129,7 @@ impl PriceClient {
     pub async fn add_prices_for_asset_id(&self, providers: &PriceProviders, asset_id: &AssetId) -> Result<usize, Box<dyn Error + Send + Sync>> {
         let asset_id_str = asset_id.to_string();
         let mut count = 0;
-        let cooldown = self.database.run(|client| client.get_config_duration(ConfigKey::PriceMissingCooldown)).await?.as_secs();
+        let cooldown = self.config.get_duration(ConfigKey::PriceMissingCooldown).await?.as_secs();
         for provider in providers.values() {
             let kind = provider.provider();
             let key = CacheKey::PriceMissingMapping(kind.id(), &asset_id_str, cooldown);

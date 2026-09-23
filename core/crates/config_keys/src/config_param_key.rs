@@ -117,7 +117,7 @@ impl RateLimit {
     }
 }
 
-#[derive(Debug, AsRefStr)]
+#[derive(Debug, Clone, Copy, AsRefStr)]
 #[strum(serialize_all = "camelCase")]
 pub enum ConfigParamKey {
     TransactionsRequestLimit(Chain),

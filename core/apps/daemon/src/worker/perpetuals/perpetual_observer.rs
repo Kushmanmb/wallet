@@ -8,7 +8,7 @@ use chain_traits::TransactionsRequest;
 use config_keys::ConfigParamKey;
 use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::Chain;
-use storage::ConfigCacher;
+use services::ConfigCacher;
 use streamer::steam_producer_queue::StreamProducerQueue;
 use streamer::{StreamProducer, TransactionsPayload};
 
@@ -16,12 +16,12 @@ pub struct PerpetualPositionObserver {
     chain: Chain,
     providers: Arc<ChainProviders>,
     cacher: CacherClient,
-    config: ConfigCacher,
+    config: Arc<ConfigCacher>,
     stream_producer: StreamProducer,
 }
 
 impl PerpetualPositionObserver {
-    pub fn new(chain: Chain, providers: Arc<ChainProviders>, cacher: CacherClient, config: ConfigCacher, stream_producer: StreamProducer) -> Self {
+    pub fn new(chain: Chain, providers: Arc<ChainProviders>, cacher: CacherClient, config: Arc<ConfigCacher>, stream_producer: StreamProducer) -> Self {
         Self {
             chain,
             providers,

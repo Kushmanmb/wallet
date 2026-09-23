@@ -1,9 +1,9 @@
 use crate::model::WorkerService;
 use config_keys::{ConfigKey, ConfigParamKey};
 use primitives::{Chain, FiatProviderName, FiatRateProvider, ListProviderName, PlatformStore, PriceProvider};
+use services::ConfigCacher;
 use std::error::Error;
 use std::time::Duration;
-use storage::ConfigCacher;
 use strum::AsRefStr;
 
 #[derive(Clone, Debug)]

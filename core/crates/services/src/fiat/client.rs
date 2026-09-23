@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::error::Error;
+use std::sync::Arc;
 
 use cacher::{CacheKey, CacherClient, RateLimiter};
 use config_keys::{ConfigKey, RateLimitKey};
@@ -14,14 +15,15 @@ use primitives::{
     RequestError,
 };
 use storage::models::{FiatAssetRow, NewFiatTransactionRow, WalletAddressRow};
-use storage::{AssetFilter, AssetsRepository, ConfigCacher, Database, DatabaseError, FiatRepository, WalletsRepository};
+use storage::{AssetFilter, AssetsRepository, Database, DatabaseError, FiatRepository, WalletsRepository};
 use streamer::{FiatWebhookPayload, QueueName, StreamProducer};
 
 use super::fiat_cacher_client::{CachedFiatQuote, FiatCacherClient};
+use crate::ConfigCacher;
 
 pub struct FiatClient {
     database: Database,
-    config: ConfigCacher,
+    config: Arc<ConfigCacher>,
     cacher: CacherClient,
     fiat_cacher: FiatCacherClient,
     rate_limiter: RateLimiter,
@@ -31,10 +33,10 @@ pub struct FiatClient {
 }
 
 impl FiatClient {
-    pub fn new(database: Database, cacher: CacherClient, providers: Vec<Box<dyn FiatProvider + Send + Sync>>, ip_check_client: IPCheckClient, stream_producer: StreamProducer) -> Self {
+    pub fn new(database: Database, config: Arc<ConfigCacher>, cacher: CacherClient, providers: Vec<Box<dyn FiatProvider + Send + Sync>>, ip_check_client: IPCheckClient, stream_producer: StreamProducer) -> Self {
         Self {
-            config: ConfigCacher::new(database.clone()),
             database,
+            config,
             fiat_cacher: FiatCacherClient::new(cacher.clone()),
             rate_limiter: RateLimiter::new(cacher.clone()),
             cacher,

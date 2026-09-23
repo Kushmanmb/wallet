@@ -1,14 +1,12 @@
 use std::collections::HashMap;
+use std::hash::Hash;
 use std::sync::RwLock;
 use std::time::{Duration, Instant};
 
 use chrono::{DateTime, NaiveDateTime};
 use config_keys::{ConfigKey, ConfigParamKey, RateLimit, RateLimitKey, RateLimitWindow};
 use serde::de::DeserializeOwned;
-use std::hash::Hash;
-
-use crate::repositories::config_repository::{ConfigRepository, config_row};
-use crate::{Database, DatabaseError};
+use storage::{ConfigRepository, Database, DatabaseError};
 
 const DEFAULT_TTL_SECONDS: u64 = 60;
 
@@ -148,7 +146,7 @@ impl ConfigCacher {
         self.database.run(move |client| client.set_config(key, &value)).await
     }
 
-    pub fn invalidate(&self, key: &ConfigKey) {
+    fn invalidate(&self, key: &ConfigKey) {
         if let Ok(mut cache) = self.cache.write() {
             cache.remove(key.as_ref());
         }
@@ -159,9 +157,9 @@ impl ConfigCacher {
         if let Some(value) = self.get_cached(&key) {
             return value;
         }
-        let lookup = key.clone();
-        let row = self.database.run(move |client| Ok::<_, DatabaseError>(config_row(client, &lookup).ok())).await.ok().flatten();
-        let value = row.map_or_else(|| param.default_value(), |row| row.value);
+        let param = *param;
+        let stored = self.database.run(move |client| Ok::<_, DatabaseError>(client.get_config_param(param).ok())).await.ok().flatten();
+        let value = stored.unwrap_or_else(|| param.default_value());
         self.set_cached(key, value.clone());
         value
     }

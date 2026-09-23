@@ -2,9 +2,10 @@ use chrono::{NaiveDateTime, Utc};
 use config_keys::ConfigKey;
 use search_index::SearchIndexClient;
 use serde::Serialize;
+use services::ConfigCacher;
 use std::error::Error;
 use std::fmt;
-use storage::{ConfigCacher, Database};
+use std::sync::Arc;
 
 #[derive(Clone, Copy)]
 pub enum SearchSyncAction {
@@ -34,16 +35,13 @@ impl fmt::Debug for SearchSyncResult {
 }
 
 pub struct SearchSyncClient {
-    config: ConfigCacher,
+    config: Arc<ConfigCacher>,
     search_index: SearchIndexClient,
 }
 
 impl SearchSyncClient {
-    pub fn new(database: Database, search_index: &SearchIndexClient) -> Self {
-        Self {
-            config: ConfigCacher::new(database),
-            search_index: search_index.clone(),
-        }
+    pub fn new(config: Arc<ConfigCacher>, search_index: &SearchIndexClient) -> Self {
+        Self { config, search_index: search_index.clone() }
     }
 
     pub async fn for_key(&self, key: ConfigKey) -> Result<IndexSync<'_>, Box<dyn Error + Send + Sync>> {

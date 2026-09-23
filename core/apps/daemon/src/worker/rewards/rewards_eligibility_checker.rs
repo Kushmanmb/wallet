@@ -1,20 +1,21 @@
 use std::error::Error;
+use std::sync::Arc;
 
 use config_keys::ConfigKey;
 use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::{NaiveDateTimeExt, RewardStatus, now};
-use storage::{ConfigCacher, Database, DatabaseError, RewardsEligibilityConfig, RewardsFilter, RewardsRepository};
+use services::ConfigCacher;
+use storage::{Database, DatabaseError, RewardsEligibilityConfig, RewardsFilter, RewardsRepository};
 use streamer::{RewardsNotificationPayload, StreamProducer, StreamProducerQueue};
 
 pub struct RewardsEligibilityChecker {
     database: Database,
-    config: ConfigCacher,
+    config: Arc<ConfigCacher>,
     stream_producer: StreamProducer,
 }
 
 impl RewardsEligibilityChecker {
-    pub fn new(database: Database, stream_producer: StreamProducer) -> Self {
-        let config = ConfigCacher::new(database.clone());
+    pub fn new(database: Database, config: Arc<ConfigCacher>, stream_producer: StreamProducer) -> Self {
         Self { database, config, stream_producer }
     }
 

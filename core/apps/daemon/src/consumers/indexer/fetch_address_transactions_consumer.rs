@@ -1,21 +1,22 @@
 use std::error::Error;
+use std::sync::Arc;
 
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
 use chain_providers::{ChainProviders, TransactionsRequest, TransactionsResult};
 use config_keys::ConfigParamKey;
-use storage::ConfigCacher;
+use services::ConfigCacher;
 use streamer::{ChainAddressPayload, StreamProducer, StreamProducerQueue, TransactionsPayload, consumer::MessageConsumer};
 
 pub struct FetchAddressTransactionsConsumer {
     pub providers: ChainProviders,
     pub producer: StreamProducer,
     pub cacher: CacherClient,
-    pub config: ConfigCacher,
+    pub config: Arc<ConfigCacher>,
 }
 
 impl FetchAddressTransactionsConsumer {
-    pub fn new(providers: ChainProviders, producer: StreamProducer, cacher: CacherClient, config: ConfigCacher) -> Self {
+    pub fn new(providers: ChainProviders, producer: StreamProducer, cacher: CacherClient, config: Arc<ConfigCacher>) -> Self {
         Self { providers, producer, cacher, config }
     }
 }

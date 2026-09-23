@@ -1,22 +1,23 @@
 use std::error::Error;
+use std::sync::Arc;
 
 use config_keys::{ConfigKey, RateLimitKey, RateLimitWindow};
 use primitives::rewards::{RedemptionResult, Rewards};
 use primitives::{NaiveDateTimeExt, now};
 use rewards::RewardsRedemptionError;
+use services::ConfigCacher;
 use services::rewards::{redeem_points, rewards_by_wallet_id, username_rules};
-use storage::{ConfigCacher, Database, RewardsRedemptionsRepository, RewardsRepository};
+use storage::{Database, RewardsRedemptionsRepository, RewardsRepository};
 use streamer::{RewardsRedemptionPayload, StreamProducer, StreamProducerQueue};
 
 pub struct RewardsRedemptionClient {
     database: Database,
-    config: ConfigCacher,
+    config: Arc<ConfigCacher>,
     stream_producer: StreamProducer,
 }
 
 impl RewardsRedemptionClient {
-    pub fn new(database: Database, stream_producer: StreamProducer) -> Self {
-        let config = ConfigCacher::new(database.clone());
+    pub fn new(database: Database, config: Arc<ConfigCacher>, stream_producer: StreamProducer) -> Self {
         Self { database, config, stream_producer }
     }
 

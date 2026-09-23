@@ -218,6 +218,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let metrics = Arc::new(metrics::Metrics::new(&providers));
     let scan_client = ScanClient::new(
         database.clone(),
+        config_cacher.clone(),
         cacher_client.clone(),
         TransactionScanConfig {
             providers,
@@ -240,8 +241,8 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let markets_client = services.markets(cacher_client.clone());
     let webhooks_client = WebhooksClient::new(stream_producer.clone(), settings.support.webhook.key.secret.clone());
     let ip_security_client = services.ip_security().await?;
-    let rewards_client = RewardsClient::new(database.clone(), cacher_client.clone(), stream_producer.clone(), ip_security_client, pusher_client.clone());
-    let redemption_client = RewardsRedemptionClient::new(database.clone(), stream_producer.clone());
+    let rewards_client = RewardsClient::new(database.clone(), config_cacher.clone(), cacher_client.clone(), stream_producer.clone(), ip_security_client, pusher_client.clone());
+    let redemption_client = RewardsRedemptionClient::new(database.clone(), config_cacher.clone(), stream_producer.clone());
     let notifications_client = NotificationsClient::new(database.clone());
     let support_client = SupportApiClient::new(settings.support.url.clone(), settings.support.widget.ios.clone(), settings.support.widget.android.clone(), database.clone());
     let support_image_upload_config = SupportImageUploadConfig::new(&settings.support.types.images)?;

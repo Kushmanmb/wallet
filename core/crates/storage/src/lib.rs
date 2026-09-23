@@ -1,6 +1,5 @@
 use tokio::task::spawn_blocking;
 
-mod config_cacher;
 pub mod database;
 pub mod error;
 pub mod models;
@@ -9,8 +8,6 @@ pub mod schema;
 pub mod sql_types;
 #[cfg(any(test, feature = "testkit"))]
 pub mod testkit;
-
-pub use config_cacher::ConfigCacher;
 
 diesel::allow_columns_to_appear_in_same_group_by_clause!(schema::transactions_addresses::address, schema::transactions::chain,);
 

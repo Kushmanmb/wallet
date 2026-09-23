@@ -29,14 +29,14 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
 
     ctx.plan_builder(WorkerService::Alerter, &config, shutdown_rx)
         .job(WorkerJob::AlertPriceAlerts, {
-            let database = database.clone();
+            let config = config.clone();
             let price_alert_client = services.price_alerts();
             let stream_producer = stream_producer.clone();
             move |_| {
-                let database = database.clone();
+                let config = config.clone();
                 let price_alert_client = price_alert_client.clone();
                 let stream_producer = stream_producer.clone();
-                async move { PriceAlertSender::new(database, price_alert_client, stream_producer).run_observer().await }
+                async move { PriceAlertSender::new(config, price_alert_client, stream_producer).run_observer().await }
             }
         })
         .jobs(WorkerJob::AlertStakeRewards, Chain::stakeable(), |chain, _| {

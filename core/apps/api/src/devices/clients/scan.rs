@@ -14,8 +14,9 @@ use security::providers::goplus::GoPlusProvider;
 use security::transaction_scan::{ProviderCheck, ScanSubject, ScanTargets, TransactionScanInput, TransactionScanResult, evaluate_transaction_scan, plan_transaction_scan, scan_subjects, token_asset_ids, website_host};
 use security::{ScanProviderConfig, ScanProviderFactory, ScanResult, TransactionScanProviders};
 use serde_json::json;
+use services::ConfigCacher;
 use settings::Settings;
-use storage::{AssetsRepository, ConfigCacher, Database, DatabaseError, ScanAddressesRepository, ScanDetectionsRepository};
+use storage::{AssetsRepository, Database, DatabaseError, ScanAddressesRepository, ScanDetectionsRepository};
 
 use crate::metrics::Metrics;
 
@@ -44,17 +45,17 @@ impl SafeCacheKey {
 
 pub struct ScanClient {
     database: Database,
-    config_cacher: ConfigCacher,
+    config_cacher: Arc<ConfigCacher>,
     cacher: CacherClient,
     config: TransactionScanConfig,
     metrics: Arc<Metrics>,
 }
 
 impl ScanClient {
-    pub fn new(database: Database, cacher: CacherClient, config: TransactionScanConfig, metrics: Arc<Metrics>) -> Self {
+    pub fn new(database: Database, config_cacher: Arc<ConfigCacher>, cacher: CacherClient, config: TransactionScanConfig, metrics: Arc<Metrics>) -> Self {
         Self {
-            config_cacher: ConfigCacher::new(database.clone()),
             database,
+            config_cacher,
             cacher,
             config,
             metrics,

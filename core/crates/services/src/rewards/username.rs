@@ -1,9 +1,10 @@
 use config_keys::ConfigKey;
 use primitives::Rewards;
 use rewards::{RewardIdentity, UsernameRules, UsernameValidationError, validate_username, validate_username_available, validate_wallet_without_username};
-use storage::{ConfigCacher, DatabaseClient, DatabaseError, RewardIdentityRecord, RewardsRepository};
+use storage::{DatabaseClient, DatabaseError, RewardIdentityRecord, RewardsRepository};
 
 use super::summary::rewards_by_wallet_id;
+use crate::ConfigCacher;
 
 pub async fn username_rules(config: &ConfigCacher) -> Result<UsernameRules, DatabaseError> {
     Ok(UsernameRules {

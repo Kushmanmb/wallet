@@ -25,9 +25,10 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     ctx.plan_builder(WorkerService::Search, &config, shutdown_rx)
         .job(WorkerJob::UpdateAssetsIndex, {
             let database = database.clone();
+            let config = config.clone();
             let search_index_client = search_index_client.clone();
             move |_| {
-                let updater = AssetsIndexUpdater::new(database.clone(), &search_index_client, primary_price_max_age);
+                let updater = AssetsIndexUpdater::new(database.clone(), config.clone(), &search_index_client, primary_price_max_age);
                 async move { updater.update().await }
             }
         })
@@ -41,17 +42,19 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
         })
         .job(WorkerJob::UpdatePerpetualsIndex, {
             let database = database.clone();
+            let config = config.clone();
             let search_index_client = search_index_client.clone();
             move |_| {
-                let updater = PerpetualsIndexUpdater::new(database.clone(), &search_index_client);
+                let updater = PerpetualsIndexUpdater::new(database.clone(), config.clone(), &search_index_client);
                 async move { updater.update().await }
             }
         })
         .job(WorkerJob::UpdateNftsIndex, {
             let database = database.clone();
+            let config = config.clone();
             let search_index_client = search_index_client.clone();
             move |_| {
-                let updater = NftsIndexUpdater::new(database.clone(), &search_index_client);
+                let updater = NftsIndexUpdater::new(database.clone(), config.clone(), &search_index_client);
                 async move { updater.update().await }
             }
         })

@@ -1,18 +1,19 @@
+use std::sync::Arc;
+
 use config_keys::ConfigKey;
 use prices::PriceAlertRules;
+use services::ConfigCacher;
 use services::prices::PriceAlertClient;
-use storage::{ConfigCacher, Database};
 use streamer::{NotificationsPayload, StreamProducer, StreamProducerQueue};
 
 pub struct PriceAlertSender {
-    config: ConfigCacher,
+    config: Arc<ConfigCacher>,
     price_alert_client: PriceAlertClient,
     stream_producer: StreamProducer,
 }
 
 impl PriceAlertSender {
-    pub fn new(database: Database, price_alert_client: PriceAlertClient, stream_producer: StreamProducer) -> Self {
-        let config = ConfigCacher::new(database);
+    pub fn new(config: Arc<ConfigCacher>, price_alert_client: PriceAlertClient, stream_producer: StreamProducer) -> Self {
         Self { config, price_alert_client, stream_producer }
     }
 

@@ -1,8 +1,10 @@
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 
 use super::sync::{SearchSyncClient, SearchSyncResult};
 use config_keys::ConfigKey;
 use search_index::{PERPETUALS_INDEX_NAME, PerpetualDocument, SearchIndexClient, sanitize_index_primary_id};
+use services::ConfigCacher;
 use storage::models::{AssetRow, PerpetualRow};
 use storage::{AssetsRepository, Database, DatabaseError, PerpetualsRepository, TagRepository};
 
@@ -12,9 +14,9 @@ pub struct PerpetualsIndexUpdater {
 }
 
 impl PerpetualsIndexUpdater {
-    pub fn new(database: Database, search_index: &SearchIndexClient) -> Self {
+    pub fn new(database: Database, config: Arc<ConfigCacher>, search_index: &SearchIndexClient) -> Self {
         Self {
-            sync_client: SearchSyncClient::new(database.clone(), search_index),
+            sync_client: SearchSyncClient::new(config, search_index),
             database,
         }
     }

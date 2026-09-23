@@ -1,6 +1,9 @@
+use std::sync::Arc;
+
 use super::sync::{SearchSyncClient, SearchSyncResult};
 use config_keys::ConfigKey;
 use search_index::{NFTDocument, NFTS_INDEX_NAME, SearchIndexClient};
+use services::ConfigCacher;
 use storage::models::NftCollectionRow;
 use storage::{Database, NftCollectionFilter, NftRepository};
 
@@ -10,9 +13,9 @@ pub struct NftsIndexUpdater {
 }
 
 impl NftsIndexUpdater {
-    pub fn new(database: Database, search_index: &SearchIndexClient) -> Self {
+    pub fn new(database: Database, config: Arc<ConfigCacher>, search_index: &SearchIndexClient) -> Self {
         Self {
-            sync_client: SearchSyncClient::new(database.clone(), search_index),
+            sync_client: SearchSyncClient::new(config, search_index),
             database,
         }
     }

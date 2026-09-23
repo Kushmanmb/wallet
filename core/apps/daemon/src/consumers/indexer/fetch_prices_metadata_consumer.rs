@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::sync::Arc;
 
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
@@ -6,13 +7,14 @@ use config_keys::{ConfigKey, ConfigParamKey};
 use gem_tracing::info_with_fields;
 use prices::{AssetPriceMapping, PriceProviders};
 use primitives::PriceId;
-use storage::{AssetFilter, AssetUpdate, AssetsLinksRepository, AssetsRepository, ConfigCacher, Database, DatabaseError, PricesProvidersRepository, PricesRepository};
+use services::ConfigCacher;
+use storage::{AssetFilter, AssetUpdate, AssetsLinksRepository, AssetsRepository, Database, DatabaseError, PricesProvidersRepository, PricesRepository};
 use streamer::consumer::MessageConsumer;
 
 pub struct FetchPricesMetadataConsumer {
     pub database: Database,
     pub cacher: CacherClient,
-    pub config: ConfigCacher,
+    pub config: Arc<ConfigCacher>,
     pub providers: PriceProviders,
 }
 

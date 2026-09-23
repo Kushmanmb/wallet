@@ -2,8 +2,8 @@ use crate::model::WorkerService;
 use crate::shutdown::ShutdownReceiver;
 use crate::worker::plan::JobPlanBuilder;
 use crate::worker::runtime::WorkerRuntime;
+use services::ConfigCacher;
 use services::Services;
-use storage::ConfigCacher;
 
 #[derive(Clone)]
 pub struct WorkerContext {

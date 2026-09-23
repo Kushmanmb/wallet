@@ -19,11 +19,12 @@ use pusher::PusherClient;
 use rewards::{AbuseIPDBClient, EvmClientProvider, IpApiClient, IpCheckProvider, TransferRedemptionService, WalletConfig};
 use search_index::{SearchIndexClient, SearchIndexConfig};
 use settings::Settings;
-use storage::{ConfigCacher, Database, DatabaseError};
+use storage::{Database, DatabaseError};
 use streamer::{Retry, ShutdownReceiver, StreamProducer, StreamProducerConfig};
 
 use crate::assets::ListsClient;
 use crate::auth::AuthClient;
+use crate::config::ConfigCacher;
 use crate::defi::DefiClient;
 use crate::fiat::FiatClient;
 use crate::nft::NFTClient;
@@ -35,12 +36,14 @@ use crate::support::SupportClient;
 pub struct Services {
     settings: Arc<Settings>,
     database: Database,
+    config: Arc<ConfigCacher>,
 }
 
 impl Services {
     pub fn new(settings: Arc<Settings>) -> Result<Self, DatabaseError> {
         let database = Database::new(&settings.postgres.url, settings.postgres.pool)?;
-        Ok(Self { settings, database })
+        let config = Arc::new(ConfigCacher::new(database.clone()));
+        Ok(Self { settings, database, config })
     }
 
     pub fn settings(&self) -> Arc<Settings> {
@@ -51,8 +54,8 @@ impl Services {
         self.database.clone()
     }
 
-    pub fn config(&self) -> ConfigCacher {
-        ConfigCacher::new(self.database())
+    pub fn config(&self) -> Arc<ConfigCacher> {
+        self.config.clone()
     }
 
     pub async fn cacher(&self) -> Result<CacherClient, Box<dyn Error + Send + Sync>> {
@@ -88,7 +91,7 @@ impl Services {
     pub async fn fiat(&self, stream_producer: StreamProducer) -> Result<FiatClient, Box<dyn Error + Send + Sync>> {
         let cacher = self.cacher().await?;
         let providers = self.fiat_providers(fiat_access_token_cacher(cacher.clone()));
-        Ok(FiatClient::new(self.database(), cacher, providers, FiatProviderFactory::new_ip_check_client(&self.settings), stream_producer))
+        Ok(FiatClient::new(self.database(), self.config(), cacher, providers, FiatProviderFactory::new_ip_check_client(&self.settings), stream_producer))
     }
 
     pub async fn fiat_access_token_cacher(&self) -> Result<Arc<dyn AccessTokenCacher>, Box<dyn Error + Send + Sync>> {
@@ -109,7 +112,7 @@ impl Services {
     }
 
     pub fn prices(&self, cacher: CacherClient) -> PriceClient {
-        PriceClient::new(self.database(), cacher)
+        PriceClient::new(self.database(), self.config(), cacher)
     }
 
     pub fn charts(&self, config: PriceConfig) -> ChartClient {

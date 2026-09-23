@@ -1,9 +1,11 @@
 use std::collections::HashMap;
+use std::sync::Arc;
 use std::time::Duration;
 
 use super::sync::{SearchSyncClient, SearchSyncResult};
 use config_keys::ConfigKey;
 use search_index::{ASSETS_INDEX_NAME, AssetDocument, SearchIndexClient, sanitize_index_primary_id};
+use services::ConfigCacher;
 use storage::models::{AssetTagRow, PriceAssetDataRow};
 use storage::{AssetsUsageRanksRepository, AssetsWithPricesFilter, Database, DatabaseError, PricesRepository, TagRepository};
 
@@ -14,9 +16,9 @@ pub struct AssetsIndexUpdater {
 }
 
 impl AssetsIndexUpdater {
-    pub fn new(database: Database, search_index: &SearchIndexClient, primary_price_max_age: Duration) -> Self {
+    pub fn new(database: Database, config: Arc<ConfigCacher>, search_index: &SearchIndexClient, primary_price_max_age: Duration) -> Self {
         Self {
-            sync_client: SearchSyncClient::new(database.clone(), search_index),
+            sync_client: SearchSyncClient::new(config, search_index),
             database,
             primary_price_max_age,
         }

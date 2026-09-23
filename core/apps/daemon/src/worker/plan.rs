@@ -2,11 +2,11 @@ use crate::model::WorkerService;
 use crate::worker::jobs::{JobLabel, JobVariant, WorkerJob};
 use config_keys::ConfigParamKey;
 use job_runner::{JobContext, JobError, JobHandle, JobPlan};
+use services::ConfigCacher;
 use std::error::Error;
 use std::fmt::Debug;
 use std::future::Future;
 use std::time::Duration;
-use storage::ConfigCacher;
 
 type PlanResult = Result<JobPlan, Box<dyn Error + Send + Sync>>;
 type AddJob = Box<dyn FnOnce(JobPlan, Duration) -> JobPlan + Send>;

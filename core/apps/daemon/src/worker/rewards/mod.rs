@@ -20,24 +20,28 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     ctx.plan_builder(WorkerService::Rewards, &config, shutdown_rx)
         .job(WorkerJob::CheckRewardsAbuse, {
             let database = database.clone();
+            let config = config.clone();
             let stream_producer = stream_producer.clone();
             move |_| {
                 let database = database.clone();
+                let config = config.clone();
                 let stream_producer = stream_producer.clone();
                 async move {
-                    let checker = RewardsAbuseChecker::new(database, stream_producer);
+                    let checker = RewardsAbuseChecker::new(database, config, stream_producer);
                     checker.check().await
                 }
             }
         })
         .job(WorkerJob::CheckRewardsEligibility, {
             let database = database.clone();
+            let config = config.clone();
             let stream_producer = stream_producer.clone();
             move |_| {
                 let database = database.clone();
+                let config = config.clone();
                 let stream_producer = stream_producer.clone();
                 async move {
-                    let checker = RewardsEligibilityChecker::new(database, stream_producer);
+                    let checker = RewardsEligibilityChecker::new(database, config, stream_producer);
                     checker.check().await
                 }
             }
