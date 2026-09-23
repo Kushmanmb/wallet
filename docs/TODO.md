@@ -234,9 +234,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 - **VM78** **S** **Settings holds one service.** iOS `SettingsViewModel` holds `GemNotificationsService` only to call `enableForSupport`; the owning service should expose it (Android routes it through `EnablePushForSupport`).
 - **VM79** **S** **The root scene stops reading the wallet store.** iOS [`RootSceneViewModel`](../ios/Gem/ViewModels/RootSceneViewModel.swift) reads `stores.walletStore.getWallet` directly; the session service answers the current wallet.
-- **VM82** **S** **WalletConnect permission rows come from Core.** Both apps hard-code the proposal's permission rows (iOS `ConnectionProposalViewModel`, Android `ProposalSceneViewModel`).
-- **VM83** **S** **The NFT unverified row comes from Core.** iOS NFT `CollectionsContent` builds the "Unverified" count row as a `ListItemModel`; it belongs in the collectible owner's sections.
-- **VM84** **S** **The wallet detail secret row comes from Core.** iOS `WalletDetailViewModel` builds "Show {secret kind}"; `GemWalletDetails` should return it.
 - **VM85** **S** **App start owns its preference steps.** `setupCurrency(locale)` and `incrementLaunchesCount` run from unrelated places — iOS `OnstartService`, Android `SessionCoordinator` and `UserConfig`.
 - **VM86** **M** **Core preference changes are observable.** Both apps mirror Core preferences in observable objects and reload them by hand after the last wallet is deleted (Android `UserConfig`, iOS `ObservablePreferences.reload(after:)`).
 - **VM87** **S** **Android search maps filters once.** [`AssetsSearchService`](../android/data/services/gemstone/src/main/kotlin/com/gemwallet/android/data/services/gemstone/assets/AssetsSearchService.kt) repeats the same 14-argument filter mapping three times.
@@ -325,6 +322,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM82, VM83, VM84 (2026-09-23).** Closed without code: each app is already mapping a Core answer or showing fixed copy, and the two apps agree. The NFT unverified row is Core's `unverified_row`, which decides whether it shows and carries its count; both apps only give it the localized "Unverified" title (VM83). The wallet detail secret row is Core's `secret_kind`, which decides whether it shows; "Show {kind}" is a localization template both apps fill the same way (VM84). The WalletConnect proposal's two permission rows are the same fixed strings on both apps with no rule behind them (VM82). Moving any of them would add an enum and a mapper per app without moving a decision.
 
 **VM80, VM81 (2026-09-23).** Closed. `GemApplicationMetadataService` held no state, so its four methods become the exported projections `application_connection_row`, `application_short_name`, `application_host` and `application_icon_url`, following [a row is projected from its value](ARCHITECTURE.md#a-row-is-projected-from-its-value-never-fetched-from-a-service); the Android WalletConnect request, auth and proposal view models drop the second service, iOS drops the `.shared` instance, and Core's WalletConnect, sign-message and confirm code call the plain functions (VM80). `GemAddAssetService.matching_chains` forwards the chain search, so Android `AddAssetViewModel` holds one service (VM81).
 
