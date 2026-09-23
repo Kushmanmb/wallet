@@ -1,0 +1,15 @@
+[package]
+name = "services"
+edition = { workspace = true }
+version = { workspace = true }
+
+[dependencies]
+api_connector = { path = "../api_connector" }
+cacher = { path = "../cacher" }
+chain_providers = { path = "../chain_providers" }
+config_keys = { path = "../config_keys" }
+primitives = { path = "../primitives" }
+search_index = { path = "../search_index" }
+settings = { path = "../settings" }
+storage = { path = "../storage" }
+streamer = { path = "../streamer" }

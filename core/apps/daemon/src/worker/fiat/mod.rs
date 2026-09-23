@@ -1,7 +1,7 @@
 use crate::model::WorkerService;
 use crate::worker::context::WorkerContext;
 use crate::worker::jobs::WorkerJob;
-use cacher::{AccessTokenCacherClient, CacherClient};
+use cacher::AccessTokenCacherClient;
 use fiat::FiatProviderFactory;
 use fiat_assets_updater::FiatAssetsUpdater;
 use fiat_rates_updater::FiatRatesUpdater;
@@ -10,17 +10,17 @@ use pricer::PriceClient;
 use prices::{FiatRatesProviderConfig, build_fiat_rates_providers};
 use primitives::FiatProviderName;
 use std::{error::Error, sync::Arc};
-use storage::ConfigCacher;
 
 mod fiat_assets_updater;
 mod fiat_rates_updater;
 
 pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<Vec<JobHandle>, Box<dyn Error + Send + Sync>> {
-    let database = ctx.database();
-    let settings = ctx.settings();
-    let config = ConfigCacher::new(database.clone());
+    let services = ctx.services();
+    let database = services.database();
+    let settings = services.settings();
+    let config = services.config();
 
-    let cacher_client = CacherClient::new(&settings.redis.url).await?;
+    let cacher_client = services.cacher().await?;
     let access_token_cacher = Arc::new(AccessTokenCacherClient::new(cacher_client.clone(), FiatProviderName::Transak.id()));
     let providers = build_fiat_rates_providers(&FiatRatesProviderConfig {
         coingecko: settings.coingecko.remote_provider_config(),

@@ -23,9 +23,9 @@ use crate::shutdown::ShutdownReceiver;
 use crate::worker::context::WorkerContext;
 use crate::worker::job_schedule::CacherJobTracker;
 use crate::worker::runtime::WorkerRuntime;
-use cacher::CacherClient;
 use gem_tracing::{error_with_fields, info_with_fields};
 use job_runner::{JobHandle, JobSchedule};
+use services::Services;
 use std::sync::atomic::{AtomicBool, Ordering};
 use streamer::ConsumerStatusReporter;
 
@@ -71,8 +71,8 @@ pub async fn main() {
     }
 }
 
-async fn run_worker_services(settings: settings::Settings, services: &[WorkerService], options: WorkerOptions) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    if services.is_empty() {
+async fn run_worker_services(settings: settings::Settings, workers: &[WorkerService], options: WorkerOptions) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    if workers.is_empty() {
         info_with_fields!("no worker services requested", status = "ok");
         return Ok(());
     }
@@ -81,23 +81,23 @@ async fn run_worker_services(settings: settings::Settings, services: &[WorkerSer
     let (shutdown_tx, shutdown_rx) = shutdown::channel();
     let shutdown_timeout = settings.daemon.shutdown.timeout;
 
-    let scheduler_cacher = CacherClient::new(&settings.redis.url).await?;
-    let database = storage::Database::new(&settings.postgres.url, settings.postgres.pool)?;
+    let services = Services::new(settings.clone())?;
+    let scheduler_cacher = services.cacher().await?;
 
-    let service_name = services.first().map(|s| s.as_ref()).unwrap_or("worker");
+    let service_name = workers.first().map(|s| s.as_ref()).unwrap_or("worker");
     let job_metrics = Arc::new(metrics::job::JobMetrics::new(service_name));
     let composite = Arc::new(metrics::Metrics::new(vec![job_metrics.clone()]));
     let health_state = health::spawn_server(composite);
 
     let signal_handle = shutdown::spawn_signal_handler(shutdown_tx);
 
-    let worker_jobs: Vec<_> = futures::future::join_all(services.iter().map(|service| {
+    let worker_jobs: Vec<_> = futures::future::join_all(workers.iter().map(|service| {
         let svc = *service;
         let tracker = Arc::new(CacherJobTracker::new(scheduler_cacher.clone(), service.as_ref()));
         let reporter = Arc::new(JobReporter::new(job_metrics.clone()));
         let schedule: Arc<dyn JobSchedule> = tracker;
         let runtime = WorkerRuntime::new(reporter, schedule);
-        let context = WorkerContext::new(settings.clone(), database.clone(), runtime, options.job.clone());
+        let context = WorkerContext::new(services.clone(), runtime, options.job.clone());
         let shutdown_rx = shutdown_rx.clone();
         async move {
             match svc.run_jobs(context, shutdown_rx).await {

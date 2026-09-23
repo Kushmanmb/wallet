@@ -17,9 +17,10 @@ use crate::reporters::parser::ParserReporter;
 use chain_traits::ChainTraits;
 use gem_tracing::{DurationMs, error_with_fields, info_with_fields};
 use primitives::Chain;
+use services::Services;
 use settings::Settings;
 use std::str::FromStr;
-use streamer::{StreamProducer, StreamProducerConfig, StreamProducerQueue, TransactionsPayload};
+use streamer::{StreamProducer, StreamProducerQueue, TransactionsPayload};
 
 use crate::shutdown::{self, ShutdownReceiver};
 use plan::{BlockPlan, BlockPlanKind, plan_next_block, should_reload_catchup, timeout_for_state};
@@ -204,9 +205,10 @@ impl Parser {
 }
 
 pub async fn run(settings: Settings, chain: Option<Chain>, health_state: Arc<HealthState>, parser_metrics: Arc<ParserMetrics>) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let database = Database::new(&settings.postgres.url, settings.postgres.pool)?;
+    let services = Services::new(Arc::new(settings.clone()))?;
+    let database = services.database();
 
-    let config = storage::ConfigCacher::new(database.clone());
+    let config = services.config();
     let catchup_reload_interval = config.get_i64(config_keys::ConfigKey::ParserCatchupReloadInterval).await?;
     let min_check = config.get_duration(config_keys::ConfigKey::ParserMinCheckInterval).await?;
     let max_check = config.get_duration(config_keys::ConfigKey::ParserMaxCheckInterval).await?;
@@ -249,9 +251,7 @@ pub async fn run(settings: Settings, chain: Option<Chain>, health_state: Arc<Hea
 
         let provider = chain_providers::ProviderFactory::new_from_settings_with_user_agent(chain, &settings, &settings::service_user_agent("parser", None));
 
-        let retry = streamer::Retry::new(settings.rabbitmq.retry.delay, settings.rabbitmq.retry.timeout);
-        let rabbitmq_config = StreamProducerConfig::new(settings.rabbitmq.url.clone(), retry);
-        let stream_producer = StreamProducer::new(&rabbitmq_config, format!("parser_{chain}").as_str(), shutdown_rx.clone()).await?;
+        let stream_producer = services.stream_producer(format!("parser_{chain}").as_str(), shutdown_rx.clone()).await?;
 
         let options = ParserOptions {
             timeout: settings.parser.timeout,

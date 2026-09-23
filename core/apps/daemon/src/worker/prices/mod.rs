@@ -31,17 +31,18 @@ use primitives::ChartTimeframe;
 use settings::Settings;
 use storage::repositories::prices_providers_repository::PricesProvidersRepository;
 use storage::{ConfigCacher, Database};
-use streamer::{StreamProducer, StreamProducerConfig};
+use streamer::StreamProducer;
 
 pub type AssetsProviders = Arc<PriceProviders>;
 
 pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<Vec<JobHandle>, Box<dyn Error + Send + Sync>> {
-    let database = ctx.database();
-    let settings = ctx.settings();
-    let cacher_client = CacherClient::new(&settings.redis.url).await?;
-    let config = Arc::new(ConfigCacher::new(database.clone()));
-    let producer_assets = stream_producer(&settings, "prices_provider_assets").await?;
-    let producer_prices = stream_producer(&settings, "prices_provider_prices").await?;
+    let services = ctx.services();
+    let database = services.database();
+    let settings = services.settings();
+    let cacher_client = services.cacher().await?;
+    let config = Arc::new(services.config());
+    let producer_assets = services.stream_producer("prices_provider_assets", streamer::no_shutdown()).await?;
+    let producer_prices = services.stream_producer("prices_provider_prices", streamer::no_shutdown()).await?;
     let enabled_providers: Vec<PriceProvider> = database.run(|client| client.get_prices_providers()).await?.into_iter().filter(|p| p.enabled).map(|p| p.id.0).collect();
     let assets_providers: AssetsProviders = Arc::new(price_providers(&settings, enabled_providers.iter().copied()));
     let price_client = PriceClient::new(database.clone(), cacher_client.clone());
@@ -354,10 +355,4 @@ fn charts_retention_key(timeframe: ChartTimeframe) -> ConfigKey {
         ChartTimeframe::Hourly => ConfigKey::PriceChartsRetentionHourly,
         ChartTimeframe::Daily => ConfigKey::PriceChartsRetentionDaily,
     }
-}
-
-async fn stream_producer(settings: &Settings, name: &str) -> Result<StreamProducer, Box<dyn Error + Send + Sync>> {
-    let retry = streamer::Retry::new(settings.rabbitmq.retry.delay, settings.rabbitmq.retry.timeout);
-    let config = StreamProducerConfig::new(settings.rabbitmq.url.clone(), retry);
-    StreamProducer::new(&config, name, streamer::no_shutdown()).await
 }

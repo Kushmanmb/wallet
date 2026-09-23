@@ -66,6 +66,7 @@ members = [
     "crates/portfolio",
     "crates/streamer",
     "crates/swapper",
+    "crates/services",
     "crates/support",
     "crates/yielder",
 ]

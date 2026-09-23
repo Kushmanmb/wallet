@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::sync::Arc;
 
 use super::api_clients::{SETUP_DEV_API_CLIENT_NAME, SETUP_DEV_API_CLIENT_SECRET, api_client_access_grants};
 use super::database::run_migrations;
@@ -16,18 +17,20 @@ use primitives::{
     },
     known_assets::{ARBITRUM_USDC, ARBITRUM_USDT, BASE_USDC, ETHEREUM_USDC, ETHEREUM_USDT, POLYGON_USDC, SMARTCHAIN_USDT, SOLANA_USDC, SOLANA_USDT, TRON_USDT},
 };
+use services::Services;
 use settings::Settings;
 use storage::models::{ChartRow, FiatAssetRow, FiatProviderCountryRow, FiatRateRow, NewFiatTransactionRow, PriceAssetRow, UpdateDeviceRow, price::NewPriceRow};
 use storage::sql_types::{Platform, PlatformStore};
 use storage::{
-    ApiClientsRepository, AssetsRepository, ChartsRepository, Database, DatabaseClient, DevicesRepository, NewNotificationRow, NewWalletRow, NotificationsRepository, PriceAlertsRepository, PricesRepository, RewardsRepository, WalletSource,
+    ApiClientsRepository, AssetsRepository, ChartsRepository, DatabaseClient, DevicesRepository, NewNotificationRow, NewWalletRow, NotificationsRepository, PriceAlertsRepository, PricesRepository, RewardsRepository, WalletSource,
     WalletType, WalletsRepository,
 };
 
 pub async fn run_setup_dev(settings: Settings) -> Result<(), Box<dyn Error + Send + Sync>> {
     info_with_fields!("setup_dev", step = "init");
 
-    let database = Database::new(&settings.postgres.url, settings.postgres.pool)?;
+    let services = Services::new(Arc::new(settings.clone()))?;
+    let database = services.database();
     run_migrations(&database, "setup_dev").await?;
     setup_database(&database).await?;
 

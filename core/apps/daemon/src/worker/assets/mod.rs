@@ -13,14 +13,12 @@ use api_connector::StaticAssetsClient;
 use asset_rank_updater::AssetRankUpdater;
 use assets_has_price_updater::AssetsHasPriceUpdater;
 use assets_images_updater::AssetsImagesUpdater;
-use chain_providers::ChainProviders;
 use config_keys::ConfigKey;
 use job_runner::{JobHandle, ShutdownReceiver};
 use perpetual_updater::PerpetualUpdater;
 use primitives::Chain;
 use settings::service_user_agent;
 use staking_apy_updater::StakeApyUpdater;
-use storage::ConfigCacher;
 use usage_rank_updater::{UsageRankUpdater, UsageRankUpdaterConfig};
 use validator_scanner::ValidatorScanner;
 
@@ -30,9 +28,10 @@ use crate::worker::context::WorkerContext;
 use crate::worker::jobs::WorkerJob;
 
 pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<Vec<JobHandle>, Box<dyn Error + Send + Sync>> {
-    let database = ctx.database();
-    let settings = ctx.settings();
-    let config = ConfigCacher::new(database.clone());
+    let services = ctx.services();
+    let database = services.database();
+    let settings = services.settings();
+    let config = services.config();
     let classification_rules = AssetClassificationRules::from_config(&config).await?;
     let usage_rank_updater_config = UsageRankUpdaterConfig {
         batch_size: config.get_usize(ConfigKey::AssetsUsageRankBatchSize).await?,
@@ -82,10 +81,10 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
             }
         })
         .jobs(WorkerJob::UpdateStakeApy, Chain::stakeable(), {
-            let settings = settings.clone();
+            let services = services.clone();
             let database = database.clone();
             move |chain, _| {
-                let providers = Arc::new(ChainProviders::for_chain(chain, &settings, &service_user_agent("daemon", Some("staking_apy"))));
+                let providers = Arc::new(services.chain_providers_for(chain, &service_user_agent("daemon", Some("staking_apy"))));
                 let database = database.clone();
                 move |_| {
                     let updater = StakeApyUpdater::new(providers.clone(), database.clone());
@@ -94,10 +93,10 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
             }
         })
         .jobs(WorkerJob::UpdateChainValidators, Chain::stakeable(), {
-            let settings = settings.clone();
+            let services = services.clone();
             let database = database.clone();
             move |chain, _| {
-                let providers = Arc::new(ChainProviders::for_chain(chain, &settings, &service_user_agent("daemon", Some("scan_validators"))));
+                let providers = Arc::new(services.chain_providers_for(chain, &service_user_agent("daemon", Some("scan_validators"))));
                 let database = database.clone();
                 move |_| {
                     let scanner = ValidatorScanner::new(providers.clone(), database.clone());
@@ -106,10 +105,11 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
             }
         })
         .jobs(WorkerJob::UpdateValidatorsFromStaticAssets, [Chain::Tron, Chain::SmartChain], {
+            let services = services.clone();
             let settings = settings.clone();
             let database = database.clone();
             move |chain, _| {
-                let providers = Arc::new(ChainProviders::for_chain(chain, &settings, &service_user_agent("daemon", Some("scan_static_assets"))));
+                let providers = Arc::new(services.chain_providers_for(chain, &service_user_agent("daemon", Some("scan_static_assets"))));
                 let assets_url = settings.assets.url.clone();
                 let database = database.clone();
                 move |_| {

@@ -4,8 +4,6 @@ mod staking_rewards_notifier;
 use std::error::Error;
 use std::sync::Arc;
 
-use cacher::CacherClient;
-use chain_providers::ChainProviders;
 use config_keys::ConfigKey;
 use job_runner::{JobHandle, ShutdownReceiver};
 use price_alerts_sender::PriceAlertSender;
@@ -13,26 +11,22 @@ use pricer::PriceAlertClient;
 use primitives::Chain;
 use settings::service_user_agent;
 use staking_rewards_notifier::{StakeRewardsConfig, StakingRewardsNotifier};
-use storage::ConfigCacher;
-use streamer::{StreamProducer, StreamProducerConfig};
 
 use crate::model::WorkerService;
 use crate::worker::context::WorkerContext;
 use crate::worker::jobs::WorkerJob;
 
 pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<Vec<JobHandle>, Box<dyn Error + Send + Sync>> {
-    let database = ctx.database();
-    let settings = ctx.settings();
-    let config = ConfigCacher::new(database.clone());
-    let cacher = CacherClient::new(&settings.redis.url).await?;
-    let retry = streamer::Retry::new(settings.rabbitmq.retry.delay, settings.rabbitmq.retry.timeout);
-    let rabbitmq_config = StreamProducerConfig::new(settings.rabbitmq.url.clone(), retry);
-    let stream_producer = StreamProducer::new(&rabbitmq_config, "send_price_alerts", shutdown_rx.clone()).await?;
+    let services = ctx.services();
+    let database = services.database();
+    let config = services.config();
+    let cacher = services.cacher().await?;
+    let stream_producer = services.stream_producer("send_price_alerts", shutdown_rx.clone()).await?;
     let stake_rewards_config = StakeRewardsConfig {
         threshold: config.get_f64(ConfigKey::AlerterStakeRewardsThreshold).await?,
         lookback: config.get_duration(ConfigKey::AlerterStakeRewardsLookback).await?,
     };
-    let chain_providers = Arc::new(ChainProviders::from_settings(&settings, &service_user_agent("daemon", Some("stake_rewards"))));
+    let chain_providers = Arc::new(services.chain_providers(&service_user_agent("daemon", Some("stake_rewards"))));
 
     ctx.plan_builder(WorkerService::Alerter, &config, shutdown_rx)
         .job(WorkerJob::AlertPriceAlerts, {

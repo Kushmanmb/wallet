@@ -2,8 +2,7 @@ mod in_transit_updater;
 mod pending_transactions_updater;
 mod vault_addresses_updater;
 
-use cacher::CacherClient;
-use chain_providers::{ChainProviders, ProviderFactory};
+use chain_providers::ProviderFactory;
 use config_keys::{ConfigKey, ConfigParamKey};
 use in_transit_updater::{InTransitConfig, InTransitUpdater};
 use job_runner::{JobHandle, ShutdownReceiver};
@@ -12,8 +11,6 @@ use primitives::{JobConfiguration, SwapProvider};
 use settings::service_user_agent;
 use std::error::Error;
 use std::sync::Arc;
-use storage::ConfigCacher;
-use streamer::{StreamProducer, StreamProducerConfig};
 use swapper::NativeProvider;
 use swapper::swapper::GemSwapper;
 use vault_addresses_updater::VaultAddressesUpdater;
@@ -24,9 +21,10 @@ use crate::worker::context::WorkerContext;
 use crate::worker::jobs::WorkerJob;
 
 pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<Vec<JobHandle>, Box<dyn Error + Send + Sync>> {
-    let database = ctx.database();
-    let settings = ctx.settings();
-    let config = ConfigCacher::new(database.clone());
+    let services = ctx.services();
+    let database = services.database();
+    let settings = services.settings();
+    let config = services.config();
 
     let in_transit_config = InTransitConfig {
         timeout: config.get_duration(ConfigKey::TransactionInTransitTimeout).await?,
@@ -40,13 +38,11 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     let pending_config = PendingTransactionsUpdaterConfig::from_config(&config).await?;
 
     let endpoints = ProviderFactory::get_chain_endpoints(&settings);
-    let providers = Arc::new(ChainProviders::from_settings(&settings, &service_user_agent("daemon", Some("transactions"))));
+    let providers = Arc::new(services.chain_providers(&service_user_agent("daemon", Some("transactions"))));
     let swapper = Arc::new(GemSwapper::new(Arc::new(NativeProvider::new_with_endpoints(endpoints))));
 
-    let retry = streamer::Retry::new(settings.rabbitmq.retry.delay, settings.rabbitmq.retry.timeout);
-    let rabbitmq_config = StreamProducerConfig::new(settings.rabbitmq.url.clone(), retry);
-    let stream_producer = StreamProducer::new(&rabbitmq_config, "transactions_worker", shutdown_rx.clone()).await?;
-    let cacher = CacherClient::new(&settings.redis.url).await?;
+    let stream_producer = services.stream_producer("transactions_worker", shutdown_rx.clone()).await?;
+    let cacher = services.cacher().await?;
     let in_transit_updater = Arc::new(InTransitUpdater::new(
         database.clone(),
         in_transit_config,

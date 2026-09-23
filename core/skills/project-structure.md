@@ -71,6 +71,7 @@ Individual `gem_*` crates for each blockchain with unified RPC client patterns:
 - `nft/`: NFT models, provider factory, and provider clients (OpenSea, Magic Eden, Alchemy, TON)
 
 ### Integrations & Services
+- `services/`: Backend orchestration and the only crate that builds storage, cache, queue, push and search clients ([Architecture § Backend Layers](architecture.md#backend-layers))
 - `fiat/`: Fiat on-ramp/off-ramp providers (MoonPay, Transak, Mercuryo, Paybis, Flashnet)
 - `name_resolver/`: Blockchain naming service integrations (ENS, SNS, etc.)
 - `security/`: Security and fraud detection provider integrations
@@ -103,6 +104,7 @@ gem_* chain crates (gem_evm, gem_solana, ...)
   └── primitives/        ← shared models
 
 apps/ (api, daemon, dynode)
+  ├── services/    ← backend orchestration and infra construction
   ├── storage/     ← Diesel ORM + PostgreSQL
   ├── pricer/      ← pricing aggregation
   ├── gem_client/  ← ReqwestClient for backend HTTP

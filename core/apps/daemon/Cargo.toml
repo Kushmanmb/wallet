@@ -32,6 +32,7 @@ fiat = { path = "../../crates/fiat" }
 nft = { path = "../../crates/nft" }
 job_runner = { path = "../../crates/job_runner" }
 search_index = { path = "../../crates/search_index" }
+services = { path = "../../crates/services" }
 cacher = { path = "../../crates/cacher" }
 streamer = { path = "../../crates/streamer" }
 localizer = { path = "../../crates/localizer" }

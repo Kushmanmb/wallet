@@ -38,6 +38,7 @@ push_notification = { path = "../../crates/push_notification" }
 portfolio = { path = "../../crates/portfolio" }
 api_connector = { path = "../../crates/api_connector" }
 search_index = { path = "../../crates/search_index" }
+services = { path = "../../crates/services" }
 defi = { path = "../../crates/defi" }
 nft = { path = "../../crates/nft" }
 cacher = { path = "../../crates/cacher" }

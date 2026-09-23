@@ -8,26 +8,21 @@ mod version_updater;
 use crate::model::WorkerService;
 use crate::worker::context::WorkerContext;
 use crate::worker::jobs::WorkerJob;
-use cacher::CacherClient;
 use config_keys::ConfigKey;
 use device_updater::DeviceUpdater;
 use job_runner::{JobHandle, ShutdownReceiver};
 use observers::InactiveDevicesObserver;
 use std::error::Error;
-use storage::ConfigCacher;
-use streamer::{StreamProducer, StreamProducerConfig};
 use transaction_cleanup::{TransactionCleanup, TransactionCleanupConfig};
 use version_updater::VersionUpdater;
 
 pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<Vec<JobHandle>, Box<dyn Error + Send + Sync>> {
-    let database = ctx.database();
-    let settings = ctx.settings();
-    let config = ConfigCacher::new(database.clone());
-    let cacher_client = CacherClient::new(settings.redis.url.as_str()).await?;
+    let services = ctx.services();
+    let database = services.database();
+    let config = services.config();
+    let cacher_client = services.cacher().await?;
 
-    let retry = streamer::Retry::new(settings.rabbitmq.retry.delay, settings.rabbitmq.retry.timeout);
-    let rabbitmq_config = StreamProducerConfig::new(settings.rabbitmq.url.clone(), retry);
-    let stream_producer = StreamProducer::new(&rabbitmq_config, "observe_inactive_devices", shutdown_rx.clone()).await?;
+    let stream_producer = services.stream_producer("observe_inactive_devices", shutdown_rx.clone()).await?;
 
     ctx.plan_builder(WorkerService::System, &config, shutdown_rx)
         .job(WorkerJob::CleanupProcessedTransactions, {

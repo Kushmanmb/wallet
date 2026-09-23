@@ -4,23 +4,26 @@ use super::scan_addresses::setup_scan_addresses;
 use config_keys::{ConfigKey, ConfigParamKey};
 use gem_tracing::info_with_fields;
 use primitives::{Asset, AssetTag, Chain, FiatProviderName, NFTChain, PlatformStore as PrimitivePlatformStore, PriceProvider};
-use search_index::{INDEX_CONFIGS, INDEX_PRIMARY_KEY, SearchIndexClient, SearchIndexConfig};
+use search_index::{INDEX_CONFIGS, INDEX_PRIMARY_KEY};
+use services::Services;
 use settings::Settings;
 use std::collections::HashSet;
+use std::sync::Arc;
 use storage::models::ConfigRow;
-use storage::{ApiClientsRepository, AssetsRepository, ChainsRepository, ConfigCacher, ConfigRepository, Database, DatabaseError, PricesProvidersRepository, ReleasesRepository, TagRepository};
-use streamer::{ExchangeKind, ExchangeName, QueueName, StreamProducer, StreamProducerConfig};
+use storage::{ApiClientsRepository, AssetsRepository, ChainsRepository, ConfigRepository, Database, DatabaseError, PricesProvidersRepository, ReleasesRepository, TagRepository};
+use streamer::{ExchangeKind, ExchangeName, QueueName};
 
 pub async fn run_setup(settings: Settings) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     info_with_fields!("setup", step = "init");
 
-    let database = Database::new(&settings.postgres.url, settings.postgres.pool)?;
+    let services = Services::new(Arc::new(settings))?;
+    let database = services.database();
     run_migrations(&database, "setup").await?;
 
     setup_database(&database).await?;
     setup_scan_addresses(&database).await?;
-    setup_search_index(&settings, &database).await?;
-    setup_queues(&settings).await?;
+    setup_search_index(&services).await?;
+    setup_queues(&services).await?;
 
     info_with_fields!("setup", step = "complete");
     Ok(())
@@ -93,19 +96,16 @@ pub(super) async fn setup_database(database: &Database) -> Result<(), Box<dyn st
     Ok(())
 }
 
-async fn setup_search_index(settings: &Settings, database: &Database) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+async fn setup_search_index(services: &Services) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     info_with_fields!("setup", step = "search index", indexes = format!("{:?}", INDEX_CONFIGS.iter().map(|c| c.name).collect::<Vec<_>>()));
 
-    let search_index_config = SearchIndexConfig {
-        batch_size: ConfigCacher::new(database.clone()).get_usize(ConfigKey::SearchIndexBatchSize).await?,
-    };
-    let search_index_client = SearchIndexClient::new(&settings.meilisearch.url, settings.meilisearch.key.as_str(), search_index_config);
+    let search_index_client = services.search_index().await?;
     search_index_client.setup(INDEX_CONFIGS, INDEX_PRIMARY_KEY).await.unwrap();
 
     Ok(())
 }
 
-async fn setup_queues(settings: &Settings) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+async fn setup_queues(services: &Services) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     info_with_fields!("setup", step = "queues");
 
     let chain_queues = QueueName::chain_queues();
@@ -113,9 +113,7 @@ async fn setup_queues(settings: &Settings) -> Result<(), Box<dyn std::error::Err
     let exchanges = ExchangeName::all();
     let chains = Chain::all();
 
-    let retry = streamer::Retry::new(settings.rabbitmq.retry.delay, settings.rabbitmq.retry.timeout);
-    let rabbitmq_config = StreamProducerConfig::new(settings.rabbitmq.url.clone(), retry);
-    let stream_producer = StreamProducer::new(&rabbitmq_config, "setup", streamer::no_shutdown()).await?;
+    let stream_producer = services.stream_producer("setup", streamer::no_shutdown()).await?;
     stream_producer.declare_queues(non_chain_queues).await?;
     stream_producer.declare_exchanges(exchanges.clone()).await?;
 

@@ -3,10 +3,9 @@ pub mod support_webhook_consumer;
 use std::error::Error;
 use std::sync::Arc;
 
-use cacher::CacherClient;
+use services::Services;
 use settings::Settings;
-use storage::Database;
-use streamer::{ConsumerStatusReporter, QueueName, ShutdownReceiver, StreamProducer, StreamProducerConfig, SupportWebhookPayload, run_consumer};
+use streamer::{ConsumerStatusReporter, QueueName, ShutdownReceiver, SupportWebhookPayload, run_consumer};
 use support::SupportClient;
 
 use crate::consumers::{consumer_config, reader_for_queue};
@@ -14,12 +13,11 @@ use crate::consumers::{consumer_config, reader_for_queue};
 use support_webhook_consumer::SupportWebhookConsumer;
 
 pub async fn run_consumer_support(settings: Settings, shutdown_rx: ShutdownReceiver, reporter: Arc<dyn ConsumerStatusReporter>) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let database = Database::new(&settings.postgres.url, settings.postgres.pool)?;
+    let services = Services::new(Arc::new(settings.clone()))?;
+    let database = services.database();
 
-    let retry = streamer::Retry::new(settings.rabbitmq.retry.delay, settings.rabbitmq.retry.timeout);
-    let rabbitmq_config = StreamProducerConfig::new(settings.rabbitmq.url.clone(), retry);
-    let stream_producer = StreamProducer::new(&rabbitmq_config, "daemon_support_producer", shutdown_rx.clone()).await?;
-    let cacher = CacherClient::new(&settings.redis.url).await?;
+    let stream_producer = services.stream_producer("daemon_support_producer", shutdown_rx.clone()).await?;
+    let cacher = services.cacher().await?;
 
     let support_client = SupportClient::new(database, stream_producer, cacher);
     let consumer = SupportWebhookConsumer::new(support_client);
