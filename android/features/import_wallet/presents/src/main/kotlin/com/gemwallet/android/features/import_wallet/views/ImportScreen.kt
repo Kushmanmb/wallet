@@ -41,7 +41,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.AppUrl
-import com.gemwallet.android.application.wallet_import.values.WalletImportResult
 import com.gemwallet.android.features.import_wallet.components.ImportInput
 import com.gemwallet.android.features.import_wallet.components.ImportKindTab
 import com.gemwallet.android.features.import_wallet.viewmodels.ImportInputUIModel
@@ -76,7 +75,7 @@ private val loadingDialogSize = 100.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ImportScreen(importType: ImportType, onImported: (WalletImportResult) -> Unit, onCancel: () -> Unit) {
+fun ImportScreen(importType: ImportType, onImported: () -> Unit, onCancel: () -> Unit) {
     DisableScreenShooting()
     DetectScreenshot(AppUrl.howToSecureSecretPhrase)
 
@@ -128,14 +127,14 @@ fun ImportScreen(importType: ImportType, onImported: (WalletImportResult) -> Uni
             }
         }
     }
-    uiState.existingWalletResult?.let { result ->
+    uiState.existingWalletName?.let { walletName ->
         InfoBottomSheet(
             item = InfoSheetEntity.ExistingWalletImported(
-                walletName = result.wallet.name,
+                walletName = walletName,
                 actionLabel = stringResource(R.string.common_continue),
                 action = {
                     viewModel.dismissExistingWallet()
-                    onImported(result)
+                    onImported()
                 },
             ),
             onClose = {

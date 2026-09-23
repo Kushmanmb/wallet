@@ -12,7 +12,7 @@ public extension LocalKeystore {
         preferences: GemWalletPreferencesService,
         explorer: GemExplorerService,
         names: GemNameService,
-        avatar: GemAvatarService
+        avatar: GemAvatarService,
     ) -> GemWalletService {
         GemWalletService(
             keystore: gemKeystore,

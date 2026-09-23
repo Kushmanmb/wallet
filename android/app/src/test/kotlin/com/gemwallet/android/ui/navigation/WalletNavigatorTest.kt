@@ -15,7 +15,6 @@ import com.gemwallet.android.features.import_wallet.navigation.ImportSelectTypeR
 import com.gemwallet.android.features.onboarding.AcceptTermsDestination
 import com.gemwallet.android.features.onboarding.AcceptTermsRoute
 import com.gemwallet.android.features.onboarding.OnboardingRoute
-import com.gemwallet.android.features.setup_wallet.navigation.SetupWalletRoute
 import com.gemwallet.android.model.ImportType
 import com.gemwallet.android.testkit.mockAsset
 import com.gemwallet.android.testkit.mockAssetId
@@ -114,16 +113,15 @@ class WalletNavigatorTest {
     }
 
     @Test
-    fun openSetupWallet_replacesCreateOrImportRoute() {
-        val walletId = mockWalletId("wallet-1")
+    fun resetToWallet_landsOnTheWalletFromCreateOrImport() {
         val createNavigator = navigatorWith(OnboardingRoute, CreateWalletRoute)
         val importNavigator = navigatorWith(OnboardingRoute, ImportMulticoinWalletRoute)
 
-        createNavigator.openSetupWallet(walletId)
-        importNavigator.openSetupWallet(walletId)
+        createNavigator.resetToWallet()
+        importNavigator.resetToWallet()
 
-        assertEquals(listOf(OnboardingRoute, SetupWalletRoute(walletId)), createNavigator.backStack.toList())
-        assertEquals(listOf(OnboardingRoute, SetupWalletRoute(walletId)), importNavigator.backStack.toList())
+        assertEquals(listOf(WalletRootRoute), createNavigator.backStack.toList())
+        assertEquals(listOf(WalletRootRoute), importNavigator.backStack.toList())
     }
 
     @Test

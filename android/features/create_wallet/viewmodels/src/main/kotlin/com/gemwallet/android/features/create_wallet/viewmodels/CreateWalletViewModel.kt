@@ -6,11 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.runCatchingCancellable
-import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.importWallet
 import com.gemwallet.android.ui.localization.text
-import com.wallet.core.primitives.WalletId
 import com.wallet.core.primitives.WalletSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -73,17 +71,15 @@ class CreateWalletViewModel @Inject constructor(private val service: GemWalletSe
         state.update { it.copy(isShowSafeMessage = true) }
     }
 
-    fun createWallet(onCreated: (walletId: WalletId?) -> Unit) {
+    fun createWallet(onCreated: () -> Unit) {
         if (state.value.loading) {
             return
         }
         state.update { it.copy(isShowSafeMessage = true, loading = true) }
         viewModelScope.launch(ioDispatcher) {
             val newState = try {
-                val created = service.importWallet(GemWalletImportKind.PHRASE, null, state.value.data.joinToString(" "), null, WalletSource.Create, context)
-                withContext(Dispatchers.Main) {
-                    onCreated(if (created.hasExistingWallets()) created.wallet().toPrimitives().id else null)
-                }
+                service.importWallet(GemWalletImportKind.PHRASE, null, state.value.data.joinToString(" "), null, WalletSource.Create, context)
+                withContext(Dispatchers.Main) { onCreated() }
                 state.value.copy(loading = false)
             } catch (err: CancellationException) {
                 throw err

@@ -173,6 +173,13 @@ pub fn details(wallet: &Wallet) -> GemWalletDetails {
     }
 }
 
+pub fn is_new_wallet(source: &WalletSource, has_synced: bool) -> bool {
+    match source {
+        WalletSource::Create => !has_synced,
+        WalletSource::Import => false,
+    }
+}
+
 pub fn view_wallet(name: String, chain: Chain, address: String) -> Wallet {
     Wallet {
         id: WalletId::View(chain, address.clone()),
@@ -263,6 +270,14 @@ pub fn existing_wallet(wallets: &[Wallet], wallet_id: &WalletId, wallet_type: Wa
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_only_a_created_wallet_that_never_synced_is_new() {
+        assert!(is_new_wallet(&WalletSource::Create, false));
+        assert!(!is_new_wallet(&WalletSource::Create, true));
+        assert!(!is_new_wallet(&WalletSource::Import, false));
+        assert!(!is_new_wallet(&WalletSource::Import, true));
+    }
 
     #[test]
     fn test_the_import_screen_names_the_network_and_offers_one_kind_for_multicoin() {

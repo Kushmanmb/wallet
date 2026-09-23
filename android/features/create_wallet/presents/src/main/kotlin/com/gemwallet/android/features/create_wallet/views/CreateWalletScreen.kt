@@ -48,13 +48,12 @@ import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.WalletTheme
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.sceneContentPaddingValues
-import com.wallet.core.primitives.WalletId
 import uniffi.gemstone.secretPhraseCopy
 
 private val loadingDialogSize = 100.dp
 
 @Composable
-fun CreateWalletScreen(onCancel: () -> Unit, onCreated: (walletId: WalletId?) -> Unit) {
+fun CreateWalletScreen(onCancel: () -> Unit, onCreated: () -> Unit) {
     DisableScreenShooting()
     DetectScreenshot(AppUrl.howToSecureSecretPhrase)
 

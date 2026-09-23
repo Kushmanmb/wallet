@@ -27,14 +27,14 @@ final class ImportWalletSceneViewModel {
     var isPresentingAlertMessage: AlertMessage?
     var isPresentingExistingWalletName: String?
 
-    private let onComplete: (@MainActor @Sendable (ImportWalletSceneResult) -> Void)?
+    private let onComplete: VoidAction
 
     init(
         service: any GemWalletServiceProtocol,
         preferences: ObservablePreferences,
         nameService: any GemNameServiceProtocol,
         type: ImportWalletType,
-        onComplete: (@MainActor @Sendable (ImportWalletSceneResult) -> Void)?,
+        onComplete: VoidAction,
     ) {
         self.service = service
         self.preferences = preferences
@@ -172,7 +172,7 @@ extension ImportWalletSceneViewModel {
     }
 
     func onSelectExistingWalletContinue() {
-        onComplete?(.existing)
+        onComplete?()
     }
 }
 
@@ -187,11 +187,10 @@ extension ImportWalletSceneViewModel {
             nameRecord: nameRecordViewModel?.state.record(),
             source: .import,
         )
-        let wallet = result.wallet().toPrimitives()
         session = session.onImporting(isImporting: false)
         switch result {
-        case .new: onComplete?(.new(wallet))
-        case .existing: isPresentingExistingWalletName = wallet.name
+        case .new: onComplete?()
+        case let .existing(wallet): isPresentingExistingWalletName = wallet.name
         }
     }
 }

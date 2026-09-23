@@ -142,7 +142,7 @@ impl fmt::Debug for GemWalletImportRequest {
 
 #[derive(Debug, Clone, uniffi::Enum)]
 pub enum GemWalletImportResult {
-    New { wallet: Wallet, has_existing_wallets: bool },
+    New { wallet: Wallet },
     Existing { wallet: Wallet },
 }
 
@@ -151,13 +151,6 @@ impl GemWalletImportResult {
     pub fn wallet(&self) -> Wallet {
         match self {
             Self::New { wallet, .. } | Self::Existing { wallet } => wallet.clone(),
-        }
-    }
-
-    pub fn has_existing_wallets(&self) -> bool {
-        match self {
-            Self::New { has_existing_wallets, .. } => *has_existing_wallets,
-            Self::Existing { .. } => true,
         }
     }
 }

@@ -306,7 +306,6 @@ impl GemWalletService {
         if let Some(wallet) = rules::existing_wallet(&wallets, &wallet_id, preview.wallet_type) {
             return Ok(GemWalletImportResult::Existing { wallet });
         }
-        let has_existing_wallets = !wallets.is_empty();
         let index = rules::next_wallet_index(&wallets);
         let (wallet, stored_secret) = match import {
             GemWalletImportType::Address { address, chain } => (
@@ -345,7 +344,7 @@ impl GemWalletService {
             self.preferences.complete_initial_synchronization(wallet.id.clone())?;
         }
         self.invalidate_subscriptions().await?;
-        Ok(GemWalletImportResult::New { wallet, has_existing_wallets })
+        Ok(GemWalletImportResult::New { wallet })
     }
 
     pub async fn setup_chains_outcome(&self, chains: Vec<Chain>) -> Result<SetupChainsOutcome, GemServiceError> {
@@ -487,13 +486,13 @@ mod tests {
 
             let first = context.service.import_wallet(request(PHRASE, "Wallet #1")).await.unwrap();
 
-            assert!(matches!(first, GemWalletImportResult::New { has_existing_wallets: false, .. }));
+            assert!(matches!(first, GemWalletImportResult::New { .. }));
             assert_eq!(first.wallet().name, "Wallet #1");
             assert_eq!(context.service.current_wallet_id().unwrap(), Some(first.wallet().id), "the import activates the wallet without a second call");
 
             let second = context.service.import_wallet(request(OTHER_PHRASE, "Wallet #2")).await.unwrap();
 
-            assert!(matches!(second, GemWalletImportResult::New { has_existing_wallets: true, .. }));
+            assert!(matches!(second, GemWalletImportResult::New { .. }));
             assert_eq!(context.service.current_wallet_id().unwrap(), Some(second.wallet().id));
 
             let error = context.service.import_wallet(request(PHRASE, "   ")).await.unwrap_err();

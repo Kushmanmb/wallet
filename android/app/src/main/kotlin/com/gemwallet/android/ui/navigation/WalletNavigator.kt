@@ -21,8 +21,6 @@ import com.gemwallet.android.features.import_wallet.navigation.ImportSelectTypeR
 import com.gemwallet.android.features.onboarding.AcceptTermsDestination
 import com.gemwallet.android.features.onboarding.AcceptTermsRoute
 import com.gemwallet.android.features.onboarding.OnboardingRoute
-import com.gemwallet.android.features.setup_wallet.navigation.SetupWalletRoute
-import com.gemwallet.android.features.wallet.presents.WalletImageSource
 import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.model.ImportType
 import com.gemwallet.android.routes
@@ -209,10 +207,9 @@ class WalletNavigator(
         push(importType.toImportRoute())
     }
     fun openWallet(walletId: WalletId) = push(WalletDetailsRoute(walletId))
-    fun openWalletImage(walletId: WalletId, source: WalletImageSource = WalletImageSource.Wallet) = push(WalletImageRoute(walletId, source))
+    fun openWalletImage(walletId: WalletId) = push(WalletImageRoute(walletId))
     fun openWalletSecurityReminder(input: WalletSecretInput) = push(WalletSecurityReminderRoute(input))
     fun finishWalletSecurityReminder(input: WalletSecretInput) = replaceTop(WalletPhraseRoute(input))
-    fun openSetupWallet(walletId: WalletId) = replaceTop(SetupWalletRoute(walletId))
     fun openAddAsset() = push(AddAssetRoute)
     fun openAsset(assetId: AssetId) = openAssetRoute(AssetRoute(assetId))
     fun openNetworkAssets(chain: Chain) = push(NetworkAssetsRoute(chain))

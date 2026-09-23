@@ -5,9 +5,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.IoDispatcher
-import com.gemwallet.android.application.wallet_import.values.WalletImportResult
 import com.gemwallet.android.ext.errorText
-import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ext.words
 import com.gemwallet.android.features.import_wallet.viewmodels.localization.fieldStringRes
 import com.gemwallet.android.features.import_wallet.viewmodels.localization.tabStringRes
@@ -108,7 +106,7 @@ class ImportViewModel @Inject constructor(
         }
     }
 
-    fun import(onImported: (WalletImportResult) -> Unit) {
+    fun import(onImported: () -> Unit) {
         if (session.value.isImporting) {
             return
         }
@@ -119,16 +117,12 @@ class ImportViewModel @Inject constructor(
             try {
                 val importType = state.value.importType
                 val imported = service.importWallet(importType.kind, importType.chain, data, nameRecord, WalletSource.Import, context)
-                val result = when (imported) {
-                    is GemWalletImportResult.Existing -> WalletImportResult.Existing(imported.wallet().toPrimitives())
-                    is GemWalletImportResult.New -> WalletImportResult.New(imported.wallet().toPrimitives())
-                }
                 state.update { it.copy(dataError = null) }
                 session.update { it.onImporting(false) }
                 withContext(Dispatchers.Main) {
-                    when (result) {
-                        is WalletImportResult.New -> onImported(result)
-                        is WalletImportResult.Existing -> state.update { it.copy(existingWalletResult = result) }
+                    when (imported) {
+                        is GemWalletImportResult.New -> onImported()
+                        is GemWalletImportResult.Existing -> state.update { it.copy(existingWalletName = imported.wallet.name) }
                     }
                 }
             } catch (err: CancellationException) {
@@ -141,7 +135,7 @@ class ImportViewModel @Inject constructor(
     }
 
     fun dismissExistingWallet() {
-        state.update { it.copy(existingWalletResult = null) }
+        state.update { it.copy(existingWalletName = null) }
     }
 }
 
@@ -152,7 +146,7 @@ data class ImportViewModelState(
     val tabs: List<GemWalletImportKind> = emptyList(),
     val showsTabs: Boolean = false,
     val dataError: Throwable? = null,
-    val existingWalletResult: WalletImportResult.Existing? = null,
+    val existingWalletName: String? = null,
 ) {
     fun toUIState(loading: Boolean, context: Context): ImportUIState = ImportUIState(
         loading = loading,
@@ -163,7 +157,7 @@ data class ImportViewModelState(
         input = importType.kind.inputUiModel(),
         importType = importType,
         dataError = dataError?.errorText()?.text(context)?.ifBlank { context.getString(R.string.errors_unknown_try_again) },
-        existingWalletResult = existingWalletResult,
+        existingWalletName = existingWalletName,
     )
 }
 
@@ -176,7 +170,7 @@ data class ImportUIState(
     val showsTabs: Boolean = false,
     val input: ImportInputUIModel = GemWalletImportKind.PHRASE.inputUiModel(),
     val dataError: String? = null,
-    val existingWalletResult: WalletImportResult.Existing? = null,
+    val existingWalletName: String? = null,
 )
 
 data class ImportTextUIModel(val text: String, val cursor: Int)

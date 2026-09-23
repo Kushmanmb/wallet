@@ -20,6 +20,7 @@ pub use store::GemBalanceStore;
 use crate::gateway::GemGateway;
 use crate::services::assets::GemAssetsService;
 use crate::services::stream::GemStreamSubscriptionService;
+use crate::services::wallet::rules as wallet_rules;
 use crate::services::wallet_session::GemWalletSessionService;
 use rules::{BalanceKind, BalanceRequest};
 
@@ -110,12 +111,17 @@ impl GemBalanceService {
     pub async fn setup_wallet(&self, wallet: Wallet) -> Result<(), GemServiceError> {
         let (enabled, disabled) = crate::services::assets::rules::default_balances(&wallet);
         let stored = self.store.get_available_balances(wallet.id.clone(), [enabled.clone(), disabled.clone()].concat()).await?;
+        let has_synced = !stored.is_empty();
         let stored_ids: Vec<AssetId> = stored.into_iter().map(|balance| balance.asset_id).collect();
         let enabled = rules::missing_asset_ids(&enabled, &stored_ids);
         let disabled = rules::missing_asset_ids(&disabled, &stored_ids);
         self.assets.add_balances(wallet.id.clone(), enabled.clone(), true).await?;
         self.assets.add_balances(wallet.id.clone(), disabled, false).await?;
-        self.refresh_enabled_assets(wallet.id, enabled).await;
+        if wallet_rules::is_new_wallet(&wallet.source, has_synced) {
+            let _ = self.stream.resubscribe().await;
+        } else {
+            self.refresh_enabled_assets(wallet.id, enabled).await;
+        }
         Ok(())
     }
 
@@ -219,10 +225,12 @@ impl GemBalanceService {
 mod tests {
     use super::model::GemAssetConfiguration;
     use super::*;
+    use crate::services::asset_discovery::testkit::DiscoveryTestkit;
     use crate::services::assets::rules::{default_asset_basic, default_balances};
+    use crate::testkit::TestAlienProvider;
     use futures::executor::block_on;
     use num_bigint::BigUint;
-    use primitives::Chain;
+    use primitives::{Chain, WalletSource};
     use testkit::{BalanceTestkit, MemoryBalanceStore};
 
     use crate::services::assets::GemAssetStore;
@@ -335,6 +343,34 @@ mod tests {
             assert_eq!(added.len(), 2);
             assert_eq!(added[0], (wallet.id.clone(), enabled, true));
             assert_eq!(added[1], (wallet.id, disabled, false));
+        });
+    }
+
+    #[test]
+    fn test_setup_of_a_created_wallet_adds_its_balances_without_asking_the_chains() {
+        block_on(async {
+            let imported = Wallet::mock_with_chains(&[Chain::Ethereum]);
+            let created = Wallet {
+                source: WalletSource::Create,
+                ..imported.clone()
+            };
+            let setup = |wallet: Wallet| async move {
+                let testkit = DiscoveryTestkit::with_provider(Arc::new(TestAlienProvider::with_status(503)), wallet.clone());
+                testkit.asset_store.save_assets(vec![default_asset_basic(Asset::from_chain(Chain::Ethereum))]).await.unwrap();
+                testkit.balance.setup_wallet(wallet).await.unwrap();
+                testkit
+            };
+
+            let created_kit = setup(created.clone()).await;
+            let imported_kit = setup(imported).await;
+
+            assert_eq!(
+                created_kit.asset_store.added_balances.lock().unwrap()[0],
+                (created.id.clone(), default_balances(&created).0, true),
+                "a created wallet still gets its default rows"
+            );
+            assert!(created_kit.provider.requested_paths().is_empty(), "a created wallet has nothing to fetch yet");
+            assert!(!imported_kit.provider.requested_paths().is_empty(), "an imported wallet asks the chains for what it holds");
         });
     }
 

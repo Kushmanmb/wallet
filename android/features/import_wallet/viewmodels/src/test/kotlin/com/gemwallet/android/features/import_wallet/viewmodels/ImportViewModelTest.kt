@@ -41,7 +41,7 @@ class ImportViewModelTest {
 
     private fun service() = mockk<GemWalletServiceInterface>(relaxed = true) {
         coEvery { defaultWalletName(any()) } returns GemLocalizedText.WalletDefaultName(index = 1)
-        coEvery { importWallet(any()) } returns GemWalletImportResult.New(mockWallet().toGem(), false)
+        coEvery { importWallet(any()) } returns GemWalletImportResult.New(mockWallet().toGem())
         every { importScreen(any()) } returns GemWalletImportScreen(
             title = GemLocalizedText.WalletMulticoin,
             kinds = listOf(GemWalletImportKind.PHRASE, GemWalletImportKind.PRIVATE_KEY, GemWalletImportKind.ADDRESS),
