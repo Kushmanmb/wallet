@@ -93,6 +93,11 @@ data class DbAssetMarket(
     val allTimeLow: Double? = null,
     val allTimeLowDate: Long? = null,
     val allTimeLowChangePercentage: Double? = null,
+    val marketCapUsd: Double? = null,
+    val marketCapFdvUsd: Double? = null,
+    val totalVolumeUsd: Double? = null,
+    val allTimeHighUsd: Double? = null,
+    val allTimeLowUsd: Double? = null,
 )
 
 @Entity(
@@ -242,13 +247,13 @@ fun AssetMarket.toRecord(assetId: AssetId) = DbAssetMarket(
     allTimeLowChangePercentage = allTimeLowValue?.percentage?.toDouble(),
 )
 
-fun AssetMarket.toRecord(assetId: AssetId, rate: Double) = copy(
-    marketCap = marketCap?.times(rate),
-    marketCapFdv = marketCapFdv?.times(rate),
-    totalVolume = totalVolume?.times(rate),
-    allTimeHighValue = allTimeHighValue?.withRate(rate),
-    allTimeLowValue = allTimeLowValue?.withRate(rate),
-).toRecord(assetId)
+fun AssetMarket.toRecord(assetId: AssetId, usd: AssetMarket) = toRecord(assetId).copy(
+    marketCapUsd = usd.marketCap,
+    marketCapFdvUsd = usd.marketCapFdv,
+    totalVolumeUsd = usd.totalVolume,
+    allTimeHighUsd = usd.allTimeHighValue?.value?.toDouble(),
+    allTimeLowUsd = usd.allTimeLowValue?.value?.toDouble(),
+)
 
 fun DbAssetMarket.toDTO() = AssetMarket(
     marketCap = marketCap,
@@ -273,5 +278,3 @@ fun DbAssetMarket.toDTO() = AssetMarket(
         )
     },
 )
-
-private fun ChartValuePercentage.withRate(rate: Double) = copy(value = value * rate.toFloat())

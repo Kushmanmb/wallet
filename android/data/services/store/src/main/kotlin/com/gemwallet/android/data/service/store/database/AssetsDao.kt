@@ -115,12 +115,6 @@ interface AssetsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun setMarket(market: DbAssetMarket)
 
-    @Query("UPDATE asset_market SET marketCap = marketCap * :factor, marketCapFdv = marketCapFdv * :factor, totalVolume = totalVolume * :factor, allTimeHigh = allTimeHigh * :factor, allTimeLow = allTimeLow * :factor")
-    suspend fun convertMarkets(factor: Double)
-
-    @Query("UPDATE asset_market SET marketCap = NULL, marketCapFdv = NULL, totalVolume = NULL, allTimeHigh = NULL, allTimeLow = NULL")
-    suspend fun clearMarketValues()
-
     @Transaction
     suspend fun upsertAssetMetadata(asset: DbAsset, links: List<DbAssetLink>, market: DbAssetMarket?) {
         upsert(asset)

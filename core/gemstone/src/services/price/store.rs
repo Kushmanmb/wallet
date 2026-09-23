@@ -1,9 +1,9 @@
 use crate::services::error::GemServiceError;
 use async_trait::async_trait;
 use primitives::currency::Currency;
-use primitives::{AssetId, AssetMarket, AssetPrice, FiatRate};
+use primitives::{AssetId, AssetPrice, FiatRate};
 
-use super::model::GemPriceUpdate;
+use super::model::{GemMarketUpdate, GemPriceUpdate};
 
 #[uniffi::export(rust, foreign)]
 #[async_trait]
@@ -14,6 +14,5 @@ pub trait GemPriceStore: Send + Sync {
     async fn save_rates(&self, rates: Vec<FiatRate>, conversion: Option<FiatRate>) -> Result<(), GemServiceError>;
     async fn save_prices(&self, currency: Currency, prices: Vec<GemPriceUpdate>) -> Result<(), GemServiceError>;
     async fn convert_prices(&self, currency: Currency, rate: f64) -> Result<(), GemServiceError>;
-    async fn save_market(&self, asset_id: AssetId, market: AssetMarket) -> Result<(), GemServiceError>;
-    async fn convert_markets(&self, factor: Option<f64>) -> Result<(), GemServiceError>;
+    async fn save_market(&self, market: GemMarketUpdate) -> Result<(), GemServiceError>;
 }

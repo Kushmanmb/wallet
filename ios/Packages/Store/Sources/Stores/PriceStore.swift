@@ -51,28 +51,9 @@ public struct PriceStore: Sendable {
         }
     }
 
-    public func updateMarket(assetId: AssetId, market: AssetMarket) throws {
+    public func updateMarket(assetId: AssetId, market: AssetMarket, marketUsd: AssetMarket) throws {
         try db.write { db in
-            try AssetMarketRecord(assetId: assetId, market: market).upsert(db)
-        }
-    }
-
-    public func convertMarkets(factor: Double?) throws {
-        let columns = [
-            AssetMarketRecord.Columns.marketCap,
-            AssetMarketRecord.Columns.marketCapFdv,
-            AssetMarketRecord.Columns.totalVolume,
-            AssetMarketRecord.Columns.allTimeHigh,
-            AssetMarketRecord.Columns.allTimeLow,
-        ]
-        try db.write { db in
-            _ = try AssetMarketRecord.updateAll(db, columns.map { column in
-                if let factor {
-                    column.set(to: column * factor)
-                } else {
-                    column.set(to: nil)
-                }
-            })
+            try AssetMarketRecord(assetId: assetId, market: market, marketUsd: marketUsd).upsert(db)
         }
     }
 
@@ -93,7 +74,8 @@ public struct PriceStore: Sendable {
     }
 
     private func convertPrices(_ db: Database, rate: Double) throws -> Int {
-        try PriceRecord.updateAll(db, [
+        try AssetMarketRecord.updateAll(db, AssetMarketRecord.Columns.usdPairs.map { $0.value.set(to: $0.usd * rate) })
+        return try PriceRecord.updateAll(db, [
             PriceRecord.Columns.price.set(to: PriceRecord.Columns.priceUsd * rate),
         ])
     }

@@ -13,6 +13,7 @@ import com.wallet.core.primitives.Currency
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import uniffi.gemstone.AssetPrice
+import uniffi.gemstone.GemMarketUpdate
 import uniffi.gemstone.GemPriceStore
 import uniffi.gemstone.GemPriceUpdate
 
@@ -47,11 +48,9 @@ class GemstonePriceStore(private val pricesDao: PricesDao, private val assetsDao
 
     override suspend fun convertPrices(currency: uniffi.gemstone.Currency, rate: Double) = pricesDao.updateValues(currency.toPrimitives(), rate)
 
-    override suspend fun saveMarket(assetId: String, market: uniffi.gemstone.AssetMarket) {
-        assetsDao.setMarket(market.toPrimitives().toRecord(AssetId(assetId)))
+    override suspend fun saveMarket(market: GemMarketUpdate) {
+        assetsDao.setMarket(market.market.toPrimitives().toRecord(AssetId(market.assetId), market.marketUsd.toPrimitives()))
     }
-
-    override suspend fun convertMarkets(factor: Double?) = factor?.let { assetsDao.convertMarkets(it) } ?: assetsDao.clearMarketValues()
 
     fun observeUsdPrice(assetId: AssetId): Flow<Double?> = pricesDao.getUsdPrice(assetId.toIdentifier())
 }

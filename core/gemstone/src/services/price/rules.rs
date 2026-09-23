@@ -14,24 +14,6 @@ pub fn rate_or_base(currency: Currency, stored: Option<FiatRate>) -> Option<Fiat
     stored.or_else(|| (currency == Currency::USD).then_some(FiatRate { symbol: Currency::USD, rate: 1.0 }))
 }
 
-pub fn market_conversion(previous: Option<&FiatRate>, next: &FiatRate) -> Option<f64> {
-    previous.filter(|previous| previous.rate > 0.0).map(|previous| next.rate / previous.rate)
-}
-
-pub fn market_at_rate(market: AssetMarket, rate: Option<f64>) -> AssetMarket {
-    match rate {
-        Some(rate) => market_in_currency(market, rate),
-        None => AssetMarket {
-            market_cap: None,
-            market_cap_fdv: None,
-            total_volume: None,
-            all_time_high_value: None,
-            all_time_low_value: None,
-            ..market
-        },
-    }
-}
-
 pub fn market_in_currency(market: AssetMarket, rate: f64) -> AssetMarket {
     let convert = |value: Option<f64>| value.map(|value| value * rate);
     AssetMarket {

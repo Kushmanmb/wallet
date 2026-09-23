@@ -90,6 +90,17 @@ struct Migrations {
             try FiatTransactionRecord.create(db: db)
             try SupportMessageRecord.create(db: db)
         }
+        migrator.registerMigration("Add USD market values to \(AssetMarketRecord.databaseTableName)") { db in
+            let columns = try db.columns(in: AssetMarketRecord.databaseTableName).map(\.name)
+            let missing = AssetMarketRecord.Columns.usdPairs.map(\.usd.name).filter { !columns.contains($0) }
+            guard !missing.isEmpty else { return }
+            try db.alter(table: AssetMarketRecord.databaseTableName) { table in
+                for name in missing {
+                    table.add(column: name, .double)
+                }
+            }
+        }
+
         try migrator.migrate(dbQueue)
     }
 
