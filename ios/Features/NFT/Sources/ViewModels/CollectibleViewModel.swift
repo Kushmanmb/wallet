@@ -26,6 +26,7 @@ import SwiftUI
 public final class CollectibleViewModel {
     private let wallet: Wallet
     private let service: any GemCollectibleServiceProtocol
+    private let gallery: any ImageGallerySaving
 
     public let query: ObservableQuery<NFTAssetRequest>
 
@@ -40,10 +41,12 @@ public final class CollectibleViewModel {
         wallet: Wallet,
         assetData: NFTAssetData,
         service: any GemCollectibleServiceProtocol,
+        gallery: any ImageGallerySaving = ImageGalleryService(),
         isPresentingSelectedAssetInput: Binding<SelectedAssetInput?>,
     ) {
         self.wallet = wallet
         self.service = service
+        self.gallery = gallery
         self.isPresentingSelectedAssetInput = isPresentingSelectedAssetInput
         query = ObservableQuery(
             NFTAssetRequest(walletId: wallet.id, assetId: assetData.asset.id),
@@ -149,31 +152,35 @@ extension CollectibleViewModel {
 
     func onSelectSaveToGallery() {
         Task {
-            do throws(ImageGalleryServiceError) {
-                try await saveImageToGallery()
-                isPresentingToast = .success(Localized.Nft.saveToPhotos)
-            } catch {
-                switch error {
-                case .wrongURL, .invalidData, .invalidResponse, .unexpectedStatusCode, .urlSessionError, .saveFailed:
-                    isPresentingAlertMessage = AlertMessage(message: Localized.Errors.errorOccurred)
-                case .permissionDenied:
-                    isPresentingAlertMessage = AlertMessage(
-                        title: Localized.Permissions.accessDenied,
-                        message: Localized.Permissions.Image.PhotoAccess.Denied.description,
-                        actions: [
-                            AlertAction(
-                                title: Localized.Common.openSettings,
-                                isDefaultAction: true,
-                                action: {
-                                    Task { @MainActor in
-                                        self.openSettings()
-                                    }
-                                },
-                            ),
-                            .cancel(title: Localized.Common.cancel),
-                        ],
-                    )
-                }
+            await saveToGallery()
+        }
+    }
+
+    func saveToGallery() async {
+        do throws(ImageGalleryServiceError) {
+            try await saveImageToGallery()
+            isPresentingToast = .success(Localized.Nft.saveToPhotos)
+        } catch {
+            switch error {
+            case .wrongURL, .invalidData, .invalidResponse, .unexpectedStatusCode, .urlSessionError, .saveFailed:
+                isPresentingAlertMessage = AlertMessage(message: Localized.Errors.errorOccurred)
+            case .permissionDenied:
+                isPresentingAlertMessage = AlertMessage(
+                    title: Localized.Permissions.accessDenied,
+                    message: Localized.Permissions.Image.PhotoAccess.Denied.description,
+                    actions: [
+                        AlertAction(
+                            title: Localized.Common.openSettings,
+                            isDefaultAction: true,
+                            action: {
+                                Task { @MainActor in
+                                    self.openSettings()
+                                }
+                            },
+                        ),
+                        .cancel(title: Localized.Common.cancel),
+                    ],
+                )
             }
         }
     }
@@ -236,7 +243,6 @@ extension CollectibleViewModel {
         guard let url = assetData.asset.images.preview.url.asURL else {
             throw ImageGalleryServiceError.wrongURL
         }
-        let saver = ImageGalleryService()
-        try await saver.saveImageFromURL(url)
+        try await gallery.saveImageFromURL(url)
     }
 }

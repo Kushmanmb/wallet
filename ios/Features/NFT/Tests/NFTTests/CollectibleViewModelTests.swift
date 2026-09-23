@@ -1,6 +1,8 @@
 import Foundation
 import GemstonePrimitivesTestKit
 import GemstoneServicesTestKit
+import ImageGalleryServiceTestKit
+import Localization
 @testable import NFT
 import NFTTestKit
 import Primitives
@@ -11,6 +13,39 @@ import Testing
 
 @MainActor
 struct CollectibleViewModelTests {
+    @Test
+    func aSavedImageShowsTheSuccessToastOnlyAfterPhotosFinishes() async {
+        let model = CollectibleViewModel.mock(assetData: .mock(), gallery: ImageGallerySaverMock(result: {
+            try? await Task.sleep(for: .milliseconds(50))
+            return nil
+        }))
+
+        await model.saveToGallery()
+
+        #expect(model.isPresentingToast != nil)
+        #expect(model.isPresentingAlertMessage == nil)
+    }
+
+    @Test
+    func aFailedPhotosWriteShowsTheErrorInsteadOfASuccessToast() async {
+        let model = CollectibleViewModel.mock(assetData: .mock(), gallery: ImageGallerySaverMock(result: { .saveFailed(AnyError("disk")) }))
+
+        await model.saveToGallery()
+
+        #expect(model.isPresentingToast == nil)
+        #expect(model.isPresentingAlertMessage?.message == Localized.Errors.errorOccurred)
+    }
+
+    @Test
+    func deniedPhotosAccessOffersTheSettings() async {
+        let model = CollectibleViewModel.mock(assetData: .mock(), gallery: ImageGallerySaverMock(result: { .permissionDenied }))
+
+        await model.saveToGallery()
+
+        #expect(model.isPresentingToast == nil)
+        #expect(model.isPresentingAlertMessage?.title == Localized.Permissions.accessDenied)
+    }
+
     @Test
     func canSendOnlyWhileTheWalletHoldsTheAsset() {
         let assetData = NFTAssetData.mock(asset: .mock(chain: .ethereum))

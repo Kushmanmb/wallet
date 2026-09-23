@@ -57,6 +57,8 @@ let package = Package(
                 "NFT",
                 "Gemstone",
                 "Primitives",
+                .product(name: "ImageGalleryService", package: "SystemServices"),
+                .product(name: "ImageGalleryServiceTestKit", package: "SystemServices"),
                 .product(name: "PrimitivesTestKit", package: "Primitives"),
                 .product(name: "GemstoneServicesTestKit", package: "GemstoneServices"),
             ],
@@ -65,6 +67,9 @@ let package = Package(
         .testTarget(
             name: "NFTTests",
             dependencies: [
+                "Localization",
+                .product(name: "ImageGalleryService", package: "SystemServices"),
+                .product(name: "ImageGalleryServiceTestKit", package: "SystemServices"),
                 .product(name: "GemstonePrimitivesTestKit", package: "GemstonePrimitives"),
                 .product(name: "PrimitivesTestKit", package: "Primitives"),
                 .product(name: "StoreTestKit", package: "Store"),

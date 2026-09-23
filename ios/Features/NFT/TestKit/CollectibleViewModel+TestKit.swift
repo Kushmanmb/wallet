@@ -2,6 +2,8 @@
 
 import class Gemstone.GemCollectibleService
 import GemstoneServicesTestKit
+import ImageGalleryService
+import ImageGalleryServiceTestKit
 import NFT
 import Primitives
 import PrimitivesTestKit
@@ -11,11 +13,13 @@ public extension CollectibleViewModel {
     static func mock(
         wallet: Wallet = .mock(),
         assetData: NFTAssetData = .mock(),
+        gallery: any ImageGallerySaving = ImageGallerySaverMock(),
     ) -> CollectibleViewModel {
         CollectibleViewModel(
             wallet: wallet,
             assetData: assetData,
             service: GemCollectibleService.mock(),
+            gallery: gallery,
             isPresentingSelectedAssetInput: .constant(.none),
         )
     }
