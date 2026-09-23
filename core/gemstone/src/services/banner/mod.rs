@@ -37,6 +37,9 @@ impl GemBannerService {
     }
 
     pub async fn set_banner_state(&self, key: GemBannerKey, state: BannerState) -> Result<(), GemServiceError> {
+        if self.store.get_state(key.clone()).await? == Some(state) {
+            return Ok(());
+        }
         self.store.set_state(key, state).await
     }
 
@@ -106,6 +109,24 @@ mod tests {
 
             assert_eq!(store.get_state(key).await.unwrap(), Some(BannerState::Cancelled));
             assert_eq!(store.writes.lock().unwrap().len(), 1);
+        });
+    }
+
+    #[test]
+    fn test_setting_the_stored_state_again_writes_nothing() {
+        block_on(async {
+            let store = Arc::new(MemoryBannerStore::default());
+            let service = GemBannerService::new(store.clone());
+            let key = rules::wallet_setup_keys(&Wallet {
+                source: WalletSource::Import,
+                ..Wallet::mock_with_chains(&[Chain::Xrp])
+            })
+            .remove(0);
+
+            service.set_banner_state(key.clone(), BannerState::Cancelled).await.unwrap();
+            service.set_banner_state(key, BannerState::Cancelled).await.unwrap();
+
+            assert_eq!(*store.state_writes.lock().unwrap(), 1);
         });
     }
 }

@@ -17,12 +17,7 @@ class GemstoneBannerStore(private val bannersDao: BannersDao) : GemBannerStore {
 
     override suspend fun getState(key: GemBannerKey): uniffi.gemstone.BannerState? = bannersDao.getBanner(key.identifier())?.state?.toGem()
 
-    override suspend fun setState(key: GemBannerKey, state: uniffi.gemstone.BannerState) {
-        val record = key.toRecord(state)
-        if (bannersDao.getBanner(record.id)?.state != record.state) {
-            bannersDao.saveBanner(record)
-        }
-    }
+    override suspend fun setState(key: GemBannerKey, state: uniffi.gemstone.BannerState) = bannersDao.saveBanner(key.toRecord(state))
 
     override suspend fun addBanners(keys: List<GemBannerKey>, state: uniffi.gemstone.BannerState) {
         bannersDao.addBanners(keys.map { it.toRecord(state) })
