@@ -30,7 +30,6 @@ use strum::IntoEnumIterator;
 
 use ::defi::{DefiProviderClient, DefiProviderConfig};
 use ::nft::{NFTProviderClient, NFTProviderConfig};
-use assets::{AssetsClient, SearchClient};
 use chain_providers::ProviderFactory;
 use config::ConfigClient;
 use config_keys::ConfigKey;
@@ -40,7 +39,6 @@ use devices::{
 };
 use model::APIService;
 use name_resolver::{NameClient, NameConfig, NameProviderFactory};
-use primitives::PriceConfig;
 use rocket::{Build, Rocket, catchers, routes};
 use services::Services;
 use settings::Settings;
@@ -186,9 +184,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let database = services.database();
     let cacher_client = services.cacher().await?;
     let config_cacher = services.config();
-    let price_config = PriceConfig {
-        primary_price_max_age: config_cacher.get_duration(config_keys::ConfigKey::PricePrimaryMaxAge).await?,
-    };
+    let price_config = services.price_config().await?;
 
     let price_client = services.prices(cacher_client.clone());
     let charts_client = services.charts(price_config);
@@ -227,9 +223,8 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
         metrics.clone(),
     );
     let wallet_configuration_client = WalletConfigurationClient::new(database.clone(), services.chain_providers(&user_agent), cacher_client.clone());
-    let assets_client = AssetsClient::new(database.clone(), price_config);
-    let search_index_client = services.search_index().await?;
-    let search_client = SearchClient::new(&search_index_client, price_client.clone());
+    let assets_client = services.assets(price_config);
+    let search_client = services.search(price_client.clone()).await?;
     let swap_client = SwapClient::new(database.clone());
     let fiat_quotes_client = FiatQuotesClient::new(database.clone(), services.fiat(stream_producer.clone()).await?);
     let nft_config = NFTProviderConfig::from_settings(&settings);

@@ -7,11 +7,11 @@ use number_formatter::{BigNumberFormatter, CryptoFiatConverter};
 use primitives::{Asset, Chain, FeePriority, FeeUnitType};
 use rocket::{State, get};
 use serde::{Deserialize, Serialize};
+use services::assets::AssetsClient;
 use services::prices::PriceClient;
 use strum::IntoEnumIterator;
 
 use crate::api_clients::PermissionChainRead;
-use crate::assets::AssetsClient;
 use crate::params::ChainParam;
 use crate::responders::{ApiError, ApiResponse};
 

@@ -1,7 +1,8 @@
-use super::SearchRequest;
 use serde_json::Value;
 
-pub fn build_assets_filters(request: &SearchRequest) -> Vec<String> {
+use super::search_request::SearchRequest;
+
+pub(super) fn build_assets_filters(request: &SearchRequest) -> Vec<String> {
     let mut filters = vec![];
     filters.push("properties.isEnabled = true".to_string());
     filters.push(format!("score.rank > {}", request.rank_threshold()));
@@ -17,11 +18,11 @@ pub fn build_assets_filters(request: &SearchRequest) -> Vec<String> {
     filters
 }
 
-pub fn build_perpetuals_filters(request: &SearchRequest) -> Vec<String> {
+pub(super) fn build_perpetuals_filters(request: &SearchRequest) -> Vec<String> {
     if request.has_tag_filter() { vec![filter_array("tags", request.tags.clone())] } else { vec![] }
 }
 
-pub fn build_filter(filters: Vec<String>) -> String {
+pub(super) fn build_filter(filters: Vec<String>) -> String {
     filters.join(" AND ")
 }
 
@@ -37,7 +38,7 @@ fn filter_string(value: String) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::params::MAX_QUERY_LIMIT;
+    use primitives::MAX_QUERY_LIMIT;
 
     #[test]
     fn build_assets_filters_short_query() {

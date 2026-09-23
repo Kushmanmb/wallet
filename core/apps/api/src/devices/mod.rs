@@ -6,7 +6,6 @@ pub mod constants;
 pub mod error;
 pub mod guard;
 pub mod signature;
-use crate::assets::AssetsClient;
 use crate::params::{AssetIdParam, ChainParam, ChartPeriodParam, CurrencyParam, FiatProviderIdParam, FiatQuoteTypeParam, NftAssetIdParam, QueryLimitParam, TransactionIdParam, UserAgent};
 use crate::responders::{ApiError, ApiResponse};
 use crate::support::SupportApiClient;
@@ -29,6 +28,7 @@ use primitives::{
     ScanTransaction, ScanTransactionPayload, Transaction, TransactionsResponse, WalletConfigurationResult, WalletId, WalletSubscription, WalletSubscriptionChains,
 };
 use rocket::{FromForm, State, delete, get, post, put};
+use services::assets::AssetsClient;
 use services::auth::AuthClient;
 use services::defi::DefiClient;
 use services::nft::NFTClient;

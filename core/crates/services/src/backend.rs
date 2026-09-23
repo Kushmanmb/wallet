@@ -23,6 +23,7 @@ use storage::{Database, DatabaseError};
 use streamer::{Retry, ShutdownReceiver, StreamProducer, StreamProducerConfig};
 
 use crate::assets::ListsClient;
+use crate::assets::{AssetsClient, SearchClient};
 use crate::auth::AuthClient;
 use crate::config::ConfigCacher;
 use crate::defi::DefiClient;
@@ -171,6 +172,20 @@ impl Services {
 
     pub fn chain_providers_for(&self, chain: Chain, user_agent: &str) -> ChainProviders {
         ChainProviders::for_chain(chain, &self.settings, user_agent)
+    }
+
+    pub async fn price_config(&self) -> Result<PriceConfig, Box<dyn Error + Send + Sync>> {
+        Ok(PriceConfig {
+            primary_price_max_age: self.config().get_duration(ConfigKey::PricePrimaryMaxAge).await?,
+        })
+    }
+
+    pub fn assets(&self, config: PriceConfig) -> AssetsClient {
+        AssetsClient::new(self.database(), config)
+    }
+
+    pub async fn search(&self, price_client: PriceClient) -> Result<SearchClient, Box<dyn Error + Send + Sync>> {
+        Ok(SearchClient::new(self.search_index().await?, price_client))
     }
 }
 

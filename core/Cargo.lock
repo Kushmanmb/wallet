@@ -533,7 +533,6 @@ dependencies = [
  "rewards",
  "rocket",
  "rocket_ws",
- "search_index",
  "security",
  "serde",
  "serde_json",

@@ -94,7 +94,7 @@ BACKEND = ROOT / "core"
 INFRA_CRATES = {"storage", "cacher", "streamer", "search_index", "pusher"}
 INFRA_DEPENDENTS = {
     "services": INFRA_CRATES,
-    "api": {"cacher", "pusher", "search_index", "storage", "streamer"},
+    "api": {"cacher", "pusher", "storage", "streamer"},
     "daemon": {"cacher", "pusher", "search_index", "storage", "streamer"},
 }
 CARGO_SECTION = re.compile(r"^\[(.+)\]\s*$")

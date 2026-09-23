@@ -1,14 +1,11 @@
-pub mod client;
-mod filter;
 mod model;
 
 use crate::params::{AssetIdParam, CurrencyParam};
 use crate::responders::{ApiError, ApiResponse};
-pub use client::{AssetsClient, SearchClient};
 use model::SearchParams;
-pub use model::SearchRequest;
 use primitives::{AssetBasic, AssetFull, AssetId, SearchResponse};
 use rocket::{State, get, post, serde::json::Json};
+use services::assets::{AssetsClient, SearchClient, SearchRequest};
 use services::prices::PriceClient;
 
 #[get("/assets/<asset_id>?<currency>")]
