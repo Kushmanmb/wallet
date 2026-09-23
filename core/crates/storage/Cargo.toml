@@ -20,6 +20,8 @@ primitives = { path = "../primitives" }
 
 [features]
 testkit = ["primitives/testkit"]
+database_integration_tests = ["testkit"]
 
 [dev-dependencies]
+tokio = { workspace = true }
 primitives = { path = "../primitives", features = ["testkit"] }

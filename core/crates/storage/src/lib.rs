@@ -91,3 +91,37 @@ impl Database {
         self.run(move |client| client.transaction(operation)).await
     }
 }
+
+#[cfg(all(test, feature = "database_integration_tests"))]
+mod database_integration_tests {
+    use primitives::Chain;
+
+    use crate::{ChainsRepository, Database, DatabaseError, ParserStateRepository};
+
+    #[tokio::test]
+    async fn test_transaction() {
+        let database = Database::mock();
+        database
+            .run(|client| -> Result<_, DatabaseError> {
+                client.add_chains(vec![Chain::Ethereum])?;
+                ParserStateRepository::add_parser_state(client, Chain::Ethereum, 12_000)
+            })
+            .await
+            .unwrap();
+        let initial = database.run(|client| ParserStateRepository::get_parser_state(client, Chain::Ethereum)).await.unwrap().current_block;
+
+        let rolled_back: Result<(), DatabaseError> = database
+            .transaction(move |client| {
+                ParserStateRepository::set_parser_state_current_block(client, Chain::Ethereum, initial + 100)?;
+                Err(DatabaseError::Error("rollback".to_string()))
+            })
+            .await;
+
+        assert!(rolled_back.is_err());
+        assert_eq!(database.run(|client| ParserStateRepository::get_parser_state(client, Chain::Ethereum)).await.unwrap().current_block, initial);
+
+        database.transaction(move |client| ParserStateRepository::set_parser_state_current_block(client, Chain::Ethereum, initial + 100)).await.unwrap();
+
+        assert_eq!(database.run(|client| ParserStateRepository::get_parser_state(client, Chain::Ethereum)).await.unwrap().current_block, initial + 100);
+    }
+}
