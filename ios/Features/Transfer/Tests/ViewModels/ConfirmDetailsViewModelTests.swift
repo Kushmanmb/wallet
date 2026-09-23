@@ -5,6 +5,7 @@ import GemstoneServicesTestKit
 import Localization
 import Primitives
 import PrimitivesTestKit
+@testable import Swap
 import Testing
 @testable import Transfer
 import TransferTestKit
@@ -14,10 +15,11 @@ struct ConfirmDetailsViewModelTests {
     func swap() {
         let model = ConfirmDetailsViewModel(type: .swap(.mock(), .mock(), .mock()), metadata: nil, confirmation: GemConfirmationMock())
 
-        guard case .swapDetails = model.itemModel else {
+        guard case let .swapDetails(details) = model.itemModel else {
             Issue.record("Expected .swapDetails")
             return
         }
+        #expect(details.allowSelectProvider == false)
     }
 
     @Test

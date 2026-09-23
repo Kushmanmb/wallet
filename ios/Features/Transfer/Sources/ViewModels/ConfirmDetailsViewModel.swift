@@ -47,6 +47,7 @@ extension ConfirmDetailsViewModel: ItemModelProvidable {
                     summary: summary,
                     slippagePercent: summary.slippagePercent(),
                     currency: confirmation.currency.rawValue,
+                    allowSelectProvider: false,
                     swapPriceImpact: fromAssetPrice.swapValue(quote.fromValue)
                         .priceImpact(receive: toAssetPrice.swapValue(quote.toValue)),
                 ),

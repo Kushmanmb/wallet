@@ -94,6 +94,7 @@ let package = Package(
                 "Components",
                 "InfoSheet",
                 "Localization",
+                "Swap",
                 "Primitives",
                 "PrimitivesComponents",
                 "Store",
