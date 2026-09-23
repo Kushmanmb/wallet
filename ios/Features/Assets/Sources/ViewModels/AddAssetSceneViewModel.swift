@@ -24,6 +24,7 @@ public final class AddAssetSceneViewModel {
 
     var isPresentingScanner = false
     var loadTrigger: AddAssetLoadTrigger?
+    private var loadAttempt = 0
     var isPresentingAlertMessage: AlertMessage?
 
     public init(wallet: Wallet, service: any GemAddAssetServiceProtocol) {
@@ -168,6 +169,9 @@ extension AddAssetSceneViewModel {
             loadTrigger = nil
             return
         }
-        loadTrigger = AddAssetLoadTrigger(chain: chain, address: address, isImmediate: isImmediate)
+        if isImmediate {
+            loadAttempt += 1
+        }
+        loadTrigger = AddAssetLoadTrigger(chain: chain, address: address, isImmediate: isImmediate, attempt: loadAttempt)
     }
 }

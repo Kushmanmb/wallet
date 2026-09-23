@@ -120,9 +120,7 @@ extension AddNodeScene {
 
     private func onSubmitUrl() {
         focusedField = nil
-        Task {
-            await model.load()
-        }
+        model.onSubmitInput()
     }
 
     private func onSelectPaste() {

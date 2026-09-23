@@ -24,6 +24,7 @@ final class AddNodeSceneViewModel {
     var isPresentingScanner: Bool = false
     var isPresentingAlertMessage: AlertMessage?
     var loadTrigger: AddNodeLoadTrigger?
+    private var loadAttempt = 0
 
     var nodeCheckDebounce: Duration {
         .milliseconds(service.nodeCheckDebounceMilliseconds())
@@ -92,13 +93,20 @@ extension AddNodeSceneViewModel {
         setLoadTrigger(isImmediate: true)
     }
 
+    func onSubmitInput() {
+        setLoadTrigger(isImmediate: true)
+    }
+
     private func setLoadTrigger(isImmediate: Bool) {
         session = session.onInput(url: urlInputModel.text)
         guard session.checksUrl() else {
             loadTrigger = nil
             return
         }
-        loadTrigger = AddNodeLoadTrigger(url: session.url, isImmediate: isImmediate)
+        if isImmediate {
+            loadAttempt += 1
+        }
+        loadTrigger = AddNodeLoadTrigger(url: session.url, isImmediate: isImmediate, attempt: loadAttempt)
     }
 
     func importFoundNode() async -> Bool {

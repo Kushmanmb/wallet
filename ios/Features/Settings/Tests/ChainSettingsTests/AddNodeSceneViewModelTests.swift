@@ -56,4 +56,22 @@ struct AddNodeSceneViewModelTests {
             return
         }
     }
+
+    @Test
+    func submittingOrPastingTheSameUrlChecksItAgain() {
+        let model = AddNodeSceneViewModel(chain: .ethereum, service: GemChainSettingsServiceMock())
+
+        model.urlInputModel.text = "https://node"
+        model.onChangeInput()
+        let typed = model.loadTrigger
+        #expect(typed?.isImmediate == false)
+
+        model.onSubmitInput()
+        let submitted = model.loadTrigger
+        #expect(submitted?.isImmediate == true)
+        #expect(submitted != typed, "done replaces the pending debounce with one immediate check")
+
+        model.setInput("https://node")
+        #expect(model.loadTrigger != submitted, "an identical paste is a fresh check")
+    }
 }
