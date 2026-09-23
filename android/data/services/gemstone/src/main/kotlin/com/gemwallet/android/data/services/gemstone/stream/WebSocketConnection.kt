@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlin.coroutines.resume
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -21,6 +20,7 @@ import uniffi.gemstone.GemConnectionServiceInterface
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.coroutines.resume
 
 data class WebSocketRequest(val url: String, val headers: Map<String, String> = emptyMap())
 
@@ -115,7 +115,12 @@ class WebSocketConnection(private val requestProvider: suspend () -> WebSocketRe
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
-                    trySend(WebSocketEvent.Message(text))
+                    val result = trySend(WebSocketEvent.Message(text))
+                    if (result.isFailure && !result.isClosed) {
+                        activeSession.compareAndSet(session, null)
+                        webSocket.cancel()
+                        close(WebSocketOverflowException())
+                    }
                 }
 
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -145,6 +150,8 @@ class WebSocketConnection(private val requestProvider: suspend () -> WebSocketRe
             headers.forEach { (name, value) -> header(name, value) }
         }
         .build()
+
+    private class WebSocketOverflowException : IllegalStateException("Message buffer overflow")
 
     private class WebSocketSession {
         val webSocket = AtomicReference<WebSocket?>()

@@ -29,7 +29,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 |---|---|---|
 | Create/import wallet, terms, phrase generation | `GemWalletService`, import records, keystore and native auth ports | — |
 | Wallet list/detail, rename, avatar, secret export | Wallet rows/details, existing export flow and NFT avatar selection | — |
-| Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | VM5, AUD27 |
+| Wallet home, header, network assets, banners | `GemWalletHomeService`, `GemBalanceService`, shared asset rows and banner context | VM5 |
 | Asset search/select, add token, recents | `GemAssetSelectionService`, `GemSelectAssetFlow`, `GemAddAssetService`, recent activity | — |
 | Asset details and asset actions | `GemAssetDetailsService`, shared rows, copy, info and load state | VM5, AUD48 |
 | Portfolio chart/statistics | `GemPortfolioService`, chart load rules, shared numbers and rows | — |
@@ -89,7 +89,6 @@ Reviewed at `855fef5ccfba98458b9bfaa0efdea01ef23c0a07` on 2026-09-19. These are 
 
 ### Android observation and recovery
 
-- **AUD27** **M** **Bug — handle WebSocket callback overflow explicitly.** [WebSocketConnection](../android/data/services/gemstone/src/main/kotlin/com/gemwallet/android/data/services/gemstone/stream/WebSocketConnection.kt) ignores failed `trySend` for messages. Slow Core/storage handling can fill the buffer and silently lose normal or perpetual events. Preserve bounded ordered delivery or trigger explicit reconnect/resynchronization recovery; do not launch an unbounded task per message. Test overflow while consumption is suspended.
 
 ### Consolidation and regression coverage
 
@@ -284,6 +283,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**AUD27 (2026-09-23).** Closed. Android `WebSocketConnection` no longer drops a message silently when its buffer is full: a failed `trySend` on an open channel ends the session with an overflow error, cancels the socket, and falls into the existing reconnect loop, whose `Disconnected` and `Connected` events make Core reset and resubscribe. A send on an already closed channel is still ignored. Delivery stays bounded and ordered with no task per message. A test suspends consumption, overflows the buffer, and checks that the socket is cancelled and a new one is opened after the backoff.
 
 **AUD29 (2026-09-23).** Closed. Android `GetTransactionDetailsImpl` follows the session and observes the transaction for that session's wallet, so a wallet switch re-reads the record under the new wallet instead of pairing the old record with the new session, and no session means no details. The store's `observeTransaction` and the details projection now pass a missing record through as null instead of dropping it, so a deleted or unmatched record clears the screen. `GetTransaction`, `GetTransactionImpl` and the `walletTransaction` helper had no other caller and are deleted. Tests cover a switch to a wallet without the record and the deletion of the shown record.
 
