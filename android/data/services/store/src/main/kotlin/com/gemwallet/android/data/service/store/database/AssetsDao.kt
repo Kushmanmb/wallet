@@ -16,7 +16,7 @@ import com.gemwallet.android.data.service.store.database.entities.DbAssetMarket
 import com.gemwallet.android.data.service.store.database.entities.DbBalance
 import com.gemwallet.android.data.service.store.database.entities.DbRecentActivity
 import com.gemwallet.android.data.service.store.database.entities.DbRecentAsset
-import com.gemwallet.android.model.AssetFilter
+import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.model.NO_QUERY_LIMIT
 import com.gemwallet.android.model.chains
 import com.gemwallet.android.model.chainsOrAssetIds
@@ -24,6 +24,7 @@ import com.wallet.core.primitives.AssetType
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.RecentActivityType
 import kotlinx.coroutines.flow.Flow
+import uniffi.gemstone.GemAssetFilter
 
 private const val ASSET_INFO_COLUMNS = """
     asset.id AS id,
@@ -362,17 +363,17 @@ interface AssetsDao {
         limit: Int,
     ): Flow<List<DbRecentAsset>>
 
-    fun getRecentAssets(walletId: String, type: List<RecentActivityType>, filters: Set<AssetFilter> = emptySet(), limit: Int = 10): Flow<List<DbRecentAsset>> = getRecentAssetsQuery(
+    fun getRecentAssets(walletId: String, type: List<RecentActivityType>, filters: Set<GemAssetFilter> = emptySet(), limit: Int = 10): Flow<List<DbRecentAsset>> = getRecentAssetsQuery(
         walletId = walletId,
         type = type,
-        enabled = AssetFilter.Enabled in filters,
-        buyable = AssetFilter.Buyable in filters,
-        swappable = AssetFilter.Swappable in filters,
-        hasBalance = AssetFilter.HasBalance in filters,
-        hasAvailableBalance = AssetFilter.HasAvailableBalance in filters,
+        enabled = GemAssetFilter.Enabled in filters,
+        buyable = GemAssetFilter.Buyable in filters,
+        swappable = GemAssetFilter.Swappable in filters,
+        hasBalance = GemAssetFilter.HasBalance in filters,
+        hasAvailableBalance = GemAssetFilter.HasAvailableBalance in filters,
         byChainsOrAssetIds = filters.chainsOrAssetIds() != null,
-        chains = filters.chainsOrAssetIds()?.chains.orEmpty(),
-        assetIds = filters.chainsOrAssetIds()?.ids.orEmpty(),
+        chains = filters.chainsOrAssetIds()?.chains.orEmpty().map { it.requireChain() },
+        assetIds = filters.chainsOrAssetIds()?.assetIds.orEmpty(),
         byChains = filters.chains().isNotEmpty(),
         selectedChains = filters.chains(),
         limit = limit,

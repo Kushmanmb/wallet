@@ -4,7 +4,6 @@ import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.features.asset_select.viewmodels.models.RecentsEmptyState
 import com.gemwallet.android.features.asset_select.viewmodels.models.RecentsSheetUIModel
-import com.gemwallet.android.model.AssetFilter
 import com.gemwallet.android.model.RecentAsset
 import com.gemwallet.android.testkit.mockAssetEthereum
 import com.gemwallet.android.testkit.mockAssetSolana
@@ -32,6 +31,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemAssetFilter
 import uniffi.gemstone.GemRecentActivityService
 import uniffi.gemstone.GemRecentsCounts
 import uniffi.gemstone.GemRecentsViewState
@@ -75,7 +75,7 @@ class RecentsSheetViewModelTest {
 
         assertFalse(vm.visible.value)
 
-        vm.show(filters = setOf(AssetFilter.HasBalance))
+        vm.show(filters = setOf(GemAssetFilter.HasBalance))
         advanceUntilIdle()
         assertTrue(vm.visible.value)
 

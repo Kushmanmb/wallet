@@ -12,7 +12,6 @@ import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
 import com.gemwallet.android.domains.asset.aggregates.AssetInfoDataAggregate
 import com.gemwallet.android.domains.asset.aggregates.toAssetInfoDataAggregate
 import com.gemwallet.android.domains.asset.assetSections
-import com.gemwallet.android.domains.asset.toQueryFilters
 import com.gemwallet.android.ext.getAccount
 import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.ext.runCatchingCancellable
@@ -24,7 +23,6 @@ import com.gemwallet.android.features.asset_select.viewmodels.models.SelectAsset
 import com.gemwallet.android.features.asset_select.viewmodels.models.SelectSearch
 import com.gemwallet.android.features.asset_select.viewmodels.models.UIState
 import com.gemwallet.android.features.asset_select.viewmodels.models.uiModel
-import com.gemwallet.android.model.AssetFilter
 import com.gemwallet.android.model.NO_QUERY_LIMIT
 import com.gemwallet.android.model.RecentAssetsRequest
 import com.gemwallet.android.ui.components.screen.assetAddedToast
@@ -59,6 +57,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemAssetAction
+import uniffi.gemstone.GemAssetFilter
 import uniffi.gemstone.GemAssetSearchStep
 import uniffi.gemstone.GemAssetSelectionServiceInterface
 import uniffi.gemstone.GemCopy
@@ -304,9 +303,9 @@ open class BaseAssetSelectViewModel(
     val recentTypes: List<RecentActivityType>
         get() = flow.action?.recentActivityTypes()?.map { it.toPrimitives() } ?: RecentActivityType.entries
 
-    fun assetFilters(): Set<AssetFilter> = assetFilters(chainFilter.value, balanceFilter.value)
+    fun assetFilters(): Set<GemAssetFilter> = assetFilters(chainFilter.value, balanceFilter.value)
 
-    private fun assetFilters(chains: List<Chain>, hasBalance: Boolean): Set<AssetFilter> = flow.appliedFilters(chains.map { it.string }, hasBalance).toQueryFilters()
+    private fun assetFilters(chains: List<Chain>, hasBalance: Boolean): Set<GemAssetFilter> = flow.appliedFilters(chains.map { it.string }, hasBalance).toSet()
 
     open fun assetsSearchLimit(query: String): Int = NO_QUERY_LIMIT
 

@@ -179,7 +179,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 #### Hand-written twins of Core types
 
 - **VM17** **S** **Core returns finished docs and page URLs.** Both apps build them: [iOS `AppUrl`](../ios/Packages/GemstonePrimitives/Sources/Config.swift) and [Android `AppUrl`](../android/gemcore/src/main/kotlin/com/gemwallet/android/AppUrl.kt) each turn a `DocsUrl`/`PublicUrl` into a URL and append `utm_source` with their platform name, and each resolves `GemBannerLink.docs` itself. Android keeps `BannerDestination` only so the resolved URL is computed outside the composable; with the URL finished in Core (the platform passed in once), `GemBannerDestination` reaches the view as it is and `BannerDestination` goes.
-- **VM19** **S** **Stop copying `GemAssetFilter`.** iOS `AssetsRequestFilter` (Store) and Android `AssetFilter` (gemcore) mirror `GemAssetFilter` case for case, mapped in [SelectAssetFilters.swift](../ios/Features/Assets/Sources/Types/SelectAssetFilters.swift) and [AssetEligibility.kt](../android/gemcore/src/main/kotlin/com/gemwallet/android/domains/asset/AssetEligibility.kt). Check whether the store layer may import the generated type.
 - **VM20** **S** **Stop hand-writing `StakeType` and `RedelegateData`.** Both apps declare them ([iOS](../ios/Packages/Primitives/Sources/Staking.swift), [Android](../android/gemcore/src/main/kotlin/com/wallet/core/primitives/Staking.kt)) beside Core's generated types and convert with `toGem()`.
 
 #### Models that hold a domain object beside its row
@@ -315,6 +314,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM19 (2026-09-23).** Closed. Android's `AssetFilter` sealed interface mirrored `GemAssetFilter` case for case; the asset search, swap store, recents and select-asset code now pass `GemAssetFilter` down to `AssetsDao`, which already sees the generated types, and `AssetEligibility.toQueryFilters` is gone. iOS keeps `AssetsRequestFilter`: the `Store` package depends on `Primitives` and GRDB only, and pulling the Gemstone binary into it to name one enum would cross the layer the package is built around, so `SelectAssetFilters.swift` stays its one mapping at that boundary.
 
 **VM44 (2026-09-23).** Closed. `GemSwapViewState.quotes_state` answers whether the provider list is loading, failed, ready or empty, ranking loading before a quote error and an error before quotes; iOS `SwapSceneViewModel.quotesState` maps it instead of testing `isQuoteLoading`, `quoteError` and `session.quotes` in turn.
 

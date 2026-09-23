@@ -3,7 +3,6 @@ package com.gemwallet.android.features.asset_select.viewmodels
 import com.gemwallet.android.data.services.gemstone.assets.AssetsSearchService
 import com.gemwallet.android.features.asset_select.viewmodels.models.BaseSelectSearch
 import com.gemwallet.android.features.asset_select.viewmodels.models.mockSelectAssetFilters
-import com.gemwallet.android.model.AssetFilter
 import com.gemwallet.android.model.NO_QUERY_LIMIT
 import com.gemwallet.android.testkit.mockAssetEthereum
 import com.gemwallet.android.testkit.mockAssetInfo
@@ -63,7 +62,7 @@ class BaseSelectSearchTest {
 
         search.items(filters).first()
 
-        verify(exactly = 1) { searchService.search("", true, NO_QUERY_LIMIT, setOf(AssetFilter.Enabled, AssetFilter.Buyable)) }
+        verify(exactly = 1) { searchService.search("", true, NO_QUERY_LIMIT, setOf(GemAssetFilter.Enabled, GemAssetFilter.Buyable)) }
     }
 
     @Test
@@ -79,7 +78,7 @@ class BaseSelectSearchTest {
         )
         search.items(filters).first()
         verify(exactly = 1) {
-            searchService.search("", false, NO_QUERY_LIMIT, setOf(AssetFilter.Buyable, AssetFilter.Chains(listOf(Chain.Ethereum)), AssetFilter.HasBalance))
+            searchService.search("", false, NO_QUERY_LIMIT, setOf(GemAssetFilter.Buyable, GemAssetFilter.Chains(listOf(Chain.Ethereum.string)), GemAssetFilter.HasBalance))
         }
     }
 }

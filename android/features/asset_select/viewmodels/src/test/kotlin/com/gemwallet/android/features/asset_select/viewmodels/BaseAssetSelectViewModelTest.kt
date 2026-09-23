@@ -5,7 +5,6 @@ import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
 import com.gemwallet.android.features.asset_select.viewmodels.models.SelectAssetFilters
 import com.gemwallet.android.features.asset_select.viewmodels.models.SelectSearch
-import com.gemwallet.android.model.AssetFilter
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.RecentAssetsRequest
 import com.gemwallet.android.model.chains
@@ -103,7 +102,7 @@ class BaseAssetSelectViewModelTest {
             override fun items(filters: Flow<SelectAssetFilters?>): Flow<List<AssetInfo>> = filters.map { current ->
                 val query = current?.queryFilters().orEmpty()
                 val chains = query.chains()
-                items.filter { (chains.isEmpty() || it.asset.id.chain in chains) && (AssetFilter.HasBalance !in query || it.balance.totalAmount > 0.0) }
+                items.filter { (chains.isEmpty() || it.asset.id.chain in chains) && (GemAssetFilter.HasBalance !in query || it.balance.totalAmount > 0.0) }
             }
         }
         return BaseAssetSelectViewModel(session, recents, service, search, GemSelectAssetType.Send, dispatcher, mockk(relaxed = true))
@@ -153,7 +152,7 @@ class BaseAssetSelectViewModelTest {
 
         model.setChainFilter(listOf(Chain.Bitcoin))
 
-        val bitcoin = setOf(AssetFilter.Chains(listOf(Chain.Bitcoin)))
+        val bitcoin = setOf(GemAssetFilter.Chains(listOf(Chain.Bitcoin.string)))
         assertEquals(bitcoin, requests.first { it.lastOrNull()?.filters == bitcoin }.last().filters)
         assertEquals(bitcoin, model.assetFilters())
     }

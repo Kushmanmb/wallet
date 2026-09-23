@@ -13,7 +13,6 @@ import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.asset_select.viewmodels.models.RecentsSheetUIModel
-import com.gemwallet.android.model.AssetFilter
 import com.gemwallet.android.model.RecentAsset
 import com.gemwallet.android.model.RecentAssetsRequest
 import com.gemwallet.android.serializer.decodeJson
@@ -34,6 +33,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemAssetFilter
 import uniffi.gemstone.GemRecentActivityServiceInterface
 import javax.inject.Inject
 
@@ -65,7 +65,7 @@ class RecentsSheetViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, RecentsSheetUIModel.Empty)
 
-    fun show(filters: Set<AssetFilter> = emptySet(), types: List<RecentActivityType> = RecentActivityType.entries) {
+    fun show(filters: Set<GemAssetFilter> = emptySet(), types: List<RecentActivityType> = RecentActivityType.entries) {
         query.clearText()
         config.value = Config(filters, types)
     }
@@ -91,7 +91,7 @@ class RecentsSheetViewModel @Inject constructor(
         )
     }
 
-    private data class Config(val filters: Set<AssetFilter>, val types: List<RecentActivityType>)
+    private data class Config(val filters: Set<GemAssetFilter>, val types: List<RecentActivityType>)
 }
 
 private const val TAG = "RecentsSheet"

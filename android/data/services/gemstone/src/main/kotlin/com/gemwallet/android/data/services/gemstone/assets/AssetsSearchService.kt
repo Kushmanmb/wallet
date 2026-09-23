@@ -7,7 +7,7 @@ import com.gemwallet.android.data.service.store.database.SearchDao
 import com.gemwallet.android.data.service.store.database.entities.DbAssetInfo
 import com.gemwallet.android.data.service.store.database.entities.toAssetInfoModel
 import com.gemwallet.android.data.service.store.database.entities.toDTO
-import com.gemwallet.android.model.AssetFilter
+import com.gemwallet.android.ext.requireChain
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.model.NO_QUERY_LIMIT
 import com.gemwallet.android.model.chains
@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import uniffi.gemstone.GemAssetFilter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,7 +27,7 @@ import javax.inject.Singleton
 @Singleton
 class AssetsSearchService @Inject constructor(private val assetsDao: AssetsDao, private val searchDao: SearchDao, private val assetListDao: AssetListDao, private val getCurrentWalletId: GetCurrentWalletId) {
 
-    fun search(query: String, byAllWallets: Boolean, limit: Int = NO_QUERY_LIMIT, filters: Set<AssetFilter> = emptySet()): Flow<List<AssetInfo>> {
+    fun search(query: String, byAllWallets: Boolean, limit: Int = NO_QUERY_LIMIT, filters: Set<GemAssetFilter> = emptySet()): Flow<List<AssetInfo>> {
         val query = query.trim()
         return getCurrentWalletId().flatMapLatest { wallet ->
             val walletId = wallet.id
@@ -46,7 +47,7 @@ class AssetsSearchService @Inject constructor(private val assetsDao: AssetsDao, 
         return assetListDao.searchWithPriority(key).map { lists -> lists.map { it.toDTO() } }
     }
 
-    fun searchAssetsByKey(searchKey: String, limit: Int = NO_QUERY_LIMIT, filters: Set<AssetFilter> = emptySet()): Flow<List<AssetInfo>> = getCurrentWalletId().flatMapLatest { wallet ->
+    fun searchAssetsByKey(searchKey: String, limit: Int = NO_QUERY_LIMIT, filters: Set<GemAssetFilter> = emptySet()): Flow<List<AssetInfo>> = getCurrentWalletId().flatMapLatest { wallet ->
         val walletId = wallet.id
         searchDao.hasAssetPriorities(searchKey).map { it > 0 }.distinctUntilChanged().flatMapLatest { hasPriority ->
             if (hasPriority) {
@@ -58,7 +59,7 @@ class AssetsSearchService @Inject constructor(private val assetsDao: AssetsDao, 
     }
 }
 
-private fun AssetsDao.filteredSearch(walletId: String, query: String, limit: Int, filters: Set<AssetFilter>, withPriority: Boolean): Flow<List<DbAssetInfo>> {
+private fun AssetsDao.filteredSearch(walletId: String, query: String, limit: Int, filters: Set<GemAssetFilter>, withPriority: Boolean): Flow<List<DbAssetInfo>> {
     val scope = filters.chainsOrAssetIds()
     val selectedChains = filters.chains()
     val search = if (withPriority) ::searchWithPriority else ::search
@@ -67,15 +68,15 @@ private fun AssetsDao.filteredSearch(walletId: String, query: String, limit: Int
         query,
         limit,
         emptyList(),
-        AssetFilter.Enabled in filters,
-        AssetFilter.Buyable in filters,
-        AssetFilter.Sellable in filters,
-        AssetFilter.Swappable in filters,
-        AssetFilter.HasBalance in filters,
-        AssetFilter.HasAvailableBalance in filters,
+        GemAssetFilter.Enabled in filters,
+        GemAssetFilter.Buyable in filters,
+        GemAssetFilter.Sellable in filters,
+        GemAssetFilter.Swappable in filters,
+        GemAssetFilter.HasBalance in filters,
+        GemAssetFilter.HasAvailableBalance in filters,
         scope != null,
-        scope?.chains.orEmpty(),
-        scope?.ids.orEmpty(),
+        scope?.chains.orEmpty().map { it.requireChain() },
+        scope?.assetIds.orEmpty(),
         selectedChains.isNotEmpty(),
         selectedChains,
     )
