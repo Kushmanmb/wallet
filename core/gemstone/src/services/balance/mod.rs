@@ -187,37 +187,15 @@ impl GemBalanceService {
 
     async fn chain_balances(&self, request: &BalanceRequest) -> Result<Vec<(BalanceKind, AssetBalance)>, GemServiceError> {
         let token_ids = rules::request_token_ids(&request.token_ids);
-        let (coin, stake, tokens, earn) = futures::join!(
-            async {
-                if request.coin {
-                    self.gateway.get_balance_coin(request.chain, request.address.clone()).await.map(|balance| vec![balance])
-                } else {
-                    Ok(Vec::new())
-                }
-            },
-            async {
-                if request.coin {
-                    self.gateway.get_balance_staking(request.chain, request.address.clone()).await.map(|balance| balance.into_iter().collect())
-                } else {
-                    Ok(Vec::new())
-                }
-            },
-            async {
-                if token_ids.is_empty() {
-                    Ok(Vec::new())
-                } else {
-                    self.gateway.get_balance_tokens(request.chain, request.address.clone(), token_ids.clone()).await
-                }
-            },
-            async {
-                if token_ids.is_empty() {
-                    Ok(Vec::new())
-                } else {
-                    self.gateway.get_balance_earn(request.chain, request.address.clone(), token_ids.clone()).await
-                }
-            },
-        );
-        Ok(rules::chain_balances(coin?, stake?, tokens?, earn?))
+        let (balances, earn) = futures::join!(self.gateway.get_account_balances(request.chain, request.address.clone(), request.coin, token_ids.clone()), async {
+            if token_ids.is_empty() {
+                Ok(Vec::new())
+            } else {
+                self.gateway.get_balance_earn(request.chain, request.address.clone(), token_ids.clone()).await
+            }
+        },);
+        let balances = balances?;
+        Ok(rules::chain_balances(balances.coin.into_iter().collect(), balances.staking.into_iter().collect(), balances.tokens, earn?))
     }
 }
 

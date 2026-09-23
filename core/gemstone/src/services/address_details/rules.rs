@@ -75,8 +75,8 @@ pub(super) fn display_name(name: Option<AddressName>, address: &str) -> Option<S
     name.map(|name| name.name).filter(|name| !name.is_empty() && name != address)
 }
 
-pub(super) fn balance_rows(chain: Chain, coin: AssetBalance, stake: Option<AssetBalance>) -> Vec<GemBalanceRow> {
-    let balance = balance_updates(chain_balances(vec![coin], stake.into_iter().collect(), Vec::new(), Vec::new()))
+pub(super) fn balance_rows(chain: Chain, coin: Option<AssetBalance>, stake: Option<AssetBalance>) -> Vec<GemBalanceRow> {
+    let balance = balance_updates(chain_balances(coin.into_iter().collect(), stake.into_iter().collect(), Vec::new(), Vec::new()))
         .iter()
         .fold(GemAssetBalance::zero(AssetId::from_chain(chain)), |balance, update| balance.applying(update));
     let breakdown = balance.detail_rows(chain, false).into_iter().filter(|row| match row {
@@ -116,11 +116,11 @@ mod tests {
         let ethereum = AssetId::from_chain(Chain::Ethereum);
         let cosmos = AssetId::from_chain(Chain::Cosmos);
 
-        assert_eq!(balance_rows(Chain::Ethereum, AssetBalance::new(ethereum, BigUint::ZERO), None), vec![GemBalanceRow::Available { value: BigUint::ZERO }]);
+        assert_eq!(balance_rows(Chain::Ethereum, Some(AssetBalance::new(ethereum, BigUint::ZERO)), None), vec![GemBalanceRow::Available { value: BigUint::ZERO }]);
         assert_eq!(
             balance_rows(
                 Chain::Cosmos,
-                AssetBalance::new(cosmos.clone(), BigUint::from(5u32)),
+                Some(AssetBalance::new(cosmos.clone(), BigUint::from(5u32))),
                 Some(AssetBalance::new_staking(cosmos.clone(), BigUint::from(100u32), BigUint::ZERO, BigUint::from(1u32))),
             ),
             vec![GemBalanceRow::Available { value: BigUint::from(5u32) }, GemBalanceRow::Staked { value: BigUint::from(101u32) },]
@@ -128,7 +128,7 @@ mod tests {
         assert_eq!(
             balance_rows(
                 Chain::Cosmos,
-                AssetBalance::new(cosmos.clone(), BigUint::from(5u32)),
+                Some(AssetBalance::new(cosmos.clone(), BigUint::from(5u32))),
                 Some(AssetBalance::new_staking(cosmos, BigUint::ZERO, BigUint::ZERO, BigUint::ZERO)),
             ),
             vec![GemBalanceRow::Available { value: BigUint::from(5u32) }]

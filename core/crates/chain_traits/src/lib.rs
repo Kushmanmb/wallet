@@ -109,8 +109,42 @@ pub trait ChainRequestClassifier: Send + Sync {
     }
 }
 
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct AccountBalances {
+    pub coin: Option<AssetBalance>,
+    pub staking: Option<AssetBalance>,
+    pub tokens: Vec<AssetBalance>,
+}
+
 #[async_trait]
 pub trait ChainBalances: Send + Sync {
+    async fn get_account_balances(&self, address: String, coin: bool, token_ids: Vec<String>) -> Result<AccountBalances, Box<dyn Error + Sync + Send>> {
+        let (coin_balance, staking, tokens) = futures::join!(
+            async {
+                match coin {
+                    true => self.get_balance_coin(address.clone()).await.map(Some),
+                    false => Ok(None),
+                }
+            },
+            async {
+                match coin {
+                    true => self.get_balance_staking(address.clone()).await,
+                    false => Ok(None),
+                }
+            },
+            async {
+                match token_ids.is_empty() {
+                    true => Ok(Vec::new()),
+                    false => self.get_balance_tokens(address.clone(), token_ids).await,
+                }
+            },
+        );
+        Ok(AccountBalances {
+            coin: coin_balance?,
+            staking: staking?,
+            tokens: tokens?,
+        })
+    }
     async fn get_balance_coin(&self, _address: String) -> Result<AssetBalance, Box<dyn Error + Sync + Send>> {
         Err("Chain does not support balance operations".into())
     }

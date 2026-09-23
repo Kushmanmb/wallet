@@ -34,15 +34,15 @@ impl GemAddressDetailsService {
 
     pub async fn refresh(&self, details: GemAddressDetails) -> GemAddressDetails {
         let chain = details.chain;
-        let (balances, name) = futures::join!(self.fetch_balances(chain, details.address.clone()), self.names.address_name(chain, details.address.clone()));
+        let (balances, name) = futures::join!(self.balance_rows(chain, details.address.clone()), self.names.address_name(chain, details.address.clone()));
         let link = self.explorer.get_address_url(chain, details.address.clone());
         rules::details(chain, details.address.clone(), rules::display_name(name.ok().flatten(), &details.address), link, details.load().data(balances))
     }
 }
 
 impl GemAddressDetailsService {
-    async fn fetch_balances(&self, chain: Chain, address: String) -> Result<Vec<GemBalanceRow>, GemServiceError> {
-        let (coin, stake) = futures::try_join!(self.gateway.get_balance_coin(chain, address.clone()), self.gateway.get_balance_staking(chain, address))?;
-        Ok(rules::balance_rows(chain, coin, stake))
+    async fn balance_rows(&self, chain: Chain, address: String) -> Result<Vec<GemBalanceRow>, GemServiceError> {
+        let balances = self.gateway.get_account_balances(chain, address, true, Vec::new()).await?;
+        Ok(rules::balance_rows(chain, balances.coin, balances.staking))
     }
 }
