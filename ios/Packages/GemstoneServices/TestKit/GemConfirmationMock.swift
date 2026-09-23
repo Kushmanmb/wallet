@@ -12,6 +12,7 @@ public import struct Gemstone.GemConfirmLoad
 public import struct Gemstone.GemConfirmLoadOptions
 public import enum Gemstone.GemConfirmRowContent
 public import struct Gemstone.GemConfirmScreen
+public import struct Gemstone.GemConfirmViewState
 public import struct Gemstone.GemFeeRateRows
 public import enum Gemstone.GemKeystoreAuthentication
 public import enum Gemstone.GemListRow
@@ -69,6 +70,15 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
 
     public func header() -> GemConfirmHeader {
         headerValue
+    }
+
+    public func viewState(screen: GemConfirmScreen, addressName: Gemstone.AddressName?) -> GemConfirmViewState {
+        GemConfirmViewState(
+            button: screen.button(),
+            feeRow: screen.feeRow(),
+            feeRates: feeRateRows(),
+            rowContents: rowContents(addressName: addressName),
+        )
     }
 
     public func feeRateRows() -> GemFeeRateRows? {

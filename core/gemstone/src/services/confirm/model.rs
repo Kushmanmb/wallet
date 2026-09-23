@@ -338,6 +338,14 @@ pub enum GemConfirmFeeRow {
     Unavailable { text: String },
 }
 
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemConfirmViewState {
+    pub button: GemConfirmButton,
+    pub fee_row: GemConfirmFeeRow,
+    pub fee_rates: Option<GemFeeRateRows>,
+    pub row_contents: Vec<GemConfirmRowContent>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

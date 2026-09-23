@@ -8,8 +8,8 @@ use super::error::GemConfirmErrorInfo;
 use super::header::{self, GemConfirmHeader};
 use super::rules::{acquire_swap_pair, asset_pick_needs_reload, preload_simulation};
 use super::{
-    ConfirmState, GemAcquireAssetFlow, GemConfirmError, GemConfirmFeeLoad, GemConfirmInput, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemFeeRateRows, GemSubmitResult,
-    GemTransferAmountResult, SendInput,
+    ConfirmState, GemAcquireAssetFlow, GemConfirmError, GemConfirmFeeLoad, GemConfirmInput, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemConfirmViewState, GemFeeRateRows,
+    GemSubmitResult, GemTransferAmountResult, SendInput,
 };
 use crate::models::list::GemListRow;
 use crate::payment::GemPaymentLoad;
@@ -96,6 +96,15 @@ impl GemConfirmation {
         let transfer = self.transfer();
         let stored = self.stored();
         header::header(&transfer, self.simulation.as_ref(), stored.as_ref().map(|state| &state.load), self.service.get_currency())
+    }
+
+    pub fn view_state(&self, screen: GemConfirmScreen, address_name: Option<AddressName>) -> GemConfirmViewState {
+        GemConfirmViewState {
+            button: screen.button(),
+            fee_row: screen.fee_row(),
+            fee_rates: self.fee_rate_rows(),
+            row_contents: self.row_contents(address_name),
+        }
     }
 
     pub fn fee_rate_rows(&self) -> Option<GemFeeRateRows> {
@@ -259,6 +268,25 @@ mod tests {
             assert!(testkit.balances.balance_writes.lock().unwrap().is_empty(), "confirming reads balances and never writes them");
             assert!(testkit.balances.enable_writes.lock().unwrap().is_empty());
         });
+    }
+
+    #[test]
+    fn test_view_state_reads_one_screen() {
+        let wallet = Wallet::mock_with_accounts(vec![Account::mock(Chain::Tron, "TJRyWwFs9wTFGZg3JbrVriFbNfCug5tDeC")]);
+        let testkit = ConfirmTestkit::new(wallet.clone(), wallet.clone());
+        let transfer = GemTransferData {
+            recipient: GemRecipient::address("THTR75o8xXAgCTQqpiot2AFRAjvW1tSbVV".into()),
+            ..GemTransferData::mock(TransactionInputType::Transfer { asset: Asset::from_chain(Chain::Tron) })
+        };
+        let confirmation = testkit.service.confirmation(wallet, transfer, None);
+        let screen = confirmation.screen();
+
+        let state = confirmation.view_state(screen.clone(), None);
+
+        assert_eq!(state.button, screen.button());
+        assert_eq!(state.fee_row, screen.fee_row());
+        assert_eq!(state.fee_rates, confirmation.fee_rate_rows());
+        assert_eq!(state.row_contents, confirmation.row_contents(None));
     }
 
     #[test]

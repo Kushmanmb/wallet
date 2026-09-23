@@ -90,7 +90,7 @@ struct ConfirmTransferSceneViewModelTests {
 
         #expect(model.transfer.chain == .smartChain)
         #expect(model.sections.contains { $0.values.contains(.verification) })
-        #expect(model.button.state == .disabled)
+        #expect(model.viewState.button.state == .disabled)
 
         model.onSelectVerification()
 
@@ -305,19 +305,32 @@ struct ConfirmTransferSceneViewModelTests {
     }
 
     @Test
+    func aFeeChangeAndARefreshEachLeaveOneConsistentViewState() async {
+        let confirmation = GemConfirmationMock(feeRates: .mock([(.normal, 20, nil), (.fast, 30, nil)]))
+        let model = ConfirmTransferSceneViewModel.mock(confirmation: confirmation)
+        let expected = { confirmation.viewState(screen: model.state.screen, addressName: model.state.addressName?.toGem()) }
+
+        model.changeFeeSelection(.priority(priority: .fast))
+        #expect(model.viewState == expected())
+
+        await model.load()
+        #expect(model.viewState == expected())
+    }
+
+    @Test
     func fetchAfterFeeChangeReplacesTheSceneWithTheServiceAnswer() async {
         let priorities: [Gemstone.FeePriority] = [.normal, .fast]
         let model = ConfirmTransferSceneViewModel.mock(confirmation: GemConfirmationMock(feeRates: .mock([(.normal, 20, nil), (.fast, 30, nil)])))
 
         await model.load()
-        #expect(model.feeRates?.rows.map(\.priority) == priorities)
+        #expect(model.viewState.feeRates?.rows.map(\.priority) == priorities)
 
         model.state.simulation = .mock(warnings: [.notice(title: .warning, message: .externallyOwnedSpenderWarning, kind: .warning)])
         model.changeFeeSelection(.priority(priority: .fast))
         await model.load()
 
         #expect(model.state.simulation.warnings.isEmpty)
-        #expect(model.feeRates?.rows.map(\.priority) == priorities)
+        #expect(model.viewState.feeRates?.rows.map(\.priority) == priorities)
     }
 
     @Test
@@ -343,7 +356,7 @@ struct ConfirmTransferSceneViewModelTests {
             model.changeFeeSelection(.priority(priority: .fast))
             await model.load()
         }
-        #expect(model.feeRates?.rows.count == 2)
+        #expect(model.viewState.feeRates?.rows.count == 2)
     }
 
     @Test
@@ -539,12 +552,12 @@ struct ConfirmTransferSceneViewModelTests {
         )
         await model.load()
 
-        #expect(model.button.state == .disabled)
+        #expect(model.viewState.button.state == .disabled)
     }
 
     @Test
     func buttonEnabledWithNoWarnings() {
-        #expect(ConfirmTransferSceneViewModel.mock().button.state == .loading)
+        #expect(ConfirmTransferSceneViewModel.mock().viewState.button.state == .loading)
     }
 
     @Test
@@ -567,7 +580,7 @@ struct ConfirmTransferSceneViewModelTests {
         )
 
         #expect(model.simulationWarnings == [.notice(title: .warning, message: .externallyOwnedSpenderWarning, kind: .warning)])
-        #expect(model.button.state != .disabled)
+        #expect(model.viewState.button.state != .disabled)
     }
 
     @Test

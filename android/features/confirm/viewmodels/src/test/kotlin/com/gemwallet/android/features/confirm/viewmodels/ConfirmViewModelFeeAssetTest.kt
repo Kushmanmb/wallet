@@ -50,7 +50,7 @@ class ConfirmViewModelFeeAssetTest {
     private val usdt = mockAssetEthereumUSDT()
     private val account = mockAccount(chain = Chain.Ethereum)
     private val confirmService = mockk<GemConfirmTransferService>(relaxed = true)
-    private val confirmation = mockk<GemConfirmation>(relaxed = true)
+    private val confirmation = mockk<GemConfirmation>(relaxed = true).stubViewState()
     private var model: ConfirmViewModel? = null
 
     @Before

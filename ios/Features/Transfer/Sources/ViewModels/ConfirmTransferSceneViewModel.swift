@@ -10,6 +10,7 @@ import enum Gemstone.GemConfirmFeeSelection
 import struct Gemstone.GemConfirmLoadOptions
 import enum Gemstone.GemConfirmRowContent
 import struct Gemstone.GemConfirmSimulationState
+import struct Gemstone.GemConfirmViewState
 import struct Gemstone.GemFeeRateRows
 import enum Gemstone.GemListRow
 import protocol Gemstone.GemPreferencesServiceProtocol
@@ -39,10 +40,7 @@ public final class ConfirmTransferSceneViewModel {
         didSet { onStateChange(state: state) }
     }
 
-    private(set) var button: GemConfirmButton
-    private(set) var feeRow: GemConfirmFeeRow
-    private(set) var feeRates: GemFeeRateRows?
-    private(set) var rowContents: [GemConfirmRowContent]
+    private(set) var viewState: GemConfirmViewState
 
     public var isPresentingSheet: ConfirmTransferSheetType?
 
@@ -71,13 +69,9 @@ public final class ConfirmTransferSceneViewModel {
             simulation: ConfirmSimulationState(result: request.simulation),
             screen: confirmation.screen(),
         )
-        let screen = state.screen
         self.loadOptions = loadOptions
         self.state = state
-        button = screen.button()
-        feeRow = screen.feeRow()
-        feeRates = confirmation.feeRateRows()
-        rowContents = confirmation.rowContents(addressName: state.addressName?.toGem())
+        viewState = confirmation.viewState(screen: state.screen, addressName: state.addressName?.toGem())
     }
 
     var payloadDetailsListItem: ListItemModel {
@@ -113,7 +107,7 @@ public final class ConfirmTransferSceneViewModel {
 
     var confirmButtonModel: ConfirmButtonViewModel {
         ConfirmButtonViewModel(
-            button: button,
+            button: viewState.button,
             authentication: confirmation.authentication(),
             onAction: { [weak self] in self?.onSelectConfirm() },
         )
@@ -136,7 +130,7 @@ public final class ConfirmTransferSceneViewModel {
             feeAsset: state.feeAsset,
             currency: confirmation.currency,
             selection: loadOptions.feeSelection,
-            feeRates: feeRates,
+            feeRates: viewState.feeRates,
             feeAssetPrice: state.metadata?.feePrice,
             feeAmount: state.fee?.value,
             additionalFees: state.fee?.additionalFees ?? [],
@@ -163,7 +157,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
     }
 
     private var detailItems: [ConfirmTransferItem] {
-        rowContents.indices.map { rowContents[$0].item(at: $0) }
+        viewState.rowContents.indices.map { viewState.rowContents[$0].item(at: $0) }
     }
 
     public func itemModel(for item: ConfirmTransferItem) -> any ItemModelProvidable<ConfirmTransferItemModel> {
@@ -174,7 +168,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
             ConfirmTransferItemModel.warnings(simulationWarnings)
         case let .row(index):
             ConfirmRowViewModel(
-                content: rowContents[index],
+                content: viewState.rowContents[index],
                 onSelectAddress: { [weak self] in self?.onSelectAddress($0) },
             )
         case .verification:
@@ -187,7 +181,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
             ConfirmTransferItemModel.balanceChange(balanceChangeModels[index])
         case .networkFee:
             ConfirmNetworkFeeViewModel(
-                feeRow: feeRow,
+                feeRow: viewState.feeRow,
                 feeModel: feeModel,
                 infoAction: onSelectNetworkFeeInfo,
             )
@@ -296,11 +290,7 @@ extension ConfirmTransferSceneViewModel {
     }
 
     private func onStateChange(state: ConfirmTransferState) {
-        let screen = state.screen
-        button = screen.button()
-        feeRow = screen.feeRow()
-        feeRates = confirmation.feeRateRows()
-        rowContents = confirmation.rowContents(addressName: state.addressName?.toGem())
+        viewState = confirmation.viewState(screen: state.screen, addressName: state.addressName?.toGem())
         guard let error = state.transactionError else { return }
         switch error {
         case .confirm:

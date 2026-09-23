@@ -196,6 +196,12 @@ class ConfirmViewModel @Inject constructor(
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    val viewState = combine(confirmation.filterNotNull(), screen, load) { confirmation, screen, load ->
+        confirmation.viewState(screen, load?.addressName)
+    }
+        .flowOn(ioDispatcher)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     private val transfer = combine(request, load) { request, load -> load?.transfer ?: request }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -219,7 +225,7 @@ class ConfirmViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, Simulation())
 
-    val button = screen.map { it.button() }
+    val button = viewState.map { it?.button ?: GemConfirmButton(GemConfirmButtonKind.CONFIRM, GemConfirmButtonState.LOADING) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, GemConfirmButton(GemConfirmButtonKind.CONFIRM, GemConfirmButtonState.LOADING))
 
     val feeAsset = content.map { it?.feeAssetUIModel }
@@ -236,10 +242,9 @@ class ConfirmViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val transactionRows: StateFlow<List<ConfirmRowUIModel>> = combine(transfer, content) { transfer, content ->
-        transfer ?: return@combine emptyList()
+    val transactionRows: StateFlow<List<ConfirmRowUIModel>> = combine(content, viewState) { content, viewState ->
         content ?: return@combine emptyList()
-        content.session.rowContents(content.load.addressName).mapNotNull { it.uiModel(context) }
+        viewState?.rowContents.orEmpty().mapNotNull { it.uiModel(context) }
     }
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -257,8 +262,8 @@ class ConfirmViewModel @Inject constructor(
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val feeUIModel = combine(feeInfo, screen) { feeInfo, screen ->
-        when (val feeRow = screen.feeRow()) {
+    val feeUIModel = combine(feeInfo, viewState) { feeInfo, viewState ->
+        when (val feeRow = viewState?.feeRow ?: GemConfirmFeeRow.Loading) {
             GemConfirmFeeRow.Loading -> FeeUIModel.Calculating
             is GemConfirmFeeRow.Unavailable -> FeeUIModel.Unavailable(feeRow.text)
             GemConfirmFeeRow.Ready -> feeInfo ?: FeeUIModel.Calculating
@@ -368,7 +373,7 @@ class ConfirmViewModel @Inject constructor(
     private fun changeFeeSelection(selection: GemConfirmFeeSelection) = loadOptions.update { it?.onFeeSelection(selection) }
 
     fun feeDetailsModel(currentFee: FeeUIModel.FeeInfo, feeAsset: FeeAssetUIModel): FeeDetailsModel? {
-        val rows = confirmation.value?.feeRateRows() ?: return null
+        val rows = viewState.value?.feeRates ?: return null
         return FeeDetailsModel(currentFee, feeAsset, rows)
     }
 
