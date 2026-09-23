@@ -133,7 +133,7 @@ pub enum ConfigParamKey {
     PriceProviderCleanOutdatedDuration(PriceProvider),
     ListProviderUpdateDuration(ListProviderName),
     ScanProviderEnable(ScanProvider),
-    ScanTypeMode(ScanType),
+    ScanTypeEnable(ScanType),
     RateLimit(RateLimitKey, RateLimitWindow),
 }
 
@@ -151,7 +151,7 @@ impl ConfigParamKey {
         let metrics = PriceProvider::all().into_iter().map(Self::PriceProviderMetricsDuration);
         let clean_outdated = PriceProvider::all().into_iter().map(Self::PriceProviderCleanOutdatedDuration);
         let scan_providers = ScanProvider::all().into_iter().map(Self::ScanProviderEnable);
-        let scan_types = ScanType::all().into_iter().map(Self::ScanTypeMode);
+        let scan_types = ScanType::all().into_iter().map(Self::ScanTypeEnable);
         let lists = ListProviderName::all().into_iter().map(Self::ListProviderUpdateDuration);
         let rate_limits = RateLimitKey::iter().flat_map(|key| RateLimitWindow::ALL.into_iter().map(move |window| Self::RateLimit(key, window)));
         transactions
@@ -187,7 +187,7 @@ impl ConfigParamKey {
             Self::PriceProviderCleanOutdatedDuration(provider) => format!("{}.{}", self.as_ref(), provider.as_ref()),
             Self::ListProviderUpdateDuration(provider) => format!("{}.{}", self.as_ref(), provider.as_ref()),
             Self::ScanProviderEnable(provider) => format!("{}.{}", self.as_ref(), provider.as_ref()),
-            Self::ScanTypeMode(scan_type) => format!("{}.{}", self.as_ref(), scan_type.as_ref()),
+            Self::ScanTypeEnable(scan_type) => format!("{}.{}", self.as_ref(), scan_type.as_ref()),
             Self::RateLimit(key, window) => format!("{}.{}", key.as_ref(), window.as_ref()),
         }
     }
@@ -208,7 +208,7 @@ impl ConfigParamKey {
             Self::PriceProviderCleanOutdatedDuration(_) => "1d".to_string(),
             Self::ListProviderUpdateDuration(_) => "1d".to_string(),
             Self::ScanProviderEnable(_) => "true".to_string(),
-            Self::ScanTypeMode(_) => "on".to_string(),
+            Self::ScanTypeEnable(_) => "true".to_string(),
             Self::RateLimit(key, window) => key.default_limit().get(*window).to_string(),
         }
     }
@@ -237,11 +237,11 @@ mod tests {
     }
 
     #[test]
-    fn test_scan_type_mode() {
-        let key = ConfigParamKey::ScanTypeMode(ScanType::AddressPoisoning);
+    fn test_scan_type_enable() {
+        let key = ConfigParamKey::ScanTypeEnable(ScanType::AddressPoisoning);
 
-        assert_eq!(key.key(), "scanTypeMode.address_poisoning");
-        assert_eq!(key.default_value(), "on");
+        assert_eq!(key.key(), "scanTypeEnable.address_poisoning");
+        assert_eq!(key.default_value(), "true");
     }
 
     #[test]

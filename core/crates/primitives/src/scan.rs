@@ -42,14 +42,6 @@ impl ScanType {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, AsRefStr, EnumString)]
-#[strum(serialize_all = "snake_case")]
-pub enum ScanMode {
-    On,
-    DryRun,
-    Off,
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScanTransactionPayload {
@@ -132,19 +124,9 @@ impl ScanAddress {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
     use serde_json::Value;
 
-    use super::{ScanMode, ScanTransactionPayload, ScanType};
-
-    #[test]
-    fn test_scan_mode_and_type_strings() {
-        assert_eq!(ScanMode::from_str("dry_run").unwrap(), ScanMode::DryRun);
-        assert_eq!(ScanMode::from_str("on").unwrap(), ScanMode::On);
-        assert!(ScanMode::from_str("true").is_err());
-        assert_eq!(ScanType::AddressPoisoning.as_ref(), "address_poisoning");
-    }
+    use super::ScanTransactionPayload;
 
     #[test]
     fn test_scan_transaction_payload_optional_website() {
