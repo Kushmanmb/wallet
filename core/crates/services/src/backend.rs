@@ -1,14 +1,15 @@
 use std::error::Error;
 use std::sync::Arc;
 
-use cacher::CacherClient;
+use cacher::{AccessTokenCacherClient, CacherClient};
 use chain_providers::ChainProviders;
 use coingecko::CoinGeckoClient;
 use config_keys::ConfigKey;
 use defi::{DefiProviderClient, DefiProviderConfig};
+use fiat::{FiatProvider, FiatProviderFactory};
 use lists::CoinGeckoListProvider;
 use nft::NFTProviderConfig;
-use primitives::{Chain, PriceConfig};
+use primitives::{AccessTokenCacher, Chain, FiatProviderName, PriceConfig};
 use pusher::PusherClient;
 use search_index::{SearchIndexClient, SearchIndexConfig};
 use settings::Settings;
@@ -18,6 +19,7 @@ use streamer::{Retry, ShutdownReceiver, StreamProducer, StreamProducerConfig};
 use crate::assets::ListsClient;
 use crate::auth::AuthClient;
 use crate::defi::DefiClient;
+use crate::fiat::FiatClient;
 use crate::nft::NFTClient;
 use crate::prices::{ChartClient, MarketsClient, PriceAlertClient, PriceClient};
 use crate::support::SupportClient;
@@ -76,6 +78,20 @@ impl Services {
         DefiClient::new(self.database(), DefiProviderClient::new(DefiProviderConfig::from_settings(&self.settings)))
     }
 
+    pub async fn fiat(&self, stream_producer: StreamProducer) -> Result<FiatClient, Box<dyn Error + Send + Sync>> {
+        let cacher = self.cacher().await?;
+        let providers = self.fiat_providers(fiat_access_token_cacher(cacher.clone()));
+        Ok(FiatClient::new(self.database(), cacher, providers, FiatProviderFactory::new_ip_check_client(&self.settings), stream_producer))
+    }
+
+    pub async fn fiat_access_token_cacher(&self) -> Result<Arc<dyn AccessTokenCacher>, Box<dyn Error + Send + Sync>> {
+        Ok(fiat_access_token_cacher(self.cacher().await?))
+    }
+
+    pub fn fiat_providers(&self, access_token_cacher: Arc<dyn AccessTokenCacher>) -> Vec<Box<dyn FiatProvider + Send + Sync>> {
+        FiatProviderFactory::new_providers(&self.settings, access_token_cacher)
+    }
+
     pub fn lists(&self) -> ListsClient {
         let coingecko = CoinGeckoClient::new(self.settings.coingecko.remote_provider_config());
         ListsClient::new(self.database(), vec![Arc::new(CoinGeckoListProvider::new(coingecko))])
@@ -112,4 +128,8 @@ impl Services {
     pub fn chain_providers_for(&self, chain: Chain, user_agent: &str) -> ChainProviders {
         ChainProviders::for_chain(chain, &self.settings, user_agent)
     }
+}
+
+fn fiat_access_token_cacher(cacher: CacherClient) -> Arc<dyn AccessTokenCacher> {
+    Arc::new(AccessTokenCacherClient::new(cacher, FiatProviderName::Transak.id()))
 }

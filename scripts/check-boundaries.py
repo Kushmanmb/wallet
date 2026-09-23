@@ -96,7 +96,6 @@ INFRA_DEPENDENTS = {
     "services": INFRA_CRATES,
     "api": {"cacher", "pusher", "search_index", "storage", "streamer"},
     "daemon": {"cacher", "pusher", "search_index", "storage", "streamer"},
-    "fiat": {"cacher", "storage", "streamer"},
     "rewards": {"cacher", "storage"},
 }
 CARGO_SECTION = re.compile(r"^\[(.+)\]\s*$")

@@ -1,18 +1,15 @@
 use std::error::Error;
-use std::sync::Arc;
 
 use async_trait::async_trait;
 use fiat::FiatProvider;
-use fiat::FiatProviderFactory;
 use gem_tracing::{error_with_fields, info_with_fields};
 use localizer::LanguageLocalizer;
-use primitives::{AccessTokenCacher, Device, FiatTransactionStatus, TransactionId};
+use primitives::{Device, FiatTransactionStatus, FiatWebhook, TransactionId};
 use push_notification::{GorushNotification, PushNotification};
-use settings::Settings;
 use storage::models::FiatTransactionRow;
 use storage::{AssetsRepository, Database, DatabaseError, FiatRepository, WalletsRepository};
 use streamer::consumer::MessageConsumer;
-use streamer::{FiatWebhook, FiatWebhookPayload, NotificationsPayload, QueueName, StreamProducer, StreamProducerQueue, WalletStreamEvent, WalletStreamPayload};
+use streamer::{FiatWebhookPayload, NotificationsPayload, QueueName, StreamProducer, StreamProducerQueue, WalletStreamEvent, WalletStreamPayload};
 
 use crate::pusher::Pusher;
 
@@ -23,9 +20,7 @@ pub struct FiatWebhookConsumer {
 }
 
 impl FiatWebhookConsumer {
-    pub fn new(database: Database, settings: Settings, stream_producer: StreamProducer, access_token_cacher: Arc<dyn AccessTokenCacher>) -> Self {
-        let providers = FiatProviderFactory::new_providers(settings, access_token_cacher);
-
+    pub fn new(database: Database, providers: Vec<Box<dyn FiatProvider + Send + Sync>>, stream_producer: StreamProducer) -> Self {
         Self { database, providers, stream_producer }
     }
 

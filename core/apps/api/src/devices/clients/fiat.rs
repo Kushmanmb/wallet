@@ -1,7 +1,8 @@
 use std::error::Error;
 
-use fiat::{FiatClient, FiatDeviceContext, FiatWebhookRequest};
+use fiat::{FiatDeviceContext, FiatWebhookRequest};
 use primitives::{FiatAssets, FiatQuoteRequest, FiatQuoteType, FiatQuoteUrl, FiatQuotes, FiatTransactionData};
+use services::fiat::FiatClient;
 use storage::{Database, DatabaseError, DevicesRepository, FiatRepository};
 
 pub struct FiatQuotesClient {

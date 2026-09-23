@@ -29,11 +29,8 @@ use gem_tracing::info_with_fields;
 use strum::IntoEnumIterator;
 
 use ::defi::{DefiProviderClient, DefiProviderConfig};
-use ::fiat::FiatClient;
-use ::fiat::FiatProviderFactory;
 use ::nft::{NFTProviderClient, NFTProviderConfig};
 use assets::{AssetsClient, SearchClient};
-use cacher::AccessTokenCacherClient;
 use chain_providers::ProviderFactory;
 use config::ConfigClient;
 use config_keys::ConfigKey;
@@ -43,7 +40,7 @@ use devices::{
 };
 use model::APIService;
 use name_resolver::{NameClient, NameConfig, NameProviderFactory};
-use primitives::{FiatProviderName, PriceConfig};
+use primitives::PriceConfig;
 use rewards::{AbuseIPDBClient, IpApiClient, IpCheckProvider, IpSecurityClient};
 use rocket::{Build, Rocket, catchers, routes};
 use services::Services;
@@ -234,10 +231,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let search_index_client = services.search_index().await?;
     let search_client = SearchClient::new(&search_index_client, price_client.clone());
     let swap_client = SwapClient::new(database.clone());
-    let fiat_providers = FiatProviderFactory::new_providers(settings_clone.clone(), Arc::new(AccessTokenCacherClient::new(cacher_client.clone(), FiatProviderName::Transak.id())));
-    let fiat_ip_check_client = FiatProviderFactory::new_ip_check_client(settings_clone.clone());
-    let fiat_client = FiatClient::new(database.clone(), cacher_client.clone(), fiat_providers, fiat_ip_check_client.clone(), stream_producer.clone());
-    let fiat_quotes_client = FiatQuotesClient::new(database.clone(), fiat_client);
+    let fiat_quotes_client = FiatQuotesClient::new(database.clone(), services.fiat(stream_producer.clone()).await?);
     let nft_config = NFTProviderConfig::from_settings(&settings);
     let nft_client = services.nft();
     let nft_provider_client = NFTProviderClient::new(nft_config);

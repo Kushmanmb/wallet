@@ -2,6 +2,7 @@ pub mod assets;
 pub mod auth;
 mod backend;
 pub mod defi;
+pub mod fiat;
 pub mod nft;
 pub mod prices;
 mod static_assets;

@@ -66,6 +66,14 @@ pub struct FiatTransactionUpdate {
     pub fiat_currency: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(clippy::large_enum_variant)]
+pub enum FiatWebhook {
+    OrderId(String),
+    Transaction(FiatTransactionUpdate),
+    None,
+}
+
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[typeshare(swift = "Equatable, Sendable, Hashable")]
 #[serde(rename_all = "camelCase")]

@@ -8,9 +8,8 @@ use crate::{
 use async_trait::async_trait;
 use futures::future;
 use primitives::currency::Currency;
-use primitives::{FiatProviderCountry, FiatProviderName, FiatQuoteRequest, FiatQuoteResponse, FiatQuoteType, FiatQuoteUrl, FiatQuoteUrlData};
+use primitives::{FiatProviderCountry, FiatProviderName, FiatQuoteRequest, FiatQuoteResponse, FiatQuoteType, FiatQuoteUrl, FiatQuoteUrlData, FiatWebhook};
 use std::error::Error;
-use streamer::FiatWebhook;
 
 use super::{
     client::MercuryoClient,
@@ -172,8 +171,7 @@ mod fiat_integration_tests {
 #[cfg(test)]
 mod tests {
     use crate::{FiatProvider, FiatWebhookRequest, providers::mercuryo::client::MercuryoClient};
-    use primitives::{FiatTransactionStatus, FiatTransactionUpdate};
-    use streamer::FiatWebhook;
+    use primitives::{FiatTransactionStatus, FiatTransactionUpdate, FiatWebhook};
 
     fn assert_transaction(webhook: FiatWebhook, expected: FiatTransactionUpdate) {
         match webhook {

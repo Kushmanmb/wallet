@@ -1,4 +1,4 @@
-use primitives::{AssetAddress, AssetId, Chain, ChainAddress, FiatProviderName, FiatTransactionUpdate, ListId, NFTAssetId, NotificationType, PriceData, PriceId, Transaction, TransactionId};
+use primitives::{AssetAddress, AssetId, Chain, ChainAddress, FiatProviderName, FiatWebhook, ListId, NFTAssetId, NotificationType, PriceData, PriceId, Transaction, TransactionId};
 use push_notification::{FailedNotification, GorushNotification};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -236,14 +236,6 @@ impl From<ChainAddress> for ChainAddressPayload {
     fn from(chain_address: ChainAddress) -> Self {
         Self::new(chain_address)
     }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[allow(clippy::large_enum_variant)]
-pub enum FiatWebhook {
-    OrderId(String),
-    Transaction(FiatTransactionUpdate),
-    None,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
