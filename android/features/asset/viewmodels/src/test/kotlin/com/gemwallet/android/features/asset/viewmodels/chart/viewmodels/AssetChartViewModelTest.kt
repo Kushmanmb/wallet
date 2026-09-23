@@ -9,7 +9,6 @@ import com.gemwallet.android.application.assets.cases.GetAssetTokenInfo
 import com.gemwallet.android.application.assets.cases.GetWalletAssets
 import com.gemwallet.android.application.pricealerts.cases.GetPriceAlerts
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
-import com.gemwallet.android.domains.pricealerts.aggregates.PriceAlertDataAggregate
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.model.AssetInfo
 import com.gemwallet.android.testkit.mockAssetInfo
@@ -23,6 +22,7 @@ import com.gemwallet.android.testkit.mockPriceAlert
 import com.wallet.core.primitives.AssetLink
 import com.wallet.core.primitives.AssetMarket
 import com.wallet.core.primitives.Currency
+import com.wallet.core.primitives.PriceAlertData
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -78,7 +78,7 @@ class AssetChartViewModelTest {
         every { getAssetTokenInfo(asset.id) } returns assetInfoFlow
         every { getAssetLinks(asset.id) } returns linksFlow
         every { getAssetMarket(asset.id) } returns marketFlow
-        every { getPriceAlerts(asset.id) } returns MutableStateFlow<List<PriceAlertDataAggregate>>(emptyList())
+        every { getPriceAlerts(asset.id) } returns MutableStateFlow<List<PriceAlertData>>(emptyList())
         every { chartService.sections(any(), any(), any(), any(), any()) } returns emptyList()
     }
 
@@ -136,7 +136,7 @@ class AssetChartViewModelTest {
     fun `the stored price and alerts reach core untouched`() = runTest(testDispatcher) {
         val alert = mockPriceAlert(assetId = asset.id)
         assetInfoFlow.value = mockAssetInfo(asset).copy(price = mockAssetPriceInfo(price = 2.5))
-        every { getPriceAlerts(asset.id) } returns MutableStateFlow(listOf(mockk<PriceAlertDataAggregate> { every { priceAlert } returns alert }))
+        every { getPriceAlerts(asset.id) } returns MutableStateFlow(listOf(mockk<PriceAlertData> { every { priceAlert } returns alert }))
 
         createViewModel()
         advanceUntilIdle()

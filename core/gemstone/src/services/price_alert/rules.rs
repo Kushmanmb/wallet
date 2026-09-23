@@ -76,10 +76,23 @@ pub enum GemPriceAlertSectionKind {
     Asset { asset_id: AssetId, name: String },
 }
 
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GemPriceAlertSection {
     pub kind: GemPriceAlertSectionKind,
     pub alert_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct GemPriceAlertItem {
+    pub id: String,
+    pub data: PriceAlertData,
+    pub row: GemPriceAlertRow,
+}
+
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct GemPriceAlertListSection {
+    pub kind: GemPriceAlertSectionKind,
+    pub items: Vec<GemPriceAlertItem>,
 }
 
 fn text(number: Option<GemFormattedNumber>) -> GemPriceAlertText {
@@ -141,6 +154,26 @@ pub fn price_alert_sections(alerts: Vec<PriceAlertData>) -> Vec<GemPriceAlertSec
             kind: GemPriceAlertSectionKind::Asset { asset_id, name: name.clone() },
             alert_ids,
         }))
+        .collect()
+}
+
+pub fn price_alert_list_sections(alerts: Vec<PriceAlertData>, price_currency: Currency) -> Vec<GemPriceAlertListSection> {
+    let by_id: HashMap<String, PriceAlertData> = alerts.iter().map(|data| (data.price_alert.id(), data.clone())).collect();
+    price_alert_sections(alerts)
+        .into_iter()
+        .map(|section| GemPriceAlertListSection {
+            kind: section.kind,
+            items: section
+                .alert_ids
+                .iter()
+                .filter_map(|id| by_id.get(id))
+                .map(|data| GemPriceAlertItem {
+                    id: data.price_alert.id(),
+                    row: price_alert_row(data, price_currency.clone()),
+                    data: data.clone(),
+                })
+                .collect(),
+        })
         .collect()
 }
 
@@ -330,6 +363,21 @@ mod tests {
                 },
             ]
         );
+    }
+
+    #[test]
+    fn test_list_sections_carry_each_alert_with_its_row_in_section_order() {
+        let bitcoin = AssetId::from_chain(Chain::Bitcoin);
+        let auto = PriceAlertData::mock(PriceAlert::new_auto(bitcoin.clone(), Currency::USD), None, None);
+        let over = PriceAlertData::mock(PriceAlert::new_price(bitcoin, Currency::USD, 100.0, PriceAlertDirection::Up), None, None);
+
+        let sections = price_alert_list_sections(vec![over.clone(), auto.clone()], Currency::USD);
+
+        assert_eq!(sections.len(), 2);
+        assert_eq!(sections[0].kind, GemPriceAlertSectionKind::Auto);
+        let items = |index: usize| sections[index].items.iter().map(|item| (item.data.price_alert.id(), item.row.clone())).collect::<Vec<_>>();
+        assert_eq!(items(0), vec![(auto.price_alert.id(), price_alert_row(&auto, Currency::USD))]);
+        assert_eq!(items(1), vec![(over.price_alert.id(), price_alert_row(&over, Currency::USD))]);
     }
 
     #[test]

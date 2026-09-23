@@ -183,7 +183,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 #### Models that hold a domain object beside its row
 
-- **VM33** **S** **Price-alert aggregates copy the row out.** Android `PriceAlertDataAggregateImpl` in [GetPriceAlertsImpl](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/pricealerts/GetPriceAlertsImpl.kt) holds `Asset` and `PriceAlert` beside `GemPriceAlertRow` and copies five of its fields.
 
 #### One view state per screen instead of many crossings
 
@@ -196,7 +195,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 - **VM41** **M** **Perpetual candles run through `GemCandleSession` on Android.** iOS drives candles through the session; Android [`PerpetualDetailsViewModel`](../android/features/perpetual/viewmodels/src/main/kotlin/com/gemwallet/android/features/perpetual/viewmodels/PerpetualDetailsViewModel.kt) calls `candles`, `mergedCandles`, `candleSubscription` and `chartPeriod` and merges by hand.
 - **VM43** **M** **Swap view state carries each side's interaction.** Both apps derive pay/receive editability, asset selection and receive-loading from loading flags: iOS `payTokenInteraction`/`receiveTokenInteraction`, Android [`SwapUiState`](../android/features/swap/viewmodels/src/main/kotlin/com/gemwallet/android/features/swap/viewmodels/models/SwapUiState.kt).
 - **VM45** **S** **Confirm decides section visibility app-side.** iOS [`ConfirmTransferSceneViewModel`](../ios/Features/Transfer/Sources/ViewModels/ConfirmTransferSceneViewModel.swift) shows the warnings, payload and balance-change sections by testing each for emptiness; land with AUD45 and VM4.
-- **VM46** **M** **Asset price alerts come as rows.** iOS [`AssetPriceAlertsViewModel`](../ios/Features/PriceAlerts/Sources/ViewModels/AssetPriceAlertsViewModel.swift) filters alerts with `alertKind(...).groupsByAsset()` per alert, then `displayedAlerts` re-joins Core's ids, and derives the auto toggle from `contains(type == .auto)`; `[PriceAlert].displayedAlerts` does the same join elsewhere.
 
 #### Rows projected once per list
 
@@ -310,6 +308,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM33, VM46 (2026-09-23).** Closed. `PriceAlertFormatter.sections(alerts, price_currency)` returns `GemPriceAlertListSection`s whose `GemPriceAlertItem`s carry the alert's id, its `PriceAlertData` and its finished `GemPriceAlertRow`, so neither app re-joins section ids to records or projects rows one by one, and the `displayed_alert_ids` export is gone. iOS `AssetPriceAlertsViewModel` reads the auto toggle and the active alerts from those sections instead of filtering with `alertKind(...).groupsByAsset()` and `[PriceAlertData].displayedAlerts`, and both list screens hand `PriceAlertItemView` a `PriceAlertItem`. Android `GetPriceAlerts` returns `PriceAlertData`; `PriceAlertViewModel` maps the Core items to `PriceAlertItemUIModel` (row plus the alert and asset for actions), and `PriceAlertDataAggregate` with its copied fields is gone.
 
 **VM32 (2026-09-23).** Closed. Android `NftItemUIModel` held the whole `NFTCollection` and optional `NFTAsset` beside `GemNftRow` only to decide where a tap goes; it now stores the row and an `NftItemTarget` (collection id or asset id) built once from the Core `GemNftItem`, the same split iOS makes in `NFTGridPosterBuilder`, and the NFT list, collections preview and wallet search switch on the target.
 

@@ -8,7 +8,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uniffi.gemstone.PriceAlertFormatter
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -17,9 +16,8 @@ object PriceAlertModule {
 
     @Provides
     @Singleton
-    fun provideGetPriceAlerts(priceAlertStore: GemstonePriceAlertStore, getWalletAssets: GetWalletAssets, priceAlertFormatter: PriceAlertFormatter): GetPriceAlerts = GetPriceAlertsImpl(
+    fun provideGetPriceAlerts(priceAlertStore: GemstonePriceAlertStore, getWalletAssets: GetWalletAssets): GetPriceAlerts = GetPriceAlertsImpl(
         priceAlertStore = priceAlertStore,
         getWalletAssets = getWalletAssets,
-        priceAlertFormatter = priceAlertFormatter,
     )
 }

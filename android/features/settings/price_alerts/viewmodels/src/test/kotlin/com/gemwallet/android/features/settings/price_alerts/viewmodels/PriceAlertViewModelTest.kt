@@ -3,10 +3,12 @@ package com.gemwallet.android.features.settings.price_alerts.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.pricealerts.cases.GetPriceAlerts
+import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.Chain
+import com.wallet.core.primitives.Currency
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -122,6 +124,7 @@ class PriceAlertViewModelTest {
         var state = enabled
         return mockk {
             every { isEnabled() } answers { state }
+            every { getCurrency() } returns Currency.USD.toGem()
             coEvery { setEnabled(any()) } answers {
                 state = firstArg()
                 Unit

@@ -34,8 +34,8 @@ public struct AssetPriceAlertsScene: View {
 
             if model.alerts.isNotEmpty {
                 Section {
-                    ForEach(model.alerts, id: \.priceAlert.id) { alert in
-                        PriceAlertItemView(alert: alert, currency: model.currency, onDelete: { onDelete(alert: $0) })
+                    ForEach(model.alerts) { item in
+                        PriceAlertItemView(item: item, onDelete: { onDelete(alert: $0) })
                     }
                 } header: {
                     Text(Localized.Stake.active)

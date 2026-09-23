@@ -8,15 +8,14 @@ import Style
 import SwiftUI
 
 struct PriceAlertItemView: View {
-    let alert: PriceAlertData
-    let currency: Currency
+    let item: PriceAlertItem
     let onDelete: (PriceAlert) -> Void
 
     var body: some View {
-        ListAssetItemView(model: PriceAlertItemViewModel(data: alert, currency: currency))
+        ListAssetItemView(model: item.model)
             .swipeActions(edge: .trailing) {
                 Button(Localized.Common.delete, role: .destructive) {
-                    onDelete(alert.priceAlert)
+                    onDelete(item.data.priceAlert)
                 }
                 .tint(Colors.red)
             }

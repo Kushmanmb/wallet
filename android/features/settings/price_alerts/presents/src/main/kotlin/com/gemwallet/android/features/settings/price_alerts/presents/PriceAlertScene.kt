@@ -34,7 +34,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.gemwallet.android.domains.asset.aggregates.AssetInfoDataAggregate
-import com.gemwallet.android.domains.pricealerts.aggregates.PriceAlertDataAggregate
+import com.gemwallet.android.features.settings.price_alerts.viewmodels.PriceAlertItemUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.empty.EmptyContentType
 import com.gemwallet.android.ui.components.empty.EmptyContentView
@@ -61,7 +61,7 @@ import uniffi.gemstone.GemListRow
 @Composable
 internal fun PriceAlertScene(
     asset: AssetInfoDataAggregate? = null,
-    sections: List<ListSection<PriceAlertDataAggregate>>,
+    sections: List<ListSection<PriceAlertItemUIModel>>,
     errorRow: GemListRow?,
     isAutoAlertEnabled: Boolean,
     enabled: Boolean,
@@ -161,7 +161,7 @@ private fun LazyListScope.emptyAlertingAssets(empty: Boolean) {
     }
 }
 
-private fun LazyListScope.assets(revealable: MutableState<String?>, sections: List<ListSection<PriceAlertDataAggregate>>, onChart: ((AssetId) -> Unit)?, onExclude: (String) -> Unit) {
+private fun LazyListScope.assets(revealable: MutableState<String?>, sections: List<ListSection<PriceAlertItemUIModel>>, onChart: ((AssetId) -> Unit)?, onExclude: (String) -> Unit) {
     listSections(sections) { position, item ->
         var minActionWidth by remember { mutableStateOf(space0) }
         val density = LocalDensity.current
@@ -186,7 +186,7 @@ private fun LazyListScope.assets(revealable: MutableState<String?>, sections: Li
                 modifier = (
                     onChart?.let {
                         Modifier
-                            .clickable(onClick = { onChart(item.assetId) })
+                            .clickable(onClick = { onChart(item.asset.id) })
                     } ?: Modifier
                     )
                     .onSizeChanged {

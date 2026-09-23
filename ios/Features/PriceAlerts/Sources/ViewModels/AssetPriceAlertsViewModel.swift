@@ -2,6 +2,7 @@
 
 import Components
 import enum Gemstone.GemLoadState
+import struct Gemstone.GemPriceAlertListSection
 import protocol Gemstone.GemPriceAlertServiceProtocol
 import enum Gemstone.GemServiceError
 import func Gemstone.loadError
@@ -66,17 +67,33 @@ public final class AssetPriceAlertsViewModel: Sendable {
 
     var isAutoAlertEnabledBinding: Binding<Bool> {
         Binding(
-            get: { self.priceAlerts.contains(where: { $0.priceAlert.type == .auto }) },
+            get: { self.sections.contains {
+                if case .auto = $0.kind {
+                    true
+                } else {
+                    false
+                }
+            } },
             set: { newValue in
                 Task { await self.toggleAutoAlert(enabled: newValue) }
             },
         )
     }
 
-    var alerts: [PriceAlertData] {
-        priceAlerts
-            .filter { PriceAlertFormatter.shared.alertKind(alert: $0.priceAlert.toGem()).groupsByAsset() }
-            .displayedAlerts
+    var alerts: [PriceAlertItem] {
+        sections.filter {
+            if case .asset = $0.kind {
+                true
+            } else {
+                false
+            }
+        }
+        .flatMap(\.items)
+        .map(PriceAlertItem.init(item:))
+    }
+
+    private var sections: [GemPriceAlertListSection] {
+        PriceAlertFormatter.shared.sections(alerts: priceAlerts.map { $0.toGem() }, priceCurrency: currency.toGem())
     }
 
     var currency: Currency {

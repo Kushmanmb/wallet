@@ -56,13 +56,12 @@ public final class PriceAlertsSceneViewModel: Sendable {
         EmptyContentTypeViewModel(type: EmptyContentType(.priceAlerts))
     }
 
-    var sections: [ListItemValueSection<PriceAlertData>] {
-        let alerts = Dictionary(priceAlerts.map { ($0.priceAlert.id, $0) }, uniquingKeysWith: { first, _ in first })
-        return PriceAlertFormatter.shared.sections(alerts: priceAlerts.map { $0.toGem() }).map { section in
+    var sections: [ListItemValueSection<PriceAlertItem>] {
+        PriceAlertFormatter.shared.sections(alerts: priceAlerts.map { $0.toGem() }, priceCurrency: currency.toGem()).map { section in
             ListItemValueSection(
                 section: section.kind.title,
                 footer: section.kind.footer,
-                values: section.alertIds.compactMap { alerts[$0] }.map { ListItemValue(value: $0) },
+                values: section.items.map { ListItemValue(value: PriceAlertItem(item: $0)) },
             )
         }
     }

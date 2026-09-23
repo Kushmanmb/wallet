@@ -9,7 +9,6 @@ import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.assets.cases.GetAssetTokenInfo
 import com.gemwallet.android.application.pricealerts.cases.GetPriceAlerts
 import com.gemwallet.android.domains.asset.aggregates.toAssetInfoDataAggregate
-import com.gemwallet.android.domains.pricealerts.aggregates.PriceAlertDataAggregate
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toAssetId
@@ -23,7 +22,6 @@ import com.gemwallet.android.ui.models.ListSection
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
-import com.wallet.core.primitives.PriceAlertData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -81,15 +79,14 @@ class PriceAlertViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val grouped = alerts.map { alerts ->
-        val byId = alerts.associateBy { it.id }
-        priceAlertFormatter.sections(alerts.map { PriceAlertData(asset = it.asset, price = null, priceAlert = it.priceAlert, rankScore = it.rankScore).toGem() })
-            .map { section -> section.kind to section.alertIds.mapNotNull { byId[it] } }
-    }
+        priceAlertFormatter.sections(alerts.map { it.toGem() }, service.getCurrency())
+            .map { section -> section.kind to section.items.map(::PriceAlertItemUIModel) }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val isAutoAlertEnabled = grouped.map { sections -> sections.any { (kind, _) -> kind is GemPriceAlertSectionKind.Auto } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val sections: StateFlow<List<ListSection<PriceAlertDataAggregate>>> = combine(grouped, assetId) { grouped, assetId ->
+    val sections: StateFlow<List<ListSection<PriceAlertItemUIModel>>> = combine(grouped, assetId) { grouped, assetId ->
         grouped.mapNotNull { (kind, items) ->
             when {
                 assetId == null -> ListSection(id = kind.sectionId(), title = kind.title(), items = items, footer = kind.footer(context))
@@ -152,7 +149,7 @@ class PriceAlertViewModel @Inject constructor(
     }
 
     fun excludeAsset(priceAlertId: String) = viewModelScope.launch(ioDispatcher) {
-        val alert = alerts.value.firstOrNull { it.id == priceAlertId } ?: return@launch
+        val alert = grouped.value.flatMap { (_, items) -> items }.firstOrNull { it.id == priceAlertId } ?: return@launch
         runCatchingCancellable { service.deletePriceAlerts(listOf(alert.priceAlert.toGem())) }
             .onFailure { errorState.value = it.errorText().text(context) }
     }
