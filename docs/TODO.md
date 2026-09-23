@@ -234,8 +234,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 - **VM78** **S** **Settings holds one service.** iOS `SettingsViewModel` holds `GemNotificationsService` only to call `enableForSupport`; the owning service should expose it (Android routes it through `EnablePushForSupport`).
 - **VM79** **S** **The root scene stops reading the wallet store.** iOS [`RootSceneViewModel`](../ios/Gem/ViewModels/RootSceneViewModel.swift) reads `stores.walletStore.getWallet` directly; the session service answers the current wallet.
-- **VM80** **S** **WalletConnect screens hold one service.** Android `WCRequestViewModel`, `WCAuthViewModel` and `ProposalSceneViewModel` hold `GemApplicationMetadataService` only for `connectionRow`.
-- **VM81** **S** **Add-asset holds one service.** Android `AddAssetViewModel` holds `GemChainService` beside `GemAddAssetService` for its chain list.
 - **VM82** **S** **WalletConnect permission rows come from Core.** Both apps hard-code the proposal's permission rows (iOS `ConnectionProposalViewModel`, Android `ProposalSceneViewModel`).
 - **VM83** **S** **The NFT unverified row comes from Core.** iOS NFT `CollectionsContent` builds the "Unverified" count row as a `ListItemModel`; it belongs in the collectible owner's sections.
 - **VM84** **S** **The wallet detail secret row comes from Core.** iOS `WalletDetailViewModel` builds "Show {secret kind}"; `GemWalletDetails` should return it.
@@ -327,6 +325,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM80, VM81 (2026-09-23).** Closed. `GemApplicationMetadataService` held no state, so its four methods become the exported projections `application_connection_row`, `application_short_name`, `application_host` and `application_icon_url`, following [a row is projected from its value](ARCHITECTURE.md#a-row-is-projected-from-its-value-never-fetched-from-a-service); the Android WalletConnect request, auth and proposal view models drop the second service, iOS drops the `.shared` instance, and Core's WalletConnect, sign-message and confirm code call the plain functions (VM80). `GemAddAssetService.matching_chains` forwards the chain search, so Android `AddAssetViewModel` holds one service (VM81).
 
 **VM90, VM94 (2026-09-23).** Closed. iOS `BannerViewModel` sized and rounded the banner icon by switching on the banner event; it now keys both on `content.icon`, the Core answer Android already styles from, with the same result for every event (VM90). The notification prompt is already Core's on both apps: iOS `PushNotificationEnablerService` asks `notificationPrompt(isGranted:)` whether to enable, request or open Settings, and Android asks `shouldAskNotifications`; only Android records the asked-at cooldown because iOS lets an app raise the system prompt once (VM94).
 

@@ -38,13 +38,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemSessionProposal
 import uniffi.gemstone.GemWalletConnectException
 import uniffi.gemstone.GemWalletConnectRejectionReason
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.WalletConnectionVerificationStatus
+import uniffi.gemstone.applicationConnectionRow
 import uniffi.gemstone.walletRows
 import javax.inject.Inject
 
@@ -53,7 +53,6 @@ class ProposalSceneViewModel @Inject constructor(
     private val approveWalletConnection: ApproveWalletConnection,
     private val activeRequest: ActiveWalletConnectRequest,
     private val walletConnectService: GemWalletConnectServiceInterface,
-    private val metadataService: GemApplicationMetadataServiceInterface,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
@@ -63,7 +62,7 @@ class ProposalSceneViewModel @Inject constructor(
     private val _proposal = MutableStateFlow<WalletConnectSessionProposal?>(null)
     private val _sessionProposal = MutableStateFlow<GemSessionProposal?>(null)
 
-    val proposal = _sessionProposal.map { prepared -> prepared?.let { metadataService.connectionRow(it.proposal.metadata) } }
+    val proposal = _sessionProposal.map { prepared -> prepared?.let { applicationConnectionRow(it.proposal.metadata) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val peerHead: StateFlow<ConnectionHeadUIModel?> = proposal.map { it?.headUIModel() }

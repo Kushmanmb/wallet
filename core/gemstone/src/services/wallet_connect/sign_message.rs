@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use primitives::{Account, ApplicationMetadata, Asset, Chain, Wallet, WalletId};
 
-use crate::application::GemApplicationMetadataService;
+use crate::application;
 use crate::keystore::{GemKeystore, decode_password, keystore_id_for_wallet};
 use crate::message::payload::MessagePayloadPreview;
 use crate::message::sign_type::{MessageType, SignMessage};
@@ -107,7 +107,7 @@ impl GemSignMessageService {
 fn review_rows(chain: Chain, wallet: &Wallet, account: &Account, metadata: &ApplicationMetadata, shows_app: bool, address_url: impl Fn(Chain, String) -> BlockExplorerLink) -> Vec<GemListRow> {
     let app = shows_app.then(|| GemListRow::App {
         name: metadata.short_name(),
-        icon_url: GemApplicationMetadataService::new().icon_url(metadata.clone()),
+        icon_url: application::icon_url(metadata),
         website_url: Some(metadata.url.clone()).filter(|url| !url.is_empty()),
     });
     let sender = GemListRow::Wallet {

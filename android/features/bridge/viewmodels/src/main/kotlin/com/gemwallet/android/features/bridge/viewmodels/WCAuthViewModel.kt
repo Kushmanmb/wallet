@@ -40,7 +40,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemSignMessageServiceInterface
 import uniffi.gemstone.GemSimulationPayloadRow
 import uniffi.gemstone.GemWalletConnectAuthAccount
@@ -49,6 +48,7 @@ import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.MessageType
 import uniffi.gemstone.SignDigestType
 import uniffi.gemstone.SignMessage
+import uniffi.gemstone.applicationConnectionRow
 import uniffi.gemstone.walletRows
 import javax.inject.Inject
 
@@ -58,7 +58,6 @@ class WCAuthViewModel @Inject constructor(
     private val activeRequest: ActiveWalletConnectRequest,
     private val walletConnectService: GemWalletConnectServiceInterface,
     private val signMessageService: GemSignMessageServiceInterface,
-    private val metadataService: GemApplicationMetadataServiceInterface,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
@@ -230,7 +229,7 @@ class WCAuthViewModel @Inject constructor(
         val selectedWallet = prepared.proposal.defaultWallet.toPrimitives()
         return AuthSceneState.Request(
             texts = ReviewTexts(context),
-            peer = metadataService.connectionRow(prepared.proposal.metadata).headUIModel(),
+            peer = applicationConnectionRow(prepared.proposal.metadata).headUIModel(),
             availableWallets = prepared.proposal.wallets.map { it.toPrimitives() },
             availableWalletRows = walletRows(prepared.proposal.wallets).map { it.uiModel(context) },
             selectedWallet = selectedWallet,

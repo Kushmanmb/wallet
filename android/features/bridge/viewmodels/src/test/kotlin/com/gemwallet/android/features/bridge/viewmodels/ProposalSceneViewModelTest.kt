@@ -5,7 +5,6 @@ import com.gemwallet.android.application.wallet_connect.ActiveWalletConnectReque
 import com.gemwallet.android.application.wallet_connect.cases.ApproveWalletConnection
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.testkit.mockApplicationMetadata
-import com.gemwallet.android.testkit.mockGemConnectionRow
 import com.gemwallet.android.testkit.mockWalletConnectSessionProposal
 import com.gemwallet.android.testkit.mockWalletConnectVerifyContext
 import com.gemwallet.android.testkit.mockWalletConnectionSessionProposal
@@ -32,7 +31,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemSessionProposal
 import uniffi.gemstone.GemWalletConnectException
 import uniffi.gemstone.GemWalletConnectServiceInterface
@@ -62,10 +60,6 @@ class ProposalSceneViewModelTest {
 
     private val verifyContext = mockWalletConnectVerifyContext()
 
-    private fun metadataService(): GemApplicationMetadataServiceInterface = mockk {
-        every { connectionRow(any()) } returns mockGemConnectionRow(iconUrl = null)
-    }
-
     private fun service(): GemWalletConnectServiceInterface = mockk(relaxed = true) {
         every { shouldProcessMessage(any()) } returns true
         every { applicationMetadata(any(), any(), any(), any()) } returns mockApplicationMetadata().toGem()
@@ -79,7 +73,6 @@ class ProposalSceneViewModelTest {
         approveWalletConnection = approve,
         activeRequest = ActiveWalletConnectRequest(events = emptyFlow()),
         walletConnectService = service,
-        metadataService = metadataService(),
         ioDispatcher = dispatcher,
         context = mockk(relaxed = true) {
             every { getString(R.string.errors_connections_malicious_origin) } returns "Malicious origin"

@@ -2,7 +2,7 @@
 
 import Components
 import Foundation
-import class Gemstone.GemApplicationMetadataService
+import func Gemstone.applicationConnectionRow
 import struct Gemstone.GemConnectionRow
 import enum Gemstone.GemVerificationLevel
 import func Gemstone.verificationLevel
@@ -127,7 +127,7 @@ public struct ConnectionProposalViewModel {
     }
 
     private var row: GemConnectionRow {
-        GemApplicationMetadataService.shared.connectionRow(metadata: payload.metadata.toGem())
+        applicationConnectionRow(metadata: payload.metadata.toGem())
     }
 }
 

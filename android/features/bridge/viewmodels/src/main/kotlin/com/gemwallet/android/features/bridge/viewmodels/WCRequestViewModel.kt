@@ -38,13 +38,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemSignMessageServiceInterface
 import uniffi.gemstone.GemSignerFailure
 import uniffi.gemstone.GemWalletConnectFailure
 import uniffi.gemstone.GemWalletConnectServiceInterface
 import uniffi.gemstone.GemWalletConnectSessionRequest
+import uniffi.gemstone.applicationConnectionRow
 import uniffi.gemstone.signerFailure
 import javax.inject.Inject
 
@@ -52,7 +52,6 @@ import javax.inject.Inject
 @HiltViewModel
 class WCRequestViewModel @Inject constructor(
     private val service: GemWalletConnectServiceInterface,
-    private val metadataService: GemApplicationMetadataServiceInterface,
     private val signMessageService: GemSignMessageServiceInterface,
     private val respondWalletConnectRequest: RespondWalletConnectRequest,
     private val pendingRequests: WalletConnectPendingRequests,
@@ -172,7 +171,7 @@ class WCRequestViewModel @Inject constructor(
     }
 
     private fun toRequest(pending: WalletConnectPendingRequest): WCRequest {
-        val row = metadataService.connectionRow(pending.appMetadata.toGem())
+        val row = applicationConnectionRow(pending.appMetadata.toGem())
         return when (pending) {
             is WalletConnectPendingRequest.SignMessage -> WCRequest.SignMessage(pending, row, signMessageService, ReviewTexts(context), context)
             is WalletConnectPendingRequest.Transaction -> WCRequest.Transaction(pending, row)

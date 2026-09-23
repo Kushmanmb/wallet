@@ -5,7 +5,6 @@ import com.gemwallet.android.application.wallet_connect.ActiveWalletConnectReque
 import com.gemwallet.android.application.wallet_connect.WalletConnectJsonRpcResponse
 import com.gemwallet.android.application.wallet_connect.WalletConnectPendingRequests
 import com.gemwallet.android.application.wallet_connect.cases.RespondWalletConnectRequest
-import com.gemwallet.android.testkit.mockGemConnectionRow
 import com.gemwallet.android.testkit.mockGemSignMessagePreview
 import com.gemwallet.android.testkit.mockGemWalletConnectMessageRequest
 import com.gemwallet.android.testkit.mockWalletConnectSessionRequest
@@ -39,7 +38,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemSignMessageServiceInterface
 import uniffi.gemstone.GemWalletConnectFailure
@@ -75,10 +73,6 @@ class WCRequestViewModelTest {
 
     private val verifyContext = mockWalletConnectVerifyContext()
 
-    private fun metadataService(): GemApplicationMetadataServiceInterface = mockk {
-        every { connectionRow(any()) } returns mockGemConnectionRow()
-    }
-
     private fun service(onProcess: suspend (GemWalletConnectSessionRequest) -> GemWalletConnectOutcome = { idle }): GemWalletConnectServiceInterface = mockk(relaxed = true) {
         every { userRejectedError() } returns GemWalletConnectRpcError(code = 4001, message = "User rejected")
         coEvery { requestOutcome(any()) } coAnswers { onProcess(firstArg()) }
@@ -96,7 +90,6 @@ class WCRequestViewModelTest {
         requests: WalletConnectPendingRequests = WalletConnectPendingRequests(),
     ) = WCRequestViewModel(
         service = service,
-        metadataService = metadataService(),
         signMessageService = signMessageService,
         respondWalletConnectRequest = respond,
         pendingRequests = requests,

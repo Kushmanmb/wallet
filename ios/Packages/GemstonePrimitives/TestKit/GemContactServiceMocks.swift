@@ -65,10 +65,6 @@ public final class GemWalletConnectServiceMock: GemWalletConnectServiceProtocol,
         )
     }
 
-    public func connectionRow(metadata _: Gemstone.ApplicationMetadata) -> GemConnectionRow {
-        connectionRowValue
-    }
-
     public func connectionSections(connections _: [Gemstone.WalletConnection]) -> [GemConnectionSection] {
         connectionSectionsValue
     }

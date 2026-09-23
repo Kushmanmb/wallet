@@ -1,6 +1,6 @@
 use super::model::{GemAvatar, GemConfirmRowContent};
 use crate::address_formatter::{GemAddressFormatStyle, GemAddressService, format_address};
-use crate::application::GemApplicationMetadataService;
+use crate::application;
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
 use crate::models::copy::address_copy;
 use crate::models::custom_types::GemBigInt;
@@ -571,7 +571,7 @@ pub fn confirm_row_contents(transfer: &GemTransferData, wallet: Wallet, address_
                 GemConfirmRowContent::Row {
                     row: GemListRow::App {
                         name,
-                        icon_url: metadata.and_then(|metadata| GemApplicationMetadataService::new().icon_url(metadata.clone())),
+                        icon_url: metadata.and_then(application::icon_url),
                         website_url: metadata.map(|metadata| metadata.url.clone()).filter(|url| !url.is_empty()),
                     },
                 }

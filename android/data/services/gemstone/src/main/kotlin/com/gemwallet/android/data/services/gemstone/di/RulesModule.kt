@@ -5,8 +5,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uniffi.gemstone.GemAddressService
-import uniffi.gemstone.GemApplicationMetadataService
-import uniffi.gemstone.GemApplicationMetadataServiceInterface
 import uniffi.gemstone.GemAssetConfigService
 import uniffi.gemstone.GemAssetConfigServiceInterface
 import uniffi.gemstone.GemConnectionService
@@ -55,12 +53,4 @@ object RulesModule {
     @Provides
     @Singleton
     fun provideSecurityServiceInterface(service: GemSecurityService): GemSecurityServiceInterface = service
-
-    @Provides
-    @Singleton
-    fun provideGemApplicationMetadataService(): GemApplicationMetadataService = GemApplicationMetadataService()
-
-    @Provides
-    @Singleton
-    fun provideApplicationMetadataServiceInterface(service: GemApplicationMetadataService): GemApplicationMetadataServiceInterface = service
 }
