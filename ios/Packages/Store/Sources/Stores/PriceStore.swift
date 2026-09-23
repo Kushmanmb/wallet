@@ -57,6 +57,25 @@ public struct PriceStore: Sendable {
         }
     }
 
+    public func convertMarkets(factor: Double?) throws {
+        let columns = [
+            AssetMarketRecord.Columns.marketCap,
+            AssetMarketRecord.Columns.marketCapFdv,
+            AssetMarketRecord.Columns.totalVolume,
+            AssetMarketRecord.Columns.allTimeHigh,
+            AssetMarketRecord.Columns.allTimeLow,
+        ]
+        try db.write { db in
+            _ = try AssetMarketRecord.updateAll(db, columns.map { column in
+                if let factor {
+                    column.set(to: column * factor)
+                } else {
+                    column.set(to: nil)
+                }
+            })
+        }
+    }
+
     public func getPrices(for assetIds: [String]) throws -> [AssetPrice] {
         try db.read { db in
             try PriceRecord

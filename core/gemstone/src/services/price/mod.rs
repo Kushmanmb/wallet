@@ -5,6 +5,7 @@ pub mod store;
 pub(crate) mod testkit;
 
 use crate::services::error::GemServiceError;
+use crate::services::preferences::GemPreferencesService;
 use futures::lock::Mutex;
 use std::sync::Arc;
 
@@ -17,14 +18,32 @@ pub use store::GemPriceStore;
 #[derive(uniffi::Object)]
 pub struct GemPriceService {
     store: Arc<dyn GemPriceStore>,
-    committed_currency: Mutex<Option<Currency>>,
+    preferences: Arc<GemPreferencesService>,
+    writes: Mutex<()>,
 }
 
 #[uniffi::export]
 impl GemPriceService {
     #[uniffi::constructor]
-    pub fn new(store: Arc<dyn GemPriceStore>) -> Self {
-        Self { store, committed_currency: Mutex::new(None) }
+    pub fn new(store: Arc<dyn GemPriceStore>, preferences: Arc<GemPreferencesService>) -> Self {
+        Self { store, preferences, writes: Mutex::new(()) }
+    }
+
+    pub async fn change_currency(&self, currency: Currency) -> Result<(), GemServiceError> {
+        let _writes = self.writes.lock().await;
+        let previous = self.preferences.get_currency();
+        if currency == previous {
+            return Ok(());
+        }
+        let Some(rate) = self.rate(currency.clone()).await? else {
+            return Err(GemServiceError::InvalidInput {
+                msg: format!("unknown currency: {currency}"),
+            });
+        };
+        let previous_rate = self.rate(previous).await?;
+        self.store.convert_prices(currency.clone(), rate.rate).await?;
+        self.store.convert_markets(rules::market_conversion(previous_rate.as_ref(), &rate)).await?;
+        self.preferences.set_currency(currency)
     }
 }
 
@@ -33,39 +52,24 @@ impl GemPriceService {
         Ok(self.store.get_prices(asset_ids).await?.into_iter().filter(AssetPrice::has_price).collect())
     }
 
-    pub async fn update_prices(&self, prices: Vec<AssetPrice>, currency: Currency) -> Result<(), GemServiceError> {
-        let committed = self.committed_currency.lock().await;
-        update_prices(self.store.as_ref(), prices, committed.clone().unwrap_or(currency)).await
+    pub async fn update_prices(&self, prices: Vec<AssetPrice>) -> Result<(), GemServiceError> {
+        let _writes = self.writes.lock().await;
+        update_prices(self.store.as_ref(), prices, self.preferences.get_currency()).await
     }
 
-    pub async fn update_rates(&self, rates: Vec<FiatRate>, currency: Currency) -> Result<(), GemServiceError> {
-        let committed = self.committed_currency.lock().await;
-        update_rates(self.store.as_ref(), rates, committed.clone().unwrap_or(currency)).await
+    pub async fn update_rates(&self, rates: Vec<FiatRate>) -> Result<(), GemServiceError> {
+        let _writes = self.writes.lock().await;
+        update_rates(self.store.as_ref(), rates, self.preferences.get_currency()).await
+    }
+
+    pub async fn update_asset_price(&self, asset_id: AssetId, price: Option<AssetPrice>) -> Result<(), GemServiceError> {
+        self.update_prices(vec![price.unwrap_or_else(|| AssetPrice::empty(asset_id))]).await
     }
 
     pub async fn update_market(&self, asset_id: AssetId, market: AssetMarket) -> Result<(), GemServiceError> {
-        self.store.save_market(asset_id, market).await
-    }
-
-    pub async fn market_in_currency(&self, market: AssetMarket, currency: Currency) -> AssetMarket {
-        let rate = self.rate(currency).await.ok().flatten().map(|rate| rate.rate);
-        rules::market_at_rate(market, rate)
-    }
-
-    pub async fn change_currency(&self, currency: Currency) -> Result<(), GemServiceError> {
-        let mut committed = self.committed_currency.lock().await;
-        let Some(rate) = rules::rate_or_base(currency.clone(), self.store.get_rate(currency.clone()).await?) else {
-            return Err(GemServiceError::InvalidInput {
-                msg: format!("unknown currency: {currency}"),
-            });
-        };
-        self.store.convert_prices(currency.clone(), rate.rate).await?;
-        *committed = Some(currency);
-        Ok(())
-    }
-
-    pub async fn update_asset_price(&self, asset_id: AssetId, price: Option<AssetPrice>, currency: Currency) -> Result<(), GemServiceError> {
-        self.update_prices(vec![price.unwrap_or_else(|| AssetPrice::empty(asset_id))], currency).await
+        let _writes = self.writes.lock().await;
+        let rate = self.rate(self.preferences.get_currency()).await?;
+        self.store.save_market(asset_id, rules::market_at_rate(market, rate.map(|rate| rate.rate))).await
     }
 
     pub async fn rate(&self, currency: Currency) -> Result<Option<FiatRate>, GemServiceError> {
@@ -107,66 +111,64 @@ mod tests {
     use chrono::Utc;
     use primitives::Chain;
 
-    #[test]
-    fn test_a_refresh_that_started_before_a_currency_switch_commits_in_the_new_currency() {
-        let store = Arc::new(MemoryPriceStore {
+    fn rates() -> MemoryPriceStore {
+        MemoryPriceStore {
             rates: std::sync::Mutex::new(vec![FiatRate { symbol: Currency::EUR, rate: 0.5 }, FiatRate { symbol: Currency::JPY, rate: 150.0 }]),
             ..Default::default()
-        });
-        let service = GemPriceService::new(store.clone());
+        }
+    }
+
+    #[test]
+    fn test_a_refresh_that_started_before_a_currency_switch_commits_in_the_new_currency() {
+        let store = Arc::new(rates());
+        let service = GemPriceService::mock(store.clone());
         let price = AssetPrice::new(AssetId::from_chain(Chain::Solana), 100.0, 1.5, Utc::now());
-        let captured = Currency::USD;
 
         futures::executor::block_on(service.change_currency(Currency::EUR)).unwrap();
         futures::executor::block_on(service.change_currency(Currency::JPY)).unwrap();
-        futures::executor::block_on(service.update_prices(vec![price.clone()], captured.clone())).unwrap();
-        futures::executor::block_on(service.update_asset_price(price.asset_id.clone(), Some(AssetPrice { price: 200.0, ..price }), captured)).unwrap();
+        futures::executor::block_on(service.update_prices(vec![price.clone()])).unwrap();
+        futures::executor::block_on(service.update_asset_price(price.asset_id.clone(), Some(AssetPrice { price: 200.0, ..price }))).unwrap();
 
         let saved = store.saved.lock().unwrap();
         assert_eq!(
             saved.iter().map(|(currency, updates)| (currency.clone(), updates[0].price)).collect::<Vec<_>>(),
             vec![(Currency::JPY, 15_000.0), (Currency::JPY, 30_000.0)]
         );
-        assert_eq!(store.converted.lock().unwrap().last(), Some(&(Currency::JPY, 150.0)));
+        assert_eq!(service.preferences.get_currency(), Currency::JPY);
     }
 
     #[test]
-    fn test_a_failed_currency_switch_keeps_writing_in_the_requested_currency() {
+    fn test_a_failed_currency_switch_keeps_the_current_currency() {
         let store = Arc::new(MemoryPriceStore::with_rate(Currency::EUR, 0.5));
-        let service = GemPriceService::new(store.clone());
+        let service = GemPriceService::mock(store.clone());
         let price = AssetPrice::new(AssetId::from_chain(Chain::Solana), 100.0, 1.5, Utc::now());
 
         assert!(futures::executor::block_on(service.change_currency(Currency::JPY)).is_err());
-        futures::executor::block_on(service.update_prices(vec![price], Currency::EUR)).unwrap();
+        futures::executor::block_on(service.update_prices(vec![price])).unwrap();
 
-        assert_eq!(store.saved.lock().unwrap()[0].0, Currency::EUR);
+        assert_eq!(store.saved.lock().unwrap()[0].0, Currency::USD);
+        assert!(store.converted.lock().unwrap().is_empty());
+        assert!(store.market_conversions.lock().unwrap().is_empty());
     }
 
     #[test]
-    fn test_a_cached_market_follows_the_current_rate_without_a_refresh() {
-        let store = Arc::new(MemoryPriceStore::with_rate(Currency::EUR, 0.5));
-        let service = GemPriceService::new(store.clone());
-        let asset_id = AssetId::from_chain(Chain::Solana);
+    fn test_markets_are_saved_in_the_current_currency_and_repriced_on_a_switch() {
+        let store = Arc::new(rates());
+        let service = GemPriceService::mock(store.clone());
         let market = AssetMarket {
             market_cap: Some(1_000.0),
             circulating_supply: Some(10.0),
-            market_cap_rank: Some(3),
             ..Default::default()
         };
 
-        futures::executor::block_on(service.update_market(asset_id, market.clone())).unwrap();
-        assert_eq!(store.markets.lock().unwrap()[0].1.market_cap, Some(1_000.0), "the stored market stays in USD");
+        futures::executor::block_on(service.change_currency(Currency::EUR)).unwrap();
+        futures::executor::block_on(service.update_market(AssetId::from_chain(Chain::Solana), market)).unwrap();
+        futures::executor::block_on(service.change_currency(Currency::JPY)).unwrap();
 
-        let euro = futures::executor::block_on(service.market_in_currency(market.clone(), Currency::EUR));
-        *store.rates.lock().unwrap() = vec![FiatRate { symbol: Currency::EUR, rate: 0.8 }];
-        let repriced = futures::executor::block_on(service.market_in_currency(market.clone(), Currency::EUR));
-        let unknown = futures::executor::block_on(service.market_in_currency(market, Currency::JPY));
-
-        assert_eq!(euro.market_cap, Some(500.0));
-        assert_eq!(repriced.market_cap, Some(800.0));
-        assert_eq!(unknown.market_cap, None, "an unknown rate hides fiat figures instead of mislabelling them");
-        assert_eq!(unknown.circulating_supply, Some(10.0));
-        assert_eq!(unknown.market_cap_rank, Some(3));
+        let saved = store.markets.lock().unwrap()[0].1.clone();
+        assert_eq!(saved.market_cap, Some(500.0));
+        assert_eq!(saved.circulating_supply, Some(10.0));
+        assert_eq!(*store.market_conversions.lock().unwrap(), vec![Some(0.5), Some(300.0)]);
     }
 
     #[test]

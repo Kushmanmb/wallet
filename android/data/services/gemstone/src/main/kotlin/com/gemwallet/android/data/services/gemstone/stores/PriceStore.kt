@@ -51,5 +51,7 @@ class GemstonePriceStore(private val pricesDao: PricesDao, private val assetsDao
         assetsDao.setMarket(market.toPrimitives().toRecord(AssetId(assetId)))
     }
 
+    override suspend fun convertMarkets(factor: Double?) = factor?.let { assetsDao.convertMarkets(it) } ?: assetsDao.clearMarketValues()
+
     fun observeUsdPrice(assetId: AssetId): Flow<Double?> = pricesDao.getUsdPrice(assetId.toIdentifier())
 }

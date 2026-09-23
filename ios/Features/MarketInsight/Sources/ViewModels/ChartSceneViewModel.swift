@@ -3,7 +3,6 @@
 import Components
 import Formatters
 import Foundation
-import struct Gemstone.AssetMarket
 import struct Gemstone.AssetPrice
 import struct Gemstone.GemChart
 import enum Gemstone.GemChartPhase
@@ -89,14 +88,12 @@ public final class ChartSceneViewModel: ChartListViewable {
         }
     }
 
-    private var market: Gemstone.AssetMarket?
-
     var sections: [GemListSection] {
         guard let priceData else { return [] }
         return service.sections(
             asset: priceData.asset.toGem(),
             price: priceData.price?.price,
-            market: market,
+            market: priceData.market?.toGem(),
             priceAlerts: priceData.priceAlerts.map { $0.toGem() },
             links: priceData.links.map { $0.toGem() },
         )
@@ -133,16 +130,6 @@ public extension ChartSceneViewModel {
         } catch {
             debugLog("chart scene: load error \(error)")
         }
-    }
-
-    func updateMarket() async {
-        guard let usdMarket = priceData?.market?.toGem() else {
-            market = nil
-            return
-        }
-        let market = await service.marketInCurrency(market: usdMarket)
-        guard !Task.isCancelled else { return }
-        self.market = market
     }
 
     func onSelectSetPriceAlerts() {

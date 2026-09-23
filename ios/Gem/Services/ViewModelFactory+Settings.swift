@@ -101,7 +101,7 @@ public extension ViewModelFactory {
     func currencyScene() -> CurrencySceneViewModel {
         CurrencySceneViewModel(
             preferences: observablePreferences,
-            service: GemCurrencyService(preferences: preferencesService, prices: priceService),
+            service: GemCurrencyService(prices: priceService),
         )
     }
 

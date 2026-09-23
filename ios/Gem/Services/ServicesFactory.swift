@@ -61,6 +61,7 @@ struct ServicesFactory {
         let staticApiClient = Gemstone.GemStaticApiClient(provider: nativeProvider)
         let priceService = Gemstone.GemPriceService(
             store: GemstonePriceStore(priceStore: stores.priceStore),
+            preferences: preferencesService,
         )
         let gemstoneAssetStore = GemstoneAssetStore(assetStore: stores.assetStore, balanceStore: stores.balanceStore)
         let gemstoneFileStore = GemstoneFileStore()
@@ -199,7 +200,6 @@ struct ServicesFactory {
             notifications: inAppNotificationService,
             support: supportService,
             subscriptions: streamSubscriptionService,
-            preferences: preferencesService,
             session: walletSessionService,
             device: deviceService,
         )

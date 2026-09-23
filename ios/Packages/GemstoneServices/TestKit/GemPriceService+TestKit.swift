@@ -1,7 +1,9 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
+import class Gemstone.GemPreferencesService
 import class Gemstone.GemPriceService
+import GemstonePrimitivesTestKit
 import GemstoneServices
 import Primitives
 import PrimitivesTestKit
@@ -12,6 +14,7 @@ public extension GemPriceService {
     static func mock(db: DB = .mock()) -> GemPriceService {
         GemPriceService(
             store: GemstonePriceStore(priceStore: .mock(db: db)),
+            preferences: GemPreferencesService(store: GemPreferencesStoreMock()),
         )
     }
 }

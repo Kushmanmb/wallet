@@ -139,7 +139,7 @@ impl PerpetualTestkit {
         let details_session = session.clone();
         let provider = Arc::new(provider);
         let gateway = Arc::new(GemGateway::new(provider.clone(), Arc::new(GemNodeService::mock()), preferences_store, Arc::new(EmptyPreferences)));
-        let price = Arc::new(GemPriceService::new(Arc::new(MemoryPriceStore::default())));
+        let price = Arc::new(GemPriceService::mock(Arc::new(MemoryPriceStore::default())));
         let asset_store = Arc::new(MemoryAssetStore::default());
         let assets = Arc::new(GemAssetsService::mock(provider.clone(), asset_store.clone()));
         let balances = Arc::new(MemoryBalanceStore::default());

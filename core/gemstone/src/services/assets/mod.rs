@@ -99,11 +99,10 @@ impl GemAssetsService {
 
 impl GemAssetsService {
     async fn sync_asset(&self, asset_id: AssetId) -> Result<AssetFull, GemServiceError> {
-        let currency = self.preferences.get_currency();
         let asset = self.get_asset(asset_id.clone()).await?;
         self.store.save_asset(asset.clone()).await?;
         let price = asset.price.as_ref().map(|price| AssetPrice::new(asset_id.clone(), price.price, price.price_change_percentage_24h, price.updated_at));
-        self.price.update_asset_price(asset_id.clone(), price, currency.clone()).await?;
+        self.price.update_asset_price(asset_id.clone(), price).await?;
         if let Some(market) = asset.market.clone() {
             self.price.update_market(asset_id, market).await?;
         }

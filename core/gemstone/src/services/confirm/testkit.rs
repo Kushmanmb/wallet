@@ -62,7 +62,7 @@ impl ConfirmTestkit {
         let gateway = Arc::new(GemGateway::new(provider.clone(), Arc::new(GemNodeService::mock()), preferences_store, Arc::new(EmptyPreferences)));
         let api = Arc::new(GemApiClient::new(provider.clone()));
         let device_api = Arc::new(GemDeviceApiClient::new(provider.clone(), Arc::new(GemDeviceKeyService::new(Arc::new(EmptyPreferences)))));
-        let price = Arc::new(GemPriceService::new(Arc::new(MemoryPriceStore::default())));
+        let price = Arc::new(GemPriceService::mock(Arc::new(MemoryPriceStore::default())));
         let asset_store = Arc::new(MemoryAssetStore);
         let assets = Arc::new(GemAssetsService::new(api, gateway.clone(), asset_store.clone(), price.clone(), preferences.clone(), session.clone()));
         let balances = Arc::new(MemoryBalanceStore::with_balances(

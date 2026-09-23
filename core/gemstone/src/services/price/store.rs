@@ -15,4 +15,5 @@ pub trait GemPriceStore: Send + Sync {
     async fn save_prices(&self, currency: Currency, prices: Vec<GemPriceUpdate>) -> Result<(), GemServiceError>;
     async fn convert_prices(&self, currency: Currency, rate: f64) -> Result<(), GemServiceError>;
     async fn save_market(&self, asset_id: AssetId, market: AssetMarket) -> Result<(), GemServiceError>;
+    async fn convert_markets(&self, factor: Option<f64>) -> Result<(), GemServiceError>;
 }

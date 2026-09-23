@@ -50,6 +50,22 @@ struct PriceStoreTests {
     }
 
     @Test
+    func convertMarketsScalesFiatFiguresAndClearsThemWithoutAFactor() throws {
+        let db = DB.mockWithChains([.ethereum])
+        let priceStore = PriceStore(db: db)
+        try priceStore.updateMarket(assetId: Chain.ethereum.assetId, market: .mock(marketCap: 1000, circulatingSupply: 10))
+        let read = { (column: String) in try db.dbQueue.read { try Double.fetchOne($0, sql: "SELECT \(column) FROM asset_market") } }
+
+        try priceStore.convertMarkets(factor: 2)
+        #expect(try read("marketCap") == 2000)
+        #expect(try read("circulatingSupply") == 10)
+
+        try priceStore.convertMarkets(factor: nil)
+        #expect(try read("marketCap") == nil)
+        #expect(try read("circulatingSupply") == 10)
+    }
+
+    @Test
     func convertPricesRecomputesFiatPriceFromUsd() throws {
         let db = DB.mockWithChains([.ethereum])
         let priceStore = PriceStore(db: db)

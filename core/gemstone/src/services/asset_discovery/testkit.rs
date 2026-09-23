@@ -77,7 +77,7 @@ impl DiscoveryTestkit {
             Arc::new(GemApiClient::new(provider.clone())),
             gateway.clone(),
             asset_store.clone(),
-            Arc::new(GemPriceService::new(Arc::new(MemoryPriceStore::default()))),
+            Arc::new(GemPriceService::mock(Arc::new(MemoryPriceStore::default()))),
             preferences.clone(),
             session.clone(),
         ));

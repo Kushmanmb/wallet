@@ -55,6 +55,7 @@ public final class GemPriceStoreMock: GemPriceStore, @unchecked Sendable {
     public func savePrices(currency _: Gemstone.Currency, prices _: [Gemstone.GemPriceUpdate]) async throws {}
     public func convertPrices(currency _: Gemstone.Currency, rate _: Double) async throws {}
     public func saveMarket(assetId _: Gemstone.AssetId, market _: Gemstone.AssetMarket) async throws {}
+    public func convertMarkets(factor _: Double?) async throws {}
 }
 
 public final class GemWalletStoreMock: GemWalletStore, @unchecked Sendable {
@@ -100,7 +101,7 @@ public extension GemAssetsService {
             api: GemApiClient(provider: provider),
             gateway: GemGateway(provider: provider, nodes: .mock(), preferences: preferences, securePreferences: GemSecureStoreMock()),
             store: store,
-            price: GemPriceService(store: GemPriceStoreMock()),
+            price: GemPriceService(store: GemPriceStoreMock(), preferences: GemPreferencesService(store: preferences)),
             preferences: GemPreferencesService(store: preferences),
             session: GemWalletSessionService(store: GemWalletSessionStoreMock(), wallets: GemWalletStoreMock()),
         )

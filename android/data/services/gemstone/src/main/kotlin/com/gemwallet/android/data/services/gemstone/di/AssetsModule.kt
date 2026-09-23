@@ -108,7 +108,6 @@ object AssetsModule {
         notificationService: GemNotificationService,
         supportService: GemSupportService,
         subscriptions: GemStreamSubscriptionService,
-        preferences: GemPreferencesService,
         session: GemWalletSessionService,
         device: GemDeviceService,
     ): GemStreamService = GemStreamService(
@@ -122,7 +121,6 @@ object AssetsModule {
         notificationService,
         supportService,
         subscriptions,
-        preferences,
         session,
         device,
     )
@@ -227,7 +225,7 @@ object AssetsModule {
 
     @Provides
     @Singleton
-    fun provideGemPriceService(priceStore: GemstonePriceStore): GemPriceService = GemPriceService(priceStore)
+    fun provideGemPriceService(priceStore: GemstonePriceStore, preferences: GemPreferencesService): GemPriceService = GemPriceService(priceStore, preferences)
 
     @Provides
     fun provideGemAssetDetailsServiceInterface(service: GemAssetDetailsService): GemAssetDetailsServiceInterface = service

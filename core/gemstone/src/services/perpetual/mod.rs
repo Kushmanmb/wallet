@@ -148,11 +148,10 @@ impl GemPerpetualService {
     }
 
     pub async fn sync_markets(&self, chain: Chain) -> Result<(), GemServiceError> {
-        let currency = self.preferences.get_currency();
         let data = self.gateway.get_perpetuals_data(chain).await?;
         self.save_markets(data).await?;
         if let Some(price) = rules::collateral_price(chain) {
-            self.price.update_prices(vec![price], currency).await?;
+            self.price.update_prices(vec![price]).await?;
         }
         self.preferences.set_perpetual_markets_updated_at(Some(Utc::now().timestamp()))
     }

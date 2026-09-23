@@ -4,8 +4,11 @@ use chrono::Utc;
 use primitives::currency::Currency;
 use primitives::{AssetId, AssetMarket, AssetPrice, FiatRate};
 
-use super::{GemPriceStore, GemPriceUpdate};
+use super::{GemPriceService, GemPriceStore, GemPriceUpdate};
 use crate::services::error::GemServiceError;
+use crate::services::preferences::GemPreferencesService;
+use crate::services::preferences::testkit::MemoryPreferencesStore;
+use std::sync::Arc;
 
 impl GemPriceUpdate {
     pub fn mock(asset_id: AssetId, price: f64, price_change_percentage_24h: f64) -> Self {
@@ -29,6 +32,13 @@ pub struct MemoryPriceStore {
     pub converted: Mutex<Vec<(Currency, f64)>>,
     pub rate_error: Mutex<Option<GemServiceError>>,
     pub markets: Mutex<Vec<(AssetId, AssetMarket)>>,
+    pub market_conversions: Mutex<Vec<Option<f64>>>,
+}
+
+impl GemPriceService {
+    pub fn mock(store: Arc<MemoryPriceStore>) -> Self {
+        Self::new(store, Arc::new(GemPreferencesService::new(Arc::new(MemoryPreferencesStore::default()))))
+    }
 }
 
 impl MemoryPriceStore {
@@ -80,6 +90,10 @@ impl GemPriceStore for MemoryPriceStore {
     }
     async fn save_market(&self, asset_id: AssetId, market: AssetMarket) -> Result<(), GemServiceError> {
         self.markets.lock().unwrap().push((asset_id, market));
+        Ok(())
+    }
+    async fn convert_markets(&self, factor: Option<f64>) -> Result<(), GemServiceError> {
+        self.market_conversions.lock().unwrap().push(factor);
         Ok(())
     }
 }

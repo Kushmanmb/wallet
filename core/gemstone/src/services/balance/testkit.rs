@@ -154,7 +154,7 @@ impl BalanceTestkit {
             Arc::new(GemApiClient::new(provider)),
             gateway.clone(),
             assets.clone(),
-            Arc::new(GemPriceService::new(Arc::new(MemoryPriceStore::default()))),
+            Arc::new(GemPriceService::mock(Arc::new(MemoryPriceStore::default()))),
             preferences,
             session.clone(),
         ));

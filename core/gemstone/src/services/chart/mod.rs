@@ -67,10 +67,6 @@ impl GemChartService {
         rules::chart_sections(&asset, self.preferences.get_currency(), price, market.as_ref(), price_alerts, links, contract_explorer)
     }
 
-    pub async fn market_in_currency(&self, market: AssetMarket) -> AssetMarket {
-        self.price.market_in_currency(market, self.preferences.get_currency()).await
-    }
-
     pub fn new_session(&self) -> GemChartSession {
         GemChartSession::new(self.chart_period(), self.get_currency())
     }

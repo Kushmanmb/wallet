@@ -14,6 +14,10 @@ pub fn rate_or_base(currency: Currency, stored: Option<FiatRate>) -> Option<Fiat
     stored.or_else(|| (currency == Currency::USD).then_some(FiatRate { symbol: Currency::USD, rate: 1.0 }))
 }
 
+pub fn market_conversion(previous: Option<&FiatRate>, next: &FiatRate) -> Option<f64> {
+    previous.filter(|previous| previous.rate > 0.0).map(|previous| next.rate / previous.rate)
+}
+
 pub fn market_at_rate(market: AssetMarket, rate: Option<f64>) -> AssetMarket {
     match rate {
         Some(rate) => market_in_currency(market, rate),
