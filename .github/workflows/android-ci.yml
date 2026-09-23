@@ -102,3 +102,12 @@ jobs:
           target: google_apis
           working-directory: android
           script: ./gradlew :data:services:store:connectedDebugAndroidTest
+
+      - name: Upload store contract test report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: store-contract-test-report
+          path: |
+            android/data/services/store/build/reports/androidTests/connected
+            android/data/services/store/build/outputs/androidTest-results/connected
