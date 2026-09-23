@@ -12,7 +12,7 @@ import Primitives
 
 extension NetworkFeeSceneViewModel {
     var selectedFeeRate: FeeRateViewModel? {
-        feeRatesViewModels.first(where: isSelected)
+        feeRatesViewModels.first(where: \.isSelected)
     }
 }
 
@@ -178,15 +178,6 @@ struct NetworkFeeSceneViewModelTests {
     }
 
     @Test
-    func selectedRateFollowsSelection() {
-        let rates = GemFeeRateRows.mock([(.normal, 2, nil), (.fast, 3, nil)], unitType: .native, decimals: 9)
-
-        #expect(NetworkFeeSceneViewModel.mock(feeAsset: .mockSolana(), feeRates: rates).selectedFeeRate?.priority == .normal)
-        #expect(NetworkFeeSceneViewModel.mock(feeAsset: .mockSolana(), selection: .priority(priority: .fast), feeRates: rates).selectedFeeRate?.priority == .fast)
-        #expect(NetworkFeeSceneViewModel.mock(feeAsset: .mockSolana(), selection: .custom(gasPrice: 5), feeRates: rates).selectedFeeRate == nil)
-    }
-
-    @Test
     func selectForwardsSelectionToOwner() async {
         await confirmation { selected in
             NetworkFeeSceneViewModel.mock(feeAsset: .mockSolana(), onSelect: {
@@ -273,7 +264,7 @@ struct NetworkFeeSceneViewModelTests {
         let selected = NetworkFeeSceneViewModel.mock(
             feeAsset: .mock(),
             selection: .custom(gasPrice: 200),
-            feeRates: .mock([(.normal, 20, 1000)], unitType: .satVb, decimals: 1, supportsCustomFee: true, selectedTotal: 200, customRate: .feeRate(rate: customRate, unit: .satVb)),
+            feeRates: .mock([(.normal, 20, 1000)], selected: nil, unitType: .satVb, decimals: 1, supportsCustomFee: true, selectedTotal: 200, customRate: .feeRate(rate: customRate, unit: .satVb)),
             feeAmount: 1000,
         )
         #expect(selected.isCustomSelected)

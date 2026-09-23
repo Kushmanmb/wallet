@@ -33,9 +33,7 @@ import WalletConnector
 @Observable
 @MainActor
 public final class ConfirmTransferSceneViewModel {
-    private(set) var loadOptions: GemConfirmLoadOptions {
-        didSet { feeRates = confirmation.feeRateRows(selection: loadOptions.feeSelection) }
-    }
+    private(set) var loadOptions: GemConfirmLoadOptions
 
     var state: ConfirmTransferState {
         didSet { onStateChange(state: state) }
@@ -78,7 +76,7 @@ public final class ConfirmTransferSceneViewModel {
         self.state = state
         button = screen.button()
         feeRow = screen.feeRow()
-        feeRates = confirmation.feeRateRows(selection: loadOptions.feeSelection)
+        feeRates = confirmation.feeRateRows()
         rowContents = confirmation.rowContents(addressName: state.addressName?.toGem())
     }
 
@@ -301,7 +299,7 @@ extension ConfirmTransferSceneViewModel {
         let screen = state.screen
         button = screen.button()
         feeRow = screen.feeRow()
-        feeRates = confirmation.feeRateRows(selection: loadOptions.feeSelection)
+        feeRates = confirmation.feeRateRows()
         rowContents = confirmation.rowContents(addressName: state.addressName?.toGem())
         guard let error = state.transactionError else { return }
         switch error {

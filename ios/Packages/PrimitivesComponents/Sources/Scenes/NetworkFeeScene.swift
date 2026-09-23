@@ -38,7 +38,7 @@ public struct NetworkFeeScene: View {
                         NavigationCustomLink(
                             with: FeeRow(
                                 emoji: feeRate.emoji,
-                                isSelected: model.isSelected(feeRate),
+                                isSelected: feeRate.isSelected,
                                 model: model.rowItem(for: feeRate),
                             ),
                         ) {

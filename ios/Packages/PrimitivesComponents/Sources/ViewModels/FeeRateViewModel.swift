@@ -13,15 +13,18 @@ public struct FeeRateViewModel: Identifiable {
     public let priority: FeePriority
     public let value: GemLocalizedText
     public let fee: BigInt?
+    public let isSelected: Bool
 
     public init(
         priority: FeePriority,
         value: GemLocalizedText,
         fee: BigInt?,
+        isSelected: Bool,
     ) {
         self.priority = priority
         self.value = value
         self.fee = fee
+        self.isSelected = isSelected
     }
 
     public var id: String {

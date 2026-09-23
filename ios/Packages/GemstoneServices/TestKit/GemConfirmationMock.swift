@@ -7,7 +7,6 @@ public import enum Gemstone.GemAcquireAssetFlow
 public import protocol Gemstone.GemConfirmationProtocol
 public import enum Gemstone.GemConfirmError
 public import struct Gemstone.GemConfirmErrorInfo
-public import enum Gemstone.GemConfirmFeeSelection
 public import enum Gemstone.GemConfirmHeader
 public import struct Gemstone.GemConfirmLoad
 public import struct Gemstone.GemConfirmLoadOptions
@@ -72,7 +71,7 @@ public final class GemConfirmationMock: GemConfirmationProtocol, @unchecked Send
         headerValue
     }
 
-    public func feeRateRows(selection _: GemConfirmFeeSelection) -> GemFeeRateRows? {
+    public func feeRateRows() -> GemFeeRateRows? {
         feeRates
     }
 

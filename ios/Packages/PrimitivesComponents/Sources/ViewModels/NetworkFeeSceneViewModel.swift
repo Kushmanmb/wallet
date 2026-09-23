@@ -88,11 +88,7 @@ public struct NetworkFeeSceneViewModel {
     // MARK: - Fee Rates
 
     public var feeRatesViewModels: [FeeRateViewModel] {
-        rows.map { FeeRateViewModel(priority: $0.priority.toPrimitives(), value: $0.value, fee: $0.fee) }
-    }
-
-    public func isSelected(_ rate: FeeRateViewModel) -> Bool {
-        selection.selectedPriority()?.toPrimitives() == rate.priority
+        rows.map { FeeRateViewModel(priority: $0.priority.toPrimitives(), value: $0.value, fee: $0.fee, isSelected: $0.isSelected) }
     }
 
     public func rowItem(for rate: FeeRateViewModel) -> ListItemModel {
@@ -106,7 +102,7 @@ public struct NetworkFeeSceneViewModel {
     // MARK: - Custom Fee
 
     public var supportsCustomFee: Bool { onSelect != nil && feeRates?.supportsCustomFee == true }
-    public var isCustomSelected: Bool { selection.customGasPrice() != nil }
+    public var isCustomSelected: Bool { feeRates?.customRate != nil }
     public var customRowItem: ListItemModel { rowItem(title: Localized.FeeRate.custom, rate: customFeeRateViewModel) }
 
     @MainActor
@@ -141,7 +137,7 @@ private extension NetworkFeeSceneViewModel {
     var rows: [GemFeeRateRow] { feeRates?.rows ?? [] }
 
     var customFeeRateViewModel: FeeRateViewModel? {
-        feeRates?.customRate.map { FeeRateViewModel(priority: .normal, value: $0, fee: feeAmount) }
+        feeRates?.customRate.map { FeeRateViewModel(priority: .normal, value: $0, fee: feeAmount, isSelected: isCustomSelected) }
     }
 
     func rowItem(title: String, rate: FeeRateViewModel?) -> ListItemModel {

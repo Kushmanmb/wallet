@@ -10,6 +10,7 @@ import enum Gemstone.GemLocalizedText
 public extension GemFeeRateRows {
     static func mock(
         _ rows: [(FeePriority, BigInt, BigInt?)],
+        selected: FeePriority? = .normal,
         unitType: FeeUnitType = .gwei,
         decimals: UInt32 = 9,
         supportsCustomFee: Bool = false,
@@ -18,7 +19,7 @@ public extension GemFeeRateRows {
         customRate: GemLocalizedText? = nil,
     ) -> GemFeeRateRows {
         GemFeeRateRows(
-            rows: rows.map { GemFeeRateRow(priority: $0.0, fee: $0.2, value: value) },
+            rows: rows.map { GemFeeRateRow(priority: $0.0, fee: $0.2, value: value, isSelected: $0.0 == selected) },
             showsOptions: rows.count > 1,
             unitType: unitType,
             unitDecimals: decimals,
