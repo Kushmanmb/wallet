@@ -82,4 +82,16 @@ class WalletConnectCoordinatorTest {
         assertEquals(wallet.id, stored.single().wallet.id)
         assertEquals("topic-1", stored.single().session.sessionId)
     }
+
+    @Test
+    fun `an extended or updated session and the connections screen re-sync through Core`() = runBlocking {
+        subject.pair("wc:uri")
+        clientEvents.subscriptionCount.first { it > 0 }
+
+        clientEvents.emit(WalletConnectEvent.SessionChanged("topic-1"))
+        coVerify(timeout = 2_000, exactly = 1) { walletConnectService.updateSessions(any()) }
+
+        subject.syncSessions()
+        coVerify(exactly = 2) { walletConnectService.updateSessions(any()) }
+    }
 }

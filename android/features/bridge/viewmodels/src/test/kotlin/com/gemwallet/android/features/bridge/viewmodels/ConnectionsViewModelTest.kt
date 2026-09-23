@@ -12,6 +12,7 @@ import com.gemwallet.android.testkit.mockWalletMulticoin
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.WalletConnection
 import io.mockk.coEvery
+import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -67,10 +68,12 @@ class ConnectionsViewModelTest {
         }
         val connections: GetWalletConnections = mockk {
             every { observeConnections() } returns flowOf(listOf(connection))
+            coJustRun { syncSessions() }
         }
         val model = ConnectionsViewModel(connections, mockk(relaxed = true), service, dispatcher, mockk(relaxed = true)).also { scopes.add(it) }
 
         assertEquals(sections.map { it.title }, model.sections.first { it.isNotEmpty() }.map { it.title })
+        coVerify { connections.syncSessions() }
     }
 
     @Test
@@ -78,6 +81,7 @@ class ConnectionsViewModelTest {
         val pair: PairWalletConnect = mockk(relaxed = true)
         val connections: GetWalletConnections = mockk {
             every { observeConnections() } returns flowOf(emptyList())
+            coJustRun { syncSessions() }
         }
         val model = ConnectionsViewModel(connections, pair, mockk(relaxed = true), dispatcher, mockk(relaxed = true)).also { scopes.add(it) }
 

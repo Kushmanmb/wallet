@@ -83,6 +83,7 @@ class WalletConnectCoordinator(
                 when (event) {
                     is WalletConnectEvent.SessionDeleted -> walletConnectService.deleteSession(event.topic)
                     is WalletConnectEvent.SessionSettled -> storeSettledSession(event.session)
+                    is WalletConnectEvent.SessionChanged -> sync()
                     else -> Unit
                 }
             }
@@ -94,6 +95,8 @@ class WalletConnectCoordinator(
     override fun observeConnections(): Flow<List<WalletConnection>> = connectionStore.observeConnections()
 
     override fun observeConnection(connectionId: String): Flow<WalletConnection?> = connectionStore.observeConnection(connectionId)
+
+    override suspend fun syncSessions() = sync()
 
     override suspend fun disconnect(connectionId: String, onSuccess: () -> Unit, onError: (GemErrorText) -> Unit) {
         walletConnectService.deleteSession(connectionId)

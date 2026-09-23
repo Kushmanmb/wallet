@@ -29,7 +29,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ConnectionsViewModel @Inject constructor(
-    getWalletConnections: GetWalletConnections,
+    private val getWalletConnections: GetWalletConnections,
     private val pairWalletConnect: PairWalletConnect,
     private val service: GemWalletConnectServiceInterface,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
@@ -43,6 +43,10 @@ class ConnectionsViewModel @Inject constructor(
             }
         }
         .stateIn(viewModelScope, SharingStarted.Companion.Lazily, emptyList())
+
+    init {
+        viewModelScope.launch(ioDispatcher) { getWalletConnections.syncSessions() }
+    }
 
     val pasteListItem = ListItemModel(title = context.getString(R.string.common_paste), image = ListItemImage.Symbol(ListItemSymbol.Paste))
     val scanListItem = ListItemModel(title = context.getString(R.string.wallet_scan_qr_code), image = ListItemImage.Symbol(ListItemSymbol.QrScanner))
