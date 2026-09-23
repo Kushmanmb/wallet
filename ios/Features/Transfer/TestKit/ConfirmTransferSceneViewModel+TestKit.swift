@@ -53,7 +53,7 @@ public extension ConfirmTransferSceneViewModel {
             request: request ?? .mock(data: data, simulation: simulation),
             wallet: wallet,
             confirmation: confirmation ?? GemConfirmationMock(
-                state: .mock(transfer: data, feeAsset: data.feeAsset().toPrimitives(), preload: nil),
+                state: .mock(transfer: data, feeAsset: data.feeAsset().toPrimitives(), fee: nil),
                 load: load ?? .success(.mock(transfer: data)),
                 execute: execute,
                 rows: rows,

@@ -11,21 +11,21 @@ struct ConfirmTransferStateTests {
     @Test
     func loadWithoutAFeeStillCarriesThePricesAndTheRecipient() {
         let state = ConfirmTransferState(
-            .mock(feeAssets: [.mock(asset: .mockTempoUSDC())], addressName: .mock(name: "Uniswap"), preload: nil),
+            .mock(feeAssets: [.mock(asset: .mockTempoUSDC())], addressName: .mock(name: "Uniswap"), fee: nil),
             screen: .mock(),
         )
 
-        #expect(state.preload == nil)
+        #expect(state.fee == nil)
         #expect(state.metadata != nil)
         #expect(state.feeAssets.count == 1)
         #expect(state.addressName?.name == "Uniswap")
     }
 
     @Test
-    func loadWithAFeeCarriesTheTransactionInput() {
-        let state = ConfirmTransferState(.mock(preload: .mock()), screen: .mock())
+    func loadWithAFeeCarriesTheTransferAmount() {
+        let state = ConfirmTransferState(.mock(fee: .mock()), screen: .mock())
 
-        #expect(state.preload != nil)
-        #expect(state.confirmData != nil)
+        #expect(state.fee != nil)
+        #expect(state.transferAmount != nil)
     }
 }

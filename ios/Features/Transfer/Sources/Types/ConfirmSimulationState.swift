@@ -12,7 +12,6 @@ import Primitives
 import PrimitivesComponents
 
 struct ConfirmSimulationState {
-    let result: SimulationResult?
     let warnings: [GemListRow]
     let hasCriticalWarning: Bool
     let payload: SimulationPayloadModel
@@ -20,14 +19,12 @@ struct ConfirmSimulationState {
     let balanceChanges: [GemSimulationBalanceChange]
 
     init(
-        result: SimulationResult?,
         warnings: [GemListRow],
         hasCriticalWarning: Bool,
         payload: SimulationPayloadModel,
         headerData: GemSimulationValue?,
         balanceChanges: [GemSimulationBalanceChange],
     ) {
-        self.result = result
         self.warnings = warnings
         self.hasCriticalWarning = hasCriticalWarning
         self.payload = payload
@@ -37,7 +34,6 @@ struct ConfirmSimulationState {
 
     init(result: SimulationResult?) {
         self.init(
-            result: result,
             warnings: simulationWarningRows(warnings: result?.warnings ?? []),
             hasCriticalWarning: false,
             payload: SimulationPayloadModel(primaryFields: [], secondaryFields: []),
@@ -48,13 +44,11 @@ struct ConfirmSimulationState {
 
     init(_ state: GemConfirmSimulationState) {
         let details = state.simulation
-        let simulation = state.result
         let payload = SimulationPayloadModel(
             primaryFields: details?.primaryFields ?? [],
             secondaryFields: details?.secondaryFields ?? [],
         )
         self.init(
-            result: simulation,
             warnings: state.warnings,
             hasCriticalWarning: details?.hasCriticalWarning ?? false,
             payload: payload,

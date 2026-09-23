@@ -2,16 +2,12 @@
 
 import Components
 import Foundation
-import struct Gemstone.GemConfirmData
 import enum Gemstone.GemConfirmError
-import enum Gemstone.GemConfirmFeeSelection
+import struct Gemstone.GemConfirmFee
 import struct Gemstone.GemConfirmLoad
 import struct Gemstone.GemConfirmMetadata
-import struct Gemstone.GemConfirmPreload
 import struct Gemstone.GemConfirmScreen
 import struct Gemstone.GemFeeAsset
-import struct Gemstone.GemFeeRateRows
-import struct Gemstone.GemTransactionLoadFee
 import struct Gemstone.GemTransferData
 import struct Gemstone.PaymentVerification
 import Primitives
@@ -26,7 +22,7 @@ struct ConfirmTransferState {
 
     var metadata: GemConfirmMetadata? { load?.metadata }
     var feeAssets: [GemFeeAsset] { load?.feeAssets ?? [] }
-    var confirmData: GemConfirmData? { load?.preload?.confirmData }
+    var fee: GemConfirmFee? { load?.fee }
     var addressName: AddressName? { load?.addressName.map { $0.toPrimitives() } }
 }
 
@@ -51,20 +47,8 @@ extension ConfirmTransferState {
         )
     }
 
-    var preload: GemConfirmPreload? {
-        load?.preload
-    }
-
     var transferAmount: TransferAmountValidation? {
-        preload?.amount.toPrimitives()
-    }
-
-    var fee: GemTransactionLoadFee? {
-        preload?.confirmData.fee
-    }
-
-    func feeRateRows(selection: GemConfirmFeeSelection) -> GemFeeRateRows? {
-        confirmData?.feeRateRows(selection: selection, feeAsset: feeAsset.toGem())
+        fee?.amount.toPrimitives()
     }
 
     var verification: PaymentVerification? {

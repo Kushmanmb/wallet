@@ -11,7 +11,6 @@ extension ConfirmSimulationState {
         headerData: GemSimulationValue? = nil,
     ) -> ConfirmSimulationState {
         ConfirmSimulationState(
-            result: nil,
             warnings: warnings,
             hasCriticalWarning: false,
             payload: SimulationPayloadModel(primaryFields: [], secondaryFields: []),

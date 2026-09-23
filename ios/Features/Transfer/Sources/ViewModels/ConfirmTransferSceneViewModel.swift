@@ -34,7 +34,7 @@ import WalletConnector
 @MainActor
 public final class ConfirmTransferSceneViewModel {
     private(set) var loadOptions: GemConfirmLoadOptions {
-        didSet { feeRates = state.feeRateRows(selection: loadOptions.feeSelection) }
+        didSet { feeRates = confirmation.feeRateRows(selection: loadOptions.feeSelection) }
     }
 
     var state: ConfirmTransferState {
@@ -78,7 +78,7 @@ public final class ConfirmTransferSceneViewModel {
         self.state = state
         button = screen.button()
         feeRow = screen.feeRow()
-        feeRates = state.feeRateRows(selection: loadOptions.feeSelection)
+        feeRates = confirmation.feeRateRows(selection: loadOptions.feeSelection)
         rowContents = confirmation.rowContents(addressName: state.addressName?.toGem())
     }
 
@@ -102,7 +102,7 @@ public final class ConfirmTransferSceneViewModel {
         guard case .payment = transfer.inputType, transfer.value.isZero else {
             return true
         }
-        return state.preload != nil
+        return state.fee != nil
     }
 
     var simulationWarnings: [GemListRow] {
@@ -140,8 +140,8 @@ public final class ConfirmTransferSceneViewModel {
             selection: loadOptions.feeSelection,
             feeRates: feeRates,
             feeAssetPrice: state.metadata?.feePrice,
-            feeAmount: state.fee?.fee,
-            additionalFees: state.confirmData?.additionalFees ?? [],
+            feeAmount: state.fee?.value,
+            additionalFees: state.fee?.additionalFees ?? [],
             feeAssets: state.feeAssets.map { $0.feeAssetItem(currency: confirmation.currency) },
             onSelect: { [weak self] in self?.changeFeeSelection($0) },
             onSelectFeeAsset: { [weak self] in self?.selectFeeAsset($0) },
@@ -171,7 +171,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
     public func itemModel(for item: ConfirmTransferItem) -> any ItemModelProvidable<ConfirmTransferItemModel> {
         switch item {
         case .header:
-            ConfirmHeaderViewModel(header: confirmation.header(load: state.load), currency: confirmation.currency)
+            ConfirmHeaderViewModel(header: confirmation.header(), currency: confirmation.currency)
         case .warnings:
             ConfirmTransferItemModel.warnings(simulationWarnings)
         case let .row(index):
@@ -207,7 +207,7 @@ extension ConfirmTransferSceneViewModel: ListSectionProvideable {
 extension ConfirmTransferSceneViewModel {
     func onSelectListError(error: ConfirmTransferError) {
         guard case let .confirm(confirmError) = error,
-              let info = confirmation.errorInfo(error: confirmError, metadata: state.metadata) else { return }
+              let info = confirmation.errorInfo(error: confirmError) else { return }
         isPresentingSheet = .info(ConfirmInfoSheetBuilder.build(
             for: info,
             networkFeeBuyAmount: Int(confirmation.insufficientNetworkFeeBuyAmount()),
@@ -301,7 +301,7 @@ extension ConfirmTransferSceneViewModel {
         let screen = state.screen
         button = screen.button()
         feeRow = screen.feeRow()
-        feeRates = state.feeRateRows(selection: loadOptions.feeSelection)
+        feeRates = confirmation.feeRateRows(selection: loadOptions.feeSelection)
         rowContents = confirmation.rowContents(addressName: state.addressName?.toGem())
         guard let error = state.transactionError else { return }
         switch error {
