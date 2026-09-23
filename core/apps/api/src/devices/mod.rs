@@ -16,7 +16,6 @@ pub use client::DevicesClient;
 pub use clients::{
     AddressNamesClient, FiatQuotesClient, NotificationsClient, PortfolioClient, RewardsClient, RewardsRedemptionClient, ScanClient, TransactionScanConfig, TransactionsClient, WalletConfigurationClient, WalletsClient, scan_providers,
 };
-use defi::DefiClient;
 use gem_auth::AuthClient;
 use guard::{AuthenticatedDevice, AuthenticatedDeviceWallet, VerifiedDeviceId};
 use name_resolver::NameClient;
@@ -31,6 +30,7 @@ use primitives::{
     ScanTransaction, ScanTransactionPayload, Transaction, TransactionsResponse, WalletConfigurationResult, WalletId, WalletSubscription, WalletSubscriptionChains,
 };
 use rocket::{FromForm, State, delete, get, post, put};
+use services::defi::DefiClient;
 use streamer::{StreamProducer, StreamProducerQueue};
 
 use crate::auth::WalletSigned;

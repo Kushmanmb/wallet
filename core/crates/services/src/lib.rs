@@ -1,5 +1,6 @@
 pub mod assets;
 mod backend;
+pub mod defi;
 pub mod prices;
 mod static_assets;
 

@@ -28,7 +28,7 @@ use std::{error::Error, str::FromStr, sync::Arc};
 use gem_tracing::info_with_fields;
 use strum::IntoEnumIterator;
 
-use ::defi::{DefiClient, DefiProviderClient, DefiProviderConfig};
+use ::defi::{DefiProviderClient, DefiProviderConfig};
 use ::fiat::FiatClient;
 use ::fiat::FiatProviderFactory;
 use ::nft::{NFTClient, NFTProviderClient, NFTProviderConfig};
@@ -243,9 +243,8 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let nft_config = NFTProviderConfig::from_settings(&settings);
     let nft_client = NFTClient::from_config(database.clone(), nft_config.clone(), settings.nft.url.clone());
     let nft_provider_client = NFTProviderClient::new(nft_config);
-    let defi_config = DefiProviderConfig::from_settings(&settings);
-    let defi_client = DefiClient::from_config(database.clone(), defi_config.clone());
-    let defi_provider_client = DefiProviderClient::new(defi_config);
+    let defi_client = services.defi();
+    let defi_provider_client = DefiProviderClient::new(DefiProviderConfig::from_settings(&settings));
     let auth_client = AuthClient::new(cacher_client.clone());
     let markets_client = MarketsClient::new(database.clone(), cacher_client.clone());
     let webhooks_client = WebhooksClient::new(stream_producer.clone(), settings.support.webhook.key.secret.clone());

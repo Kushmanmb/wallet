@@ -5,6 +5,7 @@ use cacher::CacherClient;
 use chain_providers::ChainProviders;
 use coingecko::CoinGeckoClient;
 use config_keys::ConfigKey;
+use defi::{DefiProviderClient, DefiProviderConfig};
 use lists::CoinGeckoListProvider;
 use primitives::Chain;
 use pusher::PusherClient;
@@ -14,6 +15,7 @@ use storage::{ConfigCacher, Database, DatabaseError};
 use streamer::{Retry, ShutdownReceiver, StreamProducer, StreamProducerConfig};
 
 use crate::assets::ListsClient;
+use crate::defi::DefiClient;
 
 #[derive(Clone)]
 pub struct Services {
@@ -54,6 +56,10 @@ impl Services {
             batch_size: self.config().get_usize(ConfigKey::SearchIndexBatchSize).await?,
         };
         Ok(SearchIndexClient::new(&self.settings.meilisearch.url, &self.settings.meilisearch.key, config))
+    }
+
+    pub fn defi(&self) -> DefiClient {
+        DefiClient::new(self.database(), DefiProviderClient::new(DefiProviderConfig::from_settings(&self.settings)))
     }
 
     pub fn lists(&self) -> ListsClient {

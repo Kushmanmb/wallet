@@ -96,7 +96,6 @@ INFRA_DEPENDENTS = {
     "services": INFRA_CRATES,
     "api": {"cacher", "pusher", "search_index", "storage", "streamer"},
     "daemon": {"cacher", "pusher", "search_index", "storage", "streamer"},
-    "defi": {"storage"},
     "fiat": {"cacher", "storage", "streamer"},
     "gem_auth": {"cacher"},
     "rewards": {"cacher", "storage"},

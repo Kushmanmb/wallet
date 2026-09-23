@@ -2440,7 +2440,6 @@ dependencies = [
  "serde",
  "serde_json",
  "settings",
- "storage",
 ]
 
 [[package]]
@@ -7874,6 +7873,8 @@ dependencies = [
  "chrono",
  "coingecko",
  "config_keys",
+ "defi",
+ "futures",
  "gem_client",
  "lists",
  "number_formatter",
