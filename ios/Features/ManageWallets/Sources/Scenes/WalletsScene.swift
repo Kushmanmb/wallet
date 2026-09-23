@@ -42,11 +42,11 @@ public struct WalletsScene: View {
 
             if !model.pinnedWallets.isEmpty {
                 Section {
-                    ForEach(model.pinnedWallets) {
+                    ForEach(model.pinnedItems, id: \.wallet.id) { wallet, listItem in
                         WalletListItemView(
-                            wallet: $0,
-                            listItem: model.listItem(for: $0),
-                            isPinned: $0.isPinned,
+                            wallet: wallet,
+                            listItem: listItem,
+                            isPinned: wallet.isPinned,
                             currentWalletId: model.currentWalletId,
                             onSelect: { model.onSelect(wallet: $0, dismiss: dismiss) },
                             onEdit: model.onEdit,
@@ -63,11 +63,11 @@ public struct WalletsScene: View {
             }
 
             Section {
-                ForEach(model.wallets) {
+                ForEach(model.walletItems, id: \.wallet.id) { wallet, listItem in
                     WalletListItemView(
-                        wallet: $0,
-                        listItem: model.listItem(for: $0),
-                        isPinned: $0.isPinned,
+                        wallet: wallet,
+                        listItem: listItem,
+                        isPinned: wallet.isPinned,
                         currentWalletId: model.currentWalletId,
                         onSelect: { model.onSelect(wallet: $0, dismiss: dismiss) },
                         onEdit: model.onEdit,

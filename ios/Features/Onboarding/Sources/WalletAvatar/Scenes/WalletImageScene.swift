@@ -22,11 +22,12 @@ public struct WalletImageScene: View {
     }
 
     public var body: some View {
+        let row = model.row
         VStack {
             AvatarView(
-                avatarImage: model.avatarAssetImage(for: model.wallet),
+                avatarImage: row.avatarImage,
                 size: model.emojiViewSize,
-                removeAction: model.hasAvatar ? { model.onRemoveAvatar() } : nil,
+                removeAction: row.hasAvatar ? { model.onRemoveAvatar() } : nil,
             )
             .padding(.top, .medium)
             .padding(.bottom, .extraLarge)

@@ -169,7 +169,8 @@ public final class RewardsViewModel: Sendable {
     }
 
     var walletBarViewModel: WalletBarViewViewModel {
-        WalletBarViewViewModel(name: selectedWalletRow.name, image: selectedWalletRow.avatarImage)
+        let row = selectedWalletRow
+        return WalletBarViewViewModel(name: row.name, image: row.avatarImage)
     }
 
     var rewardsUrl: URL {

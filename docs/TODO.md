@@ -208,7 +208,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 #### Rows projected once per list
 
 - **VM54** **S** **Support messages come as rows.** Both apps call `parseSupportMessageDisplayContent` and `supportMessageOutcome` per message; iOS re-reads the outcome for each of `isSending`, `isFailed` and `status`, and Android calls it inside the `SupportMessageBubble` composable. iOS `Status` copies `GemSupportMessageOutcome`.
-- **VM55** **S** **Project `walletRow` once.** iOS recomputes `walletRow(wallet)` per property read in `WalletImageViewModel` (`hasAvatar`, `avatarImage`), `WalletDetailViewModel`, `RewardsViewModel` and per wallet in `WalletsSceneViewModel`, which Core's `wallet_rows` answers once.
 
 #### Numbers and text the apps still format
 
@@ -345,6 +344,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM55 (2026-09-23).** Closed. The wallets list asked Core for one `walletRow` per wallet from the view; `WalletsSceneViewModel` now pairs each wallet with its list item from one `wallet_rows` call per section. The avatar scene read `walletRow` twice per render through `hasAvatar` and `avatarAssetImage`; it now reads the view model's `row` once, and the rewards wallet bar reads its row once. Single-wallet screens keep `wallet_row`.
 
 **VM34, VM49 (2026-09-23).** Closed. Delegation lists projected one row per delegation — iOS in each `DelegationViewModel` initializer, Android inside the `DelegationItem` composable — and Android also built a separate validator-row map beside them. Core exports `delegation_list_rows`, priced once per list from the asset price, following [one call per list](ARCHITECTURE.md#keep-the-crossings-few). iOS `DelegationViewModel` stores only the row, and the stake and earn scenes pair each `Delegation` with its model for navigation; `DelegationSceneViewModel` takes the `Delegation` and builds its header row. Android `DelegationRowUIModel` pairs the delegation with its row, `DelegationItem` reads the validator from the row, and both `validatorRows` maps are gone. Android priced delegations from the asset and iOS from each delegation's joined price; both lists now use the asset price. The single `delegation_list_row` stays for the delegation screen's header.
 

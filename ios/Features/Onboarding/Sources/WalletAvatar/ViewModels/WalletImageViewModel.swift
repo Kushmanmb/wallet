@@ -5,6 +5,7 @@ import Foundation
 import protocol Gemstone.GemWalletServiceProtocol
 import func Gemstone.nftRows
 import func Gemstone.walletAvatarEmojis
+import struct Gemstone.GemWalletRow
 import func Gemstone.walletRow
 import Localization
 import Primitives
@@ -55,12 +56,8 @@ public final class WalletImageViewModel: Sendable {
         EmptyContentTypeViewModel(type: EmptyContentType(.nfts))
     }
 
-    var hasAvatar: Bool {
-        walletRow(wallet: wallet.toGem()).hasAvatar
-    }
-
-    func avatarAssetImage(for wallet: Wallet) -> AssetImage {
-        walletRow(wallet: wallet.toGem()).avatarImage
+    var row: GemWalletRow {
+        walletRow(wallet: wallet.toGem())
     }
 
     var nftAssetItems: [NFTAssetImageItem] {

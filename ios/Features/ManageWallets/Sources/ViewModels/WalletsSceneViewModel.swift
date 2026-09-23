@@ -1,7 +1,7 @@
 import Components
 import Foundation
 import protocol Gemstone.GemWalletServiceProtocol
-import func Gemstone.walletRow
+import func Gemstone.walletRows
 import GemstonePrimitives
 import GemstoneServices
 import Localization
@@ -62,8 +62,18 @@ public final class WalletsSceneViewModel {
         service.sorted(wallets: wallets)
     }
 
-    func listItem(for wallet: Wallet) -> ListItemModel {
-        walletRow(wallet: wallet.toGem()).listItem
+    var pinnedItems: [(wallet: Wallet, listItem: ListItemModel)] {
+        items(pinnedWallets)
+    }
+
+    var walletItems: [(wallet: Wallet, listItem: ListItemModel)] {
+        items(wallets)
+    }
+
+    private func items(_ wallets: [Wallet]) -> [(wallet: Wallet, listItem: ListItemModel)] {
+        zip(wallets, walletRows(wallets: wallets.map { $0.toGem() })).map { wallet, row in
+            (wallet, row.listItem)
+        }
     }
 }
 
