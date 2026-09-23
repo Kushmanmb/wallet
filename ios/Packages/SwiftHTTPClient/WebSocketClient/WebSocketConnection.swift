@@ -59,15 +59,7 @@ public actor WebSocketConnection: WebSocketConnectable {
         guard state == .connected, let task, let connectionId else { throw WebSocketError.notConnected }
         let start = DispatchTime.now().uptimeNanoseconds
         do {
-            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
-                task.sendPing { error in
-                    if let error {
-                        continuation.resume(throwing: error)
-                    } else {
-                        continuation.resume()
-                    }
-                }
-            }
+            try await task.sendPing()
             guard self.connectionId == connectionId else { throw WebSocketError.notConnected }
             return Double(DispatchTime.now().uptimeNanoseconds - start) / 1_000_000_000
         } catch {
