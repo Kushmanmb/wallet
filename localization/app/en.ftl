@@ -20,6 +20,8 @@ common_copy = Copy
 common_share = Share
 # Used in shared app UI for the continue label.
 common_continue = Continue
+# Used in shared app UI when the user continues despite a warning.
+common_continue_anyway = Continue Anyway
 common_sign_in_with = Sign In with %@
 # Used in shared app UI for the provider label.
 common_provider = Provider
@@ -1388,6 +1390,8 @@ application_name = Gem
 
 # Used in rootcheck UI for the security alert label.
 rootcheck_security_alert = Security Warning
+# Used in rootcheck UI for the jailbreak warning body.
+rootcheck_jailbreak_body = Your device appears to be jailbroken. This may put your wallet and funds at risk.
 # Used in rootcheck UI for the body label.
 rootcheck_body = Your device appears to have root access, which can significantly increase security risks. Using this app on a rooted device may expose your assets to unauthorized access and potential loss. For the safety of your funds, we strongly recommend using a non-rooted device.
 # Used in rootcheck UI for the ignore label.

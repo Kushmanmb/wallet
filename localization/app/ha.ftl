@@ -9,6 +9,7 @@ common_secret_phrase = Kalmomin Sirri
 common_copy = Kwafi
 common_share = Raba
 common_continue = Ci gaba
+common_continue_anyway = Ci gaba duk da haka
 common_sign_in_with = Shiga da %@
 common_provider = Mai bayarwa
 common_loading = Ana lodawa
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = Gargadin Tsaro
+rootcheck_jailbreak_body = Na'urarka ta bayyana an yi mata jailbreak. Wannan na iya sa Wallet da kuɗin ku cikin haɗari.
 rootcheck_body = Na'urarka ta bayyana tana da tushen shiga, wanda zai iya ƙara haɗarin tsaro sosai. Yin amfani da wannan ƙa'idar akan na'ura mai tushe na iya fallasa kadarorin ku zuwa shiga mara izini da yuwuwar asara. Don amincin kuɗin ku, muna ba da shawarar yin amfani da na'urar da ba ta da tushe.
 rootcheck_ignore = Yi watsi da shi
 rootcheck_exit = Fita

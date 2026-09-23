@@ -9,6 +9,7 @@ common_secret_phrase = ביטוי סודי
 common_copy = העתק
 common_share = שתף
 common_continue = המשך
+common_continue_anyway = המשך בכל זאת
 common_sign_in_with = כניסה באמצעות %@
 common_provider = ספק
 common_loading = טוען
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = אזהרת אבטחה
+rootcheck_jailbreak_body = נראה שהמכשיר שלך עבר ג'יילברייק. הדבר עלול לסכן את הארנק והכספים שלך.
 rootcheck_body = נראה שלמכשיר שלך יש גישת שורש, מה שיכול להגביר משמעותית את סיכוני האבטחה. שימוש באפליקציה זו במכשיר שורשי עלול לחשוף את הנכסים שלך לגישה לא מורשית ואובדן פוטנציאלי. למען בטיחות הכספים שלך, אנו ממליצים בחום להשתמש במכשיר ללא שורש.
 rootcheck_ignore = התעלם
 rootcheck_exit = יציאה

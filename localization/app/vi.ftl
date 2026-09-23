@@ -9,6 +9,7 @@ common_secret_phrase = Cụm từ bí mật
 common_copy = Sao chép
 common_share = Chia sẻ
 common_continue = Tiếp tục
+common_continue_anyway = Vẫn tiếp tục
 common_sign_in_with = Đăng nhập bằng %@
 common_provider = Nhà cung cấp
 common_loading = Đang tải
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = Cảnh báo an ninh
+rootcheck_jailbreak_body = Thiết bị của bạn có vẻ đã bị jailbreak. Điều này có thể khiến ví và tiền của bạn gặp rủi ro.
 rootcheck_body = Thiết bị của bạn có vẻ như có quyền truy cập gốc, điều này có thể làm tăng đáng kể rủi ro bảo mật. Sử dụng ứng dụng này trên thiết bị đã root có thể khiến tài sản của bạn bị truy cập trái phép và có khả năng mất mát. Để đảm bảo an toàn cho tiền của bạn, chúng tôi đặc biệt khuyên bạn nên sử dụng thiết bị không root.
 rootcheck_ignore = Bỏ qua
 rootcheck_exit = Thoát

@@ -9,6 +9,7 @@
   <string name="common_copy">คัดลอก</string>
   <string name="common_share">แบ่งปัน</string>
   <string name="common_continue">ดำเนินการต่อ</string>
+  <string name="common_continue_anyway">ดำเนินการต่ออยู่ดี</string>
   <string name="common_sign_in_with">ลงชื่อเข้าใช้ด้วย %1$s</string>
   <string name="common_provider">ผู้ให้บริการ</string>
   <string name="common_loading">กำลังโหลด</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">อนุมัติโทเค็นได้ไม่จำกัดจำนวน</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">คำเตือนด้านความปลอดภัย</string>
+  <string name="rootcheck_jailbreak_body">อุปกรณ์ของคุณดูเหมือนจะถูกเจลเบรก ซึ่งอาจทำให้กระเป๋าเงินและเงินของคุณเสี่ยง</string>
   <string name="rootcheck_body">อุปกรณ์ของคุณดูเหมือนจะมีสิทธิ์เข้าถึงรูท ซึ่งอาจเพิ่มความเสี่ยงด้านความปลอดภัยได้อย่างมาก การใช้แอปนี้บนอุปกรณ์ที่รูทแล้วอาจทำให้ทรัพย์สินของคุณถูกเข้าถึงโดยไม่ได้รับอนุญาตและอาจสูญหายได้ เพื่อความปลอดภัยของเงินของคุณ เราขอแนะนำอย่างยิ่งให้ใช้อุปกรณ์ที่ไม่ได้รับการรูท</string>
   <string name="rootcheck_ignore">ไม่สนใจ</string>
   <string name="rootcheck_exit">ออก</string>

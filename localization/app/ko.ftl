@@ -9,6 +9,7 @@ common_secret_phrase = 비밀 문구
 common_copy = 복사
 common_share = 공유
 common_continue = 계속
+common_continue_anyway = 그래도 계속
 common_sign_in_with = %@ 계정으로 로그인
 common_provider = 공급자
 common_loading = 로딩 중
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = 보안 경고
+rootcheck_jailbreak_body = 기기가 탈옥된 것으로 보입니다. 지갑과 자산이 위험해질 수 있습니다.
 rootcheck_body = 귀하의 기기는 루트 액세스 권한이 있는 것으로 보이며, 이는 보안 위험을 상당히 증가시킬 수 있습니다. 루팅된 기기에서 이 앱을 사용하면 자산이 무단 액세스 및 잠재적 손실에 노출될 수 있습니다. 자금의 안전을 위해 루팅되지 않은 기기를 사용하는 것이 좋습니다.
 rootcheck_ignore = 무시
 rootcheck_exit = 종료

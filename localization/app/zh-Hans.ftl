@@ -9,6 +9,7 @@ common_secret_phrase = 助记词
 common_copy = 复制
 common_share = 分享
 common_continue = 继续
+common_continue_anyway = 仍要继续
 common_sign_in_with = 使用%@登录
 common_provider = 服务商
 common_loading = 加载中
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = 安全警告
+rootcheck_jailbreak_body = 你的设备似乎已越狱。这可能使你的钱包和资金面临风险。
 rootcheck_body = 检测到设备已获取 root 权限，可能显著增加安全风险。在已 root 的设备上使用此应用可能导致资产遭到未经授权的访问并造成损失。为保障资金安全，强烈建议使用非 root 设备。
 rootcheck_ignore = 忽略
 rootcheck_exit = 退出

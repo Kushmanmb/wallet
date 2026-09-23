@@ -9,6 +9,7 @@
   <string name="common_copy">Kopyala</string>
   <string name="common_share">Paylaş</string>
   <string name="common_continue">Devam et</string>
+  <string name="common_continue_anyway">Yine de devam et</string>
   <string name="common_sign_in_with">%1$s ile giriş yap</string>
   <string name="common_provider">Sağlayıcı</string>
   <string name="common_loading">Yükleniyor</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">Sınırsız token onayı</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">Güvenlik Uyarısı</string>
+  <string name="rootcheck_jailbreak_body">Cihazınız jailbreak yapılmış görünüyor. Bu, cüzdanınızı ve bakiyenizi riske atabilir.</string>
   <string name="rootcheck_body">Cihazınızın kök erişimi var gibi görünüyor, bu da güvenlik risklerini önemli ölçüde artırabilir. Bu uygulamayı köklü bir cihazda kullanmak varlıklarınızı yetkisiz erişime ve olası kayba maruz bırakabilir. Fonlarınızın güvenliği için köklü olmayan bir cihaz kullanmanızı şiddetle öneririz.</string>
   <string name="rootcheck_ignore">Yoksay</string>
   <string name="rootcheck_exit">Çıkış</string>

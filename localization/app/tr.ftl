@@ -9,6 +9,7 @@ common_secret_phrase = Gizli İfade
 common_copy = Kopyala
 common_share = Paylaş
 common_continue = Devam et
+common_continue_anyway = Yine de devam et
 common_sign_in_with = %@ ile giriş yap
 common_provider = Sağlayıcı
 common_loading = Yükleniyor
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = Güvenlik Uyarısı
+rootcheck_jailbreak_body = Cihazınız jailbreak yapılmış görünüyor. Bu, cüzdanınızı ve bakiyenizi riske atabilir.
 rootcheck_body = Cihazınızın kök erişimi var gibi görünüyor, bu da güvenlik risklerini önemli ölçüde artırabilir. Bu uygulamayı köklü bir cihazda kullanmak varlıklarınızı yetkisiz erişime ve olası kayba maruz bırakabilir. Fonlarınızın güvenliği için köklü olmayan bir cihaz kullanmanızı şiddetle öneririz.
 rootcheck_ignore = Yoksay
 rootcheck_exit = Çıkış

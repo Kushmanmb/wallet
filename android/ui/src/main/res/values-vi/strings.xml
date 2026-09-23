@@ -9,6 +9,7 @@
   <string name="common_copy">Sao chép</string>
   <string name="common_share">Chia sẻ</string>
   <string name="common_continue">Tiếp tục</string>
+  <string name="common_continue_anyway">Vẫn tiếp tục</string>
   <string name="common_sign_in_with">Đăng nhập bằng %1$s</string>
   <string name="common_provider">Nhà cung cấp</string>
   <string name="common_loading">Đang tải</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">Phê duyệt mã thông báo không giới hạn</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">Cảnh báo an ninh</string>
+  <string name="rootcheck_jailbreak_body">Thiết bị của bạn có vẻ đã bị jailbreak. Điều này có thể khiến ví và tiền của bạn gặp rủi ro.</string>
   <string name="rootcheck_body">Thiết bị của bạn có vẻ như có quyền truy cập gốc, điều này có thể làm tăng đáng kể rủi ro bảo mật. Sử dụng ứng dụng này trên thiết bị đã root có thể khiến tài sản của bạn bị truy cập trái phép và có khả năng mất mát. Để đảm bảo an toàn cho tiền của bạn, chúng tôi đặc biệt khuyên bạn nên sử dụng thiết bị không root.</string>
   <string name="rootcheck_ignore">Bỏ qua</string>
   <string name="rootcheck_exit">Thoát</string>

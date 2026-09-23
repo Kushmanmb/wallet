@@ -9,6 +9,7 @@
   <string name="common_copy">Salin</string>
   <string name="common_share">Bagikan</string>
   <string name="common_continue">Lanjutkan</string>
+  <string name="common_continue_anyway">Tetap lanjutkan</string>
   <string name="common_sign_in_with">Masuk dengan %1$s</string>
   <string name="common_provider">Penyedia</string>
   <string name="common_loading">Memuat</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">Persetujuan token tanpa batas</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">Peringatan Keamanan</string>
+  <string name="rootcheck_jailbreak_body">Perangkat Anda tampaknya di-jailbreak. Ini dapat membahayakan dompet dan dana Anda.</string>
   <string name="rootcheck_body">Perangkat Anda tampaknya memiliki akses root, yang dapat meningkatkan risiko keamanan secara signifikan. Penggunaan aplikasi ini pada perangkat yang di-root dapat menyebabkan aset Anda rentan terhadap akses tidak sah dan potensi kerugian. Demi keamanan dana Anda, kami sangat menyarankan untuk menggunakan perangkat yang tidak di-root.</string>
   <string name="rootcheck_ignore">Abaikan</string>
   <string name="rootcheck_exit">Keluar</string>

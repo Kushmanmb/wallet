@@ -9,6 +9,7 @@
   <string name="common_copy">Kopiér</string>
   <string name="common_share">Del</string>
   <string name="common_continue">Fortsæt</string>
+  <string name="common_continue_anyway">Fortsæt alligevel</string>
   <string name="common_sign_in_with">Log ind med %1$s</string>
   <string name="common_provider">Udbyder</string>
   <string name="common_loading">Indlæser</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">Ubegrænset tokengodkendelse</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">Sikkerhedsadvarsel</string>
+  <string name="rootcheck_jailbreak_body">Din enhed ser ud til at være jailbroken. Det kan bringe din tegnebog og dine midler i fare.</string>
   <string name="rootcheck_body">Din enhed ser ud til at have root-adgang, hvilket kan øge sikkerhedsrisiciene betydeligt. Brug af denne app på en rootet enhed kan udsætte dine aktiver for uautoriseret adgang og potentielt tab. Af hensyn til dine penges sikkerhed anbefaler vi kraftigt at bruge en enhed uden rod.</string>
   <string name="rootcheck_ignore">Ignorer</string>
   <string name="rootcheck_exit">Afslut</string>

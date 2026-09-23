@@ -9,6 +9,7 @@
   <string name="common_copy">Salin</string>
   <string name="common_share">Kongsi</string>
   <string name="common_continue">Teruskan</string>
+  <string name="common_continue_anyway">Teruskan juga</string>
   <string name="common_sign_in_with">Log masuk dengan %1$s</string>
   <string name="common_provider">Pembekal</string>
   <string name="common_loading">Memuatkan</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">Kelulusan token tanpa had</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">Amaran Keselamatan</string>
+  <string name="rootcheck_jailbreak_body">Peranti anda nampaknya telah di-jailbreak. Ini boleh mendedahkan dompet dan dana anda kepada risiko.</string>
   <string name="rootcheck_body">Peranti anda nampaknya mempunyai akses root, yang boleh meningkatkan risiko keselamatan dengan ketara. Menggunakan apl ini pada peranti berakar boleh mendedahkan aset anda kepada akses tanpa kebenaran dan potensi kerugian. Untuk keselamatan dana anda, kami amat mengesyorkan anda menggunakan peranti yang tidak berakar.</string>
   <string name="rootcheck_ignore">Abaikan</string>
   <string name="rootcheck_exit">Keluar</string>

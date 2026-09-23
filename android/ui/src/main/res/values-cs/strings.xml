@@ -9,6 +9,7 @@
   <string name="common_copy">Kopírovat</string>
   <string name="common_share">Sdílet</string>
   <string name="common_continue">Pokračovat</string>
+  <string name="common_continue_anyway">Přesto pokračovat</string>
   <string name="common_sign_in_with">Přihlásit se pomocí %1$s</string>
   <string name="common_provider">Poskytovatel</string>
   <string name="common_loading">Načítání</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">Neomezené schvalování tokenů</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">Bezpečnostní varování</string>
+  <string name="rootcheck_jailbreak_body">Vaše zařízení je zřejmě jailbreaknuté. To může ohrozit vaši peněženku a prostředky.</string>
   <string name="rootcheck_body">Zdá se, že vaše zařízení má přístup root, což může výrazně zvýšit bezpečnostní rizika. Používání této aplikace na zakořeněném zařízení může vystavit váš majetek neoprávněnému přístupu a potenciální ztrátě. Pro bezpečnost vašich finančních prostředků důrazně doporučujeme používat nerootované zařízení.</string>
   <string name="rootcheck_ignore">Ignorovat</string>
   <string name="rootcheck_exit">Výstup</string>

@@ -9,6 +9,7 @@ common_secret_phrase = Frază secretă
 common_copy = Copiere
 common_share = Distribuie
 common_continue = Continuă
+common_continue_anyway = Continuă oricum
 common_sign_in_with = Autentificare cu %@
 common_provider = Furnizor
 common_loading = Încărcare
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = Avertisment de securitate
+rootcheck_jailbreak_body = Dispozitivul dvs. pare să aibă jailbreak. Acest lucru vă poate pune portofelul și fondurile în pericol.
 rootcheck_body = Dispozitivul dvs. pare să aibă acces root, ceea ce poate crește semnificativ riscurile de securitate. Utilizarea acestei aplicații pe un dispozitiv înrădăcinat poate expune activele dvs. la acces neautorizat și la o potențială pierdere. Pentru siguranța fondurilor dvs., vă recomandăm insistent să utilizați un dispozitiv care nu este rootat.
 rootcheck_ignore = Ignora
 rootcheck_exit = Ieșire

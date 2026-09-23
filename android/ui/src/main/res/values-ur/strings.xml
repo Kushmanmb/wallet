@@ -9,6 +9,7 @@
   <string name="common_copy">کاپی</string>
   <string name="common_share">شیئر کریں۔</string>
   <string name="common_continue">جاری رکھیں</string>
+  <string name="common_continue_anyway">بہرحال جاری رکھیں</string>
   <string name="common_sign_in_with">%1$s کے ساتھ سائن ان کریں</string>
   <string name="common_provider">فراہم کرنے والا</string>
   <string name="common_loading">لوڈ ہو رہا ہے۔</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">لامحدود ٹوکن کی منظوری</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">سیکیورٹی وارننگ</string>
+  <string name="rootcheck_jailbreak_body">لگتا ہے کہ آپ کے آلے پر جیل بریک کیا گیا ہے۔ اس سے آپ کا والیٹ اور فنڈز خطرے میں پڑ سکتے ہیں۔</string>
   <string name="rootcheck_body">ایسا لگتا ہے کہ آپ کے آلے کو روٹ تک رسائی حاصل ہے، جس سے سیکورٹی کے خطرات میں نمایاں اضافہ ہو سکتا ہے۔ اس ایپ کو روٹڈ ڈیوائس پر استعمال کرنے سے آپ کے اثاثوں کو غیر مجاز رسائی اور ممکنہ نقصان کا سامنا کرنا پڑ سکتا ہے۔ آپ کے فنڈز کی حفاظت کے لیے، ہم ایک غیر جڑ والا آلہ استعمال کرنے کی سختی سے سفارش کرتے ہیں۔</string>
   <string name="rootcheck_ignore">نظر انداز کرنا</string>
   <string name="rootcheck_exit">باہر نکلیں۔</string>

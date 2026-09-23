@@ -9,6 +9,7 @@ common_secret_phrase = Lihim na Parirala
 common_copy = Kopyahin
 common_share = Ibahagi
 common_continue = Magpatuloy
+common_continue_anyway = Magpatuloy pa rin
 common_sign_in_with = Mag-sign in gamit ang %@
 common_provider = Provider
 common_loading = Naglo-load
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = Babala sa Seguridad
+rootcheck_jailbreak_body = Mukhang naka-jailbreak ang iyong device. Maaari nitong ilagay sa panganib ang iyong wallet at mga pondo.
 rootcheck_body = Mukhang may root access ang iyong device, na maaaring makabuluhang magpapataas ng mga panganib sa seguridad. Ang paggamit ng app na ito sa isang naka-root na device ay maaaring maglantad sa iyong mga asset sa hindi awtorisadong pag-access at potensyal na pagkawala. Para sa kaligtasan ng iyong mga pondo, lubos naming inirerekomenda ang paggamit ng hindi naka-root na device.
 rootcheck_ignore = Huwag pansinin
 rootcheck_exit = Lumabas

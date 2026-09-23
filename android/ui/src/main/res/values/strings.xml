@@ -9,6 +9,7 @@
   <string name="common_copy">Copy</string>
   <string name="common_share">Share</string>
   <string name="common_continue">Continue</string>
+  <string name="common_continue_anyway">Continue Anyway</string>
   <string name="common_sign_in_with">Sign In with %1$s</string>
   <string name="common_provider">Provider</string>
   <string name="common_loading">Loading</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">Unlimited token approval</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">Security Warning</string>
+  <string name="rootcheck_jailbreak_body">Your device appears to be jailbroken. This may put your wallet and funds at risk.</string>
   <string name="rootcheck_body">Your device appears to have root access, which can significantly increase security risks. Using this app on a rooted device may expose your assets to unauthorized access and potential loss. For the safety of your funds, we strongly recommend using a non-rooted device.</string>
   <string name="rootcheck_ignore">Ignore</string>
   <string name="rootcheck_exit">Exit</string>

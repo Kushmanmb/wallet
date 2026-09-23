@@ -9,6 +9,7 @@
   <string name="common_copy">העתק</string>
   <string name="common_share">שתף</string>
   <string name="common_continue">המשך</string>
+  <string name="common_continue_anyway">המשך בכל זאת</string>
   <string name="common_sign_in_with">כניסה באמצעות %1$s</string>
   <string name="common_provider">ספק</string>
   <string name="common_loading">טוען</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">אישור אסימונים ללא הגבלה</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">אזהרת אבטחה</string>
+  <string name="rootcheck_jailbreak_body">נראה שהמכשיר שלך עבר ג\'יילברייק. הדבר עלול לסכן את הארנק והכספים שלך.</string>
   <string name="rootcheck_body">נראה שלמכשיר שלך יש גישת שורש, מה שיכול להגביר משמעותית את סיכוני האבטחה. שימוש באפליקציה זו במכשיר שורשי עלול לחשוף את הנכסים שלך לגישה לא מורשית ואובדן פוטנציאלי. למען בטיחות הכספים שלך, אנו ממליצים בחום להשתמש במכשיר ללא שורש.</string>
   <string name="rootcheck_ignore">התעלם</string>
   <string name="rootcheck_exit">יציאה</string>

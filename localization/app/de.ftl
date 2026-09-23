@@ -9,6 +9,7 @@ common_secret_phrase = Geheime Phrase
 common_copy = Kopieren
 common_share = Teilen
 common_continue = Weiter
+common_continue_anyway = Trotzdem fortfahren
 common_sign_in_with = Mit %@ anmelden
 common_provider = Anbieter
 common_loading = Wird geladen
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = Sicherheitswarnung
+rootcheck_jailbreak_body = Ihr Gerät scheint einen Jailbreak zu haben. Das kann Ihre Wallet und Ihr Guthaben gefährden.
 rootcheck_body = Ihr Gerät scheint Root-Zugriff zu haben, was die Sicherheitsrisiken erheblich erhöhen kann. Die Verwendung dieser App auf einem gerooteten Gerät kann Ihre Vermögenswerte einem unbefugten Zugriff und einem möglichen Verlust aussetzen. Zur Sicherheit Ihrer Gelder empfehlen wir dringend die Verwendung eines nicht gerooteten Geräts.
 rootcheck_ignore = Ignorieren
 rootcheck_exit = Ausstieg

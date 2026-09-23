@@ -9,6 +9,7 @@
   <string name="common_copy">Копировать</string>
   <string name="common_share">Поделиться</string>
   <string name="common_continue">Продолжить</string>
+  <string name="common_continue_anyway">Всё равно продолжить</string>
   <string name="common_sign_in_with">Войти через %1$s</string>
   <string name="common_provider">Провайдер</string>
   <string name="common_loading">Загрузка</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">Неограниченное количество одобрений токенов</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">Предупреждение о безопасности</string>
+  <string name="rootcheck_jailbreak_body">Похоже, на вашем устройстве выполнен джейлбрейк. Это может поставить под угрозу кошелёк и средства.</string>
   <string name="rootcheck_body">Похоже, что у вашего устройства есть root-доступ, что может значительно повысить риски безопасности. Использование этого приложения на root-устройстве может подвергнуть ваши активы несанкционированному доступу и потенциальной потере. Для безопасности ваших средств мы настоятельно рекомендуем использовать не root-устройство.</string>
   <string name="rootcheck_ignore">Игнорировать</string>
   <string name="rootcheck_exit">Выход</string>

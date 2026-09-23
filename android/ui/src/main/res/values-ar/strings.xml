@@ -9,6 +9,7 @@
   <string name="common_copy">نسخ</string>
   <string name="common_share">مشاركة</string>
   <string name="common_continue">يكمل</string>
+  <string name="common_continue_anyway">متابعة على أي حال</string>
   <string name="common_sign_in_with">تسجيل الدخول باستخدام %1$s</string>
   <string name="common_provider">مزود</string>
   <string name="common_loading">تحميل</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">الموافقة على الرموز المميزة غير محدودة</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">تحذير أمني</string>
+  <string name="rootcheck_jailbreak_body">يبدو أن جهازك قد خضع لكسر الحماية. قد يعرض ذلك محفظتك وأموالك للخطر.</string>
   <string name="rootcheck_body">يبدو أن جهازك يتمتع بصلاحيات الجذر، مما قد يزيد من مخاطر الأمان بشكل كبير. قد يؤدي استخدام هذا التطبيق على جهاز به صلاحيات الجذر إلى تعريض أصولك لوصول غير مصرح به وخسارة محتملة. ولضمان سلامة أموالك، نوصي بشدة باستخدام جهاز غير متجذر.</string>
   <string name="rootcheck_ignore">يتجاهل</string>
   <string name="rootcheck_exit">مخرج</string>

@@ -9,6 +9,7 @@ common_secret_phrase = Tajná fráze
 common_copy = Kopírovat
 common_share = Sdílet
 common_continue = Pokračovat
+common_continue_anyway = Přesto pokračovat
 common_sign_in_with = Přihlásit se pomocí %@
 common_provider = Poskytovatel
 common_loading = Načítání
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = Bezpečnostní varování
+rootcheck_jailbreak_body = Vaše zařízení je zřejmě jailbreaknuté. To může ohrozit vaši peněženku a prostředky.
 rootcheck_body = Zdá se, že vaše zařízení má přístup root, což může výrazně zvýšit bezpečnostní rizika. Používání této aplikace na zakořeněném zařízení může vystavit váš majetek neoprávněnému přístupu a potenciální ztrátě. Pro bezpečnost vašich finančních prostředků důrazně doporučujeme používat nerootované zařízení.
 rootcheck_ignore = Ignorovat
 rootcheck_exit = Výstup

@@ -9,6 +9,7 @@ common_secret_phrase = गुप्त वाक्यांश
 common_copy = प्रतिलिपि
 common_share = साझा करें
 common_continue = जारी रखें
+common_continue_anyway = फिर भी जारी रखें
 common_sign_in_with = %@ से साइन इन करें
 common_provider = प्रदाता
 common_loading = लोड हो रहा है
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = सुरक्षा चेतावनी
+rootcheck_jailbreak_body = आपका डिवाइस जेलब्रेक किया हुआ लगता है। इससे आपका वॉलेट और फंड जोखिम में पड़ सकते हैं।
 rootcheck_body = ऐसा लगता है कि आपके डिवाइस में रूट एक्सेस है, जो सुरक्षा जोखिमों को काफी हद तक बढ़ा सकता है। रूट किए गए डिवाइस पर इस ऐप का उपयोग करने से आपकी संपत्ति अनधिकृत पहुंच और संभावित नुकसान के संपर्क में आ सकती है। आपके फंड की सुरक्षा के लिए, हम दृढ़ता से गैर-रूट किए गए डिवाइस का उपयोग करने की सलाह देते हैं।
 rootcheck_ignore = नजरअंदाज करें
 rootcheck_exit = बाहर निकलें

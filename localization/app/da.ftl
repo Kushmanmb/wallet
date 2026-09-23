@@ -9,6 +9,7 @@ common_secret_phrase = Hemmelig sætning
 common_copy = Kopiér
 common_share = Del
 common_continue = Fortsæt
+common_continue_anyway = Fortsæt alligevel
 common_sign_in_with = Log ind med %@
 common_provider = Udbyder
 common_loading = Indlæser
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = Sikkerhedsadvarsel
+rootcheck_jailbreak_body = Din enhed ser ud til at være jailbroken. Det kan bringe din tegnebog og dine midler i fare.
 rootcheck_body = Din enhed ser ud til at have root-adgang, hvilket kan øge sikkerhedsrisiciene betydeligt. Brug af denne app på en rootet enhed kan udsætte dine aktiver for uautoriseret adgang og potentielt tab. Af hensyn til dine penges sikkerhed anbefaler vi kraftigt at bruge en enhed uden rod.
 rootcheck_ignore = Ignorer
 rootcheck_exit = Afslut

@@ -9,6 +9,7 @@ common_secret_phrase = خفیہ جملہ
 common_copy = کاپی
 common_share = شیئر کریں۔
 common_continue = جاری رکھیں
+common_continue_anyway = بہرحال جاری رکھیں
 common_sign_in_with = %@ کے ساتھ سائن ان کریں
 common_provider = فراہم کرنے والا
 common_loading = لوڈ ہو رہا ہے۔
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = سیکیورٹی وارننگ
+rootcheck_jailbreak_body = لگتا ہے کہ آپ کے آلے پر جیل بریک کیا گیا ہے۔ اس سے آپ کا والیٹ اور فنڈز خطرے میں پڑ سکتے ہیں۔
 rootcheck_body = ایسا لگتا ہے کہ آپ کے آلے کو روٹ تک رسائی حاصل ہے، جس سے سیکورٹی کے خطرات میں نمایاں اضافہ ہو سکتا ہے۔ اس ایپ کو روٹڈ ڈیوائس پر استعمال کرنے سے آپ کے اثاثوں کو غیر مجاز رسائی اور ممکنہ نقصان کا سامنا کرنا پڑ سکتا ہے۔ آپ کے فنڈز کی حفاظت کے لیے، ہم ایک غیر جڑ والا آلہ استعمال کرنے کی سختی سے سفارش کرتے ہیں۔
 rootcheck_ignore = نظر انداز کرنا
 rootcheck_exit = باہر نکلیں۔

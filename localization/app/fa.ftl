@@ -9,6 +9,7 @@ common_secret_phrase = عبارت مخفی
 common_copy = کپی کردن
 common_share = اشتراک گذاری
 common_continue = ادامه
+common_continue_anyway = در هر صورت ادامه دهید
 common_sign_in_with = ورود با %@
 common_provider = ارائه دهنده
 common_loading = در حال بارگذاری
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = هشدار امنیتی
+rootcheck_jailbreak_body = به نظر می‌رسد دستگاه شما جیلبریک شده است. این می‌تواند کیف پول و دارایی‌های شما را در معرض خطر قرار دهد.
 rootcheck_body = به نظر می رسد دستگاه شما دسترسی ریشه دارد که می تواند خطرات امنیتی را به میزان قابل توجهی افزایش دهد. استفاده از این برنامه در یک دستگاه روت شده ممکن است دارایی های شما را در معرض دسترسی غیرمجاز و از دست دادن احتمالی قرار دهد. برای ایمنی سرمایه خود، ما قویاً توصیه می کنیم از یک دستگاه غیر روت استفاده کنید.
 rootcheck_ignore = نادیده گرفتن
 rootcheck_exit = خارج شوید

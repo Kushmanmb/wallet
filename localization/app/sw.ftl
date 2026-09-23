@@ -9,6 +9,7 @@ common_secret_phrase = Kifungu cha Siri
 common_copy = Nakili
 common_share = Shiriki
 common_continue = Endelea
+common_continue_anyway = Endelea hata hivyo
 common_sign_in_with = Ingia kwa %@
 common_provider = Mtoa huduma
 common_loading = Inapakia
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = Onyo la Usalama
+rootcheck_jailbreak_body = Kifaa chako kinaonekana kimefanyiwa jailbreak. Hii inaweza kuweka mkoba na fedha zako hatarini.
 rootcheck_body = Kifaa chako kinaonekana kuwa na ufikiaji wa mizizi, ambayo inaweza kuongeza hatari za usalama kwa kiasi kikubwa. Kutumia programu hii kwenye kifaa kilichozinduliwa kunaweza kufichua mali yako kwa ufikiaji usioidhinishwa na uwezekano wa hasara. Kwa usalama wa pesa zako, tunapendekeza sana kutumia kifaa kisicho na mizizi.
 rootcheck_ignore = Puuza
 rootcheck_exit = Toka

@@ -227,6 +227,8 @@ public enum Localized {
     public static let cancel = Localized.tr("Localizable", "common.cancel", fallback: "Cancel")
     /// Continue
     public static let `continue` = Localized.tr("Localizable", "common.continue", fallback: "Continue")
+    /// Continue Anyway
+    public static let continueAnyway = Localized.tr("Localizable", "common.continue_anyway", fallback: "Continue Anyway")
     /// Copied: %@
     public static func copied(_ p1: Any) -> String {
       return Localized.tr("Localizable", "common.copied", String(describing: p1), fallback: "Copied: %@")
@@ -1141,6 +1143,12 @@ public enum Localized {
         }
       }
     }
+  }
+  public enum Rootcheck {
+    /// Your device appears to be jailbroken. This may put your wallet and funds at risk.
+    public static let jailbreakBody = Localized.tr("Localizable", "rootcheck.jailbreak_body", fallback: "Your device appears to be jailbroken. This may put your wallet and funds at risk.")
+    /// Security Warning
+    public static let securityAlert = Localized.tr("Localizable", "rootcheck.security_alert", fallback: "Security Warning")
   }
   public enum Search {
     public enum State {

@@ -9,6 +9,7 @@
   <string name="common_copy">Kopyahin</string>
   <string name="common_share">Ibahagi</string>
   <string name="common_continue">Magpatuloy</string>
+  <string name="common_continue_anyway">Magpatuloy pa rin</string>
   <string name="common_sign_in_with">Mag-sign in gamit ang %1$s</string>
   <string name="common_provider">Provider</string>
   <string name="common_loading">Naglo-load</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">Walang limitasyong pag-apruba ng token</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">Babala sa Seguridad</string>
+  <string name="rootcheck_jailbreak_body">Mukhang naka-jailbreak ang iyong device. Maaari nitong ilagay sa panganib ang iyong wallet at mga pondo.</string>
   <string name="rootcheck_body">Mukhang may root access ang iyong device, na maaaring makabuluhang magpapataas ng mga panganib sa seguridad. Ang paggamit ng app na ito sa isang naka-root na device ay maaaring maglantad sa iyong mga asset sa hindi awtorisadong pag-access at potensyal na pagkawala. Para sa kaligtasan ng iyong mga pondo, lubos naming inirerekomenda ang paggamit ng hindi naka-root na device.</string>
   <string name="rootcheck_ignore">Huwag pansinin</string>
   <string name="rootcheck_exit">Lumabas</string>

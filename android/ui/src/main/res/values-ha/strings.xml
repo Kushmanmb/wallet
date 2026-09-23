@@ -9,6 +9,7 @@
   <string name="common_copy">Kwafi</string>
   <string name="common_share">Raba</string>
   <string name="common_continue">Ci gaba</string>
+  <string name="common_continue_anyway">Ci gaba duk da haka</string>
   <string name="common_sign_in_with">Shiga da %1$s</string>
   <string name="common_provider">Mai bayarwa</string>
   <string name="common_loading">Ana lodawa</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">Amincewa da alamar mara iyaka</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">Gargadin Tsaro</string>
+  <string name="rootcheck_jailbreak_body">Na\'urarka ta bayyana an yi mata jailbreak. Wannan na iya sa Wallet da kuɗin ku cikin haɗari.</string>
   <string name="rootcheck_body">Na\'urarka ta bayyana tana da tushen shiga, wanda zai iya ƙara haɗarin tsaro sosai. Yin amfani da wannan ƙa\'idar akan na\'ura mai tushe na iya fallasa kadarorin ku zuwa shiga mara izini da yuwuwar asara. Don amincin kuɗin ku, muna ba da shawarar yin amfani da na\'urar da ba ta da tushe.</string>
   <string name="rootcheck_ignore">Yi watsi da shi</string>
   <string name="rootcheck_exit">Fita</string>

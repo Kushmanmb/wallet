@@ -9,6 +9,7 @@
   <string name="common_copy">Copiar</string>
   <string name="common_share">Compartir</string>
   <string name="common_continue">Continuar</string>
+  <string name="common_continue_anyway">Continuar de todos modos</string>
   <string name="common_sign_in_with">Iniciar sesión con %1$s</string>
   <string name="common_provider">Proveedor</string>
   <string name="common_loading">Cargando</string>
@@ -602,6 +603,7 @@
   <string name="simulation_warning_unlimited_token_approval_title">Aprobación ilimitada de tokens</string>
   <string name="application_name">Gem</string>
   <string name="rootcheck_security_alert">Advertencia de seguridad</string>
+  <string name="rootcheck_jailbreak_body">Su dispositivo parece tener jailbreak. Esto puede poner en riesgo su billetera y sus fondos.</string>
   <string name="rootcheck_body">Su dispositivo parece tener acceso root, lo que puede aumentar significativamente los riesgos de seguridad. El uso de esta aplicación en un dispositivo rooteado puede exponer sus activos a acceso no autorizado y a una posible pérdida. Para la seguridad de sus fondos, le recomendamos encarecidamente que utilice un dispositivo no rooteado.</string>
   <string name="rootcheck_ignore">Ignorar</string>
   <string name="rootcheck_exit">Salir</string>

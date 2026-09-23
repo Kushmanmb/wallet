@@ -9,6 +9,7 @@ common_secret_phrase = Frasa Rahasia
 common_copy = Salin
 common_share = Bagikan
 common_continue = Lanjutkan
+common_continue_anyway = Tetap lanjutkan
 common_sign_in_with = Masuk dengan %@
 common_provider = Penyedia
 common_loading = Memuat
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = Peringatan Keamanan
+rootcheck_jailbreak_body = Perangkat Anda tampaknya di-jailbreak. Ini dapat membahayakan dompet dan dana Anda.
 rootcheck_body = Perangkat Anda tampaknya memiliki akses root, yang dapat meningkatkan risiko keamanan secara signifikan. Penggunaan aplikasi ini pada perangkat yang di-root dapat menyebabkan aset Anda rentan terhadap akses tidak sah dan potensi kerugian. Demi keamanan dana Anda, kami sangat menyarankan untuk menggunakan perangkat yang tidak di-root.
 rootcheck_ignore = Abaikan
 rootcheck_exit = Keluar

@@ -9,6 +9,7 @@ common_secret_phrase = العبارة السرية
 common_copy = نسخ
 common_share = مشاركة
 common_continue = يكمل
+common_continue_anyway = متابعة على أي حال
 common_sign_in_with = تسجيل الدخول باستخدام %@
 common_provider = مزود
 common_loading = تحميل
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = تحذير أمني
+rootcheck_jailbreak_body = يبدو أن جهازك قد خضع لكسر الحماية. قد يعرض ذلك محفظتك وأموالك للخطر.
 rootcheck_body = يبدو أن جهازك يتمتع بصلاحيات الجذر، مما قد يزيد من مخاطر الأمان بشكل كبير. قد يؤدي استخدام هذا التطبيق على جهاز به صلاحيات الجذر إلى تعريض أصولك لوصول غير مصرح به وخسارة محتملة. ولضمان سلامة أموالك، نوصي بشدة باستخدام جهاز غير متجذر.
 rootcheck_ignore = يتجاهل
 rootcheck_exit = مخرج

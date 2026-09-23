@@ -9,6 +9,7 @@ common_secret_phrase = リカバリーフレーズ
 common_copy = コピー
 common_share = 共有
 common_continue = 続ける
+common_continue_anyway = このまま続ける
 common_sign_in_with = %@でサインイン
 common_provider = プロバイダー
 common_loading = 読み込み中
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = セキュリティ警告
+rootcheck_jailbreak_body = このデバイスは脱獄されているようです。ウォレットと資産が危険にさらされる可能性があります。
 rootcheck_body = このデバイスは root 化されているようです。root 化されたデバイスではセキュリティリスクが大幅に高まり、資産への不正アクセスや損失につながる可能性があります。資金を守るため、root 化されていないデバイスの使用を強くお勧めします。
 rootcheck_ignore = 無視する
 rootcheck_exit = 終了

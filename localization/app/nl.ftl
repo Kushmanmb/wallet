@@ -9,6 +9,7 @@ common_secret_phrase = Geheime zin
 common_copy = Kopieer
 common_share = Deel
 common_continue = Ga door
+common_continue_anyway = Toch doorgaan
 common_sign_in_with = Inloggen met %@
 common_provider = Aanbieder
 common_loading = Laden
@@ -771,6 +772,7 @@ application_name = Gem
 # Rootcheck
 
 rootcheck_security_alert = Beveiligingswaarschuwing
+rootcheck_jailbreak_body = Uw apparaat lijkt gejailbreakt te zijn. Dit kan uw wallet en tegoeden in gevaar brengen.
 rootcheck_body = Het lijkt erop dat uw apparaat root-toegang heeft, wat de beveiligingsrisico's aanzienlijk kan vergroten. Als u deze app op een geroot apparaat gebruikt, kunnen uw bezittingen worden blootgesteld aan ongeoorloofde toegang en mogelijk verlies. Voor de veiligheid van uw geld raden wij u ten zeerste aan een niet-geroot apparaat te gebruiken.
 rootcheck_ignore = Negeer
 rootcheck_exit = Afsluiten
