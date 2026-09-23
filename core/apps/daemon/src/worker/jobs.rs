@@ -256,7 +256,7 @@ impl JobVariant {
         self
     }
 
-    pub async fn with_param_duration(self, config: &ConfigCacher, key: &ConfigParamKey) -> Result<Self, storage::DatabaseError> {
+    pub async fn with_param_duration(self, config: &ConfigCacher, key: &ConfigParamKey) -> Result<Self, Box<dyn Error + Send + Sync>> {
         Ok(self.every(config.get_param_duration(key).await?))
     }
 

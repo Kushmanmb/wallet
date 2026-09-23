@@ -32,6 +32,7 @@ Reference: `crates/gem_hypercore/src/provider/balances.rs` and `balances_mapper.
 - `services` owns every backend use case: load from storage or cache, call domain crates, save, publish. `Services::new(settings)` builds the backend graph for both apps. Each table has one writing module; other modules call it.
 - Domain crates (`fiat`, `nft`, `prices`, `swapper`, chain crates, …) hold pure rules and stateless third-party provider clients. They take and return `primitives` types and receive config values as parameters.
 - Infra crates (`storage`, `cacher`, `streamer`, `search_index`, `pusher`) reach Postgres, Redis, RabbitMQ, Meilisearch and Gorush with `primitives` in and out and no business rules. Only `services` depends on them; `just check-boundaries` enforces it, and crates in its allowlist predate the rule and leave it as their orchestration moves to `services`.
+- Queue consuming (streamer readers and `run_consumer` in daemon consumers) is transport and stays in the apps; the consumer passed to `run_consumer` and all publishing come from `services`.
 - A database transaction closure is sync: fetch from providers first, then open the transaction.
 - Add a trait only for several real implementations (providers); no ports around the database.
 

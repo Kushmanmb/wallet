@@ -4,6 +4,8 @@ use std::sync::Arc;
 use super::api_clients::{SETUP_DEV_API_CLIENT_NAME, SETUP_DEV_API_CLIENT_SECRET, api_client_access_grants};
 use super::database::run_migrations;
 use super::production::setup_database;
+use crate::Services;
+use crate::rewards::{create_username, username_rules};
 use chrono::Utc;
 use gem_tracing::info_with_fields;
 use num_bigint::BigUint;
@@ -18,8 +20,6 @@ use primitives::{
     known_assets::{ARBITRUM_USDC, ARBITRUM_USDT, BASE_USDC, ETHEREUM_USDC, ETHEREUM_USDT, POLYGON_USDC, SMARTCHAIN_USDT, SOLANA_USDC, SOLANA_USDT, TRON_USDT},
 };
 use rewards::UsernameRules;
-use services::Services;
-use services::rewards::{create_username, username_rules};
 use settings::Settings;
 use storage::{
     ApiClientsRepository, AssetsRepository, ChartPoint, ChartsRepository, DatabaseClient, DevicesRepository, FiatRepository, NewNotification, NewWallet, NotificationsRepository, PriceAlertsRepository, PriceAsset, PricesRepository,

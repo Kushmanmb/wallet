@@ -3,6 +3,8 @@ use std::error::Error;
 use primitives::Chain;
 use storage::{Database, ParserState, ParserStateRepository};
 
+use crate::Services;
+
 pub struct ParserStateService {
     chain: Chain,
     database: Database,
@@ -28,5 +30,15 @@ impl ParserStateService {
         let chain = self.chain;
         self.database.run(move |client| client.set_parser_state_latest_block(chain, block)).await?;
         Ok(())
+    }
+}
+
+impl Services {
+    pub fn parser_state(&self, chain: Chain) -> ParserStateService {
+        ParserStateService::new(chain, self.database())
+    }
+
+    pub async fn parser_chains(&self) -> Result<Vec<Chain>, Box<dyn Error + Send + Sync>> {
+        Ok(self.database().run(|client| client.get_parser_states()).await?.into_iter().map(|state| state.chain).collect())
     }
 }
