@@ -184,8 +184,7 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 #### Models that hold a domain object beside its row
 
-- **VM28** **S** **`PerpetualViewModel` keeps the `Perpetual` beside its row.** iOS [`PerpetualViewModel`](../ios/Features/Perpetuals/Sources/ViewModels/PerpetualViewModel.swift) reads the image and id from the domain object; the row should carry them.
-- **VM29** **S** **Perpetual position rows keep their data beside the row.** iOS `PerpetualPositionItemViewModel` holds `PerpetualPositionData` and `OpenPositionItemViewModel` holds `AutocloseOpenData` beside `GemPerpetualOpenRow`, reading the name from `data.symbol` because the row has no title.
+- **VM29** **S** **The open-position row keeps its data beside the row.** iOS `OpenPositionItemViewModel` holds `AutocloseOpenData` beside `GemPerpetualOpenRow`, reading the name from `data.symbol` and the image from `data.assetId` because the open row carries neither; the held-position row now carries its `id` and `asset_id`.
 - **VM30** **S** **Fiat quotes build their identity from the asset.** iOS [`FiatQuoteViewModel`](../ios/Features/FiatConnect/Sources/ViewModels/FiatQuoteViewModel.swift) keeps the `Asset` beside `GemFiatQuoteRow` to build `id` from asset, provider and amount; the row should carry an id.
 - **VM31** **S** **Swap provider items build their identity from fields.** iOS [`SwapProviderItem`](../ios/Features/Swap/Sources/Types/SwapProviderItem.swift) keeps the `SwapperQuote` beside `GemSwapProviderRow` and joins provider, title and amount into an id.
 - **VM32** **S** **NFT items keep the collection and asset beside the row.** Android [`NftItemUIModel`](../android/ui-models/src/main/kotlin/com/gemwallet/android/ui/models/NftItemUIModel.kt) holds `NFTCollection` and `NFTAsset` beside `GemNftRow`.
@@ -210,7 +209,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 #### Rows projected once per list
 
 - **VM49** **S** **Delegations are projected once per list.** Both apps call `delegationListRow` per delegation: iOS `DelegationViewModel` in its initializer, Android's [`DelegationItem`](../android/ui/src/main/kotlin/com/gemwallet/android/ui/components/list_item/DelegationItem.kt) composable inside `remember`. Core has no batched projection for this list; add one beside `transaction_rows` and call it from the view model.
-- **VM50** **S** **Perpetual market and position rows are batched.** Both apps project per row: iOS `PerpetualViewModel`/`PerpetualPositionItemViewModel`, Android `GetPerpetualsImpl` and `PerpetualPositionDataAggregateImpl`.
 - **VM54** **S** **Support messages come as rows.** Both apps call `parseSupportMessageDisplayContent` and `supportMessageOutcome` per message; iOS re-reads the outcome for each of `isSending`, `isFailed` and `status`, and Android calls it inside the `SupportMessageBubble` composable. iOS `Status` copies `GemSupportMessageOutcome`.
 - **VM55** **S** **Project `walletRow` once.** iOS recomputes `walletRow(wallet)` per property read in `WalletImageViewModel` (`hasAvatar`, `avatarImage`), `WalletDetailViewModel`, `RewardsViewModel` and per wallet in `WalletsSceneViewModel`, which Core's `wallet_rows` answers once.
 
@@ -349,6 +347,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM28, VM50 (2026-09-23).** Closed. Perpetual market and position lists projected one row per item, and iOS did it inside `PerpetualListItem` and `PerpetualPositionsList` per render. Core exports `perpetual_market_rows` and `perpetual_position_rows`, following [one call per list](ARCHITECTURE.md#keep-the-crossings-few), and both rows carry the market's `asset_id` (the position row also its `id`), so iOS `PerpetualItemViewModel` and `PerpetualPositionItemViewModel` store only the row; `PerpetualViewModel` is gone and WalletTab's duplicate `PerpetualItemsView` gives way to the shared `PerpetualSectionView`. Android zips each flow emission with the batch in `GetPerpetualsImpl` and `positionAggregates`. The single `perpetual_position_row` stays for the one-position screens (details, autoclose). VM29 narrows to the open-position row.
 
 **VM51, VM52, VM53 (2026-09-23).** Closed. Contacts, in-app notifications and fiat transactions each projected one row per item — the contacts list and the fiat list even from the view, per render. Core exports `contact_rows`, `notification_rows` and `fiat_transaction_rows` in place of the single-row exports, following [one call per list](ARCHITECTURE.md#keep-the-crossings-few): iOS builds each list's item models from one crossing (`ContactsViewModel.items`, the notification sections, `FiatTransactionViewModel.models`) and Android maps each flow emission once (`ContactListItem`, `uiModels`).
 

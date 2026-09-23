@@ -15,6 +15,13 @@ struct PerpetualPositionItemViewModelTests {
     }
 
     @Test
+    func itemsAreKeyedByTheirPosition() {
+        let positions: [PerpetualPositionData] = [.mock(position: .mock(id: "1")), .mock(position: .mock(id: "2"))]
+
+        #expect(PerpetualPositionItemViewModel.items(positions, showBalancePrivacy: .constant(false)).map(\.model.id) == ["1", "2"])
+    }
+
+    @Test
     func subtitleShoutsTheDirectionAndLeverage() {
         #expect(subtitle(.mock(position: .mock(size: 100, leverage: 5)))?.text == "LONG 5x")
         #expect(subtitle(.mock(position: .mock(size: -100, leverage: 5)))?.text == "SHORT 5x")

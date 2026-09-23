@@ -6,8 +6,8 @@ use crate::services::assets::model::{GemHeaderActions, GemPriceRow};
 use crate::services::failures::StepFailure;
 use crate::services::localization::GemLocalizedText;
 use primitives::chart::{ChartCandleStick, ChartCandleUpdate};
-use primitives::perpetual::PerpetualBalance;
-use primitives::{Asset, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, PerpetualType, WalletType};
+use primitives::perpetual::{PerpetualBalance, PerpetualData, PerpetualPositionData};
+use primitives::{Asset, AssetId, Perpetual, PerpetualAccountMode, PerpetualDirection, PerpetualMarginType, PerpetualPosition, PerpetualProvider, PerpetualType, WalletType};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -85,6 +85,8 @@ pub fn perpetual_confirm_details(perpetual_type: PerpetualType) -> Option<GemPer
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemPerpetualPositionRow {
+    pub id: String,
+    pub asset_id: AssetId,
     pub title: String,
     pub direction: PerpetualDirection,
     pub position: GemLocalizedText,
@@ -111,8 +113,14 @@ pub fn perpetual_position_row(perpetual: Perpetual, asset: Asset, position: Perp
     rules::position_row(&perpetual, &asset, &position)
 }
 
+#[uniffi::export]
+pub fn perpetual_position_rows(positions: Vec<PerpetualPositionData>) -> Vec<GemPerpetualPositionRow> {
+    positions.iter().map(|data| rules::position_row(&data.perpetual, &data.asset, &data.position)).collect()
+}
+
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemPerpetualMarketRow {
+    pub asset_id: AssetId,
     pub title: String,
     pub price: GemPriceRow,
     pub volume_24h: GemFormattedNumber,
@@ -121,8 +129,8 @@ pub struct GemPerpetualMarketRow {
 }
 
 #[uniffi::export]
-pub fn perpetual_market_row(perpetual: Perpetual, asset: Asset) -> GemPerpetualMarketRow {
-    rules::market_row(&perpetual, &asset)
+pub fn perpetual_market_rows(markets: Vec<PerpetualData>) -> Vec<GemPerpetualMarketRow> {
+    markets.iter().map(|data| rules::market_row(&data.perpetual, &data.asset)).collect()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

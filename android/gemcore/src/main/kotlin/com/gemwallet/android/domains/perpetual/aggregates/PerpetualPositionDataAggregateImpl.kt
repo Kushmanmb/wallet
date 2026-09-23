@@ -8,14 +8,17 @@ import com.wallet.core.primitives.PerpetualDirection
 import com.wallet.core.primitives.PerpetualId
 import com.wallet.core.primitives.PerpetualPositionData
 import uniffi.gemstone.GemLocalizedText
+import uniffi.gemstone.GemPerpetualPositionRow
 import uniffi.gemstone.GemValueTone
 import uniffi.gemstone.perpetualPositionRow
+import uniffi.gemstone.perpetualPositionRows
 
-class PerpetualPositionDataAggregateImpl(private val data: PerpetualPositionData) : PerpetualPositionDataAggregate {
+class PerpetualPositionDataAggregateImpl(private val data: PerpetualPositionData, row: GemPerpetualPositionRow) : PerpetualPositionDataAggregate {
+    constructor(data: PerpetualPositionData) : this(data, perpetualPositionRow(data.perpetual.toGem(), data.asset.toGem(), data.position.toGem()))
+
     override val perpetualId: PerpetualId
         get() = data.perpetual.id
     override val asset: Asset = data.asset
-    private val row = perpetualPositionRow(data.perpetual.toGem(), data.asset.toGem(), data.position.toGem())
 
     override val title: String = row.title
     override val direction: PerpetualDirection = row.direction.toPrimitives()
@@ -24,3 +27,5 @@ class PerpetualPositionDataAggregateImpl(private val data: PerpetualPositionData
     override val pnl: GemLocalizedText = row.pnl
     override val pnlState: GemValueTone = row.pnlTone
 }
+
+fun List<PerpetualPositionData>.positionAggregates(): List<PerpetualPositionDataAggregate> = zip(perpetualPositionRows(map { it.toGem() }), ::PerpetualPositionDataAggregateImpl)

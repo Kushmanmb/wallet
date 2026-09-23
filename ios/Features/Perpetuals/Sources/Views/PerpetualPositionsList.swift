@@ -21,26 +21,17 @@ public struct PerpetualPositionsList: View {
     }
 
     public var body: some View {
-        ForEach(positions) { position in
+        ForEach(PerpetualPositionItemViewModel.items(positions, showBalancePrivacy: $showBalancePrivacy), id: \.model.id) { position, model in
             if let onSelect {
                 NavigationCustomLink(
-                    with: listItem(for: position),
+                    with: ListAssetItemView(model: model),
                     action: { onSelect(position.perpetualData.asset) },
                 )
             } else {
                 NavigationLink(value: Scenes.Perpetual(position.perpetualData)) {
-                    listItem(for: position)
+                    ListAssetItemView(model: model)
                 }
             }
         }
-    }
-
-    private func listItem(for position: PerpetualPositionData) -> ListAssetItemView {
-        ListAssetItemView(
-            model: PerpetualPositionItemViewModel(
-                data: position,
-                showBalancePrivacy: $showBalancePrivacy,
-            ),
-        )
     }
 }

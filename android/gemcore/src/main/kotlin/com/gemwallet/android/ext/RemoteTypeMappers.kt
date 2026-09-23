@@ -1922,6 +1922,18 @@ fun com.wallet.core.primitives.PerpetualPosition.toGem(): uniffi.gemstone.Perpet
     funding = funding,
 )
 
+fun uniffi.gemstone.PerpetualPositionData.toPrimitives(): com.wallet.core.primitives.PerpetualPositionData = com.wallet.core.primitives.PerpetualPositionData(
+    perpetual = perpetual.toPrimitives(),
+    asset = asset.toPrimitives(),
+    position = position.toPrimitives(),
+)
+
+fun com.wallet.core.primitives.PerpetualPositionData.toGem(): uniffi.gemstone.PerpetualPositionData = uniffi.gemstone.PerpetualPositionData(
+    perpetual = perpetual.toGem(),
+    asset = asset.toGem(),
+    position = position.toGem(),
+)
+
 fun uniffi.gemstone.PerpetualSearchData.toPrimitives(): com.wallet.core.primitives.PerpetualSearchData = com.wallet.core.primitives.PerpetualSearchData(
     perpetual = perpetual.toPrimitives(),
     asset = asset.toPrimitives(),

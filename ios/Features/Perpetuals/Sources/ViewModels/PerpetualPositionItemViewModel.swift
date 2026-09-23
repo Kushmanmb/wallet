@@ -4,26 +4,35 @@ import Components
 import Foundation
 import struct Gemstone.GemPerpetualPositionRow
 import func Gemstone.perpetualPositionRow
+import func Gemstone.perpetualPositionRows
 import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
 import Style
 import SwiftUI
 
-struct PerpetualPositionItemViewModel: ListAssetItemViewable {
-    let data: PerpetualPositionData
+struct PerpetualPositionItemViewModel: ListAssetItemViewable, Identifiable {
+    let row: GemPerpetualPositionRow
     let showBalancePrivacy: Binding<Bool>
     var action: ((ListAssetItemAction) -> Void)?
 
-    private let row: GemPerpetualPositionRow
+    init(data: PerpetualPositionData) {
+        self.init(row: perpetualPositionRow(perpetual: data.perpetual.toGem(), asset: data.asset.toGem(), position: data.position.toGem()))
+    }
 
-    init(
-        data: PerpetualPositionData,
-        showBalancePrivacy: Binding<Bool> = .constant(false),
-    ) {
-        self.data = data
+    private init(row: GemPerpetualPositionRow, showBalancePrivacy: Binding<Bool> = .constant(false)) {
+        self.row = row
         self.showBalancePrivacy = showBalancePrivacy
-        row = perpetualPositionRow(perpetual: data.perpetual.toGem(), asset: data.asset.toGem(), position: data.position.toGem())
+    }
+
+    static func items(_ positions: [PerpetualPositionData], showBalancePrivacy: Binding<Bool>) -> [(data: PerpetualPositionData, model: PerpetualPositionItemViewModel)] {
+        zip(positions, perpetualPositionRows(positions: positions.map { $0.toGem() })).map { data, row in
+            (data, PerpetualPositionItemViewModel(row: row, showBalancePrivacy: showBalancePrivacy))
+        }
+    }
+
+    var id: String {
+        row.id
     }
 
     var name: String {
@@ -35,7 +44,7 @@ struct PerpetualPositionItemViewModel: ListAssetItemViewable {
     }
 
     var assetImage: AssetImage {
-        AssetIdViewModel(assetId: data.perpetual.assetId).assetImage
+        AssetIdViewModel(assetId: AssetId(core: row.assetId)).assetImage
     }
 
     var subtitleView: ListAssetItemSubtitleView {
@@ -58,11 +67,5 @@ struct PerpetualPositionItemViewModel: ListAssetItemViewable {
                 style: TextStyle(font: .footnote, color: row.pnlTone.color),
             ),
         )
-    }
-}
-
-extension PerpetualPositionItemViewModel: Identifiable {
-    var id: String {
-        data.position.id
     }
 }

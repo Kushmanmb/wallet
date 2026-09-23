@@ -3,15 +3,26 @@
 import Primitives
 import SwiftUI
 
-struct PerpetualSectionView: View {
-    let perpetuals: [PerpetualData]
-    let onPin: (PerpetualData) -> Void
-    let onSelect: (Asset) -> Void
+public struct PerpetualSectionView: View {
+    private let perpetuals: [PerpetualData]
+    private let onPin: (PerpetualData) -> Void
+    private let onSelect: (Asset) -> Void
 
-    var body: some View {
-        ForEach(perpetuals) { perpetualData in
+    public init(
+        perpetuals: [PerpetualData],
+        onPin: @escaping (PerpetualData) -> Void,
+        onSelect: @escaping (Asset) -> Void,
+    ) {
+        self.perpetuals = perpetuals
+        self.onPin = onPin
+        self.onSelect = onSelect
+    }
+
+    public var body: some View {
+        ForEach(PerpetualItemViewModel.items(perpetuals), id: \.data.id) { data, model in
             PerpetualListItem(
-                perpetualData: perpetualData,
+                perpetualData: data,
+                model: model,
                 onPin: onPin,
                 onSelect: onSelect,
             )

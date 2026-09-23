@@ -2852,6 +2852,26 @@ public extension Primitives.PerpetualPosition {
     }
 }
 
+public extension Gemstone.PerpetualPositionData {
+    func toPrimitives() -> Primitives.PerpetualPositionData {
+        Primitives.PerpetualPositionData(
+            perpetual: perpetual.toPrimitives(),
+            asset: asset.toPrimitives(),
+            position: position.toPrimitives(),
+        )
+    }
+}
+
+public extension Primitives.PerpetualPositionData {
+    func toGem() -> Gemstone.PerpetualPositionData {
+        Gemstone.PerpetualPositionData(
+            perpetual: perpetual.toGem(),
+            asset: asset.toGem(),
+            position: position.toGem(),
+        )
+    }
+}
+
 public extension Gemstone.PerpetualSearchData {
     func toPrimitives() -> Primitives.PerpetualSearchData {
         Primitives.PerpetualSearchData(

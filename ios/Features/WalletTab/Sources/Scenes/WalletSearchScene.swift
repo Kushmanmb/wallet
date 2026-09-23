@@ -4,6 +4,7 @@ import Components
 import GemstoneServices
 import Localization
 import NFT
+import Perpetuals
 import Primitives
 import PrimitivesComponents
 import Recents
@@ -146,6 +147,6 @@ public struct WalletSearchScene: View {
     }
 
     private func perpetualItems(for items: [PerpetualData]) -> some View {
-        PerpetualItemsView(items: items, onPin: model.onSelectPinPerpetual, onSelect: model.onSelectAsset)
+        PerpetualSectionView(perpetuals: items, onPin: model.onSelectPinPerpetual, onSelect: model.onSelectAsset)
     }
 }

@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import Perpetuals
 import Primitives
 import PrimitivesComponents
 import Store
@@ -34,8 +35,8 @@ public struct AssetsResultsScene: View {
             if model.showPerpetuals {
                 Section(
                     content: {
-                        PerpetualItemsView(
-                            items: model.perpetuals,
+                        PerpetualSectionView(
+                            perpetuals: model.perpetuals,
                             onPin: model.onSelectPinPerpetual,
                             onSelect: { model.onSelectAsset($0) },
                         )

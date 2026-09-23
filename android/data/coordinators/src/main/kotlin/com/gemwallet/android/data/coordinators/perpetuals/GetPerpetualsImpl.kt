@@ -11,24 +11,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import uniffi.gemstone.GemPerpetualMarketRow
 import uniffi.gemstone.GemPriceRow
 import uniffi.gemstone.perpetualMarketQuery
-import uniffi.gemstone.perpetualMarketRow
+import uniffi.gemstone.perpetualMarketRows
 import javax.inject.Inject
 
 class GetPerpetualsImpl @Inject constructor(private val perpetualStore: GemstonePerpetualStore) : GetPerpetuals {
 
     override fun getPerpetuals(searchQuery: String?): Flow<List<PerpetualDataAggregate>> = perpetualStore.observePerpetuals(perpetualMarketQuery(searchQuery.orEmpty()))
-        .map { items -> items.map { PerpetualDataAggregate(it) } }
+        .map { items -> items.zip(perpetualMarketRows(items.map { it.toGem() }), ::PerpetualDataAggregate) }
         .flowOn(Dispatchers.Default)
 
-    class PerpetualDataAggregate(val data: PerpetualData) : com.gemwallet.android.domains.perpetual.aggregates.PerpetualDataAggregate {
+    class PerpetualDataAggregate(val data: PerpetualData, row: GemPerpetualMarketRow) : com.gemwallet.android.domains.perpetual.aggregates.PerpetualDataAggregate {
 
         override val id: PerpetualId = data.perpetual.id
 
         override val asset: Asset = data.asset
-
-        private val row = perpetualMarketRow(data.perpetual.toGem(), data.asset.toGem())
 
         override val price: GemPriceRow = row.price
 

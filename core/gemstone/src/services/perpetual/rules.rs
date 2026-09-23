@@ -710,6 +710,7 @@ fn tooltip_cell(row: GemCandleTooltipRow, value: GemFormattedNumber) -> GemCandl
 
 pub fn market_row(perpetual: &Perpetual, asset: &Asset) -> GemPerpetualMarketRow {
     GemPerpetualMarketRow {
+        asset_id: perpetual.asset_id.clone(),
         title: match perpetual.name.is_empty() {
             true => asset.symbol.clone(),
             false => perpetual.name.clone(),
@@ -732,6 +733,8 @@ pub fn open_row(direction: PerpetualDirection, leverage: u8, size: f64) -> GemPe
 pub fn position_row(perpetual: &Perpetual, asset: &Asset, position: &PerpetualPosition) -> GemPerpetualPositionRow {
     let (pnl, pnl_tone) = pnl_text(position.pnl, position.margin_amount);
     GemPerpetualPositionRow {
+        id: position.id.clone(),
+        asset_id: perpetual.asset_id.clone(),
         title: match asset.symbol.is_empty() {
             true => perpetual.name.clone(),
             false => asset.symbol.clone(),
@@ -1247,6 +1250,18 @@ mod tests {
             "the row carries its price the way every other row does"
         );
         assert_eq!(market_row(&unpriced, &asset).price.price, None);
+    }
+
+    #[test]
+    fn test_rows_carry_the_market_asset_and_the_position_id() {
+        let perpetual = Perpetual::mock();
+        let asset = Asset::from_chain(Chain::HyperCore);
+        let position = PerpetualPosition::mock();
+
+        assert_eq!(market_row(&perpetual, &asset).asset_id, perpetual.asset_id);
+        let row = position_row(&perpetual, &asset, &position);
+        assert_eq!(row.asset_id, perpetual.asset_id);
+        assert_eq!(row.id, position.id);
     }
 
     #[test]

@@ -86,6 +86,7 @@ remote:
   - PerpetualMetadata
   - PerpetualOrderType
   - PerpetualPosition
+  - PerpetualPositionData
   - PerpetualProvider
   - PerpetualTriggerOrder
   - PerpetualConfirmData

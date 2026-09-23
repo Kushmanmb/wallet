@@ -2,6 +2,8 @@
 
 import Components
 import Foundation
+import struct Gemstone.GemPerpetualMarketRow
+import func Gemstone.perpetualMarketRows
 import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
@@ -9,38 +11,38 @@ import Style
 import SwiftUI
 
 struct PerpetualItemViewModel: ListAssetItemViewable {
-    let model: PerpetualViewModel
+    let row: GemPerpetualMarketRow
 
-    init(
-        model: PerpetualViewModel,
-    ) {
-        self.model = model
+    var action: ((ListAssetItemAction) -> Void)?
+
+    static func items(_ perpetuals: [PerpetualData]) -> [(data: PerpetualData, model: PerpetualItemViewModel)] {
+        zip(perpetuals, perpetualMarketRows(markets: perpetuals.map { $0.toGem() })).map { data, row in
+            (data, PerpetualItemViewModel(row: row))
+        }
     }
 
     var name: String {
-        model.name
+        row.title
     }
 
     var symbol: String? {
         .none
     }
 
-    var action: ((ListAssetItemAction) -> Void)?
-
     var assetImage: AssetImage {
-        model.assetImage
+        AssetIdViewModel(assetId: AssetId(core: row.assetId)).assetImage
     }
 
     var subtitleView: ListAssetItemSubtitleView {
-        guard let price = model.row.price.price else { return .none }
+        guard let price = row.price.price else { return .none }
         return .price(
             price: TextValue(
                 text: price.text(),
                 style: TextStyle(font: .footnote, color: Colors.gray),
             ),
             priceChangePercentage24h: TextValue(
-                text: model.priceChangeText,
-                style: TextStyle(font: .footnote, color: model.priceChangeTextColor),
+                text: row.price.change?.text() ?? .empty,
+                style: TextStyle(font: .footnote, color: row.price.change?.tone.color ?? Colors.gray),
             ),
         )
     }
@@ -48,7 +50,7 @@ struct PerpetualItemViewModel: ListAssetItemViewable {
     var rightView: ListAssetItemRightView {
         .balance(
             balance: TextValue(
-                text: model.row.volume24h.text(),
+                text: row.volume24h.text(),
                 style: TextStyle(font: .body, color: .primary, fontWeight: .semibold),
             ),
             totalFiat: TextValue(
