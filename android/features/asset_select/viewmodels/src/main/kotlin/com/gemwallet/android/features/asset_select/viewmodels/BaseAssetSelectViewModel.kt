@@ -23,7 +23,6 @@ import com.gemwallet.android.features.asset_select.viewmodels.models.SelectAsset
 import com.gemwallet.android.features.asset_select.viewmodels.models.SelectSearch
 import com.gemwallet.android.features.asset_select.viewmodels.models.UIState
 import com.gemwallet.android.features.asset_select.viewmodels.models.uiModel
-import com.gemwallet.android.model.NO_QUERY_LIMIT
 import com.gemwallet.android.model.RecentAssetsRequest
 import com.gemwallet.android.ui.components.screen.assetAddedToast
 import com.gemwallet.android.ui.components.screen.assetPinnedToast
@@ -307,9 +306,10 @@ open class BaseAssetSelectViewModel(
 
     private fun assetFilters(chains: List<Chain>, hasBalance: Boolean): Set<GemAssetFilter> = flow.appliedFilters(chains.map { it.string }, hasBalance).toSet()
 
-    open fun assetsSearchLimit(query: String): Int = NO_QUERY_LIMIT
+    open fun assetsSearchLimit(query: String): Int = ASSETS_LIMIT
 
     private companion object {
         private const val TAG = "AssetSelect"
+        private const val ASSETS_LIMIT = 100
     }
 }

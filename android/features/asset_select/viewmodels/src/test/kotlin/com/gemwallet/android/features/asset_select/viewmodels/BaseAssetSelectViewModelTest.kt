@@ -16,6 +16,7 @@ import com.gemwallet.android.testkit.mockSession
 import com.gemwallet.android.testkit.mockWallet
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.ToastMessage
+import com.wallet.core.primitives.AssetType
 import com.wallet.core.primitives.Chain
 import io.mockk.coVerify
 import io.mockk.every
@@ -26,6 +27,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -99,10 +101,10 @@ class BaseAssetSelectViewModelTest {
             every { this@mockk.invoke() } returns MutableStateFlow(mockSession(wallet = wallet))
         }
         val search = object : SelectSearch {
-            override fun items(filters: Flow<SelectAssetFilters?>): Flow<List<AssetInfo>> = filters.map { current ->
-                val query = current?.queryFilters().orEmpty()
+            override fun items(filters: Flow<SelectAssetFilters?>): Flow<List<AssetInfo>> = filters.filterNotNull().map { current ->
+                val query = current.queryFilters()
                 val chains = query.chains()
-                items.filter { (chains.isEmpty() || it.asset.id.chain in chains) && (GemAssetFilter.HasBalance !in query || it.balance.totalAmount > 0.0) }
+                items.filter { (chains.isEmpty() || it.asset.id.chain in chains) && (GemAssetFilter.HasBalance !in query || it.balance.totalAmount > 0.0) }.take(current.limit)
             }
         }
         return BaseAssetSelectViewModel(session, recents, service, search, GemSelectAssetType.Send, dispatcher, mockk(relaxed = true))
@@ -137,6 +139,13 @@ class BaseAssetSelectViewModelTest {
         assertEquals(emptyList<Chain>(), model.chainFilter.value)
         assertTrue(!model.balanceFilter.value)
         assertEquals(2, model.unpinned.first { it.size == 2 }.size)
+    }
+
+    @Test
+    fun `the picker lists at most a hundred assets`() = runTest(dispatcher) {
+        val model = viewModel((1..101).map { mockAssetInfo(asset = mockAsset(chain = Chain.Ethereum, tokenId = "0x$it", type = AssetType.ERC20)) })
+
+        assertEquals(100, model.unpinned.first { it.isNotEmpty() }.size)
     }
 
     @Test
