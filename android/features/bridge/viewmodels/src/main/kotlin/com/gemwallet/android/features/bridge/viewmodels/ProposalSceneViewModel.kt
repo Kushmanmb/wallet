@@ -103,7 +103,7 @@ class ProposalSceneViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonState.Disabled)
 
     fun onProposal(proposal: WalletConnectSessionProposal, verifyContext: WalletConnectVerifyContext, onNotify: (String) -> Unit) {
-        if (!walletConnectService.shouldProcessMessage("proposal_${proposal.proposerPublicKey}")) {
+        if (!walletConnectService.shouldProcessProposal(proposal.proposerPublicKey)) {
             return
         }
         viewModelScope.launch {

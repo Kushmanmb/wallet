@@ -227,10 +227,8 @@ extension WalletConnectorService {
     }
 
     private func approveSession(proposal: Session.Proposal, verifyContext: VerifyContext?) async throws {
-        let messageId = proposal.messageId
-
-        guard service.shouldProcessMessage(messageId: messageId) else {
-            debugLog("Ignoring duplicate proposal with ID: \(messageId)")
+        guard service.shouldProcessProposal(proposerPublicKey: proposal.id) else {
+            debugLog("Ignoring duplicate proposal with ID: \(proposal.id)")
             return
         }
 

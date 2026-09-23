@@ -61,7 +61,7 @@ class ProposalSceneViewModelTest {
     private val verifyContext = mockWalletConnectVerifyContext()
 
     private fun service(): GemWalletConnectServiceInterface = mockk(relaxed = true) {
-        every { shouldProcessMessage(any()) } returns true
+        every { shouldProcessProposal(any()) } returns true
         every { applicationMetadata(any(), any(), any(), any()) } returns mockApplicationMetadata().toGem()
         coEvery { prepareSessionProposal(any(), any(), any(), any(), any()) } returns GemSessionProposal(
             proposal = mockWalletConnectionSessionProposal(defaultWallet = main, wallets = listOf(main, secondary)).toGem(),
@@ -96,7 +96,7 @@ class ProposalSceneViewModelTest {
     @Test
     fun `a proposal Core has already seen is dropped`() = runTest(dispatcher) {
         val service = service()
-        every { service.shouldProcessMessage(any()) } returns false
+        every { service.shouldProcessProposal(any()) } returns false
 
         val model = viewModel(service = service)
         model.onProposal(proposal, verifyContext) {}

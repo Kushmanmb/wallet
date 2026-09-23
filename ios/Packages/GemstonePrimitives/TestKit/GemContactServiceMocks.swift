@@ -115,6 +115,10 @@ public final class GemWalletConnectServiceMock: GemWalletConnectServiceProtocol,
         GemSessionApproval(chains: [], accounts: [], methods: [], events: [])
     }
 
+    public func shouldProcessProposal(proposerPublicKey: String) -> Bool {
+        shouldProcessMessage(messageId: "proposal-\(proposerPublicKey)")
+    }
+
     public func shouldProcessMessage(messageId: String) -> Bool {
         let seen = seenMessageIds.contains(messageId)
         seenMessageIds.append(messageId)

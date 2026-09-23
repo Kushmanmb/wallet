@@ -88,6 +88,10 @@ impl GemWalletConnectService {
         self.sign_message.sign(wallet_id, message).await
     }
 
+    pub fn should_process_proposal(&self, proposer_public_key: String) -> bool {
+        self.should_process_message(rules::proposal_message_id(&proposer_public_key))
+    }
+
     pub fn should_process_message(&self, message_id: String) -> bool {
         let mut seen = self.seen_messages.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
         rules::record_seen_message(&mut seen, message_id, SEEN_MESSAGES_LIMIT)
@@ -611,6 +615,17 @@ mod tests {
 
             let messages = signer.messages.lock().unwrap();
             assert!(!messages[0].simulation.warnings.iter().any(|warning| warning.warning == primitives::SimulationWarningType::SuspiciousSpender));
+        })
+    }
+
+    #[test]
+    fn test_a_redelivered_proposal_is_processed_once() {
+        block_on(async {
+            let service = GemWalletConnectService::mock(Ok("0xsignature".to_string()), Wallet::mock()).await;
+
+            assert!(service.should_process_proposal("proposer".to_string()));
+            assert!(!service.should_process_proposal("proposer".to_string()));
+            assert!(service.should_process_proposal("another".to_string()));
         })
     }
 }
