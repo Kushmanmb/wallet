@@ -94,4 +94,10 @@ mod tests {
         assert_eq!(mismatched_network_id(Chain::Ethereum, None), None);
         assert_eq!(mismatched_network_id(Chain::Ethereum, Some(Chain::SmartChain.network_id())), Some(Chain::SmartChain.network_id().to_string()));
     }
+
+    #[test]
+    fn test_only_polkadot_needs_a_verification_address() {
+        assert!(super::node_verification_address(Chain::Polkadot).is_some_and(|address| !address.is_empty()));
+        assert_eq!(super::node_verification_address(Chain::Ethereum), None);
+    }
 }

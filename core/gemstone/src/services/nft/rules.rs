@@ -509,4 +509,13 @@ mod tests {
 
         assert_eq!(names(sorted), vec!["zebra", "alpha", "beta"]);
     }
+
+    #[test]
+    fn test_only_the_collections_list_offers_the_unverified_row() {
+        let data = vec![NFTData::mock_with("verified", VerificationStatus::Verified, 1), NFTData::mock_with("spam", VerificationStatus::Unverified, 1)];
+
+        assert_eq!(unverified_row(data.clone(), GemNftList::Collections).map(|row| row.count_text), Some("1".to_string()));
+        assert_eq!(unverified_row(vec![NFTData::mock_with("verified", VerificationStatus::Verified, 1)], GemNftList::Collections), None);
+        assert_eq!(unverified_row(data, GemNftList::Unverified), None);
+    }
 }

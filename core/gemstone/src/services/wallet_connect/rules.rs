@@ -723,4 +723,14 @@ mod message_tests {
         assert!(!is_origin_rejected(&WalletConnectionVerificationStatus::Verified));
         assert!(!is_origin_rejected(&WalletConnectionVerificationStatus::Unknown));
     }
+
+    #[test]
+    fn test_supported_chains_are_the_configured_chains_that_parse() {
+        let configured = crate::config::wallet_connect::get_wallet_connect_config().chains;
+        let chains = super::supported_chains();
+
+        assert!(!chains.is_empty());
+        assert!(chains.len() <= configured.len());
+        assert!(chains.iter().all(|chain| configured.contains(&chain.to_string())));
+    }
 }

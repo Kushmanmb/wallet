@@ -1833,4 +1833,13 @@ mod tests {
         large.base.balance = BigUint::from(300u64);
         assert_eq!(sorted_delegations(vec![small.clone(), large.clone()]), vec![large, small]);
     }
+
+    #[test]
+    fn test_positions_keep_only_delegations_with_a_balance() {
+        let held = Delegation::mock_with(Chain::Ethereum, StakeProviderType::Earn, DelegationState::Active, 0);
+        let mut empty = held.clone();
+        empty.base.balance = BigUint::ZERO;
+
+        assert_eq!(positions(vec![held.clone(), empty]), vec![held]);
+    }
 }

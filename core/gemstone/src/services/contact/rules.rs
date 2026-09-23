@@ -257,4 +257,9 @@ mod tests {
         assert_eq!(contact_address_fields(Chain::Ethereum), vec![GemContactAddressField::Network, GemContactAddressField::Address]);
         assert_eq!(contact_address_fields(Chain::Cosmos), vec![GemContactAddressField::Network, GemContactAddressField::Address, GemContactAddressField::Memo]);
     }
+
+    #[test]
+    fn test_a_new_contact_address_starts_on_bitcoin() {
+        assert_eq!(super::default_contact_chain(), primitives::Chain::Bitcoin);
+    }
 }
