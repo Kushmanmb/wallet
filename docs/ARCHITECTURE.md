@@ -17,7 +17,7 @@ Read the contract and the named implementation, then the actual owner and caller
 | REST or JSON-RPC client | [§ 12](#12-a-clients-requests-are-one-enum-the-client-only-sends) | [`AptosClient`](../core/crates/gem_aptos/src/rpc/client.rs) for direct sends, [`TronGridClient`](../core/crates/gem_tron/src/rpc/trongrid/client.rs) for shared credentials, [`SolanaRpc`](../core/crates/gem_solana/src/jsonrpc.rs) for RPC |
 | Tests and fixtures | [§ 10](#10-tests) and the platform testing guide | The owner's existing tests, [`primitives/src/testkit/asset_mock.rs`](../core/crates/primitives/src/testkit/asset_mock.rs) for fixtures, [`gem_client/testkit.rs`](../core/crates/gem_client/src/testkit.rs) for wire behavior |
 | Async result freshness | [Session contract](#a-screen-whose-state-changes-is-a-session), [Performance](PERFORMANCE.md) | [Fiat session](../core/gemstone/src/services/fiat/session.rs), [retained confirmation](../core/gemstone/src/services/confirm/confirmation.rs) |
-| Atomic writes and retries | [Store contract](#atomic-changes-concurrent-publication-and-query-contracts), [command outcomes](#a-command-names-its-commit-and-recovery-behavior) | [Native balance update](../ios/Packages/Store/Sources/Stores/BalanceStore.swift), [Android transaction runner](../android/data/services/gemstone/src/main/kotlin/com/gemwallet/android/data/services/gemstone/stores/PerpetualStore.kt); MIG6 names the remaining paired-adapter tests |
+| Atomic writes and retries | [Store contract](#atomic-changes-concurrent-publication-and-query-contracts), [command outcomes](#a-command-names-its-commit-and-recovery-behavior) | [Native balance update](../ios/Packages/Store/Sources/Stores/BalanceStore.swift), [Android transaction runner](../android/data/services/gemstone/src/main/kotlin/com/gemwallet/android/data/services/gemstone/stores/PerpetualStore.kt); `BalanceStoreTests` and `BalancesDaoTest` are the paired adapter tests (MIG6) |
 | Choose and complete a migration item | [Working one item](TODO.md#working-one-item), [screen coverage](TODO.md#screen-coverage-and-existing-infrastructure) | [Service map](#screen-services), [closing checks](../skills/quality-checks.md#closing-matrix) |
 
 For a service change, follow the price-alert example through [Core](#service-example-price-alerts), [store adapters](#store-adapter-example-price-alerts), [construction](#construction-example-price-alerts) and [screen calls](#direct-service-calls-and-observed-reads). Use the [service map](#service-map) to find existing owners and callers. Read [§ 13](#13-shapes-that-were-tried-and-reverted) only for rejected-design rationale; subsystem contracts remain in their own documents.
@@ -644,7 +644,7 @@ func refresh() async {
 }
 ```
 
-Never pre-assign a freshly loading record and pass it back in as the shown state: that throws away the rows a failed refresh is supposed to keep. [Performance](PERFORMANCE.md) requires rejecting obsolete wallet, asset and quote results. S72 covers request identity for the remaining chart migration.
+Never pre-assign a freshly loading record and pass it back in as the shown state: that throws away the rows a failed refresh is supposed to keep. [Performance](PERFORMANCE.md) requires rejecting obsolete wallet, asset and quote results. `GemChartSession` carries its request identity the same way; AUD65 adds the currency event.
 
 ### A screen's state is one phase enum, never a bag of flags
 
@@ -695,7 +695,7 @@ val chartUIState = combine(loaded, price) { session, price -> session.viewState(
 }
 ```
 
-The Android excerpt shows the current phase mapping; its payload-free `StateViewType.Error` loses the error detail. S72 tracks carrying the mapped error to the existing error UI. Preserve the error when implementing a new screen rather than copying that omission.
+The Android excerpt shows the current phase mapping; its payload-free `StateViewType.Error` loses the error detail. VM141 carries the mapped error to the Android chart error UI. Preserve the error when implementing a new screen rather than copying that omission.
 
 Four rules keep the collapse honest:
 
@@ -1012,7 +1012,7 @@ The existing hide/unpin adapters are the atomic-write example: [iOS balance upda
 
 Atomicity of one batch does not order overlapping operations. The [balance publication contract](#publish-a-multi-source-refresh-as-one-batch) is how stale responses and different balance-kind updates publish without overwriting newer data. Preserve explicit wallet/asset identity and independent requests; a global lock is not a default solution.
 
-Observed queries stay native. Their product contract specifies wallet scope, inclusion, ordering, limits and missing rows; paired adapter/query fixtures verify those semantics. Do not solve query parity by copying an unbounded wallet across FFI and sorting it on every emission. MIG6 adds focused contract tests through the real GRDB/Room adapters.
+Observed queries stay native. Their product contract specifies wallet scope, inclusion, ordering, limits and missing rows; paired adapter/query fixtures verify those semantics. Do not solve query parity by copying an unbounded wallet across FFI and sorting it on every emission. `BalanceStoreTests` and `BalancesDaoTest` are those contract tests, through the real GRDB/Room adapters (MIG6).
 
 ### Publish a multi-source refresh as one batch
 
@@ -1162,7 +1162,7 @@ On iOS they usually sit in the module's `Types/` folder (`Sources/Extensions/` i
 
 The mapper is the only place a `Localized.`/`R.string` is chosen from a Core variant, which is what makes the two apps comparable. `just check-mappers` parses each app's `Gemstone+Localized.swift` and `GemstoneText.kt` files into variant → key, resolves both keys to their English text, and fails on every variant the two apps resolve differently. It only sees a variant while both mappers hold it, so a key mapped anywhere else is invisible to it. `just check-docs` does the same for the guidance: every link in `docs/`, `skills/` and the `AGENTS.md` files has to point at a file that exists, a heading that exists, and — when the label is a backticked name — a symbol that is still in that file.
 
-The mapper check compares variants found in both mapper sets; it does not prove coverage or domain parity. The broader structural regression gate is planned in MIG5, not currently implemented. Treat a census hit as a review lead and explicitly exempt shared renderers, native ports, DI and legitimate child dependencies.
+The mapper check compares variants found in both mapper sets; it does not prove coverage or domain parity. `just check-boundaries` is the structural gate (MIG5): a rule joins it when a regex can decide it exactly and stays a review lead when it cannot. Treat a census hit as a review lead and explicitly exempt shared renderers, native ports, DI and legitimate child dependencies.
 
 Two files per module, no exceptions: if a screen needs a second phrasing of the same key — a tab title and a field label — both live in that one file under different names, the way Android's `tabStringRes` and `fieldStringRes` do.
 
@@ -1677,7 +1677,7 @@ Shared mutable screen state caused lifetime conflicts. Follow the [construction 
 
 Moving a store behind Core must preserve observable write order and failure behavior. Price alerts write locally before pushing to the API; reversing those steps delays the UI and loses the local update on a network failure. A refactor must preserve that behavior unless the task deliberately changes it.
 
-Wallet creation, import, rename, deletion and switching have lifecycle effects beyond a database write. The owning Core workflow defines required setup and activation order, while native observers trigger lifecycle work. Do not split required setup between independent observers or declare an import successful before its required work completes. C53 tracks consolidating today's differing create/import sequences; it must define that order once.
+Wallet creation, import, rename, deletion and switching have lifecycle effects beyond a database write. The owning Core workflow defines required setup and activation order, while native observers trigger lifecycle work. Do not split required setup between independent observers or declare an import successful before its required work completes. `GemWalletService::import_wallet` defines that order once (C53).
 
 Operations on the current wallet read the Core session through their owning service. A nullable wallet passed through every app call site causes silent early returns and inconsistent account selection. Preserve explicit wallet identifiers for operations that intentionally target a different wallet; do not turn every operation into an implicit current-session operation.
 
@@ -1766,7 +1766,7 @@ The table locates the existing owners and consumers; it is not proof that a scre
 | `GemAssetSelectionService` | — | `SelectAssetViewModel`, `WalletSearchSceneViewModel`, `AssetsResultsSceneViewModel` | `BaseAssetSelectViewModel` and its subclasses |
 | `GemChainService` | — | `ChainListSettingsViewModel` (chain picker) | `ContactChainSelectViewModel`, `SelectImportTypeViewModel`, `AddAssetViewModel` |
 | `GemChainSettingsService` | — | `ChainSettingsSceneViewModel`, `AddNodeSceneViewModel` | `NetworksViewModel`, `AddNodeViewModel` |
-| `GemChartService` | `GemChartSession` (Android retention is S72) | `ChartSceneViewModel` | `ChartViewModel` |
+| `GemChartService` | `GemChartSession` | `ChartSceneViewModel` | `ChartViewModel` |
 | `GemCollectibleService` | — | `CollectibleViewModel`, `ReportNftViewModel` | `NftDetailsViewModel` (+ `GetNftAssetDetails` observed read) |
 | `GemConfirmTransferService` | `GemConfirmation` (one confirmation in flight; it loads and executes, so it is not a session) | `ConfirmTransferSceneViewModel` (holds the `GemConfirmation` the factory opens) | `ConfirmViewModel` |
 | `GemContactService` | — | `ContactsViewModel` | `ContactsViewModel` |
@@ -1798,7 +1798,7 @@ The table locates the existing owners and consumers; it is not proof that a scre
 | `GemWalletHomeService` | — | `WalletSceneViewModel`, `NetworkAssetsSceneViewModel` | `AssetsViewModel`, `NetworkAssetsViewModel` |
 | `GemWalletService` | — | onboarding and manage-wallet view models, and `WalletImageViewModel` for the avatar (`WalletDetailViewModel` exports the secret through `export_secret`) | `CreateWalletViewModel`, `ImportViewModel`, `WalletsViewModel`, `WalletViewModel` (`rename`), `WalletSecretDataViewModel` (`export_secret`), `WalletImageViewModel`, wallet cases |
 | `GemWalletSessionService` | — | `RootSceneViewModel`, `NavigationRouter` | `SessionCoordinator` (+ the services it composes) |
-| `GemWidgetService` | — | `WidgetPriceService` (the price widget) | `WidgetCoinUIModel` and `WidgetPriceSyncWorker` through `WidgetEntryPoint` |
+| `GemWidgetService` | — | — (the iOS widget never links Gemstone; see [the iOS project overview](../ios/skills/project-overview.md)) | `WidgetCoinUIModel` and `WidgetPriceSyncWorker` through `WidgetEntryPoint` |
 
 ### Composition and lifecycle services
 
@@ -1863,7 +1863,7 @@ These choices explain apparent parity gaps. They do not authorize copying shared
 | Area | Contract |
 |---|---|
 | Authentication | Privacy lock is iOS-only; WalletConnect one-click auth is Android-only. Android gates secret reads at each call site, while iOS gates the secret read itself. A new Android caller must request authentication. Wallet auth uses the Ethereum signature scheme (`AUTH_CHAIN`) on every chain; rejecting other schemes is intentional. |
-| Autoclose | One app enables confirmation on a pending change and displays validation after tapping; the other enables only a buildable change. Both must consume the same Core outcome. The Android open-position sheet's remaining migration is S75. |
+| Autoclose | One app enables confirmation on a pending change and displays validation after tapping; the other enables only a buildable change. Both must consume the same Core outcome. The Android open-position sheet's remaining migration is VM106. |
 | Refresh | Wallet home receives socket prices and refreshes on pull; it intentionally has no interval timer. Socket reconnect delay is capped at 30 seconds. `debugLog` and stream diagnostic logging compile out in release. |
 | One-sided features | iOS support-image previews use `image_file`; Android uses notification-prompt tracking, post-search `sync_assets`, and invalid-mnemonic highlighting. Developer tools may differ (`deeplink_url` on iOS, `platform_store` on Android). Add the counterpart only when the feature is required. |
 | Equivalent integration | Both apps choose the collectible receive network through `GemSelectAssetType::ReceiveCollection`. Payment prefills reach iOS through `GemAmountTransfer::prefilled_amount` and Android through Core-built `GemRecipientNext::Amount` carried in navigation. Perpetual banners use native navigation on each app; both observable preference adapters call `GemPreferencesService.set_perpetual_enabled`. |
