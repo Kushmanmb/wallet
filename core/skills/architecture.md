@@ -24,6 +24,17 @@ Do not substitute network-wide data for provider-specific policy. A public chain
 
 Reference: `crates/gem_hypercore/src/provider/balances.rs` and `balances_mapper.rs`.
 
+## Backend Layers
+
+`api` and `daemon` are transport, `services` orchestrates, domain crates decide, infra crates reach our own systems.
+
+- `api` routes and `daemon` consumers, workers and parser decode input, call a service, and map the result. They hold no queries or business rules.
+- `services` owns every backend use case: load from storage or cache, call domain crates, save, publish. `Services::new(&Settings)` builds the graph once for both apps. Each table has one writing module; other modules call it.
+- Domain crates (`fiat`, `nft`, `prices`, `swapper`, chain crates, …) hold pure rules and stateless third-party provider clients. They take and return `primitives` types and receive config values as parameters.
+- Infra crates (`storage`, `cacher`, `streamer`, `search_index`, `api_connector`) reach Postgres, Redis, RabbitMQ, Meilisearch and Gorush with `primitives` in and out and no business rules. Only `services` depends on them; `just check-boundaries` enforces it, and crates in its allowlist predate the rule and leave it as their orchestration moves to `services`.
+- A database transaction closure is sync: fetch from providers first, then open the transaction.
+- Add a trait only for several real implementations (providers); no ports around the database.
+
 ## Repository Pattern
 
 Backend services reach the database through `DatabaseClient` accessors, one per domain (`assets()`, `devices()`, `subscriptions()`, `prices()`, `transactions()`, and so on), each implementing that domain's repository trait. Repositories return primitives, not database models; business logic stays in the service that composes several accessors.

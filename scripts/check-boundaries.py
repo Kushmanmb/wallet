@@ -90,10 +90,66 @@ def the_keystore_stays_in_its_layer():
                 yield f"{relative}:{number} reaches for the keystore outside its layer"
 
 
+BACKEND = ROOT / "core"
+INFRA_CRATES = {"storage", "cacher", "streamer", "search_index", "api_connector"}
+INFRA_DEPENDENTS = {
+    "services": INFRA_CRATES,
+    "api": {"api_connector", "cacher", "search_index", "storage", "streamer"},
+    "daemon": {"api_connector", "cacher", "search_index", "storage", "streamer"},
+    "defi": {"storage"},
+    "fiat": {"cacher", "storage", "streamer"},
+    "gem_auth": {"cacher"},
+    "gem_rewards": {"cacher", "storage"},
+    "lists": {"storage"},
+    "nft": {"storage"},
+    "portfolio": {"storage"},
+    "pricer": {"cacher", "storage"},
+    "support": {"cacher", "storage", "streamer"},
+}
+CARGO_SECTION = re.compile(r"^\[(.+)\]\s*$")
+CARGO_KEY = re.compile(r"^([A-Za-z0-9_-]+)\s*=\s*(.*)$")
+DEPENDENCY_SECTIONS = {"dependencies", "dev-dependencies", "build-dependencies"}
+
+
+def cargo_packages():
+    for path in sorted(BACKEND.rglob("Cargo.toml")):
+        if "target" in path.relative_to(BACKEND).parts or path.parent == BACKEND:
+            continue
+        name, section, dependencies = None, None, set()
+        for line in path.read_text().splitlines():
+            header = CARGO_SECTION.match(line)
+            if header:
+                section = header.group(1)
+                continue
+            key = CARGO_KEY.match(line)
+            if not key or section is None:
+                continue
+            if section == "package" and key.group(1) == "name":
+                name = key.group(2).strip().strip('"')
+            elif section.split(".")[-1] in DEPENDENCY_SECTIONS:
+                dependencies.add(key.group(1))
+        yield path.relative_to(ROOT), name, dependencies
+
+
+def only_services_reach_infra():
+    """core/skills/architecture.md § Backend Layers: only services depends on infra crates."""
+    for path, name, dependencies in cargo_packages():
+        if name in INFRA_CRATES:
+            continue
+        used = dependencies & INFRA_CRATES
+        allowed = INFRA_DEPENDENTS.get(name, set())
+        for crate in sorted(used - allowed):
+            yield f"{path} depends on infra crate {crate}"
+        if name != "services":
+            for crate in sorted(allowed - used):
+                yield f"{path} no longer depends on {crate}; remove it from INFRA_DEPENDENTS"
+
+
 RULES = [
     ("services are injected, never constructed at a call site", services_are_injected),
     ("one localization mapper names every Core key it renders", one_localization_mapper),
     ("the keystore stays in its layer", the_keystore_stays_in_its_layer),
+    ("only services depends on infra crates", only_services_reach_infra),
 ]
 
 
