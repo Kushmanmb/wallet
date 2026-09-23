@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uniffi.gemstone.GemConnectionServiceInterface
 import uniffi.gemstone.GemStreamServiceInterface
 
 class StreamObserverService(
@@ -24,6 +26,7 @@ class StreamObserverService(
     private val service: GemStreamServiceInterface,
     private val connection: WebSocketConnectable,
     private val health: ConnectionComponentHealth,
+    private val connectionService: GemConnectionServiceInterface,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
 ) {
     private var connectionJob: Job? = null
@@ -42,15 +45,20 @@ class StreamObserverService(
                         .onFailure { Log.e(TAG, "Stream session update error", it) }
                 }
             }
+            var failedAttempts = 0
             while (isActive) {
                 runCatchingCancellable {
                     val connects = service.prepareConnection()
                     currentCoroutineContext().ensureActive()
                     when (connects) {
-                        true -> observeConnection()
+                        true -> observeConnection(onSubscribed = { failedAttempts = 0 })
                         false -> wallets.first { it != null }
                     }
-                }.onFailure { Log.e(TAG, "Stream connection error", it) }
+                }.onFailure {
+                    Log.e(TAG, "Stream connection error", it)
+                    delay(connectionService.reconnectDelayMilliseconds(failedAttempts.toUInt()).toLong())
+                    failedAttempts++
+                }
             }
         }
     }
@@ -60,32 +68,33 @@ class StreamObserverService(
         connectionJob?.cancel()
     }
 
-    private suspend fun observeConnection() {
+    private suspend fun observeConnection(onSubscribed: () -> Unit) {
         try {
             connection.connect().collect { event ->
-                runCatchingCancellable {
-                    when (event) {
-                        WebSocketEvent.Connected -> {
-                            health.report(isHealthy = true)
-                            service.connected()
-                        }
-
-                        is WebSocketEvent.Message -> {
-                            val handled = service.decodeEvent(event.text)
-                            scope.launch {
-                                runCatchingCancellable { service.sync(handled) }
-                                    .onFailure { Log.e(TAG, "Stream sync error", it) }
-                            }
-                        }
-
-                        WebSocketEvent.Disconnected -> {
-                            health.report(isHealthy = false)
-                            service.disconnected()
-                        }
+                when (event) {
+                    WebSocketEvent.Connected -> {
+                        service.connected()
+                        health.report(isHealthy = true)
+                        onSubscribed()
                     }
-                }.onFailure { Log.e(TAG, "Stream event error", it) }
+
+                    is WebSocketEvent.Message -> runCatchingCancellable {
+                        val handled = service.decodeEvent(event.text)
+                        scope.launch {
+                            runCatchingCancellable { service.sync(handled) }
+                                .onFailure { Log.e(TAG, "Stream sync error", it) }
+                        }
+                    }.onFailure { Log.e(TAG, "Stream event error", it) }
+
+                    WebSocketEvent.Disconnected -> {
+                        health.report(isHealthy = false)
+                        runCatchingCancellable { service.disconnected() }
+                            .onFailure { Log.e(TAG, "Stream event error", it) }
+                    }
+                }
             }
         } finally {
+            health.report(isHealthy = false)
             withContext(NonCancellable) {
                 runCatchingCancellable { service.disconnected() }
                     .onFailure { Log.e(TAG, "Stream disconnect error", it) }

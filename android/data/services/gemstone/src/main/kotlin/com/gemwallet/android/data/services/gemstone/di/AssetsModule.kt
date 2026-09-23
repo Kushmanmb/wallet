@@ -38,6 +38,7 @@ import uniffi.gemstone.GemBalanceService
 import uniffi.gemstone.GemBalanceStore
 import uniffi.gemstone.GemBannerService
 import uniffi.gemstone.GemConnectionService
+import uniffi.gemstone.GemConnectionServiceInterface
 import uniffi.gemstone.GemDeeplinkService
 import uniffi.gemstone.GemDeviceKeyService
 import uniffi.gemstone.GemDeviceService
@@ -153,11 +154,18 @@ object AssetsModule {
 
     @Provides
     @Singleton
-    fun provideStreamObserverService(getSession: GetSession, streamService: GemStreamServiceInterface, connection: WebSocketConnectable, streamHealth: ConnectionComponentHealth): StreamObserverService = StreamObserverService(
+    fun provideStreamObserverService(
+        getSession: GetSession,
+        streamService: GemStreamServiceInterface,
+        connection: WebSocketConnectable,
+        streamHealth: ConnectionComponentHealth,
+        connectionService: GemConnectionServiceInterface,
+    ): StreamObserverService = StreamObserverService(
         getSession = getSession,
         service = streamService,
         connection = connection,
         health = streamHealth,
+        connectionService = connectionService,
     )
 
     @Provides

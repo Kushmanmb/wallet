@@ -207,6 +207,7 @@ struct ServicesFactory {
             service: streamService,
             webSocket: webSocket,
             health: streamHealth,
+            reconnection: connectionService,
         )
         let swapper = GemSwapper(rpcProvider: NativeProvider(), nodes: nodeService)
         let swapService = storages.keystore.swapService(

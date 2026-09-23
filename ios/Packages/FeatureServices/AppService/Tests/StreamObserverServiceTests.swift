@@ -137,6 +137,41 @@ struct StreamObserverServiceTests {
     }
 
     @Test
+    func aFailedFirstSubscriptionIsNotHealthyAndRecoversByReconnecting() async {
+        let opened = AsyncStream<Void>.makeStream()
+        let subscriptions = Locked(wrappedValue: 0)
+        let socket = WebSocketConnectionMock(onConnect: { opened.continuation.yield(()) })
+        let service = GemStreamServiceMock(
+            onConnected: {
+                let attempt = subscriptions.withLock { value in
+                    value += 1
+                    return value
+                }
+                if attempt == 1 {
+                    throw StreamTestError.subscribe
+                }
+            },
+        )
+        let health = ConnectionComponentHealth(component: .stream)
+        var reports = health.healthStream().makeAsyncIterator()
+        let observer = StreamObserverService.mock(service: service, webSocket: socket, health: health)
+        await observer.connect()
+        var connections = opened.stream.makeAsyncIterator()
+
+        _ = await connections.next()
+        await socket.simulateConnected()
+        #expect(await reports.next() == false)
+
+        _ = await connections.next()
+        await socket.simulateConnected()
+        #expect(await reports.next() == true)
+        #expect(subscriptions.wrappedValue == 2)
+
+        await observer.disconnect()
+        #expect(await reports.next() == false)
+    }
+
+    @Test
     func socketReportsHealthWhileTheObserverRuns() async {
         let opened = AsyncStream<Void>.makeStream()
         let socket = WebSocketConnectionMock(onConnect: { opened.continuation.yield(()) })
@@ -315,4 +350,8 @@ struct StreamObserverServiceTests {
         #expect(await closures.next() == 2)
         #expect(connectionCount.wrappedValue == 2)
     }
+}
+
+private enum StreamTestError: Error {
+    case subscribe
 }
