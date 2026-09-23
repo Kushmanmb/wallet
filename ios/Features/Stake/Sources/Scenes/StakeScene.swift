@@ -86,8 +86,8 @@ extension StakeScene {
             ListItemLoadingView()
                 .id(UUID())
         case let .data(delegations):
-            ForEach(delegations) { delegation in
-                NavigationCustomLink(with: DelegationView(delegation: delegation)) {
+            ForEach(delegations, id: \.delegation.id) { delegation, item in
+                NavigationCustomLink(with: DelegationView(delegation: item)) {
                     model.onSelect(delegation: delegation)
                 }
             }

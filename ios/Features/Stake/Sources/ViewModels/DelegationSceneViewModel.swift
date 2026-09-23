@@ -2,6 +2,7 @@
 
 import Components
 import Foundation
+import func Gemstone.delegationListRow
 import enum Gemstone.GemDelegationAction
 import struct Gemstone.GemDelegationDetails
 import enum Gemstone.GemListRow
@@ -15,7 +16,7 @@ import Style
 import SwiftUI
 
 public struct DelegationSceneViewModel {
-    public let model: DelegationViewModel
+    public let delegation: Delegation
     public let validators: [DelegationValidator]
     public let onNavigate: StakeRouteAction
 
@@ -25,27 +26,30 @@ public struct DelegationSceneViewModel {
 
     public init(
         wallet: Wallet,
-        model: DelegationViewModel,
+        delegation: Delegation,
         asset: Asset,
         service: any GemStakeServiceProtocol,
         validators: [DelegationValidator],
         onNavigate: StakeRouteAction,
     ) {
         self.wallet = wallet
-        self.model = model
+        self.delegation = delegation
         self.asset = asset
         self.service = service
         self.validators = validators
         self.onNavigate = onNavigate
     }
 
+    public var model: DelegationViewModel {
+        DelegationViewModel(row: delegationListRow(delegation: delegation.toGem(), asset: asset.toGem(), price: price, currency: service.getCurrency()))
+    }
+
     private var details: GemDelegationDetails {
-        service.delegationDetails(
-            delegation: model.delegation.toGem(),
-            asset: asset.toGem(),
-            price: model.delegation.price?.price,
-            currency: model.currency.toGem(),
-        )
+        service.delegationDetails(delegation: delegation.toGem(), asset: asset.toGem(), price: price, currency: service.getCurrency())
+    }
+
+    private var price: Double? {
+        delegation.price?.price
     }
 
     public var title: String {
@@ -83,7 +87,7 @@ public struct DelegationSceneViewModel {
     }
 
     public var availableActions: [GemDelegationAction] {
-        service.delegationActions(walletType: wallet.type.toGem(), delegation: model.delegation.toGem())
+        service.delegationActions(walletType: wallet.type.toGem(), delegation: delegation.toGem())
     }
 
     public var showManage: Bool {
@@ -91,7 +95,7 @@ public struct DelegationSceneViewModel {
     }
 
     public var canClaimRewards: Bool {
-        service.canClaimDelegationRewards(walletType: wallet.type.toGem(), delegation: model.delegation.toGem())
+        service.canClaimDelegationRewards(walletType: wallet.type.toGem(), delegation: delegation.toGem())
     }
 }
 
@@ -99,8 +103,8 @@ public struct DelegationSceneViewModel {
 
 public extension DelegationSceneViewModel {
     func onSelectAction(_ action: GemDelegationAction) {
-        let route = service.delegationActionDestination(asset: asset.toGem(), delegation: model.delegation.toGem(), action: action, validators: validators.map { $0.toGem() })
-            .route(delegation: model.delegation, validators: validators)
+        let route = service.delegationActionDestination(asset: asset.toGem(), delegation: delegation.toGem(), action: action, validators: validators.map { $0.toGem() })
+            .route(delegation: delegation, validators: validators)
         switch route {
         case .delegation: break
         case .transfer: onNavigate?(route)

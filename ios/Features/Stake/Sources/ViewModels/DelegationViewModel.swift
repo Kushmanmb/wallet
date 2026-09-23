@@ -3,9 +3,8 @@
 import Components
 import Formatters
 import Foundation
-import func Gemstone.delegationListRow
+import func Gemstone.delegationListRows
 import struct Gemstone.GemDelegationListRow
-import struct Gemstone.GemDelegationStatus
 import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
@@ -13,37 +12,25 @@ import Style
 import SwiftUI
 
 public struct DelegationViewModel: Sendable {
-    public let delegation: Delegation
-    public let currency: Currency
     private let row: GemDelegationListRow
-    public let validatorModel: ValidatorViewModel
 
-    public init(
-        delegation: Delegation,
-        asset: Asset,
-        currency: Currency,
-    ) {
-        self.delegation = delegation
-        self.currency = currency
-        row = delegationListRow(
-            delegation: delegation.toGem(),
-            asset: asset.toGem(),
-            price: delegation.price?.price,
-            currency: currency.toGem(),
-        )
-        validatorModel = ValidatorViewModel(row: row.validator)
+    init(row: GemDelegationListRow) {
+        self.row = row
     }
 
-    public var status: GemDelegationStatus {
-        row.status
+    static func items(_ delegations: [Delegation], asset: Asset, price: Double?, currency: Currency) -> [(delegation: Delegation, model: DelegationViewModel)] {
+        let rows = delegationListRows(delegations: delegations.map { $0.toGem() }, asset: asset.toGem(), price: price, currency: currency.toGem())
+        return zip(delegations, rows).map { delegation, row in
+            (delegation, DelegationViewModel(row: row))
+        }
     }
 
     public var listItem: ListItemModel {
         ListItemModel(
             title: validatorText,
             titleStyle: titleStyle,
-            titleExtra: status.state.title,
-            titleStyleExtra: TextStyle(font: .callout, color: status.tone.color),
+            titleExtra: row.status.state.title,
+            titleStyleExtra: TextStyle(font: .callout, color: row.status.tone.color),
             subtitle: balanceText,
             subtitleStyle: subtitleStyle,
             subtitleExtra: fiatValueText,
@@ -72,26 +59,12 @@ public struct DelegationViewModel: Sendable {
         row.fiat?.text()
     }
 
-    public var rewardsText: String? {
-        row.rewards?.text()
-    }
-
-    public var rewardsFiatValueText: String? {
-        row.rewardsFiat?.text()
-    }
-
     public var validatorText: String {
-        validatorModel.name
+        ValidatorViewModel(row: row.validator).name
     }
 
     public var validatorImage: AssetImage {
-        validatorModel.validatorImage
-    }
-}
-
-extension DelegationViewModel: Identifiable {
-    public var id: String {
-        delegation.id
+        ValidatorViewModel(row: row.validator).validatorImage
     }
 }
 

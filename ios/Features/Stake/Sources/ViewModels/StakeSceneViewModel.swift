@@ -124,20 +124,13 @@ public final class StakeSceneViewModel {
         EmptyContentTypeViewModel(type: EmptyContentType(.stake, symbol: assetModel.symbol))
     }
 
-    func route(delegation: DelegationViewModel) -> StakeRoute {
-        service.delegationDestination(walletType: wallet.type.toGem(), asset: asset.toGem(), delegation: delegation.delegation.toGem())
-            .route(delegation: delegation.delegation, validators: validators)
+    func route(delegation: Delegation) -> StakeRoute {
+        service.delegationDestination(walletType: wallet.type.toGem(), asset: asset.toGem(), delegation: delegation.toGem())
+            .route(delegation: delegation, validators: validators)
     }
 
-    var delegationsViewState: StateViewType<[DelegationViewModel]> {
-        let currency = service.getCurrency().toPrimitives()
-        return delegationsState.stateViewType(delegations.map { delegation in
-            DelegationViewModel(
-                delegation: delegation,
-                asset: asset,
-                currency: currency,
-            )
-        })
+    var delegationsViewState: StateViewType<[(delegation: Delegation, model: DelegationViewModel)]> {
+        delegationsState.stateViewType(DelegationViewModel.items(delegations, asset: asset, price: assetData.price?.price, currency: service.getCurrency().toPrimitives()))
     }
 
     var claimRewardsRoute: StakeRoute {
@@ -178,7 +171,7 @@ extension StakeSceneViewModel {
         onNavigate?(route(destination: destination))
     }
 
-    func onSelect(delegation: DelegationViewModel) {
+    func onSelect(delegation: Delegation) {
         onNavigate?(route(delegation: delegation))
     }
 

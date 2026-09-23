@@ -18,6 +18,7 @@ import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
+import com.gemwallet.android.ui.components.list_item.delegationRows
 import com.gemwallet.android.ui.models.navigation.RouteArgument
 import com.wallet.core.primitives.StakeProviderType
 import com.wallet.core.primitives.WalletType
@@ -43,8 +44,6 @@ import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemStakeServiceInterface
-import uniffi.gemstone.GemValidatorRow
-import uniffi.gemstone.validatorRow
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -80,10 +79,9 @@ class EarnViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val validatorRows = positions
-        .map { items -> items.associate { it.validator.id to validatorRow(it.validator.toGem()) } }
+    val positionRows = combine(positions, assetInfo.filterNotNull()) { positions, assetInfo -> positions.delegationRows(assetInfo) }
         .flowOn(ioDispatcher)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap<String, GemValidatorRow>())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val aprRow: StateFlow<GemListRow> = combine(providers, assetInfo) { items, current ->
         stakeService.earnAprRow(items.map { it.toGem() }, current?.metadata?.earnApr)

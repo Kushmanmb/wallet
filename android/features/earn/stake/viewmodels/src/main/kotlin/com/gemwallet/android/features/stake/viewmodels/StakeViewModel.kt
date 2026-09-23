@@ -25,6 +25,7 @@ import com.gemwallet.android.features.stake.viewmodels.models.uiModel
 import com.gemwallet.android.model.AmountParams
 import com.gemwallet.android.model.toAmountParams
 import com.gemwallet.android.model.toGem
+import com.gemwallet.android.ui.components.list_item.delegationRows
 import com.gemwallet.android.ui.models.actions.AmountTransactionAction
 import com.gemwallet.android.ui.models.actions.ConfirmTransactionAction
 import com.gemwallet.android.ui.models.navigation.RouteArgument
@@ -53,7 +54,6 @@ import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemStakeServiceInterface
-import uniffi.gemstone.validatorRow
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -100,11 +100,6 @@ class StakeViewModel @Inject constructor(
         .flatMapLatest { (walletId, assetId) -> getDelegations(walletId, assetId) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    private val validatorRows = delegations
-        .map { items -> items.associate { it.validator.id to validatorRow(it.validator.toGem()) } }
-        .flowOn(ioDispatcher)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
-
     private val validators = assetId
         .flatMapLatest { getValidators(it) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -128,10 +123,12 @@ class StakeViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val sections: StateFlow<List<StakeSectionUIModel>> = combine(assetInfo, actions, delegations, validatorRows) { assetInfo, actions, delegations, validatorRows ->
-        assetInfo?.let { stakeService.stakeSections(it.asset.chain.string, actions.isNotEmpty(), delegations.isNotEmpty()) }.orEmpty()
-            .map { it.uiModel(context, delegations, validatorRows) }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    val sections: StateFlow<List<StakeSectionUIModel>> = combine(assetInfo, actions, delegations) { assetInfo, actions, delegations ->
+        assetInfo ?: return@combine emptyList()
+        val rows = delegations.delegationRows(assetInfo)
+        stakeService.stakeSections(assetInfo.asset.chain.string, actions.isNotEmpty(), delegations.isNotEmpty())
+            .map { it.uiModel(context, rows) }
+    }.flowOn(ioDispatcher).stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val sync = MutableStateFlow<Boolean>(true)
 

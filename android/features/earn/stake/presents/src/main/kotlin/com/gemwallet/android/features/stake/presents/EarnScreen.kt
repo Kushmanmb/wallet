@@ -29,7 +29,6 @@ import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
 import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
-import com.gemwallet.android.ui.components.list_item.uiModel
 import com.gemwallet.android.ui.components.screen.LoadingScene
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
@@ -42,8 +41,7 @@ import uniffi.gemstone.GemListRow
 @Composable
 fun EarnScreen(amountAction: AmountTransactionAction, onDelegation: (String, String) -> Unit, onCancel: () -> Unit, viewModel: EarnViewModel = hiltViewModel()) {
     val assetInfo by viewModel.assetInfo.collectAsStateWithLifecycle()
-    val positions by viewModel.positions.collectAsStateWithLifecycle()
-    val validatorRows by viewModel.validatorRows.collectAsStateWithLifecycle()
+    val positions by viewModel.positionRows.collectAsStateWithLifecycle()
     val aprRow by viewModel.aprRow.collectAsStateWithLifecycle()
     val depositParams by viewModel.depositParams.collectAsStateWithLifecycle()
     val inSync by viewModel.isSync.collectAsStateWithLifecycle()
@@ -99,11 +97,9 @@ fun EarnScreen(amountAction: AmountTransactionAction, onDelegation: (String, Str
                     item { SubheaderItem(R.string.perpetual_positions) }
                     itemsIndexed(positions) { index, item ->
                         DelegationItem(
-                            assetInfo = earnAssetInfo,
-                            delegation = item,
-                            validator = (validatorRows[item.validator.id] ?: return@itemsIndexed).uiModel(),
+                            item = item,
                             listPosition = ListPosition.getPosition(index, positions.size),
-                            onClick = { onDelegation(item.validator.id, item.base.delegationId) },
+                            onClick = { onDelegation(item.delegation.validator.id, item.delegation.base.delegationId) },
                         )
                     }
                 }

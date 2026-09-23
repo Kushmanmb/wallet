@@ -53,6 +53,11 @@ pub fn delegation_list_row(delegation: Delegation, asset: Asset, price: Option<f
     rules::delegation_list_row(&delegation, &asset, price, currency)
 }
 
+#[uniffi::export]
+pub fn delegation_list_rows(delegations: Vec<Delegation>, asset: Asset, price: Option<f64>, currency: Currency) -> Vec<GemDelegationListRow> {
+    delegations.iter().map(|delegation| rules::delegation_list_row(delegation, &asset, price, currency.clone())).collect()
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum GemDelegationAction {
     Stake,

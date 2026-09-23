@@ -98,9 +98,7 @@ internal fun StakeScene(
 
                         is StakeSectionUIModel.Delegations -> itemsIndexed(section.rows) { index, item ->
                             DelegationItem(
-                                assetInfo = assetInfo,
-                                delegation = item.delegation,
-                                validator = item.validator,
+                                item = item,
                                 listPosition = ListPosition.getPosition(index, section.rows.size),
                                 onClick = { onAction(StakeSceneAction.OpenDelegation(item.delegation)) },
                             )

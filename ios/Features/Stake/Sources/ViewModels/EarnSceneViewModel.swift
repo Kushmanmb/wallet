@@ -96,18 +96,21 @@ public final class EarnSceneViewModel {
         EmptyContentTypeViewModel(type: EmptyContentType(.earn, symbol: asset.symbol))
     }
 
-    var positionModels: [DelegationViewModel] {
-        service.positions(delegations: positions.map { $0.toGem() })
-            .map { DelegationViewModel(delegation: Delegation(core: $0), asset: asset, currency: service.getCurrency().toPrimitives()) }
+    var positionItems: [(delegation: Delegation, model: DelegationViewModel)] {
+        DelegationViewModel.items(earnPositions, asset: asset, price: assetData.price?.price, currency: service.getCurrency().toPrimitives())
     }
 
     var hasPositions: Bool {
-        positionModels.isNotEmpty
+        earnPositions.isNotEmpty
     }
 
-    func route(delegation: DelegationViewModel) -> StakeRoute {
-        service.delegationDestination(walletType: wallet.type.toGem(), asset: asset.toGem(), delegation: delegation.delegation.toGem())
-            .route(delegation: delegation.delegation, validators: [])
+    private var earnPositions: [Delegation] {
+        service.positions(delegations: positions.map { $0.toGem() }).map { Delegation(core: $0) }
+    }
+
+    func route(delegation: Delegation) -> StakeRoute {
+        service.delegationDestination(walletType: wallet.type.toGem(), asset: asset.toGem(), delegation: delegation.toGem())
+            .route(delegation: delegation, validators: [])
     }
 
     var showEmptyState: Bool {
@@ -126,7 +129,7 @@ public final class EarnSceneViewModel {
 // MARK: - Actions
 
 extension EarnSceneViewModel {
-    func onSelect(delegation: DelegationViewModel) {
+    func onSelect(delegation: Delegation) {
         onNavigate?(route(delegation: delegation))
     }
 
