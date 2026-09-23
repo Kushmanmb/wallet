@@ -1,7 +1,6 @@
 package com.gemwallet.android.data.coordinators.di
 
 import com.gemwallet.android.application.assets.cases.GetActiveAssetsInfo
-import com.gemwallet.android.application.assets.cases.GetAssetById
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.assets.cases.GetAssetLinks
 import com.gemwallet.android.application.assets.cases.GetAssetMarket
@@ -14,7 +13,6 @@ import com.gemwallet.android.application.session.cases.GetCurrentWallet
 import com.gemwallet.android.application.session.cases.GetCurrentWalletId
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.data.coordinators.asset.GetActiveAssetsInfoImpl
-import com.gemwallet.android.data.coordinators.asset.GetAssetByIdImpl
 import com.gemwallet.android.data.coordinators.asset.GetAssetInfoImpl
 import com.gemwallet.android.data.coordinators.asset.GetAssetLinksImpl
 import com.gemwallet.android.data.coordinators.asset.GetAssetMarketImpl
@@ -59,10 +57,6 @@ object AssetModule {
     @Provides
     @Singleton
     fun provideGetChainAssetInfo(getAssetTokenInfo: GetAssetTokenInfo): GetChainAssetInfo = GetChainAssetInfoImpl(getAssetTokenInfo)
-
-    @Provides
-    @Singleton
-    fun provideGetAssetById(assetStore: GemstoneAssetStore): GetAssetById = GetAssetByIdImpl(assetStore)
 
     @Provides
     @Singleton

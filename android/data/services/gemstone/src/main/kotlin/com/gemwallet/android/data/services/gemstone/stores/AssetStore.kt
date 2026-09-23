@@ -106,8 +106,6 @@ class GemstoneAssetStore(private val assetsDao: AssetsDao) : GemAssetStore {
 
     fun observeAssetInfo(walletId: String, assetId: AssetId): Flow<AssetInfo?> = assetsDao.getAssetInfo(walletId, assetId.toIdentifier(), assetId.chain).map { it?.toDTO() }
 
-    fun observeAsset(assetId: AssetId): Flow<Asset?> = assetsDao.getAsset(assetId.toIdentifier()).map { it?.toDTO() }
-
     fun observeTokenInfo(walletId: String, assetId: AssetId): Flow<AssetInfo?> = assetsDao.getTokenInfo(walletId, assetId.toIdentifier(), assetId.chain).map { it?.toDTO() }
 
     fun observeAssetLinks(assetId: AssetId): Flow<List<AssetLink>> = assetsDao.getAssetLinks(assetId.toIdentifier()).toAssetLinksModel()
