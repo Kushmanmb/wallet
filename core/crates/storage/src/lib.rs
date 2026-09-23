@@ -15,7 +15,7 @@ pub use config_cacher::ConfigCacher;
 diesel::allow_columns_to_appear_in_same_group_by_clause!(schema::transactions_addresses::address, schema::transactions::chain,);
 
 pub use self::database::DatabaseClient;
-pub use self::error::{DatabaseError, DieselResultExt, ReferralValidationError, UsernameValidationError};
+pub use self::error::{DatabaseError, DieselResultExt};
 pub use self::models::{ApiClientGrant, ApiClientResource, ApiClientRow, ApiClientScope, AssetUsageRankRow, FiatAssetRowsExt, NewNotificationRow, NewSupportSessionRow, NewWalletRow, RewardRedemptionOptionRow};
 pub use self::repositories::{
     api_clients_repository::ApiClientsRepository,
@@ -38,7 +38,7 @@ pub use self::repositories::{
     prices_repository::{AssetsWithPricesFilter, PriceFilter, PriceUpdate, PricesRepository},
     releases_repository::ReleasesRepository,
     rewards_redemptions_repository::{RedemptionUpdate, RewardsRedemptionsRepository},
-    rewards_repository::{ReferralUpdate, ReferrerInfo, RewardsEligibilityConfig, RewardsFilter, RewardsRepository, RewardsUpdate},
+    rewards_repository::{ReferralRecord, ReferralUpdate, ReferrerInfo, RewardsEligibilityConfig, RewardsFilter, RewardsRepository, RewardsUpdate, RewardsVerification},
     risk_signals_repository::{AbusePatterns, RiskSignalsRepository},
     scan_addresses_repository::ScanAddressesRepository,
     scan_detections_repository::ScanDetectionsRepository,

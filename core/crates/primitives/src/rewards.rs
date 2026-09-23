@@ -30,6 +30,13 @@ impl RewardRedemptionType {
     }
 }
 
+pub const USERNAME_MIN_LENGTH: usize = 4;
+pub const USERNAME_MAX_LENGTH: usize = 16;
+
+pub fn is_custom_username(username: &str) -> bool {
+    (USERNAME_MIN_LENGTH..=USERNAME_MAX_LENGTH).contains(&username.len()) && username.chars().all(|character| character.is_ascii_alphanumeric())
+}
+
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, EnumIter, EnumString, AsRefStr, PartialEq)]
 #[serde(rename_all = "camelCase")]
 #[strum(serialize_all = "camelCase")]
@@ -227,7 +234,18 @@ pub struct ReferralLeaderboard {
 
 #[cfg(test)]
 mod tests {
-    use super::RewardStatus;
+    use super::{RewardStatus, is_custom_username};
+
+    #[test]
+    fn test_is_custom_username() {
+        assert!(is_custom_username("alice"));
+        assert!(is_custom_username("user1234"));
+        assert!(is_custom_username("1234567890123456"));
+        assert!(!is_custom_username("abc"));
+        assert!(!is_custom_username("12345678901234567"));
+        assert!(!is_custom_username("0x1234567890abcdef1234567890abcdef12345678"));
+        assert!(!is_custom_username("wallet_1"));
+    }
 
     #[test]
     fn test_reward_status() {

@@ -27,18 +27,18 @@ User1 (Verified/Trusted/Attribution): shares code
 
 ## Validation Pipeline
 
-Two paths depending on whether the referred user is confirming a pending referral:
+Rules live in the `rewards` crate as pure functions over facts that storage returns (`ReferralUseFacts`, `Referral`, `ReferredRewards`, the username rules); storage only reads and writes. Two paths depending on whether the referred user is confirming a pending referral:
 
 **Pending confirmation path** (user already redeemed, delay passed, calling again):
-1. `is_pending_referral` — checks Pending status, matching referrer+device+unverified referral
+1. `ReferralUseFacts::is_pending_referral` — checks Pending status, matching referrer+device+unverified referral
 2. `get_referrer_info` — verifies referrer can still refer (Verified/Trusted/Attribution)
-3. `use_or_verify_referral` — confirms the referral and creates normal reward events for the referred user; Attribution referrers receive none
+3. `use_or_verify_referral` — `Referral::validate_confirmation` (same referrer, same device), then verifies the referral and creates normal reward events for the referred user; Attribution referrers receive none
 
 **New referral path** (first-time redemption):
 1. `get_referrer_info` — fetches referrer status, referral_count, wallet_id (single query)
 2. Attribution referrer — validates referral identity, records the referral without a risk signal, and skips to the normal referred-user verification delay
 3. Other referrers — apply cooldown, hourly, daily, and weekly rate limits
-4. `validate_referral_use` — device/wallet eligibility, subscription age, self-refer check
+4. `ReferralUseFacts::validate_use` — device/wallet eligibility, subscription age, self-refer check, device already used
 5. DB connection released
 6. Android device token validation (async)
 7. IP check + geo restrictions (async, tor, ineligible countries)

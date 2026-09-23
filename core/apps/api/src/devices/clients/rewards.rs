@@ -3,11 +3,14 @@ use std::error::Error;
 use cacher::{CacherClient, GLOBAL_RATE_LIMIT_SCOPE, RateLimiter};
 use config_keys::{ConfigKey, RateLimitKey, RateLimitWindow};
 use primitives::rewards::{RewardRedemptionOption, RewardStatus};
-use primitives::{Localize, NaiveDateTimeExt, Platform, ReferralLeaderboard, RewardEvent, Rewards, WalletId, now};
+use primitives::{Chain, Localize, NaiveDateTimeExt, Platform, ReferralLeaderboard, RewardEvent, Rewards, WalletId, now};
 use pusher::PusherClient;
-use rewards::{IpSecurityClient, ReferralError, RewardsError, RiskScoreConfig, RiskScoringInput, UsernameError, evaluate_risk};
+use rewards::{
+    DeviceWallet, IpSecurityClient, NewReferralVerification, Referral, ReferralError, ReferralUseFacts, ReferralValidationError, ReferredRewards, RewardsError, RiskScoreConfig, RiskScoringInput, UsernameError, evaluate_risk,
+    new_referral_verification, referral_verification_delay, validate_username, validate_username_available, validate_wallet_without_username,
+};
 use storage::models::DeviceRow;
-use storage::{ConfigCacher, Database, NewWalletRow, ReferralValidationError, RewardsRedemptionsRepository, RewardsRepository, RiskSignalsRepository, WalletSource, WalletType, WalletsRepository};
+use storage::{ConfigCacher, ConfigRepository, Database, DatabaseClient, DatabaseError, NewWalletRow, ReferralRecord, RewardsRedemptionsRepository, RewardsRepository, RiskSignalsRepository, WalletSource, WalletType, WalletsRepository};
 use streamer::{RewardsNotificationPayload, StreamProducer, StreamProducerQueue};
 
 enum ReferralCodeUse {
@@ -32,6 +35,73 @@ async fn referrer_multiplier(config: &ConfigCacher, status: &RewardStatus) -> Re
     } else {
         config.get_i64(ConfigKey::ReferralVerifiedMultiplier).await
     }
+}
+
+fn referral(record: ReferralRecord) -> Referral {
+    Referral {
+        referrer_username: record.referrer_username,
+        referred_username: record.referred_username,
+        referred_device_id: record.referred_device_id,
+        is_verified: record.verified_at.is_some(),
+    }
+}
+
+fn referral_use_facts(client: &mut DatabaseClient, wallet_id: i32, device_id: i32) -> Result<ReferralUseFacts, DatabaseError> {
+    let referred_username = client.get_referred_username(wallet_id)?;
+    let referred_status = client.get_rewards_verification(&referred_username).ok().map(|verification| verification.status);
+    let wallet_first_subscription_at = client.get_first_subscription_date_by_wallet_id(wallet_id)?;
+    let device_wallets = client
+        .get_device_multicoin_wallet_ids(device_id, Chain::Ethereum)?
+        .into_iter()
+        .map(|wallet_id| {
+            Ok(DeviceWallet {
+                wallet_id,
+                first_subscription_at: client.get_first_subscription_date_by_wallet_id(wallet_id)?,
+            })
+        })
+        .collect::<Result<Vec<_>, DatabaseError>>()?;
+    let device_referral = client.get_referral_by_referred_device(device_id)?.map(referral);
+    Ok(ReferralUseFacts {
+        referred_username,
+        referred_status,
+        wallet_first_subscription_at,
+        device_wallets,
+        device_referral,
+    })
+}
+
+fn use_or_verify_referral(client: &mut DatabaseClient, referrer_username: &str, referrer_status: RewardStatus, wallet_id: i32, device_id: i32, risk_signal_id: Option<i32>) -> Result<Vec<RewardEvent>, Box<dyn Error + Send + Sync>> {
+    let referred_username = client.ensure_reward_identity(wallet_id)?;
+    let verification = client.get_rewards_verification(&referred_username)?;
+    let referred = ReferredRewards {
+        status: verification.status,
+        verify_after: verification.verify_after,
+    };
+    let now = now();
+    let can_verify = referred.can_verify_referral(now);
+    if referred.clears_verification_delay(now) {
+        client.clear_rewards_verification_delay(&referred_username)?;
+    }
+
+    if let Some(record) = client.get_referral_by_referred_username(&referred_username)? {
+        let referral_id = record.id;
+        referral(record).validate_confirmation(referrer_username, device_id)?;
+        if !can_verify {
+            return Ok(vec![]);
+        }
+        return Ok(client.verify_referral(referral_id, referrer_username, &referrer_status, &referred_username)?);
+    }
+
+    let base_delay = client.get_config_duration(ConfigKey::ReferralVerificationDelay)?;
+    let verified_multiplier = client.get_config_i64(ConfigKey::ReferralVerifiedMultiplier)?;
+    let verified_at = match new_referral_verification(can_verify, referral_verification_delay(base_delay, verified_multiplier, referrer_status), now) {
+        NewReferralVerification::Verified => Some(now),
+        NewReferralVerification::Delayed { verify_after } => {
+            client.delay_rewards_verification(&referred_username, verify_after)?;
+            None
+        }
+    };
+    Ok(client.record_referral(referrer_username, &referred_username, device_id, risk_signal_id, verified_at, &referrer_status)?)
 }
 
 pub struct RewardsClient {
@@ -98,11 +168,17 @@ impl RewardsClient {
             .map_err(|e| self.map_username_error(e, locale))?;
 
         let username = code.to_string();
+        validate_username(&username).map_err(|e| RewardsError::Username(UsernameError::Validation(e).localize(locale)))?;
+        let wallet_id = wallet.id;
         let (rewards, event_id) = self
             .db
-            .run(move |client| client.create_reward(wallet.id, &username))
+            .run(move |client| -> Result<_, UsernameError> {
+                validate_username_available(client.get_referral_code(&username)?.is_some())?;
+                validate_wallet_without_username(&client.ensure_reward_identity(wallet_id)?)?;
+                Ok(client.set_username(wallet_id, &username)?)
+            })
             .await
-            .map_err(|e| RewardsError::Username(UsernameError::Validation(e).localize(locale)))?;
+            .map_err(|e| RewardsError::Username(e.localize(locale)))?;
         self.publish_events(vec![event_id]).await?;
         Ok(rewards)
     }
@@ -151,19 +227,20 @@ impl RewardsClient {
                 })?;
 
                 let referrer_info = client.get_referrer_info(&referrer_username)?;
-                if client.is_pending_referral(&referrer_username, wallet_id, device_id)? {
+                let facts = referral_use_facts(client, wallet_id, device_id).map_err(|error| RewardsError::Referral(ReferralError::from(error).localize(&referral_locale)))?;
+                if facts.is_pending_referral(&referrer_username) {
                     if !referrer_info.status.is_verified() && referrer_info.status != RewardStatus::Attribution {
                         return Err(RewardsError::Referral(ReferralError::from(ReferralValidationError::RewardsNotEnabled(referrer_username.clone())).localize(&referral_locale)).into());
                     }
-                    let events = client.use_or_verify_referral(&referrer_username, &referrer_info.status, wallet_id, device_id, None)?;
+                    let events = use_or_verify_referral(client, &referrer_username, referrer_info.status, wallet_id, device_id, None)?;
                     return Ok(ReferralCodeUse::Applied(events));
                 }
 
                 if referrer_info.status == RewardStatus::Attribution {
-                    client
-                        .validate_referral_use(&referrer_username, referrer_info.wallet_id, wallet_id, device_id, device_created_at, None)
+                    facts
+                        .validate_use(&referrer_username, referrer_info.wallet_id, device_created_at, None, now())
                         .map_err(|error| RewardsError::Referral(ReferralError::from(error).localize(&referral_locale)))?;
-                    let events = client.use_or_verify_referral(&referrer_username, &referrer_info.status, wallet_id, device_id, None)?;
+                    let events = use_or_verify_referral(client, &referrer_username, referrer_info.status, wallet_id, device_id, None)?;
                     return Ok(ReferralCodeUse::Applied(events));
                 }
                 Ok(ReferralCodeUse::NeedsScoring(referrer_username))
@@ -179,7 +256,7 @@ impl RewardsClient {
             ReferralProcessResult::Success { risk_signal_id, referrer_status } => {
                 let events = self
                     .db
-                    .run(move |client| client.use_or_verify_referral(&referrer_username, &referrer_status, wallet_id, device_id, Some(risk_signal_id)))
+                    .run(move |client| use_or_verify_referral(client, &referrer_username, referrer_status, wallet_id, device_id, Some(risk_signal_id)))
                     .await?;
                 Ok(events)
             }
@@ -241,7 +318,7 @@ impl RewardsClient {
                     return Err(ReferralError::ReferrerLimitReached);
                 }
 
-                client.validate_referral_use(&username, referrer_wallet_id, wallet_id, device_id, device_created_at, Some(eligibility_days))?;
+                referral_use_facts(client, wallet_id, device_id)?.validate_use(&username, referrer_wallet_id, device_created_at, Some(eligibility_days), now())?;
                 Ok(())
             })
             .await?;

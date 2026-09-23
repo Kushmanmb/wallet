@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
-use primitives::{Chain, DeviceSubscription};
+use primitives::{Chain, DeviceSubscription, WalletId};
 
 use crate::models::{DeviceRow, NewWalletAddressRow, NewWalletRow, NewWalletSubscriptionRow, SubscriptionAddressExcludeRow, WalletAddressRow, WalletRow, WalletSubscriptionRow};
 use crate::schema::{devices, subscriptions_addresses_exclude, wallets, wallets_addresses, wallets_subscriptions};
@@ -14,6 +14,7 @@ pub trait WalletsRepository {
     fn get_wallet_by_device_and_identifier(&mut self, device_id: i32, identifier: &str) -> Result<WalletRow, DatabaseError>;
     fn get_wallet_by_id(&mut self, id: i32) -> Result<WalletRow, DatabaseError>;
     fn get_wallets(&mut self, identifiers: Vec<String>) -> Result<Vec<WalletRow>, DatabaseError>;
+    fn get_device_multicoin_wallet_ids(&mut self, device_id: i32, chain: Chain) -> Result<Vec<i32>, DatabaseError>;
     fn create_wallets(&mut self, wallets: Vec<NewWalletRow>) -> Result<usize, DatabaseError>;
     fn get_or_create_wallet(&mut self, wallet: NewWalletRow) -> Result<WalletRow, DatabaseError>;
     fn get_subscriptions(&mut self, device_id: i32) -> Result<Vec<(WalletRow, WalletSubscriptionRow, WalletAddressRow)>, DatabaseError>;
@@ -84,6 +85,18 @@ impl WalletsRepository for DatabaseClient {
 
     fn get_wallet_by_id(&mut self, id: i32) -> Result<WalletRow, DatabaseError> {
         wallets::table.filter(wallets::id.eq(id)).select(WalletRow::as_select()).first(&mut self.connection).or_not_found_internal(id.to_string())
+    }
+
+    fn get_device_multicoin_wallet_ids(&mut self, device_id: i32, chain: Chain) -> Result<Vec<i32>, DatabaseError> {
+        let mut wallet_ids = Vec::new();
+        for address in device_addresses(self, device_id, ChainRow::from(chain))? {
+            match wallet_row(self, &WalletId::Multicoin(address).id()) {
+                Ok(wallet) => wallet_ids.push(wallet.id),
+                Err(diesel::result::Error::NotFound) => {}
+                Err(error) => return Err(error.into()),
+            }
+        }
+        Ok(wallet_ids)
     }
 
     fn get_wallets(&mut self, identifiers: Vec<String>) -> Result<Vec<WalletRow>, DatabaseError> {

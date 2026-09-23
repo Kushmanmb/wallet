@@ -10,13 +10,14 @@ use num_bigint::BigUint;
 use primitives::currency::Currency;
 use primitives::{
     Asset, AssetAssociation, AssetAssociationType, AssetId, AssetType, Chain, ChartTimeframe, DeviceLocale, FiatProviderName, FiatQuoteType, FiatRateProvider, FiatTransaction, FiatTransactionStatus, NotificationType, PriceAlert,
-    PriceAlertDirection, PriceId, PriceProvider,
+    PriceAlertDirection, PriceId, PriceProvider, Rewards,
     asset_constants::{
         ARBITRUM_USDC_ASSET_ID, ARBITRUM_USDT_ASSET_ID, BASE_USDC_ASSET_ID, ETHEREUM_USDC_ASSET_ID, ETHEREUM_USDT_ASSET_ID, POLYGON_USDC_ASSET_ID, SMARTCHAIN_USDT_ASSET_ID, SOLANA_USDC_ASSET_ID, SOLANA_USDT_ASSET_ID, TON_DUST_ASSET_ID,
         TON_DUST_TOKEN_ID, TON_STON_ASSET_ID, TON_STON_TOKEN_ID, TON_USDT_ASSET_ID, TON_USDT_TOKEN_ID, TRON_USDT_ASSET_ID,
     },
     known_assets::{ARBITRUM_USDC, ARBITRUM_USDT, BASE_USDC, ETHEREUM_USDC, ETHEREUM_USDT, POLYGON_USDC, SMARTCHAIN_USDT, SOLANA_USDC, SOLANA_USDT, TRON_USDT},
 };
+use rewards::{UsernameError, validate_username, validate_username_available, validate_wallet_without_username};
 use services::Services;
 use settings::Settings;
 use storage::models::{ChartRow, FiatAssetRow, FiatProviderCountryRow, FiatRateRow, NewFiatTransactionRow, PriceAssetRow, UpdateDeviceRow, price::NewPriceRow};
@@ -25,6 +26,8 @@ use storage::{
     ApiClientsRepository, AssetsRepository, ChartsRepository, DatabaseClient, DevicesRepository, FiatRepository, NewNotificationRow, NewWalletRow, NotificationsRepository, PriceAlertsRepository, PricesRepository, RewardsRepository,
     WalletSource, WalletType, WalletsRepository,
 };
+
+const DEV_USERNAME: &str = "gemcoder";
 
 pub async fn run_setup_dev(settings: Settings) -> Result<(), Box<dyn Error + Send + Sync>> {
     info_with_fields!("setup_dev", step = "init");
@@ -148,7 +151,7 @@ fn setup_dev_devices(client: &mut DatabaseClient) -> Result<(), Box<dyn Error + 
     info_with_fields!("setup_dev", step = "add rewards");
     let devices = client.get_devices_by_wallet_id(wallet.id)?;
     if !devices.is_empty() {
-        let result = client.create_reward(wallet.id, "gemcoder");
+        let result = create_dev_username(client, wallet.id, DEV_USERNAME);
         match result {
             Ok((rewards, _)) => info_with_fields!("setup_dev", step = "rewards added", code = rewards.code.unwrap_or_default(), points = rewards.points),
             Err(e) => info_with_fields!("setup_dev", step = "rewards skipped (may already exist)", error = e.to_string()),
@@ -419,4 +422,11 @@ fn setup_dev_asset_associations(client: &mut DatabaseClient, id: &str, assets: &
 
     client.upsert_asset_associations(id, associations)?;
     Ok(())
+}
+
+fn create_dev_username(client: &mut DatabaseClient, wallet_id: i32, username: &str) -> Result<(Rewards, i32), UsernameError> {
+    validate_username(username)?;
+    validate_username_available(client.get_referral_code(username)?.is_some())?;
+    validate_wallet_without_username(&client.ensure_reward_identity(wallet_id)?)?;
+    Ok(client.set_username(wallet_id, username)?)
 }

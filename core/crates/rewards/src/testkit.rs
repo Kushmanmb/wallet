@@ -1,7 +1,7 @@
 use primitives::rewards::RewardStatus;
 use primitives::{IpUsageType, Platform, PlatformStore};
 
-use crate::{IpCheckResult, RiskScoringInput, RiskSignalInput};
+use crate::{IpCheckResult, Referral, ReferralUseFacts, RiskScoringInput, RiskSignalInput};
 
 impl RiskScoringInput {
     pub fn mock() -> Self {
@@ -33,5 +33,28 @@ impl RiskScoringInput {
 impl RiskSignalInput {
     pub fn mock() -> Self {
         RiskScoringInput::mock().to_signal_input()
+    }
+}
+
+impl Referral {
+    pub fn mock() -> Self {
+        Self {
+            referrer_username: "alice".to_string(),
+            referred_username: "bob".to_string(),
+            referred_device_id: 10,
+            is_verified: false,
+        }
+    }
+}
+
+impl ReferralUseFacts {
+    pub fn mock() -> Self {
+        Self {
+            referred_username: "bob".to_string(),
+            referred_status: Some(RewardStatus::Unverified),
+            wallet_first_subscription_at: None,
+            device_wallets: vec![],
+            device_referral: None,
+        }
     }
 }

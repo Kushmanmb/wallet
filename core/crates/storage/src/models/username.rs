@@ -11,13 +11,6 @@ pub struct UsernameRow {
     pub status: UsernameStatus,
 }
 
-impl UsernameRow {
-    pub fn has_custom_username(&self) -> bool {
-        let len = self.username.len();
-        (4..=16).contains(&len) && self.username.chars().all(|c| c.is_ascii_alphanumeric())
-    }
-}
-
 #[derive(Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::usernames)]
 #[diesel(check_for_backend(diesel::pg::Pg))]

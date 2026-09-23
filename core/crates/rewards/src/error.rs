@@ -4,7 +4,7 @@ use std::fmt;
 use config_keys::RateLimitKey;
 use localizer::LanguageLocalizer;
 use primitives::Localize;
-use storage::{DatabaseError, ReferralValidationError, UsernameValidationError};
+use storage::DatabaseError;
 
 #[derive(Debug)]
 pub enum RewardsError {
@@ -22,6 +22,65 @@ impl fmt::Display for RewardsError {
 }
 
 impl Error for RewardsError {}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ReferralValidationError {
+    CodeDoesNotExist,
+    DeviceAlreadyUsed,
+    CannotReferSelf,
+    EligibilityExpired(i64),
+    RewardsNotEnabled(String),
+}
+
+impl fmt::Display for ReferralValidationError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::CodeDoesNotExist => write!(f, "Referral code does not exist"),
+            Self::DeviceAlreadyUsed => write!(f, "This device has already been used to apply a referral code"),
+            Self::CannotReferSelf => write!(f, "Cannot use your own referral code"),
+            Self::EligibilityExpired(days) => write!(f, "eligibility_expired: {} days", days),
+            Self::RewardsNotEnabled(user) => write!(f, "Rewards are not enabled for {}", user),
+        }
+    }
+}
+
+impl Error for ReferralValidationError {}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ReferralConfirmationError {
+    AlreadyVerified,
+    CodeMismatch,
+    DeviceMismatch,
+}
+
+impl fmt::Display for ReferralConfirmationError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::AlreadyVerified => write!(f, "Referral already verified"),
+            Self::CodeMismatch => write!(f, "Referral code does not match pending referral"),
+            Self::DeviceMismatch => write!(f, "Must verify from same device"),
+        }
+    }
+}
+
+impl Error for ReferralConfirmationError {}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum UsernameValidationError {
+    Invalid(String),
+    AlreadyTaken,
+}
+
+impl fmt::Display for UsernameValidationError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Invalid(msg) => write!(f, "{}", msg),
+            Self::AlreadyTaken => write!(f, "Username already taken"),
+        }
+    }
+}
+
+impl Error for UsernameValidationError {}
 
 #[derive(Debug)]
 pub enum ReferralError {
@@ -63,7 +122,6 @@ impl Localize for ReferralError {
             Self::Validation(ReferralValidationError::CannotReferSelf) => localizer.rewards_error_referral_cannot_refer_self(),
             Self::Validation(ReferralValidationError::EligibilityExpired(days)) => localizer.rewards_error_referral_eligibility_expired(*days),
             Self::Validation(ReferralValidationError::RewardsNotEnabled(_)) => localizer.rewards_error_referral_rewards_not_enabled(),
-            Self::Validation(ReferralValidationError::Database(_)) => localizer.errors_generic(),
             Self::ReferrerLimitReached => localizer.rewards_error_referral_referrer_limit_reached(),
             Self::IpCountryIneligible(country) => localizer.rewards_error_referral_country_ineligible(country),
             Self::RiskScoreExceeded { .. } | Self::DuplicateAttempt | Self::IpTorNotAllowed | Self::LimitReached | Self::InvalidDeviceToken(_) => localizer.rewards_error_referral_limit_reached(),
@@ -121,6 +179,7 @@ impl Error for RewardsRedemptionError {}
 pub enum UsernameError {
     LimitReached(RateLimitKey),
     Validation(UsernameValidationError),
+    Database(DatabaseError),
 }
 
 impl fmt::Display for UsernameError {
@@ -128,6 +187,7 @@ impl fmt::Display for UsernameError {
         match self {
             UsernameError::LimitReached(key) => write!(f, "Username creation limit reached: {}", key.as_ref()),
             UsernameError::Validation(e) => write!(f, "{}", e),
+            UsernameError::Database(e) => write!(f, "{}", e),
         }
     }
 }
@@ -140,6 +200,7 @@ impl Localize for UsernameError {
         match self {
             Self::LimitReached(_) => localizer.rewards_error_username_daily_limit_reached(),
             Self::Validation(e) => e.to_string(),
+            Self::Database(e) => e.to_string(),
         }
     }
 }
@@ -147,5 +208,11 @@ impl Localize for UsernameError {
 impl From<UsernameValidationError> for UsernameError {
     fn from(error: UsernameValidationError) -> Self {
         UsernameError::Validation(error)
+    }
+}
+
+impl From<DatabaseError> for UsernameError {
+    fn from(error: DatabaseError) -> Self {
+        UsernameError::Database(error)
     }
 }
