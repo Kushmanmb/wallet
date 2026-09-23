@@ -376,16 +376,12 @@ extension SwapSceneViewModel {
 
 extension SwapSceneViewModel {
     private var quotesState: StateViewType<[SwapperQuote]> {
-        if viewState.isQuoteLoading {
-            return .loading
+        switch viewState.quotesState {
+        case .loading: .loading
+        case let .failed(error): .error(error)
+        case .quotes: .data(session.quotes?.quotes ?? [])
+        case .empty: .noData
         }
-        if let error = viewState.quoteError {
-            return .error(error)
-        }
-        if let quotes = session.quotes?.quotes {
-            return .data(quotes)
-        }
-        return .noData
     }
 
     private var selectedSlippageBps: UInt32? {
