@@ -13,6 +13,7 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.PercentSuggestionsBar
 import com.gemwallet.android.ui.components.buttons.MainActionButton
 import com.gemwallet.android.ui.components.isKeyboardVisible
+import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.ListItem
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.perpetual.AutocloseInputSection
@@ -25,9 +26,10 @@ import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingSmall
 import com.gemwallet.android.ui.theme.sceneContentPadding
 import com.wallet.core.primitives.TpslType
+import uniffi.gemstone.GemListRow
 
 @Composable
-internal fun AutocloseScene(model: AutocloseUIModel, priceRows: List<ListItemModel>, positionListItem: ListItemModel?, takeProfitText: String, stopLossText: String, onAction: (AutocloseAction) -> Unit) {
+internal fun AutocloseScene(model: AutocloseUIModel, priceRows: List<GemListRow>, positionListItem: ListItemModel?, takeProfitText: String, stopLossText: String, onAction: (AutocloseAction) -> Unit) {
     var focusedField: TpslType? by remember { mutableStateOf(null) }
 
     val activeField = focusedField?.let { type ->
@@ -74,7 +76,7 @@ internal fun AutocloseScene(model: AutocloseUIModel, priceRows: List<ListItemMod
             }
             item {
                 priceRows.forEachIndexed { index, row ->
-                    ListItem(model = row, listPosition = ListPosition.getPosition(index, priceRows.size))
+                    GemListRowView(row = row, listPosition = ListPosition.getPosition(index, priceRows.size))
                 }
                 Spacer16()
             }

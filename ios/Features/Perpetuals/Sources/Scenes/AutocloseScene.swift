@@ -26,10 +26,9 @@ public struct AutocloseScene: View {
             }
 
             Section {
-                if let entryPriceField = model.entryPriceField {
-                    ListItemView(field: entryPriceField)
+                ForEach(model.priceRows, id: \.self) { row in
+                    GemListRowView(row: row)
                 }
-                ListItemView(field: model.marketPriceField)
             }
 
             AutocloseInputSection(

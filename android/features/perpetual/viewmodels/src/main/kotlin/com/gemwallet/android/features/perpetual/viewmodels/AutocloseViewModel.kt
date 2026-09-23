@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.stateIn
 import uniffi.gemstone.GemAutocloseEstimator
 import uniffi.gemstone.GemAutocloseField
 import uniffi.gemstone.GemAutocloseSession
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.autocloseSession
 import javax.inject.Inject
 
@@ -88,12 +89,8 @@ class AutocloseViewModel @Inject constructor(
     val positionListItem: StateFlow<ListItemModel?> = uiModel.map { it?.position?.listItem(context) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val priceRows: StateFlow<List<ListItemModel>> = uiModel.map { model ->
-        listOfNotNull(
-            model?.entryPriceText?.let { ListItemModel(title = context.getString(R.string.perpetual_entry_price), subtitle = it) },
-            model?.let { ListItemModel(title = context.getString(R.string.perpetual_market_price), subtitle = it.marketPriceText) },
-        )
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    val priceRows: StateFlow<List<GemListRow>> = uiModel.map { it?.priceRows.orEmpty() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun onTakeProfitChanged(text: String) {
         submitAttempted.value = false

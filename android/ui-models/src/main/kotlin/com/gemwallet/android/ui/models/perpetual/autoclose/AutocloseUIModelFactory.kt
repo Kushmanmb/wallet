@@ -23,8 +23,7 @@ object AutocloseUIModelFactory {
         )
         return AutocloseUIModel(
             position = PerpetualPositionDataAggregateImpl(position),
-            marketPriceText = state.marketPrice.text(),
-            entryPriceText = state.entryPrice?.text(),
+            priceRows = state.priceRows,
             takeProfit = createField(takeProfit, estimator, state.showsErrors),
             stopLoss = createField(stopLoss, estimator, state.showsErrors),
             confirmEnabled = state.confirmEnabled,

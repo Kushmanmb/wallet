@@ -6,10 +6,11 @@ import com.gemwallet.android.ui.models.buttonState
 import com.wallet.core.primitives.TpslType
 import uniffi.gemstone.AutocloseValidation
 import uniffi.gemstone.GemFormattedNumber
+import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemValueTone
 
-data class AutocloseUIModel(val position: PerpetualPositionDataAggregate, val marketPriceText: String, val entryPriceText: String?, val takeProfit: Field, val stopLoss: Field, val confirmEnabled: Boolean) {
+data class AutocloseUIModel(val position: PerpetualPositionDataAggregate, val priceRows: List<GemListRow>, val takeProfit: Field, val stopLoss: Field, val confirmEnabled: Boolean) {
     val buttonState: ButtonState
         get() = buttonState(enabled = confirmEnabled)
 

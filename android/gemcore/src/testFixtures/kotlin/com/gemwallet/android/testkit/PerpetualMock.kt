@@ -18,6 +18,8 @@ import com.wallet.core.primitives.TpslType
 import uniffi.gemstone.AutocloseValidation
 import uniffi.gemstone.GemAutocloseField
 import uniffi.gemstone.GemAutocloseViewState
+import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemListRowTitle
 
 fun mockPerpetual(price: Double = 0.0, pricePercentChange24h: Double = 0.0, volume24h: Double = 0.0, funding: Double = 0.0) = Perpetual(
     id = PerpetualId(provider = PerpetualProvider.Hypercore, symbol = "TON"),
@@ -97,6 +99,8 @@ fun mockAutocloseField(type: TpslType = TpslType.TakeProfit, price: Double? = nu
 fun mockAutocloseViewState(confirmEnabled: Boolean = false, showsErrors: Boolean = false) = GemAutocloseViewState(
     confirmEnabled = confirmEnabled,
     showsErrors = showsErrors,
-    entryPrice = mockFormattedNumber(100.0),
-    marketPrice = mockFormattedNumber(110.0),
+    priceRows = listOf(
+        GemListRow.Amount(title = GemListRowTitle.ENTRY_PRICE, amount = mockFormattedNumber(100.0), info = null),
+        GemListRow.Amount(title = GemListRowTitle.MARKET_PRICE, amount = mockFormattedNumber(110.0), info = null),
+    ),
 )

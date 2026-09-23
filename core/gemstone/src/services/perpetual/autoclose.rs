@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::formatted_number::{GemFormattedNumber, GemValueTone, value_tone};
 use crate::models::custom_types::GemBigInt;
+use crate::models::list::{GemListRow, GemListRowTitle};
 use crate::percentage::GemPercentageStyle;
 use crate::perpetual::GemAutocloseEstimator;
 use crate::perpetual::GemPerpetual;
@@ -174,8 +175,7 @@ pub struct GemAutoclosePrices {
 pub struct GemAutocloseViewState {
     pub confirm_enabled: bool,
     pub shows_errors: bool,
-    pub entry_price: Option<GemFormattedNumber>,
-    pub market_price: GemFormattedNumber,
+    pub price_rows: Vec<GemListRow>,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -188,8 +188,12 @@ pub struct GemAutocloseSession {
     pub decimals: i32,
 }
 
-fn price_text(price: f64) -> GemFormattedNumber {
-    GemFormattedNumber::currency(price, Currency::USD, GemCurrencyStyle::Currency)
+fn price_row(title: GemListRowTitle, price: f64) -> GemListRow {
+    GemListRow::Amount {
+        title,
+        amount: GemFormattedNumber::currency(price, Currency::USD, GemCurrencyStyle::Currency),
+        info: None,
+    }
 }
 
 #[uniffi::export]
@@ -225,8 +229,10 @@ impl GemAutocloseSession {
                 (GemAutocloseConfirmPolicy::UntilSubmitted, false) => self.modify.take_profit.has_pending_change() || self.modify.stop_loss.has_pending_change(),
             },
             shows_errors: self.submit_attempted,
-            entry_price: self.prices.entry.map(price_text),
-            market_price: price_text(self.prices.market),
+            price_rows: [self.prices.entry.map(|price| price_row(GemListRowTitle::EntryPrice, price)), Some(price_row(GemListRowTitle::MarketPrice, self.prices.market))]
+                .into_iter()
+                .flatten()
+                .collect(),
         }
     }
 }
@@ -321,8 +327,7 @@ mod tests {
         let state = session.view_state();
 
         assert!(!state.confirm_enabled, "nothing has been entered yet");
-        assert_eq!(state.entry_price, None, "an unopened position has no entry price");
-        assert_eq!(state.market_price, GemFormattedNumber::currency(100.0, Currency::USD, GemCurrencyStyle::Currency));
+        assert_eq!(state.price_rows, vec![price_row(GemListRowTitle::MarketPrice, 100.0)], "an unopened position has no entry price");
         assert_eq!(session.initial_text(TpslType::TakeProfit, ".".to_string()), None);
 
         let above = session.on_price(TpslType::TakeProfit, Some(120.0));
@@ -342,8 +347,21 @@ mod tests {
         let android = GemAutocloseSession::new(changed, GemAutocloseConfirmPolicy::UntilSubmitted, prices, PerpetualProvider::Hypercore, 2);
 
         assert_eq!(ios.view_state().confirm_enabled, ios.modify.can_build());
-        assert_eq!(ios.view_state().entry_price, Some(GemFormattedNumber::currency(100.0, Currency::USD, GemCurrencyStyle::Currency)));
-        assert_eq!(ios.view_state().market_price, GemFormattedNumber::currency(110.0, Currency::USD, GemCurrencyStyle::Currency));
+        assert_eq!(
+            ios.view_state().price_rows,
+            vec![
+                GemListRow::Amount {
+                    title: GemListRowTitle::EntryPrice,
+                    amount: GemFormattedNumber::currency(100.0, Currency::USD, GemCurrencyStyle::Currency),
+                    info: None,
+                },
+                GemListRow::Amount {
+                    title: GemListRowTitle::MarketPrice,
+                    amount: GemFormattedNumber::currency(110.0, Currency::USD, GemCurrencyStyle::Currency),
+                    info: None,
+                },
+            ]
+        );
         assert!(android.view_state().confirm_enabled, "a pending change is enough before a submit");
         assert_eq!(android.on_submit_attempt().view_state().confirm_enabled, android.modify.can_build());
     }
@@ -359,7 +377,7 @@ mod tests {
         );
 
         assert!(!session.view_state().shows_errors);
-        assert_eq!(session.view_state().entry_price, None);
+        assert_eq!(session.view_state().price_rows.len(), 1, "no entry price without a position");
         assert!(session.on_submit_attempt().view_state().shows_errors);
     }
     use super::*;

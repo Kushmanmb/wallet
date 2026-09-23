@@ -144,10 +144,10 @@ impl GemAssetsService {
         if missing.is_empty() {
             return Ok(vec![]);
         }
-        self.save_backend_assets(missing).await
+        self.sync_assets(missing).await
     }
 
-    async fn save_backend_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, GemServiceError> {
+    async fn sync_assets(&self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, GemServiceError> {
         let assets = self.api.client.get_assets(asset_ids, None).await.map_err(GemApiError::from)?;
         let asset_ids = assets.iter().map(|asset| asset.asset.id.clone()).collect();
         self.store.save_assets(assets).await?;
@@ -160,7 +160,7 @@ impl GemAssetsService {
         if missing.is_empty() {
             return self.assets(asset_ids).await;
         }
-        let synced = self.save_backend_assets(missing.clone()).await.unwrap_or_default();
+        let synced = self.sync_assets(missing.clone()).await.unwrap_or_default();
         for asset_id in rules::missing_asset_ids(missing, synced) {
             if self.node_token_asset(asset_id).await.is_err() {
                 continue;

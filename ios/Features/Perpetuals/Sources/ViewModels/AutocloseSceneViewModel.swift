@@ -8,6 +8,7 @@ import enum Gemstone.GemAutocloseConfirmPolicy
 import class Gemstone.GemAutocloseEstimator
 import struct Gemstone.GemAutocloseSession
 import struct Gemstone.GemAutocloseViewState
+import enum Gemstone.GemListRow
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -82,8 +83,8 @@ public final class AutocloseSceneViewModel {
         Localized.Perpetual.autoClose
     }
 
-    public var marketPriceField: ListItemField {
-        ListItemField(title: Localized.Perpetual.marketPrice, value: viewState.marketPrice.text())
+    public var priceRows: [GemListRow] {
+        viewState.priceRows
     }
 
     public var takeProfitModel: AutocloseViewModel {
@@ -99,10 +100,6 @@ public final class AutocloseSceneViewModel {
         case let .modify(position, _): PerpetualPositionItemViewModel(data: position)
         case let .open(data, _): OpenPositionItemViewModel(data: data)
         }
-    }
-
-    public var entryPriceField: ListItemField? {
-        viewState.entryPrice.map { ListItemField(title: Localized.Perpetual.entryPrice, value: $0.text()) }
     }
 
     private var viewState: GemAutocloseViewState {
