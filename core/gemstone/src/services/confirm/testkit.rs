@@ -3,7 +3,10 @@ use std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 use primitives::{Asset, AssetBasic, AssetFull, AssetId, Chain, Transaction, Wallet, WalletId};
 
-use super::{GemConfirmData, GemConfirmFee, GemConfirmInput, GemConfirmLoad, GemConfirmMetadata, GemConfirmService, GemConfirmSimulationState, GemConfirmTransferService, GemTransactionSigner, GemTransferAmountResult, SendInput};
+use super::{
+    GemConfirmData, GemConfirmFee, GemConfirmFeeSelection, GemConfirmInput, GemConfirmLoad, GemConfirmMetadata, GemConfirmService, GemConfirmSimulationState, GemConfirmTransferService, GemTransactionSigner, GemTransferAmountResult,
+    SendInput,
+};
 use crate::GemstoneError;
 use crate::api::{GemApiClient, GemDeviceApiClient, GemStaticApiClient};
 use crate::gateway::GemGateway;
@@ -196,6 +199,7 @@ impl GemConfirmData {
                 ..GemTransactionLoadFee::mock(0)
             },
             selected_priority: FeePriority::Normal,
+            fee_selection: GemConfirmFeeSelection::Priority { priority: FeePriority::Normal },
             fee_rates: vec![],
             metadata: GemTransactionLoadMetadata::None,
             simulation: None,

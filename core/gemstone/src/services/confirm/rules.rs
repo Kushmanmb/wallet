@@ -181,12 +181,8 @@ pub fn approval_value_from(value: Option<&GemBigUint>, is_unlimited: bool) -> Ge
 }
 
 impl GemConfirmData {
-    pub(super) fn fee_rate_rows(&self, selection: GemConfirmFeeSelection, fee_asset: &Asset) -> GemFeeRateRows {
-        let selection = match selection {
-            GemConfirmFeeSelection::Priority { priority } if !self.fee_rates.iter().any(|rate| rate.priority == priority) => GemConfirmFeeSelection::Priority { priority: self.selected_priority },
-            selection => selection,
-        };
-        fee_rate_rows(self.input.transfer.input_type.get_asset().chain(), fee_asset, &self.fee_rates, &selection, &self.fee)
+    pub(super) fn fee_rate_rows(&self, fee_asset: &Asset) -> GemFeeRateRows {
+        fee_rate_rows(self.input.transfer.input_type.get_asset().chain(), fee_asset, &self.fee_rates, &self.fee_selection, &self.fee)
     }
 
     pub(super) fn fee_load(self, metadata: GemConfirmMetadata, fee_asset: Asset) -> Result<GemConfirmFeeLoad, GemConfirmError> {
@@ -521,6 +517,10 @@ fn fee_rate_rows(chain: Chain, fee_asset: &Asset, rates: &[GemFeeRate], selectio
                     priority: rate.priority,
                     fee,
                     value: fee_rate_text(unit_type, &display_value, unit_decimals, &fee_asset.symbol),
+                    is_selected: match selection {
+                        GemConfirmFeeSelection::Priority { priority } => *priority == rate.priority,
+                        GemConfirmFeeSelection::Custom { .. } => false,
+                    },
                 }
             })
             .collect(),
@@ -558,6 +558,13 @@ pub(super) fn confirmation_fee_rates(asset_id: &AssetId, is_max_amount: bool, ra
 }
 
 impl GemConfirmFeeSelection {
+    pub(super) fn applied(&self, rate: &GemFeeRate) -> Self {
+        match self {
+            Self::Priority { .. } => Self::Priority { priority: rate.priority },
+            Self::Custom { gas_price } => Self::Custom { gas_price: gas_price.clone() },
+        }
+    }
+
     pub(super) fn select_fee_rate(&self, rates: &[GemFeeRate]) -> Result<GemFeeRate, GemConfirmError> {
         match self {
             Self::Priority { priority } => rates.iter().find(|rate| &rate.priority == priority).or_else(|| rates.first()).cloned().ok_or(GemConfirmError::FeeRatesMissing),
@@ -782,10 +789,12 @@ mod tests {
         assert!(!rows.supports_custom_fee, "only bitcoin chains take a custom rate");
         assert_eq!(rows.selected_total, Some(BigInt::from(10)));
         assert_eq!(rows.normal_total, Some(BigInt::from(10)));
+        assert_eq!(rows.rows.iter().map(|row| row.is_selected).collect::<Vec<_>>(), vec![true, false], "only the selected priority is highlighted");
 
         let custom = fee_rate_rows(Chain::Ethereum, &ethereum, &rates, &GemConfirmFeeSelection::Custom { gas_price: BigInt::from(50) }, &GemTransactionLoadFee::mock(5_000));
         assert_eq!(custom.rows[0].fee, Some(BigInt::from(1_000)), "a custom rate is the base the loaded fee was computed for");
         assert_eq!(custom.selected_total, Some(BigInt::from(50)));
+        assert!(custom.rows.iter().all(|row| !row.is_selected), "a custom rate highlights no priority row");
 
         let zero = fee_rate_rows(Chain::Ethereum, &ethereum, &rates, &GemConfirmFeeSelection::Custom { gas_price: BigInt::ZERO }, &GemTransactionLoadFee::mock(5_000));
         assert!(zero.rows.iter().all(|row| row.fee.is_none()), "nothing scales against a zero base");
@@ -858,12 +867,19 @@ mod tests {
 
     #[test]
     fn test_fee_rate_rows_highlight_the_priority_core_selected_when_the_asked_one_is_not_offered() {
-        let mut confirm = GemConfirmData::mock(Chain::Ethereum, TransactionInputType::Transfer { asset: Asset::mock() });
-        confirm.fee_rates = vec![GemFeeRate::mock(FeePriority::Normal, 10)];
-        confirm.selected_priority = FeePriority::Normal;
-        let rows = confirm.fee_rate_rows(GemConfirmFeeSelection::Priority { priority: FeePriority::Fast }, &Asset::mock());
+        let rates = vec![GemFeeRate::mock(FeePriority::Normal, 10)];
+        let asked = GemConfirmFeeSelection::Priority { priority: FeePriority::Fast };
+        let selected = asked.select_fee_rate(&rates).unwrap();
+        let confirm = GemConfirmData {
+            selected_priority: selected.priority,
+            fee_selection: asked.applied(&selected),
+            fee_rates: rates,
+            ..GemConfirmData::mock(Chain::Ethereum, TransactionInputType::Transfer { asset: Asset::mock() })
+        };
+        let rows = confirm.fee_rate_rows(&Asset::mock());
 
         assert_eq!(rows.selected_total, Some(BigInt::from(10)));
+        assert_eq!(rows.rows.iter().map(|row| (row.priority, row.is_selected)).collect::<Vec<_>>(), vec![(FeePriority::Normal, true)]);
     }
 
     #[test]

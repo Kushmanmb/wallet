@@ -153,6 +153,7 @@ impl GemConfirmService {
             input: input.clone(),
             fee,
             selected_priority: selected.priority,
+            fee_selection: options.fee_selection.applied(&selected),
             fee_rates,
             metadata: load.metadata,
             simulation,

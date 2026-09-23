@@ -8,8 +8,8 @@ use super::error::GemConfirmErrorInfo;
 use super::header::{self, GemConfirmHeader};
 use super::rules::{acquire_swap_pair, asset_pick_needs_reload, preload_simulation};
 use super::{
-    ConfirmState, GemAcquireAssetFlow, GemConfirmError, GemConfirmFeeLoad, GemConfirmFeeSelection, GemConfirmInput, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemFeeRateRows,
-    GemSubmitResult, GemTransferAmountResult, SendInput,
+    ConfirmState, GemAcquireAssetFlow, GemConfirmError, GemConfirmFeeLoad, GemConfirmInput, GemConfirmLoad, GemConfirmLoadOptions, GemConfirmRowContent, GemConfirmScreen, GemConfirmTransferService, GemFeeRateRows, GemSubmitResult,
+    GemTransferAmountResult, SendInput,
 };
 use crate::models::list::GemListRow;
 use crate::payment::GemPaymentLoad;
@@ -98,10 +98,10 @@ impl GemConfirmation {
         header::header(&transfer, self.simulation.as_ref(), stored.as_ref().map(|state| &state.load), self.service.get_currency())
     }
 
-    pub fn fee_rate_rows(&self, selection: GemConfirmFeeSelection) -> Option<GemFeeRateRows> {
+    pub fn fee_rate_rows(&self) -> Option<GemFeeRateRows> {
         let stored = self.stored();
         let state = stored.as_ref()?;
-        Some(state.confirm_data.as_ref()?.fee_rate_rows(selection, &state.load.fee_asset))
+        Some(state.confirm_data.as_ref()?.fee_rate_rows(&state.load.fee_asset))
     }
 
     pub fn get_currency(&self) -> Currency {

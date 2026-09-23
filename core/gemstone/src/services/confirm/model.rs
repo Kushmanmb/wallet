@@ -93,6 +93,7 @@ pub struct GemConfirmData {
     pub input: GemConfirmInput,
     pub fee: GemTransactionLoadFee,
     pub selected_priority: FeePriority,
+    pub fee_selection: GemConfirmFeeSelection,
     pub fee_rates: Vec<GemFeeRate>,
     pub metadata: GemTransactionLoadMetadata,
     pub simulation: Option<SimulationResult>,
@@ -146,6 +147,7 @@ pub struct GemFeeRateRow {
     pub priority: FeePriority,
     pub fee: Option<GemBigInt>,
     pub value: GemLocalizedText,
+    pub is_selected: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
