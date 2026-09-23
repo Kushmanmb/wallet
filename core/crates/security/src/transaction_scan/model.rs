@@ -26,22 +26,36 @@ pub enum ScanFinding {
 pub struct ScanDetection {
     pub scan_type: ScanType,
     pub finding: ScanFinding,
+    pub target: String,
+    pub provider: Option<ScanProvider>,
+    pub reason: Option<String>,
     pub is_enforced: bool,
-    pub source: String,
+    pub is_cached: bool,
 }
 
 impl ScanDetection {
-    pub fn new(scan_type: ScanType, finding: ScanFinding, is_enforced: bool, source: impl Into<String>) -> Self {
+    pub fn local(scan_type: ScanType, finding: ScanFinding, target: String, reason: &str, is_enforced: bool) -> Self {
         Self {
             scan_type,
             finding,
+            target,
+            provider: None,
+            reason: Some(reason.to_string()),
             is_enforced,
-            source: source.into(),
+            is_cached: false,
         }
     }
 
-    pub fn provider_source(provider: ScanProvider, reason: Option<&str>) -> String {
-        format!("{}: {}", provider.as_ref(), reason.unwrap_or("malicious"))
+    pub fn provider(subject: &ScanSubject, provider: ScanProvider, reason: Option<String>, is_enforced: bool, is_cached: bool) -> Self {
+        Self {
+            scan_type: subject.scan_type,
+            finding: subject.finding.clone(),
+            target: subject.target.clone(),
+            provider: Some(provider),
+            reason,
+            is_enforced,
+            is_cached,
+        }
     }
 }
 

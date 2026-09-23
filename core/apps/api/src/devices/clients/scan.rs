@@ -8,7 +8,7 @@ use cacher::{AccessTokenCacherClient, CacheKey, CacherClient};
 use config_keys::{ConfigKey, ConfigParamKey};
 use gem_client::ReqwestClient;
 use gem_tracing::{error_with_fields, info_with_fields};
-use primitives::{ScanProvider, ScanTransaction, ScanTransactionPayload, ScanType};
+use primitives::{ScanOutcome, ScanProvider, ScanTransaction, ScanTransactionPayload, ScanType};
 use rocket::futures::future;
 use security::providers::goplus::GoPlusProvider;
 use security::transaction_scan::{ProviderCheck, ScanSubject, ScanTargets, TransactionScanInput, TransactionScanResult, evaluate_transaction_scan, plan_transaction_scan, scan_subjects, token_asset_ids, website_host};
@@ -188,37 +188,50 @@ impl ScanClient {
     }
 
     fn log(payload: &ScanTransactionPayload, result: &TransactionScanResult) {
+        let transaction_type = payload.transaction_type.as_ref();
+        let chain = payload.target.asset_id.chain.as_ref();
         let website_host = website_host(payload);
         let target = if payload.target.address.is_empty() {
             website_host.clone().unwrap_or_default()
         } else {
             payload.target.address.clone()
         };
-        let scan = ScanTransaction {
-            malicious_website: result.scan.malicious_website.as_ref().and(website_host.clone()),
-            ..result.scan.clone()
-        };
         let message = if result.scan.is_malicious == Some(true) { "security transaction blocked" } else { "security transaction result" };
-        let dry_run = result.dry_run();
         info_with_fields!(
             message,
-            transaction_type = payload.transaction_type.as_ref(),
-            chain = payload.target.asset_id.chain.as_ref(),
+            transaction_type = transaction_type,
+            chain = chain,
             source = result.source.as_ref(),
-            target = format!("{target:?}"),
-            findings = format!("{:?}", result.findings()),
-            errors = format!("{:?}", result.errors()),
             malicious = result.scan.is_malicious == Some(true),
-            dry_run_malicious = !dry_run.is_empty(),
-            provider_errors = result.checks.iter().filter(|check| check.error.is_some()).count(),
+            target = format!("{target:?}"),
             origin_asset_id = payload.origin.asset_id,
             target_asset_id = payload.target.asset_id,
-            address = format!("{:?}", payload.target.address),
             website_host = json!(website_host),
-            scan = json!(scan),
-            dry_run = json!(dry_run),
-            cached_safe = json!(result.safe),
-            providers = json!(result.providers())
+            cached_safe = json!(result.safe)
         );
+        for detection in &result.detections {
+            info_with_fields!(
+                "security finding",
+                transaction_type = transaction_type,
+                chain = chain,
+                scan_type = detection.scan_type.as_ref(),
+                target = format!("{:?}", detection.target),
+                provider = detection.provider.as_ref().map_or("internal", |provider| provider.as_ref()),
+                reason = format!("{:?}", detection.reason.as_deref().unwrap_or_default()),
+                enforced = detection.is_enforced,
+                cached = detection.is_cached
+            );
+        }
+        for check in result.checks.iter().filter(|check| check.outcome == ScanOutcome::Error) {
+            info_with_fields!(
+                "security provider error",
+                transaction_type = transaction_type,
+                chain = chain,
+                scan_type = check.scan_type.as_ref(),
+                target = format!("{:?}", result.subject_target(check.scan_type)),
+                provider = check.provider.as_ref(),
+                error = format!("{:?}", check.error.as_deref().unwrap_or_default())
+            );
+        }
     }
 }

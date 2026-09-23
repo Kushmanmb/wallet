@@ -40,13 +40,13 @@ fn local_detections(input: &TransactionScanInput) -> Vec<ScanDetection> {
         .addresses
         .iter()
         .filter(|address| address.is_malicious == Some(true))
-        .map(|address| ScanDetection::new(ScanType::Address, ScanFinding::Address(ChainAddress::new(address.chain, address.address.clone())), true, "manual"));
+        .map(|address| ScanDetection::local(ScanType::Address, ScanFinding::Address(ChainAddress::new(address.chain, address.address.clone())), address.address.clone(), "manual", true));
     let is_asset_enforced = input.enforced.contains(&ScanType::Asset);
     let assets = input
         .assets
         .iter()
         .filter(|asset| asset.score.rank <= AssetRank::Spam.threshold())
-        .map(|asset| ScanDetection::new(ScanType::Asset, ScanFinding::Asset(asset.asset.id.clone()), is_asset_enforced, asset.asset.id.to_string()));
+        .map(|asset| ScanDetection::local(ScanType::Asset, ScanFinding::Asset(asset.asset.id.clone()), asset.asset.id.to_string(), "spam", is_asset_enforced));
     addresses.chain(assets).collect()
 }
 
@@ -56,8 +56,7 @@ fn cached_detections(input: &TransactionScanInput, subjects: &[ScanSubject], is_
         .filter(|subject| !(is_target_verified && is_address_type(subject.scan_type)))
         .filter_map(|subject| {
             let verdict = input.verdicts.iter().find(|verdict| subject.matches(verdict))?;
-            let source = format!("cached {}", ScanDetection::provider_source(verdict.provider, verdict.reason.as_deref()));
-            Some(ScanDetection::new(subject.scan_type, subject.finding.clone(), input.enforced.contains(&subject.scan_type), source))
+            Some(ScanDetection::provider(subject, verdict.provider, verdict.reason.clone(), input.enforced.contains(&subject.scan_type), true))
         })
         .collect()
 }
@@ -247,7 +246,7 @@ mod tests {
         let plan = plan_transaction_scan(&input);
 
         assert_eq!(plan.targets, None);
-        assert_eq!(plan.detections[0].source, "manual");
+        assert_eq!(plan.detections[0].reason.as_deref(), Some("manual"));
     }
 
     #[test]
@@ -258,7 +257,9 @@ mod tests {
         let plan = plan_transaction_scan(&input);
 
         assert_eq!(plan.targets, None);
-        assert_eq!(plan.detections[0].source, "cached hashdit: phishing");
+        assert!(plan.detections[0].is_cached);
+        assert_eq!(plan.detections[0].provider, Some(ScanProvider::HashDit));
+        assert_eq!(plan.detections[0].reason.as_deref(), Some("phishing"));
     }
 
     #[test]

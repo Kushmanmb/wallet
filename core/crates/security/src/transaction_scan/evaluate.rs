@@ -7,7 +7,7 @@ use super::result::TransactionScanResult;
 pub fn evaluate_transaction_scan(input: &TransactionScanInput, plan: ScanPlan, checks: Vec<ProviderCheck>) -> TransactionScanResult {
     let mut detections = plan.detections;
     let mut new_verdicts = Vec::new();
-    for subject in plan.subjects {
+    for subject in &plan.subjects {
         let Some(check) = checks.iter().find(|check| check.scan_type == subject.scan_type && check.outcome == ScanOutcome::Malicious) else {
             continue;
         };
@@ -15,7 +15,7 @@ pub fn evaluate_transaction_scan(input: &TransactionScanInput, plan: ScanPlan, c
         if is_enforced {
             new_verdicts.push(subject.verdict(check.provider, check.reason.clone()));
         }
-        detections.push(ScanDetection::new(subject.scan_type, subject.finding, is_enforced, ScanDetection::provider_source(check.provider, check.reason.as_deref())));
+        detections.push(ScanDetection::provider(subject, check.provider, check.reason.clone(), is_enforced, false));
     }
 
     let is_scan_complete = plan.targets.is_none() || {
@@ -28,6 +28,7 @@ pub fn evaluate_transaction_scan(input: &TransactionScanInput, plan: ScanPlan, c
     TransactionScanResult {
         scan: scan_transaction(&detections, plan.is_memo_required, is_scan_complete),
         source: if checks.is_empty() { ScanSource::Local } else { ScanSource::Remote },
+        subjects: plan.subjects,
         detections,
         new_verdicts,
         safe: plan.safe,
@@ -110,7 +111,9 @@ mod tests {
                 reason: Some("phishing".to_string()),
             }]
         );
-        assert_eq!(result.findings(), "address hashdit: phishing");
+        assert_eq!(result.detections[0].target, "target");
+        assert_eq!(result.detections[0].reason.as_deref(), Some("phishing"));
+        assert!(!result.detections[0].is_cached);
     }
 
     #[test]
@@ -140,7 +143,10 @@ mod tests {
         assert_eq!(result.scan.is_malicious, Some(false));
         assert_eq!(result.scan.malicious_website, None);
         assert!(result.new_verdicts.is_empty());
-        assert_eq!(result.dry_run().into_iter().collect::<Vec<_>>(), vec![ScanType::Website]);
+        assert_eq!(
+            result.detections.iter().filter(|detection| !detection.is_enforced).map(|detection| detection.scan_type).collect::<Vec<_>>(),
+            vec![ScanType::Website]
+        );
     }
 
     #[test]
@@ -222,11 +228,11 @@ mod tests {
 
         assert!(result.scan.is_scan_complete);
         assert!(result.new_safe.is_empty());
-        assert!(result.errors().is_empty());
+        assert!(result.checks.iter().all(|check| check.error.is_none()));
     }
 
     #[test]
-    fn test_errors_summary() {
+    fn test_provider_error_target() {
         let input = input(TransactionType::Transfer, None);
 
         let result = evaluate(
@@ -237,6 +243,7 @@ mod tests {
             ],
         );
 
-        assert_eq!(result.errors(), "tronscan/address: timeout");
+        assert_eq!(result.subject_target(ScanType::Address), "target");
+        assert_eq!(result.checks[0].error.as_deref(), Some("timeout"));
     }
 }
