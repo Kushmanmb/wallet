@@ -19,13 +19,26 @@ struct PerpetualSceneViewModelTests {
         let service = GemPerpetualDetailsServiceMock()
         service.detailsValue = .mock(
             title: "HYPE",
-            sections: [.info(buttons: [.long, .short], rows: [.loading])],
-            modifyButtons: [.increase, .reduce],
+            sections: [.info(buttons: [GemPerpetualButtonRow(button: .long, tone: .positive), GemPerpetualButtonRow(button: .short, tone: .negative)], rows: [.loading])],
+            modifyButtons: [GemPerpetualButtonRow(button: .increase, tone: .neutral), GemPerpetualButtonRow(button: .reduce, tone: .negative)],
         )
         let model = PerpetualSceneViewModel.mock(service: service)
 
         #expect(model.details == service.detailsValue)
         #expect(model.positionData(model.details) == nil)
+    }
+
+    @Test
+    func buttonsAreDrawnInTheToneCoreGives() {
+        let model = PerpetualSceneViewModel.mock(service: GemPerpetualDetailsServiceMock())
+        let buttons = model.buttonModels([
+            GemPerpetualButtonRow(button: .long, tone: .positive),
+            GemPerpetualButtonRow(button: .increase, tone: .neutral),
+            GemPerpetualButtonRow(button: .reduce, tone: .negative),
+        ])
+
+        #expect(buttons.map(\.style) == [.green, .blue, .red])
+        #expect(buttons.map(\.isDestructive) == [false, false, true])
     }
 
     @Test

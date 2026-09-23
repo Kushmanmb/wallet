@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.gemwallet.android.domains.transaction.aggregates.TransactionDataAggregate
-import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonTone
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonUIModel
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualDetailsSectionUIModel
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualDetailsUIModel
@@ -51,6 +50,7 @@ import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemLocalizedText
 import uniffi.gemstone.GemPerpetualButton
+import uniffi.gemstone.GemValueTone
 
 @Composable
 internal fun PerpetualPositionScene(
@@ -190,15 +190,15 @@ private fun PerpetualPositionScenePreview() {
                     PerpetualDetailsSectionUIModel.Info(
                         title = "Info",
                         buttons = listOf(
-                            PerpetualButtonUIModel("Modify", GemPerpetualButton.MODIFY, PerpetualButtonTone.Primary),
-                            PerpetualButtonUIModel("Close", GemPerpetualButton.CLOSE, PerpetualButtonTone.Negative),
+                            PerpetualButtonUIModel("Modify", GemPerpetualButton.MODIFY, GemValueTone.NEUTRAL),
+                            PerpetualButtonUIModel("Close", GemPerpetualButton.CLOSE, GemValueTone.NEGATIVE),
                         ),
                         rows = listOf(GemListRow.Text(GemListRowTitle.DAILY_VOLUME, "$15.00B")),
                     ),
                 ),
                 modifyButtons = listOf(
-                    PerpetualButtonUIModel("Increase", GemPerpetualButton.INCREASE, PerpetualButtonTone.Primary),
-                    PerpetualButtonUIModel("Reduce", GemPerpetualButton.REDUCE, PerpetualButtonTone.Negative),
+                    PerpetualButtonUIModel("Increase", GemPerpetualButton.INCREASE, GemValueTone.NEUTRAL),
+                    PerpetualButtonUIModel("Reduce", GemPerpetualButton.REDUCE, GemValueTone.NEGATIVE),
                 ),
                 position = null,
             ),

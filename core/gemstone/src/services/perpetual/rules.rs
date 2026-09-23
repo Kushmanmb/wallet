@@ -13,9 +13,9 @@ use primitives::{
 use strum::IntoEnumIterator;
 
 use super::model::{
-    GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualBalanceHeader, GemPerpetualButton, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind, GemPerpetualCloseInput,
-    GemPerpetualConfirmDetails, GemPerpetualConfirmDetailsSummary, GemPerpetualDetails, GemPerpetualMarketCounts, GemPerpetualMarketQuery, GemPerpetualMarketRow, GemPerpetualMarketSection, GemPerpetualOpenRow, GemPerpetualOrderAction,
-    GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
+    GemCandleTooltip, GemCandleTooltipCell, GemCandleTooltipRow, GemMarketsRefreshTrigger, GemPerpetualBalanceHeader, GemPerpetualButton, GemPerpetualButtonRow, GemPerpetualChartLayout, GemPerpetualChartLine, GemPerpetualChartLineKind,
+    GemPerpetualCloseInput, GemPerpetualConfirmDetails, GemPerpetualConfirmDetailsSummary, GemPerpetualDetails, GemPerpetualMarketCounts, GemPerpetualMarketQuery, GemPerpetualMarketRow, GemPerpetualMarketSection, GemPerpetualOpenRow,
+    GemPerpetualOrderAction, GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
 use crate::formatted_number::{GemFormattedNumber, GemValueTone, value_tone};
 use crate::models::custom_types::GemBigInt;
@@ -763,7 +763,7 @@ pub fn details(perpetual: &Perpetual, asset: &Asset, positions: Vec<PerpetualPos
         .into_iter()
         .flatten()
         .collect(),
-        modify_buttons: vec![GemPerpetualButton::Increase, GemPerpetualButton::Reduce],
+        modify_buttons: button_rows(&[GemPerpetualButton::Increase, GemPerpetualButton::Reduce]),
         position,
     }
 }
@@ -853,10 +853,22 @@ fn info_rows(row: GemPerpetualMarketRow) -> Vec<GemListRow> {
     ]
 }
 
-fn perpetual_buttons(has_position: bool) -> Vec<GemPerpetualButton> {
+fn perpetual_buttons(has_position: bool) -> Vec<GemPerpetualButtonRow> {
     match has_position {
-        true => vec![GemPerpetualButton::Modify, GemPerpetualButton::Close],
-        false => vec![GemPerpetualButton::Long, GemPerpetualButton::Short],
+        true => button_rows(&[GemPerpetualButton::Modify, GemPerpetualButton::Close]),
+        false => button_rows(&[GemPerpetualButton::Long, GemPerpetualButton::Short]),
+    }
+}
+
+fn button_rows(buttons: &[GemPerpetualButton]) -> Vec<GemPerpetualButtonRow> {
+    buttons.iter().map(|button| GemPerpetualButtonRow { button: *button, tone: button_tone(button) }).collect()
+}
+
+fn button_tone(button: &GemPerpetualButton) -> GemValueTone {
+    match button {
+        GemPerpetualButton::Long => GemValueTone::Positive,
+        GemPerpetualButton::Short | GemPerpetualButton::Close | GemPerpetualButton::Reduce => GemValueTone::Negative,
+        GemPerpetualButton::Modify | GemPerpetualButton::Increase => GemValueTone::Neutral,
     }
 }
 
@@ -879,18 +891,45 @@ mod tests {
     }
 
     #[test]
+    fn test_each_button_carries_the_tone_it_is_drawn_in() {
+        let tones: Vec<(GemPerpetualButton, GemValueTone)> = button_rows(&[
+            GemPerpetualButton::Long,
+            GemPerpetualButton::Short,
+            GemPerpetualButton::Modify,
+            GemPerpetualButton::Close,
+            GemPerpetualButton::Increase,
+            GemPerpetualButton::Reduce,
+        ])
+        .into_iter()
+        .map(|row| (row.button, row.tone))
+        .collect();
+
+        assert_eq!(
+            tones,
+            vec![
+                (GemPerpetualButton::Long, GemValueTone::Positive),
+                (GemPerpetualButton::Short, GemValueTone::Negative),
+                (GemPerpetualButton::Modify, GemValueTone::Neutral),
+                (GemPerpetualButton::Close, GemValueTone::Negative),
+                (GemPerpetualButton::Increase, GemValueTone::Neutral),
+                (GemPerpetualButton::Reduce, GemValueTone::Negative),
+            ]
+        );
+    }
+
+    #[test]
     fn test_the_perpetual_screen_names_its_sections_rows_and_buttons_from_the_position() {
         let perpetual = Perpetual::mock();
         let asset = Asset::mock();
         let position = PerpetualPosition::mock();
-        let modify_buttons = vec![GemPerpetualButton::Increase, GemPerpetualButton::Reduce];
+        let modify_buttons = button_rows(&[GemPerpetualButton::Increase, GemPerpetualButton::Reduce]);
 
         assert_eq!(
             details(&perpetual, &asset, vec![]),
             GemPerpetualDetails {
                 title: market_row(&perpetual, &asset).title,
                 sections: vec![GemPerpetualSection::Info {
-                    buttons: vec![GemPerpetualButton::Long, GemPerpetualButton::Short],
+                    buttons: button_rows(&[GemPerpetualButton::Long, GemPerpetualButton::Short]),
                     rows: info_rows(market_row(&perpetual, &asset)),
                 }],
                 modify_buttons: modify_buttons.clone(),
@@ -904,7 +943,7 @@ mod tests {
                 sections: vec![
                     GemPerpetualSection::Position { rows: position_details(&position) },
                     GemPerpetualSection::Info {
-                        buttons: vec![GemPerpetualButton::Modify, GemPerpetualButton::Close],
+                        buttons: button_rows(&[GemPerpetualButton::Modify, GemPerpetualButton::Close]),
                         rows: info_rows(market_row(&perpetual, &asset)),
                     },
                 ],

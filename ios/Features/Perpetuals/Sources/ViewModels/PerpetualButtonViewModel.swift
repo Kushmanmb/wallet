@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import enum Gemstone.GemPerpetualButton
+import struct Gemstone.GemPerpetualButtonRow
 
 public struct PerpetualButtonViewModel: Identifiable, Hashable {
     public enum Style {
@@ -9,25 +10,29 @@ public struct PerpetualButtonViewModel: Identifiable, Hashable {
         case blue
     }
 
-    let button: GemPerpetualButton
+    let row: GemPerpetualButtonRow
 
     public var id: String {
-        String(describing: button)
+        String(describing: row.button)
+    }
+
+    var button: GemPerpetualButton {
+        row.button
     }
 
     public var title: String {
-        button.title
+        row.button.title
     }
 
     public var isDestructive: Bool {
-        button == .reduce
+        row.tone == .negative
     }
 
     public var style: Style {
-        switch button {
-        case .long: .green
-        case .short, .close: .red
-        case .modify, .increase, .reduce: .blue
+        switch row.tone {
+        case .positive: .green
+        case .negative: .red
+        case .plain, .neutral, .warning: .blue
         }
     }
 }

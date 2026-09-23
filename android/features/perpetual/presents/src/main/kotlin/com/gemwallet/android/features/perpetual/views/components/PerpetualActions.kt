@@ -11,12 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonTone
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonUIModel
 import com.gemwallet.android.ui.components.list_item.listItem
 import com.gemwallet.android.ui.theme.WalletTheme
 import com.gemwallet.android.ui.theme.paddingDefault
 import uniffi.gemstone.GemPerpetualButton
+import uniffi.gemstone.GemValueTone
 
 @Composable
 internal fun PerpetualActions(buttons: List<PerpetualButtonUIModel>, onSelect: (GemPerpetualButton) -> Unit) {
@@ -27,7 +27,7 @@ internal fun PerpetualActions(buttons: List<PerpetualButtonUIModel>, onSelect: (
         buttons.forEach { button ->
             Button(
                 onClick = { onSelect(button.action) },
-                colors = ButtonDefaults.buttonColors().copy(containerColor = button.tone.color()),
+                colors = ButtonDefaults.buttonColors().copy(containerColor = button.tone.buttonColor()),
                 modifier = Modifier.weight(1f),
             ) {
                 Text(button.title)
@@ -37,10 +37,10 @@ internal fun PerpetualActions(buttons: List<PerpetualButtonUIModel>, onSelect: (
 }
 
 @Composable
-internal fun PerpetualButtonTone.color(): Color = when (this) {
-    PerpetualButtonTone.Positive -> MaterialTheme.colorScheme.tertiary
-    PerpetualButtonTone.Negative -> MaterialTheme.colorScheme.error
-    PerpetualButtonTone.Primary -> MaterialTheme.colorScheme.primary
+private fun GemValueTone.buttonColor(): Color = when (this) {
+    GemValueTone.POSITIVE -> MaterialTheme.colorScheme.tertiary
+    GemValueTone.NEGATIVE -> MaterialTheme.colorScheme.error
+    GemValueTone.PLAIN, GemValueTone.NEUTRAL, GemValueTone.WARNING -> MaterialTheme.colorScheme.primary
 }
 
 @Preview
@@ -49,8 +49,8 @@ private fun PerpetualActionsPreview() {
     WalletTheme {
         PerpetualActions(
             buttons = listOf(
-                PerpetualButtonUIModel("Long", GemPerpetualButton.LONG, PerpetualButtonTone.Positive),
-                PerpetualButtonUIModel("Short", GemPerpetualButton.SHORT, PerpetualButtonTone.Negative),
+                PerpetualButtonUIModel("Long", GemPerpetualButton.LONG, GemValueTone.POSITIVE),
+                PerpetualButtonUIModel("Short", GemPerpetualButton.SHORT, GemValueTone.NEGATIVE),
             ),
             onSelect = {},
         )

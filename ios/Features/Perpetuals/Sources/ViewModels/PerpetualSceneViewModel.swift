@@ -4,6 +4,7 @@ import Components
 import Foundation
 import enum Gemstone.GemInfoTopic
 import enum Gemstone.GemPerpetualButton
+import struct Gemstone.GemPerpetualButtonRow
 import struct Gemstone.GemPerpetualDetails
 import protocol Gemstone.GemPerpetualDetailsServiceProtocol
 import enum Gemstone.GemPerpetualPositionAction
@@ -86,8 +87,8 @@ public final class PerpetualSceneViewModel {
         GemPerpetualButton.modify.title
     }
 
-    public func buttonModels(_ buttons: [GemPerpetualButton]) -> [PerpetualButtonViewModel] {
-        buttons.map { PerpetualButtonViewModel(button: $0) }
+    public func buttonModels(_ buttons: [GemPerpetualButtonRow]) -> [PerpetualButtonViewModel] {
+        buttons.map { PerpetualButtonViewModel(row: $0) }
     }
 
     public func onSelect(_ button: PerpetualButtonViewModel) {

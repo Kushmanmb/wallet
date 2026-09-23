@@ -221,14 +221,20 @@ impl StepFailure for GemPerpetualRefreshFailure {
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
 pub enum GemPerpetualSection {
     Position { rows: Vec<GemPerpetualPositionDetail> },
-    Info { buttons: Vec<GemPerpetualButton>, rows: Vec<GemListRow> },
+    Info { buttons: Vec<GemPerpetualButtonRow>, rows: Vec<GemListRow> },
+}
+
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct GemPerpetualButtonRow {
+    pub button: GemPerpetualButton,
+    pub tone: GemValueTone,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct GemPerpetualDetails {
     pub title: String,
     pub sections: Vec<GemPerpetualSection>,
-    pub modify_buttons: Vec<GemPerpetualButton>,
+    pub modify_buttons: Vec<GemPerpetualButtonRow>,
     pub position: Option<PerpetualPosition>,
 }
 

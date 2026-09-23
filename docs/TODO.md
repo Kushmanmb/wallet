@@ -248,7 +248,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 #### Parity: the apps answer differently today
 
 - **VM90** **S** **Banner icon shape.** iOS sizes and rounds banner icons by event; Android does not.
-- **VM91** **S** **Perpetual reduce button tone.** iOS draws Reduce blue with a destructive role; Android gives it a negative tone. `GemPerpetualButton` should carry the tone.
 - **VM92** **M** **Invalid phrase words.** Android highlights invalid phrase words through a separate `GemMnemonic`, called from the text transformation on each recomposition; iOS has no highlight. The import session should return them; decide iOS parity.
 - **VM93** **S** **Perpetual amount available balance.** Android `AmountPerpetualProvider` splices the perpetual `available` (Double to atomic) into the USDC balance; iOS uses the stored balance.
 - **VM94** **S** **Notification prompt.** Android asks through Core `shouldAskNotifications`/`setNotificationsAsked`; iOS decides in its own `PushNotificationEnablerService`.
@@ -335,6 +334,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM91 (2026-09-23).** Closed. `GemPerpetualDetails` returns `GemPerpetualButtonRow { button, tone }` for the info and modify buttons, toned once in `perpetual::rules::button_tone`: long positive, short/close/reduce negative, modify/increase neutral. iOS `PerpetualButtonViewModel` draws its style and destructive role from the tone, and Android `PerpetualButtonUIModel` carries the `GemValueTone` in place of its own `PerpetualButtonTone` switch. Both apps already drew Reduce red in the modify sheet; they now read it from one rule.
 
 **VM100, VM101 (2026-09-23).** Closed. Android `PerpetualMarketViewModel.onRefresh` ends the spinner when the refresh completes instead of holding it another 500 ms, and its scheduled refresh is `refreshMarkets` rather than `fetch`. iOS `AssetSceneViewModel` handles the perpetuals banner by enabling perpetuals and pushing `Scenes.Perpetuals` onto the wallet stack through an `onSelectPerpetuals` callback, as Android navigates directly, instead of opening a force-unwrapped `gem://` URL through the system; `GemAssetDetailsService.deeplink_gem_url` and `GemDeeplinkService.build_gem_url` had no other caller and are gone.
 

@@ -11,12 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonTone
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonUIModel
 import com.gemwallet.android.ui.components.screen.ModalBottomSheet
 import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.mainActionHeight
 import uniffi.gemstone.GemPerpetualButton
+import uniffi.gemstone.GemValueTone
 
 @Composable
 internal fun PerpetualModifyBottomSheet(isVisible: Boolean, title: String, buttons: List<PerpetualButtonUIModel>, onDismiss: () -> Unit, onSelect: (GemPerpetualButton) -> Unit) {
@@ -31,7 +31,7 @@ internal fun PerpetualModifyBottomSheet(isVisible: Boolean, title: String, butto
             }
             ModifyOption(
                 label = button.title,
-                color = if (button.tone == PerpetualButtonTone.Negative) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                color = if (button.tone == GemValueTone.NEGATIVE) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
                 onClick = {
                     onDismiss()
                     onSelect(button.action)
