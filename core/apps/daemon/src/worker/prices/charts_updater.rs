@@ -56,8 +56,8 @@ impl ChartsHistoryUpdater {
         let synced: HashSet<String> = self.cacher.get_set_members_cached(vec![CacheKey::ChartsHistory(provider_id).key()]).await?.into_iter().collect();
         let prices: Vec<PriceRow> = self
             .database
-            .prices()?
-            .get_prices_by_filter(vec![PriceFilter::Provider(provider)])?
+            .run(move |client| client.get_prices_by_filter(vec![PriceFilter::Provider(provider)]))
+            .await?
             .into_iter()
             .filter(|p| !synced.contains(&p.id.to_string()))
             .collect();
@@ -77,7 +77,12 @@ impl ChartsHistoryUpdater {
                 )
                 .await?;
             let has_history = daily.received + hourly.received > 0;
-            let extremes_updates = if has_history { self.database.prices()?.update_extremes_for_price(&price_id)? } else { 0 };
+            let extremes_updates = if has_history {
+                let price_id = price_id.clone();
+                self.database.run(move |client| client.update_extremes_for_price(&price_id)).await?
+            } else {
+                0
+            };
             if has_history {
                 self.cacher.add_to_set_cached(CacheKey::ChartsHistory(provider_id), std::slice::from_ref(&price_id)).await?;
             }
@@ -110,10 +115,8 @@ impl ChartsHistoryUpdater {
         })?;
         let price_id = price.id.to_string();
         let rows = bucketed_chart_rows(&price_id, &values, bucket_size_seconds);
-        Ok(HistorySyncStats {
-            received: values.len(),
-            inserted: self.database.charts()?.add_charts(timeframe, rows)?,
-        })
+        let inserted = self.database.run(move |client| client.add_charts(timeframe, rows)).await?;
+        Ok(HistorySyncStats { received: values.len(), inserted })
     }
 }
 

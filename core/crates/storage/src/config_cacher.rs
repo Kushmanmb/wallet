@@ -55,85 +55,98 @@ impl ConfigCacher {
         }
     }
 
-    pub fn get(&self, key: ConfigKey) -> Result<String, DatabaseError> {
+    pub async fn get(&self, key: ConfigKey) -> Result<String, DatabaseError> {
         let cache_key = key.as_ref().to_string();
         if let Some(value) = self.get_cached(&cache_key) {
             return Ok(value);
         }
-        let value = self.database.client().map_err(|e| DatabaseError::Error(e.to_string()))?.get_config(key)?;
+        let value = self.database.run(move |client| client.get_config(key)).await?;
         self.set_cached(cache_key, value.clone());
         Ok(value)
     }
 
-    pub fn get_i64(&self, key: ConfigKey) -> Result<i64, DatabaseError> {
-        Ok(self.get(key)?.parse()?)
+    pub async fn get_i64(&self, key: ConfigKey) -> Result<i64, DatabaseError> {
+        Ok(self.get(key).await?.parse()?)
     }
 
-    pub fn get_usize(&self, key: ConfigKey) -> Result<usize, DatabaseError> {
-        Ok(self.get(key)?.parse()?)
+    pub async fn get_usize(&self, key: ConfigKey) -> Result<usize, DatabaseError> {
+        Ok(self.get(key).await?.parse()?)
     }
 
-    pub fn get_f64(&self, key: ConfigKey) -> Result<f64, DatabaseError> {
-        Ok(self.get(key)?.parse()?)
+    pub async fn get_f64(&self, key: ConfigKey) -> Result<f64, DatabaseError> {
+        Ok(self.get(key).await?.parse()?)
     }
 
-    pub fn get_bool(&self, key: ConfigKey) -> Result<bool, DatabaseError> {
-        Ok(self.get(key)?.parse()?)
+    pub async fn get_bool(&self, key: ConfigKey) -> Result<bool, DatabaseError> {
+        Ok(self.get(key).await?.parse()?)
     }
 
-    pub fn get_duration(&self, key: ConfigKey) -> Result<Duration, DatabaseError> {
-        parse_duration(&self.get(key)?)
+    pub async fn get_duration(&self, key: ConfigKey) -> Result<Duration, DatabaseError> {
+        parse_duration(&self.get(key).await?)
     }
 
-    pub fn get_param_duration(&self, param: &ConfigParamKey) -> Result<Duration, DatabaseError> {
-        parse_duration(&self.get_param_value(param))
+    pub async fn get_param_duration(&self, param: &ConfigParamKey) -> Result<Duration, DatabaseError> {
+        parse_duration(&self.get_param_value(param).await)
     }
 
-    pub fn get_param_durations<T>(&self, values: impl IntoIterator<Item = T>, key: impl Fn(T) -> ConfigParamKey) -> Result<HashMap<T, Duration>, DatabaseError>
+    pub async fn get_param_durations<T>(&self, values: impl IntoIterator<Item = T>, key: impl Fn(T) -> ConfigParamKey) -> Result<HashMap<T, Duration>, DatabaseError>
     where
         T: Copy + Eq + Hash,
     {
-        values.into_iter().map(|value| self.get_param_duration(&key(value)).map(|duration| (value, duration))).collect()
+        let mut durations = HashMap::new();
+        for value in values {
+            durations.insert(value, self.get_param_duration(&key(value)).await?);
+        }
+        Ok(durations)
     }
 
-    pub fn get_param_bool(&self, param: &ConfigParamKey) -> Result<bool, DatabaseError> {
-        Ok(self.get_param_value(param).parse()?)
+    pub async fn get_param_bool(&self, param: &ConfigParamKey) -> Result<bool, DatabaseError> {
+        Ok(self.get_param_value(param).await.parse()?)
     }
 
-    pub fn get_param_usize(&self, param: &ConfigParamKey) -> Result<usize, DatabaseError> {
-        Ok(self.get_param_value(param).parse()?)
+    pub async fn get_param_usize(&self, param: &ConfigParamKey) -> Result<usize, DatabaseError> {
+        Ok(self.get_param_value(param).await.parse()?)
     }
 
-    pub fn get_rate_limit(&self, key: RateLimitKey) -> Result<RateLimit, DatabaseError> {
-        let [minute, hour, day, week] = RateLimitWindow::ALL.map(|window| self.get_param_usize(&ConfigParamKey::RateLimit(key, window)).map(|limit| limit as i64));
-        Ok(RateLimit::new(minute?, hour?, day?, week?))
+    pub async fn get_rate_limit(&self, key: RateLimitKey) -> Result<RateLimit, DatabaseError> {
+        Ok(RateLimit::new(
+            self.get_rate_limit_window(key, RateLimitWindow::Minute).await?,
+            self.get_rate_limit_window(key, RateLimitWindow::Hour).await?,
+            self.get_rate_limit_window(key, RateLimitWindow::Day).await?,
+            self.get_rate_limit_window(key, RateLimitWindow::Week).await?,
+        ))
     }
 
-    pub fn get_datetime(&self, key: ConfigKey) -> Result<NaiveDateTime, DatabaseError> {
-        let ts = self.get_i64(key)?;
+    async fn get_rate_limit_window(&self, key: RateLimitKey, window: RateLimitWindow) -> Result<i64, DatabaseError> {
+        Ok(self.get_param_usize(&ConfigParamKey::RateLimit(key, window)).await? as i64)
+    }
+
+    pub async fn get_datetime(&self, key: ConfigKey) -> Result<NaiveDateTime, DatabaseError> {
+        let ts = self.get_i64(key).await?;
         DateTime::from_timestamp(ts, 0).map(|dt| dt.naive_utc()).ok_or_else(|| DatabaseError::Error(format!("Invalid timestamp: {}", ts)))
     }
 
-    pub fn set_datetime(&self, key: ConfigKey, time: NaiveDateTime) -> Result<usize, DatabaseError> {
+    pub async fn set_datetime(&self, key: ConfigKey, time: NaiveDateTime) -> Result<usize, DatabaseError> {
         let ts = time.and_utc().timestamp();
-        self.set(key, &ts.to_string())
+        self.set(key, &ts.to_string()).await
     }
 
-    pub fn get_vec_string(&self, key: ConfigKey) -> Result<Vec<String>, DatabaseError> {
-        self.get_vec(key)
+    pub async fn get_vec_string(&self, key: ConfigKey) -> Result<Vec<String>, DatabaseError> {
+        self.get_vec(key).await
     }
 
-    pub fn get_vec<T: DeserializeOwned>(&self, key: ConfigKey) -> Result<Vec<T>, DatabaseError> {
-        self.get_json(key)
+    pub async fn get_vec<T: DeserializeOwned>(&self, key: ConfigKey) -> Result<Vec<T>, DatabaseError> {
+        self.get_json(key).await
     }
 
-    pub fn get_json<T: DeserializeOwned>(&self, key: ConfigKey) -> Result<T, DatabaseError> {
-        Ok(serde_json::from_str(&self.get(key)?)?)
+    pub async fn get_json<T: DeserializeOwned>(&self, key: ConfigKey) -> Result<T, DatabaseError> {
+        Ok(serde_json::from_str(&self.get(key).await?)?)
     }
 
-    pub fn set(&self, key: ConfigKey, value: &str) -> Result<usize, DatabaseError> {
+    pub async fn set(&self, key: ConfigKey, value: &str) -> Result<usize, DatabaseError> {
         self.invalidate(&key);
-        ConfigRepository::set_config(&mut self.database.client().map_err(|e| DatabaseError::Error(e.to_string()))?, key, value)
+        let value = value.to_string();
+        self.database.run(move |client| ConfigRepository::set_config(client, key, &value)).await
     }
 
     pub fn invalidate(&self, key: &ConfigKey) {
@@ -142,17 +155,14 @@ impl ConfigCacher {
         }
     }
 
-    fn get_param_value(&self, param: &ConfigParamKey) -> String {
+    async fn get_param_value(&self, param: &ConfigParamKey) -> String {
         let key = param.key();
         if let Some(value) = self.get_cached(&key) {
             return value;
         }
-        let value = self
-            .database
-            .client()
-            .ok()
-            .and_then(|mut client| ConfigStore::get_config_key(&mut client, &key).ok())
-            .map_or_else(|| param.default_value(), |row| row.value);
+        let lookup = key.clone();
+        let row = self.database.run(move |client| Ok::<_, DatabaseError>(ConfigStore::get_config_key(client, &lookup).ok())).await.ok().flatten();
+        let value = row.map_or_else(|| param.default_value(), |row| row.value);
         self.set_cached(key, value.clone());
         value
     }

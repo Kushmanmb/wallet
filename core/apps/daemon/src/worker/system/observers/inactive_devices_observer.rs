@@ -3,7 +3,7 @@ use localizer::LanguageLocalizer;
 use primitives::{Asset, Chain};
 use push_notification::{GorushNotification, PushNotification};
 use std::error::Error;
-use storage::{Database, DevicesRepository, WalletsRepository};
+use storage::{Database, DatabaseError, DevicesRepository, WalletsRepository};
 use streamer::{NotificationsPayload, StreamProducer, StreamProducerQueue};
 
 pub struct InactiveDevicesObserver {
@@ -19,10 +19,16 @@ impl InactiveDevicesObserver {
 
     pub async fn observe(&self) -> Result<usize, Box<dyn Error + Send + Sync>> {
         // 7 days to 14 days
-        let devices = self.database.devices()?.devices_inactive_days(10, 14, Some(true))?;
+        let devices = self.database.run(|client| client.devices_inactive_days(10, 14, Some(true))).await?;
         for device in &devices {
-            let device_row_id = self.database.devices()?.get_device_row_id(&device.id)?;
-            let subscriptions = self.database.wallets()?.get_subscriptions(device_row_id)?;
+            let device_id = device.id.clone();
+            let subscriptions = self
+                .database
+                .run(move |client| -> Result<_, DatabaseError> {
+                    let device_row_id = client.get_device_row_id(&device_id)?;
+                    client.get_subscriptions(device_row_id)
+                })
+                .await?;
             if subscriptions.is_empty() {
                 continue;
             }

@@ -55,22 +55,22 @@ pub async fn add_device_v2(device_id: VerifiedDeviceId, device: DeviceJson<Devic
     if device.id != device_id.0 {
         return Err(ApiError::BadRequest("Device id mismatch".to_string()));
     }
-    Ok(client.add_device(device)?.into())
+    Ok(client.add_device(device).await?.into())
 }
 
 #[get("/devices")]
 pub async fn get_device_v2(device: AuthenticatedDevice, client: &State<DevicesClient>) -> Result<ApiResponse<Device>, ApiError> {
-    Ok(client.get_device(&device.device_row.device_id)?.into())
+    Ok(client.get_device(&device.device_row.device_id).await?.into())
 }
 
 #[get("/devices/is_registered")]
 pub async fn is_device_registered_v2(device_id: VerifiedDeviceId, client: &State<DevicesClient>) -> Result<ApiResponse<bool>, ApiError> {
-    Ok(client.is_device_registered(&device_id.0)?.into())
+    Ok(client.is_device_registered(&device_id.0).await?.into())
 }
 
 #[get("/devices/assets?<from_timestamp>")]
 pub async fn get_device_assets_v2(device: AuthenticatedDeviceWallet, from_timestamp: Option<u64>, client: &State<AssetsClient>) -> Result<ApiResponse<Vec<AssetId>>, ApiError> {
-    Ok(client.get_assets_by_wallet_id(device.device_row.id, device.wallet_id, from_timestamp)?.into())
+    Ok(client.get_assets_by_wallet_id(device.device_row.id, device.wallet_id, from_timestamp).await?.into())
 }
 
 #[get("/devices/transactions?<params..>")]
@@ -91,18 +91,18 @@ pub async fn get_device_transactions_v2(device: AuthenticatedDeviceWallet, param
 
 #[get("/devices/transactions/<id>")]
 pub async fn get_device_transaction_by_id_v2(device: AuthenticatedDeviceWallet, id: TransactionIdParam, client: &State<TransactionsClient>) -> Result<ApiResponse<Transaction>, ApiError> {
-    Ok(client.get_transaction_by_wallet_id(device.device_row.id, device.wallet_id, &id.0)?.into())
+    Ok(client.get_transaction_by_wallet_id(device.device_row.id, device.wallet_id, &id.0).await?.into())
 }
 
 // TODO: Remove the legacy singular route after 2026-11-15.
 #[get("/devices/transaction/<id>")]
 pub async fn get_device_transaction_v2(_device: AuthenticatedDevice, id: TransactionIdParam, client: &State<TransactionsClient>) -> Result<ApiResponse<Transaction>, ApiError> {
-    Ok(client.get_transaction_by_id(&id.0)?.into())
+    Ok(client.get_transaction_by_id(&id.0).await?.into())
 }
 
 #[post("/devices/address_names", format = "json", data = "<requests>")]
 pub async fn get_device_address_names_v2(_device: AuthenticatedDevice, requests: DeviceJson<Vec<ChainAddress>>, client: &State<AddressNamesClient>) -> Result<ApiResponse<Vec<AddressName>>, ApiError> {
-    Ok(client.get_address_names(requests.into_inner())?.into())
+    Ok(client.get_address_names(requests.into_inner()).await?.into())
 }
 
 #[get("/devices/nft_assets")]
@@ -112,7 +112,7 @@ pub async fn get_device_nft_assets_v2(device: AuthenticatedDeviceWallet, client:
 
 #[get("/devices/nft_assets/<asset_id>")]
 pub async fn get_device_nft_asset_v2(_device: AuthenticatedDevice, asset_id: NftAssetIdParam, client: &State<NFTClient>) -> Result<ApiResponse<NFTAssetData>, ApiError> {
-    Ok(client.get_nft_asset_data(asset_id.0)?.into())
+    Ok(client.get_nft_asset_data(asset_id.0).await?.into())
 }
 
 #[post("/devices/nft_assets/<asset_id>/refresh")]
@@ -127,17 +127,17 @@ pub async fn get_device_defi_positions_v2(device: AuthenticatedDeviceWallet, cli
 
 #[get("/devices/rewards")]
 pub async fn get_device_rewards_v2(device: AuthenticatedDeviceWallet, client: &State<RewardsClient>) -> Result<ApiResponse<Rewards>, ApiError> {
-    Ok(client.get_rewards_by_wallet_id(device.wallet_id)?.into())
+    Ok(client.get_rewards_by_wallet_id(device.wallet_id).await?.into())
 }
 
 #[get("/devices/rewards/events")]
 pub async fn get_device_rewards_events_v2(device: AuthenticatedDeviceWallet, client: &State<RewardsClient>) -> Result<ApiResponse<Vec<RewardEvent>>, ApiError> {
-    Ok(client.get_rewards_events_by_wallet_id(device.wallet_id)?.into())
+    Ok(client.get_rewards_events_by_wallet_id(device.wallet_id).await?.into())
 }
 
 #[get("/devices/rewards/redemptions/<code>")]
 pub async fn get_device_rewards_redemption_v2(_device: AuthenticatedDevice, code: &str, client: &State<RewardsClient>) -> Result<ApiResponse<RewardRedemptionOption>, ApiError> {
-    Ok(client.get_rewards_redemption_option(code)?.into())
+    Ok(client.get_rewards_redemption_option(code).await?.into())
 }
 
 #[post("/devices/rewards/referrals/create", format = "json", data = "<request>")]
@@ -171,7 +171,7 @@ pub async fn update_device_v2(device: AuthenticatedDevice, device_input: DeviceJ
         return Err(ApiError::BadRequest("Device id mismatch".to_string()));
     }
     support_client.update_contact(device.device_row.id, &device_input).await?;
-    let updated_device = client.update_device(device_input)?;
+    let updated_device = client.update_device(device_input).await?;
     Ok(updated_device.into())
 }
 
@@ -189,7 +189,7 @@ pub async fn report_device_nft_v2(device: AuthenticatedDevice, request: DeviceJs
         .map(|asset_id| AssetId::new(asset_id).ok_or_else(|| ApiError::BadRequest(format!("Invalid asset_id: {asset_id}"))))
         .transpose()?;
 
-    Ok(client.report_nft(&device.device_row.device_id, request.collection_id.clone(), asset_id, request.reason.clone())?.into())
+    Ok(client.report_nft(&device.device_row.device_id, request.collection_id.clone(), asset_id, request.reason.clone()).await?.into())
 }
 
 #[get("/devices/name/resolve/<name>?<chain>")]
@@ -209,17 +209,17 @@ pub async fn get_device_wallet_configuration_v2(device: AuthenticatedDeviceWalle
 
 #[get("/devices/notifications?<params..>")]
 pub async fn get_device_notifications_v2(device: AuthenticatedDevice, params: DeviceNotificationsParams, client: &State<NotificationsClient>) -> Result<ApiResponse<Vec<InAppNotification>>, ApiError> {
-    Ok(client.get_notifications(&device.device_row.device_id, params.from_timestamp, params.limit.0)?.into())
+    Ok(client.get_notifications(&device.device_row.device_id, params.from_timestamp, params.limit.0).await?.into())
 }
 
 #[post("/devices/notifications/read")]
 pub async fn mark_device_notifications_read_v2(device: AuthenticatedDevice, client: &State<NotificationsClient>) -> Result<ApiResponse<usize>, ApiError> {
-    Ok(client.mark_all_as_read(&device.device_row.device_id)?.into())
+    Ok(client.mark_all_as_read(&device.device_row.device_id).await?.into())
 }
 
 #[get("/devices/subscriptions")]
 pub async fn get_device_subscriptions_v2(device: AuthenticatedDevice, client: &State<WalletsClient>) -> Result<ApiResponse<Vec<WalletSubscriptionChains>>, ApiError> {
-    Ok(client.get_subscriptions(device.device_row.id)?.into())
+    Ok(client.get_subscriptions(device.device_row.id).await?.into())
 }
 
 #[post("/devices/subscriptions", format = "json", data = "<subscriptions>")]
@@ -259,7 +259,7 @@ pub async fn delete_device_price_alerts_v2(device: AuthenticatedDevice, price_al
 
 #[get("/devices/fiat/transactions")]
 pub async fn get_device_fiat_transactions_v2(device: AuthenticatedDeviceWallet, client: &State<FiatQuotesClient>) -> Result<ApiResponse<Vec<primitives::FiatTransactionData>>, ApiError> {
-    Ok(client.get_transactions_by_device_wallet_id(device.device_row.id, device.wallet_id)?.into())
+    Ok(client.get_transactions_by_device_wallet_id(device.device_row.id, device.wallet_id).await?.into())
 }
 
 #[get("/fiat/assets/<quote_type>")]
@@ -308,5 +308,5 @@ pub async fn get_fiat_quote_url_v2(device: AuthenticatedDeviceWallet, quote_id: 
 
 #[post("/devices/portfolio/assets?<period>", format = "json", data = "<request>")]
 pub async fn get_device_portfolio_assets_v2(_device: AuthenticatedDevice, period: ChartPeriodParam, request: DeviceJson<PortfolioAssetsRequest>, portfolio_client: &State<PortfolioClient>) -> Result<ApiResponse<PortfolioAssets>, ApiError> {
-    Ok(portfolio_client.get_portfolio_charts(request.into_inner().assets, period.0)?.into())
+    Ok(portfolio_client.get_portfolio_charts(request.into_inner().assets, period.0).await?.into())
 }

@@ -33,7 +33,8 @@ impl WalletConfigurationClient {
 
     async fn externally_controlled_accounts(&self, device_id: i32, wallet_id: i32) -> Result<Vec<ChainAddress>, Box<dyn Error + Send + Sync>> {
         Ok(join_all(
-            self.subscribed_addresses(device_id, wallet_id)?
+            self.subscribed_addresses(device_id, wallet_id)
+                .await?
                 .into_iter()
                 .map(|address| async move { self.is_externally_controlled(&address).await.then_some(address) }),
         )
@@ -47,11 +48,9 @@ impl WalletConfigurationClient {
         self.get_statuses(address).await.is_some_and(|statuses| statuses.contains(&AddressStatus::ExternallyControlled))
     }
 
-    fn subscribed_addresses(&self, device_id: i32, wallet_id: i32) -> Result<HashSet<ChainAddress>, Box<dyn Error + Send + Sync>> {
-        Ok(self
-            .database
-            .wallets()?
-            .get_subscriptions_by_wallet_id(device_id, wallet_id)?
+    async fn subscribed_addresses(&self, device_id: i32, wallet_id: i32) -> Result<HashSet<ChainAddress>, Box<dyn Error + Send + Sync>> {
+        let subscriptions = self.database.run(move |client| client.get_subscriptions_by_wallet_id(device_id, wallet_id)).await?;
+        Ok(subscriptions
             .into_iter()
             .filter_map(|(subscription, address)| ADDRESS_STATUS_CHAINS.contains(&subscription.chain.0).then_some(ChainAddress::new(subscription.chain.0, address.address)))
             .collect())

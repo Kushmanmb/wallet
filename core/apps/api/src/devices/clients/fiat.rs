@@ -2,7 +2,7 @@ use std::error::Error;
 
 use fiat::{FiatClient, FiatDeviceContext, FiatWebhookRequest};
 use primitives::{FiatAssets, FiatQuoteRequest, FiatQuoteType, FiatQuoteUrl, FiatQuotes, FiatTransactionData};
-use storage::{Database, DevicesRepository, FiatRepository};
+use storage::{Database, DatabaseError, DevicesRepository, FiatRepository};
 
 pub struct FiatQuotesClient {
     database: Database,
@@ -45,15 +45,21 @@ impl FiatQuotesClient {
         self.fiat_client.process_and_publish_webhook(request, provider).await
     }
 
-    pub fn get_transactions_by_device_wallet_id(&self, device_row_id: i32, wallet_id: i32) -> Result<Vec<FiatTransactionData>, Box<dyn Error + Send + Sync>> {
-        let transactions = FiatRepository::get_fiat_transactions_by_device_and_wallet_id(&mut self.database.fiat()?, device_row_id, wallet_id)?;
+    pub async fn get_transactions_by_device_wallet_id(&self, device_row_id: i32, wallet_id: i32) -> Result<Vec<FiatTransactionData>, Box<dyn Error + Send + Sync>> {
+        let transactions = self.database.run(move |client| client.get_fiat_transactions_by_device_and_wallet_id(device_row_id, wallet_id)).await?;
 
         Ok(transactions.into_iter().map(fiat::fiat_transaction_info).collect())
     }
 
-    pub fn get_transactions_by_device_id(&self, device_id: &str) -> Result<Vec<FiatTransactionData>, Box<dyn Error + Send + Sync>> {
-        let device_row_id = self.database.devices()?.get_device_row_id(device_id)?;
-        let transactions = FiatRepository::get_fiat_transactions_by_device_id(&mut self.database.fiat()?, device_row_id)?;
+    pub async fn get_transactions_by_device_id(&self, device_id: &str) -> Result<Vec<FiatTransactionData>, Box<dyn Error + Send + Sync>> {
+        let device_id = device_id.to_string();
+        let transactions = self
+            .database
+            .run(move |client| -> Result<_, DatabaseError> {
+                let device_row_id = client.get_device_row_id(&device_id)?;
+                client.get_fiat_transactions_by_device_id(device_row_id)
+            })
+            .await?;
 
         Ok(transactions.into_iter().map(fiat::fiat_transaction_info).collect())
     }

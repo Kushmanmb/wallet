@@ -197,7 +197,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let cacher_client = CacherClient::new(redis_url).await?;
     let config_cacher = storage::ConfigCacher::new(database.clone());
     let price_config = PriceConfig {
-        primary_price_max_age: config_cacher.get_duration(config_keys::ConfigKey::PricePrimaryMaxAge)?,
+        primary_price_max_age: config_cacher.get_duration(config_keys::ConfigKey::PricePrimaryMaxAge).await?,
     };
 
     let price_client = PriceClient::new(database.clone(), cacher_client.clone());
@@ -226,21 +226,21 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let stream_producer = StreamProducer::new(&rabbitmq_config, "api", streamer::no_shutdown()).await.unwrap();
     let wallets_client = WalletsClient::new(database.clone(), stream_producer.clone());
 
-    let providers = scan_providers(&settings_clone, cacher_client.clone(), config_cacher.get_duration(ConfigKey::ScanTimeout)?)?;
+    let providers = scan_providers(&settings_clone, cacher_client.clone(), config_cacher.get_duration(ConfigKey::ScanTimeout).await?)?;
     let metrics = Arc::new(metrics::Metrics::new(&providers));
     let scan_client = ScanClient::new(
         database.clone(),
         cacher_client.clone(),
         TransactionScanConfig {
             providers,
-            required_successes: config_cacher.get_usize(ConfigKey::ScanRequiredSuccesses)?,
+            required_successes: config_cacher.get_usize(ConfigKey::ScanRequiredSuccesses).await?,
         },
         metrics.clone(),
     );
     let wallet_configuration_client = WalletConfigurationClient::new(database.clone(), ChainProviders::from_settings(&settings, &user_agent), cacher_client.clone());
     let assets_client = AssetsClient::new(database.clone(), price_config);
     let search_index_config = SearchIndexConfig {
-        batch_size: config_cacher.get_usize(ConfigKey::SearchIndexBatchSize)?,
+        batch_size: config_cacher.get_usize(ConfigKey::SearchIndexBatchSize).await?,
     };
     let search_index_client = SearchIndexClient::new(&settings_clone.meilisearch.url, &settings_clone.meilisearch.key, search_index_config);
     let search_client = SearchClient::new(&search_index_client, price_client.clone());
@@ -337,8 +337,8 @@ async fn rocket_ws_stream(settings: Settings) -> Result<Rocket<Build>, Box<dyn E
     let stream_observer_config = websocket_stream::StreamObserverConfig {
         redis_url: settings.redis.url.clone(),
         cacher_client,
-        retention: config_cacher.get_duration(config_keys::ConfigKey::DeviceStreamRetention)?,
-        history_limit: config_cacher.get_usize(config_keys::ConfigKey::DeviceStreamHistoryLimit)?,
+        retention: config_cacher.get_duration(config_keys::ConfigKey::DeviceStreamRetention).await?,
+        history_limit: config_cacher.get_usize(config_keys::ConfigKey::DeviceStreamHistoryLimit).await?,
     };
 
     let jwt_config = devices::auth_config::JwtConfig {

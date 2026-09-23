@@ -16,16 +16,17 @@ pub(crate) struct AssetClassificationRules {
 }
 
 impl AssetClassificationRules {
-    pub fn from_config(config: &ConfigCacher) -> Result<Self, DatabaseError> {
+    pub async fn from_config(config: &ConfigCacher) -> Result<Self, DatabaseError> {
         let spam_markers = config
-            .get_vec_string(ConfigKey::AssetsSpamMarkers)?
+            .get_vec_string(ConfigKey::AssetsSpamMarkers)
+            .await?
             .into_iter()
             .map(|marker| marker.trim().to_ascii_lowercase())
             .filter(|marker| !marker.is_empty())
             .collect();
         Ok(Self {
             spam_markers,
-            fraudulent_assets: config.get_json(ConfigKey::AssetsFraudulentAssets)?,
+            fraudulent_assets: config.get_json(ConfigKey::AssetsFraudulentAssets).await?,
         })
     }
 

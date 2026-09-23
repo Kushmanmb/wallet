@@ -6,7 +6,7 @@ use std::error::Error;
 use std::sync::Arc;
 use storage::ConfigCacher;
 use storage::database::prices::PriceFilter;
-use storage::{Database, PricesRepository};
+use storage::{Database, DatabaseError, PricesRepository};
 
 pub struct PricesCleanupUpdater {
     database: Database,
@@ -21,18 +21,26 @@ impl PricesCleanupUpdater {
     }
 
     pub async fn update(&self) -> Result<usize, Box<dyn Error + Send + Sync>> {
-        let cutoff = (Utc::now() - chrono::Duration::from_std(self.config.get_duration(ConfigKey::PriceOutdated)?)?).naive_utc();
-        let ids: Vec<String> = self
+        let cutoff = (Utc::now() - chrono::Duration::from_std(self.config.get_duration(ConfigKey::PriceOutdated).await?)?).naive_utc();
+        let provider = self.provider;
+        let (ids, deleted) = self
             .database
-            .prices()?
-            .get_prices_by_filter(vec![PriceFilter::Provider(self.provider), PriceFilter::UpdatedBefore(cutoff)])?
-            .into_iter()
-            .map(|p| p.id.to_string())
-            .collect();
+            .run(move |client| -> Result<(Vec<String>, usize), DatabaseError> {
+                let ids: Vec<String> = client
+                    .get_prices_by_filter(vec![PriceFilter::Provider(provider), PriceFilter::UpdatedBefore(cutoff)])?
+                    .into_iter()
+                    .map(|p| p.id.to_string())
+                    .collect();
+                if ids.is_empty() {
+                    return Ok((ids, 0));
+                }
+                let deleted = client.delete_prices(ids.clone())?;
+                Ok((ids, deleted))
+            })
+            .await?;
         if ids.is_empty() {
             return Ok(0);
         }
-        let deleted = self.database.prices()?.delete_prices(ids.clone())?;
         self.cacher.remove_from_set_cached(CacheKey::ChartsHistory(self.provider.id()), &ids).await?;
         Ok(deleted)
     }

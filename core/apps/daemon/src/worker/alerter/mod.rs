@@ -29,8 +29,8 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     let rabbitmq_config = StreamProducerConfig::new(settings.rabbitmq.url.clone(), retry);
     let stream_producer = StreamProducer::new(&rabbitmq_config, "send_price_alerts", shutdown_rx.clone()).await?;
     let stake_rewards_config = StakeRewardsConfig {
-        threshold: config.get_f64(ConfigKey::AlerterStakeRewardsThreshold)?,
-        lookback: config.get_duration(ConfigKey::AlerterStakeRewardsLookback)?,
+        threshold: config.get_f64(ConfigKey::AlerterStakeRewardsThreshold).await?,
+        lookback: config.get_duration(ConfigKey::AlerterStakeRewardsLookback).await?,
     };
     let chain_providers = Arc::new(ChainProviders::from_settings(&settings, &service_user_agent("daemon", Some("stake_rewards"))));
 
@@ -64,4 +64,5 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
             }
         })
         .finish()
+        .await
 }

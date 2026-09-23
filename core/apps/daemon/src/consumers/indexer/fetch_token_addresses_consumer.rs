@@ -6,7 +6,7 @@ use crate::model::AssetAddressChanges;
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
 use chain_providers::ChainProviders;
-use storage::{AssetsAddressesRepository, AssetsRepository, Database};
+use storage::{AssetsAddressesRepository, AssetsRepository, Database, DatabaseError};
 use streamer::{ChainAddressPayload, StreamProducer, StreamProducerQueue, consumer::MessageConsumer};
 
 pub struct FetchTokenAddressesConsumer {
@@ -31,25 +31,31 @@ impl MessageConsumer<ChainAddressPayload, usize> for FetchTokenAddressesConsumer
     async fn process(&self, payload: ChainAddressPayload) -> Result<usize, Box<dyn Error + Send + Sync>> {
         let chain_address = payload.value;
         let all_assets = self.provider.get_balance_assets(chain_address.chain, chain_address.address.clone()).await?;
-        let existing_addresses = self.database.assets_addresses()?.get_asset_addresses(chain_address.clone())?;
-        let changes = AssetAddressChanges::from_token_balances(&chain_address, existing_addresses, all_assets);
+        let (latest_count, missing_ids) = self
+            .database
+            .run(move |client| -> Result<_, DatabaseError> {
+                let existing_addresses = client.get_asset_addresses(chain_address.clone())?;
+                let changes = AssetAddressChanges::from_token_balances(&chain_address, existing_addresses, all_assets);
 
-        let asset_ids: Vec<_> = changes.addresses_to_add.iter().map(|address| address.asset_id.clone()).collect();
-        let existing_ids: HashSet<_> = self.database.assets()?.get_assets(asset_ids)?.ids().into_iter().collect();
-        let mut addresses_to_add = Vec::new();
-        let mut missing_ids = Vec::new();
+                let asset_ids: Vec<_> = changes.addresses_to_add.iter().map(|address| address.asset_id.clone()).collect();
+                let existing_ids: HashSet<_> = client.get_assets(asset_ids)?.ids().into_iter().collect();
+                let mut addresses_to_add = Vec::new();
+                let mut missing_ids = Vec::new();
 
-        for address in changes.addresses_to_add {
-            if existing_ids.contains(&address.asset_id) {
-                addresses_to_add.push(address);
-            } else {
-                missing_ids.push(address.asset_id);
-            }
-        }
+                for address in changes.addresses_to_add {
+                    if existing_ids.contains(&address.asset_id) {
+                        addresses_to_add.push(address);
+                    } else {
+                        missing_ids.push(address.asset_id);
+                    }
+                }
 
-        let latest_count = addresses_to_add.len();
-        self.database.assets_addresses()?.delete_assets_addresses(changes.addresses_to_delete)?;
-        self.database.assets_addresses()?.add_assets_addresses(addresses_to_add)?;
+                let latest_count = addresses_to_add.len();
+                client.delete_assets_addresses(changes.addresses_to_delete)?;
+                client.add_assets_addresses(addresses_to_add)?;
+                Ok((latest_count, missing_ids))
+            })
+            .await?;
 
         self.stream_producer.publish_fetch_assets(missing_ids).await?;
 

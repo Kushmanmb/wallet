@@ -19,7 +19,7 @@ impl ValidatorScanner {
         let validators = self.chain_providers.get_validators(chain).await?;
         let addresses: Vec<_> = validators.into_iter().filter_map(|v| v.as_scan_address(chain)).collect();
         let count = addresses.len();
-        self.database.scan_addresses()?.add_scan_addresses(addresses)?;
+        self.database.run(move |client| client.add_scan_addresses(addresses)).await?;
         Ok(count)
     }
 
@@ -29,7 +29,7 @@ impl ValidatorScanner {
         let validators: Vec<_> = static_validators.into_iter().map(|v| StakeValidator::new(v.id, v.name)).collect();
         let addresses: Vec<_> = validators.into_iter().filter_map(|v| v.as_scan_address(chain)).collect();
         let count = addresses.len();
-        self.database.scan_addresses()?.add_scan_addresses(addresses)?;
+        self.database.run(move |client| client.add_scan_addresses(addresses)).await?;
         Ok(count)
     }
 }

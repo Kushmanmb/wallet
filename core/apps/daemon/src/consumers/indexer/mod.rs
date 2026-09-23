@@ -133,7 +133,7 @@ async fn run_fetch_assets(settings: Arc<Settings>, database: Database, shutdown_
     let stream_reader = StreamReader::from_connection(&connection, config).await?;
     let stream_producer = StreamProducer::from_connection(&connection, shutdown_rx.clone()).await?;
     let cacher = CacherClient::new(&settings.redis.url).await?;
-    let classification_rules = AssetClassificationRules::from_config(&ConfigCacher::new(database.clone()))?;
+    let classification_rules = AssetClassificationRules::from_config(&ConfigCacher::new(database.clone())).await?;
     let consumer = FetchAssetsConsumer {
         providers: chain_providers(&settings, &name),
         database,
@@ -151,7 +151,7 @@ async fn run_fetch_asset_status(settings: Arc<Settings>, database: Database, shu
     let config = reader_config(&settings.rabbitmq, name.clone());
     let stream_reader = StreamReader::from_connection(&connection, config).await?;
     let cacher = CacherClient::new(&settings.redis.url).await?;
-    let providers = scan_providers(&settings, cacher, ConfigCacher::new(database.clone()).get_duration(ConfigKey::ScanTimeout)?)?;
+    let providers = scan_providers(&settings, cacher, ConfigCacher::new(database.clone()).get_duration(ConfigKey::ScanTimeout).await?)?;
     let consumer = FetchAssetStatusConsumer { database, providers };
     run_consumer::<AssetId, _, bool>(&name, stream_reader, queue, None, consumer, consumer_config(&settings.consumer), shutdown_rx, reporter).await
 }

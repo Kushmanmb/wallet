@@ -27,7 +27,7 @@ impl MessageConsumer<ChainAddressPayload, usize> for FetchAddressTransactionsCon
     }
     async fn process(&self, payload: ChainAddressPayload) -> Result<usize, Box<dyn Error + Send + Sync>> {
         let chain = payload.value.chain;
-        let limit = self.config.get_param_usize(&ConfigParamKey::TransactionsRequestLimit(chain))?;
+        let limit = self.config.get_param_usize(&ConfigParamKey::TransactionsRequestLimit(chain)).await?;
         let transactions_result = self.providers.get_transactions_by_address_result(chain, TransactionsRequest::new(payload.value.address, limit)).await?;
         match transactions_result {
             TransactionsResult::Transactions(transactions) => self.producer.publish_transactions(TransactionsPayload::new(chain, transactions)).await,

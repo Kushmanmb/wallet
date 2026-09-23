@@ -99,4 +99,5 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
             }
         })
         .finish()
+        .await
 }

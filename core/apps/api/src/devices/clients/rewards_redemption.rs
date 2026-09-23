@@ -1,9 +1,11 @@
+use std::error::Error;
+
 use config_keys::{ConfigKey, RateLimitKey, RateLimitWindow};
 use primitives::rewards::{RedemptionResult, Rewards};
 use primitives::{NaiveDateTimeExt, now};
 use rewards::{RewardsRedemptionError, redeem_points};
 use storage::{ConfigCacher, Database, RewardsRedemptionsRepository, RewardsRepository};
-use streamer::{StreamProducer, StreamProducerQueue};
+use streamer::{RewardsRedemptionPayload, StreamProducer, StreamProducerQueue};
 
 pub struct RewardsRedemptionClient {
     database: Database,
@@ -17,8 +19,8 @@ impl RewardsRedemptionClient {
         Self { database, config, stream_producer }
     }
 
-    pub async fn redeem_by_wallet_id(&self, wallet_id: i32, id: &str, device_id: i32) -> Result<RedemptionResult, Box<dyn std::error::Error + Send + Sync>> {
-        let rewards = self.database.rewards()?.get_reward_by_wallet_id(wallet_id)?;
+    pub async fn redeem_by_wallet_id(&self, wallet_id: i32, id: &str, device_id: i32) -> Result<RedemptionResult, Box<dyn Error + Send + Sync>> {
+        let rewards = self.database.run(move |client| client.get_reward_by_wallet_id(wallet_id)).await?;
 
         if !rewards.status.is_verified() {
             return Err(RewardsRedemptionError::NotEligible("Not eligible for rewards".to_string()).into());
@@ -26,34 +28,40 @@ impl RewardsRedemptionClient {
 
         let username = rewards.code.clone().ok_or(RewardsRedemptionError::NoUsername)?;
 
-        self.check_redemption_limits(&username, &rewards)?;
+        self.check_redemption_limits(&username, &rewards).await?;
 
-        let response = redeem_points(&mut self.database.client()?, &username, id, device_id, wallet_id)?;
-        self.stream_producer.publish_rewards_redemption(streamer::RewardsRedemptionPayload::new(response.redemption_id)).await?;
+        let option_id = id.to_string();
+        let response = self.database.run(move |client| redeem_points(client, &username, &option_id, device_id, wallet_id)).await?;
+        self.stream_producer.publish_rewards_redemption(RewardsRedemptionPayload::new(response.redemption_id)).await?;
 
         Ok(response.result)
     }
 
-    fn check_redemption_limits(&self, username: &str, rewards: &Rewards) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    async fn check_redemption_limits(&self, username: &str, rewards: &Rewards) -> Result<(), Box<dyn Error + Send + Sync>> {
         let current = now();
 
-        if rewards.created_at > current.ago(self.config.get_duration(ConfigKey::RedemptionMinAccountAge)?) {
+        if rewards.created_at > current.ago(self.config.get_duration(ConfigKey::RedemptionMinAccountAge).await?) {
             return Err(RewardsRedemptionError::AccountTooNew.into());
         }
 
-        let cooldown_since = current.ago(self.config.get_duration(ConfigKey::RedemptionCooldownAfterReferral)?);
-        if self.database.rewards()?.count_referrals_since(username, cooldown_since)? > 0 {
-            return Err(RewardsRedemptionError::CooldownNotElapsed.into());
-        }
+        let cooldown_since = current.ago(self.config.get_duration(ConfigKey::RedemptionCooldownAfterReferral).await?);
+        let limits = self.config.get_rate_limit(RateLimitKey::RedemptionPerUserLimit).await?;
+        let username = username.to_string();
+        self.database
+            .run(move |client| -> Result<(), Box<dyn Error + Send + Sync>> {
+                if client.count_referrals_since(&username, cooldown_since)? > 0 {
+                    return Err(RewardsRedemptionError::CooldownNotElapsed.into());
+                }
 
-        let limits = self.config.get_rate_limit(RateLimitKey::RedemptionPerUserLimit)?;
-        for window in RateLimitWindow::ALL {
-            let count = self.database.rewards_redemptions()?.count_redemptions_since(username, current.ago(window.duration()))?;
-            if count >= limits.get(window) {
-                return Err(RewardsRedemptionError::LimitReached.into());
-            }
-        }
+                for window in RateLimitWindow::ALL {
+                    let count = client.count_redemptions_since(&username, current.ago(window.duration()))?;
+                    if count >= limits.get(window) {
+                        return Err(RewardsRedemptionError::LimitReached.into());
+                    }
+                }
 
-        Ok(())
+                Ok(())
+            })
+            .await
     }
 }

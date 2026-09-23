@@ -28,7 +28,8 @@ pub async fn fetch_asset_status(_permission: PermissionAdminWrite, asset_id: Jso
     if asset_id.is_native() {
         return Err(ApiError::BadRequest("Asset status requires a token asset".to_string()));
     }
-    database.assets()?.get_asset(&asset_id)?;
+    let lookup_id = asset_id.clone();
+    database.run(move |client| client.get_asset(&lookup_id)).await?;
     stream_producer.publish_fetch_asset_status(asset_id.clone()).await?;
     Ok(asset_id.into())
 }

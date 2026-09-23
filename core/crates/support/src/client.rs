@@ -9,7 +9,7 @@ use primitives::{Device, StreamEvent, SupportMessage, SupportStreamEvent, Suppor
 use push_notification::{GorushNotification, PushNotification, PushNotificationSupport, PushNotificationTypes};
 use std::error::Error;
 use storage::database::devices::DevicesStore;
-use storage::{Database, OptionalExtension};
+use storage::{Database, DatabaseError, OptionalExtension};
 use streamer::{NotificationsPayload, StreamProducer, StreamProducerQueue};
 
 #[derive(Debug, Default)]
@@ -29,8 +29,10 @@ impl SupportClient {
         Self { database, stream_producer, cacher }
     }
 
-    pub fn get_device(&self, device_id: &str) -> Result<Option<Device>, Box<dyn Error + Send + Sync>> {
-        Ok(DevicesStore::get_device(&mut self.database.client()?, device_id).optional()?.map(|d| d.as_primitive()))
+    pub async fn get_device(&self, device_id: &str) -> Result<Option<Device>, Box<dyn Error + Send + Sync>> {
+        let device_id = device_id.to_string();
+        let device = self.database.run(move |client| -> Result<_, DatabaseError> { Ok(DevicesStore::get_device(client, &device_id).optional()?) }).await?;
+        Ok(device.map(|device| device.as_primitive()))
     }
 
     pub async fn process_webhook(&self, device: &Device, payload: &ChatwootWebhookPayload) -> Result<SupportWebhookResult, Box<dyn Error + Send + Sync>> {

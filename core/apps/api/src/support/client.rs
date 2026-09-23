@@ -46,7 +46,7 @@ impl SupportApiClient {
     }
 
     pub async fn update_contact(&self, device_id: i32, device: &Device) -> Result<(), Box<dyn Error + Send + Sync>> {
-        let Some(session) = self.get_session(device_id)? else {
+        let Some(session) = self.get_session(device_id).await? else {
             return Ok(());
         };
         let chatwoot = self.chatwoot(device.platform);
@@ -54,7 +54,7 @@ impl SupportApiClient {
             Some(session) => session,
             None => chatwoot.create_session(device).await?,
         };
-        self.set_session(device_id, &session)?;
+        self.set_session(device_id, &session).await?;
         Ok(())
     }
 
@@ -64,7 +64,7 @@ impl SupportApiClient {
         Fut: Future<Output = Result<T, Box<dyn Error + Send + Sync>>>,
     {
         let chatwoot = self.chatwoot(device.platform.0);
-        let session = match self.get_session(device.id)? {
+        let session = match self.get_session(device.id).await? {
             Some(session) => session,
             None => self.create_session(chatwoot, device).await?,
         };
@@ -78,18 +78,20 @@ impl SupportApiClient {
         }
     }
 
-    fn get_session(&self, device_id: i32) -> Result<Option<ChatwootSession>, Box<dyn Error + Send + Sync>> {
-        Ok(self.database.support_sessions()?.get_support_session(device_id)?.map(|session| ChatwootSession { auth_token: session.auth_token }))
+    async fn get_session(&self, device_id: i32) -> Result<Option<ChatwootSession>, Box<dyn Error + Send + Sync>> {
+        let session = self.database.run(move |client| client.get_support_session(device_id)).await?;
+        Ok(session.map(|session| ChatwootSession { auth_token: session.auth_token }))
     }
 
     async fn create_session(&self, chatwoot: &ChatwootClient, device: &DeviceRow) -> Result<ChatwootSession, Box<dyn Error + Send + Sync>> {
         let session = chatwoot.create_session(&device.as_primitive()).await?;
-        self.set_session(device.id, &session)?;
+        self.set_session(device.id, &session).await?;
         Ok(session)
     }
 
-    fn set_session(&self, device_id: i32, session: &ChatwootSession) -> Result<(), Box<dyn Error + Send + Sync>> {
-        self.database.support_sessions()?.set_support_session(NewSupportSessionRow::new(device_id, &session.auth_token))?;
+    async fn set_session(&self, device_id: i32, session: &ChatwootSession) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let row = NewSupportSessionRow::new(device_id, &session.auth_token);
+        self.database.run(move |client| client.set_support_session(row)).await?;
         Ok(())
     }
 }

@@ -59,10 +59,11 @@ impl InTransitUpdater {
     }
 
     pub async fn update(&self) -> Result<usize, Box<dyn Error + Send + Sync>> {
+        let scan_limit = self.config.scan_limit();
         let transactions = self
             .database
-            .transactions()?
-            .get_transactions_by_filter(vec![TransactionFilter::States(vec![TransactionState::InTransit])], self.config.scan_limit())?;
+            .run(move |client| client.get_transactions_by_filter(vec![TransactionFilter::States(vec![TransactionState::InTransit])], scan_limit))
+            .await?;
         let now = Utc::now();
         let transactions_to_check = {
             let schedules = self.check_schedules();
@@ -165,7 +166,8 @@ impl InTransitUpdater {
             Some(ref json) => vec![TransactionUpdate::State(state.clone()), TransactionUpdate::Kind(TransactionType::Swap.into()), TransactionUpdate::Metadata(json.clone())],
             None => vec![TransactionUpdate::State(state.clone()), TransactionUpdate::Kind(TransactionType::Swap.into())],
         };
-        self.database.transactions()?.update_transaction(chain.as_ref(), &row.hash, updates)?;
+        let hash = row.hash.clone();
+        self.database.run(move |client| client.update_transaction(chain.as_ref(), &hash, updates)).await?;
 
         let transaction = row.as_primitive(row.get_addresses())?.with_swap_state(state.clone().into(), metadata.clone());
         self.stream_producer.publish_transactions(TransactionsPayload::new_state_change_with_notify(chain, vec![transaction])).await?;

@@ -28,8 +28,8 @@ impl PerpetualAddressRefresher {
             vec![]
         } else {
             self.database
-                .wallets()?
-                .get_subscriptions_by_chain_addresses(chain, referred_addresses)?
+                .run(move |client| client.get_subscriptions_by_chain_addresses(chain, referred_addresses))
+                .await?
                 .into_iter()
                 .map(|s| s.address)
                 .collect::<HashSet<_>>()

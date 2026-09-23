@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use chrono::Utc;
 use storage::models::SubscriptionAddressExcludeRow;
-use storage::{Database, TransactionsRepository, WalletsRepository};
+use storage::{Database, DatabaseError, TransactionsRepository, WalletsRepository};
 
 #[derive(Clone)]
 pub struct TransactionCleanupConfig {
@@ -26,34 +26,41 @@ impl TransactionCleanup {
 
     pub async fn cleanup(&self) -> Result<HashMap<String, usize>, Box<dyn Error + Send + Sync>> {
         let since = (Utc::now() - self.config.lookback).naive_utc();
+        let address_max_count = self.config.address_max_count;
+        let address_limit = self.config.address_limit as i64;
 
-        let heavy_addresses = self.database.transactions()?.get_transactions_addresses(self.config.address_max_count, self.config.address_limit as i64, since)?;
+        Ok(self
+            .database
+            .run(move |client| -> Result<HashMap<String, usize>, DatabaseError> {
+                let heavy_addresses = client.get_transactions_addresses(address_max_count, address_limit, since)?;
 
-        if heavy_addresses.is_empty() {
-            return Ok(HashMap::new());
-        }
+                if heavy_addresses.is_empty() {
+                    return Ok(HashMap::new());
+                }
 
-        let subscriptions_exclude: Vec<_> = heavy_addresses
-            .iter()
-            .map(|x| SubscriptionAddressExcludeRow {
-                address: x.address.clone(),
-                chain: x.chain_id.clone(),
+                let subscriptions_exclude: Vec<_> = heavy_addresses
+                    .iter()
+                    .map(|x| SubscriptionAddressExcludeRow {
+                        address: x.address.clone(),
+                        chain: x.chain_id.clone(),
+                    })
+                    .collect();
+                client.add_subscriptions_exclude_addresses(subscriptions_exclude)?;
+
+                let total_addresses = heavy_addresses.len();
+
+                let affected_transaction_ids = client.delete_transactions_addresses(heavy_addresses)?;
+                let total_transactions_addresses = affected_transaction_ids.len();
+
+                let unique_ids: Vec<i64> = affected_transaction_ids.into_iter().collect::<HashSet<_>>().into_iter().collect();
+                let total_deleted_transactions = client.delete_orphaned_transactions(unique_ids)?;
+
+                Ok(HashMap::from([
+                    ("addresses".to_string(), total_addresses),
+                    ("transactions_addresses".to_string(), total_transactions_addresses),
+                    ("transactions_deleted".to_string(), total_deleted_transactions),
+                ]))
             })
-            .collect();
-        self.database.wallets()?.add_subscriptions_exclude_addresses(subscriptions_exclude)?;
-
-        let total_addresses = heavy_addresses.len();
-
-        let affected_transaction_ids = self.database.transactions()?.delete_transactions_addresses(heavy_addresses)?;
-        let total_transactions_addresses = affected_transaction_ids.len();
-
-        let unique_ids: Vec<i64> = affected_transaction_ids.into_iter().collect::<HashSet<_>>().into_iter().collect();
-        let total_deleted_transactions = self.database.transactions()?.delete_orphaned_transactions(unique_ids)?;
-
-        Ok(HashMap::from([
-            ("addresses".to_string(), total_addresses),
-            ("transactions_addresses".to_string(), total_transactions_addresses),
-            ("transactions_deleted".to_string(), total_deleted_transactions),
-        ]))
+            .await?)
     }
 }

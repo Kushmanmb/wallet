@@ -10,7 +10,7 @@ use primitives::{AccessTokenCacher, Device, FiatTransactionStatus, TransactionId
 use push_notification::{GorushNotification, PushNotification};
 use settings::Settings;
 use storage::models::FiatTransactionRow;
-use storage::{AssetsRepository, Database, WalletsRepository};
+use storage::{AssetsRepository, Database, DatabaseError, WalletsRepository};
 use streamer::consumer::MessageConsumer;
 use streamer::{FiatWebhook, FiatWebhookPayload, NotificationsPayload, QueueName, StreamProducer, StreamProducerQueue, WalletStreamEvent, WalletStreamPayload};
 
@@ -30,9 +30,17 @@ impl FiatWebhookConsumer {
     }
 
     async fn send_fiat_notification(&self, updated: &FiatTransactionRow) -> Result<(), Box<dyn Error + Send + Sync>> {
-        let asset = self.database.assets()?.get_asset(&updated.asset_id.0)?;
-        let wallet_id = self.database.wallets()?.get_wallet_by_id(updated.wallet_id)?.wallet_id.0;
-        let devices: Vec<Device> = self.database.wallets()?.get_devices_by_wallet_id(updated.wallet_id)?.into_iter().map(|d| d.as_primitive()).collect();
+        let asset_id = updated.asset_id.0.clone();
+        let wallet_row_id = updated.wallet_id;
+        let (asset, wallet_id, devices) = self
+            .database
+            .run(move |client| -> Result<_, DatabaseError> {
+                let asset = client.get_asset(&asset_id)?;
+                let wallet_id = client.get_wallet_by_id(wallet_row_id)?.wallet_id.0;
+                let devices: Vec<Device> = client.get_devices_by_wallet_id(wallet_row_id)?.into_iter().map(|d| d.as_primitive()).collect();
+                Ok((asset, wallet_id, devices))
+            })
+            .await?;
 
         let Some(crypto_value) = updated.value.as_deref() else {
             return Ok(());
@@ -91,8 +99,14 @@ impl MessageConsumer<FiatWebhookPayload, bool> for FiatWebhookConsumer {
             }
         };
 
-        let existing = self.database.fiat()?.get_fiat_transaction(provider_name, &transaction_update.transaction_id)?;
-        let updated = self.database.fiat()?.update_fiat_transaction(provider_name, transaction_update)?;
+        let (existing, updated) = self
+            .database
+            .run(move |client| -> Result<_, DatabaseError> {
+                let existing = client.get_fiat_transaction(provider_name, &transaction_update.transaction_id)?;
+                let updated = client.update_fiat_transaction(provider_name, transaction_update)?;
+                Ok((existing, updated))
+            })
+            .await?;
 
         info_with_fields!(
             "processed webhook",

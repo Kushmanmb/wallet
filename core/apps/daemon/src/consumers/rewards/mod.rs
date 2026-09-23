@@ -45,9 +45,9 @@ async fn run_rewards_events(settings: Arc<Settings>, database: Database, shutdow
 async fn run_rewards_redemptions(settings: Arc<Settings>, database: Database, shutdown_rx: ShutdownReceiver, reporter: Arc<dyn ConsumerStatusReporter>) -> Result<(), Box<dyn Error + Send + Sync>> {
     let config = ConfigCacher::new(database.clone());
     let retry_config = rewards_redemption_consumer::RedemptionRetryConfig {
-        max_retries: config.get_i64(ConfigKey::RedemptionRetryMaxRetries)? as u32,
-        delay: config.get_duration(ConfigKey::RedemptionRetryDelay)?,
-        errors: config.get_vec_string(ConfigKey::RedemptionRetryErrors)?,
+        max_retries: config.get_i64(ConfigKey::RedemptionRetryMaxRetries).await? as u32,
+        delay: config.get_duration(ConfigKey::RedemptionRetryDelay).await?,
+        errors: config.get_vec_string(ConfigKey::RedemptionRetryErrors).await?,
     };
     let queue = QueueName::RewardsRedemptions;
     let (name, stream_reader) = reader_for_queue(&settings, &queue, &shutdown_rx).await?;

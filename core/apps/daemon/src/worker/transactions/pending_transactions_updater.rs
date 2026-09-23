@@ -16,9 +16,9 @@ pub struct PendingTransactionsUpdaterConfig {
 }
 
 impl PendingTransactionsUpdaterConfig {
-    pub fn from_config(config: &ConfigCacher) -> Result<Self, DatabaseError> {
+    pub async fn from_config(config: &ConfigCacher) -> Result<Self, DatabaseError> {
         Ok(Self {
-            error_max_age_by_chain: config.get_param_durations(Chain::all(), ConfigParamKey::TransactionsPendingErrorMaxAge)?,
+            error_max_age_by_chain: config.get_param_durations(Chain::all(), ConfigParamKey::TransactionsPendingErrorMaxAge).await?,
         })
     }
 
@@ -88,7 +88,7 @@ impl PendingTransactionsUpdater {
             return Ok(true);
         }
 
-        if self.database.transactions()?.get_transaction_exists(&transaction_id)? {
+        if self.database.run(move |client| client.get_transaction_exists(&transaction_id)).await? {
             info_with_fields!("pending transaction already stored", chain = chain.as_ref(), identifier = identifier, elapsed = elapsed);
             return Ok(true);
         }

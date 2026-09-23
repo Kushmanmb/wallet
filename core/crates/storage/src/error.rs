@@ -1,6 +1,8 @@
 use std::error::Error;
 use std::fmt;
 
+use tokio::task::JoinError;
+
 #[derive(Debug, Clone)]
 pub enum DatabaseError {
     NotFound { resource: &'static str, lookup: NotFoundLookup },
@@ -205,6 +207,12 @@ impl From<std::str::ParseBoolError> for DatabaseError {
 
 impl From<serde_json::Error> for DatabaseError {
     fn from(error: serde_json::Error) -> Self {
+        DatabaseError::Error(error.to_string())
+    }
+}
+
+impl From<JoinError> for DatabaseError {
+    fn from(error: JoinError) -> Self {
         DatabaseError::Error(error.to_string())
     }
 }

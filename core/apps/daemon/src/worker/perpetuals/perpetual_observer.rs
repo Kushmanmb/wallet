@@ -71,7 +71,7 @@ impl PerpetualPositionObserver {
         let checkpoint_key = checkpoint.key();
         let now = chrono::Utc::now().timestamp() as u64;
         let from_timestamp: u64 = self.cacher.get_value_optional(&checkpoint_key).await?.unwrap_or(now);
-        let limit = self.config.get_param_usize(&ConfigParamKey::TransactionsRequestLimit(self.chain))?;
+        let limit = self.config.get_param_usize(&ConfigParamKey::TransactionsRequestLimit(self.chain)).await?;
 
         let request = TransactionsRequest::new(address.to_string(), limit).with_from_timestamp(Some(from_timestamp));
         let transactions = self.providers.get_transactions_by_address(self.chain, request).await?;

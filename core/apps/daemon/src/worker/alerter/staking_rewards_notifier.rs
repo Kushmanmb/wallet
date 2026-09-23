@@ -42,7 +42,7 @@ impl StakingRewardsNotifier {
     pub async fn check_chain(&self, chain: Chain) -> Result<usize, Box<dyn Error + Send + Sync>> {
         let since = chrono::Utc::now().naive_utc() - chrono::Duration::from_std(self.config.lookback)?;
         let kinds = TransactionType::staking_types().into_iter().map(Into::into).collect();
-        let addresses = self.database.transactions()?.get_addresses_by_chain_and_kind(chain.as_ref(), kinds, since)?;
+        let addresses = self.database.run(move |client| client.get_addresses_by_chain_and_kind(chain.as_ref(), kinds, since)).await?;
 
         let mut notified = 0;
         for address in &addresses {
@@ -60,7 +60,8 @@ impl StakingRewardsNotifier {
     }
 
     async fn process_address(&self, chain: Chain, address: &str) -> Result<bool, Box<dyn Error + Send + Sync>> {
-        let subscriptions = self.database.wallets()?.get_subscriptions_by_chain_addresses(chain, vec![address.to_string()])?;
+        let addresses = vec![address.to_string()];
+        let subscriptions = self.database.run(move |client| client.get_subscriptions_by_chain_addresses(chain, addresses)).await?;
         if subscriptions.is_empty() {
             return Ok(false);
         }

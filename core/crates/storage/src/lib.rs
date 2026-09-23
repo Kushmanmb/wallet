@@ -1,4 +1,4 @@
-use std::error::Error;
+use tokio::task::spawn_blocking;
 
 mod config_cacher;
 pub mod database;
@@ -69,113 +69,25 @@ impl Database {
         Ok(Self(database::create_pool(database_url, pool_size)?))
     }
 
-    pub fn client(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        Ok(DatabaseClient::from_pool(&self.0)?)
-    }
-}
-
-impl Database {
-    pub fn assets(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn api_clients(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn assets_addresses(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
+    pub async fn run<T, E, F>(&self, operation: F) -> Result<T, E>
+    where
+        T: Send + 'static,
+        E: From<DatabaseError> + Send + 'static,
+        F: FnOnce(&mut DatabaseClient) -> Result<T, E> + Send + 'static,
+    {
+        let pool = self.0.clone();
+        match spawn_blocking(move || operation(&mut DatabaseClient::from_pool(&pool)?)).await {
+            Ok(result) => result,
+            Err(error) => Err(DatabaseError::from(error).into()),
+        }
     }
 
-    pub fn assets_links(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn assets_usage_ranks(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn chains(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn charts(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn devices(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn fiat(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn migrations(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn perpetuals(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn nft(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn notifications(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn parser_state(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn price_alerts(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn prices(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn prices_providers(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn rewards(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn rewards_redemptions(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn releases(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn scan_addresses(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn scan_detections(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn support_sessions(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn tag(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn transactions(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
-    }
-
-    pub fn wallets(&self) -> Result<DatabaseClient, Box<dyn Error + Send + Sync>> {
-        self.client()
+    pub async fn transaction<T, E, F>(&self, operation: F) -> Result<T, E>
+    where
+        T: Send + 'static,
+        E: From<DatabaseError> + Send + 'static,
+        F: FnOnce(&mut DatabaseClient) -> Result<T, E> + Send + 'static,
+    {
+        self.run(move |client| client.transaction(operation)).await
     }
 }

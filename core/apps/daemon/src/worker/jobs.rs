@@ -12,11 +12,11 @@ enum JobInterval {
 }
 
 impl JobInterval {
-    fn resolve(self, config: Option<&ConfigCacher>) -> Result<Duration, Box<dyn Error + Send + Sync>> {
+    async fn resolve(self, config: Option<&ConfigCacher>) -> Result<Duration, Box<dyn Error + Send + Sync>> {
         match self {
             JobInterval::Config(key) => {
                 let cfg = config.ok_or_else(|| format!("ConfigCacher required for {:?}", key))?;
-                Ok(cfg.get_duration(key)?)
+                Ok(cfg.get_duration(key).await?)
             }
         }
     }
@@ -256,8 +256,8 @@ impl JobVariant {
         self
     }
 
-    pub fn with_param_duration(self, config: &ConfigCacher, key: &ConfigParamKey) -> Result<Self, storage::DatabaseError> {
-        Ok(self.every(config.get_param_duration(key)?))
+    pub async fn with_param_duration(self, config: &ConfigCacher, key: &ConfigParamKey) -> Result<Self, storage::DatabaseError> {
+        Ok(self.every(config.get_param_duration(key).await?))
     }
 
     pub fn name(&self) -> String {
@@ -268,8 +268,8 @@ impl JobVariant {
         self.job.worker()
     }
 
-    pub fn resolve_interval(&self, config: Option<&ConfigCacher>) -> Result<Duration, Box<dyn Error + Send + Sync>> {
-        if let Some(duration) = self.override_interval { Ok(duration) } else { self.job.interval().resolve(config) }
+    pub async fn resolve_interval(&self, config: Option<&ConfigCacher>) -> Result<Duration, Box<dyn Error + Send + Sync>> {
+        if let Some(duration) = self.override_interval { Ok(duration) } else { self.job.interval().resolve(config).await }
     }
 }
 

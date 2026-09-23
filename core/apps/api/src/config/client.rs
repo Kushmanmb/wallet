@@ -1,6 +1,6 @@
 use primitives::{AssetBasic, ConfigResponse, ConfigVersions, FiatAssets, SwapConfig, SwapProvider};
 use std::error::Error;
-use storage::{AssetFilter, AssetsRepository, Database, ReleasesRepository};
+use storage::{AssetFilter, AssetsRepository, Database, DatabaseError, ReleasesRepository};
 
 #[derive(Clone)]
 pub struct ConfigClient {
@@ -12,11 +12,18 @@ impl ConfigClient {
         Self { database }
     }
 
-    pub fn get_config(&self) -> Result<ConfigResponse, Box<dyn Error + Send + Sync>> {
-        let fiat_on_ramp_assets = self.database.assets()?.get_assets_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::IsBuyable(true)])?;
-        let fiat_off_ramp_assets = self.database.assets()?.get_assets_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::IsSellable(true)])?;
-        let swap_assets = self.database.assets()?.get_swap_assets()?;
-        let releases = self.database.releases()?.get_releases()?;
+    pub async fn get_config(&self) -> Result<ConfigResponse, Box<dyn Error + Send + Sync>> {
+        let (fiat_on_ramp_assets, fiat_off_ramp_assets, swap_assets, releases) = self
+            .database
+            .run(|client| -> Result<_, DatabaseError> {
+                Ok((
+                    client.get_assets_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::IsBuyable(true)])?,
+                    client.get_assets_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::IsSellable(true)])?,
+                    client.get_swap_assets()?,
+                    client.get_releases()?,
+                ))
+            })
+            .await?;
 
         let releases = releases.into_iter().map(|x| x.as_primitive()).collect();
 

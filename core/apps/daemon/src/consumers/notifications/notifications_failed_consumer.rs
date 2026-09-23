@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use async_trait::async_trait;
-use storage::{Database, database::devices::DeviceFieldUpdate};
+use storage::{Database, DevicesRepository, database::devices::DeviceFieldUpdate};
 use streamer::{NotificationsFailedPayload, consumer::MessageConsumer};
 
 pub struct NotificationsFailedConsumer {
@@ -27,6 +27,6 @@ impl MessageConsumer<NotificationsFailedPayload, usize> for NotificationsFailedC
             return Ok(0);
         }
 
-        Ok(self.database.client()?.devices().update_device_fields(device_ids, vec![DeviceFieldUpdate::IsPushEnabled(false)])?)
+        Ok(self.database.run(move |client| client.update_device_fields(device_ids, vec![DeviceFieldUpdate::IsPushEnabled(false)])).await?)
     }
 }

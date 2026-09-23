@@ -32,9 +32,9 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     ctx.plan_builder(WorkerService::System, &config, shutdown_rx)
         .job(WorkerJob::CleanupProcessedTransactions, {
             let cleanup_config = TransactionCleanupConfig {
-                address_max_count: config.get_i64(ConfigKey::TransactionCleanupAddressMaxCount)?,
-                address_limit: config.get_usize(ConfigKey::TransactionCleanupAddressLimit)?,
-                lookback: config.get_duration(ConfigKey::TransactionCleanupLookback)?,
+                address_max_count: config.get_i64(ConfigKey::TransactionCleanupAddressMaxCount).await?,
+                address_limit: config.get_usize(ConfigKey::TransactionCleanupAddressLimit).await?,
+                lookback: config.get_duration(ConfigKey::TransactionCleanupLookback).await?,
             };
             let transaction_cleanup = TransactionCleanup::new(database.clone(), cleanup_config);
             move |_| {
@@ -71,4 +71,5 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
             }
         })
         .finish()
+        .await
 }

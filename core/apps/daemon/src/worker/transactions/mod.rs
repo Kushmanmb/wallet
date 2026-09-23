@@ -29,15 +29,15 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     let config = ConfigCacher::new(database.clone());
 
     let in_transit_config = InTransitConfig {
-        timeout: config.get_duration(ConfigKey::TransactionInTransitTimeout)?,
-        query_limit: config.get_i64(ConfigKey::TransactionInTransitQueryLimit)?,
+        timeout: config.get_duration(ConfigKey::TransactionInTransitTimeout).await?,
+        query_limit: config.get_i64(ConfigKey::TransactionInTransitQueryLimit).await?,
         check_interval: JobConfiguration {
-            initial_interval_ms: config.get_duration(ConfigKey::TransactionTimerInTransitUpdate)?.as_millis() as u32,
-            max_interval_ms: config.get_duration(ConfigKey::TransactionInTransitMaxCheckInterval)?.as_millis() as u32,
-            step_factor: config.get_f64(ConfigKey::TransactionInTransitCheckIntervalFactor)? as f32,
+            initial_interval_ms: config.get_duration(ConfigKey::TransactionTimerInTransitUpdate).await?.as_millis() as u32,
+            max_interval_ms: config.get_duration(ConfigKey::TransactionInTransitMaxCheckInterval).await?.as_millis() as u32,
+            step_factor: config.get_f64(ConfigKey::TransactionInTransitCheckIntervalFactor).await? as f32,
         },
     };
-    let pending_config = PendingTransactionsUpdaterConfig::from_config(&config)?;
+    let pending_config = PendingTransactionsUpdaterConfig::from_config(&config).await?;
 
     let endpoints = ProviderFactory::get_chain_endpoints(&settings);
     let providers = Arc::new(ChainProviders::from_settings(&settings, &service_user_agent("daemon", Some("transactions"))));
@@ -79,4 +79,5 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
             }
         })
         .finish()
+        .await
 }

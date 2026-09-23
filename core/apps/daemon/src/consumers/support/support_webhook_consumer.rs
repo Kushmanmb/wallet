@@ -37,7 +37,7 @@ impl MessageConsumer<SupportWebhookPayload, bool> for SupportWebhookConsumer {
             return Ok(true);
         };
 
-        let Some(device) = self.support_client.get_device(&device_id)? else {
+        let Some(device) = self.support_client.get_device(&device_id).await? else {
             info_with_fields!("support webhook device not found", device_id = device_id);
             return Ok(true);
         };

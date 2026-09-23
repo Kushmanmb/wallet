@@ -47,12 +47,12 @@ async fn run_store_transactions(settings: Arc<Settings>, database: Database, shu
     let cacher = CacherClient::new(&settings.redis.url).await?;
     let config_cacher = ConfigCacher::new(database.clone());
     let config = StoreTransactionsConsumerConfig {
-        swap_outdated_timeout: config_cacher.get_duration(ConfigKey::TransactionSwapOutdatedTimeout)?,
-        outdated_block_count: config_cacher.get_i64(ConfigKey::TransactionsOutdatedBlockCount)? as u64,
-        outdated_min_timeout: config_cacher.get_duration(ConfigKey::TransactionsOutdatedMinTimeout)?,
-        max_asset_transfer_count: config_cacher.get_usize(ConfigKey::TransactionsMaxAssetTransferCount)?,
-        min_amount_usd: config_cacher.get_f64(ConfigKey::TransactionsMinAmountUsd)?,
-        primary_price_max_age: config_cacher.get_duration(ConfigKey::PricePrimaryMaxAge)?,
+        swap_outdated_timeout: config_cacher.get_duration(ConfigKey::TransactionSwapOutdatedTimeout).await?,
+        outdated_block_count: config_cacher.get_i64(ConfigKey::TransactionsOutdatedBlockCount).await? as u64,
+        outdated_min_timeout: config_cacher.get_duration(ConfigKey::TransactionsOutdatedMinTimeout).await?,
+        max_asset_transfer_count: config_cacher.get_usize(ConfigKey::TransactionsMaxAssetTransferCount).await?,
+        min_amount_usd: config_cacher.get_f64(ConfigKey::TransactionsMinAmountUsd).await?,
+        primary_price_max_age: config_cacher.get_duration(ConfigKey::PricePrimaryMaxAge).await?,
     };
     let consumer = StoreTransactionsConsumer {
         database: database.clone(),
@@ -70,13 +70,13 @@ async fn run_store_prices(settings: Arc<Settings>, database: Database, shutdown_
     let cacher_client = CacherClient::new(&settings.redis.url).await?;
     let price_client = PriceClient::new(database.clone(), cacher_client);
     let config = ConfigCacher::new(database.clone());
-    let ttl_seconds = config.get_duration(ConfigKey::PriceOutdated)?.as_secs() as i64;
+    let ttl_seconds = config.get_duration(ConfigKey::PriceOutdated).await?.as_secs() as i64;
     let consumer = StorePricesConsumer::new(
         database,
         price_client,
         store_prices_consumer::StorePricesConsumerConfig {
             ttl_seconds,
-            primary_price_max_age: config.get_duration(ConfigKey::PricePrimaryMaxAge)?,
+            primary_price_max_age: config.get_duration(ConfigKey::PricePrimaryMaxAge).await?,
         },
     );
     run_consumer::<PricesPayload, StorePricesConsumer, usize>(&name, stream_reader, queue, None, consumer, consumer_config(&settings.consumer), shutdown_rx, reporter).await
@@ -86,7 +86,7 @@ async fn run_wallet_stream(settings: Arc<Settings>, database: Database, shutdown
     let queue = QueueName::WalletStreamEvents;
     let (name, stream_reader) = reader_for_queue(&settings, &queue, &shutdown_rx).await?;
     let cacher_client = CacherClient::new(&settings.redis.url).await?;
-    let retention = ConfigCacher::new(database.clone()).get_duration(ConfigKey::DeviceStreamRetention)?;
+    let retention = ConfigCacher::new(database.clone()).get_duration(ConfigKey::DeviceStreamRetention).await?;
     let consumer = WalletStreamConsumer { database, cacher_client, retention };
     run_consumer::<WalletStreamPayload, WalletStreamConsumer, usize>(&name, stream_reader, queue, None, consumer, consumer_config(&settings.consumer), shutdown_rx, reporter).await
 }

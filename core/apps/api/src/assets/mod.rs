@@ -13,16 +13,16 @@ use rocket::{State, get, post, serde::json::Json};
 
 #[get("/assets/<asset_id>?<currency>")]
 pub async fn get_asset(asset_id: AssetIdParam, currency: CurrencyParam, client: &State<AssetsClient>, price_client: &State<PriceClient>) -> Result<ApiResponse<AssetFull>, ApiError> {
-    let asset = client.get_asset_full(&asset_id.0)?;
-    let rate = price_client.get_fiat_rate(&currency.0)?.rate;
+    let asset = client.get_asset_full(&asset_id.0).await?;
+    let rate = price_client.get_fiat_rate(&currency.0).await?.rate;
     Ok(asset.with_rate(rate).into())
 }
 
 #[post("/assets?<currency>", format = "json", data = "<asset_ids>")]
 pub async fn get_assets(asset_ids: Json<Vec<AssetId>>, currency: CurrencyParam, client: &State<AssetsClient>, price_client: &State<PriceClient>) -> Result<ApiResponse<Vec<AssetBasic>>, ApiError> {
-    let rate = price_client.get_fiat_rate(&currency.0)?.rate;
+    let rate = price_client.get_fiat_rate(&currency.0).await?.rate;
 
-    Ok(client.get_assets(asset_ids.0, rate)?.into())
+    Ok(client.get_assets(asset_ids.0, rate).await?.into())
 }
 
 #[get("/assets/search?<params..>")]

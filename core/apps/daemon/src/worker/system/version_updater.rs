@@ -1,7 +1,7 @@
 use gem_client::{ClientExt, ReqwestClient};
 use primitives::{GEM_ANDROID_PACKAGE_ID, GEM_IOS_BUNDLE_ID, PlatformStore, config::Release};
 use std::error::Error;
-use storage::{Database, ReleasesRepository, models::ReleaseRow};
+use storage::{Database, DatabaseError, ReleasesRepository, models::ReleaseRow};
 
 use super::model::{FdroidPackageResponse, GitHubRepository, HuaweiStoreResponse, ITunesLookupResponse, SamsungStoreDetail, SolanaStoreRelease};
 use super::store_target::{HuaweiAppRequest, StoreTarget};
@@ -31,23 +31,23 @@ impl VersionUpdater {
     }
 
     pub async fn update_store(&self, store: PlatformStore) -> Result<Option<String>, Box<dyn Error + Send + Sync>> {
-        if !self.database.releases()?.is_update_enabled(store)? {
+        if !self.database.run(move |client| client.is_update_enabled(store)).await? {
             return Ok(None);
         }
 
         let version = self.get_store_version(store).await?;
-        let current = self.get_current_version(store)?;
-        if current.as_ref() != Some(&version) {
-            self.set_release(Release::new(store, version.clone(), false))?;
-        }
+        let release_version = version.clone();
+        self.database
+            .run(move |client| -> Result<(), DatabaseError> {
+                let current = client.get_releases()?.into_iter().find(|r| r.platform_store.0 == store).map(|r| r.version);
+                if current.as_ref() != Some(&release_version) {
+                    client.update_release(ReleaseRow::from_primitive(Release::new(store, release_version, false)))?;
+                }
+                Ok(())
+            })
+            .await?;
 
         Ok(Some(version))
-    }
-
-    fn get_current_version(&self, store: PlatformStore) -> Result<Option<String>, Box<dyn Error + Send + Sync>> {
-        let releases = self.database.releases()?.get_releases()?;
-        let version = releases.into_iter().find(|r| r.platform_store.0 == store).map(|r| r.version);
-        Ok(version)
     }
 
     async fn get_store_version(&self, store: PlatformStore) -> Result<String, Box<dyn Error + Send + Sync>> {
@@ -60,12 +60,6 @@ impl VersionUpdater {
             PlatformStore::SolanaStore => self.get_solana_store_version().await,
             _ => Err(format!("unsupported store: {:?}", store).into()),
         }
-    }
-
-    fn set_release(&self, release: Release) -> Result<(), Box<dyn Error + Send + Sync>> {
-        let row = ReleaseRow::from_primitive(release);
-        self.database.releases()?.update_release(row)?;
-        Ok(())
     }
 
     fn store(&self, target: &StoreTarget) -> ReqwestClient {

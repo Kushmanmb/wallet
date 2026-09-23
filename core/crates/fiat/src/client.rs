@@ -15,11 +15,11 @@ use futures::future::join_all;
 use gem_tracing::{error_with_fields, info_with_fields};
 use number_formatter::BigNumberFormatter;
 use primitives::{
-    Asset, Chain, FiatAssetSymbol, FiatAssets, FiatProvider as PrimitiveFiatProvider, FiatProviderCountry, FiatQuote, FiatQuoteError as ProviderQuoteError, FiatQuoteRequest, FiatQuoteType, FiatQuoteUrl, FiatQuoteUrlData, FiatQuotes,
-    FiatTransaction, PaymentType, RequestError, WalletType,
+    Asset, AssetId, Chain, FiatAssetSymbol, FiatAssets, FiatProvider as PrimitiveFiatProvider, FiatProviderCountry, FiatQuote, FiatQuoteError as ProviderQuoteError, FiatQuoteRequest, FiatQuoteType, FiatQuoteUrl, FiatQuoteUrlData,
+    FiatQuotes, FiatTransaction, PaymentType, RequestError, WalletType,
 };
 use storage::models::{NewFiatTransactionRow, WalletAddressRow};
-use storage::{AssetFilter, AssetsRepository, ConfigCacher, Database, FiatRepository, WalletsRepository};
+use storage::{AssetFilter, AssetsRepository, ConfigCacher, Database, DatabaseError, FiatRepository, WalletsRepository};
 use streamer::{FiatWebhook, FiatWebhookPayload, StreamProducer};
 
 pub struct FiatClient {
@@ -57,17 +57,17 @@ impl FiatClient {
     }
 
     pub async fn get_on_ramp_assets(&self) -> Result<FiatAssets, Box<dyn Error + Send + Sync>> {
-        let assets = self.database.assets()?.get_assets_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::IsBuyable(true)])?;
+        let assets = self.database.run(|client| client.get_assets_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::IsBuyable(true)])).await?;
         Ok(FiatAssets::new(assets.into_iter().map(|x| x.asset.id.to_string()).collect()))
     }
 
     pub async fn get_off_ramp_assets(&self) -> Result<FiatAssets, Box<dyn Error + Send + Sync>> {
-        let assets = self.database.assets()?.get_assets_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::IsSellable(true)])?;
+        let assets = self.database.run(|client| client.get_assets_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::IsSellable(true)])).await?;
         Ok(FiatAssets::new(assets.into_iter().map(|x| x.asset.id.to_string()).collect()))
     }
 
     pub async fn get_fiat_providers_countries(&self) -> Result<Vec<FiatProviderCountry>, Box<dyn Error + Send + Sync>> {
-        Ok(FiatRepository::get_fiat_providers_countries(&mut self.database.fiat()?)?)
+        Ok(self.database.run(FiatRepository::get_fiat_providers_countries).await?)
     }
 
     pub async fn process_and_publish_webhook(&self, request: FiatWebhookRequest, provider_name: &str) -> Result<FiatWebhookPayload, Box<dyn std::error::Error + Send + Sync>> {
@@ -104,9 +104,13 @@ impl FiatClient {
         Ok(payload)
     }
 
-    fn get_fiat_mapping(&self, asset: &Asset, quote_type: &FiatQuoteType) -> Result<(FiatMappingMap, Vec<PrimitiveFiatProvider>), Box<dyn Error + Send + Sync>> {
-        let fiat_assets = self.database.fiat()?.get_fiat_assets_for_asset_id(&asset.id)?;
-        let providers = self.database.fiat()?.get_fiat_providers()?.into_iter().map(|p| p.as_primitive()).collect();
+    async fn get_fiat_mapping(&self, asset: &Asset, quote_type: &FiatQuoteType) -> Result<(FiatMappingMap, Vec<PrimitiveFiatProvider>), Box<dyn Error + Send + Sync>> {
+        let asset_id = asset.id.clone();
+        let (fiat_assets, providers) = self
+            .database
+            .run(move |client| -> Result<_, DatabaseError> { Ok((client.get_fiat_assets_for_asset_id(&asset_id)?, client.get_fiat_providers()?)) })
+            .await?;
+        let providers = providers.into_iter().map(|p| p.as_primitive()).collect();
 
         let map: FiatMappingMap = fiat_assets
             .into_iter()
@@ -139,7 +143,7 @@ impl FiatClient {
     }
 
     pub async fn get_quotes(&self, request: FiatQuoteRequest) -> Result<FiatQuotes, Box<dyn Error + Send + Sync>> {
-        let asset = self.database.assets()?.get_asset(&request.asset_id)?;
+        let asset = self.get_asset(&request.asset_id).await?;
         let (quotes, errors) = self.get_provider_quotes(&request, &asset, &request.ip_address).await?;
         Ok(FiatQuotes {
             quotes: quotes.into_iter().map(|quote| quote.quote).collect(),
@@ -150,9 +154,9 @@ impl FiatClient {
     pub async fn get_device_quotes(&self, request: FiatQuoteRequest, context: &FiatDeviceContext) -> Result<FiatQuotes, Box<dyn Error + Send + Sync>> {
         Self::validate_device_context(context)?;
         self.consume_limits(context, RateLimitKey::FiatQuoteRequestPerDeviceLimit, RateLimitKey::FiatQuoteRequestPerIpLimit).await?;
-        let asset = self.database.assets()?.get_asset(&request.asset_id)?;
-        if self.config.get_bool(ConfigKey::FiatValidateSubscription)? {
-            self.subscription_address(context, asset.chain())?;
+        let asset = self.get_asset(&request.asset_id).await?;
+        if self.config.get_bool(ConfigKey::FiatValidateSubscription).await? {
+            self.subscription_address(context, asset.chain()).await?;
         }
         let (quotes, errors) = self.get_provider_quotes(&request, &asset, &context.ip_address).await?;
         Ok(FiatQuotes {
@@ -169,7 +173,7 @@ impl FiatClient {
                 return Err(format!("IP address validation failed: {}", e).into());
             }
         };
-        let (fiat_mapping_map, db_providers) = self.get_fiat_mapping(asset, &request.quote_type)?;
+        let (fiat_mapping_map, db_providers) = self.get_fiat_mapping(asset, &request.quote_type).await?;
 
         let provider_impls = self.get_providers(request.provider_id.clone());
 
@@ -229,7 +233,7 @@ impl FiatClient {
     async fn create_quote_url(&self, quote_id: &str, context: &FiatDeviceContext, locale: &str, cached_quote: CachedFiatQuote) -> Result<FiatQuoteUrl, Box<dyn Error + Send + Sync>> {
         let CachedFiatQuote { quote, asset_symbol, country_code, .. } = cached_quote;
         let provider = self.provider(quote.provider.id.as_ref())?;
-        let wallet_address_row = self.subscription_address(context, quote.asset.chain())?;
+        let wallet_address_row = self.subscription_address(context, quote.asset.chain()).await?;
         let data = FiatQuoteUrlData {
             quote,
             asset_symbol,
@@ -246,7 +250,7 @@ impl FiatClient {
         let pending_transaction = FiatTransaction::new_pending(&data, country, url.provider_transaction_id.clone());
         let pending_transaction_row = NewFiatTransactionRow::new(pending_transaction, context.device_id, context.wallet_id, wallet_address_row.id);
 
-        self.database.fiat()?.add_fiat_transaction(pending_transaction_row)?;
+        self.database.run(move |client| -> Result<_, DatabaseError> { Ok(client.add_fiat_transaction(pending_transaction_row)?) }).await?;
         self.fiat_cacher.set_quote_url(context, quote_id, &url).await?;
 
         Ok(url)
@@ -259,8 +263,14 @@ impl FiatClient {
         Ok(())
     }
 
-    fn subscription_address(&self, context: &FiatDeviceContext, chain: Chain) -> Result<WalletAddressRow, Box<dyn Error + Send + Sync>> {
-        match self.database.client()?.subscriptions_wallet_address_for_chain(context.device_id, context.wallet_id, chain) {
+    async fn get_asset(&self, asset_id: &AssetId) -> Result<Asset, DatabaseError> {
+        let asset_id = asset_id.clone();
+        self.database.run(move |client| client.get_asset(&asset_id)).await
+    }
+
+    async fn subscription_address(&self, context: &FiatDeviceContext, chain: Chain) -> Result<WalletAddressRow, Box<dyn Error + Send + Sync>> {
+        let (device_id, wallet_id) = (context.device_id, context.wallet_id);
+        match self.database.run(move |client| client.subscriptions_wallet_address_for_chain(device_id, wallet_id, chain)).await {
             Ok(address) => Ok(address),
             Err(error) if error.is_not_found() => Err(RequestError::Forbidden.into()),
             Err(error) => Err(error.into()),
@@ -271,7 +281,7 @@ impl FiatClient {
         let device_id = context.device_id.to_string();
         let mut allowed = true;
         for (key, scope) in [(device_key, device_id.as_str()), (ip_key, context.ip_address.as_str())] {
-            allowed &= self.rate_limiter.consume(key, scope, self.config.get_rate_limit(key)?).await?;
+            allowed &= self.rate_limiter.consume(key, scope, self.config.get_rate_limit(key).await?).await?;
         }
         if !allowed {
             return Err(RequestError::LimitReached.into());

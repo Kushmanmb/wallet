@@ -14,15 +14,19 @@ impl ChartClient {
     }
 
     pub async fn get_charts_prices(&self, asset_id: &AssetId, period: ChartPeriod, currency: &Currency) -> Result<Vec<ChartValue>, Box<dyn Error + Send + Sync>> {
-        let base_rate = self.database.fiat()?.get_fiat_rate(&Currency::USD)?.as_primitive();
-        let rate = self.database.fiat()?.get_fiat_rate(currency)?.as_primitive();
-        let rate_multiplier = rate.multiplier(base_rate.rate);
-
-        let key = self.database.prices()?.get_primary_price_key(asset_id, self.config.primary_price_max_age)?;
-        Ok(self
+        let asset_id = asset_id.clone();
+        let currency = currency.clone();
+        let primary_price_max_age = self.config.primary_price_max_age;
+        let (rate_multiplier, charts) = self
             .database
-            .charts()?
-            .get_charts(&key.id(), &period)?
+            .run(move |client| -> Result<_, Box<dyn Error + Send + Sync>> {
+                let base_rate = client.get_fiat_rate(&Currency::USD)?.as_primitive();
+                let rate = client.get_fiat_rate(&currency)?.as_primitive();
+                let key = client.get_primary_price_key(&asset_id, primary_price_max_age)?;
+                Ok((rate.multiplier(base_rate.rate), client.get_charts(&key.id(), &period)?))
+            })
+            .await?;
+        Ok(charts
             .into_iter()
             .map(|(ts, price)| ChartValue {
                 timestamp: ts.and_utc().timestamp() as i32,

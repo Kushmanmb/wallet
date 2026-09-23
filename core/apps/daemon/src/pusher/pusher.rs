@@ -4,7 +4,7 @@ use localizer::LanguageLocalizer;
 use number_formatter::{ValueFormatter, ValueStyle};
 use primitives::{AddressFormatStyle, AddressFormatter, Asset, AssetVecExt, Chain, DeviceSubscription, FiatQuoteType, Transaction, TransactionNFTTransferMetadata, TransactionPerpetualMetadata, TransactionSwapMetadata, TransactionType};
 use push_notification::{GorushNotification, PushNotification, PushNotificationTransaction, PushNotificationTypes};
-use storage::{Database, ScanAddressesRepository};
+use storage::{Database, DatabaseError, ScanAddressesRepository};
 
 use api_connector::pusher::model::Message;
 
@@ -21,10 +21,11 @@ impl Pusher {
         Self { database }
     }
 
-    pub fn get_address(&self, chain: Chain, address: &str) -> Result<String, Box<dyn Error + Send + Sync>> {
-        let result = self.database.scan_addresses()?.get_scan_address(chain, address);
-        match result {
+    pub async fn get_address(&self, chain: Chain, address: &str) -> Result<String, Box<dyn Error + Send + Sync>> {
+        let value = address.to_string();
+        match self.database.run(move |client| client.get_scan_address(chain, &value)).await {
             Ok(address) => Ok(address.name.unwrap_or_default()),
+            Err(DatabaseError::ConnectionPool) => Err(DatabaseError::ConnectionPool.into()),
             Err(_) => Ok(AddressFormatter::format(address, Some(chain), AddressFormatStyle::Short)),
         }
     }
@@ -41,19 +42,15 @@ impl Pusher {
         })
     }
 
-    pub fn message(&self, localizer: LanguageLocalizer, transaction: &Transaction, address: &str, assets: &Vec<Asset>) -> Result<Message, Box<dyn Error + Send + Sync>> {
+    pub fn message(localizer: LanguageLocalizer, transaction: &Transaction, address: &str, assets: &Vec<Asset>, to_address: &str, from_address: &str) -> Result<Message, Box<dyn Error + Send + Sync>> {
         let asset = assets.asset_result(transaction.asset_id.clone())?;
         let amount = ValueFormatter::format_with_symbol(ValueStyle::Auto, &transaction.value.to_string(), asset.decimals, &asset.symbol)?;
-        let chain = transaction.asset_id.chain;
-
-        let to_address = self.get_address(chain, transaction.to.as_str())?;
-        let from_address = self.get_address(chain, transaction.from.as_str())?;
 
         match transaction.transaction_type {
             TransactionType::Transfer | TransactionType::SmartContractCall => {
                 let is_sent = transaction.is_sent(address.to_string());
                 let title = localizer.notification_transfer_title(is_sent, &amount);
-                let message = localizer.notification_transfer_description(is_sent, to_address.as_str(), from_address.as_str());
+                let message = localizer.notification_transfer_description(is_sent, to_address, from_address);
                 Ok(Message { title, message: Some(message) })
             }
             TransactionType::TransferNFT => {
@@ -69,24 +66,24 @@ impl Pusher {
                 };
                 let is_sent = transaction.is_sent(address.to_string());
                 let title = localizer.notification_nft_transfer_title(is_sent, &name);
-                let message = localizer.notification_transfer_description(is_sent, to_address.as_str(), from_address.as_str());
+                let message = localizer.notification_transfer_description(is_sent, to_address, from_address);
                 Ok(Message { title, message: Some(message) })
             }
             TransactionType::TokenApproval => Ok(Message {
                 title: localizer.notification_token_approval_title(asset.symbol.as_str()),
-                message: Some(localizer.notification_sent_description(&to_address)),
+                message: Some(localizer.notification_sent_description(to_address)),
             }),
             TransactionType::StakeDelegate | TransactionType::EarnDeposit => Ok(Message {
                 title: localizer.notification_stake_title(&amount),
-                message: Some(localizer.notification_sent_description(&to_address)),
+                message: Some(localizer.notification_sent_description(to_address)),
             }),
             TransactionType::StakeUndelegate => Ok(Message {
                 title: localizer.notification_unstake_title(&amount),
-                message: Some(localizer.notification_received_description(&to_address)),
+                message: Some(localizer.notification_received_description(to_address)),
             }),
             TransactionType::StakeRedelegate => Ok(Message {
                 title: localizer.notification_redelegate_title(&amount),
-                message: Some(localizer.notification_sent_description(&to_address)),
+                message: Some(localizer.notification_sent_description(to_address)),
             }),
             TransactionType::StakeRewards => Ok(Message {
                 title: localizer.notification_claim_rewards_title(&amount),
@@ -94,7 +91,7 @@ impl Pusher {
             }),
             TransactionType::StakeWithdraw | TransactionType::EarnWithdraw => Ok(Message {
                 title: localizer.notification_withdraw_title(&amount),
-                message: Some(localizer.notification_received_description(&to_address)),
+                message: Some(localizer.notification_received_description(to_address)),
             }),
             TransactionType::Swap => {
                 let metadata = transaction.metadata.clone().ok_or("Missing metadata")?;
@@ -144,8 +141,12 @@ impl Pusher {
     pub async fn get_messages(&self, subscription: &DeviceSubscription, transaction: Transaction, assets: Vec<Asset>) -> Result<Vec<GorushNotification>, Box<dyn Error + Send + Sync>> {
         let transaction = transaction.finalize(vec![subscription.address.clone()]).without_utxo();
 
+        let chain = transaction.asset_id.chain;
+        let to_address = self.get_address(chain, transaction.to.as_str()).await?;
+        let from_address = self.get_address(chain, transaction.from.as_str()).await?;
+
         let localizer = LanguageLocalizer::new_with_language(subscription.device.locale.as_ref());
-        let message = self.message(localizer, &transaction, &subscription.address, &assets)?;
+        let message = Self::message(localizer, &transaction, &subscription.address, &assets, &to_address, &from_address)?;
 
         let notification_transaction = PushNotificationTransaction {
             wallet_id: subscription.wallet_id.clone(),

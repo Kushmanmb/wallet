@@ -22,7 +22,7 @@ impl<'r> FromRequest<'r> for AuthenticatedDevice {
                 Err(error) => return error,
             };
 
-            let (device_row, _) = match lookup_device(req, &auth.device_id).await {
+            let device_row = match lookup_device(req, &auth.device_id).await {
                 Ok(result) => result,
                 Err(error) => return error,
             };

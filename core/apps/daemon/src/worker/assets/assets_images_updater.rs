@@ -2,7 +2,7 @@ use api_connector::StaticAssetsClient;
 use primitives::{AssetId, Chain};
 use std::collections::HashSet;
 use std::error::Error;
-use storage::{AssetFilter, AssetUpdate, AssetsRepository, Database};
+use storage::{AssetFilter, AssetUpdate, AssetsRepository, Database, DatabaseError};
 
 pub struct AssetsImagesUpdater {
     client: StaticAssetsClient,
@@ -19,26 +19,29 @@ impl AssetsImagesUpdater {
         assets.push(chain.as_asset_id());
         let new: HashSet<AssetId> = assets.into_iter().collect();
 
-        let current: HashSet<AssetId> = self
+        Ok(self
             .database
-            .assets()?
-            .get_asset_ids_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::HasImage(true), AssetFilter::Chain(chain.as_ref().to_string())])?
-            .into_iter()
-            .collect();
+            .run(move |client| -> Result<(usize, usize), DatabaseError> {
+                let current: HashSet<AssetId> = client
+                    .get_asset_ids_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::HasImage(true), AssetFilter::Chain(chain.as_ref().to_string())])?
+                    .into_iter()
+                    .collect();
 
-        let additions: Vec<AssetId> = new.difference(&current).cloned().collect();
-        let removals: Vec<AssetId> = current.difference(&new).cloned().collect();
+                let additions: Vec<AssetId> = new.difference(&current).cloned().collect();
+                let removals: Vec<AssetId> = current.difference(&new).cloned().collect();
 
-        let additions_len = additions.len();
-        let removals_len = removals.len();
+                let additions_len = additions.len();
+                let removals_len = removals.len();
 
-        if !additions.is_empty() {
-            self.database.assets()?.update_assets(additions, vec![AssetUpdate::HasImage(true)])?;
-        }
-        if !removals.is_empty() {
-            self.database.assets()?.update_assets(removals, vec![AssetUpdate::HasImage(false)])?;
-        }
+                if !additions.is_empty() {
+                    client.update_assets(additions, vec![AssetUpdate::HasImage(true)])?;
+                }
+                if !removals.is_empty() {
+                    client.update_assets(removals, vec![AssetUpdate::HasImage(false)])?;
+                }
 
-        Ok((additions_len, removals_len))
+                Ok((additions_len, removals_len))
+            })
+            .await?)
     }
 }

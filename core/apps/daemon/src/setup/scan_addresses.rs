@@ -10,9 +10,9 @@ use gem_tracing::info_with_fields;
 use primitives::{Chain, ScanAddress, SwapProvider};
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use storage::{Database, ScanAddressesRepository};
+use storage::{Database, DatabaseError, ScanAddressesRepository};
 
-pub fn setup_scan_addresses(database: &Database) -> Result<(), Box<dyn Error + Send + Sync>> {
+pub async fn setup_scan_addresses(database: &Database) -> Result<(), Box<dyn Error + Send + Sync>> {
     let mut values = HashMap::new();
 
     for chain in Chain::all() {
@@ -59,10 +59,14 @@ pub fn setup_scan_addresses(database: &Database) -> Result<(), Box<dyn Error + S
     }
 
     let count = values.len();
-    let addresses = values.keys().map(|(_, address)| address.clone()).collect();
-    let existing = database.scan_addresses()?.get_scan_addresses_by_addresses(addresses)?.into_iter().map(|row| (row.chain.0, row.address)).collect::<HashSet<_>>();
-    let values = values.into_iter().filter_map(|(key, value)| (!existing.contains(&key)).then_some(value)).collect::<Vec<_>>();
-    let inserted = if values.is_empty() { 0 } else { database.scan_addresses()?.add_scan_addresses(values)? };
+    let inserted = database
+        .run(move |client| -> Result<_, DatabaseError> {
+            let addresses = values.keys().map(|(_, address)| address.clone()).collect();
+            let existing = client.get_scan_addresses_by_addresses(addresses)?.into_iter().map(|row| (row.chain.0, row.address)).collect::<HashSet<_>>();
+            let values = values.into_iter().filter_map(|(key, value)| (!existing.contains(&key)).then_some(value)).collect::<Vec<_>>();
+            if values.is_empty() { Ok(0) } else { client.add_scan_addresses(values) }
+        })
+        .await?;
 
     info_with_fields!("setup", step = "scan addresses", count = count, inserted = inserted);
     Ok(())

@@ -22,9 +22,9 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     let settings = ctx.settings();
     let config = ConfigCacher::new(database.clone());
 
-    let primary_price_max_age = config.get_duration(ConfigKey::PricePrimaryMaxAge)?;
+    let primary_price_max_age = config.get_duration(ConfigKey::PricePrimaryMaxAge).await?;
     let search_index_config = SearchIndexConfig {
-        batch_size: config.get_usize(ConfigKey::SearchIndexBatchSize)?,
+        batch_size: config.get_usize(ConfigKey::SearchIndexBatchSize).await?,
     };
     let search_index_client = SearchIndexClient::new(&settings.meilisearch.url, settings.meilisearch.key.as_str(), search_index_config);
     ctx.plan_builder(WorkerService::Search, &config, shutdown_rx)
@@ -61,4 +61,5 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
             }
         })
         .finish()
+        .await
 }

@@ -3,7 +3,7 @@ use std::error::Error;
 use config_keys::ConfigKey;
 use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::{NaiveDateTimeExt, RewardStatus, now};
-use storage::{ConfigCacher, Database, RewardsEligibilityConfig, RewardsFilter, RewardsRepository};
+use storage::{ConfigCacher, Database, DatabaseError, RewardsEligibilityConfig, RewardsFilter, RewardsRepository};
 use streamer::{RewardsNotificationPayload, StreamProducer, StreamProducerQueue};
 
 pub struct RewardsEligibilityChecker {
@@ -19,17 +19,17 @@ impl RewardsEligibilityChecker {
     }
 
     pub async fn check(&self) -> Result<usize, Box<dyn Error + Send + Sync>> {
-        let promotion_limit = self.config.get_i64(ConfigKey::RewardsEligibilityPromotionLimit)?;
-        let active_duration = self.config.get_duration(ConfigKey::RewardsEligibilityActiveDuration)?;
+        let promotion_limit = self.config.get_i64(ConfigKey::RewardsEligibilityPromotionLimit).await?;
+        let active_duration = self.config.get_duration(ConfigKey::RewardsEligibilityActiveDuration).await?;
         let eligibility = RewardsEligibilityConfig {
             activity_cutoff: now().ago(active_duration),
-            transactions_required: self.config.get_i64(ConfigKey::RewardsEligibilityTransactionsCount)?,
+            transactions_required: self.config.get_i64(ConfigKey::RewardsEligibilityTransactionsCount).await?,
         };
 
         let usernames = self
             .database
-            .rewards()?
-            .get_rewards_by_filter(vec![RewardsFilter::Statuses(vec![RewardStatus::Unverified])])?
+            .run(|client| client.get_rewards_by_filter(vec![RewardsFilter::Statuses(vec![RewardStatus::Unverified])]))
+            .await?
             .into_iter()
             .map(|reward| reward.username)
             .collect::<Vec<_>>();
@@ -57,11 +57,19 @@ impl RewardsEligibilityChecker {
     }
 
     async fn evaluate_and_promote(&self, username: &str, eligibility: RewardsEligibilityConfig) -> Result<bool, Box<dyn Error + Send + Sync>> {
-        let Some(wallet_id) = self.database.rewards()?.check_eligibility(username, eligibility)? else {
+        let candidate = username.to_string();
+        let promotion = self
+            .database
+            .run(move |client| -> Result<_, DatabaseError> {
+                let Some(wallet_id) = client.check_eligibility(&candidate, eligibility)? else {
+                    return Ok(None);
+                };
+                Ok(Some((wallet_id, client.promote_to_verified(&candidate)?)))
+            })
+            .await?;
+        let Some((wallet_id, reward_event_ids)) = promotion else {
             return Ok(false);
         };
-
-        let reward_event_ids = self.database.rewards()?.promote_to_verified(username)?;
 
         info_with_fields!("rewards eligibility promoted user", username = username, wallet_id = wallet_id, events = reward_event_ids.len());
 

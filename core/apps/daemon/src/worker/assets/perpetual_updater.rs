@@ -5,7 +5,7 @@ use gem_tracing::error_with_fields;
 use primitives::{Chain, asset_score::AssetRank};
 use settings::{Settings, service_user_agent};
 use storage::models::NewPerpetualRow;
-use storage::{AssetUpdate, AssetsRepository, Database, PerpetualsRepository};
+use storage::{AssetUpdate, AssetsRepository, Database, DatabaseError, PerpetualsRepository};
 
 pub struct PerpetualUpdater {
     settings: Settings,
@@ -30,19 +30,25 @@ impl PerpetualUpdater {
         let perpetuals = perpetuals_data.into_iter().map(|x| NewPerpetualRow::from_primitive(x.perpetual)).collect::<Vec<_>>();
         let count = perpetuals.len();
 
-        self.database.assets()?.upsert_assets(assets)?;
-        self.database.assets()?.update_assets(
-            asset_ids,
-            vec![
-                AssetUpdate::Rank(AssetRank::Unknown.threshold()),
-                AssetUpdate::IsEnabled(false),
-                AssetUpdate::IsSwappable(false),
-                AssetUpdate::IsBuyable(false),
-                AssetUpdate::IsSellable(false),
-            ],
-        )?;
+        let perpetuals_update = self
+            .database
+            .run(move |client| -> Result<_, DatabaseError> {
+                client.upsert_assets(assets)?;
+                client.update_assets(
+                    asset_ids,
+                    vec![
+                        AssetUpdate::Rank(AssetRank::Unknown.threshold()),
+                        AssetUpdate::IsEnabled(false),
+                        AssetUpdate::IsSwappable(false),
+                        AssetUpdate::IsBuyable(false),
+                        AssetUpdate::IsSellable(false),
+                    ],
+                )?;
+                Ok(client.perpetuals_update(perpetuals))
+            })
+            .await?;
 
-        if let Err(e) = self.database.perpetuals()?.perpetuals_update(perpetuals) {
+        if let Err(e) = perpetuals_update {
             error_with_fields!("failed perpetuals update", &e, chain = chain.as_ref());
         }
         Ok(count)

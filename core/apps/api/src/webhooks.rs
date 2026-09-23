@@ -92,10 +92,12 @@ impl<'r> FromRequest<'r> for WebhookRequest {
     }
 }
 
-fn authorize_webhook(database: &State<Database>, kind: WebhookKind, sender: &str, secret: &str) -> Result<(), ApiError> {
+async fn authorize_webhook(database: &State<Database>, kind: WebhookKind, sender: &str, secret: &str) -> Result<(), ApiError> {
+    let secret = secret.to_string();
+    let resource = ApiClientResource::WebhookSender(sender.to_string());
     database
-        .api_clients()
-        .and_then(|mut client| Ok(client.get_enabled_api_client(secret, ApiClientScope::webhook(kind), ApiClientResource::WebhookSender(sender.to_string()))?))
+        .run(move |client| client.get_enabled_api_client(&secret, ApiClientScope::webhook(kind), resource))
+        .await
         .map_err(|_| ApiError::InternalServerError("Failed to load webhook endpoint".to_string()))?
         .ok_or_else(|| ApiError::NotFound("Webhook endpoint not found".to_string()))?;
 
@@ -126,7 +128,7 @@ async fn process_webhook(
     fiat_quotes_client: &State<FiatQuotesClient>,
     webhooks_client: &State<WebhooksClient>,
 ) -> Result<ApiResponse<bool>, ApiError> {
-    authorize_webhook(database, kind.0, sender, secret)?;
+    authorize_webhook(database, kind.0, sender, secret).await?;
 
     let raw_body = read_webhook_body(webhook_data).await?;
     match kind.0 {

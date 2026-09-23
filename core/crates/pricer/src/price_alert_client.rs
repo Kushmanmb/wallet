@@ -8,7 +8,7 @@ use push_notification::{GorushNotification, PushNotification, PushNotificationAs
 use std::collections::HashSet;
 use std::error::Error;
 use std::time::Duration as StdDuration;
-use storage::{AssetsRepository, Database, PriceAlertsRepository};
+use storage::{AssetsRepository, Database, DatabaseClient, DatabaseError, PriceAlertsRepository};
 
 const DEFAULT_RANK: i32 = 1000;
 
@@ -100,42 +100,51 @@ impl PriceAlertClient {
     }
 
     pub async fn get_price_alerts(&self, device_id: &str, asset_id: Option<&AssetId>) -> Result<PriceAlerts, Box<dyn Error + Send + Sync>> {
-        Ok(self.database.price_alerts()?.get_price_alerts_for_device_id(device_id, asset_id)?.into_iter().map(|x| x.price_alert).collect())
+        let device_id = device_id.to_string();
+        let asset_id = asset_id.cloned();
+        let rows = self.database.run(move |client| client.get_price_alerts_for_device_id(&device_id, asset_id.as_ref())).await?;
+        Ok(rows.into_iter().map(|x| x.price_alert).collect())
     }
 
     pub async fn add_price_alerts(&self, device_id: &str, price_alerts: PriceAlerts) -> Result<usize, Box<dyn Error + Send + Sync>> {
-        Ok(self.database.price_alerts()?.add_price_alerts(device_id, price_alerts)?)
+        let device_id = device_id.to_string();
+        Ok(self.database.run(move |client| client.add_price_alerts(&device_id, price_alerts)).await?)
     }
 
     pub async fn delete_price_alerts(&self, device_id: &str, price_alerts: PriceAlerts) -> Result<usize, Box<dyn Error + Send + Sync>> {
+        let device_id = device_id.to_string();
         let ids = price_alerts.iter().map(|x| x.id()).collect::<HashSet<_>>().into_iter().collect();
-        Ok(self.database.price_alerts()?.delete_price_alerts(device_id, ids)?)
+        Ok(self.database.run(move |client| client.delete_price_alerts(&device_id, ids)).await?)
     }
 
     pub async fn get_devices_to_alert(&self, rules: PriceAlertRules, max_age: StdDuration) -> Result<Vec<PriceAlertNotification>, Box<dyn Error + Send + Sync>> {
-        let now = Utc::now();
-        let cooldown = Duration::seconds(rules.notification_cooldown.as_secs() as i64);
-        let after_notified_at = now - cooldown;
-        let price_alerts = self.database.price_alerts()?.get_price_alerts(after_notified_at.naive_utc(), max_age)?;
-        let rates = self.fiat_rates()?;
+        self.database
+            .run(move |client| -> Result<_, Box<dyn Error + Send + Sync>> {
+                let now = Utc::now();
+                let cooldown = Duration::seconds(rules.notification_cooldown.as_secs() as i64);
+                let after_notified_at = now - cooldown;
+                let price_alerts = client.get_price_alerts(after_notified_at.naive_utc(), max_age)?;
+                let rates = Self::fiat_rates(client)?;
 
-        let mut results: Vec<PriceAlertNotification> = Vec::new();
-        let mut price_alert_ids: HashSet<String> = HashSet::new();
+                let mut results: Vec<PriceAlertNotification> = Vec::new();
+                let mut price_alert_ids: HashSet<String> = HashSet::new();
 
-        for (price_alert, price_data, device) in price_alerts {
-            if let Some(alert_result) = Self::get_price_alert_type(&price_alert, &price_data, &rates, &rules) {
-                let notification = self.price_alert_notification(device, &price_data, price_alert.clone(), alert_result, &rates)?;
-                price_alert_ids.insert(price_alert.id());
-                results.push(notification);
-            }
-        }
+                for (price_alert, price_data, device) in price_alerts {
+                    if let Some(alert_result) = Self::get_price_alert_type(&price_alert, &price_data, &rates, &rules) {
+                        let notification = Self::price_alert_notification(client, device, &price_data, price_alert.clone(), alert_result, &rates)?;
+                        price_alert_ids.insert(price_alert.id());
+                        results.push(notification);
+                    }
+                }
 
-        self.database.price_alerts()?.update_price_alerts_set_notified_at(price_alert_ids.into_iter().collect(), now.naive_utc())?;
-        Ok(results)
+                client.update_price_alerts_set_notified_at(price_alert_ids.into_iter().collect(), now.naive_utc())?;
+                Ok(results)
+            })
+            .await
     }
 
-    fn fiat_rates(&self) -> Result<Vec<FiatRate>, Box<dyn Error + Send + Sync>> {
-        Ok(self.database.fiat()?.get_fiat_rates()?.into_iter().map(|row| row.as_primitive()).collect())
+    fn fiat_rates(client: &mut DatabaseClient) -> Result<Vec<FiatRate>, DatabaseError> {
+        Ok(client.get_fiat_rates()?.into_iter().map(|row| row.as_primitive()).collect())
     }
 
     fn get_price_alert_type(price_alert: &PriceAlert, price_data: &PriceData, rates: &[FiatRate], rules: &PriceAlertRules) -> Option<AlertResult> {
@@ -185,10 +194,10 @@ impl PriceAlertClient {
         None
     }
 
-    fn price_alert_notification(&self, device: Device, price_data: &PriceData, price_alert: PriceAlert, alert_result: AlertResult, rates: &[FiatRate]) -> Result<PriceAlertNotification, Box<dyn Error + Send + Sync>> {
+    fn price_alert_notification(client: &mut DatabaseClient, device: Device, price_data: &PriceData, price_alert: PriceAlert, alert_result: AlertResult, rates: &[FiatRate]) -> Result<PriceAlertNotification, Box<dyn Error + Send + Sync>> {
         PriceAlertNotification {
             device,
-            asset: self.database.assets()?.get_asset(&price_alert.asset_id)?,
+            asset: client.get_asset(&price_alert.asset_id)?,
             price: Price::new(price_data.price, price_data.price_change_percentage_24h, price_data.last_updated_at, price_data.provider),
             alert_type: alert_result.alert_type,
             price_alert,

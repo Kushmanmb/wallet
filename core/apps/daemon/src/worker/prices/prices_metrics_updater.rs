@@ -3,7 +3,7 @@ use primitives::PriceProvider;
 use std::collections::HashMap;
 use std::error::Error;
 use storage::database::prices::PriceFilter;
-use storage::{ChartFilter, ChartsRepository, Database, PriceUpdate, PricesRepository};
+use storage::{ChartFilter, ChartsRepository, Database, DatabaseError, PriceUpdate, PricesRepository};
 
 pub struct PricesMetricsUpdater {
     database: Database,
@@ -19,35 +19,39 @@ impl PricesMetricsUpdater {
         if self.provider.supports_price_change_24h() {
             return Ok(0);
         }
-        let rows = self.database.prices()?.get_prices_by_filter(vec![PriceFilter::Provider(self.provider)])?;
-        if rows.is_empty() {
-            return Ok(0);
-        }
-
-        let now = Utc::now();
-        let upper = (now - Duration::hours(24)).naive_utc();
-        let lower = (now - Duration::hours(25)).naive_utc();
-        let price_ids: Vec<String> = rows.iter().map(|p| p.id.to_string()).collect();
-        let prices_24h_ago: HashMap<String, f64> = self
+        let provider = self.provider;
+        Ok(self
             .database
-            .charts()?
-            .get_charts_by_filter(vec![ChartFilter::CreatedBefore(upper), ChartFilter::CreatedAfter(lower), ChartFilter::PriceIds(price_ids)])?
-            .into_iter()
-            .collect();
+            .run(move |client| -> Result<usize, DatabaseError> {
+                let rows = client.get_prices_by_filter(vec![PriceFilter::Provider(provider)])?;
+                if rows.is_empty() {
+                    return Ok(0);
+                }
 
-        let mut updated = 0;
-        for row in rows {
-            if row.price == 0.0 {
-                continue;
-            }
-            let price_id = row.id.to_string();
-            let prev = prices_24h_ago.get(&price_id).copied().unwrap_or(0.0);
-            if prev == 0.0 {
-                continue;
-            }
-            let change = (row.price - prev) / prev * 100.0;
-            updated += self.database.prices()?.update_prices(vec![price_id], vec![PriceUpdate::PriceChangePercentage24h(change)])?;
-        }
-        Ok(updated)
+                let now = Utc::now();
+                let upper = (now - Duration::hours(24)).naive_utc();
+                let lower = (now - Duration::hours(25)).naive_utc();
+                let price_ids: Vec<String> = rows.iter().map(|p| p.id.to_string()).collect();
+                let prices_24h_ago: HashMap<String, f64> = client
+                    .get_charts_by_filter(vec![ChartFilter::CreatedBefore(upper), ChartFilter::CreatedAfter(lower), ChartFilter::PriceIds(price_ids)])?
+                    .into_iter()
+                    .collect();
+
+                let mut updated = 0;
+                for row in rows {
+                    if row.price == 0.0 {
+                        continue;
+                    }
+                    let price_id = row.id.to_string();
+                    let prev = prices_24h_ago.get(&price_id).copied().unwrap_or(0.0);
+                    if prev == 0.0 {
+                        continue;
+                    }
+                    let change = (row.price - prev) / prev * 100.0;
+                    updated += client.update_prices(vec![price_id], vec![PriceUpdate::PriceChangePercentage24h(change)])?;
+                }
+                Ok(updated)
+            })
+            .await?)
     }
 }

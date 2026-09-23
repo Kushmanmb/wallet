@@ -33,9 +33,9 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     let database = ctx.database();
     let settings = ctx.settings();
     let config = ConfigCacher::new(database.clone());
-    let classification_rules = AssetClassificationRules::from_config(&config)?;
+    let classification_rules = AssetClassificationRules::from_config(&config).await?;
     let usage_rank_updater_config = UsageRankUpdaterConfig {
-        batch_size: config.get_usize(ConfigKey::AssetsUsageRankBatchSize)?,
+        batch_size: config.get_usize(ConfigKey::AssetsUsageRankBatchSize).await?,
     };
     ctx.plan_builder(WorkerService::Assets, &config, shutdown_rx)
         .job(WorkerJob::UpdateSuspiciousAssetRanks, {
@@ -120,4 +120,5 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
             }
         })
         .finish()
+        .await
 }

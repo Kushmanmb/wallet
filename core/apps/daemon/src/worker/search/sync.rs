@@ -46,11 +46,11 @@ impl SearchSyncClient {
         }
     }
 
-    pub fn for_key(&self, key: ConfigKey) -> Result<IndexSync<'_>, Box<dyn Error + Send + Sync>> {
+    pub async fn for_key(&self, key: ConfigKey) -> Result<IndexSync<'_>, Box<dyn Error + Send + Sync>> {
         Ok(IndexSync {
             client: self,
             key: key.clone(),
-            last_updated_at: self.config.get_datetime(key)?,
+            last_updated_at: self.config.get_datetime(key).await?,
             now: Utc::now().naive_utc(),
         })
     }
@@ -84,7 +84,7 @@ impl IndexSync<'_> {
             self.client.search_index.index_documents(index, documents).await?
         };
 
-        self.client.config.set_datetime(self.key, self.now)?;
+        self.client.config.set_datetime(self.key, self.now).await?;
         Ok(SearchSyncResult { action, indexed_documents })
     }
 }

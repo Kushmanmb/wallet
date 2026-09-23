@@ -1,7 +1,7 @@
 use primitives::AssetId;
 use std::collections::HashMap;
 use std::error::Error;
-use storage::{AssetUsageRankRow, AssetsUsageRanksRepository, Database, TransactionsRepository};
+use storage::{AssetUsageRankRow, AssetsUsageRanksRepository, Database, DatabaseError, TransactionsRepository};
 
 #[derive(Clone, Copy)]
 pub struct UsageRankUpdaterConfig {
@@ -21,21 +21,26 @@ impl UsageRankUpdater {
     pub async fn update_usage_ranks(&self) -> Result<usize, Box<dyn Error + Send + Sync>> {
         let now = chrono::Utc::now().naive_utc();
         let thirty_days_ago = now - chrono::Duration::days(30);
+        let batch_size = self.config.batch_size;
 
-        let mut raw_scores: HashMap<AssetId, i64> = HashMap::new();
-        add_weighted_counts(&mut raw_scores, self.database.transactions()?.get_asset_usage_counts(now - chrono::Duration::hours(1))?, 250);
-        add_weighted_counts(&mut raw_scores, self.database.transactions()?.get_asset_usage_counts(now - chrono::Duration::days(1))?, 100);
-        add_weighted_counts(&mut raw_scores, self.database.transactions()?.get_asset_usage_counts(now - chrono::Duration::days(7))?, 10);
-        add_weighted_counts(&mut raw_scores, self.database.transactions()?.get_asset_usage_counts(thirty_days_ago)?, 1);
+        Ok(self
+            .database
+            .run(move |client| -> Result<usize, DatabaseError> {
+                let mut raw_scores: HashMap<AssetId, i64> = HashMap::new();
+                add_weighted_counts(&mut raw_scores, client.get_asset_usage_counts(now - chrono::Duration::hours(1))?, 250);
+                add_weighted_counts(&mut raw_scores, client.get_asset_usage_counts(now - chrono::Duration::days(1))?, 100);
+                add_weighted_counts(&mut raw_scores, client.get_asset_usage_counts(now - chrono::Duration::days(7))?, 10);
+                add_weighted_counts(&mut raw_scores, client.get_asset_usage_counts(thirty_days_ago)?, 1);
 
-        let rows: Vec<AssetUsageRankRow> = usage_ranks_from_scores(raw_scores)
-            .into_iter()
-            .map(|(asset_id, usage_rank)| AssetUsageRankRow { asset_id: asset_id.into(), usage_rank })
-            .collect();
+                let rows: Vec<AssetUsageRankRow> = usage_ranks_from_scores(raw_scores)
+                    .into_iter()
+                    .map(|(asset_id, usage_rank)| AssetUsageRankRow { asset_id: asset_id.into(), usage_rank })
+                    .collect();
 
-        let mut repository = self.database.assets_usage_ranks()?;
-        repository.delete_usage_ranks_before(thirty_days_ago)?;
-        rows.chunks(self.config.batch_size).try_fold(0, |total, batch| Ok(total + repository.upsert_usage_ranks(batch)?))
+                client.delete_usage_ranks_before(thirty_days_ago)?;
+                rows.chunks(batch_size).try_fold(0, |total, batch| Ok(total + client.upsert_usage_ranks(batch)?))
+            })
+            .await?)
     }
 }
 

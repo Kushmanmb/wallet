@@ -5,7 +5,7 @@ use super::sync::{SearchSyncClient, SearchSyncResult};
 use config_keys::ConfigKey;
 use search_index::{ASSETS_INDEX_NAME, AssetDocument, SearchIndexClient, sanitize_index_primary_id};
 use storage::models::{AssetTagRow, PriceAssetDataRow};
-use storage::{AssetsUsageRanksRepository, AssetsWithPricesFilter, Database, PricesRepository, TagRepository};
+use storage::{AssetsUsageRanksRepository, AssetsWithPricesFilter, Database, DatabaseError, PricesRepository, TagRepository};
 
 pub struct AssetsIndexUpdater {
     database: Database,
@@ -23,16 +23,17 @@ impl AssetsIndexUpdater {
     }
 
     pub async fn update(&self) -> Result<SearchSyncResult, Box<dyn std::error::Error + Send + Sync>> {
-        let sync = self.sync_client.for_key(ConfigKey::SearchAssetsLastUpdatedAt)?;
+        let sync = self.sync_client.for_key(ConfigKey::SearchAssetsLastUpdatedAt).await?;
         let filters = sync.since().map(AssetsWithPricesFilter::UpdatedSince).into_iter().collect();
-        let prices = PricesRepository::get_assets_with_prices(&mut self.database.prices()?, filters, self.primary_price_max_age)?;
+        let primary_price_max_age = self.primary_price_max_age;
+        let prices = self.database.run(move |client| PricesRepository::get_assets_with_prices(client, filters, primary_price_max_age)).await?;
 
         if prices.is_empty() {
             return sync.write(ASSETS_INDEX_NAME, Vec::<AssetDocument>::new()).await;
         }
 
-        let usage_ranks = self.database.assets_usage_ranks()?.get_all_usage_ranks()?;
-        let assets_tags_map = Self::asset_tags_by_asset(self.database.tag()?.get_assets_tags()?);
+        let (usage_ranks, assets_tags) = self.database.run(|client| -> Result<_, DatabaseError> { Ok((client.get_all_usage_ranks()?, client.get_assets_tags()?)) }).await?;
+        let assets_tags_map = Self::asset_tags_by_asset(assets_tags);
         let usage_ranks_map: HashMap<String, i32> = usage_ranks.into_iter().map(|r| (r.asset_id.to_string(), r.usage_rank)).collect();
 
         let documents = Self::build_documents(prices.iter(), &assets_tags_map, &usage_ranks_map);

@@ -59,7 +59,7 @@ pub async fn get_chain_fee_estimates(
     }
 
     let estimates = chain_client.get_transaction_fee_estimates(chain).await?;
-    let asset = assets_client.get_asset(&estimates.fee_asset)?;
+    let asset = assets_client.get_asset(&estimates.fee_asset).await?;
     let price = price_client.get_cache_price(&estimates.fee_asset).await?;
     let estimates = map_fee_estimates(asset, estimates, price.price.price)?;
     cacher.set_cached(CacheKey::TransactionFeeEstimates(chain.as_ref()), &estimates).await?;

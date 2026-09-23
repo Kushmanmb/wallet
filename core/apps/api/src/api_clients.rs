@@ -41,7 +41,8 @@ async fn authorize_api_client(req: &Request<'_>, scope: ApiClientScope) -> Outco
         return error_outcome(req, Status::InternalServerError, "Database not available");
     };
 
-    let client = match database.api_clients().and_then(|mut client| Ok(client.get_enabled_api_client(secret, scope, ApiClientResource::Global)?)) {
+    let secret = secret.to_string();
+    let client = match database.run(move |client| client.get_enabled_api_client(&secret, scope, ApiClientResource::Global)).await {
         Ok(client) => client,
         Err(_) => return error_outcome(req, Status::InternalServerError, "Failed to load API client"),
     };

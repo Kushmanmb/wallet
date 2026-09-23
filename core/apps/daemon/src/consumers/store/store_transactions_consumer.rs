@@ -4,7 +4,7 @@ use std::{collections::HashMap, error::Error};
 use async_trait::async_trait;
 use futures::{StreamExt, stream};
 use primitives::{AssetIdVecExt, Chain, DeviceSubscription, NFTAssetId, NFTChain, Transaction, TransactionId, TransactionState, TransactionType};
-use storage::{AssetFilter, AssetsAddressesRepository, AssetsRepository, Database, NftAssetFilter, NftRepository, TransactionsRepository, WalletsRepository};
+use storage::{AssetFilter, AssetsAddressesRepository, AssetsRepository, Database, DatabaseError, NftAssetFilter, NftRepository, TransactionsRepository, WalletsRepository};
 use streamer::{AssetId, NotificationsPayload, StreamProducer, StreamProducerQueue, TransactionNotificationType, TransactionsPayload, WalletStreamEvent, WalletStreamPayload, consumer::MessageConsumer};
 use swapper::cross_chain::{self, DepositAddressMap, SendAddressMap};
 
@@ -43,7 +43,7 @@ impl MessageConsumer<TransactionsPayload, usize> for StoreTransactionsConsumer {
         let min_amount = self.config.min_amount_usd;
 
         let addresses: Vec<_> = transactions.iter().flat_map(|transaction| transaction.addresses()).collect::<HashSet<_>>().into_iter().collect();
-        let subscriptions = self.database.wallets()?.get_subscriptions_by_chain_addresses(chain, addresses)?;
+        let subscriptions = self.database.run(move |client| client.get_subscriptions_by_chain_addresses(chain, addresses)).await?;
         let notification_subscriptions = Self::unique_subscriptions_per_device(subscriptions.clone());
 
         let subscription_addresses: HashSet<_> = subscriptions.iter().map(|s| &s.address).collect();
@@ -56,7 +56,7 @@ impl MessageConsumer<TransactionsPayload, usize> for StoreTransactionsConsumer {
             .into_iter()
             .collect();
 
-        let (existing_assets, missing_assets) = self.get_existing_and_missing_assets(asset_ids)?;
+        let (existing_assets, missing_assets) = self.get_existing_and_missing_assets(asset_ids).await?;
         let existing_assets_map: HashMap<AssetId, primitives::AssetPriceMetadata> = existing_assets.into_iter().map(|asset| (asset.asset.asset.id.clone(), asset)).collect();
 
         let _ = self.stream_producer.publish_fetch_assets(missing_assets).await;
@@ -69,7 +69,7 @@ impl MessageConsumer<TransactionsPayload, usize> for StoreTransactionsConsumer {
             .into_iter()
             .collect();
 
-        let missing_nft_assets = self.get_missing_nft_assets(Self::supported_nft_asset_ids(nft_asset_ids))?;
+        let missing_nft_assets = self.get_missing_nft_assets(Self::supported_nft_asset_ids(nft_asset_ids)).await?;
         let _ = self.stream_producer.publish_fetch_nft_assets(missing_nft_assets).await;
 
         let subscribed_transactions = subscriptions
@@ -98,7 +98,7 @@ impl MessageConsumer<TransactionsPayload, usize> for StoreTransactionsConsumer {
             .collect::<HashSet<_>>();
 
         let transaction_count = transactions_map.len();
-        let inserted_transaction_ids = self.upsert_transactions(transactions_map.values().cloned().collect())?;
+        let inserted_transaction_ids = self.upsert_transactions(transactions_map.values().cloned().collect()).await?;
         let publishable_transactions = transactions_map
             .values()
             .filter(|transaction| should_publish_transaction(&payload.notification_type, inserted_transaction_ids.contains(&transaction.id)))
@@ -154,7 +154,8 @@ impl MessageConsumer<TransactionsPayload, usize> for StoreTransactionsConsumer {
             })
             .collect();
 
-        self.database.assets_addresses()?.add_assets_addresses(assets_addresses.into_iter().collect())?;
+        let assets_addresses: Vec<_> = assets_addresses.into_iter().collect();
+        self.database.run(move |client| client.add_assets_addresses(assets_addresses)).await?;
         let _ = self.stream_producer.publish_notifications_transactions(notifications).await;
         let _ = self.stream_producer.publish_wallet_stream_events(wallet_events).await;
 
@@ -217,31 +218,36 @@ impl StoreTransactionsConsumer {
             && cross_chain::is_cross_chain_swap(transaction, deposit_addresses)
     }
 
-    fn get_existing_and_missing_assets(&self, assets_ids: Vec<AssetId>) -> Result<(Vec<primitives::AssetPriceMetadata>, Vec<AssetId>), Box<dyn Error + Send + Sync>> {
-        let assets_with_prices = self.database.assets()?.get_assets_with_prices(vec![AssetFilter::Ids(assets_ids.clone().ids())], self.config.primary_price_max_age)?;
+    async fn get_existing_and_missing_assets(&self, assets_ids: Vec<AssetId>) -> Result<(Vec<primitives::AssetPriceMetadata>, Vec<AssetId>), Box<dyn Error + Send + Sync>> {
+        let filters = vec![AssetFilter::Ids(assets_ids.clone().ids())];
+        let primary_price_max_age = self.config.primary_price_max_age;
+        let assets_with_prices = self.database.run(move |client| client.get_assets_with_prices(filters, primary_price_max_age)).await?;
         let existing_ids = assets_with_prices.iter().map(|asset| asset.asset.asset.id.clone()).collect::<HashSet<_>>();
         let missing_assets = assets_ids.into_iter().filter(|asset_id| !existing_ids.contains(asset_id)).collect();
         let enabled_assets = assets_with_prices.into_iter().filter(|asset| asset.asset.properties.is_enabled).collect();
         Ok((enabled_assets, missing_assets))
     }
 
-    fn get_missing_nft_assets(&self, nft_asset_ids: Vec<NFTAssetId>) -> Result<Vec<NFTAssetId>, Box<dyn Error + Send + Sync>> {
+    async fn get_missing_nft_assets(&self, nft_asset_ids: Vec<NFTAssetId>) -> Result<Vec<NFTAssetId>, Box<dyn Error + Send + Sync>> {
         if nft_asset_ids.is_empty() {
             return Ok(Vec::new());
         }
         let identifiers: Vec<String> = nft_asset_ids.iter().map(|id| id.to_string()).collect();
-        let existing = self.database.nft()?.get_nft_assets_by_filter(vec![NftAssetFilter::Identifiers(identifiers)])?;
+        let existing = self.database.run(move |client| client.get_nft_assets_by_filter(vec![NftAssetFilter::Identifiers(identifiers)])).await?;
         let existing_ids: HashSet<NFTAssetId> = existing.into_iter().map(|row| row.identifier.0).collect();
         Ok(nft_asset_ids.into_iter().filter(|id| !existing_ids.contains(id)).collect())
     }
 
-    fn upsert_transactions(&self, transactions: Vec<Transaction>) -> Result<HashSet<TransactionId>, Box<dyn Error + Send + Sync>> {
-        transactions
-            .chunks(TRANSACTION_BATCH_SIZE)
-            .try_fold(HashSet::new(), |inserted_ids, chunk| -> Result<HashSet<TransactionId>, Box<dyn Error + Send + Sync>> {
-                let chunk_inserted_ids = self.database.transactions()?.upsert_transactions(chunk.to_vec())?;
-                Ok(inserted_ids.into_iter().chain(chunk_inserted_ids).collect())
+    async fn upsert_transactions(&self, transactions: Vec<Transaction>) -> Result<HashSet<TransactionId>, Box<dyn Error + Send + Sync>> {
+        Ok(self
+            .database
+            .run(move |client| {
+                transactions.chunks(TRANSACTION_BATCH_SIZE).try_fold(HashSet::new(), |inserted_ids, chunk| -> Result<HashSet<TransactionId>, DatabaseError> {
+                    let chunk_inserted_ids = client.upsert_transactions(chunk.to_vec())?;
+                    Ok(inserted_ids.into_iter().chain(chunk_inserted_ids).collect())
+                })
             })
+            .await?)
     }
 }
 

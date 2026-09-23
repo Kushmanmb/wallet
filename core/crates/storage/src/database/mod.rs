@@ -30,6 +30,7 @@ pub mod transactions;
 pub mod usernames;
 pub mod wallets;
 
+use diesel::connection::{AnsiTransactionManager, TransactionManager};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use diesel_migrations::{EmbeddedMigrations, embed_migrations};
@@ -38,12 +39,7 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("src/migrations");
 pub type PgPool = Pool<ConnectionManager<PgConnection>>;
 pub type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
 
-use crate::{
-    DatabaseError,
-    repositories::{
-        config_repository::ConfigRepository, devices_repository::DevicesRepository, fiat_repository::FiatRepository, nft_repository::NftRepository, perpetuals_repository::PerpetualsRepository, rewards_repository::RewardsRepository,
-    },
-};
+use crate::DatabaseError;
 
 pub fn create_pool(database_url: &str, pool_size: u32) -> Result<PgPool, DatabaseError> {
     if pool_size == 0 {
@@ -63,27 +59,17 @@ impl DatabaseClient {
         Ok(Self { connection })
     }
 
-    pub fn config(&mut self) -> &mut dyn ConfigRepository {
-        self
-    }
-
-    pub fn devices(&mut self) -> &mut dyn DevicesRepository {
-        self
-    }
-
-    pub fn fiat(&mut self) -> &mut dyn FiatRepository {
-        self
-    }
-
-    pub fn perpetuals(&mut self) -> &mut dyn PerpetualsRepository {
-        self
-    }
-
-    pub fn nft(&mut self) -> &mut dyn NftRepository {
-        self
-    }
-
-    pub fn rewards(&mut self) -> &mut dyn RewardsRepository {
-        self
+    pub(crate) fn transaction<T, E: From<DatabaseError>>(&mut self, operation: impl FnOnce(&mut Self) -> Result<T, E>) -> Result<T, E> {
+        AnsiTransactionManager::begin_transaction(&mut *self.connection).map_err(DatabaseError::from)?;
+        match operation(self) {
+            Ok(value) => {
+                AnsiTransactionManager::commit_transaction(&mut *self.connection).map_err(DatabaseError::from)?;
+                Ok(value)
+            }
+            Err(error) => {
+                AnsiTransactionManager::rollback_transaction(&mut *self.connection).map_err(DatabaseError::from)?;
+                Err(error)
+            }
+        }
     }
 }

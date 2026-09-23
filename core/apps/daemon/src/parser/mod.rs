@@ -23,7 +23,7 @@ use streamer::{StreamProducer, StreamProducerConfig, StreamProducerQueue, Transa
 
 use crate::shutdown::{self, ShutdownReceiver};
 use plan::{BlockPlan, BlockPlanKind, plan_next_block, should_reload_catchup, timeout_for_state};
-use storage::{Database, models::ParserStateRow};
+use storage::{Database, DatabaseError, models::ParserStateRow};
 
 pub struct Parser {
     chain: Chain,
@@ -70,10 +70,10 @@ impl Parser {
 
     async fn get_latest_block(&self, state: &ParserStateRow) -> Result<i64, Box<dyn Error + Send + Sync>> {
         let latest_block = self.provider.get_block_latest_number().await? as i64;
-        let _ = self.state_service.set_latest_block(latest_block);
+        let _ = self.state_service.set_latest_block(latest_block).await;
 
         if state.current_block == 0 {
-            let _ = self.state_service.set_current_block(latest_block);
+            let _ = self.state_service.set_current_block(latest_block).await;
         }
 
         Ok(latest_block)
@@ -86,7 +86,7 @@ impl Parser {
         match plan.kind {
             BlockPlanKind::Enqueue => {
                 self.stream_producer.publish_blocks(self.chain, &plan.range.blocks).await?;
-                let _ = self.state_service.set_current_block(plan.range.end_block);
+                let _ = self.state_service.set_current_block(plan.range.end_block).await;
 
                 info_with_fields!(
                     "block add to queue",
@@ -102,7 +102,7 @@ impl Parser {
 
         match self.parse_blocks(plan.range.blocks).await {
             Ok(result) => {
-                let _ = self.state_service.set_current_block(plan.range.end_block);
+                let _ = self.state_service.set_current_block(plan.range.end_block).await;
 
                 info_with_fields!(
                     "block complete",
@@ -136,7 +136,7 @@ impl Parser {
                 break;
             }
 
-            let state = self.state_service.get_state()?;
+            let state = self.state_service.get_state().await?;
 
             let Some(plan) = plan_next_block(&state, state.current_block, state.latest_block) else {
                 break;
@@ -157,7 +157,7 @@ impl Parser {
                 break;
             }
 
-            let state = self.state_service.get_state()?;
+            let state = self.state_service.get_state().await?;
             self.reporter.update_state(state.current_block, state.latest_block, state.is_enabled);
             let timeout = timeout_for_state(&state, self.options.min_check, self.options.max_check);
 
@@ -207,15 +207,20 @@ pub async fn run(settings: Settings, chain: Option<Chain>, health_state: Arc<Hea
     let database = Database::new(&settings.postgres.url, settings.postgres.pool)?;
 
     let config = storage::ConfigCacher::new(database.clone());
-    let catchup_reload_interval = config.get_i64(config_keys::ConfigKey::ParserCatchupReloadInterval)?;
-    let min_check = config.get_duration(config_keys::ConfigKey::ParserMinCheckInterval)?;
-    let max_check = config.get_duration(config_keys::ConfigKey::ParserMaxCheckInterval)?;
-    let error_interval = config.get_duration(config_keys::ConfigKey::ParserErrorInterval)?;
+    let catchup_reload_interval = config.get_i64(config_keys::ConfigKey::ParserCatchupReloadInterval).await?;
+    let min_check = config.get_duration(config_keys::ConfigKey::ParserMinCheckInterval).await?;
+    let max_check = config.get_duration(config_keys::ConfigKey::ParserMaxCheckInterval).await?;
+    let error_interval = config.get_duration(config_keys::ConfigKey::ParserErrorInterval).await?;
 
     let chains: Vec<Chain> = if let Some(chain) = chain {
         vec![chain]
     } else {
-        database.parser_state()?.get_parser_states()?.into_iter().flat_map(|x| Chain::from_str(x.chain.as_ref())).collect()
+        database
+            .run(|client| -> Result<_, DatabaseError> { Ok(client.get_parser_states()?) })
+            .await?
+            .into_iter()
+            .flat_map(|x| Chain::from_str(x.chain.as_ref()))
+            .collect()
     };
 
     let chain_names = chains.iter().map(Chain::as_ref).collect::<Vec<_>>().join(",");

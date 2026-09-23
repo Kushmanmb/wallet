@@ -2,9 +2,8 @@ use rocket::Request;
 use rocket::http::Status;
 use rocket::outcome::Outcome::{Error, Success};
 use rocket::request::Outcome;
-use storage::database::devices::DevicesStore;
 use storage::models::{DeviceRow, WalletRow};
-use storage::{Database, DatabaseClient, WalletsRepository};
+use storage::{Database, DatabaseError, DevicesRepository, WalletsRepository};
 
 use crate::devices::constants::DEVICE_ID_LENGTH;
 use crate::devices::error::DeviceError;
@@ -63,32 +62,45 @@ pub(super) async fn authenticate<T>(req: &Request<'_>) -> Result<AuthResult, Out
     })
 }
 
-pub(super) async fn lookup_device<T>(req: &Request<'_>, device_id: &str) -> Result<(DeviceRow, DatabaseClient), Outcome<T, String>> {
+pub(super) async fn lookup_device<T>(req: &Request<'_>, device_id: &str) -> Result<DeviceRow, Outcome<T, String>> {
     let Success(database) = req.guard::<&rocket::State<Database>>().await else {
         return Err(auth_error_outcome(req, DeviceError::DatabaseUnavailable, Some(device_id), None));
     };
 
-    let Ok(mut db_client) = database.client() else {
-        return Err(auth_error_outcome(req, DeviceError::DatabaseError, Some(device_id), None));
-    };
-
-    let Ok(device_row) = DevicesStore::get_device(&mut db_client, device_id) else {
-        return Err(auth_error_outcome(req, DeviceError::DeviceNotFound, Some(device_id), None));
-    };
-
-    Ok((device_row, db_client))
+    let lookup_id = device_id.to_string();
+    match database.run(move |client| Ok::<_, DatabaseError>(client.get_device_row(&lookup_id))).await {
+        Ok(Ok(device_row)) => Ok(device_row),
+        Ok(Err(_)) => Err(auth_error_outcome(req, DeviceError::DeviceNotFound, Some(device_id), None)),
+        Err(_) => Err(auth_error_outcome(req, DeviceError::DatabaseError, Some(device_id), None)),
+    }
 }
 
 pub(super) async fn lookup_device_wallet<T>(req: &Request<'_>, device_id: &str, wallet_id: &str) -> Result<(DeviceRow, WalletRow), Outcome<T, String>> {
-    let (device_row, mut db_client) = lookup_device(req, device_id).await?;
-
-    let wallet_row = match db_client.get_wallet_by_device_and_identifier(device_row.id, wallet_id) {
-        Ok(wallet_row) => wallet_row,
-        Err(error) if error.is_not_found() => return Err(auth_error_outcome(req, DeviceError::WalletNotFound, Some(device_id), Some(wallet_id))),
-        Err(_) => return Err(auth_error_outcome(req, DeviceError::DatabaseError, Some(device_id), Some(wallet_id))),
+    let Success(database) = req.guard::<&rocket::State<Database>>().await else {
+        return Err(auth_error_outcome(req, DeviceError::DatabaseUnavailable, Some(device_id), None));
     };
 
-    Ok((device_row, wallet_row))
+    let lookup_device_id = device_id.to_string();
+    let lookup_wallet_id = wallet_id.to_string();
+    let lookup = database
+        .run(move |client| -> Result<_, DatabaseError> {
+            let Ok(device_row) = client.get_device_row(&lookup_device_id) else {
+                return Ok(Err(DeviceError::DeviceNotFound));
+            };
+            Ok(match client.get_wallet_by_device_and_identifier(device_row.id, &lookup_wallet_id) {
+                Ok(wallet_row) => Ok((device_row, wallet_row)),
+                Err(error) if error.is_not_found() => Err(DeviceError::WalletNotFound),
+                Err(_) => Err(DeviceError::DatabaseError),
+            })
+        })
+        .await;
+
+    match lookup {
+        Ok(Ok(rows)) => Ok(rows),
+        Ok(Err(DeviceError::DeviceNotFound)) => Err(auth_error_outcome(req, DeviceError::DeviceNotFound, Some(device_id), None)),
+        Ok(Err(error)) => Err(auth_error_outcome(req, error, Some(device_id), Some(wallet_id))),
+        Err(_) => Err(auth_error_outcome(req, DeviceError::DatabaseError, Some(device_id), None)),
+    }
 }
 
 #[cfg(test)]

@@ -6,6 +6,7 @@ use crate::database::assets::{AssetFilter, AssetUpdate};
 use crate::database::assets_associations::AssetsAssociationsStore;
 use crate::database::prices::AssetsWithPricesFilter;
 use crate::models::{AssetAssociationRow, AssetRow, NewAssetRow, PriceRow};
+use crate::repositories::perpetuals_repository::PerpetualsRepository;
 use crate::repositories::prices_repository::PricesRepository;
 use crate::{DatabaseClient, DatabaseError, DieselResultExt};
 use primitives::{Asset, AssetAssociation, AssetBasic, AssetFull, AssetId, AssetIdVecExt, AssetPriceMetadata};
@@ -79,7 +80,7 @@ impl AssetsRepository for DatabaseClient {
         let links = AssetsLinksStore::get_asset_links(self, &id)?.into_iter().map(|x| x.as_primitive()).collect();
         let associations = AssetsAssociationsStore::get_asset_associations(self, &id)?.into_iter().map(|x| x.as_primitive()).collect();
         let tags = TagStore::get_assets_tags_for_asset(self, &id)?.into_iter().map(|x| x.tag_id).collect();
-        let perpetuals = self.perpetuals().get_perpetuals_for_asset(asset_id)?;
+        let perpetuals = PerpetualsRepository::get_perpetuals_for_asset(self, asset_id)?;
         let perpetuals = perpetuals.into_iter().map(|x| x.as_basic()).collect();
 
         Ok(AssetFull {

@@ -4,7 +4,7 @@ use std::time::Duration;
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
 use primitives::{StreamEvent, StreamTransactionsUpdate, StreamWalletUpdate, WalletId, device_stream_channel, unix_timestamp};
-use storage::{Database, WalletsRepository};
+use storage::{Database, DatabaseError, WalletsRepository};
 use streamer::{WalletStreamEvent, WalletStreamPayload, consumer::MessageConsumer};
 
 pub struct WalletStreamConsumer {
@@ -33,8 +33,11 @@ impl MessageConsumer<WalletStreamPayload, usize> for WalletStreamConsumer {
     }
 
     async fn process(&self, payload: WalletStreamPayload) -> Result<usize, Box<dyn Error + Send + Sync>> {
-        let wallet = self.database.wallets()?.get_wallet_by_id(payload.wallet_id)?;
-        let devices = self.database.wallets()?.get_devices_by_wallet_id(payload.wallet_id)?;
+        let wallet_row_id = payload.wallet_id;
+        let (wallet, devices) = self
+            .database
+            .run(move |client| -> Result<_, DatabaseError> { Ok((client.get_wallet_by_id(wallet_row_id)?, client.get_devices_by_wallet_id(wallet_row_id)?)) })
+            .await?;
         let events = stream_events(wallet.wallet_id.0, payload.event);
         let now = unix_timestamp();
         let expires_at = now.saturating_add(self.retention.as_secs()) as f64;

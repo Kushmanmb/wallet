@@ -31,9 +31,9 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
 
     let providers = Arc::new(ChainProviders::from_settings(&settings, &settings::service_user_agent("daemon", Some("perpetual_observer"))));
     let classifier_config = PerpetualPositionClassifierConfig {
-        trigger_bps: config.get_i64(ConfigKey::PerpetualPriorityTriggerBps)?,
-        liquidation_bps: config.get_i64(ConfigKey::PerpetualPriorityLiquidationBps)?,
-        concurrency: config.get_usize(ConfigKey::PerpetualClassifierConcurrency)?,
+        trigger_bps: config.get_i64(ConfigKey::PerpetualPriorityTriggerBps).await?,
+        liquidation_bps: config.get_i64(ConfigKey::PerpetualPriorityLiquidationBps).await?,
+        concurrency: config.get_usize(ConfigKey::PerpetualClassifierConcurrency).await?,
     };
     let refresher = Arc::new(PerpetualAddressRefresher::new(providers.clone(), database.clone(), cacher.clone()));
 
@@ -67,4 +67,5 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
             }
         })
         .finish()
+        .await
 }

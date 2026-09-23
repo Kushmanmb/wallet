@@ -3,7 +3,7 @@ use std::error::Error;
 
 use gem_tracing::info_with_fields;
 use primitives::AssetId;
-use storage::{AssetsUsageRanksRepository, Database, PricesRepository};
+use storage::{AssetsUsageRanksRepository, Database, DatabaseError, PricesRepository};
 use streamer::{StreamProducer, StreamProducerQueue};
 
 const MAX_ASSETS_PER_RUN: usize = 1;
@@ -19,9 +19,14 @@ impl MissingPricesPublisher {
     }
 
     pub async fn update(&self) -> Result<usize, Box<dyn Error + Send + Sync>> {
-        let ranks: Vec<(AssetId, i32)> = self.database.assets_usage_ranks()?.get_all_usage_ranks()?.into_iter().map(|row| (row.asset_id.0, row.usage_rank)).collect();
-        let priced: HashSet<AssetId> = self.database.prices()?.get_prices_assets()?.into_iter().map(|row| row.asset_id.0).collect();
-        let asset_ids: Vec<AssetId> = missing_assets(ranks, &priced).into_iter().take(MAX_ASSETS_PER_RUN).collect();
+        let asset_ids: Vec<AssetId> = self
+            .database
+            .run(|client| -> Result<Vec<AssetId>, DatabaseError> {
+                let ranks: Vec<(AssetId, i32)> = client.get_all_usage_ranks()?.into_iter().map(|row| (row.asset_id.0, row.usage_rank)).collect();
+                let priced: HashSet<AssetId> = client.get_prices_assets()?.into_iter().map(|row| row.asset_id.0).collect();
+                Ok(missing_assets(ranks, &priced).into_iter().take(MAX_ASSETS_PER_RUN).collect())
+            })
+            .await?;
         let count = asset_ids.len();
         self.stream_producer.publish_fetch_prices_assets(asset_ids.clone()).await?;
         for asset_id in &asset_ids {

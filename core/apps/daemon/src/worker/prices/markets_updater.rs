@@ -25,11 +25,11 @@ impl MarketsUpdater {
         let losers = self.markets_client.get_asset_ids_for_provider_price_ids(provider, top_gainers_losers.get_losers_ids()).await?;
         let dominance = self.dominance(global.clone());
 
-        let _ = self.markets_client.set_asset_ids_for_tag(AssetTag::Trending, trending);
-        let _ = self.markets_client.set_asset_ids_for_tag(AssetTag::Gainers, gainers);
-        let _ = self.markets_client.set_asset_ids_for_tag(AssetTag::Losers, losers);
+        let _ = self.markets_client.set_asset_ids_for_tag(AssetTag::Trending, trending).await;
+        let _ = self.markets_client.set_asset_ids_for_tag(AssetTag::Gainers, gainers).await;
+        let _ = self.markets_client.set_asset_ids_for_tag(AssetTag::Losers, losers).await;
 
-        let assets = self.markets_client.get_market_assets()?;
+        let assets = self.markets_client.get_market_assets().await?;
 
         let markets = Markets {
             market_cap: global.total_market_cap.usd as f32,

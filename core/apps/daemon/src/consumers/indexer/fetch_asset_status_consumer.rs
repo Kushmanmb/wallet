@@ -70,8 +70,8 @@ impl MessageConsumer<AssetId, bool> for FetchAssetStatusConsumer {
 
         if verdict.is_malicious {
             self.database
-                .assets()?
-                .update_assets(vec![asset_id], vec![AssetUpdate::Rank(AssetRank::Fraudulent.threshold()), AssetUpdate::IsEnabled(false)])?;
+                .run(move |client| client.update_assets(vec![asset_id], vec![AssetUpdate::Rank(AssetRank::Fraudulent.threshold()), AssetUpdate::IsEnabled(false)]))
+                .await?;
         }
         let failed_providers = verdict.failed_providers.join(",");
         info_with_fields!(

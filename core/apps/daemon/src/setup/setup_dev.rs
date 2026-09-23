@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use super::api_clients::{SETUP_DEV_API_CLIENT_NAME, SETUP_DEV_API_CLIENT_SECRET, api_client_access_grants};
 use super::database::run_migrations;
 use super::production::setup_database;
@@ -18,27 +20,31 @@ use settings::Settings;
 use storage::models::{ChartRow, FiatAssetRow, FiatProviderCountryRow, FiatRateRow, NewFiatTransactionRow, PriceAssetRow, UpdateDeviceRow, price::NewPriceRow};
 use storage::sql_types::{Platform, PlatformStore};
 use storage::{
-    ApiClientsRepository, AssetsRepository, ChartsRepository, Database, DevicesRepository, NewNotificationRow, NewWalletRow, NotificationsRepository, PriceAlertsRepository, PricesRepository, RewardsRepository, WalletSource, WalletType,
-    WalletsRepository,
+    ApiClientsRepository, AssetsRepository, ChartsRepository, Database, DatabaseClient, DevicesRepository, NewNotificationRow, NewWalletRow, NotificationsRepository, PriceAlertsRepository, PricesRepository, RewardsRepository, WalletSource,
+    WalletType, WalletsRepository,
 };
 
-pub async fn run_setup_dev(settings: Settings) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub async fn run_setup_dev(settings: Settings) -> Result<(), Box<dyn Error + Send + Sync>> {
     info_with_fields!("setup_dev", step = "init");
 
     let database = Database::new(&settings.postgres.url, settings.postgres.pool)?;
-    run_migrations(&database, "setup_dev")?;
-    setup_database(&database)?;
+    run_migrations(&database, "setup_dev").await?;
+    setup_database(&database).await?;
 
-    setup_dev_currency(&database)?;
-    setup_dev_api_clients(&database)?;
-    setup_dev_devices(&database)?;
-    setup_dev_assets(&database)?;
+    database
+        .run(|client| -> Result<_, Box<dyn Error + Send + Sync>> {
+            setup_dev_currency(client)?;
+            setup_dev_api_clients(client)?;
+            setup_dev_devices(client)?;
+            setup_dev_assets(client)
+        })
+        .await?;
 
     info_with_fields!("setup_dev", step = "complete");
     Ok(())
 }
 
-fn setup_dev_currency(database: &Database) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+fn setup_dev_currency(client: &mut DatabaseClient) -> Result<(), Box<dyn Error + Send + Sync>> {
     info_with_fields!("setup_dev", step = "add currency");
 
     let fiat_rate = FiatRateRow {
@@ -50,22 +56,21 @@ fn setup_dev_currency(database: &Database) -> Result<(), Box<dyn std::error::Err
     };
 
     info_with_fields!("setup_dev", step = "add rate", currency = "USD");
-    database.fiat()?.set_fiat_rates(vec![fiat_rate])?;
+    client.set_fiat_rates(vec![fiat_rate])?;
 
     Ok(())
 }
 
-fn setup_dev_api_clients(database: &Database) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+fn setup_dev_api_clients(client: &mut DatabaseClient) -> Result<(), Box<dyn Error + Send + Sync>> {
     info_with_fields!("setup_dev", step = "api clients");
 
-    let mut api_clients = database.api_clients()?;
-    api_clients.add_api_client_grants(api_client_access_grants(SETUP_DEV_API_CLIENT_NAME))?;
-    api_clients.set_api_client_secret(SETUP_DEV_API_CLIENT_NAME, SETUP_DEV_API_CLIENT_SECRET)?;
+    client.add_api_client_grants(api_client_access_grants(SETUP_DEV_API_CLIENT_NAME))?;
+    client.set_api_client_secret(SETUP_DEV_API_CLIENT_NAME, SETUP_DEV_API_CLIENT_SECRET)?;
 
     Ok(())
 }
 
-fn setup_dev_devices(database: &Database) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+fn setup_dev_devices(client: &mut DatabaseClient) -> Result<(), Box<dyn Error + Send + Sync>> {
     info_with_fields!("setup_dev", step = "add devices");
 
     let ios_device_id = "0".repeat(64);
@@ -102,12 +107,12 @@ fn setup_dev_devices(database: &Database) -> Result<(), Box<dyn std::error::Erro
     };
 
     for (device_id, device) in [(ios_device_id.as_str(), ios_device), (android_device_id.as_str(), android_device)] {
-        database.devices()?.add_device(device)?;
+        client.add_device(device)?;
         info_with_fields!("setup_dev", step = "device added", device_id = device_id);
     }
 
-    let ios_device_row_id = database.devices()?.get_device_row_id(&ios_device_id)?;
-    let android_device_row_id = database.devices()?.get_device_row_id(&android_device_id)?;
+    let ios_device_row_id = client.get_device_row_id(&ios_device_id)?;
+    let android_device_row_id = client.get_device_row_id(&android_device_id)?;
 
     let wallet_address = "0xBA4D1d35bCe0e8F28E5a3403e7a0b996c5d50AC4";
 
@@ -118,7 +123,7 @@ fn setup_dev_devices(database: &Database) -> Result<(), Box<dyn std::error::Erro
         wallet_type: WalletType::Multicoin,
         source: WalletSource::Create,
     };
-    let wallet = database.wallets()?.get_or_create_wallet(new_wallet)?;
+    let wallet = client.get_or_create_wallet(new_wallet)?;
     info_with_fields!("setup_dev", step = "wallet added", wallet_id = wallet.id);
 
     info_with_fields!("setup_dev", step = "add wallet subscriptions");
@@ -129,18 +134,18 @@ fn setup_dev_devices(database: &Database) -> Result<(), Box<dyn std::error::Erro
         (wallet.id, Chain::Solana, solana_address.to_string()),
     ];
 
-    let result = WalletsRepository::add_subscriptions(&mut database.wallets()?, ios_device_row_id, subscriptions.clone())?;
+    let result = WalletsRepository::add_subscriptions(client, ios_device_row_id, subscriptions.clone())?;
     info_with_fields!("setup_dev", step = "ios wallet subscription added", count = result);
 
-    let result = WalletsRepository::add_subscriptions(&mut database.wallets()?, android_device_row_id, subscriptions)?;
+    let result = WalletsRepository::add_subscriptions(client, android_device_row_id, subscriptions)?;
     info_with_fields!("setup_dev", step = "android wallet subscription added", count = result);
 
-    setup_dev_fiat_transactions(database, ios_device_row_id, wallet.id)?;
+    setup_dev_fiat_transactions(client, ios_device_row_id, wallet.id)?;
 
     info_with_fields!("setup_dev", step = "add rewards");
-    let devices = database.wallets()?.get_devices_by_wallet_id(wallet.id)?;
+    let devices = client.get_devices_by_wallet_id(wallet.id)?;
     if !devices.is_empty() {
-        let result = database.rewards()?.create_reward(wallet.id, "gemcoder");
+        let result = client.create_reward(wallet.id, "gemcoder");
         match result {
             Ok((rewards, _)) => info_with_fields!("setup_dev", step = "rewards added", code = rewards.code.unwrap_or_default(), points = rewards.points),
             Err(e) => info_with_fields!("setup_dev", step = "rewards skipped (may already exist)", error = e.to_string()),
@@ -180,7 +185,7 @@ fn setup_dev_devices(database: &Database) -> Result<(), Box<dyn std::error::Erro
             metadata: Some(serde_json::json!({"username": "bob", "points": 200})),
         },
     ];
-    let result = database.notifications()?.create_notifications(notifications)?;
+    let result = client.create_notifications(notifications)?;
     info_with_fields!("setup_dev", step = "notifications added", count = result);
 
     info_with_fields!("setup_dev", step = "add price alerts");
@@ -188,13 +193,13 @@ fn setup_dev_devices(database: &Database) -> Result<(), Box<dyn std::error::Erro
         PriceAlert::new_price(AssetId::from_chain(Chain::Ethereum), Currency::USD, 3000.0, PriceAlertDirection::Up),
         PriceAlert::new_price(AssetId::from_chain(Chain::Bitcoin), Currency::USD, 50000.0, PriceAlertDirection::Down),
     ];
-    let result = database.price_alerts()?.add_price_alerts(&ios_device_id, price_alerts)?;
+    let result = client.add_price_alerts(&ios_device_id, price_alerts)?;
     info_with_fields!("setup_dev", step = "price alerts added", count = result);
 
     Ok(())
 }
 
-fn setup_dev_fiat_transactions(database: &Database, device_id: i32, wallet_id: i32) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+fn setup_dev_fiat_transactions(client: &mut DatabaseClient, device_id: i32, wallet_id: i32) -> Result<(), Box<dyn Error + Send + Sync>> {
     info_with_fields!("setup_dev", step = "add fiat transactions");
 
     let mock = || {
@@ -242,10 +247,9 @@ fn setup_dev_fiat_transactions(database: &Database, device_id: i32, wallet_id: i
         },
     ];
 
-    let evm_address_id = database.wallets()?.subscriptions_wallet_address_for_chain(device_id, wallet_id, Chain::Ethereum)?.id;
-    let solana_address_id = database.wallets()?.subscriptions_wallet_address_for_chain(device_id, wallet_id, Chain::Solana)?.id;
+    let evm_address_id = client.subscriptions_wallet_address_for_chain(device_id, wallet_id, Chain::Ethereum)?.id;
+    let solana_address_id = client.subscriptions_wallet_address_for_chain(device_id, wallet_id, Chain::Solana)?.id;
 
-    let mut fiat = database.fiat()?;
     let transaction_rows = vec![
         NewFiatTransactionRow::new(transactions[0].clone(), device_id, wallet_id, evm_address_id),
         NewFiatTransactionRow::new(transactions[1].clone(), device_id, wallet_id, evm_address_id),
@@ -254,14 +258,14 @@ fn setup_dev_fiat_transactions(database: &Database, device_id: i32, wallet_id: i
 
     let mut count = 0;
     for row in transaction_rows {
-        count += fiat.add_fiat_transaction(row)?;
+        count += client.add_fiat_transaction(row)?;
     }
 
     info_with_fields!("setup_dev", step = "fiat transactions added", count = count);
     Ok(())
 }
 
-fn setup_dev_assets(database: &Database) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+fn setup_dev_assets(client: &mut DatabaseClient) -> Result<(), Box<dyn Error + Send + Sync>> {
     info_with_fields!("setup_dev", step = "add assets");
 
     let assets = [
@@ -282,10 +286,10 @@ fn setup_dev_assets(database: &Database) -> Result<(), Box<dyn std::error::Error
     .into_iter()
     .map(|asset| asset.as_basic_primitive())
     .collect::<Vec<_>>();
-    database.assets()?.add_assets(assets)?;
+    client.add_assets(assets)?;
 
     setup_dev_asset_associations(
-        database,
+        client,
         "usdc",
         &[
             (ETHEREUM_USDC_ASSET_ID.clone(), AssetAssociationType::Official),
@@ -296,7 +300,7 @@ fn setup_dev_assets(database: &Database) -> Result<(), Box<dyn std::error::Error
         ],
     )?;
     setup_dev_asset_associations(
-        database,
+        client,
         "usdt",
         &[
             (ETHEREUM_USDT_ASSET_ID.clone(), AssetAssociationType::Official),
@@ -338,7 +342,7 @@ fn setup_dev_assets(database: &Database) -> Result<(), Box<dyn std::error::Error
         fiat_asset(FiatProviderName::Paybis, "ETH", "ETH", "ethereum", &ethereum_asset_id),
     ];
 
-    let result = database.fiat()?.add_fiat_assets(fiat_assets)?;
+    let result = client.add_fiat_assets(fiat_assets)?;
     info_with_fields!("setup_dev", step = "fiat assets added", count = result);
 
     info_with_fields!("setup_dev", step = "add fiat provider countries");
@@ -356,7 +360,7 @@ fn setup_dev_assets(database: &Database) -> Result<(), Box<dyn std::error::Error
         })
         .collect();
 
-    let result = database.fiat()?.add_fiat_providers_countries(fiat_countries)?;
+    let result = client.add_fiat_providers_countries(fiat_countries)?;
     info_with_fields!("setup_dev", step = "fiat provider countries added", count = result);
 
     info_with_fields!("setup_dev", step = "add prices and charts");
@@ -378,10 +382,10 @@ fn setup_dev_assets(database: &Database) -> Result<(), Box<dyn std::error::Error
 
     let price_assets: Vec<PriceAssetRow> = coins.iter().map(|(provider, coin_id, asset_id, _)| PriceAssetRow::new(asset_id.clone(), *provider, coin_id)).collect();
 
-    let result = database.prices()?.add_prices(prices)?;
+    let result = client.add_prices(prices)?;
     info_with_fields!("setup_dev", step = "prices added", count = result);
 
-    let result = database.prices()?.set_prices_assets(price_assets)?;
+    let result = client.set_prices_assets(price_assets)?;
     info_with_fields!("setup_dev", step = "prices_assets added", count = result);
 
     for (idx, (provider, coin_id, _, base_price)) in coins.iter().enumerate() {
@@ -393,15 +397,15 @@ fn setup_dev_assets(database: &Database) -> Result<(), Box<dyn std::error::Error
 
         let daily: Vec<ChartRow> = (30i64..1825).map(|d| ChartRow::new(price_id.clone(), gen_price(d as f64, 0.15), now - chrono::Duration::days(d))).collect();
 
-        database.charts()?.add_charts(ChartTimeframe::Hourly, hourly)?;
-        database.charts()?.add_charts(ChartTimeframe::Daily, daily)?;
+        client.add_charts(ChartTimeframe::Hourly, hourly)?;
+        client.add_charts(ChartTimeframe::Daily, daily)?;
     }
     info_with_fields!("setup_dev", step = "charts added");
 
     Ok(())
 }
 
-fn setup_dev_asset_associations(database: &Database, id: &str, assets: &[(AssetId, AssetAssociationType)]) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+fn setup_dev_asset_associations(client: &mut DatabaseClient, id: &str, assets: &[(AssetId, AssetAssociationType)]) -> Result<(), Box<dyn Error + Send + Sync>> {
     let associations = assets
         .iter()
         .map(|(asset_id, association_type)| AssetAssociation {
@@ -410,6 +414,6 @@ fn setup_dev_asset_associations(database: &Database, id: &str, assets: &[(AssetI
         })
         .collect();
 
-    database.assets()?.upsert_asset_associations(id, associations)?;
+    client.upsert_asset_associations(id, associations)?;
     Ok(())
 }

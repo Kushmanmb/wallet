@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use primitives::{AssetId, Chain, asset_score::AssetRank};
 use search_index::{ASSET_LISTS_INDEX_NAME, AssetListDocument, SearchIndexClient};
 use storage::{
-    AssetFilter, AssetsRepository, Database, TagRepository,
+    AssetFilter, AssetsRepository, Database, DatabaseClient, DatabaseError, TagRepository,
     models::{AssetTagRow, PerpetualTagRow, TagRow},
 };
 
@@ -21,21 +21,28 @@ impl AssetListsIndexUpdater {
     }
 
     pub async fn update(&self) -> Result<usize, Box<dyn std::error::Error + Send + Sync>> {
-        let tags = [self.database.tag()?.get_asset_list_tags()?, self.database.tag()?.get_perpetual_list_tags()?].concat();
-        let assets_tags = self.searchable_assets_tags(self.database.tag()?.get_assets_tags()?)?;
-        let perpetuals_tags = self.database.tag()?.get_perpetuals_tags()?;
+        let (tags, assets_tags, perpetuals_tags) = self
+            .database
+            .run(|client| -> Result<_, DatabaseError> {
+                let tags = [client.get_asset_list_tags()?, client.get_perpetual_list_tags()?].concat();
+                let assets_tags = client.get_assets_tags()?;
+                let assets_tags = Self::searchable_assets_tags(client, assets_tags)?;
+                let perpetuals_tags = client.get_perpetuals_tags()?;
+                Ok((tags, assets_tags, perpetuals_tags))
+            })
+            .await?;
         let documents = Self::build_documents(tags, &assets_tags, &perpetuals_tags);
 
         self.search_index.replace_documents(ASSET_LISTS_INDEX_NAME, documents).await
     }
 
-    fn searchable_assets_tags(&self, assets_tags: Vec<AssetTagRow>) -> Result<Vec<AssetTagRow>, Box<dyn std::error::Error + Send + Sync>> {
+    fn searchable_assets_tags(client: &mut DatabaseClient, assets_tags: Vec<AssetTagRow>) -> Result<Vec<AssetTagRow>, DatabaseError> {
         let filters = vec![
             AssetFilter::Ids(assets_tags.iter().map(|tag| tag.asset_id.to_string()).collect()),
             AssetFilter::IsEnabled(true),
             AssetFilter::RankGt(AssetRank::Trivial.threshold()),
         ];
-        let searchable_asset_ids: HashSet<AssetId> = self.database.assets()?.get_asset_ids_by_filter(filters)?.into_iter().collect();
+        let searchable_asset_ids: HashSet<AssetId> = client.get_asset_ids_by_filter(filters)?.into_iter().collect();
         Ok(assets_tags.into_iter().filter(|tag| searchable_asset_ids.contains(&tag.asset_id)).collect())
     }
 

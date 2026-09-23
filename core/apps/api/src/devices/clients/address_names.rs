@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::error::Error;
 
 use primitives::{AddressName, AddressType, Asset, AssetId, ChainAddress, VerificationStatus};
-use storage::{AssetsRepository, Database, ScanAddressesRepository};
+use storage::{AssetsRepository, Database, DatabaseError, ScanAddressesRepository};
 
 #[derive(Clone)]
 pub struct AddressNamesClient {
@@ -14,23 +14,27 @@ impl AddressNamesClient {
         Self { database }
     }
 
-    pub fn get_address_names(&self, requests: Vec<ChainAddress>) -> Result<Vec<AddressName>, Box<dyn Error + Send + Sync>> {
+    pub async fn get_address_names(&self, requests: Vec<ChainAddress>) -> Result<Vec<AddressName>, Box<dyn Error + Send + Sync>> {
         let requests: Vec<ChainAddress> = requests.into_iter().filter(|request| !request.address.is_empty()).collect();
         if requests.is_empty() {
             return Ok(vec![]);
         }
 
-        let queries = requests.iter().map(|request| (request.chain, request.address.as_str())).collect::<Vec<_>>();
-        let scan_names = self
+        let addresses = requests.clone();
+        let asset_ids = requests.iter().map(|request| AssetId::from(request.chain, Some(request.address.clone()))).collect::<Vec<_>>();
+        let (scan_rows, assets) = self
             .database
-            .scan_addresses()?
-            .get_scan_addresses(&queries)?
+            .run(move |client| -> Result<_, DatabaseError> {
+                let queries = addresses.iter().map(|request| (request.chain, request.address.as_str())).collect::<Vec<_>>();
+                Ok((client.get_scan_addresses(&queries)?, client.get_assets(asset_ids)?))
+            })
+            .await?;
+        let scan_names = scan_rows
             .into_iter()
             .filter_map(|x| x.as_primitive())
             .map(|name| (ChainAddress::new(name.chain, name.address.clone()), name))
             .collect::<HashMap<_, _>>();
-        let asset_ids = requests.iter().map(|request| AssetId::from(request.chain, Some(request.address.clone()))).collect::<Vec<_>>();
-        let asset_names = self.database.assets()?.get_assets(asset_ids)?.into_iter().filter_map(asset_entry).collect::<HashMap<_, _>>();
+        let asset_names = assets.into_iter().filter_map(asset_entry).collect::<HashMap<_, _>>();
 
         Ok(map_requests(requests, &scan_names, &asset_names))
     }

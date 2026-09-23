@@ -585,7 +585,7 @@ impl DatabaseClient {
     }
 
     fn create_new_referral(&mut self, referrer_username: &str, referred_username: &str, device_id: i32, risk_signal_id: Option<i32>, can_verify: bool, referrer_status: &PrimitiveRewardStatus) -> Result<Vec<RewardEvent>, DatabaseError> {
-        let delay = referral_verification_delay(self.config(), referrer_status)?;
+        let delay = referral_verification_delay(self, referrer_status)?;
 
         if !can_verify && let Some(delay) = delay {
             let verify_after = now() + chrono::Duration::seconds(delay.as_secs() as i64);

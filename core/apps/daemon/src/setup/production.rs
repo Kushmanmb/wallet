@@ -8,17 +8,17 @@ use search_index::{INDEX_CONFIGS, INDEX_PRIMARY_KEY, SearchIndexClient, SearchIn
 use settings::Settings;
 use std::collections::HashSet;
 use storage::models::ConfigRow;
-use storage::{ApiClientsRepository, AssetsRepository, ChainsRepository, ConfigCacher, ConfigRepository, Database, PricesProvidersRepository, ReleasesRepository, TagRepository};
+use storage::{ApiClientsRepository, AssetsRepository, ChainsRepository, ConfigCacher, ConfigRepository, Database, DatabaseError, PricesProvidersRepository, ReleasesRepository, TagRepository};
 use streamer::{ExchangeKind, ExchangeName, QueueName, StreamProducer, StreamProducerConfig};
 
 pub async fn run_setup(settings: Settings) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     info_with_fields!("setup", step = "init");
 
     let database = Database::new(&settings.postgres.url, settings.postgres.pool)?;
-    run_migrations(&database, "setup")?;
+    run_migrations(&database, "setup").await?;
 
-    setup_database(&database)?;
-    setup_scan_addresses(&database)?;
+    setup_database(&database).await?;
+    setup_scan_addresses(&database).await?;
     setup_search_index(&settings, &database).await?;
     setup_queues(&settings).await?;
 
@@ -26,65 +26,70 @@ pub async fn run_setup(settings: Settings) -> Result<(), Box<dyn std::error::Err
     Ok(())
 }
 
-pub(super) fn setup_database(database: &Database) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let chains = Chain::all();
-    info_with_fields!("setup", step = "chains", chains = format!("{:?}", chains));
+pub(super) async fn setup_database(database: &Database) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    database
+        .run(|client| -> Result<_, DatabaseError> {
+            let chains = Chain::all();
+            info_with_fields!("setup", step = "chains", chains = format!("{:?}", chains));
 
-    info_with_fields!("setup", step = "add chains");
-    let _ = database.chains()?.add_chains(chains.clone());
+            info_with_fields!("setup", step = "add chains");
+            let _ = client.add_chains(chains.clone());
 
-    info_with_fields!("setup", step = "parser state");
-    for chain in chains.iter().copied() {
-        let _ = database.parser_state()?.add_parser_state(chain, chain.block_time() as i32);
-    }
+            info_with_fields!("setup", step = "parser state");
+            for chain in chains.iter().copied() {
+                let _ = client.add_parser_state(chain, chain.block_time() as i32);
+            }
 
-    info_with_fields!("setup", step = "assets");
-    let assets = chains.into_iter().map(|x| Asset::from_chain(x).as_basic_primitive()).collect::<Vec<_>>();
-    let _ = database.assets()?.add_assets(assets);
+            info_with_fields!("setup", step = "assets");
+            let assets = chains.into_iter().map(|x| Asset::from_chain(x).as_basic_primitive()).collect::<Vec<_>>();
+            let _ = client.add_assets(assets);
 
-    info_with_fields!("setup", step = "fiat providers");
-    let providers = FiatProviderName::all().into_iter().map(storage::models::FiatProviderRow::from_primitive).collect::<Vec<_>>();
-    let _ = database.fiat()?.add_fiat_providers(providers);
+            info_with_fields!("setup", step = "fiat providers");
+            let providers = FiatProviderName::all().into_iter().map(storage::models::FiatProviderRow::from_primitive).collect::<Vec<_>>();
+            let _ = client.add_fiat_providers(providers);
 
-    info_with_fields!("setup", step = "api clients");
-    let _ = database.api_clients()?.add_api_client_grants(setup_api_client_grants());
+            info_with_fields!("setup", step = "api clients");
+            let _ = client.add_api_client_grants(setup_api_client_grants());
 
-    info_with_fields!("setup", step = "releases");
-    let releases = PrimitivePlatformStore::all()
-        .into_iter()
-        .map(|x| storage::models::ReleaseRow {
-            platform_store: x.into(),
-            version: "1.0.0".to_string(),
-            upgrade_required: false,
-            update_enabled: true,
+            info_with_fields!("setup", step = "releases");
+            let releases = PrimitivePlatformStore::all()
+                .into_iter()
+                .map(|x| storage::models::ReleaseRow {
+                    platform_store: x.into(),
+                    version: "1.0.0".to_string(),
+                    upgrade_required: false,
+                    update_enabled: true,
+                })
+                .collect::<Vec<_>>();
+            let _ = client.add_releases(releases);
+
+            info_with_fields!("setup", step = "assets tags");
+            let assets_tags = AssetTag::all().into_iter().map(storage::models::TagRow::from_primitive).collect::<Vec<_>>();
+            let _ = client.add_tags(assets_tags);
+
+            info_with_fields!("setup", step = "prices providers");
+            let providers = PriceProvider::all().into_iter().map(|provider| storage::models::PriceProviderConfigRow::new(provider, true)).collect::<Vec<_>>();
+            let _ = client.add_prices_providers(providers);
+
+            info_with_fields!("setup", step = "config");
+            let configs: Vec<ConfigRow> = ConfigKey::all().into_iter().map(ConfigRow::from_primitive).collect();
+            let _ = client.add_config(configs);
+
+            info_with_fields!("setup", step = "param config");
+            let param_configs: Vec<ConfigRow> = ConfigParamKey::all().into_iter().map(ConfigRow::from_param).collect();
+            let _ = client.add_config(param_configs);
+
+            info_with_fields!("setup", step = "cleanup stale config keys");
+            let valid: HashSet<String> = ConfigKey::all().into_iter().map(|k| k.as_ref().to_string()).chain(ConfigParamKey::all().into_iter().map(|k| k.key())).collect();
+            let stale: Vec<String> = client.get_config_keys()?.into_iter().filter(|k| !valid.contains(k)).collect();
+            if !stale.is_empty() {
+                info_with_fields!("setup", step = "delete stale config keys", count = stale.len(), keys = format!("{:?}", stale));
+                let _ = client.delete_keys(stale);
+            }
+
+            Ok(())
         })
-        .collect::<Vec<_>>();
-    let _ = database.releases()?.add_releases(releases);
-
-    info_with_fields!("setup", step = "assets tags");
-    let assets_tags = AssetTag::all().into_iter().map(storage::models::TagRow::from_primitive).collect::<Vec<_>>();
-    let _ = database.tag()?.add_tags(assets_tags);
-
-    info_with_fields!("setup", step = "prices providers");
-    let providers = PriceProvider::all().into_iter().map(|provider| storage::models::PriceProviderConfigRow::new(provider, true)).collect::<Vec<_>>();
-    let _ = database.prices_providers()?.add_prices_providers(providers);
-
-    info_with_fields!("setup", step = "config");
-    let configs: Vec<ConfigRow> = ConfigKey::all().into_iter().map(ConfigRow::from_primitive).collect();
-    let _ = database.client()?.add_config(configs);
-
-    info_with_fields!("setup", step = "param config");
-    let param_configs: Vec<ConfigRow> = ConfigParamKey::all().into_iter().map(ConfigRow::from_param).collect();
-    let _ = database.client()?.add_config(param_configs);
-
-    info_with_fields!("setup", step = "cleanup stale config keys");
-    let valid: HashSet<String> = ConfigKey::all().into_iter().map(|k| k.as_ref().to_string()).chain(ConfigParamKey::all().into_iter().map(|k| k.key())).collect();
-    let stale: Vec<String> = database.client()?.get_config_keys()?.into_iter().filter(|k| !valid.contains(k)).collect();
-    if !stale.is_empty() {
-        info_with_fields!("setup", step = "delete stale config keys", count = stale.len(), keys = format!("{:?}", stale));
-        let _ = database.client()?.delete_keys(stale);
-    }
-
+        .await?;
     Ok(())
 }
 
@@ -92,7 +97,7 @@ async fn setup_search_index(settings: &Settings, database: &Database) -> Result<
     info_with_fields!("setup", step = "search index", indexes = format!("{:?}", INDEX_CONFIGS.iter().map(|c| c.name).collect::<Vec<_>>()));
 
     let search_index_config = SearchIndexConfig {
-        batch_size: ConfigCacher::new(database.clone()).get_usize(ConfigKey::SearchIndexBatchSize)?,
+        batch_size: ConfigCacher::new(database.clone()).get_usize(ConfigKey::SearchIndexBatchSize).await?,
     };
     let search_index_client = SearchIndexClient::new(&settings.meilisearch.url, settings.meilisearch.key.as_str(), search_index_config);
     search_index_client.setup(INDEX_CONFIGS, INDEX_PRIMARY_KEY).await.unwrap();

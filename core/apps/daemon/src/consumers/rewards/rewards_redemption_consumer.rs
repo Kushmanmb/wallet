@@ -7,7 +7,7 @@ use std::error::Error;
 use std::sync::Arc;
 use std::time::Duration;
 use storage::sql_types::RedemptionStatus;
-use storage::{Database, RedemptionUpdate, RewardsRedemptionsRepository, RewardsRepository};
+use storage::{Database, DatabaseError, RedemptionUpdate, RewardsRedemptionsRepository, RewardsRepository};
 use streamer::consumer::MessageConsumer;
 use streamer::{InAppNotificationPayload, QueueName, RewardsRedemptionPayload, StreamProducer, StreamProducerQueue};
 
@@ -56,17 +56,23 @@ impl<S: RedemptionService> RewardsRedemptionConsumer<S> {
 #[async_trait]
 impl<S: RedemptionService> MessageConsumer<RewardsRedemptionPayload, PrimitiveRedemptionStatus> for RewardsRedemptionConsumer<S> {
     async fn should_process(&self, payload: &RewardsRedemptionPayload) -> Result<bool, Box<dyn Error + Send + Sync>> {
-        let redemption = self.database.rewards_redemptions()?.get_redemption(payload.redemption_id)?;
+        let redemption_id = payload.redemption_id;
+        let redemption = self.database.run(move |client| client.get_redemption(redemption_id)).await?;
         Ok(*redemption.status == PrimitiveRedemptionStatus::Pending)
     }
 
     async fn process(&self, payload: RewardsRedemptionPayload) -> Result<PrimitiveRedemptionStatus, Box<dyn Error + Send + Sync>> {
-        let redemption = self.database.rewards_redemptions()?.get_redemption(payload.redemption_id)?;
-
-        self.database.rewards_redemptions()?.update_redemption(payload.redemption_id, vec![RedemptionUpdate::Status(RedemptionStatus::Processing)])?;
-
-        let recipient_address = self.database.rewards()?.get_address_by_username(&redemption.username)?;
-        let option = self.database.rewards_redemptions()?.get_redemption_option(&redemption.option_id)?;
+        let redemption_id = payload.redemption_id;
+        let (redemption, recipient_address, option) = self
+            .database
+            .run(move |client| -> Result<_, DatabaseError> {
+                let redemption = client.get_redemption(redemption_id)?;
+                client.update_redemption(redemption_id, vec![RedemptionUpdate::Status(RedemptionStatus::Processing)])?;
+                let recipient_address = client.get_address_by_username(&redemption.username)?;
+                let option = client.get_redemption_option(&redemption.option_id)?;
+                Ok((redemption, recipient_address, option))
+            })
+            .await?;
 
         let asset_id = option.asset.as_ref().map(|a| a.id.clone());
         let asset_id_str = asset_id.as_ref().map(|a| a.to_string());
@@ -80,7 +86,7 @@ impl<S: RedemptionService> MessageConsumer<RewardsRedemptionPayload, PrimitiveRe
         match self.process_with_retry(request).await {
             Ok(transaction_id) => {
                 let updates = vec![RedemptionUpdate::TransactionId(transaction_id.clone()), RedemptionUpdate::Status(RedemptionStatus::Completed)];
-                self.database.rewards_redemptions()?.update_redemption(payload.redemption_id, updates)?;
+                self.database.run(move |client| client.update_redemption(redemption_id, updates)).await?;
 
                 if let Some(id) = &asset_id {
                     let pending_tx_id = TransactionId::new(id.chain, transaction_id.clone());
@@ -105,7 +111,7 @@ impl<S: RedemptionService> MessageConsumer<RewardsRedemptionPayload, PrimitiveRe
             Err(e) => {
                 let error_msg = e.to_string();
                 let updates = vec![RedemptionUpdate::Status(RedemptionStatus::Failed), RedemptionUpdate::Error(error_msg.clone())];
-                self.database.rewards_redemptions()?.update_redemption(payload.redemption_id, updates)?;
+                self.database.run(move |client| client.update_redemption(redemption_id, updates)).await?;
                 info_with_fields!("redemption failed", id = payload.redemption_id, asset = asset_id_str.as_deref().unwrap_or("none"), value = value, error = error_msg);
                 Ok(PrimitiveRedemptionStatus::Failed)
             }
