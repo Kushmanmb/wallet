@@ -249,9 +249,7 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 - **VM90** **S** **Banner icon shape.** iOS sizes and rounds banner icons by event; Android does not.
 - **VM92** **M** **Invalid phrase words.** Android highlights invalid phrase words through a separate `GemMnemonic`, called from the text transformation on each recomposition; iOS has no highlight. The import session should return them; decide iOS parity.
-- **VM93** **S** **Perpetual amount available balance.** Android `AmountPerpetualProvider` splices the perpetual `available` (Double to atomic) into the USDC balance; iOS uses the stored balance.
 - **VM94** **S** **Notification prompt.** Android asks through Core `shouldAskNotifications`/`setNotificationsAsked`; iOS decides in its own `PushNotificationEnablerService`.
-- **VM95** **S** **Perpetuals preview subtitle.** iOS uses `perpetualBalanceTotal`; Android composes its own in `PerpetualBalanceCoordinator`.
 - **VM96** **S** **Swap error text.** iOS maps `SwapperError` through `swapErrorDisplay`; Android handles swapper errors without it.
 - **VM97** **S** **Fiat provider names.** iOS maps names through `fiatProviderName`; Android builds provider subtitles itself.
 - **VM98** **S** **Transaction assets.** iOS uses `transactionAssetIds`, Android derives them elsewhere and alone uses `transactionSwapPair`. One Core answer for the assets a transaction touches.
@@ -334,6 +332,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM93, VM95 (2026-09-23).** Closed. Android `AmountPerpetualProvider` converted the perpetual balance's `available` back from a `Double` into the USDC balance it came from; both values live on the same balance record for the HyperCore perpetual USDC asset, so the provider now uses the stored balance as iOS does and no longer needs `GetPerpetualBalance`. Android's perpetuals preview built the whole `perpetualBalanceHeader` (and read the session for its wallet type) only to show `total`; it now calls `perpetualBalanceTotal` like iOS.
 
 **VM91 (2026-09-23).** Closed. `GemPerpetualDetails` returns `GemPerpetualButtonRow { button, tone }` for the info and modify buttons, toned once in `perpetual::rules::button_tone`: long positive, short/close/reduce negative, modify/increase neutral. iOS `PerpetualButtonViewModel` draws its style and destructive role from the tone, and Android `PerpetualButtonUIModel` carries the `GemValueTone` in place of its own `PerpetualButtonTone` switch. Both apps already drew Reduce red in the modify sheet; they now read it from one rule.
 

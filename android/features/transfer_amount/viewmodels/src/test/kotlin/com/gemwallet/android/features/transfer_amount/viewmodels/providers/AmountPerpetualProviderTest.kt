@@ -2,7 +2,6 @@ package com.gemwallet.android.features.transfer_amount.viewmodels.providers
 
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.perpetual.cases.GetPerpetual
-import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.testkit.mockAmountParamsPerpetual
 import com.gemwallet.android.testkit.mockGemPerpetualTransferData
@@ -84,16 +83,12 @@ class AmountPerpetualProviderTest {
         val getPerpetual = mockk<GetPerpetual>(relaxed = true) {
             every { getPerpetual(any()) } returns flowOf(perpetualAggregate)
         }
-        val getPerpetualBalance = mockk<GetPerpetualBalance>(relaxed = true) {
-            every { getBalance() } returns flowOf(null)
-        }
         return AmountPerpetualProvider(
             params = mockAmountParamsPerpetual(positionAction),
             context = mockk(relaxed = true),
             service = service,
             getAssetInfo = getAssetInfo,
             getPerpetual = getPerpetual,
-            getPerpetualBalance = getPerpetualBalance,
             scope = scope,
         )
     }

@@ -2,7 +2,6 @@ package com.gemwallet.android.features.transfer_amount.viewmodels.providers
 
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.perpetual.cases.GetPerpetual
-import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.stake.cases.GetDelegation
 import com.gemwallet.android.application.stake.cases.GetValidators
@@ -39,9 +38,6 @@ class AmountProviderFactoryTest {
         },
         getPerpetual = mockk<GetPerpetual>(relaxed = true) {
             every { getPerpetual(any()) } returns flowOf(null)
-        },
-        getPerpetualBalance = mockk<GetPerpetualBalance>(relaxed = true) {
-            every { getBalance() } returns flowOf(null)
         },
         getSession = mockk<GetSession>(relaxed = true) {
             every { this@mockk.invoke() } returns MutableStateFlow(null)

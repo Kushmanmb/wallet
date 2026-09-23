@@ -15,7 +15,6 @@ import com.gemwallet.android.model.text
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.list_item.ListItemModel
 import com.gemwallet.android.ui.components.perpetual.listItem
-import com.wallet.core.primitives.WalletType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,7 +22,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import uniffi.gemstone.GemPerpetualService
-import uniffi.gemstone.perpetualBalanceHeader
+import uniffi.gemstone.perpetualBalanceTotal
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,10 +35,10 @@ class PerpetualsPreviewViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
-    val tradeListItem = combine(getBalance.getBalance(), getSession(), userConfig.isHideBalances()) { balance, session, hideBalance ->
+    val tradeListItem = combine(getBalance.getBalance(), userConfig.isHideBalances()) { balance, hideBalance ->
         ListItemModel(
             title = context.getString(R.string.perpetuals_trade),
-            subtitle = perpetualBalanceHeader(balance?.toGem(), (session?.wallet?.type ?: WalletType.View).toGem()).total.text().hiddenWhen(hideBalance),
+            subtitle = perpetualBalanceTotal(balance?.toGem()).text().hiddenWhen(hideBalance),
         )
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, ListItemModel(title = context.getString(R.string.perpetuals_trade)))

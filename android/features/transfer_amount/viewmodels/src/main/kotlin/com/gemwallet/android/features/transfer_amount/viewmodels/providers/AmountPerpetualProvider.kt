@@ -3,7 +3,6 @@ package com.gemwallet.android.features.transfer_amount.viewmodels.providers
 import android.content.Context
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.perpetual.cases.GetPerpetual
-import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.domains.perpetual.LeverageState
 import com.gemwallet.android.ext.HypercoreUSDC
 import com.gemwallet.android.ext.PerpetualFormatter
@@ -62,7 +61,6 @@ class AmountPerpetualProvider(
     private val service: GemAmountServiceInterface,
     getAssetInfo: GetAssetInfo,
     getPerpetual: GetPerpetual,
-    getPerpetualBalance: GetPerpetualBalance,
     private val scope: CoroutineScope,
 ) : AmountDataProvider(scope) {
 
@@ -210,11 +208,8 @@ class AmountPerpetualProvider(
         .flatMapLatest { getAssetInfo(HypercoreUSDC.id) }
         .stateIn(scope, SharingStarted.Eagerly, null)
 
-    override val balance: StateFlow<GemAssetBalance?> = getPerpetualBalance.getBalance()
-        .combine(assetInfo.filterNotNull()) { perpetualBalance, current ->
-            val available = perpetualBalance?.available ?: 0.0
-            current.balance.toGem().copy(available = Crypto(available.toBigDecimal(), current.asset.decimals).atomicValue)
-        }
+    override val balance: StateFlow<GemAssetBalance?> = assetInfo
+        .map { it?.balance?.toGem() }
         .stateIn(scope, SharingStarted.Eagerly, null)
 
     override suspend fun buildTransfer(amount: Crypto, isMax: Boolean): GemTransferData = service.perpetualTransferData(

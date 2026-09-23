@@ -3,7 +3,6 @@ package com.gemwallet.android.features.transfer_amount.viewmodels.providers
 import android.content.Context
 import com.gemwallet.android.application.assets.cases.GetAssetInfo
 import com.gemwallet.android.application.perpetual.cases.GetPerpetual
-import com.gemwallet.android.application.perpetual.cases.GetPerpetualBalance
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.stake.cases.GetDelegation
 import com.gemwallet.android.application.stake.cases.GetStakeValidator
@@ -21,7 +20,6 @@ class AmountProviderFactory @Inject constructor(
     private val getStakeValidator: GetStakeValidator,
     private val getValidators: GetValidators,
     private val getPerpetual: GetPerpetual,
-    private val getPerpetualBalance: GetPerpetualBalance,
     private val getSession: GetSession,
     private val service: GemAmountServiceInterface,
     private val stakeService: GemStakeServiceInterface,
@@ -64,7 +62,6 @@ class AmountProviderFactory @Inject constructor(
             service = service,
             getAssetInfo = getAssetInfo,
             getPerpetual = getPerpetual,
-            getPerpetualBalance = getPerpetualBalance,
             scope = scope,
         )
     }
