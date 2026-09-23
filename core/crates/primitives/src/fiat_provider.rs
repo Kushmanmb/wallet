@@ -99,3 +99,14 @@ pub struct FiatProviderCountry {
     pub alpha2: String,
     pub is_allowed: bool,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_a_provider_reads_by_its_brand_and_not_its_case_name() {
+        assert_eq!(FiatProviderName::Flashnet.name(), "Cash App");
+        assert_eq!(FiatProviderName::MoonPay.name(), "MoonPay");
+    }
+}

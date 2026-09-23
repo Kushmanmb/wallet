@@ -62,19 +62,3 @@ pub struct GemFiatTransactionRow {
 pub fn fiat_transaction_rows(data: Vec<FiatTransactionAssetData>) -> Vec<GemFiatTransactionRow> {
     data.iter().map(rules::transaction_row).collect()
 }
-
-#[uniffi::export]
-pub fn fiat_provider_name(provider: FiatProviderName) -> String {
-    provider.name().to_string()
-}
-
-#[cfg(test)]
-mod provider_tests {
-    use super::*;
-
-    #[test]
-    fn test_a_provider_reads_by_its_brand_and_not_its_case_name() {
-        assert_eq!(fiat_provider_name(FiatProviderName::Flashnet), "Cash App");
-        assert_eq!(fiat_provider_name(FiatProviderName::MoonPay), "MoonPay");
-    }
-}
