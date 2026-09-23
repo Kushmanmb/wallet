@@ -233,7 +233,7 @@ impl GemAssetsService {
         match list {
             AssetList::Buy => self.store.set_buyable_assets(asset_ids).await?,
             AssetList::Sell => self.store.set_sellable_assets(asset_ids).await?,
-            AssetList::Swap => self.store.set_swappable_assets(asset_ids).await?,
+            AssetList::Swap => self.store.set_swappable_assets(rules::swappable_asset_ids(asset_ids)).await?,
         }
         self.preferences.set_assets_version(list, assets.version.to_string())
     }
@@ -272,10 +272,6 @@ impl GemAssetsService {
         let token_chains = rules::token_search_chains(&chains);
         let (assets, tokens) = futures::join!(self.search_assets(query.clone(), chains), self.search_tokens(query, token_chains));
         Ok(rules::merge_assets(assets?, tokens))
-    }
-
-    pub async fn sync_swappable_chains(&self) -> Result<(), GemServiceError> {
-        self.store.set_swappable_assets(rules::swappable_chain_asset_ids()).await
     }
 
     pub async fn get_fiat_assets(&self, quote_type: FiatQuoteType) -> Result<FiatAssets, GemApiError> {

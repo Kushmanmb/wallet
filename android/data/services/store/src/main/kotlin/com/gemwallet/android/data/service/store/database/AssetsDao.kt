@@ -140,7 +140,16 @@ interface AssetsDao {
     suspend fun setStakeEnabled(ids: List<String>)
 
     @Query("UPDATE asset SET is_swap_enabled = 1 WHERE id IN (:ids) AND is_swap_enabled = 0")
-    suspend fun setSwapEnabled(ids: List<String>)
+    suspend fun enableSwap(ids: List<String>)
+
+    @Query("UPDATE asset SET is_swap_enabled = 0 WHERE id NOT IN (:ids) AND is_swap_enabled = 1")
+    suspend fun disableSwapExcept(ids: List<String>)
+
+    @Transaction
+    suspend fun setSwappableAssets(ids: List<String>) {
+        enableSwap(ids)
+        disableSwapExcept(ids)
+    }
 
     @Query("UPDATE asset SET is_buy_enabled = 1 WHERE id IN (:ids) AND is_buy_enabled = 0")
     suspend fun enableBuy(ids: List<String>)

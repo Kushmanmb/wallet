@@ -45,4 +45,17 @@ struct AssetStoreTests {
         #expect(first + second == first)
         #expect(second == 0)
     }
+
+    @Test
+    func anAssetDroppedFromTheSwapListStopsBeingSwappable() throws {
+        let db = DB.mockWithChains([.ethereum, .bitcoin])
+        let store = AssetStore(db: db)
+        let ethereum = Chain.ethereum.assetId.identifier
+        let bitcoin = Chain.bitcoin.assetId.identifier
+        _ = try store.updateSwappableAssets(assetIds: [])
+
+        #expect(try store.updateSwappableAssets(assetIds: [ethereum, bitcoin]) == 2)
+        #expect(try store.updateSwappableAssets(assetIds: [ethereum]) == 1)
+        #expect(try store.getAssetBasics(for: [bitcoin]).first?.properties.isSwapable == false)
+    }
 }

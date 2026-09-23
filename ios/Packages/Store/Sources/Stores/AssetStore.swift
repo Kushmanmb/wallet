@@ -101,6 +101,11 @@ public struct AssetStore: Sendable {
         try updateColumn(column: AssetRecord.Columns.isSellable, enabledAssetIds: assetIds)
     }
 
+    @discardableResult
+    public func updateSwappableAssets(assetIds: [String]) throws -> Int {
+        try updateColumn(column: AssetRecord.Columns.isSwappable, enabledAssetIds: assetIds)
+    }
+
     private func updateColumn(column: Column, enabledAssetIds: [String]) throws -> Int {
         try db.write { db in
             let enabled = try AssetRecord

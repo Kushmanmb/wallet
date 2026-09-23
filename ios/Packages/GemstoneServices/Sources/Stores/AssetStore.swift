@@ -59,7 +59,7 @@ public final class GemstoneAssetStore: GemAssetStore, @unchecked Sendable {
     }
 
     public func setSwappableAssets(assetIds: [Gemstone.AssetId]) async throws {
-        try assetStore.setAssetIsSwappable(for: assetIds, value: true)
+        try assetStore.updateSwappableAssets(assetIds: assetIds)
     }
 
     public func addBalances(walletId: String, assetIds: [Gemstone.AssetId], enabled: Bool) async throws {

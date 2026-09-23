@@ -111,7 +111,6 @@ impl GemAppStartService {
     }
 
     async fn sync_assets(&self) -> Result<(), GemServiceError> {
-        self.assets.sync_swappable_chains().await?;
         let config = self.config.get_config().await?;
         self.assets.sync_availability(config.versions).await
     }

@@ -56,8 +56,11 @@ pub fn asset_ids(ids: &[String]) -> Vec<AssetId> {
     ids.iter().filter_map(|id| AssetId::new(id)).collect()
 }
 
-pub fn swappable_chain_asset_ids() -> Vec<AssetId> {
-    Chain::all().into_iter().filter(Chain::is_swap_supported).map(AssetId::from_chain).collect()
+pub fn swappable_asset_ids(listed: Vec<AssetId>) -> Vec<AssetId> {
+    let natives = Chain::all().into_iter().filter(Chain::is_swap_supported).map(AssetId::from_chain);
+    let mut asset_ids = listed;
+    asset_ids.extend(natives.filter(|native| !asset_ids.contains(native)).collect::<Vec<_>>());
+    asset_ids
 }
 
 pub fn token_search_chains(chains: &[Chain]) -> Vec<Chain> {
@@ -1206,11 +1209,13 @@ mod tests {
     }
 
     #[test]
-    fn test_swappable_chain_asset_ids_only_lists_swap_supported_chains() {
-        let asset_ids = swappable_chain_asset_ids();
+    fn test_the_swap_list_adds_swap_supported_natives_once() {
+        let token = AssetId::from_token(Chain::Ethereum, "0x1234");
+        let asset_ids = swappable_asset_ids(vec![token.clone(), AssetId::from_chain(Chain::Ethereum)]);
 
-        assert!(asset_ids.contains(&AssetId::from_chain(Chain::Ethereum)));
-        assert!(asset_ids.iter().all(|asset_id| asset_id.chain.is_swap_supported()));
+        assert_eq!(asset_ids.first(), Some(&token));
+        assert_eq!(asset_ids.iter().filter(|asset_id| **asset_id == AssetId::from_chain(Chain::Ethereum)).count(), 1);
+        assert!(asset_ids.iter().filter(|asset_id| asset_id.token_id.is_none()).all(|asset_id| asset_id.chain.is_swap_supported()));
     }
 
     #[test]
