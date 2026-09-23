@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 use primitives::{Asset, AssetBasic, AssetFull, AssetId, Chain, Transaction, Wallet, WalletId};
 
-use super::{GemConfirmData, GemConfirmInput, GemConfirmLoad, GemConfirmMetadata, GemConfirmService, GemConfirmSimulationState, GemConfirmTransferService, GemTransactionSigner, SendInput};
+use super::{GemConfirmData, GemConfirmFee, GemConfirmInput, GemConfirmLoad, GemConfirmMetadata, GemConfirmService, GemConfirmSimulationState, GemConfirmTransferService, GemTransactionSigner, GemTransferAmountResult, SendInput};
 use crate::GemstoneError;
 use crate::api::{GemApiClient, GemDeviceApiClient, GemStaticApiClient};
 use crate::gateway::GemGateway;
@@ -30,6 +30,7 @@ use crate::services::wallet::testkit::{MemoryAddressStore, MemoryKeystorePasswor
 use crate::services::wallet_session::{GemWalletSessionService, testkit::MemoryWalletSessionStore};
 use crate::services::{GemScanService, GemSimulationService};
 use crate::testkit::{EmptyPreferences, TestAlienProvider};
+use crate::transfer_amount::GemTransferAmount;
 use num_bigint::BigInt;
 use primitives::{Account, FeePriority, GasPriceType, TransactionInputType};
 
@@ -182,7 +183,6 @@ impl GemTransactionStatusService for UnusedTransactionStatus {
 impl GemConfirmData {
     pub fn mock(chain: Chain, input_type: TransactionInputType) -> Self {
         GemConfirmData {
-            additional_fees: vec![],
             input: GemConfirmInput {
                 from: Account::mock(chain, "sender"),
                 transfer: GemTransferData {
@@ -232,11 +232,33 @@ impl GemConfirmMetadata {
     }
 }
 
+impl GemConfirmFee {
+    pub fn mock(amount: GemTransferAmountResult) -> Self {
+        GemConfirmFee {
+            value: BigInt::from(1),
+            additional_fees: vec![],
+            selected_priority: FeePriority::Normal,
+            amount,
+        }
+    }
+}
+
+impl GemTransferAmountResult {
+    pub fn mock() -> Self {
+        GemTransferAmountResult::Amount {
+            amount: GemTransferAmount {
+                value: BigInt::from(1),
+                network_fee: BigInt::from(1),
+                is_max_amount: false,
+            },
+        }
+    }
+}
+
 impl GemConfirmSimulationState {
     pub fn mock() -> Self {
         GemConfirmSimulationState {
             chain: Chain::Ethereum,
-            result: None,
             warnings: vec![],
             simulation: None,
         }
@@ -254,7 +276,7 @@ impl GemConfirmLoad {
             fee_assets: vec![],
             simulation: GemConfirmSimulationState::mock(),
             address_name: None,
-            preload: None,
+            fee: None,
         }
     }
 }

@@ -78,7 +78,7 @@ fn header_asset(transfer: &GemTransferData) -> Asset {
 
 fn amount(transfer: &GemTransferData, load: Option<&GemConfirmLoad>, prices: &[AssetPrice], currency: Currency) -> GemTransactionAmount {
     let asset = header_asset(transfer);
-    let value = match load.and_then(|load| load.preload.as_ref()).map(|preload| &preload.amount) {
+    let value = match load.and_then(|load| load.fee.as_ref()).map(|fee| &fee.amount) {
         Some(GemTransferAmountResult::Amount { amount }) => amount.value.to_biguint().unwrap_or_default(),
         _ => transfer.value.to_biguint().unwrap_or_default(),
     };

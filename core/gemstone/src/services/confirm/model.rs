@@ -19,7 +19,7 @@ use primitives::{Account, AddressName, Asset, AssetId, Chain, ChainAddress, FeeP
 
 pub type GemAccount = Account;
 
-#[derive(Debug, Clone, uniffi::Record)]
+#[derive(Debug, Clone)]
 pub struct GemConfirmInput {
     pub from: GemAccount,
     pub transfer: GemTransferData,
@@ -88,11 +88,10 @@ impl GemConfirmLoadOptions {
     }
 }
 
-#[derive(Debug, Clone, uniffi::Record)]
+#[derive(Debug, Clone)]
 pub struct GemConfirmData {
     pub input: GemConfirmInput,
     pub fee: GemTransactionLoadFee,
-    pub additional_fees: Vec<GemFeeOptionItem>,
     pub selected_priority: FeePriority,
     pub fee_rates: Vec<GemFeeRate>,
     pub metadata: GemTransactionLoadMetadata,
@@ -191,13 +190,20 @@ pub struct GemConfirmLoad {
     pub fee_assets: Vec<GemFeeAsset>,
     pub simulation: GemConfirmSimulationState,
     pub address_name: Option<AddressName>,
-    pub preload: Option<GemConfirmPreload>,
+    pub fee: Option<GemConfirmFee>,
+}
+
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct GemConfirmFee {
+    pub value: GemBigInt,
+    pub additional_fees: Vec<GemFeeOptionItem>,
+    pub selected_priority: FeePriority,
+    pub amount: GemTransferAmountResult,
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct GemConfirmSimulationState {
     pub chain: Chain,
-    pub result: Option<SimulationResult>,
     pub warnings: Vec<GemListRow>,
     pub simulation: Option<GemConfirmSimulation>,
 }
@@ -212,13 +218,15 @@ pub enum GemTransferAmountResult {
 pub struct GemConfirmFeeLoad {
     pub fee_asset: Asset,
     pub metadata: GemConfirmMetadata,
-    pub preload: GemConfirmPreload,
+    pub fee: GemConfirmFee,
+    pub confirm_data: GemConfirmData,
+    pub simulation: Option<GemConfirmSimulationState>,
 }
 
-#[derive(Debug, Clone, uniffi::Record)]
-pub struct GemConfirmPreload {
-    pub confirm_data: GemConfirmData,
-    pub amount: GemTransferAmountResult,
+#[derive(Debug, Clone)]
+pub struct ConfirmState {
+    pub load: GemConfirmLoad,
+    pub confirm_data: Option<GemConfirmData>,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]
@@ -287,7 +295,7 @@ pub struct GemConfirmScreen {
     pub has_critical_warning: bool,
     pub failure: Option<GemConfirmFailure>,
     #[uniffi(default = true)]
-    pub has_preload: bool,
+    pub has_fee: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]

@@ -224,19 +224,23 @@ pub struct GemConfirmLoad {
     pub fee_assets: Vec<GemFeeAsset>,
     pub simulation: GemConfirmSimulationState,
     pub address_name: Option<AddressName>,
-    pub preload: Option<GemConfirmPreload>,
+    pub fee: Option<GemConfirmFee>,
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
-pub struct GemConfirmPreload {
-    pub confirm_data: GemConfirmData,
+pub struct GemConfirmFee {
+    pub value: GemBigInt,
+    pub additional_fees: Vec<GemFeeOptionItem>,
+    pub selected_priority: FeePriority,
     pub amount: GemTransferAmountResult,
 }
 ```
 
-Two things these records get right:
+Three things these records get right:
 
-**A recoverable failure is a value, not an error.** An unaffordable transfer still has a fee, fee rates and a simulation to render, so the preload's amount is an enum rather than collapsing the whole call:
+**The record carries what the screen shows, not what Core signs with.** The signing input (gas, chain metadata such as UTXO lists, the raw simulation) stays in the Core object that owns the screen; the app gets display values, and asks that object for anything derived from the signing input, such as fee rate rows, instead of sending a record back.
+
+**A recoverable failure is a value, not an error.** An unaffordable transfer still has a fee, fee rates and a simulation to render, so the fee's amount is an enum rather than collapsing the whole call:
 
 ```rust
 #[derive(Debug, Clone, uniffi::Enum)]
@@ -246,7 +250,7 @@ pub enum GemTransferAmountResult {
 }
 ```
 
-The error is the same `GemConfirmError` every other confirm failure uses, carrying the `Asset` it names and a `GemBalanceRequirement` (required, available, shortfall), so the app renders it the same way whether it came from the preload or the send.
+The error is the same `GemConfirmError` every other confirm failure uses, carrying the `Asset` it names and a `GemBalanceRequirement` (required, available, shortfall), so the app renders it the same way whether it came from the load or the send.
 
 **State that travels together is one type.** An approval is either an exact amount or unlimited — never a string plus a boolean the caller has to reassemble:
 

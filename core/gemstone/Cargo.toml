@@ -82,6 +82,9 @@ tracing.workspace = true
 bs58 = { workspace = true }
 zeroize = { workspace = true }
 
+[lints.clippy]
+large_futures = "warn"
+
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }
 

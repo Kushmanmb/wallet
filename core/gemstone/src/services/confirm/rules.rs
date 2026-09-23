@@ -21,7 +21,7 @@ use primitives::{
 
 use super::error::{GemConfirmError, GemConfirmErrorDisplay, GemConfirmErrorInfo, GemConfirmErrorSheet};
 use super::model::{
-    GemAcquireAssetFlow, GemApprovalValue, GemConfirmData, GemConfirmFeeLoad, GemConfirmFeeSelection, GemConfirmInput, GemConfirmLoad, GemConfirmMetadata, GemConfirmPreload, GemConfirmSimulationState, GemFeeAsset, GemFeeRateRow,
+    ConfirmState, GemAcquireAssetFlow, GemApprovalValue, GemConfirmData, GemConfirmFee, GemConfirmFeeLoad, GemConfirmFeeSelection, GemConfirmInput, GemConfirmLoad, GemConfirmMetadata, GemConfirmSimulationState, GemFeeAsset, GemFeeRateRow,
     GemFeeRateRows, GemTransferAmountResult, SendInput,
 };
 use crate::config::chain::custom_fee_enabled;
@@ -180,18 +180,31 @@ pub fn approval_value_from(value: Option<&GemBigUint>, is_unlimited: bool) -> Ge
     }
 }
 
-#[uniffi::export]
 impl GemConfirmData {
-    pub fn fee_rate_rows(&self, selection: GemConfirmFeeSelection, fee_asset: Asset) -> GemFeeRateRows {
+    pub(super) fn fee_rate_rows(&self, selection: GemConfirmFeeSelection, fee_asset: &Asset) -> GemFeeRateRows {
         let selection = match selection {
             GemConfirmFeeSelection::Priority { priority } if !self.fee_rates.iter().any(|rate| rate.priority == priority) => GemConfirmFeeSelection::Priority { priority: self.selected_priority },
             selection => selection,
         };
-        fee_rate_rows(self.input.transfer.input_type.get_asset().chain(), &fee_asset, &self.fee_rates, &selection, &self.fee)
+        fee_rate_rows(self.input.transfer.input_type.get_asset().chain(), fee_asset, &self.fee_rates, &selection, &self.fee)
     }
-}
 
-impl GemConfirmData {
+    pub(super) fn fee_load(self, metadata: GemConfirmMetadata, fee_asset: Asset) -> Result<GemConfirmFeeLoad, GemConfirmError> {
+        let amount = self.preload_amount(&metadata, &fee_asset)?;
+        Ok(GemConfirmFeeLoad {
+            fee: GemConfirmFee {
+                value: self.fee.fee.clone(),
+                additional_fees: self.fee.options.items(),
+                selected_priority: self.selected_priority,
+                amount,
+            },
+            fee_asset,
+            metadata,
+            confirm_data: self,
+            simulation: None,
+        })
+    }
+
     pub(super) fn preload_amount(&self, metadata: &GemConfirmMetadata, fee_asset: &Asset) -> Result<GemTransferAmountResult, GemConfirmError> {
         let transfer = &self.input.transfer;
         let available_value = transfer.available_value(&metadata.asset_balance).map_err(|error| GemConfirmError::Load { msg: error.to_string() })?;
@@ -239,21 +252,24 @@ fn amount_error(error: GemTransferAmountError, asset: &Asset, fee_asset: &Asset)
     }
 }
 
-pub fn preload_simulation(request: Option<&SimulationResult>, preload: &GemConfirmPreload) -> Option<SimulationResult> {
+pub fn preload_simulation(request: Option<&SimulationResult>, confirm_data: &GemConfirmData) -> Option<SimulationResult> {
     match request {
         Some(_) => None,
-        None => preload.confirm_data.simulation.clone(),
+        None => confirm_data.simulation.clone(),
     }
 }
 
 impl GemConfirmLoad {
-    pub(super) fn with_fee(self, fee: GemConfirmFeeLoad, simulation: Option<GemConfirmSimulationState>) -> Self {
-        Self {
-            fee_asset: fee.fee_asset,
-            metadata: fee.metadata,
-            simulation: simulation.unwrap_or(self.simulation),
-            preload: Some(fee.preload),
-            ..self
+    pub(super) fn with_fee(self, fee: GemConfirmFeeLoad, requested: Option<GemConfirmSimulationState>) -> ConfirmState {
+        ConfirmState {
+            load: Self {
+                fee_asset: fee.fee_asset,
+                metadata: fee.metadata,
+                simulation: fee.simulation.or(requested).unwrap_or(self.simulation),
+                fee: Some(fee.fee),
+                ..self
+            },
+            confirm_data: Some(fee.confirm_data),
         }
     }
 }
@@ -640,7 +656,6 @@ mod tests {
     use crate::models::custom_types::GemBigUint;
     use crate::models::transaction::GemFeeOptions;
     use crate::services::transfer::{GemRecipient, GemTransferData};
-    use crate::transfer_amount::GemTransferAmount;
     use num_bigint::BigInt;
     use num_bigint::BigUint;
     use primitives::FeeOption;
@@ -846,7 +861,7 @@ mod tests {
         let mut confirm = GemConfirmData::mock(Chain::Ethereum, TransactionInputType::Transfer { asset: Asset::mock() });
         confirm.fee_rates = vec![GemFeeRate::mock(FeePriority::Normal, 10)];
         confirm.selected_priority = FeePriority::Normal;
-        let rows = confirm.fee_rate_rows(GemConfirmFeeSelection::Priority { priority: FeePriority::Fast }, Asset::mock());
+        let rows = confirm.fee_rate_rows(GemConfirmFeeSelection::Priority { priority: FeePriority::Fast }, &Asset::mock());
 
         assert_eq!(rows.selected_total, Some(BigInt::from(10)));
     }
@@ -1589,16 +1604,6 @@ mod tests {
             warnings: vec![SimulationWarning::validation_error("preload")],
             ..SimulationResult::default()
         });
-        let preload = GemConfirmPreload {
-            confirm_data,
-            amount: GemTransferAmountResult::Amount {
-                amount: GemTransferAmount {
-                    value: GemBigInt::from(1),
-                    network_fee: GemBigInt::from(1),
-                    is_max_amount: false,
-                },
-            },
-        };
 
         assert!(
             preload_simulation(
@@ -1606,14 +1611,13 @@ mod tests {
                     warnings: vec![SimulationWarning::validation_error("request")],
                     ..SimulationResult::default()
                 }),
-                &preload
+                &confirm_data
             )
             .is_none(),
             "the request simulation is already on the screen"
         );
-        assert_eq!(preload_simulation(None, &preload).unwrap().warnings[0].message.as_deref(), Some("preload"));
-        let mut unsimulated = preload.clone();
-        unsimulated.confirm_data.simulation = None;
+        assert_eq!(preload_simulation(None, &confirm_data).unwrap().warnings[0].message.as_deref(), Some("preload"));
+        let unsimulated = GemConfirmData { simulation: None, ..confirm_data };
         assert!(preload_simulation(None, &unsimulated).is_none());
     }
 
@@ -1637,22 +1641,16 @@ mod tests {
         let fee = GemConfirmFeeLoad {
             fee_asset: btc.clone(),
             metadata: GemConfirmMetadata::mock(&eth.id, 2),
-            preload: GemConfirmPreload {
-                confirm_data: SendInput::mock(Chain::Ethereum, TransactionInputType::Transfer { asset: eth.clone() }).confirm,
-                amount: GemTransferAmountResult::Amount {
-                    amount: GemTransferAmount {
-                        value: GemBigInt::from(1),
-                        network_fee: GemBigInt::from(1),
-                        is_max_amount: false,
-                    },
-                },
-            },
+            fee: GemConfirmFee::mock(GemTransferAmountResult::mock()),
+            confirm_data: SendInput::mock(Chain::Ethereum, TransactionInputType::Transfer { asset: eth.clone() }).confirm,
+            simulation: None,
         };
 
-        let loaded = screen.clone().with_fee(fee.clone(), None);
+        let ConfirmState { load: loaded, confirm_data } = screen.clone().with_fee(fee.clone(), None);
         assert_eq!(loaded.fee_asset, btc);
         assert_eq!(loaded.metadata.asset_balance.available, GemBigUint::from(2u32));
-        assert!(loaded.preload.is_some());
+        assert!(loaded.fee.is_some());
+        assert!(confirm_data.is_some(), "the signing data stays in Core next to the screen");
         assert_eq!(loaded.fee_assets, screen.fee_assets, "the selectable fee assets come from the first answer");
         assert_eq!(loaded.address_name, screen.address_name, "the recipient's name comes from the first answer");
         assert!(loaded.simulation.warnings.is_empty(), "without a preload simulation the request simulation state stays");
@@ -1664,7 +1662,7 @@ mod tests {
                 ..GemConfirmSimulationState::mock()
             }),
         );
-        assert_eq!(resimulated.simulation.warnings.len(), 1);
+        assert_eq!(resimulated.load.simulation.warnings.len(), 1);
     }
 
     #[test]
