@@ -13,7 +13,7 @@ use crate::{
 fn default_if_account_not_found<T: Default>(result: Result<T, Box<dyn Error + Send + Sync>>) -> Result<T, Box<dyn Error + Send + Sync>> {
     match result {
         Ok(value) => Ok(value),
-        Err(error) if is_account_not_found(&error) => Ok(T::default()),
+        Err(error) if is_account_not_found(&*error) => Ok(T::default()),
         Err(error) => Err(error),
     }
 }

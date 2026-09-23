@@ -45,7 +45,7 @@ impl<C: Client + Clone> XrpClient<C> {
     pub async fn account_exists(&self, address: &str) -> Result<bool, Box<dyn Error + Send + Sync>> {
         match self.get_account_info(address).await {
             Ok(account) => Ok(account.is_some()),
-            Err(error) if is_account_not_found(&error) => Ok(false),
+            Err(error) if is_account_not_found(&*error) => Ok(false),
             Err(error) => Err(error),
         }
     }
@@ -109,7 +109,7 @@ where
     Ok(serde_json::from_value(result)?)
 }
 
-pub(crate) fn is_account_not_found(error: &Box<dyn Error + Send + Sync>) -> bool {
+pub(crate) fn is_account_not_found(error: &(dyn Error + Send + Sync + 'static)) -> bool {
     error.downcast_ref::<JsonRpcError>().is_some_and(|error| error.code == ACCOUNT_NOT_FOUND_ERROR_CODE)
 }
 
