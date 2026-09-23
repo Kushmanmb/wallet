@@ -607,6 +607,10 @@ pub fn with_resource(input: &GemStakeAmountInput, resource: Resource) -> GemStak
     }
 }
 
+pub fn validator_names(validators: Vec<DelegationValidator>) -> HashMap<String, String> {
+    validators.into_iter().filter(|validator| !validator.name.is_empty()).map(|validator| (validator.id, validator.name)).collect()
+}
+
 pub fn merge_validators(validators: Vec<DelegationValidator>, delegation_validators: Vec<DelegationValidator>, names: &HashMap<String, String>) -> Vec<DelegationValidator> {
     let active_ids: HashSet<String> = validators.iter().map(|validator| validator.id.clone()).collect();
     validators

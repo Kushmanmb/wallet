@@ -194,7 +194,10 @@ impl GemStakeService {
             self.gateway.get_staking_delegation_validators(chain, address.clone()),
             self.gateway.get_staking_delegations(chain, address),
         );
-        let names: HashMap<String, String> = names.map(|validators| validators.into_iter().map(|validator| (validator.id, validator.name)).collect()).unwrap_or_default();
+        let names: HashMap<String, String> = match names {
+            Ok(validators) => validators.into_iter().map(|validator| (validator.id, validator.name)).collect(),
+            Err(_) => rules::validator_names(self.store.get_validators(AssetId::from_chain(chain), StakeProviderType::Stake).await?),
+        };
         self.save_validators(chain, rules::merge_validators(validators?, delegation_validators?, &names)).await?;
         self.save_delegations(wallet_id, chain, delegations?, &names).await
     }
