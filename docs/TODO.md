@@ -257,8 +257,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 - **VM97** **S** **Fiat provider names.** iOS maps names through `fiatProviderName`; Android builds provider subtitles itself.
 - **VM98** **S** **Transaction assets.** iOS uses `transactionAssetIds`, Android derives them elsewhere and alone uses `transactionSwapPair`. One Core answer for the assets a transaction touches.
 - **VM99** **S** **Swap quote projection.** iOS alone calls `swapQuote`; check the Android path.
-- **VM100** **S** **Perpetual refresh spinner.** Android `PerpetualMarketViewModel.onRefresh` holds the spinner with `delay(500)` instead of ending on completion.
-- **VM101** **S** **Perpetuals banner navigation.** iOS `AssetSceneViewModel` opens `deeplinkGemUrl(.perpetuals).asURL!` through the system URL handler, force-unwrapped; Android navigates directly.
 
 ## 0. Duplicated code to delete first
 
@@ -337,6 +335,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM100, VM101 (2026-09-23).** Closed. Android `PerpetualMarketViewModel.onRefresh` ends the spinner when the refresh completes instead of holding it another 500 ms, and its scheduled refresh is `refreshMarkets` rather than `fetch`. iOS `AssetSceneViewModel` handles the perpetuals banner by enabling perpetuals and pushing `Scenes.Perpetuals` onto the wallet stack through an `onSelectPerpetuals` callback, as Android navigates directly, instead of opening a force-unwrapped `gem://` URL through the system; `GemAssetDetailsService.deeplink_gem_url` and `GemDeeplinkService.build_gem_url` had no other caller and are gone.
 
 **VM70–VM75 (2026-09-23).** Closed. Android feature composables no longer call Core. `ConfirmViewModel.showsFeeAssets` answers both the fee row and `FeeDetails` (VM70). `PerpetualChartUIModel` gains `header` and `dateText`, matching the asset `ChartUIModel`, so `PerpetualChartSection` stops calling `candlestickHeader` and `chartDateStyle` (VM71). `SwapViewModel` exposes `payBalance` and `receiveBalance`, so `SwapItem` stops calling `availableBalanceText` (VM73). `BaseAssetSelectViewModel.addressCopy`, `CreateWalletViewModel.phraseRows`/`verifiedRows`/`phraseCopy` and `WalletSecretContentUIModel.Words.rows` take the copy payloads and phrase rows out of `AssetSelectScreen`, `CreateWalletScreen`, `CheckPhrase` and `WalletSecretDataNavScreen` (VM74). VM72 and VM75 needed no change: the perpetual `priceRow` and `perpetualBalanceHeader` calls are preview sample data, and the shared `:ui` helpers run from view models (`transactionFilterOptions`), once per process (`AvatarEmoji`), inside `remember` in a shared component the way iOS component view models do (`EmptyStateUIModel`, `rememberAssetContextMenuItems`), or in previews (`aprText`).
 

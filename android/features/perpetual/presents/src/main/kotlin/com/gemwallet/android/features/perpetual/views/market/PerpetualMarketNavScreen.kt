@@ -42,11 +42,11 @@ fun PerpetualMarketNavScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.fetch()
+        viewModel.refreshMarkets()
     }
 
     val refreshIntervalMillis by viewModel.refreshIntervalMillis.collectAsStateWithLifecycle()
-    RefreshOnTimer(refreshIntervalMillis, viewModel::fetch)
+    RefreshOnTimer(refreshIntervalMillis, viewModel::refreshMarkets)
 
     DisposableEffect(Unit) {
         viewModel.subscribeMarketPrices()

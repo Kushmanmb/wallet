@@ -178,10 +178,6 @@ impl GemAssetDetailsService {
     pub async fn set_price_alert(&self, asset_id: AssetId, enabled: bool) -> Result<(), GemServiceError> {
         self.price_alerts.set_auto_alert(asset_id, enabled).await
     }
-
-    pub fn deeplink_gem_url(&self, deeplink: Deeplink) -> String {
-        self.deeplinks.build_gem_url(deeplink)
-    }
 }
 
 #[cfg(test)]

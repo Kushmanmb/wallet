@@ -24,6 +24,7 @@ public extension ViewModelFactory {
         wallet: Wallet,
         asset: Asset,
         isPresentingSelectedAssetInput: Binding<SelectedAssetInput?>,
+        onSelectPerpetuals: VoidAction,
     ) -> AssetSceneViewModel {
         AssetSceneViewModel(
             service: Gemstone.GemAssetDetailsService(
@@ -41,6 +42,7 @@ public extension ViewModelFactory {
             preferences: observablePreferences,
             input: AssetSceneInput(wallet: wallet, asset: asset),
             isPresentingSelectedAssetInput: isPresentingSelectedAssetInput,
+            onSelectPerpetuals: onSelectPerpetuals,
         )
     }
 

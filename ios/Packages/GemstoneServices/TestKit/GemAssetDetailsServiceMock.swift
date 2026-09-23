@@ -64,8 +64,4 @@ public final class GemAssetDetailsServiceMock: GemAssetDetailsServiceProtocol, @
     public func deeplinkUrl(deeplink _: Deeplink) -> String {
         "https://gemwallet.com"
     }
-
-    public func deeplinkGemUrl(deeplink _: Deeplink) -> String {
-        "https://gemwallet.com"
-    }
 }

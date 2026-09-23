@@ -83,6 +83,7 @@ struct WalletNavigationView: View {
                     wallet: model.wallet,
                     asset: $0.asset,
                     isPresentingSelectedAssetInput: model.isPresentingSelectedAssetInput,
+                    onSelectPerpetuals: { navigationState.wallet.append(Scenes.Perpetuals()) },
                 ),
             )
         }

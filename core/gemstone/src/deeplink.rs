@@ -30,29 +30,16 @@ impl GemDeeplinkService {
     pub fn build_url(&self, deeplink: Deeplink) -> String {
         deeplink.to_url()
     }
-
-    pub fn build_gem_url(&self, deeplink: Deeplink) -> String {
-        deeplink.to_gem_url()
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use primitives::Chain;
 
     #[test]
     fn test_deeplink() {
         let service = GemDeeplinkService::new();
         let rewards = Deeplink::Rewards { code: Some("gemcoder".to_string()) };
         assert_eq!(service.build_url(rewards), "https://gemwallet.com/rewards?code=gemcoder");
-        assert_eq!(service.build_gem_url(Deeplink::Perpetuals), "gem://perpetuals");
-        assert_eq!(
-            service.build_gem_url(Deeplink::Buy {
-                asset_id: AssetId::from_chain(Chain::Bitcoin),
-                amount: Some(100),
-            }),
-            "gem://tokens/bitcoin/buy?amount=100"
-        );
     }
 }

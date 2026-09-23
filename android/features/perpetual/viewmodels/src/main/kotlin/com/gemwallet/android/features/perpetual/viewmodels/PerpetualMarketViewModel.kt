@@ -31,7 +31,6 @@ import com.wallet.core.primitives.RecentActivityType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -138,12 +137,11 @@ class PerpetualMarketViewModel @Inject constructor(
         sceneState.update { PerpetualMarketSceneState.Refreshing }
         viewModelScope.launch(ioDispatcher) {
             refresh(GemMarketsRefreshTrigger.USER_REQUESTED)
-            delay(500)
             sceneState.update { PerpetualMarketSceneState.Idle }
         }
     }
 
-    fun fetch() {
+    fun refreshMarkets() {
         viewModelScope.launch(ioDispatcher) { refresh(GemMarketsRefreshTrigger.SCHEDULED) }
     }
 

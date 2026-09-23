@@ -82,7 +82,7 @@ class PerpetualMarketViewModelTest {
             emptyList()
         }
 
-        viewModel(service).fetch()
+        viewModel(service).refreshMarkets()
 
         assertEquals(GemMarketsRefreshTrigger.SCHEDULED, trigger.await())
     }

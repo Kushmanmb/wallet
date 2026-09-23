@@ -33,6 +33,7 @@ import UIKit
 public final class AssetSceneViewModel: Sendable {
     private let service: any GemAssetDetailsServiceProtocol
     private let preferences: ObservablePreferences
+    private let onSelectPerpetuals: VoidAction
 
     private var isPresentingSelectedAssetInput: Binding<SelectedAssetInput?>
 
@@ -51,9 +52,11 @@ public final class AssetSceneViewModel: Sendable {
         preferences: ObservablePreferences,
         input: AssetSceneInput,
         isPresentingSelectedAssetInput: Binding<SelectedAssetInput?>,
+        onSelectPerpetuals: VoidAction = nil,
     ) {
         self.service = service
         self.preferences = preferences
+        self.onSelectPerpetuals = onSelectPerpetuals
 
         self.input = input
         assetQuery = ObservableQuery(
@@ -311,8 +314,8 @@ public extension AssetSceneViewModel {
             case let .activateAsset(transfer):
                 isPresentingAssetSheet = .transfer(transfer)
             case .perpetuals:
-                UIApplication.shared.open(service.deeplinkGemUrl(deeplink: .perpetuals).asURL!)
                 preferences.isPerpetualEnabled = true
+                onSelectPerpetuals?()
             case let .url(link):
                 onSelect(url: link.url)
             }
