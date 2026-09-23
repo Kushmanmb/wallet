@@ -95,9 +95,7 @@ struct ServicesFactory {
         let recentAssetsService = GemRecentActivityService(store: GemstoneRecentActivityStore(store: stores.recentActivityStore), session: walletSessionService)
         let explorerService = Gemstone.GemExplorerService(preferences: preferencesService)
         let avatarService = Gemstone.GemAvatarService(wallets: gemstoneWalletStore, files: gemstoneFileStore, provider: nativeProvider)
-        let walletService = Gemstone.GemWalletService(
-            keystore: storages.keystore.gemKeystore,
-            password: GemstoneKeystorePassword(keystore: storages.keystore),
+        let walletService = storages.keystore.walletService(
             store: gemstoneWalletStore,
             session: walletSessionService,
             appPreferences: preferencesService,
@@ -211,10 +209,8 @@ struct ServicesFactory {
             health: streamHealth,
         )
         let swapper = GemSwapper(rpcProvider: NativeProvider(), nodes: nodeService)
-        let swapService = Gemstone.GemSwapService(
+        let swapService = storages.keystore.swapService(
             swapper: swapper,
-            keystore: storages.keystore.gemKeystore,
-            password: GemstoneKeystorePassword(keystore: storages.keystore),
             store: GemstoneSwapStore(
                 assetStore: stores.assetStore,
                 transactionStore: stores.transactionStore,
@@ -224,11 +220,9 @@ struct ServicesFactory {
 
         let chainService = Gemstone.GemChainService()
         let addressService = Gemstone.GemAddressService()
-        let signMessageService = Gemstone.GemSignMessageService(
+        let signMessageService = storages.keystore.signMessageService(
             names: nameService,
             explorer: explorerService,
-            keystore: storages.keystore.gemKeystore,
-            password: GemstoneKeystorePassword(keystore: storages.keystore),
         )
         let walletConnectorPresenter = WalletConnectorPresenter()
         let walletConnectorInteractor = WalletConnectorInteractor(presenter: walletConnectorPresenter)
@@ -297,10 +291,8 @@ struct ServicesFactory {
 
         let rewardsService = Gemstone.GemRewardsService(
             api: deviceApiClient,
-            auth: Gemstone.GemAuthService(
+            auth: storages.keystore.authService(
                 api: deviceApiClient,
-                keystore: storages.keystore.gemKeystore,
-                password: GemstoneKeystorePassword(keystore: storages.keystore),
                 deviceKey: deviceKeyService,
             ),
             balance: balanceService,

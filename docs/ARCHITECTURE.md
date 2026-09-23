@@ -1435,6 +1435,8 @@ A fieldless Core rule object is the second exception. `GemAssetConfigService` an
 
 Prefer the [generated abstraction](#depend-on-the-generated-abstraction-not-the-concrete-object) wherever a test needs substitution: any unstubbed method on a mocked concrete UniFFI object can reach a native handle the mock does not have.
 
+The keystore is the one dependency a composition root does not pass around. `GemKeystore` unlocks a wallet's secrets given a password, so an app that holds one can sign without the service that decides whether signing is allowed. Each platform's keystore layer — [`GemstoneServices`](../ios/Packages/GemstoneServices) on iOS, [`data:services:gemstone`](../android/data/services/gemstone) on Android — builds the four services that need it (`GemWalletService`, `GemSwapService`, `GemSignMessageService`, `GemAuthService`) and hands out those, never the keystore. On iOS they come from [`LocalKeystore+Services.swift`](../ios/Packages/GemstoneServices/Sources/Keystore/LocalKeystore+Services.swift) and `gemKeystore` is `package`, so `ios/Gem` cannot name it; on Android they come from [`KeystoreModule`](../android/data/services/gemstone/src/main/kotlin/com/gemwallet/android/data/services/gemstone/di/KeystoreModule.kt), the only module that injects the Hilt binding. `just check-boundaries` rejects a `GemKeystore` outside those two layers.
+
 ### Construction example: price alerts
 
 The shared owner is constructed in [`ServicesFactory.swift`](../ios/Gem/Services/ServicesFactory.swift) and passed through [`ViewModelFactory.swift`](../ios/Gem/Services/ViewModelFactory.swift):

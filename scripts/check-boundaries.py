@@ -23,12 +23,16 @@ SERVICE_STRUCT = re.compile(r"pub struct (Gem\w*Service)\s*(\{[^}]*\})", re.S)
 SERVICE_FIELD = re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?\w+\s*:", re.M)
 SERVICE_CALL = re.compile(r"\b(Gem\w*Service)\s*\(")
 # The composition roots § 8 names: the factory that owns the graph, the
-# per-screen factory it hands to views, the gateway both build from, and
-# Android's dependency injection modules.
-COMPOSITION = re.compile(r"(ServicesFactory\.swift|ViewModelFactory[^/]*\.swift|Gateway/GatewayService\.swift|/di/)")
+# per-screen factory it hands to views, the gateway both build from, the
+# keystore layer that builds what it will not hand out, and Android's
+# dependency injection modules.
+COMPOSITION = re.compile(r"(ServicesFactory\.swift|ViewModelFactory[^/]*\.swift|Gateway/GatewayService\.swift|LocalKeystore\+Services\.swift|/di/)")
 
 LOCALIZED_MAPPER = re.compile(r"(?:extension GemLocalizedText\b(?!: Sendable)|fun GemLocalizedText\.)")
 LOCALIZED_HOMES = {"Gemstone+Localized.swift", "GemstoneText.kt"}
+
+KEYSTORE = re.compile(r"\bGemKeystore\b")
+KEYSTORE_LAYERS = re.compile(r"(ios/Packages/GemstoneServices/|android/data/services/gemstone/)")
 
 
 def app_files():
@@ -75,9 +79,21 @@ def one_localization_mapper():
                 yield f"{path.relative_to(ROOT)}:{number} renders GemLocalizedText outside its module mapper"
 
 
+def the_keystore_stays_in_its_layer():
+    """§ 8: an app takes the services that sign, never the keystore they sign with."""
+    for path in app_files():
+        relative = str(path.relative_to(ROOT))
+        if KEYSTORE_LAYERS.search(relative):
+            continue
+        for number, line in enumerate(path.read_text().splitlines(), start=1):
+            if KEYSTORE.search(line):
+                yield f"{relative}:{number} reaches for the keystore outside its layer"
+
+
 RULES = [
     ("services are injected, never constructed at a call site", services_are_injected),
     ("one localization mapper names every Core key it renders", one_localization_mapper),
+    ("the keystore stays in its layer", the_keystore_stays_in_its_layer),
 ]
 
 
