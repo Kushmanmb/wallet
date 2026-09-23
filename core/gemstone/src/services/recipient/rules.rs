@@ -2,13 +2,14 @@ use primitives::name::NameRecord;
 use primitives::{Asset, Chain, ChainAsset, Wallet, WalletType};
 
 use super::model::{GemRecipientError, GemRecipientErrorDisplay, GemRecipientNext, GemRecipientRow, GemRecipientScan, GemRecipientSection, GemRecipientSectionKind, GemRecipientType, GemRecipientValidation};
-use crate::address::{checksum_address, validate_address};
+use crate::address::validate_address;
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::models::custom_types::GemBigInt;
 use crate::payment::{GemPaymentConfirmTransfer, GemPaymentDestination, GemPaymentRecipient};
 use crate::services::name::GemNameRecordState;
 use crate::services::name::rules::is_name_supported;
 use crate::services::transfer::{GemRecipient, GemTransferData};
+use chain_primitives::checksum_address;
 use primitives::TransactionInputType;
 
 pub fn validation(chain: Chain, input: &str, state: &GemNameRecordState) -> GemRecipientValidation {

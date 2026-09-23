@@ -1,3 +1,4 @@
+use chain_primitives::checksum_address;
 use primitives::{AssetId, Chain, ChainAddress, ScanProvider, ScanTransactionPayload, ScanType, ScanVerdict};
 use url::Url;
 
@@ -37,10 +38,11 @@ impl ScanSubject {
 pub fn scan_subjects(payload: &ScanTransactionPayload) -> Vec<ScanSubject> {
     let chain = payload.target.asset_id.chain;
     let address = &payload.target.address;
+    let target = checksum_address(address, chain);
     let addresses = [ScanType::Address, ScanType::AddressPoisoning].into_iter().filter(|_| !address.is_empty()).map(|scan_type| ScanSubject {
         scan_type,
         chain: Some(chain),
-        target: address.clone(),
+        target: target.clone(),
         finding: ScanFinding::Address(ChainAddress::new(chain, address.clone())),
     });
     let website = payload.website.clone().zip(website_host(payload)).map(|(website, host)| ScanSubject {
@@ -103,6 +105,28 @@ mod tests {
         assert_eq!(subjects[0].cache_key(), "smartchain:target");
         assert_eq!(subjects[2].cache_key(), "example.com");
         assert_eq!(subjects[2].finding, ScanFinding::Website("https://example.com/path".to_string()));
+    }
+
+    #[test]
+    fn test_scan_subjects_checksum_evm_targets() {
+        let subject = |address: &str| {
+            let mut payload = payload(None);
+            payload.target.address = address.to_string();
+            scan_subjects(&payload).remove(0)
+        };
+        let lower = subject("0x938915fd4b7c188a211113ed655ae1f18c334146");
+
+        assert_eq!(lower.target, "0x938915Fd4b7C188A211113Ed655ae1F18c334146");
+        assert_eq!(subject("0x938915FD4B7C188A211113ED655AE1F18C334146").target, lower.target);
+        assert_eq!(lower.finding, ScanFinding::Address(ChainAddress::new(Chain::SmartChain, "0x938915fd4b7c188a211113ed655ae1f18c334146".to_string())));
+    }
+
+    #[test]
+    fn test_scan_subjects_keep_non_evm_targets() {
+        let mut payload = ScanTransactionPayload::mock_with_assets(AssetId::from_chain(Chain::Solana), AssetId::from_chain(Chain::Solana));
+        payload.target.address = "So11111111111111111111111111111111111111112".to_string();
+
+        assert_eq!(scan_subjects(&payload)[0].target, "So11111111111111111111111111111111111111112");
     }
 
     #[test]

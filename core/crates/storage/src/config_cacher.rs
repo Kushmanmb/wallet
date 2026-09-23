@@ -96,6 +96,10 @@ impl ConfigCacher {
         values.into_iter().map(|value| self.get_param_duration(&key(value)).map(|duration| (value, duration))).collect()
     }
 
+    pub fn get_param_bool(&self, param: &ConfigParamKey) -> Result<bool, DatabaseError> {
+        Ok(self.get_param_value(param).parse()?)
+    }
+
     pub fn get_param_usize(&self, param: &ConfigParamKey) -> Result<usize, DatabaseError> {
         Ok(self.get_param_value(param).parse()?)
     }

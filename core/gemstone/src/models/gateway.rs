@@ -1,4 +1,4 @@
-use crate::address::checksum_address;
+use chain_primitives::checksum_address;
 use primitives::FeePriority;
 
 use primitives::{BroadcastOptions, FeeRate, GasPriceType, TransactionInputType, TransactionPreloadInput, UTXO};

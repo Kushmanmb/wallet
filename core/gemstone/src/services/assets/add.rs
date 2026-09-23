@@ -4,13 +4,13 @@ use std::sync::Arc;
 use primitives::{Asset, AssetId, Chain, Wallet};
 
 use super::rules;
-use crate::address::checksum_address;
 use crate::models::list::{GemListRow, GemListRowTitle, GemListSection, GemListSectionFooter, GemListSectionTitle, GemNoticeKind};
 use crate::services::assets::GemAssetsService;
 use crate::services::balance::GemBalanceService;
 use crate::services::error::{GemServiceError, required_account};
 use crate::services::explorer::GemExplorerService;
 use crate::services::localization::GemLocalizedText;
+use chain_primitives::checksum_address;
 use primitives::BlockExplorerLink;
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]

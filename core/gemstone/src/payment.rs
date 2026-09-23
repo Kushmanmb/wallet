@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::GemstoneError;
-use crate::address::{checksum_address, validate_address};
+use crate::address::validate_address;
 use crate::alien::{AlienProvider, AlienProviderWrapper};
 use crate::config::chain::is_memo_supported;
 use crate::config::wallet_connect::get_wallet_connect_config;
@@ -10,6 +10,7 @@ use crate::models::payment::{GemPayment, GemPaymentAmount, GemPaymentInvoice, Ge
 use crate::services::assets::GemAssetsService;
 use crate::services::error::GemServiceError;
 use crate::services::transfer::model::{GemRecipient, GemTransferData};
+use chain_primitives::checksum_address;
 use num_bigint::{BigInt, BigUint};
 use number_formatter::BigNumberFormatter;
 use payment::{PaymentLoad, PaymentService, PaymentTransaction, PaymentURLDecoder, PaymentUpdate, WalletConnectPayAuth};

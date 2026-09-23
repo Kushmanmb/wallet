@@ -1659,6 +1659,7 @@ name = "chain_primitives"
 version = "2.114.44"
 dependencies = [
  "alloy-primitives",
+ "gem_evm",
  "num-bigint 0.5.1",
  "primitives",
 ]
@@ -4056,6 +4057,7 @@ dependencies = [
  "base64 0.23.0",
  "block_explorers",
  "bs58",
+ "chain_primitives",
  "chain_traits",
  "chrono",
  "futures",
@@ -7653,6 +7655,7 @@ name = "security_provider"
 version = "2.114.44"
 dependencies = [
  "async-trait",
+ "chain_primitives",
  "gem_client",
  "gem_tracing",
  "hex",
@@ -7660,6 +7663,7 @@ dependencies = [
  "primitives",
  "serde",
  "serde_json",
+ "settings",
  "sha1 0.11.0",
  "tokio",
  "url",

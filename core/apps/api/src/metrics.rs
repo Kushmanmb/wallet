@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use metrics::{MetricsRegistry, prometheus_client};
-use primitives::{ScanProvider, ScanType};
+use primitives::{ScanOutcome, ScanProvider, ScanType};
 use prometheus_client::encoding::{EncodeLabelSet, LabelSetEncoder};
 use prometheus_client::metrics::family::Family;
 use prometheus_client::metrics::histogram::{Histogram, exponential_buckets};
@@ -39,11 +39,11 @@ impl Metrics {
             .chain(providers.poisoning.iter().map(|provider| (provider.provider(), ScanType::AddressPoisoning)))
             .chain(providers.websites.iter().map(|provider| (provider.provider(), ScanType::Website)))
         {
-            for outcome in ["clean", "malicious", "error"] {
+            for outcome in ScanOutcome::all() {
                 drop(scan_latency.get_or_create(&ScanLabels {
                     provider: provider.as_ref().to_string(),
                     kind: kind.into(),
-                    outcome,
+                    outcome: outcome.into(),
                 }));
             }
         }
@@ -52,17 +52,12 @@ impl Metrics {
         Self { registry, scan_latency }
     }
 
-    pub fn record_scan(&self, provider: ScanProvider, scan_type: ScanType, malicious: Option<bool>, latency: Duration) {
-        let outcome = match malicious {
-            Some(false) => "clean",
-            Some(true) => "malicious",
-            None => "error",
-        };
+    pub fn record_scan(&self, provider: ScanProvider, scan_type: ScanType, outcome: ScanOutcome, latency: Duration) {
         self.scan_latency
             .get_or_create(&ScanLabels {
                 provider: provider.as_ref().to_string(),
                 kind: scan_type.into(),
-                outcome,
+                outcome: outcome.into(),
             })
             .observe(latency.as_secs_f64() * 1000.0);
     }
@@ -87,10 +82,10 @@ mod tests {
             poisoning: vec![],
             websites: vec![],
         }));
-        metrics.record_scan(ScanProvider::HashDit, ScanType::Address, Some(false), Duration::from_millis(125));
-        metrics.record_scan(ScanProvider::HashDit, ScanType::Address, Some(true), Duration::from_secs(2));
-        metrics.record_scan(ScanProvider::HashDit, ScanType::Website, None, Duration::from_millis(62500));
-        metrics.record_scan(ScanProvider::GoPlus, ScanType::Address, Some(false), Duration::from_millis(5));
+        metrics.record_scan(ScanProvider::HashDit, ScanType::Address, ScanOutcome::Clean, Duration::from_millis(125));
+        metrics.record_scan(ScanProvider::HashDit, ScanType::Address, ScanOutcome::Malicious, Duration::from_secs(2));
+        metrics.record_scan(ScanProvider::HashDit, ScanType::Website, ScanOutcome::Error, Duration::from_millis(62500));
+        metrics.record_scan(ScanProvider::GoPlus, ScanType::Address, ScanOutcome::Clean, Duration::from_millis(5));
         let client = Client::tracked(rocket::build().manage(metrics).mount("/", routes![get_metrics])).unwrap();
         let response = client.get("/metrics").dispatch();
         assert_eq!(response.status(), Status::Ok);

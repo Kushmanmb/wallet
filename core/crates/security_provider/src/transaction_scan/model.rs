@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use primitives::{AssetBasic, AssetId, ChainAddress, ScanAddress, ScanProvider, ScanTransactionPayload, ScanType, ScanVerdict};
 
+use super::subject::ScanSubject;
 use crate::{AddressPoisoningTarget, AddressTarget, WebsiteTarget};
 
 pub struct TransactionScanInput {
@@ -72,6 +73,7 @@ impl ScanTargets {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ScanPlan {
+    pub subjects: Vec<ScanSubject>,
     pub detections: Vec<ScanDetection>,
     pub is_memo_required: bool,
     pub targets: Option<ScanTargets>,

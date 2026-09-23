@@ -46,6 +46,22 @@ impl ScanType {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, AsRefStr, IntoStaticStr, EnumIter)]
+#[serde(rename_all = "lowercase")]
+#[strum(serialize_all = "lowercase")]
+pub enum ScanOutcome {
+    Clean,
+    Malicious,
+    Pending,
+    Error,
+}
+
+impl ScanOutcome {
+    pub fn all() -> Vec<Self> {
+        Self::iter().collect()
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScanTransactionPayload {

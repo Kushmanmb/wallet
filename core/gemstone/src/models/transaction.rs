@@ -1,6 +1,6 @@
-use crate::address::checksum_address;
 use crate::models::custom_types::{GemBigInt, GemBigUint};
 use crate::models::*;
+use chain_primitives::checksum_address;
 use primitives::contract_call_data::ContractCallData;
 use primitives::solana_nft::SolanaNftStandard;
 use primitives::solana_token_program::SolanaTokenProgramId;

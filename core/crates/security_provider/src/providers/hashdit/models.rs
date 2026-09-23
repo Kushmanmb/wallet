@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::ScanPendingError;
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(super) struct SecurityRequest {
@@ -41,10 +43,10 @@ pub(super) enum SecurityResponse {
 }
 
 impl SecurityResponse {
-    pub(super) fn into_data(self) -> Result<SecurityData, String> {
+    pub(super) fn into_data(self, provider: &str) -> Result<SecurityData, ScanPendingError> {
         match self {
             Self::Complete { data } => Ok(data),
-            Self::InProgress { poll_after } => Err(format!("HashDit scan is in progress; retry after {poll_after} seconds")),
+            Self::InProgress { poll_after } => Err(ScanPendingError { provider: provider.to_string(), poll_after }),
         }
     }
 }

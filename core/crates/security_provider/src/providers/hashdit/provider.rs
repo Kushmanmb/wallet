@@ -31,7 +31,7 @@ impl<C: Client> HashDitProvider<C> {
 
     async fn security<B: Serialize + Send + Sync>(&self, target: HashDitTarget, body: &B) -> Result<SecurityData, Box<dyn std::error::Error + Send + Sync>> {
         let response: SecurityResponse = self.client.post(target, body).headers(self.headers()).await?;
-        Ok(response.into_data()?)
+        Ok(response.into_data(PROVIDER_NAME)?)
     }
 
     async fn scan<T: Clone + Send + Sync, B: Serialize + Send + Sync>(&self, target: &T, request_target: HashDitTarget, body: &B) -> Result<ScanResult<T>, Box<dyn std::error::Error + Send + Sync>> {
@@ -223,6 +223,7 @@ mod tests {
         let error = HashDitProvider::new(client, "api-key").scan_address(&target).await.unwrap_err();
 
         assert_eq!(error.to_string(), "HashDit scan is in progress; retry after 10 seconds");
+        assert!(error.downcast_ref::<crate::ScanPendingError>().is_some());
     }
 
     #[tokio::test]

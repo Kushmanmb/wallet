@@ -26,7 +26,7 @@ use lists::{CoinGeckoListProvider, ListsClient};
 use pricer::PriceClient;
 use primitives::{AssetId, Chain, NFTChain, PriceId, PriceProvider, TransactionIdRequest};
 use security_provider::providers::goplus::GoPlusProvider;
-use security_provider::{ScanProviderFactory, ScanProviderRemoteConfig, TokenScanProviderConfig, TokenScanProviders};
+use security_provider::{ScanProviderConfig, ScanProviderFactory, TokenScanProviders};
 use settings::Settings;
 use storage::{ConfigCacher, Database};
 use streamer::{
@@ -157,18 +157,8 @@ async fn run_fetch_asset_status(settings: Arc<Settings>, database: Database, shu
 }
 
 fn scan_providers(settings: &Settings, cacher: CacherClient, timeout: Duration) -> Result<TokenScanProviders, Box<dyn Error + Send + Sync>> {
-    let config = TokenScanProviderConfig {
-        timeout,
-        goplus: ScanProviderRemoteConfig {
-            url: settings.security.goplus.url.clone(),
-            public_key: settings.security.goplus.key.public.clone(),
-            secret_key: settings.security.goplus.key.secret.clone(),
-        },
-        hashdit: settings.security.hashdit.remote_provider_config(),
-        jupiter: settings.security.jupiter.remote_provider_config(),
-        tronscan: settings.security.tronscan.remote_provider_config(),
-    };
-    ScanProviderFactory::new_token_providers(config, Arc::new(AccessTokenCacherClient::new(cacher, GoPlusProvider::<ReqwestClient>::NAME)))
+    let config = ScanProviderConfig::new(&settings.security, timeout);
+    ScanProviderFactory::new_token_providers(&config, Arc::new(AccessTokenCacherClient::new(cacher, GoPlusProvider::<ReqwestClient>::NAME)))
 }
 
 async fn run_fetch_lists(settings: Arc<Settings>, database: Database, shutdown_rx: ShutdownReceiver, reporter: Arc<dyn ConsumerStatusReporter>) -> Result<(), Box<dyn Error + Send + Sync>> {

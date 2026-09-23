@@ -24,6 +24,20 @@ pub struct TokenTarget {
     pub chain: Chain,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ScanPendingError {
+    pub provider: String,
+    pub poll_after: u64,
+}
+
+impl std::fmt::Display for ScanPendingError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} scan is in progress; retry after {} seconds", self.provider, self.poll_after)
+    }
+}
+
+impl std::error::Error for ScanPendingError {}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ScanResult<T> {
     pub target: T,

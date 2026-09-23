@@ -10,9 +10,9 @@ pub mod model;
 pub mod providers;
 pub mod transaction_scan;
 
-pub use config::{AddressScanProviderConfig, ScanProviderRemoteConfig, TokenScanProviderConfig};
+pub use config::{ScanProviderConfig, ScanProviderRemoteConfig};
 pub use factory::ScanProviderFactory;
-pub use model::{AddressPoisoningTarget, AddressTarget, ScanResult, TokenTarget, WebsiteTarget};
+pub use model::{AddressPoisoningTarget, AddressTarget, ScanPendingError, ScanResult, TokenTarget, WebsiteTarget};
 
 pub type AddressScanProviders = Vec<Arc<dyn AddressScanProvider>>;
 pub type AddressPoisoningProviders = Vec<Arc<dyn AddressPoisoningProvider>>;

@@ -179,7 +179,7 @@ pub use self::wallet_configuration::{WalletConfiguration, WalletConfigurationRes
 pub mod utxo;
 pub use self::utxo::UTXO;
 pub mod scan;
-pub use self::scan::{AddressType, ScanAddress, ScanAddressTarget, ScanProvider, ScanSource, ScanTransaction, ScanTransactionPayload, ScanType, ScanVerdict};
+pub use self::scan::{AddressType, ScanAddress, ScanAddressTarget, ScanOutcome, ScanProvider, ScanSource, ScanTransaction, ScanTransactionPayload, ScanType, ScanVerdict};
 pub mod hex;
 pub use self::hex::{HexError, decode_hex, decode_hex_array};
 pub mod transaction_metadata_types;

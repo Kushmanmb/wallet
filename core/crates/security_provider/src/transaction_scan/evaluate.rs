@@ -1,15 +1,14 @@
-use primitives::{ScanSource, ScanTransaction, ScanType};
+use primitives::{ScanOutcome, ScanSource, ScanTransaction, ScanType};
 
 use super::check::ProviderCheck;
 use super::model::{ScanDetection, ScanFinding, ScanPlan, TransactionScanInput};
 use super::result::TransactionScanResult;
-use super::subject::scan_subjects;
 
 pub fn evaluate_transaction_scan(input: &TransactionScanInput, plan: ScanPlan, checks: Vec<ProviderCheck>) -> TransactionScanResult {
     let mut detections = plan.detections;
     let mut new_verdicts = Vec::new();
-    for subject in scan_subjects(&input.payload) {
-        let Some(check) = checks.iter().find(|check| check.scan_type == subject.scan_type && check.malicious == Some(true)) else {
+    for subject in plan.subjects {
+        let Some(check) = checks.iter().find(|check| check.scan_type == subject.scan_type && check.outcome == ScanOutcome::Malicious) else {
             continue;
         };
         let is_enforced = input.enforced.contains(&subject.scan_type);
@@ -20,7 +19,7 @@ pub fn evaluate_transaction_scan(input: &TransactionScanInput, plan: ScanPlan, c
     }
 
     let is_scan_complete = plan.targets.is_none() || {
-        let completed = checks.iter().filter(|check| input.enforced.contains(&check.scan_type) && check.malicious.is_some()).count();
+        let completed = checks.iter().filter(|check| input.enforced.contains(&check.scan_type) && check.outcome != ScanOutcome::Error).count();
         let cached = plan.safe.iter().filter(|scan_type| input.enforced.contains(scan_type)).count();
         completed + cached >= input.required_successes
     };
@@ -39,7 +38,7 @@ pub fn evaluate_transaction_scan(input: &TransactionScanInput, plan: ScanPlan, c
 
 fn is_clean(checks: &[ProviderCheck], scan_type: ScanType) -> bool {
     let mut checks = checks.iter().filter(|check| check.scan_type == scan_type).peekable();
-    checks.peek().is_some() && checks.all(|check| check.malicious == Some(false))
+    checks.peek().is_some() && checks.all(|check| check.outcome == ScanOutcome::Clean)
 }
 
 fn scan_transaction(detections: &[ScanDetection], is_memo_required: bool, is_scan_complete: bool) -> ScanTransaction {
@@ -92,8 +91,8 @@ mod tests {
         let result = evaluate(
             &input,
             vec![
-                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, Some(true)),
-                ProviderCheck::mock(ScanProvider::HashDit, ScanType::AddressPoisoning, Some(false)),
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, ScanOutcome::Malicious),
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::AddressPoisoning, ScanOutcome::Clean),
             ],
         );
 
@@ -118,7 +117,7 @@ mod tests {
     fn test_malicious_website_returns_url_and_stores_host() {
         let input = input(TransactionType::SmartContractCall, Some("https://bnbdaily.finance/path"));
 
-        let result = evaluate(&input, vec![ProviderCheck::mock(ScanProvider::HashDit, ScanType::Website, Some(true))]);
+        let result = evaluate(&input, vec![ProviderCheck::mock(ScanProvider::HashDit, ScanType::Website, ScanOutcome::Malicious)]);
 
         assert_eq!(result.scan.malicious_website.as_deref(), Some("https://bnbdaily.finance/path"));
         assert_eq!(result.new_verdicts[0].chain, None);
@@ -133,8 +132,8 @@ mod tests {
         let result = evaluate(
             &input,
             vec![
-                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, Some(false)),
-                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Website, Some(true)),
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, ScanOutcome::Clean),
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Website, ScanOutcome::Malicious),
             ],
         );
 
@@ -151,9 +150,9 @@ mod tests {
         input.enforced.remove(&ScanType::Website);
         let checks = || {
             vec![
-                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, Some(false)),
-                ProviderCheck::mock(ScanProvider::GoPlus, ScanType::Address, None),
-                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Website, Some(false)),
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, ScanOutcome::Clean),
+                ProviderCheck::mock(ScanProvider::GoPlus, ScanType::Address, ScanOutcome::Error),
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Website, ScanOutcome::Clean),
             ]
         };
         assert!(!evaluate(&input, checks()).scan.is_scan_complete);
@@ -180,9 +179,9 @@ mod tests {
         let result = evaluate(
             &input,
             vec![
-                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, Some(false)),
-                ProviderCheck::mock(ScanProvider::GoPlus, ScanType::Address, None),
-                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Website, Some(false)),
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, ScanOutcome::Clean),
+                ProviderCheck::mock(ScanProvider::GoPlus, ScanType::Address, ScanOutcome::Error),
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Website, ScanOutcome::Clean),
             ],
         );
 
@@ -196,8 +195,8 @@ mod tests {
         let result = evaluate(
             &input,
             vec![
-                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, Some(false)),
-                ProviderCheck::mock(ScanProvider::GoPlus, ScanType::Address, Some(true)),
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, ScanOutcome::Clean),
+                ProviderCheck::mock(ScanProvider::GoPlus, ScanType::Address, ScanOutcome::Malicious),
             ],
         );
 
@@ -209,10 +208,21 @@ mod tests {
         let mut input = input(TransactionType::Transfer, None);
         input.safe = HashSet::from([ScanType::Address]);
 
-        let result = evaluate(&input, vec![ProviderCheck::mock(ScanProvider::HashDit, ScanType::AddressPoisoning, None)]);
+        let result = evaluate(&input, vec![ProviderCheck::mock(ScanProvider::HashDit, ScanType::AddressPoisoning, ScanOutcome::Error)]);
 
         assert!(result.scan.is_scan_complete);
         assert_eq!(result.safe, vec![ScanType::Address]);
+    }
+
+    #[test]
+    fn test_pending_check_is_complete_but_not_safe() {
+        let input = input(TransactionType::SmartContractCall, None);
+
+        let result = evaluate(&input, vec![ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, ScanOutcome::Pending)]);
+
+        assert!(result.scan.is_scan_complete);
+        assert!(result.new_safe.is_empty());
+        assert!(result.errors().is_empty());
     }
 
     #[test]
@@ -222,8 +232,8 @@ mod tests {
         let result = evaluate(
             &input,
             vec![
-                ProviderCheck::mock(ScanProvider::Tronscan, ScanType::Address, None),
-                ProviderCheck::mock(ScanProvider::HashDit, ScanType::AddressPoisoning, Some(false)),
+                ProviderCheck::mock(ScanProvider::Tronscan, ScanType::Address, ScanOutcome::Error),
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::AddressPoisoning, ScanOutcome::Clean),
             ],
         );
 

@@ -8,9 +8,10 @@ use crate::services::localization::GemLocalizedText;
 
 const WALLET_ADDRESS_STYLE: GemAddressFormatStyle = GemAddressFormatStyle::Extra { extra: 1 };
 const SECRET_PHRASE_COLUMNS: u32 = 2;
-use crate::address::{checksum_address, validate_address};
+use crate::address::validate_address;
 use crate::keystore::GemKeystoreAccount;
 use crate::signer::decode_private_key;
+use chain_primitives::checksum_address;
 
 impl GemWalletImportType {
     pub fn validated(self) -> Result<Self, GemWalletImportError> {
