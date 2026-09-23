@@ -67,6 +67,10 @@ impl GemChartService {
         rules::chart_sections(&asset, self.preferences.get_currency(), price, market.as_ref(), price_alerts, links, contract_explorer)
     }
 
+    pub async fn market_in_currency(&self, market: AssetMarket) -> AssetMarket {
+        self.price.market_in_currency(market, self.preferences.get_currency()).await
+    }
+
     pub fn new_session(&self) -> GemChartSession {
         GemChartSession::new(self.chart_period(), self.get_currency())
     }
@@ -87,7 +91,7 @@ impl GemChartService {
         let currency = self.get_currency();
         let charts = self.api.client.get_charts(asset_id.clone(), period).await.map_err(GemApiError::from)?;
         if let Some(market) = charts.market {
-            self.price.update_market(asset_id.clone(), market, currency.clone()).await?;
+            self.price.update_market(asset_id.clone(), market).await?;
         }
         let rate = self.price.rate(currency.clone()).await?.ok_or(GemServiceError::InvalidInput {
             msg: format!("unknown currency: {currency}"),

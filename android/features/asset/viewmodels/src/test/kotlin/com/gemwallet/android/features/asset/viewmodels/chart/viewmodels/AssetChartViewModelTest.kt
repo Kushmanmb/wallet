@@ -23,6 +23,7 @@ import com.wallet.core.primitives.AssetLink
 import com.wallet.core.primitives.AssetMarket
 import com.wallet.core.primitives.Currency
 import com.wallet.core.primitives.PriceAlertData
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -80,6 +81,7 @@ class AssetChartViewModelTest {
         every { getAssetMarket(asset.id) } returns marketFlow
         every { getPriceAlerts(asset.id) } returns MutableStateFlow<List<PriceAlertData>>(emptyList())
         every { chartService.sections(any(), any(), any(), any(), any()) } returns emptyList()
+        coEvery { chartService.marketInCurrency(any()) } answers { firstArg() }
     }
 
     @After
@@ -117,8 +119,10 @@ class AssetChartViewModelTest {
         advanceUntilIdle()
 
         val market = mockAssetMarket(marketCap = 1234.0)
+        val converted = mockAssetMarket(marketCap = 617.0).toGem()
         val link = mockAssetLink()
-        every { chartService.sections(asset.toGem(), any(), market.toGem(), any(), listOf(link.toGem())) } returns listOf(
+        coEvery { chartService.marketInCurrency(market.toGem()) } returns converted
+        every { chartService.sections(asset.toGem(), any(), converted, any(), listOf(link.toGem())) } returns listOf(
             section(listOf(GemListRow.Amount(GemListRowTitle.MARKET_CAP, mockFormattedNumber(1234.0), null))),
             section(listOf(GemListRow.Social(listOf(mockGemSocialLink()))), GemListSectionTitle.SOCIAL_LINKS),
         )

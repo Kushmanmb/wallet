@@ -47,6 +47,9 @@ public struct ChartScene: View {
             }
         }
         .bindQuery(model.priceQuery)
+        .task(id: model.priceData) {
+            await model.updateMarket()
+        }
         .navigationTitle(model.title)
         .sheet(item: $model.isPresentingInfoSheet) {
             InfoSheetScene(type: $0)

@@ -105,7 +105,7 @@ impl GemAssetsService {
         let price = asset.price.as_ref().map(|price| AssetPrice::new(asset_id.clone(), price.price, price.price_change_percentage_24h, price.updated_at));
         self.price.update_asset_price(asset_id.clone(), price, currency.clone()).await?;
         if let Some(market) = asset.market.clone() {
-            self.price.update_market(asset_id, market, currency).await?;
+            self.price.update_market(asset_id, market).await?;
         }
         Ok(asset)
     }

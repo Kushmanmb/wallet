@@ -39,11 +39,13 @@ impl GemPriceService {
         update_rates(self.store.as_ref(), rates, currency).await
     }
 
-    pub async fn update_market(&self, asset_id: AssetId, market: AssetMarket, currency: Currency) -> Result<(), GemServiceError> {
-        let Some(rate) = self.rate(currency).await? else {
-            return Ok(());
-        };
-        self.store.save_market(asset_id, rules::market_in_currency(market, rate.rate)).await
+    pub async fn update_market(&self, asset_id: AssetId, market: AssetMarket) -> Result<(), GemServiceError> {
+        self.store.save_market(asset_id, market).await
+    }
+
+    pub async fn market_in_currency(&self, market: AssetMarket, currency: Currency) -> AssetMarket {
+        let rate = self.rate(currency).await.ok().flatten().map(|rate| rate.rate);
+        rules::market_at_rate(market, rate)
     }
 
     pub async fn change_currency(&self, currency: Currency) -> Result<(), GemServiceError> {
@@ -97,6 +99,33 @@ mod tests {
     use super::*;
     use chrono::Utc;
     use primitives::Chain;
+
+    #[test]
+    fn test_a_cached_market_follows_the_current_rate_without_a_refresh() {
+        let store = Arc::new(MemoryPriceStore::with_rate(Currency::EUR, 0.5));
+        let service = GemPriceService::new(store.clone());
+        let asset_id = AssetId::from_chain(Chain::Solana);
+        let market = AssetMarket {
+            market_cap: Some(1_000.0),
+            circulating_supply: Some(10.0),
+            market_cap_rank: Some(3),
+            ..Default::default()
+        };
+
+        futures::executor::block_on(service.update_market(asset_id, market.clone())).unwrap();
+        assert_eq!(store.markets.lock().unwrap()[0].1.market_cap, Some(1_000.0), "the stored market stays in USD");
+
+        let euro = futures::executor::block_on(service.market_in_currency(market.clone(), Currency::EUR));
+        *store.rates.lock().unwrap() = vec![FiatRate { symbol: Currency::EUR, rate: 0.8 }];
+        let repriced = futures::executor::block_on(service.market_in_currency(market.clone(), Currency::EUR));
+        let unknown = futures::executor::block_on(service.market_in_currency(market, Currency::JPY));
+
+        assert_eq!(euro.market_cap, Some(500.0));
+        assert_eq!(repriced.market_cap, Some(800.0));
+        assert_eq!(unknown.market_cap, None, "an unknown rate hides fiat figures instead of mislabelling them");
+        assert_eq!(unknown.circulating_supply, Some(10.0));
+        assert_eq!(unknown.market_cap_rank, Some(3));
+    }
 
     #[test]
     fn test_prices_are_converted_with_the_stored_rate() {
