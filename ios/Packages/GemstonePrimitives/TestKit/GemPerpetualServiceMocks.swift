@@ -72,6 +72,8 @@ public final class GemPerpetualServiceMock: GemPerpetualServiceProtocol, @unchec
     public private(set) var syncPositionsCount = 0
     public private(set) var clearMarketsCount = 0
     public var connectionFailures = 0
+    public var connectionGate: (@Sendable (Gemstone.Wallet) async -> Void)?
+    public private(set) var connectionCount = 0
     private var updatedAt: Int64?
 
     public init(marketsUpdatedAt: Int64? = nil) {
@@ -128,6 +130,8 @@ public final class GemPerpetualServiceMock: GemPerpetualServiceProtocol, @unchec
     }
 
     public func connection(wallet: Gemstone.Wallet) async throws -> Gemstone.GemPerpetualConnection? {
+        connectionCount += 1
+        await connectionGate?(wallet)
         if connectionFailures > 0 {
             connectionFailures -= 1
             throw AnyError("connection unavailable")
