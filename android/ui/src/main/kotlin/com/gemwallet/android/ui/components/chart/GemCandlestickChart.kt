@@ -33,7 +33,6 @@ import com.gemwallet.android.ui.models.chart.CandleDirection
 import com.gemwallet.android.ui.models.chart.CandleUIModel
 import com.gemwallet.android.ui.models.chart.CandlestickChartUIModel
 import com.gemwallet.android.ui.models.chart.ChartAxisTick
-import com.gemwallet.android.ui.models.chart.ChartReferenceLineKind
 import com.gemwallet.android.ui.models.chart.ChartReferenceLineUIModel
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.pendingColor
@@ -42,6 +41,7 @@ import com.gemwallet.android.ui.theme.space2
 import com.gemwallet.android.ui.theme.space4
 import com.gemwallet.android.ui.theme.space6
 import com.gemwallet.android.ui.theme.space8
+import uniffi.gemstone.GemPerpetualChartLineKind
 import kotlin.math.max
 import kotlin.math.min
 
@@ -213,8 +213,8 @@ fun GemCandlestickChart(model: CandlestickChartUIModel, selectedIndex: Int? = nu
 }
 
 @Composable
-private fun referenceColors(): (ChartReferenceLineKind) -> Color {
-    val colors = ChartReferenceLineKind.entries.associateWith { it.color() }
+private fun referenceColors(): (GemPerpetualChartLineKind) -> Color {
+    val colors = GemPerpetualChartLineKind.entries.associateWith { it.color() }
     return { role -> colors.getValue(role) }
 }
 
@@ -225,11 +225,11 @@ private fun candleColor(candle: CandleUIModel, up: Color, down: Color, flat: Col
 }
 
 @Composable
-private fun ChartReferenceLineKind.color(): Color = when (this) {
-    ChartReferenceLineKind.Entry -> MaterialTheme.colorScheme.outline
-    ChartReferenceLineKind.Liquidation -> MaterialTheme.colorScheme.error
-    ChartReferenceLineKind.StopLoss -> pendingColor
-    ChartReferenceLineKind.TakeProfit -> MaterialTheme.colorScheme.tertiary
+private fun GemPerpetualChartLineKind.color(): Color = when (this) {
+    GemPerpetualChartLineKind.ENTRY -> MaterialTheme.colorScheme.outline
+    GemPerpetualChartLineKind.LIQUIDATION -> MaterialTheme.colorScheme.error
+    GemPerpetualChartLineKind.STOP_LOSS -> pendingColor
+    GemPerpetualChartLineKind.TAKE_PROFIT -> MaterialTheme.colorScheme.tertiary
 }
 
 private fun DrawScope.drawYAxis(
@@ -298,7 +298,7 @@ private fun DrawScope.drawCandles(candles: List<CandleUIModel>, slotCenter: (Int
 
 private fun DrawScope.drawReferenceLines(
     referenceLines: List<ChartReferenceLineUIModel>,
-    referenceColorByRole: (ChartReferenceLineKind) -> Color,
+    referenceColorByRole: (GemPerpetualChartLineKind) -> Color,
     valueToY: (Double) -> Float,
     plotLeft: Float,
     plotRight: Float,

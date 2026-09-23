@@ -1,5 +1,6 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
+import enum Gemstone.GemSlippageSelection
 import Primitives
 import PrimitivesComponents
 @testable import Swap
@@ -35,7 +36,7 @@ struct SwapSlippageViewModelTests {
 
     @Test
     func confirmAuto() {
-        var applied: SwapSlippage?
+        var applied: GemSlippageSelection?
         let model = SwapSlippageViewModel.mock(slippage: .manual(bps: 50)) { applied = $0 }
         model.isAuto = true
         model.confirm()
@@ -49,7 +50,7 @@ struct SwapSlippageViewModelTests {
         ("10", UInt32(1000)),
     ] as [(String, UInt32)])
     func confirmAppliesManualValue(input: String, expected: UInt32) {
-        var applied: SwapSlippage?
+        var applied: GemSlippageSelection?
         let model = SwapSlippageViewModel.mock { applied = $0 }
         model.isAuto = false
         model.inputModel.text = input

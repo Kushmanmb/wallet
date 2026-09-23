@@ -11,15 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonAction
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonTone
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonUIModel
 import com.gemwallet.android.ui.components.list_item.listItem
 import com.gemwallet.android.ui.theme.WalletTheme
 import com.gemwallet.android.ui.theme.paddingDefault
+import uniffi.gemstone.GemPerpetualButton
 
 @Composable
-internal fun PerpetualActions(buttons: List<PerpetualButtonUIModel>, onSelect: (PerpetualButtonAction) -> Unit) {
+internal fun PerpetualActions(buttons: List<PerpetualButtonUIModel>, onSelect: (GemPerpetualButton) -> Unit) {
     Row(
         modifier = Modifier.listItem().padding(paddingDefault),
         horizontalArrangement = Arrangement.spacedBy(paddingDefault),
@@ -49,8 +49,8 @@ private fun PerpetualActionsPreview() {
     WalletTheme {
         PerpetualActions(
             buttons = listOf(
-                PerpetualButtonUIModel("Long", PerpetualButtonAction.OpenLong, PerpetualButtonTone.Positive),
-                PerpetualButtonUIModel("Short", PerpetualButtonAction.OpenShort, PerpetualButtonTone.Negative),
+                PerpetualButtonUIModel("Long", GemPerpetualButton.LONG, PerpetualButtonTone.Positive),
+                PerpetualButtonUIModel("Short", GemPerpetualButton.SHORT, PerpetualButtonTone.Negative),
             ),
             onSelect = {},
         )

@@ -6,7 +6,6 @@ import Foundation
 import func Gemstone.delegationListRow
 import struct Gemstone.GemDelegationListRow
 import struct Gemstone.GemDelegationStatus
-import protocol Gemstone.GemStakeServiceProtocol
 import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
@@ -20,10 +19,8 @@ public struct DelegationViewModel: Sendable {
     public let validatorModel: ValidatorViewModel
 
     public init(
-        service _: any GemStakeServiceProtocol,
         delegation: Delegation,
         asset: Asset,
-        formatter _: ValueFormatter = .short,
         currency: Currency,
     ) {
         self.delegation = delegation

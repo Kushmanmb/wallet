@@ -2,6 +2,7 @@
 
 import BigInt
 import Foundation
+import enum Gemstone.GemSlippageSelection
 import struct Gemstone.GemSwapPairFailure
 import struct Gemstone.GemSwapQuoteInput
 import protocol Gemstone.GemSwapQuoteServiceProtocol
@@ -14,15 +15,15 @@ public extension GemSwapQuoteServiceProtocol {
         getCurrency().toPrimitives()
     }
 
-    var slippage: SwapSlippage {
+    var slippage: GemSlippageSelection {
         switch slippageBps() {
         case let .some(bps): .manual(bps: bps)
         case .none: .auto
         }
     }
 
-    func setSlippage(_ slippage: SwapSlippage) throws {
-        try setSlippageBps(bps: slippage.exactBps)
+    func setSlippage(_ slippage: GemSlippageSelection) throws {
+        try setSlippageBps(bps: slippage.bps)
     }
 
     func getQuotes(fromAsset: Asset, toAsset: Asset, input: GemSwapQuoteInput) async throws -> [SwapperQuote] {
@@ -46,11 +47,18 @@ public extension GemSwapQuoteServiceProtocol {
     }
 }
 
-private extension SwapSlippage {
-    var exactBps: UInt32? {
+public extension GemSlippageSelection {
+    var bps: UInt32? {
         switch self {
         case .auto: nil
         case let .manual(bps): bps
+        }
+    }
+
+    var isCustom: Bool {
+        switch self {
+        case .auto: false
+        case .manual: true
         }
     }
 }

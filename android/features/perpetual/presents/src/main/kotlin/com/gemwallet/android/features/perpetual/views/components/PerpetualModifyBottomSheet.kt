@@ -11,15 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonAction
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonTone
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonUIModel
 import com.gemwallet.android.ui.components.screen.ModalBottomSheet
 import com.gemwallet.android.ui.theme.Spacer16
 import com.gemwallet.android.ui.theme.mainActionHeight
+import uniffi.gemstone.GemPerpetualButton
 
 @Composable
-internal fun PerpetualModifyBottomSheet(isVisible: Boolean, title: String, buttons: List<PerpetualButtonUIModel>, onDismiss: () -> Unit, onSelect: (PerpetualButtonAction) -> Unit) {
+internal fun PerpetualModifyBottomSheet(isVisible: Boolean, title: String, buttons: List<PerpetualButtonUIModel>, onDismiss: () -> Unit, onSelect: (GemPerpetualButton) -> Unit) {
     ModalBottomSheet(
         isVisible = isVisible,
         onDismissRequest = onDismiss,

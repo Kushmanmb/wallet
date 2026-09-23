@@ -112,10 +112,6 @@ public final class PerpetualsSceneViewModel {
         ))
     }
 
-    var marketSectionModels: [PerpetualMarketSectionViewModel] {
-        marketSectionList.map { PerpetualMarketSectionViewModel(section: $0) }
-    }
-
     var showSearchEmptyState: Bool {
         marketSectionList.contains(.empty)
     }

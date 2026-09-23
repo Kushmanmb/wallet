@@ -18,14 +18,14 @@ import PrimitivesComponents
 @Observable
 public final class SwapSlippageViewModel {
     private let service: any GemSwapQuoteServiceProtocol
-    private let onSelect: (SwapSlippage) -> Void
+    private let onSelect: (GemSlippageSelection) -> Void
 
     let placeholder: String
     var isAuto: Bool
     var inputModel: InputValidationViewModel
     var infoSheet: InfoSheetType?
 
-    public init(service: any GemSwapQuoteServiceProtocol, chain: Chain, slippage: SwapSlippage, onSelect: @escaping (SwapSlippage) -> Void) {
+    public init(service: any GemSwapQuoteServiceProtocol, chain: Chain, slippage: GemSlippageSelection, onSelect: @escaping (GemSlippageSelection) -> Void) {
         self.service = service
         self.onSelect = onSelect
         placeholder = Self.format(bps: service.defaultSlippage(chain: chain.rawValue).bps, service: service)

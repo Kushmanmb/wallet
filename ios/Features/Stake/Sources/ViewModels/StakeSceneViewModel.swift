@@ -133,7 +133,6 @@ public final class StakeSceneViewModel {
         let currency = service.getCurrency().toPrimitives()
         return delegationsState.stateViewType(delegations.map { delegation in
             DelegationViewModel(
-                service: service,
                 delegation: delegation,
                 asset: asset,
                 currency: currency,

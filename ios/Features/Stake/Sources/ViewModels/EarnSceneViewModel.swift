@@ -98,7 +98,7 @@ public final class EarnSceneViewModel {
 
     var positionModels: [DelegationViewModel] {
         service.positions(delegations: positions.map { $0.toGem() })
-            .map { DelegationViewModel(service: service, delegation: Delegation(core: $0), asset: asset, currency: service.getCurrency().toPrimitives()) }
+            .map { DelegationViewModel(delegation: Delegation(core: $0), asset: asset, currency: service.getCurrency().toPrimitives()) }
     }
 
     var hasPositions: Bool {

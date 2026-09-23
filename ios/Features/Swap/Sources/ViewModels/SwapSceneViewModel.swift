@@ -6,6 +6,7 @@ import Formatters
 import Foundation
 import class Gemstone.Config
 import func Gemstone.formattedPercentage
+import enum Gemstone.GemSlippageSelection
 import enum Gemstone.GemSwapButtonAction
 import enum Gemstone.GemSwapErrorDisplay
 import struct Gemstone.GemSwapPairSelection
@@ -77,7 +78,7 @@ public final class SwapSceneViewModel {
         .milliseconds(service.quoteDebounceMilliseconds())
     }
 
-    var selectedSlippage: SwapSlippage = .auto
+    var selectedSlippage: GemSlippageSelection = .auto
 
     private let onSwap: TransferDataAction
     private let service: any GemSwapQuoteServiceProtocol
@@ -339,7 +340,7 @@ extension SwapSceneViewModel {
         session = session.onProviderSelected(provider: quote.data.provider.id)
     }
 
-    func onSelectSlippage(_ slippage: SwapSlippage) {
+    func onSelectSlippage(_ slippage: GemSlippageSelection) {
         guard slippage != selectedSlippage else { return }
         selectedSlippage = slippage
         do {

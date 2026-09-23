@@ -48,7 +48,7 @@ class CandlestickChartUIModelTest {
         val model = model()
 
         assertEquals(listOf("Entry | 10.50"), model.referenceLines.map { it.label })
-        assertEquals(ChartReferenceLineKind.Entry, model.referenceLines.single().kind)
+        assertEquals(GemPerpetualChartLineKind.ENTRY, model.referenceLines.single().kind)
     }
 
     @Test

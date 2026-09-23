@@ -176,7 +176,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 #### Dead code: delete first
 
-- **VM14** **S** **Pass arguments `DelegationViewModel` actually uses.** iOS [`DelegationViewModel`](../ios/Features/Stake/Sources/ViewModels/DelegationViewModel.swift) takes `service _` and `formatter _` and ignores both, so every caller passes a service for nothing.
 
 #### Hand-written twins of Core types
 
@@ -186,13 +185,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 - **VM18** **S** **Banner models keep the domain `Banner` beside the row.** iOS [`BannerViewModel`](../ios/Packages/PrimitivesComponents/Sources/ViewModels/BannerViewModel.swift) and Android `BannerRowUIModel` hold `Banner` beside `GemBannerContent` for its id and the close call; the row should carry the key.
 - **VM19** **S** **Stop copying `GemAssetFilter`.** iOS `AssetsRequestFilter` (Store) and Android `AssetFilter` (gemcore) mirror `GemAssetFilter` case for case, mapped in [SelectAssetFilters.swift](../ios/Features/Assets/Sources/Types/SelectAssetFilters.swift) and [AssetEligibility.kt](../android/gemcore/src/main/kotlin/com/gemwallet/android/domains/asset/AssetEligibility.kt). Check whether the store layer may import the generated type.
 - **VM20** **S** **Stop hand-writing `StakeType` and `RedelegateData`.** Both apps declare them ([iOS](../ios/Packages/Primitives/Sources/Staking.swift), [Android](../android/gemcore/src/main/kotlin/com/wallet/core/primitives/Staking.kt)) beside Core's generated types and convert with `toGem()`.
-- **VM21** **S** **Use `GemLockPeriod` on iOS.** iOS [`LockPeriod`](../ios/Packages/Primitives/Sources/LockPeriod.swift) is a copy of `GemLockPeriod`; Android already uses the Core type.
-- **VM22** **S** **Use `GemBalanceRequirement` on iOS.** iOS [`BalanceRequirement`](../ios/Packages/Primitives/Sources/BalanceRequirement.swift) copies `GemBalanceRequirement` field for field.
-- **VM23** **S** **Use `GemSlippageSelection` on iOS.** iOS [`SwapSlippage`](../ios/Packages/Primitives/Sources/SwapSlippage.swift) (auto or manual bps) copies `GemSlippageSelection`; Android uses the Core type.
-- **VM24** **S** **Stop copying `GemPerpetualMarketSection` on iOS.** `PerpetualMarketSectionViewModel.Kind` copies the Core enum case for case.
-- **VM25** **S** **Stop copying `GemPerpetualButton` on Android.** `PerpetualButtonAction` in `PerpetualDetailsUIModel.kt` maps each Core button to a same-named case.
-- **VM26** **S** **Stop copying `GemPerpetualChartLineKind` on Android.** `ChartReferenceLineKind` in `CandlestickChartUIModel.kt` copies the Core enum.
-- **VM27** **S** **Fold `PerpetualDirectionViewModel` into the mappers.** iOS [`PerpetualDirectionViewModel`](../ios/Packages/PrimitivesComponents/Sources/ViewModels/PerpetualDirectionViewModel.swift) only returns localized titles and a colour for `PerpetualDirection`; that is a mapper extension, not a view model.
 
 #### Models that hold a domain object beside its row
 
@@ -366,6 +358,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM14, VM21–VM27 (2026-09-23).** Closed. `DelegationViewModel` no longer takes the service and formatter it ignored. iOS reads Core types where it kept copies: `GemLockPeriod` replaces `LockPeriod` (the Keychain keeps the same stored strings, mapped privately in `LocalKeystorePassword`, so existing lock settings read back unchanged), `GemSlippageSelection` replaces `SwapSlippage`, and the perpetuals scene switches on `GemPerpetualMarketSection` directly — a view dispatching a row key is the contract, not a leak. `BalanceRequirement` and its converter had no reader and are deleted. Android switches on `GemPerpetualButton` and `GemPerpetualChartLineKind` instead of `PerpetualButtonAction` and `ChartReferenceLineKind`. `PerpetualDirectionViewModel` was a mapper: its increase and reduce titles joined the direction's title in the PrimitivesComponents mapper and the colour already lived in the style mapper.
 
 **VM8–VM13 (2026-09-23).** Closed. Android: `walletTransactions`, `PerpetualPnlFormatter`, the gemcore `PriceChangeCalculator` and `PriceChangeFormatter` wrappers it alone used, and `RowFormatters`/`PriceValue`/`EquivalentValue` with their tests and mock are deleted; `createAmount` moved into the `AssetBalanceMock` fixture, its only caller; `GetWalletSummaryImpl` lost thirteen unused imports. Core: `GemSwapQuoteSummary.rows()` and `GemSwapDetailRow` are deleted with iOS's mapper for them. `GemWalletService.address_url` and `GemChainService.chain_from_caip2` had no caller anywhere and are deleted; `delegation_rows`, `sync_earn`, the autoclose estimator's `has_size`/`roe`, `portfolio_data` and `recover_interrupted_messages` are called inside Core only and left the export. The survey's method scan matched `.name` only, so it missed calls made from inside an extension on the generated type: `defaultWalletName`, `setupChains`, `showsRewards`, `getCurrentWalletId`, `ensureTokenAsset`, `openWalletAsset`, `walletAssets`, `formatAll`, `newest`, `candlesticks`, `headerKind` and `inputAsset` have callers and stay. `delegation_rows` returns one delegation's detail rows, not a list projection, so VM49 was reworded.
 

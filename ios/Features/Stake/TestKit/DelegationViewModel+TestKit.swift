@@ -12,7 +12,6 @@ public extension DelegationViewModel {
         rewardsShown: Bool = false,
     ) -> DelegationViewModel {
         DelegationViewModel(
-            service: GemStakeServiceMock(rewardsShown: rewardsShown),
             delegation: .mock(
                 state: state,
                 price: Price.mock(price: 2.0),

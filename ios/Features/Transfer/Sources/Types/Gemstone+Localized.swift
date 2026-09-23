@@ -65,9 +65,9 @@ extension GemConfirmTitle {
         case .freeze: Localized.Transfer.Freeze.title
         case .unfreeze: Localized.Transfer.Unfreeze.title
         case .activateAsset: Localized.Transfer.ActivateAsset.title
-        case let .perpetualOpen(direction): PerpetualDirectionViewModel(direction: direction.toPrimitives()).title
-        case let .perpetualIncrease(direction): PerpetualDirectionViewModel(direction: direction.toPrimitives()).increaseTitle
-        case let .perpetualReduce(direction): PerpetualDirectionViewModel(direction: direction.toPrimitives()).reduceTitle
+        case let .perpetualOpen(direction): direction.toPrimitives().title
+        case let .perpetualIncrease(direction): direction.toPrimitives().increaseTitle
+        case let .perpetualReduce(direction): direction.toPrimitives().reduceTitle
         case .perpetualClose: Localized.Perpetual.closePosition
         case .perpetualModify: Localized.Perpetual.modifyPosition
         }

@@ -349,6 +349,14 @@ public extension Primitives.PerpetualDirection {
         case .long: Localized.Perpetual.long
         }
     }
+
+    var increaseTitle: String {
+        Localized.Perpetual.increaseDirection(title)
+    }
+
+    var reduceTitle: String {
+        Localized.Perpetual.reduceDirection(title)
+    }
 }
 
 public extension Primitives.FeePriority {

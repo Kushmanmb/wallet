@@ -3,6 +3,7 @@
 import Components
 import Foundation
 import enum Gemstone.GemListRowTitle
+import enum Gemstone.GemLockPeriod
 import struct Gemstone.GemSecurityInput
 import protocol Gemstone.GemSettingsServiceProtocol
 import GemstoneServices
@@ -22,7 +23,7 @@ public final class SecurityViewModel {
     var isPresentingAlertMessage: AlertMessage?
     var isPresentingLockPeriods: Bool = false
     var isEnabled: Bool
-    private var storedLockPeriod: LockPeriod
+    private var storedLockPeriod: GemLockPeriod
     var isPrivacyLockEnabled: Bool
 
     public init(
@@ -51,12 +52,12 @@ public final class SecurityViewModel {
         Localized.Lock.requireAuthentication
     }
 
-    var lockPeriod: LockPeriod {
+    var lockPeriod: GemLockPeriod {
         storedLockPeriod
     }
 
-    var allLockPeriods: [LockPeriod] {
-        LockPeriod.offered
+    var allLockPeriods: [GemLockPeriod] {
+        GemLockPeriod.offered
     }
 
     private var authenticationName: String? {
@@ -136,7 +137,7 @@ extension SecurityViewModel {
         }
     }
 
-    func updateLockPeriod(to period: LockPeriod) {
+    func updateLockPeriod(to period: GemLockPeriod) {
         guard period != storedLockPeriod else { return }
         let previous = storedLockPeriod
         storedLockPeriod = period

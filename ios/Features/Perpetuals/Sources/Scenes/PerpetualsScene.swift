@@ -1,6 +1,7 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Components
+import enum Gemstone.GemPerpetualMarketSection
 import Primitives
 import PrimitivesComponents
 import Recents
@@ -73,7 +74,7 @@ struct PerpetualsScene: View {
                 .cleanListRow()
             }
 
-            ForEach(model.marketSectionModels) { section in
+            ForEach(model.marketSectionList, id: \.self) { section in
                 marketSection(section)
             }
         }
@@ -92,8 +93,8 @@ struct PerpetualsScene: View {
 
 extension PerpetualsScene {
     @ViewBuilder
-    private func marketSection(_ section: PerpetualMarketSectionViewModel) -> some View {
-        switch section.kind {
+    private func marketSection(_ section: GemPerpetualMarketSection) -> some View {
+        switch section {
         case .recents:
             RecentAssetsSectionView(
                 model: model.recentModel,

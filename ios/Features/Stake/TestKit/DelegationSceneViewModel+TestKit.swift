@@ -23,7 +23,7 @@ public extension DelegationSceneViewModel {
         let delegation = Delegation.mock(state: state, validator: validator, base: base)
         return DelegationSceneViewModel(
             wallet: wallet,
-            model: DelegationViewModel(service: stakeService, delegation: delegation, asset: chain.asset, currency: .usd),
+            model: DelegationViewModel(delegation: delegation, asset: chain.asset, currency: .usd),
             asset: chain.asset,
             service: stakeService,
             validators: validators,

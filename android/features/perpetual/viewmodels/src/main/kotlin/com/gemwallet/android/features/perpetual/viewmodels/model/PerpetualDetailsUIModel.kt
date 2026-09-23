@@ -4,18 +4,13 @@ import android.content.Context
 import com.gemwallet.android.features.perpetual.viewmodels.localization.stringRes
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemPerpetualButton
+import uniffi.gemstone.GemPerpetualDetails
 import uniffi.gemstone.GemPerpetualPositionDetail
 import uniffi.gemstone.GemPerpetualPositionDetailRow
-import uniffi.gemstone.GemPerpetualDetails
 import uniffi.gemstone.GemPerpetualSection
 import uniffi.gemstone.PerpetualPosition
 
-data class PerpetualDetailsUIModel(
-    val title: String,
-    val sections: List<PerpetualDetailsSectionUIModel>,
-    val modifyButtons: List<PerpetualButtonUIModel>,
-    val position: PerpetualPosition?,
-)
+data class PerpetualDetailsUIModel(val title: String, val sections: List<PerpetualDetailsSectionUIModel>, val modifyButtons: List<PerpetualButtonUIModel>, val position: PerpetualPosition?)
 
 sealed interface PerpetualDetailsSectionUIModel {
     val title: String
@@ -31,9 +26,7 @@ sealed interface PerpetualPositionRowUIModel {
     data class Autoclose(override val row: GemListRow) : PerpetualPositionRowUIModel
 }
 
-data class PerpetualButtonUIModel(val title: String, val action: PerpetualButtonAction, val tone: PerpetualButtonTone)
-
-enum class PerpetualButtonAction { OpenLong, OpenShort, Modify, Close, Increase, Reduce }
+data class PerpetualButtonUIModel(val title: String, val action: GemPerpetualButton, val tone: PerpetualButtonTone)
 
 enum class PerpetualButtonTone { Positive, Negative, Primary }
 
@@ -49,13 +42,15 @@ internal fun GemPerpetualSection.uiModel(context: Context): PerpetualDetailsSect
     is GemPerpetualSection.Info -> PerpetualDetailsSectionUIModel.Info(context.getString(stringRes()), buttons.map { it.uiModel(context) }, rows)
 }
 
-internal fun GemPerpetualButton.uiModel(context: Context): PerpetualButtonUIModel = when (this) {
-    GemPerpetualButton.LONG -> PerpetualButtonUIModel(context.getString(stringRes()), PerpetualButtonAction.OpenLong, PerpetualButtonTone.Positive)
-    GemPerpetualButton.SHORT -> PerpetualButtonUIModel(context.getString(stringRes()), PerpetualButtonAction.OpenShort, PerpetualButtonTone.Negative)
-    GemPerpetualButton.MODIFY -> PerpetualButtonUIModel(context.getString(stringRes()), PerpetualButtonAction.Modify, PerpetualButtonTone.Primary)
-    GemPerpetualButton.CLOSE -> PerpetualButtonUIModel(context.getString(stringRes()), PerpetualButtonAction.Close, PerpetualButtonTone.Negative)
-    GemPerpetualButton.INCREASE -> PerpetualButtonUIModel(context.getString(stringRes()), PerpetualButtonAction.Increase, PerpetualButtonTone.Primary)
-    GemPerpetualButton.REDUCE -> PerpetualButtonUIModel(context.getString(stringRes()), PerpetualButtonAction.Reduce, PerpetualButtonTone.Negative)
+internal fun GemPerpetualButton.uiModel(context: Context): PerpetualButtonUIModel = PerpetualButtonUIModel(context.getString(stringRes()), this, tone())
+
+private fun GemPerpetualButton.tone(): PerpetualButtonTone = when (this) {
+    GemPerpetualButton.LONG -> PerpetualButtonTone.Positive
+    GemPerpetualButton.SHORT -> PerpetualButtonTone.Negative
+    GemPerpetualButton.MODIFY -> PerpetualButtonTone.Primary
+    GemPerpetualButton.CLOSE -> PerpetualButtonTone.Negative
+    GemPerpetualButton.INCREASE -> PerpetualButtonTone.Primary
+    GemPerpetualButton.REDUCE -> PerpetualButtonTone.Negative
 }
 
 internal fun GemPerpetualPositionDetail.uiModel(): PerpetualPositionRowUIModel = when (kind) {

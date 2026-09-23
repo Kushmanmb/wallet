@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.gemwallet.android.domains.transaction.aggregates.TransactionDataAggregate
-import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonAction
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonTone
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualButtonUIModel
 import com.gemwallet.android.features.perpetual.viewmodels.model.PerpetualDetailsSectionUIModel
@@ -51,6 +50,7 @@ import uniffi.gemstone.GemInfoTopic
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemListRowTitle
 import uniffi.gemstone.GemLocalizedText
+import uniffi.gemstone.GemPerpetualButton
 
 @Composable
 internal fun PerpetualPositionScene(
@@ -65,14 +65,14 @@ internal fun PerpetualPositionScene(
     onAction: (PerpetualDetailsAction) -> Unit,
 ) {
     var showModifyDialog by remember { mutableStateOf(false) }
-    val onButton: (PerpetualButtonAction) -> Unit = { action ->
+    val onButton: (GemPerpetualButton) -> Unit = { action ->
         when (action) {
-            PerpetualButtonAction.OpenLong -> onAction(PerpetualDetailsAction.OpenPosition(PerpetualDirection.Long))
-            PerpetualButtonAction.OpenShort -> onAction(PerpetualDetailsAction.OpenPosition(PerpetualDirection.Short))
-            PerpetualButtonAction.Modify -> showModifyDialog = true
-            PerpetualButtonAction.Close -> onAction(PerpetualDetailsAction.ClosePosition)
-            PerpetualButtonAction.Increase -> onAction(PerpetualDetailsAction.IncreasePosition)
-            PerpetualButtonAction.Reduce -> onAction(PerpetualDetailsAction.ReducePosition)
+            GemPerpetualButton.LONG -> onAction(PerpetualDetailsAction.OpenPosition(PerpetualDirection.Long))
+            GemPerpetualButton.SHORT -> onAction(PerpetualDetailsAction.OpenPosition(PerpetualDirection.Short))
+            GemPerpetualButton.MODIFY -> showModifyDialog = true
+            GemPerpetualButton.CLOSE -> onAction(PerpetualDetailsAction.ClosePosition)
+            GemPerpetualButton.INCREASE -> onAction(PerpetualDetailsAction.IncreasePosition)
+            GemPerpetualButton.REDUCE -> onAction(PerpetualDetailsAction.ReducePosition)
         }
     }
 
@@ -174,31 +174,31 @@ private fun PerpetualPositionScenePreview() {
             details = PerpetualDetailsUIModel(
                 title = "Bitcoin Perpetual",
                 sections = listOf(
-                PerpetualDetailsSectionUIModel.Position(
-                    title = "Position",
-                    rows = listOf(
-                        PerpetualPositionRowUIModel.Item(GemListRow.Text(GemListRowTitle.PNL, "+$460.25 (+9.64%)")),
-                        PerpetualPositionRowUIModel.Autoclose(
-                            GemListRow.Lines(
-                                title = GemListRowTitle.AUTO_CLOSE,
-                                lines = listOf(GemLocalizedText.Text("TP $95,000.00"), GemLocalizedText.Text("SL $90,050.00")),
-                                info = GemInfoTopic.AutoClose,
+                    PerpetualDetailsSectionUIModel.Position(
+                        title = "Position",
+                        rows = listOf(
+                            PerpetualPositionRowUIModel.Item(GemListRow.Text(GemListRowTitle.PNL, "+$460.25 (+9.64%)")),
+                            PerpetualPositionRowUIModel.Autoclose(
+                                GemListRow.Lines(
+                                    title = GemListRowTitle.AUTO_CLOSE,
+                                    lines = listOf(GemLocalizedText.Text("TP $95,000.00"), GemLocalizedText.Text("SL $90,050.00")),
+                                    info = GemInfoTopic.AutoClose,
+                                ),
                             ),
                         ),
                     ),
-                ),
-                PerpetualDetailsSectionUIModel.Info(
-                    title = "Info",
-                    buttons = listOf(
-                        PerpetualButtonUIModel("Modify", PerpetualButtonAction.Modify, PerpetualButtonTone.Primary),
-                        PerpetualButtonUIModel("Close", PerpetualButtonAction.Close, PerpetualButtonTone.Negative),
+                    PerpetualDetailsSectionUIModel.Info(
+                        title = "Info",
+                        buttons = listOf(
+                            PerpetualButtonUIModel("Modify", GemPerpetualButton.MODIFY, PerpetualButtonTone.Primary),
+                            PerpetualButtonUIModel("Close", GemPerpetualButton.CLOSE, PerpetualButtonTone.Negative),
+                        ),
+                        rows = listOf(GemListRow.Text(GemListRowTitle.DAILY_VOLUME, "$15.00B")),
                     ),
-                    rows = listOf(GemListRow.Text(GemListRowTitle.DAILY_VOLUME, "$15.00B")),
-                ),
                 ),
                 modifyButtons = listOf(
-                    PerpetualButtonUIModel("Increase", PerpetualButtonAction.Increase, PerpetualButtonTone.Primary),
-                    PerpetualButtonUIModel("Reduce", PerpetualButtonAction.Reduce, PerpetualButtonTone.Negative),
+                    PerpetualButtonUIModel("Increase", GemPerpetualButton.INCREASE, PerpetualButtonTone.Primary),
+                    PerpetualButtonUIModel("Reduce", GemPerpetualButton.REDUCE, PerpetualButtonTone.Negative),
                 ),
                 position = null,
             ),

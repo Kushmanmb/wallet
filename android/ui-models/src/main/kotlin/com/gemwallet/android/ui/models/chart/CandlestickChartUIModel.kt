@@ -7,20 +7,13 @@ import uniffi.gemstone.GemPerpetualChartLayout
 import uniffi.gemstone.GemPerpetualChartLineKind
 import uniffi.gemstone.GemValueTone
 
-enum class ChartReferenceLineKind {
-    Entry,
-    Liquidation,
-    StopLoss,
-    TakeProfit,
-}
-
 enum class CandleDirection {
     Up,
     Down,
     Flat,
 }
 
-data class ChartReferenceLineUIModel(val kind: ChartReferenceLineKind, val price: Double, val overlapLevel: Int, val label: String)
+data class ChartReferenceLineUIModel(val kind: GemPerpetualChartLineKind, val price: Double, val overlapLevel: Int, val label: String)
 
 data class ChartAxisTick(val value: Double, val fraction: Float, val label: String)
 
@@ -51,7 +44,7 @@ data class CandlestickChartUIModel(
                 xGridlineFractions = buildXGridlineFractions(layout.xTickCount.toInt()),
                 referenceLines = layout.lines.map { line ->
                     ChartReferenceLineUIModel(
-                        kind = line.kind.referenceLineKind(),
+                        kind = line.kind,
                         price = line.price.value,
                         overlapLevel = line.overlapLevel.toInt(),
                         label = "${lineLabel(line.kind)} | ${line.price.text()}",
@@ -82,12 +75,5 @@ data class CandlestickChartUIModel(
                 -> CandleDirection.Flat
             },
         )
-
-        private fun GemPerpetualChartLineKind.referenceLineKind(): ChartReferenceLineKind = when (this) {
-            GemPerpetualChartLineKind.ENTRY -> ChartReferenceLineKind.Entry
-            GemPerpetualChartLineKind.LIQUIDATION -> ChartReferenceLineKind.Liquidation
-            GemPerpetualChartLineKind.STOP_LOSS -> ChartReferenceLineKind.StopLoss
-            GemPerpetualChartLineKind.TAKE_PROFIT -> ChartReferenceLineKind.TakeProfit
-        }
     }
 }

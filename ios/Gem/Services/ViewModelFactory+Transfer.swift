@@ -198,7 +198,7 @@ public extension ViewModelFactory {
     ) -> DelegationSceneViewModel {
         DelegationSceneViewModel(
             wallet: wallet,
-            model: DelegationViewModel(service: stakeService, delegation: delegation, asset: asset, formatter: .auto, currency: stakeService.getCurrency().toPrimitives()),
+            model: DelegationViewModel(delegation: delegation, asset: asset, currency: stakeService.getCurrency().toPrimitives()),
             asset: asset,
             service: stakeService,
             validators: validators,
