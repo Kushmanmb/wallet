@@ -148,7 +148,6 @@ fun FeeDetails(
             FeeDetailsPage.Details -> FeeRates(
                 feeItems = feeItems,
                 feeListItem = feeListItem,
-                selection = selection,
                 feeRateRows = model.feeRateModels().map { it.rowUIModel(context) },
                 customRow = if (model.supportsCustomFee) {
                     customFeeRowUIModel(context, model.customRate, selectedCustomRate?.let { currentFee.fiatAmount })
@@ -187,7 +186,6 @@ fun FeeDetails(
 private fun FeeRates(
     feeItems: List<ListItemModel>,
     feeListItem: ListItemModel?,
-    selection: FeeSelectionUIModel,
     feeRateRows: List<FeeRateRowUIModel>,
     customRow: FeeRateRowUIModel?,
     showsOptions: Boolean,
@@ -214,7 +212,6 @@ private fun FeeRates(
             itemsPositioned(feeRateRows, totalCount = totalCount) { position, row ->
                 FeeRow(
                     row = row,
-                    isSelected = selection.selectedPriority == row.priority,
                     position = position,
                     onClick = { row.priority?.let { onSelectPriority(it) } },
                 )
@@ -223,7 +220,6 @@ private fun FeeRates(
                 item {
                     FeeRow(
                         row = customRow,
-                        isSelected = selection.customRate != null,
                         position = ListPosition.getPosition(feeRateRows.size, totalCount),
                         onClick = onCustom,
                     )
@@ -357,11 +353,11 @@ private fun FeeSheetHeader(title: String, onBack: (() -> Unit)?, onConfirm: (() 
 }
 
 @Composable
-private fun FeeRow(row: FeeRateRowUIModel, isSelected: Boolean, position: ListPosition, onClick: () -> Unit) {
+private fun FeeRow(row: FeeRateRowUIModel, position: ListPosition, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier.clickable { onClick() },
         leading = {
-            EmojiCircle(row.emoji, listItemIconSize, isSelected)
+            EmojiCircle(row.emoji, listItemIconSize, row.isSelected)
         },
         title = {
             ListItemTitleText(row.model.title)

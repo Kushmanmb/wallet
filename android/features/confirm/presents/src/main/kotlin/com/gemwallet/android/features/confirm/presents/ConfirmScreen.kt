@@ -74,6 +74,7 @@ import com.gemwallet.android.ui.requestAuth
 import com.gemwallet.android.ui.theme.paddingDefault
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.ChainAddress
+import uniffi.gemstone.GemConfirmAction
 import uniffi.gemstone.GemConfirmPhase
 import uniffi.gemstone.SimulationResult
 
@@ -106,7 +107,7 @@ fun ConfirmScreen(
     val balanceChangeRows by viewModel.balanceChangeRows.collectAsStateWithLifecycle()
     val loadError by viewModel.loadError.collectAsStateWithLifecycle()
     val acquireRequest by viewModel.acquireRequest.collectAsStateWithLifecycle()
-    val feeValue by viewModel.feeValue.collectAsStateWithLifecycle()
+    val feeInfo by viewModel.feeInfo.collectAsStateWithLifecycle()
     val executeErrorText by viewModel.executeErrorText.collectAsStateWithLifecycle()
     val buttonLabel by viewModel.buttonLabel.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
@@ -163,8 +164,12 @@ fun ConfirmScreen(
                 title = buttonLabel,
                 state = buttonState,
                 onClick = {
-                    context.requestAuth(AuthRequest.Confirmation) {
-                        viewModel.send(finishAction)
+                    when (viewModel.action()) {
+                        GemConfirmAction.EXECUTE -> context.requestAuth(AuthRequest.Confirmation) {
+                            viewModel.send(finishAction)
+                        }
+
+                        GemConfirmAction.LOAD, null -> viewModel.send(finishAction)
                     }
                 },
             )
@@ -264,7 +269,7 @@ fun ConfirmScreen(
                     val onSelect: (() -> Unit)? = when {
                         verification != null -> viewModel::showVerification
 
-                        feeModel is FeeUIModel.FeeInfo -> {
+                        feeInfo != null && feeModel !is FeeUIModel.Unavailable -> {
                             { showSelectTxSpeed = true }
                         }
 
@@ -297,7 +302,7 @@ fun ConfirmScreen(
 
         FeeDetails(
             isVisible = showSelectTxSpeed,
-            currentFee = feeModel as? FeeUIModel.FeeInfo,
+            currentFee = feeInfo,
             feeItems = feeItems,
             feeListItem = feeListItem,
             selection = feeSelectionUIModel,

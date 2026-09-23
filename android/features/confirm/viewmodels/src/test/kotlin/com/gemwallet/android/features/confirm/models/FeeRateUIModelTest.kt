@@ -23,6 +23,7 @@ class FeeRateUIModelTest {
                 priority = FeePriority.Fast.toGem(),
                 fee = BigInteger("500000000000000000"),
                 value = GemLocalizedText.FeeRate(mockFormattedNumber(value = 2.5, unit = GemNumberUnit.Plain), FeeUnitType.GWEI),
+                isSelected = false,
             ),
             feeAsset = mockAssetPriceValue(mockAssetEthereum(), mockAssetPriceInfo(price = 1.0)),
         )
@@ -38,6 +39,7 @@ class FeeRateUIModelTest {
                 priority = FeePriority.Normal.toGem(),
                 fee = null,
                 value = GemLocalizedText.FeeRate(mockFormattedNumber(value = 1.0, unit = GemNumberUnit.Plain), FeeUnitType.NATIVE),
+                isSelected = false,
             ),
             feeAsset = mockAssetPriceValue(mockAssetEthereum()),
         )

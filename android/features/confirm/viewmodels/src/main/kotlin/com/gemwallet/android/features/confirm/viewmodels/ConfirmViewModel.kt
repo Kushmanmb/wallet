@@ -231,18 +231,6 @@ class ConfirmViewModel @Inject constructor(
     val showsFeeAssets = combine(feeAsset, feeAssets) { asset, assets -> showsFeeAssets(assets.map { it.asset.id.toIdentifier() }, asset?.asset?.id?.toIdentifier()) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    private val assetPrice = combine(transfer, content) { transfer, content -> transfer?.asset?.let { content?.assetPrice(it) } }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-    private val transferAmount = content.map { content ->
-        when (val amount = content?.load?.fee?.amount ?: return@map null) {
-            is GemTransferAmountResult.Amount -> amount.amount.value
-            is GemTransferAmountResult.Error -> null
-        }
-    }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
     val detailElements = combine(transfer, content, ::buildDetailElements)
         .distinctUntilChanged()
         .flowOn(ioDispatcher)
@@ -256,31 +244,27 @@ class ConfirmViewModel @Inject constructor(
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val feeUIModel = combine(content, screen) { content, screen ->
-        val fee = content?.load?.fee
-        when (val feeRow = screen.feeRow()) {
-            GemConfirmFeeRow.Loading -> FeeUIModel.Calculating
-
-            is GemConfirmFeeRow.Unavailable -> FeeUIModel.Unavailable(feeRow.text)
-
-            GemConfirmFeeRow.Ready -> if (content == null || fee == null) {
-                FeeUIModel.Calculating
-            } else {
-                FeeUIModel.FeeInfo(
-                    amount = fee.value,
-                    additionalFees = fee.additionalFees,
-                    feeAsset = content.feeAssetUIModel.asset,
-                    price = content.feeAssetUIModel.price?.price?.price,
-                    currency = content.currency,
-                    priority = fee.selectedPriority.toPrimitives(),
-                )
-            }
-        }
+    val feeInfo: StateFlow<FeeUIModel.FeeInfo?> = content.map { content ->
+        val fee = content?.load?.fee ?: return@map null
+        FeeUIModel.FeeInfo(
+            amount = fee.value,
+            additionalFees = fee.additionalFees,
+            feeAsset = content.feeAssetUIModel.asset,
+            price = content.feeAssetUIModel.price?.price?.price,
+            currency = content.currency,
+            priority = fee.selectedPriority.toPrimitives(),
+        )
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val feeValue = feeUIModel.map { (it as? FeeUIModel.FeeInfo)?.cryptoAmountWithFiat.orEmpty() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+    val feeUIModel = combine(feeInfo, screen) { feeInfo, screen ->
+        when (val feeRow = screen.feeRow()) {
+            GemConfirmFeeRow.Loading -> FeeUIModel.Calculating
+            is GemConfirmFeeRow.Unavailable -> FeeUIModel.Unavailable(feeRow.text)
+            GemConfirmFeeRow.Ready -> feeInfo ?: FeeUIModel.Calculating
+        }
+    }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val acquireRequestState = MutableStateFlow<AcquireAssetRequest?>(null)
     val acquireRequest = acquireRequestState.asStateFlow()
@@ -345,7 +329,7 @@ class ConfirmViewModel @Inject constructor(
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val feeItems: StateFlow<List<ListItemModel>> = feeUIModel.map { (it as? FeeUIModel.FeeInfo)?.feeItems(context).orEmpty() }
+    val feeItems: StateFlow<List<ListItemModel>> = feeInfo.map { it?.feeItems(context).orEmpty() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val balanceChangeRows: StateFlow<List<ListItemModel>> = simulation.map { it.balanceChanges.map { change -> change.listItem() } }
@@ -384,8 +368,7 @@ class ConfirmViewModel @Inject constructor(
     private fun changeFeeSelection(selection: GemConfirmFeeSelection) = loadOptions.update { it?.onFeeSelection(selection) }
 
     fun feeDetailsModel(currentFee: FeeUIModel.FeeInfo, feeAsset: FeeAssetUIModel): FeeDetailsModel? {
-        val options = loadOptions.value ?: return null
-        val rows = confirmation.value?.feeRateRows(options.feeSelection) ?: return null
+        val rows = confirmation.value?.feeRateRows() ?: return null
         return FeeDetailsModel(currentFee, feeAsset, rows)
     }
 
@@ -400,6 +383,8 @@ class ConfirmViewModel @Inject constructor(
         screen.update { it.onLoadStarted() }
         reload.tryEmit(Unit)
     }
+
+    fun action(): GemConfirmAction? = screen.value.action()
 
     fun send(finishAction: FinishConfirmAction) = viewModelScope.launch {
         when (screen.value.action()) {
@@ -465,7 +450,7 @@ class ConfirmViewModel @Inject constructor(
             toValue = swapData.quote.toValue,
             receiveAsset = toAsset.asset.toGem(),
             receivePrice = toAsset.price?.price?.price,
-            currency = (toAsset.price?.currency ?: Currency.USD).toGem(),
+            currency = content.currency.toGem(),
             isSelected = true,
         )
         val model = SwapDetailsUIModelFactory.create(
@@ -477,7 +462,7 @@ class ConfirmViewModel @Inject constructor(
                 slippageBps = swapData.quote.slippageBps,
                 selectedSlippage = swapData.quote.slippageBps,
                 isProviderSelectable = false,
-                priceImpact = fromAsset.swapValue(transfer.value)
+                priceImpact = fromAsset.swapValue(swapData.quote.fromValue)
                     .priceImpact(toAsset.swapValue(swapData.quote.toValue)),
             ),
         ) ?: return null

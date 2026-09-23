@@ -47,11 +47,13 @@ class FeeRateRowUIModelTest {
                 priority = FeePriority.Fast.toGem(),
                 fee = BigInteger("500000000000000000"),
                 value = GemLocalizedText.FeeRate(mockFormattedNumber(value = 2.5, unit = GemNumberUnit.Plain), FeeUnitType.GWEI),
+                isSelected = true,
             ),
             feeAsset = mockAssetPriceValue(mockAssetEthereum(), mockAssetPriceInfo(price = 1.0)),
         ).rowUIModel(context)
 
         assertEquals(FeePriority.Fast, model.priority)
+        assertEquals(true, model.isSelected)
         assertEquals("text", model.model.title)
         assertEquals("2.50 text", model.model.subtitle)
         assertEquals("$0.5", model.model.subtitleExtra)
