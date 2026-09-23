@@ -7,7 +7,7 @@ use crate::sql_types::{ChainRow, ScanProviderRow, ScanTypeRow};
 #[derive(Debug, Queryable, Selectable, Serialize, Deserialize, Clone)]
 #[diesel(table_name = crate::schema::scan_detections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct ScanDetectionRow {
+pub(crate) struct ScanDetectionRow {
     pub id: i32,
     pub scan_type: ScanTypeRow,
     pub chain: Option<ChainRow>,
@@ -19,7 +19,7 @@ pub struct ScanDetectionRow {
 }
 
 impl ScanDetectionRow {
-    pub fn as_primitive(self) -> ScanVerdict {
+    pub fn into_primitive(self) -> ScanVerdict {
         ScanVerdict {
             scan_type: self.scan_type.0,
             chain: self.chain.map(|chain| chain.0),
@@ -33,7 +33,7 @@ impl ScanDetectionRow {
 #[derive(Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::scan_detections)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct NewScanDetectionRow {
+pub(crate) struct NewScanDetectionRow {
     pub scan_type: ScanTypeRow,
     pub chain: Option<ChainRow>,
     pub target: String,

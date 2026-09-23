@@ -1,15 +1,16 @@
 use std::collections::HashMap;
+use std::slice;
 use std::time::Duration;
 
 use chrono::NaiveDateTime;
 use diesel::{prelude::*, upsert::excluded};
 use primitives::{Asset, AssetAssociation, AssetBasic, AssetFull, AssetId, AssetIdVecExt, AssetPriceMetadata};
 
-use crate::models::{AssetAssociationRow, AssetRow, NewAssetRow, PriceRow};
+use crate::models::{AssetAssociationRow, AssetRow, NewAssetRow};
 use crate::repositories::assets_links_repository::AssetsLinksRepository;
 use crate::repositories::perpetuals_repository::PerpetualsRepository;
-use crate::repositories::prices_repository::{AssetsWithPricesFilter, PricesRepository};
-use crate::repositories::tag_repository::TagRepository;
+use crate::repositories::prices_repository::primary_price_rows;
+use crate::repositories::tag_repository::asset_tag_ids;
 use crate::{DatabaseClient, DatabaseError, DieselResultExt};
 
 #[derive(Debug, Clone)]
@@ -49,6 +50,13 @@ pub enum AssetFilter {
     RankGt(i32),
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AssetSupply {
+    pub circulating: Option<f64>,
+    pub total: Option<f64>,
+    pub max: Option<f64>,
+}
+
 pub trait AssetsRepository {
     fn get_assets_all(&mut self) -> Result<Vec<AssetBasic>, DatabaseError>;
     fn add_assets(&mut self, values: Vec<AssetBasic>) -> Result<usize, DatabaseError>;
@@ -60,7 +68,7 @@ pub trait AssetsRepository {
     fn upsert_asset_associations(&mut self, id: &str, values: Vec<AssetAssociation>) -> Result<usize, DatabaseError>;
     fn get_asset_full(&mut self, asset_id: &AssetId, max_age: Duration) -> Result<AssetFull, DatabaseError>;
     fn get_assets(&mut self, asset_ids: Vec<AssetId>) -> Result<Vec<Asset>, DatabaseError>;
-    fn get_assets_rows(&mut self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetRow>, DatabaseError>;
+    fn get_assets_supply(&mut self, asset_ids: Vec<AssetId>) -> Result<Vec<(AssetId, AssetSupply)>, DatabaseError>;
     fn get_assets_basic(&mut self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetBasic>, DatabaseError>;
     fn get_assets_with_prices(&mut self, filters: Vec<AssetFilter>, max_age: Duration) -> Result<Vec<AssetPriceMetadata>, DatabaseError>;
     fn get_swap_assets(&mut self) -> Result<Vec<String>, DatabaseError>;
@@ -238,15 +246,12 @@ impl AssetsRepository for DatabaseClient {
     fn get_asset_full(&mut self, asset_id: &AssetId, max_age: Duration) -> Result<AssetFull, DatabaseError> {
         let id = asset_id.to_string();
         let asset = asset_row(self, &id).or_not_found(id.clone())?;
-        let price_row: Option<PriceRow> = PricesRepository::get_assets_with_prices(self, vec![AssetsWithPricesFilter::Ids(vec![asset_id.to_string()])], max_age)?
-            .into_iter()
-            .next()
-            .and_then(|d| d.price);
+        let price_row = primary_price_rows(self, slice::from_ref(asset_id), max_age)?.into_iter().next().map(|(_, row)| row);
         let market = price_row.as_ref().map(|x| x.as_market_primitive(&asset));
         let price = price_row.as_ref().map(|x| x.as_primitive());
         let links = self.get_asset_links(asset_id)?;
-        let associations = asset_associations(self, &id)?.into_iter().map(|x| x.as_primitive()).collect();
-        let tags = self.get_assets_tags_for_asset(asset_id)?.into_iter().map(|x| x.tag_id).collect();
+        let associations = asset_associations(self, &id)?.into_iter().map(AssetAssociationRow::into_primitive).collect();
+        let tags = asset_tag_ids(self, asset_id)?;
         let perpetuals = self.get_perpetuals_for_asset(asset_id)?;
         let perpetuals = perpetuals.into_iter().map(|x| x.as_basic()).collect();
 
@@ -267,8 +272,18 @@ impl AssetsRepository for DatabaseClient {
         Ok(asset_rows(self, asset_ids.ids())?.into_iter().map(|x| x.as_primitive()).collect())
     }
 
-    fn get_assets_rows(&mut self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetRow>, DatabaseError> {
-        Ok(asset_rows(self, asset_ids.ids())?)
+    fn get_assets_supply(&mut self, asset_ids: Vec<AssetId>) -> Result<Vec<(AssetId, AssetSupply)>, DatabaseError> {
+        Ok(asset_rows(self, asset_ids.ids())?
+            .into_iter()
+            .map(|asset| {
+                let supply = AssetSupply {
+                    circulating: asset.circulating_supply,
+                    total: asset.total_supply,
+                    max: asset.max_supply,
+                };
+                (asset.as_asset_id(), supply)
+            })
+            .collect())
     }
 
     fn get_assets_basic(&mut self, asset_ids: Vec<AssetId>) -> Result<Vec<AssetBasic>, DatabaseError> {
@@ -277,8 +292,7 @@ impl AssetsRepository for DatabaseClient {
 
     fn get_assets_with_prices(&mut self, filters: Vec<AssetFilter>, max_age: Duration) -> Result<Vec<AssetPriceMetadata>, DatabaseError> {
         let assets: Vec<AssetRow> = filter_assets(filters).select(AssetRow::as_select()).load(&mut self.connection)?;
-        let prices = self
-            .get_primary_prices(&assets.iter().map(|asset| asset.as_asset_id()).collect::<Vec<_>>(), max_age)?
+        let prices = primary_price_rows(self, &assets.iter().map(|asset| asset.as_asset_id()).collect::<Vec<_>>(), max_age)?
             .into_iter()
             .map(|(asset_id, price)| (asset_id, price.as_primitive()))
             .collect::<HashMap<_, _>>();

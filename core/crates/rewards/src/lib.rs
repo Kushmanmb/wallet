@@ -21,7 +21,7 @@ pub use ipapi::IpApiClient;
 pub use model::IpCheckResult;
 pub use redemption_service::{RedemptionAsset, RedemptionRequest, RedemptionResult, RedemptionService};
 pub use referral::{DeviceWallet, NewReferralVerification, Referral, ReferralUseFacts, ReferredRewards, new_referral_verification, referral_verification_delay};
-pub use risk_scoring::{NewRiskSignal, RiskResult, RiskScoreConfig, RiskScoringInput, RiskSignal, RiskSignalInput, evaluate_risk};
+pub use risk_scoring::{RiskResult, RiskScoreConfig, RiskScoringInput, RiskSignalInput, evaluate_risk};
 pub use summary::{available_redemption_options, invite_reward_points, offers_redemptions};
 pub use transfer_provider::{EvmClientProvider, WalletConfig};
 pub use transfer_redemption_service::TransferRedemptionService;

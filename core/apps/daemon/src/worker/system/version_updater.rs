@@ -1,7 +1,7 @@
 use gem_client::{ClientExt, ReqwestClient};
 use primitives::{GEM_ANDROID_PACKAGE_ID, GEM_IOS_BUNDLE_ID, PlatformStore, config::Release};
 use std::error::Error;
-use storage::{Database, DatabaseError, ReleasesRepository, models::ReleaseRow};
+use storage::{Database, DatabaseError, ReleasesRepository};
 
 use super::model::{FdroidPackageResponse, GitHubRepository, HuaweiStoreResponse, ITunesLookupResponse, SamsungStoreDetail, SolanaStoreRelease};
 use super::store_target::{HuaweiAppRequest, StoreTarget};
@@ -39,9 +39,9 @@ impl VersionUpdater {
         let release_version = version.clone();
         self.database
             .run(move |client| -> Result<(), DatabaseError> {
-                let current = client.get_releases()?.into_iter().find(|r| r.platform_store.0 == store).map(|r| r.version);
+                let current = client.get_releases()?.into_iter().find(|release| release.store == store).map(|release| release.version);
                 if current.as_ref() != Some(&release_version) {
-                    client.update_release(ReleaseRow::from_primitive(Release::new(store, release_version, false)))?;
+                    client.update_release(Release::new(store, release_version, false))?;
                 }
                 Ok(())
             })

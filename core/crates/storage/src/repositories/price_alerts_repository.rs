@@ -6,9 +6,9 @@ use diesel::prelude::*;
 use primitives::{AssetId, Device, DevicePriceAlert, PriceAlert, PriceAlerts, PriceData};
 
 use crate::models::{DeviceRow, PriceAlertRow};
-use crate::repositories::devices_repository::DevicesRepository;
+use crate::repositories::devices_repository::device_row;
 use crate::repositories::prices_repository::PricesRepository;
-use crate::{DatabaseClient, DatabaseError};
+use crate::{DatabaseClient, DatabaseError, DieselResultExt};
 
 pub trait PriceAlertsRepository {
     fn get_price_alerts(&mut self, after_notified_at: NaiveDateTime, max_age: Duration) -> Result<Vec<(PriceAlert, PriceData, Device)>, DatabaseError>;
@@ -35,7 +35,7 @@ impl PriceAlertsRepository for DatabaseClient {
             return Ok(vec![]);
         }
         let asset_ids: Vec<AssetId> = alerts.iter().map(|(a, _)| a.asset_id.0.clone()).collect::<HashSet<_>>().into_iter().collect();
-        let primary: HashMap<String, PriceData> = self.get_primary_prices(&asset_ids, max_age)?.into_iter().map(|(id, row)| (id.to_string(), row.as_price_data())).collect();
+        let primary: HashMap<String, PriceData> = self.get_primary_prices(&asset_ids, max_age)?.into_iter().map(|(id, price)| (id.to_string(), price)).collect();
         Ok(alerts
             .into_iter()
             .filter_map(|(alert, device)| primary.get(&alert.asset_id.to_string()).map(|price| (alert.as_primitive(), price.clone(), device.as_primitive())))
@@ -69,7 +69,7 @@ impl PriceAlertsRepository for DatabaseClient {
     }
 
     fn add_price_alerts(&mut self, device_id_value: &str, values: PriceAlerts) -> Result<usize, DatabaseError> {
-        let device = self.get_device_row(device_id_value)?;
+        let device = device_row(self, device_id_value).or_not_found(device_id_value.to_string())?;
         let rows = values.into_iter().map(|x| PriceAlertRow::new_price_alert(x, device.id)).collect::<Vec<_>>();
         use crate::schema::price_alerts::dsl::*;
         Ok(diesel::insert_into(price_alerts)
@@ -81,7 +81,7 @@ impl PriceAlertsRepository for DatabaseClient {
     }
 
     fn delete_price_alerts(&mut self, device_id_value: &str, ids: Vec<String>) -> Result<usize, DatabaseError> {
-        let device = self.get_device_row(device_id_value)?;
+        let device = device_row(self, device_id_value).or_not_found(device_id_value.to_string())?;
         use crate::schema::price_alerts::dsl::*;
         Ok(diesel::delete(price_alerts.filter(device_id.eq(device.id).and(identifier.eq_any(ids)))).execute(&mut self.connection)?)
     }

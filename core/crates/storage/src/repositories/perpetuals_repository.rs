@@ -8,9 +8,9 @@ use crate::{DatabaseClient, DatabaseError};
 pub trait PerpetualsRepository {
     fn get_perpetuals_for_asset(&mut self, asset_id: &AssetId) -> Result<Vec<Perpetual>, DatabaseError>;
 
-    fn perpetuals_update(&mut self, values: Vec<NewPerpetualRow>) -> Result<usize, DatabaseError>;
+    fn perpetuals_update(&mut self, values: Vec<Perpetual>) -> Result<usize, DatabaseError>;
 
-    fn get_perpetual_rows(&mut self) -> Result<Vec<PerpetualRow>, DatabaseError>;
+    fn get_perpetuals(&mut self) -> Result<Vec<Perpetual>, DatabaseError>;
 }
 
 impl PerpetualsRepository for DatabaseClient {
@@ -25,10 +25,11 @@ impl PerpetualsRepository for DatabaseClient {
             .collect())
     }
 
-    fn perpetuals_update(&mut self, values: Vec<NewPerpetualRow>) -> Result<usize, DatabaseError> {
+    fn perpetuals_update(&mut self, values: Vec<Perpetual>) -> Result<usize, DatabaseError> {
         if values.is_empty() {
             return Ok(0);
         }
+        let values = values.into_iter().map(NewPerpetualRow::from_primitive).collect::<Vec<_>>();
         Ok(diesel::insert_into(perpetuals::table)
             .values(&values)
             .on_conflict(perpetuals::id)
@@ -47,7 +48,8 @@ impl PerpetualsRepository for DatabaseClient {
             .execute(&mut self.connection)?)
     }
 
-    fn get_perpetual_rows(&mut self) -> Result<Vec<PerpetualRow>, DatabaseError> {
-        Ok(perpetuals::table.select(PerpetualRow::as_select()).load(&mut self.connection)?)
+    fn get_perpetuals(&mut self) -> Result<Vec<Perpetual>, DatabaseError> {
+        let rows = perpetuals::table.select(PerpetualRow::as_select()).load(&mut self.connection)?;
+        Ok(rows.iter().map(PerpetualRow::as_primitive).collect())
     }
 }

@@ -1,10 +1,8 @@
 use async_trait::async_trait;
 use services::prices::PriceClient;
-use std::collections::HashMap;
 use std::error::Error;
 use std::time::Duration;
-use storage::models::PriceRow;
-use storage::{AssetsRepository, Database, DatabaseError, PricesRepository};
+use storage::{Database, DatabaseError, PricesRepository};
 use streamer::{PricesPayload, consumer::MessageConsumer};
 
 #[derive(Clone, Copy)]
@@ -32,7 +30,7 @@ impl MessageConsumer<PricesPayload, usize> for StorePricesConsumer {
     }
 
     async fn process(&self, payload: PricesPayload) -> Result<usize, Box<dyn Error + Send + Sync>> {
-        let prices: Vec<PriceRow> = payload.prices.into_iter().map(PriceRow::from_price_data).collect();
+        let prices = payload.prices;
         let primary_price_max_age = self.config.primary_price_max_age;
         let (count, cache_entries) = self
             .database
@@ -42,19 +40,8 @@ impl MessageConsumer<PricesPayload, usize> for StorePricesConsumer {
                     return Ok((0, Vec::new()));
                 }
 
-                let primary_prices = client.get_primary_prices(&asset_ids, primary_price_max_age)?;
-                if primary_prices.is_empty() {
-                    return Ok((0, Vec::new()));
-                }
-
-                let count = primary_prices.len();
-                let primary_asset_ids: Vec<_> = primary_prices.iter().map(|(id, _)| id.clone()).collect();
-                let assets_by_id: HashMap<String, _> = client.get_assets_rows(primary_asset_ids)?.into_iter().map(|a| (a.id.clone(), a)).collect();
-                let cache_entries = primary_prices
-                    .into_iter()
-                    .filter_map(|(asset_id, price)| assets_by_id.get(&asset_id.to_string()).map(|asset| price.as_price_asset_info(asset)))
-                    .collect();
-                Ok((count, cache_entries))
+                let cache_entries = client.get_primary_price_infos(&asset_ids, primary_price_max_age)?;
+                Ok((cache_entries.len(), cache_entries))
             })
             .await?;
         if count == 0 {

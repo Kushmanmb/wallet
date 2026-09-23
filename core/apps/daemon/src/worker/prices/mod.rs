@@ -43,7 +43,7 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     let config = Arc::new(services.config());
     let producer_assets = services.stream_producer("prices_provider_assets", streamer::no_shutdown()).await?;
     let producer_prices = services.stream_producer("prices_provider_prices", streamer::no_shutdown()).await?;
-    let enabled_providers: Vec<PriceProvider> = database.run(|client| client.get_prices_providers()).await?.into_iter().filter(|p| p.enabled).map(|p| p.id.0).collect();
+    let enabled_providers: Vec<PriceProvider> = database.run(|client| client.get_prices_providers()).await?.into_iter().filter(|p| p.enabled).map(|p| p.provider).collect();
     let assets_providers: AssetsProviders = Arc::new(price_providers(&settings, enabled_providers.iter().copied()));
     let price_client = services.prices(cacher_client.clone());
     let markets_client = services.markets(cacher_client.clone());

@@ -22,8 +22,8 @@ impl MissingPricesPublisher {
         let asset_ids: Vec<AssetId> = self
             .database
             .run(|client| -> Result<Vec<AssetId>, DatabaseError> {
-                let ranks: Vec<(AssetId, i32)> = client.get_all_usage_ranks()?.into_iter().map(|row| (row.asset_id.0, row.usage_rank)).collect();
-                let priced: HashSet<AssetId> = client.get_prices_assets()?.into_iter().map(|row| row.asset_id.0).collect();
+                let ranks = client.get_all_usage_ranks()?;
+                let priced: HashSet<AssetId> = client.get_prices_asset_ids()?.into_iter().collect();
                 Ok(missing_assets(ranks, &priced).into_iter().take(MAX_ASSETS_PER_RUN).collect())
             })
             .await?;

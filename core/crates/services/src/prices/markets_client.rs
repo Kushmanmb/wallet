@@ -31,8 +31,8 @@ impl MarketsClient {
         let price_ids: Vec<String> = provider_price_ids.iter().map(|id| PriceId::id_for(provider, id)).collect();
         let lookup_price_ids = price_ids.clone();
         let assets = self.database.run(move |client| client.get_prices_assets_for_price_ids(lookup_price_ids)).await?;
-        let asset_map: HashMap<_, _> = assets.into_iter().map(|row| (row.price_id.to_string(), row.asset_id)).collect();
-        Ok(price_ids.into_iter().filter_map(|price_id| asset_map.get(&price_id).map(|asset_id| asset_id.0.clone())).collect())
+        let asset_map: HashMap<_, _> = assets.into_iter().map(|price_asset| (price_asset.price_id.to_string(), price_asset.asset_id)).collect();
+        Ok(price_ids.into_iter().filter_map(|price_id| asset_map.get(&price_id).cloned()).collect())
     }
 
     pub async fn set_asset_ids_for_tag(&self, tag: AssetTag, asset_ids: Vec<AssetId>) -> Result<usize, Box<dyn Error + Send + Sync>> {
@@ -57,6 +57,6 @@ impl MarketsClient {
     }
 
     fn asset_ids_for_tag(client: &mut DatabaseClient, tag: AssetTag) -> Result<Vec<AssetId>, DatabaseError> {
-        Ok(client.get_assets_tags_for_tag(tag.as_ref())?.into_iter().map(|x| x.asset_id.0).collect())
+        client.get_asset_ids_for_tag(tag.as_ref())
     }
 }

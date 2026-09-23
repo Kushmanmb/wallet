@@ -23,7 +23,7 @@ impl ScanDetectionsRepository for DatabaseClient {
             .select(ScanDetectionRow::as_select())
             .load(&mut self.connection)?
             .into_iter()
-            .map(|row| row.as_primitive())
+            .map(ScanDetectionRow::into_primitive)
             .collect())
     }
 

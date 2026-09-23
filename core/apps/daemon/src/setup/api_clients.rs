@@ -1,6 +1,5 @@
 use primitives::{FiatProviderName, WebhookKind};
-use storage::ApiClientScope;
-use storage::models::{ApiClientGrant, ApiClientResource};
+use storage::{ApiClientGrant, ApiClientResource, ApiClientScope};
 
 pub const SETUP_DEV_API_CLIENT_NAME: &str = "test";
 pub const SETUP_DEV_API_CLIENT_SECRET: &str = "00000000-0000-0000-0000-000000000000";

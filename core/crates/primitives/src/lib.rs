@@ -211,10 +211,12 @@ pub use self::nft::{NFTAsset, NFTAssetData, NFTAssetId, NFTAttribute, NFTAttribu
 pub mod price_alert;
 pub use self::price_alert::{DevicePriceAlert, PriceAlert, PriceAlertData, PriceAlertDirection, PriceAlertNotificationType, PriceAlertType, PriceAlerts};
 pub mod rewards;
+pub mod risk_signal;
 pub use self::rewards::{
     RedemptionResult, RedemptionStatus, ReferralAllowance, ReferralCode, ReferralLeader, ReferralLeaderboard, ReferralQuota, RewardEvent, RewardEventType, RewardLevel, RewardRedemption, RewardRedemptionOption, RewardRedemptionType,
     RewardStatus, Rewards,
 };
+pub use self::risk_signal::{NewRiskSignal, RiskSignal};
 pub mod tag;
 pub use self::tag::AssetTag;
 pub mod chain_cosmos;

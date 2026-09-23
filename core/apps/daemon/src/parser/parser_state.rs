@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use primitives::Chain;
-use storage::{Database, ParserStateRepository, models::ParserStateRow};
+use storage::{Database, ParserState, ParserStateRepository};
 
 pub struct ParserStateService {
     chain: Chain,
@@ -13,7 +13,7 @@ impl ParserStateService {
         Self { chain, database }
     }
 
-    pub async fn get_state(&self) -> Result<ParserStateRow, Box<dyn Error + Send + Sync>> {
+    pub async fn get_state(&self) -> Result<ParserState, Box<dyn Error + Send + Sync>> {
         let chain = self.chain;
         Ok(self.database.run(move |client| client.get_parser_state(chain)).await?)
     }

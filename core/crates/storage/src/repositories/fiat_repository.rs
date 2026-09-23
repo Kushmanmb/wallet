@@ -4,7 +4,9 @@ use diesel::dsl::count_star;
 use diesel::prelude::*;
 use diesel::upsert::excluded;
 use primitives::currency::Currency;
-use primitives::{AssetId, FiatProviderCountry, FiatProviderName, FiatRate, FiatTransaction, FiatTransactionUpdate};
+use std::collections::HashSet;
+
+use primitives::{AssetId, FiatAsset, FiatProvider, FiatProviderCountry, FiatProviderName, FiatQuoteType, FiatRate, FiatRateProvider, FiatTransaction, FiatTransactionStatus, FiatTransactionUpdate};
 
 use crate::models::*;
 use crate::schema::fiat_providers;
@@ -24,47 +26,57 @@ pub enum FiatAssetFilter {
     ProviderSellEnabled(bool),
 }
 
-#[derive(Debug, Clone)]
-pub enum FiatAssetUpdate {
-    IsEnabled(bool),
-    IsEnabledByProvider(bool),
-    IsBuyEnabled(bool),
-    IsSellEnabled(bool),
+#[derive(Debug, Clone, PartialEq)]
+pub struct FiatTransactionRecord {
+    pub wallet_id: i32,
+    pub asset_id: AssetId,
+    pub transaction_type: FiatQuoteType,
+    pub provider: FiatProviderName,
+    pub provider_transaction_id: Option<String>,
+    pub status: FiatTransactionStatus,
+    pub value: Option<String>,
+    pub transaction_hash: Option<String>,
+    pub quote_id: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum FiatProviderCountryFilter {
-    Provider(FiatProviderName),
-    IsAllowed(bool),
-}
-
-#[derive(Debug, Clone)]
-pub enum FiatProviderCountryUpdate {
-    IsAllowed(bool),
+impl FiatTransactionRecord {
+    fn from_row(row: FiatTransactionRow) -> Self {
+        Self {
+            wallet_id: row.wallet_id,
+            asset_id: row.asset_id.0,
+            transaction_type: row.transaction_type.0,
+            provider: row.provider_id.0,
+            provider_transaction_id: row.provider_transaction_id,
+            status: row.status.0,
+            value: row.value,
+            transaction_hash: row.transaction_hash,
+            quote_id: row.quote_id,
+        }
+    }
 }
 
 pub trait FiatRepository {
-    fn add_fiat_assets(&mut self, values: Vec<crate::models::FiatAssetRow>) -> Result<usize, DatabaseError>;
-    fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetUpdate>) -> Result<usize, DatabaseError>;
-    fn add_fiat_providers(&mut self, values: Vec<crate::models::FiatProviderRow>) -> Result<usize, DatabaseError>;
-    fn add_fiat_providers_countries(&mut self, values: Vec<crate::models::FiatProviderCountryRow>) -> Result<usize, DatabaseError>;
-    fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryUpdate>) -> Result<usize, DatabaseError>;
+    fn add_fiat_assets(&mut self, values: Vec<FiatAsset>) -> Result<usize, DatabaseError>;
+    fn sync_fiat_assets(&mut self, provider: FiatProviderName, values: Vec<FiatAsset>) -> Result<usize, DatabaseError>;
+    fn add_fiat_providers(&mut self, providers: Vec<FiatProviderName>) -> Result<usize, DatabaseError>;
+    fn add_fiat_providers_countries(&mut self, values: Vec<FiatProviderCountry>) -> Result<usize, DatabaseError>;
+    fn sync_fiat_providers_countries(&mut self, provider: FiatProviderName, values: Vec<FiatProviderCountry>) -> Result<usize, DatabaseError>;
     fn get_fiat_providers_countries(&mut self) -> Result<Vec<FiatProviderCountry>, DatabaseError>;
-    fn get_fiat_providers_countries_by_filter(&mut self, filters: Vec<FiatProviderCountryFilter>) -> Result<Vec<crate::models::FiatProviderCountryRow>, DatabaseError>;
     fn get_fiat_transactions_by_device_id(&mut self, device_id: i32) -> Result<Vec<FiatTransaction>, DatabaseError>;
     fn get_fiat_transactions_by_device_and_wallet_id(&mut self, device_id: i32, wallet_id: i32) -> Result<Vec<FiatTransaction>, DatabaseError>;
     fn count_fiat_transactions_by_device_and_wallet_id(&mut self, device_id: i32, wallet_id: i32) -> Result<i64, DatabaseError>;
-    fn get_fiat_assets_by_filter(&mut self, filters: Vec<FiatAssetFilter>) -> Result<Vec<crate::models::FiatAssetRow>, DatabaseError>;
+    fn get_fiat_asset_ids_by_filter(&mut self, filters: Vec<FiatAssetFilter>) -> Result<Vec<AssetId>, DatabaseError>;
     fn get_fiat_assets_popular(&mut self, from: NaiveDateTime, limit: i64) -> Result<Vec<AssetId>, DatabaseError>;
-    fn get_fiat_assets_for_asset_id(&mut self, asset_id: &AssetId) -> Result<Vec<crate::models::FiatAssetRow>, DatabaseError>;
-    fn set_fiat_rates(&mut self, rates: Vec<crate::models::FiatRateRow>) -> Result<usize, DatabaseError>;
+    fn get_fiat_assets_for_asset_id(&mut self, asset_id: &AssetId) -> Result<Vec<FiatAsset>, DatabaseError>;
+    fn set_fiat_rates(&mut self, provider: FiatRateProvider, rates: Vec<FiatRate>) -> Result<usize, DatabaseError>;
+    fn set_fiat_rates_enabled(&mut self, currencies: Vec<Currency>, enabled: bool) -> Result<usize, DatabaseError>;
     fn get_fiat_rates(&mut self) -> Result<Vec<FiatRate>, DatabaseError>;
     fn get_fiat_rate(&mut self, currency: &Currency) -> Result<FiatRate, DatabaseError>;
-    fn get_fiat_providers(&mut self) -> Result<Vec<crate::models::FiatProviderRow>, DatabaseError>;
+    fn get_fiat_providers(&mut self) -> Result<Vec<FiatProvider>, DatabaseError>;
     fn update_fiat_provider_payment_methods(&mut self, provider_id: FiatProviderName, values: serde_json::Value) -> Result<usize, DatabaseError>;
-    fn update_fiat_transaction(&mut self, provider: FiatProviderName, update: FiatTransactionUpdate) -> Result<FiatTransactionRow, DatabaseError>;
-    fn get_fiat_transaction(&mut self, provider: FiatProviderName, transaction_id: &str) -> Result<Option<FiatTransactionRow>, DatabaseError>;
-    fn add_fiat_transaction(&mut self, transaction: NewFiatTransactionRow) -> Result<usize, DatabaseError>;
+    fn update_fiat_transaction(&mut self, provider: FiatProviderName, update: FiatTransactionUpdate) -> Result<FiatTransactionRecord, DatabaseError>;
+    fn get_fiat_transaction(&mut self, provider: FiatProviderName, transaction_id: &str) -> Result<Option<FiatTransactionRecord>, DatabaseError>;
+    fn add_fiat_transaction(&mut self, transaction: FiatTransaction, device_id: i32, wallet_id: i32, address_id: i32) -> Result<usize, DatabaseError>;
 }
 
 fn add_fiat_assets(client: &mut DatabaseClient, values: Vec<FiatAssetRow>) -> Result<usize, diesel::result::Error> {
@@ -216,59 +228,47 @@ fn update_fiat_transaction_by_id(client: &mut DatabaseClient, transaction_id: i3
 }
 
 impl FiatRepository for DatabaseClient {
-    fn add_fiat_assets(&mut self, values: Vec<crate::models::FiatAssetRow>) -> Result<usize, DatabaseError> {
-        Ok(add_fiat_assets(self, values)?)
+    fn add_fiat_assets(&mut self, values: Vec<FiatAsset>) -> Result<usize, DatabaseError> {
+        let rows = values.into_iter().map(FiatAssetRow::from_primitive).collect::<Result<Vec<_>, _>>()?;
+        Ok(add_fiat_assets(self, rows)?)
     }
 
-    fn update_fiat_assets(&mut self, asset_ids: Vec<String>, updates: Vec<FiatAssetUpdate>) -> Result<usize, DatabaseError> {
-        if asset_ids.is_empty() || updates.is_empty() {
-            return Ok(0);
-        }
+    fn sync_fiat_assets(&mut self, provider_name: FiatProviderName, values: Vec<FiatAsset>) -> Result<usize, DatabaseError> {
         use crate::schema::fiat_assets::dsl::*;
-        Ok(updates.into_iter().try_fold(0, |total, update| {
-            let target = fiat_assets.filter(id.eq_any(&asset_ids));
-            let updated = match update {
-                FiatAssetUpdate::IsEnabled(value) => diesel::update(target).set(is_enabled.eq(value)).execute(&mut self.connection)?,
-                FiatAssetUpdate::IsEnabledByProvider(value) => diesel::update(target).set(is_enabled_by_provider.eq(value)).execute(&mut self.connection)?,
-                FiatAssetUpdate::IsBuyEnabled(value) => diesel::update(target).set(is_buy_enabled.eq(value)).execute(&mut self.connection)?,
-                FiatAssetUpdate::IsSellEnabled(value) => diesel::update(target).set(is_sell_enabled.eq(value)).execute(&mut self.connection)?,
-            };
-            Ok::<_, diesel::result::Error>(total + updated)
-        })?)
-    }
-
-    fn add_fiat_providers(&mut self, values: Vec<crate::models::FiatProviderRow>) -> Result<usize, DatabaseError> {
-        Ok(add_fiat_providers(self, values)?)
-    }
-
-    fn add_fiat_providers_countries(&mut self, values: Vec<crate::models::FiatProviderCountryRow>) -> Result<usize, DatabaseError> {
-        Ok(add_fiat_providers_countries(self, values)?)
-    }
-
-    fn update_fiat_providers_countries(&mut self, country_ids: Vec<String>, updates: Vec<FiatProviderCountryUpdate>) -> Result<usize, DatabaseError> {
-        if country_ids.is_empty() || updates.is_empty() {
+        let rows = values.into_iter().map(FiatAssetRow::from_primitive).collect::<Result<Vec<_>, _>>()?;
+        if rows.is_empty() {
             return Ok(0);
         }
-        use crate::schema::fiat_providers_countries::dsl::*;
-        Ok(updates.into_iter().try_fold(0, |total, update| {
-            let target = fiat_providers_countries.filter(id.eq_any(&country_ids));
-            let updated = match update {
-                FiatProviderCountryUpdate::IsAllowed(value) => diesel::update(target).set(is_allowed.eq(value)).execute(&mut self.connection)?,
-            };
-            Ok::<_, diesel::result::Error>(total + updated)
-        })?)
+        let ids: Vec<String> = rows.iter().map(|row| row.id.clone()).collect();
+        add_fiat_assets(self, rows)?;
+        Ok(
+            diesel::update(fiat_assets.filter(provider.eq(FiatProviderNameRow::from(provider_name))).filter(is_enabled_by_provider.eq(true)).filter(id.ne_all(ids)))
+                .set(is_enabled_by_provider.eq(false))
+                .execute(&mut self.connection)?,
+        )
     }
 
-    fn get_fiat_providers_countries_by_filter(&mut self, filters: Vec<FiatProviderCountryFilter>) -> Result<Vec<crate::models::FiatProviderCountryRow>, DatabaseError> {
+    fn add_fiat_providers(&mut self, providers: Vec<FiatProviderName>) -> Result<usize, DatabaseError> {
+        Ok(add_fiat_providers(self, providers.into_iter().map(FiatProviderRow::from_primitive).collect())?)
+    }
+
+    fn add_fiat_providers_countries(&mut self, values: Vec<FiatProviderCountry>) -> Result<usize, DatabaseError> {
+        Ok(add_fiat_providers_countries(self, values.into_iter().map(FiatProviderCountryRow::from_primitive).collect())?)
+    }
+
+    fn sync_fiat_providers_countries(&mut self, provider_name: FiatProviderName, values: Vec<FiatProviderCountry>) -> Result<usize, DatabaseError> {
         use crate::schema::fiat_providers_countries::dsl::*;
-        let mut query = fiat_providers_countries.into_boxed();
-        for filter in filters {
-            query = match filter {
-                FiatProviderCountryFilter::Provider(value) => query.filter(provider.eq(FiatProviderNameRow::from(value))),
-                FiatProviderCountryFilter::IsAllowed(value) => query.filter(is_allowed.eq(value)),
-            };
+        let rows: Vec<FiatProviderCountryRow> = values.into_iter().map(FiatProviderCountryRow::from_primitive).collect();
+        if rows.is_empty() {
+            return Ok(0);
         }
-        Ok(query.select(FiatProviderCountryRow::as_select()).load(&mut self.connection)?)
+        let ids: Vec<String> = rows.iter().map(|row| row.id.clone()).collect();
+        add_fiat_providers_countries(self, rows)?;
+        Ok(
+            diesel::update(fiat_providers_countries.filter(provider.eq(FiatProviderNameRow::from(provider_name))).filter(is_allowed.eq(true)).filter(id.ne_all(ids)))
+                .set(is_allowed.eq(false))
+                .execute(&mut self.connection)?,
+        )
     }
 
     fn get_fiat_providers_countries(&mut self) -> Result<Vec<FiatProviderCountry>, DatabaseError> {
@@ -296,7 +296,7 @@ impl FiatRepository for DatabaseClient {
             .get_result(&mut self.connection)?)
     }
 
-    fn get_fiat_assets_by_filter(&mut self, filters: Vec<FiatAssetFilter>) -> Result<Vec<crate::models::FiatAssetRow>, DatabaseError> {
+    fn get_fiat_asset_ids_by_filter(&mut self, filters: Vec<FiatAssetFilter>) -> Result<Vec<AssetId>, DatabaseError> {
         use crate::schema::{fiat_assets, fiat_providers};
 
         let mut query = fiat_assets::table.inner_join(fiat_providers::table).into_boxed();
@@ -315,19 +315,26 @@ impl FiatRepository for DatabaseClient {
             };
         }
 
-        Ok(query.select(FiatAssetRow::as_select()).distinct().order(fiat_assets::asset_id.asc()).load(&mut self.connection)?)
+        let rows: Vec<FiatAssetRow> = query.select(FiatAssetRow::as_select()).distinct().order(fiat_assets::asset_id.asc()).load(&mut self.connection)?;
+        Ok(rows.into_iter().filter_map(|row| row.asset_id.map(|value| value.0)).collect::<HashSet<_>>().into_iter().collect())
     }
 
     fn get_fiat_assets_popular(&mut self, from: NaiveDateTime, limit: i64) -> Result<Vec<AssetId>, DatabaseError> {
         Ok(get_fiat_assets_popular(self, from, limit)?.into_iter().map(Into::into).collect())
     }
 
-    fn get_fiat_assets_for_asset_id(&mut self, asset_id: &AssetId) -> Result<Vec<crate::models::FiatAssetRow>, DatabaseError> {
-        Ok(get_fiat_assets_for_asset_id(self, &asset_id.to_string())?)
+    fn get_fiat_assets_for_asset_id(&mut self, asset_id: &AssetId) -> Result<Vec<FiatAsset>, DatabaseError> {
+        Ok(get_fiat_assets_for_asset_id(self, &asset_id.to_string())?.iter().map(FiatAssetRow::as_primitive).collect())
     }
 
-    fn set_fiat_rates(&mut self, rates: Vec<crate::models::FiatRateRow>) -> Result<usize, DatabaseError> {
-        Ok(set_fiat_rates(self, rates)?)
+    fn set_fiat_rates(&mut self, provider: FiatRateProvider, rates: Vec<FiatRate>) -> Result<usize, DatabaseError> {
+        Ok(set_fiat_rates(self, rates.into_iter().map(|rate| FiatRateRow::from_primitive(rate, provider)).collect())?)
+    }
+
+    fn set_fiat_rates_enabled(&mut self, currencies: Vec<Currency>, enabled: bool) -> Result<usize, DatabaseError> {
+        use crate::schema::fiat_rates::dsl::*;
+        let currencies: Vec<CurrencyRow> = currencies.into_iter().map(CurrencyRow).collect();
+        Ok(diesel::update(fiat_rates.filter(id.eq_any(currencies))).set(is_enabled.eq(enabled)).execute(&mut self.connection)?)
     }
 
     fn get_fiat_rates(&mut self) -> Result<Vec<FiatRate>, DatabaseError> {
@@ -340,9 +347,10 @@ impl FiatRepository for DatabaseClient {
         Ok(result.as_primitive())
     }
 
-    fn get_fiat_providers(&mut self) -> Result<Vec<crate::models::FiatProviderRow>, DatabaseError> {
+    fn get_fiat_providers(&mut self) -> Result<Vec<FiatProvider>, DatabaseError> {
         use crate::schema::fiat_providers::dsl::*;
-        Ok(fiat_providers.select(FiatProviderRow::as_select()).load(&mut self.connection)?)
+        let rows = fiat_providers.select(FiatProviderRow::as_select()).load(&mut self.connection)?;
+        Ok(rows.iter().map(FiatProviderRow::as_primitive).collect())
     }
 
     fn update_fiat_provider_payment_methods(&mut self, provider_id_value: FiatProviderName, values: serde_json::Value) -> Result<usize, DatabaseError> {
@@ -352,51 +360,130 @@ impl FiatRepository for DatabaseClient {
             .execute(&mut self.connection)?)
     }
 
-    fn update_fiat_transaction(&mut self, provider: FiatProviderName, update: FiatTransactionUpdate) -> Result<FiatTransactionRow, DatabaseError> {
-        use crate::schema::fiat_transactions::dsl::*;
-
-        let provider = FiatProviderNameRow::from(provider);
-        let changeset = UpdateFiatTransactionRow::from_primitive(&update);
-
-        if let Some(row) = update_by_provider_transaction_id(self, &provider, &update.transaction_id, &changeset)? {
-            return Ok(row);
-        }
-
-        Ok(match update.provider_transaction_id.as_deref() {
-            Some(provider_transaction_id_value) => {
-                if let Some(row) = update_by_provider_transaction_id(self, &provider, provider_transaction_id_value, &changeset)? {
-                    return Ok(row);
-                }
-                if let Some(row) = update_by_quote_id(self, &provider, &update.transaction_id, provider_transaction_id_value, &changeset)? {
-                    return Ok(row);
-                }
-                let existing = get_fiat_transaction_for_quote(self, &provider, &update.transaction_id)?.ok_or(diesel::result::Error::NotFound)?;
-                let new_row = NewFiatTransactionRow::from_existing(&existing, &update, provider_transaction_id_value.to_string());
-                diesel::insert_into(fiat_transactions).values(&new_row).returning(FiatTransactionRow::as_returning()).get_result(&mut self.connection)
-            }
-            None => {
-                let existing = get_fiat_transaction_for_quote(self, &provider, &update.transaction_id)?.ok_or(diesel::result::Error::NotFound)?;
-                update_fiat_transaction_by_id(self, existing.id, changeset)
-            }
-        }?)
+    fn update_fiat_transaction(&mut self, provider: FiatProviderName, update: FiatTransactionUpdate) -> Result<FiatTransactionRecord, DatabaseError> {
+        Ok(FiatTransactionRecord::from_row(update_fiat_transaction(self, provider, update)?))
     }
 
-    fn get_fiat_transaction(&mut self, provider: FiatProviderName, transaction_id: &str) -> Result<Option<FiatTransactionRow>, DatabaseError> {
+    fn get_fiat_transaction(&mut self, provider: FiatProviderName, transaction_id: &str) -> Result<Option<FiatTransactionRecord>, DatabaseError> {
         use crate::schema::fiat_transactions::dsl::*;
 
         let provider = FiatProviderNameRow::from(provider);
-        Ok(fiat_transactions
+        let row = fiat_transactions
             .filter(provider_id.eq(&provider))
             .filter(provider_transaction_id.eq(transaction_id).or(quote_id.eq(transaction_id)))
             .order((updated_at.desc(), id.desc()))
             .select(FiatTransactionRow::as_select())
             .first(&mut self.connection)
-            .optional()?)
+            .optional()?;
+        Ok(row.map(FiatTransactionRecord::from_row))
     }
 
-    fn add_fiat_transaction(&mut self, transaction: NewFiatTransactionRow) -> Result<usize, DatabaseError> {
+    fn add_fiat_transaction(&mut self, transaction: FiatTransaction, device_id_value: i32, wallet_id_value: i32, address_id_value: i32) -> Result<usize, DatabaseError> {
         use crate::schema::fiat_transactions::dsl::*;
 
+        let transaction = NewFiatTransactionRow::new(transaction, device_id_value, wallet_id_value, address_id_value);
         Ok(diesel::insert_into(fiat_transactions).values(&transaction).on_conflict_do_nothing().execute(&mut self.connection)?)
+    }
+}
+
+fn update_fiat_transaction(client: &mut DatabaseClient, provider: FiatProviderName, update: FiatTransactionUpdate) -> Result<FiatTransactionRow, DatabaseError> {
+    use crate::schema::fiat_transactions::dsl::*;
+
+    let provider = FiatProviderNameRow::from(provider);
+    let changeset = UpdateFiatTransactionRow::from_primitive(&update);
+
+    if let Some(row) = update_by_provider_transaction_id(client, &provider, &update.transaction_id, &changeset)? {
+        return Ok(row);
+    }
+
+    Ok(match update.provider_transaction_id.as_deref() {
+        Some(provider_transaction_id_value) => {
+            if let Some(row) = update_by_provider_transaction_id(client, &provider, provider_transaction_id_value, &changeset)? {
+                return Ok(row);
+            }
+            if let Some(row) = update_by_quote_id(client, &provider, &update.transaction_id, provider_transaction_id_value, &changeset)? {
+                return Ok(row);
+            }
+            let existing = get_fiat_transaction_for_quote(client, &provider, &update.transaction_id)?.ok_or(diesel::result::Error::NotFound)?;
+            let new_row = NewFiatTransactionRow::from_existing(&existing, &update, provider_transaction_id_value.to_string());
+            diesel::insert_into(fiat_transactions).values(&new_row).returning(FiatTransactionRow::as_returning()).get_result(&mut client.connection)
+        }
+        None => {
+            let existing = get_fiat_transaction_for_quote(client, &provider, &update.transaction_id)?.ok_or(diesel::result::Error::NotFound)?;
+            update_fiat_transaction_by_id(client, existing.id, changeset)
+        }
+    }?)
+}
+
+#[cfg(all(test, feature = "database_integration_tests"))]
+mod database_integration_tests {
+    use primitives::{Asset, AssetId, Chain, FiatAsset, FiatProviderCountry, FiatProviderName};
+
+    use crate::{AssetsRepository, ChainsRepository, Database, DatabaseError, FiatRepository};
+
+    const PROVIDER: FiatProviderName = FiatProviderName::MoonPay;
+
+    fn fiat_asset(code: &str) -> FiatAsset {
+        FiatAsset {
+            id: code.to_string(),
+            asset_id: Some(AssetId::from_chain(Chain::Ethereum)),
+            provider: PROVIDER,
+            symbol: "ETH".to_string(),
+            network: None,
+            token_id: None,
+            enabled: true,
+            is_buy_enabled: true,
+            is_sell_enabled: true,
+            unsupported_countries: Default::default(),
+            buy_limits: vec![],
+            sell_limits: vec![],
+        }
+    }
+
+    fn country(alpha2: &str) -> FiatProviderCountry {
+        FiatProviderCountry {
+            provider: PROVIDER,
+            alpha2: alpha2.to_string(),
+            is_allowed: true,
+        }
+    }
+
+    #[tokio::test]
+    async fn test_sync_fiat_assets_disables_missing_assets() {
+        let database = Database::mock();
+        let assets = database
+            .run(|client| -> Result<_, DatabaseError> {
+                client.add_chains(vec![Chain::Ethereum])?;
+                client.add_assets(vec![Asset::from_chain(Chain::Ethereum).as_basic_primitive()])?;
+                client.add_fiat_providers(vec![PROVIDER])?;
+                client.sync_fiat_assets(PROVIDER, vec![fiat_asset("test_keep"), fiat_asset("test_drop")])?;
+                client.sync_fiat_assets(PROVIDER, vec![fiat_asset("test_keep")])?;
+                client.get_fiat_assets_for_asset_id(&AssetId::from_chain(Chain::Ethereum))
+            })
+            .await
+            .unwrap();
+
+        let enabled = |code: &str| assets.iter().find(|asset| asset.provider == PROVIDER && asset.id == code).map(|asset| asset.enabled);
+        assert_eq!(enabled("test_keep"), Some(true));
+        assert_eq!(enabled("test_drop"), Some(false));
+        assert_eq!(database.run(|client| client.sync_fiat_assets(PROVIDER, vec![])).await.unwrap(), 0);
+    }
+
+    #[tokio::test]
+    async fn test_sync_fiat_providers_countries_disallows_missing_countries() {
+        let database = Database::mock();
+        let countries = database
+            .run(|client| -> Result<_, DatabaseError> {
+                client.add_fiat_providers(vec![PROVIDER])?;
+                client.sync_fiat_providers_countries(PROVIDER, vec![country("XA"), country("XB")])?;
+                client.sync_fiat_providers_countries(PROVIDER, vec![country("XA")])?;
+                client.get_fiat_providers_countries()
+            })
+            .await
+            .unwrap();
+
+        let allowed = |alpha2: &str| countries.iter().find(|country| country.provider == PROVIDER && country.alpha2 == alpha2).map(|country| country.is_allowed);
+        assert_eq!(allowed("XA"), Some(true));
+        assert_eq!(allowed("XB"), Some(false));
     }
 }

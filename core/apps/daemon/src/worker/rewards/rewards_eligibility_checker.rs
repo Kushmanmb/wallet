@@ -27,13 +27,7 @@ impl RewardsEligibilityChecker {
             transactions_required: self.config.get_i64(ConfigKey::RewardsEligibilityTransactionsCount).await?,
         };
 
-        let usernames = self
-            .database
-            .run(|client| client.get_rewards_by_filter(vec![RewardsFilter::Statuses(vec![RewardStatus::Unverified])]))
-            .await?
-            .into_iter()
-            .map(|reward| reward.username)
-            .collect::<Vec<_>>();
+        let usernames = self.database.run(|client| client.get_usernames_by_filter(vec![RewardsFilter::Statuses(vec![RewardStatus::Unverified])])).await?;
         let mut promoted = 0;
 
         for username in usernames {

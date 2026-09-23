@@ -3,7 +3,6 @@ use std::error::Error;
 use std::time::Duration;
 
 use chrono::Utc;
-use storage::models::SubscriptionAddressExcludeRow;
 use storage::{Database, DatabaseError, TransactionsRepository, WalletsRepository};
 
 #[derive(Clone)]
@@ -38,14 +37,7 @@ impl TransactionCleanup {
                     return Ok(HashMap::new());
                 }
 
-                let subscriptions_exclude: Vec<_> = heavy_addresses
-                    .iter()
-                    .map(|x| SubscriptionAddressExcludeRow {
-                        address: x.address.clone(),
-                        chain: x.chain_id.clone(),
-                    })
-                    .collect();
-                client.add_subscriptions_exclude_addresses(subscriptions_exclude)?;
+                client.add_subscriptions_exclude_addresses(heavy_addresses.clone())?;
 
                 let total_addresses = heavy_addresses.len();
 

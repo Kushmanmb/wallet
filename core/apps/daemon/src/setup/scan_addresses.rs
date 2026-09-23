@@ -62,7 +62,11 @@ pub async fn setup_scan_addresses(database: &Database) -> Result<(), Box<dyn Err
     let inserted = database
         .run(move |client| -> Result<_, DatabaseError> {
             let addresses = values.keys().map(|(_, address)| address.clone()).collect();
-            let existing = client.get_scan_addresses_by_addresses(addresses)?.into_iter().map(|row| (row.chain.0, row.address)).collect::<HashSet<_>>();
+            let existing = client
+                .get_scan_addresses_by_addresses(addresses)?
+                .into_iter()
+                .map(|scan_address| (scan_address.chain, scan_address.address))
+                .collect::<HashSet<_>>();
             let values = values.into_iter().filter_map(|(key, value)| (!existing.contains(&key)).then_some(value)).collect::<Vec<_>>();
             if values.is_empty() { Ok(0) } else { client.add_scan_addresses(values) }
         })

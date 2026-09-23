@@ -8,9 +8,23 @@ pub trait ConfigRepository {
     fn get_config(&mut self, key: ConfigKey) -> Result<String, DatabaseError>;
     fn get_config_param(&mut self, key: ConfigParamKey) -> Result<String, DatabaseError>;
     fn get_config_keys(&mut self) -> Result<Vec<String>, DatabaseError>;
-    fn add_config(&mut self, configs: Vec<ConfigRow>) -> Result<usize, DatabaseError>;
+    fn add_config_keys(&mut self, keys: Vec<ConfigKey>) -> Result<usize, DatabaseError>;
+    fn add_config_params(&mut self, keys: Vec<ConfigParamKey>) -> Result<usize, DatabaseError>;
     fn set_config(&mut self, key: ConfigKey, value: &str) -> Result<usize, DatabaseError>;
     fn delete_keys(&mut self, keys: Vec<String>) -> Result<usize, DatabaseError>;
+}
+
+fn add_config_rows(client: &mut DatabaseClient, configs: Vec<ConfigRow>) -> Result<usize, diesel::result::Error> {
+    use crate::schema::config::dsl::*;
+    diesel::insert_into(config)
+        .values(&configs)
+        .on_conflict(key)
+        .do_update()
+        .set((
+            value.eq(diesel::dsl::case_when(value.eq(default_value), diesel::upsert::excluded(value)).otherwise(value)),
+            default_value.eq(diesel::upsert::excluded(default_value)),
+        ))
+        .execute(&mut client.connection)
 }
 
 fn config_row(client: &mut DatabaseClient, config_key: &str) -> Result<ConfigRow, diesel::result::Error> {
@@ -31,17 +45,12 @@ impl ConfigRepository for DatabaseClient {
         Ok(result.value)
     }
 
-    fn add_config(&mut self, configs: Vec<ConfigRow>) -> Result<usize, DatabaseError> {
-        use crate::schema::config::dsl::*;
-        Ok(diesel::insert_into(config)
-            .values(&configs)
-            .on_conflict(key)
-            .do_update()
-            .set((
-                value.eq(diesel::dsl::case_when(value.eq(default_value), diesel::upsert::excluded(value)).otherwise(value)),
-                default_value.eq(diesel::upsert::excluded(default_value)),
-            ))
-            .execute(&mut self.connection)?)
+    fn add_config_keys(&mut self, keys: Vec<ConfigKey>) -> Result<usize, DatabaseError> {
+        Ok(add_config_rows(self, keys.into_iter().map(ConfigRow::from_primitive).collect())?)
+    }
+
+    fn add_config_params(&mut self, keys: Vec<ConfigParamKey>) -> Result<usize, DatabaseError> {
+        Ok(add_config_rows(self, keys.into_iter().map(ConfigRow::from_param).collect())?)
     }
 
     fn set_config(&mut self, config_key: ConfigKey, config_value: &str) -> Result<usize, DatabaseError> {

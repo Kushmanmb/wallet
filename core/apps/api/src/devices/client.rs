@@ -3,7 +3,7 @@ use primitives::Device;
 use push_notification::{GorushNotification, PushNotification, PushNotificationTypes};
 use pusher::PusherClient;
 use std::error::Error;
-use storage::{Database, DatabaseError, DevicesRepository, PriceAlertsRepository, models::UpdateDeviceRow};
+use storage::{Database, DatabaseError, DevicesRepository, PriceAlertsRepository};
 
 use super::clients::WalletsClient;
 
@@ -19,8 +19,7 @@ impl DevicesClient {
     }
 
     pub async fn add_device(&self, device: Device) -> Result<Device, Box<dyn Error + Send + Sync>> {
-        let add_device = UpdateDeviceRow::from_primitive(device);
-        Ok(self.database.run(move |client| client.add_device(add_device)).await?)
+        Ok(self.database.run(move |client| client.add_device(device)).await?)
     }
 
     pub async fn get_device(&self, device_id: &str) -> Result<Device, Box<dyn Error + Send + Sync>> {
@@ -33,7 +32,7 @@ impl DevicesClient {
         let (device, price_alert_count) = self
             .database
             .run(move |client| -> Result<_, DatabaseError> {
-                let device = client.get_device_row(&device_id)?;
+                let device = client.get_device_record(&device_id)?;
                 let price_alert_count = client.count_price_alerts_for_device_id(device.id)?;
                 Ok((device, price_alert_count))
             })
@@ -41,13 +40,12 @@ impl DevicesClient {
         Ok(AdminDevice {
             price_alert_count,
             wallets: wallets.get_wallet_overviews(device.id).await?,
-            device: device.as_primitive(),
+            device: device.device,
         })
     }
 
     pub async fn update_device(&self, device: Device) -> Result<Device, Box<dyn Error + Send + Sync>> {
-        let update_device = UpdateDeviceRow::from_primitive(device);
-        Ok(self.database.run(move |client| client.update_device(update_device)).await?)
+        Ok(self.database.run(move |client| client.update_device(device)).await?)
     }
 
     pub async fn send_push_notification_device(&self, device_id: &str) -> Result<bool, Box<dyn Error + Send + Sync>> {

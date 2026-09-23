@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator, IntoStaticStr};
 use typeshare::typeshare;
 
-use crate::{AssetId, Chain, ChainAddress, TransactionType};
+use crate::{AddressName, AssetId, Chain, ChainAddress, TransactionType, VerificationStatus};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, AsRefStr)]
 #[strum(serialize_all = "lowercase")]
@@ -133,6 +133,24 @@ impl ScanAddress {
         self.chain == chain && self.address == address && self.is_verified == Some(true) && self.is_malicious != Some(true)
     }
 
+    pub fn address_name(&self) -> Option<AddressName> {
+        let status = if self.is_malicious == Some(true) {
+            VerificationStatus::Suspicious
+        } else if self.is_verified == Some(true) {
+            VerificationStatus::Verified
+        } else {
+            VerificationStatus::Unverified
+        };
+        Some(AddressName {
+            chain: self.chain,
+            address: self.address.clone(),
+            name: self.name.clone()?,
+            address_type: self.address_type.clone()?,
+            status,
+            image_url: None,
+        })
+    }
+
     pub fn contract(chain: Chain, address: impl Into<String>, name: impl Into<String>) -> Self {
         Self {
             chain,
@@ -165,7 +183,26 @@ impl ScanVerdict {
 mod tests {
     use serde_json::Value;
 
-    use super::{Chain, ScanAddress, ScanProvider, ScanTransactionPayload, ScanType, ScanVerdict};
+    use super::{AddressName, AddressType, Chain, ScanAddress, ScanProvider, ScanTransactionPayload, ScanType, ScanVerdict, VerificationStatus};
+
+    #[test]
+    fn test_scan_address_address_name() {
+        let router = ScanAddress::contract(Chain::Arbitrum, "0xAbC", "Router");
+        assert_eq!(
+            router.address_name(),
+            Some(AddressName {
+                chain: Chain::Arbitrum,
+                address: "0xAbC".to_string(),
+                name: "Router".to_string(),
+                address_type: AddressType::Contract,
+                status: VerificationStatus::Verified,
+                image_url: None,
+            })
+        );
+        assert_eq!(ScanAddress { name: None, ..router.clone() }.address_name(), None);
+        assert_eq!(ScanAddress { is_malicious: Some(true), ..router.clone() }.address_name().map(|name| name.status), Some(VerificationStatus::Suspicious));
+        assert_eq!(ScanAddress { is_verified: Some(false), ..router }.address_name().map(|name| name.status), Some(VerificationStatus::Unverified));
+    }
 
     #[test]
     fn test_scan_address_is_verified_for() {

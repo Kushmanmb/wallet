@@ -3,9 +3,7 @@ use std::error::Error;
 
 use crate::admin::model::AdminWalletOverview;
 use primitives::{AddressChains, Chain, WalletId, WalletSource, WalletSubscription, WalletSubscriptionChains};
-use storage::models::NewWalletRow;
-use storage::sql_types::WalletType;
-use storage::{Database, DatabaseError, DevicesRepository, FiatRepository, NftRepository, RewardsRepository, TransactionsRepository, WalletsRepository};
+use storage::{Database, DatabaseError, DevicesRepository, FiatRepository, NewWallet, NftRepository, RewardsRepository, TransactionsRepository, WalletsRepository};
 use streamer::{ChainAddressPayload, StreamProducer, StreamProducerQueue};
 
 #[derive(Clone)]
@@ -24,9 +22,8 @@ impl WalletsClient {
 
         Ok(rows
             .into_iter()
-            .fold(BTreeMap::<String, (WalletId, Vec<Chain>)>::new(), |mut acc, (wallet_row, subscription_row, _address_row)| {
-                let wallet_id = wallet_row.wallet_id.0.clone();
-                acc.entry(wallet_id.id()).or_insert((wallet_id, Vec::new())).1.push(subscription_row.chain.0);
+            .fold(BTreeMap::<String, (WalletId, Vec<Chain>)>::new(), |mut acc, (wallet, subscription)| {
+                acc.entry(wallet.wallet_id.id()).or_insert((wallet.wallet_id, Vec::new())).1.push(subscription.chain);
                 acc
             })
             .into_values()
@@ -48,14 +45,14 @@ impl WalletsClient {
             .await?;
         let mut subscriptions = BTreeMap::<String, (WalletId, WalletSource, BTreeMap<String, BTreeSet<Chain>>)>::new();
 
-        for (wallet, subscription, address) in rows {
+        for (wallet, subscription) in rows {
             subscriptions
-                .entry(wallet.wallet_id.0.id())
-                .or_insert_with(|| (wallet.wallet_id.0, wallet.source.0, BTreeMap::new()))
+                .entry(wallet.wallet_id.id())
+                .or_insert_with(|| (wallet.wallet_id, wallet.source, BTreeMap::new()))
                 .2
-                .entry(address.address)
+                .entry(subscription.address)
                 .or_default()
-                .insert(subscription.chain.0);
+                .insert(subscription.chain);
         }
 
         Ok(subscriptions.into_values().map(|(wallet_id, source, addresses)| wallet_subscription(wallet_id, source, addresses)).collect())
@@ -68,29 +65,28 @@ impl WalletsClient {
                 let rows = client.get_subscriptions(device_row_id)?;
 
                 rows.into_iter()
-                    .fold(BTreeMap::<String, WalletOverviewBuilder>::new(), |mut wallets, (wallet, subscription, address)| {
-                        let entry = wallets.entry(wallet.wallet_id.0.id()).or_insert_with(|| WalletOverviewBuilder {
+                    .fold(BTreeMap::<String, WalletOverviewBuilder>::new(), |mut wallets, (wallet, subscription)| {
+                        let entry = wallets.entry(wallet.wallet_id.id()).or_insert_with(|| WalletOverviewBuilder {
                             wallet_id: wallet.id,
-                            identifier: wallet.wallet_id.0,
-                            source: wallet.source.0,
+                            identifier: wallet.wallet_id,
+                            source: wallet.source,
                             addresses: BTreeSet::new(),
-                            address_ids: BTreeSet::new(),
                             chains: BTreeSet::new(),
                             subscription_count: 0,
                         });
                         entry.subscription_count += 1;
-                        entry.addresses.insert(address.address);
-                        entry.address_ids.insert(address.id);
-                        entry.chains.insert(subscription.chain.0);
+                        entry.addresses.insert(subscription.address);
+                        entry.chains.insert(subscription.chain);
                         wallets
                     })
                     .into_values()
                     .map(|wallet| {
                         let chains = wallet.chains.into_iter().collect::<Vec<_>>();
+                        let addresses = wallet.addresses.into_iter().collect::<Vec<_>>();
                         Ok(AdminWalletOverview {
-                            transaction_count: client.count_transactions_by_addresses(wallet.addresses.into_iter().collect(), chains.iter().map(|chain| chain.as_ref().to_string()).collect())?,
+                            transaction_count: client.count_transactions_by_addresses(addresses.clone(), chains.iter().map(|chain| chain.as_ref().to_string()).collect())?,
                             fiat_transaction_count: client.count_fiat_transactions_by_device_and_wallet_id(device_row_id, wallet.wallet_id)?,
-                            nft_count: client.count_nft_assets_by_address_ids(wallet.address_ids.into_iter().collect(), chains.clone())?,
+                            nft_count: client.count_nft_assets_by_addresses(addresses, chains.clone())?,
                             chains,
                             id: wallet.identifier,
                             source: wallet.source,
@@ -117,11 +113,11 @@ impl WalletsClient {
             .await?;
         let mut addresses = BTreeMap::<String, BTreeSet<Chain>>::new();
 
-        for (subscription, address) in rows {
-            addresses.entry(address.address).or_default().insert(subscription.chain.0);
+        for subscription in rows {
+            addresses.entry(subscription.address).or_default().insert(subscription.chain);
         }
 
-        Ok(wallet_subscription(wallet.wallet_id.0, wallet.source.0, addresses))
+        Ok(wallet_subscription(wallet.wallet_id, wallet.source, addresses))
     }
 
     pub async fn add_subscriptions(&self, device_row_id: i32, wallet_subscriptions: Vec<WalletSubscription>) -> Result<usize, Box<dyn Error + Send + Sync>> {
@@ -141,18 +137,18 @@ impl WalletsClient {
                 let identifiers: Vec<String> = wallet_subscriptions.iter().map(|x| x.wallet_id.id()).collect();
                 let mut wallet_ids: HashMap<String, i32> = client.get_wallets(identifiers)?.into_iter().map(|x| (x.wallet_id.id(), x.id)).collect();
 
-                let new_wallets: Vec<NewWalletRow> = wallet_subscriptions
+                let new_wallets: Vec<NewWallet> = wallet_subscriptions
                     .iter()
                     .filter(|x| !wallet_ids.contains_key(&x.wallet_id.id()))
-                    .map(|x| NewWalletRow {
-                        identifier: x.wallet_id.id(),
-                        wallet_type: WalletType::from(x.wallet_id.wallet_type()),
-                        source: storage::sql_types::WalletSource::from(x.source.clone().unwrap_or(WalletSource::Import)),
+                    .map(|x| NewWallet {
+                        wallet_id: x.wallet_id.clone(),
+                        wallet_type: x.wallet_id.wallet_type(),
+                        source: x.source.clone().unwrap_or(WalletSource::Import),
                     })
                     .collect();
 
                 if !new_wallets.is_empty() {
-                    let new_identifiers: Vec<String> = new_wallets.iter().map(|x| x.identifier.clone()).collect();
+                    let new_identifiers: Vec<String> = new_wallets.iter().map(|x| x.wallet_id.id()).collect();
                     client.create_wallets(new_wallets)?;
                     wallet_ids.extend(client.get_wallets(new_identifiers)?.into_iter().map(|x| (x.wallet_id.id(), x.id)));
                 }
@@ -211,7 +207,6 @@ struct WalletOverviewBuilder {
     identifier: WalletId,
     source: WalletSource,
     addresses: BTreeSet<String>,
-    address_ids: BTreeSet<i32>,
     chains: BTreeSet<Chain>,
     subscription_count: usize,
 }

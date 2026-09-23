@@ -7,10 +7,9 @@ use cacher::{CacheKey, CacherClient};
 use chrono::{DateTime, Utc};
 use gem_tracing::info_with_fields;
 use prices::PriceAssetsProvider;
-use primitives::{ChartTimeframe, ChartValue, SECONDS_PER_DAY, SECONDS_PER_HOUR};
+use primitives::{ChartTimeframe, ChartValue, PriceData, SECONDS_PER_DAY, SECONDS_PER_HOUR};
 use services::prices::PriceClient;
-use storage::models::{ChartRow, PriceRow};
-use storage::{ChartsRepository, Database, PriceFilter, PricesRepository};
+use storage::{ChartPoint, ChartsRepository, Database, PriceFilter, PricesRepository};
 
 #[derive(Clone)]
 pub struct ChartsUpdater {
@@ -53,7 +52,7 @@ impl ChartsHistoryUpdater {
         let provider_id = provider.id();
 
         let synced: HashSet<String> = self.cacher.get_set_members_cached(vec![CacheKey::ChartsHistory(provider_id).key()]).await?.into_iter().collect();
-        let prices: Vec<PriceRow> = self
+        let prices: Vec<PriceData> = self
             .database
             .run(move |client| client.get_prices_by_filter(vec![PriceFilter::Provider(provider)]))
             .await?
@@ -62,7 +61,7 @@ impl ChartsHistoryUpdater {
             .collect();
 
         for price in &prices {
-            let provider_price_id = price.provider_price_id();
+            let provider_price_id = price.provider_price_id.as_str();
             let price_id = price.id.to_string();
             info_with_fields!("charts history sync started", price_id = price_id.clone());
             let daily = self.sync(price, "daily", ChartTimeframe::Daily, SECONDS_PER_DAY as i64, self.provider.get_charts_daily(provider_price_id)).await?;
@@ -103,7 +102,7 @@ impl ChartsHistoryUpdater {
 
     async fn sync(
         &self,
-        price: &PriceRow,
+        price: &PriceData,
         label: &'static str,
         timeframe: ChartTimeframe,
         bucket_size_seconds: i64,
@@ -125,13 +124,17 @@ struct HistorySyncStats {
     inserted: usize,
 }
 
-fn bucketed_chart_rows(price_id: &str, values: &[ChartValue], bucket_size_seconds: i64) -> Vec<ChartRow> {
+fn bucketed_chart_rows(price_id: &str, values: &[ChartValue], bucket_size_seconds: i64) -> Vec<ChartPoint> {
     values
         .iter()
         .filter_map(|value| {
             let bucket = i64::from(value.timestamp).div_euclid(bucket_size_seconds) * bucket_size_seconds;
             let created_at = DateTime::<Utc>::from_timestamp(bucket, 0)?.naive_utc();
-            Some(ChartRow::new(price_id.to_string(), value.value as f64, created_at))
+            Some(ChartPoint {
+                price_id: price_id.to_string(),
+                price: value.value as f64,
+                created_at,
+            })
         })
         .collect()
 }
@@ -148,11 +151,21 @@ mod tests {
         let hourly = bucketed_chart_rows("bitcoin", slice::from_ref(&value), SECONDS_PER_HOUR as i64).remove(0);
         let daily = bucketed_chart_rows("bitcoin", &[value], SECONDS_PER_DAY as i64).remove(0);
 
-        assert_eq!(hourly.coin_id, "bitcoin");
-        assert_eq!(hourly.price, 123.45_f32 as f64);
-        assert_eq!(hourly.created_at, DateTime::<Utc>::from_timestamp(1_713_772_800, 0).unwrap().naive_utc());
-        assert_eq!(daily.coin_id, "bitcoin");
-        assert_eq!(daily.price, 123.45_f32 as f64);
-        assert_eq!(daily.created_at, DateTime::<Utc>::from_timestamp(1_713_744_000, 0).unwrap().naive_utc());
+        assert_eq!(
+            hourly,
+            ChartPoint {
+                price_id: "bitcoin".to_string(),
+                price: 123.45_f32 as f64,
+                created_at: DateTime::<Utc>::from_timestamp(1_713_772_800, 0).unwrap().naive_utc(),
+            }
+        );
+        assert_eq!(
+            daily,
+            ChartPoint {
+                price_id: "bitcoin".to_string(),
+                price: 123.45_f32 as f64,
+                created_at: DateTime::<Utc>::from_timestamp(1_713_744_000, 0).unwrap().naive_utc(),
+            }
+        );
     }
 }

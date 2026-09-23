@@ -11,7 +11,7 @@ use crate::sql_types::{AssetId, ChainRow, TransactionState, TransactionType};
 #[derive(Debug, Queryable, Selectable, Serialize, Deserialize, Clone)]
 #[diesel(table_name = crate::schema::transactions)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct TransactionRow {
+pub(crate) struct TransactionRow {
     pub id: i64,
     pub chain: ChainRow,
     pub hash: String,
@@ -33,7 +33,7 @@ pub struct TransactionRow {
 #[derive(Debug, Serialize, Deserialize, Insertable, AsChangeset, Clone)]
 #[diesel(table_name = crate::schema::transactions)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct NewTransactionRow {
+pub(crate) struct NewTransactionRow {
     pub chain: ChainRow,
     pub hash: String,
     pub from_address: Option<String>,

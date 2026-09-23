@@ -3,21 +3,21 @@ use diesel::prelude::*;
 use diesel::result::Error as DieselError;
 use diesel::sql_types::Text;
 use primitives::rewards::RewardStatus as PrimitiveRewardStatus;
-use primitives::{NaiveDateTimeExt, ReferralLeader, ReferralLeaderboard, RewardEvent, now};
+use primitives::{NaiveDateTimeExt, ReferralLeader, ReferralLeaderboard, RewardEvent, TransactionState as PrimitiveTransactionState, now};
 
 use crate::models::{NewRewardEventRow, NewRewardReferralRow, NewRewardsRow, NewUsernameRow, ReferralAttemptRow, RewardEventRow, RewardReferralRow, RewardsRow, UsernameRow, WalletRow};
 use crate::repositories::transactions_repository::{TransactionFilter, transactions_by_wallet_since};
-use crate::repositories::wallets_repository::{WalletsRepository, first_subscription_date_by_wallet_id};
-use crate::sql_types::{RewardEventType, RewardStatus, TransactionState, UsernameStatus};
+use crate::repositories::wallets_repository::{device_rows_by_wallet_id, first_subscription_date_by_wallet_id, wallet_row_by_id};
+use crate::sql_types::{RewardEventType, RewardStatus, UsernameStatus};
 use crate::{DatabaseClient, DatabaseError, DieselResultExt};
 
 #[derive(Debug, Clone)]
-pub enum ReferralUpdate {
+enum ReferralUpdate {
     VerifiedAt(NaiveDateTime),
 }
 
 #[derive(Debug, Clone)]
-pub enum RewardsUpdate {
+enum RewardsUpdate {
     Status(RewardStatus),
     VerifyAfter(NaiveDateTime),
     ClearVerifyAfter,
@@ -67,7 +67,11 @@ fn get_referral_by_referred_device_id(client: &mut DatabaseClient, referred_devi
 
 fn get_referral_by_username(client: &mut DatabaseClient, username: &str) -> Result<Option<RewardReferralRow>, DieselError> {
     use crate::schema::rewards_referrals::dsl;
-    dsl::rewards_referrals.filter(dsl::referred_username.eq(username)).first(&mut client.connection).optional()
+    dsl::rewards_referrals
+        .filter(dsl::referred_username.eq(username))
+        .select(RewardReferralRow::as_select())
+        .first(&mut client.connection)
+        .optional()
 }
 
 fn update_referral(client: &mut DatabaseClient, referral_id: i32, update: ReferralUpdate) -> Result<(), DieselError> {
@@ -263,7 +267,7 @@ fn require_reward_event(client: &mut DatabaseClient, event_id: i32) -> Result<Re
 }
 
 fn require_wallet_by_id(client: &mut DatabaseClient, wallet_id: i32) -> Result<WalletRow, DatabaseError> {
-    client.get_wallet_by_id(wallet_id)
+    wallet_row_by_id(client, wallet_id)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -338,8 +342,7 @@ impl From<RewardsRow> for RewardsRecord {
 }
 
 fn latest_wallet_device_id(client: &mut DatabaseClient, wallet_id: i32) -> Result<i32, DatabaseError> {
-    client
-        .get_devices_by_wallet_id(wallet_id)?
+    device_rows_by_wallet_id(client, wallet_id)?
         .into_iter()
         .max_by_key(|device| device.updated_at)
         .map(|device| device.id)
@@ -501,7 +504,7 @@ pub trait RewardsRepository {
     fn count_referrals_since(&mut self, referrer_username: &str, since: NaiveDateTime) -> Result<i64, DatabaseError>;
     fn get_rewards_leaderboard(&mut self) -> Result<ReferralLeaderboard, DatabaseError>;
     fn disable_rewards(&mut self, username: &str, reason: &str, comment: &str) -> Result<i32, DatabaseError>;
-    fn get_rewards_by_filter(&mut self, filters: Vec<RewardsFilter>) -> Result<Vec<RewardsRow>, DatabaseError>;
+    fn get_usernames_by_filter(&mut self, filters: Vec<RewardsFilter>) -> Result<Vec<String>, DatabaseError>;
     fn check_eligibility(&mut self, username: &str, eligibility: RewardsEligibilityConfig) -> Result<Option<i32>, DatabaseError>;
     fn promote_to_verified(&mut self, username: &str) -> Result<Vec<i32>, DatabaseError>;
 }
@@ -675,8 +678,8 @@ impl RewardsRepository for DatabaseClient {
         Ok(disable_rewards(self, username, reason, comment)?)
     }
 
-    fn get_rewards_by_filter(&mut self, filters: Vec<RewardsFilter>) -> Result<Vec<RewardsRow>, DatabaseError> {
-        Ok(get_rewards_by_filter(self, filters)?)
+    fn get_usernames_by_filter(&mut self, filters: Vec<RewardsFilter>) -> Result<Vec<String>, DatabaseError> {
+        Ok(get_rewards_by_filter(self, filters)?.into_iter().map(|row| row.username).collect())
     }
 
     fn check_eligibility(&mut self, username: &str, eligibility: RewardsEligibilityConfig) -> Result<Option<i32>, DatabaseError> {
@@ -699,7 +702,7 @@ impl RewardsRepository for DatabaseClient {
             return Ok(None);
         }
 
-        let Some(latest_activity_at) = self.get_devices_by_wallet_id(username_row.wallet_id)?.into_iter().map(|device| device.updated_at).max() else {
+        let Some(latest_activity_at) = device_rows_by_wallet_id(self, username_row.wallet_id)?.into_iter().map(|device| device.updated_at).max() else {
             return Ok(None);
         };
 
@@ -707,7 +710,7 @@ impl RewardsRepository for DatabaseClient {
             return Ok(None);
         }
 
-        let transactions_current = transactions_by_wallet_since(self, username_row.wallet_id, first_subscription_at, vec![TransactionFilter::States(vec![TransactionState::Confirmed])])?.len() as i64;
+        let transactions_current = transactions_by_wallet_since(self, username_row.wallet_id, first_subscription_at, vec![TransactionFilter::States(vec![PrimitiveTransactionState::Confirmed])])?.len() as i64;
 
         if transactions_current < eligibility.transactions_required {
             return Ok(None);

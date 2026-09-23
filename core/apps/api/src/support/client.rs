@@ -1,6 +1,6 @@
 use primitives::{Device, Platform, SupportAction, SupportMessage, SupportMessageInput};
 use std::{error::Error, future::Future};
-use storage::{Database, NewSupportSessionRow, SupportSessionsRepository, models::DeviceRow};
+use storage::{Database, DeviceRecord, SupportSessionsRepository};
 
 use services::support::{ChatwootClient, ChatwootSession};
 
@@ -19,23 +19,23 @@ impl SupportApiClient {
         }
     }
 
-    pub async fn messages(&self, device: &DeviceRow, from_timestamp: Option<u64>) -> Result<Vec<SupportMessage>, Box<dyn Error + Send + Sync>> {
-        let chatwoot = self.chatwoot(device.platform.0);
+    pub async fn messages(&self, device: &DeviceRecord, from_timestamp: Option<u64>) -> Result<Vec<SupportMessage>, Box<dyn Error + Send + Sync>> {
+        let chatwoot = self.chatwoot(device.device.platform);
         self.with_session(device, |session| async move { chatwoot.messages(&session, from_timestamp).await }).await
     }
 
-    pub async fn send_message(&self, device: &DeviceRow, input: SupportMessageInput) -> Result<SupportMessage, Box<dyn Error + Send + Sync>> {
-        let chatwoot = self.chatwoot(device.platform.0);
+    pub async fn send_message(&self, device: &DeviceRecord, input: SupportMessageInput) -> Result<SupportMessage, Box<dyn Error + Send + Sync>> {
+        let chatwoot = self.chatwoot(device.device.platform);
         self.with_session(device, |session| async move { chatwoot.send_message(&session, input.content).await }).await
     }
 
-    pub async fn send_image(&self, device: &DeviceRow, data: Vec<u8>, file_name: String, content_type: String) -> Result<SupportMessage, Box<dyn Error + Send + Sync>> {
-        let chatwoot = self.chatwoot(device.platform.0);
+    pub async fn send_image(&self, device: &DeviceRecord, data: Vec<u8>, file_name: String, content_type: String) -> Result<SupportMessage, Box<dyn Error + Send + Sync>> {
+        let chatwoot = self.chatwoot(device.device.platform);
         self.with_session(device, |session| async move { chatwoot.send_image(&session, data, file_name, content_type).await }).await
     }
 
-    pub async fn run_action(&self, device: &DeviceRow, action: SupportAction) -> Result<bool, Box<dyn Error + Send + Sync>> {
-        let chatwoot = self.chatwoot(device.platform.0);
+    pub async fn run_action(&self, device: &DeviceRecord, action: SupportAction) -> Result<bool, Box<dyn Error + Send + Sync>> {
+        let chatwoot = self.chatwoot(device.device.platform);
         self.with_session(device, |session| async move {
             match action {
                 SupportAction::Typing(status) => chatwoot.set_typing(&session, status).await,
@@ -58,12 +58,12 @@ impl SupportApiClient {
         Ok(())
     }
 
-    async fn with_session<T, F, Fut>(&self, device: &DeviceRow, call: F) -> Result<T, Box<dyn Error + Send + Sync>>
+    async fn with_session<T, F, Fut>(&self, device: &DeviceRecord, call: F) -> Result<T, Box<dyn Error + Send + Sync>>
     where
         F: FnOnce(ChatwootSession) -> Fut,
         Fut: Future<Output = Result<T, Box<dyn Error + Send + Sync>>>,
     {
-        let chatwoot = self.chatwoot(device.platform.0);
+        let chatwoot = self.chatwoot(device.device.platform);
         let session = match self.get_session(device.id).await? {
             Some(session) => session,
             None => self.create_session(chatwoot, device).await?,
@@ -79,19 +79,19 @@ impl SupportApiClient {
     }
 
     async fn get_session(&self, device_id: i32) -> Result<Option<ChatwootSession>, Box<dyn Error + Send + Sync>> {
-        let session = self.database.run(move |client| client.get_support_session(device_id)).await?;
-        Ok(session.map(|session| ChatwootSession { auth_token: session.auth_token }))
+        let auth_token = self.database.run(move |client| client.get_support_session_token(device_id)).await?;
+        Ok(auth_token.map(|auth_token| ChatwootSession { auth_token }))
     }
 
-    async fn create_session(&self, chatwoot: &ChatwootClient, device: &DeviceRow) -> Result<ChatwootSession, Box<dyn Error + Send + Sync>> {
-        let session = chatwoot.create_session(&device.as_primitive()).await?;
+    async fn create_session(&self, chatwoot: &ChatwootClient, device: &DeviceRecord) -> Result<ChatwootSession, Box<dyn Error + Send + Sync>> {
+        let session = chatwoot.create_session(&device.device).await?;
         self.set_session(device.id, &session).await?;
         Ok(session)
     }
 
     async fn set_session(&self, device_id: i32, session: &ChatwootSession) -> Result<(), Box<dyn Error + Send + Sync>> {
-        let row = NewSupportSessionRow::new(device_id, &session.auth_token);
-        self.database.run(move |client| client.set_support_session(row)).await?;
+        let auth_token = session.auth_token.clone();
+        self.database.run(move |client| client.set_support_session_token(device_id, &auth_token)).await?;
         Ok(())
     }
 }

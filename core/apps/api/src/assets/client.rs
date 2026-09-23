@@ -5,7 +5,7 @@ use super::filter::{build_assets_filters, build_filter, build_perpetuals_filters
 use super::model::SearchRequest;
 use chrono::{DateTime, Utc};
 use primitives::asset_score::AssetRank;
-use primitives::{Asset, AssetBasic, AssetFull, AssetId, AssetList, ChainAddress, NFTCollection, PerpetualSearchData, PriceConfig};
+use primitives::{Asset, AssetBasic, AssetFull, AssetId, AssetList, NFTCollection, PerpetualSearchData, PriceConfig};
 use search_index::{ASSET_LISTS_INDEX_NAME, ASSETS_INDEX_NAME, AssetListDocument, NFTDocument, NFTS_INDEX_NAME, PERPETUALS_INDEX_NAME, PerpetualDocument, SearchIndexClient};
 use services::prices::PriceClient;
 use storage::{AssetFilter, AssetsAddressesRepository, AssetsRepository, Database, DatabaseError, WalletsRepository};
@@ -45,8 +45,7 @@ impl AssetsClient {
         let assets = self
             .database
             .run(move |client| -> Result<_, DatabaseError> {
-                let subscriptions = client.get_subscriptions_by_wallet_id(device_id, wallet_id)?;
-                let chain_addresses: Vec<ChainAddress> = subscriptions.into_iter().map(|(sub, addr)| ChainAddress::new(sub.chain.0, addr.address)).collect();
+                let chain_addresses = client.get_subscriptions_by_wallet_id(device_id, wallet_id)?;
                 let asset_ids = client.get_assets_by_addresses(chain_addresses, from_datetime)?;
                 if asset_ids.is_empty() {
                     return Ok(vec![]);

@@ -2,10 +2,10 @@ use tokio::task::spawn_blocking;
 
 pub mod database;
 pub mod error;
-pub mod models;
+pub(crate) mod models;
 pub mod repositories;
-pub mod schema;
-pub mod sql_types;
+pub(crate) mod schema;
+pub(crate) mod sql_types;
 #[cfg(any(test, feature = "testkit"))]
 pub mod testkit;
 
@@ -13,39 +13,37 @@ diesel::allow_columns_to_appear_in_same_group_by_clause!(schema::transactions_ad
 
 pub use self::database::DatabaseClient;
 pub use self::error::{DatabaseError, DieselResultExt};
-pub use self::models::{ApiClientGrant, ApiClientResource, ApiClientRow, ApiClientScope, AssetUsageRankRow, FiatAssetRowsExt, NewNotificationRow, NewSupportSessionRow, NewWalletRow, RewardRedemptionOptionRow};
+pub use self::models::{ApiClientGrant, ApiClientResource, ApiClientScope};
 pub use self::repositories::{
     api_clients_repository::ApiClientsRepository,
     assets_addresses_repository::AssetsAddressesRepository,
     assets_links_repository::AssetsLinksRepository,
-    assets_repository::{AssetFilter, AssetUpdate, AssetsRepository},
+    assets_repository::{AssetFilter, AssetSupply, AssetUpdate, AssetsRepository},
     assets_usage_ranks_repository::AssetsUsageRanksRepository,
     chains_repository::ChainsRepository,
-    charts_repository::{ChartFilter, ChartsRepository},
+    charts_repository::{ChartFilter, ChartPoint, ChartsRepository},
     config_repository::ConfigRepository,
-    devices_repository::{DeviceFieldUpdate, DevicesRepository},
-    fiat_repository::{FiatAssetFilter, FiatAssetUpdate, FiatProviderCountryFilter, FiatProviderCountryUpdate, FiatRepository},
+    devices_repository::{DeviceFieldUpdate, DeviceRecord, DevicesRepository},
+    fiat_repository::{FiatAssetFilter, FiatRepository, FiatTransactionRecord},
     migrations_repository::MigrationsRepository,
-    nft_repository::{NftAssetFilter, NftCollectionFilter, NftRepository},
-    notifications_repository::NotificationsRepository,
-    parser_state_repository::ParserStateRepository,
+    nft_repository::{NftCollectionFilter, NftRepository},
+    notifications_repository::{NewNotification, NotificationsRepository},
+    parser_state_repository::{ParserState, ParserStateRepository},
     perpetuals_repository::PerpetualsRepository,
     price_alerts_repository::PriceAlertsRepository,
-    prices_providers_repository::PricesProvidersRepository,
-    prices_repository::{AssetsWithPricesFilter, PriceFilter, PriceUpdate, PricesRepository},
+    prices_providers_repository::{PriceProviderConfig, PricesProvidersRepository},
+    prices_repository::{AssetWithMarket, AssetsWithPricesFilter, PriceAsset, PriceFilter, PriceUpdate, PricesRepository},
     releases_repository::ReleasesRepository,
-    rewards_redemptions_repository::{RedemptionUpdate, RewardsRedemptionsRepository},
-    rewards_repository::{ReferralRecord, ReferralUpdate, ReferrerInfo, RewardIdentityRecord, RewardsEligibilityConfig, RewardsFilter, RewardsRecord, RewardsRepository, RewardsUpdate, RewardsVerification},
+    rewards_redemptions_repository::{RedemptionRecord, RedemptionUpdate, RewardsRedemptionsRepository},
+    rewards_repository::{ReferralRecord, ReferrerInfo, RewardIdentityRecord, RewardsEligibilityConfig, RewardsFilter, RewardsRecord, RewardsRepository, RewardsVerification},
     risk_signals_repository::{AbusePatterns, RiskSignalsRepository},
     scan_addresses_repository::ScanAddressesRepository,
     scan_detections_repository::ScanDetectionsRepository,
     support_sessions_repository::SupportSessionsRepository,
-    tag_repository::TagRepository,
+    tag_repository::{AssetTagLink, PerpetualTagLink, Tag, TagRepository},
     transactions_repository::{TransactionFilter, TransactionUpdate, TransactionsRepository},
-    wallets_repository::WalletsRepository,
+    wallets_repository::{NewWallet, WalletAddress, WalletRecord, WalletsRepository},
 };
-pub use self::sql_types::{NotificationType, TransactionState, TransactionType, WalletSource, WalletType};
-pub use diesel::OptionalExtension;
 
 #[derive(Clone)]
 pub struct Database(database::PgPool);

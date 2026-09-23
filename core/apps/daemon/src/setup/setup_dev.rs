@@ -9,8 +9,8 @@ use gem_tracing::info_with_fields;
 use num_bigint::BigUint;
 use primitives::currency::Currency;
 use primitives::{
-    Asset, AssetAssociation, AssetAssociationType, AssetId, AssetType, Chain, ChartTimeframe, DeviceLocale, FiatProviderName, FiatQuoteType, FiatRateProvider, FiatTransaction, FiatTransactionStatus, NotificationType, PriceAlert,
-    PriceAlertDirection, PriceId, PriceProvider,
+    Asset, AssetAssociation, AssetAssociationType, AssetId, AssetType, Chain, ChartTimeframe, Device, DeviceLocale, FiatAsset, FiatProviderCountry, FiatProviderName, FiatQuoteType, FiatRate, FiatRateProvider, FiatTransaction,
+    FiatTransactionStatus, NotificationType, Platform, PlatformStore, PriceAlert, PriceAlertDirection, PriceData, PriceId, PriceProvider, WalletId, WalletSource, WalletType,
     asset_constants::{
         ARBITRUM_USDC_ASSET_ID, ARBITRUM_USDT_ASSET_ID, BASE_USDC_ASSET_ID, ETHEREUM_USDC_ASSET_ID, ETHEREUM_USDT_ASSET_ID, POLYGON_USDC_ASSET_ID, SMARTCHAIN_USDT_ASSET_ID, SOLANA_USDC_ASSET_ID, SOLANA_USDT_ASSET_ID, TON_DUST_ASSET_ID,
         TON_DUST_TOKEN_ID, TON_STON_ASSET_ID, TON_STON_TOKEN_ID, TON_USDT_ASSET_ID, TON_USDT_TOKEN_ID, TRON_USDT_ASSET_ID,
@@ -21,10 +21,8 @@ use rewards::UsernameRules;
 use services::Services;
 use services::rewards::{create_username, username_rules};
 use settings::Settings;
-use storage::models::{ChartRow, FiatAssetRow, FiatProviderCountryRow, FiatRateRow, NewFiatTransactionRow, PriceAssetRow, UpdateDeviceRow, price::NewPriceRow};
-use storage::sql_types::{Platform, PlatformStore};
 use storage::{
-    ApiClientsRepository, AssetsRepository, ChartsRepository, DatabaseClient, DevicesRepository, FiatRepository, NewNotificationRow, NewWalletRow, NotificationsRepository, PriceAlertsRepository, PricesRepository, WalletSource, WalletType,
+    ApiClientsRepository, AssetsRepository, ChartPoint, ChartsRepository, DatabaseClient, DevicesRepository, FiatRepository, NewNotification, NewWallet, NotificationsRepository, PriceAlertsRepository, PriceAsset, PricesRepository,
     WalletsRepository,
 };
 
@@ -55,16 +53,9 @@ pub async fn run_setup_dev(settings: Settings) -> Result<(), Box<dyn Error + Sen
 fn setup_dev_currency(client: &mut DatabaseClient) -> Result<(), Box<dyn Error + Send + Sync>> {
     info_with_fields!("setup_dev", step = "add currency");
 
-    let fiat_rate = FiatRateRow {
-        is_enabled: true,
-        id: Currency::USD.into(),
-        name: "US Dollar".to_string(),
-        rate: 1.0,
-        provider: FiatRateProvider::Coingecko.into(),
-    };
-
     info_with_fields!("setup_dev", step = "add rate", currency = "USD");
-    client.set_fiat_rates(vec![fiat_rate])?;
+    client.set_fiat_rates(FiatRateProvider::Coingecko, vec![FiatRate { symbol: Currency::USD, rate: 1.0 }])?;
+    client.set_fiat_rates_enabled(vec![Currency::USD], true)?;
 
     Ok(())
 }
@@ -84,30 +75,30 @@ fn setup_dev_devices(client: &mut DatabaseClient, username_rules: &UsernameRules
     let ios_device_id = "0".repeat(64);
     let android_device_id = "1".repeat(64);
 
-    let ios_device = UpdateDeviceRow {
-        device_id: ios_device_id.clone(),
+    let ios_device = Device {
+        id: ios_device_id.clone(),
         platform: Platform::IOS,
         platform_store: PlatformStore::AppStore,
         token: "test_token".to_string(),
-        locale: DeviceLocale::EN.into(),
-        currency: Currency::USD.into(),
+        locale: DeviceLocale::EN,
+        currency: Currency::USD,
         is_push_enabled: true,
-        is_price_alerts_enabled: true,
+        is_price_alerts_enabled: Some(true),
         version: "1.0.0".to_string(),
         subscriptions_version: 1,
         os: "iOS 18".to_string(),
         model: "iPhone 16".to_string(),
     };
 
-    let android_device = UpdateDeviceRow {
-        device_id: android_device_id.clone(),
+    let android_device = Device {
+        id: android_device_id.clone(),
         platform: Platform::Android,
         platform_store: PlatformStore::GooglePlay,
         token: "test_token_android".to_string(),
-        locale: DeviceLocale::EN.into(),
-        currency: Currency::USD.into(),
+        locale: DeviceLocale::EN,
+        currency: Currency::USD,
         is_push_enabled: true,
-        is_price_alerts_enabled: true,
+        is_price_alerts_enabled: Some(true),
         version: "1.0.0".to_string(),
         subscriptions_version: 1,
         os: "Android 15".to_string(),
@@ -125,9 +116,8 @@ fn setup_dev_devices(client: &mut DatabaseClient, username_rules: &UsernameRules
     let wallet_address = "0xBA4D1d35bCe0e8F28E5a3403e7a0b996c5d50AC4";
 
     info_with_fields!("setup_dev", step = "add wallet");
-    let wallet_identifier = format!("multicoin_{}", wallet_address);
-    let new_wallet = NewWalletRow {
-        identifier: wallet_identifier,
+    let new_wallet = NewWallet {
+        wallet_id: WalletId::Multicoin(wallet_address.to_string()),
         wallet_type: WalletType::Multicoin,
         source: WalletSource::Create,
     };
@@ -162,34 +152,34 @@ fn setup_dev_devices(client: &mut DatabaseClient, username_rules: &UsernameRules
 
     info_with_fields!("setup_dev", step = "add notifications");
     let notifications = vec![
-        NewNotificationRow {
+        NewNotification {
             wallet_id: wallet.id,
             asset_id: None,
-            notification_type: NotificationType::RewardsEnabled.into(),
+            notification_type: NotificationType::RewardsEnabled,
             metadata: None,
         },
-        NewNotificationRow {
+        NewNotification {
             wallet_id: wallet.id,
             asset_id: None,
-            notification_type: NotificationType::ReferralJoined.into(),
+            notification_type: NotificationType::ReferralJoined,
             metadata: Some(serde_json::json!({"username": "alice", "points": 100})),
         },
-        NewNotificationRow {
+        NewNotification {
             wallet_id: wallet.id,
             asset_id: None,
-            notification_type: NotificationType::RewardsCodeDisabled.into(),
+            notification_type: NotificationType::RewardsCodeDisabled,
             metadata: None,
         },
-        NewNotificationRow {
+        NewNotification {
             wallet_id: wallet.id,
             asset_id: None,
-            notification_type: NotificationType::RewardsCreateUsername.into(),
+            notification_type: NotificationType::RewardsCreateUsername,
             metadata: Some(serde_json::json!({"points": 50})),
         },
-        NewNotificationRow {
+        NewNotification {
             wallet_id: wallet.id,
             asset_id: None,
-            notification_type: NotificationType::RewardsInvite.into(),
+            notification_type: NotificationType::RewardsInvite,
             metadata: Some(serde_json::json!({"username": "bob", "points": 200})),
         },
     ];
@@ -258,15 +248,11 @@ fn setup_dev_fiat_transactions(client: &mut DatabaseClient, device_id: i32, wall
     let evm_address_id = client.subscriptions_wallet_address_for_chain(device_id, wallet_id, Chain::Ethereum)?.id;
     let solana_address_id = client.subscriptions_wallet_address_for_chain(device_id, wallet_id, Chain::Solana)?.id;
 
-    let transaction_rows = vec![
-        NewFiatTransactionRow::new(transactions[0].clone(), device_id, wallet_id, evm_address_id),
-        NewFiatTransactionRow::new(transactions[1].clone(), device_id, wallet_id, evm_address_id),
-        NewFiatTransactionRow::new(transactions[2].clone(), device_id, wallet_id, solana_address_id),
-    ];
+    let address_ids = [evm_address_id, evm_address_id, solana_address_id];
 
     let mut count = 0;
-    for row in transaction_rows {
-        count += client.add_fiat_transaction(row)?;
+    for (transaction, address_id) in transactions.into_iter().zip(address_ids) {
+        count += client.add_fiat_transaction(transaction, device_id, wallet_id, address_id)?;
     }
 
     info_with_fields!("setup_dev", step = "fiat transactions added", count = count);
@@ -325,21 +311,19 @@ fn setup_dev_assets(client: &mut DatabaseClient) -> Result<(), Box<dyn Error + S
     let ethereum_asset_id = AssetId::from_chain(Chain::Ethereum);
     let smartchain_asset_id = AssetId::from_chain(Chain::SmartChain);
 
-    let fiat_asset = |provider: FiatProviderName, code: &str, symbol: &str, network: &str, asset_id: &AssetId| FiatAssetRow {
-        id: format!("{}_{}", provider.id(), code).to_lowercase(),
-        asset_id: Some(asset_id.into()),
-        provider: provider.into(),
-        code: code.to_string(),
+    let fiat_asset = |provider: FiatProviderName, code: &str, symbol: &str, network: &str, asset_id: &AssetId| FiatAsset {
+        id: code.to_string(),
+        asset_id: Some(asset_id.clone()),
+        provider,
         symbol: symbol.to_string(),
         network: Some(network.to_string()),
         token_id: None,
-        is_enabled: true,
-        is_enabled_by_provider: true,
+        enabled: true,
         is_buy_enabled: true,
         is_sell_enabled: true,
-        buy_limits: None,
-        sell_limits: None,
-        unsupported_countries: None,
+        unsupported_countries: Default::default(),
+        buy_limits: vec![],
+        sell_limits: vec![],
     };
 
     let fiat_assets = vec![
@@ -355,16 +339,12 @@ fn setup_dev_assets(client: &mut DatabaseClient) -> Result<(), Box<dyn Error + S
 
     info_with_fields!("setup_dev", step = "add fiat provider countries");
 
-    let fiat_countries: Vec<FiatProviderCountryRow> = FiatProviderName::all()
+    let fiat_countries: Vec<FiatProviderCountry> = FiatProviderName::all()
         .into_iter()
-        .map(|provider| {
-            let id = provider.id();
-            FiatProviderCountryRow {
-                id: format!("{}_us", id),
-                provider: provider.into(),
-                alpha2: "US".to_string(),
-                is_allowed: true,
-            }
+        .map(|provider| FiatProviderCountry {
+            provider,
+            alpha2: "US".to_string(),
+            is_allowed: true,
         })
         .collect();
 
@@ -383,12 +363,31 @@ fn setup_dev_assets(client: &mut DatabaseClient) -> Result<(), Box<dyn Error + S
         (PriceProvider::TonApi, TON_DUST_TOKEN_ID, TON_DUST_ASSET_ID.clone(), 0.64),
     ];
 
-    let prices: Vec<NewPriceRow> = coins
+    let prices: Vec<PriceData> = coins
         .iter()
-        .map(|(provider, coin_id, _, base_price)| NewPriceRow::with_market_data(*provider, coin_id.to_string(), None, Some(*base_price), None))
+        .map(|(provider, coin_id, _, base_price)| PriceData {
+            id: PriceId::new(*provider, coin_id.to_string()),
+            provider: *provider,
+            provider_price_id: coin_id.to_string(),
+            price: *base_price,
+            price_change_percentage_24h: 0.0,
+            all_time_high: 0.0,
+            all_time_high_date: None,
+            all_time_low: 0.0,
+            all_time_low_date: None,
+            market_cap_rank: None,
+            total_volume: None,
+            last_updated_at: Utc::now(),
+        })
         .collect();
 
-    let price_assets: Vec<PriceAssetRow> = coins.iter().map(|(provider, coin_id, asset_id, _)| PriceAssetRow::new(asset_id.clone(), *provider, coin_id)).collect();
+    let price_assets: Vec<PriceAsset> = coins
+        .iter()
+        .map(|(provider, coin_id, asset_id, _)| PriceAsset {
+            asset_id: asset_id.clone(),
+            price_id: PriceId::new(*provider, coin_id.to_string()),
+        })
+        .collect();
 
     let result = client.add_prices(prices)?;
     info_with_fields!("setup_dev", step = "prices added", count = result);
@@ -401,9 +400,13 @@ fn setup_dev_assets(client: &mut DatabaseClient) -> Result<(), Box<dyn Error + S
         let gen_price = |i: f64, scale: f64| (base_price + ((i * 0.3 + seed * 7.0).sin() + (i * 0.07).cos()) * base_price * scale).max(base_price * 0.1);
         let price_id = PriceId::id_for(*provider, coin_id);
 
-        let hourly: Vec<ChartRow> = (0i64..720).map(|h| ChartRow::new(price_id.clone(), gen_price(h as f64, 0.1), now - chrono::Duration::hours(h))).collect();
-
-        let daily: Vec<ChartRow> = (30i64..1825).map(|d| ChartRow::new(price_id.clone(), gen_price(d as f64, 0.15), now - chrono::Duration::days(d))).collect();
+        let point = |price: f64, created_at| ChartPoint {
+            price_id: price_id.clone(),
+            price,
+            created_at,
+        };
+        let hourly: Vec<ChartPoint> = (0i64..720).map(|h| point(gen_price(h as f64, 0.1), now - chrono::Duration::hours(h))).collect();
+        let daily: Vec<ChartPoint> = (30i64..1825).map(|d| point(gen_price(d as f64, 0.15), now - chrono::Duration::days(d))).collect();
 
         client.add_charts(ChartTimeframe::Hourly, hourly)?;
         client.add_charts(ChartTimeframe::Daily, daily)?;

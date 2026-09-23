@@ -1,8 +1,8 @@
 use crate::model::IpCheckResult;
 use primitives::rewards::RewardStatus;
-use primitives::{Platform, PlatformStore};
+use primitives::{NewRiskSignal, Platform, PlatformStore, RiskSignal};
 
-use super::model::{NewRiskSignal, RiskScore, RiskScoreConfig, RiskSignal, RiskSignalInput};
+use super::model::{RiskScore, RiskScoreConfig, RiskSignalInput};
 use super::scoring::calculate_risk_score;
 
 #[derive(Debug, Clone)]

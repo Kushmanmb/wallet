@@ -23,7 +23,7 @@ pub async fn ws_stream(ws: WebSocket, auth: AuthenticatedDevice, version: Versio
     let cacher_client = config.cacher_client.clone();
     let retention = config.retention;
     let history_limit = config.history_limit;
-    let device_id = auth.device_row.device_id.clone();
+    let device_id = auth.record.device.id.clone();
 
     ws.channel(move |ws_stream| {
         Box::pin(async move {

@@ -9,8 +9,7 @@ use prices::{AssetPriceFull, AssetPriceMapping, PriceAssetsProvider, PriceProvid
 use primitives::{AssetId, PriceData, PriceId};
 use services::ConfigCacher;
 use services::prices::PriceClient;
-use storage::models::{AssetRow, PriceRow};
-use storage::{AssetFilter, AssetUpdate, AssetsRepository, Database, DatabaseClient, DatabaseError, PriceFilter, PricesRepository};
+use storage::{AssetFilter, AssetSupply, AssetUpdate, AssetsRepository, Database, DatabaseClient, DatabaseError, PriceFilter, PricesRepository};
 use streamer::{PricesPayload, QueueName, StreamProducer, StreamProducerQueue};
 
 const BATCH_SIZE: usize = 1000;
@@ -55,7 +54,7 @@ impl PricesUpdater {
             })
             .await?;
         let retry = config.get_duration(ConfigKey::PriceMetadataRetryInterval).await?.as_secs();
-        let mut ids: Vec<_> = mappings.into_iter().filter(|mapping| enabled.contains(&mapping.asset_id.0)).map(|mapping| mapping.price_id.0).collect();
+        let mut ids: Vec<_> = mappings.into_iter().filter(|mapping| enabled.contains(&mapping.asset_id)).map(|mapping| mapping.price_id).collect();
         ids.sort_by_cached_key(PriceId::id);
         ids.dedup();
         let keys = ids.iter().map(|id| CacheKey::PriceMetadata(&id.to_string(), retry).key()).collect();
@@ -88,7 +87,7 @@ impl PricesUpdater {
         let mappings = self
             .database
             .run(move |client| -> Result<_, DatabaseError> {
-                let prices: Vec<PriceRow> = client.get_prices_by_filter(vec![PriceFilter::Provider(provider)])?.into_iter().skip(offset).take(limit).collect();
+                let prices: Vec<PriceData> = client.get_prices_by_filter(vec![PriceFilter::Provider(provider)])?.into_iter().skip(offset).take(limit).collect();
                 asset_price_mappings(client, prices)
             })
             .await?;
@@ -109,7 +108,13 @@ impl PricesUpdater {
 
         for chunk in assets.chunks(BATCH_SIZE) {
             let asset_ids: Vec<AssetId> = chunk.iter().map(|a| a.mapping.asset_id.clone()).collect();
-            let existing: HashMap<String, AssetRow> = self.database.run(move |client| client.get_assets_rows(asset_ids)).await?.into_iter().map(|a| (a.id.clone(), a)).collect();
+            let existing: HashMap<String, AssetSupply> = self
+                .database
+                .run(move |client| client.get_assets_supply(asset_ids))
+                .await?
+                .into_iter()
+                .map(|(asset_id, supply)| (asset_id.to_string(), supply))
+                .collect();
             let (known, missing): (Vec<&PriceProviderAsset>, Vec<&PriceProviderAsset>) = chunk.iter().partition(|a| existing.contains_key(&a.mapping.asset_id.to_string()));
 
             if !missing.is_empty() {
@@ -161,7 +166,7 @@ impl PricesUpdater {
     }
 }
 
-fn asset_price_mappings(client: &mut DatabaseClient, prices: Vec<PriceRow>) -> Result<Vec<AssetPriceMapping>, DatabaseError> {
+fn asset_price_mappings(client: &mut DatabaseClient, prices: Vec<PriceData>) -> Result<Vec<AssetPriceMapping>, DatabaseError> {
     if prices.is_empty() {
         return Ok(vec![]);
     }
@@ -170,16 +175,16 @@ fn asset_price_mappings(client: &mut DatabaseClient, prices: Vec<PriceRow>) -> R
     Ok(client
         .get_prices_assets_for_price_ids(price_ids)?
         .into_iter()
-        .map(|mapping| AssetPriceMapping::new(mapping.asset_id.0, mapping.price_id.0.provider_price_id))
+        .map(|mapping| AssetPriceMapping::new(mapping.asset_id, mapping.price_id.provider_price_id))
         .collect())
 }
 
-fn asset_supply_update(asset: &PriceProviderAsset, current: &AssetRow) -> Option<(AssetId, AssetUpdate)> {
+fn asset_supply_update(asset: &PriceProviderAsset, current: &AssetSupply) -> Option<(AssetId, AssetUpdate)> {
     let market = asset.market.as_ref()?;
-    let circulating = market.circulating_supply.filter(|v| *v > 0.0).or(current.circulating_supply);
-    let total = market.total_supply.filter(|v| *v > 0.0).or(current.total_supply);
-    let max = market.max_supply.filter(|v| *v > 0.0).or(current.max_supply);
-    if circulating == current.circulating_supply && total == current.total_supply && max == current.max_supply {
+    let circulating = market.circulating_supply.filter(|v| *v > 0.0).or(current.circulating);
+    let total = market.total_supply.filter(|v| *v > 0.0).or(current.total);
+    let max = market.max_supply.filter(|v| *v > 0.0).or(current.max);
+    if circulating == current.circulating && total == current.total && max == current.max {
         return None;
     }
     Some((asset.mapping.asset_id.clone(), AssetUpdate::supply(circulating, total, max)?))

@@ -48,8 +48,8 @@ impl ObservedPricesUpdater {
         let mut by_provider: HashMap<PriceProvider, Vec<AssetPriceMapping>> = HashMap::new();
         let primary_price_max_age = self.config.primary_price_max_age;
         let primary_prices = self.database.run(move |client| client.get_primary_prices(&asset_ids, primary_price_max_age)).await?;
-        for (asset_id, row) in primary_prices {
-            by_provider.entry(row.provider_value()).or_default().push(AssetPriceMapping::new(asset_id, row.provider_price_id().to_string()));
+        for (asset_id, price) in primary_prices {
+            by_provider.entry(price.provider).or_default().push(AssetPriceMapping::new(asset_id, price.provider_price_id));
         }
 
         let mut total = 0;

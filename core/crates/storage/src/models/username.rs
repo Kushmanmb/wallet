@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Queryable, Selectable, Serialize, Deserialize, Clone)]
 #[diesel(table_name = crate::schema::usernames)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct UsernameRow {
+pub(crate) struct UsernameRow {
     pub username: String,
     pub wallet_id: i32,
     pub status: UsernameStatus,
@@ -14,7 +14,7 @@ pub struct UsernameRow {
 #[derive(Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::usernames)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct NewUsernameRow {
+pub(crate) struct NewUsernameRow {
     pub username: String,
     pub wallet_id: i32,
     pub status: UsernameStatus,

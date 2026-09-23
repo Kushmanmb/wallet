@@ -18,27 +18,45 @@ enum DeviceFilter {
     CreatedBetween { start: NaiveDateTime, end: NaiveDateTime },
 }
 
+#[derive(Debug, Clone)]
+pub struct DeviceRecord {
+    pub id: i32,
+    pub device: Device,
+    pub created_at: NaiveDateTime,
+}
+
+impl DeviceRecord {
+    pub(crate) fn from_row(row: DeviceRow) -> Self {
+        Self {
+            id: row.id,
+            device: row.as_primitive(),
+            created_at: row.created_at,
+        }
+    }
+}
+
 pub trait DevicesRepository {
-    fn add_device(&mut self, device: UpdateDeviceRow) -> Result<Device, DatabaseError>;
+    fn add_device(&mut self, device: Device) -> Result<Device, DatabaseError>;
     fn get_device_by_id(&mut self, id: i32) -> Result<Device, DatabaseError>;
     fn get_device(&mut self, device_id: &str) -> Result<Device, DatabaseError>;
-    fn get_device_row(&mut self, device_id: &str) -> Result<DeviceRow, DatabaseError>;
+    fn get_device_record(&mut self, device_id: &str) -> Result<DeviceRecord, DatabaseError>;
     fn get_device_exist(&mut self, device_id: &str) -> Result<bool, DatabaseError>;
     fn get_device_row_id(&mut self, device_id: &str) -> Result<i32, DatabaseError>;
-    fn update_device(&mut self, device: UpdateDeviceRow) -> Result<Device, DatabaseError>;
+    fn update_device(&mut self, device: Device) -> Result<Device, DatabaseError>;
     fn update_device_fields(&mut self, device_ids: Vec<String>, updates: Vec<DeviceFieldUpdate>) -> Result<usize, DatabaseError>;
     fn delete_devices_subscriptions_after_days(&mut self, days: i64) -> Result<usize, DatabaseError>;
     fn devices_inactive_days(&mut self, min_days: i64, max_days: i64, push_enabled: Option<bool>) -> Result<Vec<Device>, DatabaseError>;
 }
 
-fn device_row(client: &mut DatabaseClient, device_id_value: &str) -> Result<DeviceRow, diesel::result::Error> {
+pub(crate) fn device_row(client: &mut DatabaseClient, device_id_value: &str) -> Result<DeviceRow, diesel::result::Error> {
     use crate::schema::devices::dsl::*;
     devices.filter(device_id.eq(device_id_value)).select(DeviceRow::as_select()).first(&mut client.connection)
 }
 
 impl DevicesRepository for DatabaseClient {
-    fn add_device(&mut self, device: UpdateDeviceRow) -> Result<Device, DatabaseError> {
+    fn add_device(&mut self, device: Device) -> Result<Device, DatabaseError> {
         use crate::schema::devices::dsl::*;
+        let device = UpdateDeviceRow::from_primitive(device);
         Ok(diesel::insert_into(devices)
             .values(&device)
             .on_conflict(device_id)
@@ -63,8 +81,8 @@ impl DevicesRepository for DatabaseClient {
         Ok(device_row(self, device_id).or_not_found(device_id.to_string())?.as_primitive())
     }
 
-    fn get_device_row(&mut self, device_id: &str) -> Result<DeviceRow, DatabaseError> {
-        device_row(self, device_id).or_not_found(device_id.to_string())
+    fn get_device_record(&mut self, device_id: &str) -> Result<DeviceRecord, DatabaseError> {
+        Ok(DeviceRecord::from_row(device_row(self, device_id).or_not_found(device_id.to_string())?))
     }
 
     fn get_device_exist(&mut self, device_id: &str) -> Result<bool, DatabaseError> {
@@ -79,7 +97,8 @@ impl DevicesRepository for DatabaseClient {
         Ok(device_row(self, device_id).or_not_found(device_id.to_string())?.id)
     }
 
-    fn update_device(&mut self, device: UpdateDeviceRow) -> Result<Device, DatabaseError> {
+    fn update_device(&mut self, device: Device) -> Result<Device, DatabaseError> {
+        let device = UpdateDeviceRow::from_primitive(device);
         let device_id_value = device.device_id.clone();
         use crate::schema::devices::dsl::*;
         Ok(diesel::update(devices)

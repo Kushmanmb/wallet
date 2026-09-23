@@ -28,6 +28,7 @@ pub mod price_alert_mock;
 pub mod price_data_mock;
 pub mod quote_asset_mock;
 pub mod rewards_mock;
+pub mod risk_signal_mock;
 pub mod scan_mock;
 pub mod search_mock;
 pub mod signer_mock;

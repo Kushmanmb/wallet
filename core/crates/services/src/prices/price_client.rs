@@ -9,8 +9,7 @@ use gem_tracing::error_with_fields;
 use prices::{AssetPriceFull, AssetPriceMapping, PriceAssetsProvider, PriceProviders};
 use primitives::currency::Currency;
 use primitives::{AssetId, AssetMarketPrice, AssetPriceInfo, AssetPrices, ChartTimeframe, FiatRate, FiatRateProvider, PriceData, PriceId, PriceProvider};
-use storage::models::{FiatRateRow, NewPriceRow, PriceAssetRow};
-use storage::{AssetFilter, AssetsRepository, ChartsRepository, Database, DatabaseError, FiatRepository, PricesRepository};
+use storage::{AssetFilter, AssetsRepository, ChartsRepository, Database, DatabaseError, FiatRepository, PriceAsset, PricesRepository};
 
 use crate::ConfigCacher;
 
@@ -27,8 +26,7 @@ impl PriceClient {
     }
 
     pub async fn set_fiat_rates(&self, provider: FiatRateProvider, rates: Vec<FiatRate>) -> Result<usize, Box<dyn Error + Send + Sync>> {
-        let rows = rates.into_iter().map(|rate| FiatRateRow::from_primitive(rate, provider)).collect();
-        let (count, rates) = self.database.run(move |client| -> Result<_, DatabaseError> { Ok((client.set_fiat_rates(rows)?, client.get_fiat_rates()?)) }).await?;
+        let (count, rates) = self.database.run(move |client| -> Result<_, DatabaseError> { Ok((client.set_fiat_rates(provider, rates)?, client.get_fiat_rates()?)) }).await?;
 
         self.set_cache_fiat_rates(rates).await?;
 
@@ -53,7 +51,7 @@ impl PriceClient {
             .run(move |client| client.get_prices_for_asset(&price_asset_id))
             .await?
             .into_iter()
-            .map(|row| row.as_primitive().with_rate(rate))
+            .map(|price| price.as_price().with_rate(rate))
             .collect();
         Ok(AssetMarketPrice {
             price: Some(price.as_price_primitive_with_rate(rate)),
@@ -180,15 +178,25 @@ impl PriceClient {
     }
 
     pub async fn save_prices(&self, provider: PriceProvider, prices: &[AssetPriceFull]) -> Result<usize, Box<dyn Error + Send + Sync>> {
-        let new_prices: Vec<NewPriceRow> = prices
+        let new_prices: Vec<PriceData> = prices
             .iter()
-            .map(|p| NewPriceRow::with_market_data(provider, p.mapping.provider_price_id.clone(), p.market.as_ref(), Some(p.price.price), Some(p.price.price_change_percentage_24h)))
+            .map(|price| PriceData {
+                id: PriceId::new(provider, price.mapping.provider_price_id.clone()),
+                provider,
+                ..price.as_price_data()
+            })
             .collect();
-        let asset_rows: Vec<PriceAssetRow> = prices.iter().map(|p| PriceAssetRow::new(p.mapping.asset_id.clone(), provider, &p.mapping.provider_price_id)).collect();
+        let price_assets: Vec<PriceAsset> = prices
+            .iter()
+            .map(|price| PriceAsset {
+                asset_id: price.mapping.asset_id.clone(),
+                price_id: PriceId::new(provider, price.mapping.provider_price_id.clone()),
+            })
+            .collect();
         self.database
             .run(move |client| -> Result<_, DatabaseError> {
                 client.add_prices(new_prices)?;
-                client.set_prices_assets(asset_rows)
+                client.set_prices_assets(price_assets)
             })
             .await?;
         Ok(prices.len())

@@ -1,23 +1,31 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use diesel::result::Error as DieselError;
-use primitives::rewards::{RewardRedemption, RewardRedemptionOption, RewardRedemptionType as PrimitiveRewardRedemptionType};
+use primitives::rewards::{RedemptionStatus as PrimitiveRedemptionStatus, RewardRedemption, RewardRedemptionOption, RewardRedemptionType as PrimitiveRewardRedemptionType};
 
 use crate::models::{AssetRow, NewRewardRedemptionRow, RedemptionOptionFull, RewardRedemptionOptionRow, RewardRedemptionRow};
 use crate::repositories::rewards_repository::{RewardsFilter, get_rewards_by_filter};
 use crate::sql_types::{RedemptionStatus, RewardRedemptionType};
 use crate::{DatabaseClient, DatabaseError, DieselResultExt};
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct RedemptionRecord {
+    pub username: String,
+    pub option_id: String,
+    pub wallet_id: i32,
+    pub status: PrimitiveRedemptionStatus,
+}
+
 #[derive(Debug, Clone)]
 pub enum RedemptionUpdate {
-    Status(RedemptionStatus),
+    Status(PrimitiveRedemptionStatus),
     TransactionId(String),
     Error(String),
 }
 
 pub trait RewardsRedemptionsRepository {
     fn add_redemption(&mut self, username: &str, option_id: &str, device_id: i32, wallet_id: i32) -> Result<RewardRedemption, DatabaseError>;
-    fn get_redemption(&mut self, redemption_id: i32) -> Result<RewardRedemptionRow, DatabaseError>;
+    fn get_redemption(&mut self, redemption_id: i32) -> Result<RedemptionRecord, DatabaseError>;
     fn update_redemption(&mut self, redemption_id: i32, updates: Vec<RedemptionUpdate>) -> Result<(), DatabaseError>;
     fn get_redemption_options(&mut self, types: &[PrimitiveRewardRedemptionType]) -> Result<Vec<RewardRedemptionOption>, DatabaseError>;
     fn get_redemption_option(&mut self, id: &str) -> Result<RewardRedemptionOption, DatabaseError>;
@@ -107,8 +115,14 @@ impl RewardsRedemptionsRepository for DatabaseClient {
         Ok(redemption_row.as_primitive(option))
     }
 
-    fn get_redemption(&mut self, redemption_id: i32) -> Result<RewardRedemptionRow, DatabaseError> {
-        redemption_row(self, redemption_id).or_not_found_internal(redemption_id.to_string())
+    fn get_redemption(&mut self, redemption_id: i32) -> Result<RedemptionRecord, DatabaseError> {
+        let row = redemption_row(self, redemption_id).or_not_found_internal(redemption_id.to_string())?;
+        Ok(RedemptionRecord {
+            username: row.username,
+            option_id: row.option_id,
+            wallet_id: row.wallet_id,
+            status: row.status.0,
+        })
     }
 
     fn update_redemption(&mut self, redemption_id: i32, updates: Vec<RedemptionUpdate>) -> Result<(), DatabaseError> {
@@ -121,7 +135,7 @@ impl RewardsRedemptionsRepository for DatabaseClient {
         for update in updates {
             let target = dsl::rewards_redemptions.find(redemption_id);
             match update {
-                RedemptionUpdate::Status(value) => diesel::update(target).set(dsl::status.eq(value)).execute(&mut self.connection)?,
+                RedemptionUpdate::Status(value) => diesel::update(target).set(dsl::status.eq(RedemptionStatus::from(value))).execute(&mut self.connection)?,
                 RedemptionUpdate::TransactionId(value) => diesel::update(target).set(dsl::transaction_id.eq(value)).execute(&mut self.connection)?,
                 RedemptionUpdate::Error(value) => diesel::update(target).set(dsl::error.eq(value)).execute(&mut self.connection)?,
             };

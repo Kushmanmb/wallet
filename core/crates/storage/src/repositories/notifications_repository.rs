@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
-use primitives::NotificationData;
+use primitives::{AssetId, NotificationData, NotificationType};
 
 use crate::models::{AssetRow, NewNotificationRow, NotificationRow};
 use crate::schema::{assets, devices, notifications, wallets, wallets_subscriptions};
@@ -12,9 +12,17 @@ fn wallet_ids_by_device_id(device_id: &str) -> WalletIdsSubquery<'_> {
     wallets_subscriptions::table.inner_join(devices::table).filter(devices::device_id.eq(device_id)).select(wallets_subscriptions::wallet_id)
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct NewNotification {
+    pub wallet_id: i32,
+    pub asset_id: Option<AssetId>,
+    pub notification_type: NotificationType,
+    pub metadata: Option<serde_json::Value>,
+}
+
 pub trait NotificationsRepository {
     fn get_notifications_by_device_id(&mut self, device_id: &str, from_datetime: Option<NaiveDateTime>, limit: usize) -> Result<Vec<NotificationData>, DatabaseError>;
-    fn create_notifications(&mut self, notifications: Vec<NewNotificationRow>) -> Result<usize, DatabaseError>;
+    fn create_notifications(&mut self, notifications: Vec<NewNotification>) -> Result<usize, DatabaseError>;
     fn mark_all_as_read(&mut self, device_id: &str) -> Result<usize, DatabaseError>;
 }
 
@@ -36,8 +44,17 @@ impl NotificationsRepository for DatabaseClient {
         Ok(rows.into_iter().map(|(row, wallet_identifier, asset_row)| row.as_primitive(wallet_identifier, asset_row.map(|a| a.as_primitive()))).collect())
     }
 
-    fn create_notifications(&mut self, values: Vec<NewNotificationRow>) -> Result<usize, DatabaseError> {
-        Ok(diesel::insert_into(notifications::table).values(&values).execute(&mut self.connection)?)
+    fn create_notifications(&mut self, values: Vec<NewNotification>) -> Result<usize, DatabaseError> {
+        let rows: Vec<NewNotificationRow> = values
+            .into_iter()
+            .map(|value| NewNotificationRow {
+                wallet_id: value.wallet_id,
+                asset_id: value.asset_id.map(Into::into),
+                notification_type: value.notification_type.into(),
+                metadata: value.metadata,
+            })
+            .collect();
+        Ok(diesel::insert_into(notifications::table).values(&rows).execute(&mut self.connection)?)
     }
 
     fn mark_all_as_read(&mut self, device_id: &str) -> Result<usize, DatabaseError> {

@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
-use primitives::Platform as PrimitivePlatform;
+use primitives::{NewRiskSignal, Platform as PrimitivePlatform, RiskSignal};
 
 use crate::models::{NewRiskSignalRow, RiskSignalRow};
 use crate::sql_types::{Platform, RewardStatus};
@@ -18,9 +18,9 @@ pub struct AbusePatterns {
 }
 
 pub trait RiskSignalsRepository {
-    fn add_risk_signal(&mut self, signal: NewRiskSignalRow) -> Result<i32, DatabaseError>;
+    fn add_risk_signal(&mut self, signal: NewRiskSignal) -> Result<i32, DatabaseError>;
     fn has_fingerprint_for_referrer(&mut self, fingerprint: &str, referrer_username: &str, since: NaiveDateTime) -> Result<bool, DatabaseError>;
-    fn get_matching_risk_signals(&mut self, fingerprint: &str, ip_address: &str, ip_isp: &str, device_model: &str, device_id: i32, since: NaiveDateTime) -> Result<Vec<RiskSignalRow>, DatabaseError>;
+    fn get_matching_risk_signals(&mut self, fingerprint: &str, ip_address: &str, ip_isp: &str, device_model: &str, device_id: i32, since: NaiveDateTime) -> Result<Vec<RiskSignal>, DatabaseError>;
     fn sum_risk_scores_for_referrer(&mut self, referrer_username: &str, since: NaiveDateTime) -> Result<i64, DatabaseError>;
     fn count_attempts_for_referrer(&mut self, referrer_username: &str, since: NaiveDateTime) -> Result<i64, DatabaseError>;
     fn get_referrer_usernames_with_referrals(&mut self, since: NaiveDateTime, min_referrals: i64) -> Result<Vec<String>, DatabaseError>;
@@ -37,8 +37,27 @@ pub trait RiskSignalsRepository {
 }
 
 impl RiskSignalsRepository for DatabaseClient {
-    fn add_risk_signal(&mut self, signal: NewRiskSignalRow) -> Result<i32, DatabaseError> {
+    fn add_risk_signal(&mut self, signal: NewRiskSignal) -> Result<i32, DatabaseError> {
         use crate::schema::rewards_risk_signals::dsl;
+        let signal = NewRiskSignalRow {
+            fingerprint: signal.fingerprint,
+            referrer_username: signal.referrer_username,
+            device_id: signal.device_id,
+            device_platform: signal.device_platform.into(),
+            device_platform_store: signal.device_platform_store.into(),
+            device_os: signal.device_os,
+            device_model: signal.device_model,
+            device_locale: signal.device_locale,
+            device_currency: signal.device_currency,
+            ip_address: signal.ip_address,
+            ip_country_code: signal.ip_country_code,
+            ip_usage_type: signal.ip_usage_type.into(),
+            ip_isp: signal.ip_isp,
+            ip_abuse_score: signal.ip_abuse_score,
+            risk_score: signal.risk_score,
+            user_agent: signal.user_agent,
+            metadata: Some(signal.metadata),
+        };
         Ok(diesel::insert_into(dsl::rewards_risk_signals).values(&signal).returning(dsl::id).get_result(&mut self.connection)?)
     }
 
@@ -55,10 +74,10 @@ impl RiskSignalsRepository for DatabaseClient {
         .get_result(&mut self.connection)?)
     }
 
-    fn get_matching_risk_signals(&mut self, fingerprint: &str, ip_address: &str, ip_isp: &str, device_model: &str, device_id: i32, since: NaiveDateTime) -> Result<Vec<RiskSignalRow>, DatabaseError> {
+    fn get_matching_risk_signals(&mut self, fingerprint: &str, ip_address: &str, ip_isp: &str, device_model: &str, device_id: i32, since: NaiveDateTime) -> Result<Vec<RiskSignal>, DatabaseError> {
         use crate::schema::rewards_risk_signals::dsl;
 
-        Ok(dsl::rewards_risk_signals
+        let rows = dsl::rewards_risk_signals
             .filter(dsl::created_at.ge(since))
             .filter(
                 dsl::fingerprint
@@ -70,7 +89,20 @@ impl RiskSignalsRepository for DatabaseClient {
             .order(dsl::created_at.desc())
             .limit(100)
             .select(RiskSignalRow::as_select())
-            .load(&mut self.connection)?)
+            .load(&mut self.connection)?;
+        Ok(rows
+            .into_iter()
+            .map(|row| RiskSignal {
+                fingerprint: row.fingerprint,
+                referrer_username: row.referrer_username,
+                device_id: row.device_id,
+                device_platform: row.device_platform.0,
+                device_model: row.device_model,
+                ip_address: row.ip_address,
+                ip_isp: row.ip_isp,
+                created_at: row.created_at,
+            })
+            .collect())
     }
 
     fn sum_risk_scores_for_referrer(&mut self, referrer_username: &str, since: NaiveDateTime) -> Result<i64, DatabaseError> {

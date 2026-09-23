@@ -11,11 +11,9 @@ use fiat::{FiatDeviceContext, FiatProvider, FiatWebhookRequest, IPAddressInfo, I
 use futures::future::join_all;
 use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::{
-    Asset, AssetId, Chain, FiatAssetSymbol, FiatAssets, FiatProvider as PrimitiveFiatProvider, FiatQuoteError as ProviderQuoteError, FiatQuoteRequest, FiatQuoteType, FiatQuoteUrl, FiatQuoteUrlData, FiatQuotes, FiatTransaction, FiatWebhook,
-    RequestError,
+    Asset, AssetId, Chain, FiatAsset, FiatAssetSymbol, FiatAssets, FiatQuoteError as ProviderQuoteError, FiatQuoteRequest, FiatQuoteType, FiatQuoteUrl, FiatQuoteUrlData, FiatQuotes, FiatTransaction, FiatWebhook, RequestError,
 };
-use storage::models::{FiatAssetRow, NewFiatTransactionRow, WalletAddressRow};
-use storage::{AssetFilter, AssetsRepository, Database, DatabaseError, FiatRepository, WalletsRepository};
+use storage::{AssetFilter, AssetsRepository, Database, DatabaseError, FiatRepository, WalletAddress, WalletsRepository};
 use streamer::{FiatWebhookPayload, QueueName, StreamProducer};
 
 use super::fiat_cacher_client::{CachedFiatQuote, FiatCacherClient};
@@ -142,7 +140,6 @@ impl FiatClient {
             .database
             .run(move |client| -> Result<_, DatabaseError> { Ok((client.get_fiat_providers_countries()?, client.get_fiat_assets_for_asset_id(&asset_id)?, client.get_fiat_providers()?)) })
             .await?;
-        let db_providers: Vec<PrimitiveFiatProvider> = db_providers.into_iter().map(|provider| provider.as_primitive()).collect();
         let ip_address_info = self.get_ip_address(ip_address).await.map_err(|error| format!("IP address validation failed: {error}"))?;
         let fiat_mapping_map = fiat_mapping(asset, request.quote_type, fiat_assets);
         let country_code = &ip_address_info.alpha2;
@@ -189,11 +186,11 @@ impl FiatClient {
     async fn create_quote_url(&self, quote_id: &str, context: &FiatDeviceContext, locale: &str, cached_quote: CachedFiatQuote) -> Result<FiatQuoteUrl, Box<dyn Error + Send + Sync>> {
         let CachedFiatQuote { quote, asset_symbol, country_code, .. } = cached_quote;
         let provider = self.provider(quote.provider.id.as_ref())?;
-        let wallet_address_row = self.subscription_address(context, quote.asset.chain()).await?;
+        let wallet_address = self.subscription_address(context, quote.asset.chain()).await?;
         let data = FiatQuoteUrlData {
             quote,
             asset_symbol,
-            wallet_address: wallet_address_row.address,
+            wallet_address: wallet_address.address,
             ip_address: context.ip_address.clone(),
             locale: locale.to_string(),
         };
@@ -204,9 +201,8 @@ impl FiatClient {
             None => self.get_ip_address(&context.ip_address).await?.alpha2,
         };
         let pending_transaction = FiatTransaction::new_pending(&data, Some(country), url.provider_transaction_id.clone());
-        let pending_transaction_row = NewFiatTransactionRow::new(pending_transaction, context.device_id, context.wallet_id, wallet_address_row.id);
-
-        self.database.run(move |client| client.add_fiat_transaction(pending_transaction_row)).await?;
+        let (device_id, wallet_id, address_id) = (context.device_id, context.wallet_id, wallet_address.id);
+        self.database.run(move |client| client.add_fiat_transaction(pending_transaction, device_id, wallet_id, address_id)).await?;
         self.fiat_cacher.set_quote_url(context, quote_id, &url).await?;
 
         Ok(url)
@@ -217,7 +213,7 @@ impl FiatClient {
         self.database.run(move |client| client.get_asset(&asset_id)).await
     }
 
-    async fn subscription_address(&self, context: &FiatDeviceContext, chain: Chain) -> Result<WalletAddressRow, Box<dyn Error + Send + Sync>> {
+    async fn subscription_address(&self, context: &FiatDeviceContext, chain: Chain) -> Result<WalletAddress, Box<dyn Error + Send + Sync>> {
         let (device_id, wallet_id) = (context.device_id, context.wallet_id);
         match self.database.run(move |client| client.subscriptions_wallet_address_for_chain(device_id, wallet_id, chain)).await {
             Ok(address) => Ok(address),
@@ -243,25 +239,25 @@ impl FiatClient {
     }
 }
 
-fn fiat_mapping(asset: &Asset, quote_type: FiatQuoteType, fiat_assets: Vec<FiatAssetRow>) -> FiatMappingMap {
+fn fiat_mapping(asset: &Asset, quote_type: FiatQuoteType, fiat_assets: Vec<FiatAsset>) -> FiatMappingMap {
     fiat_assets
         .into_iter()
         .filter(|fiat_asset| match quote_type {
-            FiatQuoteType::Buy => fiat_asset.is_buy_enabled(),
-            FiatQuoteType::Sell => fiat_asset.is_sell_enabled(),
+            FiatQuoteType::Buy => fiat_asset.is_buy_enabled,
+            FiatQuoteType::Sell => fiat_asset.is_sell_enabled,
         })
         .map(|fiat_asset| {
             (
-                fiat_asset.provider.0.id().to_string(),
+                fiat_asset.provider.id().to_string(),
                 FiatMapping {
                     asset: asset.clone(),
                     asset_symbol: FiatAssetSymbol {
-                        symbol: fiat_asset.symbol.clone(),
-                        network: fiat_asset.network.clone(),
+                        symbol: fiat_asset.symbol,
+                        network: fiat_asset.network,
                     },
-                    unsupported_countries: fiat_asset.unsupported_countries(),
-                    buy_limits: fiat_asset.buy_limits(),
-                    sell_limits: fiat_asset.sell_limits(),
+                    unsupported_countries: fiat_asset.unsupported_countries,
+                    buy_limits: fiat_asset.buy_limits,
+                    sell_limits: fiat_asset.sell_limits,
                 },
             )
         })

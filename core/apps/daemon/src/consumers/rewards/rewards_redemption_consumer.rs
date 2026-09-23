@@ -1,12 +1,11 @@
 use async_trait::async_trait;
 use gem_tracing::info_with_fields;
-use primitives::rewards::RedemptionStatus as PrimitiveRedemptionStatus;
+use primitives::rewards::RedemptionStatus;
 use primitives::{NotificationRewardsRedeemMetadata, NotificationType, TransactionId};
 use rewards::{RedemptionAsset, RedemptionRequest, RedemptionService};
 use std::error::Error;
 use std::sync::Arc;
 use std::time::Duration;
-use storage::sql_types::RedemptionStatus;
 use storage::{Database, DatabaseError, RedemptionUpdate, RewardsRedemptionsRepository, RewardsRepository};
 use streamer::consumer::MessageConsumer;
 use streamer::{InAppNotificationPayload, QueueName, RewardsRedemptionPayload, StreamProducer, StreamProducerQueue};
@@ -54,14 +53,14 @@ impl<S: RedemptionService> RewardsRedemptionConsumer<S> {
 }
 
 #[async_trait]
-impl<S: RedemptionService> MessageConsumer<RewardsRedemptionPayload, PrimitiveRedemptionStatus> for RewardsRedemptionConsumer<S> {
+impl<S: RedemptionService> MessageConsumer<RewardsRedemptionPayload, RedemptionStatus> for RewardsRedemptionConsumer<S> {
     async fn should_process(&self, payload: &RewardsRedemptionPayload) -> Result<bool, Box<dyn Error + Send + Sync>> {
         let redemption_id = payload.redemption_id;
         let redemption = self.database.run(move |client| client.get_redemption(redemption_id)).await?;
-        Ok(*redemption.status == PrimitiveRedemptionStatus::Pending)
+        Ok(redemption.status == RedemptionStatus::Pending)
     }
 
-    async fn process(&self, payload: RewardsRedemptionPayload) -> Result<PrimitiveRedemptionStatus, Box<dyn Error + Send + Sync>> {
+    async fn process(&self, payload: RewardsRedemptionPayload) -> Result<RedemptionStatus, Box<dyn Error + Send + Sync>> {
         let redemption_id = payload.redemption_id;
         let (redemption, recipient_address, option) = self
             .database
@@ -106,14 +105,14 @@ impl<S: RedemptionService> MessageConsumer<RewardsRedemptionPayload, PrimitiveRe
                 }
 
                 info_with_fields!("redemption completed", id = payload.redemption_id, asset = asset_id_str.as_deref().unwrap_or("none"), value = value, tx_id = transaction_id);
-                Ok(PrimitiveRedemptionStatus::Completed)
+                Ok(RedemptionStatus::Completed)
             }
             Err(e) => {
                 let error_msg = e.to_string();
                 let updates = vec![RedemptionUpdate::Status(RedemptionStatus::Failed), RedemptionUpdate::Error(error_msg.clone())];
                 self.database.run(move |client| client.update_redemption(redemption_id, updates)).await?;
                 info_with_fields!("redemption failed", id = payload.redemption_id, asset = asset_id_str.as_deref().unwrap_or("none"), value = value, error = error_msg);
-                Ok(PrimitiveRedemptionStatus::Failed)
+                Ok(RedemptionStatus::Failed)
             }
         }
     }

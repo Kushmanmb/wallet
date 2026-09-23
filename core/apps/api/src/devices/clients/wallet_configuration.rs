@@ -50,10 +50,7 @@ impl WalletConfigurationClient {
 
     async fn subscribed_addresses(&self, device_id: i32, wallet_id: i32) -> Result<HashSet<ChainAddress>, Box<dyn Error + Send + Sync>> {
         let subscriptions = self.database.run(move |client| client.get_subscriptions_by_wallet_id(device_id, wallet_id)).await?;
-        Ok(subscriptions
-            .into_iter()
-            .filter_map(|(subscription, address)| ADDRESS_STATUS_CHAINS.contains(&subscription.chain.0).then_some(ChainAddress::new(subscription.chain.0, address.address)))
-            .collect())
+        Ok(subscriptions.into_iter().filter(|subscription| ADDRESS_STATUS_CHAINS.contains(&subscription.chain)).collect())
     }
 
     async fn get_statuses(&self, address: &ChainAddress) -> Option<Vec<AddressStatus>> {

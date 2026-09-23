@@ -1,7 +1,7 @@
 use primitives::AssetId;
 use std::collections::HashMap;
 use std::error::Error;
-use storage::{AssetUsageRankRow, AssetsUsageRanksRepository, Database, DatabaseError, TransactionsRepository};
+use storage::{AssetsUsageRanksRepository, Database, DatabaseError, TransactionsRepository};
 
 #[derive(Clone, Copy)]
 pub struct UsageRankUpdaterConfig {
@@ -32,10 +32,7 @@ impl UsageRankUpdater {
                 add_weighted_counts(&mut raw_scores, client.get_asset_usage_counts(now - chrono::Duration::days(7))?, 10);
                 add_weighted_counts(&mut raw_scores, client.get_asset_usage_counts(thirty_days_ago)?, 1);
 
-                let rows: Vec<AssetUsageRankRow> = usage_ranks_from_scores(raw_scores)
-                    .into_iter()
-                    .map(|(asset_id, usage_rank)| AssetUsageRankRow { asset_id: asset_id.into(), usage_rank })
-                    .collect();
+                let rows = usage_ranks_from_scores(raw_scores);
 
                 client.delete_usage_ranks_before(thirty_days_ago)?;
                 rows.chunks(batch_size).try_fold(0, |total, batch| Ok(total + client.upsert_usage_ranks(batch)?))

@@ -19,12 +19,11 @@ use gem_tracing::{DurationMs, error_with_fields, info_with_fields};
 use primitives::Chain;
 use services::Services;
 use settings::Settings;
-use std::str::FromStr;
 use streamer::{StreamProducer, StreamProducerQueue, TransactionsPayload};
 
 use crate::shutdown::{self, ShutdownReceiver};
 use plan::{BlockPlan, BlockPlanKind, plan_next_block, should_reload_catchup, timeout_for_state};
-use storage::{Database, ParserStateRepository, models::ParserStateRow};
+use storage::{Database, ParserState, ParserStateRepository};
 
 pub struct Parser {
     chain: Chain,
@@ -60,7 +59,7 @@ impl Parser {
         shutdown::sleep_or_shutdown(duration, &self.shutdown_rx).await
     }
 
-    async fn wait_if_disabled(&self, state: &ParserStateRow, timeout: Duration) -> bool {
+    async fn wait_if_disabled(&self, state: &ParserState, timeout: Duration) -> bool {
         if state.is_enabled {
             true
         } else {
@@ -69,7 +68,7 @@ impl Parser {
         }
     }
 
-    async fn get_latest_block(&self, state: &ParserStateRow) -> Result<i64, Box<dyn Error + Send + Sync>> {
+    async fn get_latest_block(&self, state: &ParserState) -> Result<i64, Box<dyn Error + Send + Sync>> {
         let latest_block = self.provider.get_block_latest_number().await? as i64;
         let _ = self.state_service.set_latest_block(latest_block).await;
 
@@ -80,7 +79,7 @@ impl Parser {
         Ok(latest_block)
     }
 
-    async fn execute_plan(&self, plan: BlockPlan, state: &ParserStateRow, timeout: Duration) -> Result<bool, Box<dyn Error + Send + Sync>> {
+    async fn execute_plan(&self, plan: BlockPlan, state: &ParserState, timeout: Duration) -> Result<bool, Box<dyn Error + Send + Sync>> {
         let start = Instant::now();
         let blocks_desc = format!("{:?}", plan.range.blocks);
 
@@ -217,7 +216,7 @@ pub async fn run(settings: Settings, chain: Option<Chain>, health_state: Arc<Hea
     let chains: Vec<Chain> = if let Some(chain) = chain {
         vec![chain]
     } else {
-        database.run(|client| client.get_parser_states()).await?.into_iter().flat_map(|x| Chain::from_str(x.chain.as_ref())).collect()
+        database.run(|client| client.get_parser_states()).await?.into_iter().map(|x| x.chain).collect()
     };
 
     let chain_names = chains.iter().map(Chain::as_ref).collect::<Vec<_>>().join(",");

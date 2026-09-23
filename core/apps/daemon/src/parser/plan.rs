@@ -2,7 +2,7 @@ use std::cmp;
 use std::time::Duration;
 
 use chrono::Utc;
-use storage::models::ParserStateRow;
+use storage::ParserState;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum BlockPlanKind {
@@ -23,7 +23,7 @@ pub struct BlockPlan {
     pub kind: BlockPlanKind,
 }
 
-pub fn timeout_for_state(state: &ParserStateRow, min_check: Duration, max_check: Duration) -> Duration {
+pub fn timeout_for_state(state: &ParserState, min_check: Duration, max_check: Duration) -> Duration {
     let block_time = Duration::from_millis(state.block_time as u64);
     if block_time.is_zero() {
         return cmp::max(Duration::from_millis(state.timeout_latest_block as u64), min_check);
@@ -40,7 +40,7 @@ pub fn should_reload_catchup(remaining: i64, interval: i64) -> bool {
     interval > 0 && remaining % interval == 0
 }
 
-pub fn plan_next_block(state: &ParserStateRow, current_block: i64, latest_block: i64) -> Option<BlockPlan> {
+pub fn plan_next_block(state: &ParserState, current_block: i64, latest_block: i64) -> Option<BlockPlan> {
     if !state.is_enabled {
         return None;
     }
@@ -70,16 +70,16 @@ mod tests {
     use super::{BlockPlanKind, plan_next_block, should_reload_catchup, timeout_for_state};
     use chrono::Utc;
     use std::time::Duration;
-    use storage::models::ParserStateRow;
+    use storage::ParserState;
 
     const MIN: Duration = Duration::from_secs(1);
     const MAX: Duration = Duration::from_secs(8);
 
     #[test]
     fn test_timeout_for_state_no_block_time() {
-        let s = ParserStateRow {
+        let s = ParserState {
             timeout_latest_block: 500,
-            ..ParserStateRow::mock()
+            ..ParserState::mock()
         };
         assert_eq!(timeout_for_state(&s, MIN, MAX), MIN);
         assert_eq!(timeout_for_state(&s, Duration::from_millis(100), MAX), Duration::from_millis(500));
@@ -87,10 +87,10 @@ mod tests {
 
     #[test]
     fn test_timeout_for_state_uses_remaining_block_time() {
-        let s = ParserStateRow {
+        let s = ParserState {
             block_time: 12_000,
             updated_at: Utc::now().naive_utc() - chrono::Duration::seconds(4),
-            ..ParserStateRow::mock()
+            ..ParserState::mock()
         };
         let timeout = timeout_for_state(&s, MIN, MAX);
         assert!(timeout >= Duration::from_secs(7) && timeout <= Duration::from_secs(9));
@@ -98,20 +98,20 @@ mod tests {
 
     #[test]
     fn test_timeout_for_state_caps_at_max() {
-        let s = ParserStateRow {
+        let s = ParserState {
             block_time: 600_000,
             updated_at: Utc::now().naive_utc(),
-            ..ParserStateRow::mock()
+            ..ParserState::mock()
         };
         assert_eq!(timeout_for_state(&s, MIN, MAX), MAX);
     }
 
     #[test]
     fn test_timeout_for_state_overdue_block() {
-        let s = ParserStateRow {
+        let s = ParserState {
             block_time: 10_000,
             updated_at: Utc::now().naive_utc() - chrono::Duration::seconds(15),
-            ..ParserStateRow::mock()
+            ..ParserState::mock()
         };
         assert_eq!(timeout_for_state(&s, MIN, MAX), MIN);
     }
@@ -125,10 +125,10 @@ mod tests {
 
     #[test]
     fn test_plan_next_block_returns_none_when_no_blocks() {
-        let state = ParserStateRow {
+        let state = ParserState {
             await_blocks: 5,
             parallel_blocks: 3,
-            ..ParserStateRow::mock()
+            ..ParserState::mock()
         };
         let plan = plan_next_block(&state, 10, 12);
         assert!(plan.is_none());
@@ -136,10 +136,10 @@ mod tests {
 
     #[test]
     fn test_plan_next_block_returns_none_when_disabled() {
-        let state = ParserStateRow {
+        let state = ParserState {
             parallel_blocks: 3,
             is_enabled: false,
-            ..ParserStateRow::mock()
+            ..ParserState::mock()
         };
 
         assert!(plan_next_block(&state, 5, 10).is_none());
@@ -147,10 +147,7 @@ mod tests {
 
     #[test]
     fn test_plan_next_block_builds_expected_blocks() {
-        let state = ParserStateRow {
-            parallel_blocks: 3,
-            ..ParserStateRow::mock()
-        };
+        let state = ParserState { parallel_blocks: 3, ..ParserState::mock() };
         let plan = plan_next_block(&state, 5, 10).unwrap();
         assert_eq!(plan.range.blocks, vec![6, 7, 8]);
         assert_eq!(plan.range.end_block, 8);
@@ -163,10 +160,10 @@ mod tests {
 
     #[test]
     fn test_plan_next_block_enqueues_when_behind() {
-        let state = ParserStateRow {
+        let state = ParserState {
             parallel_blocks: 3,
             queue_behind_blocks: Some(2),
-            ..ParserStateRow::mock()
+            ..ParserState::mock()
         };
         let plan = plan_next_block(&state, 5, 20).unwrap();
         if let BlockPlanKind::Enqueue = plan.kind {

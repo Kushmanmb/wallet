@@ -4,7 +4,7 @@ use std::{collections::HashMap, error::Error};
 use async_trait::async_trait;
 use futures::{StreamExt, stream};
 use primitives::{AssetIdVecExt, Chain, DeviceSubscription, NFTAssetId, NFTChain, Transaction, TransactionId, TransactionState, TransactionType};
-use storage::{AssetFilter, AssetsAddressesRepository, AssetsRepository, Database, DatabaseError, NftAssetFilter, NftRepository, TransactionsRepository, WalletsRepository};
+use storage::{AssetFilter, AssetsAddressesRepository, AssetsRepository, Database, DatabaseError, NftRepository, TransactionsRepository, WalletsRepository};
 use streamer::{AssetId, NotificationsPayload, StreamProducer, StreamProducerQueue, TransactionNotificationType, TransactionsPayload, WalletStreamEvent, WalletStreamPayload, consumer::MessageConsumer};
 use swapper::cross_chain::{self, DepositAddressMap, SendAddressMap};
 
@@ -233,8 +233,7 @@ impl StoreTransactionsConsumer {
             return Ok(Vec::new());
         }
         let identifiers: Vec<String> = nft_asset_ids.iter().map(|id| id.to_string()).collect();
-        let existing = self.database.run(move |client| client.get_nft_assets_by_filter(vec![NftAssetFilter::Identifiers(identifiers)])).await?;
-        let existing_ids: HashSet<NFTAssetId> = existing.into_iter().map(|row| row.identifier.0).collect();
+        let existing_ids: HashSet<NFTAssetId> = self.database.run(move |client| client.get_nft_asset_ids(identifiers)).await?.into_iter().collect();
         Ok(nft_asset_ids.into_iter().filter(|id| !existing_ids.contains(id)).collect())
     }
 

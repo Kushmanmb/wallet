@@ -5,7 +5,7 @@ use localizer::LanguageLocalizer;
 use number_formatter::{ValueFormatter, ValueStyle};
 use primitives::{Device, JsonDecode, NotificationRewardsRedeemMetadata, NotificationType, RewardEventType};
 use push_notification::{GorushNotification, PushNotification, PushNotificationReward, PushNotificationTypes};
-use storage::{AssetsRepository, Database, DatabaseError, NewNotificationRow, NotificationType as StorageNotificationType, NotificationsRepository, WalletsRepository};
+use storage::{AssetsRepository, Database, DatabaseError, NewNotification, NotificationsRepository, WalletsRepository};
 use streamer::{InAppNotificationPayload, NotificationsPayload, StreamProducer, StreamProducerQueue, consumer::MessageConsumer};
 
 pub struct InAppNotificationsConsumer {
@@ -47,10 +47,10 @@ impl MessageConsumer<InAppNotificationPayload, usize> for InAppNotificationsCons
             .and_then(|(m, asset)| ValueFormatter::format_with_symbol(ValueStyle::Auto, &m.value.to_string(), asset.decimals, &asset.symbol).ok());
         let points = redeem.as_ref().map(|m| m.points).unwrap_or(0);
 
-        let notification = NewNotificationRow {
+        let notification = NewNotification {
             wallet_id: payload.wallet_id,
-            asset_id: payload.asset_id.map(Into::into),
-            notification_type: StorageNotificationType::from(payload.notification_type),
+            asset_id: payload.asset_id.clone(),
+            notification_type: payload.notification_type,
             metadata: payload.metadata.clone(),
         };
         let wallet_id = payload.wallet_id;
@@ -58,7 +58,7 @@ impl MessageConsumer<InAppNotificationPayload, usize> for InAppNotificationsCons
             .database
             .run(move |client| -> Result<_, DatabaseError> {
                 client.create_notifications(vec![notification])?;
-                Ok(client.get_devices_by_wallet_id(wallet_id)?.into_iter().map(|d| d.as_primitive()).collect())
+                client.get_devices_by_wallet_id(wallet_id)
             })
             .await?;
 

@@ -96,7 +96,7 @@ impl ScanClient {
             .database
             .run(move |client| -> Result<_, DatabaseError> {
                 let queries = queries.iter().map(|(chain, address)| (*chain, address.as_str())).collect::<Vec<_>>();
-                let addresses = client.get_scan_addresses(&queries)?.iter().map(|address| address.as_scan_address()).collect();
+                let addresses = client.get_scan_addresses(&queries)?;
                 let assets = client.get_assets_basic(asset_ids)?;
                 let verdicts = match detection_max_age {
                     Some(max_age) => client.get_scan_detections(targets, max_age)?,

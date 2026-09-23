@@ -3,4 +3,4 @@ mod model;
 mod scoring;
 
 pub use client::{RiskResult, RiskScoringInput, evaluate_risk};
-pub use model::{NewRiskSignal, RiskScoreConfig, RiskSignal, RiskSignalInput};
+pub use model::{RiskScoreConfig, RiskSignalInput};

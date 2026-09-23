@@ -19,6 +19,13 @@ enum ChartGranularity {
 
 pub type ChartResult = (chrono::NaiveDateTime, f64);
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct ChartPoint {
+    pub price_id: String,
+    pub price: f64,
+    pub created_at: NaiveDateTime,
+}
+
 #[derive(Debug, Clone)]
 pub enum ChartFilter {
     CreatedBefore(NaiveDateTime),
@@ -26,8 +33,25 @@ pub enum ChartFilter {
     PriceIds(Vec<String>),
 }
 
+pub(crate) fn insert_chart_rows(client: &mut DatabaseClient, timeframe: ChartTimeframe, values: Vec<ChartRow>) -> Result<usize, diesel::result::Error> {
+    if values.is_empty() {
+        return Ok(0);
+    }
+    match timeframe {
+        ChartTimeframe::Raw => diesel::insert_into(charts).values(values).on_conflict_do_nothing().execute(&mut client.connection),
+        ChartTimeframe::Hourly => {
+            let rows: Vec<HourlyChartRow> = values.into_iter().map(Into::into).collect();
+            diesel::insert_into(charts_hourly).values(rows).on_conflict_do_nothing().execute(&mut client.connection)
+        }
+        ChartTimeframe::Daily => {
+            let rows: Vec<DailyChartRow> = values.into_iter().map(Into::into).collect();
+            diesel::insert_into(charts_daily).values(rows).on_conflict_do_nothing().execute(&mut client.connection)
+        }
+    }
+}
+
 pub trait ChartsRepository {
-    fn add_charts(&mut self, timeframe: ChartTimeframe, values: Vec<ChartRow>) -> Result<usize, DatabaseError>;
+    fn add_charts(&mut self, timeframe: ChartTimeframe, values: Vec<ChartPoint>) -> Result<usize, DatabaseError>;
     fn get_charts(&mut self, price_id: &str, period: &ChartPeriod) -> Result<Vec<ChartResult>, DatabaseError>;
     fn aggregate_charts(&mut self, timeframe: ChartTimeframe) -> Result<usize, DatabaseError>;
     fn delete_charts(&mut self, timeframe: ChartTimeframe, before: NaiveDateTime) -> Result<usize, DatabaseError>;
@@ -35,21 +59,9 @@ pub trait ChartsRepository {
 }
 
 impl ChartsRepository for DatabaseClient {
-    fn add_charts(&mut self, timeframe: ChartTimeframe, values: Vec<ChartRow>) -> Result<usize, DatabaseError> {
-        if values.is_empty() {
-            return Ok(0);
-        }
-        match timeframe {
-            ChartTimeframe::Raw => Ok(diesel::insert_into(charts).values(values).on_conflict_do_nothing().execute(&mut self.connection)?),
-            ChartTimeframe::Hourly => {
-                let rows: Vec<HourlyChartRow> = values.into_iter().map(Into::into).collect();
-                Ok(diesel::insert_into(charts_hourly).values(rows).on_conflict_do_nothing().execute(&mut self.connection)?)
-            }
-            ChartTimeframe::Daily => {
-                let rows: Vec<DailyChartRow> = values.into_iter().map(Into::into).collect();
-                Ok(diesel::insert_into(charts_daily).values(rows).on_conflict_do_nothing().execute(&mut self.connection)?)
-            }
-        }
+    fn add_charts(&mut self, timeframe: ChartTimeframe, values: Vec<ChartPoint>) -> Result<usize, DatabaseError> {
+        let rows = values.into_iter().map(|point| ChartRow::new(point.price_id, point.price, point.created_at)).collect();
+        Ok(insert_chart_rows(self, timeframe, rows)?)
     }
 
     fn get_charts(&mut self, price_id: &str, period: &ChartPeriod) -> Result<Vec<ChartResult>, DatabaseError> {

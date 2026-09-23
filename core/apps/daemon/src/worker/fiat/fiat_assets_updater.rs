@@ -2,7 +2,7 @@ use chrono::{Duration, Utc};
 use fiat::{FiatProvider, model::FiatProviderAsset};
 use gem_tracing::info_with_fields;
 use primitives::{AssetId, AssetTag, Diff, FiatProviderName, currency::Currency};
-use storage::{AssetFilter, AssetUpdate, FiatAssetFilter, FiatAssetRowsExt, FiatAssetUpdate, FiatProviderCountryFilter, FiatProviderCountryUpdate};
+use storage::{AssetFilter, AssetUpdate, FiatAssetFilter};
 use storage::{AssetsRepository, Database, DatabaseError, FiatRepository, TagRepository};
 
 #[derive(Clone, Copy)]
@@ -25,7 +25,7 @@ impl FiatAssetsUpdater {
         Ok(self
             .database
             .run(|client| -> Result<usize, DatabaseError> {
-                let enabled_asset_ids = client.get_fiat_assets_by_filter(Self::fiat_asset_filters(FiatAssetDirection::Buy))?.asset_ids();
+                let enabled_asset_ids = client.get_fiat_asset_ids_by_filter(Self::fiat_asset_filters(FiatAssetDirection::Buy))?;
                 let buyable_assets_ids = client
                     .get_assets_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::IsBuyable(true)])?
                     .into_iter()
@@ -45,7 +45,7 @@ impl FiatAssetsUpdater {
         Ok(self
             .database
             .run(|client| -> Result<usize, DatabaseError> {
-                let enabled_asset_ids = client.get_fiat_assets_by_filter(Self::fiat_asset_filters(FiatAssetDirection::Sell))?.asset_ids();
+                let enabled_asset_ids = client.get_fiat_asset_ids_by_filter(Self::fiat_asset_filters(FiatAssetDirection::Sell))?;
                 let sellable_assets_ids = client
                     .get_assets_by_filter(vec![AssetFilter::IsEnabled(true), AssetFilter::IsSellable(true)])?
                     .into_iter()
@@ -118,23 +118,7 @@ impl FiatAssetsUpdater {
                     .collect();
 
                 let assets = validated_assets.into_iter().map(|(fiat_asset, asset)| Self::map_fiat_asset(fiat_asset, asset)).collect::<Vec<primitives::FiatAsset>>();
-
-                let insert_assets = assets.into_iter().map(storage::models::FiatAssetRow::from_primitive).collect::<Result<Vec<storage::models::FiatAssetRow>, _>>()?;
-                let ids = insert_assets.iter().map(|asset| asset.id.clone()).collect::<Vec<_>>();
-
-                if !insert_assets.is_empty() {
-                    client.add_fiat_assets(insert_assets)?;
-                }
-                if ids.is_empty() {
-                    return Ok(0);
-                }
-                let current_ids = client
-                    .get_fiat_assets_by_filter(vec![FiatAssetFilter::Provider(provider_name), FiatAssetFilter::IsEnabledByProvider(true)])?
-                    .into_iter()
-                    .map(|asset| asset.id)
-                    .collect();
-                let result = Diff::compare(current_ids, ids);
-                client.update_fiat_assets(result.different, vec![FiatAssetUpdate::IsEnabledByProvider(false)])
+                client.sync_fiat_assets(provider_name, assets)
             })
             .await?;
 
@@ -147,26 +131,7 @@ impl FiatAssetsUpdater {
         let provider = self.get_provider(provider_name)?;
         let countries = provider.get_countries().await?;
         let country_count = countries.len();
-        let country_rows = countries.into_iter().map(storage::models::FiatProviderCountryRow::from_primitive).collect::<Vec<_>>();
-        let ids = country_rows.iter().map(|country| country.id.clone()).collect::<Vec<_>>();
-        let disabled = self
-            .database
-            .run(move |client| -> Result<usize, DatabaseError> {
-                if !country_rows.is_empty() {
-                    client.add_fiat_providers_countries(country_rows)?;
-                }
-                if ids.is_empty() {
-                    return Ok(0);
-                }
-                let current_ids = client
-                    .get_fiat_providers_countries_by_filter(vec![FiatProviderCountryFilter::Provider(provider_name), FiatProviderCountryFilter::IsAllowed(true)])?
-                    .into_iter()
-                    .map(|country| country.id)
-                    .collect();
-                let result = Diff::compare(current_ids, ids);
-                client.update_fiat_providers_countries(result.different, vec![FiatProviderCountryUpdate::IsAllowed(false)])
-            })
-            .await?;
+        let disabled = self.database.run(move |client| client.sync_fiat_providers_countries(provider_name, countries)).await?;
         info_with_fields!("fiat update countries", provider = provider_name.id(), countries = country_count, disabled = disabled);
         Ok(country_count)
     }
@@ -183,8 +148,8 @@ impl FiatAssetsUpdater {
             is_buy_enabled: fiat_asset.is_buy_enabled,
             is_sell_enabled: fiat_asset.is_sell_enabled,
             unsupported_countries: fiat_asset.unsupported_countries.unwrap_or_default(),
-            buy_limits: fiat_asset.buy_limits.into_iter().filter(|x| x.currency == Currency::USD).collect::<Vec<_>>(), // stored usd only for now
-            sell_limits: fiat_asset.sell_limits.into_iter().filter(|x| x.currency == Currency::USD).collect::<Vec<_>>(), // stored usd only for now
+            buy_limits: fiat_asset.buy_limits.into_iter().filter(|x| x.currency == Currency::USD).collect::<Vec<_>>(),
+            sell_limits: fiat_asset.sell_limits.into_iter().filter(|x| x.currency == Currency::USD).collect::<Vec<_>>(),
         }
     }
 }

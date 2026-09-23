@@ -3,13 +3,12 @@ use super::database::run_migrations;
 use super::scan_addresses::setup_scan_addresses;
 use config_keys::{ConfigKey, ConfigParamKey};
 use gem_tracing::info_with_fields;
-use primitives::{Asset, AssetTag, Chain, FiatProviderName, NFTChain, PlatformStore as PrimitivePlatformStore, PriceProvider};
+use primitives::{Asset, AssetTag, Chain, FiatProviderName, NFTChain, PlatformStore as PrimitivePlatformStore, PriceProvider, Release};
 use search_index::{INDEX_CONFIGS, INDEX_PRIMARY_KEY};
 use services::Services;
 use settings::Settings;
 use std::collections::HashSet;
 use std::sync::Arc;
-use storage::models::ConfigRow;
 use storage::{ApiClientsRepository, AssetsRepository, ChainsRepository, ConfigRepository, Database, DatabaseError, FiatRepository, ParserStateRepository, PricesProvidersRepository, ReleasesRepository, TagRepository};
 use streamer::{ExchangeKind, ExchangeName, QueueName};
 
@@ -48,39 +47,26 @@ pub(super) async fn setup_database(database: &Database) -> Result<(), Box<dyn st
             let _ = client.add_assets(assets);
 
             info_with_fields!("setup", step = "fiat providers");
-            let providers = FiatProviderName::all().into_iter().map(storage::models::FiatProviderRow::from_primitive).collect::<Vec<_>>();
-            let _ = client.add_fiat_providers(providers);
+            let _ = client.add_fiat_providers(FiatProviderName::all());
 
             info_with_fields!("setup", step = "api clients");
             let _ = client.add_api_client_grants(setup_api_client_grants());
 
             info_with_fields!("setup", step = "releases");
-            let releases = PrimitivePlatformStore::all()
-                .into_iter()
-                .map(|x| storage::models::ReleaseRow {
-                    platform_store: x.into(),
-                    version: "1.0.0".to_string(),
-                    upgrade_required: false,
-                    update_enabled: true,
-                })
-                .collect::<Vec<_>>();
+            let releases = PrimitivePlatformStore::all().into_iter().map(|store| Release::new(store, "1.0.0".to_string(), false)).collect::<Vec<_>>();
             let _ = client.add_releases(releases);
 
             info_with_fields!("setup", step = "assets tags");
-            let assets_tags = AssetTag::all().into_iter().map(storage::models::TagRow::from_primitive).collect::<Vec<_>>();
-            let _ = client.add_tags(assets_tags);
+            let _ = client.add_tags(AssetTag::all());
 
             info_with_fields!("setup", step = "prices providers");
-            let providers = PriceProvider::all().into_iter().map(|provider| storage::models::PriceProviderConfigRow::new(provider, true)).collect::<Vec<_>>();
-            let _ = client.add_prices_providers(providers);
+            let _ = client.add_prices_providers(PriceProvider::all());
 
             info_with_fields!("setup", step = "config");
-            let configs: Vec<ConfigRow> = ConfigKey::all().into_iter().map(ConfigRow::from_primitive).collect();
-            let _ = client.add_config(configs);
+            let _ = client.add_config_keys(ConfigKey::all());
 
             info_with_fields!("setup", step = "param config");
-            let param_configs: Vec<ConfigRow> = ConfigParamKey::all().into_iter().map(ConfigRow::from_param).collect();
-            let _ = client.add_config(param_configs);
+            let _ = client.add_config_params(ConfigParamKey::all());
 
             info_with_fields!("setup", step = "cleanup stale config keys");
             let valid: HashSet<String> = ConfigKey::all().into_iter().map(|k| k.as_ref().to_string()).chain(ConfigParamKey::all().into_iter().map(|k| k.key())).collect();

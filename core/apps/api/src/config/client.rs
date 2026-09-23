@@ -25,8 +25,6 @@ impl ConfigClient {
             })
             .await?;
 
-        let releases = releases.into_iter().map(|x| x.as_primitive()).collect();
-
         let response = ConfigResponse {
             releases,
             versions: ConfigVersions {

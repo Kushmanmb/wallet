@@ -1,10 +1,11 @@
 use std::collections::HashSet;
 use std::time::Duration;
 
+use primitives::RiskSignal;
 use primitives::rewards::RewardStatus;
 use regex::Regex;
 
-use super::model::{RiskScore, RiskScoreBreakdown, RiskScoreConfig, RiskSignal, RiskSignalInput};
+use super::model::{RiskScore, RiskScoreBreakdown, RiskScoreConfig, RiskSignalInput};
 
 pub fn calculate_risk_score(
     input: &RiskSignalInput,

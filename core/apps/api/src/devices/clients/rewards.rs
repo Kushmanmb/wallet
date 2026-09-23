@@ -4,13 +4,12 @@ use std::sync::Arc;
 use cacher::{CacherClient, GLOBAL_RATE_LIMIT_SCOPE, RateLimiter};
 use config_keys::{ConfigKey, RateLimitKey, RateLimitWindow};
 use primitives::rewards::{RewardRedemptionOption, RewardStatus};
-use primitives::{Localize, NaiveDateTimeExt, Platform, ReferralLeaderboard, RewardEvent, Rewards, WalletId, now};
+use primitives::{Localize, NaiveDateTimeExt, Platform, ReferralLeaderboard, RewardEvent, Rewards, WalletId, WalletSource, WalletType, now};
 use pusher::PusherClient;
 use rewards::{ReferralError, ReferralValidationError, RewardsError, RiskScoreConfig, RiskScoringInput, UsernameError};
 use services::ConfigCacher;
 use services::rewards::{IpSecurityClient, ReferralVerificationConfig, RiskAssessment, assess_referral_risk, create_username, referral_use_facts, rewards_by_wallet_id, use_or_verify_referral, username_rules};
-use storage::models::DeviceRow;
-use storage::{Database, DatabaseError, NewWalletRow, RewardsRedemptionsRepository, RewardsRepository, WalletSource, WalletType, WalletsRepository};
+use storage::{Database, DatabaseError, DeviceRecord, NewWallet, RewardsRedemptionsRepository, RewardsRepository, WalletsRepository};
 use streamer::{RewardsNotificationPayload, StreamProducer, StreamProducerQueue};
 
 enum ReferralCodeUse {
@@ -129,14 +128,14 @@ impl RewardsClient {
         if self.consume_rate_limit(key, scope).await? { Ok(()) } else { Err(UsernameError::LimitReached(key).into()) }
     }
 
-    pub async fn use_referral_code(&self, device: &DeviceRow, address: &str, code: &str, ip_address: &str, user_agent: &str) -> Result<Vec<RewardEvent>, Box<dyn Error + Send + Sync>> {
-        let locale = device.locale.as_ref();
-        let wallet_identifier = WalletId::Multicoin(address.to_string()).id();
+    pub async fn use_referral_code(&self, device: &DeviceRecord, address: &str, code: &str, ip_address: &str, user_agent: &str) -> Result<Vec<RewardEvent>, Box<dyn Error + Send + Sync>> {
+        let locale = device.device.locale.as_ref();
+        let wallet_id = WalletId::Multicoin(address.to_string());
         let wallet = self
             .db
             .run(move |client| {
-                client.get_or_create_wallet(NewWalletRow {
-                    identifier: wallet_identifier,
+                client.get_or_create_wallet(NewWallet {
+                    wallet_id,
                     wallet_type: WalletType::Multicoin,
                     source: WalletSource::Import,
                 })
@@ -204,14 +203,14 @@ impl RewardsClient {
         }
     }
 
-    async fn validate_and_score_referral(&self, device: &DeviceRow, wallet_id: i32, referrer_username: &str, ip_address: &str, user_agent: &str) -> ReferralProcessResult {
+    async fn validate_and_score_referral(&self, device: &DeviceRecord, wallet_id: i32, referrer_username: &str, ip_address: &str, user_agent: &str) -> ReferralProcessResult {
         match self.validate_and_score_referral_inner(device, wallet_id, referrer_username, ip_address, user_agent).await {
             Ok(result) => result,
             Err(e) => ReferralProcessResult::Failed(e),
         }
     }
 
-    async fn validate_and_score_referral_inner(&self, device: &DeviceRow, wallet_id: i32, referrer_username: &str, ip_address: &str, user_agent: &str) -> Result<ReferralProcessResult, ReferralError> {
+    async fn validate_and_score_referral_inner(&self, device: &DeviceRecord, wallet_id: i32, referrer_username: &str, ip_address: &str, user_agent: &str) -> Result<ReferralProcessResult, ReferralError> {
         let device_id = device.id.to_string();
         self.consume_referral_limits([
             (RateLimitKey::ReferralGlobalLimit, GLOBAL_RATE_LIMIT_SCOPE),
@@ -255,8 +254,8 @@ impl RewardsClient {
             .await
             .map_err(ReferralError::internal)??;
 
-        if *device.platform == Platform::Android {
-            match self.pusher.is_device_token_valid(&device.token, device.platform.as_i32()).await {
+        if device.device.platform == Platform::Android {
+            match self.pusher.is_device_token_valid(&device.device.token, device.device.platform.as_i32()).await {
                 Ok(true) => {}
                 Ok(false) => return Err(ReferralError::InvalidDeviceToken("token_not_registered".to_string())),
                 Err(e) => return Err(ReferralError::InvalidDeviceToken(e.to_string())),
@@ -279,12 +278,12 @@ impl RewardsClient {
         let scoring_input = RiskScoringInput {
             username: referrer_username.to_string(),
             device_id: device.id,
-            device_platform: *device.platform,
-            device_platform_store: *device.platform_store,
-            device_os: device.os.clone(),
-            device_model: device.model.clone(),
-            device_locale: device.locale.as_ref().to_string(),
-            device_currency: device.currency.to_string(),
+            device_platform: device.device.platform,
+            device_platform_store: device.device.platform_store,
+            device_os: device.device.os.clone(),
+            device_model: device.device.model.clone(),
+            device_locale: device.device.locale.as_ref().to_string(),
+            device_currency: device.device.currency.to_string(),
             ip_result,
             referrer_status: referrer_info.status,
             referrer_referral_count: referrer_info.referral_count as i64,

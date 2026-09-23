@@ -95,12 +95,13 @@ impl<'r> FromRequest<'r> for WebhookRequest {
 async fn authorize_webhook(database: &State<Database>, kind: WebhookKind, sender: &str, secret: &str) -> Result<(), ApiError> {
     let secret = secret.to_string();
     let resource = ApiClientResource::WebhookSender(sender.to_string());
-    database
-        .run(move |client| client.get_enabled_api_client(&secret, ApiClientScope::webhook(kind), resource))
+    let exists = database
+        .run(move |client| client.has_enabled_api_client(&secret, ApiClientScope::webhook(kind), resource))
         .await
-        .map_err(|_| ApiError::InternalServerError("Failed to load webhook endpoint".to_string()))?
-        .ok_or_else(|| ApiError::NotFound("Webhook endpoint not found".to_string()))?;
-
+        .map_err(|_| ApiError::InternalServerError("Failed to load webhook endpoint".to_string()))?;
+    if !exists {
+        return Err(ApiError::NotFound("Webhook endpoint not found".to_string()));
+    }
     Ok(())
 }
 

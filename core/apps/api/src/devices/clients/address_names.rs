@@ -31,7 +31,7 @@ impl AddressNamesClient {
             .await?;
         let scan_names = scan_rows
             .into_iter()
-            .filter_map(|x| x.as_primitive())
+            .filter_map(|scan_address| scan_address.address_name())
             .map(|name| (ChainAddress::new(name.chain, name.address.clone()), name))
             .collect::<HashMap<_, _>>();
         let asset_names = assets.into_iter().filter_map(asset_entry).collect::<HashMap<_, _>>();

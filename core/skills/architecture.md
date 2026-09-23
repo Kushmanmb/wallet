@@ -37,7 +37,7 @@ Reference: `crates/gem_hypercore/src/provider/balances.rs` and `balances_mapper.
 
 ## Repository Pattern
 
-Backend code reaches Postgres through `Database::run(|client| …)`, or `Database::transaction(|client| …)` when several writes must commit together. The closure runs on a blocking thread with one pooled connection, so async workers never block on diesel. Put the queries of one unit of work in one closure and keep network calls outside it. Repository traits are implemented on `DatabaseClient` and return primitives, not database models; business logic stays in the service that composes them.
+Backend code reaches Postgres through `Database::run(|client| …)`, or `Database::transaction(|client| …)` when several writes must commit together. The closure runs on a blocking thread with one pooled connection, so async workers never block on diesel. Put the queries of one unit of work in one closure and keep network calls outside it. Repository traits are implemented on `DatabaseClient` and take and return `primitives` types; row models, `sql_types` wrappers and `schema` stay `pub(crate)` to `storage`. When no primitive fits (surrogate ids, partial projections), return a small plain struct from the repository module (`DeviceRecord`, `PriceAsset`). Resolve surrogate keys inside storage; business logic stays in the service that composes the repositories.
 
 Reference: `crates/storage/src/lib.rs` (`Database`).
 

@@ -42,12 +42,12 @@ async fn authorize_api_client(req: &Request<'_>, scope: ApiClientScope) -> Outco
     };
 
     let secret = secret.to_string();
-    let client = match database.run(move |client| client.get_enabled_api_client(&secret, scope, ApiClientResource::Global)).await {
-        Ok(client) => client,
+    let exists = match database.run(move |client| client.has_enabled_api_client(&secret, scope, ApiClientResource::Global)).await {
+        Ok(exists) => exists,
         Err(_) => return error_outcome(req, Status::InternalServerError, "Failed to load API client"),
     };
 
-    if client.is_none() {
+    if !exists {
         return error_outcome(req, Status::Unauthorized, &format!("Invalid API client for scope {}", scope.as_ref()));
     }
 

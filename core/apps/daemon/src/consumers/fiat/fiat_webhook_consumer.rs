@@ -6,8 +6,7 @@ use gem_tracing::{error_with_fields, info_with_fields};
 use localizer::LanguageLocalizer;
 use primitives::{Device, FiatTransactionStatus, FiatWebhook, TransactionId};
 use push_notification::{GorushNotification, PushNotification};
-use storage::models::FiatTransactionRow;
-use storage::{AssetsRepository, Database, DatabaseError, FiatRepository, WalletsRepository};
+use storage::{AssetsRepository, Database, DatabaseError, FiatRepository, FiatTransactionRecord, WalletsRepository};
 use streamer::consumer::MessageConsumer;
 use streamer::{FiatWebhookPayload, NotificationsPayload, QueueName, StreamProducer, StreamProducerQueue, WalletStreamEvent, WalletStreamPayload};
 
@@ -24,15 +23,15 @@ impl FiatWebhookConsumer {
         Self { database, providers, stream_producer }
     }
 
-    async fn send_fiat_notification(&self, updated: &FiatTransactionRow) -> Result<(), Box<dyn Error + Send + Sync>> {
-        let asset_id = updated.asset_id.0.clone();
+    async fn send_fiat_notification(&self, updated: &FiatTransactionRecord) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let asset_id = updated.asset_id.clone();
         let wallet_row_id = updated.wallet_id;
         let (asset, wallet_id, devices) = self
             .database
             .run(move |client| -> Result<_, DatabaseError> {
                 let asset = client.get_asset(&asset_id)?;
-                let wallet_id = client.get_wallet_by_id(wallet_row_id)?.wallet_id.0;
-                let devices: Vec<Device> = client.get_devices_by_wallet_id(wallet_row_id)?.into_iter().map(|d| d.as_primitive()).collect();
+                let wallet_id = client.get_wallet_by_id(wallet_row_id)?.wallet_id;
+                let devices: Vec<Device> = client.get_devices_by_wallet_id(wallet_row_id)?;
                 Ok((asset, wallet_id, devices))
             })
             .await?;
@@ -40,8 +39,8 @@ impl FiatWebhookConsumer {
         let Some(crypto_value) = updated.value.as_deref() else {
             return Ok(());
         };
-        let provider = updated.provider_id.0;
-        let quote_type = updated.transaction_type.0;
+        let provider = updated.provider;
+        let quote_type = updated.transaction_type;
         let notifications: Vec<GorushNotification> = devices
             .iter()
             .filter_map(|device| {
@@ -107,14 +106,14 @@ impl MessageConsumer<FiatWebhookPayload, bool> for FiatWebhookConsumer {
             "processed webhook",
             provider = provider_id,
             provider_transaction_id = updated.provider_transaction_id.as_deref().unwrap_or(""),
-            status = format!("{:?}", updated.status.0),
+            status = format!("{:?}", updated.status),
             quote_id = updated.quote_id.as_str(),
             transaction_hash = updated.transaction_hash.as_deref().unwrap_or("")
         );
 
-        if updated.status.0 == FiatTransactionStatus::Complete && !existing.is_some_and(|row| row.status.0 == FiatTransactionStatus::Complete) {
+        if updated.status == FiatTransactionStatus::Complete && !existing.is_some_and(|record| record.status == FiatTransactionStatus::Complete) {
             if let Some(hash) = &updated.transaction_hash {
-                let transaction_id = TransactionId::new(updated.asset_id.0.chain, hash.clone());
+                let transaction_id = TransactionId::new(updated.asset_id.chain, hash.clone());
                 let _ = self.stream_producer.publish(QueueName::StorePendingTransactions, &transaction_id).await;
                 info_with_fields!("published fiat transaction to pending", provider = provider_id, transaction_id = transaction_id.to_string());
             }

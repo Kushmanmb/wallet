@@ -2,7 +2,6 @@ use std::error::Error;
 
 use crate::params::MAX_QUERY_LIMIT;
 use primitives::{AssetId, Transaction, TransactionId, TransactionsResponse};
-use storage::models::TransactionRow;
 use storage::{Database, DatabaseError, DevicesRepository, ScanAddressesRepository, TransactionsRepository, WalletsRepository};
 
 use chrono::{DateTime, Utc};
@@ -32,10 +31,10 @@ impl TransactionsClient {
             .database
             .run(move |client| {
                 let subscriptions = client.get_subscriptions_by_wallet_id(device_row_id, wallet_id)?;
-                let addresses = subscriptions.iter().map(|(_, addr)| addr.address.clone()).collect::<Vec<_>>();
-                let chains = subscriptions.iter().map(|(sub, _)| sub.chain.0.as_ref().to_string()).collect::<Vec<_>>();
-                let rows = client.get_transactions_by_device_id(&device_id, addresses.clone(), chains, asset_id, from_datetime, limit, offset)?;
-                transactions_response(client, rows, addresses)
+                let addresses = subscriptions.iter().map(|subscription| subscription.address.clone()).collect::<Vec<_>>();
+                let chains = subscriptions.iter().map(|subscription| subscription.chain.as_ref().to_string()).collect::<Vec<_>>();
+                let transactions = client.get_transactions_by_device_id(&device_id, addresses.clone(), chains, asset_id, from_datetime, limit, offset)?;
+                transactions_response(client, transactions, addresses)
             })
             .await?)
     }
@@ -47,54 +46,50 @@ impl TransactionsClient {
             .run(move |client| {
                 let device_row_id = client.get_device_row_id(&device_id)?;
                 let subscriptions = client.get_subscriptions(device_row_id)?;
-                let addresses = subscriptions.iter().map(|(_, _, addr)| addr.address.clone()).collect::<Vec<_>>();
-                let chains = subscriptions.iter().map(|(_, sub, _)| sub.chain.0.as_ref().to_string()).collect::<Vec<_>>();
+                let addresses = subscriptions.iter().map(|(_, subscription)| subscription.address.clone()).collect::<Vec<_>>();
+                let chains = subscriptions.iter().map(|(_, subscription)| subscription.chain.as_ref().to_string()).collect::<Vec<_>>();
 
                 if addresses.is_empty() || chains.is_empty() {
                     return Ok(TransactionsResponse::new(Vec::new(), Vec::new()));
                 }
 
-                let rows = client.get_transactions_by_device_id(&device_id, addresses.clone(), chains, None, None, MAX_QUERY_LIMIT, 0)?;
-                transactions_response(client, rows, addresses)
+                let transactions = client.get_transactions_by_device_id(&device_id, addresses.clone(), chains, None, None, MAX_QUERY_LIMIT, 0)?;
+                transactions_response(client, transactions, addresses)
             })
             .await?)
     }
 
     pub async fn get_transaction_by_id(&self, id: &TransactionId) -> Result<Transaction, Box<dyn Error + Send + Sync>> {
         let id = id.clone();
-        let row = self.database.run(move |client| client.get_transaction_by_id(&id)).await?;
-        Ok(row.as_primitive(vec![])?)
+        Ok(self.database.run(move |client| client.get_transaction_by_id(&id, vec![])).await?)
     }
 
     pub async fn get_transaction_by_wallet_id(&self, device_row_id: i32, wallet_id: i32, id: &TransactionId) -> Result<Transaction, Box<dyn Error + Send + Sync>> {
         let id = id.clone();
-        let (addresses, row) = self
+        let (addresses, transaction) = self
             .database
             .run(move |client| -> Result<_, DatabaseError> {
-                let addresses = client.get_subscriptions_by_wallet_id(device_row_id, wallet_id)?.into_iter().map(|(_, address)| address.address).collect::<Vec<_>>();
-                Ok((addresses, client.get_transaction_by_id(&id)?))
+                let addresses = client.get_subscriptions_by_wallet_id(device_row_id, wallet_id)?.into_iter().map(|subscription| subscription.address).collect::<Vec<_>>();
+                let transaction = client.get_transaction_by_id(&id, addresses.clone())?;
+                Ok((addresses, transaction))
             })
             .await?;
-        Ok(row.as_primitive(addresses.clone())?.finalize(addresses))
+        Ok(transaction.finalize(addresses))
     }
 
     pub async fn get_transactions_by_hash(&self, hash: &str) -> Result<Vec<Transaction>, Box<dyn Error + Send + Sync>> {
         let hash = hash.to_string();
-        let rows = self.database.run(move |client| client.get_transactions_by_hash(&hash)).await?;
-        Ok(rows.into_iter().map(|row| row.as_primitive(vec![])).collect::<Result<Vec<_>, _>>()?)
+        Ok(self.database.run(move |client| client.get_transactions_by_hash(&hash)).await?)
     }
 }
 
-fn transactions_response(client: &mut impl ScanAddressesRepository, rows: Vec<TransactionRow>, addresses: Vec<String>) -> Result<TransactionsResponse, DatabaseError> {
-    let transactions = rows
-        .into_iter()
-        .map(|row| row.as_primitive(addresses.clone()).map(|transaction| transaction.finalize(addresses.clone())))
-        .collect::<Result<Vec<_>, _>>()?;
+fn transactions_response(client: &mut impl ScanAddressesRepository, transactions: Vec<Transaction>, addresses: Vec<String>) -> Result<TransactionsResponse, DatabaseError> {
+    let transactions = transactions.into_iter().map(|transaction| transaction.finalize(addresses.clone())).collect::<Vec<_>>();
 
     let address_names = client
         .get_scan_addresses_by_addresses(transactions.iter().flat_map(|x| x.addresses()).collect())?
         .into_iter()
-        .filter_map(|x| x.as_primitive())
+        .filter_map(|scan_address| scan_address.address_name())
         .collect();
 
     Ok(TransactionsResponse::new(transactions, address_names))

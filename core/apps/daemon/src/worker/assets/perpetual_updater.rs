@@ -4,7 +4,6 @@ use chain_providers::ProviderFactory;
 use gem_tracing::error_with_fields;
 use primitives::{Chain, asset_score::AssetRank};
 use settings::{Settings, service_user_agent};
-use storage::models::NewPerpetualRow;
 use storage::{AssetUpdate, AssetsRepository, Database, DatabaseError, PerpetualsRepository};
 
 pub struct PerpetualUpdater {
@@ -27,7 +26,7 @@ impl PerpetualUpdater {
 
         let assets = perpetuals_data.iter().map(|x| x.asset.clone()).collect::<Vec<_>>();
         let asset_ids = assets.iter().map(|x| x.id.clone()).collect::<Vec<_>>();
-        let perpetuals = perpetuals_data.into_iter().map(|x| NewPerpetualRow::from_primitive(x.perpetual)).collect::<Vec<_>>();
+        let perpetuals = perpetuals_data.into_iter().map(|data| data.perpetual).collect::<Vec<_>>();
         let count = perpetuals.len();
 
         let perpetuals_update = self
