@@ -2318,7 +2318,6 @@ dependencies = [
  "job_runner",
  "localizer",
  "metrics",
- "nft",
  "num-bigint 0.5.1",
  "number_formatter",
  "pricer",
@@ -5670,7 +5669,6 @@ dependencies = [
  "serde",
  "serde_json",
  "settings",
- "storage",
  "tokio",
 ]
 
@@ -7877,6 +7875,7 @@ dependencies = [
  "futures",
  "gem_client",
  "lists",
+ "nft",
  "number_formatter",
  "primitives",
  "pusher",

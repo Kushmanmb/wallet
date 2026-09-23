@@ -1,6 +1,6 @@
-use ::nft::NFTClient;
 use cacher::{CacheKey, CacherClient};
 use rocket::{State, put};
+use services::nft::NFTClient;
 use streamer::{StreamProducer, StreamProducerQueue};
 
 use crate::api_clients::PermissionAdminWrite;
@@ -9,7 +9,7 @@ use crate::responders::{ApiError, ApiResponse};
 
 #[put("/nft/collections/update/<collection_id>")]
 pub async fn update_nft_collection(_permission: PermissionAdminWrite, collection_id: NftCollectionIdParam, client: &State<NFTClient>) -> Result<ApiResponse<bool>, ApiError> {
-    Ok(client.update_collection(&collection_id.0.to_string()).await?.into())
+    Ok(client.update_collection(collection_id.0).await?.into())
 }
 
 #[put("/nft/assets/update/<asset_id>")]

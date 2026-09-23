@@ -7,6 +7,7 @@ use coingecko::CoinGeckoClient;
 use config_keys::ConfigKey;
 use defi::{DefiProviderClient, DefiProviderConfig};
 use lists::CoinGeckoListProvider;
+use nft::NFTProviderConfig;
 use primitives::Chain;
 use pusher::PusherClient;
 use search_index::{SearchIndexClient, SearchIndexConfig};
@@ -16,6 +17,7 @@ use streamer::{Retry, ShutdownReceiver, StreamProducer, StreamProducerConfig};
 
 use crate::assets::ListsClient;
 use crate::defi::DefiClient;
+use crate::nft::NFTClient;
 
 #[derive(Clone)]
 pub struct Services {
@@ -65,6 +67,10 @@ impl Services {
     pub fn lists(&self) -> ListsClient {
         let coingecko = CoinGeckoClient::new(self.settings.coingecko.remote_provider_config());
         ListsClient::new(self.database(), vec![Arc::new(CoinGeckoListProvider::new(coingecko))])
+    }
+
+    pub fn nft(&self) -> NFTClient {
+        NFTClient::from_config(self.database(), NFTProviderConfig::from_settings(&self.settings), self.settings.nft.url.clone())
     }
 
     pub fn pusher(&self) -> PusherClient {

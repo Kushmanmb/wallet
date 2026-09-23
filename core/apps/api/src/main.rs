@@ -31,7 +31,7 @@ use strum::IntoEnumIterator;
 use ::defi::{DefiProviderClient, DefiProviderConfig};
 use ::fiat::FiatClient;
 use ::fiat::FiatProviderFactory;
-use ::nft::{NFTClient, NFTProviderClient, NFTProviderConfig};
+use ::nft::{NFTProviderClient, NFTProviderConfig};
 use assets::{AssetsClient, SearchClient};
 use cacher::AccessTokenCacherClient;
 use chain_providers::ProviderFactory;
@@ -241,7 +241,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let fiat_client = FiatClient::new(database.clone(), cacher_client.clone(), fiat_providers, fiat_ip_check_client.clone(), stream_producer.clone());
     let fiat_quotes_client = FiatQuotesClient::new(database.clone(), fiat_client);
     let nft_config = NFTProviderConfig::from_settings(&settings);
-    let nft_client = NFTClient::from_config(database.clone(), nft_config.clone(), settings.nft.url.clone());
+    let nft_client = services.nft();
     let nft_provider_client = NFTProviderClient::new(nft_config);
     let defi_client = services.defi();
     let defi_provider_client = DefiProviderClient::new(DefiProviderConfig::from_settings(&settings));

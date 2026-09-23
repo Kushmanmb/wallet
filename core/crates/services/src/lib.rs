@@ -1,6 +1,7 @@
 pub mod assets;
 mod backend;
 pub mod defi;
+pub mod nft;
 pub mod prices;
 mod static_assets;
 

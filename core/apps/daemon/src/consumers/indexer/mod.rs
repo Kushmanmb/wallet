@@ -17,7 +17,6 @@ use std::error::Error;
 use std::sync::Arc;
 use std::time::Duration;
 
-use ::nft::{NFTClient, NFTProviderConfig};
 use cacher::{AccessTokenCacherClient, CacherClient};
 use futures::future;
 use gem_client::ReqwestClient;
@@ -242,23 +241,20 @@ async fn run_fetch_nft_associations(services: Services, shutdown_rx: ShutdownRec
     ChainConsumerRunner::new(services, QueueName::FetchNftAssociations, shutdown_rx, reporter)
         .await?
         .run_for_chains(chains, |runner, chain| async move {
-            FetchNftAssetsAddressesConsumer::run(runner.settings, runner.database, chain, &runner.connection, runner.cacher, runner.config, runner.shutdown_rx, runner.reporter).await
+            FetchNftAssetsAddressesConsumer::run(runner.settings, runner.services.nft(), chain, &runner.connection, runner.cacher, runner.config, runner.shutdown_rx, runner.reporter).await
         })
         .await
 }
 
 async fn run_fetch_nft_assets(services: Services, shutdown_rx: ShutdownReceiver, reporter: Arc<dyn ConsumerStatusReporter>) -> Result<(), Box<dyn Error + Send + Sync>> {
     let settings = services.settings();
-    let database = services.database();
     let queue = QueueName::FetchNFTCollectionAssets;
     let name = queue.to_string();
     let connection = StreamConnection::new(&settings.rabbitmq.url, name.clone()).await?;
     let config = reader_config(&settings.rabbitmq, name.clone());
     let stream_reader = StreamReader::from_connection(&connection, config).await?;
     let cacher = services.cacher().await?;
-    let nft_config = NFTProviderConfig::from_settings(&settings);
-    let nft_client = NFTClient::from_config(database, nft_config, settings.nft.url.clone());
-    let consumer = FetchNftAssetConsumer { nft_client, cacher };
+    let consumer = FetchNftAssetConsumer { nft_client: services.nft(), cacher };
     run_consumer::<FetchNFTAssetPayload, FetchNftAssetConsumer, usize>(&name, stream_reader, queue, None, consumer, consumer_config(&settings.consumer), shutdown_rx, reporter).await
 }
 

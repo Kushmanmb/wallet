@@ -1,8 +1,8 @@
 use std::error::Error;
 
-use ::nft::NFTClient;
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
+use services::nft::NFTClient;
 use streamer::{FetchNFTAssetPayload, consumer::MessageConsumer};
 
 pub struct FetchNftAssetConsumer {

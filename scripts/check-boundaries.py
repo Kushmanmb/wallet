@@ -99,7 +99,6 @@ INFRA_DEPENDENTS = {
     "fiat": {"cacher", "storage", "streamer"},
     "gem_auth": {"cacher"},
     "rewards": {"cacher", "storage"},
-    "nft": {"storage"},
     "pricer": {"cacher", "storage"},
     "support": {"cacher", "storage", "streamer"},
 }

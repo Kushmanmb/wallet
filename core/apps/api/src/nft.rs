@@ -1,9 +1,9 @@
 use crate::params::{NftAssetIdParam, NftCollectionIdParam};
 use crate::responders::ApiError;
-use ::nft::NFTClient;
 use primitives::NFTResource;
 use rocket::serde::json::Json;
 use rocket::{State, get};
+use services::nft::NFTClient;
 
 #[get("/nft/assets/<asset_id>/preview")]
 pub async fn get_nft_asset_preview(asset_id: NftAssetIdParam, client: &State<NFTClient>) -> Result<Json<NFTResource>, ApiError> {

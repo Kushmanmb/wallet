@@ -19,7 +19,6 @@ pub use clients::{
 use gem_auth::AuthClient;
 use guard::{AuthenticatedDevice, AuthenticatedDeviceWallet, VerifiedDeviceId};
 use name_resolver::NameClient;
-use nft::NFTClient;
 use primitives::DeviceToken;
 use primitives::device::Device;
 use primitives::name::NameRecord;
@@ -31,6 +30,7 @@ use primitives::{
 };
 use rocket::{FromForm, State, delete, get, post, put};
 use services::defi::DefiClient;
+use services::nft::NFTClient;
 use streamer::{StreamProducer, StreamProducerQueue};
 
 use crate::auth::WalletSigned;

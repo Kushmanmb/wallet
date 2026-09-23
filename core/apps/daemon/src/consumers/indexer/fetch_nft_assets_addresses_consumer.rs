@@ -1,11 +1,10 @@
 use std::{collections::HashMap, error::Error, sync::Arc};
 
-use ::nft::{NFTClient, NFTProviderConfig};
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
 use primitives::Chain;
+use services::nft::NFTClient;
 use settings::Settings;
-use storage::Database;
 use streamer::{ChainAddressPayload, ConsumerConfig, ConsumerStatusReporter, QueueName, ShutdownReceiver, StreamConnection, StreamReader, consumer::MessageConsumer, run_consumer};
 
 use crate::consumers::reader_config;
@@ -18,7 +17,7 @@ pub struct FetchNftAssetsAddressesConsumer {
 impl FetchNftAssetsAddressesConsumer {
     pub async fn run(
         settings: Settings,
-        database: Database,
+        nft_client: NFTClient,
         chain: Chain,
         connection: &StreamConnection,
         cacher: CacherClient,
@@ -30,8 +29,6 @@ impl FetchNftAssetsAddressesConsumer {
         let name = format!("{}.{}", queue, chain.as_ref());
         let config = reader_config(&settings.rabbitmq, name.clone());
         let stream_reader = StreamReader::from_connection(connection, config).await?;
-        let nft_config = NFTProviderConfig::from_settings(&settings);
-        let nft_client = NFTClient::from_config(database, nft_config, settings.nft.url.clone());
         let consumer = Self { cacher, nft_client };
         run_consumer::<ChainAddressPayload, Self, usize>(&name, stream_reader, queue, Some(chain.as_ref()), consumer, consumer_config, shutdown_rx, reporter).await
     }
