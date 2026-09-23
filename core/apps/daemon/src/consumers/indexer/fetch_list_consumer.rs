@@ -2,7 +2,7 @@ use std::error::Error;
 
 use async_trait::async_trait;
 use gem_tracing::info_with_fields;
-use lists::ListsClient;
+use services::assets::ListsClient;
 use streamer::{FetchListPayload, consumer::MessageConsumer};
 
 pub struct FetchListConsumer {

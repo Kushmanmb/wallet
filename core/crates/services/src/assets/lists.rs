@@ -1,9 +1,10 @@
-use std::{collections::HashMap, error::Error, sync::Arc};
+use std::collections::{HashMap, HashSet};
+use std::error::Error;
+use std::sync::Arc;
 
-use primitives::{AssetList, ListId, ListProviderName};
-use storage::{Database, DatabaseError, TagRepository};
-
-use crate::provider::ListProvider;
+use lists::ListProvider;
+use primitives::{AssetId, AssetList, ListId, ListProviderName};
+use storage::{AssetsRepository, Database, DatabaseClient, DatabaseError, TagRepository};
 
 pub struct ListsClient {
     database: Database,
@@ -33,11 +34,12 @@ impl ListsClient {
         };
         let tag_id = id.clone();
         let list_name = list.name.clone();
-        let asset_ids = list.asset_ids;
+        let candidate_asset_ids = list.asset_ids;
         let is_new_tag = tag.is_none();
         let count = self
             .database
             .run(move |client| -> Result<Option<usize>, DatabaseError> {
+                let asset_ids = known_asset_ids(client, candidate_asset_ids)?;
                 if is_new_tag && client.add_list_tag(&tag_id, &list_name, list_id)? == 0 {
                     return Ok(None);
                 }
@@ -71,4 +73,13 @@ impl ListsClient {
         }
         Ok(count)
     }
+}
+
+fn known_asset_ids(client: &mut DatabaseClient, asset_ids: Vec<AssetId>) -> Result<Vec<AssetId>, DatabaseError> {
+    if asset_ids.is_empty() {
+        return Ok(asset_ids);
+    }
+    let existing = client.get_assets_rows(asset_ids.clone())?.into_iter().map(|asset| asset.as_asset_id()).collect::<HashSet<_>>();
+    let mut seen = HashSet::new();
+    Ok(asset_ids.into_iter().filter(|asset_id| existing.contains(asset_id) && seen.insert(asset_id.clone())).collect())
 }

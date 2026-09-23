@@ -2316,7 +2316,6 @@ dependencies = [
  "gem_solana",
  "gem_tracing",
  "job_runner",
- "lists",
  "localizer",
  "metrics",
  "nft",
@@ -5385,7 +5384,6 @@ dependencies = [
  "async-trait",
  "coingecko",
  "primitives",
- "storage",
 ]
 
 [[package]]
@@ -7874,8 +7872,10 @@ dependencies = [
  "cacher",
  "chain_providers",
  "chrono",
+ "coingecko",
  "config_keys",
  "gem_client",
+ "lists",
  "number_formatter",
  "primitives",
  "pusher",

@@ -1,3 +1,4 @@
+pub mod assets;
 mod backend;
 pub mod prices;
 mod static_assets;

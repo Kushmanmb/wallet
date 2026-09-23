@@ -7,8 +7,10 @@ version = { workspace = true }
 chrono = { workspace = true }
 cacher = { path = "../cacher" }
 chain_providers = { path = "../chain_providers" }
+coingecko = { path = "../coingecko" }
 config_keys = { path = "../config_keys" }
 gem_client = { path = "../gem_client", features = ["reqwest"] }
+lists = { path = "../lists" }
 number_formatter = { path = "../number_formatter" }
 primitives = { path = "../primitives" }
 pusher = { path = "../pusher" }

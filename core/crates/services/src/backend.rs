@@ -3,13 +3,17 @@ use std::sync::Arc;
 
 use cacher::CacherClient;
 use chain_providers::ChainProviders;
+use coingecko::CoinGeckoClient;
 use config_keys::ConfigKey;
+use lists::CoinGeckoListProvider;
 use primitives::Chain;
 use pusher::PusherClient;
 use search_index::{SearchIndexClient, SearchIndexConfig};
 use settings::Settings;
 use storage::{ConfigCacher, Database, DatabaseError};
 use streamer::{Retry, ShutdownReceiver, StreamProducer, StreamProducerConfig};
+
+use crate::assets::ListsClient;
 
 #[derive(Clone)]
 pub struct Services {
@@ -50,6 +54,11 @@ impl Services {
             batch_size: self.config().get_usize(ConfigKey::SearchIndexBatchSize).await?,
         };
         Ok(SearchIndexClient::new(&self.settings.meilisearch.url, &self.settings.meilisearch.key, config))
+    }
+
+    pub fn lists(&self) -> ListsClient {
+        let coingecko = CoinGeckoClient::new(self.settings.coingecko.remote_provider_config());
+        ListsClient::new(self.database(), vec![Arc::new(CoinGeckoListProvider::new(coingecko))])
     }
 
     pub fn pusher(&self) -> PusherClient {

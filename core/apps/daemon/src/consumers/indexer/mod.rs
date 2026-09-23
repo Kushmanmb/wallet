@@ -19,10 +19,8 @@ use std::time::Duration;
 
 use ::nft::{NFTClient, NFTProviderConfig};
 use cacher::{AccessTokenCacherClient, CacherClient};
-use coingecko::CoinGeckoClient;
 use futures::future;
 use gem_client::ReqwestClient;
-use lists::{CoinGeckoListProvider, ListsClient};
 use pricer::PriceClient;
 use primitives::{AssetId, Chain, NFTChain, PriceId, PriceProvider, TransactionIdRequest};
 use security::providers::goplus::GoPlusProvider;
@@ -167,15 +165,12 @@ fn scan_providers(settings: &Settings, cacher: CacherClient, timeout: Duration) 
 
 async fn run_fetch_lists(services: Services, shutdown_rx: ShutdownReceiver, reporter: Arc<dyn ConsumerStatusReporter>) -> Result<(), Box<dyn Error + Send + Sync>> {
     let settings = services.settings();
-    let database = services.database();
     let queue = QueueName::FetchLists;
     let name = queue.to_string();
     let connection = StreamConnection::new(&settings.rabbitmq.url, name.clone()).await?;
     let config = reader_config(&settings.rabbitmq, name.clone());
     let stream_reader = StreamReader::from_connection(&connection, config).await?;
-    let coin_gecko_client = CoinGeckoClient::new(settings.coingecko.remote_provider_config());
-    let lists_client = ListsClient::new(database.clone(), vec![Arc::new(CoinGeckoListProvider::new(database, coin_gecko_client))]);
-    let consumer = FetchListConsumer { lists_client };
+    let consumer = FetchListConsumer { lists_client: services.lists() };
     run_consumer::<FetchListPayload, FetchListConsumer, u32>(&name, stream_reader, queue, None, consumer, consumer_config(&settings.consumer), shutdown_rx, reporter).await
 }
 
