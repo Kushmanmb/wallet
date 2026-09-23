@@ -179,7 +179,7 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 #### Hand-written twins of Core types
 
 - **VM17** **S** **Core returns finished docs and page URLs.** Both apps build them: [iOS `AppUrl`](../ios/Packages/GemstonePrimitives/Sources/Config.swift) and [Android `AppUrl`](../android/gemcore/src/main/kotlin/com/gemwallet/android/AppUrl.kt) each turn a `DocsUrl`/`PublicUrl` into a URL and append `utm_source` with their platform name, and each resolves `GemBannerLink.docs` itself. Android keeps `BannerDestination` only so the resolved URL is computed outside the composable; with the URL finished in Core (the platform passed in once), `GemBannerDestination` reaches the view as it is and `BannerDestination` goes.
-- **VM20** **S** **Stop hand-writing `StakeType` and `RedelegateData`.** Both apps declare them ([iOS](../ios/Packages/Primitives/Sources/Staking.swift), [Android](../android/gemcore/src/main/kotlin/com/wallet/core/primitives/Staking.kt)) beside Core's generated types and convert with `toGem()`.
+- **VM20** **M** **Generate `StakeType` and `RedelegateData`.** Both apps hand-write them ([iOS](../ios/Packages/Primitives/Sources/Staking.swift), [Android](../android/gemcore/src/main/kotlin/com/wallet/core/primitives/Staking.kt)) plus their mappers. Annotating the Rust types for typeshare is not enough (tried 2026-09-23): Android `Delegation` has no Kotlin serializer because of its big-integer fields, and iOS maps `Delegation` through `init(core:)` rather than the `toPrimitives()` the remote mapper generator emits. Close those two generator gaps first, then annotate and delete the hand-written copies.
 
 #### Models that hold a domain object beside its row
 
