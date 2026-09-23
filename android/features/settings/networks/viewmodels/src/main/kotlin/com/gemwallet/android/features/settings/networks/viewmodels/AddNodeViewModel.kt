@@ -34,6 +34,7 @@ class AddNodeViewModel @Inject constructor(private val service: GemChainSettings
         .stateIn(viewModelScope, SharingStarted.Eagerly, AddNodeUIModel())
     val url = mutableStateOf("")
     private var checkUrlJob: Job? = null
+    private var addUrlJob: Job? = null
 
     fun init(chain: Chain) {
         checkUrlJob?.cancel()
@@ -55,23 +56,26 @@ class AddNodeViewModel @Inject constructor(private val service: GemChainSettings
     }
 
     fun addUrl(onAdded: () -> Unit) {
+        if (addUrlJob?.isActive == true) return
         val current = session.value ?: return
         val status = current.viewState().canImport.takeIf { it }?.let { (current.check) } ?: return
-        viewModelScope.launch {
+        addUrlJob = viewModelScope.launch {
             try {
                 withContext(ioDispatcher) { service.addNode(current.chain, status.url) }
             } catch (error: GemServiceException) {
-                session.value = current.onAddFailed(error)
+                if (session.value == current) session.value = current.onAddFailed(error)
                 return@launch
             } catch (error: CancellationException) {
                 throw error
             } catch (_: Throwable) {
-                session.value = current.onAddFailed(null)
+                if (session.value == current) session.value = current.onAddFailed(null)
                 return@launch
             }
-            url.value = ""
-            checkUrlJob?.cancel()
-            session.value = current.onImported()
+            if (session.value == current) {
+                url.value = ""
+                checkUrlJob?.cancel()
+                session.value = current.onImported()
+            }
             onAdded()
         }
     }

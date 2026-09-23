@@ -20,6 +20,7 @@ import com.wallet.core.primitives.WalletId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -98,6 +99,7 @@ class TransactionsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private var syncedWalletId: WalletId? = null
+    private var refreshJob: Job? = null
 
     val transactions = combine(
         chainsFilter,
@@ -135,24 +137,33 @@ class TransactionsViewModel @Inject constructor(
         val current = walletId.value ?: return null
         if (current == syncedWalletId) return null
         syncedWalletId = current
-        return viewModelScope.launch(ioDispatcher) {
-            val state = sync()
-            if (state is GemLoadState.Error && syncedWalletId == current) {
-                syncedWalletId = null
-            }
-        }
+        transactionsState.value = GemLoadState.Loading
+        return sync(current, showsSpinner = false)
     }
 
-    private suspend fun sync(): GemLoadState = service.refresh(null, !transactions.value.isNullOrEmpty())
-        .also { transactionsState.value = it }
+    fun refresh(): Job? {
+        val current = walletId.value ?: return null
+        return sync(current, showsSpinner = true)
+    }
 
-    fun refresh() = viewModelScope.launch(ioDispatcher) {
-        _isRefreshing.update { true }
-        try {
-            sync()
-        } finally {
-            _isRefreshing.update { false }
+    private fun sync(wallet: WalletId, showsSpinner: Boolean): Job {
+        refreshJob?.cancel()
+        val job = viewModelScope.launch(ioDispatcher, start = CoroutineStart.LAZY) {
+            if (showsSpinner) _isRefreshing.update { true }
+            try {
+                val state = service.refresh(null, !transactions.value.isNullOrEmpty())
+                if (walletId.value != wallet) return@launch
+                transactionsState.value = state
+                if (state is GemLoadState.Error && syncedWalletId == wallet) {
+                    syncedWalletId = null
+                }
+            } finally {
+                if (refreshJob == coroutineContext[Job]) _isRefreshing.update { false }
+            }
         }
+        refreshJob = job
+        job.start()
+        return job
     }
 
     fun setChainsFilter(chains: List<Chain>) {

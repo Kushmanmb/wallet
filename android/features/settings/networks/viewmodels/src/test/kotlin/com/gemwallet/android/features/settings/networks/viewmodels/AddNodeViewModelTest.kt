@@ -6,13 +6,16 @@ import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.models.ButtonState
 import com.wallet.core.primitives.Chain
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -105,5 +108,30 @@ class AddNodeViewModelTest {
         advanceUntilIdle()
 
         assertEquals(AddNodeUIModel(chain = Chain.Ethereum), viewModel.uiModel.value)
+    }
+
+    @Test
+    fun `a submission in flight ignores repeated taps and keeps a newer entry`() = runTest(dispatcher) {
+        val added = CompletableDeferred<Unit>()
+        val service = service { check }
+        coEvery { service.addNode(any(), any()) } coAnswers { added.await() }
+        val viewModel = AddNodeViewModel(service, dispatcher, context)
+        viewModel.init(Chain.Ethereum)
+        viewModel.url.value = "https://node"
+        viewModel.onUrlChange()
+        advanceUntilIdle()
+        var navigations = 0
+
+        viewModel.addUrl { navigations++ }
+        viewModel.addUrl { navigations++ }
+        runCurrent()
+        viewModel.url.value = "https://other"
+        viewModel.onUrlChange()
+        added.complete(Unit)
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { service.addNode(any(), any()) }
+        assertEquals(1, navigations)
+        assertEquals("https://other", viewModel.url.value)
     }
 }
