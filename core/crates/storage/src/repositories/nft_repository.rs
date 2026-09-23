@@ -288,9 +288,10 @@ impl NftRepository for DatabaseClient {
 
 #[cfg(all(test, feature = "database_integration_tests"))]
 mod database_integration_tests {
-    use primitives::{AssetLink, Chain, Device, LinkType, NFTAsset, NFTAssetId, NFTCollection, NFTCollectionId, WalletId, WalletSource, WalletType};
+    use primitives::currency::Currency;
+    use primitives::{AssetLink, Chain, Device, FiatRate, FiatRateProvider, LinkType, NFTAsset, NFTAssetId, NFTCollection, NFTCollectionId, WalletId, WalletSource, WalletType};
 
-    use crate::{ChainsRepository, Database, DatabaseError, DevicesRepository, NewWallet, NftCollectionFilter, NftRepository, WalletsRepository};
+    use crate::{ChainsRepository, Database, DatabaseError, DevicesRepository, FiatRepository, NewWallet, NftCollectionFilter, NftRepository, WalletsRepository};
 
     const CONTRACT: &str = "0xnftcontract";
     const OWNER: &str = "0xnftowner";
@@ -323,6 +324,7 @@ mod database_integration_tests {
         let (collections, assets, owned_ids, count) = database
             .run(move |client| -> Result<_, DatabaseError> {
                 client.add_chains(vec![Chain::Ethereum])?;
+                client.set_fiat_rates(FiatRateProvider::Coingecko, vec![FiatRate { symbol: Currency::USD, rate: 1.0 }])?;
                 client.add_nft_collections(vec![collection()])?;
                 client.add_nft_assets(vec![asset("1"), asset("2"), asset("3")])?;
 
