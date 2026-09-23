@@ -40,6 +40,10 @@ impl ScanType {
     pub fn all() -> Vec<Self> {
         Self::iter().collect()
     }
+
+    pub fn is_safe_cacheable(&self) -> bool {
+        matches!(self, Self::Address | Self::Website)
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

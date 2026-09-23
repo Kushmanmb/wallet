@@ -1,72 +1,45 @@
-use primitives::{ChainAddress, ScanSource, ScanTransaction, ScanType, ScanVerdict};
+use primitives::{ScanSource, ScanTransaction, ScanType};
 
-use super::model::{ProviderCheck, ScanDetection, ScanFinding, ScanPlan, TransactionScanInput, TransactionScanResult};
-use super::plan::website_host;
-
-const PROVIDER_SCAN_TYPES: [ScanType; 3] = [ScanType::Address, ScanType::AddressPoisoning, ScanType::Website];
-const SAFE_CACHE_SCAN_TYPES: [ScanType; 2] = [ScanType::Address, ScanType::Website];
+use super::check::ProviderCheck;
+use super::model::{ScanDetection, ScanFinding, ScanPlan, TransactionScanInput};
+use super::result::TransactionScanResult;
+use super::subject::scan_subjects;
 
 pub fn evaluate_transaction_scan(input: &TransactionScanInput, plan: ScanPlan, checks: Vec<ProviderCheck>) -> TransactionScanResult {
-    let payload = &input.payload;
     let mut detections = plan.detections;
     let mut new_verdicts = Vec::new();
-
-    for scan_type in PROVIDER_SCAN_TYPES {
-        let Some(check) = checks.iter().find(|check| check.scan_type == scan_type && check.check.malicious == Some(true)) else {
+    for subject in scan_subjects(&input.payload) {
+        let Some(check) = checks.iter().find(|check| check.scan_type == subject.scan_type && check.malicious == Some(true)) else {
             continue;
         };
-        let (finding, chain, target) = match scan_type {
-            ScanType::Website => {
-                let (Some(website), Some(host)) = (payload.website.clone(), website_host(payload)) else {
-                    continue;
-                };
-                (ScanFinding::Website(website), None, host)
-            }
-            _ => (
-                ScanFinding::Address(ChainAddress::new(payload.target.asset_id.chain, payload.target.address.clone())),
-                Some(payload.target.asset_id.chain),
-                payload.target.address.clone(),
-            ),
-        };
-        let is_enforced = input.enforced.contains(&scan_type);
+        let is_enforced = input.enforced.contains(&subject.scan_type);
         if is_enforced {
-            new_verdicts.push(ScanVerdict {
-                scan_type,
-                chain,
-                target,
-                provider: check.provider,
-                reason: check.check.reason.clone(),
-            });
+            new_verdicts.push(subject.verdict(check.provider, check.reason.clone()));
         }
-        detections.push(ScanDetection::new(scan_type, finding, is_enforced, ScanDetection::provider_source(check.provider, check.check.reason.as_deref())));
+        detections.push(ScanDetection::new(subject.scan_type, subject.finding, is_enforced, ScanDetection::provider_source(check.provider, check.reason.as_deref())));
     }
 
-    let is_scan_complete = match plan.targets {
-        None => true,
-        Some(_) => {
-            let completed = checks.iter().filter(|check| input.enforced.contains(&check.scan_type) && check.check.malicious.is_some()).count();
-            let cached = plan.safe.iter().filter(|scan_type| input.enforced.contains(scan_type)).count();
-            completed + cached >= input.required_successes
-        }
+    let is_scan_complete = plan.targets.is_none() || {
+        let completed = checks.iter().filter(|check| input.enforced.contains(&check.scan_type) && check.malicious.is_some()).count();
+        let cached = plan.safe.iter().filter(|scan_type| input.enforced.contains(scan_type)).count();
+        completed + cached >= input.required_successes
     };
-    let source = if checks.is_empty() { ScanSource::Local } else { ScanSource::Remote };
-    let new_safe = SAFE_CACHE_SCAN_TYPES
-        .into_iter()
-        .filter(|scan_type| {
-            let mut type_checks = checks.iter().filter(|check| check.scan_type == *scan_type).peekable();
-            type_checks.peek().is_some() && type_checks.all(|check| check.check.malicious == Some(false))
-        })
-        .collect();
+    let new_safe = ScanType::all().into_iter().filter(|scan_type| scan_type.is_safe_cacheable() && is_clean(&checks, *scan_type)).collect();
 
     TransactionScanResult {
         scan: scan_transaction(&detections, plan.is_memo_required, is_scan_complete),
-        source,
+        source: if checks.is_empty() { ScanSource::Local } else { ScanSource::Remote },
         detections,
         new_verdicts,
         safe: plan.safe,
         new_safe,
         checks,
     }
+}
+
+fn is_clean(checks: &[ProviderCheck], scan_type: ScanType) -> bool {
+    let mut checks = checks.iter().filter(|check| check.scan_type == scan_type).peekable();
+    checks.peek().is_some() && checks.all(|check| check.malicious == Some(false))
 }
 
 fn scan_transaction(detections: &[ScanDetection], is_memo_required: bool, is_scan_complete: bool) -> ScanTransaction {
@@ -95,11 +68,10 @@ fn scan_transaction(detections: &[ScanDetection], is_memo_required: bool, is_sca
 mod tests {
     use std::collections::HashSet;
 
-    use primitives::{AssetId, Chain, ScanProvider, ScanTransactionPayload, TransactionType};
+    use primitives::{AssetId, Chain, ChainAddress, ScanProvider, ScanTransactionPayload, ScanVerdict, TransactionType};
 
     use super::*;
     use crate::transaction_scan::plan_transaction_scan;
-    use crate::transaction_scan::{ProviderCheck, TransactionScanInput};
 
     fn input(transaction_type: TransactionType, website: Option<&str>) -> TransactionScanInput {
         TransactionScanInput::mock(ScanTransactionPayload {

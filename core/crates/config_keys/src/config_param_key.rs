@@ -153,7 +153,7 @@ impl ConfigParamKey {
         let clean_outdated = PriceProvider::all().into_iter().map(Self::PriceProviderCleanOutdatedDuration);
         let scan_providers = ScanProvider::all().into_iter().map(Self::ScanProviderEnable);
         let scan_types = ScanType::all().into_iter().map(Self::ScanTypeEnable);
-        let scan_safe_cache = [ScanType::Address, ScanType::Website].into_iter().map(Self::ScanSafeCacheDuration);
+        let scan_safe_cache = ScanType::all().into_iter().filter(ScanType::is_safe_cacheable).map(Self::ScanSafeCacheDuration);
         let lists = ListProviderName::all().into_iter().map(Self::ListProviderUpdateDuration);
         let rate_limits = RateLimitKey::iter().flat_map(|key| RateLimitWindow::ALL.into_iter().map(move |window| Self::RateLimit(key, window)));
         transactions

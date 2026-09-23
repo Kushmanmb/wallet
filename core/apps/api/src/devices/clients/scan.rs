@@ -11,7 +11,7 @@ use gem_tracing::info_with_fields;
 use primitives::{ScanProvider, ScanTransaction, ScanTransactionPayload, ScanType};
 use rocket::futures::future;
 use security_provider::providers::goplus::GoPlusProvider;
-use security_provider::transaction_scan::{ProviderCheck, ScanTargets, TransactionScanInput, TransactionScanResult, detection_targets, evaluate_transaction_scan, plan_transaction_scan, safe_cache_targets, token_asset_ids, website_host};
+use security_provider::transaction_scan::{ProviderCheck, ScanSubject, ScanTargets, TransactionScanInput, TransactionScanResult, evaluate_transaction_scan, plan_transaction_scan, scan_subjects, token_asset_ids, website_host};
 use security_provider::{AddressScanProviderConfig, ScanProviderFactory, ScanProviderRemoteConfig, ScanResult, TransactionScanProviders};
 use serde_json::json;
 use settings::Settings;
@@ -65,8 +65,10 @@ impl ScanClient {
     }
 
     pub async fn get_scan_transaction(&self, payload: ScanTransactionPayload) -> Result<ScanTransaction, Box<dyn Error + Send + Sync>> {
-        let (mut input, safe_keys) = self.get_scan_input(payload)?;
-        input.safe = self.get_cached_safe(&safe_keys).await?;
+        let subjects = scan_subjects(&payload);
+        let safe_keys = self.get_safe_cache_keys(&subjects)?;
+        let safe = self.get_cached_safe(&safe_keys).await?;
+        let input = self.get_scan_input(payload, &subjects, safe)?;
         let plan = plan_transaction_scan(&input);
         let checks = match &plan.targets {
             Some(targets) => self.run_checks(targets).await?,
@@ -81,17 +83,7 @@ impl ScanClient {
         Ok(result.scan)
     }
 
-    async fn get_cached_safe(&self, keys: &[SafeCacheKey]) -> Result<HashSet<ScanType>, Box<dyn Error + Send + Sync>> {
-        let mut safe = HashSet::new();
-        for key in keys {
-            if self.cacher.get_cached_optional::<bool>(key.key()).await?.is_some() {
-                safe.insert(key.scan_type);
-            }
-        }
-        Ok(safe)
-    }
-
-    fn get_scan_input(&self, payload: ScanTransactionPayload) -> Result<(TransactionScanInput, Vec<SafeCacheKey>), Box<dyn Error + Send + Sync>> {
+    fn get_scan_input(&self, payload: ScanTransactionPayload, subjects: &[ScanSubject], safe: HashSet<ScanType>) -> Result<TransactionScanInput, Box<dyn Error + Send + Sync>> {
         let mut database = self.database.client()?;
         let mut enforced = HashSet::new();
         for scan_type in ScanType::all() {
@@ -102,30 +94,49 @@ impl ScanClient {
         let queries = [(payload.origin.asset_id.chain, payload.origin.address.as_str()), (payload.target.asset_id.chain, payload.target.address.as_str())];
         let addresses = database.get_scan_addresses(&queries)?.iter().map(|address| address.as_scan_address()).collect();
         let assets = database.get_assets_basic(token_asset_ids(&payload))?;
-        let targets = detection_targets(&payload);
+        let mut targets = subjects.iter().map(|subject| subject.target.clone()).collect::<Vec<_>>();
+        targets.dedup();
         let verdicts = if targets.is_empty() {
             Vec::new()
         } else {
             let max_age = database.get_config_duration(ConfigKey::ScanDetectionMaxAge)?;
             database.get_scan_detections(targets, max_age)?
         };
-        let mut safe_keys = Vec::new();
-        for (scan_type, target) in safe_cache_targets(&payload) {
-            let ttl = database.get_config_param_duration(ConfigParamKey::ScanSafeCacheDuration(scan_type))?.as_secs();
-            if ttl > 0 {
-                safe_keys.push(SafeCacheKey { scan_type, target, ttl });
-            }
-        }
-        let input = TransactionScanInput {
+        Ok(TransactionScanInput {
             payload,
             enforced,
             addresses,
             assets,
             verdicts,
-            safe: HashSet::new(),
+            safe,
             required_successes: self.config.required_successes,
-        };
-        Ok((input, safe_keys))
+        })
+    }
+
+    fn get_safe_cache_keys(&self, subjects: &[ScanSubject]) -> Result<Vec<SafeCacheKey>, Box<dyn Error + Send + Sync>> {
+        let mut database = self.database.client()?;
+        let mut keys = Vec::new();
+        for subject in subjects.iter().filter(|subject| subject.scan_type.is_safe_cacheable()) {
+            let ttl = database.get_config_param_duration(ConfigParamKey::ScanSafeCacheDuration(subject.scan_type))?.as_secs();
+            if ttl > 0 {
+                keys.push(SafeCacheKey {
+                    scan_type: subject.scan_type,
+                    target: subject.cache_key(),
+                    ttl,
+                });
+            }
+        }
+        Ok(keys)
+    }
+
+    async fn get_cached_safe(&self, keys: &[SafeCacheKey]) -> Result<HashSet<ScanType>, Box<dyn Error + Send + Sync>> {
+        let mut safe = HashSet::new();
+        for key in keys {
+            if self.cacher.get_cached_optional::<bool>(key.key()).await?.is_some() {
+                safe.insert(key.scan_type);
+            }
+        }
+        Ok(safe)
     }
 
     async fn run_checks(&self, targets: &ScanTargets) -> Result<Vec<ProviderCheck>, Box<dyn Error + Send + Sync>> {
@@ -194,7 +205,7 @@ impl ScanClient {
             errors = format!("{:?}", result.errors()),
             malicious = result.scan.is_malicious == Some(true),
             dry_run_malicious = !dry_run.is_empty(),
-            provider_errors = result.checks.iter().filter(|check| check.check.error.is_some()).count(),
+            provider_errors = result.checks.iter().filter(|check| check.error.is_some()).count(),
             origin_asset_id = payload.origin.asset_id,
             target_asset_id = payload.target.asset_id,
             address = format!("{:?}", payload.target.address),
