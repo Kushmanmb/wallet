@@ -44,7 +44,7 @@ fun AssetDetailsScreen(onAction: (AssetDetailsAction.Navigation) -> Unit) {
 
                     is AssetDetailsAction.TogglePriceAlert -> viewModel.togglePriceAlert(action.assetId)
 
-                    is AssetDetailsAction.CloseBanner -> viewModel.closeBanner(action.banner)
+                    is AssetDetailsAction.CloseBanner -> viewModel.closeBanner(action.key)
 
                     AssetDetailsAction.OpenPerpetuals -> {
                         viewModel.enablePerpetuals()

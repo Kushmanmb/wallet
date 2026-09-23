@@ -13,7 +13,6 @@ import com.gemwallet.android.domains.asset.aggregates.AssetInfoDataAggregate
 import com.gemwallet.android.domains.asset.assetSections
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.runCatchingCancellable
-import com.gemwallet.android.ext.toGemKey
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.banner.BannerRowUIModel
@@ -24,7 +23,6 @@ import com.gemwallet.android.ui.models.ToastEmitter
 import com.gemwallet.android.ui.models.ToastEmitterImpl
 import com.gemwallet.android.ui.models.ToastMessage
 import com.wallet.core.primitives.AssetId
-import com.wallet.core.primitives.Banner
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -38,6 +36,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemBannerKey
 import uniffi.gemstone.GemWalletHomeServiceInterface
 import javax.inject.Inject
 
@@ -133,8 +132,8 @@ class AssetsViewModel @Inject constructor(
         userConfig.hideBalances()
     }
 
-    fun closeBanner(banner: Banner) = viewModelScope.launch(ioDispatcher) {
-        runCatchingCancellable { service.closeBanner(banner.toGemKey()) }
+    fun closeBanner(key: GemBannerKey) = viewModelScope.launch(ioDispatcher) {
+        runCatchingCancellable { service.closeBanner(key) }
             .onFailure { emitToast(ToastMessage(it.errorText().text(context), R.drawable.ic_error)) }
     }
 

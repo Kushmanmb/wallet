@@ -28,8 +28,4 @@ public extension GemWalletHomeServiceProtocol {
     func setAssetPinned(assetId: AssetId, pinned: Bool) async throws {
         try await setAssetPinned(assetId: assetId.identifier, pinned: pinned)
     }
-
-    func close(_ banner: Banner) async throws {
-        try await closeBanner(key: banner.gemKey)
-    }
 }

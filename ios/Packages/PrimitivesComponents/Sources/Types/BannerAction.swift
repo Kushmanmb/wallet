@@ -3,39 +3,25 @@
 import Foundation
 import enum Gemstone.GemBannerButton
 import enum Gemstone.GemBannerDestination
-import Primitives
+import struct Gemstone.GemBannerKey
 
 public struct BannerAction: Identifiable, Sendable {
-    public let banner: Banner
+    public let id: String
+    public let key: GemBannerKey
     public let type: BannerActionType
 
-    public var id: String { banner.id }
-
     public init(
-        banner: Banner,
+        key: GemBannerKey,
         type: BannerActionType,
     ) {
-        self.banner = banner
+        id = key.identifier()
+        self.key = key
         self.type = type
     }
 }
 
 public enum BannerActionType: Sendable {
     case destination(GemBannerDestination)
-    case button(BannerButton)
+    case button(GemBannerButton)
     case closeBanner
-}
-
-public enum BannerButton: String, Sendable {
-    case buy
-    case receive
-}
-
-public extension GemBannerButton {
-    var button: BannerButton {
-        switch self {
-        case .buy: .buy
-        case .receive: .receive
-        }
-    }
 }

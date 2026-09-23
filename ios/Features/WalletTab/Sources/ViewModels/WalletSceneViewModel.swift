@@ -208,7 +208,7 @@ public extension WalletSceneViewModel {
         case .closeBanner:
             Task {
                 do {
-                    try await service.close(action.banner)
+                    try await service.closeBanner(key: action.key)
                 } catch let error as GemServiceError {
                     isPresentingToastMessage = .error(error.text().text)
                 } catch {

@@ -120,15 +120,8 @@ mod tests {
 
     #[test]
     fn test_a_blocked_multi_signature_account_disables_the_header_buttons() {
-        use crate::services::banner::rules::banner_content;
         use primitives::{Banner, BannerState};
-        let row = |event| {
-            let banner = Banner::mock(event, BannerState::Active);
-            GemBannerRow {
-                content: banner_content(banner.event, banner.asset.as_ref(), banner.state),
-                banner,
-            }
-        };
+        let row = |event| GemBannerRow::new(Banner::mock(event, BannerState::Active));
 
         assert!(header_buttons_enabled(&[]));
         assert!(header_buttons_enabled(&[row(BannerEvent::Onboarding)]));

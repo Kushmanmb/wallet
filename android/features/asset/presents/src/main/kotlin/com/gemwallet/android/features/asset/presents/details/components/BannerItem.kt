@@ -7,11 +7,11 @@ import com.gemwallet.android.features.banner.views.BannersScene
 import com.gemwallet.android.ui.components.banner.BannerDestination
 import com.gemwallet.android.ui.components.banner.BannerRowUIModel
 import com.gemwallet.android.ui.open
-import com.wallet.core.primitives.Banner
+import uniffi.gemstone.GemBannerKey
 import uniffi.gemstone.GemTransferData
 
 @Composable
-internal fun BannerItem(banners: List<BannerRowUIModel>, onStake: () -> Unit, onActivate: (GemTransferData) -> Unit, onOpenPerpetuals: () -> Unit, onClose: (Banner) -> Unit) {
+internal fun BannerItem(banners: List<BannerRowUIModel>, onStake: () -> Unit, onActivate: (GemTransferData) -> Unit, onOpenPerpetuals: () -> Unit, onClose: (GemBannerKey) -> Unit) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
 

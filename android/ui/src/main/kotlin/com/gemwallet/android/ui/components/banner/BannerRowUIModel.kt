@@ -2,15 +2,14 @@ package com.gemwallet.android.ui.components.banner
 
 import android.content.Context
 import com.gemwallet.android.AppUrl
-import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.ui.components.list_item.ListItemImage
 import com.gemwallet.android.ui.localization.bannerDescription
 import com.gemwallet.android.ui.localization.bannerTitle
 import com.gemwallet.android.ui.style.image
-import com.wallet.core.primitives.Banner
 import com.wallet.core.primitives.BannerState
 import uniffi.gemstone.GemBannerButton
 import uniffi.gemstone.GemBannerDestination
+import uniffi.gemstone.GemBannerKey
 import uniffi.gemstone.GemBannerLink
 import uniffi.gemstone.GemBannerRow
 import uniffi.gemstone.GemBannerStyle
@@ -25,10 +24,10 @@ sealed interface BannerDestination {
     data class OpenUrl(val url: String) : BannerDestination
 }
 
-data class BannerRowUIModel(val banner: Banner, val model: BannerItemUIModel)
+data class BannerRowUIModel(val key: GemBannerKey, val model: BannerItemUIModel)
 
 fun GemBannerRow.uiModel(context: Context): BannerRowUIModel = BannerRowUIModel(
-    banner = banner.toPrimitives(),
+    key = key,
     model = BannerItemUIModel(
         title = content.title?.let { bannerTitle(context, it) },
         subtitle = content.description?.let { bannerDescription(context, it) },

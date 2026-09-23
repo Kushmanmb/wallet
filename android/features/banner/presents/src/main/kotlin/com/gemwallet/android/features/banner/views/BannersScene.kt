@@ -34,24 +34,24 @@ import com.gemwallet.android.ui.theme.paddingDefault
 import com.gemwallet.android.ui.theme.paddingMiddle
 import com.gemwallet.android.ui.theme.smallIconSize
 import com.gemwallet.android.ui.theme.space2
-import com.wallet.core.primitives.Banner
 import com.wallet.core.primitives.BannerEvent
+import uniffi.gemstone.GemBannerKey
 import uniffi.gemstone.GemBannerStyle
 
 private val bannerEmojiFontSize = 32.sp
 
 @Composable
-fun BannersScene(banners: List<BannerRowUIModel>, onSelect: (BannerDestination) -> Unit, onClose: (Banner) -> Unit, onBuy: () -> Unit = {}, onReceive: () -> Unit = {}) {
+fun BannersScene(banners: List<BannerRowUIModel>, onSelect: (BannerDestination) -> Unit, onClose: (GemBannerKey) -> Unit, onBuy: () -> Unit = {}, onReceive: () -> Unit = {}) {
     val pageState = rememberPagerState { banners.size }
 
     if (banners.isEmpty()) {
         return
     }
     HorizontalPager(pageState, pageSpacing = paddingDefault) { page ->
-        val banner = banners[page].banner
+        val key = banners[page].key
         val model = banners[page].model
         if (model.style == GemBannerStyle.WELCOME) {
-            WelcomeBanner(model = model, onBuy = onBuy, onReceive = onReceive, onClose = { onClose(banner) })
+            WelcomeBanner(model = model, onBuy = onBuy, onReceive = onReceive, onClose = { onClose(key) })
             return@HorizontalPager
         }
         Box(
@@ -61,7 +61,7 @@ fun BannersScene(banners: List<BannerRowUIModel>, onSelect: (BannerDestination) 
         ) {
             BannerText(
                 model = model,
-                onCancel = { onClose(banner) },
+                onCancel = { onClose(key) },
             )
         }
     }

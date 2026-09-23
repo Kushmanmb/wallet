@@ -1,16 +1,18 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
 import Foundation
+import enum Gemstone.GemBannerButton
+import struct Gemstone.GemBannerKey
 import Localization
 import Primitives
 import Style
 
 struct BannerButtonViewModel: Identifiable {
-    let button: BannerButton
-    let banner: Banner
+    let button: GemBannerButton
+    let key: GemBannerKey
 
     var id: String {
-        button.rawValue
+        String(describing: button)
     }
 
     var title: String {
@@ -29,6 +31,6 @@ struct BannerButtonViewModel: Identifiable {
     }
 
     var action: BannerAction {
-        BannerAction(banner: banner, type: .button(button))
+        BannerAction(key: key, type: .button(button))
     }
 }

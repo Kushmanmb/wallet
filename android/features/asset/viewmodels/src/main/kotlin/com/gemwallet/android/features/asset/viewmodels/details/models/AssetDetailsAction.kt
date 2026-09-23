@@ -2,9 +2,9 @@ package com.gemwallet.android.features.asset.viewmodels.details.models
 
 import com.gemwallet.android.domains.confirm.ConfirmTransferInput
 import com.wallet.core.primitives.AssetId
-import com.wallet.core.primitives.Banner
 import com.wallet.core.primitives.Chain
 import com.wallet.core.primitives.TransactionId
+import uniffi.gemstone.GemBannerKey
 
 sealed interface AssetDetailsAction {
     sealed interface Navigation : AssetDetailsAction
@@ -13,7 +13,7 @@ sealed interface AssetDetailsAction {
     data object Pin : AssetDetailsAction
     data object Add : AssetDetailsAction
     data class TogglePriceAlert(val assetId: AssetId) : AssetDetailsAction
-    data class CloseBanner(val banner: Banner) : AssetDetailsAction
+    data class CloseBanner(val key: GemBannerKey) : AssetDetailsAction
 
     data object Close : Navigation
     data class Transfer(val assetId: AssetId) : Navigation

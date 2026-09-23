@@ -19,20 +19,25 @@ pub struct GemBannerContext {
 
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct GemBannerRow {
+    pub key: GemBannerKey,
     pub banner: Banner,
     pub content: GemBannerContent,
+}
+
+impl GemBannerRow {
+    pub fn new(banner: Banner) -> Self {
+        Self {
+            key: GemBannerKey::from(&banner),
+            content: super::rules::banner_content(banner.event, banner.asset.as_ref(), banner.state),
+            banner,
+        }
+    }
 }
 
 #[uniffi::export]
 impl GemBannerContext {
     pub fn visible_banners(&self, stored: Vec<Banner>) -> Vec<GemBannerRow> {
-        super::rules::visible_banners(stored, self)
-            .into_iter()
-            .map(|banner| GemBannerRow {
-                content: super::rules::banner_content(banner.event, banner.asset.as_ref(), banner.state),
-                banner,
-            })
-            .collect()
+        super::rules::visible_banners(stored, self).into_iter().map(GemBannerRow::new).collect()
     }
 }
 
@@ -128,6 +133,16 @@ pub struct GemBannerKey {
     pub wallet_id: Option<WalletId>,
     pub asset_id: Option<AssetId>,
     pub event: BannerEvent,
+}
+
+impl From<&Banner> for GemBannerKey {
+    fn from(banner: &Banner) -> Self {
+        Self {
+            wallet_id: banner.wallet_id.clone(),
+            asset_id: banner.asset.as_ref().map(|asset| asset.id.clone()),
+            event: banner.event,
+        }
+    }
 }
 
 #[uniffi::export]
@@ -243,6 +258,28 @@ mod tests {
         assert!(context.has_stake_balance);
         assert!(context.has_available_balance);
         assert!(context.is_asset_activated);
+    }
+
+    #[test]
+    fn test_a_banner_row_carries_the_key_that_closes_it() {
+        let wallet_id = WalletId::Multicoin("wallet-1".to_string());
+        let banner = Banner {
+            wallet_id: Some(wallet_id.clone()),
+            asset: Some(Asset::from_chain(Chain::Bitcoin)),
+            event: BannerEvent::Stake,
+            state: BannerState::Active,
+        };
+
+        let row = GemBannerRow::new(banner);
+
+        assert_eq!(
+            row.key,
+            GemBannerKey {
+                wallet_id: Some(wallet_id),
+                asset_id: Some(AssetId::from_chain(Chain::Bitcoin)),
+                event: BannerEvent::Stake,
+            }
+        );
     }
 
     #[test]

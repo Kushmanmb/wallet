@@ -17,12 +17,16 @@ public struct BannerViewModel {
         case banner
     }
 
-    private let banner: Banner
-    private let content: GemBannerContent
+    public let id: String
+    private let row: GemBannerRow
 
     public init(row: GemBannerRow) {
-        banner = row.banner.toPrimitives()
-        content = row.content
+        id = row.key.identifier()
+        self.row = row
+    }
+
+    private var content: GemBannerContent {
+        row.content
     }
 
     var image: AssetImage? {
@@ -46,7 +50,7 @@ public struct BannerViewModel {
     }
 
     var imageSize: CGFloat {
-        switch banner.event {
+        switch row.banner.event {
         case .stake,
              .accountActivation,
              .accountBlockedMultiSignature,
@@ -58,7 +62,7 @@ public struct BannerViewModel {
     }
 
     var cornerRadius: CGFloat {
-        switch banner.event {
+        switch row.banner.event {
         case .stake,
              .accountActivation,
              .activateAsset,
@@ -70,11 +74,11 @@ public struct BannerViewModel {
     }
 
     var action: BannerAction? {
-        content.destination.map { BannerAction(banner: banner, type: .destination($0)) }
+        content.destination.map { BannerAction(key: row.key, type: .destination($0)) }
     }
 
     var closeAction: BannerAction {
-        BannerAction(banner: banner, type: .closeBanner)
+        BannerAction(key: row.key, type: .closeBanner)
     }
 
     var imageStyle: ListItemImageStyle? {
@@ -93,12 +97,8 @@ public struct BannerViewModel {
     }
 
     var buttons: [BannerButtonViewModel] {
-        content.buttons.map { BannerButtonViewModel(button: $0.button, banner: banner) }
+        content.buttons.map { BannerButtonViewModel(button: $0, key: row.key) }
     }
 }
 
-extension BannerViewModel: Identifiable {
-    public var id: String {
-        banner.id
-    }
-}
+extension BannerViewModel: Identifiable {}
