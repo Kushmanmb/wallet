@@ -9,9 +9,9 @@ use primitives::{
 };
 
 use super::model::{
-    GemActivityFilters, GemAmountSign, GemSwapAgain, GemSwapProgress, GemSwapProgressStep, GemTransactionAmount, GemTransactionDetailRow, GemTransactionDetailRows, GemTransactionDetailSection, GemTransactionDetails, GemTransactionFeeRow,
-    GemTransactionFilter, GemTransactionHeader, GemTransactionHeaderAction, GemTransactionHeaderKind, GemTransactionParticipant, GemTransactionParticipantRole, GemTransactionRow, GemTransactionRowSubtitle, GemTransactionRowValue,
-    GemTransactionStateTone, GemTransactionStatus, GemTransactionSubtitle, GemTransactionTitle, GemTransactionValue,
+    GemActivityFilters, GemAmountSign, GemSwapAgain, GemSwapProgress, GemSwapProgressStep, GemTransactionAmount, GemTransactionBadge, GemTransactionDetailRow, GemTransactionDetailRows, GemTransactionDetailSection, GemTransactionDetails,
+    GemTransactionFeeRow, GemTransactionFilter, GemTransactionHeader, GemTransactionHeaderAction, GemTransactionHeaderKind, GemTransactionParticipant, GemTransactionParticipantRole, GemTransactionRow, GemTransactionRowSubtitle,
+    GemTransactionRowValue, GemTransactionStateTone, GemTransactionStatus, GemTransactionSubtitle, GemTransactionTitle, GemTransactionValue,
 };
 use crate::address_formatter::{GemAddressFormatStyle, format_address};
 use crate::config::image::GemImage;
@@ -84,6 +84,31 @@ pub fn row(extended: &TransactionExtended) -> GemTransactionRow {
         value,
         equivalent_value: row_value(extended, transaction_equivalent_value(transaction)),
         nft_image_url: transaction.nft_asset_id().map(|asset_id| GemImage::NftAsset { asset_id: asset_id.to_string() }.url()),
+        badge: badge(&transaction.transaction_type, &transaction.direction),
+    }
+}
+
+pub fn badge(transaction_type: &TransactionType, direction: &TransactionDirection) -> GemTransactionBadge {
+    match transaction_type {
+        TransactionType::Transfer | TransactionType::TransferNFT | TransactionType::SmartContractCall => match direction {
+            TransactionDirection::Incoming => GemTransactionBadge::Incoming,
+            TransactionDirection::Outgoing | TransactionDirection::SelfTransfer => GemTransactionBadge::Outgoing,
+        },
+        TransactionType::Swap
+        | TransactionType::TokenApproval
+        | TransactionType::StakeDelegate
+        | TransactionType::StakeUndelegate
+        | TransactionType::StakeRewards
+        | TransactionType::StakeRedelegate
+        | TransactionType::StakeWithdraw
+        | TransactionType::StakeFreeze
+        | TransactionType::StakeUnfreeze
+        | TransactionType::AssetActivation
+        | TransactionType::PerpetualOpenPosition
+        | TransactionType::PerpetualClosePosition
+        | TransactionType::PerpetualModifyPosition
+        | TransactionType::EarnDeposit
+        | TransactionType::EarnWithdraw => GemTransactionBadge::Asset,
     }
 }
 
@@ -649,6 +674,17 @@ pub fn activity_filters(chains: Vec<Chain>, filters: Vec<GemTransactionFilter>) 
 #[cfg(test)]
 mod tests {
     use crate::formatted_number::GemNumberNotation;
+
+    #[test]
+    fn test_only_transfers_badge_their_direction() {
+        use primitives::{TransactionDirection, TransactionType};
+
+        assert_eq!(badge(&TransactionType::Transfer, &TransactionDirection::Incoming), GemTransactionBadge::Incoming);
+        assert_eq!(badge(&TransactionType::TransferNFT, &TransactionDirection::SelfTransfer), GemTransactionBadge::Outgoing);
+        assert_eq!(badge(&TransactionType::SmartContractCall, &TransactionDirection::Outgoing), GemTransactionBadge::Outgoing);
+        assert_eq!(badge(&TransactionType::Swap, &TransactionDirection::Incoming), GemTransactionBadge::Asset);
+        assert_eq!(badge(&TransactionType::StakeDelegate, &TransactionDirection::Outgoing), GemTransactionBadge::Asset);
+    }
 
     #[test]
     fn test_the_value_tone_greens_an_incoming_amount_and_signs_a_pnl() {

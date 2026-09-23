@@ -2,10 +2,9 @@ package com.gemwallet.android.domains.transaction.aggregates
 
 import androidx.compose.runtime.Stable
 import com.wallet.core.primitives.Asset
-import com.wallet.core.primitives.TransactionDirection
 import com.wallet.core.primitives.TransactionId
 import com.wallet.core.primitives.TransactionState
-import com.wallet.core.primitives.TransactionType
+import uniffi.gemstone.GemTransactionBadge
 import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStatus
 import uniffi.gemstone.GemTransactionTitle
@@ -22,8 +21,7 @@ interface TransactionDataAggregate {
     val subtitle: GemTransactionRowSubtitle
     val valueTone: GemValueTone
 
-    val type: TransactionType
-    val direction: TransactionDirection
+    val badge: GemTransactionBadge
     val state: TransactionState
     val nftImageUrl: String?
         get() = null

@@ -1,8 +1,8 @@
 // Copyright (c). Gem Wallet. All rights reserved.
 
-import Foundation
 public import enum Gemstone.GemEmptyStateAction
 public import enum Gemstone.GemEmptyStateKind
+import Foundation
 
 public struct EmptyContentType {
     let kind: GemEmptyStateKind

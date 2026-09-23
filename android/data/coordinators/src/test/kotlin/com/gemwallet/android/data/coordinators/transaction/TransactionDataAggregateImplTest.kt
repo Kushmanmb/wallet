@@ -23,6 +23,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assume.assumeTrue
 import org.junit.Test
+import uniffi.gemstone.GemTransactionBadge
 import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.transactionRow
 import java.nio.file.Files
@@ -89,8 +90,7 @@ class TransactionDataAggregateImplTest {
 
         assertEquals(TransactionId(Chain.Bitcoin, "test-id-123"), aggregate.id)
         assertEquals(btcAsset, aggregate.asset)
-        assertEquals(TransactionType.Transfer, aggregate.type)
-        assertEquals(TransactionDirection.Incoming, aggregate.direction)
+        assertEquals(GemTransactionBadge.INCOMING, aggregate.badge)
         assertEquals(TransactionState.Pending, aggregate.state)
         assertEquals(transaction.createdAt, aggregate.createdAt)
     }

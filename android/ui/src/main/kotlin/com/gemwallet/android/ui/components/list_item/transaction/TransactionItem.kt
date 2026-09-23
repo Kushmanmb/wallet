@@ -44,10 +44,9 @@ import com.wallet.core.primitives.Asset
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.AssetType
 import com.wallet.core.primitives.Chain
-import com.wallet.core.primitives.TransactionDirection
 import com.wallet.core.primitives.TransactionId
 import com.wallet.core.primitives.TransactionState
-import com.wallet.core.primitives.TransactionType
+import uniffi.gemstone.GemTransactionBadge
 import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionStateTone
 import uniffi.gemstone.GemTransactionStatus
@@ -88,13 +87,12 @@ fun TransactionItem(data: TransactionDataAggregate, listPosition: ListPosition, 
 }
 
 @Composable
-private fun TransactionIcon(data: TransactionDataAggregate) = when (data.type) {
-    TransactionType.Transfer,
-    TransactionType.TransferNFT,
-    TransactionType.SmartContractCall,
+private fun TransactionIcon(data: TransactionDataAggregate) = when (data.badge) {
+    GemTransactionBadge.INCOMING,
+    GemTransactionBadge.OUTGOING,
     -> DirectionBadgedIcon(data)
 
-    else -> AssetIcon(data.asset)
+    GemTransactionBadge.ASSET -> AssetIcon(data.asset)
 }
 
 private const val BADGE_ICON_SCALE = 0.65f
@@ -102,13 +100,13 @@ private const val BADGE_ICON_SCALE = 0.65f
 @Composable
 private fun DirectionBadgedIcon(data: TransactionDataAggregate) {
     val size = listItemIconSize
-    val icon = when (data.direction) {
-        TransactionDirection.Incoming -> AppIcons.ArrowDownward
-        else -> AppIcons.ArrowUpward
+    val icon = when (data.badge) {
+        GemTransactionBadge.INCOMING -> AppIcons.ArrowDownward
+        GemTransactionBadge.OUTGOING, GemTransactionBadge.ASSET -> AppIcons.ArrowUpward
     }
-    val color = when (data.direction) {
-        TransactionDirection.Incoming -> MaterialTheme.colorScheme.tertiary
-        else -> MaterialTheme.colorScheme.primary
+    val color = when (data.badge) {
+        GemTransactionBadge.INCOMING -> MaterialTheme.colorScheme.tertiary
+        GemTransactionBadge.OUTGOING, GemTransactionBadge.ASSET -> MaterialTheme.colorScheme.primary
     }
     IconWithBadge(
         icon = data.nftImageUrl ?: data.asset.iconModel(),
@@ -179,8 +177,7 @@ fun PreviewTransactionItem() {
                 override val status = GemTransactionStatus(tone = GemTransactionStateTone.PENDING, showsBadge = true, showsProgress = true)
                 override val subtitle = GemTransactionRowSubtitle.ToAddress("btc12312sdfksdjfks")
                 override val valueTone = GemValueTone.PLAIN
-                override val type = TransactionType.Transfer
-                override val direction = TransactionDirection.Outgoing
+                override val badge = GemTransactionBadge.OUTGOING
                 override val state = TransactionState.Pending
                 override val createdAt = System.currentTimeMillis()
             },
@@ -210,8 +207,7 @@ fun PreviewSwapTransactionItem() {
                 override val title = GemTransactionTitle.Swap
                 override val subtitle = GemTransactionRowSubtitle.None
                 override val valueTone = GemValueTone.POSITIVE
-                override val type = TransactionType.Swap
-                override val direction = TransactionDirection.Outgoing
+                override val badge = GemTransactionBadge.ASSET
                 override val state = TransactionState.Confirmed
                 override val createdAt = System.currentTimeMillis()
             },

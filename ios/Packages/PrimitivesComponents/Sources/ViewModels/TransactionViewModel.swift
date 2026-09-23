@@ -55,27 +55,10 @@ public struct TransactionViewModel: Sendable, Identifiable, Equatable {
     }
 
     public var overlayImage: Image? {
-        switch transaction.transaction.type {
-        case .transfer, .transferNFT, .smartContractCall:
-            switch transaction.transaction.direction {
-            case .incoming: Images.Transaction.incoming
-            case .outgoing, .selfTransfer: Images.Transaction.outgoing
-            }
-        case .swap,
-             .tokenApproval,
-             .stakeDelegate,
-             .stakeUndelegate,
-             .stakeRewards,
-             .stakeRedelegate,
-             .stakeWithdraw,
-             .assetActivation,
-             .perpetualOpenPosition,
-             .perpetualClosePosition,
-             .stakeFreeze,
-             .stakeUnfreeze,
-             .perpetualModifyPosition,
-             .earnDeposit,
-             .earnWithdraw: AssetIdViewModel(assetId: assetId).assetImage.chainPlaceholder
+        switch row.badge {
+        case .incoming: Images.Transaction.incoming
+        case .outgoing: Images.Transaction.outgoing
+        case .asset: AssetIdViewModel(assetId: assetId).assetImage.chainPlaceholder
         }
     }
 

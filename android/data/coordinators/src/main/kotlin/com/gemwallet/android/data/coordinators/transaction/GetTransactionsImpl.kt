@@ -11,11 +11,9 @@ import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.model.text
 import com.wallet.core.primitives.Asset
-import com.wallet.core.primitives.TransactionDirection
 import com.wallet.core.primitives.TransactionExtended
 import com.wallet.core.primitives.TransactionId
 import com.wallet.core.primitives.TransactionState
-import com.wallet.core.primitives.TransactionType
 import com.wallet.core.primitives.WalletId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +24,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import uniffi.gemstone.GemTransactionBadge
 import uniffi.gemstone.GemTransactionRow
 import uniffi.gemstone.GemTransactionRowSubtitle
 import uniffi.gemstone.GemTransactionRowValue
@@ -108,9 +107,7 @@ class TransactionDataAggregateImpl(private val row: GemTransactionRow) : Transac
 
     override val nftImageUrl: String? = row.nftImageUrl
 
-    override val type: TransactionType = row.transactionType.toPrimitives()
-
-    override val direction: TransactionDirection = row.direction.toPrimitives()
+    override val badge: GemTransactionBadge = row.badge
 
     override val state: TransactionState = row.state.toPrimitives()
 

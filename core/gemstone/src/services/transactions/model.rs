@@ -194,6 +194,14 @@ pub struct GemTransactionRow {
     pub value_tone: GemValueTone,
     pub equivalent_value: GemTransactionRowValue,
     pub nft_image_url: Option<String>,
+    pub badge: GemTransactionBadge,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum GemTransactionBadge {
+    Incoming,
+    Outgoing,
+    Asset,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
