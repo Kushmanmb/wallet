@@ -12,15 +12,24 @@ config_keys = { path = "../config_keys" }
 defi = { path = "../defi" }
 futures = { workspace = true }
 gem_client = { path = "../gem_client", features = ["reqwest"] }
+hex = { workspace = true }
+hmac = { workspace = true }
 lists = { path = "../lists" }
+localizer = { path = "../localizer" }
 nft = { path = "../nft" }
 number_formatter = { path = "../number_formatter" }
 primitives = { path = "../primitives" }
+push_notification = { path = "../push_notification" }
 pusher = { path = "../pusher" }
 search_index = { path = "../search_index" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 settings = { path = "../settings" }
+sha2 = { workspace = true }
 storage = { path = "../storage" }
 streamer = { path = "../streamer" }
+support = { path = "../support" }
 uuid = { workspace = true }
+
+[dev-dependencies]
+primitives = { path = "../primitives", features = ["testkit"] }

@@ -5,7 +5,7 @@ use gem_tracing::{error_with_fields, info_with_fields};
 use streamer::SupportWebhookPayload;
 use streamer::consumer::MessageConsumer;
 
-use support::{ChatwootWebhookPayload, SupportClient};
+use services::support::{ChatwootWebhookPayload, SupportClient};
 
 pub struct SupportWebhookConsumer {
     support_client: SupportClient,

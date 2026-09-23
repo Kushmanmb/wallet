@@ -34,7 +34,6 @@ services = { path = "../../crates/services" }
 cacher = { path = "../../crates/cacher" }
 streamer = { path = "../../crates/streamer" }
 localizer = { path = "../../crates/localizer" }
-support = { path = "../../crates/support" }
 chain_providers = { path = "../../crates/chain_providers" }
 chain_traits = { path = "../../crates/chain_traits" }
 number_formatter = { path = "../../crates/number_formatter" }

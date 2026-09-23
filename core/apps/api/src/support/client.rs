@@ -2,7 +2,7 @@ use primitives::{Device, Platform, SupportAction, SupportMessage, SupportMessage
 use std::{error::Error, future::Future};
 use storage::{Database, NewSupportSessionRow, SupportSessionsRepository, models::DeviceRow};
 
-use ::support::{ChatwootClient, ChatwootSession};
+use services::support::{ChatwootClient, ChatwootSession};
 
 pub struct SupportApiClient {
     chatwoot_ios: ChatwootClient,

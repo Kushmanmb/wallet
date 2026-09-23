@@ -1,16 +1,16 @@
+use std::collections::HashMap;
+use std::error::Error;
+use std::io;
+
 use chrono::Utc;
 use gem_client::{CONTENT_TYPE, ClientError, ClientExt, MultipartForm, ReqwestClient, reqwest_client};
 use primitives::{Device, SupportMessage, SupportTypingStatus};
 use serde::Serialize;
 use serde_json::Value;
-use std::collections::HashMap;
-use std::error::Error;
-use std::io;
 
-use crate::{
-    ChatwootConfigResponse, ChatwootContactResponse, ChatwootContactUpdate, ChatwootMessageInput, ChatwootMessagesResponse, ChatwootSession, ChatwootTypingInput, Message, chatwoot_target::ChatwootTarget,
-    constants::QUERY_WIDGET_PUBLIC_TOKEN, support_public_messages,
-};
+use super::chatwoot_target::ChatwootTarget;
+use super::constants::QUERY_WIDGET_PUBLIC_TOKEN;
+use super::model::{ChatwootConfigResponse, ChatwootContactResponse, ChatwootContactUpdate, ChatwootMessageInput, ChatwootMessagesResponse, ChatwootSession, ChatwootTypingInput, Message, support_public_messages};
 
 const AUTH_TOKEN_HEADER: &str = "x-auth-token";
 

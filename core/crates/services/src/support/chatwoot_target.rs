@@ -1,6 +1,6 @@
 use gem_client::Target;
 
-use crate::constants::{PATH_CONFIG, PATH_CONTACT_SET_USER, PATH_MESSAGES, PATH_TOGGLE_TYPING, PATH_UPDATE_LAST_SEEN};
+use super::constants::{PATH_CONFIG, PATH_CONTACT_SET_USER, PATH_MESSAGES, PATH_TOGGLE_TYPING, PATH_UPDATE_LAST_SEEN};
 
 #[derive(Clone, Debug)]
 pub enum ChatwootTarget {

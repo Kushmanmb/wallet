@@ -99,7 +99,6 @@ INFRA_DEPENDENTS = {
     "fiat": {"cacher", "storage", "streamer"},
     "rewards": {"cacher", "storage"},
     "pricer": {"cacher", "storage"},
-    "support": {"cacher", "storage", "streamer"},
 }
 CARGO_SECTION = re.compile(r"^\[(.+)\]\s*$")
 CARGO_KEY = re.compile(r"^([A-Za-z0-9_-]+)\s*=\s*(.*)$")

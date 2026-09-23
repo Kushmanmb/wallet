@@ -543,7 +543,6 @@ dependencies = [
  "storage",
  "streamer",
  "strum",
- "support",
  "swapper",
  "tokio",
 ]
@@ -2338,7 +2337,6 @@ dependencies = [
  "storage",
  "streamer",
  "strum",
- "support",
  "swapper",
  "tokio",
 ]
@@ -7871,17 +7869,23 @@ dependencies = [
  "defi",
  "futures",
  "gem_client",
+ "hex",
+ "hmac 0.13.0",
  "lists",
+ "localizer",
  "nft",
  "number_formatter",
  "primitives",
+ "push_notification",
  "pusher",
  "search_index",
  "serde",
  "serde_json",
  "settings",
+ "sha2 0.11.0",
  "storage",
  "streamer",
+ "support",
  "uuid",
 ]
 
@@ -8359,19 +8363,7 @@ dependencies = [
 name = "support"
 version = "2.114.44"
 dependencies = [
- "cacher",
- "chrono",
- "gem_client",
- "hex",
- "hmac 0.13.0",
- "localizer",
  "primitives",
- "push_notification",
- "serde",
- "serde_json",
- "sha2 0.11.0",
- "storage",
- "streamer",
  "url",
 ]
 

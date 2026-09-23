@@ -19,6 +19,7 @@ use crate::assets::ListsClient;
 use crate::auth::AuthClient;
 use crate::defi::DefiClient;
 use crate::nft::NFTClient;
+use crate::support::SupportClient;
 
 #[derive(Clone)]
 pub struct Services {
@@ -56,6 +57,11 @@ impl Services {
         let rabbitmq = &self.settings.rabbitmq;
         let config = StreamProducerConfig::new(rabbitmq.url.clone(), Retry::new(rabbitmq.retry.delay, rabbitmq.retry.timeout));
         StreamProducer::new(&config, name, shutdown_rx).await
+    }
+
+    pub async fn support(&self, shutdown_rx: ShutdownReceiver) -> Result<SupportClient, Box<dyn Error + Send + Sync>> {
+        let stream_producer = self.stream_producer("daemon_support_producer", shutdown_rx).await?;
+        Ok(SupportClient::new(self.database(), stream_producer, self.cacher().await?))
     }
 
     pub async fn search_index(&self) -> Result<SearchIndexClient, Box<dyn Error + Send + Sync>> {

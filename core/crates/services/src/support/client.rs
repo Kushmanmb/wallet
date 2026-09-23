@@ -1,15 +1,15 @@
-use crate::{
-    ChatwootWebhookPayload,
-    constants::{EVENT_CONVERSATION_TYPING_OFF, EVENT_CONVERSATION_TYPING_ON, EVENT_MESSAGE_CREATED},
-    markdown_plain_text,
-};
+use std::error::Error;
+
 use cacher::CacherClient;
 use localizer::LanguageLocalizer;
 use primitives::{Device, StreamEvent, SupportMessage, SupportStreamEvent, SupportTypingStatus, device_stream_channel};
 use push_notification::{GorushNotification, PushNotification, PushNotificationSupport, PushNotificationTypes};
-use std::error::Error;
 use storage::{Database, DevicesRepository};
 use streamer::{NotificationsPayload, StreamProducer, StreamProducerQueue};
+use support::markdown_plain_text;
+
+use super::constants::{EVENT_CONVERSATION_TYPING_OFF, EVENT_CONVERSATION_TYPING_ON, EVENT_MESSAGE_CREATED};
+use super::model::ChatwootWebhookPayload;
 
 #[derive(Debug, Default)]
 pub struct SupportWebhookResult {
@@ -113,7 +113,7 @@ mod tests {
 
     #[test]
     fn test_build_notification_message_created() {
-        let payload: ChatwootWebhookPayload = serde_json::from_str(include_str!("../tests/testdata/chatwoot_message_created.json")).unwrap();
+        let payload: ChatwootWebhookPayload = serde_json::from_str(include_str!("../../testdata/chatwoot_message_created.json")).unwrap();
 
         let notification = SupportClient::build_notification(&Device::mock(), &payload);
 
@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     fn test_build_notification_conversation_updated() {
-        let payload: ChatwootWebhookPayload = serde_json::from_str(include_str!("../tests/testdata/chatwoot_conversation_updated.json")).unwrap();
+        let payload: ChatwootWebhookPayload = serde_json::from_str(include_str!("../../testdata/chatwoot_conversation_updated.json")).unwrap();
 
         let notification = SupportClient::build_notification(&Device::mock(), &payload);
 

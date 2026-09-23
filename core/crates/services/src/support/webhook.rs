@@ -1,6 +1,10 @@
+use std::collections::HashMap;
+use std::error::Error;
+use std::fmt;
+
+use chrono::Utc;
 use hmac::{Hmac, KeyInit, Mac};
 use sha2::Sha256;
-use std::{collections::HashMap, error::Error, fmt};
 
 const SIGNATURE_HEADER: &str = "x-chatwoot-signature";
 const TIMESTAMP_HEADER: &str = "x-chatwoot-timestamp";
@@ -32,7 +36,7 @@ impl ChatwootWebhookVerifier {
     }
 
     pub fn verify(&self, headers: &HashMap<String, String>, data: &str) -> Result<(), ChatwootWebhookError> {
-        self.verify_at(headers, data, chrono::Utc::now().timestamp())
+        self.verify_at(headers, data, Utc::now().timestamp())
     }
 
     fn verify_at(&self, headers: &HashMap<String, String>, data: &str, now: i64) -> Result<(), ChatwootWebhookError> {
