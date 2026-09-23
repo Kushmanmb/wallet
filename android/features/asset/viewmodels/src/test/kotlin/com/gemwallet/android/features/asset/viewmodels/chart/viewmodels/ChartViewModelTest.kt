@@ -254,5 +254,6 @@ class ChartViewModelTest {
         assetId = asset.id,
         connectionStatusObserver = mockk(relaxed = true),
         ioDispatcher = testDispatcher,
+        context = mockk(relaxed = true),
     ).also(viewModels::add)
 }

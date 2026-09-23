@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.asset.viewmodels.chart.viewmodels
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -8,17 +9,20 @@ import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.assets.cases.GetAssetTokenInfo
 import com.gemwallet.android.application.session.cases.GetCurrentCurrency
 import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusObserver
+import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.runCatchingCancellable
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.asset.viewmodels.chart.models.ChartUIModel
 import com.gemwallet.android.features.asset.viewmodels.chart.models.StopTimeoutMillis
+import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.models.StateViewType
 import com.gemwallet.android.ui.models.navigation.requireAssetId
 import com.wallet.core.primitives.AssetId
 import com.wallet.core.primitives.ChartPeriod
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -47,6 +51,7 @@ class ChartViewModel internal constructor(
     private val assetId: AssetId,
     connectionStatusObserver: ConnectionStatusObserver,
     private val ioDispatcher: CoroutineDispatcher,
+    private val context: Context,
 ) : ViewModel() {
     private val session = MutableStateFlow(chartService.newSession())
 
@@ -91,7 +96,7 @@ class ChartViewModel internal constructor(
                 GemChartPhase.Loading -> StateViewType.Loading
                 is GemChartPhase.Data -> StateViewType.Data(ChartUIModel(phase.data))
                 GemChartPhase.NoData -> StateViewType.NoData
-                is GemChartPhase.Failed -> StateViewType.Error()
+                is GemChartPhase.Failed -> StateViewType.Error(phase.error.errorText().text(context))
             },
         )
     }
@@ -130,6 +135,7 @@ class ChartViewModel internal constructor(
         savedStateHandle: SavedStateHandle,
         connectionStatusObserver: ConnectionStatusObserver,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
+        @ApplicationContext context: Context,
     ) : this(
         getCurrentCurrency = getCurrentCurrency,
         getAssetTokenInfo = getAssetTokenInfo,
@@ -137,6 +143,7 @@ class ChartViewModel internal constructor(
         assetId = savedStateHandle.requireAssetId(),
         connectionStatusObserver = connectionStatusObserver,
         ioDispatcher = ioDispatcher,
+        context = context,
     )
 }
 

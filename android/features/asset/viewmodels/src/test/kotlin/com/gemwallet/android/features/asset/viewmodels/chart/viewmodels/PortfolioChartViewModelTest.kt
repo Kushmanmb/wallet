@@ -160,7 +160,7 @@ class PortfolioChartViewModelTest {
 
         val state = viewModel.chartUIState.first { it.chart != StateViewType.Loading }
 
-        assertEquals(StateViewType.Error(), state.chart)
+        assertEquals(StateViewType.Error("network down"), state.chart)
     }
 
     @Test
@@ -195,5 +195,6 @@ class PortfolioChartViewModelTest {
         initialType = initialType,
         connectionStatusObserver = mockk(relaxed = true),
         ioDispatcher = testDispatcher,
+        context = mockk(relaxed = true),
     ).also(viewModels::add)
 }

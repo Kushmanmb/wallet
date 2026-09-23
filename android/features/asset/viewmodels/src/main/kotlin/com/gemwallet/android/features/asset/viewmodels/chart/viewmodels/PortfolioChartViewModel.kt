@@ -1,5 +1,6 @@
 package com.gemwallet.android.features.asset.viewmodels.chart.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,10 +8,12 @@ import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.data.services.gemstone.connection.ConnectionStatusObserver
 import com.gemwallet.android.data.services.gemstone.perpetual.ObservePerpetualWallet
+import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toPrimitives
 import com.gemwallet.android.features.asset.viewmodels.chart.models.ChartUIModel
 import com.gemwallet.android.features.asset.viewmodels.chart.models.StopTimeoutMillis
+import com.gemwallet.android.ui.localization.text
 import com.gemwallet.android.ui.models.StateViewType
 import com.wallet.core.primitives.ChartPeriod
 import com.wallet.core.primitives.Currency
@@ -50,6 +53,7 @@ class PortfolioChartViewModel internal constructor(
     initialType: PortfolioType,
     connectionStatusObserver: ConnectionStatusObserver,
     private val ioDispatcher: CoroutineDispatcher,
+    private val context: Context,
 ) : ViewModel() {
 
     private val wallet = MutableStateFlow<Wallet?>(null)
@@ -127,7 +131,7 @@ class PortfolioChartViewModel internal constructor(
         GemPortfolioPhase.Loading -> StateViewType.Loading
         is GemPortfolioPhase.Data -> StateViewType.Data(ChartUIModel(chart = chart))
         GemPortfolioPhase.NoData -> StateViewType.NoData
-        is GemPortfolioPhase.Failed -> StateViewType.Error()
+        is GemPortfolioPhase.Failed -> StateViewType.Error(error.errorText().text(context))
     }
 
     @Inject
@@ -138,6 +142,7 @@ class PortfolioChartViewModel internal constructor(
         savedStateHandle: SavedStateHandle,
         connectionStatusObserver: ConnectionStatusObserver,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
+        @ApplicationContext context: Context,
     ) : this(
         service = service,
         getSession = getSession,
@@ -145,5 +150,6 @@ class PortfolioChartViewModel internal constructor(
         initialType = savedStateHandle.portfolioType(),
         connectionStatusObserver = connectionStatusObserver,
         ioDispatcher = ioDispatcher,
+        context = context,
     )
 }
