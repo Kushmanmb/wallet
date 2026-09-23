@@ -90,6 +90,7 @@ class PerpetualMarketViewModel @Inject constructor(
     }
     val sceneState = MutableStateFlow<PerpetualMarketSceneState>(PerpetualMarketSceneState.Idle)
     private val perpetuals = getPerpetuals.getPerpetuals(query)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val unpinnedPerpetuals = perpetuals.map { items -> items.filter { !it.isPinned } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val pinnedPerpetuals = perpetuals.map { items -> items.filter { it.isPinned } }

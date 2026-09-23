@@ -113,11 +113,12 @@ class PerpetualDetailsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val position = combine(
-        perpetual,
-        getSession().filterNotNull(),
-    ) { perpetual, session -> perpetual to session.wallet.id }
-        .flatMapLatest { (perpetual, walletId) ->
-            perpetual?.let { getPerpetualPosition.getPositionByPerpetual(walletId, it.perpetual.id) } ?: flowOf(null)
+        perpetual.map { it?.perpetual?.id }.distinctUntilChanged(),
+        getSession().filterNotNull().map { it.wallet.id }.distinctUntilChanged(),
+        ::Pair,
+    )
+        .flatMapLatest { (perpetualId, walletId) ->
+            perpetualId?.let { getPerpetualPosition.getPositionByPerpetual(walletId, it) } ?: flowOf(null)
         }
         .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -189,18 +190,19 @@ class PerpetualDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 screenVisible,
-                perpetual.map { it?.perpetual }.distinctUntilChanged(),
+                perpetual.map { it?.perpetual },
                 period,
             ) { isVisible, market, period ->
-                if (isVisible && market != null) market to period else null
+                market?.takeIf { isVisible }?.let {
+                    listOf(
+                        service.candleSubscription(it.toGem(), period.toGem()),
+                        service.marketSubscription(it.toGem()),
+                    )
+                }
             }
                 .distinctUntilChanged()
-                .collectLatest { subscriptionKey ->
-                    val (market, period) = subscriptionKey ?: return@collectLatest
-                    val subscriptions = listOf(
-                        service.candleSubscription(market.toGem(), period.toGem()),
-                        service.marketSubscription(market.toGem()),
-                    )
+                .collectLatest { subscriptions ->
+                    subscriptions ?: return@collectLatest
                     subscriptions.forEach(perpetualObserver::subscribe)
                     try {
                         awaitCancellation()
@@ -230,13 +232,13 @@ class PerpetualDetailsViewModel @Inject constructor(
     private val errorState = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = errorState.asStateFlow()
 
-    fun fetch() {
+    fun refreshPerpetual() {
         storedRefreshRequests.tryEmit(Unit)
     }
 
     fun refresh() {
         candles.update { it.onRefresh() }
-        fetch()
+        refreshPerpetual()
     }
 
     fun openPosition(direction: PerpetualDirection, amountAction: AmountTransactionAction) = position(GemPerpetualPositionKind.Open(direction.toGem()), amountAction)

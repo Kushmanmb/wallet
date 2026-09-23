@@ -7,6 +7,7 @@ import com.gemwallet.android.application.perpetual.cases.GetPerpetuals
 import com.gemwallet.android.application.perpetual.cases.PerpetualObserver
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
+import com.gemwallet.android.domains.perpetual.aggregates.PerpetualDataAggregate
 import com.gemwallet.android.domains.perpetual.aggregates.PerpetualPositionDataAggregate
 import com.gemwallet.android.testkit.mockAsset
 import com.gemwallet.android.testkit.mockSession
@@ -26,6 +27,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -87,9 +89,33 @@ class PerpetualMarketViewModelTest {
         assertEquals(GemMarketsRefreshTrigger.SCHEDULED, trigger.await())
     }
 
-    private fun viewModel(service: GemPerpetualServiceInterface, positions: List<PerpetualPositionDataAggregate> = emptyList(), balance: PerpetualBalance? = null, walletType: WalletType = WalletType.Multicoin): PerpetualMarketViewModel {
+    @Test
+    fun `pinned and unpinned markets share one market observation`() = runTest(dispatcher) {
+        var collections = 0
+        val pinned = mockk<PerpetualDataAggregate> { every { isPinned } returns true }
+        val unpinned = mockk<PerpetualDataAggregate> { every { isPinned } returns false }
+        val markets = flow {
+            collections++
+            emit(listOf(pinned, unpinned))
+        }
+
+        val subject = viewModel(mockk(relaxed = true), perpetuals = markets)
+        advanceUntilIdle()
+
+        assertEquals(1, collections)
+        assertEquals(listOf(pinned), subject.pinnedPerpetuals.value)
+        assertEquals(listOf(unpinned), subject.unpinnedPerpetuals.value)
+    }
+
+    private fun viewModel(
+        service: GemPerpetualServiceInterface,
+        positions: List<PerpetualPositionDataAggregate> = emptyList(),
+        balance: PerpetualBalance? = null,
+        walletType: WalletType = WalletType.Multicoin,
+        perpetuals: Flow<List<PerpetualDataAggregate>> = flowOf(emptyList()),
+    ): PerpetualMarketViewModel {
         val getPerpetuals = mockk<GetPerpetuals>()
-        every { getPerpetuals.getPerpetuals(any<Flow<String?>>()) } returns flowOf(emptyList())
+        every { getPerpetuals.getPerpetuals(any<Flow<String?>>()) } returns perpetuals
         val getPositions = mockk<GetPerpetualPositions>()
         every { getPositions.getPerpetualPositions() } returns flowOf(positions)
         val getBalance = mockk<GetPerpetualBalance>()

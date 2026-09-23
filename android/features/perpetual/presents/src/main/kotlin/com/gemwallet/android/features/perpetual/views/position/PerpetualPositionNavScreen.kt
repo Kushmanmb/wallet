@@ -32,7 +32,7 @@ fun PerpetualPositionNavScreen(
     viewModel: PerpetualDetailsViewModel = hiltViewModel(),
 ) {
     LifecycleResumeEffect(Unit) {
-        viewModel.fetch()
+        viewModel.refreshPerpetual()
         onPauseOrDispose { }
     }
 
@@ -84,7 +84,7 @@ fun PerpetualPositionNavScreen(
     ) {
         AutocloseNavGraph(
             onDismiss = { showAutoclose = false },
-            finishAction = FinishConfirmAction { _, _ -> viewModel.fetch() },
+            finishAction = FinishConfirmAction { _, _ -> viewModel.refreshPerpetual() },
             onAcquireAsset = onAcquireAsset,
         )
     }

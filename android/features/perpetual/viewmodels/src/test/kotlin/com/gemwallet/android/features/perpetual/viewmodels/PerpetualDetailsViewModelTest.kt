@@ -25,6 +25,7 @@ import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -44,6 +45,7 @@ import org.junit.Test
 import uniffi.gemstone.GemCandleResult
 import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemPerpetualDetailsServiceInterface
+import uniffi.gemstone.GemPerpetualSubscription
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PerpetualDetailsViewModelTest {
@@ -71,20 +73,21 @@ class PerpetualDetailsViewModelTest {
             coEvery { candles(any()) } answers { GemCandleResult(request = firstArg(), state = GemLoadState.Data, candles = emptyList()) }
         },
         data: PerpetualData? = null,
+        perpetuals: Flow<PerpetualData?> = flowOf(data),
+        positions: GetPerpetualPosition = mockk(relaxed = true),
+        observer: PerpetualObserver = mockk(relaxed = true) {
+            every { chartUpdates } returns emptyFlow()
+        },
     ): PerpetualDetailsViewModel {
         val session: GetSession = mockk {
             every { this@mockk.invoke() } returns MutableStateFlow(mockSession())
         }
         val perpetual: GetPerpetual = mockk {
-            every { getPerpetualByAssetId(any()) } returns flowOf(data)
+            every { getPerpetualByAssetId(any()) } returns perpetuals
         }
-        val positions: GetPerpetualPosition = mockk(relaxed = true)
         val transactions: GetTransactions = mockk {
             every { getTransactions(any()) } returns emptyFlow()
             every { stored(any()) } returns emptyList()
-        }
-        val observer: PerpetualObserver = mockk(relaxed = true) {
-            every { chartUpdates } returns emptyFlow()
         }
         return PerpetualDetailsViewModel(
             perpetual,
@@ -97,6 +100,31 @@ class PerpetualDetailsViewModelTest {
             dispatcher,
             mockk(relaxed = true),
         ).also { models.add(it) }
+    }
+
+    @Test
+    fun `a price-only market update keeps the subscriptions and the position query`() = runTest(dispatcher) {
+        val service: GemPerpetualDetailsServiceInterface = mockk(relaxed = true) {
+            every { chartPeriod() } returns uniffi.gemstone.ChartPeriod.DAY
+            coEvery { candles(any()) } answers { GemCandleResult(request = firstArg(), state = GemLoadState.Data, candles = emptyList()) }
+            every { candleSubscription(any(), any()) } answers { GemPerpetualSubscription.Candle(firstArg<uniffi.gemstone.Perpetual>().name, "1d") }
+            every { marketSubscription(any()) } answers { GemPerpetualSubscription.MarketData(firstArg<uniffi.gemstone.Perpetual>().name) }
+        }
+        val markets = MutableStateFlow<PerpetualData?>(mockPerpetualData(perpetual = mockPerpetual(price = 1.0), asset = asset))
+        val positions: GetPerpetualPosition = mockk(relaxed = true)
+        val observer: PerpetualObserver = mockk(relaxed = true) {
+            every { chartUpdates } returns emptyFlow()
+        }
+        val model = viewModel(service = service, perpetuals = markets, positions = positions, observer = observer)
+        model.onScreenEnter()
+        advanceUntilIdle()
+
+        markets.value = mockPerpetualData(perpetual = mockPerpetual(price = 2.0), asset = asset)
+        advanceUntilIdle()
+
+        verify(exactly = 2) { observer.subscribe(any()) }
+        verify(exactly = 0) { observer.unsubscribe(any()) }
+        verify(exactly = 1) { positions.getPositionByPerpetual(any(), any()) }
     }
 
     @Test
@@ -130,7 +158,7 @@ class PerpetualDetailsViewModelTest {
         assertFalse("the spinner stops once the answer lands", model.isRefreshing.value)
         coVerify(exactly = 1) { service.refresh(asset.id.toIdentifier()) }
 
-        model.fetch()
+        model.refreshPerpetual()
         advanceUntilIdle()
         coVerify(exactly = 2) { service.refresh(asset.id.toIdentifier()) }
     }
