@@ -311,7 +311,7 @@ struct ServicesFactory {
             pushNotificationService: pushNotificationService,
             transactionStore: stores.transactionStore,
             deeplinkService: Gemstone.GemDeeplinkService(),
-            navigationService: Gemstone.GemNavigationService(assets: assetsService, session: walletSessionService),
+            navigationService: Gemstone.GemNavigationService(assets: assetsService, session: walletSessionService, transactionState: transactionStateService),
             paymentService: paymentService,
             transactionStateService: transactionStateService,
             walletConnectorPresenter: walletConnectorPresenter,

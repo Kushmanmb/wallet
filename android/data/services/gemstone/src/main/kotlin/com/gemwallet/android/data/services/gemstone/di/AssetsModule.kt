@@ -67,6 +67,7 @@ import uniffi.gemstone.GemSupportService
 import uniffi.gemstone.GemSupportStore
 import uniffi.gemstone.GemSwapService
 import uniffi.gemstone.GemSwapServiceInterface
+import uniffi.gemstone.GemTransactionStateService
 import uniffi.gemstone.GemTransactionsService
 import uniffi.gemstone.GemWalletSessionService
 import javax.inject.Singleton
@@ -235,7 +236,7 @@ object AssetsModule {
 
     @Provides
     @Singleton
-    fun provideGemNavigationService(assets: GemAssetsService, session: GemWalletSessionService): GemNavigationService = GemNavigationService(assets, session)
+    fun provideGemNavigationService(assets: GemAssetsService, session: GemWalletSessionService, transactionState: GemTransactionStateService): GemNavigationService = GemNavigationService(assets, session, transactionState)
 
     @Provides
     fun provideGemNavigationServiceInterface(service: GemNavigationService): GemNavigationServiceInterface = service

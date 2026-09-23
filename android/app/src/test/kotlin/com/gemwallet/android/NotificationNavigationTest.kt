@@ -1,6 +1,5 @@
 package com.gemwallet.android
 
-import com.gemwallet.android.application.transactions.cases.CreateTransaction
 import com.gemwallet.android.application.wallet.cases.GetWallet
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.ext.toIdentifier
@@ -33,14 +32,11 @@ import uniffi.gemstone.GemPushNotificationService
 
 class NotificationNavigationTest {
 
-    private val getWallet = mockk<GetWallet>(relaxed = true)
-    private val createTransaction = mockk<CreateTransaction>(relaxed = true)
-
     private fun navigation(target: GemNavigationTarget): NotificationNavigation {
         val navigationService = mockk<GemNavigationServiceInterface> {
             coEvery { openNotification(any()) } returns target
         }
-        return NotificationNavigation(getWallet, createTransaction, navigationService, GemPushNotificationService())
+        return NotificationNavigation(navigationService, GemPushNotificationService())
     }
 
     @Test
@@ -62,21 +58,17 @@ class NotificationNavigationTest {
     }
 
     @Test
-    fun `a transaction is stored before its route is offered`() = runBlocking {
+    fun `a transaction Core opened routes to its details`() = runBlocking {
         val assetId = mockAssetId(Chain.Ethereum)
         val walletId = mockWalletId()
         val asset = mockAsset(chain = assetId.chain, tokenId = assetId.tokenId)
         val transaction = mockTransaction(assetId = assetId)
-        val wallet = mockWallet(id = walletId.id, accounts = listOf(mockAccount(chain = assetId.chain)))
-        every { getWallet(wallet.id) } returns flowOf(wallet)
-        coEvery { createTransaction.createNotificationTransaction(wallet, assetId, transaction) } returns asset
 
         val routes = navigation(GemNavigationTarget.Transaction(asset.toGem(), walletId.id, transaction.toGem(), isPerpetual = false))
             .prepareNavigation(
                 GemPushNotification.Transaction(walletId = walletId.id, assetId = assetId.toIdentifier(), transaction = transaction.toGem()),
             )
 
-        coVerify { createTransaction.createNotificationTransaction(wallet, assetId, transaction) }
         assertEquals(listOf(AssetRoute(asset.id), TransactionDetailsRoute(transaction.id)), routes)
     }
 

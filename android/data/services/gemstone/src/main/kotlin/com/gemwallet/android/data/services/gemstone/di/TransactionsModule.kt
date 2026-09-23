@@ -1,6 +1,5 @@
 package com.gemwallet.android.data.services.gemstone.di
 
-import com.gemwallet.android.application.transactions.cases.CreateTransaction
 import com.gemwallet.android.data.service.store.database.AddressesDao
 import com.gemwallet.android.data.service.store.database.StoreTransactionRunner
 import com.gemwallet.android.data.service.store.database.TransactionsDao
@@ -78,10 +77,6 @@ object TransactionsModule {
     @Singleton
     @Provides
     fun provideTransactionStatusService(stateService: GemTransactionStateService): TransactionStatusService = TransactionStatusService(stateService = stateService).also { stateService.setStatus(it) }
-
-    @Singleton
-    @Provides
-    fun provideCreateTransactionsCase(tracker: TransactionStatusService): CreateTransaction = tracker
 
     @Provides
     fun provideGemTransactionsServiceInterface(service: GemTransactionsService): GemTransactionsServiceInterface = service

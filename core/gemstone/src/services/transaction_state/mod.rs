@@ -88,7 +88,9 @@ impl GemTransactionStateService {
     pub fn stop_tracking(&self) {
         self.tracking.cancel();
     }
+}
 
+impl GemTransactionStateService {
     pub async fn add_notification_transaction(&self, wallet: Wallet, asset_id: AssetId, transaction: Transaction) -> Result<Option<Asset>, GemServiceError> {
         let Some(asset) = self.assets.open_wallet_asset(wallet.clone(), asset_id).await? else {
             return Ok(None);
@@ -99,9 +101,7 @@ impl GemTransactionStateService {
         }
         Ok(Some(asset))
     }
-}
 
-impl GemTransactionStateService {
     pub async fn clear_pending_transactions(&self) -> Result<(), GemServiceError> {
         for pending in self.store.get_pending_transactions().await? {
             self.store.delete_transaction(pending.wallet.id, pending.transaction.id).await?;
