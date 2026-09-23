@@ -26,12 +26,20 @@ pub fn application_icon_url(metadata: ApplicationMetadata) -> Option<String> {
     icon_url(&metadata)
 }
 
+const CONNECTION_INITIAL: &str = "WC";
+
 pub fn connection_row(metadata: &ApplicationMetadata) -> GemConnectionRow {
     let name = metadata.short_name();
+    let host = Some(url_host(&metadata.url)).filter(|host| !host.is_empty());
     GemConnectionRow {
-        initial: name.chars().next().map(|first| first.to_uppercase().to_string()),
+        initial: name
+            .chars()
+            .chain(host.iter().flat_map(|host| host.chars()))
+            .next()
+            .map(|first| first.to_uppercase().to_string())
+            .unwrap_or_else(|| CONNECTION_INITIAL.to_string()),
         title: name,
-        host: Some(url_host(&metadata.url)).filter(|host| !host.is_empty()),
+        host,
         icon_url: icon_url(metadata),
     }
 }
@@ -76,7 +84,7 @@ mod tests {
             ..ApplicationMetadata::mock()
         });
         assert_eq!(hosted.host.as_deref(), Some("app.uniswap.org"));
-        assert_eq!(hosted.initial.as_deref(), Some("U"));
+        assert_eq!(hosted.initial, "U");
 
         assert_eq!(hosted.icon_url.as_deref(), Some("https://assets.gemwallet.com/proxy/icon?url=https%3A%2F%2Fapp.uniswap.org&size=256"));
 
@@ -86,7 +94,16 @@ mod tests {
             ..ApplicationMetadata::mock()
         };
         assert_eq!(application_connection_row(unhosted.clone()).host, None);
-        assert_eq!(application_connection_row(ApplicationMetadata { name: String::new(), ..unhosted.clone() }).initial, None);
+        assert_eq!(application_connection_row(ApplicationMetadata { name: String::new(), ..unhosted.clone() }).initial, "WC");
+        assert_eq!(
+            application_connection_row(ApplicationMetadata {
+                name: String::new(),
+                url: "https://app.uniswap.org".to_string(),
+                ..unhosted.clone()
+            })
+            .initial,
+            "A"
+        );
         assert_eq!(application_connection_row(unhosted).icon_url, None);
     }
 
@@ -196,6 +213,6 @@ mod tests {
 pub struct GemConnectionRow {
     pub title: String,
     pub host: Option<String>,
-    pub initial: Option<String>,
+    pub initial: String,
     pub icon_url: Option<String>,
 }

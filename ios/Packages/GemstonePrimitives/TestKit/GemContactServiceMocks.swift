@@ -21,7 +21,7 @@ public extension GemContactService {
 
 public final class GemWalletConnectServiceMock: GemWalletConnectServiceProtocol, @unchecked Sendable {
     public var connectionSectionsValue: [GemConnectionSection] = []
-    public var connectionRowValue = GemConnectionRow(title: "", host: nil, initial: nil, iconUrl: nil)
+    public var connectionRowValue = GemConnectionRow(title: "", host: nil, initial: "WC", iconUrl: nil)
     public var connectionDetailRows: [GemListRow] = []
     public var hasSessionsValue = false
     public var signatureResult: Result<String, Error> = .success("0x")

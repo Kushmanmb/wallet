@@ -7,7 +7,7 @@ import uniffi.gemstone.GemConnection
 data class ConnectionRowUIModel(val id: String, val model: ListItemModel)
 
 internal fun GemConnection.listItem(): ListItemModel {
-    val placeholder = row.initial ?: "WC"
+    val placeholder = row.initial
     return ListItemModel(
         title = row.title,
         titleExtra = row.host,
