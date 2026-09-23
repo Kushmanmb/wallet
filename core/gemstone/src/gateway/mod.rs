@@ -22,7 +22,7 @@ use swapper::swapper::GemSwapper as Swapper;
 use yielder::Yielder;
 
 use primitives::TransactionInputType;
-use primitives::perpetual::{PerpetualData, PerpetualPositionsSummary};
+use primitives::perpetual::{PerpetualAccountPositions, PerpetualData};
 use primitives::{AssetBalance, AssetId, Chain, ChartPeriod, Latency, NodeStatus, Transaction, TransactionUpdate};
 
 #[derive(uniffi::Object)]
@@ -39,7 +39,7 @@ impl std::fmt::Debug for GemGateway {
 }
 
 impl GemGateway {
-    pub async fn get_positions(&self, chain: Chain, address: String) -> Result<PerpetualPositionsSummary, GatewayError> {
+    pub async fn get_positions(&self, chain: Chain, address: String) -> Result<PerpetualAccountPositions, GatewayError> {
         self.with_provider(chain, |provider| async move { provider.get_positions(address).await }).await
     }
 

@@ -16,7 +16,7 @@ use std::sync::Arc;
 use chrono::Utc;
 use gem_hypercore::models::websocket::HyperliquidSocketMessage;
 use gem_hypercore::provider::websocket_mapper::{diff_clearinghouse_positions, diff_open_orders_positions, parse_websocket_data};
-use primitives::perpetual::{PerpetualBalance, PerpetualData};
+use primitives::perpetual::{PerpetualAccountPositions, PerpetualBalance, PerpetualData};
 use primitives::portfolio::PerpetualPortfolio;
 use primitives::{Asset, AssetId, Chain, ChartPeriod, PerpetualAccountMode, PerpetualProvider, Wallet, WalletId, WalletType};
 use std::collections::HashMap;
@@ -206,8 +206,8 @@ impl GemPerpetualService {
 
 impl GemPerpetualService {
     pub async fn sync_positions(&self, wallet_id: WalletId, chain: Chain, address: String) -> Result<PerpetualAccountMode, GemServiceError> {
-        let (mode, summary) = futures::join!(self.account_mode(wallet_id.clone(), chain, address.clone()), self.gateway.get_positions(chain, address));
-        let (mode, summary) = (mode?, summary?);
+        let PerpetualAccountPositions { mode, summary } = self.gateway.get_positions(chain, address).await?;
+        self.wallet_preferences.set_perpetual_account_mode(wallet_id.clone(), mode)?;
         let existing_ids = self.store.get_position_ids(wallet_id.clone(), provider(chain)?).await?;
         let delete_ids = rules::stale_position_ids(existing_ids, &summary.positions);
         self.store.update_positions(wallet_id.clone(), summary.positions, delete_ids).await?;
@@ -464,6 +464,22 @@ mod tests {
                 assert_eq!(testkit.wallet_preferences.get_perpetual_account_mode(wallet.id).unwrap(), PerpetualAccountMode::Unified);
             }
         });
+    }
+
+    #[test]
+    fn test_connection_and_refresh_each_ask_for_the_account_mode_once() {
+        block_on(async {
+            let testkit = PerpetualTestkit::with_unified_balance().await;
+            let wallet = Wallet::mock_with_accounts(Account::mock_chains(&[Chain::HyperCore], "0xc64c"));
+            *testkit.wallets.wallets.lock().unwrap() = vec![wallet.clone()];
+            testkit.service.session.set_current_wallet_id(Some(wallet.id.clone())).unwrap();
+
+            testkit.service.connection(wallet).await.unwrap();
+            testkit.service.sync_current_positions().await.unwrap();
+
+            let mode_requests = testkit.provider.requested_types().iter().filter(|kind| *kind == "userAbstraction").count();
+            assert_eq!(mode_requests, 2);
+        })
     }
 
     #[test]
