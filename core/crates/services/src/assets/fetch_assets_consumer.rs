@@ -7,7 +7,7 @@ use gem_tracing::info_with_fields;
 use storage::{AssetsRepository, Database};
 use streamer::{FetchAssetsPayload, StreamProducer, StreamProducerQueue, consumer::MessageConsumer};
 
-use crate::asset_spam::AssetClassificationRules;
+use crate::assets::AssetClassificationRules;
 
 pub struct FetchAssetsConsumer {
     pub database: Database,

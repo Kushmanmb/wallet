@@ -1,12 +1,10 @@
 use std::error::Error;
 use std::sync::Arc;
 
-use cacher::CacherClient;
 use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::Chain;
 use services::Services;
 use settings::Settings;
-use storage::Database;
 use streamer::{ConsumerConfig, ConsumerStatusReporter, ShutdownReceiver, StreamConnection, StreamProducer, StreamReader};
 
 use crate::consumers::{consumer_config, reader_config};
@@ -15,9 +13,7 @@ use crate::consumers::{consumer_config, reader_config};
 pub struct ChainConsumerRunner {
     pub services: Services,
     pub settings: Settings,
-    pub database: Database,
     pub connection: StreamConnection,
-    pub cacher: CacherClient,
     pub config: ConsumerConfig,
     pub shutdown_rx: ShutdownReceiver,
     pub reporter: Arc<dyn ConsumerStatusReporter>,
@@ -28,14 +24,11 @@ impl ChainConsumerRunner {
     pub async fn new(services: Services, queue: streamer::QueueName, shutdown_rx: ShutdownReceiver, reporter: Arc<dyn ConsumerStatusReporter>) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let settings = services.settings().as_ref().clone();
         let connection = StreamConnection::new(&settings.rabbitmq.url, queue.to_string()).await?;
-        let cacher = services.cacher().await?;
         let config = consumer_config(&settings.consumer);
         Ok(Self {
-            database: services.database(),
             services,
             settings,
             connection,
-            cacher,
             config,
             shutdown_rx,
             reporter,

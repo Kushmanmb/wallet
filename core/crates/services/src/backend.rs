@@ -22,6 +22,7 @@ use security::TransactionScanProviders;
 use settings::Settings;
 use storage::{Database, DatabaseError};
 use streamer::{Retry, ShutdownReceiver, StreamProducer, StreamProducerConfig};
+use tokio::sync::OnceCell;
 
 use crate::access::AccessClient;
 use crate::app::ConfigClient;
@@ -53,13 +54,19 @@ pub struct Services {
     settings: Arc<Settings>,
     database: Database,
     config: Arc<ConfigCacher>,
+    cacher: Arc<OnceCell<CacherClient>>,
 }
 
 impl Services {
     pub fn new(settings: Arc<Settings>) -> Result<Self, DatabaseError> {
         let database = Database::new(&settings.postgres.url, settings.postgres.pool)?;
         let config = Arc::new(ConfigCacher::new(database.clone()));
-        Ok(Self { settings, database, config })
+        Ok(Self {
+            settings,
+            database,
+            config,
+            cacher: Arc::new(OnceCell::new()),
+        })
     }
 
     pub fn settings(&self) -> Arc<Settings> {
@@ -75,7 +82,7 @@ impl Services {
     }
 
     pub async fn cacher(&self) -> Result<CacherClient, Box<dyn Error + Send + Sync>> {
-        CacherClient::new(&self.settings.redis.url).await
+        Ok(self.cacher.get_or_try_init(|| CacherClient::new(&self.settings.redis.url)).await?.clone())
     }
 
     pub async fn auth(&self) -> Result<AuthClient, Box<dyn Error + Send + Sync>> {

@@ -1,7 +1,7 @@
+use crate::ConfigCacher;
 use config_keys::ConfigKey;
 use primitives::{AssetBasic, AssetScore, asset_score::AssetRank};
 use serde::Deserialize;
-use services::ConfigCacher;
 use storage::DatabaseError;
 
 #[derive(Clone, Deserialize)]
@@ -11,7 +11,7 @@ struct FraudulentAssetRule {
 }
 
 #[derive(Clone)]
-pub(crate) struct AssetClassificationRules {
+pub struct AssetClassificationRules {
     spam_markers: Vec<String>,
     fraudulent_assets: Vec<FraudulentAssetRule>,
 }

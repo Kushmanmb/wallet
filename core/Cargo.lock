@@ -7821,6 +7821,7 @@ dependencies = [
 name = "services"
 version = "2.114.44"
 dependencies = [
+ "async-trait",
  "cacher",
  "chain_providers",
  "chrono",
@@ -7839,6 +7840,7 @@ dependencies = [
  "lists",
  "localizer",
  "nft",
+ "num-bigint 0.5.1",
  "number_formatter",
  "prices",
  "primitives",

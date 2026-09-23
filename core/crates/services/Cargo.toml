@@ -4,6 +4,7 @@ edition = { workspace = true }
 version = { workspace = true }
 
 [dependencies]
+async-trait = { workspace = true }
 chrono = { workspace = true }
 cacher = { path = "../cacher" }
 chain_providers = { path = "../chain_providers" }
@@ -22,6 +23,7 @@ in_app_notifications = { path = "../in_app_notifications" }
 lists = { path = "../lists" }
 localizer = { path = "../localizer" }
 nft = { path = "../nft" }
+num-bigint = { workspace = true }
 number_formatter = { path = "../number_formatter" }
 prices = { path = "../prices" }
 primitives = { path = "../primitives" }
@@ -40,7 +42,7 @@ streamer = { path = "../streamer" }
 strum = { workspace = true }
 support = { path = "../support" }
 swapper = { path = "../swapper" }
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["sync"] }
 uuid = { workspace = true }
 
 [dev-dependencies]

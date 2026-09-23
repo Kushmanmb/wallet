@@ -17,12 +17,12 @@ use job_runner::{JobHandle, ShutdownReceiver};
 use perpetual_updater::PerpetualUpdater;
 use primitives::Chain;
 use services::StaticAssetsClient;
+use services::assets::AssetClassificationRules;
 use settings::service_user_agent;
 use staking_apy_updater::StakeApyUpdater;
 use usage_rank_updater::{UsageRankUpdater, UsageRankUpdaterConfig};
 use validator_scanner::ValidatorScanner;
 
-use crate::asset_spam::AssetClassificationRules;
 use crate::model::WorkerService;
 use crate::worker::context::WorkerContext;
 use crate::worker::jobs::WorkerJob;

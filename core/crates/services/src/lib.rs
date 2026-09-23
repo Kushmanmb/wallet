@@ -5,6 +5,7 @@ pub mod auth;
 mod backend;
 pub mod chain;
 mod config;
+mod consumers;
 pub mod defi;
 pub mod devices;
 pub mod fiat;

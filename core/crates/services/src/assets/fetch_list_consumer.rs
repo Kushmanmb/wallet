@@ -1,8 +1,8 @@
 use std::error::Error;
 
+use crate::assets::ListsClient;
 use async_trait::async_trait;
 use gem_tracing::info_with_fields;
-use services::assets::ListsClient;
 use streamer::{FetchListPayload, consumer::MessageConsumer};
 
 pub struct FetchListConsumer {

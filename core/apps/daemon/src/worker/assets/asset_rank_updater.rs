@@ -2,7 +2,7 @@ use primitives::asset_score::AssetRank;
 use std::error::Error;
 use storage::{AssetFilter, AssetUpdate, AssetsRepository, Database, DatabaseError};
 
-use crate::asset_spam::AssetClassificationRules;
+use services::assets::AssetClassificationRules;
 
 pub struct AssetRankUpdater {
     database: Database,

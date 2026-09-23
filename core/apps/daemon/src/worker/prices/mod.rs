@@ -22,7 +22,7 @@ use job_runner::{JobHandle, ShutdownReceiver};
 use markets_updater::MarketsUpdater;
 use missing_prices_publisher::MissingPricesPublisher;
 use observed_prices_updater::{ObservedPricesConfig, ObservedPricesUpdater};
-use prices::{PriceAssetsProvider, PriceProvider, PriceProviderConfig, PriceProviders, build_price_providers};
+use prices::{PriceAssetsProvider, PriceProvider, PriceProviders};
 use prices_cleanup_updater::PricesCleanupUpdater;
 use prices_metrics_updater::PricesMetricsUpdater;
 use prices_updater::PricesUpdater;
@@ -44,7 +44,7 @@ pub async fn jobs(ctx: WorkerContext, shutdown_rx: ShutdownReceiver) -> Result<V
     let producer_assets = services.stream_producer("prices_provider_assets", streamer::no_shutdown()).await?;
     let producer_prices = services.stream_producer("prices_provider_prices", streamer::no_shutdown()).await?;
     let enabled_providers: Vec<PriceProvider> = database.run(|client| client.get_prices_providers()).await?.into_iter().filter(|p| p.enabled).map(|p| p.provider).collect();
-    let assets_providers: AssetsProviders = Arc::new(price_providers(&settings, enabled_providers.iter().copied()));
+    let assets_providers: AssetsProviders = Arc::new(services.price_providers(enabled_providers.iter().copied()));
     let price_client = services.prices(cacher_client.clone());
     let markets_client = services.markets(cacher_client.clone());
 
@@ -267,20 +267,6 @@ where
 {
     let variant = JobVariant::labeled(job, kind).with_param_duration(config, &interval).await?;
     Ok(builder.job(variant, provider_job(database, price_client, provider.clone(), producer.clone(), run)))
-}
-
-pub fn price_providers(settings: &Settings, providers: impl IntoIterator<Item = PriceProvider>) -> PriceProviders {
-    build_price_providers(
-        &PriceProviderConfig {
-            coingecko: settings.prices.coingecko.remote_provider_config(),
-            pyth: settings.prices.pyth.remote_provider_config(),
-            jupiter: settings.prices.jupiter.remote_provider_config(),
-            defillama: settings.prices.defillama.remote_provider_config(),
-            tonapi: settings.prices.tonapi.remote_provider_config(),
-            stonfi: settings.prices.stonfi.remote_provider_config(),
-        },
-        providers,
-    )
 }
 
 fn charts_history_job(

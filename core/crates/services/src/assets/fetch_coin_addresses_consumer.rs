@@ -1,12 +1,12 @@
 use std::error::Error;
 
-use crate::model::AssetAddressChanges;
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
 use chain_providers::ChainProviders;
-use storage::AssetsAddressesRepository;
-use storage::{Database, DatabaseError};
+use storage::Database;
 use streamer::{ChainAddressPayload, consumer::MessageConsumer};
+
+use super::addresses::update_coin_address;
 
 pub struct FetchCoinAddressesConsumer {
     pub provider: ChainProviders,
@@ -30,15 +30,7 @@ impl MessageConsumer<ChainAddressPayload, String> for FetchCoinAddressesConsumer
         let chain_address = payload.value;
         let balance = self.provider.get_balance_coin(chain_address.chain, chain_address.address.clone()).await?;
         let balance_value = balance.balance.available.to_string();
-        let changes = AssetAddressChanges::from_coin_balance(&chain_address, balance);
-
-        self.database
-            .run(move |client| -> Result<_, DatabaseError> {
-                client.delete_assets_addresses(changes.addresses_to_delete)?;
-                client.add_assets_addresses(changes.addresses_to_add)
-            })
-            .await?;
-
+        self.database.run(move |client| update_coin_address(client, &chain_address, balance)).await?;
         Ok(balance_value)
     }
 }

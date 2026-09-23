@@ -1,13 +1,13 @@
 use std::error::Error;
 use std::sync::Arc;
 
+use crate::ConfigCacher;
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
 use config_keys::{ConfigKey, ConfigParamKey};
 use gem_tracing::info_with_fields;
 use prices::{AssetPriceMapping, PriceProviders};
 use primitives::PriceId;
-use services::ConfigCacher;
 use storage::{AssetFilter, AssetUpdate, AssetsLinksRepository, AssetsRepository, Database, DatabaseError, PricesProvidersRepository, PricesRepository};
 use streamer::consumer::MessageConsumer;
 

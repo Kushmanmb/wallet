@@ -1,11 +1,16 @@
 mod chart_client;
+mod fetch_prices_consumer;
+mod fetch_prices_metadata_consumer;
 mod markets_client;
 mod portfolio;
 mod price_alert_client;
 mod price_channel;
 mod price_client;
+mod providers;
 
 pub use chart_client::ChartClient;
+pub use fetch_prices_consumer::FetchPricesConsumer;
+pub use fetch_prices_metadata_consumer::FetchPricesMetadataConsumer;
 pub use markets_client::MarketsClient;
 pub use portfolio::PortfolioClient;
 pub use price_alert_client::PriceAlertClient;

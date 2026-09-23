@@ -1,4 +1,3 @@
-mod asset_spam;
 mod client;
 mod consumers;
 mod health;

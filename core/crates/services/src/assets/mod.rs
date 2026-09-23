@@ -1,10 +1,26 @@
+mod address_changes;
+mod addresses;
 mod assets_client;
+mod classification;
+mod fetch_asset_associations_consumer;
+mod fetch_asset_status_consumer;
+mod fetch_assets_consumer;
+mod fetch_coin_addresses_consumer;
+mod fetch_list_consumer;
+mod fetch_token_addresses_consumer;
 mod lists;
 mod search_client;
 mod search_filter;
 mod search_request;
 
 pub use assets_client::AssetsClient;
+pub use classification::AssetClassificationRules;
+pub use fetch_asset_associations_consumer::FetchAssetAssociationsConsumer;
+pub use fetch_asset_status_consumer::FetchAssetStatusConsumer;
+pub use fetch_assets_consumer::FetchAssetsConsumer;
+pub use fetch_coin_addresses_consumer::FetchCoinAddressesConsumer;
+pub use fetch_list_consumer::FetchListConsumer;
+pub use fetch_token_addresses_consumer::FetchTokenAddressesConsumer;
 pub use lists::ListsClient;
 pub use search_client::SearchClient;
 pub use search_request::SearchRequest;

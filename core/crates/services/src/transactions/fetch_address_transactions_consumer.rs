@@ -1,11 +1,11 @@
 use std::error::Error;
 use std::sync::Arc;
 
+use crate::ConfigCacher;
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
 use chain_providers::{ChainProviders, TransactionsRequest, TransactionsResult};
 use config_keys::ConfigParamKey;
-use services::ConfigCacher;
 use streamer::{ChainAddressPayload, StreamProducer, StreamProducerQueue, TransactionsPayload, consumer::MessageConsumer};
 
 pub struct FetchAddressTransactionsConsumer {
