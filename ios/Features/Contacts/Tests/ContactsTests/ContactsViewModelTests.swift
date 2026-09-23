@@ -8,6 +8,7 @@ import GemstonePrimitivesTestKit
 import GemstoneServicesTestKit
 import Primitives
 import PrimitivesTestKit
+@testable import Store
 import Testing
 
 @MainActor
@@ -35,8 +36,8 @@ struct ContactsViewModelTests {
     @Test
     func aRowReadsItsTitleAndSubtitleFromCore() {
         let model = ContactsViewModel.mock()
-        let row = model.listItemModel(for: .mock(contact: .mock(name: "Satoshi"), addresses: [.mock()]))
+        model.query.value = [.mock(contact: .mock(name: "Satoshi"), addresses: [.mock()])]
 
-        #expect(row.title == "Satoshi")
+        #expect(model.items.map(\.listItem.title) == ["Satoshi"])
     }
 }

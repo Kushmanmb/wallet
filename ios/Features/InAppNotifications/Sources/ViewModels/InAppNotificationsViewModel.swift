@@ -6,6 +6,7 @@ import enum Gemstone.GemLoadState
 import enum Gemstone.GemNotificationDestination
 import protocol Gemstone.GemNotificationServiceProtocol
 import func Gemstone.loadError
+import func Gemstone.notificationRows
 import enum Gemstone.UrlAction
 import Localization
 import Primitives
@@ -51,11 +52,11 @@ public final class InAppNotificationsViewModel {
     }
 
     public var sections: [ListSection<InAppNotificationListItemViewModel>] {
-        DateSectionBuilder(
-            items: notifications,
-            dateKeyPath: \.createdAt,
-            transform: { InAppNotificationListItemViewModel(notification: $0) },
-        ).build()
+        let notifications = notifications
+        let items = zip(notifications, notificationRows(notifications: notifications.map { $0.toGem() })).map {
+            InAppNotificationListItemViewModel(notification: $0, row: $1)
+        }
+        return DateSectionBuilder(items: items, dateKeyPath: \.createdAt).build()
     }
 }
 

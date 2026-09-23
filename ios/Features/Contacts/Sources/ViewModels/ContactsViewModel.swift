@@ -2,8 +2,9 @@
 
 import Components
 import Foundation
-import func Gemstone.contactRow
+import func Gemstone.contactRows
 import struct Gemstone.GemContactAddressInput
+import struct Gemstone.GemContactRow
 import protocol Gemstone.GemContactServiceProtocol
 import struct Gemstone.GemRecipient
 import GemstonePrimitives
@@ -97,9 +98,15 @@ public final class ContactsViewModel {
         EmptyContentTypeViewModel(type: EmptyContentType(.contacts))
     }
 
-    func listItemModel(for contact: ContactData) -> ListItemModel {
-        let row = contactRow(contact: contact.contact.toGem())
-        return ListItemModel(
+    var items: [(contact: ContactData, listItem: ListItemModel)] {
+        let contacts = contacts
+        return zip(contacts, contactRows(contacts: contacts.map { $0.contact.toGem() })).map { contact, row in
+            (contact, listItemModel(contact: contact, row: row))
+        }
+    }
+
+    private func listItemModel(contact: ContactData, row: GemContactRow) -> ListItemModel {
+        ListItemModel(
             title: row.title,
             titleExtra: row.subtitle,
             titleStyleExtra: .calloutSecondary,

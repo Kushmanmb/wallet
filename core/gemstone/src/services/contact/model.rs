@@ -207,6 +207,10 @@ pub struct GemContactRow {
 }
 
 #[uniffi::export]
+pub fn contact_rows(contacts: Vec<Contact>) -> Vec<GemContactRow> {
+    contacts.into_iter().map(contact_row).collect()
+}
+
 pub fn contact_row(contact: Contact) -> GemContactRow {
     GemContactRow {
         title: contact.name.clone(),

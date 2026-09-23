@@ -54,27 +54,27 @@ fun ContactsNavScreen(onAction: (ContactsAction) -> Unit, viewModel: ContactsVie
             )
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                itemsPositioned(contacts, key = { _, item -> item.contact.id }) { position, item ->
+                itemsPositioned(contacts, key = { _, item -> item.contact.contact.id }) { position, item ->
                     SwipeableItemWithActions(
-                        isRevealed = revealed.value == item.contact.id,
+                        isRevealed = revealed.value == item.contact.contact.id,
                         actions = {
                             ActionIcon(
                                 onClick = {
-                                    viewModel.deleteContact(item.contact)
+                                    viewModel.deleteContact(item.contact.contact)
                                     revealed.value = null
                                 },
                                 backgroundColor = MaterialTheme.colorScheme.error,
                                 icon = AppIcons.Delete,
                             )
                         },
-                        onExpanded = { revealed.value = item.contact.id },
+                        onExpanded = { revealed.value = item.contact.contact.id },
                         onCollapsed = { revealed.value = null },
                         listPosition = position,
                     ) { itemPosition ->
                         ListItem(
-                            model = remember(item) { viewModel.listItem(item) },
+                            model = item.model,
                             listPosition = itemPosition,
-                            modifier = Modifier.clickable { onAction(ContactsAction.OpenContact(item.contact.id)) },
+                            modifier = Modifier.clickable { onAction(ContactsAction.OpenContact(item.contact.contact.id)) },
                             minHeight = ListItemDefaults.defaultMinHeight,
                             accessory = { DataBadgeChevron() },
                         )

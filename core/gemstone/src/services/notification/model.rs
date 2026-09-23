@@ -33,6 +33,10 @@ fn destination(url: Option<&str>) -> Option<GemNotificationDestination> {
 }
 
 #[uniffi::export]
+pub fn notification_rows(notifications: Vec<InAppNotification>) -> Vec<GemNotificationRow> {
+    notifications.into_iter().map(notification_row).collect()
+}
+
 pub fn notification_row(notification: InAppNotification) -> GemNotificationRow {
     GemNotificationRow {
         title: notification.item.title.clone(),

@@ -2,7 +2,7 @@
 
 import Components
 import Foundation
-import func Gemstone.fiatTransactionRow
+import func Gemstone.fiatTransactionRows
 import enum Gemstone.GemFiatTransactionBadge
 import struct Gemstone.GemFiatTransactionRow
 import GemstonePrimitives
@@ -11,13 +11,23 @@ import Primitives
 import Style
 import SwiftUI
 
-public struct FiatTransactionViewModel: Sendable {
+public struct FiatTransactionViewModel: Sendable, Identifiable {
+    public let id: String
+    public let createdAt: Date
     private let row: GemFiatTransactionRow
     private let locale: Locale
 
-    public init(info: FiatTransactionAssetData, locale: Locale = .current) {
-        row = fiatTransactionRow(data: info.toGem())
+    public init(info: FiatTransactionAssetData, row: GemFiatTransactionRow, locale: Locale = .current) {
+        id = info.id
+        createdAt = info.createdAt
+        self.row = row
         self.locale = locale
+    }
+
+    public static func models(_ transactions: [FiatTransactionAssetData], locale: Locale = .current) -> [FiatTransactionViewModel] {
+        zip(transactions, fiatTransactionRows(data: transactions.map { $0.toGem() })).map {
+            FiatTransactionViewModel(info: $0, row: $1, locale: locale)
+        }
     }
 
     public var listItemModel: ListItemModel {

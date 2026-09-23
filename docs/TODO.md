@@ -211,9 +211,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 - **VM49** **S** **Delegations are projected once per list.** Both apps call `delegationListRow` per delegation: iOS `DelegationViewModel` in its initializer, Android's [`DelegationItem`](../android/ui/src/main/kotlin/com/gemwallet/android/ui/components/list_item/DelegationItem.kt) composable inside `remember`. Core has no batched projection for this list; add one beside `transaction_rows` and call it from the view model.
 - **VM50** **S** **Perpetual market and position rows are batched.** Both apps project per row: iOS `PerpetualViewModel`/`PerpetualPositionItemViewModel`, Android `GetPerpetualsImpl` and `PerpetualPositionDataAggregateImpl`.
-- **VM51** **S** **Contact rows are batched.** `contactRow` runs per contact in iOS `ContactsViewModel` and Android `ContactsViewModel`.
-- **VM52** **S** **Notification rows are batched.** `notificationRow` runs per notification in iOS `InAppNotificationListItemViewModel` and Android `NotificationRowUIModel`.
-- **VM53** **S** **Fiat transaction rows are batched.** `fiatTransactionRow` runs per transaction in iOS `FiatTransactionViewModel` and Android `FiatTransactionRowUIModel`.
 - **VM54** **S** **Support messages come as rows.** Both apps call `parseSupportMessageDisplayContent` and `supportMessageOutcome` per message; iOS re-reads the outcome for each of `isSending`, `isFailed` and `status`, and Android calls it inside the `SupportMessageBubble` composable. iOS `Status` copies `GemSupportMessageOutcome`.
 - **VM55** **S** **Project `walletRow` once.** iOS recomputes `walletRow(wallet)` per property read in `WalletImageViewModel` (`hasAvatar`, `avatarImage`), `WalletDetailViewModel`, `RewardsViewModel` and per wallet in `WalletsSceneViewModel`, which Core's `wallet_rows` answers once.
 
@@ -352,6 +349,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM51, VM52, VM53 (2026-09-23).** Closed. Contacts, in-app notifications and fiat transactions each projected one row per item — the contacts list and the fiat list even from the view, per render. Core exports `contact_rows`, `notification_rows` and `fiat_transaction_rows` in place of the single-row exports, following [one call per list](ARCHITECTURE.md#keep-the-crossings-few): iOS builds each list's item models from one crossing (`ContactsViewModel.items`, the notification sections, `FiatTransactionViewModel.models`) and Android maps each flow emission once (`ContactListItem`, `uiModels`).
 
 **VM48 (2026-09-23).** Closed. `GemPerpetualChartLayout` carries `tones`, one per candle in input order, computed once while the layout is built; iOS colours each candle mark and the current price from it and Android builds each `CandleUIModel` direction from it, so neither app calls `valueTone` per candle per render.
 

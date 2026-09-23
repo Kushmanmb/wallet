@@ -5,7 +5,6 @@ import Foundation
 import enum Gemstone.GemNotificationDestination
 import enum Gemstone.GemNotificationIcon
 import struct Gemstone.GemNotificationRow
-import func Gemstone.notificationRow
 import GemstonePrimitives
 import Localization
 import Primitives
@@ -16,10 +15,12 @@ public struct InAppNotificationListItemViewModel: Identifiable, Sendable {
     private let row: GemNotificationRow
 
     public let id: String
+    let createdAt: Date
 
-    public init(notification: InAppNotification) {
+    public init(notification: InAppNotification, row: GemNotificationRow) {
         id = notification.id
-        row = notificationRow(notification: notification.toGem())
+        createdAt = notification.createdAt
+        self.row = row
     }
 
     public var destination: GemNotificationDestination? {

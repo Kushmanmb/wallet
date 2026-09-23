@@ -24,8 +24,7 @@ public struct FiatTransactionsScene: View {
             }
             ForEach(model.sections) { section in
                 Section {
-                    ForEach(section.values) {
-                        let viewModel = FiatTransactionViewModel(info: $0)
+                    ForEach(section.values) { viewModel in
                         if let url = viewModel.detailsUrl {
                             SafariNavigationLink(url: url) {
                                 ListItemView(model: viewModel.listItemModel)

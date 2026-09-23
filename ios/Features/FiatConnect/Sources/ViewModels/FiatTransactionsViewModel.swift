@@ -24,8 +24,8 @@ public final class FiatTransactionsViewModel {
         query.value
     }
 
-    var sections: [ListSection<FiatTransactionAssetData>] {
-        DateSectionBuilder(items: transactions, dateKeyPath: \.createdAt).build()
+    var sections: [ListSection<FiatTransactionViewModel>] {
+        DateSectionBuilder(items: FiatTransactionViewModel.models(transactions), dateKeyPath: \.createdAt).build()
     }
 
     init(walletId: WalletId, service: any GemFiatQuoteServiceProtocol) {

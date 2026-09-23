@@ -10,28 +10,30 @@ import com.gemwallet.android.ui.components.list_item.ListItemTextStyle
 import com.wallet.core.primitives.InAppNotification
 import uniffi.gemstone.GemNotificationDestination
 import uniffi.gemstone.GemNotificationIcon
-import uniffi.gemstone.notificationRow
+import uniffi.gemstone.GemNotificationRow
+import uniffi.gemstone.notificationRows
 
 data class NotificationRowUIModel(val id: String, val createdAt: Long, val destination: GemNotificationDestination?, val model: ListItemModel)
 
-internal fun InAppNotification.uiModel(context: Context): NotificationRowUIModel {
-    val row = notificationRow(toGem())
-    return NotificationRowUIModel(
-        id = item.id,
-        createdAt = createdAt,
-        destination = row.destination,
-        model = ListItemModel(
-            title = row.title,
-            titleTag = if (row.isUnread) context.getString(R.string.assets_tags_new) else null,
-            titleTagStyle = ListItemTextStyle.Primary,
-            titleExtra = row.subtitle,
-            subtitle = row.value,
-            subtitleStyle = ListItemTextStyle.Body,
-            subtitleExtra = row.subvalue,
-            image = row.icon?.image(),
-        ),
-    )
+internal fun List<InAppNotification>.uiModels(context: Context): List<NotificationRowUIModel> = zip(notificationRows(map { it.toGem() })) { notification, row ->
+    notification.uiModel(row, context)
 }
+
+private fun InAppNotification.uiModel(row: GemNotificationRow, context: Context): NotificationRowUIModel = NotificationRowUIModel(
+    id = item.id,
+    createdAt = createdAt,
+    destination = row.destination,
+    model = ListItemModel(
+        title = row.title,
+        titleTag = if (row.isUnread) context.getString(R.string.assets_tags_new) else null,
+        titleTagStyle = ListItemTextStyle.Primary,
+        titleExtra = row.subtitle,
+        subtitle = row.value,
+        subtitleStyle = ListItemTextStyle.Body,
+        subtitleExtra = row.subvalue,
+        image = row.icon?.image(),
+    ),
+)
 
 private fun GemNotificationIcon.image(): ListItemImage? = when (this) {
     is GemNotificationIcon.Emoji -> ListItemImage.Emoji(glyph)

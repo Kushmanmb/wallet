@@ -21,11 +21,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uniffi.gemstone.GemContactRow
 import uniffi.gemstone.GemContactServiceInterface
-import uniffi.gemstone.contactRow
+import uniffi.gemstone.contactRows
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,18 +39,20 @@ class ContactsViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
-    val contacts: StateFlow<List<ContactData>> = getContacts.getContacts()
+    val contacts: StateFlow<List<ContactListItem>> = getContacts.getContacts()
+        .map { contacts -> contacts.zip(contactRows(contacts.map { it.contact.toGem() }), ::listItem) }
+        .flowOn(ioDispatcher)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    fun listItem(contact: ContactData): ListItemModel {
-        val row = contactRow(contact.contact.toGem())
-        return ListItemModel(
+    private fun listItem(contact: ContactData, row: GemContactRow): ContactListItem = ContactListItem(
+        contact = contact,
+        model = ListItemModel(
             title = row.title,
             titleExtra = row.subtitle,
             titleExtraLineLimit = 1,
             image = ContactAvatarState.from(contact.contact.imageUrl).image(row.initials),
-        )
-    }
+        ),
+    )
 
     private val errorState = MutableStateFlow<String?>(null)
     val errorText: StateFlow<String?> = errorState.asStateFlow()
@@ -61,3 +66,5 @@ class ContactsViewModel @Inject constructor(
 
     fun clearError() = errorState.update { null }
 }
+
+data class ContactListItem(val contact: ContactData, val model: ListItemModel)

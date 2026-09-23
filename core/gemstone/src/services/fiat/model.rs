@@ -59,8 +59,8 @@ pub struct GemFiatTransactionRow {
 }
 
 #[uniffi::export]
-pub fn fiat_transaction_row(data: FiatTransactionAssetData) -> GemFiatTransactionRow {
-    rules::transaction_row(&data)
+pub fn fiat_transaction_rows(data: Vec<FiatTransactionAssetData>) -> Vec<GemFiatTransactionRow> {
+    data.iter().map(rules::transaction_row).collect()
 }
 
 #[uniffi::export]

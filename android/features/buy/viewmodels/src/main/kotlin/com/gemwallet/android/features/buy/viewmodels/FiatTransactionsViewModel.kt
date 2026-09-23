@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.application.fiat.cases.ObserveFiatTransactions
 import com.gemwallet.android.features.buy.viewmodels.models.FiatTransactionRowUIModel
-import com.gemwallet.android.features.buy.viewmodels.models.uiModel
+import com.gemwallet.android.features.buy.viewmodels.models.uiModels
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -37,7 +37,7 @@ class FiatTransactionsViewModel @Inject constructor(
 
     private val loadState = MutableStateFlow<GemLoadState>(GemLoadState.Loading)
     val transactions: StateFlow<List<FiatTransactionRowUIModel>> = observeFiatTransactions()
-        .map { items -> items.map { it.uiModel(context) } }
+        .map { items -> items.uiModels(context) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val errorRow: StateFlow<GemListRow?> = combine(loadState, transactions) { state, items ->

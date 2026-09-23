@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.notifications.cases.GetInAppNotifications
 import com.gemwallet.android.application.session.cases.GetCurrentWallet
 import com.gemwallet.android.features.settings.in_app_notifications.viewmodels.models.NotificationRowUIModel
-import com.gemwallet.android.features.settings.in_app_notifications.viewmodels.models.uiModel
+import com.gemwallet.android.features.settings.in_app_notifications.viewmodels.models.uiModels
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,7 +41,7 @@ class InAppNotificationsViewModel @Inject constructor(
         .map { it?.id }
         .filterNotNull()
         .flatMapLatest { walletId -> getInAppNotifications(walletId) }
-        .map { notifications -> notifications.map { it.uiModel(context) } }
+        .map { notifications -> notifications.uiModels(context) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val errorRow: StateFlow<GemListRow?> = combine(loadState, notifications) { state, items ->

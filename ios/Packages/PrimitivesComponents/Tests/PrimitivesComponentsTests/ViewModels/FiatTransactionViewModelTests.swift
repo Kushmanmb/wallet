@@ -12,10 +12,10 @@ import Testing
 struct FiatTransactionViewModelTests {
     @Test
     func theRowComesFromCore() {
-        let model = FiatTransactionViewModel(
-            info: .mock(asset: .mockEthereum(), status: .pending, fiatAmount: 25, value: "1500000000000000000"),
+        let model = FiatTransactionViewModel.models(
+            [.mock(asset: .mockEthereum(), status: .pending, fiatAmount: 25, value: "1500000000000000000")],
             locale: Locale(identifier: "en_US"),
-        )
+        )[0]
 
         let row = model.listItemModel
 
@@ -27,7 +27,7 @@ struct FiatTransactionViewModelTests {
 
     @Test
     func aFailedTransactionIsDimmed() {
-        let model = FiatTransactionViewModel(info: .mock(status: .failed), locale: Locale(identifier: "en_US"))
+        let model = FiatTransactionViewModel.models([.mock(status: .failed)], locale: Locale(identifier: "en_US"))[0]
 
         #expect(model.listItemModel.subtitleStyle.color == Colors.gray)
     }
