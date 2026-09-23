@@ -80,7 +80,7 @@ class ConfirmViewModelHeaderTest {
         every { confirmation.insufficientNetworkFeeBuyAmount() } returns 10
         every { confirmation.screen() } returns mockGemConfirmScreen()
         every { confirmation.loadOptions() } returns mockGemConfirmLoadOptions()
-        every { confirmation.header(any()) } returns GemConfirmHeader.Transaction(GemTransactionHeader.Symbol(asset.toGem()))
+        every { confirmation.header() } returns GemConfirmHeader.Transaction(GemTransactionHeader.Symbol(asset.toGem()))
         coEvery { confirmation.state() } returns mockGemConfirmLoad(asset).copy(transfer = transfer)
         coEvery { confirmation.load(any()) } coAnswers { awaitCancellation() }
         every { confirmService.confirmation(any(), transfer, any()) } returns confirmation

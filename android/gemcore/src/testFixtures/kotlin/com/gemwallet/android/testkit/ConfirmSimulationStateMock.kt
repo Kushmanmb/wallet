@@ -7,7 +7,6 @@ import uniffi.gemstone.GemSimulationBalanceChange
 
 fun mockGemConfirmSimulationState(chain: Chain = Chain.Ethereum, balanceChanges: List<GemSimulationBalanceChange>? = null) = GemConfirmSimulationState(
     chain = chain.string,
-    result = null,
     warnings = emptyList(),
     simulation = balanceChanges?.let {
         GemConfirmSimulation(

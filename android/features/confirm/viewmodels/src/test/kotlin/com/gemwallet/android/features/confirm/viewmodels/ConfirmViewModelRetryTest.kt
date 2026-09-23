@@ -8,6 +8,7 @@ import com.gemwallet.android.domains.confirm.pack
 import com.gemwallet.android.ext.toGem
 import com.gemwallet.android.testkit.mockAccount
 import com.gemwallet.android.testkit.mockAssetHyperCoreUBTC
+import com.gemwallet.android.testkit.mockGemConfirmFee
 import com.gemwallet.android.testkit.mockGemConfirmLoad
 import com.gemwallet.android.testkit.mockGemConfirmLoadOptions
 import com.gemwallet.android.testkit.mockGemConfirmScreen
@@ -39,21 +40,12 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import uniffi.gemstone.GasPriceType
-import uniffi.gemstone.GemConfirmData
 import uniffi.gemstone.GemConfirmFeeSelection
 import uniffi.gemstone.GemConfirmHeader
-import uniffi.gemstone.GemConfirmInput
 import uniffi.gemstone.GemConfirmPhase
-import uniffi.gemstone.GemConfirmPreload
 import uniffi.gemstone.GemConfirmTransferService
 import uniffi.gemstone.GemConfirmation
-import uniffi.gemstone.GemFeeOptions
 import uniffi.gemstone.GemTransactionHeader
-import uniffi.gemstone.GemTransactionLoadFee
-import uniffi.gemstone.GemTransactionLoadMetadata
-import uniffi.gemstone.GemTransferAmount
-import uniffi.gemstone.GemTransferAmountResult
 import uniffi.gemstone.GemTransferData
 import uniffi.gemstone.PerpetualType
 import uniffi.gemstone.TransactionInputType
@@ -106,14 +98,13 @@ class ConfirmViewModelRetryTest {
     }
 
     private fun viewModel(transfer: GemTransferData): ConfirmViewModel {
-        val input = GemConfirmInput(from = account.toGem(), transfer = transfer)
         every { confirmation.getCurrency() } returns Currency.USD.toGem()
-        every { confirmation.errorInfo(any(), any()) } returns null
+        every { confirmation.errorInfo(any()) } returns null
         every { confirmation.insufficientNetworkFeeBuyAmount() } returns 10
         every { confirmService.confirmation(any(), transfer, any()) } returns confirmation
         every { confirmation.screen() } returns mockGemConfirmScreen()
         every { confirmation.loadOptions() } returns mockGemConfirmLoadOptions()
-        every { confirmation.header(any()) } returns GemConfirmHeader.Transaction(GemTransactionHeader.Symbol(asset.toGem()))
+        every { confirmation.header() } returns GemConfirmHeader.Transaction(GemTransactionHeader.Symbol(asset.toGem()))
         coEvery { confirmation.state() } returns mockGemConfirmLoad(asset)
         var calls = 0
         coEvery { confirmation.load(any()) } answers {
@@ -121,27 +112,7 @@ class ConfirmViewModelRetryTest {
             if (calls == 1) {
                 throw IllegalStateException("preload failed")
             } else {
-                mockGemConfirmLoad(
-                    asset = asset,
-                    preload = GemConfirmPreload(
-                        confirmData = GemConfirmData(
-                            fee = GemTransactionLoadFee(
-                                fee = BigInteger.ONE,
-                                gasPriceType = GasPriceType.Regular(gasPrice = BigInteger.ONE),
-                                gasLimit = BigInteger.ONE,
-                                options = GemFeeOptions(emptyMap()),
-                                feeAsset = asset.id.chain.string,
-                            ),
-                            additionalFees = emptyList(),
-                            selectedPriority = FeePriority.Normal.toGem(),
-                            feeRates = emptyList(),
-                            metadata = GemTransactionLoadMetadata.None,
-                            simulation = null,
-                            input = input,
-                        ),
-                        amount = GemTransferAmountResult.Amount(GemTransferAmount(value = BigInteger.ONE, networkFee = BigInteger.ONE, isMaxAmount = false)),
-                    ),
-                )
+                mockGemConfirmLoad(asset = asset, fee = mockGemConfirmFee())
             }
         }
         return ConfirmViewModel(

@@ -87,7 +87,6 @@ import uniffi.gemstone.GemConfirmAction
 import uniffi.gemstone.GemConfirmButton
 import uniffi.gemstone.GemConfirmButtonKind
 import uniffi.gemstone.GemConfirmButtonState
-import uniffi.gemstone.GemConfirmData
 import uniffi.gemstone.GemConfirmException
 import uniffi.gemstone.GemConfirmFeeRow
 import uniffi.gemstone.GemConfirmFeeSelection
@@ -236,7 +235,7 @@ class ConfirmViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val transferAmount = content.map { content ->
-        when (val amount = content?.load?.preload?.amount ?: return@map null) {
+        when (val amount = content?.load?.fee?.amount ?: return@map null) {
             is GemTransferAmountResult.Amount -> amount.amount.value
             is GemTransferAmountResult.Error -> null
         }
@@ -258,22 +257,22 @@ class ConfirmViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val feeUIModel = combine(content, screen) { content, screen ->
-        val confirmData = content?.confirmData
+        val fee = content?.load?.fee
         when (val feeRow = screen.feeRow()) {
             GemConfirmFeeRow.Loading -> FeeUIModel.Calculating
 
             is GemConfirmFeeRow.Unavailable -> FeeUIModel.Unavailable(feeRow.text)
 
-            GemConfirmFeeRow.Ready -> if (content == null || confirmData == null) {
+            GemConfirmFeeRow.Ready -> if (content == null || fee == null) {
                 FeeUIModel.Calculating
             } else {
                 FeeUIModel.FeeInfo(
-                    amount = confirmData.fee.fee,
-                    additionalFees = confirmData.additionalFees,
+                    amount = fee.value,
+                    additionalFees = fee.additionalFees,
                     feeAsset = content.feeAssetUIModel.asset,
                     price = content.feeAssetUIModel.price?.price?.price,
                     currency = content.currency,
-                    priority = confirmData.selectedPriority.toPrimitives(),
+                    priority = fee.selectedPriority.toPrimitives(),
                 )
             }
         }
@@ -286,11 +285,11 @@ class ConfirmViewModel @Inject constructor(
     private val acquireRequestState = MutableStateFlow<AcquireAssetRequest?>(null)
     val acquireRequest = acquireRequestState.asStateFlow()
 
-    val loadError = combine(screen, confirmation, content, networkFeeBuyAmount) { screen, confirmation, content, buyAmount ->
+    val loadError = combine(screen, confirmation, networkFeeBuyAmount) { screen, confirmation, buyAmount ->
         val error = screen.failure?.takeIf { it.stage == GemConfirmStage.LOAD }?.error ?: return@combine null
         ConfirmErrorUIModel(
             text = error.display().text(context),
-            info = confirmation?.errorInfo(error, content?.load?.metadata)?.infoSheet(context, buyAmount, ::acquire),
+            info = confirmation?.errorInfo(error)?.infoSheet(context, buyAmount, ::acquire),
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -370,8 +369,8 @@ class ConfirmViewModel @Inject constructor(
     val header: StateFlow<ConfirmHeaderUIModel?> = combine(
         combine(confirmation, load, currency.filterNotNull(), ::Triple),
         combine(isLoading, isPaymentPlaceholder, ::Pair),
-    ) { (confirmation, load, currency), (loading, isPlaceholder) ->
-        confirmation?.let { confirmHeader(it.header(load), loading, isPlaceholder, context, currency) }
+    ) { (confirmation, _, currency), (loading, isPlaceholder) ->
+        confirmation?.let { confirmHeader(it.header(), loading, isPlaceholder, context, currency) }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val feeSelectionUIModel: StateFlow<FeeSelectionUIModel> = loadOptions.filterNotNull()
@@ -385,9 +384,9 @@ class ConfirmViewModel @Inject constructor(
     private fun changeFeeSelection(selection: GemConfirmFeeSelection) = loadOptions.update { it?.onFeeSelection(selection) }
 
     fun feeDetailsModel(currentFee: FeeUIModel.FeeInfo, feeAsset: FeeAssetUIModel): FeeDetailsModel? {
-        val confirmData = content.value?.confirmData ?: return null
         val options = loadOptions.value ?: return null
-        return FeeDetailsModel(currentFee, feeAsset, confirmData.feeRateRows(options.feeSelection, feeAsset.asset.toGem()))
+        val rows = confirmation.value?.feeRateRows(options.feeSelection) ?: return null
+        return FeeDetailsModel(currentFee, feeAsset, rows)
     }
 
     fun changePaymentAsset(assetId: AssetId) {
@@ -431,8 +430,6 @@ class ConfirmViewModel @Inject constructor(
     }
 
     private data class ConfirmContent(val session: GemConfirmation, val currency: Currency, val load: GemConfirmLoad) {
-        val confirmData: GemConfirmData? = load.preload?.confirmData
-
         val feeAssetUIModel: FeeAssetUIModel =
             FeeAssetUIModel.from(load.feeAsset.toPrimitives(), load.metadata.feeAssetBalance, load.metadata.feePrice(), currency)
 

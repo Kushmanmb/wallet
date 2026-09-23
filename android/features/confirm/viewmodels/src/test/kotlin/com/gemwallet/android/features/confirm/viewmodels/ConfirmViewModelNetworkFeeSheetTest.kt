@@ -109,14 +109,14 @@ class ConfirmViewModelNetworkFeeSheetTest {
     private fun viewModel(): ConfirmViewModel {
         val transfer = mockGemTransferData(asset = asset, value = BigInteger.TEN)
         every { confirmation.getCurrency() } returns Currency.USD.toGem()
-        every { confirmation.errorInfo(any(), any()) } answers { confirmErrorInfo(firstArg(), emptyList(), Currency.USD.toGem()) }
+        every { confirmation.errorInfo(any()) } answers { confirmErrorInfo(firstArg(), emptyList(), Currency.USD.toGem()) }
         every { confirmation.insufficientNetworkFeeBuyAmount() } returns 10
         every { confirmation.acquireAssetFlow(any()) } returns GemAcquireAssetFlow.FIAT
         every { confirmation.acquireSwapPair(any(), any()) } returns GemSwapPairSelection(payAssetId = payAsset.id.toIdentifier(), receiveAssetId = asset.id.toIdentifier())
         every { confirmService.confirmation(any(), transfer, any()) } returns confirmation
         every { confirmation.screen() } returns mockGemConfirmScreen()
         every { confirmation.loadOptions() } returns mockGemConfirmLoadOptions()
-        every { confirmation.header(any()) } returns GemConfirmHeader.Transaction(GemTransactionHeader.Symbol(asset.toGem()))
+        every { confirmation.header() } returns GemConfirmHeader.Transaction(GemTransactionHeader.Symbol(asset.toGem()))
         coEvery { confirmation.state() } returns mockGemConfirmLoad(asset)
         coEvery { confirmation.load(any()) } answers {
             throw GemConfirmException.InsufficientNetworkFee(asset = asset.toGem(), requirement = null)

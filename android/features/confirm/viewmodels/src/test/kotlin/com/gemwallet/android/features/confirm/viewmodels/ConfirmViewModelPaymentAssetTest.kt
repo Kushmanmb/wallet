@@ -147,7 +147,8 @@ class ConfirmViewModelPaymentAssetTest {
         every { confirmation.screen() } returns mockGemConfirmScreen()
         every { confirmation.loadOptions() } returns mockGemConfirmLoadOptions()
         every { confirmation.getCurrency() } returns Currency.USD.toGem()
-        every { confirmation.header(any()) } answers { GemConfirmHeader.Transaction(GemTransactionHeader.Symbol((firstArg<GemConfirmLoad?>()?.transfer ?: transfer).asset.toGem())) }
+        var loaded: GemConfirmLoad? = null
+        every { confirmation.header() } answers { GemConfirmHeader.Transaction(GemTransactionHeader.Symbol((loaded?.transfer ?: transfer).asset.toGem())) }
         coEvery { confirmation.state() } returns mockGemConfirmLoad(ethereum).copy(transfer = transfer)
         coEvery { confirmation.load(any()) } coAnswers {
             val options = firstArg<GemConfirmLoadOptions>()
@@ -155,7 +156,7 @@ class ConfirmViewModelPaymentAssetTest {
                 gate?.await()
             }
             val asset = if (options.assetId == usdt.id.toIdentifier()) usdt else ethereum
-            mockGemConfirmLoad(asset).copy(transfer = payment(asset))
+            mockGemConfirmLoad(asset).copy(transfer = payment(asset)).also { loaded = it }
         }
         return ConfirmViewModel(
             getSession = mockk<GetSession> {
