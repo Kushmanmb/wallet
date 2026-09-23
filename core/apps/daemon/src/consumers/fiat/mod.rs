@@ -1,5 +1,3 @@
-pub mod fiat_webhook_consumer;
-
 use std::error::Error;
 use std::sync::Arc;
 
@@ -9,16 +7,10 @@ use streamer::{ConsumerStatusReporter, FiatWebhookPayload, QueueName, ShutdownRe
 
 use crate::consumers::{consumer_config, reader_for_queue};
 
-use fiat_webhook_consumer::FiatWebhookConsumer;
-
 pub async fn run_consumer_fiat(settings: Settings, shutdown_rx: ShutdownReceiver, reporter: Arc<dyn ConsumerStatusReporter>) -> Result<(), Box<dyn Error + Send + Sync>> {
     let services = Services::new(Arc::new(settings.clone()))?;
-    let database = services.database();
     let queue = QueueName::FiatOrderWebhooks;
     let (name, stream_reader) = reader_for_queue(&settings, &queue, &shutdown_rx).await?;
-    let stream_producer = services.stream_producer(&format!("{name}_producer"), shutdown_rx.clone()).await?;
-    let providers = services.fiat_providers(services.fiat_access_token_cacher().await?);
-    let consumer = FiatWebhookConsumer::new(database, providers, stream_producer);
-    let consumer_config = consumer_config(&settings.consumer);
-    run_consumer::<FiatWebhookPayload, FiatWebhookConsumer, bool>(&name, stream_reader, queue, None, consumer, consumer_config, shutdown_rx, reporter).await
+    let consumer = services.fiat_webhook_consumer(&name, shutdown_rx.clone()).await?;
+    run_consumer::<FiatWebhookPayload, _, bool>(&name, stream_reader, queue, None, consumer, consumer_config(&settings.consumer), shutdown_rx, reporter).await
 }
