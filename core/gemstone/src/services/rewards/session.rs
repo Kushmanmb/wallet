@@ -10,6 +10,7 @@ pub struct GemRewardsSession {
     pub wallet_id: Option<WalletId>,
     pub state: GemLoadState,
     pub rewards: Option<Rewards>,
+    pub is_refreshing: bool,
 }
 
 #[uniffi::export]
@@ -22,7 +23,12 @@ impl GemRewardsSession {
             wallet_id: Some(wallet_id),
             state: GemLoadState::Loading,
             rewards: None,
+            is_refreshing: false,
         }
+    }
+
+    pub fn on_refreshing(&self) -> Self {
+        Self { is_refreshing: true, ..self.clone() }
     }
 
     pub fn on_result(&self, result: GemRewardsResult) -> Self {
@@ -34,6 +40,7 @@ impl GemRewardsSession {
             wallet_id: self.wallet_id.clone(),
             state: shown.state,
             rewards: shown.value,
+            is_refreshing: false,
         }
     }
 
@@ -41,6 +48,7 @@ impl GemRewardsSession {
         Self {
             state: GemLoadState::Data,
             rewards: Some(rewards),
+            is_refreshing: false,
             ..self.clone()
         }
     }
@@ -53,6 +61,7 @@ impl GemRewardsSession {
         GemRewardsViewState {
             state: self.state.clone(),
             rewards: rules::state(self.rewards.as_ref(), now),
+            is_refreshing: self.is_refreshing,
         }
     }
 }
@@ -72,6 +81,7 @@ pub fn rewards_session() -> GemRewardsSession {
         wallet_id: None,
         state: GemLoadState::Loading,
         rewards: None,
+        is_refreshing: false,
     }
 }
 
@@ -150,5 +160,19 @@ mod tests {
         let switched = shown.on_select_wallet(WalletId::Multicoin("0x2".to_string()));
         assert_eq!(switched.view_state(now()).state, GemLoadState::Loading);
         assert_eq!(switched.request(), Some(WalletId::Multicoin("0x2".to_string())));
+    }
+
+    #[test]
+    fn test_a_refresh_shows_until_its_result_arrives() {
+        let wallet_id = WalletId::Multicoin("wallet".into());
+        let session = rewards_session().on_select_wallet(wallet_id.clone()).on_refreshing();
+        assert!(session.view_state(Utc::now()).is_refreshing);
+
+        let loaded = session.on_result(GemRewardsResult {
+            wallet_id,
+            state: GemLoadState::Data,
+            rewards: None,
+        });
+        assert!(!loaded.view_state(Utc::now()).is_refreshing);
     }
 }

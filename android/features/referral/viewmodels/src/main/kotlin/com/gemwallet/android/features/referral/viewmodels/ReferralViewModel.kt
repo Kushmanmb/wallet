@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.gemstone.GemIncomingCode
 import uniffi.gemstone.GemListRow
+import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemRewardsAction
 import uniffi.gemstone.GemRewardsRedemption
 import uniffi.gemstone.GemRewardsServiceInterface
@@ -65,10 +66,15 @@ class ReferralViewModel @Inject constructor(
 
     val currentWallet = MutableStateFlow<Wallet?>(null)
     private val session = MutableStateFlow(rewardsSession())
-    val inSync = MutableStateFlow(SyncType.Init)
 
     private val viewState = session.map { it.viewState(System.currentTimeMillis() / 1000) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, session.value.viewState(System.currentTimeMillis() / 1000))
+
+    val isLoading: StateFlow<Boolean> = viewState.map { it.state == GemLoadState.Loading }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    val isRefreshing: StateFlow<Boolean> = viewState.map { it.isRefreshing }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val loadError: StateFlow<GemServiceException?> = viewState.map { loadError(it.state, hasRows = false) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -121,7 +127,7 @@ class ReferralViewModel @Inject constructor(
         .distinctUntilChangedBy { it.id.id }
         .onEach { wallet ->
             session.update { it.onSelectWallet(wallet.id.id) }
-            sync(wallet, SyncType.Init)
+            sync(wallet)
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -131,17 +137,14 @@ class ReferralViewModel @Inject constructor(
     }
 
     fun sync() {
-        sync(referralWallet.value ?: return, SyncType.Refresh)
+        val wallet = referralWallet.value ?: return
+        session.update { it.onRefreshing() }
+        sync(wallet)
     }
 
-    private fun sync(wallet: Wallet, type: SyncType) = viewModelScope.launch(ioDispatcher) {
-        inSync.update { type }
-        try {
-            val result = service.refresh(wallet.id.id)
-            session.update { it.onResult(result) }
-        } finally {
-            inSync.update { SyncType.None }
-        }
+    private fun sync(wallet: Wallet) = viewModelScope.launch(ioDispatcher) {
+        val result = service.refresh(wallet.id.id)
+        session.update { it.onResult(result) }
     }
 
     fun createReferral(username: String, callback: (Throwable?) -> Unit) = viewModelScope.launch(ioDispatcher) {

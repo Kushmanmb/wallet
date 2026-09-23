@@ -14,6 +14,7 @@ pub struct GemRewardsResult {
 pub struct GemRewardsViewState {
     pub state: GemLoadState,
     pub rewards: GemRewardsState,
+    pub is_refreshing: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]

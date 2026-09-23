@@ -32,7 +32,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gemwallet.android.ext.errorText
-import com.gemwallet.android.features.referral.viewmodels.SyncType
 import com.gemwallet.android.features.referral.viewmodels.models.IncomingCodeUIModel
 import com.gemwallet.android.features.referral.viewmodels.models.RewardRedemptionUIModel
 import com.gemwallet.android.features.referral.viewmodels.models.RewardsSectionUIModel
@@ -74,7 +73,8 @@ private val referralCodeMaxWidth = 250.dp
 
 @Composable
 fun ReferralScene(
-    inSync: SyncType,
+    isLoading: Boolean,
+    isRefreshing: Boolean,
     loadError: GemServiceException?,
     isAvailableWalletSelect: Boolean,
     referralLink: String?,
@@ -100,7 +100,7 @@ fun ReferralScene(
     val shareTitle = stringResource(id = R.string.common_share, link)
 
     var getStartedDialogShow by remember(actions) { mutableStateOf(false) }
-    var codeDialogShow by remember(incomingCode, inSync) { mutableStateOf(incomingCode.confirm != null && inSync == SyncType.None) }
+    var codeDialogShow by remember(incomingCode, isLoading, isRefreshing) { mutableStateOf(incomingCode.confirm != null && !isLoading && !isRefreshing) }
     val referralCode = incomingCode.confirm
 
     val successStr = stringResource(R.string.common_done)
@@ -159,14 +159,14 @@ fun ReferralScene(
         },
         onClose = onClose,
     ) {
-        if (inSync == SyncType.Init) {
+        if (isLoading) {
             Box(modifier = Modifier.fillMaxSize()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
             return@Scene
         }
         PullToRefreshBox(
-            isRefreshing = inSync != SyncType.None,
+            isRefreshing = isRefreshing,
             onRefresh = onRefresh,
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -245,7 +245,8 @@ private fun ReferralScenePreview() {
     WalletTheme {
         ReferralScene(
             loadError = null,
-            inSync = SyncType.None,
+            isLoading = false,
+            isRefreshing = false,
             isAvailableWalletSelect = false,
             referralLink = null,
             actions = listOf(GemRewardsAction.Share),
@@ -271,7 +272,8 @@ private fun ReferralSceneNoRewardsPreview() {
     WalletTheme {
         ReferralScene(
             loadError = null,
-            inSync = SyncType.None,
+            isLoading = false,
+            isRefreshing = false,
             isAvailableWalletSelect = false,
             referralLink = null,
             actions = listOf(GemRewardsAction.CreateCode, GemRewardsAction.UseReferralCode),
