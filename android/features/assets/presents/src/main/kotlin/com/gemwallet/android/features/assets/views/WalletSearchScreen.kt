@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gemwallet.android.domains.asset.aggregates.AssetInfoDataAggregate
-import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.features.asset_select.presents.views.AssetSelectAction
 import com.gemwallet.android.features.asset_select.presents.views.AssetSelectScene
 import com.gemwallet.android.features.asset_select.presents.views.RecentsSheetHost
@@ -33,6 +32,7 @@ import com.gemwallet.android.ui.components.list_item.property.DataBadgeChevron
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.ToastEffect
 import com.gemwallet.android.ui.models.ListPosition
+import com.gemwallet.android.ui.models.NftItemTarget
 import com.gemwallet.android.ui.theme.space0
 import com.wallet.core.primitives.AssetType
 import com.wallet.core.primitives.PerpetualId
@@ -155,11 +155,9 @@ fun WalletSearchScreen(onAction: (WalletSearchAction) -> Unit, viewModel: Wallet
                     model = item,
                     listPosition = position,
                     onClick = {
-                        val asset = item.asset
-                        if (asset == null) {
-                            handleAction(WalletSearchAction.OpenNftCollection(item.collection.id.toIdentifier()))
-                        } else {
-                            handleAction(WalletSearchAction.OpenNftAsset(asset.id))
+                        when (val target = item.target) {
+                            is NftItemTarget.Collection -> handleAction(WalletSearchAction.OpenNftCollection(target.id))
+                            is NftItemTarget.Asset -> handleAction(WalletSearchAction.OpenNftAsset(target.id))
                         }
                     },
                 )

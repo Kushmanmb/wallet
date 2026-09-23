@@ -22,7 +22,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gemwallet.android.ext.toIdentifier
 import com.gemwallet.android.features.nft.presents.components.NFTItem
 import com.gemwallet.android.features.nft.viewmodels.NftListViewModels
 import com.gemwallet.android.ui.R
@@ -36,6 +35,7 @@ import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
 import com.gemwallet.android.ui.icons.AppIcons
 import com.gemwallet.android.ui.models.ListPosition
+import com.gemwallet.android.ui.models.NftItemTarget
 import com.gemwallet.android.ui.models.NftItemUIModel
 import com.gemwallet.android.ui.models.actions.CancelAction
 import com.gemwallet.android.ui.models.actions.NftAssetIdAction
@@ -158,11 +158,9 @@ internal fun NftListScene(
                             NFTItem(
                                 model = item,
                                 onClick = {
-                                    val asset = item.asset
-                                    if (asset == null) {
-                                        onAction(NftListAction.OpenCollection(item.collection.id.toIdentifier()))
-                                    } else {
-                                        onAction(NftListAction.OpenAsset(asset.id))
+                                    when (val target = item.target) {
+                                        is NftItemTarget.Collection -> onAction(NftListAction.OpenCollection(target.id))
+                                        is NftItemTarget.Asset -> onAction(NftListAction.OpenAsset(target.id))
                                     }
                                 },
                             )

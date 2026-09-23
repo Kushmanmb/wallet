@@ -183,7 +183,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 #### Models that hold a domain object beside its row
 
-- **VM32** **S** **NFT items keep the collection and asset beside the row.** Android [`NftItemUIModel`](../android/ui-models/src/main/kotlin/com/gemwallet/android/ui/models/NftItemUIModel.kt) holds `NFTCollection` and `NFTAsset` beside `GemNftRow`.
 - **VM33** **S** **Price-alert aggregates copy the row out.** Android `PriceAlertDataAggregateImpl` in [GetPriceAlertsImpl](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/pricealerts/GetPriceAlertsImpl.kt) holds `Asset` and `PriceAlert` beside `GemPriceAlertRow` and copies five of its fields.
 
 #### One view state per screen instead of many crossings
@@ -311,6 +310,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM32 (2026-09-23).** Closed. Android `NftItemUIModel` held the whole `NFTCollection` and optional `NFTAsset` beside `GemNftRow` only to decide where a tap goes; it now stores the row and an `NftItemTarget` (collection id or asset id) built once from the Core `GemNftItem`, the same split iOS makes in `NFTGridPosterBuilder`, and the NFT list, collections preview and wallet search switch on the target.
 
 **VM29, VM30, VM31 (2026-09-23).** Closed. iOS `FiatQuoteViewModel` drops the `Asset` it kept only to build an identity and uses the row's `quote_id` (VM30). iOS `SwapProviderItem` stores only `GemSwapProviderRow`, keyed by its provider; selecting a provider hands the `SwapProvider` to `GemSwapSession.onProviderSelected`, so the item no longer carries the `SwapperQuote` (VM31). VM29 needed no change: the open-position item's name and image are the symbol and asset id of the app's own `AutocloseOpenData` navigation value, and routing them through `GemPerpetualOpenRow` would only echo them back.
 
