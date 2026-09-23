@@ -60,15 +60,11 @@ public final class TransactionsViewModel {
     }
 
     public var emptyContentModel: EmptyContentTypeViewModel {
-        switch transactionsEmptyState(
+        let kind = transactionsEmptyState(
             chains: filterModel.chainsFilter.selectedChains.map(\.rawValue),
             filters: filterModel.transactionTypesFilter.selectedTypes,
-        ) {
-        case .noActivity:
-            EmptyContentTypeViewModel(type: EmptyContentType(.activity, isViewOnly: wallet.isViewOnly, actions: [.buy: onSelectBuy, .receive: onSelectReceive]))
-        case .noResults:
-            EmptyContentTypeViewModel(type: EmptyContentType(.searchActivity, actions: [.clearFilters: onSelectCleanFilters]))
-        }
+        )
+        return EmptyContentTypeViewModel(type: EmptyContentType(kind, isViewOnly: wallet.isViewOnly, actions: [.buy: onSelectBuy, .receive: onSelectReceive, .clearFilters: onSelectCleanFilters]))
     }
 }
 

@@ -7,6 +7,7 @@ use chrono::{DateTime, Utc};
 use primitives::{AddressName, Asset, AssetId, AssetPrice, Chain, ChainAsset, NFTAssetId, PerpetualDirection, Resource, Transaction, TransactionDirection, TransactionExtended, TransactionId, TransactionState, TransactionType};
 
 use super::rules;
+use crate::services::empty_state::GemEmptyStateKind;
 use primitives::BlockExplorerLink;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, uniffi::Enum)]
@@ -253,17 +254,11 @@ pub enum GemTransactionBadge {
     Asset,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemTransactionsEmptyState {
-    NoActivity,
-    NoResults,
-}
-
 #[uniffi::export]
-pub fn transactions_empty_state(chains: Vec<Chain>, filters: Vec<GemTransactionFilter>) -> GemTransactionsEmptyState {
+pub fn transactions_empty_state(chains: Vec<Chain>, filters: Vec<GemTransactionFilter>) -> GemEmptyStateKind {
     match chains.is_empty() && filters.is_empty() {
-        true => GemTransactionsEmptyState::NoActivity,
-        false => GemTransactionsEmptyState::NoResults,
+        true => GemEmptyStateKind::Activity,
+        false => GemEmptyStateKind::SearchActivity,
     }
 }
 

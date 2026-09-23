@@ -36,11 +36,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.gemstone.GemChainsFilterSummary
+import uniffi.gemstone.GemEmptyStateKind
 import uniffi.gemstone.GemListRow
 import uniffi.gemstone.GemLoadState
 import uniffi.gemstone.GemRefreshKind
 import uniffi.gemstone.GemTransactionFilter
-import uniffi.gemstone.GemTransactionsEmptyState
 import uniffi.gemstone.GemTransactionsFilterSummary
 import uniffi.gemstone.GemTransactionsServiceInterface
 import uniffi.gemstone.chainsFilterSummary
@@ -72,9 +72,9 @@ class TransactionsViewModel @Inject constructor(
 
     val typeFilterOptions: List<TransactionFilterUIModel> = transactionFilterOptions(context)
 
-    val showsNoResults: StateFlow<Boolean> = combine(chainsFilter, typeFilter) { chains, types ->
-        transactionsEmptyState(chains.map { it.string }, types) == GemTransactionsEmptyState.NO_RESULTS
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val emptyStateKind: StateFlow<GemEmptyStateKind> = combine(chainsFilter, typeFilter) { chains, types ->
+        transactionsEmptyState(chains.map { it.string }, types)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, GemEmptyStateKind.ACTIVITY)
 
     val filterSummary: StateFlow<TransactionsFilterSummaryUIModel> = combine(chainsFilter, typeFilter) { chains, types ->
         TransactionsFilterSummaryUIModel(

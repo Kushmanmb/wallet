@@ -728,13 +728,14 @@ mod tests {
 
     #[test]
     fn test_an_empty_activity_list_reads_as_no_results_only_once_a_filter_is_on() {
-        use super::super::model::{GemTransactionsEmptyState, transactions_empty_state};
+        use super::super::model::transactions_empty_state;
+        use crate::services::empty_state::GemEmptyStateKind;
 
-        assert_eq!(transactions_empty_state(vec![], vec![]), GemTransactionsEmptyState::NoActivity);
-        assert_eq!(transactions_empty_state(vec![Chain::Ethereum], vec![]), GemTransactionsEmptyState::NoResults);
+        assert_eq!(transactions_empty_state(vec![], vec![]), GemEmptyStateKind::Activity);
+        assert_eq!(transactions_empty_state(vec![Chain::Ethereum], vec![]), GemEmptyStateKind::SearchActivity);
         assert_eq!(
             transactions_empty_state(vec![], vec![GemTransactionFilter::Swaps]),
-            GemTransactionsEmptyState::NoResults,
+            GemEmptyStateKind::SearchActivity,
             "a type filter hides activity just as a chain filter does"
         );
     }

@@ -48,7 +48,7 @@ internal fun TransactionsScene(
     typeFilter: List<TransactionFilterUIModel>,
     typeFilterOptions: List<TransactionFilterUIModel>,
     filterSummary: TransactionsFilterSummaryUIModel,
-    showsNoResults: Boolean,
+    emptyStateKind: GemEmptyStateKind,
     listState: LazyListState = rememberLazyListState(),
     showBuyAction: Boolean,
     showReceiveAction: Boolean,
@@ -89,7 +89,7 @@ internal fun TransactionsScene(
                     item {
                         EmptyContentView(
                             type = transactionsEmptyContentType(
-                                hasFilters = showsNoResults,
+                                kind = emptyStateKind,
                                 showBuyAction = showBuyAction,
                                 showReceiveAction = showReceiveAction,
                                 onAction = onAction,
@@ -127,19 +127,7 @@ internal fun TransactionsScene(
     )
 }
 
-private fun transactionsEmptyContentType(hasFilters: Boolean, showBuyAction: Boolean, showReceiveAction: Boolean, onAction: (TransactionsListAction) -> Unit): EmptyContentType {
-    if (hasFilters) {
-        return EmptyContentType(
-            GemEmptyStateKind.SEARCH_ACTIVITY,
-            actions = mapOf(
-                GemEmptyStateAction.CLEAR_FILTERS to {
-                    onAction(TransactionsListAction.ClearChainsFilter)
-                    onAction(TransactionsListAction.ClearTypesFilter)
-                },
-            ),
-        )
-    }
-
+private fun transactionsEmptyContentType(kind: GemEmptyStateKind, showBuyAction: Boolean, showReceiveAction: Boolean, onAction: (TransactionsListAction) -> Unit): EmptyContentType {
     val onBuy: (() -> Unit)? = if (showBuyAction) {
         { onAction(TransactionsListAction.Buy) }
     } else {
@@ -151,5 +139,9 @@ private fun transactionsEmptyContentType(hasFilters: Boolean, showBuyAction: Boo
         null
     }
 
-    return EmptyContentType(GemEmptyStateKind.ACTIVITY, actions = mapOf(GemEmptyStateAction.BUY to onBuy, GemEmptyStateAction.RECEIVE to onReceive))
+    val onClearFilters = {
+        onAction(TransactionsListAction.ClearChainsFilter)
+        onAction(TransactionsListAction.ClearTypesFilter)
+    }
+    return EmptyContentType(kind, actions = mapOf(GemEmptyStateAction.BUY to onBuy, GemEmptyStateAction.RECEIVE to onReceive, GemEmptyStateAction.CLEAR_FILTERS to onClearFilters))
 }

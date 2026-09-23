@@ -18,7 +18,7 @@ fun TransactionsNavScreen(onTransaction: (TransactionId) -> Unit, onBuy: (() -> 
     val chainFilter by viewModel.chainsFilter.collectAsStateWithLifecycle()
     val typeFilter by viewModel.typeFilterRows.collectAsStateWithLifecycle()
     val filterSummary by viewModel.filterSummary.collectAsStateWithLifecycle()
-    val showsNoResults by viewModel.showsNoResults.collectAsStateWithLifecycle()
+    val emptyStateKind by viewModel.emptyStateKind.collectAsStateWithLifecycle()
     val walletId by viewModel.walletId.collectAsStateWithLifecycle()
     val availableChains by viewModel.availableChains.collectAsStateWithLifecycle()
     val errorRow by viewModel.errorRow.collectAsStateWithLifecycle()
@@ -39,7 +39,7 @@ fun TransactionsNavScreen(onTransaction: (TransactionId) -> Unit, onBuy: (() -> 
         typeFilter = typeFilter,
         typeFilterOptions = viewModel.typeFilterOptions,
         filterSummary = filterSummary,
-        showsNoResults = showsNoResults,
+        emptyStateKind = emptyStateKind,
         listState = listState,
         showBuyAction = onBuy != null,
         showReceiveAction = onReceive != null,
