@@ -41,7 +41,7 @@ class Migration_96_97Test {
         }
 
         helper.runMigrationsAndValidate(testDb, 97, true, Migration_96_97).use { database ->
-            assertEquals(listOf(listOf("900.0", null)), database.rows("SELECT marketCap, marketCapUsd FROM asset_market"))
+            assertEquals(listOf(listOf("1", "1")), database.rows("SELECT marketCap = 900.0, marketCapUsd IS NULL FROM asset_market"))
         }
     }
 
