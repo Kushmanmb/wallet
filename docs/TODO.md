@@ -40,7 +40,7 @@ This map routes work to current owners. It groups existing ids rather than creat
 | Amount entry, fiat equivalent, amount extras | `GemAmountService`, `GemAmountEntry`, existing provider inputs | — |
 | Confirmation, fees, simulation, acquisition | `GemConfirmTransferService`, `GemConfirmation`, shared headers/rows/info | VM3, VM4, AUD5, AUD45 |
 | Swap, providers, slippage and swap details | `GemSwapQuoteService`, `GemSwapSession`, `GemSlippageSession` | VM3, AUD50 |
-| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD29, AUD34, AUD47 |
+| Activity, asset/position history, transaction details | `GemTransactionsService`, detail records, native indexed queries | AUD34, AUD47 |
 | Buy/sell quotes, provider opening, fiat history | `GemFiatQuoteService`, `GemFiatSession`, existing fiat transaction owner | — |
 | Perpetual market list/search/pins and balance | `GemPerpetualService`, market session/rows, native search indexes | AUD38 |
 | Perpetual position/details/candles/activity | `GemPerpetualDetailsService`, position rows, chart load rules | — |
@@ -90,7 +90,6 @@ Reviewed at `855fef5ccfba98458b9bfaa0efdea01ef23c0a07` on 2026-09-19. These are 
 ### Android observation and recovery
 
 - **AUD27** **M** **Bug — handle WebSocket callback overflow explicitly.** [WebSocketConnection](../android/data/services/gemstone/src/main/kotlin/com/gemwallet/android/data/services/gemstone/stream/WebSocketConnection.kt) ignores failed `trySend` for messages. Slow Core/storage handling can fill the buffer and silently lose normal or perpetual events. Preserve bounded ordered delivery or trigger explicit reconnect/resynchronization recovery; do not launch an unbounded task per message. Test overflow while consumption is suspended.
-- **AUD29** **M** **Bug — clear transaction details on wallet change or deletion.** [Transaction observation](../android/data/services/gemstone/src/main/kotlin/com/gemwallet/android/data/services/gemstone/stores/TransactionStore.kt) drops null rows; [detail projection](../android/data/coordinators/src/main/kotlin/com/gemwallet/android/data/coordinators/transaction/GetTransactionDetailsImpl.kt) combines session and transaction independently and drops null again. Old details/actions can survive or be paired with a different wallet. Preserve absence and bind the row to wallet identity. Test wallet A→B with no matching record and deletion of the displayed record; the model cleanup already landed with U18, so this is the absence handling only.
 
 ### Consolidation and regression coverage
 
@@ -285,6 +284,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**AUD29 (2026-09-23).** Closed. Android `GetTransactionDetailsImpl` follows the session and observes the transaction for that session's wallet, so a wallet switch re-reads the record under the new wallet instead of pairing the old record with the new session, and no session means no details. The store's `observeTransaction` and the details projection now pass a missing record through as null instead of dropping it, so a deleted or unmatched record clears the screen. `GetTransaction`, `GetTransactionImpl` and the `walletTransaction` helper had no other caller and are deleted. Tests cover a switch to a wallet without the record and the deletion of the shown record.
 
 **AUD46 (2026-09-23).** Closed. Core `GemAutocloseDraft` holds the open-position form's take profit and stop loss, each with its edited flag: `on_defaults` replaces only the prices the user has not touched, and `on_edited` records an edit only when the value changes and treats empty input as no price. iOS `AmountPerpetualViewModel` and Android `AmountPerpetualProvider` keep one draft in place of their own values and the `isAutocloseEdited` flag or trigger, and the defaults projection stays in `GemAmountService`. Core, iOS and Android tests cover a leverage change that refreshes untouched defaults and keeps an edited price.
 

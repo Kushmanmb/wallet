@@ -3,12 +3,10 @@ package com.gemwallet.android.data.coordinators.di
 import com.gemwallet.android.application.session.cases.GetCurrentWalletId
 import com.gemwallet.android.application.session.cases.GetSession
 import com.gemwallet.android.application.transactions.cases.GetPendingTransactionsCount
-import com.gemwallet.android.application.transactions.cases.GetTransaction
 import com.gemwallet.android.application.transactions.cases.GetTransactionDetails
 import com.gemwallet.android.application.transactions.cases.GetTransactions
 import com.gemwallet.android.data.coordinators.transaction.GetPendingTransactionsCountImpl
 import com.gemwallet.android.data.coordinators.transaction.GetTransactionDetailsImpl
-import com.gemwallet.android.data.coordinators.transaction.GetTransactionImpl
 import com.gemwallet.android.data.coordinators.transaction.GetTransactionsImpl
 import com.gemwallet.android.data.services.gemstone.stores.GemstoneTransactionStore
 import dagger.Module
@@ -31,17 +29,13 @@ object TransactionModule {
 
     @Provides
     @Singleton
-    fun provideGetTransaction(getCurrentWalletId: GetCurrentWalletId, transactionStore: GemstoneTransactionStore): GetTransaction = GetTransactionImpl(getCurrentWalletId, transactionStore)
-
-    @Provides
-    @Singleton
     fun provideGetPendingTransactionsCount(getCurrentWalletId: GetCurrentWalletId, transactionStore: GemstoneTransactionStore): GetPendingTransactionsCount = GetPendingTransactionsCountImpl(getCurrentWalletId, transactionStore)
 
     @Provides
     @Singleton
-    fun provideGetTransactionDetails(getSession: GetSession, getTransaction: GetTransaction, transactionDetailsService: GemTransactionDetailsService): GetTransactionDetails = GetTransactionDetailsImpl(
+    fun provideGetTransactionDetails(getSession: GetSession, transactionStore: GemstoneTransactionStore, transactionDetailsService: GemTransactionDetailsService): GetTransactionDetails = GetTransactionDetailsImpl(
         getSession = getSession,
-        getTransaction = getTransaction,
+        transactionStore = transactionStore,
         transactionDetailsService = transactionDetailsService,
     )
 }

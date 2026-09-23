@@ -13,6 +13,7 @@ import com.wallet.core.primitives.TransactionId
 import com.wallet.core.primitives.WalletId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import uniffi.gemstone.GemTransactionStore
 
@@ -28,7 +29,7 @@ class GemstoneTransactionStore(private val transactionsDao: TransactionsDao, pri
     fun observeTransactions(walletId: WalletId, filters: List<TransactionsRequestFilter>): Flow<List<TransactionExtended>> =
         transactionsDao.getExtendedTransactions(walletId, filters).distinctUntilChanged().mapNotNull { items -> items.toDTO() }
 
-    fun observeTransaction(walletId: WalletId, transactionId: TransactionId): Flow<TransactionExtended?> = transactionsDao.getExtendedTransaction(walletId, transactionId).distinctUntilChanged().mapNotNull { it?.toDTO() }
+    fun observeTransaction(walletId: WalletId, transactionId: TransactionId): Flow<TransactionExtended?> = transactionsDao.getExtendedTransaction(walletId, transactionId).distinctUntilChanged().map { it?.toDTO() }
 
     fun observeTransactionsCount(walletId: WalletId, filters: List<TransactionsRequestFilter>): Flow<Int?> = transactionsDao.getTransactionsCount(walletId, filters).distinctUntilChanged()
 }
