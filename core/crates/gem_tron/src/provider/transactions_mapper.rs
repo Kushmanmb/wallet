@@ -167,7 +167,10 @@ impl TransactionContext {
         let owner = TronAddress::from_hex_or_base58(&self.from)?;
         let swap = tron_swap_metadata(self.chain, &owner, contract_value.call_value, logs, internal_transactions)?;
 
-        Some(self.build_transaction(swap.from_asset.clone(), self.from.clone(), self.from.clone(), TransactionType::Swap, swap.from_value.clone(), serde_json::to_value(&swap).ok()))
+        Some(Transaction {
+            contract: contract_value.contract_address.clone(),
+            ..self.build_transaction(swap.from_asset.clone(), self.from.clone(), self.from.clone(), TransactionType::Swap, swap.from_value.clone(), serde_json::to_value(&swap).ok())
+        })
     }
 
     fn map_token_transfer(&self, contract_value: &ContractParameterValue, logs: &[TronLog]) -> Option<Transaction> {
@@ -479,6 +482,7 @@ mod tests {
         assert!(result.is_some());
         let transaction = result.unwrap();
         assert_eq!(transaction.transaction_type, TransactionType::Swap);
+        assert_eq!(transaction.contract.as_deref(), Some("TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"));
         assert_eq!(transaction.from, transaction.to);
         assert_eq!(transaction.asset_id, Chain::Tron.as_asset_id());
         assert_eq!(transaction.value, BigUint::from(1000000u64));
@@ -514,6 +518,7 @@ mod tests {
 
         let transaction = map_transaction(Chain::Tron, transaction, receipt).unwrap();
         assert_eq!(transaction.transaction_type, TransactionType::Swap);
+        assert_eq!(transaction.contract.as_deref(), Some("TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"));
 
         let metadata: TransactionSwapMetadata = serde_json::from_value(transaction.metadata.unwrap()).unwrap();
         let usdt = TronAddress::from_hex("41a614f803b6fd780986a42c78ec9c7f77e6ded13c").unwrap().encode();
