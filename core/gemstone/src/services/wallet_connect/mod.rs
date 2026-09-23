@@ -217,7 +217,7 @@ impl GemWalletConnectService {
             Ok(response) => GemWalletConnectOutcome { response: Some(response), failure: None },
             Err(_) if rules::is_expired(expiry, Utc::now()) => GemWalletConnectOutcome::expired(),
             Err(GemServiceError::Cancelled) => GemWalletConnectOutcome::rejected(None),
-            Err(error) => GemWalletConnectOutcome::rejected(Some(GemWalletConnectFailure::Failed { message: error.to_string() })),
+            Err(error) => GemWalletConnectOutcome::rejected(Some(GemWalletConnectFailure::Failed { error: error.text() })),
         }
     }
 }
@@ -435,7 +435,7 @@ mod tests {
         assert_eq!(
             block_on(service.request_outcome(GemWalletConnectSessionRequest::mock_siws())),
             GemWalletConnectOutcome::rejected(Some(GemWalletConnectFailure::Failed {
-                message: "SIWS address does not match signing account".to_string()
+                error: GemErrorText::message("SIWS address does not match signing account".to_string())
             }))
         );
     }
@@ -529,7 +529,12 @@ mod tests {
                 .await
                 .request_outcome(GemWalletConnectSessionRequest::mock("8"))
                 .await;
-            assert_eq!(failed, GemWalletConnectOutcome::rejected(Some(GemWalletConnectFailure::Failed { message: "keystore".to_string() })));
+            assert_eq!(
+                failed,
+                GemWalletConnectOutcome::rejected(Some(GemWalletConnectFailure::Failed {
+                    error: GemErrorText::message("keystore".to_string())
+                }))
+            );
         });
     }
 }

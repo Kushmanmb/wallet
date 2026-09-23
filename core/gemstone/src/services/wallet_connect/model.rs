@@ -60,7 +60,7 @@ pub enum GemWalletConnectResponse {
 pub enum GemWalletConnectFailure {
     MaliciousOrigin,
     Expired,
-    Failed { message: String },
+    Failed { error: GemErrorText },
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Enum)]

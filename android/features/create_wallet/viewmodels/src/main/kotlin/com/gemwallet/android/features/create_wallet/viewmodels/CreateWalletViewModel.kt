@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.gemwallet.android.application.IoDispatcher
 import com.gemwallet.android.ext.errorText
 import com.gemwallet.android.ext.runCatchingCancellable
-import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.screen.PhraseRow
 import com.gemwallet.android.ui.components.screen.phraseRows
 import com.gemwallet.android.ui.importWallet
@@ -41,7 +40,7 @@ class CreateWalletViewModel @Inject constructor(private val service: GemWalletSe
     private val state = MutableStateFlow(CreateWalletViewModelState())
     val uiState = state.asStateFlow()
 
-    val errorText: StateFlow<String?> = state.map { it.dataError?.text(context)?.ifBlank { context.getString(R.string.errors_unknown_try_again) } }
+    val errorText: StateFlow<String?> = state.map { it.dataError?.text(context) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val verification = MutableStateFlow<GemVerifyPhraseSession?>(null)

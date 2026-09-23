@@ -57,7 +57,6 @@ fun ProposalScene(proposal: WalletConnectSessionProposal, verifyContext: WalletC
     val availableWallets by viewModel.availableWallets.collectAsStateWithLifecycle()
     val availableWalletRows by viewModel.availableWalletRows.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
-    val unknownErrorMessage = stringResource(id = R.string.errors_unknown_try_again)
 
     LaunchedEffect(proposal) {
         viewModel.onProposal(proposal, verifyContext) { message ->
@@ -84,7 +83,7 @@ fun ProposalScene(proposal: WalletConnectSessionProposal, verifyContext: WalletC
             availableWalletRows = availableWalletRows,
             buttonState = buttonState,
             onReject = viewModel::onReject,
-            onApprove = { viewModel.onApprove { error -> onError(error.text(context).ifBlank { unknownErrorMessage }) } },
+            onApprove = { viewModel.onApprove { error -> onError(error.text(context)) } },
             onWalletSelected = viewModel::onWalletSelected,
         )
     }

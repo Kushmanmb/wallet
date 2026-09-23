@@ -11,7 +11,7 @@ extension GemWalletConnectFailure {
         switch self {
         case .maliciousOrigin: GemWalletConnectError.InvalidOrigin
         case .expired: AnyError(Localized.WalletConnect.requestExpired)
-        case let .failed(message): AnyError(message)
+        case let .failed(error): error
         }
     }
 }

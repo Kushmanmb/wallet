@@ -38,6 +38,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import uniffi.gemstone.GemErrorText
 import uniffi.gemstone.GemServiceException
 import uniffi.gemstone.GemSignMessageServiceInterface
 import uniffi.gemstone.GemWalletConnectFailure
@@ -138,7 +139,7 @@ class WCRequestViewModelTest {
         val error = CompletableDeferred<String>()
         val notified = mutableListOf<String>()
         val model = viewModel(
-            service = service { GemWalletConnectOutcome(response = null, failure = GemWalletConnectFailure.Failed("Request failed")) },
+            service = service { GemWalletConnectOutcome(response = null, failure = GemWalletConnectFailure.Failed(GemErrorText.Message("Request failed"))) },
         )
 
         model.onRequest(sessionRequest, verifyContext, onNotify = { notified.add(it) }, onError = { error.complete(it) })

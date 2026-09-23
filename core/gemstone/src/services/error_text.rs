@@ -30,12 +30,28 @@ pub enum GemErrorText {
     Message { text: String },
 }
 
+impl GemErrorText {
+    pub fn message(text: String) -> Self {
+        match text.trim().is_empty() {
+            true => Self::Unknown,
+            false => Self::Message { text },
+        }
+    }
+
+    fn network_message(text: String) -> Self {
+        match text.trim().is_empty() {
+            true => Self::Unknown,
+            false => Self::NetworkMessage { text },
+        }
+    }
+}
+
 #[uniffi::export]
 impl GemServiceError {
     pub fn text(&self) -> GemErrorText {
         match self {
             Self::Api { msg } | Self::Gateway { msg } | Self::Store { msg } | Self::Core { msg } | Self::Platform { msg } | Self::InvalidInput { msg } | Self::NotFound { msg } | Self::Unsupported { msg } => {
-                GemErrorText::Message { text: msg.clone() }
+                GemErrorText::message(msg.clone())
             }
             Self::NoAccountForChain { .. } => GemErrorText::NoAccountForChain,
             Self::Offline => GemErrorText::NetworkOffline,
@@ -62,7 +78,7 @@ impl GemWalletImportError {
 impl GemstoneError {
     pub fn text(&self) -> GemErrorText {
         match self {
-            Self::AnyError { msg } | Self::SignerError { msg, .. } => GemErrorText::Message { text: msg.clone() },
+            Self::AnyError { msg } | Self::SignerError { msg, .. } => GemErrorText::message(msg.clone()),
             Self::Cancelled => GemErrorText::Cancelled,
         }
     }
@@ -73,7 +89,7 @@ impl GatewayError {
     pub fn text(&self) -> GemErrorText {
         match self {
             Self::Offline => GemErrorText::NetworkOffline,
-            Self::NetworkError { msg } | Self::PlatformError { msg } => GemErrorText::Message { text: msg.clone() },
+            Self::NetworkError { msg } | Self::PlatformError { msg } => GemErrorText::message(msg.clone()),
             Self::NetworkIdMismatch { .. } => GemErrorText::InvalidNetworkId,
         }
     }
@@ -97,7 +113,7 @@ impl GemWalletConnectError {
             Self::UnsupportedChains => GemErrorText::UnsupportedChain,
             Self::InvalidOrigin => GemErrorText::MaliciousOrigin,
             Self::UnsupportedWallets => GemErrorText::NoSupportedWallets,
-            Self::Service { msg } => GemErrorText::Message { text: msg.clone() },
+            Self::Service { msg } => GemErrorText::message(msg.clone()),
         }
     }
 }
@@ -105,7 +121,7 @@ impl GemWalletConnectError {
 #[uniffi::export]
 pub fn alien_error_text(error: AlienError) -> GemErrorText {
     match error {
-        AlienError::RequestError { msg } | AlienError::ResponseError { msg } => GemErrorText::NetworkMessage { text: msg },
+        AlienError::RequestError { msg } | AlienError::ResponseError { msg } => GemErrorText::network_message(msg),
         AlienError::Http { status, .. } => GemErrorText::NetworkStatus { status: status as u32 },
         AlienError::Offline => GemErrorText::NetworkOffline,
     }
@@ -116,7 +132,7 @@ pub fn payment_error_text(error: GemPaymentError) -> GemErrorText {
     match error {
         GemPaymentError::NoPaymentOptions => GemErrorText::NotSupported,
         GemPaymentError::Status { status } => GemErrorText::Payment { status },
-        GemPaymentError::InvalidRequest { reason } | GemPaymentError::Network { reason } => GemErrorText::Message { text: reason },
+        GemPaymentError::InvalidRequest { reason } | GemPaymentError::Network { reason } => GemErrorText::message(reason),
     }
 }
 
@@ -124,6 +140,13 @@ pub fn payment_error_text(error: GemPaymentError) -> GemErrorText {
 mod tests {
     use super::*;
     use crate::api::GemApiError;
+
+    #[test]
+    fn test_a_blank_message_reads_as_unknown() {
+        assert_eq!(GemServiceError::Api { msg: " ".into() }.text(), GemErrorText::Unknown);
+        assert_eq!(alien_error_text(AlienError::RequestError { msg: String::new() }), GemErrorText::Unknown);
+        assert_eq!(payment_error_text(GemPaymentError::Network { reason: String::new() }), GemErrorText::Unknown);
+    }
 
     #[test]
     fn test_a_missing_account_names_the_chain() {

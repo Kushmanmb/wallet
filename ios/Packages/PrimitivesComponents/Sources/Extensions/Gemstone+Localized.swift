@@ -640,6 +640,12 @@ public extension GemBannerDescription {
     }
 }
 
+extension GemErrorText: @retroactive LocalizedError {
+    public var errorDescription: String? {
+        text
+    }
+}
+
 extension GemRecipientError: @retroactive LocalizedError {
     public var errorDescription: String? { display().errorDescription }
 }

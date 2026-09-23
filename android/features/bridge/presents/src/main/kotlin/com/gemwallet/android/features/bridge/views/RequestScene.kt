@@ -29,8 +29,7 @@ fun RequestScene(request: WalletConnectSessionRequest, verifyContext: WalletConn
     val viewModel: WCRequestViewModel = hiltViewModel()
     BackHandler(onBack = viewModel::onReject)
     val context = LocalContext.current
-    val unknownErrorMessage = stringResource(id = R.string.errors_unknown_try_again)
-    val reportError: (String) -> Unit = { message -> onError(message.ifBlank { unknownErrorMessage }) }
+    val reportError: (String) -> Unit = { message -> onError(message) }
 
     LaunchedEffect(request.topic, request.request.id) {
         viewModel.onRequest(

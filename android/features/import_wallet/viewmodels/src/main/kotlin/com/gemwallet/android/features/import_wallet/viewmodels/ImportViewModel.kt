@@ -10,7 +10,6 @@ import com.gemwallet.android.ext.words
 import com.gemwallet.android.features.import_wallet.viewmodels.localization.fieldStringRes
 import com.gemwallet.android.features.import_wallet.viewmodels.localization.tabStringRes
 import com.gemwallet.android.model.ImportType
-import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.fields.NameResolveIndicatorUIModel
 import com.gemwallet.android.ui.importWallet
 import com.gemwallet.android.ui.localization.string
@@ -156,7 +155,7 @@ data class ImportViewModelState(
         tabs = tabs.map { kind -> ImportTabUIModel(type = importType.copy(kind = kind), title = kind.tabStringRes(), isSelected = kind == importType.kind) },
         input = importType.kind.inputUiModel(),
         importType = importType,
-        dataError = dataError?.errorText()?.text(context)?.ifBlank { context.getString(R.string.errors_unknown_try_again) },
+        dataError = dataError?.errorText()?.text(context),
         existingWalletName = existingWalletName,
     )
 }
