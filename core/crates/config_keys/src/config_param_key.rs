@@ -134,6 +134,7 @@ pub enum ConfigParamKey {
     ListProviderUpdateDuration(ListProviderName),
     ScanProviderEnable(ScanProvider),
     ScanTypeEnable(ScanType),
+    ScanSafeCacheDuration(ScanType),
     RateLimit(RateLimitKey, RateLimitWindow),
 }
 
@@ -152,6 +153,7 @@ impl ConfigParamKey {
         let clean_outdated = PriceProvider::all().into_iter().map(Self::PriceProviderCleanOutdatedDuration);
         let scan_providers = ScanProvider::all().into_iter().map(Self::ScanProviderEnable);
         let scan_types = ScanType::all().into_iter().map(Self::ScanTypeEnable);
+        let scan_safe_cache = [ScanType::Address, ScanType::Website].into_iter().map(Self::ScanSafeCacheDuration);
         let lists = ListProviderName::all().into_iter().map(Self::ListProviderUpdateDuration);
         let rate_limits = RateLimitKey::iter().flat_map(|key| RateLimitWindow::ALL.into_iter().map(move |window| Self::RateLimit(key, window)));
         transactions
@@ -168,6 +170,7 @@ impl ConfigParamKey {
             .chain(lists)
             .chain(scan_providers)
             .chain(scan_types)
+            .chain(scan_safe_cache)
             .chain(rate_limits)
             .collect()
     }
@@ -188,6 +191,7 @@ impl ConfigParamKey {
             Self::ListProviderUpdateDuration(provider) => format!("{}.{}", self.as_ref(), provider.as_ref()),
             Self::ScanProviderEnable(provider) => format!("{}.{}", self.as_ref(), provider.as_ref()),
             Self::ScanTypeEnable(scan_type) => format!("{}.{}", self.as_ref(), scan_type.as_ref()),
+            Self::ScanSafeCacheDuration(scan_type) => format!("{}.{}", self.as_ref(), scan_type.as_ref()),
             Self::RateLimit(key, window) => format!("{}.{}", key.as_ref(), window.as_ref()),
         }
     }
@@ -209,6 +213,8 @@ impl ConfigParamKey {
             Self::ListProviderUpdateDuration(_) => "1d".to_string(),
             Self::ScanProviderEnable(_) => "true".to_string(),
             Self::ScanTypeEnable(_) => "true".to_string(),
+            Self::ScanSafeCacheDuration(ScanType::Website) => "6h".to_string(),
+            Self::ScanSafeCacheDuration(_) => "1d".to_string(),
             Self::RateLimit(key, window) => key.default_limit().get(*window).to_string(),
         }
     }
@@ -242,6 +248,16 @@ mod tests {
 
         assert_eq!(key.key(), "scanTypeEnable.address_poisoning");
         assert_eq!(key.default_value(), "true");
+    }
+
+    #[test]
+    fn test_scan_safe_cache_duration() {
+        let website = ConfigParamKey::ScanSafeCacheDuration(ScanType::Website);
+
+        assert_eq!(website.key(), "scanSafeCacheDuration.website");
+        assert_eq!(website.default_value(), "6h");
+        assert_eq!(ConfigParamKey::ScanSafeCacheDuration(ScanType::Address).default_value(), "1d");
+        assert!(!ConfigParamKey::all().iter().any(|key| key.key() == "scanSafeCacheDuration.address_poisoning"));
     }
 
     #[test]

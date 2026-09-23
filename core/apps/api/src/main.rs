@@ -230,6 +230,7 @@ async fn rocket_api(settings: Settings) -> Result<Rocket<Build>, Box<dyn Error +
     let metrics = Arc::new(metrics::Metrics::new(&providers));
     let scan_client = ScanClient::new(
         database.clone(),
+        cacher_client.clone(),
         TransactionScanConfig {
             providers,
             required_successes: config_cacher.get_usize(ConfigKey::ScanRequiredSuccesses)?,

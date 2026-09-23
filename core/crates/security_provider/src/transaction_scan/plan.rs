@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use primitives::asset_score::AssetRank;
 use primitives::{AssetId, ChainAddress, ScanTransactionPayload, ScanType, TransactionType};
 use url::Url;
@@ -16,13 +18,14 @@ pub fn plan_transaction_scan(input: &TransactionScanInput) -> ScanPlan {
         !is_verified_address && !cached.iter().any(|detection| detection.scan_type == scan_type)
     };
     let is_resolved = detections.iter().any(|detection| detection.is_enforced) || (is_target_verified && website_host(payload).is_none());
+    let mut safe = Vec::new();
     let targets = if is_resolved {
         None
     } else {
         provider_targets(payload).map(|targets| ScanTargets {
-            address: targets.address.filter(|_| is_scanned(ScanType::Address)),
-            poisoning: targets.poisoning.filter(|_| is_scanned(ScanType::AddressPoisoning)),
-            website: targets.website.filter(|_| is_scanned(ScanType::Website)),
+            address: select_target(targets.address, ScanType::Address, is_scanned(ScanType::Address), &input.safe, &mut safe),
+            poisoning: select_target(targets.poisoning, ScanType::AddressPoisoning, is_scanned(ScanType::AddressPoisoning), &input.safe, &mut safe),
+            website: select_target(targets.website, ScanType::Website, is_scanned(ScanType::Website), &input.safe, &mut safe),
         })
     };
 
@@ -30,7 +33,13 @@ pub fn plan_transaction_scan(input: &TransactionScanInput) -> ScanPlan {
         detections,
         is_memo_required: input.addresses.iter().any(|address| address.is_memo_required == Some(true)),
         targets,
+        safe,
     }
+}
+
+pub fn safe_cache_targets(payload: &ScanTransactionPayload) -> Vec<(ScanType, String)> {
+    let address = (!payload.target.address.is_empty()).then(|| (ScanType::Address, format!("{}:{}", payload.target.asset_id.chain.as_ref(), payload.target.address)));
+    address.into_iter().chain(website_host(payload).map(|host| (ScanType::Website, host))).collect()
 }
 
 pub fn detection_targets(payload: &ScanTransactionPayload) -> Vec<String> {
@@ -49,6 +58,15 @@ pub fn token_asset_ids(payload: &ScanTransactionPayload) -> Vec<AssetId> {
         }
     }
     targets
+}
+
+fn select_target<T>(target: Option<T>, scan_type: ScanType, is_scanned: bool, cached_safe: &HashSet<ScanType>, safe: &mut Vec<ScanType>) -> Option<T> {
+    let target = target.filter(|_| is_scanned)?;
+    if cached_safe.contains(&scan_type) {
+        safe.push(scan_type);
+        return None;
+    }
+    Some(target)
 }
 
 fn local_detections(input: &TransactionScanInput) -> Vec<ScanDetection> {
@@ -183,6 +201,37 @@ mod tests {
         let mut payload = payload(TransactionType::SmartContractCall, None);
         payload.target.address = String::new();
         assert!(detection_targets(&payload).is_empty());
+    }
+
+    #[test]
+    fn test_safe_cache_targets() {
+        assert_eq!(
+            safe_cache_targets(&payload(TransactionType::Transfer, Some("https://example.com/path"))),
+            vec![(ScanType::Address, "smartchain:target".to_string()), (ScanType::Website, "example.com".to_string())]
+        );
+    }
+
+    #[test]
+    fn test_plan_skips_cached_safe_types() {
+        let mut input = TransactionScanInput::mock(payload(TransactionType::Transfer, Some("https://example.com")));
+        input.safe = HashSet::from([ScanType::Address]);
+
+        let plan = plan_transaction_scan(&input);
+        let targets = plan.targets.unwrap();
+
+        assert_eq!(plan.safe, vec![ScanType::Address]);
+        assert_eq!(targets.address, None);
+        assert!(targets.poisoning.is_some());
+        assert!(targets.website.is_some());
+    }
+
+    #[test]
+    fn test_plan_verified_target_ignores_cached_safe_address() {
+        let mut input = TransactionScanInput::mock(payload(TransactionType::SmartContractCall, Some("https://example.com")));
+        input.addresses = vec![verified("target")];
+        input.safe = HashSet::from([ScanType::Address]);
+
+        assert!(plan_transaction_scan(&input).safe.is_empty());
     }
 
     #[test]

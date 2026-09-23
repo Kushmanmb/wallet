@@ -69,6 +69,9 @@ pub enum CacheKey<'a> {
     PendingTransactions(&'a str),
     TransactionFeeEstimates(&'a str),
     TransactionFeeEstimatesFresh(&'a str),
+
+    // Security scan keys (scan type, target, ttl)
+    ScanSafe(&'a str, &'a str, u64),
 }
 
 impl CacheKey<'_> {
@@ -110,6 +113,7 @@ impl CacheKey<'_> {
             Self::PendingTransactions(chain) => format!("transactions:pending:{}", chain),
             Self::TransactionFeeEstimates(chain) => format!("transactions:fee_estimates:{}", chain),
             Self::TransactionFeeEstimatesFresh(chain) => format!("transactions:fee_estimates:fresh:{}", chain),
+            Self::ScanSafe(scan_type, target, _) => format!("scan:safe:{}:{}", scan_type, target),
         }
     }
 
@@ -150,6 +154,7 @@ impl CacheKey<'_> {
             Self::PendingTransactions(_) => 30 * SECONDS_PER_DAY,
             Self::TransactionFeeEstimates(_) => 5 * SECONDS_PER_YEAR,
             Self::TransactionFeeEstimatesFresh(_) => SECONDS_PER_HOUR,
+            Self::ScanSafe(_, _, ttl) => *ttl,
         }
     }
 }
@@ -163,5 +168,12 @@ mod tests {
         let key = CacheKey::FetchTransaction("ethereum", "0x123");
         assert_eq!(key.key(), "fetch:transaction:ethereum:0x123");
         assert_eq!(key.ttl(), 30 * SECONDS_PER_DAY);
+    }
+
+    #[test]
+    fn test_scan_safe() {
+        let key = CacheKey::ScanSafe("website", "example.com", 3600);
+        assert_eq!(key.key(), "scan:safe:website:example.com");
+        assert_eq!(key.ttl(), 3600);
     }
 }

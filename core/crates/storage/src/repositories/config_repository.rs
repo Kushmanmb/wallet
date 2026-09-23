@@ -13,6 +13,7 @@ pub trait ConfigRepository {
     fn get_config_param(&mut self, key: ConfigParamKey) -> Result<String, DatabaseError>;
     fn get_config_param_bool(&mut self, key: ConfigParamKey) -> Result<bool, DatabaseError>;
     fn get_config_duration(&mut self, key: ConfigKey) -> Result<Duration, DatabaseError>;
+    fn get_config_param_duration(&mut self, key: ConfigParamKey) -> Result<Duration, DatabaseError>;
     fn get_config_keys(&mut self) -> Result<Vec<String>, DatabaseError>;
     fn add_config(&mut self, configs: Vec<ConfigRow>) -> Result<usize, DatabaseError>;
     fn set_config(&mut self, key: ConfigKey, value: &str) -> Result<usize, DatabaseError>;
@@ -46,6 +47,12 @@ impl ConfigRepository for DatabaseClient {
 
     fn get_config_duration(&mut self, key: ConfigKey) -> Result<Duration, DatabaseError> {
         let value = self.get_config(key)?;
+        primitives::parse_duration(&value).ok_or_else(|| DatabaseError::Error(format!("Failed to parse duration: {}", value)))
+    }
+
+    fn get_config_param_duration(&mut self, key: ConfigParamKey) -> Result<Duration, DatabaseError> {
+        let key = key.key();
+        let value = ConfigStore::get_config_key(self, &key).or_not_found(key)?.value;
         primitives::parse_duration(&value).ok_or_else(|| DatabaseError::Error(format!("Failed to parse duration: {}", value)))
     }
 

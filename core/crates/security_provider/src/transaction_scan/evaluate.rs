@@ -4,6 +4,7 @@ use super::model::{ProviderCheck, ScanDetection, ScanFinding, ScanPlan, Transact
 use super::plan::website_host;
 
 const PROVIDER_SCAN_TYPES: [ScanType; 3] = [ScanType::Address, ScanType::AddressPoisoning, ScanType::Website];
+const SAFE_CACHE_SCAN_TYPES: [ScanType; 2] = [ScanType::Address, ScanType::Website];
 
 pub fn evaluate_transaction_scan(input: &TransactionScanInput, plan: ScanPlan, checks: Vec<ProviderCheck>) -> TransactionScanResult {
     let payload = &input.payload;
@@ -44,16 +45,26 @@ pub fn evaluate_transaction_scan(input: &TransactionScanInput, plan: ScanPlan, c
         None => true,
         Some(_) => {
             let completed = checks.iter().filter(|check| input.enforced.contains(&check.scan_type) && check.check.malicious.is_some()).count();
-            completed >= input.required_successes
+            let cached = plan.safe.iter().filter(|scan_type| input.enforced.contains(scan_type)).count();
+            completed + cached >= input.required_successes
         }
     };
     let source = if checks.is_empty() { ScanSource::Local } else { ScanSource::Remote };
+    let new_safe = SAFE_CACHE_SCAN_TYPES
+        .into_iter()
+        .filter(|scan_type| {
+            let mut type_checks = checks.iter().filter(|check| check.scan_type == *scan_type).peekable();
+            type_checks.peek().is_some() && type_checks.all(|check| check.check.malicious == Some(false))
+        })
+        .collect();
 
     TransactionScanResult {
         scan: scan_transaction(&detections, plan.is_memo_required, is_scan_complete),
         source,
         detections,
         new_verdicts,
+        safe: plan.safe,
+        new_safe,
         checks,
     }
 }
@@ -82,6 +93,8 @@ fn scan_transaction(detections: &[ScanDetection], is_memo_required: bool, is_sca
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use primitives::{AssetId, Chain, ScanProvider, ScanTransactionPayload, TransactionType};
 
     use super::*;
@@ -186,6 +199,48 @@ mod tests {
         assert!(result.scan.is_scan_complete);
         assert_eq!(result.scan.is_malicious, Some(false));
         assert_eq!(result.source, ScanSource::Local);
+    }
+
+    #[test]
+    fn test_new_safe_requires_every_check_clean() {
+        let input = input(TransactionType::SmartContractCall, Some("https://example.com"));
+
+        let result = evaluate(
+            &input,
+            vec![
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, Some(false)),
+                ProviderCheck::mock(ScanProvider::GoPlus, ScanType::Address, None),
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Website, Some(false)),
+            ],
+        );
+
+        assert_eq!(result.new_safe, vec![ScanType::Website]);
+    }
+
+    #[test]
+    fn test_malicious_type_is_not_safe() {
+        let input = input(TransactionType::SmartContractCall, None);
+
+        let result = evaluate(
+            &input,
+            vec![
+                ProviderCheck::mock(ScanProvider::HashDit, ScanType::Address, Some(false)),
+                ProviderCheck::mock(ScanProvider::GoPlus, ScanType::Address, Some(true)),
+            ],
+        );
+
+        assert!(result.new_safe.is_empty());
+    }
+
+    #[test]
+    fn test_cached_safe_counts_as_completed() {
+        let mut input = input(TransactionType::Transfer, None);
+        input.safe = HashSet::from([ScanType::Address]);
+
+        let result = evaluate(&input, vec![ProviderCheck::mock(ScanProvider::HashDit, ScanType::AddressPoisoning, None)]);
+
+        assert!(result.scan.is_scan_complete);
+        assert_eq!(result.safe, vec![ScanType::Address]);
     }
 
     #[test]

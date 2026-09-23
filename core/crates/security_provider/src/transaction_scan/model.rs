@@ -14,6 +14,7 @@ pub struct TransactionScanInput {
     pub addresses: Vec<ScanAddress>,
     pub assets: Vec<AssetBasic>,
     pub verdicts: Vec<ScanVerdict>,
+    pub safe: HashSet<ScanType>,
     pub required_successes: usize,
 }
 
@@ -59,6 +60,7 @@ pub struct ScanPlan {
     pub detections: Vec<ScanDetection>,
     pub is_memo_required: bool,
     pub targets: Option<ScanTargets>,
+    pub safe: Vec<ScanType>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -103,6 +105,8 @@ pub struct TransactionScanResult {
     pub source: ScanSource,
     pub detections: Vec<ScanDetection>,
     pub new_verdicts: Vec<ScanVerdict>,
+    pub safe: Vec<ScanType>,
+    pub new_safe: Vec<ScanType>,
     pub checks: Vec<ProviderCheck>,
 }
 
@@ -141,6 +145,7 @@ impl TransactionScanInput {
             addresses: vec![],
             assets: vec![],
             verdicts: vec![],
+            safe: HashSet::new(),
             required_successes: 1,
         }
     }
