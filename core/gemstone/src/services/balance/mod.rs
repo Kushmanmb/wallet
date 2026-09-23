@@ -14,7 +14,7 @@ use futures::lock::Mutex as AsyncMutex;
 use primitives::{Asset, AssetBalance, AssetId, Wallet, WalletId};
 use std::mem::{Discriminant, discriminant};
 
-pub use model::{GemAssetBalance, GemAssetBalanceRow, GemBalanceRecord, GemBalanceRequirement, GemBalanceResource, GemBalanceRow, GemBalanceRowValue, GemBalanceUpdate, GemBalanceUpdateType, GemBalanceValue};
+pub use model::{GemAssetBalance, GemAssetBalanceRow, GemBalanceRecord, GemBalanceRequirement, GemBalanceRow, GemBalanceRowValue, GemBalanceUpdate, GemBalanceUpdateType, GemBalanceValue};
 pub use store::GemBalanceStore;
 
 use crate::gateway::GemGateway;

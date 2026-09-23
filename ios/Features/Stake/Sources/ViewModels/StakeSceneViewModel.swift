@@ -3,6 +3,7 @@
 import Components
 import Formatters
 import Foundation
+import func Gemstone.balanceResourceRows
 import struct Gemstone.GemAssetBalance
 import struct Gemstone.GemClaimRewards
 import enum Gemstone.GemInfoTopic
@@ -112,12 +113,8 @@ public final class StakeSceneViewModel {
         }
     }
 
-    var energyField: ListItemField {
-        ListItemField(title: Resource.energy.title, value: balanceModel.energyText)
-    }
-
-    var bandwidthField: ListItemField {
-        ListItemField(title: Resource.bandwidth.title, value: balanceModel.bandwidthText)
+    var resourceRows: [GemListRow] {
+        balanceResourceRows(metadata: assetData.balance.metadata?.toGem())
     }
 
     var emptyContentModel: EmptyContentTypeViewModel {
@@ -207,10 +204,6 @@ extension StakeSceneViewModel {
 
     private var claimRewards: GemClaimRewards {
         service.claimRewards(chain: chain.chain.rawValue, delegations: delegations.map { $0.toGem() })
-    }
-
-    private var balanceModel: BalanceViewModel {
-        BalanceViewModel(asset: asset, balance: assetData.balance, formatter: formatter)
     }
 
     private func route(amount: AmountType) -> StakeRoute {

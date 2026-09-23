@@ -347,18 +347,6 @@ mod tests {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
-pub enum GemBalanceResource {
-    Energy,
-    Bandwidth,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
-pub struct GemBalanceResourceRow {
-    pub resource: GemBalanceResource,
-    pub text: String,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, uniffi::Record)]
 pub struct GemAssetConfiguration {
     pub is_enabled: Option<bool>,

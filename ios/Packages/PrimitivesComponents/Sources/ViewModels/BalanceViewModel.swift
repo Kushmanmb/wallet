@@ -3,8 +3,6 @@
 import BigInt
 import Formatters
 import Foundation
-import func Gemstone.balanceResourceRows
-import enum Gemstone.GemBalanceResource
 import GemstonePrimitives
 import Primitives
 import Style
@@ -56,20 +54,6 @@ public struct BalanceViewModel: Sendable {
 
     public func balanceTextWithSymbol(_ value: BigInt) -> String {
         formatter.string(value, decimals: asset.decimals.asInt, currency: asset.symbol)
-    }
-
-    public var energyText: String {
-        resourceText(.energy)
-    }
-
-    public var bandwidthText: String {
-        resourceText(.bandwidth)
-    }
-
-    private func resourceText(_ resource: GemBalanceResource) -> String {
-        balanceResourceRows(metadata: balance.metadata?.toGem())
-            .first { $0.resource == resource }?
-            .text ?? ""
     }
 
     var total: BigInt {

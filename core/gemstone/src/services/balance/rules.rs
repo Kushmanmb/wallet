@@ -4,8 +4,9 @@ use crate::services::collections::{missing, unique};
 
 use primitives::{Account, Asset, AssetBalance, AssetFiatValue, AssetId, BalanceCalculator, BalanceMetadata, Chain, TotalFiatValue};
 
-use super::model::{GemAssetBalance, GemAssetConfiguration, GemBalanceRecord, GemBalanceResource, GemBalanceResourceRow, GemBalanceUpdate, GemBalanceUpdateType};
+use super::model::{GemAssetBalance, GemAssetConfiguration, GemBalanceRecord, GemBalanceUpdate, GemBalanceUpdateType};
 use crate::formatted_number::{GemFormattedNumber, GemValueTone};
+use crate::models::list::{GemListRow, GemListRowTitle};
 use crate::percentage::GemPercentageStyle;
 use crate::precision::GemCurrencyStyle;
 use crate::precision::GemValueStyle;
@@ -31,15 +32,15 @@ pub fn balance_amount_styled(value: &BigUint, asset: &Asset, style: GemValueStyl
 }
 
 #[uniffi::export]
-pub fn balance_resource_rows(metadata: Option<BalanceMetadata>) -> Vec<GemBalanceResourceRow> {
+pub fn balance_resource_rows(metadata: Option<BalanceMetadata>) -> Vec<GemListRow> {
     let Some(metadata) = metadata else { return Vec::new() };
-    let row = |resource, available: u32, total: u32| GemBalanceResourceRow {
-        resource,
-        text: format!("{available} / {total}"),
+    let row = |title, available: u32, total: u32| GemListRow::Text {
+        title,
+        value: format!("{available} / {total}"),
     };
     vec![
-        row(GemBalanceResource::Energy, metadata.energy_available, metadata.energy_total),
-        row(GemBalanceResource::Bandwidth, metadata.bandwidth_available, metadata.bandwidth_total),
+        row(GemListRowTitle::Energy, metadata.energy_available, metadata.energy_total),
+        row(GemListRowTitle::Bandwidth, metadata.bandwidth_available, metadata.bandwidth_total),
     ]
 }
 
@@ -265,13 +266,13 @@ mod tests {
         assert_eq!(
             rows,
             vec![
-                GemBalanceResourceRow {
-                    resource: GemBalanceResource::Energy,
-                    text: "100 / 250".to_string()
+                GemListRow::Text {
+                    title: GemListRowTitle::Energy,
+                    value: "100 / 250".to_string()
                 },
-                GemBalanceResourceRow {
-                    resource: GemBalanceResource::Bandwidth,
-                    text: "5 / 600".to_string()
+                GemListRow::Text {
+                    title: GemListRowTitle::Bandwidth,
+                    value: "5 / 600".to_string()
                 },
             ]
         );

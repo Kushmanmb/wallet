@@ -30,7 +30,6 @@ import com.gemwallet.android.ui.components.list_head.HeaderIcon
 import com.gemwallet.android.ui.components.list_item.DelegationItem
 import com.gemwallet.android.ui.components.list_item.GemListRowView
 import com.gemwallet.android.ui.components.list_item.SubheaderItem
-import com.gemwallet.android.ui.components.list_item.energyItem
 import com.gemwallet.android.ui.components.list_item.property.itemsPositioned
 import com.gemwallet.android.ui.components.screen.PullToRefreshBox
 import com.gemwallet.android.ui.components.screen.Scene
@@ -94,7 +93,9 @@ internal fun StakeScene(
                             onRewards = { onAction(StakeSceneAction.ClaimRewards) },
                         )
 
-                        is StakeSectionUIModel.Resources -> energyItem(assetInfo.balance.metadata)
+                        is StakeSectionUIModel.Resources -> itemsIndexed(section.rows) { index, row ->
+                            GemListRowView(row = row, listPosition = ListPosition.getPosition(index, section.rows.size))
+                        }
 
                         is StakeSectionUIModel.Delegations -> itemsIndexed(section.rows) { index, item ->
                             DelegationItem(

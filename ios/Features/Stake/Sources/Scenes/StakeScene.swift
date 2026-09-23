@@ -57,8 +57,9 @@ extension StakeScene {
                 actionLink(item)
             }
         case .resources:
-            ListItemView(field: model.energyField)
-            ListItemView(field: model.bandwidthField)
+            ForEach(model.resourceRows, id: \.self) { row in
+                GemListRowView(row: row)
+            }
         case .delegations:
             delegationsPlaceholder
         }

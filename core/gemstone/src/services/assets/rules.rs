@@ -21,7 +21,7 @@ use crate::percentage::GemPercentageStyle;
 use crate::perpetual::GemPerpetual;
 use crate::precision::GemCurrencyStyle;
 use crate::services::balance::rules::{balance_amount, balance_resource_rows};
-use crate::services::balance::{GemAssetBalance, GemAssetBalanceRow, GemBalanceResource, GemBalanceRow, GemBalanceRowValue};
+use crate::services::balance::{GemAssetBalance, GemAssetBalanceRow, GemBalanceRow, GemBalanceRowValue};
 use crate::services::nft::rules::nft_chains;
 use crate::services::price::rules::has_price;
 use crate::services::price_alert::rules::{displayed_price_alert_ids, price_alert_toggle};
@@ -594,18 +594,7 @@ pub fn details_sections(input: DetailsSectionsInput) -> Vec<GemAssetDetailSectio
         section(
             GemListSectionTitle::Resources,
             match shows_resources {
-                true => balance_resource_rows(fee_balance_metadata)
-                    .into_iter()
-                    .map(|resource| {
-                        row(GemListRow::Text {
-                            title: match resource.resource {
-                                GemBalanceResource::Energy => GemListRowTitle::Energy,
-                                GemBalanceResource::Bandwidth => GemListRowTitle::Bandwidth,
-                            },
-                            value: resource.text,
-                        })
-                    })
-                    .collect(),
+                true => balance_resource_rows(fee_balance_metadata).into_iter().map(row).collect(),
                 false => vec![],
             },
         ),

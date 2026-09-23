@@ -30,7 +30,6 @@ import uniffi.gemstone.FeeOption
 import uniffi.gemstone.FeeUnitType
 import uniffi.gemstone.GemApprovalValue
 import uniffi.gemstone.GemAssetMenuAction
-import uniffi.gemstone.GemBalanceResource
 import uniffi.gemstone.GemBalanceRowValue
 import uniffi.gemstone.GemBannerDescription
 import uniffi.gemstone.GemBannerTitle
@@ -474,11 +473,6 @@ fun GemRecipientSectionKind.stringRes(): Int = when (this) {
     GemRecipientSectionKind.CONTACTS -> R.string.contacts_title
     GemRecipientSectionKind.WALLETS -> R.string.transfer_recipient_my_wallets
     GemRecipientSectionKind.VIEW_WALLETS -> R.string.transfer_recipient_view_wallets
-}
-
-fun GemBalanceResource.titleRes(): Int = when (this) {
-    GemBalanceResource.ENERGY -> R.string.stake_resource_energy
-    GemBalanceResource.BANDWIDTH -> R.string.stake_resource_bandwidth
 }
 
 fun GemTransactionRowSubtitle.text(context: Context): String? = when (this) {
