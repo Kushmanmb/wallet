@@ -88,7 +88,7 @@ final class FiatSceneViewModelTests {
     }
 
     @Test
-    func showFiatTypePickerWhenSellEnabledWithZeroBalance() {
+    func theTypePickerShowsWhenSellIsEnabledWithZeroBalance() {
         let model = FiatSceneViewModel.mock()
 
         model.assetQuery.value = .mock(
@@ -96,7 +96,7 @@ final class FiatSceneViewModelTests {
             metadata: .mock(isSellEnabled: true),
         )
 
-        #expect(model.showFiatTypePicker)
+        #expect(model.viewState.showsTypePicker)
     }
 
     @Test
@@ -107,7 +107,7 @@ final class FiatSceneViewModelTests {
         model.assetQuery.value = unsupportedAssetData
         model.onAssetDataChange(previousAssetData, unsupportedAssetData)
 
-        #expect(!model.showFiatTypePicker)
+        #expect(!model.viewState.showsTypePicker)
         #expect(model.type == .buy)
         #expect(model.amount == "40")
         #expect(model.loadTrigger?.request == GemFiatQuoteRequest(quoteType: .buy, amount: 40))

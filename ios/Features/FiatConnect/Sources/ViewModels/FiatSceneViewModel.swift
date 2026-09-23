@@ -78,7 +78,7 @@ public final class FiatSceneViewModel {
     }
 
     var viewState: GemFiatViewState {
-        session.viewState(assetPrice: priceUsdQuery.value, isUrlLoading: urlState.isLoading)
+        session.viewState(assetPrice: priceUsdQuery.value, isUrlLoading: urlState.isLoading, isSellEnabled: assetData.metadata.isSellEnabled)
     }
 
     var amount: String {
@@ -178,10 +178,6 @@ public final class FiatSceneViewModel {
 
     var suggestedAmounts: [GemFiatSuggestedAmount] {
         service.suggestedAmounts()
-    }
-
-    var showFiatTypePicker: Bool {
-        assetData.metadata.isSellEnabled
     }
 
     var assetBalance: String? {

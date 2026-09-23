@@ -22,7 +22,7 @@ public struct FiatConnectNavigationView: View {
         .bindQuery(model.priceUsdQuery)
         .navigationTitle(model.title)
         .toolbar {
-            if model.showFiatTypePicker {
+            if model.viewState.showsTypePicker {
                 FiatTypeToolbar(selectedType: $model.type)
             }
             ToolbarItem(placement: .topBarTrailing) {

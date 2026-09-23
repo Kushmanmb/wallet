@@ -73,6 +73,7 @@ pub struct GemFiatViewState {
     pub amount_check: GemFiatAmountCheck,
     pub button_action: GemFiatButtonAction,
     pub button_state: GemFiatButtonState,
+    pub shows_type_picker: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
@@ -128,7 +129,7 @@ impl GemFiatViewState {
 
 #[uniffi::export]
 impl GemFiatSession {
-    pub fn view_state(&self, asset_price: Option<f64>, is_url_loading: bool) -> GemFiatViewState {
+    pub fn view_state(&self, asset_price: Option<f64>, is_url_loading: bool, is_sell_enabled: bool) -> GemFiatViewState {
         let operation = self.current();
         let selected_quote_row = self.selected_quote_row(asset_price);
         GemFiatViewState {
@@ -142,6 +143,7 @@ impl GemFiatSession {
             amount_check: self.amount_check(),
             button_action: self.button_action(),
             button_state: self.button_state(is_url_loading),
+            shows_type_picker: is_sell_enabled,
         }
     }
 
@@ -566,7 +568,7 @@ mod tests {
                 ])
             });
 
-        let state = session.view_state(Some(50.0), false);
+        let state = session.view_state(Some(50.0), false, true);
         assert_eq!(state.quote_type, FiatQuoteType::Buy);
         assert_eq!(state.amount, "100");
         assert_eq!(state.phase, GemFiatQuotePhase::Ready);
@@ -581,7 +583,9 @@ mod tests {
         assert!(state.can_select_provider);
         assert_eq!(state.button_action, GemFiatButtonAction::Continue);
         assert_eq!(state.button_state, GemFiatButtonState::Enabled);
-        assert_eq!(session.view_state(None, true).button_state, GemFiatButtonState::Loading);
+        assert_eq!(session.view_state(None, true, false).button_state, GemFiatButtonState::Loading);
+        assert!(!session.view_state(None, false, false).shows_type_picker);
+        assert!(session.view_state(None, false, true).shows_type_picker);
     }
 
     #[test]
@@ -597,6 +601,7 @@ mod tests {
             amount_check: GemFiatAmountCheck::Valid,
             button_action: GemFiatButtonAction::Continue,
             button_state: GemFiatButtonState::Disabled,
+            shows_type_picker: false,
         };
 
         assert_eq!(state(GemFiatQuotePhase::NoInput).quotes_message(), Some(GemFiatQuotesMessage::EnterAmount));

@@ -293,12 +293,12 @@ class FiatViewModelTest {
         try {
             advanceTimeBy(DebounceSettleMs)
             runCurrent()
-            assertFalse(viewModel.showFiatTypePicker.value)
+            assertFalse(viewModel.showsTypePicker.value)
 
             assetDataFlow.value = mockAssetData(balance = mockAssetBalance(asset, available = BigInteger("0")), price = mockAssetPriceInfo(price = 100.0), metadata = mockAssetMetaData(isSellEnabled = true))
             advanceTimeBy(DebounceSettleMs)
             runCurrent()
-            assertTrue(viewModel.showFiatTypePicker.value)
+            assertTrue(viewModel.showsTypePicker.value)
         } finally {
             viewModel.viewModelScope.cancel()
         }
@@ -367,7 +367,7 @@ class FiatViewModelTest {
             assetDataFlow.value = mockAssetData(balance = mockAssetBalance(asset, available = OneBitcoin), price = mockAssetPriceInfo(price = 100.0), metadata = mockAssetMetaData(isSellEnabled = false))
             advanceTimeBy(DebounceSettleMs)
             runCurrent()
-            assertFalse(viewModel.showFiatTypePicker.value)
+            assertFalse(viewModel.showsTypePicker.value)
             assertEquals(FiatQuoteType.Buy, viewModel.type.value)
             assertEquals("25", viewModel.amount.value)
             coVerify(exactly = 1) {

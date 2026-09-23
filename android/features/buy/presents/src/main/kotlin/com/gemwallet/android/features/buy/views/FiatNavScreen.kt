@@ -54,7 +54,7 @@ fun FiatNavScreen(cancelAction: CancelAction, onFiatTransactions: () -> Unit, vi
     val selectedProvider by viewModel.selectedProvider.collectAsStateWithLifecycle()
     val providerListItem by viewModel.providerListItem.collectAsStateWithLifecycle()
     val rateRow by viewModel.rateRow.collectAsStateWithLifecycle()
-    val showFiatTypePicker by viewModel.showFiatTypePicker.collectAsStateWithLifecycle()
+    val showsTypePicker by viewModel.showsTypePicker.collectAsStateWithLifecycle()
 
     ObserveStartedState(viewModel::setRefreshEnabled)
 
@@ -83,7 +83,7 @@ fun FiatNavScreen(cancelAction: CancelAction, onFiatTransactions: () -> Unit, vi
             FiatTitle(
                 asset = currentAsset,
                 type = type,
-                showFiatTypePicker = showFiatTypePicker,
+                showsTypePicker = showsTypePicker,
                 onTypeClick = viewModel::setType,
             )
         },
@@ -103,8 +103,8 @@ fun FiatNavScreen(cancelAction: CancelAction, onFiatTransactions: () -> Unit, vi
 }
 
 @Composable
-private fun FiatTitle(asset: Asset, type: FiatQuoteType, showFiatTypePicker: Boolean, onTypeClick: (FiatQuoteType) -> Unit) {
-    if (showFiatTypePicker) {
+private fun FiatTitle(asset: Asset, type: FiatQuoteType, showsTypePicker: Boolean, onTypeClick: (FiatQuoteType) -> Unit) {
+    if (showsTypePicker) {
         TabsBar(FiatQuoteType.entries, type, onTypeClick) { item ->
             Text(stringResource(item.titleRes(), ""))
         }

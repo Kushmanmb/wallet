@@ -92,9 +92,9 @@ class FiatViewModel @Inject constructor(
     private val assetPriceUsd: StateFlow<Double?> = getAssetPriceUsd(assetId)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val viewState = combine(session, isUrlLoading, assetPriceUsd) { session, isUrlLoading, priceUsd ->
-        session.viewState(priceUsd, isUrlLoading)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, session.value.viewState(null, false))
+    private val viewState = combine(session, isUrlLoading, assetPriceUsd, assetData) { session, isUrlLoading, priceUsd, assetData ->
+        session.viewState(priceUsd, isUrlLoading, assetData?.metadata?.isSellEnabled == true)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, session.value.viewState(null, false, false))
 
     val amount: StateFlow<String> = viewState.map { it.amount }
         .stateIn(viewModelScope, SharingStarted.Eagerly, viewState.value.amount)
@@ -110,11 +110,8 @@ class FiatViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val showFiatTypePicker = assetData
-        .filterNotNull()
-        .map { it.metadata.isSellEnabled }
-        .distinctUntilChanged()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val showsTypePicker: StateFlow<Boolean> = viewState.map { it.showsTypePicker }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, viewState.value.showsTypePicker)
 
     val suggestedAmounts = type.mapLatest {
         service.suggestedAmounts().map {
