@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.gemwallet.android.ext.toIdentifier
-import com.gemwallet.android.features.asset_select.viewmodels.models.RecentsEmptyState
 import com.gemwallet.android.features.asset_select.viewmodels.models.RecentsSheetUIModel
 import com.gemwallet.android.ui.R
 import com.gemwallet.android.ui.components.SearchBar
@@ -102,10 +101,6 @@ fun RecentsBottomSheet(isVisible: Boolean, uiModel: RecentsSheetUIModel, query: 
 }
 
 @Composable
-private fun RecentsEmptyStateView(state: RecentsEmptyState) {
-    val type = when (state) {
-        RecentsEmptyState.NoRecents -> EmptyContentType(GemEmptyStateKind.RECENTS)
-        RecentsEmptyState.NoSearchResults -> EmptyContentType(GemEmptyStateKind.SEARCH_ASSETS)
-    }
-    EmptyContentView(type = type, modifier = Modifier.fillMaxSize())
+private fun RecentsEmptyStateView(kind: GemEmptyStateKind) {
+    EmptyContentView(type = EmptyContentType(kind), modifier = Modifier.fillMaxSize())
 }

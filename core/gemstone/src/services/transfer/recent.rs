@@ -3,6 +3,7 @@ use std::sync::Arc;
 use primitives::{Asset, AssetId, RecentActivityType, WalletId};
 
 use crate::services::assets::GemAssetAction;
+use crate::services::empty_state::GemEmptyStateKind;
 use crate::services::error::GemServiceError;
 use crate::services::search::rules::matching_assets;
 use crate::services::transfer::rules::TransferInput;
@@ -102,9 +103,10 @@ mod tests {
         assert!(!searched.sections.shows_clear, "a search hides the clear action");
 
         let missed = service.view_state(assets, "  nothing  ".to_string());
-        assert!(missed.sections.shows_no_results && !missed.sections.shows_empty);
+        assert_eq!(missed.sections.empty, Some(GemEmptyStateKind::SearchAssets));
+        assert_eq!(listed.sections.empty, None);
 
-        assert!(service.view_state(vec![], String::new()).sections.shows_empty);
+        assert_eq!(service.view_state(vec![], String::new()).sections.empty, Some(GemEmptyStateKind::Recents));
     }
 
     #[test]
@@ -145,19 +147,28 @@ pub struct GemRecentsViewState {
 pub struct GemRecentsSections {
     pub shows_items: bool,
     pub shows_clear: bool,
-    pub shows_no_results: bool,
-    pub shows_empty: bool,
+    pub empty: Option<GemEmptyStateKind>,
+}
+
+const RECENT_ASSETS_LIMIT: u32 = 10;
+
+#[uniffi::export]
+pub fn recent_assets_limit() -> u32 {
+    RECENT_ASSETS_LIMIT
 }
 
 #[uniffi::export]
 impl GemRecentsCounts {
     pub fn sections(&self, is_searching: bool) -> GemRecentsSections {
-        let no_results = self.recents > 0 && is_searching && self.matching == 0;
+        let empty = match (self.matching > 0, self.recents > 0 && is_searching) {
+            (true, _) => None,
+            (false, true) => Some(GemEmptyStateKind::SearchAssets),
+            (false, false) => Some(GemEmptyStateKind::Recents),
+        };
         GemRecentsSections {
             shows_items: self.matching > 0,
             shows_clear: self.recents > 0 && !is_searching,
-            shows_no_results: no_results,
-            shows_empty: self.recents == 0,
+            empty,
         }
     }
 }
@@ -169,17 +180,15 @@ mod section_tests {
     #[test]
     fn test_a_search_that_matches_nothing_is_not_the_same_as_having_no_recents() {
         let searched = GemRecentsCounts { recents: 5, matching: 0 }.sections(true);
-        assert!(searched.shows_no_results);
-        assert!(!searched.shows_empty);
+        assert_eq!(searched.empty, Some(GemEmptyStateKind::SearchAssets));
         assert!(!searched.shows_clear);
 
         let none = GemRecentsCounts { recents: 0, matching: 0 }.sections(false);
-        assert!(none.shows_empty);
-        assert!(!none.shows_no_results);
+        assert_eq!(none.empty, Some(GemEmptyStateKind::Recents));
         assert!(!none.shows_clear);
 
         let listed = GemRecentsCounts { recents: 5, matching: 5 }.sections(false);
         assert!(listed.shows_items);
-        assert!(!listed.shows_empty);
+        assert_eq!(listed.empty, None);
     }
 }

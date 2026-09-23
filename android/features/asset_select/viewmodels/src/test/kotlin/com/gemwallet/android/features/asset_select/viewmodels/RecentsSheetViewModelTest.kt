@@ -2,7 +2,6 @@ package com.gemwallet.android.features.asset_select.viewmodels
 
 import com.gemwallet.android.data.services.gemstone.assets.RecentAssetsService
 import com.gemwallet.android.ext.toGem
-import com.gemwallet.android.features.asset_select.viewmodels.models.RecentsEmptyState
 import com.gemwallet.android.features.asset_select.viewmodels.models.RecentsSheetUIModel
 import com.gemwallet.android.model.RecentAsset
 import com.gemwallet.android.testkit.mockAssetEthereum
@@ -32,6 +31,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import uniffi.gemstone.GemAssetFilter
+import uniffi.gemstone.GemEmptyStateKind
 import uniffi.gemstone.GemRecentActivityService
 import uniffi.gemstone.GemRecentsCounts
 import uniffi.gemstone.GemRecentsViewState
@@ -126,7 +126,7 @@ class RecentsSheetViewModelTest {
         )
         assertTrue(searchNoResults.isEmpty)
         assertFalse(searchNoResults.showClear)
-        assertEquals(RecentsEmptyState.NoSearchResults, searchNoResults.emptyState)
+        assertEquals(GemEmptyStateKind.SEARCH_ASSETS, searchNoResults.emptyState)
 
         val noRecents = RecentsSheetUIModel(
             items = persistentListOf(),
@@ -134,6 +134,6 @@ class RecentsSheetViewModelTest {
         )
         assertTrue(noRecents.isEmpty)
         assertFalse(noRecents.showClear)
-        assertEquals(RecentsEmptyState.NoRecents, noRecents.emptyState)
+        assertEquals(GemEmptyStateKind.RECENTS, noRecents.emptyState)
     }
 }

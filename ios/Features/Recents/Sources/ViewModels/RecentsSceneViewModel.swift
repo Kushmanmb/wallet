@@ -59,7 +59,7 @@ public final class RecentsSceneViewModel {
     }
 
     var showEmpty: Bool {
-        recentsSections.showsEmpty || recentsSections.showsNoResults
+        recentsSections.empty != nil
     }
 
     var showClear: Bool {
@@ -79,7 +79,7 @@ public final class RecentsSceneViewModel {
     }
 
     var emptyModel: any EmptyContentViewable {
-        EmptyContentTypeViewModel(type: EmptyContentType(recentsSections.showsNoResults ? .searchAssets : .recents))
+        EmptyContentTypeViewModel(type: EmptyContentType(recentsSections.empty ?? .recents))
     }
 
     private var filteredAssets: [RecentAsset] {
