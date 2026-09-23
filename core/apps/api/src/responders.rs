@@ -1,8 +1,8 @@
 use cacher::CacheError;
 use fiat::error::FiatQuoteError;
 use gem_client::ClientError;
-use gem_rewards::{RewardsError, RewardsRedemptionError, UsernameError};
 use primitives::{RequestError, ResponseResult};
+use rewards::{RewardsError, RewardsRedemptionError, UsernameError};
 use rocket::response::{Responder, Response};
 use rocket::serde::json::Json;
 use rocket::{Request, http::Status};
@@ -176,8 +176,8 @@ mod tests {
     use super::ApiError;
     use cacher::CacheError;
     use gem_client::ClientError;
-    use gem_rewards::{RewardsError, RewardsRedemptionError};
     use primitives::RequestError;
+    use rewards::{RewardsError, RewardsRedemptionError};
     use storage::DatabaseError;
 
     #[test]

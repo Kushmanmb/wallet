@@ -1,9 +1,9 @@
 use std::error::Error;
 
+use chain_providers::ProviderFactory;
 use gem_tracing::error_with_fields;
 use primitives::{Chain, asset_score::AssetRank};
 use settings::{Settings, service_user_agent};
-use settings_chain::ProviderFactory;
 use storage::models::NewPerpetualRow;
 use storage::{AssetUpdate, AssetsRepository, Database, PerpetualsRepository};
 

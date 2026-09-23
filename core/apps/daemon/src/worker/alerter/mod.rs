@@ -5,13 +5,13 @@ use std::error::Error;
 use std::sync::Arc;
 
 use cacher::CacherClient;
+use chain_providers::ChainProviders;
 use config_keys::ConfigKey;
 use job_runner::{JobHandle, ShutdownReceiver};
 use price_alerts_sender::PriceAlertSender;
 use pricer::PriceAlertClient;
 use primitives::Chain;
 use settings::service_user_agent;
-use settings_chain::ChainProviders;
 use staking_rewards_notifier::{StakeRewardsConfig, StakingRewardsNotifier};
 use storage::ConfigCacher;
 use streamer::{StreamProducer, StreamProducerConfig};

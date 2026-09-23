@@ -4,8 +4,9 @@ mod provider_config;
 
 use std::{collections::HashMap, sync::Arc};
 
+use alchemy::{AlchemyApi, alchemy_url};
 use chain_traits::ChainTraits;
-use gem_alchemy::{AlchemyApi, alchemy_url};
+use everstake::{EverstakeClient, EverstakeStakingClient};
 use gem_algorand::rpc::{AlgorandClient, AlgorandIndexer, AlgorandProvider};
 use gem_aptos::rpc::AptosClient;
 use gem_bitcoin::rpc::client::BitcoinClient;
@@ -13,7 +14,6 @@ use gem_bsc::BscStakingClient;
 use gem_cardano::rpc::CardanoClient;
 use gem_client::{ReqwestClient, retry_policy};
 use gem_cosmos::rpc::client::CosmosClient;
-use gem_everstake::{EverstakeClient, EverstakeStakingClient};
 use gem_evm::rpc::{EVMAssetBalanceProvider, EVMIndexer, EVMTransactionsByAddressProvider, EthereumClient, EthereumProvider};
 use gem_hypercore::rpc::client::HyperCoreClient;
 use gem_jsonrpc::client::JsonRpcClient;

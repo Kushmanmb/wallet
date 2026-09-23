@@ -25,8 +25,8 @@ use gem_client::ReqwestClient;
 use lists::{CoinGeckoListProvider, ListsClient};
 use pricer::PriceClient;
 use primitives::{AssetId, Chain, NFTChain, PriceId, PriceProvider, TransactionIdRequest};
-use security_provider::providers::goplus::GoPlusProvider;
-use security_provider::{ScanProviderConfig, ScanProviderFactory, TokenScanProviders};
+use security::providers::goplus::GoPlusProvider;
+use security::{ScanProviderConfig, ScanProviderFactory, TokenScanProviders};
 use settings::Settings;
 use storage::{ConfigCacher, Database};
 use streamer::{

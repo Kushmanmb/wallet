@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use async_trait::async_trait;
-use settings_chain::ChainProviders;
+use chain_providers::ChainProviders;
 use streamer::{FetchBlocksPayload, StreamProducer, StreamProducerQueue, TransactionsPayload, consumer::MessageConsumer};
 
 pub struct FetchBlocksConsumer {

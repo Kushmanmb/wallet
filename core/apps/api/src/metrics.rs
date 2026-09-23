@@ -9,7 +9,7 @@ use prometheus_client::metrics::family::Family;
 use prometheus_client::metrics::histogram::{Histogram, exponential_buckets};
 use rocket::response::content::RawText;
 use rocket::{State, get};
-use security_provider::TransactionScanProviders;
+use security::TransactionScanProviders;
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 struct ScanLabels {

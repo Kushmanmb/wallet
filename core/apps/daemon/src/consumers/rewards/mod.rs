@@ -6,15 +6,15 @@ use std::error::Error;
 use std::str::FromStr;
 use std::sync::Arc;
 
+use chain_providers::ProviderFactory;
 use config_keys::ConfigKey;
 use gem_client::ReqwestClient;
 use gem_evm::rpc::{EthereumClient, EthereumProvider};
 use gem_jsonrpc::JsonRpcClient;
-use gem_rewards::{EvmClientProvider, TransferRedemptionService, WalletConfig};
 use primitives::rewards::RedemptionStatus;
 use primitives::{ChainType, EVMChain};
+use rewards::{EvmClientProvider, TransferRedemptionService, WalletConfig};
 use settings::Settings;
-use settings_chain::ProviderFactory;
 use storage::{ConfigCacher, Database};
 use streamer::{ConsumerStatusReporter, QueueName, RewardsNotificationPayload, RewardsRedemptionPayload, ShutdownReceiver, run_consumer};
 

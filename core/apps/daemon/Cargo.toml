@@ -17,7 +17,7 @@ num-bigint = { workspace = true }
 
 prometheus-client = { workspace = true }
 metrics = { path = "../../crates/metrics" }
-gem_tracing = { path = "../../crates/tracing" }
+gem_tracing = { path = "../../crates/gem_tracing" }
 settings = { path = "../../crates/settings" }
 storage = { path = "../../crates/storage" }
 api_connector = { path = "../../crates/api_connector" }
@@ -36,15 +36,15 @@ cacher = { path = "../../crates/cacher" }
 streamer = { path = "../../crates/streamer" }
 localizer = { path = "../../crates/localizer" }
 support = { path = "../../crates/support" }
-settings_chain = { path = "../../crates/settings_chain" }
+chain_providers = { path = "../../crates/chain_providers" }
 chain_traits = { path = "../../crates/chain_traits" }
 number_formatter = { path = "../../crates/number_formatter" }
-gem_rewards = { path = "../../crates/gem_rewards" }
+rewards = { path = "../../crates/rewards" }
 gem_client = { path = "../../crates/gem_client", features = ["reqwest"] }
 gem_evm = { path = "../../crates/gem_evm", features = ["rpc", "reqwest"] }
 gem_jsonrpc = { path = "../../crates/gem_jsonrpc", features = ["client", "reqwest"] }
 swapper = { path = "../../crates/swapper", features = ["reqwest_provider"] }
-security_provider = { path = "../../crates/security_provider" }
+security = { path = "../../crates/security" }
 
 [dev-dependencies]
 gem_solana = { path = "../../crates/gem_solana", features = ["rpc"] }

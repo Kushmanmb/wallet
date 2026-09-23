@@ -1,5 +1,5 @@
 [package]
-name = "gem_rewards"
+name = "rewards"
 version = { workspace = true }
 edition = "2021"
 

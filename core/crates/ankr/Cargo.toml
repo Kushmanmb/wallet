@@ -1,5 +1,5 @@
 [package]
-name = "gem_blockscout"
+name = "ankr"
 version = { workspace = true }
 edition = { workspace = true }
 
@@ -8,11 +8,13 @@ testkit = []
 
 [dependencies]
 gem_client = { path = "../gem_client" }
+gem_jsonrpc = { path = "../gem_jsonrpc", features = ["client"] }
 serde_serializers = { path = "../serde_serializers", features = ["bigint"] }
 
 num-bigint = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 
 [dev-dependencies]
-gem_client = { path = "../gem_client", features = ["testkit"] }
+gem_jsonrpc = { path = "../gem_jsonrpc", features = ["testkit"] }
 tokio = { workspace = true }

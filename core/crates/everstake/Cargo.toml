@@ -1,5 +1,5 @@
 [package]
-name = "gem_everstake"
+name = "everstake"
 version = { workspace = true }
 edition = { workspace = true }
 

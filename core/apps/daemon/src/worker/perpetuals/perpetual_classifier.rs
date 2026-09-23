@@ -3,10 +3,10 @@ use std::error::Error;
 use std::sync::Arc;
 
 use cacher::{CacheKey, CacherClient};
+use chain_providers::ChainProviders;
 use futures::{StreamExt, stream};
 use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::{Chain, PerpetualPosition};
-use settings_chain::ChainProviders;
 
 #[derive(Clone, Copy)]
 pub struct PerpetualPositionClassifierConfig {

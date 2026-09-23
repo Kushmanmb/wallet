@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
 use chain_traits::ChainTraits;
+use everstake::EverstakeStakingClient;
 use gem_algorand::rpc::{AlgorandClient, AlgorandProvider};
 use gem_aptos::rpc::client::AptosClient;
 use gem_bitcoin::rpc::client::BitcoinClient;
 use gem_bsc::BscStakingClient;
 use gem_cardano::rpc::client::CardanoClient;
 use gem_cosmos::rpc::client::CosmosClient;
-use gem_everstake::EverstakeStakingClient;
 use gem_evm::rpc::{EthereumClient, EthereumProvider};
 use gem_hypercore::rpc::client::HyperCoreClient;
 use gem_jsonrpc::grpc::AlienGrpcTransport;

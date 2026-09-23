@@ -1,6 +1,6 @@
 use api_connector::StaticAssetsClient;
+use chain_providers::ChainProviders;
 use primitives::{Chain, StakeValidator};
-use settings_chain::ChainProviders;
 use std::error::Error;
 use std::sync::Arc;
 use storage::{Database, ScanAddressesRepository};

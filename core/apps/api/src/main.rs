@@ -35,6 +35,7 @@ use ::nft::{NFTClient, NFTProviderClient, NFTProviderConfig};
 use api_connector::PusherClient;
 use assets::{AssetsClient, SearchClient};
 use cacher::{AccessTokenCacherClient, CacherClient};
+use chain_providers::{ChainProviders, ProviderFactory};
 use config::ConfigClient;
 use config_keys::ConfigKey;
 use devices::DevicesClient;
@@ -42,15 +43,14 @@ use devices::{
     AddressNamesClient, FiatQuotesClient, NotificationsClient, PortfolioClient, RewardsClient, RewardsRedemptionClient, ScanClient, TransactionScanConfig, TransactionsClient, WalletConfigurationClient, WalletsClient, scan_providers,
 };
 use gem_auth::AuthClient;
-use gem_rewards::{AbuseIPDBClient, IpApiClient, IpCheckProvider, IpSecurityClient};
 use model::APIService;
 use name_resolver::{NameClient, NameConfig, NameProviderFactory};
 use pricer::{ChartClient, MarketsClient, PriceAlertClient, PriceClient};
 use primitives::{FiatProviderName, PriceConfig};
+use rewards::{AbuseIPDBClient, IpApiClient, IpCheckProvider, IpSecurityClient};
 use rocket::{Build, Rocket, catchers, routes};
 use search_index::{SearchIndexClient, SearchIndexConfig};
 use settings::Settings;
-use settings_chain::{ChainProviders, ProviderFactory};
 use storage::Database;
 use streamer::{StreamProducer, StreamProducerConfig};
 use swap::SwapClient;

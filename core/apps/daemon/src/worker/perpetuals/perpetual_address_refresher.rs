@@ -3,9 +3,9 @@ use std::error::Error;
 use std::sync::Arc;
 
 use cacher::{CacheKey, CacherClient};
+use chain_providers::ChainProviders;
 use gem_tracing::info_with_fields;
 use primitives::Chain;
-use settings_chain::ChainProviders;
 use storage::{Database, WalletsRepository};
 
 pub struct PerpetualAddressRefresher {

@@ -1,4 +1,4 @@
-use gem_alchemy::nft::{Attribute, ContractMetadata, NftMetadata, OwnedNft};
+use alchemy::nft::{Attribute, ContractMetadata, NftMetadata, OwnedNft};
 use gem_evm::ethereum_address_checksum;
 use primitives::{Chain, NFTAsset, NFTAssetId, NFTAttribute, NFTAttributeType, NFTCollection, NFTCollectionId, NFTImages, NFTResource, VerificationStatus};
 
@@ -88,7 +88,7 @@ fn map_attribute(attribute: &Attribute) -> Option<NFTAttribute> {
 
 #[cfg(test)]
 mod tests {
-    use gem_alchemy::nft::{ContractMetadata, NftMetadata, OwnedNftsResponse};
+    use alchemy::nft::{ContractMetadata, NftMetadata, OwnedNftsResponse};
 
     use super::*;
     use crate::testkit::TEST_BSC_COLLECTION;

@@ -1,6 +1,6 @@
+use chain_providers::ChainProviders;
 use clap::Args;
 use primitives::Chain;
-use settings_chain::ChainProviders;
 use std::error::Error;
 
 #[derive(Args)]

@@ -1,7 +1,7 @@
 use std::error::Error;
 
+use chain_providers::{ChainProviders, TransactionFeeEstimates, TransactionIdRequest, TransactionsRequest};
 use primitives::{Asset, AssetBalance, Chain, ChainAddress, Transaction, TransactionStateRequest, TransactionUpdate};
-use settings_chain::{ChainProviders, TransactionFeeEstimates, TransactionIdRequest, TransactionsRequest};
 
 pub struct ChainClient {
     providers: ChainProviders,

@@ -168,12 +168,12 @@ Security checks cover malicious addresses, address poisoning, websites, and toke
 
 | Provider | Address security | Address poisoning | Website security | Token security |
 | --- | --- | --- | :---: | --- |
-| [GoPlus](../core/crates/security_provider/src/providers/goplus/provider.rs) | [EVM subset](../core/crates/security_provider/src/providers/goplus/mapper.rs), Tron | ❌ | ❌ | [EVM subset](../core/crates/security_provider/src/providers/goplus/mapper.rs), Tron |
-| [HashDit](../core/crates/security_provider/src/providers/hashdit/provider.rs) | [EVM subset](../core/crates/security_provider/src/providers/hashdit/mapper.rs) | [EVM subset](../core/crates/security_provider/src/providers/hashdit/mapper.rs), Tron | ✅ | [EVM subset](../core/crates/security_provider/src/providers/hashdit/mapper.rs), Solana |
-| [Jupiter](../core/crates/security_provider/src/providers/jupiter/provider.rs) | ❌ | ❌ | ❌ | Solana |
-| [Tronscan](../core/crates/security_provider/src/providers/tronscan/provider.rs) | Tron | ❌ | ❌ | Tron |
+| [GoPlus](../core/crates/security/src/providers/goplus/provider.rs) | [EVM subset](../core/crates/security/src/providers/goplus/mapper.rs), Tron | ❌ | ❌ | [EVM subset](../core/crates/security/src/providers/goplus/mapper.rs), Tron |
+| [HashDit](../core/crates/security/src/providers/hashdit/provider.rs) | [EVM subset](../core/crates/security/src/providers/hashdit/mapper.rs) | [EVM subset](../core/crates/security/src/providers/hashdit/mapper.rs), Tron | ✅ | [EVM subset](../core/crates/security/src/providers/hashdit/mapper.rs), Solana |
+| [Jupiter](../core/crates/security/src/providers/jupiter/provider.rs) | ❌ | ❌ | ❌ | Solana |
+| [Tronscan](../core/crates/security/src/providers/tronscan/provider.rs) | Tron | ❌ | ❌ | Tron |
 
-<sub>Reviewed 2026-09-10. Sources: [provider factory](../core/crates/security_provider/src/factory.rs), [HashDit chain mapping](../core/crates/security_provider/src/providers/hashdit/mapper.rs), [HashDit Address Security](https://docs.hashdit.io/api-reference/endpoint/address-security-v2/supported-chains), [Address Poisoning](https://docs.hashdit.io/api-reference/endpoint/address-poisoning/supported-chains), [Domain Security](https://docs.hashdit.io/api-reference/endpoint/domain-security), and [Solana Token Security](https://docs.hashdit.io/api-reference/endpoint/solana-token-security).</sub>
+<sub>Reviewed 2026-09-10. Sources: [provider factory](../core/crates/security/src/factory.rs), [HashDit chain mapping](../core/crates/security/src/providers/hashdit/mapper.rs), [HashDit Address Security](https://docs.hashdit.io/api-reference/endpoint/address-security-v2/supported-chains), [Address Poisoning](https://docs.hashdit.io/api-reference/endpoint/address-poisoning/supported-chains), [Domain Security](https://docs.hashdit.io/api-reference/endpoint/domain-security), and [Solana Token Security](https://docs.hashdit.io/api-reference/endpoint/solana-token-security).</sub>
 
 ## Transaction-indexing providers
 

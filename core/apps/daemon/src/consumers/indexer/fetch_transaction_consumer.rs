@@ -2,8 +2,8 @@ use std::error::Error;
 
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
+use chain_providers::ChainProviders;
 use primitives::TransactionIdRequest;
-use settings_chain::ChainProviders;
 use streamer::{StreamProducer, StreamProducerQueue, TransactionsPayload, consumer::MessageConsumer};
 
 pub struct FetchTransactionConsumer {

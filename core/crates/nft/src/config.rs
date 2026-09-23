@@ -1,4 +1,4 @@
-use gem_alchemy::{AlchemyApi, alchemy_url};
+use alchemy::{AlchemyApi, alchemy_url};
 use gem_client::RemoteProviderConfig;
 use primitives::Chain;
 use settings::Settings;

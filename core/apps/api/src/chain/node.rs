@@ -1,10 +1,10 @@
+use chain_providers::{ProviderConfig, ProviderFactory};
 use gem_client::DEFAULT_REQUEST_TIMEOUT;
 use gem_tracing::{error_fields, error_with_fields};
 use primitives::{Chain, NodeStatus, node_config::NodeRegion};
 use reqwest::Client;
 use rocket::{State, get};
 use serde::Serialize;
-use settings_chain::{ProviderConfig, ProviderFactory};
 use tokio::time::timeout;
 
 use crate::api_clients::PermissionChainRead;

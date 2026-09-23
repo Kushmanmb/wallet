@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use futures::future;
 use gem_tracing::{error_with_fields, info_with_fields};
 use primitives::{AssetId, asset_score::AssetRank};
-use security_provider::{TokenScanProviders, TokenTarget};
+use security::{TokenScanProviders, TokenTarget};
 use storage::{AssetUpdate, AssetsRepository, Database};
 use streamer::consumer::MessageConsumer;
 

@@ -4,13 +4,13 @@ use std::time::Duration;
 
 use cacher::CacheKey;
 use cacher::CacherClient;
+use chain_providers::ChainProviders;
 use gem_tracing::info_with_fields;
 use localizer::LanguageLocalizer;
 use num_bigint::BigUint;
 use number_formatter::{BigNumberFormatter, ValueFormatter, ValueStyle};
 use primitives::{Asset, Chain, DelegationBase, DeviceSubscription, TransactionType};
 use push_notification::{GorushNotification, PushNotification};
-use settings_chain::ChainProviders;
 use storage::{Database, TransactionsRepository, WalletsRepository};
 use streamer::{NotificationsPayload, StreamProducer, StreamProducerQueue};
 

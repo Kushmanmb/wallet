@@ -99,7 +99,7 @@ INFRA_DEPENDENTS = {
     "defi": {"storage"},
     "fiat": {"cacher", "storage", "streamer"},
     "gem_auth": {"cacher"},
-    "gem_rewards": {"cacher", "storage"},
+    "rewards": {"cacher", "storage"},
     "lists": {"storage"},
     "nft": {"storage"},
     "portfolio": {"storage"},

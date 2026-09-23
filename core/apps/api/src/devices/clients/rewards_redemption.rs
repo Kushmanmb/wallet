@@ -1,7 +1,7 @@
 use config_keys::{ConfigKey, RateLimitKey, RateLimitWindow};
-use gem_rewards::{RewardsRedemptionError, redeem_points};
 use primitives::rewards::{RedemptionResult, Rewards};
 use primitives::{NaiveDateTimeExt, now};
+use rewards::{RewardsRedemptionError, redeem_points};
 use storage::{ConfigCacher, Database, RewardsRedemptionsRepository, RewardsRepository};
 use streamer::{StreamProducer, StreamProducerQueue};
 

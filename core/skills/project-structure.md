@@ -30,8 +30,8 @@ Shared Rust library compiled to iOS Swift Package and Android AAR using UniFFI b
 
 Individual `gem_*` crates for each blockchain with unified RPC client patterns:
 - **Bitcoin family** (`gem_bitcoin`): Bitcoin, Bitcoin Cash, Litecoin, Dogecoin
-- **EVM chains** (`gem_evm` family crate plus `gem_optimism`, `gem_bsc`, `gem_everstake`, `gem_monad`, `gem_tempo`): Ethereum, Polygon, Arbitrum, Optimism, Base, zkSync, Linea, BSC, Monad, Tempo, and the other chains in `ChainConfig`; see [New Chain Checklist](new-chain-checklist.md) for the crate boundary
-- **EVM indexers** (`gem_alchemy`, `gem_ankr`, `gem_blockscout`): address history and token balance providers composed only by `settings_chain`
+- **EVM chains** (`gem_evm` family crate plus `gem_optimism`, `gem_bsc`, `everstake`, `gem_monad`, `gem_tempo`): Ethereum, Polygon, Arbitrum, Optimism, Base, zkSync, Linea, BSC, Monad, Tempo, and the other chains in `ChainConfig`; see [New Chain Checklist](new-chain-checklist.md) for the crate boundary
+- **EVM indexers** (`alchemy`, `ankr`, `blockscout`): address history and token balance providers composed only by `chain_providers`
 - **Alternative L1s**: Solana (`gem_solana`), Sui (`gem_sui`), TON (`gem_ton`), Aptos (`gem_aptos`), NEAR (`gem_near`), Stellar (`gem_stellar`), Algorand (`gem_algorand`), Tron (`gem_tron`), XRP (`gem_xrp`), Cardano (`gem_cardano`), Polkadot (`gem_polkadot`)
 - **Cosmos ecosystem** (`gem_cosmos`): Cosmos Hub, Osmosis, Celestia, Injective, Sei, Noble
 
@@ -73,7 +73,7 @@ Individual `gem_*` crates for each blockchain with unified RPC client patterns:
 ### Integrations & Services
 - `fiat/`: Fiat on-ramp/off-ramp providers (MoonPay, Transak, Mercuryo, Paybis, Flashnet)
 - `name_resolver/`: Blockchain naming service integrations (ENS, SNS, etc.)
-- `security_provider/`: Security and fraud detection provider integrations
+- `security/`: Security and fraud detection provider integrations
 - `api_connector/`: Backend API connector utilities
 - `gem_hypercore/`: Perpetuals (perps) trading support via Hyperliquid integration
 
@@ -84,9 +84,9 @@ Individual `gem_*` crates for each blockchain with unified RPC client patterns:
 - `job_runner/`: Background job execution framework
 - `search_index/`: Search indexing and query capabilities
 - `streamer/`: Real-time data streaming utilities
-- `tracing/`: Logging and tracing infrastructure
+- `gem_tracing/`: Logging and tracing infrastructure
 - `settings/`: Configuration management
-- `settings_chain/`: Chain-specific configuration settings
+- `chain_providers/`: Builds each chain's provider and runs node checks
 
 ## Key Dependency Relationships
 

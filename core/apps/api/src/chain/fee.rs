@@ -2,12 +2,12 @@ use std::collections::BTreeMap;
 use std::error::Error;
 
 use cacher::{CacheKey, CacherClient};
+use chain_providers::{TransactionFeeEstimate, TransactionFeeEstimates};
 use number_formatter::{BigNumberFormatter, CryptoFiatConverter};
 use pricer::PriceClient;
 use primitives::{Asset, Chain, FeePriority, FeeUnitType};
 use rocket::{State, get};
 use serde::{Deserialize, Serialize};
-use settings_chain::{TransactionFeeEstimate, TransactionFeeEstimates};
 use strum::IntoEnumIterator;
 
 use crate::api_clients::PermissionChainRead;
@@ -111,8 +111,8 @@ fn map_estimates_by_priority(estimates: Vec<TransactionFeeEstimate>, rate_decima
 
 #[cfg(test)]
 mod tests {
+    use chain_providers::{TransactionFeeEstimate, TransactionFeeEstimates};
     use primitives::{Asset, FeePriority, GasPriceType};
-    use settings_chain::{TransactionFeeEstimate, TransactionFeeEstimates};
 
     use super::map_fee_estimates;
 

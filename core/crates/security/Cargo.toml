@@ -1,5 +1,5 @@
 [package]
-name = "security_provider"
+name = "security"
 version = { workspace = true }
 edition = { workspace = true }
 
@@ -12,7 +12,7 @@ hex = { workspace = true }
 sha1 = { workspace = true }
 gem_client = { path = "../gem_client", features = ["reqwest"] }
 jupiter = { path = "../jupiter" }
-gem_tracing = { path = "../tracing" }
+gem_tracing = { path = "../gem_tracing" }
 chain_primitives = { path = "../chain_primitives" }
 settings = { path = "../settings" }
 url = { workspace = true }

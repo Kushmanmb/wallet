@@ -1,8 +1,8 @@
 use async_trait::async_trait;
-use gem_rewards::{RedemptionAsset, RedemptionRequest, RedemptionService};
 use gem_tracing::info_with_fields;
 use primitives::rewards::RedemptionStatus as PrimitiveRedemptionStatus;
 use primitives::{NotificationRewardsRedeemMetadata, NotificationType, TransactionId};
+use rewards::{RedemptionAsset, RedemptionRequest, RedemptionService};
 use std::error::Error;
 use std::sync::Arc;
 use std::time::Duration;

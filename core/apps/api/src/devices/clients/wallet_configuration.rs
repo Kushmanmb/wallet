@@ -2,9 +2,9 @@ use std::collections::HashSet;
 use std::error::Error;
 
 use cacher::{CacheKey, CacherClient};
+use chain_providers::ChainProviders;
 use futures::future::join_all;
 use primitives::{AddressStatus, Chain, ChainAddress, WalletConfiguration, WalletConfigurationResult, WalletId};
-use settings_chain::ChainProviders;
 use storage::{Database, WalletsRepository};
 
 const ADDRESS_STATUS_CHAINS: [Chain; 6] = [Chain::Tron, Chain::Solana, Chain::Xrp, Chain::Stellar, Chain::Algorand, Chain::Aptos];

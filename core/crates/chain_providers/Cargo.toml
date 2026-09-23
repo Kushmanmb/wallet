@@ -1,5 +1,5 @@
 [package]
-name = "settings_chain"
+name = "chain_providers"
 version = { workspace = true }
 edition = { workspace = true }
 
@@ -13,8 +13,8 @@ chain_traits = { path = "../chain_traits" }
 settings = { path = "../settings" }
 gem_client = { path = "../gem_client", features = ["reqwest"] }
 gem_jsonrpc = { path = "../gem_jsonrpc", features = ["client"] }
-gem_tracing = { path = "../tracing" }
-gem_alchemy = { path = "../gem_alchemy" }
+gem_tracing = { path = "../gem_tracing" }
+alchemy = { path = "../alchemy" }
 
 gem_algorand = { path = "../gem_algorand", features = ["rpc", "reqwest"] }
 gem_aptos = { path = "../gem_aptos", features = ["rpc", "reqwest"] }
@@ -23,7 +23,7 @@ gem_cardano = { path = "../gem_cardano", features = ["rpc", "reqwest"] }
 gem_cosmos = { path = "../gem_cosmos", features = ["rpc", "reqwest"] }
 gem_tempo = { path = "../gem_tempo", features = ["rpc"] }
 gem_evm = { path = "../gem_evm", features = ["indexer", "reqwest"] }
-gem_everstake = { path = "../gem_everstake", features = ["rpc", "reqwest"] }
+everstake = { path = "../everstake", features = ["rpc", "reqwest"] }
 gem_monad = { path = "../gem_monad", features = ["rpc", "reqwest"] }
 gem_bsc = { path = "../gem_bsc", features = ["rpc", "reqwest"] }
 gem_hypercore = { path = "../gem_hypercore", features = ["reqwest"] }

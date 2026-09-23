@@ -5,7 +5,7 @@ use std::error::Error;
 use crate::model::AssetAddressChanges;
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
-use settings_chain::ChainProviders;
+use chain_providers::ChainProviders;
 use storage::{AssetsAddressesRepository, AssetsRepository, Database};
 use streamer::{ChainAddressPayload, StreamProducer, StreamProducerQueue, consumer::MessageConsumer};
 

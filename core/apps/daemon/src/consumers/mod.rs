@@ -8,8 +8,8 @@ pub mod support;
 
 use std::error::Error;
 
+use chain_providers::ChainProviders;
 use settings::Settings;
-use settings_chain::ChainProviders;
 use streamer::{ConsumerConfig, QueueName, ShutdownReceiver, StreamProducer, StreamProducerConfig, StreamReader, StreamReaderConfig};
 
 pub use fiat::run_consumer_fiat;

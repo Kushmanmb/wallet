@@ -2,8 +2,8 @@ use std::error::Error;
 
 use async_trait::async_trait;
 use cacher::{CacheKey, CacherClient};
+use chain_providers::ChainProviders;
 use gem_tracing::info_with_fields;
-use settings_chain::ChainProviders;
 use storage::{AssetsRepository, Database};
 use streamer::{FetchAssetsPayload, StreamProducer, StreamProducerQueue, consumer::MessageConsumer};
 

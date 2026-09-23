@@ -242,7 +242,7 @@ pub async fn run(settings: Settings, chain: Option<Chain>, health_state: Arc<Hea
         let shutdown_rx = shutdown_rx.clone();
         let settings = settings.clone();
 
-        let provider = settings_chain::ProviderFactory::new_from_settings_with_user_agent(chain, &settings, &settings::service_user_agent("parser", None));
+        let provider = chain_providers::ProviderFactory::new_from_settings_with_user_agent(chain, &settings, &settings::service_user_agent("parser", None));
 
         let retry = streamer::Retry::new(settings.rabbitmq.retry.delay, settings.rabbitmq.retry.timeout);
         let rabbitmq_config = StreamProducerConfig::new(settings.rabbitmq.url.clone(), retry);

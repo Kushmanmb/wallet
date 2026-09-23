@@ -1,8 +1,8 @@
 use std::error::Error;
 use std::sync::Arc;
 
+use chain_providers::ChainProviders;
 use primitives::Chain;
-use settings_chain::ChainProviders;
 use storage::{AssetUpdate, AssetsRepository, Database};
 
 pub struct StakeApyUpdater {
