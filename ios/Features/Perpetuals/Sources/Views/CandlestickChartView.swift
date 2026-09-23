@@ -110,14 +110,14 @@ struct CandlestickChartView: View {
 
     @ChartContentBuilder
     private var candlestickMarks: some ChartContent {
-        ForEach(model.candles, id: \.date) { candle in
+        ForEach(model.candleMarks, id: \.candle.date) { candle, color in
             RuleMark(
                 x: .value(ChartKey.date, candle.date),
                 yStart: .value(ChartKey.low, candle.low),
                 yEnd: .value(ChartKey.high, candle.high),
             )
             .lineStyle(StrokeStyle(lineWidth: .space1))
-            .foregroundStyle(model.candleColor(for: candle))
+            .foregroundStyle(color)
 
             RectangleMark(
                 x: .value(ChartKey.date, candle.date),
@@ -125,7 +125,7 @@ struct CandlestickChartView: View {
                 yEnd: .value(ChartKey.close, candle.close),
                 width: .fixed(.space4),
             )
-            .foregroundStyle(model.candleColor(for: candle))
+            .foregroundStyle(color)
         }
     }
 

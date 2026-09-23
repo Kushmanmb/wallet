@@ -8,7 +8,6 @@ import struct Gemstone.GemChartHeader
 import struct Gemstone.GemPerpetualChartLayout
 import func Gemstone.perpetualChartLayout
 import class Gemstone.PriceChangeCalculator
-import func Gemstone.valueTone
 import GemstonePrimitives
 import Primitives
 import PrimitivesComponents
@@ -74,7 +73,11 @@ struct CandlestickChartViewModel {
     }
 
     var currentPriceColor: Color {
-        candles.last.map(candleColor(for:)) ?? Colors.gray
+        layout.tones.last?.color ?? Colors.gray
+    }
+
+    var candleMarks: [(candle: ChartCandleStick, color: Color)] {
+        zip(candles, layout.tones).map { ($0, $1.color) }
     }
 
     func header(for selectedCandle: ChartCandleStick?) -> GemChartHeader? {
@@ -88,10 +91,6 @@ struct CandlestickChartViewModel {
 
     func tooltipModel(for candle: ChartCandleStick) -> CandleTooltipViewModel {
         CandleTooltipViewModel(candle: candle)
-    }
-
-    func candleColor(for candle: ChartCandleStick) -> Color {
-        valueTone(value: candle.close - candle.open).color
     }
 
     func candle(for date: Date) -> ChartCandleStick? {

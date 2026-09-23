@@ -17,7 +17,7 @@ use super::model::{
     GemPerpetualConfirmDetails, GemPerpetualConfirmDetailsSummary, GemPerpetualDetails, GemPerpetualMarketCounts, GemPerpetualMarketQuery, GemPerpetualMarketRow, GemPerpetualMarketSection, GemPerpetualOpenRow, GemPerpetualOrderAction,
     GemPerpetualOrderInput, GemPerpetualPositionAction, GemPerpetualPositionDetail, GemPerpetualPositionDetailRow, GemPerpetualPositionKind, GemPerpetualPositionRow, GemPerpetualSection, GemPerpetualTransferData,
 };
-use crate::formatted_number::{GemFormattedNumber, GemValueTone};
+use crate::formatted_number::{GemFormattedNumber, GemValueTone, value_tone};
 use crate::models::custom_types::GemBigInt;
 use crate::models::list::{GemInfoTopic, GemListRow, GemListRowTitle, GemListSection, GemListSectionFooter, GemListSectionTitle};
 use crate::models::placeholder::EMPTY_VALUE;
@@ -299,6 +299,7 @@ pub fn chart_layout(candles: &[ChartCandleStick], position: Option<&PerpetualPos
         x_tick_count: chart_x_tick_count(candles.len()),
         lines,
         current_price: candles.last().map(|candle| GemFormattedNumber::adaptive(candle.close, None)),
+        tones: candles.iter().map(|candle| value_tone(candle.close - candle.open)).collect(),
     }
 }
 
@@ -1109,6 +1110,17 @@ mod tests {
         assert_eq!(layout.ticks[0].value, 9.0);
         assert_eq!(layout.ticks[3].value, 13.0);
         assert!(layout.lines.is_empty());
+    }
+
+    #[test]
+    fn test_chart_layout_colours_each_candle_by_its_move() {
+        let rising = ChartCandleStick::mock_range(9.0, 12.0);
+        let falling = ChartCandleStick { open: 12.0, close: 9.0, ..rising.clone() };
+        let flat = ChartCandleStick { open: 10.0, close: 10.0, ..rising.clone() };
+
+        let layout = chart_layout(&[rising, falling, flat], None);
+
+        assert_eq!(layout.tones, vec![GemValueTone::Positive, GemValueTone::Negative, GemValueTone::Neutral]);
     }
 
     #[test]

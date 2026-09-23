@@ -1,6 +1,5 @@
 package com.gemwallet.android.ui.models.chart
 
-import com.gemwallet.android.domains.price.tone
 import com.gemwallet.android.model.text
 import com.wallet.core.primitives.ChartCandleStick
 import uniffi.gemstone.GemPerpetualChartLayout
@@ -35,7 +34,7 @@ data class CandlestickChartUIModel(
         fun from(candles: List<ChartCandleStick>, layout: GemPerpetualChartLayout, lineLabel: (GemPerpetualChartLineKind) -> String): CandlestickChartUIModel {
             val span = layout.priceHigh - layout.priceLow
             return CandlestickChartUIModel(
-                candles = candles.map(::candleUIModel),
+                candles = candles.zip(layout.tones, ::candleUIModel),
                 yMin = layout.priceLow,
                 yMax = layout.priceHigh,
                 yTicks = layout.ticks.map { tick ->
@@ -59,12 +58,12 @@ data class CandlestickChartUIModel(
             return (0 until tickCount).map { tick -> tick.toFloat() / (tickCount - 1) }
         }
 
-        private fun candleUIModel(candle: ChartCandleStick): CandleUIModel = CandleUIModel(
+        private fun candleUIModel(candle: ChartCandleStick, tone: GemValueTone): CandleUIModel = CandleUIModel(
             open = candle.open,
             high = candle.high,
             low = candle.low,
             close = candle.close,
-            direction = when ((candle.close - candle.open).tone()) {
+            direction = when (tone) {
                 GemValueTone.POSITIVE -> CandleDirection.Up
 
                 GemValueTone.NEGATIVE -> CandleDirection.Down

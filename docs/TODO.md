@@ -206,7 +206,6 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 - **VM45** **S** **Confirm decides section visibility app-side.** iOS [`ConfirmTransferSceneViewModel`](../ios/Features/Transfer/Sources/ViewModels/ConfirmTransferSceneViewModel.swift) shows the warnings, payload and balance-change sections by testing each for emptiness; land with AUD45 and VM4.
 - **VM46** **M** **Asset price alerts come as rows.** iOS [`AssetPriceAlertsViewModel`](../ios/Features/PriceAlerts/Sources/ViewModels/AssetPriceAlertsViewModel.swift) filters alerts with `alertKind(...).groupsByAsset()` per alert, then `displayedAlerts` re-joins Core's ids, and derives the auto toggle from `contains(type == .auto)`; `[PriceAlert].displayedAlerts` does the same join elsewhere.
 - **VM47** **S** **Recents return rows, not ids.** iOS [`RecentsSceneViewModel`](../ios/Features/Recents/Sources/ViewModels/RecentsSceneViewModel.swift) filters its list against `viewState.matchingAssetIds`.
-- **VM48** **S** **Chart candles carry their direction.** Both apps call `valueTone(close - open)` per candle per render (iOS `CandlestickChartViewModel.candleColor`, Android `CandlestickChartUIModel`); `GemPerpetualChartLayout` should carry each candle's direction.
 
 #### Rows projected once per list
 
@@ -353,6 +352,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM48 (2026-09-23).** Closed. `GemPerpetualChartLayout` carries `tones`, one per candle in input order, computed once while the layout is built; iOS colours each candle mark and the current price from it and Android builds each `CandleUIModel` direction from it, so neither app calls `valueTone` per candle per render.
 
 **VM2 (2026-09-23).** Closed. `GemTransactionRow` carries `badge` — incoming, outgoing or the asset's own icon — decided once by `transactions::rules::badge`, so neither app switches on the transaction type and direction any more: iOS `TransactionViewModel.overlayImage` and Android `TransactionIcon` map the badge, and Android's `TransactionDataAggregate` drops its `type` and `direction`. The survey called this a parity bug; it was not — Android's `AssetIcon` already draws the token's chain badge that iOS overlays — so the change removes the duplicated rule, not a visible difference. The subtitle joining stays where it is, in each app's mapper.
 

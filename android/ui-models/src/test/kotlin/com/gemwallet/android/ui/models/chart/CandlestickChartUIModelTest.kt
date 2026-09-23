@@ -6,6 +6,7 @@ import org.junit.Test
 import uniffi.gemstone.GemPerpetualChartLayout
 import uniffi.gemstone.GemPerpetualChartLine
 import uniffi.gemstone.GemPerpetualChartLineKind
+import uniffi.gemstone.GemValueTone
 import uniffi.gemstone.formattedAdaptive
 
 class CandlestickChartUIModelTest {
@@ -23,10 +24,11 @@ class CandlestickChartUIModelTest {
         xTickCount = 6u,
         lines = listOf(GemPerpetualChartLine(GemPerpetualChartLineKind.ENTRY, formattedAdaptive(10.5, null), 0u)),
         currentPrice = formattedAdaptive(10.0, null),
+        tones = listOf(GemValueTone.POSITIVE, GemValueTone.NEGATIVE, GemValueTone.NEUTRAL),
     )
 
     @Test
-    fun candleDirectionsReflectOpenVsClose() {
+    fun candleDirectionsFollowTheLayoutTones() {
         val model = model()
 
         assertEquals(CandleDirection.Up, model.candles[0].direction)

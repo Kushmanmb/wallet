@@ -148,6 +148,7 @@ pub struct GemPerpetualChartLayout {
     pub x_tick_count: u32,
     pub lines: Vec<GemPerpetualChartLine>,
     pub current_price: Option<GemFormattedNumber>,
+    pub tones: Vec<GemValueTone>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
