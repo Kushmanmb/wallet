@@ -86,7 +86,6 @@ Reviewed at `855fef5ccfba98458b9bfaa0efdea01ef23c0a07` on 2026-09-19. These are 
 
 ### iOS lifecycle and result handling
 
-- **AUD23** **S** **Verification — cover websocket session retirement.** [Stream transport](../ios/Packages/SwiftHTTPClient/WebSocketClient/WebSocketConnection.swift) now invalidates the previous session before `startConnection` installs a new one, and `deinit` invalidates the last one, so a reconnect no longer strands a `URLSession` together with the `WebSocketSessionDelegate` it retains. No test covers it: `WebSocketClient` declares no test target in [Package.swift](../ios/Packages/SwiftHTTPClient/Package.swift) and the session is constructed inline, so neither creation nor invalidation is observable. Add a `WebSocketClientTests` target and the smallest seam that exposes session lifetime, then test that repeated failed connections retire every session and delegate, and that the connection-id guards still reject callbacks from a retired session.
 
 ### Android observation and recovery
 
@@ -292,6 +291,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**AUD23 (2026-09-23).** Closed. `WebSocketConfiguration` takes a `makeSession` factory (defaulting to the same `URLSession(configuration:delegate:delegateQueue: nil)` the transport built inline), and `SwiftHTTPClient` gains a `WebSocketClientTests` target, registered in `unit_frameworks.xctestplan`. Tests drive repeated refused connections through a recording factory and check that every session is invalidated and every delegate released once the connection is disconnected, and that a callback from a retired session's delegate cannot move the connection to `.connected`.
 
 **AUD22 (2026-09-23).** Closed. `ImageGalleryService` conforms to a new `ImageGallerySaving` protocol, `SystemServices` gains an `ImageGalleryServiceTestKit` library with `ImageGallerySaverMock` (the `ConnectivityServiceTestKit` pattern), and `CollectibleViewModel` takes the saver as `gallery` (defaulting to `ImageGalleryService()`); the save work moves into `saveToGallery()`. Tests cover a delayed successful save showing the success toast only after Photos finishes, a failed write showing the error alert instead of a toast, and denied access offering Settings.
 

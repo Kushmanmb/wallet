@@ -195,11 +195,7 @@ public actor WebSocketConnection: WebSocketConnectable {
         )
 
         invalidateSession()
-        session = URLSession(
-            configuration: configuration.sessionConfiguration,
-            delegate: delegate,
-            delegateQueue: nil,
-        )
+        session = configuration.makeSession(configuration.sessionConfiguration, delegate)
 
         task = session?.webSocketTask(with: request)
         task?.resume()
