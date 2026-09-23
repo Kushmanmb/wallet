@@ -50,26 +50,16 @@ public struct BannerViewModel {
     }
 
     var imageSize: CGFloat {
-        switch row.banner.event {
-        case .stake,
-             .accountActivation,
-             .accountBlockedMultiSignature,
-             .activateAsset,
-             .suspiciousAsset,
-             .tradePerpetuals: .image.asset
-        case .onboarding: .image.medium
+        switch content.icon {
+        case .bitcoin: .image.medium
+        case .moneyBag, .network, .warning, .suspicious, .perpetuals, .none: .image.asset
         }
     }
 
     var cornerRadius: CGFloat {
-        switch row.banner.event {
-        case .stake,
-             .accountActivation,
-             .activateAsset,
-             .suspiciousAsset,
-             .tradePerpetuals: 14
-        case .accountBlockedMultiSignature,
-             .onboarding: 0
+        switch content.icon {
+        case .warning, .bitcoin: 0
+        case .moneyBag, .network, .suspicious, .perpetuals, .none: 14
         }
     }
 

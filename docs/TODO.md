@@ -247,9 +247,7 @@ The second pass read every view model, UI model, aggregate, coordinator and app 
 
 #### Parity: the apps answer differently today
 
-- **VM90** **S** **Banner icon shape.** iOS sizes and rounds banner icons by event; Android does not.
 - **VM92** **M** **Invalid phrase words.** Android highlights invalid phrase words through a separate `GemMnemonic`, called from the text transformation on each recomposition; iOS has no highlight. The import session should return them; decide iOS parity.
-- **VM94** **S** **Notification prompt.** Android asks through Core `shouldAskNotifications`/`setNotificationsAsked`; iOS decides in its own `PushNotificationEnablerService`.
 - **VM98** **M** **Transaction assets are stored two ways.** iOS stores every asset a transaction touches through `transactionAssetIds` into its transaction-assets table; Android stores only swap pairs through `transactionSwapPair` into `DbTransactionSwapMetadata`. Aligning them needs a store migration on one app, so decide which schema both keep before moving either.
 
 ## 0. Duplicated code to delete first
@@ -329,6 +327,8 @@ Read this before adding an item. Each rule below was learned by listing somethin
 - **Exclude on every sweep:** `Gem*Store` foreign-trait implementations, Hilt `@Provides`, Room `TypeConverters`, `@Preview` composables, framework overrides, `#Preview` bodies, generated files and test kits. All are called by generated or native code no token search can see.
 
 ## Ledger of closed sections
+
+**VM90, VM94 (2026-09-23).** Closed. iOS `BannerViewModel` sized and rounded the banner icon by switching on the banner event; it now keys both on `content.icon`, the Core answer Android already styles from, with the same result for every event (VM90). The notification prompt is already Core's on both apps: iOS `PushNotificationEnablerService` asks `notificationPrompt(isGranted:)` whether to enable, request or open Settings, and Android asks `shouldAskNotifications`; only Android records the asked-at cooldown because iOS lets an app raise the system prompt once (VM94).
 
 **VM96, VM97, VM99 (2026-09-23).** Closed. Swap errors already agree: Android's transfer failures go through `GemSwapSession`, which builds the same `GemSwapErrorDisplay` that iOS's `SwapperError` description asks `swap_error_display` for (VM96). Fiat provider names already come from Core on both apps through each quote row's `providerName`; iOS's `FiatProviderName.displayName` had no caller, so it and the `fiat_provider_name` export are gone and the brand-name test moves to `primitives` (VM97). iOS called `swap_quote` only from tests and test kits; the `swapQuote` extension moves from `GemstonePrimitives` into `GemstoneServicesTestKit` (VM99). VM98 is reworded: the two apps store transaction assets in different schemas.
 
