@@ -66,6 +66,13 @@ impl GemChartSession {
         Self::new(period, self.currency.clone())
     }
 
+    pub fn on_currency(&self, currency: Currency) -> Self {
+        if currency == self.currency {
+            return self.clone();
+        }
+        Self::new(self.period, currency)
+    }
+
     pub fn view_state(&self, price: Option<AssetPrice>) -> GemChartViewState {
         GemChartViewState {
             period: self.period,
@@ -188,5 +195,22 @@ mod tests {
             "a chart for the period the user left behind never reaches the screen"
         );
         assert_eq!(selected_week.on_failed(error, ChartPeriod::Day).view_state(None).phase, GemChartPhase::Loading, "neither does its failure");
+    }
+
+    #[test]
+    fn test_a_currency_change_drops_the_loaded_chart_and_keeps_the_period() {
+        let loaded = GemChartSession::new(ChartPeriod::Week, Currency::USD).on_loaded(
+            GemChart {
+                values: Vec::new(),
+                base_value: 0.0,
+                current: None,
+            },
+            ChartPeriod::Week,
+        );
+
+        assert_eq!(loaded.on_currency(Currency::USD), loaded);
+        let switched = loaded.on_currency(Currency::EUR);
+        assert_eq!(switched, GemChartSession::new(ChartPeriod::Week, Currency::EUR));
+        assert!(switched.is_loading);
     }
 }

@@ -55,15 +55,7 @@ class ChartViewModel internal constructor(
 
     init {
         viewModelScope.launch {
-            getCurrentCurrency.getCurrency().collect { currency ->
-                session.update { held ->
-                    if (held.currency == currency.toGem()) {
-                        held
-                    } else {
-                        chartService.newSession().onSelectPeriod(held.period)
-                    }
-                }
-            }
+            getCurrentCurrency.getCurrency().collect { currency -> session.update { it.onCurrency(currency.toGem()) } }
         }
         viewModelScope.launch {
             session.collectLatest { current ->

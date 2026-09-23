@@ -25,6 +25,7 @@ import SwiftUI
 @Observable
 public final class ChartSceneViewModel: ChartListViewable {
     private let service: any GemChartServiceProtocol
+    private let preferences: ObservablePreferences
 
     let walletId: WalletId
     let assetModel: AssetViewModel
@@ -101,12 +102,14 @@ public final class ChartSceneViewModel: ChartListViewable {
 
     public init(
         service: any GemChartServiceProtocol,
+        preferences: ObservablePreferences,
         assetModel: AssetViewModel,
         walletId: WalletId,
         onSetPriceAlert: @escaping (Asset) -> Void,
         onSelectAddress: (@MainActor @Sendable (ChainAddress) -> Void)? = nil,
     ) {
         self.service = service
+        self.preferences = preferences
         self.assetModel = assetModel
         self.walletId = walletId
         session = service.newSession()
@@ -130,6 +133,17 @@ public extension ChartSceneViewModel {
         } catch {
             debugLog("chart scene: load error \(error)")
         }
+    }
+
+    var currency: Primitives.Currency {
+        preferences.currency
+    }
+
+    func onChangeCurrency() async {
+        let next = session.onCurrency(currency: currency.toGem())
+        guard next != session else { return }
+        session = next
+        await load()
     }
 
     func onSelectSetPriceAlerts() {

@@ -47,6 +47,9 @@ public struct ChartScene: View {
             }
         }
         .bindQuery(model.priceQuery)
+        .task(id: model.currency) {
+            await model.onChangeCurrency()
+        }
         .navigationTitle(model.title)
         .sheet(item: $model.isPresentingInfoSheet) {
             InfoSheetScene(type: $0)

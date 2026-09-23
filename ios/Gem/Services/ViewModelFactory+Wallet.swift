@@ -136,6 +136,7 @@ public extension ViewModelFactory {
                 preferences: preferencesService,
                 explorer: explorerService,
             ),
+            preferences: observablePreferences,
             assetModel: AssetViewModel(asset: asset),
             walletId: walletId,
             onSetPriceAlert: onSetPriceAlert,
