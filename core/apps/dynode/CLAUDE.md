@@ -1,6 +1,6 @@
 # Dynode
 
-Read [README.md](README.md) for local usage and configuration.
+Read [Dynode docs](../../../docs/DYNODE.md) for local usage and configuration.
 
 ## Architecture
 
