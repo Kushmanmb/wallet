@@ -37,11 +37,11 @@ The flow is terms, reminder, phrase, quick test, store. Terms: [`accept_terms_it
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Picking: new(words) shuffles chips inside groups of 4
-    Picking --> Picking: on_pick(wrong word, used chip, unknown index) changes nothing
-    Picking --> Picking: on_pick(next word) fills next_index
-    Picking --> Complete: every word picked, is_complete
-    Complete --> [*]: Continue calls import_wallet(source Create)
+    [*] --> Picking: words shuffled in groups of four
+    Picking --> Picking: wrong word, nothing changes
+    Picking --> Picking: next word, slot filled
+    Picking --> Complete: every word picked
+    Complete --> [*]: wallet stored
 ```
 
 **Rules.**
@@ -105,21 +105,17 @@ Import sends one request: kind, chain, raw input, the resolved name record if an
 ```mermaid
 sequenceDiagram
     participant App
-    participant W as GemWalletService
-    participant K as Keystore
-    participant S as Wallet store
-    App->>W: import_wallet(request)
-    W->>W: import_request, import_name, validated
-    W->>K: preview_import (no write)
-    W->>S: get_wallets
-    alt same id and type exists
-        W-->>App: Existing { wallet }, made current
+    participant Core
+    participant Keystore
+    participant Store
+    App->>Core: import
+    Core->>Core: validate, derive the wallet id
+    alt already stored
+        Core-->>App: existing wallet, made current
     else new
-        W->>K: get_password(create only if keystore empty), create_store
-        W->>S: add_wallet, save address names
-        Note over W,S: on failure the new keystore file is deleted
-        W->>W: bump subscriptions version, set current wallet
-        W-->>App: New { wallet }
+        Core->>Keystore: write the secret (not for an address)
+        Core->>Store: save the wallet and its names
+        Core-->>App: new wallet, made current
     end
 ```
 
@@ -177,22 +173,15 @@ Both flows end in the same place, the wallet screen, and differ only in what the
 
 ```mermaid
 flowchart TD
-    C["Create wallet<br/>phrase generated and verified"] --> Store["Store the wallet, name it,<br/>make it current<br/>(one Core call)"]
-    I["Import wallet<br/>phrase, private key or address"] --> Store
-    Store --> Setup["setup_wallet<br/>default assets · wallet banners ·<br/>default balance rows · wallet configuration"]
-    Setup --> Screen["Wallet screen opens<br/>from the store: rows at zero, prices from the socket"]
-    Screen --> Src{"Wallet source?"}
-    Src -- created, never synced --> Created["No chain request<br/>price subscription only<br/>onboarding banner: Buy or Receive"]
-    Created --> Pull1["First pull: stamp discovery time,<br/>fetch nothing"]
-    Pull1 --> Normal["Second pull onward:<br/>behaves like any wallet"]
-    Src -- imported --> Par
-    subgraph Par["Concurrently, neither waits for the other"]
-        direction LR
-        Bal["Balances of the enabled default assets<br/>coin · staking · tokens · earn per chain<br/>one atomic write"]
-        Disc["Asset discovery<br/>tokens seen for the addresses · first transactions · NFTs<br/>each found token is enabled and fetched"]
-    end
-    Par --> Loading["'Loading' row until the assets step completes;<br/>a failed step stays incomplete and the next pull retries"]
-    Loading --> Normal
+    A[Create or import] --> B[Wallet stored and made current]
+    B --> C[Wallet screen opens from the store]
+    C --> D{Created here?}
+    D -- yes --> E[No network requests]
+    E --> F[Second refresh: balances and discovery]
+    D -- no --> G[Fetch balances]
+    D -- no --> H[Discover tokens, history, NFTs]
+    G --> I[Rows update in one write]
+    H --> I
 ```
 
 ### After a wallet is created
@@ -276,31 +265,24 @@ There is no separate empty view. A new wallet shows its default assets at zero (
 
 ```mermaid
 sequenceDiagram
-    participant Home as GemWalletHomeService
-    participant Bal as GemBalanceService
-    participant Chain as Gateway per chain
-    participant Store as GemBalanceStore
-    Home->>Bal: update_enabled_balances(wallet)
-    Note over Bal: sequence = next_sequence()
-    par chain A
+    participant Screen as Wallet screen
+    participant Core
+    participant Chain as Each chain
+    participant Store
+    Screen->>Core: refresh
+    par every chain at once
         par coin
-            Bal->>Chain: get_balance_coin
+            Core->>Chain: coin balance
         and staking
-            Bal->>Chain: get_balance_staking
+            Core->>Chain: staking balance
         and tokens
-            Bal->>Chain: get_balance_tokens
+            Core->>Chain: token balances
         and earn
-            Bal->>Chain: get_balance_earn
+            Core->>Chain: earn balances
         end
-        Note over Bal: chain_balances(coin?, stake?, tokens?, earn?)
-    and chain B .. N
-        Bal->>Chain: the same four requests
     end
-    Note over Bal: published_balances keeps the chains that answered, remembers the first error
-    Bal->>Store: get_available_balances (inside the wallet lane)
-    Note over Bal: newer_updates, changed_balances, balance_records
-    Bal->>Store: update_balances(records) once, one transaction
-    Bal-->>Home: Ok, or the first failure after the write
+    Core->>Store: one write with every chain that answered
+    Core-->>Screen: done, or the first failure
 ```
 
 Setup ([`setup_wallet`](../core/gemstone/src/services/balance/mod.rs)) adds the default enabled and disabled rows a wallet lacks; a wallet created in the app with nothing synced only resubscribes prices, every other wallet fetches its enabled defaults. Enabling ([`set_assets_enabled`](../core/gemstone/src/services/balance/mod.rs)) dedupes the ids, drops native mirror tokens, fetches unknown assets from the API, creates missing rows, writes one configuration patch (disabling also unpins) and then fetches the newly enabled balances; disabling only rebuilds the price subscription. Discovery ([`sync_assets`](../core/gemstone/src/services/asset_discovery/mod.rs)) asks the API for assets seen since the wallet's last discovery time, keeps the ones on the wallet's chains, enables them through the same path, then stamps the time and marks the step complete. A balance carries `available`, `frozen`, `locked`, `staked`, `pending`, `pending_unconfirmed`, `rewards`, `reserved`, `withdrawable`, `earn` and optional metadata (Tron votes, energy and bandwidth); a coin answer writes available, frozen, reserved and pending unconfirmed, a stake answer writes staked, pending, rewards, locked and frozen and keeps the previous metadata when it carries none, a token answer writes available, an earn answer writes earn. The row total ([`total`](../core/gemstone/src/services/balance/model.rs)) is available plus frozen, locked, staked, pending, rewards and earn; reserved and pending unconfirmed are shown as their own rows on the asset screen, and energy and bandwidth read "available / total" ([`balance_resource_rows`](../core/gemstone/src/services/balance/rules.rs)). Prices are stored in USD and in the current currency, converted once at write with the stored rate ([`update_prices`](../core/gemstone/src/services/price/mod.rs), [`fiat_prices`](../core/gemstone/src/services/price/rules.rs)); only moved prices are saved, a currency switch reconverts the stored prices, and the row multiplies its total by the stored currency price, so no app converts anything.
