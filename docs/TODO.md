@@ -275,6 +275,8 @@ An entry is dated rationale, not a current completion claim. Landed items are on
 
 **AUD39 (2026-09-23).** Declined, then its ledger line was dropped in `da61e19671`; recorded here so it is not re-raised: coin, token and staking balances stay separate, independent calls, because a shared per-chain snapshot would let one component's failure or latency hold back the others. The implementation was reverted in `98bbdca63e`. Do not merge them to save the repeated account read on Tron, Cosmos or Stellar.
 
+**AUD35 (2026-09-24).** Reverted: the `store_contract_tests` emulator job from `4c1f0cd0f4` is gone from Android CI. The store's Room DAO and migration tests run locally with `just test-integration`; do not add an emulator job for them to CI.
+
 ### Landed
 
 One line per item; the commit carries the detail. Grouped by the day it landed.
@@ -284,7 +286,6 @@ One line per item; the commit carries the detail. Grouped by the day it landed.
 - **VM137** Core exports `support_attachment_limits()` (2048 px, JPEG 90) from `support/rules.rs`; Android's resizer reads it in place of its two constants, and iOS gains the dimension cap (`UIImage.fitting(maxDimension:)`) before compressing at the shared quality.
 - **VM141** Android's asset and portfolio charts map `Failed` to `StateViewType.Error(error.errorText().text(context))`, the way the perpetual candles do, so the chart shows Core's error instead of "No data available"; both view models take the application context.
 - **VM130** `GemWalletConnectService.should_process_proposal(proposer_public_key)` composes the proposal dedupe key (`rules::proposal_message_id`); iOS drops `Session.Proposal.messageId` and Android its `"proposal_…"` string, and both pass the proposer public key they already used.
-- **AUD35** Android CI runs `store_contract_tests`: an x86_64 API 34 emulator job (`ReactiveCircus/android-emulator-runner`) runs `:data:services:store:connectedDebugAndroidTest` (the Room DAO and migration contract tests, 35 today) and uploads the report on failure. Its first run failed on a real test mismatch, which proves it executes the tests and fails the build. The rollback/retry tests the item mentioned no longer exist in the instrumented sources.
 - **VM112** `GemRecentsSections` answers `empty: Option<GemEmptyStateKind>` (`Recents`, or `SearchAssets` for a search that matched nothing) beside `shows_items` and `shows_clear`, and Core exports `recent_assets_limit`. The iOS phase switch and `sectionLimit`, Android's `RecentsEmptyState`, its mapping back to the kind, and the hardcoded limit are gone.
 - **VM113** `GemRewardsSession` has an `on_refreshing` event and `is_refreshing` on its view state, cleared by a result, new rewards or a wallet switch. Android drives the full-screen spinner from the `Loading` state and pull-to-refresh from `is_refreshing`; `SyncType.kt` and `inSync` are gone. iOS keeps its `.refreshable`.
 - **VM117** `GemFiatSession.view_state` takes the sell-enabled flag and answers `GemFiatViewState.shows_type_picker`; iOS reads it from the view state and Android projects it from its view-state flow, replacing both app-side `showFiatTypePicker` getters.
